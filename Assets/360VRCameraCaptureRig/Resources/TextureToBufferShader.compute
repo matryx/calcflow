@@ -1,0 +1,30 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel TextureToBuffer
+
+Texture2D<float4> source;
+RWStructuredBuffer<uint> result;
+RWStructuredBuffer<uint> forceWaitResultBuffer;
+uint width, height;
+SamplerState MyPointRepeatSampler;
+uint startIdx;
+uint sentinelIdx;
+uint forceWaitValue;
+float gamma;
+
+[numthreads(32,32,1)] // Must match threadsX, threadsY in CapturePanorama.cs
+void TextureToBuffer (uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= width || id.y >= height) // In case width/height not multiple of numthreads
+	    return;
+
+	float4 color = source.SampleLevel(MyPointRepeatSampler, float2(((float)id.x + 0.5)/ width, ((float)id.y + 0.5)/ height), 0);
+	color = pow(color, gamma);
+	color *= 255.0;
+	result[startIdx + (id.y * width) + id.x] = ((int)color.r << 16u) | ((int)color.g << 8u) | (int)color.b;
+
+	if (id.x == width - 1u && id.y == height - 1u && id.z == 0u)
+	{
+        forceWaitResultBuffer[0] = forceWaitValue; // Used on CPU side to force a wait for this operation to complete
+		result[sentinelIdx] = 1419455993u; // Sentinel value - must match BufferSentinelValue in CapturePanorama.cs
+	}
+}

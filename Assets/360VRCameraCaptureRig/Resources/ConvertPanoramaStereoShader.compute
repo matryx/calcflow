@@ -1,0 +1,256 @@
+﻿#pragma kernel RenderStereo
+
+RWStructuredBuffer<uint> result;
+RWStructuredBuffer<uint> forceWaitResultBuffer;
+StructuredBuffer<uint> cameraPixels;
+uint equirectangularWidth;
+uint equirectangularHeight;
+uint ssaaFactor;
+uint cameraWidth;
+uint cameraHeight;
+float tanHalfHFov, tanHalfVFov, hFovAdjust, vFovAdjust, interpupillaryDistance, circleRadius;
+uint numCirclePoints;
+uint circlePointStart, circlePointEnd, circlePointCircularBufferStart, circlePointCircularBufferSize;
+uint leftRightPass;
+uint forceWaitValue;
+uint cameraPixelsSentinelIdx;
+
+[numthreads(32,32,1)] // Must match threadsX, threadsY in CapturePanorama.cs
+void RenderStereo (uint3 dtid : SV_DispatchThreadID)
+{
+	if (dtid.x >= equirectangularWidth || dtid.y >= equirectangularHeight) // In case width/height not multiple of numthreads
+	    return;
+	if (dtid.x == equirectangularWidth - 1 && dtid.y == equirectangularHeight - 1 && dtid.z == 1)
+	{
+	    forceWaitResultBuffer[0] = forceWaitValue; // Used on CPU side to force a wait for this operation to complete
+		result[equirectangularWidth * equirectangularHeight * 2] =
+		    cameraPixels[cameraPixelsSentinelIdx]; // Sentinel value - set correctly only if set correctly in input buffer
+	}
+
+	static const float pi = 3.14159265f;
+	uint2 pos = dtid.xy;
+	uint2 loopStart = pos * ssaaFactor;
+	uint2 loopEnd = loopStart + uint2(ssaaFactor, ssaaFactor);
+
+	uint i = dtid.z;
+
+	float4 totalColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	for (uint y = loopStart.y; y < loopEnd.y; y++)
+	{
+		for (uint x = loopStart.x; x < loopEnd.x; x++)
+		{
+			float xcoord = (float)x / (equirectangularWidth  * ssaaFactor);
+			float ycoord = (float)y / (equirectangularHeight * ssaaFactor);
+
+			float latitude = (ycoord - 0.5f) * pi;
+			float sinLat, cosLat;
+			sincos(latitude, sinLat, cosLat);
+
+			float longitude = (xcoord * 2.0f - 1.0f) * pi;
+			float sinLong, cosLong;
+			sincos(longitude, sinLong, cosLong);
+
+			// Scale IPD down as latitude moves toward poles to avoid discontinuities
+			float latitudeNormalized = latitude / (pi / 2.0f); // Map to [-1, 1]
+
+			// float ipdScale = 1.0f;
+			// float ipdScale = 1.0f - latitudeNormalized * latitudeNormalized;
+			float ipdScale = 1.5819767068693265f * exp(-latitudeNormalized * latitudeNormalized) - 0.5819767068693265f;
+			// float ipdScale = 1.1565176427496657f * exp(-2.0f * latitudeNormalized * latitudeNormalized) - 0.15651764274966568f;
+			// float ipdScale = 1.0000454019910097f * exp(-10.0f * latitudeNormalized * latitudeNormalized) - 0.00004540199100968779f;
+
+			float scaledEyeRadius = ipdScale * interpupillaryDistance / 2.0f;
+
+			// The following is equivalent to:
+			// Quaternion eyesRotation = Quaternion.Euler(0.0f, longitude * 360.0f / (2 * pi), 0.0f);
+			// float3 initialEyePosition = (i == 0 ? float3.left : float3.right) * scaledEyeRadius;
+			// float3 pos = eyesRotation * initialEyePosition; // eye position
+			// float3 dir = eyesRotation * float3.forward; // gaze direction
+
+			float3 dir = float3(sinLong, 0.0f, cosLong);
+
+			// Find place on circle where gaze ray crosses circle.
+			// Simplest way to do this is solve it geometrically assuming longitude=0, then rotate.
+			float angle = (pi/2.0f - acos(scaledEyeRadius/circleRadius));
+			if (i == 0) angle = -angle;
+			float circlePointAngle = longitude + angle;
+			if (circlePointAngle < 0.0f) circlePointAngle += 2 * pi;
+			if (circlePointAngle >= 2 * pi) circlePointAngle -= 2 * pi;
+
+			float circlePointNumber = circlePointAngle / (2 * pi) * numCirclePoints;
+			uint circlePoint0 = (uint)floor(circlePointNumber);
+			if (circlePoint0 < circlePointStart)
+			 	circlePoint0 += numCirclePoints; // Deal with an edge case when doing final slice with SSAA > 1
+			if (circlePoint0 < circlePointStart || circlePoint0 + 1 >= circlePointEnd)
+				return;
+
+            uint cameraNum;
+            float u, v;
+
+            float ipdScaleLerp = 1.0f - ipdScale * 5.0f; // Scale [0, 0.2] to [0, 1] and reverse
+
+            // Top/bottom cap
+            float4 colorCap = float4(0, 0, 0, 0);
+            if (ipdScaleLerp > 0.0f)
+			{
+				float equirectRayDirectionX = cosLat * sinLong;
+				float equirectRayDirectionY = sinLat;
+				float equirectRayDirectionZ = cosLat * cosLong;
+                float distance = 1.0f / equirectRayDirectionY;
+                u = equirectRayDirectionX * distance; v = equirectRayDirectionZ * distance;
+                if (u * u <= 1 && v * v <= 1)
+                {
+                    if (equirectRayDirectionY > 0.0f)
+                    {
+                        cameraNum = 0;
+                    }
+                    else
+                    {
+                        u = -u;
+                        cameraNum = 1;
+                    }
+
+                    u = (u + 1.0f) * 0.5f;
+                    v = (v + 1.0f) * 0.5f;
+
+					// GetCameraPixelBilinear(cameraPixels, cameraNum, u, v);
+
+					u *= cameraWidth;
+					v *= cameraHeight;
+					uint left   = (uint)floor(u);
+					uint right  = min(cameraWidth  - 1, left + 1);
+					uint top    = (uint)floor(v);
+					uint bottom = min(cameraHeight - 1, top  + 1);
+					float uFrac = frac(u);
+					float vFrac = frac(v);
+
+					uint baseIdx = cameraNum * cameraWidth * cameraHeight;
+					uint topRow    = baseIdx + top    * cameraWidth;
+					uint bottomRow = baseIdx + bottom * cameraWidth;
+					uint topLeft     = cameraPixels[topRow    + left ];
+					uint topRight    = cameraPixels[topRow    + right];
+					uint bottomLeft  = cameraPixels[bottomRow + left ];
+					uint bottomRight = cameraPixels[bottomRow + right];
+
+					float r = lerp(lerp( topLeft  >> 16        ,  bottomLeft  >> 16        , vFrac),
+								   lerp( topRight >> 16        ,  bottomRight >> 16        , vFrac), uFrac);
+					float g = lerp(lerp((topLeft  >>  8) & 0xFF, (bottomLeft  >>  8) & 0xFF, vFrac),
+								   lerp((topRight >>  8) & 0xFF, (bottomRight >>  8) & 0xFF, vFrac), uFrac);
+					float b = lerp(lerp( topLeft         & 0xFF,  bottomLeft         & 0xFF, vFrac),
+								   lerp( topRight        & 0xFF,  bottomRight        & 0xFF, vFrac), uFrac);
+
+					float4 col = float4(r, g, b, 255.0f);
+					colorCap = col;
+                }
+            }
+
+			float4 color0 = float4(0, 0, 0, 0), color1 = float4(0, 0, 0, 0);
+			for (uint j=0; j < 2; j++)
+			{
+				uint circlePointIdx = (circlePoint0 + j) % numCirclePoints;
+				float cameraPointAngle = 2 * pi * circlePointIdx / numCirclePoints;
+				float sinCameraPointAngle, cosCameraPointAngle;
+				sincos(cameraPointAngle, sinCameraPointAngle, cosCameraPointAngle);
+
+				// Equivalent to (using fact that both dir and circlePointNorm are unit vectors):
+				// Quaternion circlePointRotation = Quaternion.Euler(0.0f, cameraPointAngle * 360.0f / (2 * pi), 0.0f);
+				// float3 circlePointNormal = circlePointRotation * float3.forward;
+				// float newLongitudeDegrees = sign(cross(circlePointNormal, dir).y) * angle(circlePointNormal, dir);
+
+				// Clamp here avoids numerical out-of-bounds trouble when circlePointAngle = longitude
+				float newLongitude = sign(dir.x * cosCameraPointAngle - dir.z * sinCameraPointAngle) *
+									 acos(clamp(dir.z * cosCameraPointAngle + dir.x * sinCameraPointAngle, -1.0f, 1.0f));
+				float sinNewLong, cosNewLong;
+				sincos(newLongitude, sinNewLong, cosNewLong);
+
+				// Select which of the two cameras for this point to use and adjust ray to make camera plane perpendicular to axes
+				// 2 + because first two are top/bottom
+				uint cameraNumBase = 2 + ((circlePoint0 + j + circlePointCircularBufferStart - circlePointStart) % circlePointCircularBufferSize) * 2;
+
+				float3 textureRayDirAdjusted;
+
+				if (leftRightPass)
+				{
+					cameraNum = cameraNumBase + (newLongitude >= 0.0f ? 1 : 0);
+                        
+					float longitudeAdjust = (newLongitude >= 0.0f ? -hFovAdjust : hFovAdjust);
+					float longSum = newLongitude + longitudeAdjust;
+					float sinLongSum, cosLongSum;
+					sincos(longSum, sinLongSum, cosLongSum);
+
+					// Equivalent to:
+					// float3 textureRayDir = Quaternion.Euler(-latitude * 360.0f / (2 * pi), newLongitude * 360.0f / (2 * pi), 0.0f) * float3.forward;
+					// float3 textureRayDirAdjusted = Quaternion.Euler(0.0f, longitudeAdjust * 360.0f / (2 * pi), 0.0f) * textureRayDir;
+					textureRayDirAdjusted = float3(cosLat * sinLongSum, sinLat, cosLat * cosLongSum);
+					// float3 textureRayDirAdjusted = float3(
+					//     sin(latitude + newLongitude + longitudeAdjust) - sinLat * cosLongSum,
+					//     sinLat,
+					//     cos(latitude + newLongitude + longitudeAdjust) + sinLat * sinLongSum);
+				}
+				else // if (!leftRightPass)
+				{
+					cameraNum = cameraNumBase + (latitude >= 0.0f ? 1 : 0);
+					float latitudeAdjust = (latitude >= 0.0f ? vFovAdjust : -vFovAdjust);
+					float sinLatAdjust, cosLatAdjust;
+					sincos(latitudeAdjust, sinLatAdjust, cosLatAdjust);
+
+					// Equivalent to:
+					// textureRayDirAdjusted = Quaternion.Euler(latitudeAdjust * 360.0f / (2 * pi), 0.0f, 0.0f) * textureRayDir;
+
+					textureRayDirAdjusted = float3(cosLat * sinNewLong,
+					 							   cosLatAdjust * sinLat - cosLat * cosNewLong * sinLatAdjust,
+					 							   sinLatAdjust * sinLat + cosLat * cosNewLong * cosLatAdjust);
+				}
+
+				u =  textureRayDirAdjusted.x / textureRayDirAdjusted.z / tanHalfHFov;
+				v = -textureRayDirAdjusted.y / textureRayDirAdjusted.z / tanHalfVFov;
+
+				if (! (textureRayDirAdjusted.z > 0.0f && u * u <= 1.0f && v * v <= 1.0f) )
+					return;
+
+				u = (u + 1.0f) * 0.5f;
+        		v = (v + 1.0f) * 0.5f;
+
+				// GetCameraPixelBilinear(cameraPixels, cameraNum, u, v);
+
+				u *= cameraWidth;
+				v *= cameraHeight;
+				uint left   = (uint)floor(u);
+				uint right  = min(cameraWidth  - 1, left + 1);
+				uint top    = (uint)floor(v);
+				uint bottom = min(cameraHeight - 1, top  + 1);
+				float uFrac = frac(u);
+				float vFrac = frac(v);
+
+				uint baseIdx = cameraNum * cameraWidth * cameraHeight;
+				uint topRow    = baseIdx + top    * cameraWidth;
+				uint bottomRow = baseIdx + bottom * cameraWidth;
+				uint topLeft     = cameraPixels[topRow    + left ];
+				uint topRight    = cameraPixels[topRow    + right];
+				uint bottomLeft  = cameraPixels[bottomRow + left ];
+				uint bottomRight = cameraPixels[bottomRow + right];
+
+				float r = lerp(lerp( topLeft  >> 16        ,  bottomLeft  >> 16        , vFrac),
+							   lerp( topRight >> 16        ,  bottomRight >> 16        , vFrac), uFrac);
+				float g = lerp(lerp((topLeft  >>  8) & 0xFF, (bottomLeft  >>  8) & 0xFF, vFrac),
+							   lerp((topRight >>  8) & 0xFF, (bottomRight >>  8) & 0xFF, vFrac), uFrac);
+				float b = lerp(lerp( topLeft         & 0xFF,  bottomLeft         & 0xFF, vFrac),
+							   lerp( topRight        & 0xFF,  bottomRight        & 0xFF, vFrac), uFrac);
+
+				float4 col = float4(r, g, b, 255.0f);
+				if (j == 0) color0 = col; else color1 = col;
+			}
+
+			float4 c = lerp(color0, color1, frac(circlePointNumber));
+            if (colorCap.a > 0.0f && ipdScaleLerp > 0.0f)
+                c = lerp(c, colorCap, ipdScaleLerp);
+
+			totalColor += float4(c.r, c.g, c.b, 255.0f);
+		}
+	}
+
+	totalColor /= ssaaFactor * ssaaFactor;
+	result[((dtid.y + equirectangularHeight * i) * equirectangularWidth) + dtid.x] =
+		((uint)totalColor.r << 16) | ((uint)totalColor.g << 8) | (uint)totalColor.b;
+}
