@@ -70,7 +70,7 @@ public class FlexMenu : MonoBehaviour
 
     public void RegisterResponder(FlexMenuResponder responder)
     {
-        print("responder " + responder);
+        //print("responder " + responder);
         this.responder = responder;
     }
 

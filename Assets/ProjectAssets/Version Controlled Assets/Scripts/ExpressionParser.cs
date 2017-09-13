@@ -21,7 +21,7 @@ public static class ExpressionParser {
         return map.Aggregate(input, (i, m) => Regex.Replace(i, m.Key, m.Value, RegexOptions.IgnoreCase));
     }
 
-    public static List<string> Parse(string input) {
+    public static List<string> Parse(this string input) {
         input = Clean(input);
         return Regex.Matches(input, splitPattern).Cast<Match>().Select(m => m.Value).ToList<string>();
     }

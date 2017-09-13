@@ -10,23 +10,16 @@ public class TabButton : QuickButton
 
     Vector3 uncollapsedPos, uncollapsedScale, buttonPos;
 
-    //IDEA: put all of collapse function here and use arrow buttons for scrolling
-
-    // Use this for initialization
     protected override void Start()
     {
         base.Start();
 
-        uncollapsedPos = new Vector3(1.806f, -3.2f, 0f);
+        uncollapsedPos = new Vector3(1.806f, -3.52f, 0f);
         uncollapsedScale = new Vector3(1f, 1f, 1f);
-        buttonPos = new Vector3(1.8f, -6.4f, 0);
+        buttonPos = new Vector3(1.8f, -6.69f, 0);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+    void Update() { }
 
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
     {
@@ -74,8 +67,5 @@ public class TabButton : QuickButton
         }
     }
 
-    protected override void ButtonExitBehavior(GameObject other)
-    {
-
-    }
+    protected override void ButtonExitBehavior(GameObject other) { }
 }

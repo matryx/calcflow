@@ -38,6 +38,7 @@ public class MainMenu : QuickButton
         resetPos.gameObject.SetActive(false);
         resetScene.gameObject.SetActive(false);
         home.gameObject.SetActive(false);
+
         if (menus != null)
         {
             menus.gameObject.SetActive(false);
@@ -72,11 +73,13 @@ public class MainMenu : QuickButton
         resetScene.gameObject.SetActive(false);
         yield return StartCoroutine(ScaleTo(home, buttonScale, Vector3.zero, 0.1f));
         home.gameObject.SetActive(false);
+
         if (menus != null)
         {
             yield return StartCoroutine(ScaleTo(menus, buttonScale, Vector3.zero, 0.1f));
             menus.gameObject.SetActive(false);
         }
+
         yield return StartCoroutine(ScaleTo(resetPos, buttonScale, Vector3.zero, 0.1f));
         resetPos.gameObject.SetActive(false);
     }
@@ -85,11 +88,13 @@ public class MainMenu : QuickButton
     {
         resetPos.gameObject.SetActive(true);
         yield return StartCoroutine(ScaleTo(resetPos, Vector3.zero, buttonScale, 0.1f));
+
         if (menus != null)
         {
             menus.gameObject.SetActive(true);
             yield return StartCoroutine(ScaleTo(menus, Vector3.zero, buttonScale, 0.1f));
         }
+
         home.gameObject.SetActive(true);
         yield return StartCoroutine(ScaleTo(home, Vector3.zero, buttonScale, 0.1f));
         resetScene.gameObject.SetActive(true);

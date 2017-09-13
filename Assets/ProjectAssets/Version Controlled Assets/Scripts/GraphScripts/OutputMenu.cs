@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OutputMenu : MonoBehaviour {
+public class OutputMenu : MonoBehaviour
+{
 
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
@@ -25,7 +26,8 @@ public class OutputMenu : MonoBehaviour {
 
     //PRESTREAM CODE
     bool saveable = true;
-    bool Saveable {
+    bool Saveable
+    {
         get
         {
             return saveable;
@@ -35,7 +37,8 @@ public class OutputMenu : MonoBehaviour {
             if (saveable == false && value == true)
             {
                 saveButton.SetState(0);
-            } else if (value == false)
+            }
+            else if (value == false)
             {
                 saveButton.SetState(-1);
             }
@@ -106,9 +109,10 @@ public class OutputMenu : MonoBehaviour {
                 calcManager.toExport = true;
                 break;
             case "Save":
-                if (Saveable) {
-                    print("saving");
-                calcManager.saveLoadMenu.Save();
+                print("save button pressed");
+                if (Saveable)
+                {
+                    calcManager.saveLoadMenu.Save();
                 }
                 break;
         }

@@ -77,11 +77,20 @@ public class MultiSelectFlexPanel : FlexPanelComponent
 
     }
 
+    bool initialized = false;
 
-    // Use this for initialization
-    void Start()
+    private void Start()
     {
-        Actions.Clear();
-        AddAllChildActions();
+        Initialize();
+    }
+    // Use this for initialization
+    public MultiSelectFlexPanel Initialize()
+    {
+        if (!initialized)
+        {
+            AddAllChildActions();
+            initialized = true;
+        }
+        return this;
     }
 }

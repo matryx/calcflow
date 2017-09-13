@@ -5,43 +5,34 @@ using UnityEngine;
 public class Collapse : QuickButton {
     public Transform[] menus;
 
-    bool animating;
+    private bool animating;
+    private IEnumerator routine;
+
     Transform currMenu;
     Vector3 collapsedPos, uncollapsedPos;
     Vector3 collapsedScale, uncollapsedScale;
     Vector3 targetScale, targetPos, buttonPos;
     Vector3 buttonCollPos, buttonUncollPos;
 
-    private IEnumerator routine;
-
-    //IDEA:
-    // -- make bar the grabbable component and just toggle collapse 
-    //    using tab buttons (talk to Ethan about this)
-
-    // Use this for initialization
-
     protected override void Start () {
         base.Start();
 
         collapsedPos = new Vector3(1.806f, -0.54f, 0f);
-        uncollapsedPos = new Vector3(1.806f, -3.52f, 0f);
+        uncollapsedPos = new Vector3(1.806f, -3.529f, 0.003f);
 
         collapsedScale = new Vector3(1f, 0f, 1f);
         uncollapsedScale = new Vector3(1f, 1f, 1f);
 
         buttonCollPos = new Vector3(1.8f, -0.75f, 0);
-        buttonUncollPos = new Vector3(1.8f, -6.7f, 0);
-	}
+        buttonUncollPos = new Vector3(1.8f, -6.69f, 0);
+    }
 	
-	// Update is called once per frame
 	void Update ()
     {
         foreach(Transform t in menus)
         {
             if (t.gameObject.activeSelf) currMenu = t;
         }
-
-        
 	}
 
     IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)
@@ -84,8 +75,7 @@ public class Collapse : QuickButton {
 
     bool doneAnimating()
     {
-        return (currMenu.localScale == targetScale &&
-                currMenu.localPosition == targetPos);
+        return (currMenu.localScale == targetScale && currMenu.localPosition == targetPos);
     }
 
     IEnumerator CollapseMenu()
@@ -116,13 +106,10 @@ public class Collapse : QuickButton {
         {
             animating = true;
             routine = (currMenu.gameObject.activeSelf) ?
-                      CollapseMenu() : UncollapseMenu();
+                       CollapseMenu() : UncollapseMenu();
             StartCoroutine(routine);
         }
     }
 
-    protected override void ButtonExitBehavior(GameObject other)
-    {
-
-    }
+    protected override void ButtonExitBehavior(GameObject other) { }
 }

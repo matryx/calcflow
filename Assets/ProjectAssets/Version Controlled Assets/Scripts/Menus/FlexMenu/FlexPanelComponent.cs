@@ -62,14 +62,12 @@ abstract public class FlexPanelComponent : MonoBehaviour
 
     public void RemoveAllActions()
     {
-        print("deregistering buttons to panel " + name);
-
         foreach (FlexActionableComponent action in actions)
         {
             action.DismantleComponent();
         }
 
-            actions.Clear();
+        actions.Clear();
     }
 
     public virtual void AddAction(FlexActionableComponent action)

@@ -8,7 +8,7 @@ public class AdvertisingScreen : MonoBehaviour {
     public int nextSceneIndex;
 	// Use this for initialization
 	void Start () {
-        Invoke("LoadScene", 3.5f);
+        Invoke("LoadScene", 5.0f);
     }
 	
 	// Update is called once per frame

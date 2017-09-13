@@ -39,7 +39,6 @@ public class CalcManager : MonoBehaviour
     internal bool toExport = false;
 
     [SerializeField]
-    public FlexActionableComponent defaultFunction;
     public FlexActionableComponent defaultSpeed;
     public FlexActionableComponent defaultEffect;
 
@@ -166,7 +165,6 @@ public class CalcManager : MonoBehaviour
     // Use this for initialization
     void Awake()
     {
-        print("awake going to initialize now.");
         Initialize();
     }
 

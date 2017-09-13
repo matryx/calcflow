@@ -76,6 +76,7 @@ public class HeightMapIntegration : MonoBehaviour
             return;
         }
         TessellateSurface();
+        //StartCoroutine(TessellateSurface());
         sphere.GetComponent<ConstraintGrabbable>().SetXRange(uMin, uMax);
         sphere.GetComponent<ConstraintGrabbable>().SetZRange(vMin, vMax);
     }
@@ -153,7 +154,14 @@ public class HeightMapIntegration : MonoBehaviour
 
         varU.value = uMin + (uMax - uMin) * u;
         varV.value = vMin + (vMax - vMin) * v;
-        mappingCache[uv] = new Vector3(uMin + (uMax - uMin) * u, (float)expZ.Evaluate(), vMin + (vMax - vMin) * v);
+        float z = (float)expZ.Evaluate();
+        if (float.IsNaN(z)) z = 0f;
+        if (float.IsNegativeInfinity(z)) z = float.MinValue;
+        if (float.IsPositiveInfinity(z)) z = float.MaxValue;
+        Vector3 result = new Vector3(uMin + (uMax - uMin) * u, z, vMin + (vMax - vMin) * v);
+        ClampToBound(ref result);
+        //mappingCache[uv] = new Vector3(uMin + (uMax - uMin) * u, z, vMin + (vMax - vMin) * v);
+        mappingCache[uv] = result;
         return mappingCache[uv];
     }
 
@@ -164,16 +172,28 @@ public class HeightMapIntegration : MonoBehaviour
         return Vector3.Cross(tanU, tanV);
     }
 
+    const float MaxRange = 20f;
     bool OnBoundingBox(Vector3 v)
     {
-        return v.x >= 20f || v.x <= -20f || v.y >= 20f || v.y <= -20f || v.z >= 20f || v.z <= -20f;
+        return Mathf.Abs(v.x) >= MaxRange || Mathf.Abs(v.y) >= MaxRange || Mathf.Abs(v.z) >= MaxRange;
+    }
+
+    void ClampToBound(ref Vector3 v)
+    {
+        if (v.x >= MaxRange) v.x = MaxRange;
+        if (v.y >= MaxRange) v.y = MaxRange;
+        if (v.z >= MaxRange) v.z = MaxRange;
+        if (v.x <= -MaxRange) v.x = -MaxRange;
+        if (v.y <= -MaxRange) v.y = -MaxRange;
+        if (v.z <= -MaxRange) v.z = -MaxRange;
     }
 
     Dictionary<Vector2, Vector3> mappingCache = new Dictionary<Vector2, Vector3>();
-    public void TessellateSurface()
+    float MinDist = 0.05f;
+    public IEnumerator TessellateSurface()
     {
 
-        float alloweddist = 0.03f;
+        float alloweddist = 0.1f;
         int i0, i1, i2, i3;
         float umin, umax, vmin, vmax;
         var positionIndex = new Dictionary<Vector3, int>();
@@ -212,7 +232,7 @@ public class HeightMapIntegration : MonoBehaviour
             i3 = indices.Pop(); i2 = indices.Pop(); i1 = indices.Pop(); i0 = indices.Pop();
             vmax = uvRanges.Pop(); vmin = uvRanges.Pop(); umax = uvRanges.Pop(); umin = uvRanges.Pop();
 
-            if (positions.Count > 65500)
+            if (positions.Count > 32000)
             {
                 faces.Add(i0);
                 faces.Add(i1);
@@ -236,7 +256,7 @@ public class HeightMapIntegration : MonoBehaviour
             Vector3 v3 = positions[i3];
 
             //float maxDist = 40f;
-            if ((OnBoundingBox(v0) && OnBoundingBox(v1)) || (OnBoundingBox(v2) && OnBoundingBox(v3)) || (OnBoundingBox(v0) && OnBoundingBox(v3)) || (OnBoundingBox(v1) && OnBoundingBox(v2)))
+            if (OnBoundingBox(v0) && OnBoundingBox(v1)&&OnBoundingBox(v2)&&OnBoundingBox(v3))
             {
                 //positions[i0] = Clamp(v0); positions[i1] = Clamp(v1); positions[i2] = Clamp(v2); positions[i3] = Clamp(v3);
                 //faces.Add(i0);
@@ -247,6 +267,17 @@ public class HeightMapIntegration : MonoBehaviour
                 //faces.Add(i3);
                 continue;
             }
+
+            if(Vector3.Distance(v0,v1)<MinDist
+                || Vector3.Distance(v0, v2) < MinDist
+                || Vector3.Distance(v0, v3) < MinDist
+                || Vector3.Distance(v1, v2) < MinDist
+                || Vector3.Distance(v1, v3) < MinDist
+                || Vector3.Distance(v2, v3) < MinDist)
+            {
+                continue;
+            }
+            //ClampToBound(ref v0); ClampToBound(ref v1); ClampToBound(ref v2); ClampToBound(ref v3);
 
             bool cut_mid = false, cut_u_min = false, cut_u_max = false, cut_v_min = false, cut_v_max = false;
 
@@ -491,12 +522,18 @@ public class HeightMapIntegration : MonoBehaviour
             }
             else
             {
-                faces.Add(i0);
-                faces.Add(i1);
-                faces.Add(i2);
-                faces.Add(i0);
-                faces.Add(i2);
-                faces.Add(i3);
+                //if (!OnBoundingBox(positions[i0]))
+                    faces.Add(i0);
+                //if (!OnBoundingBox(positions[i1]))
+                    faces.Add(i1);
+                //if (!OnBoundingBox(positions[i2]))
+                    faces.Add(i2);
+                //if (!OnBoundingBox(positions[i0]))
+                    faces.Add(i0);
+                //if (!OnBoundingBox(positions[i2]))
+                    faces.Add(i2);
+                //if (!OnBoundingBox(positions[i3]))
+                    faces.Add(i3);
             }
             //mesh.mesh.Clear();
             //mesh.mesh.SetVertices(positions);
@@ -506,6 +543,7 @@ public class HeightMapIntegration : MonoBehaviour
             //yield return null;
         }
 
+        //Debug.Log("Tessellation finished");
 
         //duplicate triangles for back face
         if (positions.Count < 32500)
@@ -532,6 +570,9 @@ public class HeightMapIntegration : MonoBehaviour
         mesh.mesh.SetUVs(0, uvs);
         mesh.mesh.RecalculateNormals();
         mesh.mesh.SetTriangles(faces, 0);
+
+        //Debug.Log("Mesh finalized");
+        return null;
     }
 
     protected Mesh TessellateCurve(float umin, float? umax, float vmin, float? vmax)
@@ -548,7 +589,7 @@ public class HeightMapIntegration : MonoBehaviour
 
     protected Mesh TessellateUCurve(float u_min, float u_max, float v)
     {
-        float alloweddist = 0.03f;
+        float alloweddist = 0.05f;
 
         var positionIndex = new Dictionary<Vector3, int>();
         mappingCache = new Dictionary<Vector2, Vector3>();
@@ -572,6 +613,11 @@ public class HeightMapIntegration : MonoBehaviour
         {
             i0 = indices.Pop(); i1 = indices.Pop();
             umin = uMinMax.Pop(); umax = uMinMax.Pop();
+
+            if (OnBoundingBox(sideVertices[i0]) && OnBoundingBox(sideVertices[i1]))
+            {
+                continue;
+            }
 
             float umid = (umin + umax) / 2.0f;
             Vector3 mid = (sideVertices[i0] + sideVertices[i1]) / 2.0f;
@@ -658,7 +704,7 @@ public class HeightMapIntegration : MonoBehaviour
 
     protected Mesh TessellateVCurve(float v_min, float v_max, float u)
     {
-        float alloweddist = 0.03f;
+        float alloweddist = 0.05f;
 
         var positionIndex = new Dictionary<Vector3, int>();
         mappingCache = new Dictionary<Vector2, Vector3>();
@@ -682,6 +728,11 @@ public class HeightMapIntegration : MonoBehaviour
         {
             i0 = indices.Pop(); i1 = indices.Pop();
             vmin = vMinMax.Pop(); vmax = vMinMax.Pop();
+
+            if (OnBoundingBox(sideVertices[i0]) && OnBoundingBox(sideVertices[i1]))
+            {
+                continue;
+            }
 
             float vmid = (vmin + vmax) / 2.0f;
             Vector3 mid = (sideVertices[i0] + sideVertices[i1]) / 2.0f;

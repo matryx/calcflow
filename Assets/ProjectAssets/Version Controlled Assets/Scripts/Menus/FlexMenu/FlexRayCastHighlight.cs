@@ -22,7 +22,7 @@ public class FlexRayCastHighlight : MonoBehaviour {
 
     void OnRayCastStart(RayCastSender sender)
     {
-        print("raycast Start. NumHitters: " + numhitters);
+        //print("raycast Start. NumHitters: " + numhitters);
         numhitters++;
     }
 

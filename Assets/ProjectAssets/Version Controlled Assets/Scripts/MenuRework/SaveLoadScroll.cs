@@ -35,11 +35,11 @@ public class SaveLoadScroll : MonoBehaviour {
 
         if (angle == 90)            //UP scroll moves buttons down
         {
-            menu.moveButtons(0);
+            //menu.moveButtons(0);
         }
         else if (angle == 270)      //DOWN scroll moves buttons up
         {
-            menu.moveButtons(1);
+            //menu.moveButtons(1);
         }
     }
 

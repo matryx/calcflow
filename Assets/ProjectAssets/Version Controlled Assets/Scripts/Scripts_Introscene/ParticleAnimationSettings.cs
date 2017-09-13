@@ -19,6 +19,7 @@ internal class ParticleSettingsResponder : FlexMenu.FlexMenuResponder
     {
         effect = defaultEffect;
         speed = defaultSpeed;
+        Flex_ActionStart(defaultEffect.name, defaultEffect, null);
     }
 
     public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
