@@ -56,7 +56,7 @@ public class PresetMenu : MonoBehaviour
         //R1 -> R1
         presets.Add("Cinquefoil Knot", cinquefoilKnot);
         presets.Add("Circle", circle);
-        presets.Add("Circle Outline", sphereOutline);
+        presets.Add("Sphere Outline", sphereOutline);
         presets.Add("Hypocloid", hypocloid);
         presets.Add("Hypocloid Surface", hypocloidSurface);
         presets.Add("Trefoil Knot", trefoilKnot);
@@ -318,7 +318,7 @@ public class PresetMenu : MonoBehaviour
                 wmax = ExpressionParser.Parse("2pi");
                 break;
             case "Tetrahedron":
-                x = ExpressionParser.Parse("u(1-w)");
+                x = ExpressionParser.Parse("u(1-v)");
                 y = ExpressionParser.Parse("uv(1-w)");
                 z = ExpressionParser.Parse("uvw");
                 umin = ExpressionParser.Parse("0");
@@ -336,6 +336,7 @@ public class PresetMenu : MonoBehaviour
         expressionSet.AddRange("t", tmin, tmax);
         expressionSet.AddRange("u", umin, umax);
         expressionSet.AddRange("v", vmin, vmax);
+        expressionSet.AddRange("w", wmin, wmax);
         calcManager.PresetPressed();
     }
 }

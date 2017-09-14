@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+#endif
 using UnityEngine.SceneManagement;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(Scroll))]
 public class ScrollEditor : Editor
 {
@@ -75,3 +78,4 @@ public class ScrollEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 }
+#endif
