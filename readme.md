@@ -14,7 +14,7 @@ The repository contains the open-sourced code to Calcflow. Calcflow is a powerfu
 * Programming Language: C#
 * Comptaible with Windows
 * Hardware necessary for Calcflow to run: Oculus Rift or HTC Vive
-* 
+
 
 ## Built With
 
@@ -28,7 +28,7 @@ Currently, the version is 5.6.2f1
 
 * **Ethan Vander Horn** - *Lead Calcflow Developer* - [EthanVanderHorn](https://github.com/EthanVanderHorn)
 * **Edward Zhou** - *Lead Calcflow Developer* - [YangZ530](https://github.com/YangZ530)
-* **Jacqueline Bontigao** - *Developer* 
+* **Jacqueline Bontigao** - *UI Developer* - [Calcodeus](https://github.com/calcodeus)
 
 ## License
 
