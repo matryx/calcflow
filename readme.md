@@ -1,19 +1,27 @@
 # Calcflow
-The repository contains the open-sourced code to Calcflow. Calcflow is a powerful mathematical visualization tool that is designed to give students, educators, and engineers alike a better grasp on some of the most difficult concepts in vector calculus. Utilizing the best UI/UX theory, Calcflow is an intuitive VR interface for vector calculus and is used by scientists and engineers for both educational and commercial applications. Some of the core features are as follows:
+![interpolations](https://user-images.githubusercontent.com/27929626/30620444-6667fa74-9d73-11e7-9b2b-342171dc5139.gif)
+
+The repository contains the open-sourced code to Calcflow, a powerful mathematical visualization tool designed to give students, educators, and engineers a better grasp on some of the most difficult concepts in vector calculus. Utilizing the best UI/UX theory, Calcflow is an intuitive VR interface for vector calculus and is used by scientists and engineers for both educational and commercial applications. Some core features:
 
 * Parametric graphing utility designed to map points in 2D space into 3D by defining (x,y,z) as a function of parameters u and v. Recent functionality also includes the ability to map from 1D to 3D.
 * Vector field utility
-* Cross product and vector addition modules rendered in real time as a user moves the initial vectors around
+* Cross product and vector addition modules rendered in real time as a user manipulates initial vectors
 * Double integral grapher
 
+## Why Calcflow?
+Today, the most common tool for complex maths visualization in the classroom is the TI-84+. Scientists, researchers, and other professionals who implement calculus in their work may rely on more complex toolkits like MATLAB. Though these tools offer broader functionality, they are similarly if not more unintuitive than their handheld counterparts. 
+
+![particles](https://user-images.githubusercontent.com/27929626/30620415-2a4d3482-9d73-11e7-98f8-e906e83205e2.gif)
+
+Visualization plays a crucial role in understanding, mastering, and improving upon mathematical concepts, but today's standard interfaces frustrate and alienate many individuals, creating an excessively high barrier of entry to higher level math studies. Calcflow shatters this interfacial bottleneck by enabling users to interact directly with complex equations in physical space. Users can manipulate inputs and parameters and observe changes to 3D visualizations in realtime.
 
 ## Getting Started
 
 ### Prerequisites
 
 * Programming Language: C#
-* Comptaible with Windows
-* Hardware necessary for Calcflow to run: Oculus Rift or HTC Vive
+* Operating System: Windows
+* VR HMD: Oculus Rift or HTC Vive
 
 
 ## Built With
