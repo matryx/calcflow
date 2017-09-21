@@ -4,16 +4,56 @@ using UnityEngine;
 
 public class ScrollBar : MonoBehaviour
 {
-    Transform bar, scroller;
+    Transform bar, scroller, scroll;
     Scroll.orientation orientation;
 
     float scrollerHeight, scrollerWidth;
     int numPages, currPage;
     public float moveSpeed;
+    Material scrollerMaterial;  
 
     void Awake()
     {
-        currPage = 1; 
+        currPage = 1;
+        scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
+        scrollerMaterial = scroll.GetComponent<Scroll>().scrollerMaterial;
+
+        initializeScrollBar();
+    }
+
+    private void initializeScrollBar()
+    {
+        bar = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
+        bar.name = "Bar";
+        bar.GetComponent<Renderer>().material = scroll.GetComponent<Renderer>().material;
+        bar.transform.SetParent(scroll.parent);
+        bar.transform.localPosition = Vector3.zero;
+        bar.transform.localEulerAngles = Vector3.zero;
+
+        float xScale = (orientation == Scroll.orientation.VERTICAL) ? 0.15f : scroll.localScale.x / 1.5f;
+        float yScale = (orientation == Scroll.orientation.VERTICAL) ? scroll.localScale.y / 1.5f : 0.15f;
+
+        bar.transform.localScale = new Vector3(xScale, yScale, scroll.localScale.z);
+
+        float moveBy = (orientation == Scroll.orientation.VERTICAL) ?
+                       (scroll.localScale.x / 2) + (bar.transform.localScale.x / 2) + 0.1f :
+                       (scroll.localScale.y / 2) + (bar.transform.localScale.y / 2) + 0.1f;
+
+        bar.transform.localPosition = (orientation == Scroll.orientation.VERTICAL) ?
+                               new Vector3(moveBy, 0, 0) : new Vector3(0, -moveBy, 0);
+
+        scroller = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
+        scroller.name = "Scroller";
+        scroller.GetComponent<Renderer>().material = scrollerMaterial;
+        scroller.transform.SetParent(transform);
+        scroller.transform.localScale = Vector3.zero;
+        scroller.transform.localPosition = Vector3.zero;
+        scroller.transform.localEulerAngles = Vector3.zero;
+
+        transform.SetParent(bar.transform);
+        transform.localPosition = Vector3.zero;
+        transform.SetParent(scroll.parent);
+        bar.transform.SetParent(transform);
     }
 
     public void moveScroller(Scroll.direction dir)
@@ -53,7 +93,7 @@ public class ScrollBar : MonoBehaviour
         else
         {
             gameObject.SetActive(true);
-            setScroller();
+            setUpScrollBar();
         }
     }
 
@@ -62,10 +102,12 @@ public class ScrollBar : MonoBehaviour
         return currPage;
     }
 
-    private void setScroller()
+    private void setUpScrollBar()
     {
-        bar = transform.Find("Bar");
-        scroller = transform.Find("Scroller");
+        float xScale = (orientation == Scroll.orientation.VERTICAL) ? 0.15f : scroll.localScale.x / 1.5f;
+        float yScale = (orientation == Scroll.orientation.VERTICAL) ? scroll.localScale.y / 1.5f : 0.15f;
+
+        bar.transform.localScale = new Vector3(xScale, yScale, scroll.localScale.z);
 
         if (orientation == Scroll.orientation.VERTICAL)
         {

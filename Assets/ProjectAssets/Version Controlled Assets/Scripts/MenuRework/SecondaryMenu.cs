@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class SecondaryMenu : MonoBehaviour
 {
+    //TODO: finish implementing particle count, already made skeleton code for it
+
+    //BUG: animation doesn't happen until you actually go to animation settings and
+    //     click one of the style buttons. for some reason the button isn't being virtually pressed
+    //     even though it's supposed to be
+
     internal class SecondaryMenuResponder : FlexMenu.FlexMenuResponder
     {
         SecondaryMenu secMenu;
@@ -24,51 +30,55 @@ public class SecondaryMenu : MonoBehaviour
     public Transform functionMenu;
     public Transform animationMenu;
     public Transform saveLoadMenu;
-    Vector3 setPosition;
-    Vector3 setScale;
+    public Transform settingsMenu;
+    public GameObject volumeBall; 
 
     SecondaryMenuResponder responder;
 
-    // Use this for initialization
     void Start()
     {
         functionMenu.gameObject.SetActive(true);
         animationMenu.gameObject.SetActive(false);
         saveLoadMenu.gameObject.SetActive(false);
-
-        setPosition = functionMenu.localPosition;
-        setScale = Vector3.one;
+        settingsMenu.gameObject.SetActive(false);
 
         responder = new SecondaryMenuResponder();
         responder.initialize(this);
         GetComponent<FlexMenu>().RegisterResponder(responder);
+        volumeBall.GetComponent<Collider>().enabled = false;
+        volumeBall.GetComponent<MeshRenderer>().enabled = false;
     }
 
     void toggleMenu(string menuName)
     {
         switch (menuName)
         {
-            case "ExampleFunctions":
+            case "Presets":
                 functionMenu.gameObject.SetActive(true);
                 animationMenu.gameObject.SetActive(false);
                 saveLoadMenu.gameObject.SetActive(false);
+                settingsMenu.gameObject.SetActive(false);
                 break;
             case "Animation":
                 functionMenu.gameObject.SetActive(false);
                 animationMenu.gameObject.SetActive(true);
                 saveLoadMenu.gameObject.SetActive(false);
+                settingsMenu.gameObject.SetActive(false);
                 break;
             case "SaveLoad":
                 functionMenu.gameObject.SetActive(false);
                 animationMenu.gameObject.SetActive(false);
                 saveLoadMenu.gameObject.SetActive(true);
+                settingsMenu.gameObject.SetActive(false);
+                break;
+            case "Settings":
+                functionMenu.gameObject.SetActive(false);
+                animationMenu.gameObject.SetActive(false);
+                saveLoadMenu.gameObject.SetActive(false);
+                settingsMenu.gameObject.SetActive(true);
                 break;
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+    void Update() { }
 }

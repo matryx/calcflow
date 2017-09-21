@@ -17,14 +17,14 @@ public class Collapse : QuickButton {
     protected override void Start () {
         base.Start();
 
-        collapsedPos = new Vector3(1.806f, -0.54f, 0f);
-        uncollapsedPos = new Vector3(1.806f, -3.529f, 0.003f);
+        collapsedPos = new Vector3(1.876f, -0.54f, 0f);
+        uncollapsedPos = new Vector3(1.876f, -3.52f, 0.006999969f);
 
         collapsedScale = new Vector3(1f, 0f, 1f);
         uncollapsedScale = new Vector3(1f, 1f, 1f);
 
-        buttonCollPos = new Vector3(1.8f, -0.75f, 0);
-        buttonUncollPos = new Vector3(1.8f, -6.69f, 0);
+        buttonCollPos = new Vector3(1.882f, -0.75f, 0);
+        buttonUncollPos = new Vector3(1.882f, -6.718f, -0.025f);
     }
 	
 	void Update ()

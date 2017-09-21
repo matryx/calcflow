@@ -7,8 +7,7 @@ using NanoVRController;
 [RequireComponent(typeof(JoyStickReceiver))]
 public class Scroll : MonoBehaviour
 {
-    //REQUIRED: 
-    // (1) some type of transparent shaders(not standard), Unlit/UnlitAlphaWithFade is recommended
+    //REQUIRED: some type of transparent shaders(not standard), Unlit/UnlitAlphaWithFade recommended
 
     private List<Transform> objects;
     private List<Transform> toAdd = new List<Transform>();
@@ -17,9 +16,9 @@ public class Scroll : MonoBehaviour
     private Vector3 toPos;
     private JoyStickReceiver jsReceiver;
 
-    [SerializeField]
-    private Material scrollerMaterial;
     public Transform objectParent;
+    [SerializeField]
+    public Material scrollerMaterial;
     [SerializeField]
     private Vector3 margin;
     [SerializeField]
@@ -116,60 +115,19 @@ public class Scroll : MonoBehaviour
         moveObjects();
     }
 
-    private void setUpScrollBar()
+    private void setUpMenu()
     {
+        if (transform.parent.GetComponentInChildren<ScrollBar>()) return;
+
         scrollBar = new GameObject().transform;
         scrollBar.name = "ScrollBar";
         scrollBar.SetParent(transform.parent);
         scrollBar.localScale = Vector3.one;
         scrollBar.localPosition = Vector3.zero;
         scrollBar.localEulerAngles = Vector3.zero;
-
-        GameObject bar = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        bar.name = "Bar";
-        Material m = transform.GetComponent<Renderer>().material;
-        bar.GetComponent<Renderer>().material = m;
-        bar.transform.SetParent(transform.parent);
-        bar.transform.localPosition = Vector3.zero;
-        bar.transform.localEulerAngles = Vector3.zero;
-
-        float xScale = (currOrientation == orientation.VERTICAL) ? 0.15f : transform.localScale.x / 1.5f;
-        float yScale = (currOrientation == orientation.VERTICAL) ? transform.localScale.y / 1.5f : 0.15f;
-
-        bar.transform.localScale = new Vector3(xScale, yScale, transform.localScale.z);
-
-        float moveBy = (currOrientation == orientation.VERTICAL) ?
-                       (transform.localScale.x / 2) + (bar.transform.localScale.x / 2) + 0.1f :
-                       (transform.localScale.y / 2) + (bar.transform.localScale.y / 2) + 0.1f;
-
-        bar.transform.localPosition = (currOrientation == orientation.VERTICAL) ?
-                                       new Vector3(moveBy, 0, 0) : new Vector3(0, -moveBy, 0);
-
-        GameObject scroller = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        scroller.name = "Scroller";
-        scroller.GetComponent<Renderer>().material = scrollerMaterial;
-        scroller.transform.SetParent(scrollBar);
-        scroller.transform.localPosition = Vector3.zero;
-        scroller.transform.localEulerAngles = Vector3.zero;
-
-        scrollBar.SetParent(bar.transform);
-        scrollBar.localPosition = Vector3.zero;
-        scrollBar.SetParent(transform.parent);
-        bar.transform.SetParent(scrollBar);
-
         scrollBar.gameObject.AddComponent<ScrollBar>();
         scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation);
         scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
-    }
-
-    private void setUpMenu()
-    {
-        setUpScrollBar();
-
-        if (objects == null || objects.Count == 0)
-        {
-            scrollBar.gameObject.SetActive(false);
-        }
 
         Vector3 startPos = transform.localPosition;
 

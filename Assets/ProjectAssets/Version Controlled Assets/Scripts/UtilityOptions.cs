@@ -1,36 +1,57 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class UtilityOptions : MonoBehaviour {
-
+public class UtilityOptions : MonoBehaviour
+{
     Transform vo;
+    AudioSource audioSource;
+    bool alreadyPlayed = false;
 
-	// Use this for initialization
-	void Start () {
-        if (transform.Find("Description"))
+    void Start()
+    {
+        //NOTE: GameOptions is buggy
+
+        #region old code with GameOptions
+        //if (transform.Find("Description"))
+        //{
+        //    if (GameOptions.instance.options[0])
+        //    {
+        //        transform.Find("Description").gameObject.SetActive(true);
+        //    }
+        //    else
+        //    {
+        //        transform.Find("Description").gameObject.SetActive(false);
+        //    }
+        //}
+
+        //if (vo = transform.Find("Voiceover"))
+        //{
+        //    if (GameOptions.instance.options[2])
+        //    {
+        //        audioSource = vo.GetComponent<AudioSource>();
+        //        //transform.FindChild("Voiceover").GetComponent<AudioSource>().Play();
+        //        audioSource.Play();
+        //        print("audiosource initialized");
+        //    }
+        //}
+        #endregion
+
+        audioSource = transform.Find("Voiceover").GetComponent<AudioSource>();
+    }
+
+    void Update()
+    {
+        if (!SettingsVariables.narration && audioSource && audioSource.isPlaying)
         {
-            if (GameOptions.instance.options[0])
-            {
-                transform.Find("Description").gameObject.SetActive(true);
-            }
-            else
-            {
-                transform.Find("Description").gameObject.SetActive(false);
-            }
+            audioSource.Stop();
+            alreadyPlayed = false;
         }
-
-        if (vo = transform.Find("Voiceover"))
+        else if (SettingsVariables.narration && audioSource && 
+                 !audioSource.isPlaying && !alreadyPlayed)
         {
-            if (GameOptions.instance.options[2])
-            {
-                //transform.FindChild("Voiceover").GetComponent<AudioSource>().Play();
-                vo.GetComponent<AudioSource>().Play();
-            }
+            audioSource.volume = SettingsVariables.volume;
+            audioSource.Play();
+            alreadyPlayed = true;
         }
-	}
-	
-	// Update is called once per frame
-	void Update () {
-
-	}
+    }
 }

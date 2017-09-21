@@ -2,7 +2,7 @@
 using System.Collections;
 using NanoVRController;
 
-
+[RequireComponent(typeof(RayCastReceiver))]
 public class ConstraintGrabbable : GrabbableObject {
 
     [SerializeField]

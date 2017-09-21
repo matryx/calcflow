@@ -48,22 +48,22 @@ namespace NanoVRController
         protected override void Update()
         {
             // A/X Button
-            if(OVRInput.Get(OVRInput.Button.One, ovrController))
+            if (OVRInput.Get(OVRInput.Button.One, ovrController))
             {
                 components[ButtonId.BUTTON1].press = true;
             }
             // B/Y Button
-            if(OVRInput.Get(OVRInput.Button.Two, ovrController))
+            if (OVRInput.Get(OVRInput.Button.Two, ovrController))
             {
                 components[ButtonId.BUTTON2].press = true;
             }
             // Trigger
-            if(OVRInput.Get(OVRInput.Touch.PrimaryIndexTrigger, ovrController))
+            if (OVRInput.Get(OVRInput.Touch.PrimaryIndexTrigger, ovrController))
             {
                 components[ButtonId.TRIGGER].axis1 = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, ovrController);
                 components[ButtonId.TRIGGER].touch = true;
             }
-            if(OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, ovrController))
+            if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, ovrController))
             {
                 components[ButtonId.TRIGGER].axis1 = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, ovrController);
                 components[ButtonId.TRIGGER].press = true;
@@ -81,14 +81,14 @@ namespace NanoVRController
                 components[ButtonId.THUMBPAD].axis2 = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, ovrController).y;
                 components[ButtonId.THUMBPAD].touch = true;
             }
-            if(OVRInput.Get(OVRInput.Button.PrimaryThumbstick, ovrController))
+            if (OVRInput.Get(OVRInput.Button.PrimaryThumbstick, ovrController))
             {
                 components[ButtonId.THUMBPAD].axis1 = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, ovrController).x;
                 components[ButtonId.THUMBPAD].axis2 = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, ovrController).y;
                 components[ButtonId.THUMBPAD].press = true;
             }
             // Thumb Rest
-            if(OVRInput.Get(OVRInput.Touch.PrimaryThumbRest, ovrController))
+            if (OVRInput.Get(OVRInput.Touch.PrimaryThumbRest, ovrController))
             {
                 components[ButtonId.THUMBREST].touch = true;
             }
@@ -104,7 +104,7 @@ namespace NanoVRController
             }
 
             float elapsed = Time.time - hapticStartTime;
-            if(elapsed >= hapticDuration)
+            if (elapsed >= hapticDuration)
             {
                 OVRInput.SetControllerVibration(0f, 0f, ovrController);
             }
@@ -117,10 +117,13 @@ namespace NanoVRController
 
         public override void SendHapticEvent(float frequency, float amplitude, float duration)
         {
-            hapticStartTime = Time.time;
-            hapticDuration = duration;
+            if (SettingsVariables.haptics)
+            {
+                hapticStartTime = Time.time;
+                hapticDuration = duration;
 
-            OVRInput.SetControllerVibration(frequency, amplitude, ovrController);
+                OVRInput.SetControllerVibration(frequency, amplitude, ovrController);
+            }
         }
     }
 }

@@ -14,9 +14,9 @@ public class TabButton : QuickButton
     {
         base.Start();
 
-        uncollapsedPos = new Vector3(1.806f, -3.52f, 0f);
+        uncollapsedPos = new Vector3(1.876f, -3.52f, 0.006999969f);
         uncollapsedScale = new Vector3(1f, 1f, 1f);
-        buttonPos = new Vector3(1.8f, -6.69f, 0);
+        buttonPos = new Vector3(1.882f, -6.718f, -0.025f);
     }
 
     void Update() { }
@@ -53,6 +53,7 @@ public class TabButton : QuickButton
             thisMenu.localPosition != uncollapsedPos)
         {
             thisMenu.gameObject.SetActive(true);
+
             StartCoroutine(ScaleTo(thisMenu, thisMenu.localScale, uncollapsedScale, 0.5f));
             StartCoroutine(MoveTo(thisMenu, thisMenu.localPosition, uncollapsedPos, 0.5f));
 

@@ -79,7 +79,8 @@ namespace NanoVRController
                 {
                     components[ButtonId.TRIGGER].axis1 = device.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger).x;
                     components[ButtonId.TRIGGER].press = true;
-                } else
+                }
+                else
                 {
                     components[ButtonId.GRIP].axis1 = device.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger).x;
                     components[ButtonId.GRIP].press = true;
@@ -104,13 +105,13 @@ namespace NanoVRController
             velocity = device.velocity;
             angularVelocity = device.angularVelocity;
 
-            foreach(ControllerComponent c in components.Values)
+            foreach (ControllerComponent c in components.Values)
             {
                 c.UpdateComponent();
             }
 
             float elapsed = Time.time - hapticStartTime;
-            if(elapsed <= hapticDuration)
+            if (elapsed <= hapticDuration)
             {
                 device.TriggerHapticPulse(hapticAmp);
             }
@@ -118,11 +119,15 @@ namespace NanoVRController
 
         public override void SendHapticEvent(float frequency, float amplitude, float duration)
         {
-            hapticStartTime = Time.time;
-            hapticDuration = duration;
-            hapticAmp = (ushort)(amplitude * 3999);
-            var device = SteamVR_Controller.Input((int)trackedObj.index);
-            device.TriggerHapticPulse(hapticAmp);
+            if (SettingsVariables.haptics)
+            {
+                hapticStartTime = Time.time;
+                hapticDuration = duration;
+                hapticAmp = (ushort)(amplitude * 3999);
+                var device = SteamVR_Controller.Input((int)trackedObj.index);
+                device.TriggerHapticPulse(hapticAmp);
+
+            }
         }
     }
 }
