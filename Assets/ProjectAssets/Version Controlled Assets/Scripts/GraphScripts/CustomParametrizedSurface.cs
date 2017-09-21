@@ -72,7 +72,6 @@ public class CustomParametrizedSurface : MonoBehaviour
     // number of threads for a group
     private const int GROUP_SIZE = 256;
 
-    private int particleCount;
     private int threadGroups;
 
     public enum ParticleEffectList
@@ -92,7 +91,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     [Range(0.1f, 2.0f)]
     public float effectStrength = 2.0f;
 
-    public int resolution;
+    public int particleCount;
     public Gradient gradient;
 
     AK.ExpressionSolver solver;
@@ -137,7 +136,6 @@ public class CustomParametrizedSurface : MonoBehaviour
 
     void InitializeParticleSystem()
     {
-        particleCount = resolution * resolution;
         threadGroups = Mathf.CeilToInt((float)particleCount / GROUP_SIZE);
 
         int l = particleCount;

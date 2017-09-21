@@ -54,6 +54,7 @@ public class ScrollBar : MonoBehaviour
         transform.localPosition = Vector3.zero;
         transform.SetParent(scroll.parent);
         bar.transform.SetParent(transform);
+        gameObject.SetActive(false);
     }
 
     public void moveScroller(Scroll.direction dir)
@@ -86,7 +87,7 @@ public class ScrollBar : MonoBehaviour
         numPages = num;
         if (currPage > numPages) currPage = numPages;
 
-        if (numPages == 1)
+        if (numPages == 1 || numPages == 0)
         {
             gameObject.SetActive(false);
         }
