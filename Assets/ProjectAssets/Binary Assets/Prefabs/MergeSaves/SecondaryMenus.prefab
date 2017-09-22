@@ -91,6 +91,7 @@ GameObject:
   - component: {fileID: 114222256904840956}
   - component: {fileID: 114536994246171624}
   - component: {fileID: 114059055971859178}
+  - component: {fileID: 114937151742337378}
   m_Layer: 11
   m_Name: SettingsMenu
   m_TagString: Untagged
@@ -212,8 +213,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4155329495757694}
-  - component: {fileID: 114455856983177126}
-  - component: {fileID: 114140995697283548}
   m_Layer: 11
   m_Name: VibrationToggle
   m_TagString: Untagged
@@ -390,7 +389,6 @@ GameObject:
   - component: {fileID: 114544582776371686}
   - component: {fileID: 114664997043244784}
   - component: {fileID: 114899299667801174}
-  - component: {fileID: 114396992864616340}
   m_Layer: 11
   m_Name: Body
   m_TagString: Untagged
@@ -1622,7 +1620,6 @@ GameObject:
   - component: {fileID: 114714713938943646}
   - component: {fileID: 114182572662695644}
   - component: {fileID: 114469377046946228}
-  - component: {fileID: 114308885882010398}
   m_Layer: 11
   m_Name: Body
   m_TagString: Untagged
@@ -1789,8 +1786,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4149814328850316}
-  - component: {fileID: 114102305876345854}
-  - component: {fileID: 114279738037301170}
   m_Layer: 11
   m_Name: NarrationToggle
   m_TagString: Untagged
@@ -2028,8 +2023,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1750669510672270}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.05, y: 9.9034, z: -11.09}
+  m_LocalRotation: {x: -0, y: 0.07034964, z: -0, w: 0.9975225}
+  m_LocalPosition: {x: 6.67, y: 9.9034, z: 4.38}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4684474914521434}
@@ -7307,21 +7302,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9258c3a4c3547c6468765f979a889e90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &114102305876345854
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1889668469249044}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 450225c0e3018a94b95065dbe1920f36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  passiveColor: {r: 0, g: 0, b: 0, a: 0}
-  hoveringColor: {r: 0, g: 0, b: 0, a: 0}
-  selectedColor: {r: 0, g: 0, b: 0, a: 0}
-  disabledColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &114105453579059612
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7400,18 +7380,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b4d03b803169ff43b55e264d921fb47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &114140995697283548
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1209029181112896}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1810d5c23c249e446831f8a4a3b3b522, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  press: 0
 --- !u!114 &114141587223995614
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7798,18 +7766,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   verbose: 0
---- !u!114 &114279738037301170
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1889668469249044}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1810d5c23c249e446831f8a4a3b3b522, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  press: 0
 --- !u!114 &114279932120529834
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -7923,18 +7879,6 @@ MonoBehaviour:
   fadeInDelay: 0.1
   currOrientation: 0
   currDirection: 0
---- !u!114 &114308885882010398
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1814853120753314}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec61eede9883a3f41a347f6db180cfe7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 114279738037301170}
 --- !u!114 &114319781305409298
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -8157,18 +8101,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 114641066058765566}
---- !u!114 &114396992864616340
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1282554566535202}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec61eede9883a3f41a347f6db180cfe7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 114140995697283548}
 --- !u!114 &114399495463869444
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -8325,21 +8257,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   press: 0
---- !u!114 &114455856983177126
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1209029181112896}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 450225c0e3018a94b95065dbe1920f36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  passiveColor: {r: 0, g: 0, b: 0, a: 0}
-  hoveringColor: {r: 0, g: 0, b: 0, a: 0}
-  selectedColor: {r: 0, g: 0, b: 0, a: 0}
-  disabledColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &114462395939446702
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -9433,6 +9350,21 @@ MonoBehaviour:
   hoveringColor: {r: 0.5176471, g: 0.8745098, b: 0.99215686, a: 1}
   selectedColor: {r: 0.18039216, g: 0.5568628, b: 0.6117647, a: 1}
   disabledColor: {r: 0, g: 0, b: 0, a: 0}
+--- !u!114 &114937151742337378
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1069391502027058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1853892043c932b46abd99398b4f98ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  low: 2000
+  medium: 10000
+  high: 262144
+  ultra: 360000
 --- !u!114 &114937734274764256
 MonoBehaviour:
   m_ObjectHideFlags: 1

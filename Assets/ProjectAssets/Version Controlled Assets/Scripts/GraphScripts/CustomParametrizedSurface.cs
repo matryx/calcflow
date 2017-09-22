@@ -14,19 +14,6 @@ public class CustomParametrizedSurface : MonoBehaviour
     const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
     #endregion
 
-    [SerializeField]
-    public DisplayParam displayParam;
-
-    [Serializable]
-    public class DisplayParam
-    {
-        public string xExpression;
-        public string yExpression;
-        public string zExpression;
-        public string uExpression;
-        public string vExpression;
-    }
-
     List<Particle[]> threadResults = new List<Particle[]>();
 
     public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
@@ -52,6 +39,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     private Particle[] particles;
     private Particle[] source;
     private Particle[] dest;
+
     private float animProgress;
 
     public float particleSize = 0.05f;
@@ -103,7 +91,6 @@ public class CustomParametrizedSurface : MonoBehaviour
         InitializeParticleSystem();
         //InitializeCorrespondingPoint();
     }
-
 
     public MeshFilter mesh;
     Coroutine tessellate;
@@ -208,16 +195,20 @@ public class CustomParametrizedSurface : MonoBehaviour
     /// </summary>
     public void GenerateParticles()
     {
-        displayParam = new DisplayParam();
-        displayParam.xExpression = expressionSets[0].expressions[X].rawText;
-        displayParam.yExpression = expressionSets[0].expressions[Y].rawText;
-        displayParam.zExpression = expressionSets[0].expressions[Z].rawText;
-        displayParam.uExpression = expressionSets[0].ranges["u"].Max.rawText;
-        displayParam.vExpression = expressionSets[0].ranges["v"].Max.rawText;
-
         if (setup != null) StopCoroutine(setup);
         setup = StartCoroutine(SetupParticles());
     }
+
+    ///<summary>
+    ///Changes particle graph and regraphs.
+    ///</summary>
+    public void ChangeParticleCount(int count)
+    {
+        particleCount = count;
+        InitializeParticleSystem();
+        GenerateParticles();
+    }
+
 
     int num_threads;
 

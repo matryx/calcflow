@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CalcManager : MonoBehaviour
 {
-    public CustomParametrizedSurface.DisplayParam displayParam;
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
@@ -179,12 +178,6 @@ public class CalcManager : MonoBehaviour
             inputReceived = false;
             updateOverlay = true;
             bool isValid = expressionSet.CompileAll();
-            displayParam = new CustomParametrizedSurface.DisplayParam();
-            displayParam.xExpression = expressionSet.expressions[X].rawText;
-            displayParam.yExpression = expressionSet.expressions[Y].rawText;
-            displayParam.zExpression = expressionSet.expressions[Z].rawText;
-            displayParam.uExpression = expressionSet.ranges["u"].Max.rawText;
-            displayParam.vExpression = expressionSet.ranges["v"].Max.rawText;
             ManageFeedback();
             if (isValid)
                 paramSurface.GenerateParticles();
