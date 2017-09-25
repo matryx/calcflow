@@ -27,8 +27,6 @@ public class ToggleDelete : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        print(!confirmDeleteButton.gameObject.activeSelf);
-
         if (!confirmDeleteButton.gameObject.activeSelf)
         {
             StartCoroutine(ActivateButton());

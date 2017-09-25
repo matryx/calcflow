@@ -99,7 +99,6 @@ public class CalcInput : MonoBehaviour
 
     public void Initialize(CalcManager cm)
     {
-        print("registering");
         calcManager = cm;
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);
