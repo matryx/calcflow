@@ -242,6 +242,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
+    //BUG: need to handle rearrange when deleting from the middle (decide whether to adjust from top or bottom)
     public void deleteObjects(List<Transform> objs)
     {
         List<int> indeces = new List<int>();
