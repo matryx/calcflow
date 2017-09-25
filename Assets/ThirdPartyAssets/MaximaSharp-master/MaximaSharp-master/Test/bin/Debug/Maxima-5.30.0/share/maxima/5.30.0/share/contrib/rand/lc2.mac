@@ -1,0 +1,96 @@
+/* Filename lc2.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/* program number 2: lc2(), lindstedt's method for more general
+   differential equations. see page 14 in "perturbation methods,
+   bifurcation theory and computer algebra". */
+
+
+
+
+lc2():=(
+
+/* input the differential equation */
+kill(x,y,xylist,paramlist),
+print("the d.e.'s are of the form x' = -y + e*f, y' = x + e*g"),
+print("where f,g are of the form: 
+          quadratic + e*(linear + cubic) + e^2*(quartic) + ..."),
+f:read("enter f:"),
+print("f =",f),
+g:read("enter g:"),
+print("g =",g),
+
+/* set up the series expansions */
+n:read("enter truncation order:"),
+k[0]:1,
+k[1]:0,
+w:sum(k[i]*e^i,i,0,n),
+xy:[x:b[0]*cos(z)+sum(xx[i](z)*e^i,i,1,n),
+    y:b[0]*sin(z)+sum(yy[i](z)*e^i,i,1,n)],
+xylist:[xx[0](z)=b[0]*cos(z),
+        yy[0](z)=b[0]*sin(z)],
+
+/* plug into d.e.'s and collect terms */
+temp1:[-diff(x,z)*w-y+e*ev(f,diff),-diff(y,z)*w+x+e*ev(g,diff)],
+temp2:taylor(temp1,e,0,n),
+for i:1 thru n do eq[i]:coeff(temp2,e,i),
+
+
+/* main loop */
+for i:1 thru n do block(
+
+/* trigonometric simplification */
+temp3:expand(trigreduce(expand(ev(eq[i],xylist,paramlist,diff)))),
+
+/* eliminate secular terms */
+if i=1 then (temp4:temp3, go(skip_to_here_first_time))
+       else newparamlist:
+             solve([coeff(part(temp3,1),sin(z))-coeff(part(temp3,2),cos(z)),
+                    coeff(part(temp3,1),cos(z))+coeff(part(temp3,2),sin(z))],
+                   [b[i-2],k[i]]),
+if i=2 then (paramlist:newparamlist,
+             print("choices for limit cycle amplitude:"),
+             for j:1 thru length(paramlist) do
+                 print(j,")  ",part(paramlist,j,1,2)),
+             r1:read("enter choice number"),
+             paramlist:part(paramlist,r1))
+        else paramlist:append(paramlist,newparamlist),
+temp4:expand(ev(temp3,paramlist)),
+xylist:expand(ev(xylist,paramlist)),
+skip_to_here_first_time,
+
+/* output progress */
+print("done with step",i,"of",n),
+
+/* exit here if last iteration */
+if i=n then go(end),
+
+/* solve the d.e.'s */
+temp4a:subst(dummy(z),yy[i](z),temp4),
+atvalue(dummy(z),z=0,0),
+temp5:desolve(temp4a,[xx[i](z),dummy(z)]),
+temp5a:subst(yy[i](z),dummy(z),temp5),
+temp5b:subst(b[i],xx[i](0),temp5a),
+xylist:append(xylist,[temp5b]),
+
+/* end of main loop */
+end),
+
+/* output results */
+w:ev(w,paramlist),
+soln:taylor(ev([x,y],xylist,paramlist),e,0,n-2),
+print("x =",part(soln,1)),
+print("y =",part(soln,2)),
+print("w =",w))$

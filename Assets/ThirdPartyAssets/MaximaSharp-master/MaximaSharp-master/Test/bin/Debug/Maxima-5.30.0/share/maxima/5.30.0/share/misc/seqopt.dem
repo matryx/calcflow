@@ -1,0 +1,95 @@
+/*-*-MACSYMA-*-*/
+if properties(sequence_optimize) = [] then load(seqopt)$
+/* To illustate the exponent gathering capabilities of SEQUENCE_OPTIMIZE,
+   we start with a product of terms with complicated exponents, EXP1:       */
+exp1:a^(tan(th)/r+3)*b^(tan(th)/r+300)*f^(tan(th)/r+2)*g^4*h;
+sequence_optimize(exp1);
+/* The next expression, EXP2, is a simple product of terms raised to integer
+   powers:                                                                  */
+exp2:a^40*b^35*f^21*g^2;
+/* Notice how the integer exponents are gathered: */
+sequence_optimize(exp2);
+/* Note that the result is an expression which is not a standard simplified
+   form.  To see this clearly, we reevaluate the expression:                */
+ev(%);
+/* For this reason, it is recommended that the optimization be performed only
+   as the last step before code generation(FORTRAN, for example).
+
+   Next, with EXP3, we examine a case where the exponents are not integers. */
+exp3:(a*b*k*q*r*s*t)^(4*sin(u))*(v*w*x*y*z)^(5*sin(u));
+sequence_optimize(exp3);
+/* Note that whereas m^4*n^5 would be cheaper as (m*n)^4*n, the expense of
+   computing the analogous form of the result of SEQUENCE_OPTIMIZE(EXP3)
+   (where "m" and "n" are now complicated expressions) prevents it from
+   being returned.
+
+   Now, consider EXP4, where the exponents are yet more complicated. */
+exp4:a^(4/sqrt(u))*b^(5/4/sqrt(u))*c^(s*sqrt(u));
+sequence_optimize(exp4);
+/* So, the exponent gathering capability of SEQUENCE_OPTIMIZE is substantial.
+
+   Next, lets look at some common subexpression extraction.  First, an
+   example of a single expression that OPTIMIZE could handle equally well. */
+exp5:r*(u-v)*log(s*sqrt(u-v))/(t-a*(u-v));
+sequence_optimize(exp5);
+/* SEQUENCE_OPTIMIZE already does more, however, because it informs you of
+   the number of times a given subexpression occurred.
+
+   Next, in the list of equations, EQNS1, we observe the fact that
+   SEQUENCE_OPTIMIZE can deal with a number of expressions simultaneously. */
+eqns1:[r1[i]=b[i]^3*q[i]^4*z-p[i],
+       r2[i]=sqrt(b[i]*q[i])*(u*v)^(2/3),
+       r3[i]=(u*v)^(5/3)-t[i],
+       r4[i]=g[i]+b[i]^6*q[i]^6/p[i]];
+sequence_optimize(eqns1);
+/* Note that the output is in the form of a list, since the input was in
+   that form; also, there was exponent gathering in this example.
+
+   Now turn to the case of saving the optimization information.  To
+   demonstrate this, we will turn on the flag to save this list in
+   OPTIM_EQUIVS :                                                      */
+save_optim_info:true$
+/* Since we wish to target these equations to a vectorizing DO-LOOP, we
+   must give each optimized temporary value found the loop index as a
+   suffix.  Say we have chosen that index to be "k".  Then, the appropriate
+   command is:                                                             */
+sequence_optim_suffix:?"(K)";
+/* The first sequence to be optimized will provide the values for
+   OPTIM_EQUIVS. */
+eqns2:[t\(k\)=a\(k\)*(b1\(i\,j\)+exb1\(i\,j\))-exp(-hnu/ti\(i\,j\)),
+       u\(k\)=b\(k\)*(b2\(i\,j\)+exb2\(i\,j\))*(b3\(i\,j\)+exb3\(i\,j\)),
+       v\(k\)=(b1\(i\,j\)+exb1\(i\,j\))*(b3\(i\,j\)+exb3\(i\,j\))^2,
+       w\(k\)=(b2\(i\,j\)+exb2\(i\,j\))/sqrt((b1\(i\,j\)+exb1\(i\,j\))^2+
+               (b2\(i\,j\)+exb2\(i\,j\))^2+(b3\(i\,j\)+exb3\(i\,j\))^2),
+       x\(k\)=sqrt((b1\(i\,j\)+exb1\(i\,j\))^2+
+               (b2\(i\,j\)+exb2\(i\,j\))^2+(b3\(i\,j\)+exb3\(i\,j\))^2)
+              *sqrt(b1\(i\,j\)+exb1\(i\,j\))-exp(-hnu/ti\(i\,j\))];
+sequence_optim_prefix:'optb;
+sequence_optim_counter:1$
+sequence_optimize(eqns2);
+/* Since SAVE_OPTIM_INFO was true, lets look at OPTIM_EQUIVS :  */
+optim_equivs;
+/* This optimization will be useful in optimizing the next code
+   sequence, EQNS3. */
+eqns3:[a1\(k\)=q*b1\(i\,j\)*(exb1\(i\,j\)+b1\(i\,j\))^3
+	       -sqrt(t-v\(k\))*exp(-hnu/ti\(i\,j\)),
+       a2\(k\)=-hnu*exp(-hnu/ti\(i\,j\)),
+       a3\(k\)=r^2*b2\(i\,j\)*(exb2\(i\,j\)+b2\(i\,j\))^2*b3\(i\,j\),
+       a4\(k\)=t*rr\(k\)*b3\(i\,j\)^4*(exb3\(i\,j\)+b3\(i\,j\))^4,
+       a5\(k\)=(t-v\(k\))*sqrt((exb1\(i\,j\)+b1\(i\,j\))^2+
+                               (exb2\(i\,j\)+b2\(i\,j\))^2+
+			       (exb3\(i\,j\)+b3\(i\,j\))^2)
+			 /sqrt(b1\(i\,j\)*b2\(i\,j\)*b3\(i\,j\)),
+        a6\(k\)=hnu*ti\(i\,j\)^(t-v\(k\))];
+/* Before optimizing it, lets change the prefix for intermediate labels. */
+sequence_optim_prefix:'optim;
+sequence_optim_counter:1$
+sequence_optimize(eqns3);
+/* Notice that SEQUENCE_OPTIMIZE was able to use the multi-level information
+   in OPTIM_EQUIVS("optb6(k)" at top level, with "optb1(k)", etc. imbedded one
+   level).  Note also the new value of OPTIM_EQUIVS: */
+optim_equivs;
+/* Had it been useful to retain the previous value of OPTIM_EQUIVS, we
+   should have done SAVE_OPTIM_INFO:FALSE$  prior to the last
+   SEQUENCE_OPTIMIZE command.                                         */
+"end of demo"$

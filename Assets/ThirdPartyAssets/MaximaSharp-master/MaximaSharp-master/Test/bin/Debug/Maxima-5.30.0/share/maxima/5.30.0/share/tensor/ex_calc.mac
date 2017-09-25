@@ -1,0 +1,216 @@
+/* Copyright (C) 2003 Valerij Pipin <pip@iszf.irk.ru>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Commentary:
+ * Its purpose is to extend the maxima's itensor ability to manage the
+ * exterior forms. We introduce the "~" operator for the exterior product,
+ * and "|" for the inner product of a form with a vector.
+*/
+
+infix("~");
+declare("~",additive);
+declare("~",antisymmetric);
+
+igeowedge_flag:false;
+
+"~"(any,body):=block
+(
+  [i,l1,l2,l11,l22,l1s,lk1,div],
+  if listp(cartan_basis) and not member(body,cartan_basis) and
+                             member(any,cartan_basis) then -body~any
+  else if not atom(any) and op(any)="+" then
+    apply(op(any),[part(any,1)~body,rest(any)~body])
+  else if not atom(body) and op(body)="+" then
+    apply(op(body),[any~part(body,1),any~rest(body)])
+  else if not atom(any) and op(any)="-" then -((-any)~body)
+  else if not atom(body) and op(body)="-" then -(any~(-body))
+  else if not atom(any) and op(any)="*" then
+  (
+    if numberp(first(any)) then first(any)*(second(any)~body)
+    else (first(any)~body)*second(any)
+  )
+  else if not atom(body) and op(body)="*" then
+  (
+    if numberp(first(body)) then first(body)*(any~second(body))
+    else (any~first(body))*second(body)
+  )
+  else if atom(any) and atom(body) then
+  (
+    if any=body then 0
+    else nounify("~")(any,body)
+  )
+  else if not atom(any) and nounify(op(any))=nounify("~") and
+          not atom(body) and nounify(op(body))=nounify("~") and
+          (?intersect)(args(any),args(body))#[] then 0
+  else if not atom(any) and nounify(op(any))=nounify("~") then
+  (
+     if member(body, any) then 0
+     else nounify("~")(any,body)
+  )
+  else if not atom(body) and nounify(op(body))=nounify("~") then
+  (
+     if member(any, body) then 0
+     else nounify("~")(any,body)
+  )
+  else if atom(any) and nounify(op(body))=nounify("~") and
+          member(any,body) then 0
+  else if atom(body) and nounify(op(any))=nounify("~") and
+          member(body,any) then 0
+  else
+  (
+    l1:first(indices(any)),
+    l2:first(indices(body)),
+    if l1=[] then return(any*body)
+    else if l2=[] then return(any*body)
+    else
+    (
+      l11 : makelist(idummy(), i,1, length(l1)),
+      l22 : makelist(idummy(), i,1, length(l2)),
+      l1s:map("=",l1,l11), l2s:map("=",l2,l22),
+      lk1:append(l1,l2),lk2:append(l11,l22),
+      any:sublis(l1s,any), body:sublis(l2s,body),
+      div:if igeowedge_flag then length(l1)!*length(l2)! else length(lk1)!,
+      factor(canform(contract(expand(kdelta(lk1,lk2)*any*body)))/div)
+    )
+  )
+);
+
+contind(t):=if mapatom(t) then []
+	else if ?rpobj(t) then conti(t)
+	else if op(t)="+" then
+	(
+		indices(t),
+		contind(part(t,1))
+	)
+	else if op(t)="-" then contind(part(t,1))
+	else if op(t)="/" then append(contind(part(t,1)),covind(part(t,2)))
+	else if op(t)="*" then
+	block
+	(
+		[l:[]],
+		map(lambda([x],l:append(l,contind(x))),args(t)),
+		l	
+	)
+	else error("Cannot determine list of contravariant indices.");
+
+covind(t):=if mapatom(t) then []
+	else if ?rpobj(t) then append(covi(t),deri(t))
+	else if op(t)="+" then
+	(
+		indices(t),
+		covind(part(t,1))
+	)
+	else if op(t)="-" then covind(part(t,1))
+	else if op(t)="/" then append(covind(part(t,1)),contind(part(t,2)))
+	else if op(t)="*" then
+	block
+	(
+		[l:[]],
+		map(lambda([x],l:append(l,covind(x))),args(t)),
+		l	
+	)
+	else error("Cannot determine list of covariant indices.");
+
+extdiff(forma,[optind]):=if not mapatom(forma) and op(forma)=extdiff then 0
+/* A misguided attempt to check for valid forms... DO NOT UNCOMMENT
+ *      else if (?rpobj)(forma)#false and length(conti(forma))>0
+ *      then error("A differential form cannot have a contravariant index")
+ *      else if (?rpobj)(forma)#false and length(covi(forma))>1 and
+ *              dispsym(forma,length(covi(forma)),0)#
+ *              [[anti,[makelist(i,i,1,length(covi(forma)))],[]]]
+ *      then error("Tensor not declared anti(all) in its covariant indices")
+ */
+        else if not mapatom(forma) and op(forma)="+" then
+          sum(apply(extdiff,cons(part(forma,%%i),optind)),%%i,1,length(forma))
+/* Another misguided attempt to process products. Fails because it
+ * separates contractable products, yielding invalid results. DO NOT UNCOMMENT
+ *      else if not mapatom(forma) and op(forma)="*" then block
+ *        (
+ *          [d:(if length(optind)>0 then optind[1] else idummy())],
+ *          extdiff(first(forma),d)*rest(forma)+
+ *          first(forma)*extdiff(rest(forma),d)
+ *        )
+ */
+        else block
+(
+  [l11,l1s,lk1,lk2,indd,res,
+/* l1:listify(intersect(setify(covi(forma)),setify(first(indices(forma))))),*/
+   l1:listify(intersect(setify(covind(forma)),setify(first(indices(forma))))),
+   div,ind1:if length(optind)>0 then optind[1] else idummy()],
+  if l1=[] then return(idiff(forma,ind1))
+  else
+  (
+    l11:makelist(idummy(),i,1,length(l1)),
+    l1s:map("=",l1,l11),
+    lk1:append([ind1],l1),
+    indd:idummy(),
+    lk2:append(l11,[indd]),
+    res:sublis(l1s,forma),
+    res:contract(canform(ratexpand(kdelta(lk1,lk2)*idiff(res,indd)))),
+    /* If a frame base is used, the contribution of ifb must be added */
+    if iframe_flag=true then
+      for i thru length(l1) do
+    (
+      l1s:map("=",[l1[i]],[indd]),
+      res:res+(if evenp(length(l1)) then 1 else -1)*
+              'ifb([l1[i],ind1],[indd])*sublis(l1s,forma)
+    ),
+    div:if igeowedge_flag then (length(lk1)-1)! else length(lk1)!,
+    factor(res/div)
+  )
+);
+
+/* VTT: To ensure consistent application of the "first" index in | */
+permutator(l):=block
+(
+    [result:1,temp],
+	for i thru length(l)-1 do if orderlessp(l[i+1],l[i]) then
+	(temp:l[i+1],l[i+1]:l[i],l[i]:temp,i:0,result:-result),
+	[result,l]
+);
+
+infix("|");
+declare("|",additive);
+/* VTT: ADDITIVE doesn't always do the trick so we break up sums manually */
+"|"(forma,vec):=block
+(
+  [ind1,perm],
+  forma:distrib(forma),
+  if not(atom(forma)) and (op(forma)="+" or op(forma)="=") then
+    apply(op(forma),[part(forma,1)|vec,rest(forma)|vec])
+/* When I thought that I'd implement MACSYMA's Cartan package features
+ * as part of this package, I thought I needed this. But I don't.
+ *  else if listp(forma) and listp(cartan_basis) then
+ *  (
+ *    for i thru length(cartan_basis) do
+ *      vec:subst(forma[i],cartan_basis[i],-vec),
+ *    vec
+ *  )
+ */
+  else
+  (
+    /* We must not attempt to permute derivative indices. Non-derivative
+       indices are found as the intersection of free indices, and free
+       indices of the UNDIFF'd form of forma. However, we still do the
+       contraction with respect to the first free covariant index which
+       may be a derivative index. Urgh. */
+/*    perm:permutator((?intersect)(first(indices(forma)),
+                                 first(indices(undiff(forma))))),
+    if perm[2]=[] then perm:[1,first(indices(forma))],
+    if perm[2]=[] then 0
+    else perm[1]*(contract(canform(expand(forma*
+                 vec([],[first(sort(indices(forma)[1]))])))))*/
+    ind1:first(sort(first(indices(forma)))),
+    contract(canform(expand(forma*vec([],[ind1]))))
+  )
+);
+

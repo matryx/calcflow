@@ -1,0 +1,172 @@
+/* Copyright (C) 2003 Valerij Pipin <pip@iszf.irk.ru>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Commentary:
+ * Simplification of expressions containing the Levi-Civita symbol.
+*/
+/*
+lc2kdt(exp):=block([i1,tem],
+	tem:0,
+	if nterms(exp)=1 then _lc2kdt0(exp)
+	else
+	(
+		for i1 thru nterms(exp) do
+			tem:tem+_lc2kdt0(part(exp,i1)),
+		tem
+	)
+);
+*/
+lc2kdt(exp):=block(
+  [exp:expand(exp),n:nterms(exp)],
+  sum(_lc2kdt0(if n>1 then part(exp,i%) else exp),i%,1,n)
+);
+
+/*
+_lc2kdt0(exp):=block([temp1:1,temp2:1,temp,i1],
+	if part(exp,0)="-" then for i1 thru length(part(num(exp),1)) do
+	(
+		temp:part(num(exp),1,i1),
+		if tenpr(temp) and verbify(name(temp))=levi_civita then
+		(
+			temp1:_lcprod(temp1,temp),
+			temp2:temp2*temp
+		)
+	)
+	else for i1 thru length(num(exp)) do
+	(
+		temp:part(num(exp),i1),
+		if tenpr(temp) and verbify(name(temp))=levi_civita then
+		(
+			temp1:_lcprod(temp1,temp),
+			temp2:temp2*temp
+		)
+	),
+	temp1*ratsimp(exp/temp2)
+);*/
+
+_lc2kdt0(exp):=block(
+  [res:1,fre:1,fac],
+  if op(exp)="-" then return(-_lc2kdt0(part(exp,1))),
+  if op(num(exp))#"*" then return(exp),
+  for i thru length(num(exp)) do
+  (
+    fac:part(num(exp),i),
+    if tenpr(fac) and verbify(name(fac))=levi_civita then
+      res:_lcprod(res,fac)
+    else fre:fre*fac
+  ),
+  ratsimp(res*fre)/denom(exp)
+);
+
+/*_lcprod(lc1,lc2):=block([temp1,tempk,ln11,lf,l1,l2,l11,l22,lku,lkl],
+	if numberp(lc1) or symbolp(lc1) then lc1*lc2
+	else if tenpr(lc2) then	/* so name(LC1)=LC */
+	(
+		if verbify(name(lc2))=levi_civita and tenpr(lc1) then
+		(		/* again test if LC1 is a single */
+			l1:covi(lc1),
+			l11:conti(lc1),
+			l2:covi(lc2),
+			l22:conti(lc2),
+			lkl:append(l1,l2),
+			lku:append(l11,l22),
+			if lkl=[] then
+			(
+				lf:length(l11),
+				ln11:makelist(idummy(),i,1,lf),
+				(
+					tempk:1,
+					for i thru lf do
+						tempk:tempk*kdelta([],[ln11[i],l11[i]])
+				),
+				kdelta(ln11,l22)*tempk
+			)
+			else if lku=[] then
+			(
+				lf:length(l1),
+				ln11:makelist(idummy(),i,1,lf),
+				(
+					tempk:1,
+					for i thru lf do
+						tempk:tempk*kdelta([l1[i],ln11[i]],[])
+				),
+				kdelta(l2,ln11)*tempk
+			)
+			else kdelta(lkl,lku)
+		)
+		else lc1*lc2
+	)
+	else
+	(
+		if numberp(lc2) or symbolp(lc2) then lc2*lc1
+		else
+		(
+			temp1:_extlc(lc1,lc2),
+			_lcprod(lc1,temp1)*(lc2/temp1)
+		)
+	)
+);*/
+
+_lcprod(lc1,lc2):=block([temp1,ln11,lf,l1,l2,l11,l22,lku,lkl],
+	if numberp(lc1) or symbolp(lc1) then lc1*lc2
+	else if tenpr(lc2) then	/* so name(LC1)=LC */
+	(
+		if verbify(name(lc2))=levi_civita and tenpr(lc1) then
+		(		/* again test if LC1 is a single */
+			l1:covi(lc1),
+			l11:conti(lc1),
+			l2:covi(lc2),
+			l22:conti(lc2),
+			lkl:append(l1,l2),
+			lku:append(l11,l22),
+			if lkl=[] then
+			(
+				lf:length(l11),
+				ln11:makelist(idummy(),i,1,lf),
+				kdelta(ln11,l22)*prod(ev(imetric)([-ln11[i%],-l11[i%]],[]),i%,1,lf)
+			)
+			else if lku=[] then
+			(
+				lf:length(l1),
+				ln11:makelist(idummy(),i,1,lf),
+				kdelta(l2,ln11)*prod(ev(imetric)([l1[i%],ln11[i%]],[]),i%,1,lf)
+			)
+			else kdelta(lkl,lku)
+		)
+		else lc1*lc2
+	)
+	else
+	(
+		if numberp(lc2) or symbolp(lc2) then lc2*lc1
+		else
+		(
+			temp1:_extlc(lc1,lc2),
+			_lcprod(lc1,temp1)*(lc2/temp1)
+		)
+	)
+);
+
+
+_extlc(lc1,lc2):=block([temp],
+	if covi(lc1)#[] then
+	(
+		temp:part(num(lc2),1,1),
+		if tenpr(temp) and verbify(name(temp))=levi_civita and conti(temp)#[] then temp
+		else 1.
+	)
+	else
+	(
+		temp:part(num(lc2),1,1),
+		if tenpr(temp) and verbify(name(temp))=verbify(name(lc1)) and covi(temp)#[] then temp
+		else 1.
+	)
+);

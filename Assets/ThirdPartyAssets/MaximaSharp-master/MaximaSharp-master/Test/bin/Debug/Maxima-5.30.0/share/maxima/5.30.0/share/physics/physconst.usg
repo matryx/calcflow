@@ -1,0 +1,457 @@
+
+
+               Definitions of Fundamental Physical Constants        
+                        CODATA Recommended Values   
+			     Maxima Package     
+
+
+
+This package defines many fundamental physical quantities, using the CODATA
+definitions.  In order to load the package, type:
+
+(C1) load("physconst.mac");
+
+This will load the package.  If you use a defined value in a calculation, you
+will not see the numerical value unless you specifically tell Maxima to output
+it.  For example, if we wish to calculate E=mc^2 for a specific m:
+
+(C2) %m: 35*kg;
+(D2)                                 35 kg
+(C6) E: %m*%%c^2;
+                                        2
+(D6)                              35 %%c  kg
+(C7) float(%);
+                                                   2
+                          3.14564312557886E+18 kg m
+(D7)                      --------------------------
+                                       2
+                                      s
+
+Note the use of %m instead of m for mass.  This avoids any confusion between the
+unit meters and the mass.  Although in this case Maxima would have done what you
+expected, it is a good habit not to include names in equations that are the same
+as unit names, in case you make a mistake in choosing variables
+
+The Relative Standard Uncertainty (RSU) is included where relevant.  To get the
+RSU associated with a particular variable, use the get command.  For example, if
+you wanted the RSU for the Rydberg constant:
+
+(C8) get(%Ry, RSU);
+(D8)                                7.6E-12
+
+
+Here is a list of the defined constants:
+
+Quantity					Maxima Symbol
+------------------------------------------------------------------
+speed of light in vacuum: 			%%c %c_0
+   
+magnetic constant: 				%u_0 %mu_0
+
+electric constant: 				%e_0 %epsilon_0
+
+characteristic impedance of vacuum: 		%Z_0
+
+Newtonian constant of gravitation:  		%G
+ 
+Planck constant:  				%%h
+
+Planck constant in eVs:  			%h_eV
+
+Hbar: 				 		%h_bar
+
+Hbar:  						%h_bar_eV
+   
+Planck mass:  					%P_m
+
+Planck length:  				%P_l
+   
+Planck time:  					%P_t
+
+Electromagnetic Constants
+------------------------------------------------------------------------
+elementary charge:  				%%e
+
+magnetic flux quantum: 				%capitalphi_0  %mfq_0
+   
+conductance quantum:  				%G_0
+
+Josephson constant:  				%K_J
+
+von Klitzing constant:  			%R_K
+    
+Bohr magneton:  				%u_B
+
+Bohr magneton in eV T-1:  			%ueVT_B
+
+nuclear magneton:  				%u_N
+
+nuclear magneton in eV T-1: 			%ueVT_N
+
+
+Atomic and Nuclear Constants:
+General
+-------------------------------------------------------------------------
+
+fine-structure constant: 			%alpha
+
+Rydberg constant: 				%Ry %Ry_INF			
+
+Bohr radius: 					%a_0
+
+Hartree energy:  				%E_h
+Hartree energy in eV:   			%Eev_h
+     
+quantum of circulation   h/(2me):  		%qcir2
+quantum of circulation   h/(me):  		%qcir
+     
+Electroweak
+-------------------------------------------------------------------------
+
+Fermi coupling constant:   			%Fcc
+
+weak mixing angled  W (on-shell scheme):  	%wma_W
+
+Electron, e-
+-------------------------------------------------------------------------
+
+electron mass:   				%m_e
+electron mass (electron relative 
+atomic mass times u):  				%m_e_u
+
+electron mass - energy equivalent:   		%me_J 
+
+electron mass - energy equivalent in MeV:  	%me_MeV
+
+electron-muon mass ratio:  			%memu
+
+electron-tau mass ratio:   			%metau
+
+electron-proton mass ratio:   			%memp
+
+electron-neutron mass ratio:  			%memn
+
+electron-deuteron mass ratio:   		%memd
+
+electron to alpha particle mass ratio:   	%memalpha
+
+electron charge to mass quotient:   		%echargeemass
+
+electron molar mass:    			%Molar_e
+
+Compton wavelength:  				%lambdaC
+ 
+classical electron radius: 			%r_e
+
+Thomson cross section:				%sigma_e
+
+electron magnetic moment:   			%u_e
+
+electron magnetic moment to Bohr 
+magneton ratio:  				%ueuB
+
+electron magnetic moment to nuclear 
+magneton ratio:   				%ueuN
+
+electron magnetic moment anomaly |ue|/uB - 1:   %a_e
+    
+electron g-factor: 				%g_e
+
+electron-muon magnetic moment ratio:  		%ueuu
+
+electron-proton magnetic moment ratio :  	%ueup
+
+electron to shielded proton magnetic 
+moment ratio  (H2O, sphere, 25  C):  		%ueusp
+
+electron-neutron magnetic moment ratio:   	%ueun
+    
+electron-deuteron magnetic moment ratio:   	%ueud
+
+electron to shielded helione magnetic 
+moment ratio  (gas, sphere, 25  C):  		%ueush
+
+electron gyromagnetic ratio:  			%gamma_e
+    
+Muon, u-
+-------------------------------------------------------------------------
+
+muon mass:   %m_u
+muon mass in muon relative atomic 
+mass times u:   				%mu_u
+
+energy equivalent:   				%muc2_J
+energy equivalent in MeV:			%muc2_MeV
+
+muon-electron mass ratio:   			%mume
+
+muon-tau mass ratio:  				%mum
+
+muon-proton mass ratio:   			%mump
+
+muon-neutron mass ratio:  			%mumn
+
+muon molar mass:  				%Molar_u
+   
+muon Compton wavelength:  			%lambda_C_u
+
+muon magnetic moment:   			%uu
+
+ratio of muon magnetic moment to Bohr 
+magneton ratio:  				%uuuB
+   
+ratio of muon magnetic moment to nuclear 
+magneton ratio:   				%uuuN
+
+muon magnetic moment anomaly:   		%a_u
+   
+muon g-factor -2(1 + au):   			%g_u
+
+muon-proton magnetic moment ratio:   		%uuup
+
+Tau, tau-
+-------------------------------------------------------------------------
+
+tau mass:   					%m_tau
+tau mass  (tau relative atomic mass times u):	%mu_tau
+   
+tau mass energy equivalent:   			%mtauc2_J
+
+tau mass energy equivalent in MeV:		%mtauc2_MeV
+
+tau-electron mass ratio:  			%mtaume
+
+tau-muon mass ratio:   				%mtaumu
+
+tau-proton mass ratio:   			%mtaump
+
+tau-neutron mass ratio:   			%mtaumn
+
+tau molar mass:					%Molar_tau
+
+tau Compton wavelength:   			%lambda_C_tau
+
+Proton, p
+-------------------------------------------------------------------------
+
+proton mass: 					%m_p
+proton mass (proton relative atomic 
+mass times u): 					%mu_p
+   
+energy equivalent:  				%mpc2_J
+energy equivalent in MeV: 			%mpc2_MeV
+   
+proton-electron mass ratio:			%mpme
+
+proton-muon mass ratio:				%mpmu
+
+proton-tau mass ratio:				%mpmtau
+
+proton-neutron mass ratio:			%mpmn
+
+proton charge to mass quotient:   		%emp
+
+proton molar mass:				%Molar_p
+
+proton Compton wavelength h/mpc: 		%lambda_C_p
+   
+proton magnetic moment:  			%up
+   
+proton magnetic moment to Bohr 
+magneton ratio:					%upuB
+
+proton magnetic moment to nuclear 
+magneton ratio:					%upuN
+
+proton g-factor 2up/uN: 			%g_p
+
+proton-neutron magnetic moment ratio: 		%upun
+   
+shielded proton magnetic moment  
+(H2O, sphere, 25  C):				%usp
+
+shielded proton magnetic moment to Bohr 
+magneton ratio:					%uspuB
+
+shielded proton magnetic moment to nuclear 
+magneton ratio:					%uspuN
+
+proton magnetic shielding correction 
+(H2O, sphere, 25  C):  				%spc
+
+proton gyromagnetic ratio:			%gamma_p
+
+shielded proton gyromagnetic ratio 
+(H2O, sphere, 25  C):  				%gamma_sp
+
+Neutron, n
+-------------------------------------------------------------------------
+
+neutron mass: 					%m_n
+neutron mass (neutron relative atomic 
+mass times u):					%mu_n
+   
+neutron mass energy equivalent: 		%mnc2_J
+
+neutron mass energy equivalent  in MeV: 	%mnc2_MeV
+   
+neutron-electron mass ratio:			%mnme
+   
+neutron-muon mass ratio:			%mnmu
+
+neutron-tau mass ratio:				%mnm
+
+neutron-proton mass ratio:			%mnmp
+
+neutron molar mass: 				%Molar_n
+
+neutron Compton wavelength:  			%lambda_C_n
+   
+neutron magnetic moment:			%un
+   
+neutron magnetic moment to Bohr 
+magneton ratio:					%unuB
+
+neutron magnetic moment to nuclear
+ magneton ratio:				%unuN
+
+neutron g-factor:				%g_n
+
+neutron-electron magnetic moment ratio: 	%unue
+   
+neutron-proton magnetic moment ratio:		%unup
+
+neutron to shielded proton magnetic 
+moment ratio (H2O, sphere, 25  C):  		%unusp
+   
+neutron gyromagnetic ratio:			%gamma_n
+
+Deuteron, d
+-------------------------------------------------------------------------
+
+deuteron mass:					%m_d
+   
+deuteron mass (deuteron relative atomic 
+mass times u): 					%mu_d
+
+deuteron mass energy equivalent:		%mdc2_J
+
+deuteron mass energy equivalent in MeV: 	%mdc2_eV
+   
+deuteron-electron mass ratio: 			%mdme
+   
+deuteron-proton mass ratio:			%mdmp
+
+deuteron molar mass:				%Molar_d
+
+deuteron magnetic moment: 			%ud
+   
+deuteron magnetic moment to Bohr 
+magneton ratio:					%uduB
+   
+deuteron magnetic moment to nuclear 
+magneton ratio:					%uduN
+
+deuteron-electron magnetic moment ratio:	%udue
+
+deuteron-proton magnetic moment ratio:		%udup
+
+deuteron-neutron magnetic moment ratio:		%udun
+
+Helion, h
+-------------------------------------------------------------------------
+
+helion mass:					%m_h
+
+helion mass (helion relative atomic 
+mass times u): 					%mu_h
+   
+helion mass energy equivalent:			%mhc2_J
+helion mass energy equivalent in MeV:		%mhc2_MeV
+
+helion-electron mass ratio:			%mhme
+
+helion-proton mass ratio:			%mhmp
+
+helion molar mass:				%Molar_h
+
+shielded helion magnetic moment 
+(gas, sphere, 25  C):   			%ush
+
+shielded helion magnetic moment to Bohr 
+magneton ratio:					%ushuB
+
+shielded helion magnetic moment to nuclear 
+magneton ratio: 				%ushuN
+
+shielded helion to proton magnetic 
+moment ratio  (gas, sphere, 25  C):   		%ushup
+
+shielded helion to shielded proton magnetic 
+moment ratio  (gas/H2O, spheres, 25  C):   	%ushusp
+
+shielded helion gyromagnetic  
+(gas, sphere, 25  C):				%gamma_h
+
+Alpha particle, 
+-------------------------------------------------------------------------
+
+alpha particle mass: 				%m_alpha
+alpha particle mass (alpha particle 
+relative atomic mass times u):			%mu_alpha
+   
+alpha particle mass energy equivalent: 		%malphac2_J
+
+alpha particle mass energy equivalent in MeV: 	%malphac2_MeV
+
+alpha particle to electron mass ratio:		%malphame
+
+alpha particle to proton mass ratio:		%malphamp
+
+alpha particle molar mass:  			%Molar_alpha
+
+PHYSICO-CHEMICAL
+-------------------------------------------------------------------------
+
+Avogadro constant: 				%N_A %L
+
+atomic mass constant 
+mu = 112m(12C) = 1 u = 10E-3 kg mol-1/NA:  	%m_u
+
+energy equivalent of the atomic mass constant:	%muc2_J
+    
+energy equivalent of the atomic mass 
+constant in MeV:				%muc2_MeV
+
+Faraday constant:   				%%F
+
+molar Planck constant:  			%N_Ah
+
+molar gas constant: 				%%R
+
+Boltzmann constant: 				%k_J
+
+Boltzmann constant in eV:			%k_eV
+
+Loschmidt constant  NA/Vm:			%n_0
+
+molar volume of ideal gas RT/p   
+T = 273.15 K, p = 101.325 kPa: 			%Vm_1
+molar volume of ideal gas RT/p   
+T = 273.15 K, p = 100 kPa:  			%Vm_2
+
+
+Sackur-Tetrode constant (absolute entropy constant):
+T1 = 1 K, p0 = 100 kPa: 			%S_0R_1
+T1 = 1 K, p0 = 101.325 kPa: 			%S_0R_2
+
+Stefan-Boltzmann constant:			%sigma
+
+first radiation constant:  			%c_1
+
+first radiation constant for 
+spectral radiance:   				%c_1L
+
+second radiation constant:   			%c_2
+
+Wien displacement law constant:  		%b

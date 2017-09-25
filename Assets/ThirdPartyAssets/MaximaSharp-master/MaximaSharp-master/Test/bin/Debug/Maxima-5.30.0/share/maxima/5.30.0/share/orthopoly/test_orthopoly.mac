@@ -1,0 +1,1621 @@
+/* Be sure to test uncompiled and compiled code.  
+We assume all orthopoly user functions autoload.*/
+
+showtime : all$
+float2bf : true$
+
+/*  Rodrigue's formulae */
+
+jacobi_p_rod(n,a,b,x) := block([ an, rho, g ],
+    an : (-1)^n * 2^n * n!,
+    rho : (1-t)^a * (1 + t)^b,
+    g : 1-t^2,
+    rat(subst(x,t, diff(rho * g^n,t,n) / (an * rho))))$
+
+gen_laguerre_rod(n, a, x) := block([an, rho, g],
+   an : n!,
+   rho : exp(-t) * t^a,
+   g : t,
+  rat(subst(x,t, diff(rho * g^n,t,n) / (an * rho))))$
+
+hermite_rod(n,x) := block([an, rho, g],
+   an : (-1)^n,
+   rho : exp(-t^2),
+   g : 1,
+  rat(subst(x,t, diff(rho * g^n,t,n) / (an * rho))))$
+
+/*See A&S 10.1.25 page 439. */
+
+spherical_bessel_j_rod(n,x) := block([sofar,k],
+  sofar : sin(x)/x,
+  for k : 1 thru n do (
+     sofar : -diff(sofar,x) / x
+  ),
+  x^n * sofar)$
+
+spherical_bessel_y_rod(n,x) := block([sofar,k],
+  sofar : cos(x) / x,
+  for k : 1 thru n do (
+     sofar : -diff(sofar,x) / x
+  ),
+  -x^n * sofar)$
+     
+all_functions :   [jacobi_p,
+  ultraspherical,
+  assoc_legendre_p,
+  legendre_q,
+  assoc_legendre_q,
+  chebyshev_t,
+  chebyshev_u,
+  laguerre,
+  gen_laguerre,
+  legendre_p,
+  hermite,
+  spherical_hankel2,
+  spherical_hankel1,
+  spherical_bessel_j,
+  spherical_bessel_y,
+  assoc_leg_cos,
+  spherical_harmonic]$
+
+
+errors_found : [ ]$
+tests_pass : [ ]$
+
+zerop(e) := is(0=e)$
+        
+check_zero_list(e) := block([ k, okay,n],
+   kill(labels), 
+   okay : true,
+   k : 0,
+   n : length(e),
+   while okay and k < n do (
+      k : k + 1,
+      if not zerop(e[ k ]) then (
+          okay : false
+      ) 
+  ),
+  if okay then (
+      tests_pass : endcons(test_name, tests_pass),
+      print("okay:  ", test_name)
+  ) else (
+         print("error: ", test_name),
+         print("should vanish = ", e[ k ]),
+         errors_found : endcons(test_name, errors_found)
+  )   
+)$
+
+check_true_list(e) := block([ ],
+   if member(false, e) then  (
+       print("error:  ",  test_name),
+       errors_found : endcons(test_name, errors_found)
+   )  else (
+      print("okay:  ", test_name),
+      tests_pass : endcons(test_name, tests_pass)
+   )   
+)$
+
+
+/* Jacobi Rodrigues test*/
+
+test_name :  "Jacobi Rodrigues test"$
+foo : makelist(jacobi_p(k,a,b,x) - jacobi_p_rod(k,a,b,x), k,0,5)$
+foo : rat(foo)$
+check_zero_list(foo)$
+ 
+/*  gen_laguerre Rodrigues*/
+
+test_name : "gen_laguerre Rodrigues"$
+foo : makelist(gen_laguerre(k,a,x) - gen_laguerre_rod(k,a,x), k,0,5)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*  hermite Rodrigues*/
+
+test_name : "hermite Rodrigues"$
+foo : makelist(hermite(k,x) - hermite_rod(k,x), k,0,5)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*  spherical_bessel_j Rodrigues*/
+
+test_name : "spherical_bessel_j Rodrigues"$
+foo : makelist(spherical_bessel_j(k,x) - spherical_bessel_j_rod(k,x), k,0,5)$
+foo : ratsimp(exponentialize(foo))$
+check_zero_list(foo)$
+
+/*  spherical_bessel_y Rodrigues*/
+
+test_name : "spherical_bessel_y Rodrigues"$
+foo : makelist(spherical_bessel_y(k,x) - spherical_bessel_y_rod(k,x), k,0,5)$
+foo : ratsimp(exponentialize(foo))$
+check_zero_list(foo)$
+
+/*---------------*/
+
+
+test_name : "spherical harmonic orthogonality"$
+
+
+f(n1,m1,n2,m2) := defint(defint(trigreduce(spherical_harmonic(n1,m1,th,ph) * 
+   conjugate(spherical_harmonic(n2,m2,th,ph)) * sin(th)),th,0,%pi),ph,0,2*%pi)$
+
+sofar : [ ]$
+for n1 : 0 thru 2 do (
+   for m1 : -n1 thru n1 do (
+        for n2 : 0 thru 2 do (
+	    for  m2 : - n2 thru n2 do (
+	         sofar : cons(f(n1,m1,n2,m2) - kron_delta(n1,n2) * kron_delta(m1,m2), sofar)
+	     )
+	  )
+      )
+ )$
+check_zero_list(sofar)$      	      	 
+
+    
+/*----------------*/
+
+/* See A&S 22.3.14 page 776 and 22.5.4 page 777.
+*/
+
+test_name : "A&S 22.3.14"$
+
+foo : makelist(ultraspherical(n,a,cos(x))/a - 2*cos(n*x)/n,n,1, 3)$
+foo : limit(foo,a,0)$
+foo : ratsimp(trigreduce(foo))$
+check_zero_list(foo)$ 
+
+/* See A&S 22.3.14 page 776
+*/
+
+test_name : "A&S 22.3.14"$
+
+foo : makelist(chebyshev_t(n,cos(x)) - cos(n*x),n,0, 3)$
+foo : ratsimp(trigreduce(foo))$
+check_zero_list(foo)$ 
+
+/* See A&S 22.3.15 page 776
+*/
+
+test_name : "A&S 22.3.15"$
+
+foo : makelist(sin(x) * chebyshev_u(n,cos(x)) - sin((n+1)*x),n,0, 4)$
+foo : ratsimp(trigreduce(foo))$
+check_zero_list(foo)$ 
+   
+/* See A&S 22.7.15  page 782.
+*/
+
+test_name : "A&S 22.7.15"$
+
+jacobi_rec(n) := (n + a/2+b/2+1)*(1-x)*jacobi_p(n,a+1,b,x) 
+      - (n+a+1)*jacobi_p(n,a,b,x) + (n+1)*jacobi_p(n+1,a,b,x)$
+      
+check_zero_list(makelist(ratsimp(jacobi_rec(n)),n,0,  7))$
+
+/* See  A&S 22.7.16 page 782
+*/
+
+test_name : "A&S 22.7.16"$
+
+jacobi_rec(n) := (n + a/2+b/2+1)*(1+x)*jacobi_p(n,a,b+1,x) 
+      - (n+b+1)*jacobi_p(n,a,b,x) - (n+1)*jacobi_p(n+1,a,b,x)$
+
+check_zero_list(makelist(ratsimp(jacobi_rec(n)),n,0, 7))$
+
+/* See A&S 22.7.17 page 782
+*/
+
+test_name : "A&S 22.7.17"$
+
+jacobi_rec(n) := (1-x)*jacobi_p(n,a+1,b,x) 
+      + (1+x)*jacobi_p(n,a,b+1,x) - 2*jacobi_p(n,a,b,x)$
+
+check_zero_list(makelist(ratsimp(jacobi_rec(n)),n,0, 7))$   
+
+/* See A&S 22.7.18 page 782
+*/
+
+test_name : "A&S 22.7.18"$
+
+jacobi_rec(n) := (2*n+a+b)*jacobi_p(n,a-1,b,x) 
+      - (n+a+b)*jacobi_p(n,a,b,x) +  (n+b)*jacobi_p(n-1,a,b,x)$
+
+check_zero_list(makelist(ratsimp(jacobi_rec(n)),n,1, 7))$   
+
+/* See A&S 22.7.19 page 782
+*/
+
+test_name : "A&S 22.7.19"$
+
+jacobi_rec(n) := (2*n+a+b)*jacobi_p(n,a,b-1,x) 
+      - (n+a+b)*jacobi_p(n,a,b,x) -  (n+a)*jacobi_p(n-1,a,b,x)$
+     
+check_zero_list(makelist(ratsimp(jacobi_rec(n)),n, 1, 7))$   
+
+/* See A&S 22.7.20 page 782
+*/
+
+test_name : "A&S 22.7.20"$
+
+jacobi_rec(n) := jacobi_p(n,a,b-1,x) 
+      - jacobi_p(n,a-1,b,x) -  jacobi_p(n-1,a,b,x)$
+
+check_zero_list(makelist(ratsimp(jacobi_rec(n)),n,1, 2))$   
+
+/* See A&S 22.7.21 page 782
+*/
+
+test_name : "A&S 22.7.21"$
+
+ultraspherical_rec(n) := 2*a*(1-x^2)*ultraspherical(n-1,a+1,x)
+- (2*a+n-1) * ultraspherical(n-1,a,x) + n*x*ultraspherical(n,a,x)$
+
+foo : makelist(ratsimp(ultraspherical_rec(n)),n,1, 7)$
+foo : append(ev(foo,a=4/5), ev(foo, a= -2/3), ev(foo, a=8))$
+check_zero_list(foo)$   
+
+   
+/* See A&S 22.7.23 page 782;  funny 22.7.22 is missing a lhs.
+    Maxima lacks simplification rules to simplify linear 
+    combinations of gamma functions. 
+*/
+
+test_name : "A&S 22.7.23"$
+
+ultraspherical_rec(n) := (n+a)*ultraspherical(n+1,a-1,x)
+- (a-1) * (ultraspherical(n+1,a,x) - ultraspherical(n-1,a,x))$
+
+foo : makelist(ratsimp(ultraspherical_rec(n)),n,1, 7)$
+foo : append(ev(foo,a=4/5,rat), ev(foo, a=8,rat))$
+check_zero_list(foo)$   
+
+
+/* See A&S 22.7.24 page 782
+*/
+
+test_name : "A&S 22.7.24"$
+
+cheb_rec(n,m) := 2 * chebyshev_t(m,x) * chebyshev_t(n,x)
+- chebyshev_t(n+m,x) - chebyshev_t(n-m,x)$
+
+foo : makelist(makelist(cheb_rec(n, m), m,1,n),n,1, 9)$
+foo : rat(foo)$
+foo : apply(append,foo)$
+check_zero_list(foo)$   
+
+
+/* See A&S 22.7.25 page 782
+*/
+
+test_name : "A&S 22.7.25"$
+
+cheb_rec(n,m) := 2*(x^2-1)*chebyshev_u(m-1,x) * chebyshev_u(n-1,x)
+ - chebyshev_t(n+m,x) + chebyshev_t(n-m,x)$
+
+foo : makelist(makelist(cheb_rec(n, m), m,1,n),n,1, 9)$
+foo : rat(foo)$
+foo : apply(append,foo)$
+check_zero_list(foo)$   
+ 
+
+/* See A&S 22.7.26 page 782
+*/
+
+test_name : "A&S 22.7.26"$
+
+cheb_rec(n,m) := 2*chebyshev_t(m,x) * chebyshev_u(n-1,x)
+   -chebyshev_u(n+m-1,x) - chebyshev_u(n-m-1,x)$
+
+foo : makelist(makelist(cheb_rec(n, m), m, 0, n-1),n,1, 9)$
+foo : rat(foo)$
+foo : apply(append,foo)$
+check_zero_list(foo)$   
+   
+/* See A&S 22.7.27 page 782
+*/
+
+test_name : "A&S 22.7.27"$
+
+cheb_rec(n,m) := 2*chebyshev_t(n,x) * chebyshev_u(m-1,x)
+   -chebyshev_u(n+m-1,x) + chebyshev_u(n-m-1,x)$
+
+foo : makelist(makelist(cheb_rec(n, m), m,1,n-1),n,  2,  10)$
+foo : rat(foo)$
+foo : apply(append,foo)$
+check_zero_list(foo)$   
+
+/* See A&S 22.7.28 page 782
+*/
+
+test_name : "A&S 22.7.28"$
+
+cheb_rec(n) := 2*chebyshev_t(n,x) * chebyshev_u(n-1,x)
+   -chebyshev_u(2*n-1,x)$
+
+foo : makelist(cheb_rec(n), n,2,10)$
+foo : rat(foo)$
+check_zero_list(foo)$   
+
+/* See A&S 22.7.29 page 783
+*/
+
+test_name : "A&S 22.7.29"$
+
+lag_rec(n) := gen_laguerre(n,1/3+1,x) -((x-n) * gen_laguerre(n,1/3,x) + (1/3+n) * gen_laguerre(n-1,1/3,x))/x$
+check_zero_list(ratsimp(makelist(lag_rec(n),n,1, 10)))$
+
+lag_rec(n) := gen_laguerre(n,5+1,x) -((x-n) * gen_laguerre(n,5,x) + (5+n) * gen_laguerre(n-1,5,x))/x$
+check_zero_list(ratsimp(makelist(lag_rec(n),n,1,10)))$
+
+lag_rec(n) := gen_laguerre(n,1,x) -((x-n) * gen_laguerre(n,0,x) + (n) * gen_laguerre(n-1,0,x))/x$
+check_zero_list(ratsimp(makelist(lag_rec(n),n,1,10)))$
+
+
+/* See A&S 22.7.30 page 783
+*/
+
+test_name : "A&S 22.7.30"$
+
+declare(a,integer)$
+
+lag_rec(n) := gen_laguerre(n,a-1,x) -  gen_laguerre(n,a,x) +  gen_laguerre(n-1,a,x)$
+
+check_zero_list(ratsimp(makelist(lag_rec(n),n,1, 10)))$
+remove(a,integer)$
+ 
+ /* See A&S 22.7.31 page 783
+ */
+
+test_name : "A&S 22.7.31"$
+
+lag_rec(n) := gen_laguerre(n,a+1,x) -  (n+a+1)*gen_laguerre(n,a,x) / x +  (n+1)*gen_laguerre(n+1,a,x)/x$
+check_zero_list(ratsimp(makelist(lag_rec(n),n,0, 7)))$
+ 
+ /* See A&S 22.7.32 page 783
+ */
+
+test_name : "A&S 22.7.32"$
+
+lag_rec(n) := gen_laguerre(n,a-1,x) -  (n+1)*gen_laguerre(n+1,a,x) / (n+a) +  (n+1-x)*gen_laguerre(n,a,x)/(n+a)$
+check_zero_list(ratsimp(makelist(lag_rec(n),n,0,7)))$
+
+/* See A&S 22.2.1 page 774
+*/
+
+test_name : "A&S 22.2.1"$
+
+f(a,b,n,m) := integrate((1-x)^a*(1+x)^b * jacobi_p(n,a,b,x) 
+                                        * jacobi_p(m,a,b,x),x,-1,1)$
+foo : makelist(makelist(f(1/2,-1/2,n,m), n, 0, m - 1), m, 1, 5)$
+foo : apply(append,foo)$
+check_zero_list(foo)$   
+
+foo : makelist(makelist(f(1/3,2/3,n,m), n, 0, m - 1), m, 1, 5)$
+foo : apply(append,foo)$
+check_zero_list(foo)$   
+
+
+test_name : "jacobi normalization"$
+
+stand(n) := expand(jacobi_p(n,a,b,1) - binomial(n+a,n))$
+check_zero_list(makelist(stand(n),n,0, 7))$
+
+test_name : "A&S 22.2.3"$
+
+assume(a > 1/2)$
+baz(n,m) := 'integrate((1-x^2)^(a-1/2) * ultraspherical(n,a,x)* ultraspherical(m,a,x),x,-1,1)$
+foo : makelist(makelist(ev(baz(n,m),integrate),n,0,m-1),m,1, 2)$
+foo : ev(foo, rat)$
+forget(a > 1/2)$
+foo : apply(append,foo)$
+check_zero_list(foo)$   
+
+/* See A&S 22.2.3 page 774; Maxima doesn't know enough about 
+the gamma functions to simplify these expressions to zero.
+*/
+
+test_name : "A&S 22.2.3"$
+
+stand(n) := ultraspherical(n,a,1) - binomial(n+2*a-1,n)$
+foo : makelist(stand(n),n,0, 7)$
+foo : append(ev(foo,a=2/3), ev(foo, a=7), ev(foo,a=1/3))$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/* See A&S 22.2.10 page 774
+*/
+
+test_name : "A&S 22.2.10"$
+
+f(n,m) := integrate(legendre_p(n,(rat(x))) * legendre_p(m,rat(x)),x,-1,1) - kron_delta(n,m) * 2 /(2*n+1)$
+foo : makelist(makelist(f(n,m),n,0,3),m,0,3)$
+foo : apply(append, foo)$
+check_zero_list(foo)$
+
+test_name : "legendre poly normalization"$
+stand(n) := legendre_p(n,1) -1$
+foo : makelist(stand(n),n,0,35)$
+check_zero_list(foo)$
+
+/* See A&S 22.2.12 page 774
+*/
+
+test_name : "A&S 22.2.12"$
+baz(n,m) := 'integrate(gen_laguerre(n,a,x) * gen_laguerre(m,a,x) * exp(-x)*x^a,x,0,inf) - kron_delta(n,m) * gamma(a+n+1)/n!$
+foo : makelist(makelist(baz(n,m),n,0,5),m,0,5)$
+foo : apply(append, ev(foo,a=2/3, integrate))$
+check_zero_list(foo)$
+
+
+/* See A&S 22.2.13 page 775
+*/
+
+test_name : "A&S 22.2.13"$
+baz(n,m) := 'integrate(laguerre(n,x) * laguerre(m,x) * exp(-x),x,0,inf) - kron_delta(n,m)$
+foo : makelist(makelist(ev(baz(n,m), integrate), n,0,4),m,0,4)$
+foo : rat(foo)$
+foo : apply(append, foo)$
+check_zero_list(foo)$
+
+/* See A&S 22.2.14 page 775
+*/
+
+test_name : "A&S 22.2.14"$
+baz(n,m) := 'integrate(hermite(n,x) * hermite(m,x) * exp(-x^2),x,-inf,inf) - kron_delta(n,m) * sqrt(%pi) * 2^n * n!$
+foo : makelist(makelist(ev(baz(n,m), integrate), n,0,4),m,0,4)$
+foo : apply(append, foo)$
+check_zero_list(foo)$
+
+
+/* Some Christoffel-Darboux sum formulae
+*/
+
+/* See A&S 22.12.2 page 785
+*/
+
+test_name : "A&S 22.12.2"$
+baz(n) := sum(chebyshev_t(2*k,x) ,k,0,n)  - (1 + chebyshev_u(2*n,x))/2$
+foo : makelist(rat(baz(n)),n,0,7)$
+check_zero_list(foo)$
+
+/* See A&S 22.12.3 page 785
+*/
+
+test_name : "A&S 22.12.3"$
+baz(n) := sum(chebyshev_t(2*k+1,x) ,k,0,n-1)  - chebyshev_u(2*n-1,x)/2$
+foo : makelist(rat(baz(n)),n,1, 7)$
+check_zero_list(foo)$
+
+/* See A&S 22.12.4 page 785
+*/
+
+test_name : "A&S 22.12.4"$
+baz(n) := sum(chebyshev_u(2*k,x) ,k,0,n)  - (1-chebyshev_t(2*n+2,x))/(2 * (1-x^2))$
+foo : makelist(rat(baz(n)),n,1, 11)$
+check_zero_list(foo)$
+
+/* See A&S 22.2.12.5 page 785
+*/
+
+test_name : "A&S 22.12.5"$
+baz(n) := sum(chebyshev_u(2*k+1,x) ,k,0,n-1)  - (x-chebyshev_t(2*n+1,x))/(2 * (1-x^2))$
+foo : makelist(rat(baz(n)),n,1,7)$
+check_zero_list(foo)$
+
+/* See A&S 22.12.6 page 785
+*/
+
+test_name : "A&S 22.12.6"$
+baz(n) := gen_laguerre(n,a+b+1,x+y) - sum(gen_laguerre(k,a,x) * gen_laguerre(n-k,b,y),k,0,n)$
+foo : makelist(rat(baz(n)),n,1, 7)$
+check_zero_list(foo)$
+
+/* See A&S 22.12.7 page 785
+*/
+
+test_name : "A&S 22.12.7"$
+baz(n) := gen_laguerre(n,a,x*y) - 
+sum(binomial(n+a,m) * y^(n-m) * (1-y)^m * gen_laguerre(n-m,a,x),m,0,n)$
+foo : makelist(rat(baz(n)),n,1,3)$
+check_zero_list(foo)$
+
+/* See A&S 22.12.8 page 785
+*/
+
+test_name : "A&S 22.12.8"$
+baz(n) := hermite(n,x+y) - sum(binomial(n, k) * hermite(k,sqrt(2)*x) * hermite(n-k,sqrt(2)*y),k,0,n) / 2^(n/2)$
+foo : makelist(rat(baz(n)),n,0, 7)$
+check_zero_list(foo)$
+
+/* See A&S 22.5.17 page 778
+*/
+
+test_name : "A&S 22.5.17"$
+baz(n,m) := gen_laguerre(n,m,x) - (-1)^m * diff(laguerre(n+m,x),x,m)$
+foo : makelist(makelist(baz(i,j),j,0,i),i,0,7)$
+foo : rat(foo)$
+foo : apply(append,foo)$
+check_zero_list(foo)$
+
+/* See A&S 22.7.29 page 783
+*/
+
+test_name : "A&S 22.7.29"$
+baz(n) := gen_laguerre(n,a+1,x) - ((x-n)*gen_laguerre(n,a,x) + (a+n)*gen_laguerre(n-1,a,x))/x$
+foo : makelist(baz(i),i,1,8)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/* float tests
+*/
+
+test_name : "A&S 22.12.2 - float"$
+orthopoly_returns_intervals : true$
+listarith : true$
+
+xargs(e) := if intervalp(e) then args(e) else [e,0]$
+
+f(n,x) := block([p,q],
+   p : sum(xargs(chebyshev_t(2*i,x)),i,0,n),
+   q : xargs(chebyshev_u(2*n,x)) / 2,
+   [part(p,1) - part(q,1), part(p,2) + part(q,2)])$
+   
+gomer : []$
+for i : -50 thru 50 do (
+  foo : f(10, 1.25 * i),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo - 0.5) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(35, 0.01 * i),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo - 0.5) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : 1 thru 100 do (
+  foo : f(35, -0.01 * i),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo - 0.5) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(35, 0.01 * i + %i * 0.2),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo - 0.5) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(36, -0.01 * i + %i * 0.2),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo - 0.5) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+test_name : "A&S 22.12.3 - float"$
+
+f(n,x) := block([p,q],
+   p : sum(xargs(chebyshev_t(2*i+1,x)),i,0,n-1),
+   q : xargs(chebyshev_u(2*n-1,x)) / 2,
+   [part(p,1) - part(q,1), part(p,2) + part(q,2)])$
+
+
+gomer : []$
+for i : -50 thru 50 do (
+  foo : f(10, 1.25 * i),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(35, 0.01 * i),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : 1 thru 100 do (
+  foo : f(35, -0.01 * i),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(35, 0.01 * i + %i * 0.2),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(36, -0.01 * i + %i * 0.2),
+  e : part(foo,2), 
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo, gomer))$
+check_zero_list(gomer)$
+
+
+test_name : "G&R 8.974-3-float"$
+
+f(n,a,x) := block([p,q],
+   p : sum(xargs(gen_laguerre(i,a,x)),i,0,n),
+   q : xargs(gen_laguerre(n,a+1,x)),
+   [part(p,1) - part(q,1), part(p,2) + part(q,2)])$
+   
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(11,0.4, float(0.01 * i)),
+  e : part(foo,2),
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(12,0.4, float(0.01 * i)),
+  e : part(foo,2),
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(12,-0.4, float(0.01 * i)),
+  e : part(foo,2),
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(12,-41.0, float(0.01 * i)),
+  e : part(foo,2),
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+gomer : []$
+for i : -100 thru 100 do (
+  foo : f(12,-4.1, float(0.01 * i * %i)),
+  e : part(foo,2),
+  foo : part(foo,1),
+  if (abs(foo) <= e) then foo : 0 else foo : 1,
+  gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+test_name : "random jacobi float"$
+
+gomer : [ ]$
+for i : 1 thru 500 do (
+   n : random(10),
+   a : random(11) / (1 + random(9)),
+   b : random(11) / (1 + random(9)),
+   x : (random(11) - 5) / (1 + random(10)),
+   exact : float(jacobi_p(n,a,b,x)),
+   approx : jacobi_p(n,float(a),float(b),float(x)),
+   if (abs(exact-part(approx,1)) <= part(approx,2)) then foo : 0 else foo : 1,
+   if (foo = 1) then print ("n = ",n, " a = ",a," b = ",b, "x = ",x),
+   gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+test_name : "random ultraspherical float"$
+
+gomer : [ ]$
+for i : 1 thru 500 do (
+   n : random(10),
+   a : random(11) / (1 + random(9)),
+   x : (random(11) - 5) / (1 + random(10)),
+   exact : float(ultraspherical(n,a,x)),
+   approx : ultraspherical(n,float(a),float(x)),
+   if (abs(exact-part(approx,1)) <= part(approx,2)) then foo : 0 else foo : 1,
+   if (foo = 1) then print ("n = ",n, " a = ",a,"x = ",x),
+   gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+test_name : "random chebyshev_t float"$
+gomer : [ ]$
+for i : 1 thru 500 do (
+   n : random(10),
+   x : (random(11) - 5) / (1 + random(10)),
+   exact : float(chebyshev_t(n,x)),
+   approx : chebyshev_t(n,float(x)),
+   if (abs(exact-part(approx,1)) <= part(approx,2)) then foo : 0 else foo : 1,
+   if (foo = 1) then print("chebyshev_t float error; n = ",n, "x = ",x),
+   gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+test_name : "random chebyshev_u float"$
+gomer : [ ]$
+for i : 1 thru 500 do (
+   n : random(10),
+   x : (random(11) - 5) / (1 + random(10)),
+   exact : float(chebyshev_u(n,x)),
+   approx : chebyshev_u(n,float(x)),
+   if (abs(exact-part(approx,1)) <= part(approx,2)) then foo : 0 else foo : 1,
+   if (foo = 1) then print("chebyshev_t float error; n = ",n, "x = ",x),
+   gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+
+test_name : "random legendre float"$
+gomer : [ ]$
+for i : 1 thru 500 do (
+   n : random(10),
+   x : (random(11) - 5) / (1 + random(10)),
+   exact : float(legendre_p(n,x)),
+   approx : legendre_p(n,float(x)),
+   if (abs(exact-part(approx,1)) <= part(approx,2)) then foo : 0 else foo : 1,
+   if (foo = 1) then print("legendre float error; n = ",n, "x = ",x),
+   gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+test_name : "random hermite float"$
+gomer : [ ]$
+for i : 1 thru 500 do (
+   n : random(10),
+   x : (random(11) - 5) / (1 + random(10)),
+   exact : float(hermite(n,x)),
+   approx : hermite(n,float(x)),
+   if (abs(exact-part(approx,1)) <= part(approx,2)) then foo : 0 else foo : 1,
+   if (foo = 1) then print("hermite float error; n = ",n, "x = ",x),
+   gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+
+test_name : "random gen_laguerre float"$
+
+gomer : [ ]$
+for i : 1 thru 500 do (
+   n : random(10),
+   a : random(11) / (1 + random(9)),
+   x : (random(11) - 5) / (1 + random(10)),
+   exact : float(gen_laguerre(n,a,x)),
+   approx : gen_laguerre(n,float(a),float(x)),
+   if (abs(exact-part(approx,1)) <= part(approx,2)) then foo : 0 else foo : 1,
+   if (foo = 1) then print ("n = ",n, " a = ",a," b = ",b, "x = ",x),
+   gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+test_name : "random assoc_legendre_p float"$
+gomer : [ ]$
+for i : 1 thru 500 do (
+   n : random(10),
+   m : random(10),
+   x : (random(11) - 5)/ (1 + random(10)),
+   exact : float(assoc_legendre_p(n,m,x)),
+   approx : assoc_legendre_p(n,m,float(x)),
+   if not(intervalp(approx)) then approx : interval(approx,0),
+   if (abs(exact-part(approx,1)) <= part(approx,2)) then foo : 0 else foo : 1,
+   if (foo = 1) then print ("n =", n, " m = ", m, " x = ",x),
+   gomer : cons(foo,gomer))$
+check_zero_list(gomer)$
+
+remvalue(n)$
+remvalue(x)$
+remvalue(k)$
+q : []$
+
+test_name : "simple spherical_bessel_j test"$
+
+fpprec : 75$
+foo : ratsimp(spherical_bessel_j(5,x))$
+q : makelist(ev(foo / bfloat(spherical_bessel_j(5,0.1 * k)) - 1.0b0, 
+   x = 0.1b0 * k),k,1,10)$
+q : map(lambda([s], if abs(s) < 5.0b-11 then 0 else 1), q)$
+check_zero_list(q)$
+
+foo : ratsimp(spherical_bessel_j(5,x))$
+q : makelist(ev(foo / bfloat(spherical_bessel_j(5,0.1 * k)) - 1.0b0, 
+   x = 0.1b0 * k),k,-10,-1)$
+q : map(lambda([s], if abs(s) < 5.0b-11 then 0 else 1), q)$
+check_zero_list(q)$
+
+test_name : "simple spherical_bessel_y test"$
+
+q : []$
+foo : expand(spherical_bessel_y(5,x))$
+q : makelist(ev(foo / bfloat(spherical_bessel_y(5,0.1 * k)) - 1.0b0, 
+   x = 0.1b0*k),k,1,10)$
+q : map(lambda([s], if abs(s) < 5.0b-11 then 0 else 1), q)$
+check_zero_list(q)$
+
+q : []$
+foo : spherical_bessel_y(5,x)$
+q : makelist(ev(foo / bfloat(spherical_bessel_y(5,0.1 * k)) - 1.0b0,
+   x = 0.1b0*k),k,-10,-1)$
+q : map(lambda([s], if abs(s) < 5.0b-11 then 0 else 1), q)$
+check_zero_list(q)$
+
+
+remvalue(n)$
+remvalue(i)$
+remvalue(x)$
+remvalue(a)$
+remvalue(b)$
+remvalue(gomer)$
+remvalue(exact)$
+remvalue(approx)$
+remfunction(f)$
+
+/* See A & S 8.5.4
+*/
+
+test_name : "A&S 8.5.3"$
+
+foo(n) := (n + 1)*legendre_q(n+1,x) - (2*n+1)*x*legendre_q(n,x) 
+    + n*legendre_q(n-1,x)$
+gomer  : makelist(rat(foo(i)),i,1,15)$
+check_zero_list(gomer)$
+
+test_name : "A&S 8.5.3"$
+foo(n) :=  (n + 1)*legendre_p(n+1,x) - (2*n+1)*x*legendre_p(n,x) 
+    + n*legendre_p(n-1,x)$
+gomer : makelist(rat(foo(i)),i,1,15)$
+check_zero_list(gomer)$
+
+test_name : "A&S 8.5.3"$
+
+foo(n,m) := (n - m + 1) * assoc_legendre_q(n+1,m,x) - 
+   (2*n + 1) * x * assoc_legendre_q(n,m,x) + (n + m) * assoc_legendre_q(n-1,m,x)$
+
+gomer : makelist(makelist(foo(n,m),m,-n+1,n-1),n,1,5)$
+gomer : map(ratsimp,apply(append, gomer))$
+check_zero_list(gomer)$
+
+
+
+/* See A&S 8.6.7 page 334
+*/
+
+test_name : "A&S 8.6.7"$
+foo : makelist(makelist(assoc_legendre_q(n,m,x) - (-1)^m * (1-x^2)^(m/2) * diff(legendre_q(n,x),x,m),m,0,n),n,0,4)$
+foo : apply(append,foo)$
+foo : ratsimp(foo)$
+check_zero_list(foo)$
+
+
+/* See G&R 8.810 page 1014
+*/
+
+test_name : "G&R 8.810"$
+foo : makelist(makelist(assoc_legendre_p(n,m,x) - (-1)^m * (1-x^2)^(m/2) * diff(legendre_p(n,x),x,m),n,0,5),m,0,5)$
+foo : apply(append,foo)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+
+/* See G&R 8.813 page 1015
+*/
+
+test_name : "G&R 8.813 (1-6)"$
+
+foo : [assoc_legendre_p(1,1,x) + sqrt(1-x^2),
+         assoc_legendre_p(2,1,x) + 3 * x * sqrt(1-x^2),
+         assoc_legendre_p(2,2,x) - 3 *(1-x^2),
+         assoc_legendre_p(3,1,x) + 3 * sqrt(1-x^2) *(5*x^2-1) / 2,
+         assoc_legendre_p(3,2,x) - 15*x*(1-x^2),
+         assoc_legendre_p(3,3,x) + 15 * (1-x^2)^(3/2)]$
+
+foo :  rat(foo)$	 
+
+check_zero_list(foo)$
+
+/* See G&R 8.950 (1) page 1033
+*/
+
+test_name : "G&R 8.950 (1)"$
+foo : makelist(hermite(n,x) - (-1)^n * exp(x^2) * diff(exp(-x^2),x,n),n,0,9)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+
+/* See G&R 8.952 (1) page 1033
+*/
+
+test_name : "G&R 8.952 (1)"$
+foo : makelist(diff(hermite(n,x),x) - 2 * n * hermite(n-1,x),n,1,7)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/* See G&R 8.952 (2) page 1033
+*/
+test_name : "G&R 8.952 (2)"$
+foo : makelist(hermite(n+1,x) - 2 * x * hermite(n,x) + 2 * n * hermite(n-1,x),n,1,7)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/* See G&R 8.956 (1-3) page 1034
+*/
+
+test_name : "G&R 8.956 (1-5)"$
+
+foo : [hermite(0,x) - 1,
+         hermite(1,x) - 2*x,
+	 hermite(2,x) - (4*x^2 -2),
+	 hermite(3,x) - (8*x^3-12*x),
+	 hermite(4,x) - (16*x^4 - 48 * x^2 + 12)]$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/* See A&S 10.1.19 page 439 
+*/
+
+test_name : "A&S 10.1.19 spherical_hankel2"$
+baz(n) := spherical_hankel2(n-1,x) + spherical_hankel2(n+1,x) - (2*n+1) * spherical_hankel2(n,x) /x$
+foo : makelist(baz(k),k,-7,7)$
+foo : rat(expand(foo))$
+check_zero_list(foo)$
+
+test_name : "A&S 10.1.19 spherical_hankel1"$
+baz(n) := spherical_hankel1(n-1,x) + spherical_hankel1(n+1,x) - (2*n+1) * spherical_hankel1(n,x) /x$
+foo : makelist(baz(k),k,-7,7)$
+foo : rat(expand(foo))$
+check_zero_list(foo)$
+
+test_name : "A&S 10.1.19 spherical_bessel_j"$
+baz(n) := spherical_bessel_j(n-1,x) + spherical_bessel_j(n+1,x) - (2*n+1) * spherical_bessel_j(n,x) /x$
+foo : makelist(baz(k),k,-7,7)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+test_name : "A&S 10.1.19 spherical_bessel_y"$
+baz(n) := spherical_bessel_y(n-1,x) + spherical_bessel_y(n+1,x) - (2*n+1) * spherical_bessel_y(n,x) /x$
+foo : makelist(baz(k),k,-7,7)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*--------------*/
+
+/* See A&S 10.1.20 page 439 
+*/
+
+test_name : "A&S 10.1.20 spherical_hankel1"$
+remvalue(q)$
+baz(n) := n * spherical_hankel1(n-1,q) - (n+1)*spherical_hankel1(n+1,q)
+ -(2*n+1) * diff(spherical_hankel1(n,q),q)$
+foo : makelist(baz(k),k,-7,7)$
+foo : ratsimp(foo)$
+check_zero_list(foo)$
+
+test_name : "A&S 10.1.20 spherical_hankel2"$
+baz(n) := n * spherical_hankel2(n-1,q) - (n+1)*spherical_hankel2(n+1,q)
+ -(2*n+1) * diff(spherical_hankel2(n,q),q)$
+foo : makelist(baz(k),k,-7,7)$
+foo : ratsimp(foo)$
+check_zero_list(foo)$
+
+test_name : "A&S 10.1.20 spherical_bessel_j"$
+baz(n) := n * spherical_bessel_j(n-1,q) - (n+1)*spherical_bessel_j(n+1,q)
+ -(2*n+1) * diff(spherical_bessel_j(n,q),q)$
+foo : makelist(baz(k),k,-7,7)$
+foo : ratsimp(foo)$
+check_zero_list(foo)$
+
+test_name : "A&S 10.1.20 spherical_bessel_y"$
+baz(n) := n * spherical_bessel_y(n-1,q) - (n+1)*spherical_bessel_y(n+1,q)
+ -(2*n+1) * diff(spherical_bessel_y(n,q),q)$
+foo : makelist(baz(k),k,-7,7)$
+foo : ratsimp(foo)$
+check_zero_list(foo)$
+ 
+/*--------------*/
+
+kill(labels)$
+
+test_name : "A&S 10.1.31"$
+f(n) := spherical_bessel_j(n,t) *spherical_bessel_y(n-1,t) -
+    spherical_bessel_j(n-1,t) *spherical_bessel_y(n,t) - 1/t^2$
+
+foo : makelist(f(k),k,-3, 3)$
+foo : trigreduce(ratsimp(foo))$
+check_zero_list(foo)$
+    
+/*--------------*/
+
+remove(n,integer)$
+remove(k,integer)$
+remove(i,integer)$
+remvalue(a,b,x,n,m,i,j)$
+test_name : "jacobi_p gradef test"$
+q : [ ]$
+for i : 0 thru 15 do (
+   foo : diff(jacobi_p(n,a,b,x^2) - jacobi_p(i,a,b,x^2),x),
+   foo : ev(foo, n=i),
+   foo : rat(foo),
+   q : cons(foo,q))$
+check_zero_list(q)$
+	
+/*--------------*/
+
+test_name : "ultraspherical gradef test"$
+q : [ ]$
+for i : 0 thru 15 do (
+   foo : diff(ultraspherical(n,a,x^2) - ultraspherical(i,a,x^2),x),
+   foo : ev(foo, n = i),
+   foo : rat(foo),
+   q : cons(foo, q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "assoc_legendre_p gradef test"$
+remvalue(q,i,j,n,m,x,foo)$
+q : []$
+for i : 0 thru 15 do (
+   for j : -15 thru 15 do (
+      foo : diff(assoc_legendre_p(n,m,x) - assoc_legendre_p(i,j,x),x),
+      foo : ev(foo, n=i,m=j),
+      foo : radcan(foo),
+      q : cons(foo,q)))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "assoc_legendre_q gradef test"$
+remvalue(q,i,j,n,m,x,foo,w)$
+q : []$
+for i : 0 thru 5 do (
+   for j : -i thru i do (
+      w : assoc_legendre_q(i,j,x),
+      w : diff(w,x),
+      foo : diff(assoc_legendre_q(n, m, x),x) - w,
+      foo : ev(foo, n=i,m=j),
+      foo : ratsimp(expand(foo)),
+      q : cons(foo,q)))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "chebyshev_t gradef test"$
+q : []$
+for i : 0 thru 15 do (
+   foo : diff(chebyshev_t(n,x^2) - chebyshev_t(i,x^2),x),
+   foo : ev(foo, n = i),
+   foo : rat(foo),
+   q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "chebyshev_u gradef test"$
+q : []$
+for i : 0 thru 15 do (
+    foo : diff(chebyshev_u(n,x^2) - chebyshev_u(i,x^2),x),
+    foo : ev(foo, n=i),
+    foo : rat(foo),
+    q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "laguerre gradef test"$
+q : [ ]$
+for i : 0 thru 15 do (
+    foo : diff(laguerre(n,x^2) - laguerre(i,x^2),x),
+    foo : ev(foo, n=i),
+    foo : rat(foo),
+    q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "gen_laguerre gradef test"$
+q : [ ]$
+for i : 0 thru 15 do (
+    foo : diff(gen_laguerre(n,a,x^2) - gen_laguerre(i,a,x^2),x),
+    foo : ev(foo, n=i),
+    foo : rat(foo),
+    q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "legendre_p gradef test"$
+q : [ ]$
+for i : 0 thru 15 do (
+     foo : diff(legendre_p(n,x^2) - legendre_p(i,x^2),x),
+     foo : ev(foo, n=i),
+     foo : rat(foo),
+     q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "legendre_q gradef test"$
+q : [ ]$
+for i : 0 thru 15 do (
+     foo : diff(legendre_q(n,x) - legendre_q(i,x),x),
+     foo : ev(foo, n=i),
+     foo : rat(foo),
+     q : cons(foo,q))$
+check_zero_list(q)$
+
+
+test_name : "hermite gradef test"$
+q : []$
+for i : 0 thru 15 do (
+   foo : diff(hermite(n,x^2) - hermite(i,x^2),x),
+   foo : ev(foo, n=i),
+   foo : rat(foo),
+   q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "spherical_hankel2 gradef test"$
+q : []$
+for i : 0 thru 15 do (
+   foo : diff(spherical_hankel2(n,x^2) - spherical_hankel2(i,x^2),x),
+   foo : ev(foo, n=i),
+   foo : rat(foo),
+   q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "spherical_hankel1 gradef test"$
+q : [ ]$
+for i : 0 thru 15 do (
+    foo : diff(spherical_hankel1(n,x^2) - spherical_hankel1(i,x^2),x),
+    foo : ev(foo, n=i),
+    foo : ratsimp(foo),
+    q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "spherical_bessel_j gradef test"$
+q : []$
+for i : 0 thru 15 do (
+   foo : diff(spherical_bessel_j(n,x^2) - spherical_bessel_j(i,x^2),x),
+   foo : ev(foo, n=i),
+   foo : ratsimp(foo),
+   q : cons(foo,q))$
+check_zero_list(q)$
+
+/*--------------*/
+
+test_name : "spherical_bessel_y gradef test"$
+q : []$
+for i : 0 thru 15 do (
+   foo : diff(spherical_bessel_y(n,x^2) - spherical_bessel_y(i,x^2),x),
+   foo : ev(foo, n=i),
+   foo : rat(foo),
+   q : cons(foo,q))$
+check_zero_list(q)$
+
+
+/*--------------*/
+
+test_name : "spherical_harmonic gradef test"$
+remvalue(q,i,j,n,m,x,foo)$
+q : []$
+for i : 0 thru 5 do (
+   for j : -i thru i do (
+ foo : [diff(spherical_harmonic(n, m, x, y) - spherical_harmonic(i, j, x, y),x),
+          diff(spherical_harmonic(n, m, x, y) - spherical_harmonic(i,j, x, y),y)],
+     foo : ev(foo, n=i, m=j),
+     foo : radcan(foo),
+     foo : trigreduce(rat(foo)),
+     q : append(foo,q)))$
+check_zero_list(q)$
+remvalue(q)$
+
+/*--------------*/
+
+test_name : "jacobi sum representation"$
+declare(n,integer)$
+foo : jacobi_p(n,p,q,2/3)$
+foo : ev(foo, sum, n=7)$
+foo : rat(foo - jacobi_p(7,p,q,2/3))$ 
+check_zero_list([foo])$
+
+/*--------------*/
+
+test_name : "ultraspherical sum representation"$
+foo : ultraspherical(n,p,-2/3)$
+foo : ev(foo, sum, n=2)$
+foo : rat(foo - ultraspherical(2,p,-2/3))$ 
+check_zero_list([foo])$
+
+/*--------------*/
+test_name : "legendre_p sum representation"$
+foo : legendre_p(n,1/8)$
+foo : ev(foo, sum, n=8)$
+foo : rat(foo - legendre_p(8,1/8))$ 
+check_zero_list([foo])$
+
+/*----------------*/
+
+test_name : "chebyshev_t sum representation"$
+foo : chebyshev_t(n,2)$
+foo : ev(foo, sum, n=5)$
+foo : rat(foo - chebyshev_t(5,2))$ 
+check_zero_list([foo])$
+
+/*----------------*/
+
+test_name : "chebyshev_u sum representation"$
+foo : chebyshev_u(n,-1/4)$
+foo : ev(foo, sum, n=15)$
+foo : rat(foo - chebyshev_u(15,-1/4))$ 
+check_zero_list([foo])$
+
+/*---------------*/
+
+test_name : "laguerre sum representation"$
+foo : laguerre(n,2/3)$
+foo : ev(foo,sum,n=4)$
+foo : rat(foo - laguerre(4,2/3))$
+check_zero_list([foo])$
+
+/*---------------*/
+
+test_name : "generalized laguerre sum representation"$
+foo : gen_laguerre(n,a,-2/3)$
+foo : ev(foo,sum,n=4)$
+foo : rat(foo - gen_laguerre(4,a,-2/3))$
+check_zero_list([foo])$
+
+
+remvalue([x,n,k])$
+
+test_name : "pochhammer-1"$
+check_zero_list(ratsimp([pochhammer(x,0) - 1, pochhammer(x,1) - x,
+pochhammer(x,2) - x*(x+1), pochhammer(x,5)/pochhammer(x,4) - (x+4)]))$
+
+test_name : "pochhammer-2"$
+check_zero_list(makelist(ratsimp(pochhammer(x,-k) * pochhammer(1-x,k) - (-1)^k),k,-5,5))$
+
+test_name : "pochhammer-grad"$
+foo : pochhammer(x,n)$
+dfoo : diff(foo,x)$
+goober : makelist(diff(ev(foo,n = k),x) - ev(dfoo,n = k),k,-5,5)$
+check_zero_list(expand(subst([x = 7/2], goober)));
+check_zero_list(expand(subst([x = -7/2], goober)));
+
+/*-----------------*/
+
+test_name : "unit_step"$
+check_zero_list([unit_step(-2), unit_step(-1/9), unit_step(-1.2),
+unit_step(-1.5b-2), unit_step(0), unit_step(0.0), unit_step(0.0b0),
+unit_step(2)-1, unit_step(1/9)-1, unit_step(4.5)-1, unit_step(8.23b3)-1,
+unit_step(x^2+1)-1,unit_step(exp(x))-1])$
+
+/*----------------*/
+
+test_name : "kron_delta"$
+
+check_zero_list([kron_delta(1,2), kron_delta(1,1)-1, kron_delta(x,rat(x)) - 1,
+kron_delta(x,y)-kron_delta(y,x), kron_delta(1.0,1.0)-1])$
+
+
+
+/*----------------*/
+
+test_name : "jacobi_p recursion"$
+
+foo : orthopoly_recur(jacobi_p,[m,a,b,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "ultraspherical recursion"$
+
+foo : orthopoly_recur(ultraspherical,[m,a,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "chebyshev_t_recursion"$
+
+foo : orthopoly_recur(chebyshev_t,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "chebyshev_u recursion"$
+
+foo : orthopoly_recur(chebyshev_u,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "legendre_p recursion"$
+
+foo : orthopoly_recur(legendre_p,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "legendre_q recursion"$
+foo : orthopoly_recur(legendre_q,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "assoc_legendre_p recursion"$
+foo : orthopoly_recur(assoc_legendre_p,[m,1,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,2,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "assoc_legendre_p recursion"$
+foo : orthopoly_recur(assoc_legendre_p,[m,2,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,3,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "assoc_legendre_q recursion"$
+foo : orthopoly_recur(assoc_legendre_q,[m,1,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,2,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*----------------*/
+
+test_name : "laguerre recursion"$
+
+foo : orthopoly_recur(laguerre,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*----------------*/
+
+test_name : "gen_laguerre recursion"$
+
+foo : orthopoly_recur(gen_laguerre,[m,a,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*-----------------*/
+test_name : "hermite recursion"$
+
+foo : orthopoly_recur(hermite,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*----------------*/
+test_name : "spherical_bessel_j recursion"$
+foo : orthopoly_recur(spherical_bessel_j,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+
+/*---------------------------------------*/
+test_name : "spherical_bessel_j recursion"$
+foo : orthopoly_recur(spherical_bessel_y,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*---------------------------------------*/
+test_name : "spherical_hankel1 recursion"$
+foo : orthopoly_recur(spherical_hankel1,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*---------------------------------------*/
+test_name : "spherical_hankel2 recursion"$
+foo : orthopoly_recur(spherical_hankel2,[m,x])$
+foo : rhs(foo)-lhs(foo)$
+foo : makelist(ev(foo,m=k),k,1,6)$
+foo : rat(foo)$
+check_zero_list(foo)$
+
+/*---------------------------------------*/
+
+test_name : "jacobi_weight"$
+foo : orthopoly_weight(jacobi_p,[n,2,3,x])$
+foo : integrate(jacobi_p(5,2,3,x) * jacobi_p(4,2,3,x) * foo[1],x,foo[2],foo[3])$
+check_zero_list([foo])$
+
+/*---------------------------------------*/
+
+test_name : "ultraspherical_weight"$
+foo : orthopoly_weight(ultraspherical,[n,2,x])$
+foo : integrate(ultraspherical(5,2,x) * ultraspherical(4,2,x) 
+	* foo[1],x,foo[2],foo[3])$
+check_zero_list([foo])$
+
+/*---------------------------------------*/
+
+test_name : "chebyshev_t_weight"$
+foo : orthopoly_weight(chebyshev_t,[n,x])$
+foo : integrate(chebyshev_t(5,x) * chebyshev_t(4,x) 
+	* foo[1],x,foo[2],foo[3])$
+check_zero_list([foo])$
+
+/*---------------------------------------*/
+
+test_name : "chebyshev_u_weight"$
+foo : orthopoly_weight(chebyshev_u,[n,x])$
+foo : integrate(chebyshev_u(5,x) * chebyshev_u(4,x) 
+	* foo[1],x,foo[2],foo[3])$
+check_zero_list([foo])$
+
+/*---------------------------------------*/
+
+test_name : "legendre_p_weight"$
+foo : orthopoly_weight(legendre_p,[n,x])$
+foo : integrate(legendre_p(5,x) * legendre_p(4,x) 
+	* foo[1],x,foo[2],foo[3])$
+check_zero_list([foo])$
+
+/*---------------------------------------*/
+
+test_name : "laguerre_weight"$
+foo : orthopoly_weight(laguerre,[n,x])$
+foo : integrate(laguerre(5,x) * laguerre(4,x) 
+	* foo[1],x,foo[2],foo[3])$
+check_zero_list([foo])$
+
+/*---------------------------------------*/
+
+test_name : "gen_laguerre_weight"$
+foo : orthopoly_weight(gen_laguerre,[n,1/2,x])$
+foo : integrate(gen_laguerre(5,1/2,x) * gen_laguerre(4,1/2,x) 
+	* foo[1],x,foo[2],foo[3])$
+check_zero_list([foo])$
+
+/*---------------------------------------*/
+
+test_name : "hermite_weight"$
+foo : orthopoly_weight(hermite,[n,x])$
+foo : integrate(hermite(5,x) * hermite(4,x) 
+	* foo[1],x,foo[2],foo[3])$
+check_zero_list([foo])$
+
+
+/*---------------------------------------*/
+
+orthopoly_returns_intervals : false$
+
+test_name : "legendre_p negative degree--symbolic argument"$
+foo1 : makelist (legendre_p (-k, u), k, 1, 8);
+foo2 : makelist (legendre_p (k - 1, u), k, 1, 8);
+check_zero_list(foo1 - foo2)$
+
+test_name : "legendre_p negative degree--rational argument"$
+foo1 : makelist (legendre_p (-k, 11/7), k, 1, 8);
+foo2 : makelist (legendre_p (k - 1, 11/7), k, 1, 8);
+check_zero_list(foo1 - foo2)$
+
+test_name : "legendre_p negative degree--float argument"$
+foo1 : makelist (legendre_p (-k, float (17/16)), k, 1, 8);
+foo2 : makelist (legendre_p (k - 1, float (17/16)), k, 1, 8);
+foo : map (lambda ([a, b], is (a = b)), foo1, foo2);
+check_true_list (foo);
+
+/*---------------------------------------*/
+
+test_name : "assoc_legendre_p negative degree--symbolic argument"$
+foo1 : makelist (assoc_legendre_p (-k, 1, u), k, 1, 8);
+foo2 : makelist (assoc_legendre_p (k - 1, 1, u), k, 1, 8);
+check_zero_list(foo1 - foo2)$
+
+test_name : "assoc_legendre_p negative degree--rational argument"$
+foo1 : makelist (assoc_legendre_p (-k, 1, 11/7), k, 1, 8);
+foo2 : makelist (assoc_legendre_p (k - 1, 1, 11/7), k, 1, 8);
+check_zero_list(foo1 - foo2)$
+
+test_name : "assoc_legendre_p negative degree--float argument"$
+foo1 : makelist (assoc_legendre_p (-k, 1, float (17/16)), k, 1, 8);
+foo2 : makelist (assoc_legendre_p (k - 1, 1, float (17/16)), k, 1, 8);
+foo : map (lambda ([a, b], is (a = b)), foo1, foo2);
+check_true_list (foo);
+
+reset (orthopoly_returns_intervals);
+
+
+print("orthopoly version = ", get('orthopoly,'version))$
+print("errors found = ", errors_found)$
+print("number of tests passed =", length(tests_pass))$
+
+
+/* Generate A&S Figure 22.4 page 776 
+*/
+
+
+orthopoly_returns_intervals : false$
+
+foo : ['(ultraspherical(2,0.5,x)),
+'(ultraspherical(3,0.5,x)),
+'(ultraspherical(4,0.5,x)),
+'(ultraspherical(5,0.5,x))]$
+
+plot2d(foo,[x,-1,1])$
+
+/* Generate A&S Figure 22.5 page 777 
+*/
+
+
+foo : ['(ultraspherical(5, 0.2, x)),
+'(ultraspherical(5, 0.4, x)),
+'(ultraspherical(5, 0.6, x)),
+'(ultraspherical(5, 0.8, x)),
+'(ultraspherical(5, 1.0, x))]$
+
+plot2d(foo, [x,-0.8,0.8])$
+
+/* Generate A&S Figure 22.6 page 778
+*/
+
+foo : ['(chebyshev_t(1,x)),
+'(chebyshev_t(2,x)),
+'(chebyshev_t(3,x)),
+'(chebyshev_t(4,x)),
+'(chebyshev_t(5,x))]$
+
+
+plot2d(foo,[x,-1.0,1.0])$
+
+/* Generate A&S Figure 22.7 page 779
+*/
+
+
+foo : ['(chebyshev_u(1,x)),
+'(chebyshev_u(2,x)),
+'(chebyshev_u(3,x)),
+'(chebyshev_u(4,x)),
+'(chebyshev_u(5,x))]$
+
+
+plot2d(foo,[x,-1.0,1.0])$

@@ -1,0 +1,32 @@
+
+delint(expr,var,[limits]):=block([arg,arglist,isd],
+arglist:cons(var,limits),
+if length(limits)#0 and length(limits)#2 then error(
+"wrong number of arguments to delint"),
+if not atom(expr) then
+if part(expr,0)="+" or (part(expr,0)="-" and length(expr)>1) then
+	return((apply('delint,cons(part(expr,1),arglist))+apply
+	('delint,cons(expr-part(expr,1),arglist)))),
+isd:isdeltap(expr),
+if isd=false then return(apply('integrate,cons(expr,arglist))),
+arg:rhs(part(isd,2)),
+if freeof(var,arg) then return(apply('integrate,cons(expr,arglist))),
+apply('delintd,cons(expr,cons(arg,arglist))))$
+
+/* loadfile(utils,fasl,mps)$ */
+
+matchdeclare([dum1,dum2],true)$
+
+
+defmatch(isdeltap,dum1*delta(dum2))$
+delintd(grand,arg,var,[l]):=
+block([prederror:false,programmode:true,rest,nsol,solns,jac,ans],
+solns:map(rhs,solve(arg,var)),
+if (nsol:length(solns))=0 then return(0)
+,solns:removeimag(solns),
+if length(l)=2 then solns:rem_out_of_range(solns,l[1],l[2]),
+if (nsol:length(solns))=0 then return(0),
+rest:grand/delta(arg),
+jac:abs(diff(arg,var)),
+if length(l)=2 then sum(subst((solns[n]),var,rest/jac),n,1,nsol)
+	else sum(subst(solns[n],var,rest/jac)*theta(var-solns[n]),n,1,nsol))$

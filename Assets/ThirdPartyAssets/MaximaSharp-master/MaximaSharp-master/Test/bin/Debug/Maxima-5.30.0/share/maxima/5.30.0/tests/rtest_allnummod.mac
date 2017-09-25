@@ -1,0 +1,1667 @@
+kill (all);
+done;
+
+ceiling(42);
+42$
+
+ceiling(-128);
+-128$
+
+ceiling(-5/2);
+-2$
+
+ceiling(0);
+0$
+
+ceiling(5/2);
+3$
+
+ceiling(-5.6);
+-5$
+
+ceiling(7.8);
+8$
+
+ceiling(-5.6b0);
+-5$
+
+ceiling(7.8b0);
+8$
+
+ceiling(%pi);
+4$
+
+ceiling(%e);
+3$
+
+ceiling(%phi);
+2$
+
+ceiling(minf);
+und$
+
+ceiling(inf);
+und$
+
+ceiling(infinity);
+ceiling(infinity)$
+
+ceiling(zeroa);
+1$
+
+ceiling(zerob);
+0$
+
+ceiling(und);
+und$
+
+ceiling(ind);
+und$
+
+args(ceiling(rat(x)));
+[x]$
+
+args(ceiling(rat(a+b)));
+[a+b]$
+
+ceiling(ceiling(x));
+'(ceiling(x))$
+
+ceiling(5 + ceiling(x));
+5 + ceiling(x)$
+
+ceiling(ceiling(x) + ceiling(y));
+ceiling(x) + ceiling(y)$
+
+ceiling(ceiling(x) - ceiling(y));
+ceiling(x) - ceiling(y)$
+
+ceiling(ceiling(x) * ceiling(y));
+ceiling(x) * ceiling(y)$
+
+ceiling(6 * ceiling(x) - 28 * ceiling(y));
+6 * ceiling(x) - 28 * ceiling(y)$
+
+ceiling(ceiling(x));
+'(ceiling(x))$
+
+(declare(n,integer),0);
+0$
+
+ceiling(n);
+n$
+
+ceiling(abs(n));
+abs(n)$
+
+ceiling(abs(n)!);
+abs(n)!$
+
+ceiling(n + 1932);
+n + 1932$
+
+ceiling(n - 128);
+n - 128$
+
+ceiling(n^5);
+n^5$
+
+(assume(n > 0),0);
+0$
+
+ceiling(5^n);
+5^n$
+
+ceiling(-n);
+-n$
+
+(declare(m,integer),0);
+0$
+
+(assume(m < 0),0);
+0$
+
+ceiling(7^m);
+'(ceiling(7^m))$
+
+ceiling(n*m);
+n*m$
+
+ceiling(n + m);
+n + m$
+
+ceiling(n -m);
+n - m$
+
+ceiling(6*n - 28 * m);
+6*n - 28 * m$
+
+ceiling(abs(n+m)!);
+abs(n+m)!$
+
+ceiling(abs(n) - n);
+abs(n) - n$
+
+(forget(m < 0, n >0), 0);
+0$
+
+ceiling(max(n,m));
+max(n,m)$
+
+ceiling(min(n,m));
+min(n,m)$
+
+ceiling(x+17);
+ceiling(x) + 17$
+
+ceiling(a*b - 32);
+ceiling(a*b) - 32$
+
+ceiling(-x);
+-floor(x)$
+
+ceiling(-exp(x));
+-floor(exp(x))$
+
+ceiling(rat(x));
+ceiling(x)$
+
+ceiling(x + 10!) + floor(-x - 10!);
+0$
+
+ceiling(a/b + 1909) + floor(-a/b - 1909);
+0$
+
+(numerval(x,5.6),0);
+0$
+
+floor(x);
+5$
+
+ceiling(x);
+6$
+
+floor(x+8);
+13$
+
+ceiling(x+8);
+14$
+
+(kill(x,numerval),0);
+0$
+
+(kill(xx), assume(0 < xx, xx < 1),0);
+0$
+
+floor(xx);
+0$
+
+ceiling(xx);
+1$
+
+floor(-xx);
+-1$
+
+ceiling(-xx);
+0$
+
+(assume(-1 < yy, yy < 0),0);
+0$
+
+floor(yy);
+-1$
+
+ceiling(yy);
+0$
+
+ceiling(%i^%i);
+1$
+
+ceiling(asin(-107) -42);
+ceiling(asin(-107)) - 42$
+
+/* SF bug  #1653672 */
+
+trigsimp(floor(asin(cos(sqrt(2))^2 + sin(sqrt(2))^2 - 1/7)));
+1$
+
+trigsimp(ceiling(asin(cos(sqrt(2))^2 + sin(sqrt(2))^2 - 1/7)));
+2$
+
+/* SF bug #1644378 */
+
+(x : ?bigfloatone,0);
+0$
+
+(ceiling(log(2)), is(x = ?bigfloatone));
+true$
+
+(remvalue(x),0);
+0$
+
+ceiling(signum(x));
+signum(x)$
+
+ceiling(5 * signum(x));
+5 * signum(x)$
+
+ceiling(charfun(x < 5) + 7);
+charfun(x < 5) + 7$
+
+ceiling(max(34, abs(n)!, n * m, n + m, n^8));
+max(34, abs(n)!, n * m, n + m, n^8)$
+
+(declare(ne,even, no, odd),0);
+0$
+
+ceiling(ne);
+ne$
+
+ceiling(ne * no / 2);
+ne * no / 2$
+
+ceiling(ne^2 + 1);
+ne^2 + 1$
+
+ceiling(abs(ne)!);
+abs(ne)!$
+
+ceiling(no);
+no$
+
+ceiling(ne/2);
+ne/2$
+
+ceiling((no + 1)/2);
+(no + 1)/2$
+
+(remove(ne,even, no,odd),0);
+0$
+
+(remove(n,integer),remove(m,integer),0);
+0$
+
+charfun(true);
+1$
+
+charfun(false);
+0$
+
+charfun(1 < 3);
+1$
+
+charfun(1 <= 3);
+1$
+
+charfun(1 > 3);
+0$
+
+charfun(1 >= 3);
+0$
+
+charfun(1 = 3);
+0$
+
+charfun(1 # 3);
+1$
+
+charfun(integerp(3));
+1$
+
+charfun(integerp(sqrt(5)));
+0$
+
+(p : charfun(x < 1), subst(x=5,p));
+0$
+
+(p : charfun(x < 1), subst(x=-10,p));
+1$
+
+charfun(rat(x));
+charfun(x)$
+
+(p : charfun(not(equal(x,1))),0);
+0$
+
+subst(x=1,p);
+0$
+
+subst(x=5,p);
+1$
+
+subst(x=z,p);
+charfun(not(equal(z,1)))$
+
+(p : charfun(-1 < x and x < 1),0);
+0$
+
+subst(x=1/%pi,p);
+1$
+
+subst(x = -1,p);
+0$
+
+subst(x = 1, p);
+0$
+
+subst(x = 0,p);
+1$
+
+(remvalue(p),0);
+0$
+
+
+
+
+is(compare(1,2) = "<");
+true$
+
+is(compare(2,1) = ">");
+true$
+
+is(compare(2,2) = "=");
+true$
+
+is(compare(x,abs(x)) = "<=");
+true$
+
+is(compare(abs(x),x) = ">=");
+true$
+
+is(compare(1/x,0) = "#");
+true$
+
+compare(a,b);
+unknown$
+
+compare(a,1);
+unknown$
+
+compare(%i,1);
+notcomparable$
+
+compare(1+ %i,0);
+notcomparable$
+
+is(compare(%i,%i) = "=");
+true$
+
+is(compare(a < b, a < b) = "=");
+true$
+
+is(compare(rat(x),x) = "=");
+true$
+
+compare([1,2],[5,6]);
+notcomparable$
+
+compare(%i,%i + 1);
+notcomparable$
+
+/* With revision 1.15 of maxmin.lisp this result has changed to notcomparable */
+is(compare(infinity,infinity) = "=");
+false$
+
+is(compare(inf,inf) = "=");
+true$
+
+compare(infinity,inf);
+notcomparable$
+
+is(compare(inf,-minf) = "=");
+true$
+
+is(compare(inf,inf+7) = "=");
+true$
+
+is(compare(inf,minf) = ">");
+true$
+
+is(compare(inf,-inf) = ">");
+true$
+
+is(compare(minf,-minf) = "<");
+true$
+
+is(compare(log(x), log(x) + 1) = "<");
+true$
+
+is(compare(log(x), log(x)) = "=");
+true$
+
+is(compare(acosh(x^2+1), acosh(x^2+1) + 1) = "<");
+true$
+
+
+
+
+featurep(5,even);
+false$
+
+featurep(5,odd);
+true$
+
+featurep(-5,even);
+false$
+
+featurep(-5,odd);
+true$
+
+featurep(0,even);
+true$
+
+featurep(0,odd);
+false$
+
+featurep(2/3, even);
+false$
+
+featurep(-5/7,odd);
+false$
+
+featurep(5.6, even);
+false$
+
+featurep(0.0, even);
+false$
+
+featurep(5.6b0, even);
+false$
+
+featurep(5.7b0, odd);
+false$
+
+featurep(x,even);
+false$
+
+featurep(x,odd);
+false$
+
+featurep(%i,even);
+false$
+
+featurep(2*x, even);
+false$
+
+featurep(false, even);
+false$
+
+featurep(true,even);
+false$
+
+featurep(false, odd);
+false$
+
+featurep([false], odd);
+false$
+
+featurep(a<b, even);
+false$
+
+featurep(rat(a<b),even);
+false$
+
+featurep(5 = 7, odd);
+false$
+
+featurep([2,4,6],even);
+false$
+
+(declare(ni, integer, me, even, no, odd, ne, even, mo,odd),0);
+0$
+
+featurep(me,even);
+true$
+
+featurep(no,odd);
+true$
+
+featurep(2*ni, even);
+true$
+
+featurep(2*ni+1,odd);
+true$
+
+featurep(-me,even);
+true$
+
+featurep(-me,odd);
+false$
+
+featurep(abs(me),even);
+true$
+
+featurep(abs(mo),odd);
+true$
+
+featurep(ni * me, even);
+true$
+
+featurep(ni * no, odd);
+false$
+
+featurep(me + ne, even);
+true$
+
+featurep(me - ne, even)$
+true$
+
+featurep(7*me - 9*ne, even)$
+true$
+
+featurep(no * mo, odd);
+true$
+
+featurep(no + mo, odd);
+false$
+
+featurep(me^7, even);
+true$
+
+featurep(me^7, odd);
+false$
+
+featurep(me^(-9), even);
+false$
+
+featurep(no^7, odd);
+true$
+
+featurep(no^(-7), odd);
+false$
+
+featurep(no^ni, even);
+false$
+
+featurep(ne^%i, even);
+false$
+
+featurep(rat(x+x*y,x), even);
+false$
+
+featurep(rat(ne),even);
+true$
+
+featurep(rat(ne^2 + 5 * ne),even);
+true$
+
+featurep(rat(no), odd);
+true$
+
+/* ... open it close it, break it fix it, ... declare it, remove it */
+
+(remove(ni, integer, me, even, no, odd, ne, even, mo,odd),0);
+0$
+
+
+
+
+
+floor(42);
+42$
+
+floor(-128);
+-128$
+
+floor(-5/2);
+-3$
+
+floor(0);
+0$
+
+floor(0.0);
+0$
+
+floor(0.0b0);
+0$
+
+floor(5/2);
+2$
+
+floor(-5.6);
+-6$
+
+floor(7.8);
+7$
+
+floor(-5.6b0);
+-6$
+
+floor(7.8b0);
+7$
+
+floor(%pi);
+3$
+
+floor(%e);
+2$
+
+floor(%phi);
+1$
+
+floor(minf);
+und$
+
+floor(inf);
+und$
+
+floor(infinity);
+und$
+
+floor(zeroa);
+0$
+
+floor(zerob);
+-1$
+
+floor(und);
+und$
+
+floor(ind);
+und$
+
+floor(floor(x));
+'(floor(x))$
+
+floor(5 + floor(x));
+5 + floor(x)$
+
+floor(floor(x) + floor(y));
+floor(x) + floor(y)$
+
+floor(floor(x) - floor(y));
+floor(x) - floor(y)$
+
+floor(floor(x) * floor(y));
+floor(x) * floor(y)$
+
+floor(6 * floor(x) + 28 * floor(y));
+6 * floor(x) + 28 * floor(y)$
+
+floor(ceiling(x));
+ceiling(x)$
+
+(declare(n,integer),0);
+0$
+
+floor(n);
+n$
+
+floor(abs(n));
+abs(n)$
+
+(declare(np,integer),0);
+0$
+
+(assume(np >= 0),0);
+0$
+
+floor(np!);
+np!$
+
+floor(n + 1932);
+n + 1932$
+
+floor(n - 128);
+n - 128$
+
+floor(n^5);
+n^5$
+
+(assume(n > 0),0);
+0$
+
+floor(5^n);
+5^n$
+
+floor(-n);
+-n$
+
+(declare(m,integer),0);
+0$
+
+(assume(m < 0),0);
+0$
+
+floor(7^m);
+'(floor(7^m))$
+
+floor(n*m);
+n*m$
+
+floor(n + m);
+n + m$
+
+floor(n -m);
+n - m$
+
+floor(6*n - 28 * m);
+6*n - 28 * m$
+
+floor(abs(n+m)!);
+abs(n+m)!$
+
+floor(abs(n) - n);
+abs(n) - n$
+
+floor(max(n,m));
+max(n,m)$
+
+floor(min(n,m));
+min(n,m)$
+
+floor(x+17);
+floor(x) + 17$
+
+floor(a*b - 32);
+floor(a*b) - 32$
+
+floor(-x);
+-ceiling(x)$
+
+floor(-exp(x));
+-ceiling(exp(x))$
+
+floor(rat(x));
+floor(x)$
+
+floor(107^5 + 1/8);
+107^5$
+
+floor(10! + 1/%pi);
+10!$
+
+floor(104! + 1/%e);
+104!$
+
+floor(-107^5 + 1/8);
+-107^5$
+
+floor(-10! + 1/%pi);
+-10!$
+
+floor(-104! + 1/%e);
+-104!$
+
+floor(1007^3 + 9/17);
+1007^3$
+
+floor(n + 1/%pi);
+n$
+
+floor(n - 1/%pi);
+n - 1$
+
+floor(2 * n + 2/3);
+2 * n$
+
+floor(abs(n) + 1/5);
+abs(n)$
+
+floor(max(n,6) + 1/3);
+max(n,6);
+
+floor(n * m + 1/%e);
+n * m$
+
+floor(n + m - 2/3);
+n + m -1$
+
+floor(5 * n - 7 * m);
+5 * n - 7 * m$
+
+floor(5 * n - 7 * m + 1/8);
+5 * n - 7 * m$
+
+floor(7 + %i/5);
+7 + floor(%i / 5)$
+
+floor(2 * n + 5 + 3/%pi);
+2 * n + 5$
+
+is(floor(sqrt(117)) <=  sqrt(117));
+true$
+
+floor(107! / 2) + ceiling(107! / 2) - 107!;
+0$
+
+floor(-107! / 2) + ceiling(-107! / 2) + 107!;
+0$
+
+sum(floor(k * 17 / 5),k,1,4);
+16 * 4 / 2$
+
+sum(floor(k * 17 / 507),k,1,506);
+16 * 506 / 2$
+
+ceiling(x) + floor(-x);
+0$
+
+sum(floor((41 + k)/27),k,0,26);
+41$
+
+sum(floor((-41 + k)/27),k,0,26);
+-41$
+
+sum(floor(%pi + k/56),k,0,55) - floor(56 * %pi);
+0$
+
+sum(floor(-sqrt(1932) + k/56),k,0,55) - floor(-56 * sqrt(1932));
+0$
+
+
+floor(sqrt(978) + sqrt(979)) - floor(sqrt(4* 978 + 2));
+0$
+
+floor(%i^%i);
+0$
+
+floor(acos(67) + 42);
+floor(acos(67)) + 42$
+
+/* See "Concrete Mathematics", 3.27, page 87. */
+
+sum(floor(sqrt(k)),k,1,25^2-1);
+25^2 * 25 - 25^3 / 3 - 25^2/2 - 25/6$
+
+expand(floor(sqrt(5) * (sqrt(5) - 1/sqrt(5))));
+4$
+
+floor(10! * sqrt(5) *(sqrt(5) - 1/sqrt(5)) + 1/(10^6 *%pi));
+4 * 10!$
+
+floor(10! * sqrt(5) *(sqrt(5) - 1/sqrt(5)) + 1/(10^9 *%pi));
+4 * 10!$
+
+floor(sqrt(5) *(sqrt(5) - 1/sqrt(5)) + 1/(10^15 *%pi));
+4$
+
+floor(sqrt(5) *(sqrt(5) - 1/sqrt(5)) + 1/(10^159 *%pi) + 1/2);
+4$
+
+(declare(ne,even, no, odd),0);
+0$
+
+floor(ne);
+ne$
+
+floor(28 * ne - 5);
+28 * ne - 5$
+
+floor(ne / 2 - 14);
+ne / 2 - 14$
+
+floor(no);
+no$
+
+floor(ne/2);
+ne/2$
+
+floor((no + 1)/2);
+(no + 1)/2$
+
+(remove(ne,even, no,odd),forget(np >= 0), 0);
+0$
+
+(forget(m < 0, n >0), remove(n,integer),remove(m,integer), remove(np,integer), 0);
+0$
+
+
+featurep(-1,integer);
+true$
+
+featurep(0,integer);
+true$
+
+featurep(1,integer);
+true$
+
+featurep(%pi,integer);
+false$
+
+featurep(x,integer);
+false$
+
+featurep(-x,integer);
+false$
+
+featurep(signum(x),integer);
+true$
+
+featurep(charfun(a < b),integer);
+true$
+
+featurep(floor(2001 + x/z),integer);
+true$
+
+featurep(ceiling(a*b+c),integer);
+true$
+
+(declare(ne,even,no,odd, ni, integer),0);
+0$
+
+featurep(ni,integer);
+true$
+
+featurep(ni + 8, integer);
+true$
+
+featurep(ni + ne, integer);
+true$
+
+featurep(abs(ni + 371)!,integer);
+true$
+
+featurep(23 * ne,integer);
+true$
+
+featurep(-23 * ne + 15,integer);
+true$
+
+featurep(ni^89,integer);
+true$
+
+featurep(ni^-89,integer);
+false$
+
+featurep(ni / ne,integer);
+false$
+
+featurep(abs(ni),integer);
+true$
+
+featurep(ni^(no^2), integer);
+true$
+
+featurep(abs(ni), integer);
+true$
+
+featurep(abs(ne/2),integer);
+true$
+
+(remove(ne,even,no,odd,ni,integer),0);
+0$
+
+
+
+
+
+lmax([]);
+minf$
+
+lmax(set());
+minf$
+
+lmin([]);
+inf$
+
+lmin(set());
+inf$
+
+lmax([2,3,5]);
+5$
+
+lmax(set(2,3,4));
+4$
+
+lmin([2,3,4]);
+2$
+
+lmin(set(2,3,4));
+2$
+
+lmax([x]);
+x$
+
+lmin([x]);
+x$
+
+lmax([x,x,x]);
+x$
+
+lmin([x,x,x]);
+x$
+
+lmax(makelist(1/i,i,1,1000));
+1$
+
+lmin(makelist(1/i,i,1,1000));
+1/1000$
+
+
+
+
+
+
+(put(trylevel,1, maxmin),0);
+0$
+
+/*---boundary cases---*/
+max();
+minf$
+
+min();
+inf$
+
+/*----singleton cases---*/
+
+max(a);
+a$
+
+min(a);
+a$
+
+max(inf);
+inf$
+
+max(minf);
+minf$
+
+(assume(-1 < x, x < 1),0);
+0$
+
+max(acos(x));
+acos(x)$
+
+min(acos(x));
+acos(x)$
+
+max(log(x+2));
+log(x+2)$
+
+min(log(x+2));
+log(x+2)$
+
+(forget(-1 < x, x < 1),0);
+0$
+
+max(a-b);
+a-b$
+
+min(a-b);
+a-b$
+
+max(1/x);
+1/x$
+
+min(1/x);
+1/x$
+
+max(-x);
+-x$
+
+min(-x);
+min(-x)$
+
+
+/*---numbers----*/
+
+min(1,2,3);
+1$
+
+max(1,2,3);
+3$
+
+min(1,1/5,-8);
+-8$
+
+max(1,1/5,-8);
+1$
+
+max(0.34,9.1);
+9.1$
+
+min(0.34,9.1);
+0.34$
+
+max(0.34b0,9.1);
+9.1$
+
+min(0.34b0,9.1);
+0.34b0$
+
+/*--- extended reals ---*/
+
+max(3,inf);
+inf$
+
+max(3, minf);
+3$
+
+min(2/3,inf);
+2/3$
+
+min(2/3,minf);
+minf$
+
+max(inf,minf);
+inf$
+
+min(inf,minf);
+minf$
+
+max(inf,minf,2,3);
+inf$
+
+min(inf,2,3);
+2$
+
+max(x,inf,minf);
+inf$
+
+min(x,minf,inf);
+minf$
+
+max(minf,a,b,inf);
+inf$
+
+min(a,b,minf,inf);
+minf$
+
+max(7.78b0, inf);
+inf$
+
+
+/*--flatten----*/
+
+max(a,max(b,c));
+max(a,b,c)$
+
+min(a,min(b,c));
+min(a,b,c)$
+
+min(a,min(b,min(c,d)));
+min(a,b,c,d)$
+
+max(a,max(b,max(c,d)));
+max(a,b,c,d)$
+
+max(max(a,b),max(c,d));
+max(a,b,c,d)$
+
+min(min(a,b),min(c,d));
+min(a,b,c,d)$
+
+/*--non-comparable cases--*/
+
+max(und,false,true,%i,ind,3,4,5);
+max(und,false,true,%i,ind,5)$
+
+min(und,false,true,%i,ind,3,4,5);
+min(und,false,true,%i,ind,3);
+
+max(a < b, a,a,b);
+max(a < b,a,b)$
+
+min(a # b, a,a,b,a);
+min(a # b,a,b)$
+
+/*---symbolic----*/
+
+max(a,b,a);
+max(a,b)$
+
+min(a,b,b);
+min(a,b)$
+
+max(a,b) - max(b,b,a);
+0$
+
+min(a,b) - min(a,a,a,b);
+0$
+
+min(0,a^2);
+0$
+
+max(0,-a^2);
+0$
+
+max(x,abs(x));
+abs(x);
+
+max(u,n,k,u+1,n+2,k+3);
+max(u+1,n+2,k+3);
+
+min(u,n,k,u+1,n+2,k+3);
+min(u,n,k);
+
+max(x^2, x^2+1,-6);
+x^2 + 1$
+
+/*--CRE expressions----*/
+
+ratdisrep(max(x,rat(x)));
+x$
+
+ratdisrep(min(x,rat(x)))$
+x$
+
+ratdisrep(max(rat(x*y)));
+x*y$
+
+ratdisrep(max(rat(x^2+y,x), rat(x^2+y,y)));
+x^2+y$
+
+/*--absolute values---*/
+
+max(x,abs(x));
+abs(x)$
+
+min(x,abs(x));
+min(x,abs(x))$
+
+max(abs(x),5*abs(x), 7*abs(x));
+7*abs(x)$
+
+min(abs(x),5*abs(x), 7*abs(x));
+abs(x)$
+
+max(acos(x), acos(x) + 1);
+acos(x)+1$
+
+min(log(x), log(x) + %pi);
+log(x)$
+
+
+/*---other-----*/
+
+(mode(a,b,c) := min(max(a,b),max(b,c),max(a,c)),0);
+0$
+
+mode(1,2,3);
+2$
+
+mode(-56,1,%pi);
+1$
+
+mode(x,x,x);
+x$
+
+/*--- sign can't handle this 
+mode(x,x,y);
+x$
+----------------------------*/
+
+mode(abs(x),0,-abs(x));
+0$
+
+mode(a,a+1,a+28);
+a+1$
+
+mode(exp(x+1), exp(x+2), exp(x));
+exp(x+1)$
+
+/*-- try a higher trylevel----*/
+
+(put(trylevel,2,maxmin),0);
+0$
+
+max(x,-x);
+abs(x)$
+
+min(x,-x);
+-abs(x)$
+
+max(x,7,-x);
+max(7,abs(x));
+
+max(x,-7,-x);
+abs(x)$
+
+min(x,7,-x);
+-abs(x)$
+
+max(-cos(x^2), cos(x), cos(x^2));
+max(cos(x), abs(cos(x^2)))$
+
+min(-cos(x^2), cos(x), cos(x^2));
+min(cos(x), -abs(cos(x^2)))$
+
+/*--try a higher trylevel-----*/
+
+(put(trylevel,3,maxmin),0);
+0$
+
+max(x,2*x,3*x);
+max(x,3*x);
+
+min(x,2*x,3*x);
+min(x,3*x);
+
+max(x,0,2*x,3*x);
+max(0,3*x);
+
+min(x,0,2*x,3*x);
+min(0,3*x);
+
+max(x^2,x^4,x^6);
+max(x^2,x^6);
+
+min(x^2,x^4,x^6);
+min(x^2,x^6);
+
+(kill(mode),0);
+0$
+
+
+
+
+(kill(all),0);
+0$
+
+mod(12,0);
+12$
+
+mod(x,0);
+x$
+
+mod(5,3);
+2$
+
+mod(5,-3);
+-1$
+
+mod(-5,3);
+1$
+
+mod(-5,-3);
+-2$
+
+mod(0,0);
+0$
+
+mod(0,x);
+0$
+
+mod(x,1);
+x - floor(x);
+
+mod(x,0);
+x$
+
+mod(a*x,a*y);
+a * mod(x,y)$
+
+floor(sqrt(5)) + mod(sqrt(5),1);
+sqrt(5)$
+
+floor(-sqrt(5)) + mod(-sqrt(5),1);
+-sqrt(5)$
+
+mod(%pi,1);
+%pi-3$
+
+
+
+
+
+
+
+
+
+
+(fpprec : 18,0);
+0$
+
+rationalize(-46);
+-46$
+
+rationalize(-2/3);
+-2/3$
+
+rationalize(0);
+0$
+
+rationalize(0.25);
+1/4$
+
+rationalize(0.25b0);
+1/4$
+
+rationalize(2.5b-1);
+1/4$
+
+rationalize(0.35b0 - 3.5b-1);
+0$
+
+rationalize(-0.75);
+-3/4$
+
+rationalize(1.125);
+9/8$
+
+rationalize(100.125b0);
+801/8$
+
+rationalize(-100.125b0);
+-801/8$
+
+rationalize(%i);
+%i$
+
+rationalize(%pi);
+%pi$
+
+rationalize(minf);
+minf$
+
+rationalize(inf);
+inf$
+
+rationalize(infinity);
+infinity$
+
+rationalize(x);
+x$
+
+rationalize(-x);
+-x$
+
+rationalize(a+b/c);
+a+b/c$
+
+rationalize(a^b);
+a^b$
+
+rationalize(log(0.25 * x - 0.5));
+log(x/4 - 1/2)$
+
+rationalize([u,n,k]);
+[u,n,k]$
+
+rationalize(v.t);
+v.t$
+
+rationalize(a^^0.125);
+a^^(1/8)$
+
+rationalize(rat(a+b + 0.125));
+(8 * a + 8 * b + 1)/8$
+
+rationalize(rat(1+x+x^2.0));
+1+x+x^2$
+
+rationalize(matrix([a,0.25],[-a,2.0^z]));
+matrix([a,1/4],[-a,2^z]);
+
+rationalize([[0.75],[m,j,w],[-2.0],[a.m.h]]);
+[[3/4],[m,j,w],[-2],[a.m.h]]$
+
+rationalize(f(-0.1875) + %pi * 3.0);
+f(-3/16) + 3 * %pi$
+
+rationalize(f(-0.1875b0) + %pi * 3.0);
+f(-3/16) + 3 * %pi$
+
+rationalize(a = 2.5);
+a = 5/2$
+
+rationalize(abs(x - 0.1875));
+abs(x - 3/16)$
+
+rationalize(x!);
+x!$
+
+rationalize(0.09375 < 0.3984375);
+3/32 < 51/128$
+
+rationalize(0.09375b0 < 0.3984375b0);
+3/32 < 51/128$
+
+(reset (fpprec), 0);
+0;
+
+/* SF bug 1703298  max leads to UND error */
+
+max(1/(q-1));
+1/(q-1)$
+
+max(1/(q-1),1/(q-1));
+1/(q-1)$
+
+sort(args(max(1/(q-1),1/(q-2))));
+''(sort([1/(q-1),1/(q-2)]))$
+
+is(compare(1/(q-1),minf) = ">");
+true$
+
+is(compare(minf, 1/(q-1)) = "<");
+true$
+
+/* SF bug 1703376  max(inf, ...) doesn't simplify to inf */
+
+max(1/(1-x),inf);
+inf$
+
+min(1/(1-x),minf);
+minf$
+
+/* SF bug 1764114  signum misses simp rule */
+
+(tellsimpafter (signum(x), zzz), signum(-x));
+-zzz;
+
+floor(log(8) / log(2));
+3$
+
+ceiling(log(8) / log(2));
+3$
+
+floor(log(125) / log(5) + 42 / 5);
+11$
+
+ceiling(log(125) / log(5) + 42 / 5);
+12$
+
+/* SF bug [ 1220227 ] MIN is not correct (problem with "is" function) */
+
+(f(h,k,l):=(h^k)*((1/h)*k*(1+l)+(d-k)*2*l),
+ g(h,k,l):=2*d*l+(h^k)*((1/h)*k*(1-l)-(d-k)*2*l),
+ d:2,
+ l:0.5,
+ aa: f((1-v)^(1/2),2,l),
+ bb: f((1-v),1,l),
+ cc: g(v^(1/2),2,l),
+ dd: g(v,1,l),
+ 0);
+0;
+
+min (aa, bb, cc, dd);
+min (3.0*sqrt(1 - v), 1.0*sqrt(v) + 2.0, (0.5/v - 1.0)*v + 2.0);
+
+ratsimp (bb - dd);
+0;
+
+block ([prederror : false], is (cc > aa));
+unknown;
+
+block ([prederror : false], is (cc > bb));
+unknown;
+
+block ([prederror : false], is (cc > dd));
+unknown;
+
+/* SF bug [ 1995595 ] sign(max(7,x) - max(6,x)) --> error */
+
+sign (max (7, foo543) - max (6, foo543));
+pnz;
+
+/* SF bug [ 2144225 ] rationalize bug / fix (?) */
+map('rationalize, [cos(s)]);
+[cos(s)]$
+
+map(lambda([s], rationalize(s)), [cos(s)]);
+[cos(s)]$
+
+integrate(floor(x),x);
+(-floor(x)+2*x-1)*floor(x)/2$
+
+integrate(floor(x),x,0,3);
+3$
+
+integrate(ceiling(x),x);
+(-ceiling(x)+2*x+1)*ceiling(x)/2$
+
+integrate(ceiling(x),x,0,4);
+10$
+
+(remvalue(d, l, aa, bb, cc, dd),0);
+0$
+
+/* Bug report ID: 2123651 - min and max of imaginary and real numbers
+ * These are the examples from the bug report.
+ */
+
+min(%i*inf,inf);
+'min(%i*inf,inf);
+
+min(%i*minf,minf);
+'min(minf,%i*minf);
+
+min(%i*inf,inf);
+'min(%i*inf,inf);
+
+min(%i*minf,minf);
+'min(minf,%i*minf);
+
+min(%i*-inf,-inf);
+'min(minf,%i*-inf);
+
+min(%i*-inf,minf);
+'min(minf,%i*-inf);
+
+min(%i*minf,-inf);
+'min(minf,%i*minf);
+
+max(%i*minf,inf);
+'max(inf,%i*minf);
+
+max(%i*minf,minf);
+'max(minf,%i*minf);
+
+max(%i*inf,inf);
+'max(inf,%i*inf);
+
+max(%i*-inf,-inf);
+'max(-inf,%i*-inf);
+
+max(%i*minf,minf);
+'max(minf,%i*minf);
+
+max(7*%i*inf+4*inf,4*%i*inf+3);
+'max(4*%i*inf+3,7*%i*inf+4*inf);
+
+min(7*%i*inf+4*inf,4*%i*inf+3);
+'min(7*%i*inf+4*inf,4*%i*inf+3);
+
+min(7*%i*minf+4*inf,4*%i*minf+3);
+'min(7*%i*minf+4*inf,4*%i*minf+3);
+
+min(7*%i*minf+4*inf,4*%i*-inf+3);
+'min(4*%i*-inf+3,7*%i*minf+4*inf);
+
+min(-inf,minf);
+minf;
+
+max(-inf,minf);
+minf;

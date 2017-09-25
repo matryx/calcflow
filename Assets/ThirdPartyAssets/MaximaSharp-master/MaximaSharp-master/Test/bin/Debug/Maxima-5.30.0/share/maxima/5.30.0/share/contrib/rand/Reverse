@@ -1,0 +1,16 @@
+/*    
+(d8) THIS PROGRAM REVERSES THE FUNCTION Y EXPRESSED AS
+
+
+A POWER SERIES IN X.  CALL IT WITH
+
+
+                      REV(Y,X,N)
+
+
+WHERE N IS THE TRUNCATION ORDER
+*/   
+
+rev(y,x,n):=(y:taylor(y,x,0,n),eq:x = sum(b[i]*y^i,i,1,n),
+    sol:solve(makelist(coeff(eq,x,i),i,1,n),makelist(b[i],i,1,n)),y:'y,
+    eq:x = sum(b[i]*y^i,i,1,n),eq:ev(eq,sol))$

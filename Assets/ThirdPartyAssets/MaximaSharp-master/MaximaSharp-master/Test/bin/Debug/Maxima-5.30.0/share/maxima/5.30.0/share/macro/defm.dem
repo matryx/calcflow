@@ -1,0 +1,21 @@
+/* Demo of macsyma substitution macros. */
+
+eval_when([translate,batch,demo],
+          if get('sharem,'version) = false
+             then loadfile(autolo,fasl,dsk,sharem))$
+
+/* define a macro to compute a numerical integration. 
+   We want it to take an expression, a variable, and upper and
+   lower limits. The expression will be evaluated for values
+   of the variable between the upper and lower limits. */
+
+rect_rule('exp,'x,a,b,dx)=>
+ (modedeclare([a,b,dx],float),
+  block([%_sum:0.0],modedeclare(%_sum,float),
+        for x:a thru b step dx do %_sum:%_sum+exp,
+	dx*%_sum))$
+
+grind(rect_rule);
+
+define(g(a),macroexpand(rect_rule(x^2,x,0.0,a,0.1)))$
+grind(g);

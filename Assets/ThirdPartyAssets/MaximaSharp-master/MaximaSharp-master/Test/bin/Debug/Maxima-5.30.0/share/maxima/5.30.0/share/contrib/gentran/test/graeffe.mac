@@ -1,0 +1,23 @@
+n : 10$
+q : 0$
+for i:0 step 2 thru n do
+    q : q + a(i+1)*x^(n-i)$
+r : 0$
+for i:1 step 2 thru n-1 do
+    r : r + a(i+1)*x^(n-i)$
+p : q^2 - r^2$
+p : ratsubst(y, x^2, p)$
+for i:0 thru n do
+    b[i] : ratcoeff(p, y, i)$
+gentranlang : fortran$
+gentranpush("graeffe.f");
+gentran( subroutine( graeff(a,b) ),
+               type("real*8", a(eval(n+1)), b(eval(n+1))),
+               literal("c",cr),
+               literal("c",tab,"--  Graeffe Root-Squaring Method   --",cr),
+               literal("c",tab,"--  to Find Roots of a Polynomial  --",cr),
+               literal("c",cr) );
+for i:1 thru n+1 do
+          gentran( lrsetq( b[i], b[i-1] ) );
+gentran( return(), end() );
+gentranpop(false);

@@ -1,0 +1,64 @@
+if get('orthopoly,'version) = 'false then load("orthopoly")$
+showtime : all;
+
+/* Let %a0 be the Bohr radius, mu the reduced mass, and %eo the
+electron charge. Declare these constants to be positive. */
+
+assume(%a0 > 0, mu > 0, %hbar > 0, %eo > 0);
+
+/* Merzbacher and orthopoly use different normalizations for the 
+generalized Laguerre polynomials.  The function convert_to_mertz
+supplies a factor that converts from orthopoly normalization to 
+Merzbacher. The hydrogen atom  eigenfunctions  are given by */
+
+convert_to_mertz(n,l) := ((n+l)!^2 / ((n-l-1)! * (2*l+1)!)) / binomial(n+l, n-l-1);
+
+psi(n,l,m) := sqrt((2 / (%a0 * n))^3 * (n-l-1)! / (2*n * ((n+l)!)^3)) * 
+     (2 * r / (%a0 * n))^l * exp(-r / (%a0 * n)) * gen_laguerre(n-l-1,2*l+1,2*r / (%a0 * n))  *
+      spherical_harmonic(l,m, theta,phi) *  convert_to_mertz(n,l) ;
+
+
+/* Define the L2 inner product using a matchfix operator <<f,g>>. */      
+
+matchfix("<<",">>");
+
+"<<"(f,g) := integrate(integrate(integrate(conjugate(f)*g*r^2 * sin(theta),
+   theta,0,%pi),phi,0,2*%pi),r,0,inf);
+
+/* Find <r> ,<r^2>, and <r^2> -<r>^2 for n=1,2,3, and 4 states. */
+
+makelist(makelist(<<psi(n,l,0), r * psi(n,l,0)>>,l,0,n-1),n,1,4);
+makelist(makelist(<<psi(n,l,0), r^2 * psi(n,l,0)>>,l,0,n-1),n,1,4);
+makelist(makelist(<<psi(n,l,0), r^2 * psi(n,l,0)>> - 
+   <<psi(n,l,0), r * psi(n,l,0)>>^2,l,0,n-1),n,1,4);
+
+/* Find the energies of the n=1,2,3, and 4 states.  Let ham
+be the hamiltonian. The function replace_hbar(e) replaces
+hbar by %eo * sqrt(mu * %a0).*/
+
+ham(e) := (-%hbar^2 / (2*mu)) * (diff(r^2 * diff(e,r),r) / r^2 + diff(sin(theta)*diff(e,theta),theta)/(r^2 * sin(theta))
+ + diff(e,phi,2)/(r^2 * sin(theta)^2)) - %eo^2 *e / r;
+
+replace_hbar(e) := radcan(subst(%hbar=%eo * sqrt(mu * %a0),e));
+
+replace_hbar(makelist(makelist(<<psi(n,l,0), ham(psi(n,l,0))>>,l,0,n-1),n,1,4));
+
+/* Use degenerate perturbational methods to study the n = 3 Stark
+hamiltonian; this is problem 17.5 in Merzbacher; alpha is the
+reduced electric field strength. */
+
+n : 3;
+
+e : makelist(makelist(psi(n,l,m),m,-l,l),l,0,n-1)$
+
+e : apply(append,e)$
+
+stark_pot : alpha * r * cos(theta);
+
+overlap(f,g) := <<f, stark_pot * g>>;
+
+m : apply(matrix, outermap(overlap, e,e))$
+
+load("eigen");
+
+energy_shifts : eigenvalues(m);

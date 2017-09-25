@@ -1,0 +1,303 @@
+A. Vector analysys I 
+
+A1.vector to form
+in this package, a vector shoud be transformed to a form.
+for example,[a,b,c]<---->a*Dx+b*Dy+c*Dz (so called work form)
+[a,b,c]<---->a*Dy@Dz+b*Dz@Dx+c*Dx@Dy (so called fluid form)
+vtof1,vtof2 need the scale_factor,so not to use f_star(),to use fstar_with_clf()
+or under global environment ( see lorentz_example.txt)
+ 
+(%i17) fstar_with_clf([x,y,z],[x,y,z],vtof1([a,b,c]));
+(%o17)                        c Dz + b Dy + a Dx
+(%i18) fstar_with_clf([x,y,z],[x,y,z],vtof2([a,b,c]));
+(%o18)                    a Dy Dz - b Dx Dz + c Dx Dy
+(%i19) fstar_with_clf([r,th,phi],[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)],
+vtof1([a,b,c]));
+(%o19)                b Dth sin(phi) r + c Dphi r + a Dr
+(%i20) fstar_with_clf([r,th,phi],[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)],
+vtof2([a,b,c]));
+                                 2                       b Dphi Dr
+(%o20)      a Dphi Dth sin(phi) r  + c Dr Dth sin(phi) - ---------
+                                                         sin(phi)
+(%i21) fstar_with_clf([r,th,phi],[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)],
+scale_factor);
+(%o21)                        [1, sin(phi) r, r]
+
+A2. grad,rot or curle,div,laplacian
+grad(f) is d(f),if A is vector,a:vtof1(A) then rot(A) is h_st(d(a)),or nest2([h_st,d],a)
+h_st() is hodge star operator,div(f) is h_st(d(h_st(f))),laplacian(f) is d(h_st(d(f)))
+or-1(d(antid(a))+antid(d(a)))s ok generally
+
+1.gradiant
+(%i22) fstar_with_clf([x,y,z],[x,y,z],(depends(f,[x,y,z]),d(f)));
+                                df      df      df
+(%o22)                       Dz -- + Dy -- + Dx --
+                                dz      dy      dx
+(%i23) fstar_with_clf([r,th,phi],[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)]
+,(depends(f,[r,th,phi]),d(f)));
+                              df       df         df
+(%o23)                    Dth --- + Dr -- + Dphi ----
+                              dth      dr        dphi 
+
+2.rotate
+(%i24) fstar_with_clf([x,y,z],[x,y,z],(depends([a,b,c],[x,y,z]),aa:vtof1([a,b,c]),
+h_st(d(aa))));
+                 db      da      dc      da      dc      db
+(%o24)           -- Dz - -- Dz - -- Dy + -- Dy + -- Dx - -- Dx
+                 dx      dy      dx      dz      dy      dz
+(%i25) format(%,%poly(Dx,Dy,Dz),factor);
+                   db   da        dc   da        dc   db
+(%o25)            (-- - --) Dz - (-- - --) Dy + (-- - --) Dx
+                   dx   dy        dx   dz        dy   dz
+(%i29) fstar_with_clf([r,th,phi],[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)],
+(depends([a,b,c],[r,th,phi]),aa:vtof1([a,b,c]),h_st(d(aa))))$
+
+(%i30) format(%,%poly(Dr,Dth,Dphi),factor);
+             db                           da
+       Dphi (-- sin(phi) r + b sin(phi) - ---)
+             dr                           dth                  dc          da
+(%o30) --------------------------------------- - Dth sin(phi) (-- r + c - ----)
+                      sin(phi)                                 dr         dphi
+                                               db                          dc
+                                          Dr (---- sin(phi) + b cos(phi) - ---)
+                                              dphi                         dth
+                                        - -------------------------------------
+                                                       sin(phi) r
+
+3.divergent
+(%i31) fstar_with_clf([x,y,z],[x,y,z],(depends([a,b,c],[x,y,z]),aa:vtof1([a,b,c]),
+nest2([d,h_st],aa)));
+                    dc            db            da
+(%o31)              -- Dx Dy Dz + -- Dx Dy Dz + -- Dx Dy Dz
+                    dz            dy            dx
+(%i32) fstar_with_clf([x,y,z],[x,y,z],(depends([a,b,c],[x,y,z]),aa:vtof1([a,b,c]),
+nest2([h_st,d,h_st],aa)));
+                                 dc   db   da
+(%o32)                           -- + -- + --
+                                 dz   dy   dx
+
+(%i33) fstar_with_clf([r,th,phi],[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)],
+(depends([a,b,c],[r,th,phi]),aa:vtof1([a,b,c]),nest2([h_st,d,h_st],aa)));
+                                   db         dc
+                                   ---       ----
+                   c cos(phi)      dth       dphi   2 a   da
+(%o33)             ---------- + ---------- + ---- + --- + --
+                   sin(phi) r   sin(phi) r    r      r    dr
+
+4.laplacian
+(%i34) fstar_with_clf([x,y,z],[x,y,z],(depends(f,[x,y,z]),nest2([d,h_st,d],f)));
+                            2              2              2
+                           d f            d f            d f
+(%o34)            Dx Dy Dz --- + Dx Dy Dz --- + Dx Dy Dz ---
+                             2              2              2
+                           dz             dy             dx
+(%i36) fstar_with_clf([x,y,z],[x,y,z],(depends(f,[x,y,z]),nest2([h_st,d,h_st,d],f)));
+                                 2     2     2
+                                d f   d f   d f
+(%o36)                          --- + --- + ---
+                                  2     2     2
+                                dz    dy    dx
+(%i37) fstar_with_clf([r,th,phi],[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)],
+(depends(f,[r,th,phi]),nest2([h_st,d,h_st,d],f)));
+                                           2           2
+                                          d f         d f
+                 df    df                 ----       -----
+               2 --   ---- cos(phi)          2           2    2
+                 dr   dphi                dth        dphi    d f
+(%o37)         ---- + ------------- + ------------ + ----- + ---
+                r                2       2       2     2       2
+                       sin(phi) r     sin (phi) r     r      dr
+(%i38) fstar_with_clf([r,th,phi],[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)],
+(depends(f,[r,th,phi]),nest2([d,h_st,d],f)));
+                    2
+                   d f           2                 df
+(%o38) Dphi Dr Dth --- sin(phi) r  + 2 Dphi Dr Dth -- sin(phi) r
+                     2                             dr
+                   dr
+                                                2
+                                               d f
+                                   Dphi Dr Dth ----
+                    2                             2
+                   d f                         dth                 df
+    + Dphi Dr Dth ----- sin(phi) + ---------------- + Dphi Dr Dth ---- cos(phi)
+                      2                sin(phi)                   dphi
+
+A3. Example for vorticity
+problem: in R3 we think velocity field v=rot(A),div(A)=0,so A is vector potential.
+prove voricity w=rot(v) satisfy ¦¤A= -w
+a solution: as restricted 2 spaces,A can be posed,a1*Dx+a2*Dy.
+w=rot(rot(A)),then
+(%i40) fstar_with_clf([x,y,z],[x,y,z],(depends([a1,a2],[x,y]),A:a1*Dx+a2*Dy,
+nest2([h_st,d,h_st,d],A)));
+                      2         2          2          2
+                     d a2      d a1       d a2       d a1
+(%o40)             - ---- Dy + ----- Dy + ----- Dx - ---- Dx
+                       2       dx dy      dx dy        2
+                     dx                              dy
+
+from condition ,div(A)=0
+(%i41) fstar_with_clf([x,y,z],[x,y,z],(depends([a1,a2],[x,y]),A:a1*Dx+a2*Dy,d(h_st(A))));
+                          da2            da1
+(%o78)                    --- Dx Dy Dz + --- Dx Dy Dz
+                           dy             dx
+d(a2)/dy+d(a1)/dx=0 ,then d^2(a1)/dxdy= -d^2(a2)/dx^2,d^2(a2)/dxdy=-d^2(a1)/dy^2
+
+¦¤A is -(d(antid(A))+antid(d(A))
+(%i42) fstar_with_clf([x,y,z],[x,y,z],(depends([a1,a2],[x,y]),A:a1*Dx+a2*Dy,-(nest2([d,antid],A)+nest2([antid,d],A))));
+                      2         2         2         2
+                     d a2      d a2      d a1      d a1
+(%o42)               ---- Dy + ---- Dy + ---- Dx + ---- Dx
+                       2         2         2         2
+                     dy        dx        dy        dx
+then 
+¦¤A= -w 
+but in this case,old fashion style is good with ¦¤A=grad(div(A)-rot(rot(A))
+
+B.Changing integral variable more than two variables
+
+B1.this is from ¦£(z)*¦£(1-z)
+changing integral variable more than two variables,such like
+(%i55) f_star([u,v],(s:u/(v+1),t:u*v/(v+1),exp(-(s+t))*s^(-z)*t^(z-1)*d(s)@d(t)))$
+(%i57) format(%o55,%poly(u,v),factor);
+                                          u v      u
+                                       - ----- - -----
+                               z - 1     v + 1   v + 1
+                        Du Dv v      %e
+(%o57)                  ------------------------------
+                                    v + 1
+this integral,v,[0,inf],u,[0,inf] is %pi/sin(%pi) (=beta(z,1-z))
+
+B2. from entrance exam. of graduate course in japan
+(1)integrate x+y+z=u,y+z=u*v,z=u*v*w,on 0<u<1,0<v<1,0<w<1 by pullback (x^2+y^2+z^2)dxdydz
+
+(%i43) solve([x+y+z=u,y+z=u*v,z=u*v*w],[x,y,z]);
+(%o43)           [[x = u (1 - v), y = u v (1 - w), z = u v w]]
+(%i45) f_star([u,v,w],(x:u*(1-v),y:u*v*(1-w),z:u*v*w,(x^2+y^2+z^2)*d(x)@d(y)@d(z)));
+                      2     2  2  2    2  2        2    2        2
+(%o45)      Du Dv Dw u  v (u  v  w  + u  v  (1 - w)  + u  (1 - v) )
+	
+(%i46) defint(defint(defint(u^2*v*(u^2*v^2*w^2+u^2*v^2*(1-w)^2+u^2*(1-v)^2),w,0,1)
+,v,0,1),u,0,1);
+(%o46) 1/20
+(%o47) kill(x,y,z);
+
+slightly easy problem
+(2) (d^2/dx^2+d^2/dy^2)(log(sqrt(x^2+y^2)))
+
+(%i38) fstar_with_clf([x,y],[x,y],(d(h_st(d(log(sqrt(x^2+y^2)))))))$
+(%i39) format(%,%poly(Dx,Dy),factor);
+(%o39)                                 0
+
+(3) Integrate (x*Dx@Dy) on x^2/a^2+y^2/b^2<=1,x>=0,y>=0
+
+(%i40) fstar_with_clf([x,y],[x,y],(depends([a1,a2],[x,y]),d(a1*d(x)+a2*d(y))));
+                             da2         da1
+(%o40)                       --- Dx Dy - --- Dx Dy
+                              dx          dy
+(%i41) fstar_with_clf([x,y],[x,y],(d(1/2*x^2*Dy)));
+(%o41)                             Dx Dy x
+1/2*x^2*Dy x=a*cos(th),y=b*sin(th)  on boundary you may use line integrate.
+
+B3. Integral
+
+we must pay attention to effects of some singularity and of topology (De Rham cohomology )
+this points is most difficult to calculate multivariable integral in CAS,I think.
+see Frankel book "The Geometry of PHYSICS" p162 5.5 Finding Potential.
+
+(Pontrjaguin index)
+(%i74) f_star([phi,theta],(pu1:sin(phi)*cos(theta),pu2:sin(phi)*sin(theta),pu3:cos(phi),
+    pu1*d(pu2)@d(pu3)+pu2*d(pu3)@d(pu1)+pu3*d(pu1)@d(pu2)))$
+(%i76) trigsimp(%o74);
+(%o76)                       Dphi Dtheta sin(phi)
+So this map induce (x,y)-->(pu1,pu2,pu3)  IxI--->S2,boundary 1X1 -->one point.
+%o76 is volume form  in S2,if we can pull back IxI,we integrate this and say
+this integral value is n*4pai. n is a integer.
+(%i79) f_star([x,y],(depends([p1,p2,p3],[x,y]),p1*d(p2)@d(p3)+p2*d(p3)@d(p1)+p3*d(p1)@d(p2)));
+
+                dp2 dp3         dp2 dp3              dp1 dp3         dp1 dp3
+(%o79) p1 (Dx Dy --- --- - Dx Dy --- ---) + p2 (Dx Dy --- --- - Dx Dy --- ---)
+                 dx  dy          dy  dx               dy  dx          dx  dy
+                                                    dp1 dp2         dp1 dp2
+                                           + (Dx Dy --- --- - Dx Dy --- ---) p3
+                                                    dx  dy          dx  dy
+
+(%o79) is written by using vector,(p1,p2,p3).{(d/dx(p1,p2,p3)Xd/dy(p1,p2,p3))*Dx@Dy}
+integrate with IxI,this is homotopy invariant.
+generaly speaking,in exchaing coordinates, vector equations are not always invariant but differntial forms are invariant. so we can calculate forms with
+some suitable or fit coordinate,then by pulling back it  with general ones. 
+
+C.Integral factor (always possible locally,but not global)
+
+locally necessary and  sufficient condition is d(w)@w=0. so if f^-1 is integral factor
+,d(w)=d(log|f|)@w . usually we use frobenius method(or theorem) but I propose a new method
+with quantization.
+ 
+(%i72) fstar_with_clf([x,y,z],[x,y,z],trans_toexact(y*z*d(x)+x*z*d(y)+d(z)));
+                         2            2
+                  Dz u1 y  z + Dz u2 x  z - Dx u3 y - Dy u3 x
+(%o72)            -------------------------------------------
+                               2  2       2  2
+                           u1 y  z  + u2 x  z  + u3
+u1,u2,u3 is scale factor.
+integral factor do'nt depends on metric,so u1->0,u2->0. or u2->0,u3->0 so on.
+this is a quantization from clifford algebra to grassmann algebra.
+
+(%i74) limit(limit(%o72,u1,0),u2,0);
+(%o74)                           - Dx y - Dy x
+(%i75) limit(limit(%o72,u3,0),u2,0);
+                                      Dz
+(%o75)                                --
+                                      z
+now w is  y*z*d(x)+x*z*d(y)+d(z),by %o74 d(w)=(- Dx y - Dy x)@w,
+d(log|f|)=-( Dx y + Dy x)=-d(x*y),f^(-1)=%e^(x*y) is integral factor.
+by %o75 d(w)=Dz/z @w,d(log|f|)=Dz/z,f^(-1)=1/z is also integral factor.
+but %e^(x*y)is better than 1/z. see Flanders P92,93.
+
+D. Poission bracket (symplectic form,symplectic manifold)
+
+for example symplectic manifold dim 6,it has 2form named to symplectic forms.
+ 1. w is closed form 2. w^3==w@w@w is not 0 everywhere .
+(if dim 2*m,w^mis not0)
+(%i39) f_star([p1,q1,p2,q2,p3,q3],(omega:Dp1@Dq1+Dp2@Dq2+Dp3@Dq3,omega@omega@omega));
+(%o39)                    - 6 Dp1 Dp2 Dp3 Dq1 Dq2 Dq3
+(%i40) f_star([p1,q1,p2,q2,p3,q3],(omega:Dp1@Dq1+Dp2@Dq2+Dp3@Dq3,d(omega)));
+(%o40)                                 0
+so this omega is simplectic form.
+Poission bracket is definded as coordinates free
+	inner(Xf,(inner(Xg,omega))),and inner(Xg,omega) is d(g).
+(%i42) f_star([p1,p2,p3,q1,q2,q3],(depends([g],[p1,p2,p3,q1,q2,q3]),omega:Dp1@Dq1+Dp2@Dq2
+	+Dp3@Dq3,inner(diff(g,q1)*Dp1-diff(g,p1)*Dq1+diff(g,q2)*Dp2-diff(g,p2)*Dq2+diff(g,q3)*Dp3
+	-diff(g,p3)*Dq3,omega)));
+               dg        dg        dg        dg        dg        dg
+(%o42)     Dq3 --- + Dq2 --- + Dq1 --- + Dp3 --- + Dp2 --- + Dp1 ---
+               dq3       dq2       dq1       dp3       dp2       dp1
+because poission bracket is defined
+by inner(Xf,d(g)) in this package p_braket().
+
+(%i55) f_star([p1,q1,p2,q2,p3,q3],(depends([f,g],[p1,q1,p2,q2,p3,q3]),p_braket(f,g)));
+           df  dg    df  dg    df  dg    df  dg    df  dg    df  dg
+(%o55)     --- --- + --- --- + --- --- - --- --- - --- --- - --- ---
+           dp3 dq3   dp2 dq2   dp1 dq1   dq3 dp3   dq2 dp2   dq1 dp1
+
+Jacobi identity
+
+(%i63) f_star([p1,q1,p2,q2,p3,q3],(depends([f,g,h],[p1,q1,p2,q2,p3,q3]),
+p_braket(p_braket(f,g),h)+p_braket(p_braket(g,h),f)+p_braket(p_braket(h,f),g)))$
+(%i64) ratsimp(%);
+(%o64)                                 0
+(%i67) f_star([p1,q1,p2,q2,p3,q3],(depends([f,g,h],[p1,q1,p2,q2,p3,q3]),
+	p_braket(f,g*h)-g*p_braket(f,h)-h*p_braket(f,g)))$
+(%i68) ratsimp(%);
+(%o68)                                 0
+
+Is canonical? [p,q]--->[P,Q]
+(%i69) f_star([p,q],(P:q*cot(p),Q:log(sin(p)/q),d(P)@d(Q)))$
+(%i70) trigsimp(%);
+(%o70)                               Dp Dq
+DP@DQ=Dp@Dq show canonical coordinates each other.
+if H is hamiltonian, d(q)/dt=p_braket(q,H),d(p)/dt=p_braket(p,H)
+(%i71) f_star([p1,q1,p2,q2,p3,q3],(depends([f,g,h],[p1,q1,p2,q2,p3,q3]),
+p_braket(f*g,h)-f*p_braket(g,h)-g*p_braket(f,h)))$ is 0
+if p_braket(g,H)=0 and p_braket(f,H)=0 (f,g is first integral),then
+p_braket(f*g,h)=0 so f*g is a first integral too.
+from jacobi identity p_braket(f,g) is also first integral.

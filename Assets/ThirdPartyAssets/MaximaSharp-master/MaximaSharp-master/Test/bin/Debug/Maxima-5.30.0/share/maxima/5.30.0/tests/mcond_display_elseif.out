@@ -1,0 +1,165 @@
+(%i1)               '(if a > b then c else d)
+(%o1)                if a > b then c else d
+(%i2)                if a > b then c else d
+(%o2)                if a > b then c else d
+(%i3)                  '(if a > b then c)
+(%o3)                    if a > b then c
+(%i4)                    if a > b then c
+(%o4)                    if a > b then c
+(%i5) '(if a then (if b then (if c then d
+    else (if e then f else g)) else (if h then i else j)) else k)
+(%o5) if a then (if b then (if c then d
+     else (if e then f else g)) else (if h then i else j)) else k
+(%i6) if a then (if b then (if c then d
+     else (if e then f else g)) else (if h then i else j)) else k
+(%o6) if a then (if b then (if c then d
+     else (if e then f else g)) else (if h then i else j)) else k
+(%i7)                    '(if a then b)
+(%o7)                      if a then b
+(%i8)                 '(if a then b else d)
+(%o8)                  if a then b else d
+(%i9)          '(if a then b elseif c then false)
+(%o9)            if a then b elseif c then false
+(%i10)           '(if a then b elseif c then d)
+(%o10)             if a then b elseif c then d
+(%i11)        '(if a then b elseif c then d else f)
+(%o11)         if a then b elseif c then d else f
+(%i12) '(if a then b elseif c then d elseif e then false)
+(%o12)   if a then b elseif c then d elseif e then false
+(%i13)   '(if a then b elseif c then d elseif e then f)
+(%o13)     if a then b elseif c then d elseif e then f
+(%i14) '(if a then b elseif c then d elseif e then f else h)
+(%o14) if a then b elseif c then d elseif e then f else h
+(%i15) '(if a then b elseif c then d elseif e then f elseif g
+                                                      then false)
+(%o15) if a then b elseif c then d elseif e then f elseif g
+                                                       then false
+(%i16) '(if a then b elseif c then d elseif e then f elseif g
+                                                          then h)
+(%o16) if a then b elseif c then d elseif e then f elseif g
+                                                           then h
+(%i17)                     if a then b
+(%o17)                     if a then b
+(%i18)                 if a then b else d
+(%o18)                 if a then b else d
+(%i19)           if a then b elseif c then false
+(%o19)           if a then b elseif c then false
+(%i20)             if a then b elseif c then d
+(%o20)             if a then b elseif c then d
+(%i21)         if a then b elseif c then d else f
+(%o21)         if a then b elseif c then d else f
+(%i22)   if a then b elseif c then d elseif e then false
+(%o22)   if a then b elseif c then d elseif e then false
+(%i23)     if a then b elseif c then d elseif e then f
+(%o23)     if a then b elseif c then d elseif e then f
+(%i24) if a then b elseif c then d elseif e then f else h
+(%o24) if a then b elseif c then d elseif e then f else h
+(%i25) if a then b elseif c then d elseif e then f elseif g
+                                                       then false
+(%o25) if a then b elseif c then d elseif e then f elseif g
+                                                       then false
+(%i26) if a then b elseif c then d elseif e then f elseif g
+                                                           then h
+(%o26) if a then b elseif c then d elseif e then f elseif g
+                                                           then h
+             3      q
+(%i27) (a : z , b : -, c : x < 1024, d : 1729.0, 
+                    p
+e : if a > b then c else d, f : 
+if c < d then a elseif c < b then e else g, g : abs(r), 
+h : %pi e, 0)
+(%o27)                          0
+(%i28)                     if a then b
+                              3      q
+(%o28)                    if z  then -
+                                     p
+(%i29)                 if a then b else d
+                        3      q
+(%o29)              if z  then - else 1729.0
+                               p
+(%i30)           if a then b elseif c then false
+                 3      q
+(%o30)       if z  then - elseif x < 1024 then false
+                        p
+(%i31)             if a then b elseif c then d
+                3      q
+(%o31)      if z  then - elseif x < 1024 then 1729.0
+                       p
+(%i32)         if a then b elseif c then d else f
+           3      q
+(%o32) if z  then - elseif x < 1024 then 1729.0
+                  p
+                                  3                   q
+ else (if x < 1024 < 1729.0 then z  elseif x < 1024 < -
+                                                      p
+           3   q
+ then (if z  > - then x < 1024 else 1729.0) else g)
+               p
+(%i33)   if a then b elseif c then d elseif e then false
+           3      q
+(%o33) if z  then - elseif x < 1024 then 1729.0
+                  p
+                      3   q
+          elseif (if z  > - then x < 1024 else 1729.0) then false
+                          p
+(%i34)     if a then b elseif c then d elseif e then f
+           3      q
+(%o34) if z  then - elseif x < 1024 then 1729.0
+                  p
+             3   q
+ elseif (if z  > - then x < 1024 else 1729.0)
+                 p
+                                  3                   q
+ then (if x < 1024 < 1729.0 then z  elseif x < 1024 < -
+                                                      p
+           3   q
+ then (if z  > - then x < 1024 else 1729.0) else g)
+               p
+(%i35) if a then b elseif c then d elseif e then f else h
+           3      q
+(%o35) if z  then - elseif x < 1024 then 1729.0
+                  p
+             3   q
+ elseif (if z  > - then x < 1024 else 1729.0)
+                 p
+                                  3                   q
+ then (if x < 1024 < 1729.0 then z  elseif x < 1024 < -
+                                                      p
+           3   q
+ then (if z  > - then x < 1024 else 1729.0) else g)
+               p
+               3   q
+ else %pi (if z  > - then x < 1024 else 1729.0)
+                   p
+(%i36) if a then b elseif c then d elseif e then f elseif g
+                                                       then false
+           3      q
+(%o36) if z  then - elseif x < 1024 then 1729.0
+                  p
+             3   q
+ elseif (if z  > - then x < 1024 else 1729.0)
+                 p
+                                  3                   q
+ then (if x < 1024 < 1729.0 then z  elseif x < 1024 < -
+                                                      p
+           3   q
+ then (if z  > - then x < 1024 else 1729.0) else g) elseif abs(r)
+               p
+ then false
+(%i37) if a then b elseif c then d elseif e then f elseif g
+                                                           then h
+           3      q
+(%o37) if z  then - elseif x < 1024 then 1729.0
+                  p
+             3   q
+ elseif (if z  > - then x < 1024 else 1729.0)
+                 p
+                                  3                   q
+ then (if x < 1024 < 1729.0 then z  elseif x < 1024 < -
+                                                      p
+           3   q
+ then (if z  > - then x < 1024 else 1729.0) else g) elseif abs(r)
+               p
+               3   q
+ then %pi (if z  > - then x < 1024 else 1729.0)
+                   p

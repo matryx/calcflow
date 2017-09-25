@@ -1,0 +1,65 @@
+/* coded by LPH prior to MAY 12, 1983 */
+/* re-coded for DOE MACSYMA */
+
+/* I made some changes so that ineq loads without       */
+/* asking for the sign of d. Mario Rodriguez, 30-4-2006 */
+
+/*
+eval_when([translate,batch,demo,load,loadfile],
+transcompile:true,
+matchdeclare([a,b],true,c,negp,d,posp),
+matchdeclare([e,f,g,h],freeof("<=",">=","<",">","=")));
+*/
+
+
+transcompile:true$
+matchdeclare([a,b],true,c,negp,d,posp)$
+matchdeclare([e,f,g,h],freeof("<=",">=","<",">","="))$
+
+negp(u):=
+   (mode_declare(u,any,function(negp),boolean),
+    if asksign(u)='neg then true);
+posp(u):=
+   (mode_declare(u,any,function(posp),boolean),
+    if asksign(u)='pos then true);
+define_variable(?matchreverse,true,boolean);
+
+
+/*
+eval_when(translate,simp:false,transcompile:true);
+*/
+
+simp:false$
+tellsimpafter((a<b)*c,a*c>b*c);
+tellsimpafter((a>b)*c,a*c<b*c);
+tellsimpafter(("<="(a,b))*c,">="(a*c,b*c));
+tellsimpafter((">="(a,b))*c,"<="(a*c,b*c));
+tellsimpafter((a<b)*d,a*d<b*d);
+tellsimpafter((a>b)*d,a*d>b*d);
+tellsimpafter(("<="(a,b))*d,"<="(a*d,b*d));
+tellsimpafter((">="(a,b))*d,">="(a*d,b*d));
+
+tellsimpafter((a<b)+e,a+e<b+e);
+tellsimpafter(("<="(a,b))+e,"<="(a+e,b+e));
+tellsimpafter((a>b)+e,a+e>b+e);
+tellsimpafter((">="(a,b))+e,">="(a+e,b+e));
+
+tellsimpafter((e<f)+(g<h),e+g<f+h);
+tellsimpafter((e<f)+("<="(g,h)),e+g<f+h);
+tellsimpafter(("<="(e,f))+("<="(g,h)),"<="(e+g,f+h));
+tellsimp((g<h)+(e=f),g+e<h+f);
+tellsimp(("<="(g,h))+(e=f),"<="(g+e,h+f));
+tellsimp((e=f)+(g<h),g+e<h+f);
+tellsimp((e=f)+("<="(g,h)),"<="(g+e,h+f));
+tellsimp((e=f)+(g>h),g+e>h+f);
+tellsimp((e=f)+(">="(g,h)),">="(g+e,h+f));
+tellsimp((g>h)+(e=f),g+e>h+f);
+tellsimp((">="(g,h))+(e=f),">="(g+e,h+f));
+tellsimpafter((e>f)+(g>h),e+g>f+h);
+tellsimpafter((e>f)+(">="(g,h)),e+g>f+h);
+tellsimpafter((">="(e,f))+(">="(g,h)),">="(e+g,f+h));
+simp:true$
+
+/*
+eval_when(translate,simp:true); 
+*/

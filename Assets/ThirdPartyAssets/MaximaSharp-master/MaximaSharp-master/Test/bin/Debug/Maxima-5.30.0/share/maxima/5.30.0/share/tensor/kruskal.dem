@@ -1,0 +1,45 @@
+/* Copyright (C) 2008 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * The Kruskal extension of the Schwarzschild metric.
+ *
+ */
+kill(allbut(props));
+
+("Computing Kruskal's maximal extension of the Schwarzschild metric" )$
+
+("We begin with redefinining the derivative of Lambert's W function.")$
+gradef(lambert_w(x),lambert_w(x)/(1+lambert_w(x))/x);
+("We want ctensor to perform rational factorization.")$
+ratfac:true;
+load(ctensor);
+ct_coords:[T,R,u,v];
+("This is Kruskal's metric in explicit form")$
+r:2*(lambert_w((R-T)*(R+T)*exp(-1))+1)*G*M;
+lg:ident(4);
+lg[1,1]:-lg[2,2]:-16*G^2*M^2/(-T^2+R^2)*lambert_w(exp(-1)*(-T^2+R^2))/(lambert_w(exp(-1)*(-T^2+R^2))+1);
+lg[3,3]:-r^2;
+lg[4,4]:-r^2*sin(u)^2;
+ric:zeromatrix(4,4);
+cmetric();
+christof(mcs);
+ricci(false);
+("Let us verify that this is a vacuum metric (Ricci tensor is zero)")$
+radcan(ric);
+("We now wish to express the metric coefficients as functions of r")$
+kill(r);
+("This is t: we can now plot the tt component of the metric")$
+block([title: "The Kruskal-Szekeres metric coefficient for GM=1"],
+/*plot3d([r*cos(u),r*sin(u),ev(subst((1-r/(2*G*M))*exp(r/(2*G*M))+R^2,T^2,ug[1,1]),G=1,M=1)],[r,0.01,5],[u,-%pi,%pi],['grid,50,15]));*/
+/*plot3d([r*cos(u),r*sin(u),ev(subst((1-r/(2*G*M))*exp(r/(2*G*M))+R^2,T^2,ug[1,1]),G=1,M=1)],[r,0.01,5],[u,-%pi,%pi],['grid,7,7],[plot_format,gnuplot],[gnuplot_term,dumb],[gnuplot_dumb_term_command, "set term dumb 132 50"]));*/
+plot2d(ev(subst((1-r/(2*G*M))*exp(r/(2*G*M))+R^2,T^2,ug[1,1]),G=1,M=1),[r,0,5],[plot_format,gnuplot],[gnuplot_term,dumb]));
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

@@ -1,0 +1,166 @@
+ttyoff:true$
+dimension(w) := block(/* w is an equation or a list of
+      equations with an indeterminate on the left and a product of
+      powers of mass, length, tyme, temperature, and charge on
+      the right.  globally establishes corresponding row(s) for
+      exponent matrices, returning done. */
+   [v, actual, valid],
+   valid: '[mass, length, tyme, charge, temperature],
+   w:listify(w),
+   for u in w do (
+      v:rhs(u), u:lhs(u),
+      actual: listofvars(v),
+      for ac in actual do if not member(ac,valid) then print(
+         "warning:", ac, "not member of", valid),
+      put(u,v,'dimension))) $
+
+listify(w) := if listp(w) then w else [w] $
+
+%pure: '[boltzmannsconstant, electricpermittivityofavacuum] $
+
+nondimensionalize(u) := block(/* u is a list of indeterminates
+      representing classes of physical quantities such as velocity or
+      length, for which dimensions have previously been established
+      by the dimension function.  returns a list of nondimensional
+      combinations of the physical quantities in u. */
+/* ratmx:false in doe macsyma */
+   [b, c, v, w, m, n, i, r, basis, logexpand, ratmx:false, scalarmatrixp],
+   u: listify(u),
+
+   /* determine basis: */
+   m:n:0,
+   basis:[length, tyme, mass, temperature, charge],
+   if member('boltzmannsconstant, %pure) then (m:m+1,
+       basis:delete('temperature,basis)),
+   if member('electricpermittivityofavacuum,%pure) then (m:m+1,
+       basis:delete('charge,basis)),
+   if member('gravityconstant,%pure) then (n:n+1,
+      basis:delete('mass,basis)),
+   if member('plancksconstant,%pure) then (n:n+1,
+      basis:delete('tyme,basis)),
+   if member('speedoflight,%pure) then (n:n+1,
+      basis:delete('length,basis)),
+   if basis=[] then return(u),
+   if n>0 and m<2 then error("invalid to include gravityconstant",
+      "plancksconstant or speedoflight without also including",
+      "boltzmannsconstant & electricpermittivityofavacuum"),
+   c:b:v:w: [],
+/* ratmx:false in doe macsyma */
+   logexpand:/* ratmx: */true,  scalarmatrixp:false,
+   n:0, m:length(basis),
+
+   /* construct matrix of exponents: */
+   for uu in u do (b: get(uu, 'dimension),
+      if b=false then error("first do an appropriate dimension(",''uu,
+      "= term with powers of mass, length, tyme, temperature & charge"
+         ),
+      if member('boltzmannsconstant, %pure) then
+         b: subst(temperature=mass*length^2/tyme^2, b),
+      if member(electricpermittivityofavacuum,%pure) then
+         b: subst(charge=length^(3/2)*mass^(1/2)/tyme, b),
+      if member(speedoflight,%pure) then
+         if member(plancksconstant,%pure) then
+            b: subst([length=1/mass,tyme=1/mass], b)
+         else if member(gravityconstant,%pure) then
+            b: subst([mass=tyme,length=tyme], b)
+         else b: subst(length=tyme, b)
+      else if member(plancksconstant,%pure) then
+         if member(gravityconstant,%pure) then
+            b: subst([mass=length^(-1/3), tyme=length^(-5/3)], b)
+         else b: subst(tyme=mass*length^2, b)
+      else if member(gravityconstant,%pure) then
+         b: subst(mass=length^3/tyme^2, b),
+      b:log(b),  r:[],
+      for uu in basis do r:cons(coeff(b,log(uu)), r),
+      c:cons(r,c), w:cons(uu,w), n:n+1),
+   c:substinpart('matrix,c,0),
+   r:rank(c),
+   if r=0 then return(u),
+   if r=n then return([]),
+
+   /* delete dependent columns: */
+   i:1,
+   while r<m do (b:submatrix(c,i),
+      while rank(b)<r do (i:i+1,
+         b:submatrix(c,i)),
+      m:m-1,
+      c:b),
+
+   /* partition into a nonsingular part and the other rows: */
+   c:substinpart("[",c,0),  b:[], 
+   for j:1 thru r do(
+      b:cons(first(c),b),
+      while rank(substinpart('matrix,b,0))<j do(
+         c:endcons(first(c),rest(c)),
+         b:cons(first(c),rest(b)),
+         w:endcons(first(w),rest(w))),
+      c:rest(c), v:cons(first(w),v), w:rest(w)),
+   c:substinpart('matrix,c,0),  b:substinpart('matrix,b,0),
+
+   /* form the matrix of physical-quantity exponents and the
+      corresponding dimensionless products: */
+   c: c.b^^-1,  b:[],
+   for l:1 thru n-r do
+      b: cons(w[l]/product(v[k]^c[l,k],k,1,r), b),
+   return(b)) $
+
+dimension([
+acceleration = length/tyme^2,
+angle = 1,
+angularacceleration = 1/tyme^2,
+angularmomentum = mass*length^2/tyme^2,
+angularvelocity = 1/tyme,
+area = length^2,
+boltzmannsconstant = mass*length^2/tyme^2/temperature,
+capacitance = tyme^2*charge^2/mass/length^2,
+charge = charge,
+current = charge/tyme,
+currentdensity = charge/tyme/length^2,
+density = mass/length^3,
+distance = length,
+electricfield = mass*length/tyme^2/charge,
+electricpermittivity = tyme^2*charge^2/mass/length^3,
+electricpermittivityofavacuum = tyme^2*charge^2/mass/length^3,
+energy = mass*length^2/tyme^2,
+enthalpy = length^2/tyme^2,
+frequency = 1/tyme,
+filmcoefficient = mass/tyme^3/temperature,
+flow = length^3/tyme,
+gravityconstant = length^3/mass/tyme^2,
+heat = mass*length^2/tyme^2,
+heatcapacity = mass*length^2/tyme^2/temperature,
+heattransfercoefficient = 1/tyme,
+inductance = mass*length^2/charge^2,
+internalenergy = length^2/tyme^2,
+kinematicviscosity = length^2/tyme,
+length = length,
+mass = mass,
+moment = mass*length^2/tyme^2,
+momentum = mass*length/tyme,
+magneticinduction = mass/tyme/charge,
+magneticpermittivity = mass*length/charge^2,
+plancksconstant = mass*length^2/tyme,
+poissonsratio = 1,
+power = mass*length^2/tyme^3,
+pressure = mass/length/tyme^2,
+resistance = mass*length^2/tyme/charge^2,
+specificheat = length^2/tyme^2/temperature,
+speedoflight = length/tyme,
+shearmodulus = mass/length/tyme^2,
+surfacetension = mass/tyme^2,
+stefanboltzmannconstant = mass/tyme^3/temperature^4,
+stress = mass/length/tyme^2,
+strain = 1,
+temperature = temperature,
+thermalconductivity = mass*length/tyme^3/temperature,
+thermalexpansioncoefficient = 1/temperature,
+thermaldiffusivity = length^2/tyme,
+tyme = tyme,
+velocity = length/tyme,
+volume = length^3,
+voltage = mass*length^2/tyme^2/charge,
+viscosity = mass/tyme/length,
+work = mass*length^2/tyme^2,
+youngsmodulus = mass/length/tyme^2]) $
+alias(time,tyme,cputime,time)$
+ttyoff: false$

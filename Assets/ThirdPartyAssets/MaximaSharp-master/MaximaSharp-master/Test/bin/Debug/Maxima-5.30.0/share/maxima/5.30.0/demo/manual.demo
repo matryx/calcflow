@@ -1,0 +1,1267 @@
+ /* 
+   This file is to be run by the EXAMPLE command, and may not 
+   otherwise work.
+   The following are either acceptable lines to Maxima, or they are
+   two successive '&' characters 
+   and then followed by the name of the section of examples, and then followed by
+   a sequence of Maxima forms, e.g.
+   
+   '&'& topic               (without the quotes)
+   
+      /* This is a comment */
+      <Maxima form 1>;
+      <Maxima form 2>;
+      ...
+*/
+
+&& additive
+   
+   declare(f,additive);
+   f(2*a+3*b);
+
+&& algsys
+
+   f1:2*x*(1-l1)-2*(x-1)*l2$
+   f2:l2-l1$
+   f3:l1*(1-x**2-y)$
+   f4:l2*(y-(x-1)**2)$
+   algsys([f1,f2,f3,f4],[x,y,l1,l2]);
+   f1:x**2-y**2$
+   f2:x**2-x+2*y**2-y-1$
+   algsys([f1,f2],[x,y]);
+
+&& allroots
+
+   (2*x+1)^3=13.5*(x^5+1);
+   allroots(%);
+   
+&& antisymmetric
+ 
+   declare(h,antisymmetric);
+   h(x,z,y);
+
+&& append
+
+   append([y+x,0,-3.2],[2.5e20,x]);
+   
+&& arrayinfo
+
+   b[1,x]:1$
+   array(f,2,3);
+   arrayinfo(b);
+   arrayinfo(f);
+
+&& arrays
+  
+   a[n]:=n*a[n-1];
+   a[0]:1$
+   a[5];
+   a[n]:=n$
+   a[6];
+   a[4];
+
+&& at 
+
+   atvalue(f(x,y),[x=0,y=1],a^2);
+   atvalue('diff(f(x,y),x),x=0,y+1);
+   printprops(all,atvalue);
+   diff(4*f(x,y)^2-u(x,y)^2,x);
+   at(%,[x=0,y=1]);
+
+&& atvalue
+      
+   kill(f,x,a,u,g);
+   atvalue(f(x,y),[x=0,y=1],a^2)$
+   atvalue('diff(f(x,y),x),x=0,y+1);
+   printprops(all,atvalue);
+   diff(4*f(x,y)^2-u(x,y)^2,x);
+   at(%,[x=0,y=1]);
+
+&& augcoefmatrix  
+   
+   [2*x-(a-1)*y=5*b,a*x+b*y+c=0]$
+   augcoefmatrix(%,[x,y]);
+
+&& bezout
+
+   bezout(a*y+x^2+1,y^2+x*y+b,x);
+   expand(determinant(%));
+   %-expand(resultant(a*y+x^2+1,y^2+x*y+b,x));
+   
+&& block
+
+   kill(f);
+   hessian(f):=block([dfxx,dfxy,dfxz,dfyy,dfyz,dfzz],
+         dfxx:diff(f,x,2),dfxy:diff(f,x,1,y,1),
+         dfxz:diff(f,x,1,z,1),dfyy:diff(f,y,2),
+         dfyz:diff(f,y,1,z,1),dfzz:diff(f,z,2),
+         determinant(matrix([dfxx,dfxy,dfxz],[dfxy,dfyy,dfyz],
+                 [dfxz,dfyz,dfzz])))$
+   kill(x,y,z);
+   hessian(x^3-3*a*x*y*z+y^3);
+   subst(1,z,quotient(%,-54*a^2));
+   f(x):=block([y,use_fast_arrays:false], local(a), y:4, a[y]:x, display(a[y]))$
+   y:2$
+   a[y+2]:0$
+   f(9);
+   ff(x):=block([y,a,use_fast_arrays:true], y:4, a[y]:x, display(a[y]))$
+   ff(10);
+   a[y+2];
+
+&& bothcoeff  
+   
+   islinear(exp,var):=block([c],
+               c:bothcoef(rat(exp,var),var),
+               is(freeof(var,c) and c[1]#0))$
+   islinear((r^2-(x-r)^2)/x,x);
+   
+&& catch
+   
+   g(l):=catch(map(lambda([x],if x<0 then throw(x) else f(x)),l))$
+   g([1,2,3,7]);
+   g([1,2,-3,7]);
+
+&& cf
+  
+   cf([1,2,-3]+[1,-2,1]);
+   cfdisrep(%);
+   cflength:4$
+   cf(sqrt(3));
+   cfexpand(%);
+   ev(%[1,2]/%[2,2],numer);
+
+&& cfdisrep  
+      
+   cf([1,2,-3]+[1,-2,1]);
+   cfdisrep(%);
+
+&& cfexpand
+  
+   cflength:4$
+   cf(sqrt(3));
+   cfexpand(%);
+   ev(%[1,2]/%[2,2],numer);
+
+&& changevar  
+   
+   'integrate(%e^(sqrt(a)*sqrt(y)),y,0,4);
+   changevar(%,y-z^2/a,z,y);
+
+&& charpoly  
+
+   a:matrix([3,1],[2,4]);
+   expand(charpoly(a,lambda));
+   (programmode:true,solve(%));
+   matrix([x1],[x2]);
+   ev(a.%-lambda*%,%th(2)[1]);
+   %[1,1]=0;
+   x1^2+x2^2=1;
+   solve([%th(2),%],[x1,x2]);
+
+&& coeff
+   
+   coeff(2*a*tan(x)+tan(x)+b=5*tan(x)+3,tan(x));
+   coeff(y+x*%e^x+1,x,0);
+
+&& combine
+   
+   combine(a/x+b/x+a/y+b/y);
+   
+&& commutative 
+   
+   declare(h,commutative);
+   h(x,z,y);
+
+&& complex  
+   
+   (sqrt(-4)+sqrt(2.25))^2;
+   expand(%);
+   expand(sqrt(2*%i));
+   
+&& content  
+   
+   content(2*x*y+4*x^2*y^2,y);
+
+&& defmatch  
+   
+   nonzeroandfreeof(x,e):=is(e#0 and freeof(x,e));
+   matchdeclare(a,nonzeroandfreeof(x),b,freeof(x));
+   defmatch(linear,a*x+b,x);
+   linear(3*z+(y+1)*z+y**2,z);
+   matchdeclare([a,f],true);
+   constinterval(l,h):=constantp(h-l)$
+   matchdeclare(b,constinterval(a))$
+   matchdeclare(x,atom)$
+   block(remove(integrate,outative),
+         defmatch(checklimits,'integrate(f,x,a,b)),
+         declare(integrate,outative))$
+   'integrate(sin(t),t,x+%pi,x+2*%pi)$
+   checklimits(%);
+   'integrate(sin(t),t,0,x)$
+   checklimits(%);
+   remvalue(a,b,f,x)$
+   
+&& deftaylor
+  
+   deftaylor(f(x),x^2+sum(x^i/(2^i*i!^2),i,4,inf));
+   taylor(%e^sqrt(f(x)),x,0,4);
+
+&& delete  
+   
+   delete(sin(x),x+sin(x)+y);
+
+&& depends
+  
+   kill(a,x,f,y,t);
+   depends(a,x);
+   diff(a.a,x);
+   depends(f,[x,y],[x,y],t);
+   diff(f,t);
+
+&& derivdegree  
+   
+   'diff(y,x,2)+'diff(y,z,3)*2+'diff(y,x)*x^2;
+   derivdegree(%,y,x);
+
+&& desolve  
+   
+   eqn1:'diff(f(x),x)='diff(g(x),x)+sin(x);
+   eqn2:'diff(g(x),x,2)='diff(f(x),x)-cos(x);
+   atvalue('diff(g(x),x),x=0,a);
+   atvalue(f(x),x=0,1);
+   desolve([eqn1,eqn2],[f(x),g(x)]);
+   /* verification */
+   [eqn1,eqn2],%,diff;
+
+&& diff
+  
+   kill(f,g,h,x,y);
+   diff(sin(x)+x^3+2*x^2,x);
+   diff(sin(x)*cos(x),x);
+   diff(sin(x)*cos(x),x,2);
+   derivabbrev:true$
+   diff(exp(f(x)),x,2);
+   'integrate(f(x,y),y,g(x),h(x));
+   diff(%,x);
+
+&& display  
+   
+   display(b[1,2]);
+
+&& divide  
+
+   divide(x+y,x-y,x);
+   divide(x+y,x-y);
+   
+&& do
+  
+   for a:-3 thru 26 step 7 do ldisplay(a)$
+   s:0$
+   for i:1 while i<=10 do s:s+i;
+   s;
+   series:1$
+   term:exp(sin(x))$
+   for p:1 unless p>7 do
+             (term:diff(term,x)/p,
+             series:series+subst(x=0,term)*x^p)$
+   series;
+   poly:0$
+   for i:1 thru 5 do
+           for j:i step -1 thru 1 do
+              poly:poly+i*x^j$
+   poly;
+   guess:-3.0$
+   for i thru 10 do (guess:subst(guess,x,0.5*(x+10/x)),
+            if abs(guess^2-10)<0.00005 then return(guess));
+   for count:2 next 3*count thru 20
+            do ldisplay(count)$
+   x:1000;
+   thru 10 while x#0 do x:0.5*(x+5/x)$
+   x;
+   remvalue(x);
+   newton(f,guess):=block([numer,y],local(f,df,x,guess),
+   	 numer:true,
+           define(df(x),diff(f(x),x)),
+        do (y:df(guess), if y=0 then error(
+             "derivative at",guess,"is zero"),
+            guess:guess-f(guess)/y,
+            if abs(f(guess))<5.0e-6 then return(guess)))$
+   sqr(x):=x^2-5.0$
+   newton(sqr,1000);
+   for f in [log, rho, atan] do ldisp(f(1.0))$
+   ev(concat(e,linenum-1),numer);
+   
+&& dotscrules  
+
+   declare(l,scalar,[m1,m2,m3],nonscalar);
+   expand((1-l*m1).(1-l*m2).(1-l*m3));
+   %,dotscrules;
+   rat(%,l);
+
+&& dpart
+
+   dpart(x+y/z^2,1,2,1);
+   expand((b+a)^4);
+   (b+a)^2*(y+x)^2;
+   expand(%);
+   %th(3)/%;
+   factor(%);
+   dpart(%th(2),2,4);
+   part(%th(3),2,4);
+   
+&& echelon  
+   
+   matrix([2,1-a,-5*b],[a,b,c]);
+   echelon(%);
+
+&& eliminate  
+   
+   exp1:2*x^2+y*x+z;
+   exp2:3*x+5*y-z-1;
+   exp3:z^2+x-y^2+5;
+   eliminate([exp3,exp2,exp1],[y,z]);
+
+&& entermatrix  
+   
+   entermatrix(2,1);
+   
+&& equations  
+   
+   x+1=y^2;
+   x-1=2*y+1$
+   %th(2)+%;
+   %th(3)/y;
+   1/%;
+
+&& ev
+
+   kill(y,x,w);
+   sin(x)+cos(y)+(w+1)^2+'diff(sin(w),w);
+   ev(%,sin,expand,diff,x=2,y=1);
+   ev(x+y,x:a+y,y:2);
+   'diff(y^2+x*y+x^2,x,2,y,1);
+    
+   ev(%,diff);
+   2*x-3*y=3$
+   -3*x+2*y=-4$
+   solve([%th(2),%]);
+   ev(%th(3),%);
+   x+1/x>gamma(1/2);
+   ev(%,numer,x=1/2);
+   ev(%,pred);
+   
+&& evaluation  
+
+   diff(x*f(x),x);
+   f(x):=sin(x)$
+   ev(%th(2),diff);
+   x;
+   x:3$
+   x;
+   'x;
+   f(x):=x^2;
+   'f(2);
+   ev(%,f);
+   '(f(2));
+   ''%;
+   sum(i!,i,1,4);
+   'sum(i!,i,1,4);
+   remvalue(x);
+   'integrate(f(x),x,a,b);
+   for i thru 5 do s:s+i^2;
+   s;
+   ev(%,s:0);
+   ev(%th(2));
+   'sum(g(i),i,0,n);
+   z*%e^z;
+   ev(%,z:x^2);
+   subst(x^2,z,%th(3));
+   a:%;
+   a+1;
+   kill(a,y);
+   a;
+   /* declare(integrate,noun)$ */
+   integrate(y^2,y);
+   ''integrate(y^2,y);
+   f(y):=diff(y*log(y),y,2);
+   f(y):=''(diff(y*log(y),y,2));
+   ''(concat(c,linenum-1));
+   (x+y)^3$
+   diff(%,x);
+   y:x^2+1$
+   ''(concat(c,linenum-2));
+
+&& evenfun
+ 
+   declare(g,evenfun);
+   g(-x);
+
+&& exp
+  
+   ev(%e^x*sin(x)^2,exponentialize);
+   kill(x);
+   integrate(%,x);
+   ev(%,demoivre);
+   ans:ev(%,ratexpand);
+   ev(%,x:1,numer)-ev(%,x:0,numer);
+   integrate(%e^x*sin(x)^2,x);
+   trigreduce(%);
+   %-ans;
+   ev(sin(x),%emode);
+
+&& expand  
+   
+   (1/(x+y)^4-3/(y+z)^3)^2;
+   expand(%,2,0);
+   expand(a.(b+c.(d+e)+f));
+   expand((x+1)^3);
+   (x+1)^7;
+   expand(%);
+   expand(%th(2),7,7);
+   ev(a*(b+c)+a*(b+c)^2,expop:1);
+
+&& factcomb
+
+   (n+1)^2*n!^2;
+   factcomb(%);
+
+&& factor
+  
+   factor(2^63-1);
+   factor(z^2*(x+2*y)-4*x-8*y);
+   x^2*y^2+2*x*y^2+y^2-x^2-2*x-1;
+   block([dontfactor:[x]],factor(%/36/(y^2+2*y+1)));
+   factor(%e^(3*x)+1);
+   factor(x^4+1,a^2-2);
+   factor(x^3+x^2*y^2-x*z^2-y^2*z^2);
+   (x+2)/(x+3)/(x+b)/(x+c)^2;
+   ratsimp(%);
+   partfrac(%,x);
+   map('factor,%);
+   ratsimp((x^5-1)/(x-1));
+   subst(a,x,%);
+   factor(%th(2),%);
+   factor(x^12+1);
+   factor(x^99+1);
+   
+&& factorsum  
+   
+   ev((x+1)*((u+v)^2+a*(w+z)^2),expand);
+   factorsum(%);
+
+&& featurep 
+
+   declare(j,even)$
+   featurep(j,integer);
+
+&& freeof
+  
+   freeof(y,sin(x+2*y));
+   freeof(cos(y),"*",sin(y)+cos(x));
+
+&& fullmap  
+   
+   fullmap(g,a+b*c);
+   map(g,a+b*c);
+
+&& fullmapl
+  
+   fullmapl("+",[3,[4,5]],[[a,1],[0,-1.5]]);
+
+&& funcsolve
+   
+   funcsolve((n+1)*f(n)-(n+3)*f(n+1)/(n+1)=(n-1)/(n+2),f(n));
+
+&& functions
+   
+   kill(x,y,f,g,h);
+   f(x):=x^2+y;
+   f(2);
+   ev(f(2),y:7);
+   f(x):=sin(x)^2+1;
+   f(x+1);
+   g(y,z):=f(z)+3*y;
+   ev(g(2*y+z,-0.5),y:7);
+   h(n):=sum(i*x^i,i,0,n);
+   functions;
+   t[n](x):=ratexpand(2*x*t[n-1](x)-t[n-2](x));
+   t[0](x):=1$
+   t[1](x):=x$
+   t[4](y);
+   g[n](x):=sum(ev(x),i,n,n+2);
+   h(n,x):=sum(ev(x),i,n,n+2);
+   g[2](i^2);
+   h(2,i^2);
+   p[n](x):=ratsimp(1/(2^n*n!)*diff((x^2-1)^n,x,n));
+   q(n,x):=ratsimp(1/(2^n*n!)*diff((x^2-1)^n,x,n));
+   p[2];
+   p[2](y+1);
+   q(2,y);
+   p[2](5);
+   f[i,j](x,y):=x^i+y^j;
+   g(fun,a,b):=print(fun," applied to ",a," and ",b," is ",fun(a,b))$
+   g(f[2,1],sin(%pi),2*c);
+
+&& genmatrix
+  
+   h[i,j]:=1/(i+j-1)$
+   genmatrix(h,3,3);
+
+&& get
+  
+   put(%e,transcendental,type);
+   put(%pi,transcendental,type)$
+   put(%i,algebraic,type)$
+   typeof(x):=block([q], if numberp(x)
+               then return(algebraic),
+               if not atom(x)
+               then return(maplist(typeof,x)),
+               q:get(x,type), if q=false then
+               error("not numeric") else q)$
+   errcatch(typeof(2*%e+x*%pi));
+   typeof(2*%e+%pi);
+
+&& gfactor  
+   
+   gfactor(x^4-1);
+
+&& gradef
+  
+   depends(y,x);
+   kill(f,g,j);
+   gradef(f(x,y),x^2,g(x,y));
+   diff(f(x,y),x);
+   gradef(j(n,z),'diff(j(n,z),n),
+	j(n-1,z)-n/z*j(n,z))$
+   ratsimp(diff(j(2,x),x,2));
+   
+&& horner  
+   
+   poly:1.0e-20*x^2-5.5*x+5.2e20;
+   errcatch(ev(%,x=1.0e20));
+   horner(poly,x),keepfloat;
+   ev(%,x=1.0e20);
+   
+&& if
+  
+   fib[n]:=if n=1 or n=2 then 1 else fib[n-1]+fib[n-2];
+   fib[1]+fib[2];
+   fib[3];
+   fib[5];
+   eta(mu,nu):=if mu=nu then mu else if mu>nu then mu-nu else mu+nu;
+   eta(5,6);
+   eta(eta(7,7),eta(1,2));
+   if not 5>=2 and 6<=5 or 4+1>3 then a else b;
+   
+&& ilt  
+   
+   'integrate(sinh(a*x)*f(t-x),x,0,t)+b*f(t)=t^2;
+   laplace(%,t,s);
+   linsolve([%],['laplace(f(t),t,s)]);
+   ilt(ev(%[1]),s,t);
+
+&& inpart  
+   
+   x+y+w*z;
+   inpart(%,3,2);
+   'limit(f(x)^g(x+1),x,0,minus);
+   inpart(%,1,2);
+
+&& integrate
+   
+   test(f):=block([u],u:integrate(f,x),ratsimp(f-diff(u,x)));
+   test(sin(x));
+   test(1/(1+x));
+   test(1/(1+x^2));
+   integrate(sin(x)^3,x);
+   kill(q)$
+   integrate(%e^x/(%e^x+2),x);
+   integrate(1/(x*log(x)),x);
+   integrate(sin(2*x+3),x);
+   integrate(%e^x*erf(x),x);
+   integrate(x/(x^3+1),x);
+   diff(%,x);
+   ratsimp(%);
+   integrate(x^(5/4)/(x+1)^(5/2),x,0,inf);
+   gradef(q(x),sin(x^2));
+   diff(log(q(r(x))),x);
+   integrate(%,x);
+
+&& is  
+   
+   is(x^2>=2*x-1);
+   assume(a>1);
+   is(log(log(a+1)+1)>0 and a^2+1>2*a);
+   
+&& isolate  
+   
+   (a+b)^4*(1+x*(2*x+(c+d)^2));
+   isolate(%,x);
+   ratexpand(%)$
+   ev(%);
+   (a+b)*(x+a+b)^2*%e^(x^2+a*x+b);
+   isolate(%,x),exptisolate:true;
+  
+&& lambda
+  
+   lambda([x,y,z],x^2+y^2+z^2);
+   %(1,2,a);
+   "+"(1,2,a);
+   
+&& laplace
+  
+   laplace(%e^(2*t+a)*sin(t)*t,t,s);
+
+&& lassociative 
+   
+   declare(g,lassociative);
+   g(g(a,b),g(c,d));
+   g(g(a,b),g(c,d))-g(a,g(b,g(c,d)));
+
+&& let  
+   
+   matchdeclare([a,a1,a2],true);
+   oneless(x,y):=is(x=y-1)$
+   let(a1*a2!,a1!,oneless,a2,a1);
+   let(a1!/a1,(a1-1)!),letrat;
+   letsimp(n*m!*(n-1)!/m),letrat;
+   let(sin(a)^2,1-cos(a)^2);
+   sin(x)^4;
+   letsimp(%);
+   
+&& letrules  
+   
+   matchdeclare([a,a1,a2],true);
+   oneless(x,y):=is(x=y-1)$
+   let(a1*a2!,a1!,oneless,a2,a1);
+   let(a1!/a1,(a1-1)!),letrat;
+   letsimp(n*m!*(n-1)!/m),letrat;
+   let(sin(a)^2,1-cos(a)^2);
+   sin(x)^4;
+   letsimp(%);
+
+&& limit  
+   
+   limit(x*log(x),x,0,plus);
+   limit((1+x)^(1/x),x,0);
+   limit(%e^x/x,x,inf);
+   limit(sin(1/x),x,0);
+   
+&& linear 
+
+   declare(f,linear);
+   f(2*a+3*b);
+   f(2*x+y,x);
+   
+&& linsolve  
+   
+   x+z=y$
+   2*a*x-y=2*a^2$
+   y-2*z=2$
+   linsolve([%th(3),%th(2),%],[x,y,z]),globalsolve;
+
+&& listofvars  
+   
+   listofvars(f(x[1]+y)/g^(2+a));
+
+&& lists  
+   
+   [x^2,y/3,-2];
+   %[1]*x;
+   [a,%th(2),%];
+   
+&& logcontract  
+   
+   2*(a*log(x) + 2*a*log(y));
+   logcontract(%);
+   logcontract(log(sqrt(x+1)+sqrt(x)) + log(sqrt(x+1)-sqrt(x)));
+
+&& map  
+   
+   map(f,x+a*y+b*z);
+   map(lambda([u],partfrac(u,x)),x+1/(x^3+4*x^2+5*x+2));
+   map(ratsimp, x/(x^2+x)+(y^2+y)/y);
+   map("=",[a,b],[-0.5,3]);
+
+&& matchdeclare  
+   
+   matchdeclare(a,true)$
+   tellsimp(sin(a)^2,1-cos(a)^2)$
+   sin(y)^2;
+   kill(rules);
+   nonzeroandfreeof(x,e):=is(e#0 and freeof(x,e));
+   matchdeclare(a,nonzeroandfreeof(x),b,freeof(x));
+   defmatch(linear,a*x+b,x);
+   linear(3*z+(y+1)*z+y**2,z);
+   matchdeclare([a,f],true);
+   constinterval(l,h):=constantp(h-l)$
+   matchdeclare(b,constinterval(a))$
+   matchdeclare(x,atom)$
+   block(remove(integrate,outative),
+         defmatch(checklimits,'integrate(f,x,a,b)),
+         declare(integrate,outative))$
+   'integrate(sin(t),t,x+%pi,x+2*%pi)$
+   checklimits(%);
+   'integrate(sin(t),t,0,x)$
+   checklimits(%);
+   
+&& matrices  
+
+   m:matrix([a,0],[b,1]);
+   m^2;
+   m.m;
+   m[1,1]*m;
+   %-%th(2)+1;
+   m^^-1;
+   [x,y].m;
+   matrix([a,b,c],[d,e,f],[g,h,i]);
+   %^^2;
+   
+&& minfactorial  
+
+   n!/(n+1)!;
+   minfactorial(%);
+   
+&& multiplicative 
+
+   declare(f,multiplicative);
+   f(2*a*b);
+   
+&& multthru  
+
+   x/(x-y)^2-1/(x-y)-f(x)/(x-y)^3;
+   multthru((x-y)^3,%);
+   ratexpand(%);
+   ((a+b)^10*s^2+2*a*b*s+(a*b)^2)/(a*b*s^2);
+   multthru(%);
+   multthru(a.(b+c.(d+e)+f));
+   
+&& nary 
+
+   declare(j,nary);
+   j(j(a,b),j(c,d));
+   
+&& nounify  
+   'limit(f(x)^g(x+1),x,0,minus);
+   is(inpart(%,0)=nounify(limit));
+   
+&& nroots  
+
+   x^10-2*x^4+1/2;
+   nroots(%,-6,9.1);
+   
+&& numfactor  
+
+   gamma(7/2);
+   numfactor(%);
+   
+&& nusum  
+
+   nusum(n*n!,n,0,n);
+   nusum(n^4*4^n/binomial(2*n,n),n,0,n);
+   unsum(%,n);
+   unsum(prod(i^2,i,1,n),n);
+   nusum(%,n,1,n);
+   
+&& oddfun 
+
+   declare(f,oddfun);
+   f(-x);
+   
+&& ode2  
+
+   x^2*'diff(y,x) + 3*x*y = sin(x)/x;
+   soln1:ode2(%,y,x);
+   ic1(soln1,x=%pi,y=0);
+   'diff(y,x,2) + y*'diff(y,x)^3 = 0;
+   soln2:ode2(%,y,x);
+   ratsimp(ic2(soln2,x=0,y=0,'diff(y,x)=2));
+   bc2(soln2,x=0,y=1,x=1,y=3);
+   
+&& optimize  
+
+   diff(exp(x^2+y)/(x+y),x,2);
+   optimize(%);
+   
+&& ordergreat  
+   
+   a^2+b*x;
+   ordergreat(a);
+   a^2+b*x;
+   %-%th(3);
+   unorder();
+   
+&& orderless  
+
+   y^2+b*x;
+   orderless(y);
+   y^2+b*x;
+   %-%th(3);
+   unorder();
+   
+&& outative 
+
+   declare(f,outative);
+   f(2*a);
+   
+&& part  
+
+   x+y/z^2;
+   part(%,1,2,2);
+   remvalue(x);
+   'integrate(f(x),x,a,b)+x;
+   part(%,1,1);
+   x^2+2*x=y^2;
+   %+1;
+   lhs(%);
+   part(%th(2),2);
+   part(%,1);
+   27*y^3+54*x*y^2+36*x^2*y+y+8*x^3+x+1;
+   part(%,2,[1,3]);
+   sqrt(piece/54);
+   
+&& partfrac  
+
+   2/(x+2)-2/(x+1)+1/(x+1)^2;
+   ratsimp(%);
+   partfrac(%,x);
+   
+&& partition  
+
+   partition(2*a*x*f(x),x);
+   partition(a+b,x);
+   
+&& pickapart  
+
+   integrate(1/(x^3+2),x)$
+   pickapart(%,1);
+   
+&& poissimp  
+
+   pfeformat:true$
+   poissimp(sin(x)^2);
+   (2*a^2-b)*cos(x+2*y)-(a*b+5)*sin(u-4*x);
+   poisexpt(%,2)$
+   printpois(%);
+   poisint(%th(2),y)$
+   poissimp(%);
+   poissimp(sin(x)^5+cos(x)^5);
+   pfeformat:false$
+   
+&& polarform  
+
+   rectform(sin(2*%i+x));
+   polarform(%);
+   rectform(log(3+4*%i));
+   polarform(%);
+   rectform((2+3.5*%i)^0.25),numer;
+   polarform(%);
+   
+&& poly_discriminant  
+
+   factor(poly_discriminant((x-a)*(x-b)*(x-c),x));
+   
+&& posfun 
+
+   declare(f,posfun);
+   is(f(x)>0);
+   
+&& powerseries  
+
+   powerseries(log(sin(x)/x),x,0);
+   
+&& printprops 
+
+   gradef(r,x,x/r)$
+   gradef(r,y,y/r)$
+   printprops(r,atomgrad);
+   propvars(atomgrad);
+   
+&& product  
+
+   product(x+i*(i+1)/2,i,1,4);
+
+&& properties 
+
+   properties(cons);
+   assume(var1>0);
+   properties(var1);
+   var2:2$
+   properties(var2);
+   
+&& propvars 
+
+   gradef(r,x,x/r)$
+   gradef(r,y,y/r)$
+   printprops(r,atomgrad);
+   propvars(atomgrad);
+   
+&& qunit  
+
+   qunit(17);
+   expand(%*(sqrt(17)-4));
+   
+&& radcan  
+
+   (log(x^2+x)-log(x))^a/log(x+1)^(a/2);
+   radcan(%);
+   log(a^(2*x)+2*a^x+1)/log(a^x+1);
+   radcan(%);
+   (%e^x-1)/(%e^(x/2)+1);
+   radcan(%);
+   
+&& rank  
+
+   matrix([2,1-a,-5*b],[a,b,c]);
+   rank(%);
+   
+&& rassociative 
+
+   declare(g,rassociative);
+   g(g(a,b),g(c,d));
+   g(g(a,b),g(c,d))-g(a,g(b,g(c,d)));
+   
+&& rat  
+
+   rat(x^2);
+   diff(f(%),x);
+   ((x-2*y)^4/(x^2-4*y^2)^2+1)*(y+a)*(2*y+x)/(4*y^2+x^2);
+   rat(%,y,a,x);
+   (x+3)^20;
+   rat(%);
+   diff(%,x);
+   factor(%);
+   
+&& ratcoeff  
+
+   a*x+b*x+5$
+   ratcoef(%,a+b);
+   
+&& ratdiff  
+
+   (4*x^3+10*x-11)/(x^5+5);
+   polymod(%),modulus:3;
+   ratdiff(%th(2),x);
+   
+&& ratexpand  
+
+   ratexpand((2*x-3*y)^3);
+   (x-1)/(x+1)^2+1/(x-1);
+   expand(%);
+   ratexpand(%th(2));
+   
+&& ratsimp  
+
+   sin(x/(x^2+x))=%e^((log(x)+1)^2-log(x)^2);
+   ratsimp(%);
+   b*(a/b-x)+b*x+a;
+   ratsimp(%);
+   ((x-1)^(3/2)-(x+1)*sqrt(x-1))/sqrt(x-1)/sqrt(x+1);
+   ratsimp(%);
+   x^(a+1/a),ratsimpexpons;
+   
+&& ratsubst  
+
+   ratsubst(a,x*y^2,x^4*y^8+x^4*y^3);
+   1 + cos(x) + cos(x)^2 + cos(x)^3 + cos(x)^4;
+   ratsubst(1-sin(x)^2,cos(x)^2,%);
+   ratsubst(1-cos(x)^2,sin(x)^2,sin(x)^4);
+   
+&& ratweight  
+
+   ratweight(a,1,b,1);
+   rat(a+b+1);
+   %^2;
+   ev(%th(2)^2,ratwtlvl:1);
+   
+&& realpart  
+
+   (%i*v+u)/(f+%i*e)+%e^(%i*alpha);
+   realpart(%);
+   
+&& realroots  
+
+   realroots(x^5-x-1,5.0e-6);
+   %[1],float;
+   x^5-x-1,%;
+   
+&& residue  
+
+   residue(s/(s^2+a^2),s,a*%i);
+   residue(sin(a*x)/x^4,x,0);
+   
+&& resultant  
+
+   resultant(a*y+x^2+1,y^2+x*y+b,x);
+   
+&& reveal  
+
+   integrate(1/(x^3+2),x)$
+   reveal(%,2);
+   reveal(%th(2),3);
+   
+&& reverse  
+   
+   union(x,y):=if x=[] then y else
+                  if member(t:first(x),y) then union(rest(x),y)
+                  else cons(t,union(rest(x),y))$
+   union([a,b,1,1/2,x^2],[-x^2,a,y,1/2]);
+   bernpoly(x,5);
+   maplist(numfactor,%);
+   apply(min,%);
+   
+&& risch
+  
+   risch(x^2*erf(x),x);
+   diff(%,x),ratsimp;
+   
+&& rootscontract 
+
+   rootsconmode:false$
+   rootscontract(x^(1/2)*y^(3/2));
+   rootscontract(x^(1/2)*y^(1/4));
+   rootsconmode:true$
+   rootscontract(x^(1/2)*y^(1/4));
+   rootscontract(x^(1/2)*y^(1/3));
+   rootsconmode:all$
+   rootscontract(x^(1/2)*y^(1/4));
+   rootscontract(x^(1/2)*y^(1/3));
+   rootsconmode:false$
+   rootscontract(sqrt(sqrt(x+1)+sqrt(x))*sqrt(sqrt(x+1)-sqrt(x))); 
+   rootsconmode:true$
+   rootscontract(sqrt(sqrt(5)+5)-5^(1/4)*sqrt(sqrt(5)+1));
+   
+&& scanmap  
+
+   (a^2+2*a+1)*y+x^2;
+   scanmap(factor,%);
+   scanmap(factor,expand(%th(2)));
+   u*v^(a*x+b)+c;
+   scanmap('f,%);
+   
+&& scsimp  
+
+   exp:k^2*n^2+k^2*m^2*n^2-k^2*l^2*n^2-k^2*l^2*m^2*n^2;
+   eq1:k^2+l^2=1;
+   eq2:n^2-m^2=1;
+   scsimp(exp,eq1,eq2);
+   exq:(k1*k4-k1*k2-k2*k3)/k3^2;
+   eq3:k1*k4-k2*k3=0;
+   eq4:k1*k2+k3*k4=0;
+   scsimp(exq,eq3,eq4);
+   
+&& solve  
+
+   solve(asin(cos(3*x))*(f(x)-1),x);
+   solve(5^f(x)=125,f(x)),solveradcan;
+   [4*x^2-y^2=12,x*y-x=2];
+   solve(%,[x,y]);
+   solve(x^3+a*x+1,x);
+   solve(x^3-1);
+   solve(x^6-1);
+   ev(x^6-1,%[1]);
+   expand(%);
+   x^2-1;
+   solve(%,x);
+   %th(2),%[1];
+   
+&& specint  
+
+   assume(p>0,a>0)$
+   /* a laplace transform */
+   t^(1/2)*%e^(-a*t/4)*%e^(-p*t);
+   specint(%,t);
+   /* a bessel function */
+   t^(1/2)*%j[1](2*a^(1/2)*t^(1/2))*%e^(-p*t);
+   specint(%,t);
+   forget(p>0,a>0)$
+   
+&& sqfr  
+
+   sqfr(4*x^4+4*x^3-3*x^2-4*x-1);
+   
+&& substinpart  
+
+   x.'diff(f(x),x,2);
+   substinpart(d^2,%,2);
+   substinpart(f1,f[1](x+1),0);
+   
+&& substitute  
+
+   subst(a,x+y,x+(x+y)^2+y);
+   subst(-%i,%i,a+b*%i);
+   subst(x,y,x+y);
+   subst(x=0,diff(sin(x),x));
+   errcatch(ev(diff(sin(x),x),x=0));
+   integrate(x^i,x),i=-1;
+   errcatch(subst(-1,i,integrate(x^i,x)));
+   matrix([a,b],[c,d]);
+   subst("[",matrix,%);
+
+&& substpart  
+
+   1/(x^2+2);
+   substpart(3/2,%,2,1,2);
+   27*y^3+54*x*y^2+36*x^2*y+y+8*x^3+x+1;
+   substpart(factor(piece),%,[1,2,3,5]);
+   1/x+y/x-1/z;
+   substpart(xthru(piece),%,[2,3]);
+   substpart("+",%,1,0);
+   ratsimp((k^2*x^2-1)*(cos(x)+eps)/(3*k+n[1])/(5*k-n[2]));
+   factor(%);
+   substpart(ratsimp(piece),%,1,[1,2]);
+   -substpart(-piece,%,1,1);
+   a+b/(x*(y+(a+b)*x)+1);
+   substpart(multthru(piece),%,1,2,1);
+
+&& sum
+
+   sum(i^2+2^i,i,0,n),simpsum;
+   sum(3^(-i),i,1,inf),simpsum;
+   sum(i^2,i,1,4)*sum(1/i^2,i,1,inf),simpsum;
+   sum(i^2,i,1,5);
+
+&& symmetric 
+
+   declare(h,symmetric);
+   h(x,z,y);
+
+&& syntax  
+
+   matchfix("{","}");
+   infix("|");
+   {x|x>0};
+   {x|x<2};
+   infix(".u.")$
+   infix(".i.")$
+   %th(4).u.%th(3);
+   %th(5).u.%th(4);
+   {1,2,3}$
+   {3,4,5}$
+   %th(2).u.%th(2).u.%;
+   infix(".u.",100,100)$
+   infix(".i.",120,120)$
+   %th(5).u.%th(5).u.%;
+   remove(".u.",operator)$
+   errcatch(%th(7).u.%th(3));
+   remove(["{","}",".i.",".u."],operator)$
+
+&& taylor
+
+   taylor(sqrt(1+a*x+sin(x)),x,0,3);
+   %^2;
+   taylor(sqrt(1+x),x,0,5);
+   %^2;
+   product((x^i+1)^2.5,i,1,inf)/(x^2+1);
+   taylor(%,x,0,3),keepfloat;
+   taylor(1/log(1+x),x,0,3);
+   taylor(cos(x)-sec(x),x,0,5);
+   taylor((cos(x)-sec(x))^3,x,0,5);
+   taylor((cos(x)-sec(x))^-3,x,0,5);
+   taylor(sqrt(1-k^2*sin(x)^2),x,0,6);
+   taylor((1+x)^n,x,0,4);
+   taylor(sin(x+y),x,0,3,y,0,3);
+   taylor(sin(x+y),[x,y],0,3);
+   taylor(1/sin(x+y),x,0,3,y,0,3);
+   taylor(1/sin(x+y),[x,y],0,3);
+
+&& taytorat  
+
+   taylor(1+x,[x,0,3]);
+   1/%;
+   taylor(1+x+y+z,[x,0,3],[y,1,2],[z,2,1]);
+   1/%;
+   taylor(1+x+y+z,[x,0,3],[y,0,3],[z,0,3]);
+   1/%;
+
+&& tellrat  
+
+   10*(1+%i)/(3^(1/3)+%i);
+   ratdisrep(rat(%)),algebraic;
+   tellrat(a^2+a+1);
+   a/(sqrt(2)+sqrt(3))+1/(a*sqrt(2)-1);
+   ratdisrep(rat(%)),algebraic;
+   tellrat(y^2=x^2);
+
+&& tellsimp  
+
+   matchdeclare(x,freeof(%i))$
+   %iargs:false$
+   tellsimp(sin(%i*x),%i*sinh(x));
+   trigexpand(sin(x+%i*y));
+   %iargs:true$
+   errcatch(0^0);
+   tellsimp(0^0,1),simp:false;
+   0^0;
+   remrule("^",%th(2)[1]);
+   tellsimp(sin(x)^2,1-cos(x)^2)$
+   (sin(x)+1)^2;
+   expand(%);
+   sin(x)^2;
+   kill(rules);
+   matchdeclare(a,true)$
+   tellsimp(sin(a)^2,1-cos(a)^2)$
+   sin(y)^2;
+   kill(rules);
+
+&& triangularize  
+
+   matrix([2,1-a,-5*b],[a,b,c]);
+   triangularize(%);
+
+&& trig  
+
+   sin(%pi/12)+tan(%pi/6);
+   ev(%,numer);
+   sin(1);
+   sin(1),numer;
+   beta(1/2,2/5);
+   ev(%,numer);
+   diff(atanh(sqrt(x)),x);
+   fpprec:25$
+   sin(0.5b0);
+   cos(x)^2-sin(x)^2;
+   ev(%,x:%pi/3);
+   diff(%th(2),x);
+   integrate(%th(3),x);
+   expand(%);
+   trigexpand(%);
+   trigreduce(%);
+   sech(x)^2*sinh(x)*tanh(x)/coth(x)^2 + cosh(x)^2*sech(x)^2*tanh(x)/coth(x)^2
+   	+ sech(x)^2*tanh(x)/coth(x)^2;
+   trigsimp(%);
+   ev(sin(x),exponentialize);
+   taylor(sin(x)/x,x,0,4);
+   ev(cos(x)^2-sin(x)^2,sin(x)^2=1-cos(x)^2);
+
+&& trigexpand  
+
+   x+sin(3*x)/sin(x),trigexpand,expand;
+   trigexpand(sin(10*x+y));
+
+&& trigreduce  
+   
+   -sin(x)^2+3*cos(x)^2+x;
+   expand(trigreduce(%));
+   declare(j,integer,e,even,o,odd);
+   sin(x+(e+1/2)*%pi);
+   sin(x+(o+1/2)*%pi);
+
+&& unorder  
+
+   a^2+b*x;
+   ordergreat(a);
+   a^2+b*x;
+   %-%th(3);
+   unorder();
+
+&& xthru  
+
+   ((x+2)^20-2*y)/(x+y)^20+(x+y)^-19-x/(x+y)^20;
+   xthru(%);
+ 
+&& zeroequiv  
+   
+   zeroequiv(sin(2*x)-2*sin(x)*cos(x),x);
+   zeroequiv(%e^x+x,x);
+   zeroequiv(log(a*b)-log(a)-log(b),a);

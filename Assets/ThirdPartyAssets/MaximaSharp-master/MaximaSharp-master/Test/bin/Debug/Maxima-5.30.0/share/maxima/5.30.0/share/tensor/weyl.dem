@@ -1,0 +1,161 @@
+/* Copyright (C) 2005 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Exploring the Riemann and Weyl tensors
+ *
+*/
+("Exploring the Riemann and Weyl tensors")$
+if get('itensor,'version)=false then load(itensor);
+("Define a standard metric")$
+remcomps(g);
+imetric(g);
+decsym(g,2,0,[sym(all)],[]);
+decsym(g,0,2,[],[sym(all)]);
+("Let us prove some basic identities of the curvature tensor")$
+ishow(icurvature([i,j,k],[l])+icurvature([i,k,j],[l]))$
+canform(%);
+ishow(icurvature([i,j,k],[l])+icurvature([j,k,i],[l])+icurvature([k,i,j],[l]))$
+%,ichr2$
+("Sometimes we need to simplify repeatedly...")$
+canform(%th(2))$
+nterms(%);
+canform(contract(rename(%th(2))))$
+nterms(%);
+canform(contract(rename(%th(2))));
+("Now define the covariant Riemann-tensor")$
+remcomps(R);
+kill(R);
+components(R([i,j,k,l],[]),'icurvature([i,j,k],[m])*g([l,m],[]));
+("which is antisymmetric in its middle two indices")$
+R([i,j,k,l],[])+R([i,k,j,l],[])$
+%,icurvature$
+%,ichr2$
+canform(contract(contract(expand(%))))$
+canform(contract(rename(%)));
+decsym(R,4,0,[anti(2,3)],[]);
+("and also antisymmetric in its first and last index")$
+R([i,j,k,l],[])+R([l,j,k,i],[])$
+%,icurvature$
+canform(contract(rename(%)))$
+%,ichr2$
+canform(contract(canform(simpmetderiv(canform(%)))))$
+canform(contract(rename(%)))$
+allsym:true;
+canten(%th(2));
+allsym:false;
+decsym(R,4,0,[anti(1,4)],[]);
+("But it is equal to itself with the first and last index pair swapped")$
+R([i,j,k,l],[])-R([j,i,l,k],[]),noeval;
+ishow(canform(%))$
+%,R$
+%,icurvature$
+canform(contract(rename(%)))$
+%,ichr2$
+canform(contract(canform(simpmetderiv(canform(%)))))$
+canform(contract(rename(%)))$
+allsym:true;
+canten(%th(2));
+allsym:false;
+("Contraction of R in the first and last indices yields zero")$
+ishow(canform(icurvature([k,i,j],[k])))$
+%,ichr2$
+canform(rename(expand(%)))$
+canform(contract(rename(%)))$
+ishow(simpmetderiv(%))$
+ishow(rename(canform(conmetderiv(%,imetric))))$
+("Now let us define the Ricci-tensor")$
+components(R([i,j],[]),'icurvature([i,j,k],[k]));
+("The Ricci tensor is symmetrical")$
+ishow(canform(R([i,j],[])-R([j,i],[])))$
+%,icurvature$
+ishow(canform(%))$
+%,ichr2$
+ishow(rename(canform(rename(expand(%)))))$              /* Terms remain! But see Frankel, p. 300 */
+rename(contract(rename(contract(rename(canform(simpmetderiv(%)))))))$
+rename(canform(factor(simpmetderiv(canform(%)))));
+decsym(R,2,0,[sym(all)],[]);
+decsym(R,0,2,[],[sym(all)]);
+("This is the curvature scalar")$
+components(R([],[]),R([i,j],[])*g([],[i,j]));
+("Now we can define the Weyl-tensor")$
+("To do this, we need an improved definition of the Riemann tensor")$
+("This definition will not mess up index ordering")$
+remcomps(R);
+("First, a helper function")$
+coni(x):=not atom(x) and op(x)="-"$
+("R() is now defined as a function taking two lists as parameters")$
+R(cov,con):=
+(
+    if length(con) > 0 then
+    (
+        cov:append(cov, map("-", con)),
+        con:[]
+    ),
+    if length(cov) = 4 then
+    block(
+        [tmp:idummy()],
+        if coni(cov[1]) then g([],[tmp,-cov[1]])*'R([tmp,cov[2],cov[3],cov[4]],[])
+        else if coni(cov[2]) then g([],[tmp,-cov[2]])*'R([cov[1],tmp,cov[3],cov[4]],[])
+        else if coni(cov[3]) then g([],[tmp,-cov[3]])*'R([cov[1],cov[2],tmp,cov[4]],[])
+        else if coni(cov[4]) then 'icurvature([cov[1],cov[2],cov[3]],[-cov[4]])
+        else g([tmp,cov[4]],[])*'icurvature([cov[1],cov[2],cov[3]],[tmp])
+    )
+    else if length(cov) = 2 then
+    (
+        [tmp:idummy()],
+        if coni(cov[1]) then g([],[tmp,-cov[1]])*'R([tmp,cov[2]],[])
+        else if coni(cov[2]) then g([],[tmp,-cov[2]])*'R([tmp,cov[1]],[])
+        else 'icurvature([cov[1],cov[2],tmp],[tmp])
+    )
+    else if length(cov) = 0 then
+    (
+        [tmp:idummy()],
+        'R([tmp],[tmp])
+    )
+    else funmake(R,append([[cov,con]], der))
+)$
+("Now we can define the Weyl tensor itself")$
+remcomps(W);
+components(W([i,j,k,l],[]),'R([i,j,k,l],[])+1/('dim-1)/('dim-2)*'R([],[])*(g([j,i],[])*g([l,k],[])-g([j,l],[])*g([i,k],[]))+1/('dim-2)*(g([k,i],[])*'R([l,j],[])-g([k,l],[])*'R([i,j],[])-g([j,i],[])*'R([l,k],[])+g([j,l],[])*'R([i,k],[])));
+("Let us prove that the Weyl-tensor is trace free in all its indices")$
+("We work in arbitrary dimensions")$
+dim:'dim;
+("This hand-crafted simplification function works well on W")$
+simpW(x):=
+(
+    x:canform(factor(canform(contract(canform(x))))),
+    x:ev(x,R),
+    x:canform(factor(canform(x))),
+    x:ev(x,icurvature),
+    x:canform(x),
+    x:ev(x,ichr2),
+    x:canform(contract(simpmetderiv(canform(contract(canform(x)))))),
+    flipflag:not flipflag,
+    x:simpmetderiv(canform(contract(simpmetderiv(x,stop))),stop),
+    flipflag:not flipflag,
+    canform(conmetderiv(canform(contract(simpmetderiv(canform(x),stop))),imetric))
+)$
+("And here we go...")$
+ishow(W([i,j,k,l],[])*g([-i,-j],[]))$
+simpW(%);
+ishow(W([i,j,k,l],[])*g([-i,-k],[]))$
+simpW(%);
+ishow(W([i,j,k,l],[])*g([-i,-l],[]))$
+simpW(%);
+ishow(W([i,j,k,l],[])*g([-j,-k],[]))$
+simpW(%);
+ishow(W([i,j,k,l],[])*g([-j,-l],[]))$
+simpW(%);
+ishow(W([i,j,k,l],[])*g([-k,-l],[]))$
+simpW(%);
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

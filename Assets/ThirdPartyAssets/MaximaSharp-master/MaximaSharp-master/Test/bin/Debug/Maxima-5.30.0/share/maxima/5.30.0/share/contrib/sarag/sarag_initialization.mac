@@ -1,0 +1,39 @@
+/* It makes the linear solver non-verbose */
+linsolvewarn : false;
+
+/* Necessary to use "lcm" */
+/*load("functs"); */
+
+/* Fix for the wrong redefinition of "evenp" and "oddp" */
+/* introduced in Maxima 5.9.3-3 */
+/* evenp(i) := is(mod(i,2)=0); */
+/* oddp(i) := is(mod(i,2)=1); */
+
+/* 
+lcm(a,b) := ratexpand(a*b/gcd(a,b));
+*/
+
+lst_gcd(lst) := 
+  if length(lst) = 1 then 
+    lst[1]
+  else
+    if length(lst) = 2 then
+      pair_gcd(lst[1],lst[2])
+    else
+      lst_gcd(cons(pair_gcd(lst[1],lst[2]),rest(lst,2)));
+
+pair_gcd(lhs,rhs) := gcd(lhs,rhs); /* just to avoid name conflicts */
+
+pair_lcm(lhs,rhs) := ratexpand((lhs*rhs)/pair_gcd(lhs,rhs));
+
+
+lst_lcm(lst) := 
+  if length(lst) = 1 then
+    lst[1]
+  else
+    if length(lst) = 2 then
+      pair_lcm(lst[1],lst[2])
+    else
+      lst_lcm(cons(pair_lcm(lst[1],lst[2]),rest(lst,2)));
+
+sarag_lcm([lst]) := lst_lcm(lst);

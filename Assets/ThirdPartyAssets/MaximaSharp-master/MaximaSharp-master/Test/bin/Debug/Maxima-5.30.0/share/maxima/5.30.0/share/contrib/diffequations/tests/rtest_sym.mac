@@ -1,0 +1,182 @@
+/* Test cases for symtest() function */
+
+use_pdiff:true;
+true;
+
+/*  E. S. Cheb-Terrab, A. D. Roche,  Symmetries and First Order ODE Patterns
+    Equation 32 */
+phi: (y*x^2)/(3*y*(x^2+y^2)*atan(x/y)+y^2*(1-3*x)+x^2*(1-2*x));
+x^2*y/(3*atan(x/y)*y*(y^2+x^2)+(1-3*x)*y^2+(1-2*x)*x^2);
+symtest(phi,xi:1/x^2+1/y^2,eta:0,y,x);
+0;
+
+ /* E. S. Cheb-Terrab, A. D. Roche,  Symmetries and First Order ODE Patterns
+    Equation 58 */
+symtest(phi:y^2/(sin(y-x)-x^2+2*x*y),xi:y^2,eta:y^2,y,x);
+0;
+
+/* Above, with change of variables */
+symtest(ev(phi,x=t,y=u),u^2,u^2,u,t);
+0;
+
+/* E. S. Cheb-Terrab, T. Koloknikov,  First Order ODEs, 
+   Symmetries and Linear Transformations, Equation 41 */
+sym:lie_FxHx(phi:u*t+a*b*t^(a+1)*exp(u)-a/t+a*t*(log(t)+c),u,t);
+[1/t,-(a/t^2)];
+symtest(phi,xi:sym[1],eta:sym[2],u,t);
+0;
+/* Equation 40 */
+sym:ode1_a(phi:b*exp(a*x*y)*x^a+(x^2-1)*y/x-1/x^2+log(x)+c,y,x);
+[1/x,-((x*y+1)/x^3)];
+symtest(phi,xi:sym[1],eta:sym[2],y,x);
+0;
+
+/* Kamke 84
+   E. S. Cheb-Terrab, T. Koloknikov,  First Order ODEs, 
+   Symmetries and Linear Transformations, Equation 55 */
+sym:lie_FxHx(phi:f(a*x+b*y),y,x);
+[1,-a/b];
+symtest(phi,xi:sym[1],eta:sym[2],y,x);
+0;
+
+/* E. S. Cheb-Terrab, T. Koloknikov,  First Order ODEs, 
+   Symmetries and Linear Transformations, Equation 59 */
+sym:lie_FxHx(phi:(-y^2+2*x*y-sin(y-x))/x^2,y,x);
+[x^2,x^2];
+symtest(phi,xi:sym[1],eta:sym[2],y,x);
+0;
+
+/*  Kamke ODE 85 
+    E. S. Cheb-Terrab, A. D. Roche,  Symmetries and First Order ODE Patterns
+    Equation 66 
+ (Need to load pdiff) */
+symtest(phi:-x^(a-1)*y^(1-b)*H(x^a/a+y^b/b),xi:x^(1-a),eta:-y^(1-b),y,x);
+0;
+
+/*  Kamke ODE 120 */
+symtest(phi:y*(x*log(x^2/y)+2)/x,xi:1,eta:2*y/x,y,x);
+0;
+
+/* Kamke ODE 128
+   E. S. Cheb-Terrab, T. Koloknikov,  First Order ODEs, 
+   Symmetries and Linear Transformations, Equation 28 */
+sym:ode1_a(phi:(f(x)*g(x^a*y)-a*y)/x,y,x);
+[x^(1-a)/f(x),-(a*y/(x^a*f(x)))];
+symtest(phi,xi:sym[1],eta:sym[2],y,x);
+0;
+
+/*  Kamke ODE 189
+    E. S. Cheb-Terrab, A. D. Roche,  Symmetries and First Order ODE Patterns
+    Equation 93 */
+symtest(phi:-(a*y^n-b*x^(n*(m+1)))/x^(n*(m+1)-m),xi:x,eta:(m+1)*y,y,x);
+0;
+
+/* From Maple odetools docs */
+sym:ode1_a(phi:f((y-x*log(x))/x)+log(x),y,x);
+[x,y+x];
+symtest(phi,xi:sym[1],eta:sym[2],y,x);
+0;
+
+/* Zwillinger p261. This tests case 2.  
+   Expected [xi=x,eta=y/2] but this answer is OK */
+sym:ode1_a(phi:-(y*(y^2-x))/x^2, y, x);
+[-1,-y/x];
+symtest(phi,xi:sym[1],eta:sym[2],y,x);
+0;
+symtest(phi,x,y/2,y,x);
+0; /* The expected answer is OK too */
+mu:lie_integrating_factor(phi,xi,eta);
+-(x^2/y^3);
+ans:lie_exact(phi,mu,y,x);
+-((2*x*y^2-x^2)/(2*y^2))=%c;
+ans:first(solve(ans,y));
+y=-x/(sqrt(2)*sqrt(x+%c));
+ode_check('diff(y,x)=phi,ans);
+0;
+/* and the whole thing in one go */
+ode1_lie(phi,y,x);
+-((2*x*y^2-x^2)/(2*y^2))=%c;
+
+/* This is a subcase of the case above.  It seems OK */
+sym:lie_FxHx(phi:(x-%e^(2*u))/x^2,u,x);
+[-1,-(1/x)];
+symtest(phi,xi:sym[1],eta:sym[2],u,x);
+0;
+
+/* and this is a typo that returns false via case 3 (probably OK) */
+sym:ode1_a(phi:x^2/(y*(y^2-x)), y, x);
+false;
+
+/* Murphy 180 - exact - can be solved by ode2() */
+ode1_lie(phi:y*(1+2*x*y)/x,y,x);
+false; /* Investigate me */
+ode1_a(phi:y*(1+2*x*y)/x,y,x);
+false;
+
+/* Unit tests for lie_symgen_separable
+
+   solve 'diff(y,x) = phi(x,y) = f(x)*g(y)
+
+   This is using a sledge hammer to crack walnuts, but educational
+
+ */
+s:lie_symgen_separable(f:cos(x),g:exp(y),y,x);
+[1/cos(x),0];
+symtest(phi:f*g,xi:s[1],eta:s[2],y,x);
+0;
+mu:lie_integrating_factor(phi,xi,eta);
+-%e^-y;
+ans:lie_exact(phi,mu,y,x);
+%e^-y*(sin(x)*%e^y+1) = %c;
+solve(ans,y);
+[y = -log(%c-sin(x))];
+ode_check('diff(y,x)=phi,%[1]);
+0;
+
+s:lie_symgen_separable(f:cos(x),g:tan(y),y,x);
+[1/cos(x),0];
+symtest(phi:f*g,xi:s[1],eta:s[2],y,x);
+0;
+mu:lie_integrating_factor(phi,xi,eta);
+-1/tan(y);
+ans:lie_exact(phi,mu,y,x);
+sin(x)-log(sin(y)) = %c;
+solve(ans,y);
+[y = asin(%e^(sin(x)-%c))];
+ode_check('diff(y,x)=phi,%[1]);
+0;
+
+
+/* Unit tests for lie_symgen_linear
+
+   solve 'diff(y,x) = phi(x,y) = f(x)*y + g(x)
+
+ */
+s:lie_symgen_linear(f:2,g:1,y,x);
+[1/2,%c*%e^(2*x)];
+symtest(phi:f*y+g,xi:s[1],eta:s[2],y,x);
+0;
+mu:lie_integrating_factor(phi,xi,eta);
+-2/(2*y-2*%c*%e^(2*x)+1);
+ans:lie_exact(phi,mu,y,x);
+2*x-log(-2*y+2*%c*%e^(2*x)-1) = %c;
+solve(ans,y);
+[y = -((%e^(2*x-%c)-2*%c*%e^(2*x)+1)/2)];
+ode_check('diff(y,x)=phi,%[1]);
+0;
+
+s:lie_symgen_linear(f:1,g:sin(x)+x,y,x);
+[1,(sin(x)-cos(x)+2*%c*%e^x-2)/2];
+symtest(phi:f*y+g,xi:s[1],eta:s[2],y,x);
+0;
+mu:lie_integrating_factor(phi,xi,eta);
+-2/(2*y+sin(x)+cos(x)-2*%c*%e^x+2*x+2);
+ans:lie_exact(phi,mu,y,x);
+x-log(2*y+sin(x)+cos(x)-2*%c*%e^x+2*x+2) = %c;
+solve(ans,y);
+[y = -((sin(x)+cos(x)-%e^(x-%c)-2*%c*%e^x+2*x+2)/2)];
+ode_check('diff(y,x)=phi,%[1]);
+0;
+
+use_pdiff:false;
+false;

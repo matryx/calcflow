@@ -1,0 +1,41 @@
+prefix ("@@");
+@@ x := 1 - x;
+prefix ("prefx");
+prefx u := 1/u;
+infix ("##");
+a ## b := b - a;
+infix ("infx");
+x infx y := x^y;
+nary ("~~");
+"~~" ([L]) := first (L) - apply ("+", rest (L));
+nary ("nry");
+"nry" ([L]) := apply (".", L);
+postfix ("==");
+x == := x^x;
+postfix ("postfx");
+z postfx := z*z;
+matchfix ("<-", "->");
+"<-" ([L]) := 1 + L;
+matchfix ("matchfx", "xfhctam");
+"matchfx" ([L]) := 1 - L;
+nofix ("--");
+-- := print (FOO);
+nofix ("nofx");
+"nofx" () := print (BAR);
+
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$@@)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$prefx)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$##)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$infx)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '~~@)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$nry)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$==)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$postfx)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$<-)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$->)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$matchfx)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$xfhctam)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$--)))
+:lisp (let ((*print-readably* t)) (print (symbol-plist '$nofx)))
+
+save ("tmp_define_ops.lisp", all);

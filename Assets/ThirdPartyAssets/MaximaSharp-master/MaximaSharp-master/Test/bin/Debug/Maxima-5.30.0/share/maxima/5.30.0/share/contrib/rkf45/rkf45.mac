@@ -1,0 +1,185 @@
+/*
+--------------------------------------------------------------------------------
+Copyright (C) 2011 Panagiotis Papasotiriou
+
+This software is released under the terms of the GNU General Public License.
+See <http://www.gnu.org/licenses/> for details.
+--------------------------------------------------------------------------------
+     Version: 1
+Date created: September 12, 2011
+ Last update: October 26, 2011
+      Author: Panagiotis J. Papasotiriou
+--------------------------------------------------------------------------------
+Brief description:
+
+rkf45 is a Maxima function for solving initial value problems with automatic
+step size and error control.
+This is an implementation of the Runge-Kutta-Fehlberg 4th-5th-order scheme.
+--------------------------------------------------------------------------------
+Syntax:
+
+rkf45(ode,func,init,interval,options)
+rkf45([ode1,ode2,...],[func1,func2,...],[init1,init2,...],interval,options)
+
+The first form solves a first-order differential equation, ode, with respect to
+the initial condition init, where func is the dependent variable and init is the
+value of the dependent variable at the initial point.
+
+Similarly, the second form solves a system of first-order differential
+equations, ode1,ode2,..., with respect to the initial conditions
+init1,init2,..., where func1,func2,... are the dependent variables and
+init1,init2,... are the values of the dependent variables at the initial point.
+
+Differential equation(s) should be given as expressions depending only on the
+independent and dependent variables, and should define the derivative of the
+dependent variable with respect to the independent variable. For instance, the
+differential equation y'(x)+(x+1)*y=0 should be given as -(x+1)*y.
+The argument "interval" should be a list of three elements. The first element
+identifies the independent variable, while the second and third elements are the
+initial and final values for the independent variable, for instance: [x,0,6].
+Initial value does not need to be less than final value, so an interval like
+[x,6,0] is also valid.
+
+rkf45 accepts the following optional arguments:
+
+*      full_solution: A Boolean. If set to true, a full list of the solution at
+                      all intermediate points will be returned. If set to false,
+                      only the solution at the last integration point is
+                      returned. Default: true.
+
+* absolute_tolerance: The desired absolute tolerance of the result. Default:
+                      1e-6.
+
+*     max_iterations: Maximum number of iterations. Default: 10000.
+
+*            h_start: Initial integration step. Default: one 100th of the
+                      integration interval, (interval[3]-interval[2])/100.
+
+*             report: A Boolean. If set to true, rkf45 prints a report at
+                      exit, giving details about the calculations done.
+                      Default: false.
+
+Integration step size ia selected automatically in such a way that the estimated
+local error is less than user-specified absolute tolerance.
+The result is returned as a list with n+1 columns, where n is the number of
+first-order differential equations. The first column contains the values of the
+independent variable selected by the algorithm. The second column contains the
+values of the first dependent variable at the corresponding value of the
+independent variable. Similarly, the third column contains the values of the
+second dependent variable at the corresponding value of the independent
+variable, and so on.
+
+rkf45 can be used to solve moderately stiff initial value problems, although it
+is not designed for that purpose.
+--------------------------------------------------------------------------------
+Examples:
+
+(1) A first-order differential equation, y'=x*(y-1)+3, with y(0)=-2:
+    rkf45(x*(y-1)+3,y,-2,[x,0,4]) returns solution at selected points from x=0
+    to x=4.
+
+(2) A second-order differential equation, y''=x+y*y', with y(-1)=2, y'(-1)=0:
+    rkf45([y2,x+y1*y2],[y1,y2],[2,0],[x,-1,4]) returns solution at selected
+    points from x=-1 to x=4.
+
+See rkf45.dem for more examples. Detailed documentation and several examples
+discussed in detail can be found at the accompanying document rkf45.pdf.
+--------------------------------------------------------------------------------
+*/
+rkf45(odes,funcs,initial,interval,[options]):=block(
+  [numer:true,atol,save_steps,maxit,show_report,xi,xc,yi,h,not_ok,
+   k1,k2,k3,k4,k5,k6,trunc_error,h_optimal,estimated_errors,step_extrema,
+   x_tiny:1e-7*interval[3],bad_steps:0,sol],
+  /* Check interval for errors */
+  if (not(listp(interval))) then error("Error: interval should be a list, but found",interval,"instead."),
+  /* Set optional arguments */
+  atol:assoc('absolute_tolerance,options,1e-6),
+  save_steps:assoc('full_solution,options,true),
+  maxit:assoc('max_iterations,options,10000),
+  show_report:assoc('report,options,false),
+  h:assoc('h_start,options,(interval[3]-interval[2])/100),
+  /* Convert arguments to lists, if necessary */
+  if (not(listp(odes))) then odes:[odes],
+  if (not(listp(funcs))) then funcs:[funcs],
+  if (not(listp(initial))) then initial:[initial],
+  /* Define right-hand-side function */
+  local(f_rhs),
+  define(funmake(f_rhs,cons(interval[1],funcs)),odes),
+  translate(f_rhs),
+  /* Initialize */
+  xi:interval[2], yi:initial,
+  /* Check initial values */
+  if member(false,map(numberp,apply(f_rhs,cons(xi,yi)))) then error("Error: initial should be a list of numbers, but found",funcs,"instead."),
+  /* Set up the rest */
+  estimated_errors:[1e30,-1e30],
+  step_extrema:[1e30,-1e30],
+  if save_steps then sol:[cons(xi,yi)],
+  not_ok:true,
+  /* Main loop */
+  for i:1 thru maxit do (
+    /* Compute solution at xi+h */
+    xc:xi,
+    k1:h*apply(f_rhs,cons(xi,yi)),
+    k2:h*apply(f_rhs,cons(xi+0.25*h,yi+0.25*k1)),
+    k3:h*apply(f_rhs,cons(xi+0.375*h,yi+0.09375*k1+0.28125*k2)),
+    k4:h*apply(f_rhs,cons(xi+9.230769230769231e-1*h,yi+8.793809740555303e-1*k1
+                                                      -3.277196176604461*k2
+                                                      +3.320892125625854*k3)),
+    k5:h*apply(f_rhs,cons(xi+h,yi+2.032407407407407*k1-8*k2+7.173489278752437*k3
+                                 -2.058966861598441e-1*k4)),
+    k6:h*apply(f_rhs,cons(xi+0.5*h,yi-2.962962962962963e-1*k1+2*k2
+                                     -1.381676413255361*k3
+                                     +4.529727095516569e-1*k4-0.275*k5)),
+    /* Estimate local truncation error */
+    trunc_error:lmax(abs(2.777777777777778e-3*k1-2.994152046783626e-2*k3
+                        -2.919989367357788e-2*k4+0.02*k5+3.636363636363636e-2*k6
+                        ))/abs(h),
+    if (trunc_error<atol) then (
+      /* Step accepted, do it */
+      xi:xc+h,
+      yi:yi+1.157407407407407e-1*k1+5.489278752436647e-1*k3
+           +5.353313840155946e-1*k4-0.2*k5,
+      if save_steps then sol:endcons(cons(xi,yi),sol),
+      estimated_errors[1]:min(trunc_error,estimated_errors[1]),
+      estimated_errors[2]:max(trunc_error,estimated_errors[2]),
+      step_extrema[1]:min(h,step_extrema[1]),
+      step_extrema[2]:max(h,step_extrema[2]),
+      /* Return if final point is reached. */
+      if abs(xi-interval[3])<=x_tiny then (
+        not_ok:false,
+        if not(save_steps) then sol:cons(xi,yi),
+        if show_report then (
+          print("------------------------------------------------------"),
+          print("Info: rkf45:"),
+          print("   Integration points selected:",i+1-bad_steps),
+          print("    Total number of iterations:",i),
+          print("           Bad steps corrected:",bad_steps),
+          print("       Minimum estimated error:",estimated_errors[1]),
+          print("       Maximum estimated error:",estimated_errors[2]),
+          print("Minimum integration step taken:",step_extrema[1]),
+          print("Maximum integration step taken:",step_extrema[2]),
+          print("------------------------------------------------------")
+        ),
+        return()
+      )
+    ) else (
+      /* Step is not accepted, must try again with optimal step */
+      bad_steps:bad_steps+1
+    ),
+    /* Prepare next step */
+    h_optimal:min(max(0.84089641525371*(atol/trunc_error)^0.25,0.1),4)*h,
+    if h_optimal>0 then
+      if xi+h_optimal<interval[3] then h:h_optimal else h:interval[3]-xi
+    else if xi+h_optimal>interval[3] then h:h_optimal else h:interval[3]-xi
+  ),
+  /* Warn user if necessary */
+  if not_ok then (
+    print("Warning: rkf45: Integration stopped at x =",xi,"(stiff problem?)"),
+    print("                Iterations limit has been reached. Check if differential"),
+    print("                equations/initial conditions are given correctly, reduce"),
+    print("                accuracy, and/or increase maximum number of steps.")
+  ),
+  /* Return solution */
+  return(sol)
+)$
+/*----------------------------------------------------------------------------*/

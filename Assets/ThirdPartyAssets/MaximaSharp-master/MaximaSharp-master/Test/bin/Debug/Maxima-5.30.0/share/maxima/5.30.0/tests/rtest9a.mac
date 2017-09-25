@@ -1,0 +1,62 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+kill(all);
+done;
+deftaylor(f(x),x^2+sum(x^i/(2^i*i!^2),i,4,inf));
+[f]$
+taylor(%e^sqrt(f(x)),x,0,4);
+1+x+x^2/2+3073*x^3/18432+12817*x^4/307200$
+
+niceindices(powerseries(log(sin(x)/x),x,0));
+/*('sum((-1)^i1*2^(2*i1)*bern(2*i1)*x^(2*i1)/(i1*(2*i1)!),i1,1,inf))/2$*/
+'sum((-1)^i*2^(2*i-1)*bern(2*i)*x^(2*i)/(i*(2*i)!),i,1,inf);
+
+ev(x+sin(3*x)/sin(x),trigexpand,expand);
+-sin(x)^2+3*cos(x)^2+x$
+trigexpand(sin(10*x+y));
+cos(10*x)*sin(y)+sin(10*x)*cos(y)$
+-sin(x)^2+3*cos(x)^2+x;
+-sin(x)^2+3*cos(x)^2+x$
+expand(trigreduce(%));
+2*cos(2*x)+x+1$
+declare(j,integer,e,even,o,odd);
+done$
+sin(x+(e+1/2)*%pi),expand;
+cos(x)$
+sin(x+(o+1/2)*%pi),expand;
+-cos(x)$
+(linel:500,diff(exp(x^2+y)/(x+y),x,2));
+4*x^2*%e^(y+x^2)/(y+x)+2*%e^(y+x^2)/(y+x)-4*x*%e^(y+x^2)/(y+x)^2 +2*%e^(y+x^2)/(y+x)^3$
+
+sconcat(optimize(%));
+''(sconcat("block([%1,%2,%3,%4],%1:y+x,%2:x^2,%3:%e^(y+%2),%4:1/%1,4*%2*%4*%3+2*%4*%3-4*x*%3/%1^2+2*%3/%1^3)"))$
+
+linel:79;
+79$
+laplace(%e^(2*t+a)*sin(t)*t,t,s);
+%e^a*(2*s-4)/(s^2-4*s+5)^2$
+'integrate(sinh(a*x)*f(t-x),x,0,t)+b*f(t) = t^2;
+'integrate(f(t-x)*sinh(a*x),x,0,t)+b*f(t) = t^2$
+
+expand(laplace(%,t,s),0,0);
+''(expand(b*laplace(f(t),t,s)+a*laplace(f(t),t,s)/(s^2-a^2) = 2/s^3,0,0))$
+
+linsolve([%],['laplace(f(t),t,s)]);
+['laplace(f(t),t,s) = (2*s^2-2*a^2)/(b*s^5+(a-a^2*b)*s^3)]$
+
+(exp : %,0);
+0$
+
+assume(a>0,b>0,a*b>1);
+[a>0,b>0,a*b>1];
+ilt(ev(exp[1]),s,t);
+f(t)=-2*cosh(sqrt(a*b*(a*b-1))*t/b)/(a^3*b^2-2*a^2*b+a)+a*t^2/(a*b-1)+2/(a^3*b^2-2*a^2*b+a)$
+forget(a>0,b>0,a*b>1);
+[a>0,b>0,a*b>1];
+

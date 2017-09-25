@@ -1,0 +1,43 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Demonstrating ic_convert()
+ */
+if get('itensor,'version)=false then load(itensor);
+if get('ctensor,'version)=false then load(ctensor);
+("The RHS of the heat transport equation")$
+dim:3;
+remcomps(g);
+imetric(g);
+eqn:ishow(td = canform(rename(expand(covdiff(
+     -k([],[])*covdiff(t([],[]),i),j)*g([],[i,j]))))+ source)$
+
+("Convert it to a CTENSOR program")$
+heat:ic_convert(eqn);
+
+("Next, write the equation in Cartesian coordinates:")$
+ct_coords:[x,y,z];
+lg:ident(3);
+ug:invert(lg);
+christof(mcs);
+depends([t,k],ct_coords);
+ev(heat);
+
+("Now get the equation in spherical coordinates.")$
+ct_coords:[r,th,ph];
+lg:matrix([1,0,0],[0,r^2,0],[0,0,r^2*sin(th)^2])$
+ug:invert(lg)$
+christof(all);
+remove([t,k],dependency);
+depends(t,ct_coords);
+ev(heat);
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

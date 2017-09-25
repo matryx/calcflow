@@ -1,0 +1,172 @@
+/* Filename twovar.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/* program number 6: twovar(), a function to perform a two variable
+   expansion to order epsilon for n weakly coupled perturbed nonlinear
+   oscillators. see page 94 in "perturbation methods, bifurcation
+   theory and computer algebra". */
+
+
+
+twovar():=block(
+
+choice:read("do you want to enter new data (y/n)"),
+
+if choice = n then go(jump1),
+
+/* input d.e.'s */
+n:read("number of d.e.'s"),
+
+print("the",n,"d.e.'s will be in the form:"),
+print("x[i]'' + w[i]^2 x[i] = e f[i](x[1],...,x[",n,"],t)"),
+
+for i:1 thru n do
+    x[i]:read("enter symbol for x[",i,"]"),
+
+for i:1 thru n do
+    depends(x[i],t),
+
+for i:1 thru n do
+    w[i]:read("enter w[",i,"]"),
+
+for i:1 thru n do
+    f[i]:read("enter f[",i,"]"),
+
+jump1,
+
+/* update eqs for substitution of resonant values on 2nd time thru */
+for i:1 thru n do(
+   w[i]:ev(w[i]),
+   f[i]:ev(f[i])),
+
+/* echo back the d.e.'s */
+print("the d.e.'s are entered as:"),
+for i:1 thru n do
+    print(x[i],"'' +",w[i]^2*x[i],"=",e*f[i]),
+
+print("the method assumes a solution in the form:"),
+print("x[i] = x0[i] + e x1[i]"),
+print("where x0[i] = a[i](eta) cos w[i] xi + b[i](eta) sin w[i] xi"),
+print("where xi = t and eta = e t"),
+
+/* don't use a or b as parameters in the given d.e.'s */
+depends([a,b],eta),
+
+for i:1 thru n do
+    x0[i]:a[i]*cos(w[i]*xi)+b[i]*sin(w[i]*xi),
+
+for i:1 thru n do
+    g[i]:ev(f[i],t=xi),
+
+for i:1 thru n do(
+    for j:1 thru n do
+        g[i]:ev(g[i],x[j]::x0[j])),
+    
+for i:1 thru n do(
+    g[i]:g[i]-2*diff(x0[i],xi,1,eta,1),
+    g[i]:ev(g[i],diff),
+    g[i]:expand(trigreduce(expand(g[i])))),    
+
+/* collect secular terms */
+for i:1 thru n do(
+    s[i]:coeff(g[i],sin(w[i]*xi)),
+    c[i]:coeff(g[i],cos(w[i]*xi))),
+
+/* display secular terms */
+print("removal of secular terms in the x1[i] eqs. gives:"),
+
+for i:1 thru n do(
+    print(s[i],"= 0"),
+    print(c[i],"= 0")),
+
+abeqs:append(makelist(s[i],i,1,n),makelist(c[i],i,1,n)),
+
+choice2:read("do you want to transform to polar coordinates (y/n)"),
+
+if choice2=n then go(jump2),
+
+/* transform to polar coordinates */
+depends([r,theta],eta),
+trans:makelist([a[i]=r[i]*cos(theta[i]),b[i]=r[i]*sin(theta[i])],i,1,n),
+inteqs:ev(abeqs,trans,diff),
+rtheqs:solve(inteqs,append(makelist(diff(r[i],eta),i,1,n),
+                     makelist(diff(theta[i],eta),i,1,n))),
+rtheqs:trigsimp(rtheqs),
+rtheqs:expand(trigreduce(rtheqs)),
+print(rtheqs),
+
+jump2,
+
+choice3:read("do you want to search for resonant parameter values (y/n)"),
+
+if choice3=n then go(end),
+
+/* obtain frequencies which appear on rhs's of d.e.'s */
+
+/* define pattern matching rules to isolate freqs */
+matchdeclare([dummy1,dummy2],true),
+defrule(cosarg,dummy1*cos(dummy2),dummy2),
+defrule(sinarg,dummy1*sin(dummy2),dummy2),
+
+for i:1 thru n do(
+/* change sum to a list */
+    temp1:args(g[i]),
+/* remove constant terms */
+    temp2:map(trigidentify,temp1),
+/* isolate arguments of trig terms */
+    temp3:apply1(temp2,cosarg,sinarg),
+    temp4:ev(temp3,xi=1),
+/* remove duplicate arguments */
+    freq[i]:setify(temp4)),
+
+/* display frequencies */                   
+for i:1 thru n do(
+    print(x[i],"eq's resonant freq =",w[i]),
+    print("freqs on rhs =",freq[i])),
+
+jump3,
+
+par:read("which parameter to search for ?"),
+
+/* compute resonant values of desired parameter */
+resvals:[],
+for i:1 thru n do(
+   for j:1 thru length(freq[i]) do(
+      res:solve(part(freq[i],j)=w[i],par),
+      if (res#[] and res#all) then resvals:append(resvals,res),
+      res:solve(part(freq[i],j)=-w[i],par),
+      if (res#[] and res#all) then resvals:append(resvals,res))),
+
+/* eliminate duplicate parameter values */
+resvalues:setify(resvals),
+
+/* display resonant parameter values */
+print(resvalues),
+
+choice4:read("do you want to search for another parameter (y/n) ?"),
+
+if choice4=y then go(jump3),
+
+end," ")$
+
+/* auxiliary functions */
+
+trigidentify(exp):=if freeof(sin,exp) and freeof(cos,exp) then 0 else exp$
+
+setify(list):=(
+    set:[list[1]],
+    for i:2 thru length(list) do(
+        if not member(list[i],set) then set:cons(list[i],set)),
+    set)$

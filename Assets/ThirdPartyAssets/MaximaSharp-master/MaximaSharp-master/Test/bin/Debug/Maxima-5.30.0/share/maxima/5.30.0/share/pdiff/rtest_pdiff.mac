@@ -1,0 +1,300 @@
+(load(pdiff),kill(all), 0);
+0$ 
+
+pderivop(f);
+f$
+
+pderivop(f,0);
+f$
+
+pderivop(42,0)(x);
+42$
+
+pderivop(42,1)(x);
+0$
+
+op(pderivop(%pi));
+lambda$
+
+pderivop(%pi)(a,b,2);
+%pi$
+
+pderivop(12.1,1)(x);
+0$
+
+pderivop('log,1)(x);
+1/x$
+
+pderivop('abs,1)(x);
+x/abs(x)$
+
+pderivop('acos,2)(x);
+''(diff(acos(x),x,2))$
+
+pderivop(bessel_i,0,1)(n,x);
+''(diff(bessel_i(n,x),x))$
+
+pderivop(bessel_j,0,1)(n,x);
+''(diff(bessel_j(n,x),x))$
+
+pderivop(bessel_k,0,1)(n,x);
+''(diff(bessel_k(n,x),x))$
+
+pderivop(bessel_y,0,1)(n,x);
+''(diff(bessel_y(n,x),x))$
+
+makelist(pderivop('sqrt,k)(x),k,0,5);
+''(makelist(diff(sqrt(x),x,k),k,0,5))$
+
+pderivop('erf,1)(x);
+''(diff(erf(x),x))$
+
+[pderivop("^",1,0)(a,b),pderivop("^",0,1)(a,b), pderivop("^",1,1)(a,b)];
+''([diff(a^b,a), diff(a^b,b),diff(a^b,a,1,b,1)])$
+
+[pderivop("^^",1,0)(a,b),pderivop("^^",0,1)(a,b), pderivop("^^",1,1)(a,b)];
+''([diff(a^^b,a), diff(a^^b,b),diff(a^^b,a,1,b,1)])$
+
+[pderivop(".",1,0)(a,b),pderivop(".",0,1)(a,b), pderivop(".",1,1)(a,b)];
+''([diff(a.b,a), diff(a.b,b),diff(a.b,a,1,b,1)])$
+
+is(op(pderivop(lambda([[x]], x),1)) = 'pderivop);
+true$
+
+(gradef(ff(a,b),a+b,a-b), [pderivop(ff,1,0)(x,y), pderivop(ff,0,1)(x,y), pderivop(ff,1,1)(x,y)]);
+[y+x,x-y,1]$
+
+errcatch(pderivop(ff,1));
+[]$
+
+(remove(ff,gradef),0);
+0$
+
+(gradef(ff(a), ff(a-1)), [pderivop(ff)(x), pderivop(ff,1)(x), pderivop(ff,2)(x)]);
+[ff(x),ff(x-1),ff(x-2)]$
+
+(remove(ff,gradef),0);
+0$
+
+convert_to_diff(pderivop(f[5],1,1)(x,y));
+''(diff(f[5](x,y),x,1,y,1))$
+
+errcatch(pderivop(f,1,2)(x));
+[]$
+
+errcatch(pderivop(f,1,2)());
+[]$
+
+errcatch(pderivop(f,1,2)(x,x,x));
+[]$
+
+(pderivop(f,x), subst(x = 5,%%));
+pderivop(f,5)$
+
+(pderivop(f,x,y), ratsubst(5,x,%%), ratsubst(7,y,%%));
+pderivop(f,5,7)$
+
+(clear_rules(), tellsimpafter(pderivop(f,1)(a),1), tellsimpafter(pderivop(f,2)(a),1),0);
+0$
+
+subst(x=a, diff(f(x),x,2) + diff(f(x),x));
+2$
+
+(clear_rules(),0);
+0$
+
+(commute_partial_derivatives : true,0);
+0$
+
+pderivop(pderivop(f,1,0),0,1) - pderivop(f,1,1);
+0$
+
+(commute_partial_derivatives : false,0);
+0$
+
+is(pderivop(pderivop(f,1,0),0,1) = pderivop(f,1,1));
+false$
+
+(reset(commute_partial_derivatives),0);
+0$
+
+pderivop(lambda([s], s^2),1)(x);
+2 *x$
+
+pderivop(lambda([s], 42),1)(x);
+0$
+
+pderivop(lambda([a,b], f(a,b)))(x,y);
+f(x,y)$
+
+pderivop(lambda([a,b], f(a,b)),1,0)(x,y) - diff(f(x,y),x);
+0$
+
+pderivop(lambda([a,b], f(a,b)),1,1)(x,y) - diff(f(x,y),x,1,y,1);
+0$
+
+(diff(f(x,y),x,1,y,1), subst([x=1,y=2],%%), %% - at(diff(f(x,y),x,1,y,1),[x=1,y=2]));
+0$
+
+(f(x) := x^3, g : pderivop(f,1), [op(g), g(6)]);
+[lambda,108]$
+
+(remfunction(f), remvalue(g),0);
+0$
+
+(commute_partial_derivatives : true, pderivop(pderivop(f,0,1),1,0));
+pderivop(f,1,1)$
+
+/* examples from pdiff-doc.pdf */
+
+ratdisrep(taylor(f(x+x^2),x,0,2));
+''(f(0) + at(diff(f(x + x^2),x),x = 0) * x + at(diff(f(x + x^2),x,2),x = 0) * x^2/2)$
+
+(f(x - c*t) + f(x + c * t), expand(diff(%%,t,2) - c^2 * diff(%%,x,2)));
+0$
+
+(diff(f(x,y),x,1,y,1), subst(p(s),y, %%), 
+  convert_to_diff(%%), ev(%%, 'diff, 'at));
+''(subst(p(s),y, diff(f(x,y),x,1,y,1)))$
+
+(tellsimpafter(pderivop(f,1)(1),1), 
+  tellsimpafter(pderivop(f,2)(1),2), 
+  diff(f(x),x,2) + diff(f(x),x),
+  subst(1,x,%%));
+3$
+
+(clear_rules(),0);
+0$
+
+(tellsimpafter(pderivop(f,1,0)(0,0),a),
+  tellsimpafter(pderivop(f,0,1)(0,0),b),
+  sublis([x = 0, y = 0], diff(f(x,y),x) + diff(f(x,y),y)));
+a+b$
+
+(clear_rules(),0);
+0$
+
+(commute_partial_derivatives : true, pderivop(pderivop(f,3,4),1,2));
+pderivop(f,4,6)$
+
+(pderivop(f,1), apply(%%,[z]));
+''(diff(f(z),z))$
+
+(f(x) := x^2, pderivop(f,2), apply(%%,[10]));
+2$
+
+(remfunction(f),0);
+0$
+
+(pderivop(lambda([x],x^2),1), op(%%));
+lambda$
+
+(de : 4*x^2 * 'diff(y,x,2) + 4*x * 'diff(y,x,1) + (x-1)*y = 0,
+ de : subst(g(x^n),y,de),
+ de : ev(de, diff),
+ de : radcan(subst(x^(1/n),x, de)),
+ de : subst(1/2,n, de),
+ convert_to_diff(de)),logexpand;
+x^2 * 'diff(g(x),x,2)+x*'diff(g(x),x,1)+(x^2-1)*g(x)=0$
+
+(remvalue(de),0);
+0$
+
+/* end of examples from pdiff-doc.pdf */
+
+convert_to_diff([-1,42, 123.0, -7.8b0, x, cos(q), a+b, [], a # b, f(x)]);
+[-1,42, 123.0, -7.8b0, x, cos(q), a+b, [], a # b, f(x)]$
+
+convert_to_diff(f[5](x));
+f[5](x)$
+
+convert_to_diff(f[g[5]](x));
+f[g[5]](x)$
+
+convert_to_diff(pderviop(f,4,5));
+pderviop(f,4,5)$
+
+convert_to_diff(diff(f(x),x));
+'diff(f(x),x,1)$
+
+convert_to_diff(diff(f(x),x,5));
+'diff(f(x),x,5)$
+
+convert_to_diff(42 + diff(f(x),x,5) + diff(g(x),x));
+42 + 'diff(f(x),x,5) + 'diff(g(x),x)$
+
+(diff(f(x),x), subst(x=10,%%), convert_to_diff(%%), ev(%%, f(x) := x^7, 'diff, 'at));
+7000000$
+
+(diff(f(x),x), subst(x=a,%%), convert_to_diff(%%), ev(%%, f(x) := x^7, 'diff, 'at));
+7 * a^6$
+
+(diff(f(x,y),x,1,y,1), subst([x=a,y=b], %%), convert_to_diff(%%), ev(%%, f(x,y) := x^2 * y^2, 'diff, 'at));
+4*a*b$
+
+(clear_rules(),0);
+0$
+
+(tellsimpafter(f(0),6),tellsimpafter(''(subst(x=0, diff(f(x),x))), 28), taylor(f(x),x,0,1));
+6+28*x$
+
+(clear_rules(),0);
+0$
+
+/*chain rule tests */
+is(equal(diff(f(g(x)),x), diff(g(x),x) * pderivop(f,1)(g(x))));
+true$
+
+is(equal(diff(f(g(x), h(x)),x), diff(g(x),x) * pderivop(f,1,0)(g(x), h(x)) + 
+    diff(h(x),x) * pderivop(f,0,1)(g(x), h(x))));
+true$
+
+(diff(f(x^3),x), convert_to_diff(%%), ev(%%, f(x) := x^5, diff, at));
+''(diff((x^5)^3,x))$
+
+(diff(f(x^2,x*y),x), subst(x = 1, %%), ev(%%, f(x,y) := x^2 * y^2, diff, at));
+''(subst(x=1, diff((x^2)^2 * (x*y)^2,x)))$
+
+/* subscripted functions */
+
+pderivop(f[2]);
+f[2]$
+
+pderivop(f[2],0);
+f[2]$
+
+(pderivop(f[2],1), %%(x), convert_to_diff(%%));
+'diff(f[2](x),x,1)$
+
+(pderivop(f[x],1), %%(x), convert_to_diff(%%));
+'diff(f[x](x),x,1)$
+
+(pderivop(f[2],1,1), %%(x,y), convert_to_diff(%%));
+'diff(f[2](x,y),x,1,y,1)$
+
+(pderivop(f,1,1), %%(x,y), subst(y=10,%%), convert_to_diff(%%), ev(%%, f(x,y) := x^2 * y^2, diff, at));
+''(subst(y=10, diff(x^2*y^2,x,1,y,1)))$
+
+[pderivop(%pi)(), pderivop(%pi)(a), pderivop(%pi)(a,b,c)];
+[%pi, %pi, %pi]$
+
+(diff(f(x^2),x), ev(%%, f = sin));
+2*x*cos(x^2)$
+
+/* check that the default for use_pdiff is false */
+(reset(use_pdiff),0);
+0$
+
+use_pdiff;
+false$
+
+
+
+
+
+
+
+
+
+
+

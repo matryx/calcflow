@@ -1,0 +1,188 @@
+(load("integer_sequence"),0);
+0$
+
+args(a .. b);
+[a,b]$
+
+args(a .. b .. c);
+[a,b,c]$
+
+a .. 1 .. b;
+a .. b$
+
+0 .. 0;
+[0]$
+
+0 .. 1;
+[0,1]$
+
+-1 .. -1;
+[-1]$
+
+-1 .. 1;
+[-1,0,1]$
+
+1/2 .. 3;
+[1/2,3/2,5/2]$
+
+0 .. 22/7;
+[0,1,2,3]$
+
+%i .. %i + 2;
+[%i,%i+1,%i+2]$
+
+a .. a;
+[a]$
+
+args(w .. g .. w);
+[w,g,w]$
+
+(assume(notequal(g,0)),0);
+0$
+
+args(w .. g .. w);
+[w]$
+
+(forget(notequal(g,0)),0);
+0$
+
+a .. a - 1;
+[]$
+
+1 .. 2 .. 1;
+[1]$
+
+x .. x;
+[x]$
+
+x .. 1 .. x;
+[x]$
+
+x .. -1 .. x;
+[x]$
+
+x .. x + 1;
+[x,x+1]$
+
+x .. x - 1;
+[]$
+
+x .. -1 .. x-1;
+[x,x-1]$
+
+sqrt(2) .. 3;
+[sqrt(2), sqrt(2) + 1]$
+
+1.0 .. 5.1;
+[1.0, 2.0, 3.0, 4.0, 5.0]$
+
+1.0 .. 5.1b0;
+[1.0, 2.0, 3.0, 4.0, 5.0]$
+
+1.0b0 .. 5.1b0;
+[1.0b0, 2.0b0, 3.0b0, 4.0b0, 5.0b0]$
+
+42.0 .. 45.0;
+[42.0,43.0,44.0,45.0]$
+
+args(x .. inf);
+[x,inf]$
+
+args(minf .. inf);
+[minf,inf]$
+
+args(%i .. 2 * %i);
+[%i, 2*%i]$
+
+ratsubst(1, a, a .. a + 1);
+[1,2]$
+
+ratsubst(2, h, 0 .. h .. 5);
+[0,2,4]$
+
+subst(1, a, a .. a + 1);
+[1,2]$
+
+subst(2, h, 0 .. h .. 5);
+[0,2,4]$
+
+(assume(big > small),0);
+0$
+
+big .. small;
+[]$
+
+big .. 2 .. small;
+[]$
+
+args(big .. -1 .. small);
+[big,-1,small]$
+
+(forget(big > small),0);
+0$
+
+(assume(equal(a,b)),0);
+0$
+
+a .. b;
+[a]$
+
+(forget(equal(a,b)),0);
+0$
+
+args(a .. %i .. a+1);
+[a,%i,a + 1]$
+
+errcatch(a .. b .. c .. d);
+[]$
+
+errcatch(a .. 0 .. b);
+[]$
+
+errcatch(".."());
+[]$
+
+errcatch(".."(a));
+[]$
+
+rat(a) ..  a;
+[a]$
+
+a .. rat(a);
+[a]$
+
+rat(a) .. 5 .. a;
+[a]$
+
+args(a .. rat(h) .. b);
+[a,h,b]$
+
+[a] .. [a];
+[[a]]$
+
+/* Known bug(s)   */
+
+/* csign(ind) ---> error, not pnz */
+
+args(0 .. ind);
+[0,ind]$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

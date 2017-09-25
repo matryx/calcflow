@@ -1,0 +1,50 @@
+ttyoff:true $
+coords: [
+cartesian2d: '[[x,y], x, y],
+cartesian3d: '[[x,y,z], x, y, z],
+polar: '[[r*cos(theta), r*sin(theta)], r, theta] ,
+polarcylindrical: '[[r*cos(theta), r*sin(theta), z], r, theta, z],
+spherical: '[[r*sin(theta)*cos(phi), r*sin(theta)*sin(phi),
+   r*cos(theta)], r, theta, phi],
+elliptic: '[[e*cosh(u)*cos(v), e*sinh(u)*sin(v)], u, v],
+ellipticcylindrical: '[[e*cosh(u)*cos(v), e*sinh(u)*sin(v), z], u, v, z] ,
+confocalelliptic: '[[e*u*v, e*sqrt((u**2-1)*(1-v**2))], u, v],
+prolatespheroidalsqrt: '[[e*u*v, e*sqrt((u**2-1)*(1-v**2))*cos(phi), e*sqrt((u**2-1)*(1-v**2))*sin(phi)], phi, u, v] ,
+oblatespheroidalsqrt: '[[e*u*v*sin(phi), e*sqrt((u**2-1)*(1-v**2)),
+e*u*v*cos(phi)], phi, u, v] ,
+parabolic: '[[(u**2-v**2)/2, u*v], u, v],
+paraboliccylindrical: '[[(u**2-v**2)/2, u*v, z], u, v, z] ,
+paraboloidal: '[[u*v*cos(phi), u*v*sin(phi), (u**2-v**2)/2], phi, u, v] ,
+prolatespheroidal: '[[e*sinh(u)*sin(v)*cos(phi),
+e*sinh(u)*sin(v)*sin(phi), e*cosh(u)*cos(v)], phi, u, v],
+oblatespheroidal: '[[e*cosh(u)*cos(v)*cos(phi),
+e*cosh(u)*cos(v)*sin(phi), e*sinh(u)*sin(v)], phi, u, v],
+bipolar: '[[e*sinh(v)/(cosh(v)-cos(u)), e*sin(u)/(cosh(v)-cos(u))],
+u, v] ,
+bipolarcylindrical: '[[e*sinh(v)/(cosh(v)-cos(u)), 
+e*sin(u)/(cosh(v)-cos(u)), z], u, v, z] ,
+toroidal: '[[e*sinh(v)*cos(phi)/(cosh(v)-cos(u)),
+e*sinh(v)*sin(phi)/(cosh(v)-cos(u)), e*sin(u)/(cosh(v)-cos(u))],
+phi, u, v] ,
+conical: '[[w*u*v/(e*f), w*sqrt((u**2-e**2)*(v**2-e**2)/(e**2-f**2))/e,
+w*sqrt((u**2-f**2)*(v**2-f**2)/(f**2-e**2))/f], u, v, w] ,
+confocalellipsoidal: '[[sqrt((e**2-w)*(e**2-u)*(e**2-v)/
+(e**2-f**2)/(e**2-g**2)), sqrt((f**2-w)*(f**2-u)*(f**2-v)/
+(f**2-e**2)/(f**2-g**2)),
+sqrt((g**2-w)*(g**2-u)*(g**2-v)/(g**2-e**2)/(g**2-f**2))]
+, u, v, w]]$
+
+ttyoff: false $
+/* predefined coordinate transformations:
+cartesian2d, cartesian3d,
+polar, polarcylindrical,
+spherical, oblatespheroidal, prolatespheroidal,
+   oblatespheroidalsqrt, prolatespheroidalsqrt,
+elliptic, ellipticcylindrical, confocalelliptic,
+   confocalellipsoidal,
+parabolic, paraboliccylindrical, paraboloidal,
+bipolar, bipolarcylindrical,
+toroidal,
+conical */
+/*  reserved coordinate variables and parameters: */
+listofvars(coords);

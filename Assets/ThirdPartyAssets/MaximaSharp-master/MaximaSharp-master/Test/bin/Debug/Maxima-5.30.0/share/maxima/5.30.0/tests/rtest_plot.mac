@@ -1,0 +1,378 @@
+/* execute this script 
+ *
+ * (1) wait for user between examples:
+ *  demo ("tests/rtest_plot.mac");
+ *
+ * (2) or noninteractively:
+ *  batch ("tests/rtest_plot.mac");
+ *
+ * Maxima waits for the user to close the Openmath window
+ * before proceeding, but otherwise it just blazes through.
+ */
+
+/* Examples copied from plot2d documentation */
+
+"Plots of common functions." $
+
+plot2d (sin(x), [x, -5, 5])$
+plot2d (sec(x), [x, -2, 2], [y, -20, 20], [nticks, 200])$
+
+"Plotting functions by name." $
+
+F(x) := x^2 $
+:lisp (defun |$g| (x) (m* x x x))
+H(x) := if x < 0 then x^4 - 1 else 1 - x^5 $
+plot2d (F, [u, -1, 1])$
+plot2d ([F, G, H], [u, -1, 1], [y, -1.5, 1.5])$
+
+"We can plot a circle using a parametric plot ..." $
+
+plot2d ([parametric, cos(t), sin(t), [t,-%pi,%pi], [nticks,80]], [x, -4/3, 4/3])$
+
+"If we repeat that plot with only 8 points ..." $
+
+plot2d ([parametric, cos(t), sin(t), [t, -%pi*2, %pi*2], [nticks, 8]], [x, -2, 2], [y, -1.5, 1.5])$
+
+"Combination of an ordinary plot ..." $
+
+plot2d ([x^3+2, [parametric, cos(t), sin(t), [t, -5, 5], [nticks, 80]]], [x, -3, 3])$
+
+"Example of a logarithmic plot:" $
+
+plot2d (exp(3*s), [s, -2, 2], [logy])$
+
+"To show some examples of discrete plots, ..." $
+
+xx:[10, 20, 30, 40, 50]$
+yy:[.6, .9, 1.1, 1.3, 1.4]$
+xy:[[10,.6], [20,.9], [30,1.1], [40,1.3], [50,1.4]]$
+plot2d([discrete,xx,yy])$
+
+"We will now show the plot with only points, ..." $
+
+plot2d([discrete, xy], [style, points])$
+
+"The plot of the data points can be shown together with ..." $
+
+plot2d([[discrete,xy], 2*%pi*sqrt(l/980)], [l,0,50],
+ [style, [points,5,2,6], [lines,1,1]], [legend,"experiment","theory"],
+ [xlabel,"pendulum's length (cm)"], [ylabel,"period (s)"])$
+
+"To save a plot ..." $
+
+plot2d (sin(x), [x, 0, 2*%pi], [psfile, concat (maxima_tempdir, "/sin.eps")])$
+
+"The next example uses the y option ..." $
+
+plot2d ([gamma(x), 1/gamma(x)], [x, -4.5, 5], [y, -10, 10], [gnuplot_preamble, "set key bottom"])$
+
+"We can also use a `gnuplot_preamble' to produce fancy x-axis labels." $
+
+my_preamble: "set xtics ('-2pi' -6.283, \
+'-3pi/2' -4.712, '-pi' -3.1415, '-pi/2' -1.5708, '0' 0, \
+'pi/2' 1.5708, 'pi' 3.1415,'3pi/2' 4.712, '2pi' 6.283)"$
+plot2d([cos(x), sin(x), tan(x), cot(x)], [x, -2*%pi, 2.1*%pi], [y, -2, 2],
+ [axes, x], [gnuplot_preamble, my_preamble]);
+
+"... fancy x-axis labels, and produces PostScript output ..." $
+
+my_preamble: "set xtics ('-2{/Symbol p}' \
+-6.283, '-3{/Symbol p}/2' -4.712, '-{/Symbol p}' -3.1415, \
+'-{/Symbol p}/2' -1.5708, '0' 0,'{/Symbol p}/2' 1.5708, \
+'{/Symbol p}' 3.1415,'3{/Symbol p}/2' 4.712, '2{/Symbol p}' \
+6.283)"$
+plot2d ([cos(x), sin(x), tan(x)], [x, -2*%pi, 2*%pi],
+ [y, -2, 2], [gnuplot_preamble, my_preamble], [psfile, concat (maxima_tempdir, "/trig.eps")]);
+
+/* Examples copied from plot3d documentation */
+
+"Displays a plot of one or three expressions as functions of two variables." $
+
+plot3d (2^(-u^2 + v^2), [u, -3, 3], [v, -2, 2]);
+
+"The same graph can be plotted using openmath ..." $
+
+plot3d (2^(-u^2 + v^2), [u, -3, 3], [v, -2, 2], [plot_format, openmath]);
+
+"An example of the third pattern of arguments is" $
+
+plot3d ([cos(x)*(3 + y*cos(x/2)), sin(x)*(3 + y*cos(x/2)),
+ y*sin(x/2)], [x, -%pi, %pi], [y, -1, 1], ['grid, 50, 15]);
+
+"This example shows a plot of the real part of `z^1/3' ..." $
+
+plot3d (r^.33*cos(th/3), [r, 0, 1], [th, 0, 6*%pi], ['grid, 12, 80],
+ ['transform_xy, polar_to_xy], [box, false],[legend,false]);
+
+"Other examples are the Klein bottle:" $
+
+expr_1: 5*cos(x)*(cos(x/2)*cos(y) + sin(x/2)*sin(2*y)+ 3.0) - 10.0$
+expr_2: -5*sin(x)*(cos(x/2)*cos(y) + sin(x/2)*sin(2*y)+ 3.0)$
+expr_3: 5*(-sin(x/2)*cos(y) + cos(x/2)*sin(2*y))$
+plot3d ([expr_1, expr_2, expr_3], [x, -%pi, %pi], [y, -%pi, %pi], ['grid, 40, 40]);
+
+"and a torus:" $
+
+expr_1: cos(y)*(10.0+6*cos(x))$
+expr_2: sin(y)*(10.0+6*cos(x))$
+expr_3: -6*sin(x)$
+plot3d ([expr_1, expr_2, expr_3], [x, 0, 2*%pi], [y, 0, 2*%pi], ['grid, 40, 40]);
+
+"Sometimes it is necessary to define a function to plot the expression." $
+
+M: matrix([1, 2, 3, 4], [1, 2, 3, 2], [1, 2, 3, 4], [1, 2, 3, 3])$
+f(x, y) := float (M [?round(x), ?round(y)])$
+plot3d (f, [x, 1, 4], [y, 1, 4], ['grid, 4, 4])$
+
+"Here is a three-dimensional plot using the gnuplot pm3d terminal." $
+
+plot3d (atan (-x^2 + y^3/4), [x, -4, 4], [y, -4, 4], [grid, 50, 50], [gnuplot_pm3d, true])$
+
+"And a three-dimensional plot without a mesh and with contours ..." $
+
+my_preamble: "set pm3d at s;unset surface;set contour;\
+set cntrparam levels 20;unset key"$
+plot3d(atan(-x^2 + y^3/4), [x, -4, 4], [y, -4, 4], [grid, 50, 50],
+ [gnuplot_pm3d, true], [gnuplot_preamble, my_preamble])$
+
+"Finally, a plot where the z-axis is represented by color only." $
+
+plot3d (cos (-x^2 + y^3/4), [x, -4, 4], [y, -4, 4],
+ [gnuplot_preamble, "set view map; unset surface"], [gnuplot_pm3d, true], [grid, 150, 150])$
+
+/* Examples copied from plot_options documentation */
+
+"Option: `plot_realpart'" $
+
+plot2d (log(x), [x, -5, 5], [plot_realpart, false]);
+plot2d (log(x), [x, -5, 5], [plot_realpart, true]);
+
+/* further *plot-realpart* examples from mailing list 2010-08-13 "plot3d: function not defined everywhere in the plotting range" */
+
+plot2d (log(x), [x, -3, 3]);
+plot3d (log(x), [x, -3, 3], [y, -3, 3]);
+contour_plot (log(x), [x, -3, 3], [y, -3, 3]);
+
+/* (other options listed under plot_options do not have plot2d or plot3d examples) */
+
+/* Examples copied from contour_plot documentation */
+
+"contour_plot examples" $
+
+contour_plot (x^2 + y^2, [x, -4, 4], [y, -4, 4]);
+
+contour_plot (sin(y) * cos(x)^2, [x, -4, 4], [y, -4, 4]);
+
+"contour_plot with named function" $
+
+F(x, y) := x^3 + y^2;
+contour_plot (F, [u, -4, 4], [v, -4, 4]);
+
+"contour_plot with gnuplot_preamble" $
+
+contour_plot (F, [u, -4, 4], [v, -4, 4], [gnuplot_preamble, "set size ratio -1"]);
+
+"contour_plot with gnuplot_preamble via set_plot_option" $
+
+set_plot_option ([gnuplot_preamble, "set cntrparam levels 12"])$
+contour_plot (F, [u, -4, 4], [v, -4, 4]);
+
+/* Examples adapted from demo/demo.dem
+ * (others are duplicates or not different enough)
+ */
+
+"two dimensional parametric plot" $
+
+plot2d ([parametric, t*sin(t), t*cos(t)], [t, 0, 80], [nticks, 1000]);
+
+"three dimensional cartesian plot of a bessel function" $
+
+plot3d (bessel_j (0, sqrt(x^2 + y^2)), [x, -12, 12], [y, -12, 12]);
+
+"three dimensional polar plot of the same bessel function" $
+
+plot3d (bessel_j (0, r), [th, 0, 2*%pi], [r, 0, 12], ['transform_xy, polar_to_xy]);
+
+"three dimensional plot of x*exp(-x^2-y^2)" $
+
+plot3d (x*exp(- x^2 - y^2), [x, -2, 2], [y, -2, 2]);
+
+/* Example adapted from demo/plots.mac
+ * (others are duplicates or not different enough)
+ */
+
+"Real part of z^1/6" $
+
+plot3d (r^(1/6.0)*cos(th/6), [r, 0, 1], [th, 0, 2*6*%pi], ['grid, 12, 121], ['transform_xy, polar_to_xy]);
+
+/* Examples related to bug reports or other specific topics */
+
+/* SF bug [ 1699445 ] plot2d in very narrow range
+ * triggers Gnuplot bug on Windows (line outside bounding box)
+ */
+
+"[ 1699445 ] plot2d in very narrow range" $
+
+plot2d (sin(x), [x, 1.57079628, 1.570796326794897]);
+
+"[ 2234113 ] plot2d odd roots of X plots only positive values" $
+
+plot2d (x^(1/3), [x, -5, 5]);
+
+plot2d (u^(1/5), [u, -5, 5]);
+
+"r1.55 src/plot.lisp: ensure that log plots are adequately sampled" $
+
+plot2d (x, [x, 1e-5, 100], [logy]);
+
+plot2d (x, [x, 1e-5, 100], [logx]);
+
+"r1.62 src/plot.lisp: expand the cases recognized by COERCE-FLOAT-FUN" $
+
+:lisp (defun $f (x) (+ (cl:sin x) 0.1))
+:lisp (defmspec $h (x) (+ (cl:sin (cadr x)) 0.3))
+(g(x) := sin(x) + 0.2,
+ i(x) ::= sin(x) + 0.4,
+ prefix ("j"),
+ "j"(x) := sin(x) + 0.5,
+ matchdeclare (x, floatnump),
+ tellsimpafter (k(x), sin(x) + 0.6));
+
+plot2d ([f, g, h, i, sin, k], [u, 0, 1]);
+
+/* "j" in list of functions tickles a bug -- quote marks not sanitized
+ * work around it by explicit legend spec
+ */
+plot2d (["+", "j"], [u, 0, 1], [legend, "+", "j"]);
+
+"(not a plot example, maybe it should be moved elsewhere)" $
+
+map (lambda ([f], quad_qags (f, u, 0, 1)), [f, g, h, i, "+", "j", sin, k]);
+
+"r1.82 src/plot.lisp: floatify non-float numbers" $
+
+plot2d ([discrete, [1, 2, 3, 4], [1, 1/2, 1/3, 1/4]]);
+
+plot2d ([discrete, [1, 2, 3, 4], [1/%e, 1/%pi, 1/%phi, 1/%gamma]]);
+
+plot2d ([discrete, [1, 2, 3, 4], [1b0, 0.5b0, 0.33b0, 0.25b0]]);
+
+"SF bug [ 2672976 ] wxMaxima 0.8.1: set logscale x gives error";
+
+plot2d (sin(x), [x, 0, 1], [logx, true]);
+
+plot2d (sin(u), [u, 0, 1], [logx, true]);
+
+plot2d (sin(u), [u, 0, 1], [logx, true], [y, 0, 1], [logy, true]);
+
+"verify that nested numerical integral is handled correctly";
+
+plot2d (w^2 * quad_qags (1/(s - w), s, 1, 5) [1], [w, -5, -1], [adapt_depth, 0]);
+
+"another nested numerical integral";
+
+(kill (W, R, A),
+ W(t) := 95*sqrt(t)*sin(t/6)^2,
+ R(t) := 275*sin(t/3)^2,
+ A(t) := 1200 + quad_qags (W(x) - R(x), x, 0, t) [1],
+ plot2d (A(t), [t, 0, 18], [adapt_depth, 0]));
+
+"plotting realpart and imagpart";
+
+plot3d (realpart (asin (x + y*%i)), [x, -2, 2], [y, -2, 2], [grid, 20, 20]);
+
+plot3d (imagpart (asin (x + y*%i)), [x, -2, 2], [y, -2, 2], [grid, 20, 20]);
+
+plot3d (realpart (exp (x + y*%i)), [x, -2, 2], [y, -2, 2], [grid, 20, 20]);
+
+plot3d (imagpart (exp (x + y*%i)), [x, -2, 2], [y, -2, 2], [grid, 20, 20]);
+
+"messages about non-numeric values and clipped values";
+
+plot2d (sqrt (x), [x, 0, 1]); /* no message */
+
+plot2d (sqrt (x), [x, -1, 1]); /* some non-numeric */
+
+plot2d (sqrt (x), [x, 0, 1], [y, 0, 1/2]); /* some clipped */
+
+plot2d (sqrt (x), [x, -1, 1], [y, 0, 1/2]); /* some non-numeric, some clipped */
+
+plot2d (sqrt (x), [x, -2, -1]); /* all non-numeric */
+
+plot2d (sqrt (x), [x, 0, 1], [y, -2, -1]); /* all clipped */
+
+plot2d (sqrt (x), [x, -1, 1], [y, -2, -1]); /* all non-numeric or clipped */
+
+"coping with overflow in intermediate results";
+
+/* from the mailing list "plot numerical question" 2009-03-11 */
+
+(r4(s) := block ([s : bfloat(s)], s!/(((s/4)!)^4 * 4^s)),
+ plot2d (r4, [s, 200, 300], [adapt_depth, 0], [nticks, 5]));
+
+plot2d ('r4(s), [s, 200, 300], [adapt_depth, 0], [nticks, 5]);
+
+/* from mailing list 2009-02-18
+ * "Re: [Maxima] I want to tell maxima (-1)^0.33333333333333=-1, what should i do?"
+ */
+
+foo29(x):=(sqrt(-16*x^4-16*x^3+20*x^2+12*x+23)/(6*sqrt(3))+(16*x^3-12*x^2-6*x-25)/54)^(1/3)$
+
+plot2d (foo29 (u), [u, -1, 0]);
+
+plot2d (foo29, [u, -1, 0]);
+
+compile (foo29);
+
+plot2d (foo29, [u, -1, 0]);
+
+/* bug report "Wrong result given by coerce-float-fun" ID: 2880115 */
+
+(kill(f),
+ f(k) := integrate (exp(%i*k*x)*sin(x)/x, x, minf, inf),
+ plot2d (f, [x, -3, 3], [adapt_depth, 0], [nticks, 5]));
+
+(translate(f),
+ plot2d (f, [x, -3, 3], [adapt_depth, 0], [nticks, 5]));
+
+/* bug report "xlabel and ylabel don't change plot3d axis labels" - ID: 3020589 */
+
+(Bxt(x, r) := x^2 + r^2,
+ [R, L] : [1, 1],
+ plot3d(Bxt(x,r),[x,0,L],[r,0,R],[xlabel,"x [m]"],[ylabel,"r [m]"],[zlabel,"Bx [T]"],[legend,"Axial field"]));
+
+/* same but now using default axis labels */
+plot3d(Bxt(x,r),[x,0,L],[r,0,R],[legend,"Axial field"]);
+
+/* from the mailing list 2011-05-26:
+ * "Wrong usage" error message when trying to plot with plot3d or contour_plot
+ * should expect this example to provoke an advisory message and make a plot
+ */
+
+block (local (fn, Fn, pw, fbn, fbnxcy, loww),
+ fn(x):=1/sqrt(2*%pi)*exp((-x^2)/2),
+ Fn(x):=integrate(fn(t),t,-inf,x),
+ pw(r1,r2,s1,s2):=1-Fn((r2-r1)/sqrt(s1^2+s2^2)),
+ fbn(x,y,r):=1/(2*%pi*sqrt(1-r^2))*exp((-(x^2-2*r*x*y+y^2))/(2*(1-r^2))),
+ fbnxcy(x,y,r) := fbn(x,y,r) / fn(y),
+ loww(rs2, ro, r, s1, s2) := quad_qagi(fbnxcy(rs1, rs2, r)*pw(rs1, ro, s1, s2), rs1, minf, inf),
+ plot3d( loww(rs2, 0, r, 1, 1)[1] , [rs2, -1.5, 2.5], [r, 0.1, 0.9] ));
+
+/* simpler version of the preceding one */
+
+block (local (foo),
+ foo(x, y) := if numberp(x) and numberp(y) then [x^2 - y^2] else funmake (foo, [x, y]),
+ plot3d (foo (a, b)[1], [a, -1, 1], [b, -1, 1]));
+
+/* helix -- see mailing list 2012-01-22 "3D curve parametric plot" */
+
+plot3d([sin(t), cos(t), t], [t,-5,5], [y,-5,5], [grid,100,2], [gnuplot_pm3d,false])$
+
+/* plot2d/plot3d with subscripted variable */
+
+(kill (x, a), plot2d (a[x]^3, [a[x], -1, 1]));
+
+plot3d (a[x]^2 - x[a]^3, [a[x], -1, 1], [x[a], -1, 1]);
+
+"FINIS" $
+

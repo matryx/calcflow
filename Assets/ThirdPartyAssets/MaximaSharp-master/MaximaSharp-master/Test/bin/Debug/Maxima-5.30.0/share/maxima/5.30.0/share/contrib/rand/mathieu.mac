@@ -1,0 +1,43 @@
+/* Filename mathieu.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /*
+(d4) This program computes the transition curves in
+
+
+ Mathieu's equation using a perturbation method.
+
+
+Call it by typing:
+
+
+                      MATHIEU()
+
+*/
+
+mathieu():=(input(),y0:cos(t),findtc(),y0:sin(t),findtc())$
+input():=(n:read("ENTER TRANSITION CURVE NUMBER N"),
+      m:read("ENTER DEGREE OF TRUNCATION"))$
+findtc():=(setup1(),setup2(),for i thru m do (step1(),step2(),step3()),
+       output())$
+setup1():=(w:1,for i thru m do w:w+k[i]*e^i,x:y0,
+       for i thru m do x:x+y[i](t)*e^i)$
+setup2():=(temp1:diff(x,t,2)+x*(w+4/n^2*e*cos(2*t/n)),
+       temp1:taylor(temp1,e,0,m),for i thru m do eq[i]:coeff(temp1,e,i))$
+step1():=temp1
+      :expand(trigreduce(expand(ev(eq[i],makelist([e[j],f[j]],j,1,i-1),
+				   diff))))$
+step2():=(f[i]:solve(coeff(temp1,y0),k[i]),temp1:ev(temp1,f[i]))$
+step3():=(temp1:ode2(temp1,y[i](t),t),e[i]:ev(temp1,%k1:0,%k2:0))$
+output():=(print("delta=",expand(n^2/4*ev(w,makelist([f[j]],j,1,m)))),
+       print(" "))$

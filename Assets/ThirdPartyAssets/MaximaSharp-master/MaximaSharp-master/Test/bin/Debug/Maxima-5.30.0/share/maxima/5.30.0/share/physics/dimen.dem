@@ -1,0 +1,68 @@
+/* First load the necessary file: */
+load("dimen.mac")$
+/* It is conjectured that for thermistors there is a physical
+relationship between the voltage drop, current, ambient temperature,
+room-temperature resistance, convective heat transfer coefficient, and
+a constant, BETA, having the dimension of temperature.  First, to see
+if the dimension of BETA is already known: */
+get(beta, 'dimension);
+/* It is not.  To establish it: */
+dimension(beta=temperature);
+/* To automatically determine a set of dimensionless variables
+sufficient to characterize the physical relation: */
+nondimensionalize([voltage, current, temperature, resistance,
+      heattransfercoefficient, beta]);
+/* We learn that the relation may be expressed as a function of
+only the above 3 variables rather than a function of the six physical
+quantities.  Evidently dimensions were preestablished for all but the
+last of these particular input quantities, but an appropriate error
+message would have informed us if this were not so.  An extensive
+set of dimensions have been prestablished, as may be seen from the
+listing of DIMEN >.
+
+As another example, there is thought to be a relation between the
+viscosity, average velocity, molecular mass, and repulsion
+coefficient of a gas.  The repulsive force between two molecules is
+believed to be of the form  K/DISTANCE^N, with unknown N, so K must
+have the following dimensions: */
+dimension(k=mass*length^(n+1)/time^2) $
+/* To get the computation time in milliseconds to be printed
+ automatically: */
+cputime: true $
+/* To do a dimensional analysis of the gas viscosity problem: */
+nondimensionalize([viscosity, k, mass, velocity]);
+/* The physical relation must be expressible as a function of
+this one dimensionless variable, or equivalently, this variable must
+equal a constant.  Consequently, physical measurements may be used
+to determine N.  It turns out to be in the range 7 to 12 for common
+gases.
+
+As a final example, suppose that we conjecture a relation between the
+deflection angle of a light ray, the mass of a point mass, the speed
+of light, and the distance from the mass to the point of closest
+approach: */
+nondimensionalize([angle, mass, length, speedoflight]);
+/* We learn that there cannot be a dimensionless relation
+connecting all of these quantities and no others.  Let us also try
+including the constant that enters the inverse-square law of
+gravitation: */
+nondimensionalize([angle, mass, length, speedoflight,
+      gravityconstant]);
+/* Altermatively, for astrophysics problems such as this,we may
+prefer to use a dimensional basis in which the gravity constant is
+taken as a pure number, eliminating one member from our dimensional
+basis: */
+%pure: cons(gravityconstant, %pure);
+/* Note that the latter two of the above constants are pure
+numbers by default, respectively eliminating TEMPERATURE and CHARGE
+from the basis, but the user may include all five of TEMPERATURE,
+CHARGE, MASS, LENGTH, and TIME in the basis by resetting %PURE to [].
+Altermatively, the user may wish to include SPEEDOFLIGHT in %PURE for
+relativistic problems or PLANCKSCONSTANT for quantum problems.  For
+dimensional analysis it doesn't really matter which basis member is
+eliminated by each pure constant, but in fact the latter two
+respectively eliminate LENGTH and TIME, whereas GRAVITYCONSTANT
+eliminates MASS.
+
+To proceed with our analysis: */
+nondimensionalize([angle, mass, length, speedoflight]);

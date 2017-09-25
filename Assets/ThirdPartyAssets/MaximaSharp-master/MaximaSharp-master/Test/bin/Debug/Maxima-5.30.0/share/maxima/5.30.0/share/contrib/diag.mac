@@ -1,0 +1,294 @@
+/*
+   diag.mac
+
+   Contains the functions:
+     (1) diag
+     (2) JF
+     (3) jordan
+     (4) minimalPoly
+     (5) dispJordan
+     (6) ModeMatrix
+     (7) mat_function
+
+   plus some internal utility funcions. If you make use of one of
+   them, consider asking on the mailing list: we can try to make a
+   more useful API and give it a sensible name (not prefixed by
+   "diag_"), that we won't change.
+
+   See the manual or the comments above the relevant function for more
+   information on how each works.
+
+   As with the rest of Maxima, this code is distributed under the GPL,
+   version 2+
+*/
+load("eigen")$
+
+/*
+  Return the direct sum of the elements of LST, made into 1x1 matrices
+  if they weren't already matrices.
+*/
+diag (lst) :=
+  block ([lst: map (lambda ([A], if matrixp (A) then A else matrix([A])), lst),
+          size: 0, left: 0, rows: []],
+    for A in lst do size: size + length (A),
+    for A in lst do (
+      for r in args(A) do
+        rows: cons (append (makelist (0, left), r,
+                            makelist (0, size - (left + length (r)))),
+                    rows),
+      left: left + length (first (A))),
+    apply (matrix, reverse (rows)))$
+
+/*
+  Construct a Jordan block of size N x N and eigenvalue EIVAL.
+*/
+JF (eival, n) :=
+  if is (n <= 0) then
+    error ("Cannot construct matrix with size < 0")
+  else
+    genmatrix (
+      lambda ([i,j],
+              if is (i = j) then eival
+              elseif is (j = i + 1) then 1
+              else 0),
+      n, n)$
+	  
+/*
+  Calculate the correct partition of multiplicity for the matrix A at
+  the eigenvalue eival.
+*/
+diag_calculate_mult_partition (A, multiplicity, eival) :=
+  if is (multiplicity = 1) then [1] else
+  block ([Abar: A - eival * ident (length (A)),
+          n: length (A),
+          nullity],
+    nullity: n - rank (Abar),
+    if is (nullity = 1) then [multiplicity]
+    elseif is (nullity = multiplicity) then makelist (1, nullity)
+    else block ([blocks_left: nullity, mults: [], Abarpow: Abar, dnull],
+      for k: 1 do (
+        Abarpow: Abarpow . Abar,
+        dnull: n - rank (Abarpow) - nullity,
+        nullity: nullity + dnull,
+        if (dnull < blocks_left) then (
+          mults: append (makelist (k, blocks_left - dnull), mults),
+          multiplicity: multiplicity - k * (blocks_left - dnull),
+          blocks_left: dnull),
+        if is (blocks_left * (k + 1) = multiplicity) then
+          return (append (makelist (k+1, blocks_left), mults)),
+        if is (blocks_left * (k + 1) > multiplicity) then
+          error ("Unexpected blocks left over!"))))$
+
+/*
+  Calculate the JCF of A. Returns a list of eigenvalues and their
+  multiplicities.
+*/
+jordan (A) :=
+  block([eigenlist: eigenvectors (A)],
+    map (lambda ([eival, mult],
+                 cons (eival, diag_calculate_mult_partition (A, mult, eival))),
+         eigenlist[1][1], eigenlist[1][2]))$
+
+/*
+  Calculate the minimal polynomial, expressed in the symbol "x", of
+  any matrix with the given list of eigenvalues and their
+  multiplicities.
+*/
+minimalPoly (jordan_info) :=
+  lreduce ("*",
+    map (lambda ([eival_lst], ('x - first (eival_lst))^(second (eival_lst))),
+         jordan_info))$
+
+/*
+  Take a list of eigenvalues and their multiplicities and build the
+  corresponding Jordan matrix.
+*/
+dispJordan (jordan_info) := block ([blocks: []],
+  for eival_lst in jordan_info do
+    for size in rest (eival_lst) do
+      blocks: cons (JF (first (eival_lst), size), blocks),
+  diag (reverse (blocks)))$
+
+/*
+  Takes a "sorted list" and produces a histogram of elements and their
+  frequencies:
+
+     [3,3,2,2,2,1,1,1] => [[3,2],[2,3],[1,3]]
+
+  The "sorted" requirement is merely that any object only occurs in
+  one block. Thus, we will do the right thing on [1,1,0,0,2,2], but
+  not on [1,1,0,0,1,1].
+*/
+diag_sorted_list_histogram (list) :=
+  if is (emptyp (list)) then [] else
+  block([pairs: [], current: first (list), count: 1],
+    for lst: rest (list) next rest (lst) while not (emptyp (lst))
+    do
+      if is (current = first (lst)) then
+        count: count + 1
+      else (
+        pairs: cons ([current, count], pairs),
+        current: first (lst),
+        count: 1),
+    reverse (cons ([current, count], pairs)))$
+
+
+/*
+  Find a formula for a general element of the kernel of A.
+
+  Returns the solution as a row vector of (linear) expressions in the
+  variables of %rnum_list.
+*/
+diag_kernel_element (A) :=
+  block ([vars: makelist (gensym (), length (first (A))), eqns, soln],
+    eqns: map (first, args (A . apply (matrix, map("[", vars)))),
+    soln: algsys (eqns, vars),
+    if emptyp (soln) then error ("Could not solve for the kernel of ", A),
+    map (rhs, first (soln)))$
+
+/*
+  Calculate the general form for a chain of generalized eigenvectors
+  for A, of the form [v1, v2, ..., vn] such that (A-eival*I).v1 = 0 and
+  (A-eival*I).vk = v(k-1) where n = degree.
+
+  If degree is not correct, throws an error.
+
+  Otherwise returns [chain, freevars] where chain is a list of the
+  eigenvectors, each of which is represented as a list, and freevars
+  is the list of free variables.
+*/
+diag_general_jordan_chain (A, eival, degree) :=
+  block ([n: length (A), Abar, ret],
+    if (is (n < 1) or not (length (A[1]) = n)) then
+    error ("Invalid input matrix: ", A),
+    Abar: A - eival * ident (n),
+    ret: [diag_kernel_element (Abar^^degree)],
+    for i : 2 thru degree do
+      ret: cons (args (map (first, Abar . first(ret))), ret),
+    [ret, %rnum_list])$
+
+/*
+  LI_ROWS should be a list of lists representing row vectors that are
+  linearly independent. Then CHAIN_EXPR is a list of row vectors in
+  VARIABLES representing a Jordan chain. The function tries to find a
+  choice of variables such that CHAIN_EXPR is linearly independent of
+  LI_ROWS.
+
+  (Note: Because chain_expr represents a Jordan chain, it suffices to
+         check linear independence for the first and last elements of
+         CHAIN_EXPR)
+*/
+diag_find_li_chain (li_rows, chain_expr, variables) :=
+  block ([dict: false, extra_rows],
+    for vals in ident (length (variables)) do (
+      dict: map ("=", variables, vals),
+      extra_rows: subst (dict,
+                         if is (length (chain_expr) > 1) then
+                         [first (chain_expr), last (chain_expr)]
+                         else [first (chain_expr)]),
+      if is (rank (apply (matrix, append (li_rows, extra_rows))) =
+             length (li_rows) + length (extra_rows))
+      then return (true)
+      else dict: false),
+    if is (dict = false) then
+      error ("Could not find a linearly independent vector"),
+    /* Rectform since complex eigenvalues result in horrible
+       expressions here otherwise */
+    rectform (subst (dict, chain_expr)))$
+
+/*
+   Calculates the mode matrix of A, which is a matrix T such that
+      T^^(-1) . A . T = JordanForm (A)
+
+   F should be a list of the eigenvalues of A together with their
+   multiplicities, as returned by jordan(A).
+
+   Notes on algorithm:
+
+   rest(ev_pair) is a list of chain lengths, which we convert to
+   multiplicities. We need to hunt for chains starting with the
+   longest, but that is guaranteed since jordan(A) returns the block
+   lengths in that order.
+
+   For each chain length, we find a general form for a Jordan chain
+   that length then we evaluate the formula, varying the parameters to
+   make sure we end up with a linearly independent chain. Note that it
+   suffices to check that the first term of the chain list (the actual
+   eigenvector) is linearly independent from the rows we've got so
+   far.
+
+   Since generalised eigenvectors for different eigenvalues are
+   linearly independent, we don't bother checking there.
+
+*/
+ModeMatrix (a,F):= block([msize: length(a), all_rows: []],
+  for ev_pair in F do
+  block ([eival: first (ev_pair),
+          multiplist: diag_sorted_list_histogram (rest (ev_pair)),
+          mat_rows: [], mat_rank: 0],
+    for degree_pair in multiplist do
+    block ([mindeg: first (degree_pair),
+            genev_pair, genevs, free_vars],
+      genev_pair: diag_general_jordan_chain (a, eival, first (degree_pair)),
+      for k : 1 thru second (degree_pair) do
+        mat_rows:
+          append (mat_rows,
+                  diag_find_li_chain (mat_rows,
+                                      first (genev_pair),
+                                      second (genev_pair)))),
+    all_rows: append (all_rows, mat_rows)),
+  transpose (apply (matrix, all_rows)))$
+
+/*
+  Return a list of taylor coefficients for the function f expanded
+  around some arbitrary point VAR where f(var) = EXPR. The first
+  element of the list is f(var) and the last is
+  diff(f(var),var,maxpow).
+*/
+diag_taylor_coefficients (expr, var, maxpow) :=
+  block ([coeffs: [expr]],
+    for k:1 thru maxpow do
+      (expr: diff (expr, var), coeffs: cons (expr/k!, coeffs)),
+    reverse (coeffs))$
+
+/*
+  Build a matrix of the form:
+
+        [ f(0)  f'(0)  f''(0) ]
+        [  0    f(0)   f'(0)  ]
+        [  0      0     f(0)  ]
+
+  except with coefficients taken from the COEFFS list, substituting
+  EIGENVALUE for VAR, where SIZE is the size of the matrix. This is
+  the result of Taylor expanding a f(A), where A is a Jordan block,
+  around its eigenvalue.
+*/
+diag_taylor_expand_block (coeffs, var, eigenvalue, size) := (
+  coeffs: makelist (subst (eigenvalue, var, coeffs[i]), i, 1, size),
+  apply (matrix,
+         makelist (makelist (if is (i<k) then 0 else coeffs[i-k+1], i, 1, size),
+                   k, 1, size)))$
+
+/*
+  Take an analytic function, f, and a matrix, A, and calculate f(A) by
+  means of the associated Taylor series.
+*/
+mat_function (f, A) :=
+  block ([jordan: jordan (A),
+          var: gensym(),
+          coeffs, blocks: [], modemat],
+    coeffs: diag_taylor_coefficients (f(var), var,
+                                      lmax (map (second, jordan)) - 1),
+    for jordan_lst in jordan do
+      block ([bigmat: diag_taylor_expand_block (coeffs, var,
+                                                first (jordan_lst),
+                                                second (jordan_lst))],
+        for size in rest (jordan_lst) do
+          blocks:
+            cons (if is (size = second (jordan_lst)) then bigmat else
+                  apply (matrix,
+                         makelist (makelist (bigmat[i,j], j, 1, n), i, 1, n)),
+                  blocks)),
+    /* Glue the blocks together and conjugate by the mode matrix */
+    modemat: ModeMatrix (A, jordan),
+    modemat . diag (reverse (blocks)) . (modemat)^^(-1))$

@@ -1,0 +1,79 @@
+/* -*- Mode: Macsyma -*- */
+
+/*************************************************************************************
+ Demo of Format package
+*************************************************************************************/
+
+/***********************************************************************
+ General restructuring */
+format((a+b*x)*(c-x)^2,%poly(x),factor);
+format((1+2*eps*(q+r*cos(g))^2)^4,%series(eps,2),%trig(g),factor);
+format((1+2*a+a^2)*b + a*(1+2*b+b^2),%sum,%product,%factor);
+format(expand((1+a)^2/(1+b)^2),%ratsimp,%factor);
+t1:expand((1+x^4)*y^2+(1+x^8)*y^4)$
+format(t1,%p(y),%f);
+format(t1,%p(y),%f(a^2-2));
+format(expand((a+x)^3-a^3),%f-a^3);
+
+/* Contrast power series & Taylor series: */
+format((1+sin(x)-x)^3,%series(x,3),%f);
+format((1+sin(x)-x)^3,%taylor(x,3),%f);
+/***********************************************************************
+ Focussing simplifications on subexpressions*/
+foo:x^2*sin(y)^4-2*x^2*sin(y)^2+x^4*cos(y)^4-2*x^4*cos(y)^2+x^4+x^2+1$
+trigsimp(foo);
+format(foo,%p(x),trigsimp);
+
+sqrtp(f):=not(atom(f)) and part(f,0)='sqrt$
+first(solve(a*x^2+b*x-(b-2*a)/4,x));
+format(%,%rhs,%preformat(%p(match(sqrtp))),%match(sqrtp),%arg(1),%f);
+
+/***********************************************************************
+ Subtemplates & template chains. Compare: */
+t2:expand((1+a)^2*(1+x)^2/(1+b^2)/(1+y)^2)$
+format(t2,%r[%p(x)],%f);
+format(t2,%r[[%p(x),%f]]);
+
+/* Contrast these subtemplates */
+l1:[1+2*a+a^2,1+2*b+b^2,1+2*c+c^2]$
+format(l1,%list,%f);
+format(l1,%list[%noop,%f]);
+format(l1,%list[%noop,%ditto(%f)]);
+
+/* Contrast various templates & subtemplate usage */
+format((1+a)^2/(1+2*b+b^2),%frac[expand,%f]);
+format((1+a)^2/(1+2*b+b^2),%expression[expand,%f]);
+format((1+a)^2/(1+2*b+b^2),%denom,%f);
+format((1+a)^2/(1+2*b+b^2),%num,expand);
+
+/***********************************************************************
+ Bags: Lists, Relations & Matrices */
+
+format([a=b,c=d,e=f],%equation);
+format(%,%list);
+
+format(1+2*a+a^2 < 1+2*b+b^2,%rel("<")[%f]);
+format(1+2*a+a^2 < 1+2*b+b^2,%rhs("<"),%f);
+format(1+2*a+a^2 < 1+2*b+b^2,%lhs("<"),%f);
+format(1+2*a+a^2 = 1+2*b+b^2,%lhs,%f);
+m1:matrix([a^2+2*a+1=q,b^2+2*b+1=r],[c^2+2*c+1=s,d^2+2*d+1=t])$
+format(m1,%equation,%matrix[%list[%factor]]);
+format(m1,%eq,%element(1,1),%f);
+format(m1,%equation,%matrix[%noop,%list[%noop,%factor]]);
+format(m1,%eq,%element(2,2),%f);
+
+/***********************************************************************
+ Conditionals */
+format(a*(1+2*x+x^2)+b*(1+2*y+y^2),%sum,%if(lambda([xx],freeof(x,xx)))[%f,%subst(x=q)]);
+
+/***********************************************************************
+ User defined patterns */
+put(%myrectform,
+     lambda([expr],
+       block([pair:rectformlist(expr)],
+          format_piece(pair[1]) +%I* format_piece(pair[2]))),
+     formatter)$
+format(expand((1+a)^2+%I*(1+b)^2),%myrectform,%sqfr);
+
+/* Clean up */
+(remvalue(t1,t2,foo,m1),kill(%myrectform),remfunction(sqrtp))$

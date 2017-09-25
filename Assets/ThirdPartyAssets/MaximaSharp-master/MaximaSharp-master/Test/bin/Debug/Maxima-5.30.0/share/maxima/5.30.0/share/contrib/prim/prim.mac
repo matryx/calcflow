@@ -1,0 +1,47 @@
+/*
+I am putting this macsyma implementation of Prim's algorithm in the public
+domain.  It is derived from the implementation of the algorithm
+in Horowitz and Sahni's book, Fundamentals of Computer Algorithms.
+They mention the algorithm first appeared in the Bell System Technical
+Journal, in 1957.
+dan.stanger@ieee.org
+*/
+prim_cost[0,0]:inf; /* initialize a hashed array */
+cost(ii,jj):=block([e,i,j],
+   if ii > jj then (i:jj,j:ii) else (i:ii,j:jj),
+   e:prim_cost[i,j],
+   if arraymake(prim_cost,[i,j]) = e then inf else e
+);
+fromNode(l):=first(l)$
+toNode(l):=second(l)$
+/* E array of nodes, COST cost function */
+prim(E,COST,n):=block(
+      [T,mincost,NEAR,k,l],
+   ?mlocal(NEAR),
+   array(NEAR,n),
+   mincost:inf,
+   for i:1 thru n do block([c,kk,ll],
+      kk:fromNode(E[i]),ll:toNode(E[i]),
+      if (c:COST(kk,ll)) < mincost then block(mincost:c,k:kk,l:ll)
+   ),
+   T:[[k,l]],
+   for i:1 thru n do if COST(i,l) < COST(i,k) then NEAR[i]:l else NEAR[i]:k,
+   NEAR[k]:0,NEAR[l]:0,
+   for i:2 thru n-1 do block([j:0,maxcost:inf],
+      for jj:1 thru n do block(
+         if NEAR[jj] # 0 and COST(jj,NEAR[jj]) < maxcost then block(
+	    maxcost:COST(jj,NEAR[jj]), j:jj)
+      ),
+      if j > 0 then block(
+         T:cons([j, NEAR[j]],T),
+         mincost:mincost+COST(j,NEAR[j]),
+         NEAR[j]:0,
+         for k:1 thru n do block(
+            if NEAR[k] # 0 and COST(k,NEAR[k]) > COST(k,j) then NEAR[k]:j
+         )
+      )
+   ),
+   ?MUNLOCAL(),
+   T
+)$
+

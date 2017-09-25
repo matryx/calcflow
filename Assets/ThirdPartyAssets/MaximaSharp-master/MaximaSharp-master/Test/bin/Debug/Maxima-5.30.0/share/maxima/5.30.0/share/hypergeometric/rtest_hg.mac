@@ -1,0 +1,684 @@
+(kill(all), 
+   fpprec : 25, 
+   load("hypergeometric"), 
+   expand_hypergeometric : false, 
+   max_fpprec : 1000,
+   start : absolute_real_time (), 
+   0);
+0$
+errcatch(max_fpprec : %pi);
+[false]$
+
+max_fpprec;
+1000$
+
+errcatch(expand_hypergeometric : 42);
+[false]$
+
+expand_hypergeometric;
+false$
+
+/* argument length checks */
+
+errcatch(hypergeometric([3],[10]));
+[]$
+
+errcatch(hypergeometric());
+[]$
+
+errcatch(hypergeometric([]));
+[]$
+
+/* 0F0 simplification */
+hypergeometric([],[],x);
+exp(x)$
+
+/* 1F0 simplification */
+hypergeometric([a],[],x);
+1/(1-x)^a$
+
+hypergeometric([-5],[],x);
+(1-x)^5$
+
+hypergeometric([%i],[],x);
+1/(1-x)^%i$
+
+/* sort and remove parameters */
+
+hypergeometric([a,a],[b],x);
+hypergeometric([a,a],[b],x)$
+
+hypergeometric([a,a],[a],x);
+1/(1-x)^a$
+
+hypergeometric([a,a],[a,b],x);
+hypergeometric([a],[b],x)$
+
+hypergeometric([a,b],[c,d],0);
+1$
+
+/* Special values */
+hypergeometric([5/3, 42],[%i, 23],0);
+1$
+
+hypergeometric([5/3, 7.892],[%i, 23],0.0);
+1.0$
+
+hypergeometric([5/3, 7.892],[%i, 23],0.0b0);
+1.0b0$
+
+hypergeometric([],[],0.5);
+''(exp(0.5))$
+
+hypergeometric([],[],0.5b0);
+''(exp(0.5b0))$
+
+hypergeometric([],[],0.5 + %i);
+''(exp(0.5 + %i))$
+
+hypergeometric([],[],0.5b0 + %i);
+''(exp(0.5b0 + %i))$
+
+hypergeometric([0],[],1);
+1$
+
+hypergeometric([0,a],[b],x);
+1$
+
+/* undefined cases */
+hypergeometric([7],[-9],x);
+'hypergeometric([7],[-9],x)$
+
+hypergeometric([inf],[-9],x);
+'hypergeometric([inf],[-9],x);
+
+hypergeometric([7],[8,9,minf],0);
+'hypergeometric([7],[8,9,minf],0)$
+
+/* 1F1 reflection */
+hypergeometric([a],[b],-x) - hypergeometric([b-a],[b],x)*%e^(-x);
+0$
+
+hypergeometric([a],[b],p-q) - hypergeometric([b-a],[b],q-p)*%e^(p-q);
+0$
+
+/* polynomial cases (include taylor cases)*/
+(fake_hg(a,b,x,n) := block([listarith : true],
+    sum(product(xreduce("*",a + l) * x /((1 + l) * xreduce("*", b + l)),l,0,k-1), k, 0,n)), 0)$
+0$
+
+(expand_hypergeometric : true,0);
+0$
+
+ratsimp(hypergeometric([-5,a],[b],x) - fake_hg([-5,a], [b],x, 6));
+0$
+
+ratsimp(hypergeometric([-5,3/5],[],x) - fake_hg([-5,3/5], [],x, 6));
+0$
+
+ratsimp(hypergeometric([-5,3/5 + %i],[1/12],x) - fake_hg([-5,3/5 + %i], [1/12],x, 6));
+0$
+
+ratsimp(hypergeometric([-5,3/5 + %i],[1/12], 4/3) - fake_hg([-5,3/5 + %i], [1/12], 4/3, 6));
+0$
+
+(expand_hypergeometric : false,0);
+0$
+
+ratsimp(hypergeometric([-5,3/5 + %i],[1/12], 4/3 + %i/9) - fake_hg([-5,3/5 + %i], [1/12], 4/3 + %i/9, 6));
+0$
+
+hypergeometric([9,3],[1/2], taylor(x,x,0,3)) - fake_hg([9,3],[1/2], taylor(x,x,0,3),3);
+''(taylor(0,x,0,3))$
+
+hypergeometric([2,3,5],[8,8,74], taylor(x,x,0,4)) - fake_hg([2,3,5],[8,8,74], taylor(x,x,0,4),5);
+''(taylor(0,x,0,4))$
+
+/* Exp doesn't taylorize; this isn't a bug in hypergeometric */
+hypergeometric([],[], taylor(x,x,0,5)) - exp(x);
+''(taylor(0,x,0,5))$
+
+hypergeometric([3/8],[], taylor(x,x,0,5)) - 1/(1-x)^(3/8);
+''(taylor(0,x,0,5))$
+
+/* Chu-Vandermonde identity */
+sublis([a = 1/2, b = -2/3, c = 12, x = 1],
+  hypergeometric([a,b],[c],x) -  gamma(c) * gamma(c - a - b) / (gamma(c-a) * gamma (c-b)));
+0$
+
+sublis([a = 1/2, b = -2/3, c = 121/10, x = 1],
+  hypergeometric([a,b],[c],x) -  gamma(c) * gamma(c - a - b) / (gamma(c-a) * gamma (c-b)));
+0$
+
+/* numerical */
+
+(fpprec : 20, close_p(a,b, dig) := is(abs(a-b) < 10^-dig * abs(a)),0);
+0$
+
+(check_id(id, xo, dig) := close_p(rectform(sublis(xo, rhs(id))), rectform(sublis(xo, lhs(id))), dig),0);
+0$
+
+close_p(hypergeometric([-30,1/2], [4,2 + %i], 1/2), hypergeometric([-30,1/2], [4,2 + %i],0.5b0), 20);
+true$
+
+close_p(hypergeometric([-75,1/2], [1/2,2 + %i], 1/2),hypergeometric([-75,1/2], [1/2,2 + %i], 0.5b0), 17);
+true$
+
+(id : hypergeometric([1/2,1/2],[3/2],z^2) = asin(z)/z,0);
+0$
+
+check_id(id, [z= 0.1], 13);
+true$
+
+check_id(id, [z=0.1 + 0.2 * %i], 13);
+true$
+
+check_id(id, [z=-0.99b0], 18);
+true$
+
+/* G&R 9.121, 2 */
+(id : hypergeometric([-n/2,-(n-1)/2],[1/2], z^2) = ((1 + z)^n + (1- z)^n)/2,0);
+0$
+
+check_id(id, [z=0.42, n = 11], 15);
+true$
+
+check_id(id, [z=0.42b0 * %i, n = 21], 15);
+true$
+
+check_id(id, [z=0.42b0 * %i, n = 37], 15);
+true$
+
+/* G&R 9.121, 6 */
+
+(id : hypergeometric([1,1],[2],-z) = log(1 + z) / z,0);
+0$
+
+check_id(id, [z = -0.99b0], 20);
+true$
+
+check_id(id, [z = 0.99b0], 20);
+true$
+
+check_id(id, [z = 0.056b0 - 0.1b0 * %i], 18);
+true$
+
+check_id(id, [z = 0.042b0 - 0.1b0 * %i], 18);
+true$
+
+(id : hypergeometric([100],[2],x) = hgfred([100],[2],x),0);
+0$
+
+check_id(id,[x = 0.9],13);
+true$
+
+abramowitz_id(abramowitz_id(hypergeometric([a,b],[c],x), "15.3.3"), "15.3.3");
+hypergeometric([a,b],[c],x)$
+
+abramowitz_id(abramowitz_id(hypergeometric([6,2],[9],x), "15.3.3"), "15.3.3");
+hypergeometric([6,2],[9],x)$
+
+/*
+hypergeom([2308094809027379/562949953421312,6980579422424269/562949953421312],
+          [2871044762448691/562949953421312],-5685794529555251/562949953421312);
+*/
+
+close_p(hypergeometric([4.1, 12.4],[5.1], -10.1), float(1.8514804991703517693765213431502813b-7), 14);
+true$
+
+/* expand */
+
+block([expand_hypergeometric : false], hypergeometric([-4,5],[7],x));
+hypergeometric([-4,5],[7],x)$
+
+block([expand_hypergeometric : true], hypergeometric([-4,5],[7],x));
+x^4/3-(5*x^3)/3+(45*x^2)/14-(20*x)/7+1$
+
+hypergeometric([-4,5],[7],2/3);
+163/1701$
+
+hypergeometric([-4,5],[7],2/(1 + %i));
+1/7-(5*%i)/21$
+
+hypergeometric([-6],[2], rat(x));
+''(rat((x^6-42*x^5+630*x^4-4200*x^3+12600*x^2-15120*x+5040)/5040))$
+
+hypergeometric_simp(hypergeometric([2,1],[3],x));
+-2*(log(1-x)/x+1/x+(log(1-x)*(1-x))/x^2)$
+
+hypergeometric_simp(hypergeometric([a,b],[c],x));
+hypergeometric([a,b],[c],x)$
+
+/* conjugates */
+
+conjugate(hypergeometric([a],[c],x + %i*y));
+hypergeometric([a],[c],x - %i*y)$
+
+conjugate(hypergeometric([%i],[c,d],x + %i*y));
+hypergeometric([-%i],[c,d],x - %i*y)$
+
+conjugate(hypergeometric([%i],[%i-5,d],x + %i*y));
+hypergeometric([-%i],[-%i-5,d],x - %i*y)$
+
+/* Kummer transformation */
+hypergeometric([a],[b],-x);
+hypergeometric([b-a],[b],x)*%e^(-x)$
+
+hypergeometric([b-a],[b],x)*%e^(-x) - hypergeometric([a],[b],-x);
+0$
+
+/* derivatives */
+
+diff(hypergeometric([a,b],[c],x),x);
+(a*hypergeometric([a+1,b+1],[c+1],x)*b)/c$
+
+diff(hypergeometric([a,b],[],x),x);
+a*hypergeometric([a+1,b+1],[],x)*b$
+
+errcatch(diff(hypergeometric([a,b],[c],x),a));
+[]$
+
+errcatch(diff(hypergeometric([x,b],[c],x),x));
+[]$
+
+rationalize(hypergeometric([3,5],[12],1.0));
+''(limit(hgfred([3,5],[12],x),x,1))$
+
+/* http://functions.wolfram.com/webMathematica/FunctionEvaluation.jsp?name=Hypergeometric2F1 */
+
+close_p(hypergeometric([10,1/2],[4/5],11.34), 1.3549350983566885E-11 - 0.0378552663235813 * %i, 14);
+true$
+
+hypergeometric([-10, 4.1],[%i], -10.1 + %i);
+1.045909655864634E13 + 3.8059389422734617E13 * %i$
+
+hypergeometric([3.4, 5.6],[0.9], 1.01);
+5.5055743253266464E17 -1.7888695373728154E17 * %i$
+
+(fpprec : 20, hypergeometric([2,4],[7.1b0],5.6b0 + %i));
+0.08245572273577160061b0 - 0.34771832247673618857b0*%i$
+
+(fpprec : 20, hypergeometric([2,4],[7.1b0],5.6b0));
+0.26986105349383515333b0 + 0.35425557684972100084b0*%i$
+
+z : float(hypergeometric([-100,1/2],[4/5 + %i], 13/10));
+0.05884530173873348*%i+0.062826546005002537$
+
+hypergeometric([-100,1/2],[4/5 + %i], 1.3);
+0.05884530173873348*%i+0.062826546005002537$
+
+z : float(hypergeometric([-10, 41/10],[%i], -101/10 + %i));
+1.0459096558646348E13 + %i * 3.8059389422734648E13$
+
+hypergeometric([-10, 4.1],[%i], -10.1 + %i);
+1.0459096558646348E13 + %i * 3.8059389422734648E13$
+
+abramowitz_id(hypergeometric([a,b],[c],x),"15.3.4");
+hypergeometric([a,c-b],[c],x/(x-1))/(1-x)^a$
+
+/* A&S 15.3.15 I think this is an identity off [1,inf) */
+
+(remvalue(z), domain : complex, fpprec : 20, 0);
+0$
+
+(id : hypergeometric([a,b],[2*b], x) = (1-x)^(-a/2) * hypergeometric([a/2, b-a/2],[b+1/2], x^2/(4*x - 4)),0);
+0$
+
+check_id(id, [a = 1.56, b = 12.8, x = 1.067 + 0.001 * %i], 13);
+true$
+
+check_id(id, [a = 1.56, b = 12.8, x = -100.42 - %i], 13);
+true$
+
+check_id(id, [a = 1.56, b = 12.8, x = cos(42.0) + %i * sin(42.0)], 15);
+true$
+
+check_id(id, [a = 1.56b0, b = 12.8b0, x = 1.067b0 + 0.001b0 * %i], 18);
+true$
+
+check_id(id, [a = 1.56b0, b = 12.8b0, x = -100.42b0 - %i], 10);
+true$
+
+check_id(id, [a = 1.56b0, b = 12.8b0, x = cos(42.0b0) + %i * sin(42.0b0)], 10);
+true$
+
+/* A&S 15.3.16 */
+
+(id : hypergeometric([a,b],[2*b],x)=(1-x/2)^(-a) * hypergeometric([a/2, 1/2 + a/2],[b + 1/2], x^2/(2-x)^2),0);
+0$
+
+check_id(id, [a = -1.056b0, b = -1.8b0, x = -10.66b0 - %i], 18);
+true$
+
+check_id(id, [a = -1.056b0, b = -1.8b0, x = cos(2.1b0) + %i * sin(2.1b0)], 18);
+true$
+
+/* A&S 15.3.31 */
+
+(id : hypergeometric([a,1-a],[c],x) = (1-x)^(c-1) * hypergeometric([(c-a)/2, (c + a -1)/2],[c],4*x-4*x^2),0);
+0$
+
+check_id(id, [a = 0.056b0, c = -0.8b0, x = -101.7b0 + %i], 18);
+true$
+
+check_id(id, [a = 0.056b0, c = -0.8b0, x = cos(2.1b0) + %i * sin(2.1b0)], 18);
+true$
+
+/* A&S 15.2.19 */
+
+(id : (b-a)*(1-x) * hypergeometric([a,b],[c],x) - (c-a) * hypergeometric([a-1,b],[c],x) + 
+     (c-b) * hypergeometric([a,b-1],[c],x),0);
+0$
+
+close_p(hypergeometric([1,1],[2],0.998b0), -log(1 - 0.998b0)/0.998b0, fpprec-1);
+true$
+
+close_p(hypergeometric([1,1],[2],0.998), (-log(1 - 0.998)/0.998), 15);
+true$
+
+/* Maple uses base ten floats, so comparing Maple to Maxima is tricky. To
+compare a Maple result to Maxima, do:
+
+ (1) In Maxima, set fpprec and use rationalize to convert floats to rationals. For
+     big floats, the value of rationalize depends on fpprec, so be sure to set fpprec
+     to the desired value.
+
+ (2) In Maple, set Digits. Evaluate convert(hypergeom(...),float), where the arguments are
+     rationals determined in step 1.
+
+Don't get me wrong: Maple does allow IEEE double floats, but Maple big floats (that is
+non-doubles) are base ten, I think.
+*/
+
+close_p(hypergeometric([1,1],[2], 0.999b0), -log(1-0.999b0)/0.999b0, fpprec-1);
+true$
+
+close_p(hypergeometric([1,1],[2],1.3), -log(1-1.3)/1.3, 15);
+true$
+
+close_p(hypergeometric([1,1],[2],1.3b0), -log(1-1.3b0)/1.3b0, fpprec-1);
+true$
+
+hypergeometric([100],[2],0.9b0);
+''(nfloat(hgfred([100],[2],x),[x = 0.9b0], fpprec))$
+
+is(abs(nfloat(id, [a = 2/3, b= 42, c = 27/7, x=-1776.0], 18)) < 1.0e-14);
+true$
+
+/* actual regresssions */
+
+diff(hypergeometric([a,b],[c,d],-x),x);
+-(a*hypergeometric([a+1,b+1],[c+1,d+1],-x)*b)/(c*d)$
+
+close_p(nfloat(hypergeometric([3.4],[7.8],'z), ['z = 5.67]), 18.61833264303484, 15);
+true$
+
+block([max_fpprec : 2000], hypergeometric([101],[11], -1181.0b0));
+''(bfloat(sublis([x=-1181], hgfred([101],[11],x))))$ 
+
+block([expand_hypergeometric : true], hypergeometric([-2],[2/3 + %i], x));
+(9/442-189*%i/442)*x^2+(18*%i/13-12/13)*x+1$
+
+/* Using doubles, this test causes an overflow. The code should switch to big floats.
+Yes, the test is slow :(. */
+
+hypergeometric([3],[8.7],-1000.1);
+2.8986069810127266E-7$
+
+block([fpprec : 25], hypergeometric([-1000],[2/3],-1181.0b0));
+1.813981492619807238503838b731$
+
+/* A&S 13.4.1 */
+(id : (b-a) * hypergeometric([a-1],[b],x) + (2*a-b+x)*hypergeometric([a],[b],x) 
+    - a * hypergeometric([a+1],[b],x),0);
+0$
+
+is(abs(nfloat(id, [a=1.67, b = -56.5, x = -0.42], 15)) < 1.0e-14);
+true$
+
+is(abs(nfloat(id, [a=1.67 + %i, b = -56.5, x = 10.42 + 11.88*%i], 15)) < 5.0e-14);
+true$
+
+close_p(subst([a=1.67, b=56.1, x = -1.42], hypergeometric([a], [b], x) * (x - b + 2 * a)), -51.96358410181497,13);
+true$
+
+close_p(subst([a=1.67, b=56.1, x = -1.42], hypergeometric([a], [b], x) * (x - b)), -55.16695012064225,13);
+true$
+
+/* A&S 15.1.7 */
+
+(id : hypergeometric([1/2,1/2],[3/2],-x^2) - log(x + sqrt(1+x^2)) / x,0);
+0$
+
+is(abs(nfloat(id, [x = cos(-47.0) + %i * sin(-47.0)], 12)) < 10^-10);
+true$
+
+/* A&S 15.1.4 */
+
+(id : hypergeometric([1/2,1],[3/2],x^2) - log((1+x)/(1-x))/(2*x),0);
+0$
+
+is(abs(nfloat(id, [x = exp(5.0 - 2.807 * %i)], 12)) < 10^-10);
+true$
+
+is(abs(nfloat(id, [x = -10.7 + %i], 20)) < 10^-19);
+true$
+
+is(abs(nfloat(id, [x = 28.07 + 0.01 * %i], 20)) < 10^-19);
+true$
+
+
+close_p(nfloat(hypergeometric([1/2,1],[3/2], x), [x =cos(23.0) + %i * sin(23.0)], 18), 
+  bfloat(rectform(hgfred([1/2,1],[3/2], cos(23) + %i * sin(23)))), 15);
+true$
+
+
+/* bugs!!! 
+
+is(abs(nfloat(id, [x = cos(-47.0b0) + %i * sin(-47.0b0)], 10)) < 10^-8);
+true$
+
+hypergeometric([1/2,1/2],[3/2],10.0e6);
+hypergeometric([1/2,1/2],[3/2],10.0e2);
+hypergeometric([5.0b-1, 1.0b0],[1.5b0], 0.995b0);
+is(abs(nfloat(id, [x = -1964.1b0], 20)) < 10^-20);
+*/
+
+hypergeometric([1/2,1],[3/2], 2807.0);
+''(float(3.562945408378278793890989970521468894557558424951846558009b-4
+            - 2.964822314792439520081705392154987108698281707824080659881b-2 * %i))$
+
+(load("functs"),0);
+0$
+
+/* A&S 13.1.20 */
+(id : determinant(wronskian([hypergeometric([a],[b],x), x^(1-b) * hypergeometric([1+a-b],[2-b],x)],x)) - (1-b)*x^(-b)*exp(x),0);
+0$
+
+is(abs(nfloat(id, [a = 1.45, b=2.807, x=3.14159], 18)) < 10^-18);
+true$
+
+is(abs(nfloat(id, [a = 1.45 - %i, b=-2.807, x=3.14159 + 3.14159*%i], 18)) < 10^-18);
+true$
+
+is(abs(nfloat(id, [a = 1.45 - %i, b=-2.807, x=-19.13], 18)) < 10^-18);
+true$
+
+/* A&S 13.4.4 */
+(id : b * hypergeometric([a],[b],x) -b* hypergeometric([a-1],[b],x)-x*hypergeometric([a],[b+1],x),0);
+0$
+
+is(abs(nfloat(id, [a = 10.45 - %i, b=-12.807, x=-29.13], 18)) < 10^-18);
+true$
+
+/* A&S 13.6.1 */
+(id : hypergeometric([nu+1/2],[2*nu+1],2*%i*x) - gamma(1+nu) * exp(%i*x) * (x/2)^(-nu) * bessel_j(nu,x),0);
+0$
+
+is(abs(rectform(sublis([nu=6.7, x = 28.07],id))) < 1/10^18);
+true$
+
+is(abs(float(rectform(sublis([nu=-6.01, x = -2.0 + 4.0 * %i ],id)))) < 1/10^14);
+true$
+
+f : abramowitz_id(42*elliptic_kc(x*(x-1)), "a&s17.3.9-->");
+21*%pi*hypergeometric([1/2,1/2],[1],(x-1)*x)$
+
+abramowitz_id(f, "a&s17.3.9<--");
+42*elliptic_kc(x*(x-1))$
+
+f : abramowitz_id(42*elliptic_ec(x*(x-1)), "a&s17.3.10-->");
+21*%pi*hypergeometric([-1/2,1/2],[1],(x-1)*x)$
+
+abramowitz_id(f, "a&s17.3.10<--");
+42*elliptic_ec((x-1)*x)$
+
+f : abramowitz_id(elliptic_kc(p) + elliptic_ec(q), "a&s17.3.9-->", "a&s17.3.10-->");
+%pi*hypergeometric([1/2,1/2],[1],p)/2+%pi*hypergeometric([-1/2,1/2],[1],q)/2$
+
+abramowitz_id(f,"a&s17.3.9<--", "a&s17.3.10<--");
+elliptic_kc(p) + elliptic_ec(q)$
+
+(id :  hypergeometric([3/2 + n/5, 2/3, -n, 2*n + 2],[n + 11/6, 4/3, n/5+1/2], 2/27) -
+	 pochhammer(5/2,n) * pochhammer(11/6,n) / (pochhammer(3/2,n) * pochhammer(7/2,n)),0);
+0$
+
+makelist(sublis([n = k], id), k,0,10);
+''(makelist(0,k,0,10))$
+
+/* Value at 1/2; see http://en.wikipedia.org/wiki/List_of_hypergeometric_identities */
+
+(id : hypergeometric([a,1-a],[c], 1/2) - gamma(c/2) *  gamma(c/2 + 1/2)/(gamma(c/2 + a/2) * 
+gamma(1/2 + c/2 - a/2)),0);
+0$
+
+is(abs(nfloat(id,[a=4/5, c = 2/3], 23)) < 1/10^23);
+true$
+
+is(abs(nfloat(id,[a=28.07, c = 1909], 23)) < 1/10^23);
+true$
+
+is(abs(nfloat(id,[a=-28.07 + %i, c = 19.09 - %i], 23)) < 1/10^18);
+true$
+
+is(abs(nfloat(hypergeometric([1/6,1/2],[2/3],125/128) - 4 * 2^(1/6) / 3,[], 22)) < 1/10^22);
+true$
+
+
+/* and just for fun */
+taylor(hypergeometric([a+1,b],[c,d],x)*(((b-a-1)*x)/((c-a-1)*(d-a-1))-(c*d-2*a*d-2*d-2*a*c-2*c+3*a^2+7*a+4)/((c-a-1)*(d-a-1)))+hypergeometric([a+2,b],[c,d],x)*(((a+1)*x)/((c-a-1)*(d-a-1))-((a+1)*(d+c-3*a-5))/((c-a-1)*(d-a-1)))-((a+1)*(a+2)*hypergeometric([a+3,b],[c,d],x))/((c-a-1)*(d-a-1))+
+hypergeometric([a,b],[c,d],x),x,0,15);
+''(taylor(0,x,0,15))$
+
+/* SF bug 2855935  */
+
+hypergeometric([a],[],1);
+hypergeometric([a],[],1)$
+
+(assume(a < 0),0);
+0$
+
+hypergeometric([a],[],1);
+0$
+
+(forget(a < 0),0);
+0$
+
+/* Integrals of hypergeometric functions */
+integrate(hypergeometric([1],[2],z),z); 
+hypergeometric([1,1],[2,2],z)*z$
+
+integrate(hypergeometric([a,b],[c],z),z);
+hypergeometric([a-1,b-1],[c-1],z)*(c-1)/((a-1)*(b-1))$
+
+integrate(hypergeometric([a,b],[c],2*z),z);
+hypergeometric([a-1,b-1],[c-1],2*z)*(c-1)/(2*(a-1)*(b-1))$
+
+/* next three tests regressions for Bug ID: 2949677 */
+hypergeometric([-4, 38/5],[13/5],1);
+3125/6279$
+
+close_p(hypergeometric([-4, 38/5],[13/5],1.0), 3125/6279, 14);
+true$
+
+close_p(hypergeometric([-4, 38/5],[13/5],1.0b0), 3125/6279, fpprec-2);
+true$
+
+/* Regression for Kummer reflection - ID: 2954141 */
+
+hypergeometric([-2],[3],x), expand_hypergeometric : true;
+x^2/12-(2*x)/3+1$
+
+hypergeometric([-2],[3],-x),expand_hypergeometric : true;
+x^2/12+2*x/3+1$
+
+hypergeometric([-1],[-2],x), expand_hypergeometric : true;
+x/2+1$
+
+
+/* regression: Unevaluated numerical hypergeometric() call - ID: 2996065 */
+
+close_p(hypergeometric([-1/4,1/4],[1],16.0/25),0.95126303911614,15);
+true$
+
+close_p(hypergeometric([1,1],[2], 0.998),6.227062222867928,15);
+true$
+
+close_p(hypergeometric([1/2,-1/2],[1], 0.64), 0.812549610282201,15);
+true$
+
+/* tests for new code for x near exp(%i * %pi / 3) */
+
+close_p(hypergeometric([1/2,2/3],[6], 0.5b0+%i * sqrt(3.0b0)/2),
+  5.56090808176771804282797055039701904767032b-2*%i
+  +1.01996502902735430283851818152075979159011b0, fpprec-2);
+true$
+
+close_p(hypergeometric([1/2,2/3],[6], 0.5b0 - %i * sqrt(3.0b0)/2),
+	-5.56090808176771804282797055039701904767032b-2*%i
+        	+1.01996502902735430283851818152075979159011b0, fpprec-2);
+true$
+
+/* tests aimed toward increasing code coverage*/
+
+(remvalue(id,a,b,c,d,x,z,f),0);
+0$
+
+conjugate(hypergeometric([1/2, 6],[9], 1/2 + %i/8));
+hypergeometric([1/2, 6],[9], 1/2 - %i/8)$
+
+conjugate(hypergeometric([a,b,c,d],[f], 8 + %i));
+'(conjugate(hypergeometric([a,b,c,d],[f], 8 + %i)))$
+
+block([fpprec : 20], close_p(hypergeometric([5/8],[], 1.97b0), nfloat(1/(1-x)^(5/8),[x = 1.97b0],20), 18));
+true$
+
+close_p(hypergeometric([-1],[3/4],0.5), 1/3, 15);
+true$
+
+block([expand_hypergeometric : true], hypergeometric([-2, 1/2 + %i/7],[%i/9],x));
+(29241/16072-108783*%i/16072)*x^2+(9*%i-18/7)*x+1$
+
+tex(hypergeometric([2],[9],x),false);
+"$$F\\left( \\left. \\begin{array}{c}2\\\\9\\end{array} \\right |,x\\right)$$
+"$
+
+tex(hypergeometric([a,b],[c],x),false);
+"$$F\\left( \\left. \\begin{array}{c}a,\\;b\\\\c\\end{array} \\right |,x
+ \\right)$$
+"$
+
+/* float hypergeometric error | fix - ID: 3426847 */
+block([fpprec : 56], close_p(hypergeometric([1],[3/2,3/2], -10000.0), -4.012030270249197E-4, 15));
+true$
+
+/* Unevaluated numerical hypergeometric() call - ID: 2996065 */
+close_p(hypergeometric([-1/4,1/4],[1],16.0/25), 0.95126303911614, 15);
+true$
+
+(time : (absolute_real_time ()- start), print(time), is(time < 40));
+true$
+
+(remvalue(start), reset(domain, fpprec, expand_hypergeometric, max_fpprec), 
+ remfunction(fake_hg, close_p, check_id),0);
+0$

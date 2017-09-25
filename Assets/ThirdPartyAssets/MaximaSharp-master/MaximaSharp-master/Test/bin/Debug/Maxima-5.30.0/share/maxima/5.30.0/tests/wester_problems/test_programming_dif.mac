@@ -1,0 +1,49 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Programming/dif.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Programming and Miscellaneous ---------- */
+/* Define a simple differentiation operator.  This is most easily done with
+   pattern matching.  Here is an expression that we ultimately hope to be able
+   to differentiate. */
+expr: a + b*u + c*u^2 + d*(e*u + f)^3 + g*u*exp(h*u);
+dif(e, x):= block([oper, n],
+   if not atom(e) then
+      oper: part(e, 0),
+   n: length(e),
+/* Start by making the derivative of a sum to be the sum of the derivatives. */
+   if oper = "+" then
+      map(lambda([z], dif(z, x)), e)
+/* Add the product rule. */
+   else if oper = "*" then
+      dif(part(e, 1), x) * part(e, 2..n) + part(e, 1) * dif(part(e, 2..n), x)
+/* Now, make the derivative of a constant (with respect to x) zero. */
+   else if freeof(x, e) then
+       0
+/* Define the derivative of x with respect to x to be one. */
+   else if e = x then
+       1
+/* Enter the generalized power rule. */
+   else if oper = "^" and not freeof(x, part(e, 1)) then
+       part(e, 2)*part(e, 1)^(part(e, 2) - 1)*dif(part(e, 1), x)
+/* To get that last term, add in the exponential rule. */
+   else if oper = "^" and part(e, 1) = %e then
+      e*dif(part(e, 2), x)
+   );
+/* Now, try it out! => b + 2 c u + 3 d e (e u + f)^2 + g exp(h u) (1 + h u) */
+dif(expr, u);
+/* ---------- Quit ---------- */
+quit();

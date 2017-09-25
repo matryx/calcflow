@@ -1,0 +1,46 @@
+/* a macro for floatdefunk, needed until optimu is used */
+load("fltdfnk.mc")$
+
+/* Example of use of double integrator (DBLINT), part 2 */
+
+/* Get the fasl file for DBLINT */ 
+load('dblint); 
+
+/* Use DBLINT to get the double integral of exp(x-y^2) over the region
+bounded by y=1 and y=2+x^(3/2) and x=0 to x=1 */
+
+/* Define the integrand as a function of two variables */
+
+f(x,y):=(mode_declare([x,y],float),exp(x-y^2)); 
+
+/* Define the lower and upper limits on the inner (y in this case)
+integral as a function of the outer variable (x in this case) */
+
+r(x):=(mode_declare(x,float),1.0); 
+s1(x):=(mode_declare(x,float),2.0+x^(3/2));
+
+/* Now translate these functions for the sake of efficiency */
+
+translate(f,r,s1); 
+
+/* Call the DBLINT function with quoted arguments for function names, and
+floating point values for the endpoints of the outer (x) integration
+*/ 
+
+dblint_answer:dblint('f,'r,'s1,0.0,1.0); 
+
+/* Now generate the exact integral over y using RISCH */
+
+inty:risch(exp(x-y^2),y); 
+
+/* Now get the integrand of the x integral */
+
+xint:ev(inty,y:2+x^(3/2))-ev(inty,y:1);
+
+/* Try to do the x integral exactly */
+
+risch(xint,x);
+radcan(%);
+%,nouns;
+/* Still no luck with closed-form */
+"end of dblint.dm1"$

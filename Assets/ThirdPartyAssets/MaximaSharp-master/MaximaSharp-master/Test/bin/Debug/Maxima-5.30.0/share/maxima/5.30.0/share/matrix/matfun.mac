@@ -1,0 +1,17 @@
+
+/* Assorted matrix functions written for ELIZC by JPG */
+/* Examples: Let M be a 4x4 matrix.
+SEL(M,[1,3],[2,4]); gives MATRIX([M12,M14],[M32,M34]).
+	SEL is short for SELECT.
+ROWS(M,[1,3]); gives MATRIX([M11,M12,M13,M14],[M31,M32,M33,M34]).
+COLS(M,[1,3]); gives MATRIX([M11,M13],[M21,M23],[M31,M33],[M41,M43]). */
+
+/* The functionality of subscrmap is broken. The function sel does not work as 
+ * expected. subscrmap is not documented and it does not work since Maxima 5.9.
+ * None of the functions sel, rows, and cols are used in Maxima core or share.
+ * Consider to remove the complete file (DK 09/2010).
+ */
+sel(m,r,c):=block([subscrmap:true],apply('matrix,ev(m[r,c],eval)))$
+
+rows(m,r):=apply('matrix,makelist(m[i],i,r))$
+cols(m,c):=transpose(rows(transpose(m),c))$

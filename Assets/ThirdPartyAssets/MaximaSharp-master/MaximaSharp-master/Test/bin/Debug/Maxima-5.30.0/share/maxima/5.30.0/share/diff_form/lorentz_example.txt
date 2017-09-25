@@ -1,0 +1,187 @@
+Maxima 5.9.3 http://maxima.sourceforge.net
+Using Lisp GNU Common Lisp (GCL) GCL 2.6.7 (aka GCL)
+Distributed under the GNU Public License. See the file COPYING.
+Dedicated to the memory of William Schelter.
+This is a development version of Maxima. The function bug_report()
+provides bug reporting information.
+(%i1) batch("new_cartan_test4.mac");
+
+batching #p/home/furuya/sagyo/new_cartan_test4.mac
+(%i2)                        load(cartan_new.lisp)
+(%i3)                              infix(@)
+(%i4)                              infix(&)
+(%i5)                              infix(|)
+(%i6)                 coords : read(Input new coordinate)
+Input new coordinate
+[x,y,z,t];
+(%i7)                    dim : extdim : length(coords)
+(%i8)                basis : VR : extsub  : extsubb  : []
+                                        1          1
+(%i9)    for i thru dim do basis : endcons(concat(D, coords ), basis)
+                                                           i
+(%i10) for i thru dim do (extsub      : cons(basis  = - basis , extsub ),
+                                1 + i             i          i        i
+ extsubb  : cons(basis  = 0, extsub ), ci : concat(v, i), VR : endcons(ci, VR))
+        i             i            i
+(%i11)                               basis
+(%o11)                         [Dx, Dy, Dz, Dt]
+(%i12) cliffordtype : read(please input metric type,for example [1,1,1],if E3)
+please input metric type,for example [1,1,1],if E3
+[1,1,1,-1];
+(%o12)                          [1, 1, 1, - 1]
+(%i13) translist : read(represent the standard coordinates with new one)
+represent the standard coordinates with new one
+[x,y,z,%i*c*t];
+(%o13)                         [x, y, z, %i c t]
+(%i14)                          norm_table : []
+(%i15)                         scale_factor : []
+(%i16)                              _l : []
+(%i17) for i thru dim do (_l : map(lambda([x], diff(x, coords )), translist),
+                                                             i
+                      2
+_l : map(lambda([x], x ), _l), _p : ratsimp(trigsimp(apply(+, _l))),
+                     cliffordtype
+                                 i
+norm_table : endcons(-------------, norm_table))
+                          _p
+(%i18)                            norm_table
+                                           1
+(%o18)                           [1, 1, 1, --]
+                                            2
+                                           c
+                                                   norm_table
+                                                             i
+(%i19) for i thru dim do extsubb2  : cons(basis  = -----------, extsub )
+                                 i             i     basis            i
+                                                          i
+                                       2        1
+(%i20) for i thru dim do (a_ : solve(x_  - -----------, [x_]),
+                                           norm_table
+                                                     i
+                                   scale_factor : cons(rhs(a_ ), scale_factor))
+                                                             2
+(%i21)               scale_factor : reverse(scale_factor)
+(%i22)                           scale_factor
+(%o22)                           [1, 1, 1, c]
+(%i23) nest2(_f, _x) := block([_a : [_x], i],
+if listp(_f) then (_f : reverse(_f), for i thru length(_f)
+do _a : map(_f , _a)) else _a : map(_f, _a), _a )
+              i                                1
+(%i24) nest3(_f, _x, _n) := block([_a, i], _a : [_x],
+                                         for i thru _n do _a : map(_f, _a), _a)
+                               2
+(%i25)           aa_ : solve(x_  - apply(*, norm_table), [x_])
+(%i26)                        volume : rhs(aa_ )
+                                              2
+                                           1
+(%i27)                          volume : ------
+                                         volume
+(%i28)            matrix_element_mult : lambda([x, y], x @ y)
+(%i29)                       load(hodge_test3.mac)
+(%i30)                      load(f_star_test4.mac)
+(%i31)                        load(helpfunc.mac)
+(%i32)                        load(coeflist.lisp)
+(%i33)                         load(format.lisp)
+(%i34)                            load(diag)
+(%i35)                         load(poisson.mac)
+(%i36)                        load(frobenius.mac)
+(%i37)                        load(curvture2.mac)
+(%o38)                       new_cartan_test4.bat
+(%i38) h_st(Dx@c*Dt);
+(%o38)                               Dy Dz
+(%i39) h_st(Dx@Dy);
+(%o39)                              c Dt Dz
+(%i40) h_st(Dz@c*Dt);
+(%o40)                               Dx Dy
+(%i41) h_st(Dy@c*Dt);
+(%o41)                              - Dx Dz
+(%i42) h_st(Dz@Dx);
+(%o42)                              c Dt Dy
+(%i43) h_st(Dy@Dz);
+(%o43)                              c Dt Dx
+
+/* [e1,e2,e3] is electric field,[b1,b2,b3]is magnetic field 
+in free space Maxwell equation d(F)=0 and d(h_st(F))=0 */
+
+(%i44) depends([e1,e2,e3],[x,y,z,t]);
+(%o44)         [e1(x, y, z, t), e2(x, y, z, t), e3(x, y, z, t)]
+(%i45) depends([b1,b2,b3],[x,y,z,t]);
+(%o45)         [b1(x, y, z, t), b2(x, y, z, t), b3(x, y, z, t)]
+(%i46) F:(e1*Dx+e2*Dy+e3*Dz)@(c*Dt)+(b1*Dy@Dz+b2*Dz@Dx+b3*Dx@Dy);
+(%o46) c Dt Dz e3 + c Dt Dy e2 + c Dt Dx e1 + b1 Dy Dz - b2 Dx Dz + b3 Dx Dy
+(%i47)  d(F)$
+
+(%i48)  format(%o47,%poly(Dx,Dy,Dz),factor);
+                   de3     de2   db1                de3     de1   db2
+(%o48) Dt Dy Dz (c --- - c --- + ---) + Dt Dx Dz (c --- - c --- - ---)
+                   dy      dz    dt                 dx      dz    dt
+                                de2     de1   db3     db3   db2   db1
+                  + Dt Dx Dy (c --- - c --- + ---) + (--- + --- + ---) Dx Dy Dz
+                                dx      dy    dt      dz    dy    dx
+
+/*to translate this relation to vector ,we introduce d_2 operator which is exterior
+derivative with space variables only. it is easy to define this.
+or like as %i152,can use local d operator,maybe this is more confortable */
+
+(%i49)  d_2(_pform):=sum(basis[i]@(diff(_pform,coords[i])),i,1,dim-1);
+(%o49) d_2(_pform) := sum(basis  @ diff(_pform, coords ), i, 1, dim - 1)
+                               i                      i
+(%i50)  d_2(e1*Dx+e2*Dy+e3*Dz);
+             de3         de3         de2         de2         de1         de1
+(%o50) Dy Dz --- + Dx Dz --- - Dy Dz --- + Dx Dy --- - Dx Dz --- - Dx Dy ---
+             dy          dx          dz          dx          dz          dy
+(%i51)  format(%,%poly(Dx,Dy,Dz),factor);
+                  de3   de2           de3   de1           de2   de1
+(%o51)     Dy Dz (--- - ---) + Dx Dz (--- - ---) + Dx Dy (--- - ---)
+                  dy    dz            dx    dz            dx    dy
+
+
+/* rot(E) <---->h_st(d(E)),div(B) <----> d(h_st(B))
+and X=0 <--->h_st(X)=0    */
+
+(%i52) fstar_with_clf([x,y,z],[x,y,z],d(e1*Dx+e2*Dy+e3*Dz));
+             de3         de3         de2         de2         de1         de1
+(%o52) Dy Dz --- + Dx Dz --- - Dy Dz --- + Dx Dy --- - Dx Dz --- - Dx Dy ---
+             dy          dx          dz          dx          dz          dy
+(%i53) fstar_with_clf([x,y,z],[x,y,z],h_st(d(e1*Dx+e2*Dy+e3*Dz)))$
+
+(%i54)  format(%,%poly(Dx,Dy,Dz),factor);
+                   de3   de2        de3   de1        de2   de1
+(%o54)         Dx (--- - ---) - Dy (--- - ---) + Dz (--- - ---)
+                   dy    dz         dx    dz         dx    dy
+(%i55) h_st(%);
+                  de3              de3              de2              de2
+(%o55) c Dt Dy Dz --- + c Dt Dx Dz --- - c Dt Dy Dz --- + c Dt Dx Dy ---
+                  dy               dx               dz               dx
+                                                           de1              de1
+                                              - c Dt Dx Dz --- - c Dt Dx Dy ---
+                                                           dz               dy
+(%i56)  format(%,%poly(Dx,Dy,Dz),factor);
+                   de3   de2                de3   de1                de2   de1
+(%o56) c Dt Dy Dz (--- - ---) + c Dt Dx Dz (--- - ---) + c Dt Dx Dy (--- - ---)
+                   dy    dz                 dx    dz                 dx    dy
+(%i57) diff(b1*Dx+b2*Dy+b3*Dz,t);
+                           db3      db2      db1
+(%o57)                     --- Dz + --- Dy + --- Dx
+                           dt       dt       dt
+(%i58)  h_st(%);
+               db1              db2              db3
+(%o58)         --- c Dt Dy Dz - --- c Dt Dx Dz + --- c Dt Dx Dy
+               dt               dt               dt
+
+/* from d(F)=0,See %o48,and we find two part
+1/c*%o58+%o56 ,div(B).each of them is zero. 1/c*%o58+%o56 is equal
+rot(E)+1/c*d(B)/dt (Faraday's law),%o60 is equal div(B) (=0,nonexistence magnetism) */
+
+(%i59) %o48 -(1/c*%o58+%o56)$
+
+(%i60)  format(%,%poly(Dx,Dy,Dz),factor);
+                           db3   db2   db1
+(%o60)                    (--- + --- + ---) Dx Dy Dz
+                           dz    dy    dx
+(%i61) fstar_with_clf([x,y,z],[x,y,z],d(h_st(b1*Dx+b2*Dy+b3*Dz)));
+                  db3            db2            db1
+(%o61)            --- Dx Dy Dz + --- Dx Dy Dz + --- Dx Dy Dz
+                  dz             dy             dx
+/*you may continue d(h_st(F)),see Flanders "Differential Forms with Applications 
+to the Physical Sciences"4.6 Maxwell's Field Equations P45~P47.

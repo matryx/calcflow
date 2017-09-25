@@ -1,0 +1,80 @@
+Every square matrix can be expressed as a linear combination of
+commuting projection matrices plus a nilpotent matrix.  Specifically,
+given a square matrix M, there are scalars z1, z2, ... zn and matrices 
+P1, P2, ... , Pn, D, such that
+
+(1) M = z1 P1 + z2 P2 + ... + zn Pn + D,
+(2) spectrum(M) = {z1,z2, ..., zn},
+(3) Pi Pj = Pj Pi = kron_delta(i,j) Pi, for 1 <= i,j <= n,
+(4) D is nilpotent,
+(5) D Pi = Pi D, for 1 <= i <= n,
+(6) P1 + P2 + ... + Pn = I.
+
+We call (1) the spectral representation of M.  Recall that a matrix
+is D is nilpotent means that there is a positive integer k such that
+D^k = 0.
+
+The spectral representation of a matrix is not a continuous function of
+the matrix arguments. Here is an example
+
+(C1) spectral_rep(matrix([1,0],[0,x]));
+
+Proviso: assuming x-1 # 0
+			     [ 0  0 ]  [ 1  0 ]	  [ 0  0 ]
+(D1) 		   [[x, 1], [[ 	    ], [      ]], [ 	 ]]
+			     [ 0  1 ]  [ 0  0 ]	  [ 0  0 ]
+
+Maxima does give a warning that it has assumed that x does not equal 1.
+Unfortunately, the assumption x-1 # 0 isn't available to the user. When  
+x = 1, the spectral representation is 
+
+(C2) spectral_rep(matrix([1,0],[0,1]));
+
+				 [ 1  0 ]   [ 0	 0 ]
+(D2) 			  [[1], [[      ]], [ 	   ]]
+				 [ 0  1 ]   [ 0	 0 ]
+(C3) 
+
+Functions:
+
+spectral_rep(mat)
+
+When mat is a square matrix, return a list of the form 
+
+   [[z1,z2, ... zn], [P1, P2, ... ,Pn], D],
+
+where z1 P1 + z2 P2 + ... + zn Pn + D is the spectral representation of M.
+
+matrixexp(mat, t)
+
+When mat is a square matrix, return exp(mat * t).  The second argument
+is optional and it defaults to 1.
+
+matrixfun(lambda-expr, mat)
+
+When mat is a square matrix and lambda-expr is a Maxima lambda expression,
+extend the function lambda-expr to matrices and return lambda-expr(mat). 
+Thus matrixfun(lambda([x],x^2), mat) == mat . mat and  
+matrixfun(lambda([x], 1/x), mat) == mat^^-1.  
+
+If the lambda-expr involves an unknown function, you may need to load 
+pdiff; otherwise, you'll get an error. Here is an example
+
+(C1) load("matexp.lisp")$
+(C2) m : matrix([1,2],[0,1])$
+(C3) matrixfun(lambda([x], f(x)),m);
+
+Attempt to differentiate with respect to a number:
+1 -- an error.  Quitting.  To debug this try debugmode(true);
+(C4) load("pdiff")$
+(C5)  matrixfun(lambda([x], f(x)),m);
+
+			      [ f(1)  2 f   (1) ]
+(D5) 			      [ 	 (1)    ]
+			      [		        ]
+			      [	 0      f(1)    ]
+(C6) 
+
+
+Barton Willis wrote matexp. This code is covered by the GNU public
+license. Please send bug reports to the Maxima mailing list.

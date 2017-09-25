@@ -1,0 +1,112 @@
+/*               COPYRIGHT NOTICE
+
+Copyright (C) 2010 Donald J Bindner
+
+This program is free software; you can redistribute
+it and/or modify it under the terms of the
+GNU General Public License as published by
+the Free Software Foundation; either version 2 
+of the License, or (at your option) any later version. 
+
+This program is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the 
+GNU General Public License for more details at
+http://www.gnu.org/copyleft/gpl.html
+*/
+
+
+/*
+This is a set of user contributed plotting routines
+based on package draw.
+
+See documentation in drawutils.texi
+*/
+
+
+
+put('drawutils, 1, 'version) $
+
+if not get('draw,'version) then load("draw") $
+
+
+
+
+
+/*********************/
+/* Vector fields     */
+/*       by          */
+/* Donald J. Bindner */
+/*      2010         */
+/*********************/
+
+
+plot_vector_field( F, X, Y, [args] ) := block(
+ [vars, G,P,Q, points, grid_d,u,scale, range,xrange,yrange, v],
+ scale : assoc('scale,args,1), args:delete( 'scale=scale, args ),
+ /* create function versions of each componont and of the field itself */
+ vars : [ X[1],Y[1] ],
+ P : G( vars, ev(F[1])), P : subst( lambda, G, P ),
+ Q : G( vars, ev(F[2])), Q : subst( lambda, G, Q ),
+ G : lambda( [z], [apply(P,z), apply(Q,z)] ),
+ /* create a list of points to base arrows at */
+ points : listify( cartesian_product( 
+      setify( makelist(  X[2] + (X[3]-X[2])*i/10, i, 0, 10 )),
+      setify( makelist(  Y[2] + (Y[3]-Y[2])*i/10, i, 0, 10 )) )),
+ /* diagonal length of a grid square */
+ grid_d : sqrt((X[3]-X[2])^2 + (Y[3]-Y[2])^2)/10.0,
+ /* u is the divisor that shortens arrows to fit in grid squares */
+ u : max( apply( max, makelist( abs(P(k[1],k[2])), k, points )) / (X[3]-X[2]) * 10,
+          apply( max, makelist( abs(Q(k[1],k[2])), k, points )) / (Y[3]-Y[2]) * 10 ),
+ if scale#0 and u>grid_d/50.0 then u:scale/u else u:1,
+ /* xrange and yrange need to be large enough to contain head
+  * and tail of each arrow (or some won't appear in output) */
+ range : lambda( [z], [ apply(min,z), apply(max,z) ] ),
+ xrange : range( flatten(makelist( [k[1],k[1]+P(k[1],k[2])], k, points ))),
+ yrange : range( flatten(makelist( [k[2],k[2]+Q(k[1],k[2])], k, points ))),
+ /* generate the vectors to draw and set an appropriate arrow
+  * head length for each one */
+ v : flatten( makelist( [head_length=u*sqrt(G(k).G(k))/5+grid_d/100, vector(k, u*G(k) )], k, points )),
+ /* draw! */
+ draw2d(color=blue,line_width=1,head_type='nofilled,
+        head_angle=20,'xrange=xrange,'yrange=yrange,
+        xlabel=string(X[1]),ylabel=string(Y[1]), args, v )   )$
+
+
+plot_vector_field3d( F, X, Y, Z, [args] ) := block(
+ [vars, G,P,Q,R, points, grid_d,u,scale, range,xrange,yrange,zrange, v],
+ scale : assoc('scale,args,1), args:delete( 'scale=scale, args ),
+ /* create function versions of each componont and of the field itself */
+ vars : [ X[1],Y[1],Z[1] ],
+ P : G( vars, ev(F[1])), P : subst( lambda, G, P ),
+ Q : G( vars, ev(F[2])), Q : subst( lambda, G, Q ),
+ R : G( vars, ev(F[3])), R : subst( lambda, G, R ),
+ G : lambda( [z], [apply(P,z), apply(Q,z), apply(R,z)] ),
+ /* create a list of points to base arrows at */
+ points : listify( cartesian_product( 
+      setify( makelist(  X[2] + (X[3]-X[2])*i/5, i, 0, 5 )),
+      setify( makelist(  Y[2] + (Y[3]-Y[2])*i/5, i, 0, 5 )),
+      setify( makelist(  Z[2] + (Z[3]-Z[2])*i/5, i, 0, 5 )) )),
+ /* the diagonal length of a grid square */
+ grid_d : sqrt((X[3]-X[2])^2 + (Y[3]-Y[2])^2 + (Z[3]-Z[2])^2)/5.0,
+ /* u is the divisor that shortens arrows to fit in grid squares */
+ u : max( apply( max, makelist( abs(P(k[1],k[2],k[3])), k, points )) / (X[3]-X[2]) * 5,
+          apply( max, makelist( abs(Q(k[1],k[2],k[3])), k, points )) / (Y[3]-Y[2]) * 5,
+          apply( max, makelist( abs(R(k[1],k[2],k[3])), k, points )) / (Z[3]-Z[2]) * 5 ),
+ if scale#0 and u>grid_d/50.0 then u:scale/u else u:1,
+ /* xrange,yrange,zrange need to be large enough to contain head
+  * and tail of each arrow (or some won't appear in output) */
+ range : lambda( [z], [ apply(min,z), apply(max,z) ] ),
+ xrange : range( flatten(makelist( [k[1],k[1]+P(k[1],k[2],k[3])], k, points ))),
+ yrange : range( flatten(makelist( [k[2],k[2]+Q(k[1],k[2],k[3])], k, points ))),
+ zrange : range( flatten(makelist( [k[3],k[3]+R(k[1],k[2],k[3])], k, points ))),
+ /* generate the vectors to draw and set an appropriate arrow
+  * head length for each one */
+ v : flatten(makelist( [head_length=u*sqrt(G(k).G(k))/10+grid_d/100, vector(k, u*G(k))], k, points )),
+ /* draw! */
+ draw3d(color=blue,line_width=1,head_type='nofilled,
+        head_angle=10,'xrange=xrange,'yrange=yrange,
+        'zrange=zrange,xlabel=string(X[1]),ylabel=string(Y[1]),zlabel=string(Z[1]), args, v ) )$
+
+

@@ -1,0 +1,145 @@
+reduct1.mac is from the book "Perturbation Methods, Bifurcation Theory
+and Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+It performs a Liapunov-Schmidt reduction for steady state bifurcations
+in one differential equation depending on one independent variable.
+The de has the form y'' + f(y,y',alpha) = 0. y = y(x) is defined on a
+real interval with dirichlet or neumann boundary conditions and f
+depends only linearly on alpha.
+
+The example is from p168.  maxima-5.9.0 cvs reproduces the
+results from the book.
+
+
+(C1) load("./reduct1.mac");
+(D1)                             ./reduct1.mac
+(C2) reduction1();
+ENTER DEPENDENT VARIABLE
+Y;
+USE X AS THE INDEPENDENT VARIABLE AND ALPHA AS A PARAMETER TO VARY
+ENTER THE CRITICAL BIFURCATION VALUE ALPHA
+%PI^2;
+                            2
+WE DEFINE LAM = ALPHA -  %PI
+ENTER THE CRITICAL EIGENFUNCTION
+COS(%PI*X);
+WHAT IS THE LENGTH OF THE X-INTERVAL
+1;
+SPECIFY THE BOUNDARY CONDITIONS
+YOUR CHOICE FOR THE B.C. ON Y AT X=0 AND X= 1
+ENTER 1 FOR Y=0, 2 FOR Y'=0
+B.C. AT 0?
+2;
+B.C. AT 1 ?
+2;
+THE D.E. IS OF THE FORM Y'' + F(Y,Y',ALPHA) = 0,ENTER F
+ALPHA*SIN(Y);
+ 2
+d Y             2
+--- + (LAM + %PI ) SIN(Y)
+  2
+dX
+DO YOU KNOW APRIORI THAT SOME TAYLOR COEFFICENTS ARE ZERO, Y/N
+Y;
+TO WHICH ORDER DO YOU WANT TO CALCULATE
+5;
+IS DIFF(W,AMP, 2 ,LAM, 0 ) IDENTICALLY ZERO
+
+, Y/N
+Y;
+IS DIFF(W,AMP, 3 ,LAM, 0 ) IDENTICALLY ZERO
+
+, Y/N
+N;
+
+Dependent equations eliminated:  (2)
+   3
+  d W      COS(3 %PI X)
+[----- = - ------------]
+     3          32
+ dAMP
+IS DIFF(W,AMP, 4 ,LAM, 0 ) IDENTICALLY ZERO
+
+, Y/N
+Y;
+IS DIFF(W,AMP, 1 ,LAM, 1 ) IDENTICALLY ZERO
+
+, Y/N
+N;
+
+Dependent equations eliminated:  (2)
+     2
+    d W
+[--------- = 0]
+ dAMP dLAM
+IS DIFF(W,AMP, 2 ,LAM, 1 ) IDENTICALLY ZERO
+
+, Y/N
+Y;
+IS DIFF(W,AMP, 3 ,LAM, 1 ) IDENTICALLY ZERO
+
+, Y/N
+N;
+
+Dependent equations eliminated:  (2)
+     4
+    d W         9 COS(3 %PI X)
+[---------- = - --------------]
+     3                    2
+ dAMP  dLAM        256 %PI
+IS G_POLY( 1 , 0 ) IDENTICALLY
+
+ZERO, Y/N
+Y;
+IS G_POLY( 2 , 0 ) IDENTICALLY
+
+ZERO, Y/N
+Y;
+IS G_POLY( 3 , 0 ) IDENTICALLY
+
+ZERO, Y/N
+N;
+IS G_POLY( 4 , 0 ) IDENTICALLY
+
+ZERO, Y/N
+Y;
+IS G_POLY( 5 , 0 ) IDENTICALLY
+
+ZERO, Y/N
+N;
+IS G_POLY( 1 , 1 ) IDENTICALLY
+
+ZERO, Y/N
+N;
+IS G_POLY( 2 , 1 ) IDENTICALLY
+
+ZERO, Y/N
+Y;
+IS G_POLY( 3 , 1 ) IDENTICALLY
+
+ZERO, Y/N
+N;
+IS G_POLY( 4 , 1 ) IDENTICALLY
+
+ZERO, Y/N
+Y;
+                     3                      2    5      2    3
+                  AMP  LAM   AMP LAM   3 %PI  AMP    %PI  AMP
+(D2)            - -------- + ------- + ----------- - ---------
+                     16         2         1024          16
+(C3) solve(%,lam);
+                                  2    4         2    2
+                             3 %PI  AMP  - 64 %PI  AMP
+(D3)                  [LAM = --------------------------]
+                                         2
+                                   64 AMP  - 512
+(C4) taylor(%,amp,0,4);
+                                 2    2         2     4
+                              %PI  AMP    (5 %PI ) AMP
+(D4)/T/        [LAM + . . . = --------- + ------------- + . . .]
+                                  8            512
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

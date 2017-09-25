@@ -1,0 +1,139 @@
+(kill(all),0);
+0$
+
+/* numbers */
+
+map('signum,[-2, -2/3, -3.4b-2, -7.8b-32]);
+[- 1, - 1, - 1.0b0, - 1.0b0]$
+
+map('signum,[0,0.0, 0.0b0]);
+[0,0.0,0.0b0]$
+
+map('signum,[2, 2/3, 3.4b-2, 7.8b-32]);
+[1,1,1.0b0,1.0b0]$
+
+map('signum, [minf, %pi, %e, %phi, inf]);
+[-1,1,1,1,1]$
+
+signum(x);
+signum(x)$
+
+signum(rat(x));
+signum(x)$
+
+/* reflection */
+
+signum(a) + signum(-a)$
+0$
+
+signum(a - b) + signum(b-a);
+0$
+
+signum(rat(a-b)) + signum(rat(b-a));
+0$
+
+/* expunge negative or positive factors */
+
+signum(sqrt(6) * x);
+signum(x)$
+
+signum(-sqrt(5) * x);
+-signum(x)$
+
+signum(x^2 + 1);
+1$
+
+/* nounform for complex */
+
+(declare(z, complex),0);
+0$
+
+signum(z);
+signum(z)$
+
+signum(%i);
+signum(%i)$
+
+signum(%i - 6);
+signum(%i - 6)$
+
+signum(z^2 + 1);
+signum(z^2 + 1)$
+
+(assume(p > 0, n < 0, pz >= 0, nz <= 0),0);
+0$
+
+signum(p * x);
+signum(x)$
+
+signum(n * x);
+-signum(x)$
+
+signum(pz * x);
+signum(pz * x)$
+
+signum(nz * x);
+signum(nz * x)$
+
+signum(p * n * x);
+-signum(x)$
+
+signum(signum(x));
+signum(x)$
+
+factor(signum(p * x + p));
+signum(x + 1)$
+
+factor(signum(p * x^2 + p));
+1$
+
+signum(p * x) - signum(x);
+0$
+
+signum(n * x) + signum(x);
+0$
+
+signum(%i * sqrt(1 - sqrt(2)));
+-1$
+
+limit(signum(x),x,minf);
+-1$
+
+limit(signum(x),x,0,'minus);
+-1$
+
+limit(signum(x),x,0);
+und$
+
+limit(signum(x),x,0,'plus);
+1$
+
+limit(signum(x),x,inf);
+1$
+
+limit(x * signum(x),x,0);
+0$
+
+limit(signum(x+a),x,minf);
+-1$
+
+limit(signum(x+a),x,inf);
+1$
+
+(assume(notequal(a,0)),0);
+0$
+
+limit(signum(x),x,a);
+signum(a)$
+
+limit(signum(a*x),x,minf);
+-signum(a)$
+
+limit(signum(a*x),x,inf);
+signum(a)$
+
+limit(signum(x),x,1/a);
+signum(1/a)$
+
+(forget(p > 0, n < 0, pz >= 0, nz <= 0,notequal(a,0)), remove(z,complex), 0);
+0$

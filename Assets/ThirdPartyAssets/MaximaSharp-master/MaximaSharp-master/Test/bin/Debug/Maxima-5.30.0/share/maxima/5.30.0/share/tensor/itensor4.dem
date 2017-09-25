@@ -1,0 +1,62 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Demonstrating special tensors
+ */
+if get('itensor,'version)=false then load(itensor);
+("the Kronecker delta is defined the usual way")$
+ishow(kdelta([i],[j]))$
+ishow(kdelta([i,j],[n,m]))$
+ishow(kdelta([i,j,k],[l,n,m]))$
+
+("A symmetricized version is also defined, useful in many calculations:")$
+ishow(kdels([i],[l]))$
+ishow(kdels([i,j],[l,k]))$
+ishow(kdels([i,j,k],[l,m,n]))$
+ishow(ev(kdels([],[]),kdelta))$
+
+("Contraction of such kdels and kdelta gives zero.  Look at the huge sum")$
+ishow(expand(kdels([i,j,k],[l,m,n])*kdelta([l,m,n],[i1,i2,i3])))$
+ishow(contract(%))$
+
+("Another example")$
+("take the symmetrization of A_ijk")$
+ishow(contract(expand(a([i1,j1,k1],[])*kdels([i,j,k],[i1,j1,k1]))))$
+
+("The Levi-Civita symbol accepts numeric and symbolic arguments:")$
+dim:3;
+levi_civita([1,2,3]);
+levi_civita([i,j,j],[]);
+%,kdelta;
+("The lc2kdt function simplifies the unevaluated Levi-Civita symbol")$
+ishow('levi_civita([i,j,k],[])*a([],[j])*
+      'levi_civita([],[k,l,n])*b([l],[])*c([n],[]))$
+ishow(contract(expand(lc2kdt(%))))$
+
+ishow('levi_civita([i,j,k],[])*a([],[j])*b([],[k])*'levi_civita([],[i,l,n])*c([l],[])*u([n],[]))$
+ishow(contract(expand(lc2kdt(%))))$
+
+("Two simplification rules process Levi-Civita index patterns")$
+ishow('levi_civita([i,j,k],[])*a([],[j])*a([],[k])+'levi_civita([],[i,j,k])*a([j])*b([k]))$
+applyb1(%,lc_l,lc_u)$
+ishow(factor(canform(contract(expand(%)))))$
+
+("Finally look for the dualization of the antisymmetric tensor B")$
+decsym(B,2,0,[anti(all)],[]);
+ishow(B([i,j],[]))$
+("Compute the dualization")$
+rank:length(covi(B([i,j],[])))$
+dual:ishow('levi_civita([],[l,i,j])*B([i,j],[])/rank!)$
+("Return to the original")$
+ishow('levi_civita([i2,j2,l],[])*dual)$
+ishow(canform(contract(expand(lc2kdt(%)))))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

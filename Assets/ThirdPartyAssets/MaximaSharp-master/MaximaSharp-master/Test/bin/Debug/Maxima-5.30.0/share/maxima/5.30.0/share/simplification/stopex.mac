@@ -1,0 +1,177 @@
+/* -*-Macsyma-*- */
+eval_when(batch,ttyoff:true)$
+/*ASB;STOPEX 15
+2:48pm  Wednesday, 4 November 1981
+7:55pm  Saturday, 29 May 1982
+  Added a DIAGEVAL_VERSION for this file.
+1:48pm  Saturday, 12 June 1982
+  Changed loadflags to getversions, DEFINE_VARIABLE:'MODE.
+*/
+
+eval_when(translate,
+	  transcompile:true,
+	  define_variable:'mode,
+	  modedeclare(function(freeofl),boolean))$
+
+put('stopex,15,'diageval_version)$
+/*
+eval_when([batch,loadfile],
+	  if get('gnauto,'diageval_version)=false
+	  then load('[gnauto,fasl,dsk,dgval]))$
+*/
+
+/* GNU Maxima */
+
+/* Commented out all local SPECIAL declarations.  For other changes,
+   search for `Maxima:' below. -wj */
+
+eval_when([batch,loadfile],
+  if get('gnauto,'diageval_version)=false
+  then load("genut"))$
+
+eval_when(translate,
+	  declare_translated(exwrt_power1,varmult,distribute,exwrt_power,
+			     freeofl,stopexpandl1,orpartitionl,ldelete,
+			     stopexpandl))$
+
+/* Switches  */
+define_variable(iforp,false,boolean)$
+define_variable(expandwrt_denom,false,boolean)$
+define_variable(expandwrt_nonrat,true,boolean)$
+
+stopexpand(exp,[varlist]):=
+  if atom(exp) or mapatom(exp)
+  then exp
+  else block([partswitch:true,inflag:true,piece],
+	     stopexpandl(exp,varlist))$
+
+expandwrt(exp,[varlist]):=
+  if atom(exp) or mapatom(exp)
+  then exp
+  else block([partswitch:true,inflag:true,piece],
+	     stopexpandl(exp,varlist))$
+
+expandwrtl(exp,varlist):=stopexpandl(exp,varlist)$
+
+stopexpandl(exp,varlist):=  
+  if atom(exp) or mapatom(exp)
+  then exp
+  else block([inflag:true,partswitch:true,piece,ip0dum],
+	     if (ip0dum:inpart(exp,0))="+"
+	     then map(lambda([termdum],stopexpandl(termdum,varlist)),exp)
+	     else block(
+  [nonratdum,iforp:true,dendum],
+  if expandwrt_nonrat
+  then (nonratdum:
+	ldelete(varlist,last(orpartitionl(showratvars(exp),"[",varlist))),
+	for idum in nonratdum do
+	    if not atom(idum)
+	    then exp:subst(map(lambda([dum],stopexpandl(dum,varlist)),idum),
+			   idum,exp)),
+  if expandwrt_denom and (dendum:denom(exp))#1
+  then exp:num(exp)/stopexpandl(dendum,varlist),
+  stopexpandl1(exp,varlist)))$
+
+stopexpandl1(exp,varlist):=
+  if atom(exp) or mapatom(exp)
+  then exp
+  else block([ip0dum:inpart(exp,0),dum:1,varfound:false],
+  modedeclare(varfound,boolean),
+	     if freeofl(varlist,exp)
+	     then exp
+	     else if freeof("+",exp) then return(exp),
+	     if ip0dum="+"
+	     then return(map(lambda([termdum],
+				    stopexpandl1(termdum,varlist)),exp))
+	     else if ip0dum="^"
+		  then if inpart(exp,1,0)="+"
+	               then exwrt_power(exp,varlist)
+		       else exp
+		  else if ip0dum="*"
+		       then (for idum in exp do
+			         if not freeofl(varlist,idum)
+			         then (idum:stopexpandl1(idum,varlist),
+				       if varfound
+				       then dum:distribute(dum,idum,varlist)
+				       else (varfound:true,
+					     dum:varmult(dum,idum,varlist)))
+			         else if varfound
+				      then dum:varmult(idum,dum,varlist)
+				      else dum:dum*idum,
+		             dum)
+		       else if matrixp(exp) or listp(exp)
+		            then matrixmap(lambda([dumm],
+						  stopexpandl1(dumm,varlist)),
+				           exp)
+		            else if ip0dum="." and expandwrt_nonrat
+		                 then remove_nested_dots0l(map(lambda([dum],
+							      stopexpandl1(dum,
+								     varlist)),
+							       exp),
+							   varlist)
+			         else exp)$
+
+exwrt_power(exp,varlist):=block(
+  [ip1dum,ip2dum1,exwrtlist,splitdum,fsplitdum],
+  /* DECLARE(EXWRTLIST,SPECIAL), */
+  if inpart(exp,0)#"^" then return(exp),
+  if not freeofl(varlist,ip1dum:inpart(exp,1))
+     and integerp(ip2dum1:inpart(exp,2))
+     and (mode_identity(fixnum,ip2dum1))>1
+     and inpart(ip1dum,0)="+"
+  then (splitdum:orpartitionl(ip1dum,"+",varlist),
+	if (fsplitdum:first(splitdum))#0
+	then (exwrtlist:cons(1,exwrt_power1(last(splitdum),ip2dum1,varlist)),
+	      sum(varmult(fsplitdum^kdum*ip2dum1!/(kdum!*(ip2dum1-kdum)!),
+			  first(exwrtlist:rest(exwrtlist)),
+			  varlist),
+                         /* Maxima: added MODE_IDENTITY for translator */
+		  kdum,0,mode_identity(fixnum,ip2dum1)))
+	else first(exwrt_power1(last(splitdum),ip2dum1,varlist)))
+  else exp)$
+
+exwrt_power1(exp,powerdum,varlist):=(
+  modedeclare(powerdum,fixnum),
+ block(
+  [dum:[exp,1],firstdum:stopexpandl1(exp,varlist)],
+  if powerdum=1 then return(dum),
+  if inpart(exp,0)#"+"
+  then for idum:2 thru powerdum do
+	   dum:cons(exp^idum,dum)
+  else for idum:2 thru powerdum do
+	   dum:cons(firstdum:
+		    map(lambda([dum],multthru(dum,firstdum)),exp),dum),
+  dum))$
+
+varmult(fact,exp,varlist):=block(
+  [splitdum:orpartitionl(exp,"+",varlist)],
+  fact*first(splitdum)+multthru(fact,last(splitdum)))$
+
+distribute(exp1,exp2,varlist):=block(
+  [splitexp1:orpartitionl(exp1,"+",varlist),
+   splitexp2:orpartitionl(exp2,"+",varlist),
+   fsplexp1,fsplexp2,lsplexp1,lsplexp2],
+  lsplexp1:last(splitexp1),
+  lsplexp2:last(splitexp2),
+  (fsplexp1:first(splitexp1))*(fsplexp2:first(splitexp2))
+  +(if fsplexp1#0
+    then varmult(fsplexp1,stopexpandl1(lsplexp2,varlist),varlist)
+    else 0)
+  +(if fsplexp2#0
+    then varmult(fsplexp2,stopexpandl1(lsplexp1,varlist),varlist)
+    else 0)
+  +(if inpart(lsplexp1,0)="+"
+    then map(lambda([term],stopexpandl1(term*lsplexp2,varlist)),lsplexp1)
+    else if inpart(lsplexp2,0)="+"
+	 then map(lambda([term],stopexpandl1(term*lsplexp1,varlist)),lsplexp2)
+	 else lsplexp1*lsplexp2))$
+
+expandwrt_factored(exp,[varlist]):=
+  if listp(exp) or matrixp(exp)
+  then matrixmap(lambda([dum],apply('expandwrt_factored,cons(dum,varlist))),
+		 exp)
+  else block([iforp:true,piece,partswitch:true,inflag:true,dum],
+	     dum:orpartitionl(exp,"*",varlist),
+	     first(dum)*stopexpandl(last(dum),varlist))$
+
+eval_when(batch,ttyoff:false)$

@@ -1,0 +1,149 @@
+/*
+   This is a first pass at a Lindstedt code.  It can solve problems
+   with initial conditions entered, which can be arbitrary constants,
+   (just not %k1 and %k2) where the initial conditions on the perturbation
+   equations are z[i]=0,z'[i]=0 for i >0. Examples are:
+   Lindstedt('diff(x,t,2)+x-(e*x^3)/6,e,2,[1,0]);
+
+   Problems occur when initial conditions are not given, as the constants
+   in the perturbation equations are the same as the zero order equation
+   solution.  Also, problems occur when the initial conditions for the
+   perturbation equations are not z[i]=0,z'[i]=0 for i >0, such as the
+   Van der Pol equation.
+
+   Remaining work:  Fix initial condition and limit cycle determination.
+
+
+Copyright (C) 2001  Dan Stanger
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+*/
+
+second(l):=first(rest(l));
+
+/* This routine finds the dependent and independent variables in a
+   equation by finding derivitives and looking at the variables in them. */
+LindstedtFindDiffVars(exp):=block([dvars:[],ivars:[],d:part('diff(x,y),0),p],
+   scanmap(
+      lambda([x],
+         if not mapatom(x) then
+            (if inpart(x,0) = d then
+               block([dvar:inpart(x,1), ivar:inpart(x,2)],
+                  if not member(dvar, dvars) then dvars:cons(dvar,dvars),
+                  if not member(ivar, ivars) then ivars:cons(ivar,ivars))),
+         x),
+      exp),
+   [dvars,ivars]);
+
+/* This routine will process the equation eq as follows.
+   First derivitives will be replaced by zp, second derivitives with z2p,
+   and the dependent variable with z.  The independent variable will be
+   replaced by T. */
+LindstedtProcessEquation(eq, dvar, ivar, z, zp, z2p, T):=block(
+   [%zp%:?gensym(),%z2p:?gensym()],
+   eq:subst(%zp%,'diff(dvar,ivar),eq),
+   eq:subst(%z2p%, 'diff(dvar,ivar,2),eq),
+   sublis([dvar=z,ivar=T,%zp%=zp,%z2p%=z2p],eq));
+
+LindstedtProcessIC2(sol, ic, dvar, ivar):=
+   ic2(sol,ivar=0,dvar=first(ic),'diff(dvar,ivar)=second(ic));
+
+/* This routine finds and solves for secular terms.  For now,
+   it only looks for powers of the ivar */
+LindstedtRemoveSecularTerms(sol,ivar):=block(
+   /* get the high power of ivar in the solution and loop down */
+   [h:hipow(sol,ivar), param],
+   for i:h step -1 thru 1 do block([secularTerm,vars],
+      /* find the power of ivar */
+      secularTerm:coeff(sol,ivar,i),
+      /* get the variables in the term */
+      vars:listofvars(secularTerm),
+      /* hopefully find a parameter to solve for */
+      vars:delete(ivar,vars),
+      /* print("vars",vars), */
+      if vars = [] then return(sol),
+      param:solve(secularTerm, vars),
+      /* now param is the solution list, which is a array element.
+         to assign to it I am using the following hack,  but i am
+         sure there is a better way of doing this */
+      apply(ev,subst(":","=",param))),
+      /* This was the previous method I used to assign to the array
+      map(lambda([eq],block([l:lhs(eq),r:rhs(eq),a,s],
+                 a:part(l,0),s:part(l,1),
+                 arraymake(a,[s])::r)),
+         param)), */
+   return(param)
+);
+
+Lindstedt(eq,pvar, torder, [ic]):=
+   block([dvars, ivar, l:LindstedtFindDiffVars(eq),solutionList],
+      dvars:first(l), ivar:second(l),
+      if length(ivar) # 1 then error("Number of independent variables not 1"),
+      ivar:first(ivar),
+      if length(dvars) = 0 then error("Number of dependent variables is 0"),
+      if length(dvars) = 1 then
+         /* since there is 1 dependent variable, name it z0, and form a
+            solution in the form of sum(z[i](lamda*t)).  to avoid
+            problems, lamda is used instead of lambda. */
+         block([v,sol,T,dvar:first(dvars),
+            lamda,z,zSum,lamdaSum,zPrimeSum,zPrimePrimeSum],
+            local(lamda,z),
+            array([lamda,z],torder+1),
+            lamda[0]:1,
+            lamdaSum:sum(lamda[i]*pvar^i,i,0,torder),
+            zSum:sum(z[i]*pvar^i,i,0,torder),
+            depends(z,T),
+            zPrimeSum:sum(diff(z[i],T)*pvar^i,i,0,torder),
+            zPrimePrimeSum:sum(diff(z[i],T,2)*pvar^i,i,0,torder),
+            zPrimeSum:lamdaSum*zPrimeSum,
+            zPrimePrimeSum:lamdaSum*lamdaSum*zPrimePrimeSum,
+            eq:LindstedtProcessEquation( eq, dvar, ivar, zSum, zPrimeSum,
+               zPrimePrimeSum, T),
+            eq:expand(eq),
+            /* extract the equation for z[0]. */
+            v:coeff(eq,pvar,0),
+            /* print("z[0] ode",v), */
+            sol:ode2(v, z[0], T), /* solve the ode */
+            /* if initial conditions are supplied, then apply ic2
+               to the solution and initial condition list.  Then
+               remove z[0] from the solution altogether.  A sanity
+               check for the removal of z[0] could be done here. */
+            if length(ic) > 0 then
+                z[0]:rhs(LindstedtProcessIC2(sol,first(ic), z[0],T))
+                else z[0]:rhs(sol),
+            /* now remove z[0] from the equation and expand again */
+            eq:ev(ratsubst(z[0], 'z[0], eq),nouns),
+            eq:expand(trigreduce(eq)),
+            /* start loop for higher order terms */
+            /* print("Looping for higher order terms"), */
+            for i:1 thru torder do block([param],
+               /* determine the ode */
+               v:coeff(eq, pvar, i),
+               sol:ode2(v, z[i], T),
+               sol:expand(rhs(ic2(sol, T=0, z[i]=0, 'diff(z[i], T) = 0))),
+               param:LindstedtRemoveSecularTerms(sol,T),
+               /* replace the following with lratsubst when its implemented */
+               map(lambda([eq],block([l:lhs(eq),r:rhs(eq)], 
+                   sol:ratsubst(r,l,sol))),
+                  param),
+               z[i]:sol,
+               /* eq:ev(ratsubst(z[i],'z[i],eq),NOUNS), */
+               eq:ev(eq,nouns),
+               eq:expand(trigreduce(eq))
+            ),
+            solutionList:[[[sum(z[i]*pvar^i,i,0,torder)],
+                T=ivar*sum(lamda[i]*pvar^i,i,0,torder)]]
+         ));

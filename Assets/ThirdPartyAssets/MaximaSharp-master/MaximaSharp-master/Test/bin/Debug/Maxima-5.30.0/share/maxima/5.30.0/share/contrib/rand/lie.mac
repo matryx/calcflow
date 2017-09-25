@@ -1,0 +1,163 @@
+/* Filename lie.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/* program number 9: lie(), lie transformations for hamiltonian systems.
+   see page 144 in "perturbation methods, bifurcation theory and
+   computer algebra". */
+
+
+lie():=block(
+ 
+/* input problem ? */
+choice1:read("do you want to input a new problem (y/n) ?"),
+ 
+if choice1=n then go(jump1),
+ 
+/* input problem */
+n:read("enter number of degrees of freedom"),
+for ii:1 thru n do (
+   q[ii]:read("enter symbol for q[",ii,"]"),
+   p[ii]:read("enter symbol for p[",ii,"]")),
+kill(w),
+print("the hamiltonian depends on the q's, p's, t and e (small parameter)"),
+print("the e=0 problem must be of the form:"),
+print("h =",sum((p[ii]^2+w[ii]^2*q[ii]^2)/2,ii,1,n)),
+horiginal:read("enter the hamiltonian"),
+print("h =",horiginal),
+ 
+/* transform to action-angle variables */
+/* find the w[ii]'s */
+h0:ev(horiginal,e=0),
+for ii:1 thru n do
+   w[ii]:sqrt(diff(h0,q[ii],2)),
+print("the action-angle variables are j's for action, phi's for angle"), 
+for ii:1 thru n do
+   tr[ii]:[q[ii]=sqrt(2*j[ii]/w[ii])*sin(phi[ii]),
+          p[ii]=sqrt(2*j[ii]*w[ii])*cos(phi[ii])],
+tran:makelist(tr[ii],ii,1,n),
+h:ev(horiginal,tran,assume_pos:true,infeval),
+h:trigsimp(h),
+h:expand(trigreduce(expand(h))),
+print("h =",h),
+ 
+jump1,
+ 
+/* input truncation order */
+ntrunc:read("enter highest order terms in e to be kept"),
+for ii:0 thru ntrunc do
+   h[ii]:ratcoef(h,e,ii),
+ 
+/* lie transforms */
+/* near identity transformation from (j,phi)'s to (i,psi)'s */
+ 
+/* update variables */
+for ii:1 thru n do(
+   p[ii]:i[ii],
+   q[ii]:psi[ii]),
+ 
+/* replace j and phi by i and psi in h's */
+for ii:0 thru ntrunc do
+   h[ii]:ev(h[ii],makelist(j[iii]=i[iii],iii,1,n),
+                makelist(phi[iii]=psi[iii],iii,1,n)),
+ 
+k[0]:h[0],
+ 
+/* declare wgen[i] to be a fn of t, q's and p's */
+kill(wgen),
+depends(wgen,[t]),
+for ii:1 thru n do
+  depends(wgen,[q[ii],p[ii]]),
+ 
+/* e=0 problem is of form sum(w[ii]*i[ii]) */
+/* choose wgen[ii] to kill as much as possible in eq(ii) */
+/* equate k[ii] to unremovable terms */
+ 
+/* define pattern matching rules to isolate args of trig terms */
+matchdeclare([dummy1,dummy2],true),
+defrule(cosarg,dummy1*cos(dummy2),dummy2),
+defrule(sinarg,dummy1*sin(dummy2),dummy2),
+ 
+for ii:1 thru ntrunc do(
+ 
+   eqn[ii]:expand(trigreduce(expand(eq(ii)))),
+   temp:expand(ev(eqn[ii],wgen[ii]=0)),
+/* change sum to a list */
+   temp1:args(temp),
+/* remove constant terms */
+   temp2:map(trigidentify,temp1),
+/* isolate arguments of trig terms */
+   arg1:apply1(temp2,cosarg,sinarg),
+/* remove duplicate arguments */
+   arg2:setify(arg1),
+/* remove resonant arguments */
+   arg3:sublist(arg2,notresp),
+ 
+/* choose wgen to eliminate nonresonant terms */
+   leng:length(arg3),
+   wgentemp1:0,
+   for jj:1 thru leng do(
+      wgentemp2:aaa*cos(part(arg3,jj))+bbb*sin(part(arg3,jj)),
+      temp4:ev(eqn[ii],wgen[ii]=wgentemp2,diff),
+      temp5:solve([ratcoef(temp4,cos(part(arg3,jj))),
+                   ratcoef(temp4,sin(part(arg3,jj)))],[aaa,bbb]),
+      wgentemp1:wgentemp1+ev(wgentemp2,temp5)),
+   wgen[ii]:wgentemp1,
+   print("wgen[",ii,"] ="),
+   print(wgen[ii]),
+   k[ii]:expand(ev(eqn[ii],diff)),
+   k[ii]:expand(ratsimp(k[ii])),
+   print("the transformed hamiltonian k[",ii,"] ="),
+   print(k[ii])),   
+ 
+kamiltonian:sum(k[ii]*e^ii,ii,0,ntrunc),
+print ("the transformed hamiltonian is "),
+print ("k =",kamiltonian),
+ 
+choice2:read("do you want to see the near identity transformation (y/n) ?"),
+if choice2=n then go(end),
+ 
+/* the near identity transformation */
+for ii:1 thru n do(
+   jtrans[ii]:sum(s(iii,p[ii])*e^iii,iii,0,ntrunc),
+   phitrans[ii]:sum(s(iii,q[ii])*e^iii,iii,0,ntrunc)),
+for ii:1 thru n do(
+   print(j[ii],"=",jtrans[ii]),
+   print(phi[ii],"=",phitrans[ii])),
+ 
+end,
+kamiltonian)$
+ 
+ 
+poisson(f,g):=
+          sum(diff(f,q[ii])*diff(g,p[ii])-diff(f,p[ii])*diff(g,q[ii]),ii,1,n)$
+ 
+l(ii,f):=poisson(wgen[ii],f)$
+ 
+s(ii,f):=(if ii=0 then f else sum(l(ii-m,s(m,f)),m,0,ii-1)/ii)$
+ 
+eq(ii):=(h[ii]+(diff(wgen[ii],t)+poisson(wgen[ii],h[0]))/ii
+        +sum(l(ii-m,k[m])+m*s(ii-m,h[m]),m,1,ii-1)/ii)$
+ 
+lzap(any):=diff(any,t)+poisson(any,h[0])$
+
+trigidentify(exp):=if freeof(sin,exp) and freeof(cos,exp) then 0 else exp$
+
+notresp(exp):=not is(lzap(exp) = 0)$
+
+setify(list):=(
+   set:[list[1]],
+   for i:2 thru length(list) do(
+      if not member(list[i],set) then set:cons(list[i],set)),
+   set)$

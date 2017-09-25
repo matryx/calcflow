@@ -1,0 +1,99 @@
+What's New (Decemeber 2005)
+
+(1) New texi documentation; courtesy of Robert Dodier.
+
+(2) Added function mat_fullunblocker; a fully recursive version of
+mat_unblocker.
+
+(3) Added function mat_trace; a block matrix friendly function for
+the matrix trace.
+
+(4) Improved algorthim for matrix condition number estimation.
+
+The new version of linalg can be downloaded from 
+http://www.unk.edu/facstaff/profiles/willisb/.
+
+A tour of new functions:
+
+(1) The file linearalgebra/conjugate.lisp has an alternative to 
+the /eigen/conjugate function.  The /eigen/conjugate function
+only does the substitution %i --> -%i.  The conjugate
+function in linearalgebra is (I hope) somewhat smarter.
+
+(%o1) c:/maxima/linearalgebra/linalg.mac
+(%i2) declare(z,complex)$
+(%i3) conjugate([z,z^2,sqrt(z)]);
+(%o3) [conjugate(z),conjugate(z)^2,conjugate(sqrt(z))]
+
+Off the branch cut of sqrt, conjugate and sqrt commute. Telling
+Maxima that z isn't on branch cut allows it to transform
+conjugate(sqrt(z)) --> sqrt(conjugate(z)).
+
+(%i4) assume(imagpart(z) > 0)$
+(%i5) conjugate(sqrt(z));
+(%o5) sqrt(conjugate(z))
+
+(2) New functions for generating matrices:
+
+(%i6) hilbert_matrix(2);
+(%o6) matrix([1,1/2],[1/2,1/3])
+(%i7) vandermonde_matrix([a,b]);
+(%o7) matrix([1,a],[1,b])
+
+(3) A matrix kronecker_product
+
+(%i9) kronecker_product(hilbert_matrix(2), vandermonde_matrix([5,6]));
+(%o9) matrix([1,5,1/2,5/2],[1,6,1/2,3],[1/2,5/2,1/3,5/3],[1/2,3,1/3,2])
+
+(4) A function that converts block matrices to unblocked matrices
+
+(%i12) matrix([matrix([4,5]), matrix([6,7])]);
+(%o12) matrix([matrix([4,5]),matrix([6,7])])
+(%i13) mat_unblocker(%);
+(%o13) matrix([4,5,6,7])
+
+(5) LU factorization
+
+There is code for LU factorization.  It uses partial pivoting when
+the matrix is numeric.
+
+(%i1) load("linalg");
+Warning - you are redefining the Maxima function RANK
+(%o1) c:/maxima/linearalgebra/linalg.mac
+(%i2) lu_factor(matrix([a,b],[c,d]));
+(%o2) [matrix([a,b],[c/a,d-(b*c)/a]),[1,2]]
+
+Do the LU factorization using CRE expressions.  Try this using
+the general representation -- it is very slow.
+
+(%i4) lu_factor(vandermonde_matrix([a,b,c,d,e]),crefield)$
+(%i5) m : first(%)$
+(%i6) factor(product(m[i,i],i,1,5));
+(%o6) (b-a)*(c-a)*(c-b)*(d-a)*(d-b)*(d-c)*(e-a)*(e-b)*(e-c)*(e-d)
+
+LU factor using CL complex numbers 
+
+(%i14) w[i,j] := ?random(1.0) + %i * ?random(1.0)$
+Evaluation took 0.00 seconds (0.00 elapsed)
+(%i15) m : genmatrix(w,100,100)$
+Evaluation took 0.45 seconds (0.45 elapsed)
+(%i16) lu_factor(m,complexfloatfield)$
+Evaluation took 1.73 seconds (1.73 elapsed)
+
+(This code will not win any speed awards.)
+
+There is also code for solving linear systems using the LU
+factorization
+
+(%i19) m : hilbert_matrix(5)$
+(%i20) m : lu_factor(m)$
+(%i21) lu_backsub(m, matrix([1],[1],[1],[1],[1]));
+(%o21) matrix([5],[-120],[630],[-1120],[630])
+(%i22) hilbert_matrix(5) . %;
+(%o22) matrix([1],[1],[1],[1],[1])
+
+(6) My spectral representation code is now included in linalg.
+
+As always, let me know how I can improve this code.
+
+Barton Willis

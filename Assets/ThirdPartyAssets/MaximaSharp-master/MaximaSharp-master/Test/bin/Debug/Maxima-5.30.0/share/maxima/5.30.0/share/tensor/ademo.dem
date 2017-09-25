@@ -1,0 +1,56 @@
+/* Copyright (C) 2003 Valerij Pipin <pip@iszf.irk.ru>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * The double divergence of the Riemann tensor
+ *
+*/
+/* THE FINAL RESULT SHOULD BE ZERO--THE DOUBLE DIVERGENCE OF THE
+ RIEMANN TENSOR ON ANTISYMMETRIC INDICES VANISHES IDENTICALLY */
+
+("
+The double divergence of the Riemann-tensor on its antisymmetric
+indices should vanish. We can prove this in geodesic coordinates:")$
+showtime:true;
+if get('itensor,'version)=false then load(itensor);
+remcomps(g);
+imetric(g);
+covdiff(icurvature([r,s,t],[u])*g([],[s,i])*g([],[t,j]),i)$
+nterms(%);
+rename(expand(%th(2)))$
+igeodesic_coords(canform(rename(expand(ev(%)))),g)$
+ishow(%)$
+canform(covdiff(%,j))$
+nterms(%);
+rename(expand(igeodesic_coords(%th(2),g)));
+showtime:false;
+
+/* Old version. Longer, faster, but uses suspect simplifications.
+load(itensor)$
+showtime:true;
+allsym:true;
+q:covdiff(covdiff(icurvature([r,s,t],[u])*g([],[s,i])*g([],[t,j]),i),j)$
+nterms(q);
+h:canform(expand(rename(igeodesic_coords(q,g))))$
+nterms(%);
+imetric:g$
+h2:igeodesic_coords(canform(ev(h)),g)$
+nterms(%);
+conmetderiv(h2,g)$
+h3:igeodesic_coords(%,g)$
+nterms(%);
+h4:canform(rename(expand(rename(h3))))$
+h6:canform(ev(h4))$
+nterms(%);
+conmetderiv(h6,g)$
+h8:igeodesic_coords(%,g)$
+nterms(%);
+ishow(canten(rename(h8)))$ */

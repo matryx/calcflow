@@ -1,0 +1,435 @@
+/* Tests of Jacobi elliptic functions and elliptic integrals */
+
+kill(all);
+done$
+
+/* derivatives */
+diff(jacobi_sn(u,m),u);
+jacobi_cn(u,m)*jacobi_dn(u,m);
+
+diff(jacobi_sn(u,m),m);
+jacobi_cn(u,m)*jacobi_dn(u,m)*(u-elliptic_e(asin(jacobi_sn(u,m)),m)/(1-m))
+  /(2*m)
+ +jacobi_cn(u,m)^2*jacobi_sn(u,m)/(2*(1-m));
+
+diff(jacobi_cn(u,m),u);
+-jacobi_dn(u,m)*jacobi_sn(u,m);
+
+diff(jacobi_cn(u,m),m);
+-(jacobi_dn(u,m)*jacobi_sn(u,m)*(u-elliptic_e(asin(jacobi_sn(u,m)),m)/(1-m))/(2*m))
+  -(jacobi_cn(u,m)*jacobi_sn(u,m)^2/(2*(1-m)));
+
+diff(jacobi_dn(u,m),u);
+-m*jacobi_cn(u,m)*jacobi_sn(u,m);
+
+diff(jacobi_dn(u,m),m);
+-(jacobi_cn(u,m)*jacobi_sn(u,m)*(u-elliptic_e(asin(jacobi_sn(u,m)),m)/(1-m))/2)
+  -(jacobi_dn(u,m)*'jacobi_sn(u,m)^2/(2*(1-m)));
+
+diff(inverse_jacobi_sn(u,m),u);
+1/(sqrt(1-u^2)*sqrt(1-m*u^2));
+
+diff(inverse_jacobi_sn(u,m),m);
+((elliptic_e(asin(u),m)-(1-m)*elliptic_f(asin(u),m))/m-(u*sqrt(1-u^2)/sqrt(1-m*u^2)))/(1-m);
+
+diff(inverse_jacobi_cn(u,m),u);
+-(1/(sqrt(1-u^2)*sqrt(m*u^2-m+1)));
+
+diff(inverse_jacobi_cn(u,m),m);
+((elliptic_e(asin(sqrt(1-u^2)),m)-(1-m)*elliptic_f(asin(sqrt(1-u^2)),m))/m
+   -(sqrt(1-u^2)*abs(u)/sqrt(1-m*(1-u^2))))/(1-m);
+
+diff(inverse_jacobi_dn(u,m),u);
+1/(sqrt(1-u^2)*sqrt(u^2+m-1));
+
+diff(inverse_jacobi_dn(u,m),m);
+((elliptic_e(asin(sqrt(1-u^2)/sqrt(m)),m)-(1-m)*elliptic_f(asin(sqrt(1-u^2)/sqrt(m)),m))/m
+  -sqrt(1-(1-u^2)/m)*sqrt(1-u^2)/(sqrt(m)*abs(u)))/(1-m)
+-(sqrt(1-u^2)/(2*m^(3/2)*sqrt(1-(1-u^2)/m)*abs(u)));
+
+diff(elliptic_e(phi,m),phi);
+sqrt(1-m*sin(phi)^2);
+
+diff(elliptic_e(phi,m),m);
+(elliptic_e(phi,m)-elliptic_f(phi,m))/(2*m);
+
+diff(elliptic_f(phi,m),phi);
+1/sqrt(1-m*sin(phi)^2);
+
+diff(elliptic_f(phi,m),m);
+((elliptic_e(phi,m)-(1-m)*elliptic_f(phi,m))/m
+   -(cos(phi)*sin(phi)/sqrt(1-m*sin(phi)^2)))
+ /(2*(1-m));
+
+diff(elliptic_kc(m),m);
+(elliptic_ec(m)-(1-m)*elliptic_kc(m))/(2*(1-m)*m);
+
+diff(elliptic_ec(m),m);
+(elliptic_ec(m)-elliptic_kc(m))/(2*m);
+
+/* Integrals */
+
+integrate(jacobi_sn(u,m),u); /* A&S 16.24.1 */
+log(jacobi_dn(u,m)-sqrt(m)*jacobi_cn(u,m))/sqrt(m);
+
+integrate(jacobi_cn(u,m),u); /* A&S 16.24.2 */
+acos(jacobi_dn(u,m))/sqrt(m);
+
+integrate(jacobi_dn(u,m),u); /* A&S 16.24.3 */
+asin(jacobi_sn(u,m));
+
+integrate(jacobi_cd(u,m),u); /* A&S 16.24.4 */
+log(sqrt(m)*jacobi_sd(u,m)+jacobi_nd(u,m))/sqrt(m);
+
+/* Use functions.wolfram.com 09.35.21.001.01, not A&S 16.24.5 */
+integrate(jacobi_sd(u,m),u);
+-(sqrt(1-m*jacobi_cd(u,m)^2)*jacobi_dn(u,m)*asin(sqrt(m)*jacobi_cd(u,m))
+  /((1-m)*sqrt(m)));
+
+/* Use functions.wolfram.com 09.32.21.0001.01, not A&S 16.24.6 */
+integrate(jacobi_nd(u,m),u); 
+sqrt(1-jacobi_cd(u,m)^2)*acos(jacobi_cd(u,m))/((1-m)*jacobi_sd(u,m));
+
+integrate(jacobi_dc(u,m),u); /* A&S 16.24.7 */
+log(jacobi_sc(u,m)+jacobi_nc(u,m));
+
+integrate(jacobi_nc(u,m),u); /* A&S 16.24.8 */
+log(sqrt(1-m)*jacobi_sc(u,m)+jacobi_dc(u,m))/sqrt(1-m);
+
+integrate(jacobi_sc(u,m),u); /* A&S 16.24.9 */
+log(sqrt(1-m)*jacobi_nc(u,m)+jacobi_dc(u,m))/sqrt(1-m);
+
+integrate(jacobi_ns(u,m),u); /* A&S 16.24.10 */
+log(jacobi_ds(u,m)-jacobi_cs(u,m));
+
+/* Use functions.wolfram.com 09.30.21.0001.01, not A&S 16.24.11 */
+integrate(jacobi_ds(u,m),u);
+log((1-jacobi_cn(u,m))/jacobi_sn(u,m));
+
+integrate(jacobi_cs(u,m),u); /* A&S 16.24.12 */
+log(jacobi_ns(u,m)-jacobi_ds(u,m));
+
+/* Check the integrals and derivatives by confirming
+
+       f(x,m)-diff(integral(x,m),x),x) = constant
+
+  Look at Taylor expansion about zero, rather than messing about with 
+  elliptic function.  This was sufficient to find several errors  */
+(te(f,n):=ratsimp(
+           taylor(f(x,m)
+           -diff(integrate(f(x,m),x),x),x,0,n)),
+ti(f,n):=ratsimp(
+           taylor(integrate(f(x,m),x),x,0,n)
+            -integrate(taylor(f(x,m),x,0,n-1),x)),
+td(f,n):=ratsimp(
+           taylor(diff(f(x,m),x),x,0,n)
+            -diff(taylor(f(x,m),x,0,n+1),x)),
+/* Compare analytic and numerical integral */
+ni(f,x1,x2,m):= block(
+  [x,n,I,In,Ia,key:1,eps:1.0e-14],
+  I:integrate(f(x,n),x),
+  In:quad_qag(f(x,m),x,x1,x2,key),
+  Ia:subst([x=float(x2),n=float(m)],I)-subst([x=float(x1),n=float(m)],I),
+  if ( abs(Ia-In[1]) < eps ) then
+    true
+  else
+    [Ia,In[1]]
+),
+done);
+done;
+
+te(jacobi_sn,4);
+0;
+
+te(jacobi_cn,4);
+0;
+
+te(jacobi_dn,4);
+0;
+
+te(jacobi_cd,4);
+0;
+
+assume(m>0,m<1); /* also ok for m<0 and m>0 */
+[m > 0, m < 1];
+te(jacobi_sd,4);
+0;
+forget(m>0,m<1);
+[m > 0, m < 1];
+
+te(jacobi_nd,4);
+0;
+
+te(jacobi_dc,4);
+0;
+
+te(jacobi_nc,4);
+0;
+
+te(jacobi_sc,4);
+0;
+
+/* jacobi_ns, jacobi_ds and jacobi_cs are singular at x=0 
+   Compare numerical and analytic integrals for a single case.
+*/
+
+ni(jacobi_ns,1,2,1/2);
+true;
+
+ni(jacobi_ds,1,2,1/2);
+true;
+
+ni(jacobi_cs,1,2,1/2);
+true;
+
+kill(te,ti,td,ni);
+done;
+
+/* Slightly modified version of test_table taken from rtest_expintegral.mac */
+
+(test_table(func,table,eps) :=
+block([badpoints : [],
+       abserr    : 0,
+       maxerr    : -1],
+  for entry in table do
+    block([z : entry[1],
+	   result, answer],
+      z : expand(rectform(bfloat(entry[1]))),
+      result : rectform(apply(func, z)),
+      answer : expand(rectform(bfloat(entry[2]))),
+      abserr : abs(result-answer),
+      maxerr : max(maxerr,abserr),
+      if abserr > eps then
+	badpoints : cons ([z,result,answer,abserr],badpoints)
+    ),
+  if badpoints # [] then
+    cons(maxerr,badpoints)
+  else
+    badpoints
+),done);
+done;
+
+/* These test values come from http://getnet.net/~cherry/testrf.mac */
+ 
+(mrf:[[[1,2,0],1.3110287771461b0],
+     [[%i,-%i,0],1.8540746773014b0],
+     [[0.5,1,0],1.8540746773014b0],
+     [[%i-1,%i,0],0.79612586584234b0-%i*(1.2138566698365b0)],
+     [[2,3,4],0.58408284167715b0],
+     [[%i,-%i,2],1.0441445654064b0],
+     [[%i-1,%i,1-%i],0.93912050218619b0-%i*(0.53296252018635b0)]],
+done);
+done;
+
+test_table('carlson_rf, mrf, 1.5b-13);
+[];
+
+(mrc:[[[0,1/4],bfloat(%pi)],
+      [[9/4,2],log(2b0)],
+      [[0,%i],(1-%i)*(1.1107207345396b0)],
+      [[-%i,%i],1.2260849569072b0-%i*(0.34471136988768b0)],
+      [[1/4,-2],log(2b0)/3],
+      [[%i,-1],0.77778596920447b0+%i*(0.19832484993429b0)],
+      [[0,1/4],%pi],
+      [[9/4,2],log(2)],
+      [[2,1],-log(sqrt(2)-1)],
+      [[-%i,%i],-log(sqrt(2)-1)/2+ %pi/4-%i*(log(sqrt(2)-1)/2+%pi/4)],
+      [[1/4,-2],log(2)/3],
+      [[%i,-1],sqrt(sqrt(2)/4-1/4)*atan(sqrt(sqrt(2)-1))-
+               sqrt(sqrt(2)/16+1/16)*log(-sqrt(2*sqrt(2)+2)+sqrt(2)+1)+
+               %i*(sqrt(sqrt(2)/4+1/4)*atan(sqrt(sqrt(2)-1))+sqrt(sqrt(2)/16-
+               1/16)*log(-sqrt(2*sqrt(2)+2)+sqrt(2)+1))],
+      [[0,1],%pi/2],
+      [[%i,%i+1],%pi/4+%i*log(sqrt(2)-1)/2]],
+done);
+done;
+
+test_table('carlson_rc, mrc, 2.5b-14);
+[];
+
+(mrj:[[[0,1,2,3],0.77688623778582b0],
+      [[2,3,4,5],0.14297579667157b0],
+      [[2,3,4,-1+%i],0.13613945827771b0-%i*(0.38207561624427b0)],
+      [[%i,-%i,0,2],1.6490011662711b0],
+      [[-1+%i,-1-%i,1,2],0.9414835884122b0],
+      [[%i,-%i,0,1-%i],1.8260115229009b0+%i*(1.2290661908643b0)],
+      [[-1+%i,-1-%i,1,-3+%i],-0.61127970812028b0-%i*(1.0684038390007b0)],
+      [[-1+%i,-2-%i,-%i,-1+%i],1.8249027393704b0-%i*(1.2218475784827b0)],
+      [[2,3,4,-0.5],0.24723819703052b0],
+      [[2,3,4,-5],-0.12711230042964b0]],
+done);
+done;
+
+test_table('carlson_rj, mrj, 1b-13);
+[];
+
+(mrd:[[[0,2,1],1.7972103521034b0],
+      [[2,3,4],0.16510527294261b0],
+      [[%i,-%i,2],0.6593385415422b0],
+      [[0,%i,-%i],1.270819627191b0+%i*(2.7811120159521b0)],
+      [[0,%i-1,%i],-1.8577235439239b0-%i*(0.96193450888839b0)],
+      [[-2-%i,-%i,-1+%i],1.8249027393704b0-%i*(1.2218475784827b0)]],
+done);
+done;
+
+test_table('carlson_rd, mrd, 6e-14);
+[];
+
+/* Some tests of the Jacobian elliptic functions.  
+ * Just some tests at random points, to verify that we are accurate.
+ * The reference values were obtained from Mathematica, but we could 
+ * also just compute the values using a much larger fpprec.
+ */
+
+test_table('jacobi_sn,
+           [[[1b0+%i*1b0, .7b0], 1.134045971912365274954b0 + 0.352252346922494477621b0*%i],
+            [[1b0+%i*1b0, 2b0], 0.98613318109123804740b0 + 0.09521910819727230780b0*%i],
+            [[1b0+%i*1b0, 2b0+3b0*%i], 0.94467077879445294981b0 - 0.19586410083100945528b0* %i],
+            [[1.785063352082689082581887b0 *%i + 8.890858759528509578661528b-1,
+              9.434463451695984398149033b-1 - 1.476052973708684178844821b-1 * %i],
+             1.345233534539675700312281b0 - 7.599023926615176284214056b-2 * %i]],
+           1b-15);
+[];
+
+test_table('jacobi_cn,
+           [[[1b0+%i*1b0, .7b0], 0.571496591371764254029b0 - 0.698989917271916772991b0*%i ],
+            [[1b0+%i*1b0, 2b0], 0.33759463268642431412b0 - 0.27814044708010806377b0*%i],
+            [[1b0+%i*1b0, 2b0+3b0*%i], -0.52142079485827170824b0 - 0.35485177134179601850b0*%i],
+            [[100b0, .7b0], 0.93004753815774770476196b0]], 
+           6b-14);
+[];
+
+test_table('jacobi_dn,
+           [[[1b0+%i*1b0, .7b0], 0.62297154372331777630564880787568b0 - 0.448863598031509643267241389621738b0 *%i ],
+            [[1b0+%i*1b0, 2b0], 0.1913322443206041462495606602242b0 - 0.9815253294150083432282549919753b0 * %i],
+            [[1b0+%i*1b0, 2b0+3b0*%i], 0.6147387452173944656984656771134b0 - 1.4819401302071697495918834416787b0 * %i],
+            [[100b0, .7b0], 0.95157337933724324055428565654872978b0],
+            [[1.785063352082689082581887b0 *%i + 8.890858759528509578661528b-1,
+              9.434463451695984398149033b-1 - 1.476052973708684178844821b-1 * %i],
+             -8.617730683333292717095686b-1 *%i - 2.663978258141280808361839b-1]], 
+           2b-15);
+[];
+
+/* These routines for cn and dn work well for small (<= 1?) values of
+ * u and m.  They have known issues for large real values of u.
+ */
+(ascending_transform(u,m) :=
+  block([root_m : expand(rectform(sqrt(m))), mu, root_mu1, v],
+    mu : expand(rectform(4*root_m/(1+root_m)^2)),
+    root_mu1 : expand(rectform((1-root_m)/(1+root_m))),
+    v : expand(rectform(u/(1+root_mu1))),
+    [v, mu, root_mu1]),
+ elliptic_dn_ascending(u,m) :=
+  if is(abs(m-1) < 4*10^(-fpprec)) then sech(u)
+  else
+    block([v, mu, root_mu1, new],
+      [v, mu, root_mu1] : ascending_transform(u,m),
+      new : elliptic_dn_ascending(v, mu),
+      expand(rectform((1-root_mu1)/mu*(new^2 + root_mu1)/new))),
+ elliptic_cn_ascending(u,m) :=
+  if is(abs(m-1) < 4*10^(-fpprec)) then sech(u)
+  else
+    block([v, mu, root_mu1, new],
+      [v, mu, root_mu1] : ascending_transform(u,m),
+      new : elliptic_dn_ascending(v, mu),
+      expand(rectform((1+root_mu1)/mu*(new^2-root_mu1)/new))),
+ done);
+done;
+
+/* Test with random values for the argument and parameter. */
+(test_random(n, eps, testf, truef) :=
+  block([badpoints : [], maxerr : -1],
+    for k : 1 thru n do
+      block([z : bfloat(1-2*random(1d0) + %i * (1-2*random(1d0))),
+             m : bfloat(1-2*random(1d0) + %i * (1-2*random(1d0))),
+             ans, expected, abserr],
+        ans : testf(z, m),
+        expected : truef(z, m),
+        abserr : abs(ans-expected),
+        maxerr : max(maxerr, abserr),
+        if abserr > eps then
+          badpoints : cons([[z,m], ans, expected, abserr], badpoints)),
+    if badpoints # [] then
+      cons(maxerr, badpoints)
+    else
+      badpoints),
+ done);
+done;
+
+test_random(50, 2b-15, 'jacobi_dn, 'elliptic_dn_ascending);
+[];
+
+test_random(50, 2b-15, 'jacobi_cn, 'elliptic_cn_ascending);
+[];
+
+/* Test elliptic_f by using the fact that
+
+inverse_jacobi_sn(x,m) = elliptic_f(asin(x), m)
+
+*/
+(test_ef(x,m) := jacobi_sn(elliptic_f(asin(x),m), m), id(x,m):=x, done);
+done;
+
+test_random(100, 6b-13, 'test_ef, 'id);
+[];
+
+/* Test elliptic_kc These values are from 
+ *
+ * http://functions.wolfram.com/EllipticIntegrals/EllipticK/03/01/
+ */
+
+block([oldfpprec : fpprec, fpprec:100],
+  test_table('elliptic_kc,
+	     [[[1/2], 8*%pi^(3/2)/gamma(-1/4)^2],
+	      [[17-12*sqrt(2)], 2*(2+sqrt(2))*%pi^(3/2)/gamma(-1/4)^2],
+	      [[-1], gamma(1/4)^2/4/sqrt(2*%pi)]],
+	     2b-100));
+[];
+
+/* Some tests for specific values */
+inverse_jacobi_sn(1,m);
+elliptic_kc(m);
+
+inverse_jacobi_sn(x,0);
+asin(x);
+
+inverse_jacobi_sn(x,1);
+log(tan(asin(x)/2 + %pi/4));
+
+inverse_jacobi_sd(1/sqrt(1-m),m);
+elliptic_kc(m);
+
+inverse_jacobi_ds(sqrt(1-m),m);
+elliptic_kc(m);
+
+/* elliptic_kc(1) is undefined */
+errcatch(elliptic_kc(1));
+[];
+errcatch(elliptic_kc(1.0));
+[];
+errcatch(elliptic_kc(1.0b0));
+[];
+
+/* Test noun/verb results from elliptic functions */
+diff(inverse_jacobi_sn(x,0),x);
+1/sqrt(1-x^2);
+
+diff(elliptic_pi(4/3,phi,0),phi);
+sec(phi)^2/(1-tan(phi)^2/3);
+
+diff(elliptic_pi(3/4,phi,0),phi);
+sec(phi)^2/(1+tan(phi)^2/4);
+
+diff(elliptic_pi(1,phi,0),phi);
+sec(phi)^2;
+
+
+elliptic_ec(1);
+1;
+
+/* Test periodicity of elliptic_e */
+elliptic_e(x, 1);
+2*round(x/%pi)+sin(x);
+
+elliptic_e(3,1/2);
+elliptic_e(3-%pi,1/2)+2*elliptic_ec(1/2);

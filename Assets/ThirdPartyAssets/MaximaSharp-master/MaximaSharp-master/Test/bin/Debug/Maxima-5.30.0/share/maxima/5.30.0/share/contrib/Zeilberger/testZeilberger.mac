@@ -1,0 +1,117 @@
+
+/* ------------------------------ */
+/* Gosper's algorithm's Test File */
+
+g1:(-1)^k*k/(4*k^2-1);
+
+g2:1/(4*k^2-1);
+
+g3:x^k;
+
+g4:(-1)^k*a!/(k!*(a-k)!);
+
+g5:k*k!;
+
+g6:(k+1)*k!/(k+1)!;
+
+/* Non-Gosper summable                                        */
+/* It has been checked against the Mathematica package "Zb"   */
+/* by Paule/Schorn/Riese available at www.risc.uni-linz.ac.at */
+g7:1/((a-k)!*k!);
+
+/* --------------------------------- */
+/* Zeiberger's Algorithm's Test File */
+
+f1 : binomial(n,k);
+
+f2 : binomial(n,k)^2;
+
+f3 : binomial(n,k)^3;
+
+f4 : binomial(n,k)^4;
+
+f5 : binomial(n,k)^5;
+
+f6 : binomial(n,k)^6;
+
+f7 : binomial(n,k)^7;
+
+f8 : binomial(n,k)^8;
+
+f9: binomial(n,k)^9;
+
+f10: binomial(n,k)^10;
+
+/* Binomial theorem */
+h1: binomial(n,k)*x^k;
+
+/* Vandermonde identity recurrence */
+h2: binomial(a, k)* binomial(b, n-k);
+
+/* Dixon's identity */
+h3: binomial(n+b, n+k)* binomial(n+c, c+k)*binomial(b+c, b+k)*(-1)^k;
+
+/* Karlsson-Gosper identity 1 */
+h4: binomial(n,k)*(n-1/4)!/(n-k-1/4)!/(2*n+k + 1/4)!*9^(-k);
+
+/* Karlsson-Gosper identity 2 */
+h5: binomial(n,k) * (n-1/4)! / (n-k-1/4)! / (2*n+k+5/4)! * 9^(-k);
+
+/* Wilson polynomials recurrence */
+h6: binomial(n,k) * (n+a+b+c+d-2+k)! * (a+x+k-1)! * (a-x+k-1)! /
+               (n+a+b+c+d-2)! / (a+b+k-1)! / (a+c+k-1)! / (a+d+k-1)! * (-1)^k;
+
+
+/* Wilson polynomials without constants in k (for debugging) */
+h6b : removeBinomial(h6)/(n!)*((n+d+c+b+a-2)!);
+
+/* Laguerre-Orthogonality */
+h7: (k+k2)! * (n1)! * (n2)! / (k)! / (n1-k)! / (k2)! / (n2-k2)! / 
+                (k)! / (k2)! * (-1)^k;
+
+/*  Fibonacci-Recurrence */
+h8: (-k+n)! / k! / (-2*k+n)!;
+
+/* Trinomial coefficients */
+h9: n! / k! / (k+m)! / (-2*k-m+n)!;
+
+/*  First special case of Strehl identity (MEMO, Feb 25, 1992) */
+h10: binomial(n, k)^2 * binomial( 2*k, k);
+
+
+/* Second special case of Strehl identity (MEMO, Feb 25, 1992) */ 
+h11: binomial(n, k)^2 * binomial( 2*k, k+a);
+
+/* Third special case of Strehl identity (MEMO, Feb 25, 1992) */
+h12: binomial(n, k)^2 * binomial( 2*k, k) * binomial(2*k,n-k);
+
+/* Fibonacci recurrence */
+h13: (n+k)! * n! / k!^3 / (n-k)!^2;
+
+/* Debugging artificial examples */
+d1 : (2*n+k-1)!/(4*n+2*k)!;
+
+d2 : (3*n+k-1)!/(6*n+2*k)!;
+
+
+GOSPER_TEST :
+  [[g1,k,n,0],[g2,k,n,0],[g3,k,n,0],
+   [g4,k,n,0],[g5,k,n,0],[g6,k,n,0]];
+
+EASY_TEST :
+[[f1,k,n,1],[f2,k,n,1],[f3,k,n,2],[f4,k,n,2],
+ [h1,k,n,1],[h2,k,n,1],[h8,k,n,2],[h9,k,n,2],
+ [h10,k,n,2],[h13,k,n,2],[d1,k,n,1],[d2,k,n,1]];
+
+HARD_TEST :
+[[h3,k,n,1],[h4,k,n,1],[h5,k,n,1],[h7,k,n1,1],[h11,k,n,3]];
+
+EXTREME_TEST : [[f5,k,n,3], [h6,k,n,2],[h12,k,n,5]];
+
+FULL_TEST : append(GOSPER_TEST,EASY_TEST,
+                   HARD_TEST,EXTREME_TEST);
+
+kill (g1, g2, g3, g4, g5, g6, g7,
+    f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
+    h1, h2, h3, h4, h5, h6, h6b, h7, h8, h9, h10, h11, h12, h13,
+    d1, d2);

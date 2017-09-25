@@ -1,0 +1,55 @@
+/* -*- Mode: Macsyma -*- */
+
+/*************************************************************************************
+  Demo of Coeflist package.
+  This package defines tools for extracting coefficients of polynomials, 
+  trigonometric sums and power and Taylor series
+*************************************************************************************/
+
+/* COEFFS: Coefficients of Polynomials */
+
+coeffs(a+b*x^2*y+c*x^3*y^2+d*x^4,x);
+
+ptest : (a+b*x^2*y+c*x^3*y^2+d*x^4)^2 + (d*y+c*x^2+a*x^4)^2$
+ctest:coeffs(ptest,x);
+coeffs(ptest,x,y);
+
+/* GET_COEF finds a particular coefficient.  UNCOEF rebuilds the result. */
+get_coef(ctest,3);
+ratsimp(ptest-uncoef(ctest));
+
+/* Stretching the definition of Polynomials: */
+coeffs(x^m*(x+x^2+x^m)+x^(2*m),x);
+
+nptest:(a+b*sin(x)*x^2)^3$
+coeffs(nptest,x);
+
+/* Partitioning a polynomial: */
+partition_poly(ptest,'evenp,x);
+
+/* TRIG_COEFFS: Trigonometric series */
+trig_coeffs(a*cos(x+y)+b*sin(x+2*y),x);
+
+ftest : (a*cos(x+y)+b*sin(x+2*y))^2+(a*cos(x-y)+b*cos(2*x+3*y))^2$
+trig_coeffs(ftest,x); 
+trig_coeffs(ftest,x,y); 
+
+/* SERIES_COEFFS & TAYLOR_COEFFS: Power Series & Taylor series*/
+series_coeffs(ptest,x,4);
+Taylor_coeffs(ptest,x,4);
+/* Notice Series only expands over arithmetic: */
+series_coeffs(nptest,x,4);
+Taylor_coeffs(nptest,x,4);
+
+/* Alternative specification of variables */
+sqrtp(s) := not(atom(s)) and op(s)='sqrt$
+coeffs(a+sqrt(1+b)+c,match('sqrtp));
+coeffs(a*log(x)+log(y)*log(x),operator(log));
+
+/* Additional Utilities: */
+matching_parts(a+sqrt(1+b)+c,'sqrtp);
+function_calls(a*log(x)+log(y)*log(x),log);
+function_arguments(a*log(x)+log(y)*log(x),log);
+
+/* Clean up*/
+(remvalue(ptest,ctest,nptest,ftest),remfunction(sqrtp))$

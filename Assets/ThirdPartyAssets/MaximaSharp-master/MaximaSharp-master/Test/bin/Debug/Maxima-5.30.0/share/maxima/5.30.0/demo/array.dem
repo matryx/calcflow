@@ -1,0 +1,87 @@
+/* ======================================================================== */
+/*  file: array.dem  */
+/*  indices problems */
+
+subscrmap:true$
+/*
+this batch file illustrates various new array capabilities available
+
+which are completely compatible with the existing scheme.
+
+mapping in this context means distribute the name over the structure 
+
+indicated by the subscripts.
+
+included are implied mapping using lists as subscripts,
+
+generalized element extraction from list or matrix structures,
+
+implied assignment mapping, and recursive list structures.  
+
+compatibility with hashed arrays and declared arrays is shown.
+
+first consider using list structures as subscripts. a,b, and c
+
+below can be arrays, hashed arrays, list structures, matrices or 
+
+undefined.
+
+*/
+
+
+(a[1]:first,a[2]:second);
+a[[1,2]],eval;
+l:[3,2,1];
+l[3];
+l[1];
+''l[1];
+l[1],eval;
+middle&&mat:matrix([q,v],[w,u]);
+mat[1];
+mat[[1,2],[1,2]],eval;
+mat[[1,2]],eval;
+
+/*
+assignment maps can be carried out with "::" or (''foo):
+
+*/
+d[ [1,2] ]::99;
+d[1];
+(''mat):0;
+q;
+mat;
+ll[''l]::l;
+ll[1];
+
+
+
+/*
+recursive list structures:
+
+*/
+x:[x,y];
+y:[y,'x];
+h['x,'y];
+%,eval;
+%,eval;
+%,eval;
+
+/*
+mapping a function on a list structure
+*/
+fullmapl(foo,[[a,b],[c,d]]);
+fullmapl(func,'[aa+bb,'[aa,bb],[aa,bb],[3,4]]);
+dsl:'[as+bs,[ds,es],'[gs,hs],144];
+f(x):=x**2;
+func:f$
+fullmapl(func,dsl);
+
+
+
+/*
+to come: shaping, general reduction, general contraction or expansion
+
+(inner and outer products), arithmetic, the world, the universe
+
+*/
+foobar;

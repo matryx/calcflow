@@ -1,0 +1,71 @@
+hill1.mac and hill2.mac are from the book "Computer Algebra in Applied
+Mathematics: An introduction to MACSYMA", by Richard H Rand, Pitman
+(1984).
+
+Mathieu's equation is x''+(delta+e*cos(t))*x=0 
+
+For given values of the parameters delta and e, either all the
+solutions are bounded (the equation is stable) or there exist
+unbounded solutions (the equation is unstable).  The regions of
+stability are separated from thos of instability by "transition
+curves".
+
+This program computes the transition curves of Mathieu's equation
+using Fourier series to obtain Hill's determinants.
+
+The run below, using maxima-5.9.0cvs, reproduces the result on pages
+108-109 of the book.  The results are identical to those from
+mathieu0.mac and mathieu.mac.
+
+
+(C1) load("./hill1.mac");
+(D1)                              ./hill1.mac
+(C2) load("./hill2.mac");
+(D2)                              ./hill2.mac
+(C3) hill();
+ENTER TRANSITION CURVE NUMBER N
+0;
+ENTER DEGREE OF TRUNCATION
+6;
+             6      4    2
+         29 e    7 e    e
+delta= - ----- + ---- - --
+          144     32    2
+
+(D3)                                 FALSE
+(C4) hill();
+ENTER TRANSITION CURVE NUMBER N
+1;
+ENTER DEGREE OF TRUNCATION
+6;
+           6       5    4     3    2
+       49 e    11 e    e     e    e    e   1
+delta= ----- - ----- - --- + -- - -- - - + -
+       36864   4608    384   32   8    2   4
+
+           6       5    4     3    2
+       49 e    11 e    e     e    e    e   1
+delta= ----- + ----- - --- - -- - -- + - + -
+       36864   4608    384   32   8    2   4
+
+(D4)
+(C5) hill();
+ENTER TRANSITION CURVE NUMBER N
+2;
+ENTER DEGREE OF TRUNCATION
+6;
+                6        4      2
+       1002401 e    763 e    5 e
+delta= ---------- - ------ + ---- + 1
+        4976640      3456     12
+
+              6       4    2
+         289 e     5 e    e
+delta= - ------- + ---- - -- + 1
+         4976640   3456   12
+
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

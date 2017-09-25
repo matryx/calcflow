@@ -1,0 +1,32 @@
+/*
+ * Simple quadratic, no constraints:
+ *
+ * f = 10*(x1+1)^2+x2^2
+ *
+ * True solution: x1=-1, x2=0
+ */
+
+fmin_cobyla(10*(x1+1)^2+x2^2, [x1, x2], [1,1], iprint=1);
+
+/* Output
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   86   F = 2.278637E-11    MAXCV = 0.000000E+00
+   X =-9.999989E-01   3.210519E-06
+[[x1 = -.9999988829086158,x2 = 3.210519264934976e-6],
+        2.278636555645255e-11, 86, 0]
+
+*/
+
+/* True output
+
+       Output from test problem 1 (Simple quadratic)
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   86   F = 2.278637E-11    MAXCV =  .000000E+00
+   X =-9.999989E-01   3.210519E-06
+*/
+
+

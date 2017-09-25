@@ -1,0 +1,35 @@
+;;; -*- Mode: lisp; Package: CL-USER -*-
+
+;;; System to convert the Fortran code to Lisp
+;;;
+;;; To regenerate the Lisp code, just do
+;;;
+;;; (mk:oos "lbfgs-lisp" :compile :force t)
+;;;
+;;; in this directory.
+
+(in-package #:cl-user)
+(require :f2cl)
+
+(mk:define-language :f2cl-lisp
+    :compiler #'f2cl:f2cl
+    :loader #'identity
+    :source-extension "f"
+    :binary-extension "lisp")
+
+(mk:defsystem lbfgs-lisp
+  :source-extension "f"
+  :language :f2cl-lisp
+  :components
+  ((:file "lbfgs-daxpy")
+   (:file "lbfgs-ddot")
+   (:file "lb1"
+	  :depends-on ("lb2"))
+   (:file "lb2"
+	  :compiler-options (:declare-common t))
+   (:file "lbfgs"
+	  :depends-on ("mcsrch" "lb2" "lbfgs-ddot" "lbfgs-daxpy"))
+   (:file "mcsrch"
+	  :depends-on ("mcstep" "lb2"))
+   (:file "mcstep")))
+

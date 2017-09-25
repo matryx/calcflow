@@ -1,0 +1,149 @@
+Maxima 5.9.3 http://maxima.sourceforge.net
+Using Lisp GNU Common Lisp (GCL) GCL 2.6.7 (aka GCL)
+Distributed under the GNU Public License. See the file COPYING.
+Dedicated to the memory of William Schelter.
+This is a development version of Maxima. The function bug_report()
+provides bug reporting information.
+(%i1) batch("new_cartan_test4.bat");
+
+batching #p/home/furuya/sagyo/new_cartan_test4.bat
+(%i2)                        load(cartan_new.lisp)
+(%i3)                              infix(@)
+(%i4)                              infix(&)
+(%i5)                              infix(|)
+(%i6)                 coords : read(Input new coordinate)
+Input new coordinate
+[a,b];
+(%i7)                    dim : extdim : length(coords)
+(%i8)                basis : VR : extsub  : extsubb  : []
+                                        1          1
+(%i9)    for i thru dim do basis : endcons(concat(D, coords ), basis)
+                                                           i
+(%i10) for i thru dim do (extsub      : cons(basis  = - basis , extsub ),
+                                1 + i             i          i        i
+ extsubb  : cons(basis  = 0, extsub ), ci : concat(v, i), VR : endcons(ci, VR))
+        i             i            i
+(%i11)                               basis
+(%o11)                             [Da, Db]
+(%i12) cliffordtype : read(please input metric type,for example [1,1,1],if E3)
+please input metric type,for example [1,1,1],if E3
+[1,1];
+(%o12)                              [1, 1]
+(%i13) translist : read(represent the standard coordinates with new one)
+represent the standard coordinates with new one
+[(2+cos(a))*cos(b),(2+cos(a))*sin(b),sin(a)];
+(%o13)        [(cos(a) + 2) cos(b), (cos(a) + 2) sin(b), sin(a)]
+(%i14)                          norm_table : []
+(%i15)                         scale_factor : []
+(%i16)                              _l : []
+(%i17) for i thru dim do (_l : map(lambda([x], diff(x, coords )), translist),
+                                                             i
+                      2
+_l : map(lambda([x], x ), _l), _p : ratsimp(trigsimp(apply(+, _l))),
+                     cliffordtype
+                                 i
+norm_table : endcons(-------------, norm_table))
+                          _p
+(%i18)                            norm_table
+                                        1
+(%o18)                    [1, ----------------------]
+                                 2
+                              cos (a) + 4 cos(a) + 4
+                                                   norm_table
+                                                             i
+(%i19) for i thru dim do extsubb2  : cons(basis  = -----------, extsub )
+                                 i             i     basis            i
+                                                          i
+                                       2        1
+(%i20) for i thru dim do (a_ : solve(x_  - -----------, [x_]),
+                                           norm_table
+                                                     i
+                                   scale_factor : cons(rhs(a_ ), scale_factor))
+                                                             2
+(%i21)               scale_factor : reverse(scale_factor)
+(%i22)                           scale_factor
+(%o22)                          [1, cos(a) + 2]
+(%i23) nest2(_f, _x) := block([_a : [_x], i],
+if listp(_f) then (_f : reverse(_f), for i thru length(_f)
+do _a : map(_f , _a)) else _a : map(_f, _a), _a )
+              i                                1
+(%i24) nest3(_f, _x, _n) := block([_a, i], _a : [_x],
+                                         for i thru _n do _a : map(_f, _a), _a)
+                               2
+(%i25)           aa_ : solve(x_  - apply(*, norm_table), [x_])
+(%i26)                        volume : rhs(aa_ )
+                                              2
+                                           1
+(%i27)                          volume : ------
+                                         volume
+(%i28)            matrix_element_mult : lambda([x, y], x @ y)
+(%i29)                       load(hodge_test3.mac)
+(%i30)                      load(f_star_test4.mac)
+(%i31)                        load(helpfunc.mac)
+(%i32)                        load(coeflist.lisp)
+(%i33)                         load(format.lisp)
+(%i34)                            load(diag)
+(%i35)                         load(poisson.mac)
+(%i36)                        load(frobenius.mac)
+(%i37)                        load(curvture2.mac)
+(%o38)                       new_cartan_test4.bat
+
+/*[x,y,z]=translist,this case parametrized torous by [a,b] */
+
+(%i38) d(translist);
+(%o38) [- cos(a) sin(b) Db - 2 sin(b) Db - sin(a) cos(b) Da,
+                  cos(a) cos(b) Db + 2 cos(b) Db - sin(a) sin(b) Da, cos(a) Da]
+(%i39) m:coefmatrix(%,basis);
+                  [ - sin(a) cos(b)  (- cos(a) - 2) sin(b) ]
+                  [                                        ]
+(%o39)            [ - sin(a) sin(b)   (cos(a) + 2) cos(b)  ]
+                  [                                        ]
+                  [     cos(a)                 0           ]
+(%i40) trigsimp(m.diag([1,1/(cos(a)+2)]));
+                         [ - sin(a) cos(b)  - sin(b) ]
+                         [                           ]
+(%o40)                   [ - sin(a) sin(b)   cos(b)  ]
+                         [                           ]
+                         [     cos(a)          0     ]
+(%i41) trigsimp(add_tan(%));
+                [ - sin(a) cos(b)  - sin(b)  - cos(a) cos(b) ]
+                [                                            ]
+(%o41)          [ - sin(a) sin(b)   cos(b)   - cos(a) sin(b) ]
+                [                                            ]
+                [     cos(a)          0         - sin(a)     ]
+(%i42) transpose(%).d(%)$
+       
+(%i43) trigsimp(%);
+/*this is 次 in Flanders P41 but transposed */
+                    [      0       sin(a) Db     - Da     ]
+                    [                                     ]
+(%o43)              [ - sin(a) Db      0      - cos(a) Db ]
+                    [                                     ]
+                    [     Da       cos(a) Db       0      ]
+(%i44) map("*",scale_factor,basis);
+/*this is [sigma1,sigma2] in Flanders P41 but transposed */
+(%o44)                   [Da, (cos(a) + 2) Db]
+(%i45) basis;
+(%o45)                             [Da, Db]
+(%i46) scale_factor;
+(%o46)                          [1, cos(a) + 2]
+
+/*Gaussian curvature K is K*sigma1@aigma2=w1@w2
+now w1=-Da,w2=-cos(a)*Db,and %o44 so K=cos(a)/(2+cos(a))
+0<=a<2%pi,0<=b<2%pi,integrate K on this torous,
+cos(a)/(2+cos(a)) *(2+cos(a))*Da@Db is equal cos(a)Da@Db
+on 0<=a<2%pi,0<=b<2%pi ,apparently this is 0.
+Theory says integrate K on total surface is 2*%pi*聿 
+聿 is euler character,torous's character is 0 */
+
+
+/* d(次)=-次.次 ,this style is Darling,Flanderse style is transpose
+transpose(d(omega))=d(transpose(omega))=-(transpose(omega).transpose(omega))
+obviously AL:transpose(omega)=-omega,d(AL)=AL.AL */
+
+(%i47) d(%o43)+%o43.%o43;
+                                  [ 0  0  0 ]
+                                  [         ]
+(%o47)                            [ 0  0  0 ]
+                                  [         ]
+                                  [ 0  0  0 ]

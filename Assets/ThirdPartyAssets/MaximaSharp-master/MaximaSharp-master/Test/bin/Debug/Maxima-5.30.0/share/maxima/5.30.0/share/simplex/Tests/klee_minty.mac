@@ -1,0 +1,36 @@
+/*****************************************************************************
+ *                                                                           *
+ * ************************************************************************* *
+ * ***                                                                   *** *
+ * ***                         ~*~ SIMPLEX ~*~                           *** *
+ * ***                                                                   *** *
+ * ***               A simple implementation of the simplex              *** *
+ * ***             algorithm for Linear Programming for Maxima.          *** *
+ * ***                                                                   *** *
+ * ***   This file provides function klee_minty, which produces a linear *** *
+ * ***   program, which requires exponential time to solve using the     *** *
+ * ***   standard simplex method with no scaling. This file is part of   *** *
+ * ***   the simplex package for Maxima.                                 *** *
+ * ***                                                                   *** *
+ * ***                                                                   *** *
+ * ***   Version: 1.0 (September 2004)                                   *** *
+ * ***   Author:  Andrej Vodopivec <andrej.vodopivec@fmf.uni-lj.si>      *** *
+ * ***                                                                   *** *
+ * ************************************************************************* *
+ *                                                                           *
+ *****************************************************************************/
+
+klee_minty(n) := block(
+  [A, b, c],
+  A : zeromatrix(n,2*n),
+  for i:1 thru n do (
+    for j:1 thru i-1 do
+      A[i,j] : 2*10^(i-j),
+    A[i,i] : 1,
+    A[i,i+n] : 1
+  ),
+  b : makelist(100^i, i, 0, n-1),
+  c : -makelist(10^(n-i), i, 1, n),
+  for i:1 thru n do c : append(c, [0]),
+  [A, b, c]
+  )$

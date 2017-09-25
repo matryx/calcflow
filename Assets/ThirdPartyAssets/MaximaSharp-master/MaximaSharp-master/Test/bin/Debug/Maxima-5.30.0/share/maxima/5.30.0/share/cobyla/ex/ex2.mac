@@ -1,0 +1,34 @@
+/*
+ * 2D unit circle
+ *
+ * f = x1*x2
+ * 1-x1^2-x2^2 >= 0
+ *
+ * True solution: x1=1/sqrt(2), x2=-1/sqrt(2)
+ */
+
+fmin_cobyla(x1*x2, [x1, x2], [1,1], constraints = [1>=x1^2+x2^2], iprint=1);
+
+/* Output
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   66   F =-5.000000E-01    MAXCV = 1.999956E-12
+   X = 7.071058E-01  -7.071077E-01
+[[x1 = .7071058493484819,x2 = -.7071077130247994],-.4999999999992633,
+         66, 0];
+
+*/
+
+/* True output
+
+       Output from test problem 2 (2D unit circle calculation)
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   66   F =-5.000000E-01    MAXCV = 1.999956E-12
+   X = 7.071058E-01  -7.071077E-01
+
+*/
+
+

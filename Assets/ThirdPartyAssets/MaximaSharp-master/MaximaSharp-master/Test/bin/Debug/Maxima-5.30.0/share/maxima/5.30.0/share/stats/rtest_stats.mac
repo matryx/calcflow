@@ -1,0 +1,169 @@
+(kill (all),
+ load (stats),
+ save_tolerance : float_approx_equal_tolerance,
+ float_approx_equal_tolerance : 1e-8,
+ 0);
+0;
+
+test_mean([78,64,35,45,45,75,43,74,42,42],
+          'conflevel=0.9,
+          'alternative='less,
+          'mean=50);
+inference_result("MEAN TEST",
+                        [[mean_estimate,54.3],[conf_level,0.9],
+                         [conf_interval,[minf,61.51314273502712]],
+                         [method,"Exact t-test. Unknown variance."],
+                         [hypotheses,
+                          "H0: mean = 50 , H1: mean < 50"],
+                         [statistic,.8244705235071678],
+                         [distribution,[student_t,9]],
+                         [p_value,.7845100411786889]],[1,2,3,4,5,6,7,8]);
+
+
+
+test_means_difference([20.4,62.5,61.3,44.2,11.1,23.7],
+               [1.2,6.9,38.7,20.4,17.2],
+               'alternative='greater);
+inference_result("DIFFERENCE OF MEANS TEST",
+                        [[diff_estimate,20.31999999999999],[conf_level,0.95],
+                         [conf_interval,[-.04597417812882298,inf]],
+                         [method,"Exact t-test. Welch approx."],
+                         [hypotheses,"H0: mean1 = mean2 , H1: mean1 > mean2"],
+                         [statistic,1.838004300728477],
+                         [distribution,[student_t,8.62758740184604]],
+                         [p_value,.05032746527991905]],[1,2,3,4,5,6,7,8]);
+
+
+
+test_variance([203,229,215,220,223,233,208,228,209],
+              'alternative='greater,
+              'variance=200);
+inference_result("VARIANCE TEST",
+                        [[var_estimate,110.75],[conf_level,0.95],
+                         [conf_interval,[57.13433376937479,inf]],
+                         [method,
+                          "Variance Chi-square test. Unknown mean."],
+                         [hypotheses,
+                          "H0: var = 200 , H1: var > 200"],
+                         [statistic,4.43],[distribution,[chi2,8]],
+                         [p_value,.8163948512777689]],[1,2,3,4,5,6,7,8]);
+
+
+
+
+test_variance_ratio([20.4,62.5,61.3,44.2,11.1,23.7],
+                    [1.2,6.9,38.7,20.4,17.2],
+                    'alternative='greater);
+inference_result("VARIANCE RATIO TEST",
+                        [[ratio_estimate,2.316933391522034],[conf_level,0.95],
+                         [conf_interval,[.3703504689507268,inf]],
+                         [method,
+                          "Variance ratio F-test. Unknown means."],
+                         [hypotheses,"H0: var1 = var2 , H1: var1 > var2"],
+                         [statistic,2.316933391522034],[distribution,[f,5,4]],
+                         [p_value,.2179269692254457]],[1,2,3,4,5,6,7,8]);
+
+
+
+
+test_sign([2,0.1,7,1.8,4,2.3,5.6,7.4,5.1,6.1,6],
+          'median=6,
+          'alternative='greater);
+inference_result("SIGN TEST",
+                        [[med_estimate,5.1],
+                         [method,"Non parametric sign test."],
+                         [hypotheses,
+                          "H0: median = 6 , H1: median > 6"],
+                         [statistic,7],[distribution,[binomial,10,0.5]],
+                         [p_value,.05468749999999989]],[1,2,3,4,5,6]);
+
+
+
+
+test_signed_rank([17.1,15.9,13.7,13.4,15.5,17.6],
+                 'median=15,
+                 'alternative=greater);
+inference_result("SIGNED RANK TEST",
+                        [[med_estimate,15.7],[method,"Exact test"],
+                         [hypotheses,
+                          "H0: med = 15 , H1: med > 15"],
+                         [statistic,14],[distribution,[signed_rank,6]],
+                         [p_value,0.28125]],[1,2,3,4,5,6]);
+
+
+
+test_rank_sum([12,15,17,38,42,10,23,35,28],
+              [21,18,25,14,52,65,40,43],
+              'alternative='less);
+inference_result("RANK SUM TEST",
+                        [[method,"Exact test"],
+                         [hypotheses,"H0: med1 = med2 , H1: med1 < med2"],
+                         [statistic,22],[distribution,[rank_sum,9,8]],
+                         [p_value,0.0997943233237351]],[1,2,3,4,5]);
+
+
+
+test_normality([12,15,17,38,42,10,23,35,28]);
+inference_result("SHAPIRO - WILK TEST",
+                        [[statistic,.9251055695162436],
+                         [p_value,.4361763918860381]],[1,2]);
+
+
+
+z:simple_linear_regression(matrix([125,140.7],[130,155.1],[135,160.3],[140,167.2],[145,169.8]),
+                    'conflevel=0.99);
+inference_result("SIMPLE LINEAR REGRESSION",
+                       [[model,1.405999999999985*x-31.18999999999804],
+                        [means,[135.0,158.62]],
+                        [variances,[50.0,106.9896000000008]],
+                        [correlation,.9611685255255155],
+                        [adc,.8984599126145604],
+                        [a_estimation,-31.18999999999804],
+                        [a_conf_int,[-215.2179151598772,152.8379151598812]],
+                        [b_estimation,1.405999999999985],
+                        [b_conf_int,[.04469633662525307,2.767303663374718]],
+                        [hypotheses,"H0: b = 0 ,H1: b # 0"],
+                        [statistic,6.032686683658114],
+                        [distribution,[student_t,3]],
+                        [p_value,.009131954735741799],
+                        [v_estimation,13.57966666666665],
+                        [v_conf_int,[3.173274925102496,568.0143894218797]],
+                        [cond_mean_conf_int,
+                         [1.405999999999985*x
+                           -21.52410081697646*(0.004*(135.0-x)^2+0.2)^0.5
+                           -31.18999999999804,
+                          1.405999999999985*x
+                           +21.52410081697646*(0.004*(135.0-x)^2+0.2)^0.5
+                           -31.18999999999804]],
+                        [new_pred_conf_int,
+                         [1.405999999999985*x
+                           -21.52410081697646*(0.004*(135.0-x)^2+1.2)^0.5
+                           -31.18999999999804,
+                          1.405999999999985*x
+                           +21.52410081697646*(0.004*(135.0-x)^2+1.2)^0.5
+                           -31.18999999999804]],
+                        [residuals,
+                         [[144.5600000000001,-3.860000000000156],
+                          [151.5900000000001,3.509999999999906],
+                          [158.62,1.680000000000007],
+                          [165.6499999999999,1.550000000000068],
+                          [172.6799999999999,-2.879999999999853]]]],
+                       [1,4,14,9,10,11,12,13]);
+
+
+
+take_inference('model,z), 'x=133;
+155.808;
+
+
+
+take_inference('means,z);
+[135.0,158.62];
+
+
+
+take_inference('new_pred_conf_int,z), 'x=133;
+[132.0728595995113,179.5431404004887];
+
+(float_approx_equal_tolerance : save_tolerance, 0);
+0;

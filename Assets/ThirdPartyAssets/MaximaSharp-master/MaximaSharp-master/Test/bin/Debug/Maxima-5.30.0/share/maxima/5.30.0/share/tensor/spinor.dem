@@ -1,0 +1,62 @@
+/*
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Spinor algebra
+ */
+
+if get('itensor,'version)=false then load(itensor);
+("We are working with a spinor base, which is two dimensional")$
+dim:2;
+("The epsilon-spinor is antisymmetric and contracts to the Kronecker-delta")$
+defcon(e);
+defcon(e,e,kdelta);
+remsym(e,2,0);
+remsym(e,0,2);
+decsym(e,2,0,[anti(all)],[]);
+decsym(e,0,2,[],[anti(all)]);
+
+("Verifying the epsilon-spinor's properties")$
+ishow(e([A,B],[])*e([],[B,C]))$
+ishow(contract(%))$
+ishow(e([A,B],[])*e([],[C,B]))$
+ishow(contract(%))$
+ishow(contract(e([A],[A])))$
+%,kdelta;
+
+("h is a spinor representing, for instance, a Lorentz transform")$
+defcon(h,h,kdelta);
+h([A,B],[])*h([],[A,B]),noeval$
+ishow(%)$
+ishow(LHS:contract(%))$
+
+("We split h into symmetric and antisymmetric parts:")$
+decsym(f,2,0,[sym(all)],[]);
+decsym(f,0,2,[],[sym(all)]);
+remcomps(h);
+components(h([A,B],[]),a*e([A,B],[])+f([A,B],[]));
+
+("Now we compute the upper-index components of h")$
+ishow(contract(h([A,B],[])*e([],[A,D])))$
+ishow(contract(expand(%)))$
+ishow(contract(%*e([],[C,B])))$
+ishow(contract(expand(%)))$
+components(h([],[C,D]),%);
+
+("We can now contract h with itself and evaluate")$
+ishow(h([A,B],[])*h([],[A,B]))$
+ishow(RHS:contract(expand(%)))$
+
+/* NB: I believe Penrose&Rindler p172 contains a sign error here */
+
+("And get a simple identity for Lorentz transforms in a spinor base:")$
+ishow(ev(distrib((LHS=RHS)/2)))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

@@ -1,0 +1,155 @@
+/*
+Copyright 2009 by Barton Willis
+
+  This is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License,
+  http://www.gnu.org/copyleft/gpl.html.
+
+ This software has NO WARRANTY, not even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+/* Gauss hypergeometric transformations */
+
+hypergeometric_order(p,q) := [length(p), length(q)];
+
+nonpositive_integer_p(x) := (x : rationalize(x), integerp(x) and (x < 1));
+
+not_one_p(x) := (x # 1) and (x # 1.0) and (x # 1.0b0);
+
+abramowitz_id(e, [l]) := block([sublis_apply_lambda : true, x, str],
+  for str in l do (
+    x : function_identity[str],
+    if x # false then e : sublis([x], e)),
+  e);
+
+function_identity[otherwise]:= false;
+
+/* See, for example, http://www.math.ucla.edu/~cbm/aands/page_559.htm */
+
+function_identity["15.3.3"] : 'hypergeometric = lambda([p,q,x], block([a,b,c,f,success],
+    f : funmake('hypergeometric, [p,q,x]),
+    success : false,
+    if hypergeometric_order(p,q) = [2,1] then (
+      a : first(p),
+      b : second(p),
+      c : first(q),
+      if not_one_p(x) or maybe(c-a-b > 0) = true then (
+        f :(1-x)^(c-a-b) * hypergeometric([c-a, c-b],[c],x),
+        success : true)),
+    multiple_values(f, success)));
+ 
+function_identity["15.3.4"] : 'hypergeometric = lambda([p,q,x], block([a,b,c,f,success],
+    f : funmake('hypergeometric, [p,q,x]),
+    success : false,
+    if hypergeometric_order(p,q) = [2,1] then (
+      a : first(p),
+      b : second(p),
+      c : first(q),
+      if not_one_p(x) or maybe(a < 0) = true then (
+        f : hypergeometric([a,c-b],[c],rectform(x/(x-1))) / (1-x)^a,
+        success : true)),
+    multiple_values(f, success)));
+   
+function_identity["15.3.5"] : 'hypergeometric = lambda([p,q,x], block([a,b,c,f,success],
+    f : funmake('hypergeometric, [p,q,x]),
+    success : false,
+    if hypergeometric_order(p,q) = [2,1] then (
+      a : first(p),
+      b : second(p),
+      c : first(q),
+      if not_one_p(x) or  maybe(b < 0) = true then (
+        hypergeometric([b,c-a],[c], x /(x-1))/(1-x)^b,
+        success : true)),
+    multiple_values(f, success)));
+
+function_identity["15.3.6"] : 'hypergeometric = lambda([p,q,x], block([a,b,c,f,success],
+    f  : funmake('hypergeometric, [p,q,x]),
+    success : false,
+    if hypergeometric_order(p,q) = [2,1] then (
+      a : first(p),
+      b : second(p),
+      c : first(q),
+      if some('nonpositive_integer_p, [c,c-a-b,c-a,c-b,a+b-c+1,a+b-c,a,b,c-a-b+1])=true then (
+        success : false)
+      else (
+        f : gamma(c) * gamma(c-a-b)/ (gamma(c-a) * gamma(c-b))
+        * hypergeometric([a,b],[a+b-c+1],1-x)
+        + (gamma(c) * gamma(a + b - c) /(gamma(a) * gamma(b))) * (1-x)^(c-a-b)
+        * hypergeometric([c-a,c-b],[c-a-b+1],1-x),
+        success : true)),
+    multiple_values(f, success)));
+   
+function_identity["15.3.7"] : 'hypergeometric = lambda([p,q,x], block([a,b,c,f,success],
+    f : funmake('hypergeometric, [p,q,x]),
+    success : false,
+    if hypergeometric_order(p,q) = [2,1] then (
+      a : first(p),
+      b : second(p),
+      c : first(q),
+      if b < a then [a,b] : sublis([a = b, b = a], [a,b]),
+      if some('nonpositive_integer_p, [c, b-a, a-b, b, c-a, c-b,1-c+a,1-c+b]) = true then (
+        success : false)
+      else (
+        f : gamma(c) * gamma(b-a) / (gamma(b) * gamma(c-a))
+        * (-x)^(-a) * hypergeometric([a,1-c+a],[1-b+a],1/x)
+        + (gamma(c) * gamma(a-b) /(gamma(a) * gamma(c-b)))
+        * (-x)^(-b) * hypergeometric([b,1-c+b],[1-a+b],1/x),
+        success : true)),
+    multiple_values(f, success)));
+  
+function_identity["15.3.8"] : 'hypergeometric = lambda([p,q,x], block([a,b,c,f,success],
+    f  : funmake('hypergeometric, [p,q,x]),
+    success : false,
+    if hypergeometric_order(p,q) = [2,1] then (
+      a : first(p),
+      b : second(p),
+      c : first(q),
+      if some('nonpositive_integer_p, [c,b-a,b,c-a,a-b,a,c-b,b-a+1]) = true then (
+        success : false)
+      else (
+        f : (gamma(c) * gamma(b-a)/(gamma(b) * gamma(c-a)))
+        * (1-x)^(-a) * hypergeometric([a,c-b],[a-b+1], 1/(1-x))
+        + (gamma(c) * gamma(a-b) /(gamma(a) * gamma(c-b)))
+        * (1-x)^(-b) * hypergeometric([b,c-a],[b-a+1],1/(1-x)),
+        success : true)),
+    multiple_values(f, success)));
+
+function_identity["15.3.9"] : 'hypergeometric = lambda([p,q,x], block([a,b,c,f : [], success],
+    f : funmake('hypergeometric, [p,q,x]),
+    success : false,
+    if hypergeometric_order(p,q) = [2,1] then (
+      a : first(p),
+      b : second(p),
+      c : first(q),
+      if some('nonpositive_integer_p, [c,c-a-b,c-a,c-b,a+b-c+1,a+b-c,a,b,c-a-b+1])=true then (
+        success : false)
+      else (
+        f : (gamma(c) * gamma(c-a-b)/(gamma(c-a) * gamma(c-b)))
+        * (x)^(-a) * hypergeometric([a,a-c+1],[a+b-c+1], 1 - 1/x)
+        + (gamma(c) * gamma(a + b - c) /(gamma(a) * gamma(b)))
+        * (1-x)^(c-a-b) * x^(a-c) * hypergeometric([c-a,1-a],[c-a-b+1],1 - 1/x),
+      success : true)),
+  multiple_values(f, success)));
+
+function_identity["a&s13.1.3-->"] : 'hypergeometric_u = lambda([a,b,x], block([f, success],
+   f : funmake('hypergeometric_u, [a,b,x]),
+   success : false,
+   if some('nonpositive_integer_p, [b,1+a-b,2-b]) then (
+     success : false)
+   else (
+     f : (%pi / sin(%pi * b)) * (hypergeometric([a],[b],x) / (gamma(1+a-b) * gamma(b)) -
+       (x)^(1-b) * hypergeometric([1+a-b],[2-b],x)/ (gamma(a) * gamma(2-b))),
+     success : true),
+   multiple_values(f,success)));
+ 
+function_identity["a&s17.3.9-->"] : nounify('elliptic_kc) = lambda([x], hypergeometric([1/2,1/2],[1],x) * %pi/2);
+
+function_identity["a&s17.3.9<--"] : 'hypergeometric = lambda([p,q,x], 
+    if is(equal(p , [1/2,1/2])) and is(equal(q, [1])) then (2/%pi) * elliptic_kc(x) else funmake('hypergeometric, [p,q,x]));
+
+function_identity["a&s17.3.10-->"] : nounify('elliptic_ec) = lambda([x], hypergeometric([-1/2,1/2],[1],x) * %pi/2);
+
+function_identity["a&s17.3.10<--"] : 'hypergeometric = lambda([p,q,x], 
+    if (p = [-1/2,1/2]) and (q = [1]) then (2/%pi) * elliptic_ec(x) else funmake('hypergeometric, [p,q,x]));
+

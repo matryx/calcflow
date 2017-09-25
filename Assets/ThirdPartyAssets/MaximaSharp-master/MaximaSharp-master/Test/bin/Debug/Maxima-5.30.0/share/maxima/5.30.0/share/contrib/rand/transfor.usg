@@ -1,0 +1,72 @@
+transfor.mac is from the book "Perturbation Methods, Bifurcation
+Theory and Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+The procedure transform() performs an arbitrary (not necessarily
+linear) coordinate transformation on a system of differential
+equations.
+
+The example is from p43.  maxima-5.9.0 cvs reproduces the
+results from the book.
+
+(C1) load("./transfor.mac");
+(D1)                            ./transfor.mac
+(C2) transform();
+ENTER NUMBER OF EQUATIONS
+3;
+ENTER SYMBOL FOR ORIGINAL VARIABLE 1
+x;
+ENTER SYMBOL FOR ORIGINAL VARIABLE 2
+y;
+ENTER SYMBOL FOR ORIGINAL VARIABLE 3
+z;
+ENTER SYMBOL FOR TRANSFORMED VARIABLE 1
+u;
+ENTER SYMBOL FOR TRANSFORMED VARIABLE 2
+v;
+ENTER SYMBOL FOR TRANSFORMED VARIABLE 3
+w;
+THE RHS'S OF THE D.E.'S ARE FUNCTIONS OF THE ORIGINAL VARIABLES:
+ENTER RHS OF x D.E.
+D x /DT =
+s*(y-x);
+D x /DT = s (y - x)
+ENTER RHS OF y D.E.
+D y /DT =
+r*x-y-x*z;
+D y /DT = - x z - y + r x
+ENTER RHS OF z D.E.
+D z /DT =
+-b*z+x*y;
+D z /DT = x y - b z
+THE TRANSFORMATION IS ENTERED NEXT:
+ENTER x AS A FUNCTION OF THE NEW VARIABLES
+x =
+u+v;
+x = v + u
+ENTER y AS A FUNCTION OF THE NEW VARIABLES
+y =
+u-v/s;
+        v
+y = u - -
+        s
+ENTER z AS A FUNCTION OF THE NEW VARIABLES
+z =
+w;
+z = w
+       du     s (u w + (1 - r) u) + s v (w - r + 1)
+(D2) [[-- = - -------------------------------------,
+       dT                     s + 1
+
+                                                   2
+dv     s ((r - 1) u - u w) + v (s (- w + r + 1) + s  + 1)
+-- = - --------------------------------------------------,
+dT                           s + 1
+
+                 2     2
+dw     s (b w - u ) + v  + (u - s u) v
+-- = - -------------------------------]]
+dT                    s
+
+Local Variables: ***
+mode: Text ***
+End: ***

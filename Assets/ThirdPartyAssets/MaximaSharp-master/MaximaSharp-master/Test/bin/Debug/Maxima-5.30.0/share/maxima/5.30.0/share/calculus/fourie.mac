@@ -1,0 +1,211 @@
+define_variable(sinnpiflag,true,boolean)$
+define_variable(cosnpiflag,true,boolean)$
+
+remfun1(fun,exp):=scanmap(lambda([q],delfun1(fun,q)),exp)$
+
+delfun1(fun,exp):=if not atom(exp) and inpart(exp,0) = fun
+	 then first(args(exp)) else exp$
+
+remfunn1(fun,exp):=scanmap(lambda([q],delfunn1(fun,q)),exp)$
+
+delfunn1(fun,exp):=if not atom(exp) and inpart(exp,0) = fun
+	  then -first(args(exp)) else exp$
+
+remfun2(fun,exp,var):=scanmap(lambda([q],delfun2(fun,q,var)),exp)$
+
+delfun2(fun,exp,var):=
+     if	not atom(exp) and inpart(exp,0) = fun and member(var,listofvars(exp))
+	 then first(args(exp)) else exp$
+
+remfunn2(fun,exp,var):=scanmap(lambda([q],delfunn2(fun,q,var)),exp)$
+
+delfunn2(fun,exp,var):=
+      if not atom(exp) and inpart(exp,0) = fun
+		       and member(var,listofvars(exp))
+	  then -first(args(exp)) else exp$
+
+remfun(fun,exp,[var]):=if var = [] then remfun1(fun,exp)
+        else (if length(var) = 1 then remfun2(fun,exp,first(var))
+		  else error("too many arguments to remfun"))$
+
+remfunn(fun,exp,[var]):=if var = [] then remfunn1(fun,exp)
+	 else (if length(var) = 1 then remfunn2(fun,exp,first(var))
+		   else error("too many arguments to remfunn"))$
+
+funp1(fun,exp):=block([inflag],inflag:true,
+      if mapatom(exp) then false
+	  else (if inpart(exp,0) = fun then true
+		    else member(true,maplist(lambda([q],funp1(fun,q)),exp))))$
+ /* commented out of DOE MACSYMA
+; APPLY("OR",MAPLIST(LAMBDA([Q],FUNP1(FUN,Q)),EXP))))$ */
+
+
+funp2(fun,exp,var):=block([inflag],inflag:true,
+      if mapatom(exp) then false
+	  else (if inpart(exp,0) = fun and member(var,listofvars(exp))
+		    then true
+		    else member(true,
+                                maplist(lambda([q],funp2(fun,q,var)),exp))))$
+/* commented out of DOE MACSYMA
+APPLY("OR",MAPLIST(LAMBDA([Q],FUNP2(FUN,Q,VAR)),EXP))))$ */
+
+funp(fun,exp,[var]):=if var = [] then funp1(fun,exp)
+      else (if length(var) = 1 then funp2(fun,exp,first(var))
+	        else error("too many arguments to funp"))$
+
+equalp(x,y):=block([prederror],prederror:false,
+       if is(equal(x,y)) = true then true)$
+
+parity(f,x):=if evenfunp(f,x) then 'even
+        else (if oddfunp(f,x) then 'odd else 'neither)$
+
+evenfunp(f,x):=if equalp(f,subst(-x,x,f)) then true$
+
+oddfunp(f,x):=if equalp(f,-subst(-x,x,f)) then true$
+
+parint(f,x,a,b):=
+    if not (equalp(-a,b) or a = 'minf and b = 'inf or a = 'inf and b = 'minf)
+        then f
+        else (if atom(f) or inpart(f,0) # "+" then parint1(f,x)
+		  else map(lambda([q],parint1(q,x)),f))$
+
+parint1(f,x):=if oddfunp(f,x) then 0 else f$
+
+adefint(f,x,a,b):=block([asign,bsign],
+	if equalp(a,b) then 0
+	    else (if not (freeof(%i,f) and freeof(%i,a) and freeof(%i,b))
+		      then ldefint(f,x,a,b)
+		      else (f:parint(f,x,a,b),
+			    if equalp(f,0) then 0
+			        else (if not funp2('abs,f,x)
+					  then ldefint(f,x,a,b)
+					  else (asign:asksign(a),
+						bsign:asksign(b),
+						if 
+						 (asign = 'neg
+						   or asign = 'zero)
+						   and (bsign = 'neg
+						    or bsign = 'zero)
+						  then ldefint(
+						  remfunn2('abs,f,x),x,a,b)
+						  else (if 
+						  (asign = 'zero
+						    or asign = 'pos)
+						    and (bsign = 'zero
+						     or bsign = 'pos)
+						   then ldefint(
+						   remfun2('abs,f,x),x,a,b)
+						   else (if asign = 'neg
+							     then ratsimp(
+							     ldefint(
+							      remfunn2(
+							       'abs,f,x),x,a,
+							      0)
+							      +ldefint(
+							       remfun2(
+								'abs,f,x),x,
+							       0,b))
+							     else ratsimp(
+							     ldefint(
+							      remfun2(
+							       'abs,f,x),x,a,
+							      0)
+							      +ldefint(
+							       remfunn2(
+								'abs,f,x),x,
+							       0,b)))))))))$
+
+indefint(f,x,halfplane):=if halfplane = 'pos
+	  then integrate(remfun2('abs,f,x),x)
+	  else (if halfplane = 'neg then integrate(remfunn2('abs,f,x),x)
+		    else (if halfplane = 'both
+			      then append(
+			      ldisp(integrate(remfunn2('abs,f,x),x)),
+			      ldisp(integrate(remfun2('abs,f,x),x)))
+			      else error("invalid halfplane:",halfplane)))$
+
+absint(f,x,[range]):=if range = [] then indefint(f,x,'pos)
+        else (if length(range) = 1 then indefint(f,x,first(range))
+		  else (if length(range) = 2
+			    then adefint(f,x,range[1],range[2])
+			    else error("too many arguments to absint")))$
+
+fourint(f,x):=block([z],
+if evenfunp(f,x) then append(fourintcos(f,x),ldisp(b[z] = 0))
+	 else (if oddfunp(f,x) then append(ldisp(a[z] = 0),fourintsin(f,x))
+		   else fourintcoeff(f,x)))$
+
+fourintcoeff(f,x):=block([az,bz,z],assume(z > 0),
+	     az:adefint(f*cos(z*x),x,'minf,'inf)/%pi,
+	     bz:adefint(f*sin(z*x),x,'minf,'inf)/%pi,
+	     append(ldisp(a[z] = az),ldisp(b[z] = bz)))$
+
+fourintcos(f,x):=block([az,z],assume(z > 0),
+	   az:2*adefint(f*cos(z*x),x,0,'inf)/%pi,ldisp(a[z] = az))$
+
+fourintsin(f,x):=block([bz,z],assume(z > 0),
+	   bz:2*adefint(f*sin(z*x),x,0,'inf)/%pi,ldisp(b[z] = bz))$
+
+fourier(f,x,p):=block([n],
+if evenfunp(f,x) then append(fourcos(f,x,p),ldisp(b[n] = 0))
+	 else (if oddfunp(f,x)
+		   then append(ldisp(a[0] = 0),ldisp(a[n] = 0),
+			       foursin(f,x,p)) else fourcoeff(f,x,p)))$
+
+fourcoeff(f,x,p):=block([a0,an,bn,n],assume(n > 0),
+	  a0:adefint(f,x,-p,p)/(2*p),an:adefint(f*cos(n*%pi*x/p),x,-p,p)/p,
+	  bn:adefint(f*sin(n*%pi*x/p),x,-p,p)/p,
+	  append(ldisp(a[0] = a0),ldisp(a[n] = an),ldisp(b[n] = bn)))$
+
+fourcos(f,x,p):=block([a0,an,n],assume(n > 0),a0:adefint(f,x,0,p)/p,
+	an:2*adefint(f*cos(n*%pi*x/p),x,0,p)/p,
+	append(ldisp(a[0] = a0),ldisp(a[n] = an)))$
+
+foursin(f,x,p):=block([bn,n],assume(n > 0),
+	bn:2*adefint(f*sin(n*%pi*x/p),x,0,p)/p,ldisp(b[n] = bn))$
+
+foursimp(exp):=if listp(exp)
+	  then map(lambda([q],first(ldisp(foursimp(apply('ev,[q]))))),exp)
+	  else (if not freeof("=",exp) then lhs(exp) = foursimple(rhs(exp))
+		    else foursimple(exp))$
+
+foursimple(exp):=block([n],
+	   if funp1('integrate,exp) then exp
+	       else (if sinnpiflag then exp:ratsubst(0,sin(n*%pi),exp),
+		     if cosnpiflag then exp:ratsubst((-1)^n,cos(n*%pi),exp),
+		     factor(exp)))$
+
+fourexpand(l,x,p,nn):=block([simpsum,series,l1,lhsl1,n],
+	   if not listp(l) then error("first argument not a list")
+	       else (if l = [] then error("argument list is empty")
+			 else (l:apply('ev,[l]),simpsum:true,series:0,
+			       unless l = [] do
+				      (l1:first(l),l:rest(l),lhsl1:lhs(l1),
+				       if lhsl1 = a[0]
+					   then series:series+rhs(l1)
+					   else (if lhsl1 = a[n]
+						     then series
+						     :series
+						      +apply('sum,
+							     [rhs(l1)
+							       *cos(
+								n*%pi*x/p),n,
+							      1,nn])
+						     else (if lhsl1 = b[n]
+							       then series
+							       :series
+								+apply(
+								 'sum,
+								 [
+								  rhs(l1)
+								   *sin(
+								    n*%pi*x
+								     /p),n,1,
+								  nn])
+							       else error(
+							       "invalid equati
+on in argument list:",
+							       l1)))),
+			       series)))$
+
+totalfourier(f,x,p):=fourexpand(foursimp(fourier(f,x,p)),x,p,'inf)$

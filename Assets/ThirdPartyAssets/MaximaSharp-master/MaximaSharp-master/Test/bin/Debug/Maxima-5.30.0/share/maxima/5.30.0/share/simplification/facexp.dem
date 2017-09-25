@@ -1,0 +1,155 @@
+/*  First load the necessary file: */
+load("facexp");
+/* Here is an expression to work with: */
+exp1:d*e*f^2+c*e*f^2-d*e+c*e+b*c*d+a*c*d;
+/* The function FACSUM can be used to cast an expression
+	into a form in which it is fully expanded with respect
+	to a specified set of variables, but factored with
+	respect to all other variables: */
+facsum(exp1,e,f);
+/*  For the next example, we use EXP2: */
+exp2:c*d*(x*y*z+w*y*z+u*v^2*z-u*z+u*v^2*y+u*y)
+	+d*e*f^2+c*e*f^2-d*e+c*e+b*c*d;
+/* Another mode in which FACSUM is useful results in a form
+	 in which a second set of variables plays the same role as
+	 above, but one level deeper in the expression.  These var-
+	 iables are given to FACSUM in a list. */
+facsum(exp2,c,d,[u,v]);
+/*  The list can occur in any position in the argument list: */
+facsum(exp2,[u,v],c,d);
+/*  Or it can be split up: */
+facsum(exp2,c,[u],d,[v]);
+/*  List arguments can be nested arbitrarily deeply,
+	 depending upon the requirements of the situation: */
+exp3:c*d*q*x*y*z+2*c*d*m*p*x*y*z+c*d*m*n*x*y*z
+	+c*d*q*w*y*z+2*c*d*m*p*w*y*z+c*d*m*n*w*y*z+c*d*q*u*v^2*z
+	+2*c*d*m*p*u*v^2*z+c*d*m*n*u*v^2*z-c*d*q*u*z-2*c*d*m*p*u*z
+	-c*d*m*n*u*z+c*d*u*v^2*y+c*d*u*y+d*e*f^2+c*e*f^2
+	-d*e+c*e+b*c*d;
+facsum(exp3,c,d,[u,v,[z,[m]]]);
+/*  The arguments of FACSUM need not be atomic. */
+exp4:subst(log(m+n),c,exp2);
+facsum(exp4,log(m+n),[e,f]);
+/*  FACSUM also recognizes in its argument the special
+	 form OPERATOR.  This form can be used to indicate to
+	 FACSUM that all structures within its argument that 
+	 have certain indicated leading operators are to be
+	 specially treated.
+	 For example, consider the expression EXP5: */
+exp5:x+(a.b)*(c+d)+(b.a)*(d+c)+log(a*b)*2*(c+d)+log(a/b)*2*(d+c);
+/* First FACTOR EXP5, to obtain an expression
+	 to work on: */
+exp5_factored:factor(exp5);
+/* To demonstrate the use of OPERATOR, we recover the original
+	 form of EXP5: */
+facsum(exp5_factored,operator(log,"."));
+is(%=exp5);
+/* This form also works: */
+facsum(exp5_factored,operator(log),operator("."));
+/* Another function that is related to FACSUM is
+	 FACTORFACSUM.  FACTORFACSUM is similar to FACSUM, except
+	 that it first factors the expression, then calls FACSUM 
+	 on each of the factors.  It can take all the arguments
+	 that FACSUM can, including the nested lists and the form
+	 OPERATOR.
+		To get an expression to work on, we use EXP6: */
+exp6:exp5*2*(e+(h+f)*(e.f));
+/* And EXPAND it: */
+exp6_expanded:expand(exp6);
+/* To illustrate the use of FACTORFACSUM, we recover the 
+	 original form of EXP6: */
+factorfacsum(exp6_expanded,operator(".",log));
+is(%=exp6);
+/* There is a switch NEXTLAYERFACTOR[FALSE]
+	 which can be used in two ways to control the behavior
+	 of FACSUM.  By setting NEXTLAYERFACTOR:TRUE one can force
+	 FACSUM to FACTOR the coefficients of the variables specified
+	 at any level before it calls itself recursively on the
+	 factors of those coefficients:  */
+exp7:f*h+f*g-2*c*d*f^2+2*c*d*e^2;
+facsum(exp7,c,[e]),nextlayerfactor:true;
+facsum(exp7,c,[e]);
+/* The second method for controlling the behavior of
+	 FACSUM is to include the atom NEXTLAYERFACTOR in the
+	 in the argument list of FACSUM: */
+facsum(exp7,c,'nextlayerfactor,[e]);
+/* Notice that this method produced the same result as
+	 simply setting NEXTLAYERFACTOR:TRUE.  The difference
+	 between the two methods is that the second method allows
+	 one to achieve the effect of NEXTLAYERFACTOR:TRUE for
+	 only a few specified levels of the expression, instead
+	 of for all levels.  For example, consider EXP8: */
+exp8:-2*c*d*f^2*h^2*l^2+f*h^2*l^2-4*c*d*f^2*h^2*k*l
+	 +2*f*h^2*k*l-4*c*d*f^2*g*h*l+2*f*g*h*l-2*c*d*f^2*h^2*k^2
+	 +f*h^2*k^2-4*c*d*f^2*g*h*k+2*f*g*h*k-2*c*d*f^2*g^2
+	 +f*g^2+2*c*d*e^2;
+facsum(exp8,c,'nextlayerfactor,[f]);
+facsum(exp8,c,[f,'nextlayerfactor]);
+
+/* Another switch FACSUM_COMBINE[TRUE] controls the form
+	 returned by FACSUM when its argument has a denominator.
+	 If FACSUM_COMBINE is TRUE then the form returned will
+	 be a ratio of polynomials.  If FALSE, then the denominator
+	 factors will be distributed over the terms of the numerator.
+	 In either case, both the numerator and denominator will
+	 be processed according to the arguments of FACSUM. */
+exp1/(c*(e+f)+d*e);
+facsum(exp1/(c*(e+f)+d*e),e,f,[c,d]);
+facsum(exp1/(c*(e+f)+d*e),e,f,[c,d]),facsum_combine:false;
+/* It is also possible to control the form of the coefficients
+         of products of quantities specified in the argument list of
+	 FACSUM.  (Normally, these coefficients are factored, unless 
+         they are numbers, and the function that is used for this
+         purpose is called NONUMFACTOR.)  But it is possible to use
+         other functions in place of NONUMFACTOR by changing the
+         AUTOMATIC property of FACSUM.  */
+get('facsum,'automatic);
+/*  Let us illustrate this procedure by changing from
+         NONUMFACTOR to SQFR. */
+put('facsum,'sqfr,'automatic);
+/*  Now compare the behavior of FACSUM to its former 
+         behavior.  Here is what it did with NONUMFACTOR AUTOMATIC: */
+playback([5,6])$
+/* And now with SQFR AUTOMATIC: */
+facsum(exp2,c,d,[u,v]);
+/*  Since this particular choice for AUTOMATIC is so
+         useful, it is available as a separate function, SQFRFACSUM.
+         More complicated choices are possible, depending on the
+         requirements of the situation.  One possibility is illustrated
+         below.
+           The AUTOMATIC function can be declared FORMAL.  If this
+         is done, then the function will not be applied, but will
+         be introduced into the expression in the places where it
+         would have been applied.  This capability is useful for
+         constructing expressions that one intends to use later
+         in function definitions.  We illustrate with SQFR:
+         (Maxima: NOUN does the same thing, doesn't it. You can define
+         an alias for it if you want to, see genut.mac). */
+/* DECLARE(SQFR,FORMAL)$ */
+declare(sqfr,noun)$
+facsum(exp2,c,d,[u,v]);
+/*  Now restore the default AUTOMATIC property: */
+put('facsum,'nonumfactor,'automatic);
+/* Sometimes one must combine large expressions that
+	 have already been processed with FACSUM, perhaps in different
+	 Macsymas for reasons of space.  To combine these expressions
+	 it is not necessary to FACSUM their sum.  An alternative is
+	 to use COLLECTTERMS.  To illustrate the use of COLLECTTERMS,
+	 we use EXP9 and EXP10. */
+exp9:a*u+b;
+exp10:c*u+d;
+/* COLLECTERMS(exp, var1, var2..) collects terms of exp that contain
+	 like powers of the vari.  */
+collectterms(exp9+exp10,u);
+e*u^2+f/u +b+d;
+exp11:expand(%+exp10*u);
+collectterms(%,u);
+/* Another more complex example: */
+u^2*v+exp11+subst(v,u,exp11);
+collectterms(%,u,v);
+/* COLLECTTERMS also accepts arguments in the same form
+	 as FACSUM: */
+exp2;
+collectterms(exp2,c,d,[u,v]);
+exp5_factored;
+collectterms(exp5_factored,operator(log,"."));

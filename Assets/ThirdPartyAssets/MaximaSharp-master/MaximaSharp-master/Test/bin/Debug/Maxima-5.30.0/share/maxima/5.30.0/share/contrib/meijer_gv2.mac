@@ -1,0 +1,214 @@
+/* Copyright 2007 by Edmond Orignac.
+ * This file is released under the terms of the GNU General Public License, version 2.
+ */
+
+/* MacRobert E-function  as defined in Bateman Manuscript Project.
+a=[a_1,...a_n]
+b=[b_1,...b_m] 
+*/
+
+    /* Quoting Edmond Orignac (the author) from an email 2007-03-26:
+
+    "The second script [i.e. this one] attempts to reduce the E-function of MacRobert
+    and the G-function of Meijer to simpler formulas with generalized
+    hypergeometric functions or Bessel/Trig/exponentials/powers.
+    The E-function and G-function generalize hypergeometric functions
+    and are described in the Bateman Manuscript Project (vol.1).
+    The simplification  is done by application of some simplification
+    formulas valid for some special cases and
+    by application of Slater's theorem when no two indices differ by
+    an integer. I have done some simple tests
+    comparing the output of the program with the formulas from
+    functions.wolfram.com and the result was satisfactory.
+    However, my script remains incomplete."
+
+    "First, I have not succeeded to implement some of the formulas
+    quoted by CS Meijer in the Compositio Mathematicae (available
+    at http://www.numdam.com) article mentioned in the comments
+    of my program. The problem is simply that I could not devise
+    a simple way to find the indices of two elements in a list of 4
+    coefficients whose sum would be zero.
+    I was thinking of using nested loops with a while condition
+    as I would do in a C program but I was unsure how to exit
+    from the nested loops while preserving the values of the
+    two loop indices. Maybe there is a more natural way of doing
+    this in Maxima, that does not use nested loops at all, but
+    I did not find it."
+
+    "Second, there exists an article by Kelly Roach (presented at
+    Issac in 1997) and available from citeseer at Penn State
+    which is discussing another method based on contiguity relations
+    to simplify Meijer G-functions. I have not understood how exactly
+    the contiguity relations are used in that case, but I think that
+    quite a few extra cases could be treated by this method."
+
+     */
+
+macrobert_ered(a,b,x):=block([aa,bb,c,d,y], 
+c:[1],
+d:[],
+aa:b,
+bb:a,
+y:meijer_gred(x,bb,c,aa,d), 
+return(y))$
+
+
+
+/* Meijer G-function as defined in Bateman Manuscript Project.
+a=[a_1,...a_n]
+b=[b_1,...b_m]
+c=[a_{n+1},...,a_p]
+d=[b_{m+1},...,b_q]
+
+Some formulas have been taken from http://functions.wolfram.com, 
+page on Meijer G-function.
+
+
+More formulas have to be implemented.
+*/
+meijer_gred(x,b,a,c,d):=block([m,n,p,q,sa,sb,sc,sd,s1,s2,i,j,k,k1,k2,nu],
+ if (not(listp(a) and listp(b) and listp(c) and
+listp(d))) then return(false),
+s1:[],
+s2:[],
+
+/* We put all the elements common to lists a and d in s1 */ 
+for i in a do if member(i,d) then s1:cons(i,s1),
+/* We put all  the elements common to lists b and c in s2 */ 
+for i in b do if member(i,c) then s2:cons(i,s2),
+
+
+/* We delete the common elements in lists a and d */ 
+for i in s1 do if (member(i,a) and member(i,d)) then block([],
+a:delete(i,a,1),
+d:delete(i,d,1)
+),
+
+/* We delete the common elements in lists b and c */ 
+for i in s2 do if (member(i,b) and member(i,c)) then block([],
+b:delete(i,b,1),
+c:delete(i,c,1)
+),
+
+/* In case a check of the contents of the lists would be necessary 
+print (b),
+print (a),
+print (c),
+print (d),
+*/ 
+
+ 
+m:length(b),
+n:length(a),
+p:n+length(c),
+q:m+length(d), 
+
+
+
+/* The case of m=0 */
+if (m>0) then go(m1), 
+
+if (n=0 and p=0 and q=0) then return(delta(x-1)),
+
+/* The case of m=0, n=1 */ 
+
+if (n>1) then go (m1),
+if (p=1 and q=0) then return(x^(first(a)-1)*exp(-1/x)),
+if (p=1 and q=1) then return (x^(first(a)-1)*(1-1/x)^(first(a)-first(d) -1)/gamma(first(a)-first(d))*theta(abs(x)-1)), 
+if (p=2 and q=0) then return (x^((first(a)+first(c))/2-1)*bessel_j(first(c)-first(a),2/sqrt(x))), 
+if (p=2 and q=1) then return (hgfred([1-first(a)+first(d)],[1-first(a)+first(c)],1/x)),
+if (p=2 and q=2) then return (hgfred([1-first(a)+first(d),1-first(a)+last(d)],[1-first(a)+first(c)],-1/x)),
+if (p=3 and q=0) then return (x^(first(a)-1)*hgfred([],[1-first(a)+first(c)],[1-first(a)+last(c)],-1/x)), 
+if (p=3 and q=1) then return (x^(first(a)-1)*hgfred([1-first(a)+first(b)],[1-first(a)+first(c),1-first(a)+last(c)],1/x)/gamma(first(a)-first(b))), 
+
+
+/* The case of m=1 */ 
+
+m1,
+if (m>1) then go (m2),
+if (p=0 and q=1) then return(x^first(b)*exp(-x)),
+if (p=0 and q=2) then return (x^((first(b)+first(d))/2)*bessel_j(first(b)-first(d),2*sqrt(x))), 
+if (m=1 and n=1 and p=1 and q=1) then return(gamma(1-first(a)+first(b))*x^(first(b))*(1+x)^(first(a)-first(b)-1)), 
+
+m2,
+/* formula from L. T. Wille J. Math. Phys. 29 p. 599 (1987) */  
+if (m=2 and n=0 and p=1 and q=2 and d[1]=1 and ((b[1]=0 and b[2]=1/2) or (b[1]=1/2 and b[2]=0))) then return(sqrt(%pi)*(1-erf(x))), 
+
+/* Formulas from C. S. Meijer Compositio Mathematica 8, p. 49 (1951) */
+if (m#2 or p#0 or q#4) then go(bsl2),
+if (expand((b[1]-b[2])^2)#1/4 or expand((d[1]-d[2]))^2#1/4) then go(bsl2),
+if (expand(b[1]+b[2]+d[1]+d[2])#1) then go(bsl1a),
+nu:expand(b[1]+b[2]-1/2),
+return(bessel_j(2*nu,4*x^(1/4))),
+bsl1a,
+if (expand(b[1]+b[2]+d[1]+d[2])#0) then go(bsl2), 
+nu:expand(b[1]+b[2]-1/2),
+return(bessel_j(2*nu+1,4*x^(1/4))/x^(1/4)),
+
+bsl2,
+
+  
+ 
+
+/* If Slater's theorem is applicable the Meijer G function becomes a sum of power of x times pFq generalized hypergeometric function of x. Note that for p=q we should really apply 07.34.26.0006.01 from Wolfram functions site. Here we are implicitly assuming abs(x)<1. */
+
+if ((p<=q) and not(test_int_diff(b))) then return (block([y,z,k],
+    
+    z:0,
+    for k:1 thru m do z:z+block([],
+      w:x^(b[k]),
+      for j:1 thru length(c) do w:w/gamma(c[j]-b[k]),
+      for j:1 thru length(a) do w:w*gamma(1+b[k]-a[j]),
+      for j:1 thru (k-1) do w:w*gamma(b[j]-b[k]),
+      for j:(k+1) thru m do w:w*gamma(b[j]-b[k]),
+      for j:1 thru length(d) do w:w/gamma(1+b[k]-d[j]),
+      sa:[],
+      sb:[],
+      for j:1 thru length(a) do sa:cons(1+b[k]-a[j],sa),
+      for j:1 thru length(c) do sa:cons(1+b[k]-c[j],sa),
+      for j:1 thru (k-1) do sb:cons(1+b[k]-b[j],sb),
+      for j:(k+1) thru length(b) do sb:cons(1+b[k]-b[j],sb),
+      for j:1 thru length(d) do sb:cons(1+b[k]-d[j],sb),
+      return (w*hgfred(sa,sb,(-1)^(m+n-p)*x))),
+    return(z)
+      )),
+        
+
+/* We try to apply Slater's theorem after analytic continuation when p>q  */
+ 
+if ((p>q) and not(test_int_diff(a))) then return (block([y,z,k],
+    
+    z:0,
+    for k:1 thru n do z:z+block([j,w],
+      w:x^(a[k]-1),
+      for j:1 thru length(d) do w:w/gamma(a[k]-d[j]),
+      for j:1 thru length(b) do w:w*gamma(1+b[j]-a[k]),
+      for j:1 thru (k-1) do w:w*gamma(a[k]-a[j]),
+      for j:(k+1) thru n do w:w*gamma(a[k]-a[j]),
+      for j:1 thru length(c) do w:w/gamma(1+c[j]-a[k]),
+      sa:[],
+      sb:[],
+      for j:1 thru length(b) do sa:cons(1+b[j]-a[k],sa),
+      for j:1 thru length(d) do sa:cons(1+d[j]-a[k],sa),
+      for j:1 thru (k-1) do sb:cons(1+a[j]-a[k],sb),
+      for j:(k+1) thru length(a) do sb:cons(1+a[j]-a[k],sb),
+      for j:1 thru length(c) do sb:cons(1+c[j]-a[k],sb),
+      return (w*hgfred(sa,sb,(-1)^(m+n-q)/x))),
+    return(z)
+      )),
+
+
+/* Catch all case */    
+
+
+
+return (meijer_G(x,b,a,c,d)))$
+
+
+test_int_diff(a):=block([i,j,n,z],
+  if (not(listp(a))) then return(false),
+  n:length(a),
+  if (n=1) then return(false),
+  z:false,
+  for i:1 thru n do for j:i+1 thru n do z:(z or integerp(a[j]-a[i])),
+  return(z))$

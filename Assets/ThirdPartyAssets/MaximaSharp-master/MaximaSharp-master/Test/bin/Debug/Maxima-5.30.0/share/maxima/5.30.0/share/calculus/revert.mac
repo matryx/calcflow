@@ -1,0 +1,19 @@
+revert(exp, t) := block([f, n, v, w, r1], n : hipow(exp, t), 
+array([v,w], n), r1:1/ratcoeff(exp,t,1), v[1]:1,
+for k:2 thru n do (v[k]:ratcoef(exp, t, k)*r1 ,w[k]: - v[k] ), w[1]  : 1, 
+f : lambda([j], for i from j + 1 thru n do w[i]:w[i]-w[j]*v[i-j+1]),
+for j from 2 thru n - 1 do apply(f,[j]), for k from 2 thru n - 1 
+do (for j from k thru n - 1 do apply(f,[j])), f : 0, 
+for k thru n do f:f+w[k]*(t*r1)^k, f)$
+
+revert2(exp, var, n) := block([f, v, w, r1, n2], n2:hipow(exp,var),
+if  n2 = 0 then return(exp), array([v,w], n), 
+v[0]  : ratcoef(exp, var, 0), r1:1/ratcoef(exp,var,1),
+v[1]:1,
+for k:2 thru n do (v[k]: ratcoef(exp, var, k)*r1, w[k]: - v[k] ), w[1]: 1, 
+f : lambda([j], for i from j + 1 thru n do w[i]  : w[i]  - w[j]*v[i-j+1]  ), 
+for j from 2 thru n - 1 do apply(f,[j]), for k from 2 thru n - 1 
+do (for j from k thru n - 1 do apply(f,[j])), f : 0, 
+r1  : ratdisrep(r1), for k thru n 
+do f:ratdisrep(w[k])*(ratdisrep(var-v[0])*r1)^k+f, f)$
+

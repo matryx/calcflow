@@ -1,0 +1,68 @@
+#!/bin/sh
+
+if [ $# -lt 1 ]; then
+  echo "Need to pass in names of Maxima test files to use"
+  exit 1
+fi
+
+# First, build up the Maxima batch file
+rm -f mathmltest.mac
+for i in $@
+do
+  # The following is easy but does not cope with multiline test output
+  # sed 's/.*\$$/tmp:%;mathml(tmp,"mathmltest.xml");tmp;/' $i >> mathmltest.mac
+
+  echo "/* $i */" >> mathmltest.mac
+  awk '{line[count]=$0; count++;}
+       /; *$/ {lastsemicolonline=NR; 
+               for (i=0; i < count; i++) print line[i];
+               delete line;
+               count=0;}
+       /\$ *$/ {lastdollarline=NR; 
+                count=0;
+                print "tmp:%;mathml(tmp,\"mathmltest.xml\");tmp;"}' $i >> mathmltest.mac
+done
+
+# Now run Maxima over the test file, to produce mathmltest.xml
+rm -f mathmltest.xml mathmltest_ie.xml
+../maxima-local -b mathmltest.mac
+
+# Now insert some paragraph breaks
+sed 's/<pre>/<p\/><pre>/' mathmltest.xml > tmp$$
+sed 's/<math/<p\/><math/' tmp$$ > mathmltest.xml
+rm tmp$$
+
+# Put in XHTML epilog
+echo "</body>
+</html>" >> mathmltest.xml
+
+# Make into XHTML for IE 
+echo "<?xml version=\"1.0\"?>
+<?xml-stylesheet type=\"text/xsl\" href=\"pmathml.xsl\"?>
+<!DOCTYPE html 
+[
+  <!ENTITY mathml \"http://www.w3.org/1998/Math/MathML\">" >> mathmltest_ie.xml
+cat mathml_ref_list >> mathmltest_ie.xml
+echo "]>  
+<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">
+<head>
+<title>Maxima MathML Output Test Page</title>
+</head>
+<body>" >> mathmltest_ie.xml
+cat mathmltest.xml >> mathmltest_ie.xml
+
+# Make into XHTML for normal browsers
+echo "<?xml version=\"1.0\"?>
+<?xml-stylesheet type=\"text/xsl\" href=\"pmathml.xsl\"?>
+<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN\"
+               \"http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd\"
+[
+  <!ENTITY mathml \"http://www.w3.org/1998/Math/MathML\">
+]>  
+<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">
+<head>
+<title>Maxima MathML Output Test Page</title>
+</head>
+<body>" > tmp$$.xml
+cat mathmltest.xml >> tmp$$.xml
+mv tmp$$.xml mathmltest.xml

@@ -1,0 +1,587 @@
+infix ("`", 118, 118);
+infix ("``", 117, 117);
+
+declare (constvalue, evfun);
+
+constvalue (e) :=
+  if mapatom(e)
+    then
+     (if symbolp(e)
+        then (get (e, 'constvalue), if %% # false then %% else e)
+        else e)
+    else map (constvalue, e);
+
+declare_constvalue (a, x) ::= buildq ([a, x], put (a, x, 'constvalue));
+
+remove_constvalue (a) ::= buildq ([a], rem (a, 'constvalue));
+
+/* Hold off on this display symbol business.
+ * :lisp (put '$\` '(#\space #\space) 'dissym)
+ */
+
+declare (dimensional, feature);
+declare (nondimensional, feature);
+
+declare_units (a%, u%) :=
+  block (local (a%, u%), 
+  if listp(a%)
+    then map (lambda ([a1%], local(a1%), declare1_units (a1%, u%)), a%)
+    else declare1_units (a%, u%), u%);
+
+declare1_units (a%, u%) :=
+  block (local (a%, u%),
+  apply ('define_variable, [a%, a%, any_check]),
+  put (a%, units_check (a%), value_check),
+  put (a%, u%, units),
+  if featurep (a%, 'dimensional) = false
+    then apply (declare, [a%, 'dimensional]));
+
+declare_qty (a%, q%) :=
+  block (local (a%, q%),
+  if listp(a%)
+    then map (lambda ([a1%], local(a1%), declare1_qty (a1%, q%)), a%)
+    else declare1_qty (a%, q%), q%);
+
+/* Maybe we want to work with constvalue in declare1_qty
+ * (instead of the indicator qty).
+ */
+declare1_qty (a%, q%) :=
+  block (local (a%, q%),
+  if featurep (a%, 'dimensional) = false
+    then apply (declare, [a%, 'dimensional]), put (a%, q%, qty));
+
+units_check (zz%) :=
+  block (local (zz%),
+  buildq ([zz%: zz%], lambda([yy%],
+    if units('zz%) # 1 and units(yy%) # 1 and units(yy%) # units('zz%)
+    then throw (oops ('zz%, yy%)))));
+
+qty(e%) :=
+  block (local (e%),
+  if atom(e%) then
+    if featurep (e%, 'dimensional) then
+      if get (e%, qty) = false then 'qty(e%) else get (e%, qty)
+    else e%
+  else if unitop_p(e%) then first(e%)
+  else if featurep (op(e%), 'dimensional) then 'qty(e%)
+  else apply (op(e%), map (qty, args(e%))));
+
+units(e%) :=
+  block (local (e%),
+  if atom(e%) then 
+    if symbolp (e%) and get (e%, 'constvalue) # false
+      then units (get (e%, 'constvalue))
+    elseif featurep (e%, 'dimensional) then
+      if get (e%, units) = false then 'units(e%) else get (e%, units)
+    else 1
+  else if mapatom (e%) then units (op (e%))  /* mapatom but not atom => subscripted */
+  else if unitop_p(e%) then second(e%)
+  else if featurep (op(e%), 'dimensional) then units(op(e%))
+  else if op(e%) = "^" then units (first (e%)) ^ second (e%)
+  else if op(e%) = "+" or op(e%) = "-" then apply ("+", unique (map (units, args (e%))))
+  else if nondimensionalp (e%) then 1
+  else apply (op(e%), map (units, args(e%))));
+
+d(e%) := dimension (units (e%));
+
+matchdeclare
+  ([aa%, bb%], true,
+    cc%, constantp,
+    ccn0%, constantp_not0,
+    ccn1%, constantp_not1,
+    /* dl = "dimensionless" */
+    dl%, lambda ([e], dimensions (e) = 1),
+    mm%, mult_expr_nontrivialconstfactorsp,
+    nd%, nondimensionalp,
+    pp%, lambda ([e], not atom(e) and op(e) = "+"),
+    qq%, lambda ([e], not atom(e) and (op(e) = "=" or listp(e) or matrixp(e) or setp(e))),
+    uu%, unitop_p,
+    xx%, nonconstantp);
+
+simp: false$
+/* tellsimpafter rules are applied in order of declaration; tellsimp, the other way around */
+tellsimp (nd% `` dl%, apply_units_conversion (nd%, dl%));
+tellsimp (uu% `` aa%, apply_units_conversion (uu%, aa%));
+tellsimp (pp% `` aa%, apply ("+", map (buildq ([aa%], lambda ([e], e `` aa%)), args (pp%))));
+tellsimp (qq% `` aa%, map (lambda ([e], e `` aa%), qq%));
+tellsimpafter (uu%^ccn1%, (qty(uu%)^ccn1%) ` simplify_units (units(uu%)^ccn1%));
+tellsimpafter (aa% * nd% * uu%, aa% * multiply_with_units (nd%, uu%));
+tellsimpafter (aa% + uu%, add_with_units (aa%, uu%));
+
+tellsimpafter (aa% ` (xx% + ccn0%), (aa% - ccn0%)`xx%);
+tellsimpafter (aa% ` mm%, (constant_factors(mm%) * aa%) ` everything_else(mm%));
+tellsimpafter (aa% ` cc%, aa%*cc%);
+tellsimpafter (uu% ` nd%, qty (uu%) ` (units (uu%) * nd%));
+tellsimpafter (abs (aa% ` bb%), abs (aa%) ` bb%);
+tellsimpafter (aa% ` abs (bb%), aa% ` bb%);
+simp: true$
+
+matchdeclare (uu%, lambda ([e], unitp (e) and not unitop_p (e)));
+defrule (rexpand_dimensional, uu%, qty (uu%) ` units (uu%));
+expand_dimensional (e) := applyb1 (e, rexpand_dimensional);
+
+unitop_p (e%) := not atom(e%) and atom (op(e%)) and is (nounify (op(e%)) = nounify ("`"));
+unitp (e%) :=
+  if atom(e%) then featurep (e%, 'dimensional)
+  else if unitop_p (e%) then true
+  else featurep (op(e%), 'dimensional);
+
+constantp_not1 (x%) := constantp(x%) and x% # 1;
+constantp_not0 (x%) := constantp(x%) and x% # 0;
+nonconstantp (x%) := not constantp (x%);
+mult_exprp (e%) := not atom(e%) and atom (op(e%)) and (nounify (op(e%)) = nounify ("*") or nounify (op(e%)) = nounify ("/"));
+mult_expr_nontrivialconstfactorsp (e%) := mult_exprp (e%) and constant_factors (e%) # 1;
+nondimensionalp (e%) :=
+  if atom (e%) then (not symbolp (e%) or not featurep (e%, 'dimensional))
+  elseif featurep (nounify (op (e%)), 'nondimensional) then true
+  else
+   (get (nounify (op (e%)), 'nondimensionalp),
+    if %% # false then apply (%%, args (e%)));
+nondimensional_not1 (e%) := e% # 1 and nondimensionalp (e%);
+nondimensional_not0 (e%) := e% # 0 and nondimensionalp (e%);
+
+(map (nounify, [qty, sin, cos, tan, asin, acos, atan, atan2, log, exp, sinh, cosh, tanh, asinh, acosh, atanh]),
+  apply (declare, [%%, 'nondimensional]));
+/* HMM. MAYBE THESE RULES FOR "^" AND "/" ARE TOO STRICT. LET IT STAND FOR NOW. */
+put (nounify ("^"), lambda ([a%, b%], nondimensionalp (a%) and nondimensionalp (b%)), 'nondimensionalp);
+put (nounify ("/"), lambda ([a%, b%], nondimensionalp (a%) and nondimensionalp (b%)), 'nondimensionalp);
+put (nounify (sqrt), lambda ([a%], nondimensionalp (a%)), 'nondimensionalp);
+put (nounify ("+"), lambda ([[a%]], every (nondimensionalp, a%)), 'nondimensionalp);
+put (nounify ("*"), lambda ([[a%]], every (nondimensionalp, a%)), 'nondimensionalp);
+put (nounify ("-"), lambda ([[a%]], every (nondimensionalp, a%)), 'nondimensionalp);
+
+add_with_units (x%, u%) :=
+  if unitp (u%) then
+    x% + u%
+  else
+    /* identify terms with like units and add them up. */
+    block ([r%: [], a%: args(u%)],
+    while a% # [] do
+      block ([s%: qty(a%[1]), b%: []],
+      for i%:2 thru length(a%) do
+        if units (a%[i%]) = units (a%[1]) then
+          s%: s% + qty (a%[i%])
+        else
+          b%: cons (a%[i%], b%),
+      r%: cons (s%`units(a%[1]), r%),
+      a%: b%),
+    if length (r%) = 1 then
+      x% + r%[1]
+    else
+      cons (x%, apply ("+", r%)));
+      
+multiply_with_units(x%, u%) :=
+  if unitp (u%) then
+    (x%*qty(u%))`units(u%)
+  else
+    /* Work around effect of *AFTERFLAG in tellsimpafter rules:
+     * if units = 1, return foo instead of foo ` 1.
+     */
+    block ([qq, uu],
+      qq : x%*apply ("*", map (qty, args (u%))),
+      uu : simplify_units (apply ("*", map (units, args (u%)))),
+      if uu = 1 then qq else qq ` uu);
+
+matchdeclare (a%, all);
+defrule (runits1, 'units (a%), 1);
+
+constant_factors (e%) := block ([L%, eqns%],
+    e% : apply1 (e%, runits1),
+    L%: listofvars(e%),
+    eqns%: map ("=", L%, L%*0+1),
+    subst (eqns%, e%));
+
+everything_else(e%) := e%/constant_factors(e%);
+
+simplify_units (e%) := block
+  ([L% : listofvars (e%), mycontext : ?gensym ()],
+    L% : makelist (x% > 0, x%, L%),
+    newcontext (mycontext),
+    apply (assume, L%),
+    e% : expand (e%, 0, 0),
+    apply (forget, L%),
+    killcontext (mycontext),
+    e%);
+
+/* Compile matchdeclare predicate functions in hopes of greater speed */
+/* Don't compile nondimensionalp due to bug in translator: %% is handled incorrectly. */
+compile (constantp_not0, constantp_not1, mult_expr_nontrivialconstfactorsp, /* nondimensionalp, */ unitop_p, unitp, nonconstantp);
+
+known_unit_conversions : {};
+
+get_unit_conversion (u) := assoc (u, known_unit_conversions);
+
+declare_unit_conversion ([L]) := block ([S, ctxt],
+    if not every (equationp, L)
+        then error ("declare_unit_conversion: all arguments must be equations."),
+    setify (ratsimp (L)),
+    S : map (flatten_conversion_equation, %%),
+    ctxt : context,
+    context : ezunits_context,
+    apply (assume, map (lambda ([x], x > 0), maplist (rhs, S))),
+    known_unit_conversions : union (known_unit_conversions, S),
+    kill (conversions_to_base_units), /* simple, heavy-handed */
+    reset_convert_units (), /* simple, heavy-handed */
+    context : ctxt,
+    done);
+
+flatten_conversion_equation (e%) := block
+  ([l% : lhs (e%), r% : rhs (e%)],
+    if unitop_p (l%) and unitop_p (r%)
+        then qty (l%) * units (l%) = qty (r%) * units (r%)
+        elseif not unitop_p (l%) and not unitop_p (r%) then e%
+        else error ("declare_unit_conversion: both sides must be unit expressions or both not unit expressions; found: ", e%));
+
+equationp (e) := not atom (e) and op (e) = "=";
+
+compute_conversion_factor (u1%, u2%) :=
+ (if conversions_to_base_units = 'conversions_to_base_units
+    then compute_conversions_to_base_units (),
+  ev (simplify_units (u1% / u2%), conversions_to_base_units));
+
+compute_conversions_to_base_units () :=
+ (print ("ezunits: computing conversions to base units; may take a moment."),
+  conversions_to_base_units : listify (compute_conversions_to_base_units0 (known_unit_conversions)));
+
+compute_conversions_to_base_units0 (conversion_eqns) :=
+block ([derived_units, primitive_units, defined_so_far, undefined_so_far, definitions, definablep, now_definable],
+
+  derived_units : map (lhs, conversion_eqns),
+  primitive_units : setdifference (setify (listofvars (map (rhs, conversion_eqns))), derived_units),
+  defined_so_far : primitive_units,
+  undefined_so_far : conversion_eqns,
+  definitions : {},
+
+  definablep : lambda ([e], every (lambda ([x], elementp (x, defined_so_far)), setify (listofvars (rhs (e))))),
+  now_definable : subset (undefined_so_far, definablep),
+
+  while length (now_definable) > 0
+    do block ([make_definition, new_definitions],
+      make_definition : lambda ([e], block ([L : listofvars (rhs (e))],
+                       for x in definitions do if member (lhs (x), L) then e : subst (x, e)), e),
+        
+      new_definitions : map (make_definition, now_definable),
+      definitions : union (definitions, new_definitions),
+      defined_so_far : union (defined_so_far, map (lhs, new_definitions)),
+      undefined_so_far : setdifference (undefined_so_far, now_definable),
+      now_definable : subset (undefined_so_far, definablep)),
+  
+  if undefined_so_far # {} then print ("ezunits: hmm, these are still undefined:", map (lhs, undefined_so_far)),
+  definitions);
+
+apply_units_conversion (uu%, nd%) :=
+  if listp (nd%)
+    /* Handle conversions of the form foo `` [u1, u2, u3].
+     * May want to ensure dimensions of u1, u2, u3 are all the same.
+     * Might change list to some other operator, e.g. noncommutative plus
+     * (which would have to be invented for the purpose).
+     */
+    then block ([q%, r%],
+        q% : convert_units [units (uu%), first (nd%)] (qty (uu%)),
+        r% : [(if rest (nd%) = [] then q% else floor (q%)) ` first (nd%)],
+        while rest (nd%) # []
+            do
+               (q% : convert_units [first (nd%), second (nd%)] (q% - floor (q%)),
+                nd% : rest (nd%),
+                r% : cons ((if rest (nd%) = [] then q% else floor (q%)) ` first (nd%), r%)),
+        reverse (r%))
+
+    else convert_units [units(uu%), nd%] (qty(uu%)) ` nd%;
+    
+/* kill the convert_units memoizing function (including all memoized values),
+ * then redefine it, and prep it with conversions for temperature units,
+ * which can't be computed by a simple multiplication.
+ * Hmm, I wonder if the temperature conversions should be declared in ezunits_functions.mac.
+ */
+
+reset_convert_units () :=
+   (kill (convert_units),
+
+    convert_units [u1%, u2%] := block ([a%],
+        a% : compute_conversion_factor (u1%, u2%),
+        buildq ([a%], lambda ([x], a% * x))),
+
+    convert_units [degF, degC] : lambda ([x], 5/9*(x - 32)),
+    convert_units [degF, K] : lambda ([x], 27315/100 + 5/9*(x - 32)),
+    convert_units [degF, R] : lambda ([x], 45967/100 + x),
+
+    convert_units [degC, degF] : lambda ([x], 32 + 9/5*x),
+    convert_units [degC, R] : lambda ([x], 45967/100 + 32 + 9/5*x),
+    convert_units [degC, K] : lambda ([x], 27315/100 + x),
+
+    convert_units [K, degC] : lambda ([x], x - 27315/100),
+    convert_units [K, degF] : lambda ([x], 32 + 9/5*(x - 27315/100)),
+
+    convert_units [R, degC] : lambda ([x], 5/9*(x - 45967/100 - 32)),
+    convert_units [R, degF] : lambda ([x], x - 45967/100));
+
+/* Dimensional analysis
+ */
+
+declare_dimensions ([L%]) :=
+    if length (L%) > 2
+        then (declare_dimensions1 (L%[1], L%[2]), apply (declare_dimensions, rest (rest (L%))))
+        elseif length (L%) = 2
+            then (declare_dimensions1 (L%[1], L%[2]), 'done)
+            else error ("declare_dimensions: expected an even number of arguments.");
+    
+declare_dimensions1 (a%, b%) :=
+    if listp (a%)
+        then map (lambda ([a1%], declare_dimensions1 (a1%, b%)), a%)
+        elseif symbolp (b%)
+            then put (a%, b%, 'dimension)
+            else error ("declare_dimensions: second argument must be a symbol.");
+
+remove_dimensions ([L%]) :=
+   (if not every (symbolp, L)
+        then error ("remove_dimensions: all arguments must be symbols."),
+    map (lambda ([a%], put (a%, false, 'dimension)), L%));
+
+declare_fundamental_dimensions ([L]) :=
+   (if not every (symbolp, L)
+        then error ("declare_fundamental_dimensions: all arguments must be symbols."),
+    L : sublist (L, lambda ([a], not member (a, fundamental_dimensions))),
+    map (lambda ([a], assume (a > 0)), L),
+    fundamental_dimensions : append (fundamental_dimensions, L),
+    'done);
+
+remove_fundamental_dimensions ([L]) :=
+    if L = '[all]
+        then apply (remove_fundamental_dimensions, fundamental_dimensions)
+        else
+           (fundamental_dimensions : sublist (fundamental_dimensions, lambda ([x], not member (x, L))),
+            map (lambda ([a], forget (a > 0)), L),
+            'done);
+
+declare_fundamental_units ([L]) :=
+   (if not every (symbolp, L)
+        then error ("declare_fundamental_units: all arguments must be symbols."),
+    map (lambda ([x, y], put (x, y, 'dimension)), odds (L), evens (L)),
+    map (lambda ([x, y], put (y, x, 'unit)), odds (L), evens (L)));
+
+remove_fundamental_units ([L]) :=
+   (if not every (symbolp, L)
+        then error ("remove_fundamental_units: all arguments must be symbols."),
+    map (lambda ([x], put (get (x, 'dimension), false, 'unit)), L),
+    map (lambda ([x], put (x, false, 'dimension)), L));
+
+fundamental_dimensions : [];
+block ([L],
+    L : [[m, length], [kg, mass], [s, time], [A, current], [K, temperature], [mol, quantity], [cd, luminous_intensity]],
+    apply (declare_fundamental_dimensions, map (second, L)),
+    apply (declare_fundamental_units, flatten (L)));
+
+/* I GUESS RULES FOR DIMENSIONS COULD RECOGNIZE EQUATIONS, DERIVATIVES, AND INTEGRALS
+ */
+
+matchdeclare
+   (aa%, lambda ([e%], atom (e%) and not symbolp (e%)),
+    bb%, lambda ([e%], symbolp (e%) and member (e%, fundamental_dimensions)),
+    cc%, lambda ([e%], symbolp (e%) and get (e%, 'units) # false),
+    dd%, lambda ([e%], symbolp (e%) and get (e%, 'constvalue) # false),
+    ee%, lambda ([e%], symbolp (e%) and get (e%, 'dimension) # false),
+    ee1%, lambda ([e%], symbolp (e%) and ?mget (e%, 'numer) # false),
+    ff%, lambda ([e%], symbolp (e%)),
+    gg%, lambda ([e%], not atom (e%) and op (e%) = "`"),
+    hh%, lambda ([e%], not atom (e%) and op (e%) = "^"),
+    ii%, lambda ([e%], not atom (e%) and member (op (e%), ["+", "-", "*", "/"])));
+
+simp : false;
+defrule (raa, 'dimensions (aa%), 1);
+defrule (rbb, 'dimensions (bb%), bb%);
+defrule (rcc, 'dimensions (cc%), dimensions (get (cc%, 'units)));
+defrule (rdd, 'dimensions (dd%), dimensions (get (dd%, 'constvalue)));
+defrule (ree, 'dimensions (ee%), get (ee%, 'dimension));
+defrule (ree1, 'dimensions (ee1%), dimensions (?mget (ee1%, 'numer)));
+defrule
+   (rff,
+    'dimensions (ff%), 
+    block
+      ([ff%2 : ev (ff%, args (known_unit_conversions), infeval)],
+        if ff%2 # ff% then dimensions (ff%2) else 'dimensions (ff%)));
+defrule (rgg, 'dimensions (gg%), (constvalue (first (gg%)), if unitp (%%) then dimensions (second (%%)) else 1) * dimensions (second (gg%)));
+matchdeclare (aa%, all, bb%, constantp_not1);
+defrule (rhh, 'dimensions (aa%^bb%), dimensions (aa%) ^ bb%);
+defrule (rii, 'dimensions (ii%), map (dimensions, ii%));
+/* ??? defrule (rjj, 'dimensions (sqrt (aa%)), sqrt (dimensions (aa%))); */
+simp : true;
+
+dimensions (expr) :=
+    if not atom (expr) and (setp (expr) or listp (expr) or matrixp (expr) or op (expr) = "=")
+        then map (dimensions, expr)
+        else apply (apply1, ['dimensions (expr), raa, rbb, rcc, rdd, ree, ree1, rff, rgg, rhh, rii]);
+
+/* Adapted from dimensions_as_list in share/physics/dimension.mac.
+ * Thanks to Barton Willis.
+ */
+/* FOLLOWING DEFINITION HANDLES DIMENSION NOUNS INCORRECTLY
+ * NEED TO REVISIT THIS
+ */
+dimensions_as_list (e) :=
+    if listp (e)
+        then map ('dimensions_as_list, e)
+        else
+           (e : dimensions (e),
+            if polynomialp (e, fundamental_dimensions, lambda ([x], numberp (x)), lambda ([x], integerp (x)))
+                then makelist (hipow (e, d), d, fundamental_dimensions)
+                else 'dimensions_as_list (e));
+
+fundamental_units ([L]) :=
+    if L = []
+        then
+            map
+               (lambda ([x], (get (x, 'unit), if %% = false then 'unit (x) else %%)),
+                fundamental_dimensions)
+        else
+            if listp (L [1])
+                then map ('fundamental_units, L [1])
+                else block ([d],
+                    d : dimensions_as_list (L [1]),
+                    if listp (d)
+                        then apply ("*", map ("^", fundamental_units (), d))
+                        else 'fundamental_units (L [1]));
+
+/* Adapted from dimensionless in share/physics/dimension.mac.
+ * Thanks to Barton Willis.
+ */
+
+dimensionless (e) :=
+    if not listp (e)
+        then 'dimensionless (e)
+        else
+            args
+               (map
+                   (lambda ([s], xreduce ("*", map("^", e, first (transpose (s))))),
+                    nullspace (transpose (funmake ('matrix, map ('dimensions_as_list, e))))));
+
+/* Adapted from natural_unit in share/physics/dimension.mac.
+ * Thanks to Barton Willis.
+ */
+
+natural_unit (d, e) :=
+block
+  ([vars, s],
+ 
+    if not listp (e)
+        then return ('natural_unit (d, e)),
+
+    d : dimensions_as_list (d),
+    s : map ('dimensions_as_list, e),
+    vars : makelist (?gensym(), k, 1, length (e)),
+
+    block
+      ([linsolve_params : true,
+        back_subst : true,
+        globalsolve : false],
+        s : linsolve (s . vars - d, vars)),
+
+    s : xreduce ("*", map ("^", e, map ('rhs, s))),
+    s : subst (map ("=", %rnum_list, makelist (0, i, 1, length (%rnum_list))), s),
+    map (lambda ([x], s * x), cons (1, dimensionless (e))));
+
+/* A couple of convenience functions.
+ */
+
+derived_units () :=
+    listify (map (lhs, conversions_to_base_units));
+
+known_units () :=
+    sort (append (fundamental_units (), derived_units ()));
+
+display_known_unit_conversions () := 
+    for x in known_unit_conversions do display (x);
+
+/* Rules to unit-ify 'diff and 'integrate expressions.
+ */
+
+simp : false;
+
+matchdeclare ([uu%, vv%, aa%, bb%], unitop_p);
+
+tellsimp ('diff (uu%, vv%, 1), 'diff (qty (uu%), qty (vv%), 1) ` (units (uu%) / units (vv%)));
+
+tellsimp ('integrate (uu%, vv%), 'integrate (qty (uu%), qty (vv%)) ` (units (uu%) * units (vv%)));
+
+tellsimp
+   ('integrate (uu%, vv%, aa%, bb%),
+    if units (aa%) = units (vv%) and units (bb%) = units (vv%)
+        then 'integrate (qty (uu%), qty (vv%), qty (aa%), qty (bb%)) ` (units (uu%) * units (vv%))
+        else 'integrate (qty (uu%), qty (vv%), qty (aa% `` units (vv%)), qty (bb% `` units (vv%))) ` (units (uu%) * units (vv%)));
+
+simp : true;
+
+/* Rules to unit-ify solve.
+ */
+
+matchdeclare (uu%, unitop_p);
+defrule (rununitify, uu%, subst_qty (uu%) * subst_units (uu%));
+
+subst_qty (u) := block ([v : listofvars (qty (u)), substs],
+  for v1 in v do if qty_gensyms [v1] = false then qty_gensyms [v1] : gensym (),
+  substs : makelist (v1 = qty_gensyms [v1], v1, v),
+  subst (substs, qty (u)));
+
+subst_units (u) := block ([v : listofvars (units (u)), substs],
+  for v1 in v do if units_gensyms [v1] = false then units_gensyms [v1] : gensym (),
+  substs : makelist (v1 = units_gensyms [v1], v1, v),
+  subst (substs, units (u)));
+
+matchdeclare (gg%, unit_gensym_p);
+unit_gensym_p (e) := member (e, listarray (units_gensyms));
+defrule (rreunitify, gg%, 1 ` gg%); /* apply via applyb1 only to avoid infinite recursion !! */
+
+solve_dimensional (e%, v%) := solve_dimensional1 (if not listp (e%) then [e%] else e%, if not listp (v%) then [v%] else v%);
+
+solve_dimensional1 (e%, v%) := block
+([qty_gensyms : make_array ('hashed),
+  units_gensyms : make_array ('hashed)],
+  applyb1 (e%, rununitify),
+  /* ENSURE QTY_GENSYMS AND UNITS_GENSYMS KEY SETS ARE DISJOINT ?? */
+  subst (gensym_map (qty_gensyms), [%%, v%]),
+  subst (gensym_map (units_gensyms), %%),
+  apply (solve, %%),
+  applyb1 (%%, rreunitify),
+  subst (inverse_gensym_map (units_gensyms), %%),
+  subst (inverse_gensym_map (qty_gensyms), %%));
+
+gensym_map (h) := map ("=", rest (arrayinfo (h), 2), listarray (h));
+inverse_gensym_map (h) := map ("=", listarray (h), rest (arrayinfo (h), 2));
+
+/* Degrees to pure number conversion for trigonometric functions.
+ * Not sure if this should be enabled by default; maybe it should be optional.
+ * Well, go ahead for now, in the absence of evidence to the contrary.
+ */
+
+simp : false;
+declare_unit_conversion (degree = %pi/180);
+matchdeclare (uu, lambda ([e], unitp(e) and dimensions(e) = 1));
+map (lambda ([f], apply (tellsimp, [apply (f, [uu]), apply (f, [uu``1])])), '[sin, cos, tan, csc, sec, cot, atan]);
+
+matchdeclare (aa, unitp, bb, lambda ([e], dimensions (e) = dimensions (aa)));
+tellsimp (atan2 (aa, bb), atan2 (qty (aa), qty (bb `` units (aa))));
+
+/* Subscript applied to "`" expression => exchange "`" with subscript
+ * Note that this applies only to literal "`" expressions.
+ */
+
+matchdeclare ([aa, bb, cc], all);
+tellsimpafter ((aa ` bb) [cc], aa [cc] ` bb);
+
+/* "@" applied to "`" expression => exchange "`" with "@"
+ * Note that this applies only to literal "`" expressions.
+ */
+
+matchdeclare ([aa, bb, cc], all);
+/* substitute into "@" expression because "@" quotes its second argument */
+tellsimpafter ((aa ` bb) @ cc, buildq ([aa, bb, cc], (aa @ cc) ` bb));
+
+/* realpart/imagpart applied to "`" expression => exchange "`" with realpart/imagpart
+ * Note that this applies only to literal "`" expressions.
+ * Note further that this applies only to realpart/imagpart nouns.
+ */
+
+matchdeclare ([aa, bb], all);
+tellsimpafter ('realpart (aa ` bb), 'realpart (aa) ` bb);
+tellsimpafter ('imagpart (aa ` bb), 'imagpart (aa) ` bb);
+
+simp : true;

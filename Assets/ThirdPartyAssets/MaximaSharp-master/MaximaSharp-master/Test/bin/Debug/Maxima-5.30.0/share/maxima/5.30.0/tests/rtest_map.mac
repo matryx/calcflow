@@ -1,0 +1,311 @@
+(kill(all),0);
+0$
+
+map(f, '(if x < 1 then 5 else 2));
+'(if f(x < 1) then f(5) else f(2))$
+
+fullmap(f, '(if x < 1 then 5 else 2));
+'(if f(x) < f(1) then f(5) else f(2))$
+
+/* The user documentation says that matrixmap returns a matrix. So
+matrixmap(f,[6]) --> [f(6)] is wrong. */
+
+errcatch(matrixmap(f, [6]));
+[]$
+
+map('cos,[]);
+[]$
+
+map('cos, matrix());
+matrix()$
+
+map('exp, set());
+set()$
+
+map(f, set(a,b));
+set(f(a),f(b))$
+
+map(lambda([x],x^2), set(-1,1));
+set(1)$
+
+errcatch(map(f, false));
+[]$
+
+map(f[1], []);
+[]$
+
+map(f[q], [2]);
+[f[q](2)]$
+
+map(f[5],[1,2,inf]);
+[f[5](1), f[5](2), f[5](inf)]$
+
+errcatch(map(f, 1.5b0));
+[]$
+
+map('cos, [0]);
+[1]$
+
+map(lambda([x], x^2), []);
+[]$
+
+map(f, [[]]);
+[f([])]$
+
+map(f, [false]);
+[f(false)]$
+
+map(f, [[false]]);
+[f([false])]$
+
+map(f, [2,[2]]);
+[f(2), f([2])]$
+
+map(f,[a],[b],[c]);
+[f(a,b,c)]$
+
+map(f,[a],[b],[c,b]), maperror : false;
+[f(a,b,c)]$
+
+map(lambda([a,b], is(a < b)), [],[]);
+[]$
+
+map(lambda([a,b], is(a < b)), [1],[2]);
+[true]$
+
+map(lambda([a,b], is(a < b)), [x],[x+1]);
+[true]$
+
+errcatch(map(lambda([a,b], is(a < b)), [x],[x+1],[x+2]));
+[]$
+
+map("=",[a,b],[1,2]);
+[a=1,b=2]$
+
+map("#",[a,b],[1,2]);
+[a # 1,b # 2]$
+
+map(f,-x);
+-f(x)$
+
+map(f,a+b);
+f(a) + f(b)$
+
+map(f,a-b);
+f(a) + f(-b)$
+
+map(f, rat(a+b));
+f(a) + f(b)$
+
+map(f, a+b*c);
+f(a) + f(b*c)$
+
+map(f, a^b);
+f(a)^f(b)$
+
+map(f, a^(b^c));
+f(a)^f(b^c)$
+
+map(f,a*b*c);
+f(a) * f(b) * f(c)$
+
+map(f, a/b);
+f(a) / f(b)$
+
+map(f, dpart(a*b*c,1));
+''(dpart(f(a) * f(b) * f(c),1,1))$
+
+errcatch(map(f,1));
+[]$
+
+map(f,[[[x]]]);
+[f([[x]])]$
+
+map(log, x < y);
+log(x) < log(y)$
+
+map(f, cfdisrep([1,2,3,4]));
+f(1) + f(''(cfdisrep([0,2,3,4])))$
+
+map('append, [[v]],[[t]]);
+[[v,t]]$
+
+map('first,[[u,1],[n,2],[k,3]]);
+[u,n,k]$
+
+map(f, a.b);
+f(a) . f(b)$
+
+map(f, a^^b);
+f(a)^^f(b)$
+
+map(j, j());
+j()$
+
+map(q,j());
+j()$
+
+map(q,j(m));
+j(q(m))$
+
+map(q,j(m()))$
+j(q(m()))$
+
+map(t,q(%pi));
+q(t(%pi))$
+
+fullmap('cos,[]);
+[]$
+
+fullmap('cos, matrix());
+matrix()$
+
+fullmap('exp, set());
+set()$
+
+fullmap(f, set(a,b));
+set(f(a),f(b))$
+
+fullmap(lambda([x],x^2), set(-1,1));
+set(1)$
+
+fullmap(f[1], []);
+[]$
+
+fullmap(f[q], [2]);
+[f[q](2)]$
+
+fullmap(f[5],[1,2,inf]);
+[f[5](1), f[5](2), f[5](inf)]$
+
+errcatch(fullmap(f, 1.5b0));
+[]$
+
+fullmap('cos, [0]);
+[1]$
+
+fullmap(lambda([x], x^2), []);
+[]$
+
+fullmap(f, [[]]);
+[[]]$
+
+fullmap(f, [false]);
+[f(false)]$
+
+fullmap(f, [[false]]);
+[[f(false)]]$
+
+fullmap(f, [2,[2]]);
+[f(2), [f(2)]]$
+
+fullmap(f,[a],[b],[c]);
+[f(a,b,c)]$
+
+fullmap(f,[a],[b],[c,b]), maperror : false;
+[f(a,b,c)]$
+
+fullmap(lambda([a,b], is(a < b)), [],[]);
+[]$
+
+fullmap(lambda([a,b], is(a < b)), [1],[2]);
+[true]$
+
+fullmap(lambda([a,b], is(a < b)), [x],[x+1]);
+[true]$
+
+errcatch(fullmap(lambda([a,b], is(a < b)), [x],[x+1],[x+2]));
+[]$
+
+fullmap("=",[a,b],[1,2]);
+[a=1,b=2]$
+
+fullmap("#",[a,b],[1,2]);
+[a # 1,b # 2]$
+
+fullmap(f,-x);
+-f(x)$
+
+fullmap(f,a+b);
+f(a) + f(b)$
+
+fullmap(f,a-b), inflag : true$
+f(a) + f(-1) * f(b)$
+
+fullmap(f,a-b), inflag : false$
+f(a) - f(b)$
+
+fullmap(f, rat(a+b));
+f(a) + f(b)$
+
+fullmap(f, a+b*c);
+f(a) + f(b)*f(c)$
+
+fullmap(f, a^b);
+f(a)^f(b)$
+
+fullmap(f, a^(b^c));
+f(a)^(f(b)^f(c))$
+
+fullmap(f,a*b*c);
+f(a) * f(b) * f(c)$
+
+fullmap(f, a/b);
+f(a) / f(b)$
+
+fullmap(f, dpart(a*b*c,1));
+''(dpart(f(a) * f(b) * f(c),1))$
+
+errcatch(fullmap(f,1));
+[]$
+
+fullmap(f,[[[x]]]);
+[[[f(x)]]]$
+
+fullmap(log, x < y);
+log(x) < log(y)$
+
+fullmap(f, a.b);
+f(a) . f(b)$
+
+fullmap(f,a.b + b . a);
+f(a) . f(b) + f(b) . f(a)$
+
+fullmap(f, a^^b);
+f(a)^^f(b)$
+
+fullmap(f, a. (b .c ));
+f(a) . (f(b) . f(c))$
+
+fullmap(f, a^^(b^^c));
+f(a)^^(f(b)^^f(c))$
+
+matrixmap(f,matrix());
+matrix()$
+
+matrixmap(f, matrix([]));
+matrix([])$
+
+matrixmap(f, matrix([],[]));
+matrix([],[])$
+
+matrixmap(f, matrix([5]));
+matrix([f(5)])$
+
+matrixmap('cosh, matrix([a,b],[c,d]));
+matrix([cosh(a), cosh(b)],[cosh(c), cosh(d)])$
+
+matrixmap(lambda([x], x * ident(2)), matrix([1,2],[3,4]));
+matrix([matrix([1,0],[0,1]),matrix([2,0],[0,2])],[matrix([3,0],[0,3]),matrix([4,0],[0,4])])$
+
+
+
+
+
+
+
+
+
+
+
+

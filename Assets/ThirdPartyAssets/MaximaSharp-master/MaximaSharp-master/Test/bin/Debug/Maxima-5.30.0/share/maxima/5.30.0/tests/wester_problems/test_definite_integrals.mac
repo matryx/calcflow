@@ -1,0 +1,135 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/DefiniteIntegrals/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Definite Integrals ---------- */
+/* The following two functions have a pole at a.  The first integral has a
+   principal value of zero; the second is divergent */
+integrate(1/(x - a), x, a - 1, a + 1);
+errcatch(integrate(1/(x - a)^2, x, a - 1, a + 1));
+/* Different branches of the square root need to be chosen in the intervals
+   [0, 1] and [1, 2].  The correct results are 4/3, [4 - sqrt(8)]/3,
+   [8 - sqrt(8)]/3, respectively */
+integrate(sqrt(x + 1/x - 2), x, 0, 1);
+integrate(sqrt(x + 1/x - 2), x, 1, 2);
+integrate(sqrt(x + 1/x - 2), x, 0, 2);
+/* => sqrt(2)   [a modification of a problem due to W. Kahan] */
+integrate(sqrt(2 - 2*cos(2*x))/2, x, -3*%pi/4, -%pi/4);
+/* Contour integrals => pi/a e^(-a) for a > 0.  See Norman Levinson and
+   Raymond M. Redheffer, _Complex Variables_, Holden-Day, Inc., 1970, p. 198.
+   */
+assume(a > 0)$
+'integrate(cos(x)/(x^2 + a^2), x, -inf, inf);
+ev(%, integrate);
+/* Integrand with a branch point => pi/sin(pi a) for 0 < a < 1
+   [Levinson and Redheffer, p. 212] */
+assume(a < 1)$
+declare(a, noninteger)$
+'integrate(t^(a - 1)/(1 + t), t, 0, inf);
+ev(%, integrate);
+remove(a, noninteger)$
+forget(a > 0, a < 1)$
+/* Integrand with a residue at infinity => -2 pi [sin(pi/5) + sin(2 pi/5)]
+   (principal value)   [Levinson and Redheffer, p. 234] */
+errcatch(integrate(5*x^3/(1 + x + x^2 + x^3 + x^4), x, -inf, inf));
+integrate(5*x^3/(1 + x + x^2 + x^3 + x^4), x, -inf, inf), intanalysis = false;
+/* integrate(1/[1 + x + x^2 + ... + x^(2 n)], x = -infinity..infinity)
+   = 2 pi/(2 n + 1) [1 + cos(pi/[2 n + 1])] csc(2 pi/[2 n + 1])
+   [Levinson and Redheffer, p. 255] => 2 pi/5 [1 + cos(pi/5)] csc(2 pi/5) */
+q: (2*atan(43*sqrt(3)/(9*sqrt(257))) + %pi)/6;
+assume(equal(cos(q)*sin(2*q) - sin(q)*cos(2*q) - sin(q), 0))$
+integrate(1/(1 + x + x^2 + x^4), x, -inf, inf);
+forget(equal(cos(q)*sin(2*q) - sin(q)*cos(2*q) - sin(q), 0))$
+remvalue(q)$
+/* Integrand with a residue at infinity and a branch cut => pi [sqrt(2) - 1]
+   [Levinson and Redheffer, p. 234] */
+integrate(sqrt(1 - x^2)/(1 + x^2), x, -1, 1);
+factor(%);
+/* This is a common integral in many physics calculations
+   => q/p sqrt(pi/p) e^(q^2/p)   (Re p > 0)   [Gradshteyn and Ryzhik 3.462(6)]
+   */
+assume(p > 0)$
+integrate(x*exp(-p*x^2 + 2*q*x), x, -inf, inf);
+forget(p > 0)$
+/* => 2 Euler's_constant   [Gradshteyn and Ryzhik 8.367(5-6)] */
+integrate(1/log(t) + 1/(1 - t) - log(log(1/t)), t, 0, 1);
+/* This integral comes from atomic collision theory => 0   [John Prentice] */
+integrate(sin(t)/t*exp(2*%i*t), t, -inf, inf);
+/* => 1/12   [Gradshteyn and Ryzhik 6.443(3)] */
+integrate(log(gamma(x))*cos(6*%pi*x), x, 0, 1);
+/* => 36/35   [Gradshteyn and Ryzhik 7.222(2)] */
+integrate((1 + x)^3*legendre_p(1, x)*legendre_p(2, x), x, -1, 1);
+/* => 1/sqrt(a^2 + b^2)   (a > 0 and b real)
+      [Gradshteyn and Ryzhik 6.611(1)] */
+integrate(exp(-a*x)*bessel_j[0](b*x), x, 0, inf);
+/* Integrand contains a special function => 4/(3 pi)   [Tom Hagstrom] */
+integrate((bessel_j[1](x)/x)^2, x, 0, inf);
+/* => (cos 7 - 1)/7   [Gradshteyn and Ryzhik 6.782(3)] */
+integrate(cos_int(x)*bessel_j[0](2*sqrt(7*x)), x, 0, inf);
+/* This integral comes from doing a two loop Feynman diagram for a QCD problem
+   => - [17/3 + pi^2]/36 + log 2/9 [35/3 - pi^2/2 - 4 log 2 + log(2)^2]
+      + zeta(3)/4 = 0.210883...   [Rolf Mertig] */
+integrate(x^2*li[3](1/(x + 1)), x, 0, 1);
+romberg(x^2*li[3](1/(x + 1)), x, 0, 1);
+sfloat(- (17/3 + %pi^2)/36 + log(2)/9*(35/3 - %pi^2/2 - 4*log(2) + log(2)^2)
+       + zeta(3)/4);
+/* Integrate a piecewise defined step function s(t) multiplied by cos t, where
+   s(t) = 0   (t < 1);   1   (1 <= t <= 2);   0   (t > 2)
+   => 0   (u < 1);   sin u - sin 1   (1 <= u <= 2);   sin 2 - sin 1   (u > 2)
+   */
+s(t):= if 1 <= t and t <= 2 then 1 else 0$
+integrate(s(t)*cos(t), t, 0, u);
+s(t):= unit_step(t - 1) - unit_step(t - 2)$
+integrate(s(t)*cos(t), t, 0, u);
+ratsimp(%);
+remfunction(s)$
+/* Integrating first with respect to y and then x is much easier than
+   integrating first with respect to x and then y
+   => (|b| - |a|) pi   [W. Kahan] */
+assume(a > 0, b > 0)$
+integrate(integrate(x/(x^2 + y^2), y, -inf, inf), x, a, b);
+integrate(integrate(x/(x^2 + y^2), x, a, b), y, -inf, inf);
+(forget(a > 0, b > 0), assume(a < 0, b > 0))$
+integrate(integrate(x/(x^2 + y^2), y, -inf, inf), x, a, b);
+integrate(integrate(x/(x^2 + y^2), x, a, b), y, -inf, inf);
+(forget(a < 0, b > 0), assume(a < 0, b < 0))$
+integrate(integrate(x/(x^2 + y^2), y, -inf, inf), x, a, b);
+integrate(integrate(x/(x^2 + y^2), x, a, b), y, -inf, inf);
+forget(a < 0, b < 0)$
+/* => [log(sqrt(2) + 1) + sqrt(2)]/3   [Caviness et all, section 2.10.1] */
+assume(not(equal(y, 0)))$
+integrate(integrate(sqrt(x^2 + y^2), x, 0, 1), y, 0, 1);
+ratsimp(logarc(%));
+factor(log(sqrtdenest(sqrtdenest(sqrtdenest(radcan(exp(logcontract(%))))))));
+tldefint(integrate(sqrt(x^2 + y^2), x, 0, 1), y, 0, 1);
+forget(not(equal(y, 0)))$
+/* => (pi a)/2   [Gradshteyn and Ryzhik 4.621(1)] */
+assume((sin(a)*sin(y) - 1)*(sin(a)*sin(y) + 1) < 0)$
+integrate(integrate(sin(a)*sin(y)/sqrt(1 - sin(a)^2*sin(x)^2*sin(y)^2),
+                    x, 0, %pi/2),
+          y, 0, %pi/2);
+forget((sin(a)*sin(y) - 1)*(sin(a)*sin(y) + 1) < 0)$
+/* => 46/15   [Paul Zimmermann] */
+assume(not(equal(x, 0)), x^2 < 2)$
+integrate(integrate(abs(y - x^2), y, 0, 2), x, -1, 1);
+forget(not(equal(x, 0)), x^2 < 2)$
+/* Multiple integrals: volume of a tetrahedron => a b c / 6 */
+'integrate('integrate('integrate(1, z, 0, c*(1 - x/a - y/b)),
+                      y, 0, b*(1 - x/a)),
+           x, 0, a);
+ev(%, integrate);
+/* ---------- Quit ---------- */
+quit();

@@ -1,0 +1,72 @@
+(kill (all), 0);
+0;
+
+diff(acsc(x) - asin(1/x),x);
+0$
+
+diff(asec(x) - acos(1/x),x);
+0$
+
+diff(asech(x) - acosh(1/x),x);
+0$
+
+diff(acsch(x) - asinh(1/x),x);
+0$
+
+/* A&S 4.4.9 */
+diff(asec(x) + acsc(x),x);
+0$
+
+/* A&S 4.4.14 */
+diff(asin(-x) + asin(x),x);
+0$
+
+/* A&S 4.4.20 */
+diff(asin(x) + %i*asinh(%i*x),x);
+0$
+
+/* A&S 4.4.23 */
+diff(acsc(x) - %i*acsch(%i*x),x);
+0$
+
+/* A&S 4.4.25 */
+diff(acot(x) - %i*acoth(%i*x),x);
+0$
+
+/* harmonic check */
+
+diff(acsc(x+%i*y),x,2) + diff(acsc(x+%i*y),y,2);
+0$
+
+diff(asec(x+%i*y),x,2) + diff(asec(x+%i*y),y,2);
+0$
+
+diff(acot(x+%i*y),x,2) + diff(acot(x+%i*y),y,2);
+0$
+
+diff(asin(x+%i*y),x,2) + diff(asin(x+%i*y),y,2);
+0$
+
+diff(acos(x+%i*y),x,2) + diff(acos(x+%i*y),y,2);
+0$
+
+diff(atan(x+%i*y),x,2) + diff(atan(x+%i*y),y,2);
+0$
+
+diff(acsch(x+%i*y),x,2) + diff(acsch(x+%i*y),y,2);
+0$
+
+diff(asech(x+%i*y),x,2) + diff(asech(x+%i*y),y,2);
+0$
+
+diff(acoth(x+%i*y),x,2) + diff(acoth(x+%i*y),y,2);
+0$
+
+diff(asinh(x+%i*y),x,2) + diff(asinh(x+%i*y),y,2);
+0$
+
+diff(acosh(x+%i*y),x,2) + diff(acosh(x+%i*y),y,2);
+0$
+
+diff(atanh(x+%i*y),x,2) + diff(atanh(x+%i*y),y,2);
+0$

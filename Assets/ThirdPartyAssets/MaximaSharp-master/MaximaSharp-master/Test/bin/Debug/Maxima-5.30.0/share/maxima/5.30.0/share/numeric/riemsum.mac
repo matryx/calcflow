@@ -1,0 +1,57 @@
+
+critical_points(expr,var):= block([numer:true,f:diff(expr,var)],
+    realroots(num(f)*denom(f),10^-7));
+
+function_max(expr,var,a,b,critical_points):=
+   block([y:max(at(expr,var=a),at(expr,var=b)) ],
+          for v in critical_points
+             do (v:at(x,v),
+             if a<v and v<b and at(expr,var=v) > y then y:at(expr,var=v)),
+          y);
+upper_sum(expr,var,partition):=
+  block([crit:critical_points(expr,var)],
+    partition:sort(partition), 
+     sum(function_max(expr,var,partition[i],partition[i+1],crit)*
+             (partition[i+1]-partition[i]),i,1,length(partition)-1));
+
+/* this will be part of maxima in a little while .. */
+	       
+graph_riemann_sum(up,expr,var,partition):=
+  block([lis,numer:true,crit:critical_points(expr,var),n:length(partition),xx,
+	 interval,display2d:false,sgn,min:100000,max:-10000000],
+    sgn: if up= upper then 1 else -1,
+    partition:sort(partition), 
+    interval:partition[n]-partition[1],
+    lis:[],
+    for i:0 thru 50 do (xx:partition[1]+i*interval/50,
+			lis:cons(val:at(expr,var=xx),lis),
+			lis:cons(xx,lis),
+			if val < min then min:val,
+			if val > max then max:val),
+    sprint("{plot2d ", "{xrange " ,partition[1]-.5,partition[n]+.5,"} {yrange" ,
+	   min-.5,max+.5, "} {xversusy "),
+    tcl_output(lis,1),
+    tcl_output(lis,2),
+    sprint( "}"),
+    sprint(" {xversusy {"),
+    for i:1 thru n-1
+     do(
+       sprint(partition[i],partition[i],partition[i+1],partition[i+1],
+	      partition[i])),
+    sprint(" } { "),
+    for i:1 thru n-1
+      do(xx:sgn*function_max(sgn*expr,var,partition[i],partition[i+1],crit),
+	 sprint(0.0,xx,xx,0.0,0.0)),
+    sprint("}}}"),
+    ""
+      );
+	
+	
+	
+upper_and_lower_sums(expr,var,partition):=
+   block([up:upper_sum(expr,var,partition),
+          low:-upper_sum(-expr,var,partition)],
+    [up,low,up-low]);
+
+make_partition(a,b,n):=makelist(a+(b-a)*i/n,i,0,n);
+

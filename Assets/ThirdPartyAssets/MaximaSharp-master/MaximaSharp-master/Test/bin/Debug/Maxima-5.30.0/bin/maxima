@@ -1,0 +1,205 @@
+#!/bin/sh
+# -*- Shell-script -*-
+
+unixize () {
+    echo "$1" | sed -e 's%\\\\%/%g' | sed -e 's%^\([A-Za-z]\):%/\1%'
+}
+
+setup_vars() {
+  if [ -z "$MAXIMA_VERSION" ]; then
+    MAXIMA_VERSION=5.30.0
+  fi
+  prefix=`unixize "c:/maxima"`
+  exec_prefix=`unixize "${prefix}"`
+  PACKAGE=maxima
+  top_srcdir=`unixize "/usr/local/src/maxima-5.30.0"`
+  libdir=`unixize "${exec_prefix}/lib"`
+  if [ -n "$MAXIMA_LAYOUT_AUTOTOOLS" ]; then
+      layout_autotools="$MAXIMA_LAYOUT_AUTOTOOLS"
+  else
+      layout_autotools=true
+  fi
+  if [ "$layout_autotools" = "true" ]; then
+      MAXIMA_DEFAULT_IMAGESDIR=$libdir/$PACKAGE/$MAXIMA_VERSION
+  else
+      MAXIMA_DEFAULT_IMAGESDIR=$top_srcdir/src
+  fi  
+  if [ -n "$MAXIMA_PREFIX" ]; then
+      if [ "$layout_autotools" = "true" ]; then
+	  MAXIMA_IMAGESDIR=`unixize "$MAXIMA_PREFIX"`/lib/$PACKAGE/$MAXIMA_VERSION
+      else
+	  MAXIMA_IMAGESDIR=`unixize "$MAXIMA_PREFIX"`/src
+      fi  
+  else
+      MAXIMA_IMAGESDIR="$MAXIMA_DEFAULT_IMAGESDIR"
+  fi
+  MAXIMA_DEFAULT_LISP=gcl
+  # If the the binary directory for the default lisp is not present,
+  # choose the first one we find.
+  if [ ! -d "$MAXIMA_IMAGESDIR/binary-$MAXIMA_DEFAULT_LISP" ]; then
+    MAXIMA_DEFAULT_LISP=`ls -1 $MAXIMA_IMAGESDIR 2>/dev/null | head -n 1 | sed 's/binary-//'`
+  fi
+  if [ -z "$MAXIMA_LISP" ]; then
+    MAXIMA_LISP=$MAXIMA_DEFAULT_LISP
+  fi
+}
+
+unsetup_vars () {
+  unset MAXIMA_IMAGESDIR
+  unset MAXIMA_LISP
+}
+
+process_userdir_argument() {
+    while [ -n "$1" ]; do
+        case $1 in 
+        --userdir ) MAXIMA_USERDIR=$2 ; shift;;
+        --userdir=* ) MAXIMA_USERDIR=`echo "$1" | sed 's/--userdir=//'` ;;
+        esac
+        shift
+    done
+if [ -n "$MAXIMA_USERDIR" ]; then
+    export MAXIMA_USERDIR
+fi
+}
+
+# make a special check for --userdir argument, because it influences location
+# of maximarc, which is sourced before  other command-line options are
+# processed
+process_userdir_argument "$@"
+
+if [ -z "$MAXIMA_USERDIR" ]; then
+  maximarc_path="$HOME/.maxima/maximarc"
+else
+  maximarc_path="`unixize \"$MAXIMA_USERDIR\"`/maximarc"
+fi
+if [ -f "$maximarc_path" ]; then
+  . "$maximarc_path"
+fi
+
+# For some reason TeXmacs sets MAXIMA_DIRECTORY to the empty string,
+# which breaks maxima's internal path logic. This is a workaround.
+if [ -z "$MAXIMA_DIRECTORY" ]; then
+  unset MAXIMA_DIRECTORY
+fi
+
+arg1=$1
+arg2=$2
+arg3=$3
+arg4=$4
+arg5=$5
+arg6=$6
+arg7=$7
+arg8=$8
+arg9=$9
+while [ -n "$1" ]; do
+    case $1 in 
+	-l|--lisp ) MAXIMA_LISP=$2 ; shift;;
+	--lisp=*) MAXIMA_LISP=`echo "$1" | sed 's/--lisp=//'` ;;
+	-u|--use-version ) MAXIMA_VERSION=$2 ; shift;;
+	--use-version=*) MAXIMA_VERSION=`echo "$1" | sed 's/--use-version=//'` 
+	    ;;
+	-X|--lisp-options) MAXIMA_LISP_OPTIONS="$2" ; shift ;;
+	--lisp-options=*) MAXIMA_LISP_OPTIONS=`echo "$1" | sed 's/--lisp-options=//'` ;;
+	--userdir ) : ; shift;; # noop; handled by process_userdir_argument
+	--userdir=*) : ;; # noop; handled by process_userdir_argument
+	-v|--verbose ) verbose=true;;
+	*) ;;
+    esac
+    shift
+done
+
+# Allow ccl as an alias of openmcl.
+if [ "$MAXIMA_LISP" = "ccl" ]; then
+    MAXIMA_LISP=openmcl
+fi
+
+
+setup_vars
+
+if [ ! -d "$MAXIMA_IMAGESDIR" ]; then
+# Have we been moved?
+  MAXIMA_PREFIX=`(cd \`dirname $0\` 1>/dev/null 2>/dev/null; dirname \`pwd\`)`
+  export MAXIMA_PREFIX
+  unsetup_vars
+  setup_vars
+  if [ ! -d "$MAXIMA_IMAGESDIR" ]; then
+    echo "$0: unable to determine MAXIMA_PREFIX" 1>&2
+    exit 1
+  fi
+fi
+
+maxima_image_base="$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima"
+
+if [ "$verbose" = "true" ]; then
+    set -x
+fi
+if [ "$MAXIMA_LISP" = "clisp" ]; then
+    if [ "$layout_autotools" = "true" ]; then
+      if [ -x "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima" ]; then
+        exec "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima" $MAXIMA_LISP_OPTIONS -q "" -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+      else
+	exec "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/lisp.exe" $MAXIMA_LISP_OPTIONS -q -M "$maxima_image_base.mem" "" -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+      fi
+    else
+      if [ -x "$maxima_image_base" ]; then
+        exec "$maxima_image_base"  $MAXIMA_LISP_OPTIONS -q  "" -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+      else
+	exec "clisp" $MAXIMA_LISP_OPTIONS -q -M "$maxima_image_base.mem" "" -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+      fi
+    fi
+elif [ "$MAXIMA_LISP" = "cmucl" ]; then
+    # CMUCL can use either an executable image or a regular lisp core
+    # file.  Check for the executable image and run that if possible.
+    # Otherwise, fallback and use the lisp core file.
+    if [ "$layout_autotools" = "true" ]; then
+	if [ -x "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima" ]; then
+	    exec "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima" $MAXIMA_LISP_OPTIONS -quiet -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+	else
+	    exec "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/lisp" $MAXIMA_LISP_OPTIONS -quiet -core "$maxima_image_base.core" -eval '(cl-user::run)' -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+	fi
+    else
+	if [ -x "$maxima_image_base" ]; then
+	    exec "$maxima_image_base" $MAXIMA_LISP_OPTIONS -quiet -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+	else
+	    exec "lisp" $MAXIMA_LISP_OPTIONS -quiet -core "$maxima_image_base.core" -eval '(cl-user::run)' -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+	fi
+    fi
+elif [ "$MAXIMA_LISP" = "scl" ]; then
+    if [ "$layout_autotools" = "true" ]; then
+	exec "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/lisp" $MAXIMA_LISP_OPTIONS -quiet -core "$maxima_image_base.core" -eval '(cl-user::run)' -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+    else
+	exec "scl" $MAXIMA_LISP_OPTIONS -quiet -core "$maxima_image_base.core" -eval '(cl-user::run)' -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+    fi
+elif [ "$MAXIMA_LISP" = "gcl" ]; then
+    exec "$maxima_image_base" -eval '(cl-user::run)' $MAXIMA_LISP_OPTIONS -f -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+elif [ "$MAXIMA_LISP" = "acl" ]; then
+# FIXME: arguments need in a manner consistent with the way they are extracted
+#        in the function get-application-args in command-line.lisp
+    exec "lisp" -I "$maxima_image_base.dxl" $MAXIMA_LISP_OPTIONS -e '(cl-user::run)' "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+elif [ "$MAXIMA_LISP" = "openmcl" ]; then
+# OPENMCL can use either an executable image or a regular lisp core
+# file.  Check for the executable image and run that if possible.
+# Otherwise, fallback and use the lisp core file.
+# FIXME: arguments need in a manner consistent with the way they are extracted
+#        in the function get-application-args in command-line.lisp
+    if [ -x "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima" ]; then
+      exec "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima" $MAXIMA_LISP_OPTIONS -e '(cl-user::run)' -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+    else
+      exec "openmcl" -I "$maxima_image_base.image" $MAXIMA_LISP_OPTIONS -e '(cl-user::run)' -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+   fi
+
+elif [ "$MAXIMA_LISP" = "ecl" ]; then
+   exec "$maxima_image_base"  $MAXIMA_LISP_OPTIONS -- "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+
+elif [ "$MAXIMA_LISP" = "sbcl" ]; then
+# Use executable image if it exists
+  if [ -x "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima" ]; then
+    exec "$MAXIMA_IMAGESDIR/binary-$MAXIMA_LISP/maxima" --noinform $MAXIMA_LISP_OPTIONS --end-runtime-options --eval '(cl-user::run)' --end-toplevel-options "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+  else
+    exec "sbcl" --core "$maxima_image_base.core" --noinform $MAXIMA_LISP_OPTIONS --end-runtime-options --eval '(cl-user::run)' --end-toplevel-options "$arg1" "$arg2" "$arg3" "$arg4" "$arg5" "$arg6" "$arg7" "$arg8" "$arg9"
+  fi
+
+else
+    echo "$0: lisp=\"$MAXIMA_LISP\" not known. Use --list-avail to see possible options." >&2
+    exit 1
+fi

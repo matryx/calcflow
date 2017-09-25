@@ -1,0 +1,761 @@
+/* Filename physicalconstants.mac
+
+       ***************************************************************
+       *        Definitions of Fundamental Physical Constants        *
+       *                  CODATA Recommended Values                  *
+       *            (Version .4 - current as of March 2002)          *
+       *                                                             *
+       *         Source, Peter J. Mohr and Barry N. Taylor, 	     *
+       *         CODATA Recommended Values of the Fundamental        *
+       *         Physical Constants, 1998		 	     *
+       *							     *
+       *         Website: physics.nist.gov/constants		     *
+       *                 --------------------------                  *
+       *                  Programmed by Cliff Yapp                   *
+       ***************************************************************
+
+   Abbreviations, 
+      RSU: Relative Standard Uncertainty
+
+    Variables with two percent signs: %%c, %%h, %%e, %%F, %%R
+    
+   Changes:
+      .1  -  first version uploaded
+      .2  -  converted to numerval usage, added units to value 
+             assignments, converted to E notation
+      .3  -  added RSU into definitions via qput
+      .4  -  minor cleanup, added %h_bar to definitions
+=========================================================================*/ 
+
+ttyoff: nolabels, true$
+
+/*Universal Constants
+-------------------------------------------------------------------------*/
+
+/*speed of light in vacuum*/
+   numerval(%%c, 299792458*m/s)$
+   numerval(%c_0, 299792458*m/s)$
+   
+/*magnetic constant*/
+   numerval(%u_0, 4*%pi*1E-7*N/(A^2))$
+   numerval(%mu_0, 4*%pi*1E-7*N/(A^2))$
+
+/*electric constant*/ 
+   numerval(%e_0, 8.854187817E-12*F/m)$
+   numerval(%epsilon_0, 8.854187817E-12*F/m)$
+
+/*characteristic impedance of vacuum*/ 
+   numerval(%Z_0, 376.730313461*Ohms)$
+
+/*Newtonian constant of gravitation*/    
+   numerval(%G, 6.673E-11*m^3/(kg*s^2))$
+   qput(%G, 1.5E-3, RSU)$
+   
+/*Planck constant*/    
+   numerval(%%h, 6.62606876E-34*J*s)$
+   qput(%%h, 7.8E-8, RSU)$
+
+/*Planck constant in eVs*/	
+   numerval(%h_eV, 4.13566727E-15*eV*s)$
+   qput(%h_eV, 3.9E-8, RSU)$
+ 
+/*Hbar*/
+   numerval(%h_bar, 1.054571596E-34*J*s)$
+   qput(%h_bar, 7.8E-8, RSU)$
+
+/*Hbar in eV*/
+   numerval(%h_bar_eV, 6.58211889E-16*eV*s)$
+   qput(%h_bar_eV, 3.9E-8, RSU)$
+   
+/*Planck mass*/
+   numerval(%P_m, 2.1767E-8*kg)$
+   qput(%P_m, 7.5E-4, RSU)$
+
+/*Planck length*/  
+   numerval(%P_l, 1.6160E-35*m)$
+   qput(%P_l, 7.5E-4, RSU)$
+   
+/*Planck time*/ 
+   numerval(%P_t, 5.3906E-44*s)$
+    qput(%P_t, 7.5E-4, RSU)$
+
+/*Electromagnetic Constants
+------------------------------------------------------------------------*/
+/*elementary charge*/
+   numerval(%%e, 1.602176462E-19*C)$
+   qput(%%e, 3.9E-8, RSU)$
+
+/*magnetic flux quantum*/ 
+   numerval(%capitalphi_0, 2.067833636E-15*Wb)$
+   qput(%capitalphi_0, 3.9E-8, RSU)$
+   numerval(%mfq_0, 2.067833636E-15*Wb)$
+   qput(%mfq_0, 3.9E-8, RSU)$	
+   
+/*conductance quantum*/ 
+   numerval(%G_0, 7.748091696E-5*S)$
+   qput(%G_0, 3.7E-9, RSU)$
+
+/*Josephson constant*/
+   numerval(%K_J, 483597.898E9*Hz/V)$
+   qput(%K_J, 3.9E-8, RSU)$
+
+/*von Klitzing constant*/
+   numerval(%R_K, 25812.807572*Ohms)$
+   qput(%R_K, 3.7E-9, RSU)$
+    
+/*Bohr magneton*/
+   numerval(%u_B, 927.400899E-26*J/T)$
+   qput(%u_B, 4.0E-8, RSU)$
+/*Bohr magneton in eV T-1*/
+   numerval(%ueVT_B, 5.788381749E-5*eV/T)$
+   qput(%ueVT_B, 7.3E-9, RSU)$
+
+/*nuclear magneton*/ 
+   numerval(%u_N, 5.05078317E-27*J/T)$
+   qput(%u_N, 4.0E-8, RSU)$
+/*nuclear magneton in eV T-1*/   	
+   numerval(%ueVT_N, 3.152451238E-8*eV/T)$
+   qput(%ueVT_N, 7.6E-9, RSU)$
+
+
+/*Atomic and Nuclear Constants*/
+/*General
+-------------------------------------------------------------------------*/
+
+/*fine-structure constant*/ 
+   numerval(%alpha, 7.297352533E-3)$
+   qput(%alpha, 3.7E-9, RSU)$
+
+/*Rydberg constant*/  
+   numerval(%Ry, 10973731.568549/m)$
+   qput(%Ry, 7.6E-12, RSU)$
+   numerval(%Ry_INF, 10973731.568549/m)$
+   qput(%Ry_INF, 7.6E-12, RSU)$				
+
+/*Bohr radius*/ 
+   numerval(%a_0, 0.5291772083E-10*m)$
+   qput(%a_0, 3.7E-9, RSU)$
+
+/*Hartree energy*/ 
+   numerval(%E_h, 4.35974381E-18*J)$
+   qput(%E_h, 7.8E-8, RSU)$
+/*Hartree energy in eV*/    
+   numerval(%Eev_h, 27.2113834*eV)$
+   qput(%Eev_h, 3.9E-8, RSU)$
+     
+/*quantum of circulation   h/(2me)*/ 
+   numerval(%qcir2, 3.636947516E-4*m^2/s)$
+   qput(%qcir2, 7.3E-9, RSU)$
+/*quantum of circulation   h/(me)*/ 
+   numerval(%qcir, 7.273895032E-4*m^2/s)$
+   qput(%qcir, 7.3E-9, RSU)$
+     
+/*Electroweak
+-------------------------------------------------------------------------*/
+
+/*Fermi coupling constant*/    
+   numerval(%Fcc, 1.16639E-5/GeV^2)$
+   qput(%Fcc, 8.6E-6, RSU)$
+/*weak mixing angled  W (on-shell scheme)*/
+   numerval(%wma_W, 0.2224)$
+   qput(%wma_W, 8.7E-3, RSU)$
+
+/*Electron, e-
+-------------------------------------------------------------------------*/
+
+/*electron mass*/    
+   numerval(%m_e, 9.10938188E-31*kg)$
+   qput(%m_e, 7.9E-8, RSU)$
+/*electron mass (electron relative atomic mass times u)*/
+   numerval(%m_e_u, 5.485799110E-4*u)$
+   qput(%m_e_u,  2.1E-9, RSU)$
+/*electron mass - energy equivalent*/    
+   numerval(%me_J, 8.18710414E-14*J)$
+   qput(%me_J, 7.9E-8, RSU)$
+/*electron mass - energy equivalent in MeV*/
+   numerval(%me_MeV, 0.510998902*MeV)$
+   qput(%me_MeV, 4.0E-8, RSU)$
+
+/*electron-muon mass ratio*/
+   numerval(%memu, 4.83633210E-3)$
+    qput(%memu, 3.0E-8, RSU)$
+
+/*electron-tau mass ratio*/    
+   numerval(%metau, 2.87555E-4)$
+   qput(%metau, 1.6E-4, RSU)$
+
+/*electron-proton mass ratio*/    
+   numerval(%memp, 5.446170232E-4)$
+    qput(%memp, 2.1E-9, RSU)$
+
+/*electron-neutron mass ratio*/ 
+   numerval(%memn, 5.438673462E-4)$
+   qput(%memn, 2.2E-9, RSU)$
+
+/*electron-deuteron mass ratio*/    
+   numerval(%memd, 2.7244371170E-4)$
+   qput(%memd, 2.1E-9, RSU)$
+
+/*electron to alpha particle mass ratio*/    
+   numerval(%memalpha, 1.3709335611E-4)$
+   qput(%memalpha, 2.1E-9, RSU)$
+
+/*electron charge to mass quotient*/    
+   numerval(%echargeemass, -1.758820174E11*C/kg)$
+   qput(%echargeemass,  4.0E-8, RSU)$
+
+/*electron molar mass*/     
+   numerval(%Molar_e, 5.485799110E-7*kg/mol)$
+   qput(%Molar_e, 2.1E-9, RSU)$
+
+/*Compton wavelength*/ 
+   numerval(%lambdaC, 2.426310215E-12*m)$
+     qput(%lambdaC, 7.3E-9, RSU)$
+ 
+/*classical electron radius*/  
+   numerval(%r_e, 2.817940285E-15*m)$
+   qput(%r_e, 1.1E-8, RSU)$
+
+/*Thomson cross section*/ 
+   numerval(%sigma_e, 0.665245854E-28*m^2)$
+   qput(%sigma_e, 2.2E-8, RSU)$
+
+/*electron magnetic moment*/    
+   numerval(%u_e, -928.476362E-26*J/T)$
+   qput(%u_, 4.0E-8, RSU)$
+
+/*electron magnetic moment to Bohr magneton ratio*/    	
+   numerval(%ueuB, -1.0011596521869)$
+   qput(%ueuB, 4.1E-12, RSU)$
+
+/*electron magnetic moment to nuclear magneton ratio*/    
+   numerval(%ueuN, -1838.2819660)$
+   qput(%ueuN, 2.1E-9, RSU)$
+
+/*electron magnetic moment anomaly |ue|/uB - 1*/    
+   numerval(%a_e, 1.1596521869E-3)$
+   qput(%a_e, 3.5E-9, RSU)$
+    
+/*electron g-factor*/ 
+   numerval(%g_e, -2.0023193043737)$
+   qput(%g_e, 4.1E-12, RSU)$
+
+/*electron-muon magnetic moment ratio*/   
+   numerval(%ueuu, 206.7669720)$
+   qput(%ueuu, 3.0E-8, RSU)$
+
+/*electron-proton magnetic moment ratio */   
+   numerval(%ueup, -658.2106875)$
+       qput(%ueup, 1.0E-8, RSU)$
+
+/*electron to shielded proton magnetic moment ratio  (H2O, sphere, 25  C)*/
+   numerval(%ueusp, -658.2275954)$
+   qput(%ueusp, 1.1E-8, RSU)$
+
+/*electron-neutron magnetic moment ratio*/    
+   numerval(%ueun, 960.92050)$
+   qput(%ueun, 2.4E-7, RSU)$
+    
+/*electron-deuteron magnetic moment ratio*/    
+   numerval(%ueud, -2143.923498)$
+   qput(%ueud, 1.1E-8, RSU)$
+
+/*electron to shielded helione magnetic moment ratio  (gas, sphere, 25  C)*/
+   numerval(%ueush, 864.058255)$
+   qput(%ueush, 1.2E-8, RSU)$
+
+/*electron gyromagnetic ratio*/ 
+   numerval(%gamma_e, 1.760859794E11/(s*T))$
+   qput(%gamma_e, 4.0E-8, RSU)$
+    
+/*Muon, u-
+-------------------------------------------------------------------------*/
+
+/*muon mass*/    
+   numerval(%m_u, 1.88353109E-28*kg)$
+   qput(%m_u, 8.4E-8, RSU)$
+/*muon mass in muon relative atomic mass times u*/    
+   numerval(%mu_u, 0.1134289168*u)$
+   qput(%mu_u, 3.0E-8, RSU)$
+
+/*energy equivalent*/    
+   numerval(%muc2_J, 1.69283332E-11*J)$
+   qput(%muc2_J, 8.4E-8, RSU)$
+/*energy equivalent in MeV*/ 
+   numerval(%muc2_MeV, 105.6583568*MeV)$
+   qput(%muc2_MeV, 4.9E-8, RSU)$
+
+/*muon-electron mass ratio*/    
+   numerval(%mume, 206.7682657)$
+   qput(%mume, 3.0E-8, RSU)$
+
+/*muon-tau mass ratio*/
+   numerval(%mum, 5.94572E-2)$
+   qput(%mum, 1.6E-4, RSU)$
+
+/*muon-proton mass ratio*/
+   numerval(%mump, 0.1126095173)$
+   qput(%mump, 3.0E-8, RSU)$
+
+/*muon-neutron mass ratio*/ 
+   numerval(%mumn, 0.1124545079)$
+   qput(%mumn, 3.0E-8, RSU)$
+
+/*muon molar mass*/ 
+   numerval(%Molar_u, 0.1134289168E-3*kg/mol)$
+   qput(%Molar_u, 3.0E-8, RSU)$
+   
+/*muon Compton wavelength*/ 
+   numerval(%lambda_C_u, 11.73444197E-15*m)$
+   qput(%lambda_C_u, 2.9E-8, RSU)$
+
+/*muon magnetic moment*/    
+   numerval(%uu, -4.49044813E-26*J/T)$
+   qput(%uu, 4.9E-8, RSU)$
+
+/*ratio of muon magnetic moment to Bohr magneton ratio*/ 
+   numerval(%uuuB, -4.84197085E-3)$
+   qput(%uuuB, 3.0E-8, RSU)$
+   
+/*ratio of muon magnetic moment to nuclear magneton ratio*/    
+   numerval(%uuuN, -8.89059770)$
+   qput(%uuuN, 3.0E-8, RSU)$
+
+/*muon magnetic moment anomaly |uu|/(e /2mu) - 1*/    
+   numerval(%a_u, 1.16591602E-3)$
+   qput(%a_u, 5.5E-7, RSU)$
+   
+/*muon g-factor -2(1 + au)*/    
+   numerval(%g_u, -2.0023318320)$
+   qput(%g_u, 6.4E-10, RSU)$
+
+/*muon-proton magnetic moment ratio*/    
+   numerval(%uuup, -3.18334539)$
+   qput(%uuup, 3.2E-8, RSU)$
+
+/*Tau, tau-
+-------------------------------------------------------------------------*/
+
+/*tau mass*/    
+   numerval(%m_tau, 3.16788E-27*kg)$
+   qput(%m_tau, 1.6E-4, RSU)$
+/*tau mass  (tau relative atomic mass times u)*/   
+   numerval(%mu_tau, 1.90774*u)$
+   qput(%mu_tau, 1.6E-4, RSU)$
+   
+/*tau mass energy equivalent*/    
+   numerval(%mtauc2_J, 2.84715E-10*J)$
+   qput(%mtauc2_J, 1.6E-4, RSU)$
+
+/*tau mass energy equivalent in MeV*/ 
+   numerval(%mtauc2_MeV, 1777.05*MeV)$
+   qput(%mtauc2_MeV, 1.6E-4, RSU)$
+
+/*tau-electron mass ratio*/   
+   numerval(%mtaume, 3477.60)$
+   qput(%mtaume, 1.6E-4, RSU)$
+
+/*tau-muon mass ratio*/    
+   numerval(%mtaumu, 16.8188)$
+   qput(%mtaumu, 1.6E-4, RSU)$
+
+/*tau-proton mass ratio*/    
+   numerval(%mtaump, 1.89396)$
+   qput(%mtaump, 1.6E-4, RSU)$
+
+/*tau-neutron mass ratio*/    
+   numerval(%mtaumn, 1.89135)$
+   qput(%mtaumn, 1.6E-4, RSU)$
+
+/*tau molar mass*/ 
+   numerval(%Molar_tau, 1.90774E-3*kg/mol)$
+   qput(%Molar_tau, 1.6E-4, RSU)$
+
+/*tau Compton wavelength*/    
+   numerval(%lambda_C_tau, 0.69770E-15*m)$
+   qput(%lambda_C_tau, 1.6E-4, RSU)$
+
+/*Proton, p
+-------------------------------------------------------------------------*/
+
+/*proton mass*/  
+   numerval(%m_p, 1.67262158E-27*kg)$
+    qput(%m_p, 7.9E-8, RSU)$
+/*proton mass (proton relative atomic mass times u)*/  
+   numerval(%mu_p, 1.00727646688*u)$
+   qput(%mu_p, 1.3E-10, RSU)$
+   
+/*energy equivalent*/   
+   numerval(%mpc2_J, 1.50327731E-10*J)$
+    qput(%mpc2_J, 7.9E-8, RSU)$
+/*energy equivalent in MeV*/  
+   numerval(%mpc2_MeV, 938.271998*MeV)$
+   qput(%mpc2_MeV, 4.0E-8, RSU)$
+   
+/*proton-electron mass ratio*/ 
+   numerval(%mpme, 1836.1526675)$
+   qput(%mpme, 2.1E-9, RSU)$
+
+/*proton-muon mass ratio*/ 
+   numerval(%mpmu, 8.88024408)$
+   qput(%mpmu, 3.0E-8, RSU)$
+
+/*proton-tau mass ratio*/ 
+   numerval(%mpmtau, 0.527994)$
+   qput(%mpmtau, 1.6E-4, RSU)$
+
+/*proton-neutron mass ratio*/ 
+   numerval(%mpmn, 0.99862347855)$
+   qput(%mpmn, 5.8E-10, RSU)$
+
+/*proton charge to mass quotient*/    
+   numerval(%emp, 9.57883408E7*C/kg)$
+   qput(%emp, 4.0E-8, RSU)$
+
+/*proton molar mass*/ 
+   numerval(%Molar_p, 1.00727646688E-3*kg/mol)$
+   qput(%Molar_p, 1.3E-10, RSU)$
+
+/*proton Compton wavelength h/mpc*/  
+   numerval(%lambda_C_p, 1.321409847E-15*m)$
+   qput(%lambda_C_p, 7.6E-9, RSU)$
+   
+/*proton magnetic moment*/   
+   numerval(%up, 1.410606633E-26*J/T)$
+   qput(%up, 4.1E-8, RSU)$
+   
+/*proton magnetic moment to Bohr magneton ratio*/ 
+   numerval(%upuB, 1.521032203E-3)$
+   qput(%upuB, 1.0E-8, RSU)$
+
+/*proton magnetic moment to nuclear magneton ratio*/ 
+   numerval(%upuN, 2.792847337)$
+   qput(%upuN, 1.0E-8, RSU)$
+
+/*proton g-factor 2up/uN*/  
+   numerval(%g_p, 5.585694675)$
+   qput(%g_p, 1.0E-8, RSU)$
+
+/*proton-neutron magnetic moment ratio*/  
+   numerval(%upun, -1.45989805)$
+   qput(%upun, 2.4E-7, RSU)$
+   
+/*shielded proton magnetic moment  (H2O, sphere, 25  C)*/
+   numerval(%usp, 1.410570399E-26*J/T)$
+   qput(%usp, 4.2E-8, RSU)$
+
+/*shielded proton magnetic moment to Bohr magneton ratio*/ 
+   numerval(%uspuB, 1.520993132E-3)$
+   qput(%uspuB, 1.1E-8, RSU)$
+
+/*shielded proton magnetic moment to nuclear magneton ratio*/ 
+   numerval(%uspuN, 2.792775597)$
+   qput(%uspuN, 1.1E-8, RSU)$
+
+/*proton magnetic shielding correction 1 - u p/up  (H2O, sphere, 25  C)*/
+   numerval(%spc, 25.687E-6)$
+   qput(%spc, 5.7E-4, RSU)$
+
+/*proton gyromagnetic ratio*/ 
+   numerval(%gamma_p, 2.67522212E8/(s*T))$
+   qput(%gamma_p, 4.1E-8, RSU)$
+
+/*shielded proton gyromagnetic ratio (H2O, sphere, 25  C)*/
+   numerval(%gamma_sp, 2.67515341E8/(s*T))$
+   qput(%gamma_sp, 4.2E-8, RSU)$
+
+/*Neutron, n
+-------------------------------------------------------------------------*/
+
+/*neutron mass*/  
+   numerval(%m_n, 1.67492716E-27*kg)$
+    qput(%m_n, 7.9E-8, RSU)$
+/*neutron mass (neutron relative atomic mass times u)*/ 
+   numerval(%mu_n, 1.00866491578*u)$
+   qput(%mu_n, 5.4E-10, RSU)$
+   
+/*neutron mass energy equivalent*/  
+   numerval(%mnc2_J, 1.50534946E-10*J)$
+   qput(%mnc2_J, 7.9E-8, RSU)$
+
+/*neutron mass energy equivalent  in MeV*/  
+   numerval(%mnc2_MeV, 939.565330*MeV)$
+   qput(%mnc2_MeV, 4.0E-8, RSU)$
+   
+/*neutron-electron mass ratio*/ 
+   numerval(%mnme, 1838.6836550)$
+   qput(%mnme, 2.2E-9, RSU)$
+   
+/*neutron-muon mass ratio*/ 
+   numerval(%mnmu, 8.89248478)$
+   qput(%mnmu, 3.0E-8, RSU)$
+
+/*neutron-tau mass ratio*/ 
+   numerval(%mnm, 0.528722)$
+   qput(%mnm, 1.6E-4, RSU)$
+
+/*neutron-proton mass ratio*/ 
+   numerval(%mnmp, 1.00137841887)$
+   qput(%mnmp, 5.8E-10, RSU)$
+
+/*neutron molar mass*/  
+   numerval(%Molar_n, 1.00866491578E-3*kg/mol)$
+   qput(%Molar_n, 5.4E-10, RSU)$
+
+/*neutron Compton wavelength*/
+   numerval(%lambda_C_n, 1.319590898E-15*m)$
+   qput(%lambda_C_n, 7.6E-9, RSU)$
+   
+/*neutron magnetic moment*/ 
+   numerval(%un, -0.96623640E-26*J/T)$
+   qput(%un, 2.4E-7, RSU)$
+   
+/*neutron magnetic moment to Bohr magneton ratio*/ 
+   numerval(%unuB, -1.04187563E-3)$
+   qput(%unuB, 2.4E-7, RSU)$
+
+/*neutron magnetic moment to nuclear magneton ratio*/ 
+   numerval(%unuN, -1.91304272)$
+   qput(%unuN, 2.4E-7, RSU)$
+
+/*neutron g-factor*/ 
+   numerval(%g_n, -3.82608545)$
+   qput(%g_n, 2.4E-7, RSU)$
+
+/*neutron-electron magnetic moment ratio*/  
+   numerval(%unue, 1.04066882E-3)$
+   qput(%unue, 2.4E-7, RSU)$
+   
+/*neutron-proton magnetic moment ratio*/ 
+   numerval(%unup, -0.68497934)$
+   qput(%unup, 2.4E-7, RSU)$
+
+/*neutron to shielded proton magnetic moment ratio (H2O, sphere, 25  C)*/
+   numerval(%unusp, -0.68499694)$
+   qput(%unusp, 2.4E-7, RSU)$
+   
+/*neutron gyromagnetic ratio*/ 
+   numerval(%gamma_n, 1.83247188E8/(s*T))$
+   qput(%gamma_n, 2.4E-7, RSU)$
+
+/*Deuteron, d
+-------------------------------------------------------------------------*/
+
+/*deuteron mass*/ 
+   numerval(%m_d, 3.34358309E-27*kg)$
+   qput(%m_d, 7.9E-8, RSU)$
+   
+/*deuteron mass (deuteron relative atomic mass times u)*/  
+   numerval(%mu_d, 2.01355321271*u)$
+   qput(%mu_d, 1.7E-10, RSU)$
+
+/*deuteron mass energy equivalent*/ 
+   numerval(%mdc2_J, 3.00506262E-10*J)$
+     qput(%mdc2_J, 7.9E-8, RSU)$
+
+/*deuteron mass energy equivalent in MeV*/  
+   numerval(%mdc2_eV, 1875.612762*MeV)$
+   qput(%mdc2_eV, 4.0E-8, RSU)$
+   
+/*deuteron-electron mass ratio*/  
+   numerval(%mdme, 3670.4829550)$
+   qput(%mdme, 2.1E-9, RSU)$
+   
+/*deuteron-proton mass ratio*/ 
+   numerval(%mdmp, 1.99900750083)$
+   qput(%mdmp, 2.0E-10, RSU)$
+
+/*deuteron molar mass*/ 
+   numerval(%Molar_d, 2.01355321271E-3*kg/mol)$
+   qput(%Molar_d, 1.7E-10, RSU)$
+
+/*deuteron magnetic moment*/  
+   numerval(%ud, 0.433073457E-26*J/T)$
+   qput(%ud, 4.2E-8, RSU)$
+   
+/*deuteron magnetic moment to Bohr magneton ratio*/ 
+   numerval(%uduB, 0.4669754556E-3)$
+   qput(%uduB, 1.1E-8, RSU)$
+   
+/*deuteron magnetic moment to nuclear magneton ratio*/ 
+   numerval(%uduN, 0.8574382284)$
+   qput(%uduN, 1.1E-8, RSU)$
+
+/*deuteron-electron magnetic moment ratio*/ 
+   numerval(%udue, -4.664345537E-4)$
+   qput(%udue, 1.1E-8, RSU)$
+
+/*deuteron-proton magnetic moment ratio*/ 
+   numerval(%udup, 0.3070122083)$
+   qput(%udup, 1.5E-8, RSU)$
+
+/*deuteron-neutron magnetic moment ratio*/ 
+   numerval(%udun, -0.44820652)$
+   qput(%udun, 2.4E-7, RSU)$
+
+/*Helion, h
+-------------------------------------------------------------------------*/
+
+/*helion mass*/ 
+   numerval(%m_h, 5.00641174E-27*kg)$
+   qput(%m_h, 7.9E-8, RSU)$
+
+/*helion mass (helion relative atomic mass times u)*/  
+   numerval(%mu_h, 3.01493223469*u)$
+   qput(%mu_h, 2.8E-10, RSU)$
+   
+/*helion mass energy equivalent*/ 
+   numerval(%mhc2_J, 4.49953848E-10*J)$
+   qput(%mhc2_J, 7.9E-8, RSU)$
+/*helion mass energy equivalent in MeV*/ 
+   numerval(%mhc2_MeV, 2808.39132*MeV)$
+   qput(%mhc2_MeV, 4.0E-8, RSU)$
+
+/*helion-electron mass ratio*/ 
+   numerval(%mhme, 5495.885238)$
+   qput(%mhme, 2.1E-9, RSU)$
+
+/*helion-proton mass ratio*/ 
+   numerval(%mhmp, 2.99315265850)$
+   qput(%mhmp, 3.1E-10, RSU)$
+
+/*helion molar mass*/ 
+   numerval(%Molar_h, 3.01493223469E-3*kg/mol)$
+   qput(%Molar_h, 2.8E-10, RSU)$
+
+/*shielded helion magnetic moment (gas, sphere, 25  C)*/
+   numerval(%ush, -1.074552967E-26*J/T)$
+   qput(%ush, 4.2E-8, RSU)$
+
+/*shielded helion magnetic moment to Bohr magneton ratio*/ 
+   numerval(%ushuB, -1.158671474E-3)$
+   qput(%ushuB, 1.2E-8, RSU)$
+
+/*shielded helion magnetic moment to nuclear magneton ratio*/  
+   numerval(%ushuN, -2.127497718)$
+   qput(%ushuN, 1.2E-8, RSU)$
+
+/*shielded helion to proton magnetic moment ratio  (gas, sphere, 25  C)*/
+   numerval(%ushup, -0.761766563)$
+   qput(%ushup, 1.5E-8, RSU)$
+
+/*shielded helion to shielded proton magnetic moment ratio  (gas/H2O, spheres, 25  C)*/
+   numerval(%ushusp, -0.7617861313)$
+   qput(%ushusp, 4.3E-9, RSU)$
+
+/*shielded helion gyromagnetic  (gas, sphere, 25  C)*/ 
+   numerval(%gamma_h, 2.037894764E8/(s*T))$
+   qput(%gamma_h, 4.2E-8, RSU)$
+
+/*Alpha particle, 
+-------------------------------------------------------------------------*/
+
+/*alpha particle mass*/  
+   numerval(%m_alpha, 6.64465598E-27*kg)$
+   qput(%m_alpha, 7.9E-8, RSU)$
+/*alpha particle mass (alpha particle relative atomic mass times u)*/ 
+   numerval(%mu_alpha, 4.0015061747*u)$
+   qput(%mu_alpha, 2.5E-10, RSU)$
+   
+/*alpha particle mass energy equivalent*/  
+   numerval(%malphac2_J, 5.97191897E-10*J)$
+     qput(%malphac2_J, 7.9E-8, RSU)$
+
+/*alpha particle mass energy equivalent in MeV*/  
+   numerval(%malphac2_MeV, 3727.37904*MeV)$
+   qput(%malphac2_MeV, 4.0E-8, RSU)$
+
+/*alpha particle to electron mass ratio*/ 
+   numerval(%malphame, 7294.299508)$
+   qput(%malphame, 2.1E-9, RSU)$
+
+/*alpha particle to proton mass ratio*/ 
+   numerval(%malphamp, 3.9725996846)$
+   qput(%malphamp, 2.8E-10, RSU)$
+
+/*alpha particle molar mass*/
+   numerval(%Molar_alpha, 4.0015061747E-3*kg/mol)$
+   qput(%Molar_alpha, 2.5E-10, RSU)$
+
+/*PHYSICO-CHEMICAL
+-------------------------------------------------------------------------*/
+
+/*Avogadro constant*/  
+   numerval(%N_A, 6.02214199E23/mol)$
+   qput(%N_A, 7.9E-8, RSU)$
+   numerval(%L, 6.02214199E23/mol)$
+   qput(%L, 7.9E-8, RSU)$
+
+/*atomic mass constant mu = 112m(12C) = 1 u = 10E-3 kg mol-1/NA*/
+   numerval(%m_u, 1.66053873E-27*kg)$
+   qput(%m_u, 7.9E-8, RSU)$
+
+/*energy equivalent of the atomic mass constant*/
+   numerval(%muc2_J, 1.49241778E-10*J)$
+   qput(%muc2_J, 7.9E-8, RSU)$
+    
+/*energy equivalent of the atomic mass constant in MeV*/ 
+   numerval(%muc2_MeV, 931.494013*MeV)$
+   qput(%muc2_MeV, 4.0E-8, RSU)$
+
+/*Faraday constant*/
+   numerval(%%F, 96485.3415*C/mol)$
+   qput(%%F, 4.0E-8, RSU)$
+
+/*molar Planck constant*/   
+   numerval(%N_Ah, 3.990312689E-10*J*s/mol)$
+   qput(%N_Ah, 7.6E-9, RSU)$
+
+/*molar gas constant*/  
+   numerval(%%R, 8.314472*J/(mol*K))$
+   qput(%%R, 1.7E-6, RSU)$
+
+/*Boltzmann constant*/ 
+   numerval(%k_J, 1.3806503E-23*J/K)$
+   qput(%k_J, 1.7E-6, RSU)$
+
+/*Boltzmann constant in eV*/ 
+   numerval(%k_eV, 8.617342E-5*eV/K)$
+   qput(%k_eV, 1.7E-6, RSU)$
+
+/*Loschmidt constant  NA/Vm*/ 
+   numerval(%n_0, 2.6867775E25/m^3)$
+   qput(%n_0, 1.7E-6, RSU)$
+
+/*molar volume of ideal gas RT/p   T = 273.15 K, p = 101.325 kPa*/ 
+   numerval(%Vm_1, 22.413996E-3*m^3/mol)$
+   qput(%Vm_1, 1.7E-6, RSU)$
+/*molar volume of ideal gas RT/p   T = 273.15 K, p = 100 kPa*/  
+   numerval(%Vm_2, 22.710981E-3*m^3/mol)$
+   qput(%Vm_2, 1.7E-6, RSU)$
+
+
+/*Sackur-Tetrode constant (absolute entropy constant) 52 + ln_(2 mukT1/h2)3/2kT1/p0*/
+/*T1 = 1 K, p0 = 100 kPa*/ 
+   numerval(%S_0R_1, -1.1517048)$
+   qput(%S_0R_1, 3.8E-6, RSU)$
+/*T1 = 1 K, p0 = 101.325 kPa*/ 	
+   numerval(%S_0R_2, -1.1648678)$
+   qput(%S_0R_2, 3.7E-6, RSU)$
+
+/*Stefan-Boltzmann constant*/ 
+   numerval(%sigma, 5.670400E-8*W/(m^2*K^4))$
+   qput(%sigma, 7.0E-6, RSU)$
+
+/*first radiation constant*/
+   numerval(%c_1, 3.74177107E-16*W*m^2)$
+   qput(%c_1, 7.8E-8, RSU)$
+
+/*first radiation constant for spectral radiance*/
+   numerval(%c_1L, 1.191042722E-16*W*m^2/sr)$
+   qput(%c_1L, 7.8E-8, RSU)$
+
+/*second radiation constant*/
+   numerval(%c_2, 1.4387752E-2*m*K)$
+   qput(%c_2, 1.7E-6, RSU)$
+
+/*Wien displacement law constant b =  maxT = c2/4.965 114231...*/ 
+   numerval(%b, 2.8977686E-3*m*K)$
+   qput(%b, 1.7E-6, RSU)$
+
+ttyoff: nolabels, false$
