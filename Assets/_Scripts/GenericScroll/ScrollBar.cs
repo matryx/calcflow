@@ -56,13 +56,6 @@ public class ScrollBar : MonoBehaviour
                                            new Vector3(0, -moveBy, 0) : new Vector3(0, moveBy, 0);
         }
 
-        //float moveBy = (orientation == Scroll.orientation.VERTICAL) ?
-        //               (scroll.localScale.x / 2) + (bar.transform.localScale.x / 2) + 0.1f :
-        //               (scroll.localScale.y / 2) + (bar.transform.localScale.y / 2) + 0.1f;
-
-        //bar.transform.localPosition = (orientation == Scroll.orientation.VERTICAL) ?
-        //                       new Vector3(moveBy, 0, 0) : new Vector3(0, -moveBy, 0);
-
         scroller = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
         scroller.name = "Scroller";
         scroller.GetComponent<Renderer>().material = scrollerMaterial;
