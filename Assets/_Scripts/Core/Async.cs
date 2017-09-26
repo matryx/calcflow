@@ -131,7 +131,7 @@ namespace Nanome.Core
                 }
                 catch (Exception exc)
                 {
-                    Logs.error("Error in a thread", exc);
+                    Debug.Log("Error in a thread: " + exc.ToString());
                 }
             });
             mainThread.success = success;

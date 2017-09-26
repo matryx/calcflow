@@ -10,19 +10,25 @@ public class MaximaTest : MonoBehaviour {
     // Use this for initialization
     void Start () {
         print("(((3 * (x ^ 2)) + (2 * x)) + 1)");
-        print(Simplify("(((3 * (x ^ 2)) + (2 * x)) + 1)"));
+        runExpression();
+        Simplify("(((3 * (x ^ 2)) + (2 * x)) + 1)");
     }
 
-    private static Process Process = NewMaxima();
+    static string MaximaRoot = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), @"Assets\ThirdPartyAssets\Maxima-5.30.0");
+    static string MaximaPath = System.IO.Path.Combine(MaximaRoot, @"bin");
+    static string MaximaExe = System.IO.Path.Combine(MaximaPath, @"maxima.bat");
+    static string inputFile =  @"testInput.txt";
+    static string args = "- eval \"(cl-user::run)\" --very-quiet  < \"" + inputFile + "\"";
+    static string settings = "display2d: false;";
+    
+
+    private static Process Process = null;
 
     private static Process NewMaxima()
     {
-        string MaximaRoot = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), @"Assets\ThirdPartyAssets\Maxima-5.30.0");
-        string MaximaExe = System.IO.Path.Combine(MaximaRoot, @"lib\maxima\5.30.0\binary-gcl\maxima.exe");
-        string WorkingDirectory1 = System.IO.Path.Combine(MaximaRoot, @"bin\");
         print(MaximaRoot);
         print(MaximaExe);
-        print(WorkingDirectory1);
+        //print(WorkingDirectory1);
 
         print(System.IO.Directory.GetCurrentDirectory());
 
@@ -32,7 +38,7 @@ public class MaximaTest : MonoBehaviour {
         }
         var startInfo = new ProcessStartInfo(MaximaExe, @" - eval ""(cl-user::run)"" -f ")
         {
-            WorkingDirectory = WorkingDirectory1,
+            //WorkingDirectory = WorkingDirectory1,
             UseShellExecute = false,
             //CreateNoWindow = true,
             RedirectStandardInput = true,
@@ -45,55 +51,38 @@ public class MaximaTest : MonoBehaviour {
         return Process.Start(startInfo);
     }
 
-    private static string runExpression()
+    private static void runExpression()
     {
+        print("./maxima " + args);
+        Nanome.Core.Process.execInThread(MaximaExe, args, MaximaPath, callback);
+    }
 
+    private static void callback(Nanome.Core.Process.Result result)
+    {
+        print(result.output);
+        print(result.error);
     }
 
     #region StringOps
-    public static string Eval(string expr)
+    public static void Eval(string expr)
     {
-        if (Process == null)
-        {
-            print("Starting maxima");
-            Process = NewMaxima();
-        }
-        print("Starting eval");
-        Process.StandardInput.WriteLine(string.Format("{0}$ grind({1});", string.Join("$", Functions.ToArray()), expr.ToLower()));
-        print("printing standardInput");
-        string result = Process.StandardOutput.ReadLine();
-        print(result);
-        while (!result.EndsWith("$"))
-        {
-            result += Process.StandardOutput.ReadLine();
-            print("Partial result");
-            print(result);
-        }
-        Process.StandardOutput.ReadLine();
-        if (result.EndsWith("$"))
-        {
-            print("Non failure eval");
-            return result.TrimEnd('$');
-        }
-        print("Failure eval");
-        Process = NewMaxima();
-        throw new System.Exception(string.Format("Unexpected result: {0}", result));
+        System.IO.File.WriteAllText(System.IO.Path.Combine(MaximaPath, inputFile), settings + expr + ";");
     }
-    public static string Simplify(string expr)
+    public static void Simplify(string expr)
     {
-        return Eval(string.Format("factor(fullratsimp(trigsimp({0})))", expr));
+        Eval(string.Format("factor(fullratsimp(trigsimp({0})))", expr));
     }
-    public static string Differentiate(string expr, string wrt = "x")
+    public static void Differentiate(string expr, string wrt = "x")
     {
-        return Eval(string.Format("diff({0}, {1})", expr, wrt));
+        Eval(string.Format("diff({0}, {1})", expr, wrt));
     }
-    public static string Integrate(string expr, string wrt = "x")
+    public static void Integrate(string expr, string wrt = "x")
     {
-        return Eval(string.Format("integrate({0}, {1})", expr, wrt));
+        Eval(string.Format("integrate({0}, {1})", expr, wrt));
     }
-    public static string Integrate(string expr, int from, int to, string wrt = "x")
+    public static void Integrate(string expr, int from, int to, string wrt = "x")
     {
-        return Eval(string.Format("integrate({0}, {1}, {2}, {3})", expr, wrt, from, to));
+        Eval(string.Format("integrate({0}, {1}, {2}, {3})", expr, wrt, from, to));
     }
     #endregion
 
