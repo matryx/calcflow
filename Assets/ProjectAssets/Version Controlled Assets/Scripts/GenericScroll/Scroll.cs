@@ -277,7 +277,13 @@ public class Scroll : MonoBehaviour
         {
             highestVisIndex = objects.Count - 1;
 
-            if (numPages < prevNum) lowestVisIndex = lowestVisIndex - (fixedRowOrCol * (prevNum - numPages));
+            if (highestVisIndex - lowestVisIndex + 1 <= numberOfVisibleThings - fixedRowOrCol)
+            {
+                int offsetBy = (numberOfVisibleThings / fixedRowOrCol) -
+                               (int)Mathf.Ceil(((float)(highestVisIndex - lowestVisIndex + 1) / (float)fixedRowOrCol));
+                lowestVisIndex = lowestVisIndex - (fixedRowOrCol * offsetBy);
+            }
+
             if (numPages == 1) lowestVisIndex = 0;
         }
 
@@ -286,6 +292,8 @@ public class Scroll : MonoBehaviour
 
     private void moveObjects()
     {
+        if (objects == null || objects.Count == 0) return;
+
         if (((currDirection == direction.DOWN || currDirection == direction.RIGHT) && lowestVisIndex == 0) ||
             ((currDirection == direction.UP || currDirection == direction.LEFT) && highestVisIndex == objects.Count - 1))
             return;
