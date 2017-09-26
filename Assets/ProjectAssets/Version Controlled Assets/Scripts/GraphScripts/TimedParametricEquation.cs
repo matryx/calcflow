@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using AK;
+using System.Threading;
 
 /// <summary>
 /// class for parametric visualization that supports time lapse
 /// </summary>
-public class TimedParametricEquation : MonoBehaviour {
+public class TimedParametricEquation : MonoBehaviour
+{
 
     #region GPUParticle
     private struct Particle
@@ -62,19 +64,63 @@ public class TimedParametricEquation : MonoBehaviour {
 
     public int resolution;
 
+    private int core_num;
+
+    #region SolverWrapper
     private ExpressionSolver solver;
-    
+    internal struct ParametricEquationSet
+    {
+        internal AK.Expression xExpr;
+        internal Dictionary<string, AK.Variable> xVars;
+        internal AK.Expression yExpr;
+        internal Dictionary<string, AK.Variable> yVars;
+        internal AK.Expression zExpr;
+        internal Dictionary<string, AK.Variable> zVars;
+    }
+    private Dictionary<string, AK.Variable> globalVars;
+    #endregion
 
-	// Use this for initialization
-	void Start () {
+    private int width;
+    private int depth;
+
+    private List<int[]> samples;
+    private List<Vector3> results;
+
+    private object lck;
+    private float maxRange;
+
+    #region EditorTest
+    public string ExpressionX;
+    public string ExpressionY;
+    public string ExpressionZ;
+    public float UMin;
+    public float UMax;
+    public float VMin;
+    public float VMax;
+    public float WMin;
+    public float WMax;
+    public float TMin;
+    public float TMax;
+    #endregion
+
+    // Use this for initialization
+    void Start()
+    {
         InitializeParticleSystem();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+        core_num = SystemInfo.processorCount;
+        lck = new object();
+        solver = new ExpressionSolver();
+        globalVars["t"] = solver.SetGlobalVariable("t", TMin);
+        GenerateParticles();
+    }
 
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    #region ParticleFunctions
     void InitializeParticleSystem()
     {
         particleCount = resolution * resolution;
@@ -143,5 +189,124 @@ public class TimedParametricEquation : MonoBehaviour {
         particleMaterial.SetMatrix("_worldRot", m);
         Graphics.DrawProcedural(MeshTopology.Points, particleCount);
     }
+    #endregion
 
+    public List<int[]> SetupSamples(int depth, int width)
+    {
+        List<int[]> samples = new List<int[]>();
+
+        bool done = false;
+        int[] array = new int[depth];
+        while (!done)
+        {
+            samples.Add(array.Clone() as int[]);
+            if (depth > 0)
+                array[0] += 1;
+            for (int i = 0; i < depth; i++)
+            {
+                if (array[i] >= width)
+                {
+                    if (i + 1 == depth)
+                    {
+                        done = true;
+                        break;
+                    }
+                    array[i] = 0;
+                    array[i + 1] += 1;
+                }
+            }
+        }
+        return samples;
+    }
+
+    public void GenerateParticles()
+    {
+        ParametricEquationSet[] pesArr = new ParametricEquationSet[core_num];
+        for (int i = 0; i < core_num; i++)
+        {
+            pesArr[i] = new ParametricEquationSet
+            {
+                xExpr = new AK.Expression(),
+                xVars = new Dictionary<string, Variable>(),
+                yExpr = new AK.Expression(),
+                yVars = new Dictionary<string, Variable>(),
+                zExpr = new AK.Expression(),
+                zVars = new Dictionary<string, Variable>()
+            };
+            pesArr[i].xVars["u"] = pesArr[i].xExpr.SetVariable("u", 0);
+            pesArr[i].xVars["v"] = pesArr[i].xExpr.SetVariable("v", 0);
+            pesArr[i].xVars["w"] = pesArr[i].xExpr.SetVariable("w", 0);
+            pesArr[i].xExpr = solver.SymbolicateExpression(ExpressionX);
+
+            pesArr[i].yVars["u"] = pesArr[i].yExpr.SetVariable("u", 0);
+            pesArr[i].yVars["v"] = pesArr[i].yExpr.SetVariable("v", 0);
+            pesArr[i].yVars["w"] = pesArr[i].yExpr.SetVariable("w", 0);
+            pesArr[i].yExpr = solver.SymbolicateExpression(ExpressionY);
+
+            pesArr[i].zVars["u"] = pesArr[i].zExpr.SetVariable("u", 0);
+            pesArr[i].zVars["v"] = pesArr[i].zExpr.SetVariable("v", 0);
+            pesArr[i].zVars["w"] = pesArr[i].zExpr.SetVariable("w", 0);
+            pesArr[i].zExpr = solver.SymbolicateExpression(ExpressionZ);
+        }
+
+        Thread[] threads = new Thread[core_num];
+        int count = samples.Count;
+        for (int i = 0; i < core_num; i++)
+        {
+            int TID = i;
+            if (i + 1 == core_num)
+            {
+                threads[TID] = new Thread(() => ThreadedEvaluate(pesArr[TID],
+                Mathf.CeilToInt((float)TID / core_num * count),
+                count));
+            }
+            else
+            {
+                threads[TID] = new Thread(() => ThreadedEvaluate(pesArr[TID],
+                    Mathf.CeilToInt((float)TID / core_num * count),
+                    Mathf.CeilToInt((float)(TID + 1) / core_num * count)));
+            }
+        }
+        for (int i = 0; i < core_num; i++)
+        {
+            threads[i].Join();
+        }
+    }
+
+    private void ThreadedEvaluate(ParametricEquationSet pes, int begin, int end)
+    {
+        for (int i = begin; i < end; i++)
+        {
+            int[] currSample = samples[i];
+
+            pes.xVars["u"].value = UMin + (float)currSample[0] / (width - 1) * (UMax - UMin);
+            pes.xVars["v"].value = VMin + (float)currSample[1] / (width - 1) * (VMax - VMin);
+            pes.xVars["w"].value = WMin + (float)currSample[2] / (width - 1) * (WMax - WMin);
+            float x = (float)pes.xExpr.Evaluate();
+
+            pes.yVars["u"].value = UMin + (float)currSample[0] / (width - 1) * (UMax - UMin);
+            pes.yVars["v"].value = VMin + (float)currSample[1] / (width - 1) * (VMax - VMin);
+            pes.yVars["w"].value = WMin + (float)currSample[2] / (width - 1) * (WMax - WMin);
+            float y = (float)pes.yExpr.Evaluate();
+
+            pes.zVars["u"].value = UMin + (float)currSample[0] / (width - 1) * (UMax - UMin);
+            pes.zVars["v"].value = VMin + (float)currSample[1] / (width - 1) * (VMax - VMin);
+            pes.zVars["w"].value = WMin + (float)currSample[2] / (width - 1) * (WMax - WMin);
+            float z = (float)pes.zExpr.Evaluate();
+
+            lock (lck)
+            {
+                maxRange = (Mathf.Abs(x) > maxRange) ? Mathf.Abs(x) : maxRange;
+                maxRange = (Mathf.Abs(y) > maxRange) ? Mathf.Abs(y) : maxRange;
+                maxRange = (Mathf.Abs(z) > maxRange) ? Mathf.Abs(z) : maxRange;
+            }
+
+            System.Random rand = new System.Random();
+            particles[i] = new Particle
+            {
+                position = new Vector3(x, y, z),
+                velocity = new Vector3(0.5f - (float)rand.NextDouble(), 0.5f - (float)rand.NextDouble(), 0.5f - (float)rand.NextDouble()).normalized * 0.1f
+            };
+        }
+    }
 }
