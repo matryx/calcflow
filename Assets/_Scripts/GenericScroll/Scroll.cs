@@ -115,19 +115,23 @@ public class Scroll : MonoBehaviour
         moveObjects();
     }
 
-    private void setUpMenu()
+    public void setUpMenu()
     {
         if (transform.parent.GetComponentInChildren<ScrollBar>()) return;
 
-        scrollBar = new GameObject().transform;
-        scrollBar.name = "ScrollBar";
-        scrollBar.SetParent(transform.parent);
-        scrollBar.localScale = Vector3.one;
-        scrollBar.localPosition = Vector3.zero;
-        scrollBar.localEulerAngles = Vector3.zero;
-        scrollBar.gameObject.AddComponent<ScrollBar>();
-        scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation);
-        scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
+        if (scrollBar == null)
+        {
+            scrollBar = new GameObject().transform;
+            scrollBar.name = "ScrollBar";
+            scrollBar.SetParent(transform.parent);
+            scrollBar.localScale = Vector3.one;
+            scrollBar.localPosition = Vector3.zero;
+            scrollBar.localEulerAngles = Vector3.zero;
+            scrollBar.gameObject.AddComponent<ScrollBar>();
+            scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation);
+            scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
+            scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
+        }
 
         Vector3 startPos = transform.localPosition;
 
