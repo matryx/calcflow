@@ -38,10 +38,13 @@ public class Scroll : MonoBehaviour
 
     [System.Serializable]
     public enum orientation { VERTICAL, HORIZONTAL }
+    [System.Serializable]
+    public enum placement { TOP, BOTTOM, LEFT, RIGHT }
     public enum direction { UP, DOWN, LEFT, RIGHT }
 
     public orientation currOrientation = orientation.VERTICAL;
     public direction currDirection = direction.UP;
+    public placement scrollBarPlacement = placement.RIGHT;
 
     int numPages;
     int lowestVisIndex = 0;
@@ -128,7 +131,8 @@ public class Scroll : MonoBehaviour
             scrollBar.localPosition = Vector3.zero;
             scrollBar.localEulerAngles = Vector3.zero;
             scrollBar.gameObject.AddComponent<ScrollBar>();
-            scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation);
+            scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation); 
+            scrollBar.GetComponent<ScrollBar>().setPlacement(scrollBarPlacement); 
             scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
             scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
         }

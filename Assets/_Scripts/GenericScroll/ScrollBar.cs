@@ -6,6 +6,7 @@ public class ScrollBar : MonoBehaviour
 {
     Transform bar, scroller, scroll;
     Scroll.orientation orientation;
+    Scroll.placement placement;
 
     float scrollerHeight, scrollerWidth;
     int numPages, currPage;
@@ -39,12 +40,28 @@ public class ScrollBar : MonoBehaviour
 
         bar.transform.localScale = new Vector3(xScale, yScale, scroll.localScale.z);
 
-        float moveBy = (orientation == Scroll.orientation.VERTICAL) ?
-                       (scroll.localScale.x / 2) + (bar.transform.localScale.x / 2) + 0.1f :
-                       (scroll.localScale.y / 2) + (bar.transform.localScale.y / 2) + 0.1f;
+        float moveBy;
+        if (orientation == Scroll.orientation.VERTICAL)
+        {
+            moveBy = (scroll.localScale.x / 2) + (bar.transform.localScale.x / 2) + 0.1f;
 
-        bar.transform.localPosition = (orientation == Scroll.orientation.VERTICAL) ?
-                               new Vector3(moveBy, 0, 0) : new Vector3(0, -moveBy, 0);
+            bar.transform.localPosition = (placement == Scroll.placement.RIGHT) ?
+                                           new Vector3(moveBy, 0, 0) : new Vector3(-moveBy, 0, 0);
+        }
+        else
+        {
+            moveBy = (scroll.localScale.y / 2) + (bar.transform.localScale.y / 2) + 0.1f;
+
+            bar.transform.localPosition = (placement == Scroll.placement.BOTTOM) ?
+                                           new Vector3(0, -moveBy, 0) : new Vector3(0, moveBy, 0);
+        }
+
+        //float moveBy = (orientation == Scroll.orientation.VERTICAL) ?
+        //               (scroll.localScale.x / 2) + (bar.transform.localScale.x / 2) + 0.1f :
+        //               (scroll.localScale.y / 2) + (bar.transform.localScale.y / 2) + 0.1f;
+
+        //bar.transform.localPosition = (orientation == Scroll.orientation.VERTICAL) ?
+        //                       new Vector3(moveBy, 0, 0) : new Vector3(0, -moveBy, 0);
 
         scroller = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
         scroller.name = "Scroller";
@@ -152,6 +169,11 @@ public class ScrollBar : MonoBehaviour
     public void setOrientation(Scroll.orientation or)
     {
         orientation = or;
+    }
+
+    public void setPlacement(Scroll.placement pl)
+    {
+        placement = pl;
     }
 
     IEnumerator MoveTo(Vector3 start, Vector3 end, float overTime)

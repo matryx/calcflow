@@ -53,6 +53,7 @@ public class ScrollEditor : Editor
 
         scroll.currOrientation =
             (Scroll.orientation)EditorGUILayout.EnumPopup("Orientation", scroll.currOrientation);
+        scroll.scrollBarPlacement = (Scroll.placement)EditorGUILayout.EnumPopup("Scroll Placement", scroll.scrollBarPlacement);
 
         placementFold = EditorGUILayout.Foldout(placementFold, "Object Placement", foldoutStyle);
         if (placementFold)
