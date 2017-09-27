@@ -229,7 +229,8 @@ public class TimedParametricEquation : MonoBehaviour
             {
                 continue;
             }
-            currTime = Mathf.Lerp(TMin, TMax, (lastTime - TMin) / (TMax - TMin)+0.01f);
+            //currTime = Mathf.Lerp(TMin, TMax, (lastTime - TMin) / (TMax - TMin)+0.01f);
+            currTime = Mathf.Lerp(TMin, TMax, (lastTime + 0.1f - TMin) / (TMax - TMin));
             if (currTime >= TMax)
                 currTime = TMin;
             globalVars["t"].value = currTime;
@@ -366,7 +367,7 @@ public class TimedParametricEquation : MonoBehaviour
             Particle p = new Particle
             {
                 position = new Vector3(x, z, y),
-                color = Color.cyan,
+                color = Color.yellow,
                 velocity = new Vector3(0.5f - (float)rand.NextDouble(),
                 0.5f - (float)rand.NextDouble(),
                 0.5f - (float)rand.NextDouble()).normalized * 0.1f

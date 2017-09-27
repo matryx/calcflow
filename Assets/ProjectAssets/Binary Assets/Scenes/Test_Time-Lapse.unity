@@ -142,15 +142,15 @@ MonoBehaviour:
   particleEffect: 3
   effectStrength: 2
   resolution: 200
-  ExpressionX: 3*cos(u)*sin(v)*cos(t)
-  ExpressionY: 3*sin(u)*sin(v)*sin(t)
-  ExpressionZ: 3*(cos(v)+log(tan(0.5*v)))+0.4*u
-  UMin: -12.56637
-  UMax: 12.56637
-  VMin: 0.005
-  VMax: 3.1365926
+  ExpressionX: cos(u)*sin(v)
+  ExpressionY: sin(u)*sin(v)
+  ExpressionZ: t/100*cos(v)
+  UMin: 0
+  UMax: 6.283186
+  VMin: 0
+  VMax: 3.1415927
   TMin: 0
-  TMax: 6.283185
+  TMax: 100
   Play: 0
 --- !u!4 &569911532
 Transform:
