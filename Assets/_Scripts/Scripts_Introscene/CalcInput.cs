@@ -39,6 +39,14 @@ public class CalcInput : MonoBehaviour
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
 
+    public void Initialize(CalcManager cm)
+    {
+        calcManager = cm;
+        keyboard = GetComponent<FlexMenu>();
+        responder = new KeyboardInputResponder(this);
+        keyboard.RegisterResponder(responder);
+    }
+
     public void ChangeOutput(CalcOutput calcOutput) 
     {
         currExpression = calcOutput;
@@ -47,7 +55,6 @@ public class CalcInput : MonoBehaviour
 
     public void HandleInput(string buttonID)
     {
-        print(buttonID + " fired");
         #region switch
         switch (buttonID)
         {
@@ -90,21 +97,20 @@ public class CalcInput : MonoBehaviour
             case "Button_end":
                 index = currExpression.tokens.Count;
                 break;
+            case "ToggleCaps":
+                
+                break;
             #endregion
         }
         #endregion
+
         calcManager.inputReceived = true;
-
     }
 
-    public void Initialize(CalcManager cm)
+    private void toggleCapital()
     {
-        calcManager = cm;
-        keyboard = GetComponent<FlexMenu>();
-        responder = new KeyboardInputResponder(this);
-        keyboard.RegisterResponder(responder);
-    }
 
+    }
 }
 
 
