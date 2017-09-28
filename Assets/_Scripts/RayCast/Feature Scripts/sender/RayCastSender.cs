@@ -9,6 +9,7 @@ public class RayCastSender : MonoBehaviour {
         public bool hitting;
         public GameObject targetParent;
         public GameObject target;
+        public Vector3 point;
 
         /// <summary>
         /// Basic Constructor
@@ -16,11 +17,12 @@ public class RayCastSender : MonoBehaviour {
         /// <param name="hit"></param>
         /// <param name="target"></param>
         /// <param name="targetParent"></param>
-        public TargetData(bool hit, GameObject target, GameObject targetParent)
+        public TargetData(bool hit, GameObject target, GameObject targetParent, Vector3 point)
         {
             this.hitting = hit;
             this.target = target;
             this.targetParent = targetParent;
+            this.point = point;
         }
 
         public TargetData()
@@ -34,13 +36,12 @@ public class RayCastSender : MonoBehaviour {
     #region publicVariables
     public LayerMask raycastLayers;
     #endregion
-    private Vector3 targetPoint;
 
     public Vector3 TargetPoint
     {
         get
         {
-            return targetPoint;
+            return currTargetData.point;
         }
     }
 
@@ -61,7 +62,7 @@ public class RayCastSender : MonoBehaviour {
     {
         NotifyRaycastEnd(currTargetData);
         currTargetData = new TargetData();
-        this.targetPoint = Vector3.zero;
+        currTargetData.point = Vector3.zero;
     }
 
     void Update()
@@ -135,7 +136,6 @@ public class RayCastSender : MonoBehaviour {
             targetParent = null;
             targetPoint = Vector3.zero;
         }
-        this.targetPoint = targetPoint;
-        return new TargetData(hitting, target, targetParent);
+        return new TargetData(hitting, target, targetParent, targetPoint);
     }
 }
