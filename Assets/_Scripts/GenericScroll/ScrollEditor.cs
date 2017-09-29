@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 [CustomEditor(typeof(Scroll))]
+[ExecuteInEditMode]
 public class ScrollEditor : Editor
 {
     SerializedProperty scrollerMaterial;
@@ -40,6 +41,7 @@ public class ScrollEditor : Editor
     protected static bool placementFold = true;
     protected static bool lerpSpeedFold = true;
 
+    //BUG: not updating to actual selected orientation and scroll placement
     public override void OnInspectorGUI()
     {
         GUIStyle foldoutStyle = new GUIStyle(EditorStyles.foldout);
@@ -53,7 +55,8 @@ public class ScrollEditor : Editor
 
         scroll.currOrientation =
             (Scroll.orientation)EditorGUILayout.EnumPopup("Orientation", scroll.currOrientation);
-        scroll.scrollBarPlacement = (Scroll.placement)EditorGUILayout.EnumPopup("Scroll Placement", scroll.scrollBarPlacement);
+        scroll.scrollBarPlacement =
+            (Scroll.placement)EditorGUILayout.EnumPopup("Scroll Placement", scroll.scrollBarPlacement);
 
         placementFold = EditorGUILayout.Foldout(placementFold, "Object Placement", foldoutStyle);
         if (placementFold)

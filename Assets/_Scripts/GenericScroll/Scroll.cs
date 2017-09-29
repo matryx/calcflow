@@ -39,7 +39,7 @@ public class Scroll : MonoBehaviour
     [System.Serializable]
     public enum orientation { VERTICAL, HORIZONTAL }
     [System.Serializable]
-    public enum placement { TOP, BOTTOM, LEFT, RIGHT }
+    public enum placement { RIGHT, BOTTOM, LEFT, TOP }
     public enum direction { UP, DOWN, LEFT, RIGHT }
 
     public orientation currOrientation = orientation.VERTICAL;

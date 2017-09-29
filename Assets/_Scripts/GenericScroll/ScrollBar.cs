@@ -22,6 +22,7 @@ public class ScrollBar : MonoBehaviour
         if (bar == null || scroller == null) initializeScrollBar();
     }
 
+    //BUG: editor always takes default orientation and placement 
     public void initializeScrollBar()
     {
         if (bar && scroller) return;
@@ -39,6 +40,10 @@ public class ScrollBar : MonoBehaviour
         float yScale = (orientation == Scroll.orientation.VERTICAL) ? scroll.localScale.y / 1.5f : 0.15f;
 
         bar.transform.localScale = new Vector3(xScale, yScale, scroll.localScale.z);
+
+        print(transform.parent);
+        print(orientation);
+        print(placement);
 
         float moveBy;
         if (orientation == Scroll.orientation.VERTICAL)
