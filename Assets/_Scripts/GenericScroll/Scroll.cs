@@ -36,15 +36,15 @@ public class Scroll : MonoBehaviour
     [SerializeField]
     private float fadeInDelay = 0.10f;
 
-    [System.Serializable]
     public enum orientation { VERTICAL, HORIZONTAL }
-    [System.Serializable]
     public enum placement { RIGHT, BOTTOM, LEFT, TOP }
     public enum direction { UP, DOWN, LEFT, RIGHT }
 
-    public orientation currOrientation = orientation.VERTICAL;
+    [SerializeField]
+    private orientation currOrientation = orientation.VERTICAL;
+    [SerializeField]
+    private placement scrollBarPlacement = placement.RIGHT;
     public direction currDirection = direction.UP;
-    public placement scrollBarPlacement = placement.RIGHT;
 
     int numPages;
     int lowestVisIndex = 0;
@@ -118,6 +118,16 @@ public class Scroll : MonoBehaviour
         moveObjects();
     }
 
+    public orientation getOrientation()
+    {
+        return currOrientation;
+    }
+
+    public placement getScrollBarPlacement()
+    {
+        return scrollBarPlacement;
+    }
+
     public void setUpMenu()
     {
         if (transform.parent.GetComponentInChildren<ScrollBar>()) return;
@@ -131,8 +141,6 @@ public class Scroll : MonoBehaviour
             scrollBar.localPosition = Vector3.zero;
             scrollBar.localEulerAngles = Vector3.zero;
             scrollBar.gameObject.AddComponent<ScrollBar>();
-            scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation); 
-            scrollBar.GetComponent<ScrollBar>().setPlacement(scrollBarPlacement); 
             scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
             scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
         }

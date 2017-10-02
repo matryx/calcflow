@@ -9,16 +9,18 @@ using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 [CustomEditor(typeof(Scroll))]
-[ExecuteInEditMode]
 public class ScrollEditor : Editor
 {
     SerializedProperty scrollerMaterial;
+    SerializedProperty objectParent;
+    SerializedProperty currOrientation;
+    SerializedProperty scrollBarPlacement;
+
     SerializedProperty margin;
     SerializedProperty padding;
-
     SerializedProperty fixedRowOrCol;
     SerializedProperty numberOfVisibleThings;
-    SerializedProperty objectParent;
+
     SerializedProperty movementSpeed;
     SerializedProperty fadeSpeed;
     SerializedProperty fadeInDelay;
@@ -27,6 +29,8 @@ public class ScrollEditor : Editor
     {
         scrollerMaterial = serializedObject.FindProperty("scrollerMaterial");
         objectParent = serializedObject.FindProperty("objectParent");
+        currOrientation = serializedObject.FindProperty("currOrientation");
+        scrollBarPlacement = serializedObject.FindProperty("scrollBarPlacement");
 
         margin = serializedObject.FindProperty("margin");
         padding = serializedObject.FindProperty("padding");
@@ -41,22 +45,19 @@ public class ScrollEditor : Editor
     protected static bool placementFold = true;
     protected static bool lerpSpeedFold = true;
 
-    //BUG: not updating to actual selected orientation and scroll placement
     public override void OnInspectorGUI()
     {
+        serializedObject.Update();
+
         GUIStyle foldoutStyle = new GUIStyle(EditorStyles.foldout);
         foldoutStyle.fontStyle = FontStyle.Bold;
 
         Scroll scroll = (Scroll)target;
-        serializedObject.Update();
-
         EditorGUILayout.PropertyField(scrollerMaterial);
         EditorGUILayout.PropertyField(objectParent);
 
-        scroll.currOrientation =
-            (Scroll.orientation)EditorGUILayout.EnumPopup("Orientation", scroll.currOrientation);
-        scroll.scrollBarPlacement =
-            (Scroll.placement)EditorGUILayout.EnumPopup("Scroll Placement", scroll.scrollBarPlacement);
+        EditorGUILayout.PropertyField(currOrientation);
+        EditorGUILayout.PropertyField(scrollBarPlacement);
 
         placementFold = EditorGUILayout.Foldout(placementFold, "Object Placement", foldoutStyle);
         if (placementFold)

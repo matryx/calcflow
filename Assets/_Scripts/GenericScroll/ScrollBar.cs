@@ -18,6 +18,8 @@ public class ScrollBar : MonoBehaviour
         currPage = 1;
         scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
         scrollerMaterial = scroll.GetComponent<Scroll>().scrollerMaterial;
+        orientation = scroll.GetComponent<Scroll>().getOrientation();
+        placement = scroll.GetComponent<Scroll>().getScrollBarPlacement();
 
         if (bar == null || scroller == null) initializeScrollBar();
     }
@@ -40,10 +42,6 @@ public class ScrollBar : MonoBehaviour
         float yScale = (orientation == Scroll.orientation.VERTICAL) ? scroll.localScale.y / 1.5f : 0.15f;
 
         bar.transform.localScale = new Vector3(xScale, yScale, scroll.localScale.z);
-
-        print(transform.parent);
-        print(orientation);
-        print(placement);
 
         float moveBy;
         if (orientation == Scroll.orientation.VERTICAL)
@@ -162,16 +160,6 @@ public class ScrollBar : MonoBehaviour
             scroller.localPosition = new Vector3(scroller.localPosition.x + ((currPage - 1) * scrollerWidth),
                                                  scroller.localPosition.y, scroller.localPosition.z);
         }
-    }
-
-    public void setOrientation(Scroll.orientation or)
-    {
-        orientation = or;
-    }
-
-    public void setPlacement(Scroll.placement pl)
-    {
-        placement = pl;
     }
 
     IEnumerator MoveTo(Vector3 start, Vector3 end, float overTime)
