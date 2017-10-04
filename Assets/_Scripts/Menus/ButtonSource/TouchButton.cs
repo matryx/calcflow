@@ -6,14 +6,9 @@ using System;
 
 public class TouchButton : Button {
 
-    public bool verbose = false;
 
     void OnTriggerEnter(Collider other)
     {
-        if (verbose)
-        {
-            print("triggered");
-        }
         if (other.gameObject.layer == LayerMask.NameToLayer("ButtonPresser")) 
             PressButton(other.gameObject);
     }

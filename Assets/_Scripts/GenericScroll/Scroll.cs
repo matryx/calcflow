@@ -155,13 +155,9 @@ public class Scroll : MonoBehaviour
             1 + (int)System.Math.Ceiling((double)(objects.Count - numberOfVisibleThings) / fixedRowOrCol);
         scrollBar.GetComponent<ScrollBar>().setNumPages(numPages);
 
-        print("CURRPAGE: " + scrollBar.GetComponent<ScrollBar>().getCurrPage());
-        print("NUMPAGES: " + numPages);
-
         if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == numPages)
         {
             highestVisIndex = objects.Count - 1;
-            print("highest: " + highestVisIndex);
         }
 
         if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == 1 && numPages > 1)
