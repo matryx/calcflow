@@ -8,7 +8,8 @@ public class ScrollBar : MonoBehaviour
     Scroll.orientation orientation;
 
     float scrollerHeight, scrollerWidth;
-    int numPages, currPage;
+    int numPages;
+    int currPage = 1;
     public float moveSpeed;
     Material scrollerMaterial;
 
