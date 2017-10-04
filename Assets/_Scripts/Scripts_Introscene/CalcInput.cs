@@ -64,8 +64,6 @@ public class CalcInput : MonoBehaviour
             default:
                 currExpression.tokens.Insert(index, buttonID);
                 index++;
-
-                print("HELLO");
                 break;
             case "Paste":
                 string temp = GUIUtility.systemCopyBuffer;
