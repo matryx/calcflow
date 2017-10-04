@@ -32,6 +32,7 @@ public class CalcInput : MonoBehaviour
     private CalcManager calcManager;
 
     private FlexMenu keyboard;
+    private Transform letterPanel;
 
     KeyboardInputResponder responder;
 
@@ -45,6 +46,7 @@ public class CalcInput : MonoBehaviour
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);
+        letterPanel = transform.Find("LetterPanel");
     }
 
     public void ChangeOutput(CalcOutput calcOutput) 
@@ -98,7 +100,7 @@ public class CalcInput : MonoBehaviour
                 index = currExpression.tokens.Count;
                 break;
             case "ToggleCaps":
-                
+                toggleCapital();
                 break;
             #endregion
         }
@@ -107,6 +109,7 @@ public class CalcInput : MonoBehaviour
         calcManager.inputReceived = true;
     }
 
+    //TODO: implement
     private void toggleCapital()
     {
 
