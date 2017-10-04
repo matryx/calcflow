@@ -33,6 +33,7 @@ public class CalcInput : MonoBehaviour
 
     private FlexMenu keyboard;
     private Transform letterPanel;
+    bool capitalized = false;
 
     KeyboardInputResponder responder;
 
@@ -49,7 +50,7 @@ public class CalcInput : MonoBehaviour
         letterPanel = transform.Find("LetterPanel");
     }
 
-    public void ChangeOutput(CalcOutput calcOutput) 
+    public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
         index = currExpression.tokens.Count;
@@ -63,6 +64,8 @@ public class CalcInput : MonoBehaviour
             default:
                 currExpression.tokens.Insert(index, buttonID);
                 index++;
+
+                print("HELLO");
                 break;
             case "Paste":
                 string temp = GUIUtility.systemCopyBuffer;
@@ -102,17 +105,35 @@ public class CalcInput : MonoBehaviour
             case "ToggleCaps":
                 toggleCapital();
                 break;
-            #endregion
+                #endregion
         }
         #endregion
 
         calcManager.inputReceived = true;
     }
 
-    //TODO: implement
+    //NOTE: tested and works but calcinput is disconnected 
     private void toggleCapital()
     {
+        foreach (Transform child in letterPanel)
+        {
+            if (child.name != "ToggleCaps")
+            {
+                child.name = (capitalized) ? child.name.ToLower() : child.name.ToUpper();
 
+                child.GetComponentInChildren<TextMesh>().text = (capitalized) ?
+                                                                 child.GetComponentInChildren<TextMesh>().text.ToLower() :
+                                                                 child.GetComponentInChildren<TextMesh>().text.ToUpper();
+            }
+            else
+            {
+                child.GetComponentInChildren<TextMesh>().text = (capitalized) ?
+                                                                 child.GetComponentInChildren<TextMesh>().text.ToUpper() :
+                                                                 child.GetComponentInChildren<TextMesh>().text.ToLower();
+            }
+        }
+
+        capitalized = !capitalized;
     }
 }
 

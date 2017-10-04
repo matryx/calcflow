@@ -19,7 +19,6 @@ public class ToggleKeyboardState : QuickButton {
     {
         calculatorPanel = transform.parent.parent.Find("KeyboardPanel");
         letterPanel = transform.parent.parent.Find("LetterPanel");
-        print("CALC: " + calculatorPanel.name);
 
         stateText = transform.parent.GetComponentInChildren<TextMesh>();
     }
@@ -28,7 +27,6 @@ public class ToggleKeyboardState : QuickButton {
     {
         if (calculatorPanel.gameObject.activeSelf)
         {
-            print("HELLO");
             calculatorPanel.gameObject.SetActive(false);
             letterPanel.gameObject.SetActive(true);
 
