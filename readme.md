@@ -45,4 +45,4 @@ This project is licensed under the NANOME VR PRODUCT SUITE - see the [LICENSE.md
 ## Acknowledgments
 
 * We would like to thank John Eggers, Marc Loschen, and Kyle Lee for the initial development and support as well as all the developers who have been involved in this project. We also would like to thank the students involved in UC San Diego's Summer Academy Vector Calculus course in 2016 and 2017 for providing the instrumental feedback necessary for Calcflow's development.
-
+* We would like to honor Dr. Jeff Remmel for his contributions and advice over the years. It is sad news for everyone on the Matryx team because he helped us start Calcflow back when we first conceived of the project. He was a prolific mathematician and a passionate believer in STEM education. See this [article](http://www.sandiegouniontribune.com/news/science/sd-me-jeffrey-remmel-20171006-story.html) for what other mathematicians at UC San Diego said about him.
