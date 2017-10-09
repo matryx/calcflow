@@ -2,20 +2,42 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Expressions : MonoBehaviour {
-    Scroll expressionScroll;
+public class Expressions : MonoBehaviour
+{
 
-	void Awake () {
+    //internal class Expression 
+    //{
+    //    ExpressionType etype;
+    //    List<Transform> components;
+    //    List<Action> actions;
+    //}
+
+    Scroll expressionScroll;
+    //List<Expression> expressions;
+    //Expression selectedExpr;
+    public enum ExpressionType { Constant, Paramet, VecField }
+    public enum Action { Add, Remove, Hide, Flowline }
+
+    //NOTES: managing expressions
+    // - need to keep track of selected Expr
+    // - selected Expr affects which Actions are shown, the graph and output destination
+
+    void Awake()
+    {
         expressionScroll = GetComponentInChildren<Scroll>();
 
-        GameObject selector = Instantiate(Resources.Load("Expressions/ExpressionSelector", typeof(GameObject))) as GameObject;
-        GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
-
-        expressionScroll.addObject(selector.transform);
-        expressionScroll.addObject(sep.transform);
+        if (transform.Find("Panel").childCount == 0)
+        {
+            transform.Find("ExpressionSelector").gameObject.SetActive(true);
+        }
+        else
+        {
+            transform.Find("ExpressionSelector").gameObject.SetActive(false);
+        }
     }
 
-    void Update () {
-		
-	}
+    void Update()
+    {
+
+    }
 }

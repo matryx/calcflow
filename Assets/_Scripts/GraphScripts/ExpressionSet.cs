@@ -10,6 +10,7 @@ public class ExpressionSet
     {
         X, Y, Z
     }
+
     public enum RangeOptions
     {
         p, q, r, s, t, u, v, w

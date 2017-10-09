@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class ExpressionSelector : QuickButton {
     Scroll expressionScroll;
+    Expressions expressionHandler;
     List<Transform> thisSelector;
-    public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     protected override void Start()
     {
         base.Start();
         expressionScroll = GameObject.Find("Expressions").GetComponentInChildren<Scroll>();
+        expressionHandler = expressionScroll.GetComponentInParent<Expressions>();
         thisSelector.Add(transform.parent.parent);
     }
 
@@ -24,27 +25,26 @@ public class ExpressionSelector : QuickButton {
         switch (transform.name)
         {
             case "Constant":
-                GameObject cons = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
+                GameObject cons = Instantiate(Resources.Load("Expressions/Constant", typeof(GameObject))) as GameObject;
                 expressionScroll.addObject(cons.transform);
                 break;
             case "Parametrization":
-                GameObject param1 = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
-                GameObject param2 = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
-                GameObject param3 = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
-
-                expressionScroll.addObject(param1.transform);
-                expressionScroll.addObject(param2.transform);
-                expressionScroll.addObject(param3.transform);
+                GameObject param = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
+                
+                foreach (Transform child in param.transform)
+                {
+                    expressionScroll.addObject(child);
+                }
                 break;
             case "VectorField":
-                GameObject vec1 = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
-                GameObject vec2 = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
-                GameObject vec3 = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
-                GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                GameObject vec = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
 
-                expressionScroll.addObject(vec1.transform);
-                expressionScroll.addObject(vec2.transform);
-                expressionScroll.addObject(vec3.transform);
+                foreach (Transform child in vec.transform)
+                {
+                    expressionScroll.addObject(child);
+                }
+
+                GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
                 expressionScroll.addObject(var.transform);
                 break;
         }
