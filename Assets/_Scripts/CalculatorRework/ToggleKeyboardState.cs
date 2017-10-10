@@ -6,8 +6,6 @@ public class ToggleKeyboardState : QuickButton {
     private Transform calculatorPanel, letterPanel;
     private TextMesh stateText;
 
-    //TODO: test this and write script for toggling capital letters
-
 	protected override void Start ()
     {
         base.Start();

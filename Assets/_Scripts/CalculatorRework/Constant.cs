@@ -3,13 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Constant : MonoBehaviour {
+    Expressions.ExpressionType type;
+    List<Transform> components;
 
-	// Use this for initialization
-	void Start () {
-		
+	void Awake () {
+        type = Expressions.ExpressionType.Constant;
+        components = new List<Transform>();
 	}
 	
-	// Update is called once per frame
+    public void addComponent(Transform comp)
+    {
+        components.Add(comp);
+    }
+
 	void Update () {
 		
 	}

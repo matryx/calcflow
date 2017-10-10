@@ -29,6 +29,9 @@ public class Expressions : MonoBehaviour
         if (transform.Find("Panel").childCount == 0)
         {
             transform.Find("ExpressionSelector").gameObject.SetActive(true);
+            transform.Find("Actions").Find("Remove").gameObject.SetActive(false);
+            transform.Find("Actions").Find("Hide").gameObject.SetActive(false);
+            transform.Find("Actions").Find("Flowline").gameObject.SetActive(false);
         }
         else
         {

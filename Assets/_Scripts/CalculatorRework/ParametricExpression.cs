@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ParametricExpression : MonoBehaviour {
+    Expressions.ExpressionType type;
+    List<Transform> components;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    void Awake () {
+        type = Expressions.ExpressionType.Paramet;
+    }
+
+    public void addComponent(Transform comp)
+    {
+        components.Add(comp);
+    }
+
+    void Update () {
 		
 	}
 }
