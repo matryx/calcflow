@@ -97,7 +97,7 @@ public class CalcInput : MonoBehaviour
             #endregion
         }
         #endregion
-
+        calcManager.updateText = true;
     }
 
     public void Initialize(CalcManager cm)
