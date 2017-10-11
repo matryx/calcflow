@@ -9,6 +9,11 @@ public class Scroll : MonoBehaviour
 {
     //REQUIRED: some type of transparent shaders(not standard), Unlit/UnlitAlphaWithFade recommended
 
+    //TODO: 
+    //  - add functionality that lets you add to any index in list of objects
+    //    (for expression manager)
+    //  - handle searching through grandchildren for fading 
+
     private List<Transform> objects;
     private List<Transform> toAdd = new List<Transform>();
 

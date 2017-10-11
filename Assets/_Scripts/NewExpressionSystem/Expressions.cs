@@ -4,17 +4,7 @@ using UnityEngine;
 
 public class Expressions : MonoBehaviour
 {
-
-    //internal class Expression 
-    //{
-    //    ExpressionType etype;
-    //    List<Transform> components;
-    //    List<Action> actions;
-    //}
-
-    Scroll expressionScroll;
-    //List<Expression> expressions;
-    //Expression selectedExpr;
+    List<Transform> expressions;
     public enum ExpressionType { Constant, Paramet, VecField }
     public enum Action { Add, Remove, Hide, Flowline }
 
@@ -24,19 +14,13 @@ public class Expressions : MonoBehaviour
 
     void Awake()
     {
-        expressionScroll = GetComponentInChildren<Scroll>();
+        expressions = new List<Transform>();
+    }
 
-        if (transform.Find("Panel").childCount == 0)
-        {
-            transform.Find("ExpressionSelector").gameObject.SetActive(true);
-            transform.Find("Actions").Find("Remove").gameObject.SetActive(false);
-            transform.Find("Actions").Find("Hide").gameObject.SetActive(false);
-            transform.Find("Actions").Find("Flowline").gameObject.SetActive(false);
-        }
-        else
-        {
-            transform.Find("ExpressionSelector").gameObject.SetActive(false);
-        }
+    public void addExpr(Transform exp)
+    {
+        expressions.Add(exp);
+        exp.SetParent(transform);
     }
 
     void Update()

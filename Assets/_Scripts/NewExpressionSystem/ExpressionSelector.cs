@@ -2,81 +2,93 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExpressionSelector : QuickButton {
+public class ExpressionSelector : QuickButton
+{
     Scroll expressionScroll;
-    Expressions expressionHandler;
-    public AddExpression addExpr;
+    Expressions expressions;
+    //public AddExpression addExpr;
 
     protected override void Start()
     {
         base.Start();
-        expressionScroll = GameObject.Find("Expressions").GetComponentInChildren<Scroll>();
-        expressionHandler = expressionScroll.GetComponentInParent<Expressions>();
+        expressionScroll = GameObject.Find("ExpressionMenu").GetComponentInChildren<Scroll>();
+        expressions = GameObject.Find("ExpressionMenu").GetComponentInChildren<Expressions>();
     }
 
     //TODO:
-    // - need Expressions to have a script for keeping track of expression clumps and which one is selected
-    // - decide how to handle parenting and separate parts
+    // - test
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        switch (transform.name)
+        switch (transform.parent.name)
         {
             case "Constant":
-                GameObject cons = Instantiate(Resources.Load("Expressions/Constant", typeof(GameObject))) as GameObject;
-                cons.GetComponent<Constant>().addComponent(cons.transform);
-                expressionScroll.addObject(cons.transform);
+                GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
+                cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
+
+                //TODO: add to second to last index instead of end
+                expressionScroll.addObject(cons.transform.Find("Constant"));
+                expressions.addExpr(cons.transform);
                 break;
             case "Parametrization":
-                //Transform paramParent = new GameObject().transform;
-                //paramParent.name = "Parametrization";
-                //paramParent.localEulerAngles = Vector3.zero;
-                //paramParent.localScale = Vector3.one;
+                GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
 
-                GameObject param = Instantiate(Resources.Load("Expressions/ExpressionSet", typeof(GameObject))) as GameObject;
-                param.AddComponent<ParametricExpression>();
-                param.GetComponent<ParametricExpression>().addComponent(param.transform);
-
-                //param.transform.SetParent(paramParent);
-                
                 foreach (Transform child in param.transform)
                 {
-                    expressionScroll.addObject(child);
+                    foreach (Transform gchild in child)
+                    {
+                        if (child.name == "ExpressionSet")
+                        {
+                            param.GetComponent<ParametricExpression>().addExpression(gchild);
+                        }
+                        else if (child.name == "Variables")
+                        {
+                            param.GetComponent<ParametricExpression>().addVariable(gchild);
+                        }
+
+                        //TODO: add to second to last index instead of end
+                        expressionScroll.addObject(gchild);
+                    }
                 }
+
+                expressions.addExpr(param.transform);
                 break;
             case "VectorField":
-                //Transform vecParent = new GameObject().transform;
-                //vecParent.name = "VectorField";
-                //vecParent.localEulerAngles = Vector3.zero;
-                //vecParent.localScale = Vector3.one;
-
-                GameObject vec = Instantiate(Resources.Load("Expressions/Expression", typeof(GameObject))) as GameObject;
-                vec.AddComponent<VectorFieldExpression>();
-                vec.GetComponent<VectorFieldExpression>().addComponent(vec.transform);
-                //vec.transform.SetParent(vecParent);
+                GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
 
                 foreach (Transform child in vec.transform)
                 {
-                    expressionScroll.addObject(child);
+                    if (child.name == "Variable")
+                    {
+                        vec.GetComponent<VectorFieldExpression>().setRange(child);
+                        //TODO: add to second to last index instead of end
+                        expressionScroll.addObject(child);
+                        continue;
+                    }
+
+                    foreach (Transform gchild in child)
+                    {
+                        vec.GetComponent<VectorFieldExpression>().addExpression(gchild);
+                        //TODO: add to second to last index instead of end
+                        expressionScroll.addObject(gchild);
+                    }
                 }
 
-                GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-                vec.GetComponent<VectorFieldExpression>().addComponent(var.transform);
-
-                //var.transform.SetParent(vecParent);
-                expressionScroll.addObject(var.transform);
+                expressions.addExpr(vec.transform);
                 break;
         }
 
         GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+        //TODO: add to second to last index instead of last
         expressionScroll.addObject(sep.transform);
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
-        addExpr.setAddActiveFalse();
+        //addExpr.setAddActiveFalse(); //not needed anymore
     }
 
-    void Update () {
-		
-	}
+    void Update()
+    {
+
+    }
 }

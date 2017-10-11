@@ -4,15 +4,21 @@ using UnityEngine;
 
 public class ParametricExpression : MonoBehaviour {
     Expressions.ExpressionType type;
-    List<Transform> components;
+    List<Transform> expressions;
+    List<Transform> variables;
 
     void Awake () {
         type = Expressions.ExpressionType.Paramet;
     }
 
-    public void addComponent(Transform comp)
+    public void addExpression(Transform expr)
     {
-        components.Add(comp);
+        expressions.Add(expr);
+    }
+
+    public void addVariable(Transform var)
+    {
+        variables.Add(var);
     }
 
     void Update () {
