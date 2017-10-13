@@ -72,17 +72,17 @@ public class Scroll : MonoBehaviour
         if (transform.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local rotation of object with Scroll script needs to be zero");
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-            #endif
+#endif
         }
 
         if (objectParent.localScale != Vector3.one || objectParent.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local scale and local rotation of Object Parent needs to be one and zero");
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-            #endif
+#endif
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
@@ -258,7 +258,8 @@ public class Scroll : MonoBehaviour
         }
         else
         {
-            if (deleting && !obj.gameObject.activeSelf) StartCoroutine(FadeButtonIn(obj));
+            //if (deleting && !obj.gameObject.activeSelf) StartCoroutine(FadeButtonIn(obj));
+            if (deleting && !obj.gameObject.activeSelf) StartCoroutine(FadeButton(obj, false));
             obj.gameObject.SetActive(true);
         }
     }
@@ -348,24 +349,28 @@ public class Scroll : MonoBehaviour
                 {
                     if (i >= lowestVisIndex && i < lowestVisIndex + fixedRowOrCol)
                     {
-                        FadeButtonOut(obj);
+                        //FadeButtonOut(obj);
+                        StartCoroutine(FadeButton(obj, true));
                     }
                     else if (i > highestVisIndex && i <= highestVisIndex + fixedRowOrCol)
                     {
-                        StartCoroutine(FadeButtonIn(obj));
+                        //StartCoroutine(FadeButtonIn(obj));
+                        StartCoroutine(FadeButton(obj, false));
                     }
                 }
                 else if (currDirection == direction.DOWN || currDirection == direction.RIGHT)
                 {
                     if (i < lowestVisIndex && i >= lowestVisIndex - fixedRowOrCol)
                     {
-                        StartCoroutine(FadeButtonIn(obj));
+                        //StartCoroutine(FadeButtonIn(obj));
+                        StartCoroutine(FadeButton(obj, false));
                     }
                     else if (i <= highestVisIndex && i > highestVisIndex - fixedRowOrCol)
                     {
                         if (((highestVisIndex + 1) % fixedRowOrCol == 0) ||
                             (i > (highestVisIndex - ((highestVisIndex + 1) % fixedRowOrCol))))
-                            FadeButtonOut(obj);
+                            //FadeButtonOut(obj);
+                            StartCoroutine(FadeButton(obj, true));
                     }
                 }
             }
@@ -394,29 +399,79 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    void FadeButtonOut(Transform obj)
-    {
-        AnimateFade(obj, obj.GetComponentInChildren<Renderer>().material.GetColor("_Color").a, transparent, fadeSpeed);
-    }
+    //void FadeButtonOut(Transform obj)
+    //{
+    //    if (obj.GetComponentInChildren<Renderer>() == null)
+    //    {
+    //        print("NULL RENDERER");
+    //    }
+    //    AnimateFade(obj, obj.GetComponentInChildren<Renderer>().material.GetColor("_Color").a, transparent, fadeSpeed);
+    //}
 
-    void AnimateFade(Transform obj, float from, float to, float time)
+    //void AnimateFade(Transform obj, float from, float to, float time)
+    //{
+    //    foreach (Transform child in obj)
+    //    {
+    //        if (child.childCount > 0)
+    //        {
+    //            foreach (Transform gchild in child)
+    //            {
+    //                StartCoroutine(FadeObj(gchild, from, to));
+    //            }
+    //        }
+    //        else
+    //        {
+    //            StartCoroutine(FadeObj(child, from, to, time));
+    //        }
+    //    }
+    //}
+
+    IEnumerator FadeButton(Transform obj, bool fadeOut)
     {
+        float to = (fadeOut) ? transparent : opaque;
+
+        if (!fadeOut)
+        {
+            yield return new WaitForSeconds(fadeInDelay);
+            obj.gameObject.SetActive(true);
+        } 
+
         foreach (Transform child in obj)
         {
-            StartCoroutine(FadeObj(child, from, to, time));
+            if (child.childCount > 0)
+            {
+                foreach (Transform gchild in child)
+                {
+                    float from = (gchild.GetComponent<TMPro.TextMeshPro>()) ?
+                                  gchild.GetComponent<Renderer>().material.GetColor("_FaceColor").a :
+                                  gchild.GetComponent<Renderer>().material.GetColor("_Color").a;
+                    StartCoroutine(FadeObj(gchild, from, to));
+                }
+            }
+            else
+            {
+                float from = (child.GetComponent<TMPro.TextMeshPro>()) ?
+                              child.GetComponent<Renderer>().material.GetColor("_FaceColor").a :
+                              child.GetComponent<Renderer>().material.GetColor("_Color").a;
+                StartCoroutine(FadeObj(child, from, to));
+            }
         }
+
+        yield return null;
     }
 
     #region Coroutines
-    IEnumerator FadeButtonIn(Transform obj)
-    {
-        yield return new WaitForSeconds(fadeInDelay);
+    //IEnumerator FadeButtonIn(Transform obj)
+    //{
+    //    yield return new WaitForSeconds(fadeInDelay);
 
-        obj.gameObject.SetActive(true);
-        AnimateFade(obj, obj.GetComponentInChildren<Renderer>().material.GetColor("_Color").a, opaque, fadeSpeed);
-    }
+    //    obj.gameObject.SetActive(true);
+    //    AnimateFade(obj, obj.GetComponentInChildren<Renderer>().material.GetColor("_Color").a, opaque, fadeSpeed);
+    //}
 
-    IEnumerator FadeObj(Transform obj, float start, float end, float time)
+    //TODO: handle deeper hierarchies like variables in vec field and param
+    //IEnumerator FadeObj(Transform obj, float start, float end, float time)
+    IEnumerator FadeObj(Transform obj, float start, float end)
     {
         Material mat = obj.GetComponent<Renderer>().material;
         string colorName = "_Color";
@@ -425,7 +480,7 @@ public class Scroll : MonoBehaviour
         if (mat.HasProperty("_FaceColor")) colorName = "_FaceColor";
         if (mat.HasProperty(colorName)) col = mat.GetColor(colorName);
 
-        for (float i = 0.0f; i < 1.0f; i += Time.deltaTime * (1 / time))
+        for (float i = 0.0f; i < 1.0f; i += Time.deltaTime * (1 / fadeSpeed))
         {
             col = mat.GetColor(colorName);
             col.a = Mathf.Lerp(start, end, i);

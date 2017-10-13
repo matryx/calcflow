@@ -6,9 +6,23 @@ public class VectorFieldExpression : MonoBehaviour {
     Expressions.ExpressionType type;
     List<Transform> expressions;
     Transform range;
+    bool initialized = false;
 
     void Awake () {
+        if (initialized) return;
         type = Expressions.ExpressionType.VecField;
+        expressions = new List<Transform>();
+        initialized = true;
+    }
+
+    public void Initialize()
+    {
+        if (!initialized)
+        {
+            type = Expressions.ExpressionType.VecField;
+            expressions = new List<Transform>();
+            initialized = true;
+        }
     }
 
     public void addExpression(Transform expr)

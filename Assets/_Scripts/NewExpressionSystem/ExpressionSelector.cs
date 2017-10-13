@@ -23,6 +23,7 @@ public class ExpressionSelector : QuickButton
         {
             case "Constant":
                 GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
+                cons.GetComponent<Constant>().Initialize();
                 cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
 
                 //TODO: add to second to last index instead of end
@@ -31,6 +32,7 @@ public class ExpressionSelector : QuickButton
                 break;
             case "Parametrization":
                 GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
+                param.GetComponent<ParametricExpression>().Initialize();
 
                 foreach (Transform child in param.transform)
                 {
@@ -54,6 +56,7 @@ public class ExpressionSelector : QuickButton
                 break;
             case "VectorField":
                 GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
+                vec.GetComponent<VectorFieldExpression>().Initialize();
 
                 foreach (Transform child in vec.transform)
                 {
