@@ -8,32 +8,46 @@ using UnityEngine;
 public class PlaybackLog : Nanome.Core.Behaviour
 {
 
-    static void SaveLog()
+    private void Awake()
+    {
+        Log = log;
+    }
+
+    public static List<PlayBackLogAction> Log;
+
+    static string jsonExtension = "json";
+    static string fileName = "recording1";
+
+    public static void SaveLog()
     {
         string savePath = Path.Combine(Path.Combine(
             System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments),
             "Calcflow"), "Recordings");
 
-        JsonUtility.ToJson(log);
-        //System.IO.File.WriteAllText(Path.Combine(savePath, fileName) + jsonExtension, json);
+        if (!System.IO.Directory.Exists(savePath))
+        {
+            System.IO.Directory.CreateDirectory(savePath);
+        }
+
+        System.IO.File.WriteAllText(Path.Combine(savePath, fileName) + jsonExtension, JsonUtility.ToJson(Log));
 
     }
 
     [SerializeField]
-    static Queue<PlayBackLogAction> log = new Queue<PlayBackLogAction>();
+    List<PlayBackLogAction> log = new List<PlayBackLogAction>();
 
-    public static void LogMovement(float timestamp, Vector3 destination)
+    public static void LogMovement(float timestamp, GameObject subject, Vector3 destination)
     {
-        log.Enqueue(PlayBackLogAction.CreateMovement(timestamp, destination));
+        Log.Add(PlayBackLogAction.CreateMovement(timestamp, subject, destination));
     }
 
-    public static void LogButtonPress(float timestamp, GameObject presser)
+    public static void LogButtonPress(float timestamp, GameObject subject, GameObject presser)
     {
-        log.Enqueue(PlayBackLogAction.CreateButtonPress(timestamp, presser));
+        Log.Add(PlayBackLogAction.CreateButtonPress(timestamp, subject, presser));
     }
 
     [Serializable]
-    internal class PlayBackLogAction {
+    public class PlayBackLogAction {
 
         public enum ActionType
         {
@@ -41,13 +55,15 @@ public class PlaybackLog : Nanome.Core.Behaviour
             ButtonPress
         }
         [SerializeField]
-        ActionType type;
+        public ActionType type;
         [SerializeField]
-        float timeStamp;
+        public GameObject subject;
         [SerializeField]
-        Vector3 dest;
+        public float timeStamp;
         [SerializeField]
-        GameObject ButtonPresser;
+        public Vector3 dest;
+        [SerializeField]
+        public GameObject ButtonPresser;
 
         internal void SetType(string type)
         {
@@ -73,21 +89,27 @@ public class PlaybackLog : Nanome.Core.Behaviour
 
         }
 
-        internal static PlayBackLogAction CreateMovement(float timestamp, Vector3 destination)
+        internal static PlayBackLogAction CreateMovement(float timestamp, GameObject subject, Vector3 destination)
         {
             PlayBackLogAction newAction = new PlayBackLogAction();
             newAction.type = ActionType.Movement;
             newAction.dest = destination;
+            newAction.subject = subject;
             return newAction;
         }
 
-        internal static PlayBackLogAction CreateButtonPress(float timestamp, GameObject presser)
+        internal static PlayBackLogAction CreateButtonPress(float timestamp, GameObject subject, GameObject presser)
         {
             PlayBackLogAction newAction = new PlayBackLogAction();
             newAction.type = ActionType.ButtonPress;
             newAction.ButtonPresser = presser;
+            newAction.subject = subject;
             return newAction;
         }
 
+        public void Reenact()
+        {
+            print("stuff");
+        }
     }
 }

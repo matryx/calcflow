@@ -5,13 +5,29 @@ using UnityEngine;
 public class MovementLogger : Nanome.Core.Behaviour
 {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    Vector3 lastPos;
+    float timeSinceLastCheck = 0.0f;
+    float checkFrequency = .03f;
+
+    void RecordPosition()
+    {
+        timeSinceLastCheck += Time.fixedDeltaTime;
+        if (timeSinceLastCheck > checkFrequency)
+        {
+            if (lastPos != transform.position)
+            {
+                lastPos = transform.position;
+                PlaybackLog.LogMovement(PlaybackClock.GetTime(), gameObject, transform.position);
+            }
+            timeSinceLastCheck = 0.0f;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (Recorder.Recording)
+        {
+            RecordPosition();
+        }
+    }
 }
