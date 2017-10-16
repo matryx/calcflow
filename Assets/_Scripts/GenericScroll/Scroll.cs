@@ -428,34 +428,43 @@ public class Scroll : MonoBehaviour
 
     IEnumerator FadeButton(Transform obj, bool fadeOut)
     {
-        float to = (fadeOut) ? transparent : opaque;
-
         if (!fadeOut)
         {
             yield return new WaitForSeconds(fadeInDelay);
             obj.gameObject.SetActive(true);
-        } 
-
-        foreach (Transform child in obj)
-        {
-            if (child.childCount > 0)
-            {
-                foreach (Transform gchild in child)
-                {
-                    float from = (gchild.GetComponent<TMPro.TextMeshPro>()) ?
-                                  gchild.GetComponent<Renderer>().material.GetColor("_FaceColor").a :
-                                  gchild.GetComponent<Renderer>().material.GetColor("_Color").a;
-                    StartCoroutine(FadeObj(gchild, from, to));
-                }
-            }
-            else
-            {
-                float from = (child.GetComponent<TMPro.TextMeshPro>()) ?
-                              child.GetComponent<Renderer>().material.GetColor("_FaceColor").a :
-                              child.GetComponent<Renderer>().material.GetColor("_Color").a;
-                StartCoroutine(FadeObj(child, from, to));
-            }
         }
+
+        float to = (fadeOut) ? transparent : opaque;
+        Renderer[] childrenRenderer = obj.GetComponentsInChildren(typeof(Renderer)) as Renderer[];
+
+        foreach (Renderer r in childrenRenderer)
+        {
+            float from = (r.gameObject.GetComponent<TMPro.TextMeshPro>()) ?
+                          r.material.GetColor("_FaceColor").a :
+                          r.material.GetColor("_Color").a;
+            StartCoroutine(FadeObj(r, from, to));
+        }
+
+        //foreach (Transform child in obj)
+        //{
+        //    if (child.childCount > 0)
+        //    {
+        //        foreach (Transform gchild in child)
+        //        {
+        //            float from = (gchild.GetComponent<TMPro.TextMeshPro>()) ?
+        //                          gchild.GetComponent<Renderer>().material.GetColor("_FaceColor").a :
+        //                          gchild.GetComponent<Renderer>().material.GetColor("_Color").a;
+        //            StartCoroutine(FadeObj(gchild, from, to));
+        //        }
+        //    }
+        //    else
+        //    {
+        //        float from = (child.GetComponent<TMPro.TextMeshPro>()) ?
+        //                      child.GetComponent<Renderer>().material.GetColor("_FaceColor").a :
+        //                      child.GetComponent<Renderer>().material.GetColor("_Color").a;
+        //        StartCoroutine(FadeObj(child, from, to));
+        //    }
+        //}
 
         yield return null;
     }
@@ -471,9 +480,9 @@ public class Scroll : MonoBehaviour
 
     //TODO: handle deeper hierarchies like variables in vec field and param
     //IEnumerator FadeObj(Transform obj, float start, float end, float time)
-    IEnumerator FadeObj(Transform obj, float start, float end)
+    IEnumerator FadeObj(Renderer rend, float start, float end)
     {
-        Material mat = obj.GetComponent<Renderer>().material;
+        Material mat = rend.material;
         string colorName = "_Color";
         Color col = Color.white;
 
@@ -484,15 +493,15 @@ public class Scroll : MonoBehaviour
         {
             col = mat.GetColor(colorName);
             col.a = Mathf.Lerp(start, end, i);
-            obj.GetComponent<Renderer>().material.SetColor(colorName, col);
+            rend.material.SetColor(colorName, col);
             yield return null;
         }
 
         col.a = end;
-        obj.GetComponent<Renderer>().material.SetColor(colorName, col);
+        rend.GetComponent<Renderer>().material.SetColor(colorName, col);
         fading = false;
 
-        if (end == transparent) obj.parent.gameObject.SetActive(false);
+        if (end == transparent) rend.gameObject.transform.parent.gameObject.SetActive(false);
     }
 
     IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)
