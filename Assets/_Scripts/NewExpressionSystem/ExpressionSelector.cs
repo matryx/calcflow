@@ -6,6 +6,7 @@ public class ExpressionSelector : QuickButton
 {
     Scroll expressionScroll;
     Expressions expressions;
+    JoyStickAggregator joyStickAggregator;
     //public AddExpression addExpr;
 
     protected override void Start()
@@ -13,10 +14,19 @@ public class ExpressionSelector : QuickButton
         base.Start();
         expressionScroll = GameObject.Find("ExpressionMenu").GetComponentInChildren<Scroll>();
         expressions = GameObject.Find("ExpressionMenu").GetComponentInChildren<Expressions>();
+        joyStickAggregator = expressionScroll.GetComponent<JoyStickAggregator>();
     }
 
-    //TODO:
-    // - test
+    private void addForwarders(Transform obj)
+    {
+        JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>();
+        foreach (JoyStickForwarder j in forwarders)
+        {
+            joyStickAggregator.AddForwarder(j);
+        }
+    }
+
+    //TODO: fix renderer issues with variables
     protected override void ButtonEnterBehavior(GameObject other)
     {
         switch (transform.parent.name)
@@ -25,6 +35,7 @@ public class ExpressionSelector : QuickButton
                 GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
                 cons.GetComponent<Constant>().Initialize();
                 cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
+                addForwarders(cons.transform);
 
                 //TODO: add to second to last index instead of end
                 expressionScroll.addObject(cons.transform.Find("Constant"));
@@ -33,6 +44,7 @@ public class ExpressionSelector : QuickButton
             case "Parametrization":
                 GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
                 param.GetComponent<ParametricExpression>().Initialize();
+                addForwarders(param.transform);
 
                 foreach (Transform child in param.transform)
                 {
@@ -57,6 +69,7 @@ public class ExpressionSelector : QuickButton
             case "VectorField":
                 GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
                 vec.GetComponent<VectorFieldExpression>().Initialize();
+                addForwarders(vec.transform);
 
                 foreach (Transform child in vec.transform)
                 {
@@ -81,6 +94,7 @@ public class ExpressionSelector : QuickButton
         }
 
         GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+        addForwarders(sep.transform);
         //TODO: add to second to last index instead of last
         expressionScroll.addObject(sep.transform);
     }

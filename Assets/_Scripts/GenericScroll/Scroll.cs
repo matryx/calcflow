@@ -72,17 +72,17 @@ public class Scroll : MonoBehaviour
         if (transform.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local rotation of object with Scroll script needs to be zero");
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-#endif
+            #endif
         }
 
         if (objectParent.localScale != Vector3.one || objectParent.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local scale and local rotation of Object Parent needs to be one and zero");
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-#endif
+            #endif
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
@@ -258,7 +258,6 @@ public class Scroll : MonoBehaviour
         }
         else
         {
-            //if (deleting && !obj.gameObject.activeSelf) StartCoroutine(FadeButtonIn(obj));
             if (deleting && !obj.gameObject.activeSelf) StartCoroutine(FadeButton(obj, false));
             obj.gameObject.SetActive(true);
         }
@@ -349,12 +348,10 @@ public class Scroll : MonoBehaviour
                 {
                     if (i >= lowestVisIndex && i < lowestVisIndex + fixedRowOrCol)
                     {
-                        //FadeButtonOut(obj);
                         StartCoroutine(FadeButton(obj, true));
                     }
                     else if (i > highestVisIndex && i <= highestVisIndex + fixedRowOrCol)
                     {
-                        //StartCoroutine(FadeButtonIn(obj));
                         StartCoroutine(FadeButton(obj, false));
                     }
                 }
@@ -362,14 +359,12 @@ public class Scroll : MonoBehaviour
                 {
                     if (i < lowestVisIndex && i >= lowestVisIndex - fixedRowOrCol)
                     {
-                        //StartCoroutine(FadeButtonIn(obj));
                         StartCoroutine(FadeButton(obj, false));
                     }
                     else if (i <= highestVisIndex && i > highestVisIndex - fixedRowOrCol)
                     {
                         if (((highestVisIndex + 1) % fixedRowOrCol == 0) ||
                             (i > (highestVisIndex - ((highestVisIndex + 1) % fixedRowOrCol))))
-                            //FadeButtonOut(obj);
                             StartCoroutine(FadeButton(obj, true));
                     }
                 }
@@ -399,33 +394,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    //void FadeButtonOut(Transform obj)
-    //{
-    //    if (obj.GetComponentInChildren<Renderer>() == null)
-    //    {
-    //        print("NULL RENDERER");
-    //    }
-    //    AnimateFade(obj, obj.GetComponentInChildren<Renderer>().material.GetColor("_Color").a, transparent, fadeSpeed);
-    //}
-
-    //void AnimateFade(Transform obj, float from, float to, float time)
-    //{
-    //    foreach (Transform child in obj)
-    //    {
-    //        if (child.childCount > 0)
-    //        {
-    //            foreach (Transform gchild in child)
-    //            {
-    //                StartCoroutine(FadeObj(gchild, from, to));
-    //            }
-    //        }
-    //        else
-    //        {
-    //            StartCoroutine(FadeObj(child, from, to, time));
-    //        }
-    //    }
-    //}
-
+    #region Coroutines
     IEnumerator FadeButton(Transform obj, bool fadeOut)
     {
         if (!fadeOut)
@@ -435,52 +404,20 @@ public class Scroll : MonoBehaviour
         }
 
         float to = (fadeOut) ? transparent : opaque;
-        Renderer[] childrenRenderer = obj.GetComponentsInChildren(typeof(Renderer)) as Renderer[];
+        Renderer[] childrenRenderer = obj.GetComponentsInChildren<Renderer>(true);
 
         foreach (Renderer r in childrenRenderer)
         {
             float from = (r.gameObject.GetComponent<TMPro.TextMeshPro>()) ?
                           r.material.GetColor("_FaceColor").a :
                           r.material.GetColor("_Color").a;
-            StartCoroutine(FadeObj(r, from, to));
+            StartCoroutine(FadeObj(r, obj, from, to));
         }
-
-        //foreach (Transform child in obj)
-        //{
-        //    if (child.childCount > 0)
-        //    {
-        //        foreach (Transform gchild in child)
-        //        {
-        //            float from = (gchild.GetComponent<TMPro.TextMeshPro>()) ?
-        //                          gchild.GetComponent<Renderer>().material.GetColor("_FaceColor").a :
-        //                          gchild.GetComponent<Renderer>().material.GetColor("_Color").a;
-        //            StartCoroutine(FadeObj(gchild, from, to));
-        //        }
-        //    }
-        //    else
-        //    {
-        //        float from = (child.GetComponent<TMPro.TextMeshPro>()) ?
-        //                      child.GetComponent<Renderer>().material.GetColor("_FaceColor").a :
-        //                      child.GetComponent<Renderer>().material.GetColor("_Color").a;
-        //        StartCoroutine(FadeObj(child, from, to));
-        //    }
-        //}
 
         yield return null;
     }
 
-    #region Coroutines
-    //IEnumerator FadeButtonIn(Transform obj)
-    //{
-    //    yield return new WaitForSeconds(fadeInDelay);
-
-    //    obj.gameObject.SetActive(true);
-    //    AnimateFade(obj, obj.GetComponentInChildren<Renderer>().material.GetColor("_Color").a, opaque, fadeSpeed);
-    //}
-
-    //TODO: handle deeper hierarchies like variables in vec field and param
-    //IEnumerator FadeObj(Transform obj, float start, float end, float time)
-    IEnumerator FadeObj(Renderer rend, float start, float end)
+    IEnumerator FadeObj(Renderer rend, Transform rootParent, float start, float end)
     {
         Material mat = rend.material;
         string colorName = "_Color";
@@ -501,7 +438,7 @@ public class Scroll : MonoBehaviour
         rend.GetComponent<Renderer>().material.SetColor(colorName, col);
         fading = false;
 
-        if (end == transparent) rend.gameObject.transform.parent.gameObject.SetActive(false);
+        if (end == transparent) rootParent.gameObject.SetActive(false);
     }
 
     IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)
