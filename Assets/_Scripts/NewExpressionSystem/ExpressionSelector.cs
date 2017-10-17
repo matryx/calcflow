@@ -7,7 +7,6 @@ public class ExpressionSelector : QuickButton
     Scroll expressionScroll;
     Expressions expressions;
     JoyStickAggregator joyStickAggregator;
-    //public AddExpression addExpr;
 
     protected override void Start()
     {
@@ -20,15 +19,21 @@ public class ExpressionSelector : QuickButton
     private void addForwarders(Transform obj)
     {
         JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>();
+        print(obj.name + " has " + forwarders.Length + " forwarders");
         foreach (JoyStickForwarder j in forwarders)
         {
             joyStickAggregator.AddForwarder(j);
         }
     }
 
-    //TODO: fix renderer issues with variables
+    //BUGS: 
+    // - renderer issues with variables
+    // - scroll bar has white sliver on top
+    // - some expressions not highlighting (seems to be the first one)
     protected override void ButtonEnterBehavior(GameObject other)
     {
+        List<Transform> emptyList = new List<Transform>();
+        Transform fakeObj = new GameObject().transform;
         switch (transform.parent.name)
         {
             case "Constant":
@@ -37,8 +42,7 @@ public class ExpressionSelector : QuickButton
                 cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
                 addForwarders(cons.transform);
 
-                //TODO: add to second to last index instead of end
-                expressionScroll.addObject(cons.transform.Find("Constant"));
+                expressionScroll.addToIndex(-1, emptyList, cons.transform.Find("Constant"), true, false);
                 expressions.addExpr(cons.transform);
                 break;
             case "Parametrization":
@@ -46,6 +50,7 @@ public class ExpressionSelector : QuickButton
                 param.GetComponent<ParametricExpression>().Initialize();
                 addForwarders(param.transform);
 
+                List<Transform> gchildrenParam = new List<Transform>();
                 foreach (Transform child in param.transform)
                 {
                     foreach (Transform gchild in child)
@@ -59,11 +64,11 @@ public class ExpressionSelector : QuickButton
                             param.GetComponent<ParametricExpression>().addVariable(gchild);
                         }
 
-                        //TODO: add to second to last index instead of end
-                        expressionScroll.addObject(gchild);
+                        gchildrenParam.Add(gchild);
                     }
                 }
 
+                expressionScroll.addToIndex(-1, gchildrenParam, fakeObj, true, true);
                 expressions.addExpr(param.transform);
                 break;
             case "VectorField":
@@ -71,38 +76,34 @@ public class ExpressionSelector : QuickButton
                 vec.GetComponent<VectorFieldExpression>().Initialize();
                 addForwarders(vec.transform);
 
+                List<Transform> gchildrenVec = new List<Transform>();
                 foreach (Transform child in vec.transform)
                 {
                     if (child.name == "Variable")
                     {
                         vec.GetComponent<VectorFieldExpression>().setRange(child);
-                        //TODO: add to second to last index instead of end
-                        expressionScroll.addObject(child);
+                        gchildrenVec.Add(child);
                         continue;
                     }
 
                     foreach (Transform gchild in child)
                     {
                         vec.GetComponent<VectorFieldExpression>().addExpression(gchild);
-                        //TODO: add to second to last index instead of end
-                        expressionScroll.addObject(gchild);
+                        gchildrenVec.Add(gchild);
                     }
                 }
 
+                expressionScroll.addToIndex(-1, gchildrenVec, fakeObj, true, true);
                 expressions.addExpr(vec.transform);
                 break;
         }
 
         GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
         addForwarders(sep.transform);
-        //TODO: add to second to last index instead of last
-        expressionScroll.addObject(sep.transform);
+        expressionScroll.addToIndex(-1, emptyList, sep.transform, true, false);
     }
 
-    protected override void ButtonExitBehavior(GameObject other)
-    {
-        //addExpr.setAddActiveFalse(); //not needed anymore
-    }
+    protected override void ButtonExitBehavior(GameObject other) { }
 
     void Update()
     {

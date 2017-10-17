@@ -24,7 +24,6 @@ public class ScrollBar : MonoBehaviour
         if (bar == null || scroller == null) initializeScrollBar();
     }
 
-    //BUG: editor always takes default orientation and placement 
     public void initializeScrollBar()
     {
         if (bar && scroller) return;

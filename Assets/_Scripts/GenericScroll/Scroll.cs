@@ -9,11 +9,6 @@ public class Scroll : MonoBehaviour
 {
     //REQUIRED: some type of transparent shaders(not standard), Unlit/UnlitAlphaWithFade recommended
 
-    //TODO: 
-    //  - add functionality that lets you add to any index in list of objects
-    //    (for expression manager)
-    //  - handle searching through grandchildren for fading 
-
     private List<Transform> objects;
     private List<Transform> toAdd = new List<Transform>();
 
@@ -72,17 +67,17 @@ public class Scroll : MonoBehaviour
         if (transform.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local rotation of object with Scroll script needs to be zero");
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-            #endif
+#endif
         }
 
         if (objectParent.localScale != Vector3.one || objectParent.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local scale and local rotation of Object Parent needs to be one and zero");
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-            #endif
+#endif
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
@@ -217,6 +212,34 @@ public class Scroll : MonoBehaviour
 
         toAdd.Clear();
         adding = false;
+    }
+
+    //TODO: refactor, could probably use a better implementation
+    public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast, bool multipleObjs)
+    {
+        if (secondToLast) atIndex = objects.Count - 1;
+        if (atIndex < 0 || atIndex > objects.Count - 1) return;
+
+        if (multipleObjs)
+        {
+            int temp = atIndex;
+            foreach (Transform o in objs)
+            {
+                objects.Insert(temp, o);
+                temp++;
+            }
+        }
+        else
+        {
+            objects.Insert(atIndex, obj);
+        }
+
+        setNumPagesAndHighestVisIndex();
+
+        for (int i = atIndex; i < objects.Count; i++)
+        {
+            placeObject(objects[i], i, false);
+        }
     }
 
     private void placeObject(Transform obj, int ind, bool deleting)
