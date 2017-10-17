@@ -10,16 +10,20 @@ public class Replayer : MonoBehaviour {
 
     private void Start()
     {
-        log = PlaybackLog.Log;
+        LoadReplay(PlaybackLog.instance);
     }
 
     private void Update()
     {
         Replaying = EditorReplay;
-        if (Replaying) print("replaying...");
+    }
+    
+    private void LoadReplay(PlaybackLog replay)
+    {
+        this.log = replay.GetLogCopy();
     }
 
-    private static void StartReplaying()
+    private void StartReplaying()
     {
         PlaybackClock.StartClock();
     }
@@ -30,30 +34,36 @@ public class Replayer : MonoBehaviour {
         {
             while (true)
             {
+                print("attempting pop");
                 if (log.Count == 0)
                 {
+                    print("nothing to pop");
                     Replaying = false;
                     break;
                 }
-                if (log[0].timeStamp < PlaybackClock.GetTime())
+                if (log[0].timeStamp <= PlaybackClock.GetTime() - PlaybackLog.Period)
                 {
+                    print("popping next instruction");
                     log[0].Reenact();
                     log.RemoveAt(0);
                 }
                 else
                 {
+                    print("nothing to pop... yet");
                     break;
                 }
             }
         }
     }
 
-    private static void StopReplaying()
+    private void StopReplaying()
     {
         PlaybackClock.StopClock();
+        EditorReplay = false;
+        replay = false;
     }
 
-    public static bool Replaying
+    public bool Replaying
     {
         get
         {

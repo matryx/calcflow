@@ -3,23 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
 
-public static class PlaybackClock{
+public class PlaybackClock : MonoBehaviour{
 
-    static Stopwatch timer = new Stopwatch();
+    public Stopwatch timer = new Stopwatch();
 
-    public static void StartClock()
+    public void StartClock()
     {
         timer.Start();
     }
 
-    public static long GetTime()
+    public long GetTime()
     {
         return timer.ElapsedMilliseconds;
     }
 
-    public static void StopClock()
+    public void StopClock()
     {
         timer.Stop();
+    }
+
+    public void RestartClock()
+    {
         timer.Reset();
     }
 }

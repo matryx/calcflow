@@ -4,16 +4,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using Nanome.Maths;
+using Extensions;
 
 public class PlaybackLog : Nanome.Core.Behaviour
 {
 
     private void Awake()
     {
-        Log = log;
+        instance = this;
     }
 
-    public static List<PlayBackLogAction> Log;
+    public static PlaybackLog instance;
+    public const float Period = .03f;
+
+    [SerializeField]
+    public float period = .03f;
 
     static string jsonExtension = "json";
     static string fileName = "recording1";
@@ -29,25 +35,31 @@ public class PlaybackLog : Nanome.Core.Behaviour
             System.IO.Directory.CreateDirectory(savePath);
         }
 
-        System.IO.File.WriteAllText(Path.Combine(savePath, fileName) + jsonExtension, JsonUtility.ToJson(Log));
+        System.IO.File.WriteAllText(Path.Combine(savePath, fileName) + jsonExtension, JsonUtility.ToJson(instance.log));
 
     }
 
     [SerializeField]
     List<PlayBackLogAction> log = new List<PlayBackLogAction>();
 
-    public static void LogMovement(float timestamp, GameObject subject, Vector3 destination)
+    public List<PlayBackLogAction> GetLogCopy()
     {
-        Log.Add(PlayBackLogAction.CreateMovement(timestamp, subject, destination));
+        return new List<PlayBackLogAction>(log);
     }
 
-    public static void LogButtonPress(float timestamp, GameObject subject, GameObject presser)
+    public static void LogMovement(long timestamp, GameObject subject, Vector3 destination)
     {
-        Log.Add(PlayBackLogAction.CreateButtonPress(timestamp, subject, presser));
+        instance.log.Add(PlayBackLogAction.CreateMovement(timestamp, subject, destination));
+    }
+
+    public static void LogButtonPress(long timestamp, GameObject subject, GameObject presser)
+    {
+        instance.log.Add(PlayBackLogAction.CreateButtonPress(timestamp, subject, presser));
     }
 
     [Serializable]
-    public class PlayBackLogAction {
+    public class PlayBackLogAction
+    {
 
         public enum ActionType
         {
@@ -59,7 +71,7 @@ public class PlaybackLog : Nanome.Core.Behaviour
         [SerializeField]
         public GameObject subject;
         [SerializeField]
-        public float timeStamp;
+        public long timeStamp;
         [SerializeField]
         public Vector3 dest;
         [SerializeField]
@@ -89,27 +101,43 @@ public class PlaybackLog : Nanome.Core.Behaviour
 
         }
 
-        internal static PlayBackLogAction CreateMovement(float timestamp, GameObject subject, Vector3 destination)
+        internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination)
         {
-            PlayBackLogAction newAction = new PlayBackLogAction();
-            newAction.type = ActionType.Movement;
-            newAction.dest = destination;
-            newAction.subject = subject;
+            PlayBackLogAction newAction = new PlayBackLogAction
+            {
+                type = ActionType.Movement,
+                timeStamp = timestamp,
+                dest = destination,
+                subject = subject
+            };
             return newAction;
         }
 
-        internal static PlayBackLogAction CreateButtonPress(float timestamp, GameObject subject, GameObject presser)
+        internal static PlayBackLogAction CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
         {
-            PlayBackLogAction newAction = new PlayBackLogAction();
-            newAction.type = ActionType.ButtonPress;
-            newAction.ButtonPresser = presser;
-            newAction.subject = subject;
+            PlayBackLogAction newAction = new PlayBackLogAction
+            {
+                type = ActionType.ButtonPress,
+                timeStamp = timestamp,
+                ButtonPresser = presser,
+                subject = subject
+            };
             return newAction;
         }
 
         public void Reenact()
         {
-            print("stuff");
+            switch (type)
+            {
+                case ActionType.Movement:
+                    print("moving to: " + dest);
+                    subject.MoveTo(dest, PlaybackLog.Period);
+                    break;
+                case ActionType.ButtonPress:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

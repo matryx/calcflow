@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Linq;
 using System;
+using Nanome.Maths;
 
 namespace Extensions
 {
@@ -93,6 +94,41 @@ namespace Extensions
 
             if (!typeof(T).IsInterface) throw new SystemException("Specified type is not an interface!");
             return gObj.GetInterfacesInParents<T>().FirstOrDefault();
+        }
+
+        public static void MoveTo(this GameObject gObj, Vector3 destination, float seconds)
+        {
+            LerpMover.LerpMove(gObj, destination, seconds);
+        }
+
+    }
+
+    public class LerpMover : MonoBehaviour
+    {
+
+        LerpVector3 lerper;
+
+        public static void LerpMove(GameObject gObj, Vector3 destination, float seconds)
+        {
+            gObj.AddComponent<LerpMover>().lerper = new LerpVector3(gObj.transform.position, destination, seconds);
+        }
+
+        public void StopLerping()
+        {
+            enabled = false;
+            Destroy(this);
+        }
+
+        private void Update()
+        {
+            if (!lerper.done())
+            {
+                transform.position = lerper.current();
+            }
+            else
+            {
+                Destroy(this);
+            }
         }
     }
 }

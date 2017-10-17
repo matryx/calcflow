@@ -7,12 +7,12 @@ public class MovementLogger : Nanome.Core.Behaviour
 
     Vector3 lastPos;
     float timeSinceLastCheck = 0.0f;
-    float checkFrequency = .03f;
 
     void RecordPosition()
     {
         timeSinceLastCheck += Time.fixedDeltaTime;
-        if (timeSinceLastCheck > checkFrequency)
+        print(PlaybackLog.Period);
+        if (timeSinceLastCheck > PlaybackLog.Period)
         {
             if (lastPos != transform.position)
             {
