@@ -34,4 +34,14 @@ public class JoyStickForwarder : MonoBehaviour {
         destination = receiver;
         GetComponent<JoyStickReceiver>().JoyStickTouched += destination.ReceiverJoystickInput;
     }
+
+    public bool v;
+
+    private void Update()
+    {
+        if (v)
+        {
+            print(destination);
+        }
+    }
 }

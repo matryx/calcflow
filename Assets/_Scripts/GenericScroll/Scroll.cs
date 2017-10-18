@@ -215,12 +215,12 @@ public class Scroll : MonoBehaviour
     }
 
     //TODO: refactor, could probably use a better implementation
-    public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast, bool multipleObjs)
+    public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
     {
         if (secondToLast) atIndex = objects.Count - 1;
         if (atIndex < 0 || atIndex > objects.Count - 1) return;
 
-        if (multipleObjs)
+        if (objs.Count > 0)
         {
             int temp = atIndex;
             foreach (Transform o in objs)

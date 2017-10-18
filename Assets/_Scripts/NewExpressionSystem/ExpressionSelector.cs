@@ -27,9 +27,7 @@ public class ExpressionSelector : QuickButton
     }
 
     //BUGS: 
-    // - renderer issues with variables
     // - scroll bar has white sliver on top
-    // - some expressions not highlighting (seems to be the first one)
     protected override void ButtonEnterBehavior(GameObject other)
     {
         List<Transform> emptyList = new List<Transform>();
@@ -42,7 +40,7 @@ public class ExpressionSelector : QuickButton
                 cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
                 addForwarders(cons.transform);
 
-                expressionScroll.addToIndex(-1, emptyList, cons.transform.Find("Constant"), true, false);
+                expressionScroll.addToIndex(-1, emptyList, cons.transform.Find("Constant"), true);
                 expressions.addExpr(cons.transform);
                 break;
             case "Parametrization":
@@ -68,7 +66,7 @@ public class ExpressionSelector : QuickButton
                     }
                 }
 
-                expressionScroll.addToIndex(-1, gchildrenParam, fakeObj, true, true);
+                expressionScroll.addToIndex(-1, gchildrenParam, fakeObj, true);
                 expressions.addExpr(param.transform);
                 break;
             case "VectorField":
@@ -91,16 +89,17 @@ public class ExpressionSelector : QuickButton
                         vec.GetComponent<VectorFieldExpression>().addExpression(gchild);
                         gchildrenVec.Add(gchild);
                     }
+
                 }
 
-                expressionScroll.addToIndex(-1, gchildrenVec, fakeObj, true, true);
+                expressionScroll.addToIndex(-1, gchildrenVec, fakeObj, true);
                 expressions.addExpr(vec.transform);
                 break;
         }
 
         GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
         addForwarders(sep.transform);
-        expressionScroll.addToIndex(-1, emptyList, sep.transform, true, false);
+        expressionScroll.addToIndex(-1, emptyList, sep.transform, true);
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
