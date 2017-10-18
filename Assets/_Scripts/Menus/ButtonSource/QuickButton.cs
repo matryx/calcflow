@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class QuickButton : MonoBehaviour {
+public abstract class QuickButton : Nanome.Core.Behaviour{
 
     protected virtual void Start()
     {

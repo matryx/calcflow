@@ -5,8 +5,13 @@ using UnityEngine;
 public class Recorder : MonoBehaviour {
 
     public bool EditorRecord = false;
+    public static PlaybackClock clock = new PlaybackClock();
 
     private static bool record = false;
+
+    private void Start()
+    {
+    }
 
     private void Update()
     {
@@ -16,12 +21,13 @@ public class Recorder : MonoBehaviour {
 
     private static void StartRecording()
     {
-        PlaybackClock.StartClock();
+        
+        clock.StartClock();
     }
 
     private static void StopRecording()
     {
-        PlaybackClock.StopClock();
+        clock.StopClock();
     }
 
     public static bool Recording

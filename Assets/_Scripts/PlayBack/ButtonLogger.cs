@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ButtonLogger : Nanome.Core.Behaviour
+public class ButtonLogger : QuickButton
 {
+    protected override void ButtonEnterBehavior(GameObject other)
+    {
+        throw new System.NotImplementedException();
+    }
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    protected override void ButtonExitBehavior(GameObject other)
+    {
+        throw new System.NotImplementedException();
+    }
 }

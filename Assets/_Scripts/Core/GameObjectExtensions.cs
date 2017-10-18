@@ -5,6 +5,14 @@ using Nanome.Maths;
 
 namespace Extensions
 {
+    public enum Direction
+    {
+        up,
+        down,
+        left,
+        right
+    }
+
     public static class GameObjectExtensions
     {
         /// <summary>

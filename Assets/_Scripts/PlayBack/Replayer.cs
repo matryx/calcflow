@@ -5,12 +5,16 @@ using UnityEngine;
 public class Replayer : MonoBehaviour {
 
     public bool EditorReplay = false;
-    public List<PlaybackLog.PlayBackLogAction> log;
+    private static List<PlaybackLog.PlayBackLogAction> log;
     private static bool replay = false;
+    private static PlaybackClock clock = new PlaybackClock();
+
+    public static Replayer _instance;
 
     private void Start()
     {
-        LoadReplay(PlaybackLog.instance);
+        _instance = this;
+        LoadReplay(PlaybackLog.recordingInstance);
     }
 
     private void Update()
@@ -20,12 +24,12 @@ public class Replayer : MonoBehaviour {
     
     private void LoadReplay(PlaybackLog replay)
     {
-        this.log = replay.GetLogCopy();
+        log = replay.GetLogCopy();
     }
 
-    private void StartReplaying()
+    private static void StartReplaying()
     {
-        PlaybackClock.StartClock();
+        clock.StartClock();
     }
 
     private void FixedUpdate()
@@ -41,7 +45,7 @@ public class Replayer : MonoBehaviour {
                     Replaying = false;
                     break;
                 }
-                if (log[0].timeStamp <= PlaybackClock.GetTime() - PlaybackLog.Period)
+                if (log[0].timeStamp <= clock.GetTime())
                 {
                     print("popping next instruction");
                     log[0].Reenact();
@@ -56,14 +60,14 @@ public class Replayer : MonoBehaviour {
         }
     }
 
-    private void StopReplaying()
+    private static void StopReplaying()
     {
-        PlaybackClock.StopClock();
-        EditorReplay = false;
+        clock.StopClock();
+        _instance.EditorReplay = false;
         replay = false;
     }
 
-    public bool Replaying
+    public static bool Replaying
     {
         get
         {

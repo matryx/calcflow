@@ -17,7 +17,7 @@ public class MovementLogger : Nanome.Core.Behaviour
             if (lastPos != transform.position)
             {
                 lastPos = transform.position;
-                PlaybackLog.LogMovement(PlaybackClock.GetTime(), gameObject, transform.position);
+                PlaybackLog.LogMovement(Recorder.clock.GetTime()-(long)(PlaybackLog.Period*1000), gameObject, transform.position);
             }
             timeSinceLastCheck = 0.0f;
         }

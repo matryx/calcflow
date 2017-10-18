@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
 
-public class PlaybackClock : MonoBehaviour{
+public class PlaybackClock {
 
     public Stopwatch timer = new Stopwatch();
+
+    public PlaybackClock ()
+    {
+    }
 
     public void StartClock()
     {

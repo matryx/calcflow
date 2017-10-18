@@ -10,12 +10,7 @@ using Extensions;
 public class PlaybackLog : Nanome.Core.Behaviour
 {
 
-    private void Awake()
-    {
-        instance = this;
-    }
-
-    public static PlaybackLog instance;
+    public static PlaybackLog recordingInstance;
     public const float Period = .03f;
 
     [SerializeField]
@@ -35,7 +30,7 @@ public class PlaybackLog : Nanome.Core.Behaviour
             System.IO.Directory.CreateDirectory(savePath);
         }
 
-        System.IO.File.WriteAllText(Path.Combine(savePath, fileName) + jsonExtension, JsonUtility.ToJson(instance.log));
+        System.IO.File.WriteAllText(Path.Combine(savePath, fileName) + jsonExtension, JsonUtility.ToJson(recordingInstance.log));
 
     }
 
@@ -49,33 +44,30 @@ public class PlaybackLog : Nanome.Core.Behaviour
 
     public static void LogMovement(long timestamp, GameObject subject, Vector3 destination)
     {
-        instance.log.Add(PlayBackLogAction.CreateMovement(timestamp, subject, destination));
+        recordingInstance.log.Add(PlayBackLogAction.CreateMovement(timestamp, subject, destination));
     }
 
     public static void LogButtonPress(long timestamp, GameObject subject, GameObject presser)
     {
-        instance.log.Add(PlayBackLogAction.CreateButtonPress(timestamp, subject, presser));
+        recordingInstance.log.Add(PlayBackLogAction.CreateButtonPress(timestamp, subject, presser));
     }
 
     [Serializable]
-    public class PlayBackLogAction
+    public abstract class PlayBackLogAction
     {
-
         public enum ActionType
         {
             Movement,
-            ButtonPress
+            Rotation,
+            ButtonPress,
+            ButtonUnpress
         }
-        [SerializeField]
-        public ActionType type;
         [SerializeField]
         public GameObject subject;
         [SerializeField]
         public long timeStamp;
-        [SerializeField]
-        public Vector3 dest;
-        [SerializeField]
-        public GameObject ButtonPresser;
+
+        ActionType type;
 
         internal void SetType(string type)
         {
@@ -96,48 +88,129 @@ public class PlaybackLog : Nanome.Core.Behaviour
             this.type = type;
         }
 
-        PlayBackLogAction()
+        internal PlayBackLogAction()
         {
 
         }
 
+        internal static PlayBackLogAction CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
+        {
+            PlayBackLogAction newAction = new SpawnLogAction
+            {
+                type = ActionType.Movement,
+                timeStamp = timestamp,
+                position = position,
+                rotation = rotation,
+                scale = scale,
+                subject = subject
+            };
+
+            return newAction;
+        }
+
         internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination)
         {
-            PlayBackLogAction newAction = new PlayBackLogAction
+            PlayBackLogAction newAction = new MovementLogAction
             {
                 type = ActionType.Movement,
                 timeStamp = timestamp,
                 dest = destination,
                 subject = subject
             };
+
+            return newAction;
+        }
+
+        internal static PlayBackLogAction CreateRotation(long timestamp, GameObject subject, Quaternion destination)
+        {
+            PlayBackLogAction newAction = new RotationLogAction
+            {
+                type = ActionType.Movement,
+                timeStamp = timestamp,
+                dest = destination,
+                subject = subject
+            };
+
+            return newAction;
+        }
+
+        internal static PlayBackLogAction CreateScale(long timestamp, GameObject subject, Vector3 scale)
+        {
+            PlayBackLogAction newAction = new ScaleLogAction
+            {
+                type = ActionType.Movement,
+                timeStamp = timestamp,
+                scale = scale,
+                subject = subject
+            };
+
             return newAction;
         }
 
         internal static PlayBackLogAction CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
         {
-            PlayBackLogAction newAction = new PlayBackLogAction
+            PlayBackLogAction newAction = new ButtonPressLogAction
             {
                 type = ActionType.ButtonPress,
                 timeStamp = timestamp,
                 ButtonPresser = presser,
-                subject = subject
+                subject = subject,
             };
             return newAction;
         }
 
-        public void Reenact()
+        internal static PlayBackLogAction CreateButtonUnpress(long timestamp, GameObject subject, GameObject presser)
         {
-            switch (type)
+            PlayBackLogAction newAction = new ButtonUnpressLogAction
             {
-                case ActionType.Movement:
-                    print("moving to: " + dest);
-                    subject.MoveTo(dest, PlaybackLog.Period);
-                    break;
-                case ActionType.ButtonPress:
-                    break;
-                default:
-                    break;
-            }
+                type = ActionType.ButtonUnpress,
+                timeStamp = timestamp,
+                ButtonPresser = presser,
+                subject = subject,
+            };
+            return newAction;
         }
+
+        public abstract void Reenact();
+    }
+
+    public class SpawnLogAction : PlayBackLogAction
+    {
+        [SerializeField]
+        internal Vector3 position;
+        [SerializeField]
+        internal Quaternion rotation;
+        [SerializeField]
+        internal Vector3 scale;
+    }
+
+    public class MovementLogAction : PlayBackLogAction
+    {
+        [SerializeField]
+        public Vector3 dest;
+    }
+
+    public class RotationLogAction : PlayBackLogAction
+    {
+        [SerializeField]
+        public Quaternion dest;
+    }
+
+    public class ScaleLogAction : PlayBackLogAction
+    {
+        [SerializeField]
+        public Vector3 scale;
+    }
+
+    public class ButtonPressLogAction : PlayBackLogAction
+    {
+        [SerializeField]
+        public GameObject ButtonPresser;
+    }
+
+    public class ButtonUnpressLogAction : PlayBackLogAction
+    {
+        [SerializeField]
+        public GameObject ButtonPresser;
     }
 }
