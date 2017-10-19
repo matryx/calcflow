@@ -48,18 +48,16 @@ public class ExpressionSelector : QuickButton
                 List<Transform> gchildrenParam = new List<Transform>();
                 foreach (Transform child in param.transform)
                 {
-                    foreach (Transform gchild in child)
+                    if (child.name == "ExpressionSet")
                     {
-                        if (child.name == "ExpressionSet")
+                        foreach (Transform gchild in child)
                         {
-                            param.GetComponent<ParametricExpression>().addExpression(gchild);
+                            if (child.name == "ExpressionSet")
+                            {
+                                param.GetComponent<ParametricExpression>().addExpression(gchild);
+                            }
+                            gchildrenParam.Add(gchild);
                         }
-                        else if (child.name == "Variables")
-                        {
-                            param.GetComponent<ParametricExpression>().addVariable(gchild);
-                        }
-
-                        gchildrenParam.Add(gchild);
                     }
                 }
 

@@ -215,6 +215,7 @@ public class Scroll : MonoBehaviour
     }
 
     //TODO: refactor, could probably use a better implementation
+    //      - get objects count
     public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
     {
         if (secondToLast) atIndex = objects.Count - 1;
@@ -240,6 +241,11 @@ public class Scroll : MonoBehaviour
         {
             placeObject(objects[i], i, false);
         }
+    }
+
+    public int getIndex(Transform obj)
+    {
+        return objects.IndexOf(obj);
     }
 
     private void placeObject(Transform obj, int ind, bool deleting)
