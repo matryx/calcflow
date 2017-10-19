@@ -6,11 +6,11 @@ public class ButtonLogger : QuickButton
 {
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        throw new System.NotImplementedException();
+        PlaybackLog.LogButtonPress(gameObject, other);
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
-        throw new System.NotImplementedException();
+        PlaybackLog.LogButtonUnpress(gameObject, other);
     }
 }

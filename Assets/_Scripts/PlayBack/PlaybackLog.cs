@@ -6,9 +6,14 @@ using System.Linq;
 using UnityEngine;
 using Nanome.Maths;
 using Extensions;
+using CalcFlowUI;
 
 public class PlaybackLog : Nanome.Core.Behaviour
 {
+    [SerializeField]
+    private void Start()
+    {
+    }
 
     public static PlaybackLog recordingInstance;
     public const float Period = .03f;
@@ -42,23 +47,33 @@ public class PlaybackLog : Nanome.Core.Behaviour
         return new List<PlayBackLogAction>(log);
     }
 
-    public static void LogMovement(long timestamp, GameObject subject, Vector3 destination)
+    public static void LogSpawn(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
     {
-        recordingInstance.log.Add(PlayBackLogAction.CreateMovement(timestamp, subject, destination));
+        recordingInstance.log.Add(PlayBackLogAction.CreateSpawn(Recorder.clock.GetTime(), subject, destination, rotation, scale));
     }
 
-    public static void LogButtonPress(long timestamp, GameObject subject, GameObject presser)
+    public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
     {
-        recordingInstance.log.Add(PlayBackLogAction.CreateButtonPress(timestamp, subject, presser));
+        recordingInstance.log.Add(PlayBackLogAction.CreateMovement(Recorder.clock.GetTime() - (long)(PlaybackLog.Period * 1000), subject, destination, rotation, scale));
+    }
+
+    public static void LogButtonPress(GameObject subject, GameObject presser)
+    {
+        recordingInstance.log.Add(PlayBackLogAction.CreateButtonPress(Recorder.clock.GetTime(), subject, presser));
+    }
+
+    public static void LogButtonUnpress(GameObject subject, GameObject presser)
+    {
+        recordingInstance.log.Add(PlayBackLogAction.CreateButtonUnpress(Recorder.clock.GetTime(), subject, presser));
     }
 
     [Serializable]
-    public abstract class PlayBackLogAction
+    public class PlayBackLogAction
     {
         public enum ActionType
         {
+            Spawn,
             Movement,
-            Rotation,
             ButtonPress,
             ButtonUnpress
         }
@@ -66,6 +81,16 @@ public class PlaybackLog : Nanome.Core.Behaviour
         public GameObject subject;
         [SerializeField]
         public long timeStamp;
+        [SerializeField]
+        internal Vector3 position;
+        [SerializeField]
+        internal Quaternion rotation;
+        [SerializeField]
+        internal Vector3 scale;
+        [SerializeField]
+        internal GameObject buttonPresser;
+
+
 
         ActionType type;
 
@@ -88,16 +113,12 @@ public class PlaybackLog : Nanome.Core.Behaviour
             this.type = type;
         }
 
-        internal PlayBackLogAction()
-        {
-
-        }
 
         internal static PlayBackLogAction CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
         {
-            PlayBackLogAction newAction = new SpawnLogAction
+            PlayBackLogAction newAction = new PlayBackLogAction
             {
-                type = ActionType.Movement,
+                type = ActionType.Spawn,
                 timeStamp = timestamp,
                 position = position,
                 rotation = rotation,
@@ -108,38 +129,14 @@ public class PlaybackLog : Nanome.Core.Behaviour
             return newAction;
         }
 
-        internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination)
+        internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
         {
-            PlayBackLogAction newAction = new MovementLogAction
+            PlayBackLogAction newAction = new PlayBackLogAction
             {
                 type = ActionType.Movement,
                 timeStamp = timestamp,
-                dest = destination,
-                subject = subject
-            };
-
-            return newAction;
-        }
-
-        internal static PlayBackLogAction CreateRotation(long timestamp, GameObject subject, Quaternion destination)
-        {
-            PlayBackLogAction newAction = new RotationLogAction
-            {
-                type = ActionType.Movement,
-                timeStamp = timestamp,
-                dest = destination,
-                subject = subject
-            };
-
-            return newAction;
-        }
-
-        internal static PlayBackLogAction CreateScale(long timestamp, GameObject subject, Vector3 scale)
-        {
-            PlayBackLogAction newAction = new ScaleLogAction
-            {
-                type = ActionType.Movement,
-                timeStamp = timestamp,
+                position = destination,
+                rotation = rotation,
                 scale = scale,
                 subject = subject
             };
@@ -149,11 +146,11 @@ public class PlaybackLog : Nanome.Core.Behaviour
 
         internal static PlayBackLogAction CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
         {
-            PlayBackLogAction newAction = new ButtonPressLogAction
+            PlayBackLogAction newAction = new PlayBackLogAction
             {
                 type = ActionType.ButtonPress,
                 timeStamp = timestamp,
-                ButtonPresser = presser,
+                buttonPresser = presser,
                 subject = subject,
             };
             return newAction;
@@ -161,56 +158,42 @@ public class PlaybackLog : Nanome.Core.Behaviour
 
         internal static PlayBackLogAction CreateButtonUnpress(long timestamp, GameObject subject, GameObject presser)
         {
-            PlayBackLogAction newAction = new ButtonUnpressLogAction
+            PlayBackLogAction newAction = new PlayBackLogAction
             {
                 type = ActionType.ButtonUnpress,
                 timeStamp = timestamp,
-                ButtonPresser = presser,
+                buttonPresser = presser,
                 subject = subject,
             };
             return newAction;
         }
 
-        public abstract void Reenact();
+        public void Reenact()
+        {
+            Button button;
+            switch (type)
+            {
+                case ActionType.Movement:
+                    subject.MoveTo(position, PlaybackLog.Period);
+                    subject.RotateTo(rotation, PlaybackLog.Period);
+                    subject.GlobalScaleTo(scale, PlaybackLog.Period);
+                    break;
+                case ActionType.Spawn:
+                    GameObject spawned = Instantiate(subject);
+                    spawned.transform.position = position;
+                    spawned.transform.rotation = rotation;
+                    spawned.transform.localScale = scale;
+                    break;
+                case ActionType.ButtonPress:
+                    button = subject.GetComponent<Button>();
+                    button.PressButton(this.buttonPresser);
+                    break;
+                case ActionType.ButtonUnpress:
+                    button = subject.GetComponent<Button>();
+                    button.UnpressButton(this.buttonPresser);
+                    break;
+            }
+        }
     }
 
-    public class SpawnLogAction : PlayBackLogAction
-    {
-        [SerializeField]
-        internal Vector3 position;
-        [SerializeField]
-        internal Quaternion rotation;
-        [SerializeField]
-        internal Vector3 scale;
-    }
-
-    public class MovementLogAction : PlayBackLogAction
-    {
-        [SerializeField]
-        public Vector3 dest;
-    }
-
-    public class RotationLogAction : PlayBackLogAction
-    {
-        [SerializeField]
-        public Quaternion dest;
-    }
-
-    public class ScaleLogAction : PlayBackLogAction
-    {
-        [SerializeField]
-        public Vector3 scale;
-    }
-
-    public class ButtonPressLogAction : PlayBackLogAction
-    {
-        [SerializeField]
-        public GameObject ButtonPresser;
-    }
-
-    public class ButtonUnpressLogAction : PlayBackLogAction
-    {
-        [SerializeField]
-        public GameObject ButtonPresser;
-    }
 }

@@ -104,16 +104,47 @@ namespace Extensions
             return gObj.GetInterfacesInParents<T>().FirstOrDefault();
         }
 
+        /// <summary>
+        /// Lerps the global position to the target position over a number of seconds
+        /// </summary>
         public static void MoveTo(this GameObject gObj, Vector3 destination, float seconds)
         {
             LerpMover.LerpMove(gObj, destination, seconds);
         }
 
+        /// <summary>
+        /// Lerps the global rotation to the target rotation over a number of seconds
+        /// </summary>
+        public static void RotateTo(this GameObject gObj, Quaternion destination, float seconds)
+        {
+            LerpRotator.LerpRotate(gObj, destination, seconds);
+        }
+
+        /// <summary>
+        /// Lerps the localScale to the targetScale over a number of seconds
+        /// </summary>
+        public static void LocalScaleTo(this GameObject gObj, Vector3 destination, float seconds)
+        {
+            LerpScaler.LerpLocalScale(gObj, destination, seconds);
+        }
+
+        /// <summary>
+        /// Lerps the lossyScale to the targetScale over a number of seconds
+        /// </summary>
+        public static void GlobalScaleTo(this GameObject gObj, Vector3 destination, float seconds)
+        {
+            LerpScaler.LerpGlobalScale(gObj, destination, seconds);
+        }
+
+        public static void SetGlobalScale(this Transform transform, Vector3 globalScale)
+        {
+            transform.localScale = Vector3.one;
+            transform.localScale = new Vector3(globalScale.x / transform.lossyScale.x, globalScale.y / transform.lossyScale.y, globalScale.z / transform.lossyScale.z);
+        }
     }
 
-    public class LerpMover : MonoBehaviour
+    public class LerpMover : Nanome.Core.Behaviour
     {
-
         LerpVector3 lerper;
 
         public static void LerpMove(GameObject gObj, Vector3 destination, float seconds)
@@ -132,6 +163,78 @@ namespace Extensions
             if (!lerper.done())
             {
                 transform.position = lerper.current();
+            }
+            else
+            {
+                Destroy(this);
+            }
+        }
+    }
+
+    public class LerpRotator : Nanome.Core.Behaviour
+    {
+        LerpQuaternion lerper;
+
+        public static void LerpRotate(GameObject gObj, Quaternion destination, float seconds)
+        {
+            gObj.AddComponent<LerpRotator>().lerper = new LerpQuaternion(gObj.transform.rotation, destination, seconds);
+        }
+
+        public void StopLerping()
+        {
+            enabled = false;
+            Destroy(this);
+        }
+
+        private void Update()
+        {
+            if (!lerper.done())
+            {
+                transform.rotation = lerper.current();
+            }
+            else
+            {
+                Destroy(this);
+            }
+        }
+    }
+
+    public class LerpScaler : Nanome.Core.Behaviour
+    {
+        LerpVector3 lerper;
+        bool global = false;
+
+        public static void LerpLocalScale(GameObject gObj, Vector3 destination, float seconds)
+        {
+            LerpScaler s = gObj.AddComponent<LerpScaler>();
+            s.lerper = new LerpVector3(gObj.transform.localScale, destination, seconds);
+            s.global = false;
+        }
+
+        public static void LerpGlobalScale(GameObject gObj, Vector3 destination, float seconds)
+        {
+            LerpScaler s = gObj.AddComponent<LerpScaler>();
+            s.lerper = new LerpVector3(gObj.transform.lossyScale, destination, seconds);
+            s.global = true;
+        }
+
+        public void StopLerping()
+        {
+            enabled = false;
+            Destroy(this);
+        }
+
+        private void Update()
+        {
+            if (!lerper.done())
+            {
+                if (!global)
+                {
+                    transform.localScale = lerper.current();
+                } else
+                {
+                    transform.SetGlobalScale(lerper.current());
+                }
             }
             else
             {

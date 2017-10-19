@@ -6,6 +6,9 @@ public class MovementLogger : Nanome.Core.Behaviour
 {
 
     Vector3 lastPos;
+    Vector3 lastScale;
+    Quaternion lastRotation;
+
     float timeSinceLastCheck = 0.0f;
 
     void RecordPosition()
@@ -14,10 +17,12 @@ public class MovementLogger : Nanome.Core.Behaviour
         print(PlaybackLog.Period);
         if (timeSinceLastCheck > PlaybackLog.Period)
         {
-            if (lastPos != transform.position)
+            if (lastPos != transform.position || lastRotation != transform.rotation || lastScale != transform.lossyScale)
             {
                 lastPos = transform.position;
-                PlaybackLog.LogMovement(Recorder.clock.GetTime()-(long)(PlaybackLog.Period*1000), gameObject, transform.position);
+                lastRotation = transform.rotation;
+                lastScale = transform.lossyScale;
+                PlaybackLog.LogMovement(gameObject, transform.position, transform.rotation, transform.lossyScale);
             }
             timeSinceLastCheck = 0.0f;
         }
