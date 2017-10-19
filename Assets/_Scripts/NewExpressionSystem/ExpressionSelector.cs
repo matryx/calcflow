@@ -19,15 +19,12 @@ public class ExpressionSelector : QuickButton
     private void addForwarders(Transform obj)
     {
         JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>();
-        print(obj.name + " has " + forwarders.Length + " forwarders");
         foreach (JoyStickForwarder j in forwarders)
         {
             joyStickAggregator.AddForwarder(j);
         }
     }
 
-    //BUGS: 
-    // - scroll bar has white sliver on top
     protected override void ButtonEnterBehavior(GameObject other)
     {
         List<Transform> emptyList = new List<Transform>();

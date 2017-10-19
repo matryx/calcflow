@@ -128,7 +128,7 @@ public class ScrollBar : MonoBehaviour
 
         if (orientation == Scroll.orientation.VERTICAL)
         {
-            scrollerHeight = (float)System.Math.Round((bar.localScale.y / numPages), 2);
+            scrollerHeight = (float)System.Math.Round((bar.localScale.y / numPages), 2) + 0.01f;
             scroller.localScale = new Vector3(bar.localScale.x + 0.02f, scrollerHeight,
                                               bar.localScale.z + 0.02f);
 
