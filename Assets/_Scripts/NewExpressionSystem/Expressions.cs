@@ -10,7 +10,8 @@ public class Expressions : MonoBehaviour
 
     //NOTES: managing expressions
     // - need to keep track of selected Expr
-    // - selected Expr affects which Actions are shown, the graph and output destination
+    // - make it so that selected Expr affects which Actions are shown, the graph and output destination
+    // - expression components need to know what expression they're connected to
 
     void Awake()
     {

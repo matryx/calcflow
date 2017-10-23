@@ -23,7 +23,6 @@ public class ParametricExpression : MonoBehaviour
         emptyList = new List<Transform>();
 
         scroll = FindObjectOfType<Scroll>();
-        //scroll = transform.parent.parent.parent.parent.GetComponentInChildren<Scroll>();
         initialized = true;
     }
 
@@ -43,7 +42,8 @@ public class ParametricExpression : MonoBehaviour
         expressions.Add(expr);
     }
 
-    //TODO: test
+    //NOTE: when you create a variable, make sure to add forwarder
+    //      just like it's done in ExpressionSelector
     public void addVariable(Transform newVar)
     {
         if (variables.Count % 2 == 0)

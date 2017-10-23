@@ -35,6 +35,7 @@ public class ExpressionSelector : QuickButton
                 GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
                 cons.GetComponent<Constant>().Initialize();
                 cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
+                cons.GetComponentInChildren<ExpressionComponent>().setExpressionParent(cons.transform);
                 addForwarders(cons.transform);
 
                 expressionScroll.addToIndex(-1, emptyList, cons.transform.Find("Constant"), true);
@@ -52,10 +53,8 @@ public class ExpressionSelector : QuickButton
                     {
                         foreach (Transform gchild in child)
                         {
-                            if (child.name == "ExpressionSet")
-                            {
-                                param.GetComponent<ParametricExpression>().addExpression(gchild);
-                            }
+                            param.GetComponent<ParametricExpression>().addExpression(gchild);
+                            gchild.GetComponent<ExpressionComponent>().setExpressionParent(param.transform);
                             gchildrenParam.Add(gchild);
                         }
                     }
@@ -75,6 +74,7 @@ public class ExpressionSelector : QuickButton
                     if (child.name == "Variable")
                     {
                         vec.GetComponent<VectorFieldExpression>().setRange(child);
+                        child.GetComponentInChildren<ExpressionComponent>().setExpressionParent(vec.transform);
                         gchildrenVec.Add(child);
                         continue;
                     }
@@ -82,6 +82,7 @@ public class ExpressionSelector : QuickButton
                     foreach (Transform gchild in child)
                     {
                         vec.GetComponent<VectorFieldExpression>().addExpression(gchild);
+                        gchild.GetComponent<ExpressionComponent>().setExpressionParent(vec.transform);
                         gchildrenVec.Add(gchild);
                     }
 

@@ -13,14 +13,11 @@ public class TempVariableTest : QuickButton {
     protected override void ButtonEnterBehavior(GameObject other)
     {
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-        print("made var: " + var);
+        var.GetComponent<ExpressionComponent>().setExpressionParent(param.transform);
         param.addVariable(var.transform);
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
 
-    // Update is called once per frame
-    void Update () {
-		
-	}
+    void Update() { }
 }
