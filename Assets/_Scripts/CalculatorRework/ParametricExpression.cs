@@ -69,8 +69,6 @@ public class ParametricExpression : MonoBehaviour
         int lastComponentInd = (variableClumps.Count > 0) ?
                            scroll.getIndex(variableClumps[variableClumps.Count - 1]) : scroll.getIndex(expressions[2]);
 
-        print("LAST COMP IND: " + lastComponentInd);
-
         Transform newVarClump = new GameObject().transform;
         newVarClump.name = "Var Clump";
         newVarClump.localScale = Vector3.one;
