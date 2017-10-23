@@ -22,7 +22,8 @@ public class ParametricExpression : MonoBehaviour
         variables = new List<Transform>();
         emptyList = new List<Transform>();
 
-        scroll = transform.parent.parent.GetComponentInChildren<Scroll>();
+        scroll = FindObjectOfType<Scroll>();
+        //scroll = transform.parent.parent.parent.parent.GetComponentInChildren<Scroll>();
         initialized = true;
     }
 
@@ -68,12 +69,15 @@ public class ParametricExpression : MonoBehaviour
         int lastComponentInd = (variableClumps.Count > 0) ?
                            scroll.getIndex(variableClumps[variableClumps.Count - 1]) : scroll.getIndex(expressions[2]);
 
+        print("LAST COMP IND: " + lastComponentInd);
+
         Transform newVarClump = new GameObject().transform;
+        newVarClump.name = "Var Clump";
         newVarClump.localScale = Vector3.one;
         newVarClump.localPosition = Vector3.zero;
         newVarClump.localEulerAngles = Vector3.zero;
         scroll.addToIndex(lastComponentInd + 1, emptyList, newVarClump, false);
-        variableClumps.Add(var);
+        variableClumps.Add(newVarClump);
 
         var.SetParent(newVarClump);
         var.localPosition = new Vector3(-1.2f, 0, 0);
