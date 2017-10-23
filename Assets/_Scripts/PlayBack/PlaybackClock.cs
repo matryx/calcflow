@@ -1,33 +1,79 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Nanome.Core.Daemon;
 using System.Diagnostics;
 
-public class PlaybackClock {
+public class PlaybackClock : Nanome.Core.Behaviour{
 
-    public Stopwatch timer = new Stopwatch();
+    public static Stopwatch timer = new Stopwatch();
 
-    public PlaybackClock ()
-    {
-    }
+    public delegate void ClockCallBack();
+    private static event ClockCallBack triggerTimer;
+    static bool running;
 
-    public void StartClock()
+    public static void StartClock()
     {
         timer.Start();
+        running = true;
+        Dispatcher.queue(runTimer());
     }
 
-    public long GetTime()
+    public static long GetTime()
     {
         return timer.ElapsedMilliseconds;
     }
 
-    public void StopClock()
+    public static void StopClock()
     {
+        running = false;
         timer.Stop();
     }
 
-    public void RestartClock()
+    public static void RestartClock()
     {
         timer.Reset();
     }
+
+    static long timeLastChecked = 0;
+
+    static bool CheckTimer()
+    {
+        long time = GetTime();
+        if (time - timeLastChecked > PlaybackLog.Period)
+        {
+            timeLastChecked = time;
+            return true;
+        }
+        return false;
+    }
+
+
+    static IEnumerator runTimer()
+    {
+        print("enum started");
+        while (running)
+        {
+            print("enumerator functioning");
+            if (CheckTimer())
+            {
+                if (triggerTimer != null)
+                    triggerTimer.Invoke();
+            }
+            yield return null;
+        }
+    }
+
+    static bool timerRunning = false;
+
+    public static void AddToTimer(ClockCallBack callBack)
+    {
+        triggerTimer += callBack;
+    }
+
+    public static void RemoveFromTimer(ClockCallBack callBack)
+    {
+        triggerTimer -= callBack;
+    }
+
 }

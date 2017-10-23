@@ -29,7 +29,8 @@ public class Replayer : MonoBehaviour {
 
     private static void StartReplaying()
     {
-        clock.StartClock();
+        _instance.LoadReplay(PlaybackLog.recordingInstance);
+        PlaybackClock.StartClock();
     }
 
     private void FixedUpdate()
@@ -45,7 +46,7 @@ public class Replayer : MonoBehaviour {
                     Replaying = false;
                     break;
                 }
-                if (log[0].timeStamp <= clock.GetTime())
+                if (log[0].timeStamp <= PlaybackClock.GetTime())
                 {
                     print("popping next instruction");
                     log[0].Reenact();
@@ -62,7 +63,7 @@ public class Replayer : MonoBehaviour {
 
     private static void StopReplaying()
     {
-        clock.StopClock();
+        PlaybackClock.StopClock();
         _instance.EditorReplay = false;
         replay = false;
     }

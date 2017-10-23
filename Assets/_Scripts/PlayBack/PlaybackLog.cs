@@ -24,6 +24,11 @@ public class PlaybackLog : Nanome.Core.Behaviour
     static string jsonExtension = "json";
     static string fileName = "recording1";
 
+    private void Awake()
+    {
+        recordingInstance = this;
+    }
+
     public static void SaveLog()
     {
         string savePath = Path.Combine(Path.Combine(
@@ -47,24 +52,24 @@ public class PlaybackLog : Nanome.Core.Behaviour
         return new List<PlayBackLogAction>(log);
     }
 
-    public static void LogSpawn(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
+    public static void LogSpawn(GameObject subject)
     {
-        recordingInstance.log.Add(PlayBackLogAction.CreateSpawn(Recorder.clock.GetTime(), subject, destination, rotation, scale));
+        recordingInstance.log.Add(PlayBackLogAction.CreateSpawn(PlaybackClock.GetTime(), subject, subject.transform.position, subject.transform.rotation, subject.transform.lossyScale));
     }
 
     public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
     {
-        recordingInstance.log.Add(PlayBackLogAction.CreateMovement(Recorder.clock.GetTime() - (long)(PlaybackLog.Period * 1000), subject, destination, rotation, scale));
+        recordingInstance.log.Add(PlayBackLogAction.CreateMovement(PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000), subject, destination, rotation, scale));
     }
 
     public static void LogButtonPress(GameObject subject, GameObject presser)
     {
-        recordingInstance.log.Add(PlayBackLogAction.CreateButtonPress(Recorder.clock.GetTime(), subject, presser));
+        recordingInstance.log.Add(PlayBackLogAction.CreateButtonPress(PlaybackClock.GetTime(), subject, presser));
     }
 
     public static void LogButtonUnpress(GameObject subject, GameObject presser)
     {
-        recordingInstance.log.Add(PlayBackLogAction.CreateButtonUnpress(Recorder.clock.GetTime(), subject, presser));
+        recordingInstance.log.Add(PlayBackLogAction.CreateButtonUnpress(PlaybackClock.GetTime(), subject, presser));
     }
 
     [Serializable]
@@ -91,8 +96,8 @@ public class PlaybackLog : Nanome.Core.Behaviour
         internal GameObject buttonPresser;
 
 
-
-        ActionType type;
+        [SerializeField]
+        public ActionType type;
 
         internal void SetType(string type)
         {

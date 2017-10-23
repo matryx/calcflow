@@ -6,6 +6,7 @@ public class Recorder : MonoBehaviour {
 
     public bool EditorRecord = false;
     public static PlaybackClock clock = new PlaybackClock();
+    private static HashSet<int> AllGameObjects = new HashSet<int>();
 
     private static bool record = false;
 
@@ -16,18 +17,17 @@ public class Recorder : MonoBehaviour {
     private void Update()
     {
         Recording = EditorRecord;
-        if (Recording) print("recording...");
     }
 
     private static void StartRecording()
     {
-        
-        clock.StartClock();
+        PlaybackClock.StartClock();
+        PlaybackClock.AddToTimer(CheckForSpawns);
     }
 
     private static void StopRecording()
     {
-        clock.StopClock();
+        PlaybackClock.StopClock();
     }
 
     public static bool Recording
@@ -46,6 +46,18 @@ public class Recorder : MonoBehaviour {
                 StopRecording();
             }
             record = value;
+        }
+    }
+
+    private static void CheckForSpawns()
+    {
+        foreach (GameObject gObj in (GameObject[])GameObject.FindObjectsOfType<GameObject>())
+        {
+            if (!AllGameObjects.Contains(gObj.GetInstanceID())){
+                PlaybackLog.LogSpawn(gObj);
+                gObj.AddComponent<MovementLogger>();
+                AllGameObjects.Add(gObj.GetInstanceID());
+            }
         }
     }
 }
