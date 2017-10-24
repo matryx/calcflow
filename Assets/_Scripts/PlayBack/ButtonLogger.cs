@@ -6,11 +6,11 @@ public class ButtonLogger : QuickButton
 {
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        PlaybackLog.LogButtonPress(gameObject, other);
+        Recorder.LogButtonPress(gameObject, other);
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
-        PlaybackLog.LogButtonUnpress(gameObject, other);
+        Recorder.LogButtonUnpress(gameObject, other);
     }
 }

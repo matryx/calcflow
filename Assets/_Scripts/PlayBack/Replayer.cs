@@ -5,16 +5,14 @@ using UnityEngine;
 public class Replayer : MonoBehaviour {
 
     public bool EditorReplay = false;
-    private static List<PlaybackLog.PlayBackLogAction> log;
+    private static List<PlayBackLogAction> log;
     private static bool replay = false;
-    private static PlaybackClock clock = new PlaybackClock();
 
     public static Replayer _instance;
 
     private void Start()
     {
         _instance = this;
-        LoadReplay(PlaybackLog.recordingInstance);
     }
 
     private void Update()
@@ -22,6 +20,11 @@ public class Replayer : MonoBehaviour {
         Replaying = EditorReplay;
     }
     
+    private void LoadReplay(string json)
+    {
+        LoadReplay(JsonUtility.FromJson<PlaybackLog>(json));
+    }
+
     private void LoadReplay(PlaybackLog replay)
     {
         log = replay.GetLogCopy();
@@ -29,7 +32,8 @@ public class Replayer : MonoBehaviour {
 
     private static void StartReplaying()
     {
-        _instance.LoadReplay(PlaybackLog.recordingInstance);
+        _instance.LoadReplay(JsonUtility.ToJson(Recorder.recordLog));
+        PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
     }
 

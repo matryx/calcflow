@@ -141,6 +141,19 @@ namespace Extensions
             transform.localScale = Vector3.one;
             transform.localScale = new Vector3(globalScale.x / transform.lossyScale.x, globalScale.y / transform.lossyScale.y, globalScale.z / transform.lossyScale.z);
         }
+
+        public static T EnsureOneOf<T>(this GameObject gameObject) where T : MonoBehaviour
+        {
+            T t = gameObject.GetComponent<T>();
+            if(t == null)
+            {
+                t = gameObject.AddComponent<T>();
+            } else
+            {
+                Debug.Log(gameObject.name + " already contains " + typeof(T));
+            }
+            return t;
+        }
     }
 
     public class LerpMover : Nanome.Core.Behaviour

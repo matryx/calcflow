@@ -20,7 +20,7 @@ public class MovementLogger : Nanome.Core.Behaviour
             lastPos = transform.position;
             lastRotation = transform.rotation;
             lastScale = transform.lossyScale;
-            PlaybackLog.LogMovement(gameObject, transform.position, transform.rotation, transform.lossyScale);
+            Recorder.LogMovement(gameObject, transform.position, transform.rotation, transform.lossyScale);
         }
     }
 }
