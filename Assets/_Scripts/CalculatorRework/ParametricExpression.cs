@@ -58,6 +58,11 @@ public class ParametricExpression : MonoBehaviour
         variables.Add(newVar);
     }
 
+    public Expressions.ExpressionType getType()
+    {
+        return type;
+    }
+
     private void addToVarClump(Transform var)
     {
         var.SetParent(variableClumps[variableClumps.Count - 1]);
