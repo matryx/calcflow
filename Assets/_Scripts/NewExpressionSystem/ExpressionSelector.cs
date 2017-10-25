@@ -71,21 +71,22 @@ public class ExpressionSelector : QuickButton
                 List<Transform> gchildrenVec = new List<Transform>();
                 foreach (Transform child in vec.transform)
                 {
-                    if (child.name == "Variable")
+                    switch (child.name)
                     {
-                        vec.GetComponent<VectorFieldExpression>().setRange(child);
-                        child.GetComponentInChildren<ExpressionComponent>().setExpressionParent(vec.transform);
-                        gchildrenVec.Add(child);
-                        continue;
+                        case "ExpressionSet":
+                            foreach (Transform gchild in child)
+                            {
+                                vec.GetComponent<VectorFieldExpression>().addExpression(gchild);
+                                gchild.GetComponent<ExpressionComponent>().setExpressionParent(vec.transform);
+                                gchildrenVec.Add(gchild);
+                            }
+                            break;
+                        case "Variable":
+                            vec.GetComponent<VectorFieldExpression>().setRange(child);
+                            child.GetComponentInChildren<ExpressionComponent>().setExpressionParent(vec.transform);
+                            gchildrenVec.Add(child);
+                            break;
                     }
-
-                    foreach (Transform gchild in child)
-                    {
-                        vec.GetComponent<VectorFieldExpression>().addExpression(gchild);
-                        gchild.GetComponent<ExpressionComponent>().setExpressionParent(vec.transform);
-                        gchildrenVec.Add(gchild);
-                    }
-
                 }
 
                 expressionScroll.addToIndex(-1, gchildrenVec, fakeObj, true);

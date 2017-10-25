@@ -10,11 +10,13 @@ public class Expressions : MonoBehaviour
     //public enum Action { Add, Remove, Hide, Flowline }
 
     public Transform remove, hide, flowLine;
-    Color activeColor, inactiveColor;
+    Color actionActiveColor, actionInactiveColor;
+    Color expressionActiveColor, expressionInactiveColor;
 
     //TODO: managing expressions
-    // - need to keep track of selected Expr
-    // - make it so that selected Expr affects which Actions are shown, the graph and output destination
+    // major UI changes:
+    // - organize the expressions into tabs of the type of expression
+    // - instead of using boxes, use "lines" under text, lerping (google forms as reference)
     void Awake()
     {
         expressions = new List<Transform>();
@@ -22,8 +24,11 @@ public class Expressions : MonoBehaviour
         hide.gameObject.SetActive(true);
         flowLine.gameObject.SetActive(true);
 
-        activeColor = remove.Find("Body").GetComponent<Renderer>().material.color;
-        inactiveColor = Color.gray;
+        actionActiveColor = remove.Find("Body").GetComponent<Renderer>().material.color;
+        actionInactiveColor = Color.gray;
+
+        ColorUtility.TryParseHtmlString("#64C3A7FF", out expressionActiveColor);
+        ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
     }
 
     public void addExpr(Transform exp)
@@ -34,7 +39,12 @@ public class Expressions : MonoBehaviour
 
     public void setSelectedExpr(Transform expr)
     {
+        //if (selectedExpression)
+        //    selectedExpression.GetComponentInChildren<Renderer>().material.color = expressionInactiveColor;
+
         selectedExpression = expr;
+        //selectedExpression.GetComponentInChildren<Renderer>().material.color = expressionActiveColor;
+
         remove.gameObject.SetActive(true);
         hide.gameObject.SetActive(true);
         flowLine.gameObject.SetActive(true);
@@ -44,24 +54,24 @@ public class Expressions : MonoBehaviour
             hide.GetComponentInChildren<Collider>().enabled = true;
             flowLine.GetComponentInChildren<Collider>().enabled = false;
 
-            hide.GetComponentInChildren<Renderer>().material.color = activeColor;
-            flowLine.GetComponentInChildren<Renderer>().material.color = inactiveColor;
+            hide.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
+            flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
         }
         else if (expr.GetComponent<VectorFieldExpression>())
         {
             hide.GetComponentInChildren<Collider>().enabled = false;
             flowLine.GetComponentInChildren<Collider>().enabled = true;
 
-            hide.GetComponentInChildren<Renderer>().material.color = inactiveColor;
-            flowLine.GetComponentInChildren<Renderer>().material.color = activeColor;
+            hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+            flowLine.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
         }
         else if (expr.GetComponent<Constant>())
         {
             hide.GetComponentInChildren<Collider>().enabled = false;
             flowLine.GetComponentInChildren<Collider>().enabled = false;
 
-            hide.GetComponentInChildren<Renderer>().material.color = inactiveColor;
-            flowLine.GetComponentInChildren<Renderer>().material.color = inactiveColor;
+            hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+            flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
         }
     }
 
