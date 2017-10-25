@@ -8,8 +8,7 @@ public class ExpressionBody : QuickButton {
     protected override void Start()
     {
         base.Start();
-        //BUG: returning null
-        expression = GameObject.Find("Expression").GetComponent<Expressions>();
+        expression = GameObject.Find("Expressions").GetComponent<Expressions>();
     }
 
     protected override void ButtonEnterBehavior(GameObject other)

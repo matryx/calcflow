@@ -22,9 +22,8 @@ public class Expressions : MonoBehaviour
         hide.gameObject.SetActive(true);
         flowLine.gameObject.SetActive(true);
 
-        activeColor = remove.GetComponentInChildren<Renderer>().material.color;
-        float gray = activeColor.grayscale;
-        inactiveColor = new Color(gray, gray, gray);
+        activeColor = remove.Find("Body").GetComponent<Renderer>().material.color;
+        inactiveColor = Color.gray;
     }
 
     public void addExpr(Transform exp)
@@ -36,8 +35,10 @@ public class Expressions : MonoBehaviour
     public void setSelectedExpr(Transform expr)
     {
         selectedExpression = expr;
+        remove.gameObject.SetActive(true);
+        hide.gameObject.SetActive(true);
+        flowLine.gameObject.SetActive(true);
 
-        //display proper actions
         if (expr.GetComponent<ParametricExpression>())
         {
             hide.GetComponentInChildren<Collider>().enabled = true;
