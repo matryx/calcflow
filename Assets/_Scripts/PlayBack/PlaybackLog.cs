@@ -65,6 +65,8 @@ public class PlayBackLogAction
     [SerializeField]
     public GameObject subject;
     [SerializeField]
+    public string serializedSubject;
+    [SerializeField]
     public long timeStamp;
     [SerializeField]
     internal Vector3 position;
@@ -99,7 +101,7 @@ public class PlayBackLogAction
     }
 
 
-    internal static PlayBackLogAction CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
+    internal static PlayBackLogAction CreateSpawn(long timestamp, string serializedSubject , Vector3 position, Quaternion rotation, Vector3 scale)
     {
         PlayBackLogAction newAction = new PlayBackLogAction
         {
@@ -108,7 +110,7 @@ public class PlayBackLogAction
             position = position,
             rotation = rotation,
             scale = scale,
-            subject = subject
+            serializedSubject = serializedSubject
         };
 
         return newAction;
@@ -164,7 +166,8 @@ public class PlayBackLogAction
                 subject.GlobalScaleTo(scale, PlaybackLog.Period);
                 break;
             case ActionType.Spawn:
-                GameObject spawned = GameObject.Instantiate(subject);
+                
+                GameObject spawned = GameObject.Instantiate(JsonUtility.FromJson<GameObject>(serializedSubject));
                 spawned.transform.position = position;
                 spawned.transform.rotation = rotation;
                 spawned.transform.localScale = scale;

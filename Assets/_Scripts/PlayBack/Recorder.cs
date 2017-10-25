@@ -87,12 +87,17 @@ public class Recorder : MonoBehaviour {
 
     public static void LogSpawn(GameObject subject)
     {
-        recordLog.log.Add(PlayBackLogAction.CreateSpawn(PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000), subject, subject.transform.position, subject.transform.rotation, subject.transform.lossyScale));
+        recordLog.log.Add(PlayBackLogAction.CreateSpawn(PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000), 
+                          JsonUtility.ToJson(subject), 
+                          subject.transform.position, 
+                          subject.transform.rotation, 
+                          subject.transform.lossyScale));
     }
 
     public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
     {
-        recordLog.log.Add(PlayBackLogAction.CreateMovement(PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000), subject, destination, rotation, scale));
+        recordLog.log.Add(PlayBackLogAction.CreateMovement(PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000), 
+                          subject, destination, rotation, scale));
     }
 
     public static void LogButtonPress(GameObject subject, GameObject presser)

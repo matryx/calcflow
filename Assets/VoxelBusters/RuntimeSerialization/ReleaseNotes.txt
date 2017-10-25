@@ -1,0 +1,40 @@
+1.2.1
+New Features:
+	Using UIDSystem, you can choose to avoid child gameobject serialization.
+	Using UIDSystem, you can control the components that you prefer to serialize.
+	Providing RSUtility class, to help developers create plugin compatible gameobjects/prefab clones at runtime.
+	
+Changes:
+	UIDSystem code is refined and exposes methods to Update/Reassign UID's at runtime.
+	UIDSystem Editor inspector provides buttons to Update and Reset UID's.
+	RendererRSExtension serializes sorting order and layer as well.
+	UIDSystem now supports Undo actions.
+	Fixed: Compiler issues related to RigidbodyRSExtensions in Unity v5.2.1.
+	Fixed: Sprite serialization anchor offset issue.
+	Fixed: IDictionary issues on deserializing key of unsupported types.
+	Fixed: Failed null-checks for Unity Object types.
+
+1.1
+New Features:
+	UIDSystem overcomes limitations of RS such as unique name for GameObjects, Gameobject cant have multiple component of same type.
+	IRuntimeSerializableActivator interface provides control of object creation while deserializing.
+	RSExtensionManager allows mapping types to its extensions, which can avoid use of Reflection.
+	You can add intializer properties to RuntimeSerializationInfo. Useful for creating objects with custom definition by providing serialized intializer values.
+	Supports Unity2D types: Collider2D, Sprite, SpriteRenderer, Rigidbody2D, PhysicsMaterial2D.
+	Supports Unity3D types: Joints, Lights, Camera, NavMesh.
+	Supports Generic Collection types: Queue, Stack, HashSet.
+	Supports System types: Guid, TimeSpan.
+	Supports Prefab serialization.
+	Supports Edit mode serialization.
+	
+Changes:
+	Material serialization is fully functional.
+	By default RuntimeSerializable attribute serializes all public variables.
+	RuntimeSerializable attribute allows us to define extension dependency for any object. Useful for serializing properties of parent class which belongs to external library.
+	ObjectWriter and ObjectReader is completely generic and is capable of handling serialization of any type.
+
+Important: 
+	Delete package folders before updating.
+
+1.0
+	- Initial Release
