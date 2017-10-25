@@ -248,6 +248,14 @@ public class Scroll : MonoBehaviour
         }
     }
 
+    public void clear()
+    {
+        if(objects != null)
+        {
+            deleteObjects(objects);
+        }
+    }
+
     public void deleteObjects(List<Transform> objs)
     {
         List<int> indeces = new List<int>();

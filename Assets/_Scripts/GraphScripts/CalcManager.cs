@@ -24,6 +24,12 @@ public class CalcManager : MonoBehaviour
     [HideInInspector]
     public SaveLoadMenu saveLoadMenu;
 
+    [HideInInspector]
+    public TournamentMenu tournamentMenu;
+
+    [HideInInspector]
+    public SubmissionMenu submissionMenu;
+
     public CustomParametrizedSurface paramSurface;
     private CalcInput calcInput;
     private PieceWiseControl pieceWiseControl;
@@ -67,6 +73,10 @@ public class CalcManager : MonoBehaviour
         internal SaveLoadMenu saveLoadMenu;
         [SerializeField]
         internal ParticleAnimationSettings particleAnimationSettings;
+        [SerializeField]
+        internal TournamentMenu tournamentMenu;
+        [SerializeField]
+        internal SubmissionMenu submissionMenu;
     }
 
     [System.Serializable]
@@ -135,6 +145,8 @@ public class CalcManager : MonoBehaviour
         pieceWiseControl = connectedMenus.pieceWiseControl;
         boundsManager = connectedMenus.boundsManager;
         saveLoadMenu = connectedMenus.saveLoadMenu;
+        tournamentMenu = connectedMenus.tournamentMenu;
+        submissionMenu = connectedMenus.submissionMenu;
 
         if (connectedMenus.boundsManager != null) connectedMenus.boundsManager.Initialize(this);
         connectedMenus.calcInput.Initialize(this);
@@ -149,6 +161,10 @@ public class CalcManager : MonoBehaviour
         connectedMenus.presetMenu.Initialize(this);
 
         connectedMenus.saveLoadMenu.Initialize(this);
+
+        connectedMenus.tournamentMenu.Initialize(this);
+
+        connectedMenus.submissionMenu.Initialize(this);
 
         if (connectedMenus.particleAnimationSettings != null)
             connectedMenus.particleAnimationSettings.Initialize(this);
