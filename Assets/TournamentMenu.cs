@@ -9,7 +9,7 @@ public class TournamentMenu : MonoBehaviour {
     private MultiSelectFlexPanel tournamentsPanel;
 
     [SerializeField]
-    private SubmissionMenu submissionMenu;
+    private SubmissionsMenu submissionMenu;
 
     private string[] Intro = { "A", "The"};
     private string[] Setup = { "Cure for our", "Cure for The", "Solution to The", "End of", "Quest for The", "Mission to", "Beginning of our", "Promise to Create The", "Beautiful Relationship with The" };
@@ -76,9 +76,9 @@ public class TournamentMenu : MonoBehaviour {
             string noun = this.nouns[indexFour];
             string outro = this.Outro[indexFive];
 
-            string description = intro + " " + setup + " " + adjective + " " + noun + " " + outro;
+            string title = intro + " " + setup + " " + adjective + " " + noun + " " + outro;
 
-            Matryx_Tournament aTournament = new Matryx_Tournament(description, random.Next(10000000, 200000000).GetHashCode().ToString(), random.Next(100, 5000000));
+            Matryx_Tournament aTournament = new Matryx_Tournament(title, random.Next(10000000, 200000000).GetHashCode().ToString(), random.Next(100, 5000000));
             tournaments.Add("" + i, aTournament);
         }
     }
@@ -97,10 +97,10 @@ public class TournamentMenu : MonoBehaviour {
     private GameObject createButton(Matryx_Tournament tournament)
     {
         GameObject button = Instantiate(Resources.Load("Tournament_Cell", typeof(GameObject))) as GameObject;
-        button.name = tournament.name;
+        button.name = tournament.title;
         button.GetComponent<TournamentContainer>().SetTournament(tournament);
 
-        string shortName = tournament.name.Length > maxTextLength ? tournament.name.Replace(tournament.name.Substring(maxTextLength), "...") : tournament.name;
+        string shortName = tournament.title.Length > maxTextLength ? tournament.title.Replace(tournament.title.Substring(maxTextLength), "...") : tournament.title;
         button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = shortName;
 
         TMPro.TextMeshPro matryxBountyTMP = button.transform.Find("MTX_Amount").GetComponent<TMPro.TextMeshPro>();
@@ -118,5 +118,6 @@ public class TournamentMenu : MonoBehaviour {
 
         Matryx_Tournament tournament = source.GetComponent<TournamentContainer>().GetTournament();
         submissionMenu.SetTournament(tournament);
+        submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
     }
 }

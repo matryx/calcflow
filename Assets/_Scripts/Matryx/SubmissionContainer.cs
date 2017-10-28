@@ -2,21 +2,52 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Matryx_Submission
+public class Matryx_Submission
 {
-    public Matryx_Submission(string name, string bodyAddress)
+    public Matryx_Submission(EthereumAddress address)
     {
-        this.name = name;
-        this.descriptionAddress = bodyAddress;
+        this.address = address;
     }
-    public string name;
-    public string descriptionAddress;
+    public Matryx_Submission(string title, string bodyAddress)
+    {
+        this.title = title;
+        this.bodyAddress = bodyAddress;
+    }
+
+    public EthereumAddress address;
+    private string title;
+    private string bodyAddress;
+    private string body;
     //public DateTime startTime;
     //public DateTime roundDuration;
     //public int round;
     //public DateTime reviewDuration;
     //public List<EthereumAddress> submissions;
     //public EthereumAddress updateAgentAddress;
+
+    public string getTitle()
+    {
+        if (title != null)
+        {
+            return title;
+        }
+
+        //TODO: Implement
+        return "tournament";
+
+    }
+
+    public string getBody()
+    {
+        if (body != null)
+        {
+            return body;
+        }
+
+        //TODO: Implement
+        return "body of work from " + bodyAddress;
+    }
+
 }
 
 public class SubmissionContainer : MonoBehaviour {

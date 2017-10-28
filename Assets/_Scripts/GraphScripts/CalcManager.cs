@@ -28,7 +28,7 @@ public class CalcManager : MonoBehaviour
     public TournamentMenu tournamentMenu;
 
     [HideInInspector]
-    public SubmissionMenu submissionMenu;
+    public SubmissionsMenu submissionsMenu;
 
     public CustomParametrizedSurface paramSurface;
     private CalcInput calcInput;
@@ -75,6 +75,8 @@ public class CalcManager : MonoBehaviour
         internal ParticleAnimationSettings particleAnimationSettings;
         [SerializeField]
         internal TournamentMenu tournamentMenu;
+        [SerializeField]
+        internal SubmissionsMenu submissionsMenu;
         [SerializeField]
         internal SubmissionMenu submissionMenu;
     }
@@ -146,7 +148,7 @@ public class CalcManager : MonoBehaviour
         boundsManager = connectedMenus.boundsManager;
         saveLoadMenu = connectedMenus.saveLoadMenu;
         tournamentMenu = connectedMenus.tournamentMenu;
-        submissionMenu = connectedMenus.submissionMenu;
+        submissionsMenu = connectedMenus.submissionsMenu;
 
         if (connectedMenus.boundsManager != null) connectedMenus.boundsManager.Initialize(this);
         connectedMenus.calcInput.Initialize(this);
@@ -164,7 +166,7 @@ public class CalcManager : MonoBehaviour
 
         connectedMenus.tournamentMenu.Initialize(this);
 
-        connectedMenus.submissionMenu.Initialize(this);
+        connectedMenus.submissionsMenu.Initialize(this);
 
         if (connectedMenus.particleAnimationSettings != null)
             connectedMenus.particleAnimationSettings.Initialize(this);
