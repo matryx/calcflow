@@ -16,7 +16,8 @@ public class AnimationHandler : MonoBehaviour {
     public void Awake()
     {
         activeScale = transform.localScale;
-        inactiveScale = new Vector3(0.2f, 0.01f, 0.2f);
+        inactiveScale = Vector3.zero;
+        transform.localScale = Vector3.zero;
     }
 
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
