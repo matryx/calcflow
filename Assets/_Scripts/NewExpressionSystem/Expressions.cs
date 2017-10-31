@@ -5,6 +5,7 @@ using UnityEngine;
 public class Expressions : MonoBehaviour
 {
     Transform selectedExpression;
+    ExpressionBody selectedBody;
     List<Transform> expressions;
     public enum ExpressionType { Constant, Paramet, VecField }
     //public enum Action { Add, Remove, Hide, Flowline }
@@ -37,12 +38,19 @@ public class Expressions : MonoBehaviour
         exp.SetParent(transform);
     }
 
-    public void setSelectedExpr(Transform expr)
+    public Transform getSelectedExpr()
+    {
+        return selectedExpression;
+    }
+
+    public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
         //if (selectedExpression)
         //    selectedExpression.GetComponentInChildren<Renderer>().material.color = expressionInactiveColor;
 
+        if (selectedBody) selectedBody.unSelect();
         selectedExpression = expr;
+        selectedBody = body;
         //selectedExpression.GetComponentInChildren<Renderer>().material.color = expressionActiveColor;
 
         remove.gameObject.SetActive(true);

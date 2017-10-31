@@ -55,11 +55,34 @@ public class ExpressionBody : QuickButton {
             expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
         }
 
-        expression.setSelectedExpr(expComp.getExpressionParent());
+        expression.setSelectedExpr(expComp.getExpressionParent(), this);
     }
 
-    protected override void ButtonExitBehavior(GameObject other)
+    protected override void ButtonExitBehavior(GameObject other) { }
+
+    IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
     {
+        float startTime = Time.time;
+
+        if (end == selectedScale) obj.gameObject.SetActive(true);
+
+        while (Time.time < startTime + overTime)
+        {
+            obj.localScale = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
+            yield return null;
+        }
+
+        obj.localScale = end;
+        if (end == idleScale) obj.gameObject.SetActive(false);
+    }
+
+    public void unSelect()
+    {
+        if (!transform.parent.gameObject.activeSelf) {
+            feedBack.localScale = idleScale;
+            return;
+        }
+
         if (!finishedScaling)
         {
             if (menuActive)
@@ -81,18 +104,5 @@ public class ExpressionBody : QuickButton {
         finishedScaling = false;
     }
 
-    IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
-    {
-        float startTime = Time.time;
-
-        while (Time.time < startTime + overTime)
-        {
-            obj.localScale = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
-            yield return null;
-        }
-
-        obj.localScale = end;
-    }
-
-    void Update () { }
+    void Update() { }
 }
