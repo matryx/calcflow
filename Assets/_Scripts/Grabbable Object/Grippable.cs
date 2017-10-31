@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using NanoVRController;
 using TriggerForwarding;
 
-public abstract class Grippable : MonoBehaviour, TriggerListener
+public abstract class Grippable : Nanome.Core.Behaviour, TriggerListener
 {
     public enum PRIORITY
     {

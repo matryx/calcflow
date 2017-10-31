@@ -112,7 +112,7 @@ public class PlayBackLogAction
             scale = scale,
             serializedSubject = serializedSubject
         };
-
+        RSManager.Serialize
         return newAction;
     }
 

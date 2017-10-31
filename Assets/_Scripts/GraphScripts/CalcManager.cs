@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
 
-public class CalcManager : MonoBehaviour
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
+public class CalcManager : Nanome.Core.Behaviour
 {
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;

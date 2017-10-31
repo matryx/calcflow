@@ -3,7 +3,9 @@ using System.Collections;
 //using OvrTouch.Hands;
 using NanoVRController;
 
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class ScalableObject : GrabbableObject
 {
     float distance;

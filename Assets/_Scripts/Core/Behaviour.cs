@@ -1,9 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
+using VoxelBusters.RuntimeSerialization;
 
 namespace Nanome.Core
 {
-
+    [RuntimeSerializable(typeof(MonoBehaviour), false)]
     public class Behaviour : MonoBehaviour
     {
 
