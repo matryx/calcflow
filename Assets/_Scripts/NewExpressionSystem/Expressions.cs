@@ -8,7 +8,6 @@ public class Expressions : MonoBehaviour
     ExpressionBody selectedBody;
     List<Transform> expressions;
     public enum ExpressionType { Constant, Paramet, VecField }
-    //public enum Action { Add, Remove, Hide, Flowline }
 
     public Transform remove, hide, flowLine;
     Color actionActiveColor, actionInactiveColor;
@@ -17,7 +16,6 @@ public class Expressions : MonoBehaviour
     //TODO: managing expressions
     // major UI changes:
     // - organize the expressions into tabs of the type of expression
-    // - instead of using boxes, use "lines" under text, lerping (google forms as reference)
     void Awake()
     {
         expressions = new List<Transform>();
