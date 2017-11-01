@@ -53,8 +53,9 @@ public class Replayer : MonoBehaviour {
                 if (log[0].timeStamp <= PlaybackClock.GetTime())
                 {
                     print("popping next instruction");
-                    log[0].Reenact();
+                    PlayBackLogAction item = log[0];
                     log.RemoveAt(0);
+                    item.Reenact();
                 }
                 else
                 {

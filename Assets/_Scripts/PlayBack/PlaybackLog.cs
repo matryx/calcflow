@@ -7,6 +7,7 @@ using UnityEngine;
 using Nanome.Maths;
 using Extensions;
 using CalcFlowUI;
+using VoxelBusters.RuntimeSerialization;
 
 [Serializable]
 public class PlaybackLog
@@ -50,11 +51,12 @@ public class PlaybackLog
     {
         return new List<PlayBackLogAction>(log);
     }
-
 }
 [Serializable]
 public class PlayBackLogAction
 {
+    internal static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>();
+
     public enum ActionType
     {
         Spawn,
@@ -63,9 +65,7 @@ public class PlayBackLogAction
         ButtonUnpress
     }
     [SerializeField]
-    public GameObject subject;
-    [SerializeField]
-    public string serializedSubject;
+    public int subjectKey;
     [SerializeField]
     public long timeStamp;
     [SerializeField]
@@ -101,7 +101,7 @@ public class PlayBackLogAction
     }
 
 
-    internal static PlayBackLogAction CreateSpawn(long timestamp, string serializedSubject , Vector3 position, Quaternion rotation, Vector3 scale)
+    internal static PlayBackLogAction CreateSpawn(long timestamp, GameObject subject , Vector3 position, Quaternion rotation, Vector3 scale)
     {
         PlayBackLogAction newAction = new PlayBackLogAction
         {
@@ -110,9 +110,9 @@ public class PlayBackLogAction
             position = position,
             rotation = rotation,
             scale = scale,
-            serializedSubject = serializedSubject
+            subjectKey = subject.GetInstanceID()
         };
-        RSManager.Serialize
+        RSManager.Serialize(subject, newAction.subjectKey.ToString(), eSaveTarget.FILE_SYSTEM);
         return newAction;
     }
 
@@ -125,7 +125,7 @@ public class PlayBackLogAction
             position = destination,
             rotation = rotation,
             scale = scale,
-            subject = subject
+            subjectKey = subject.GetInstanceID()
         };
 
         return newAction;
@@ -138,7 +138,7 @@ public class PlayBackLogAction
             type = ActionType.ButtonPress,
             timeStamp = timestamp,
             buttonPresser = presser,
-            subject = subject,
+            subjectKey = subject.GetInstanceID()
         };
         return newAction;
     }
@@ -150,7 +150,7 @@ public class PlayBackLogAction
             type = ActionType.ButtonUnpress,
             timeStamp = timestamp,
             buttonPresser = presser,
-            subject = subject,
+            subjectKey = subject.GetInstanceID()
         };
         return newAction;
     }
@@ -158,25 +158,29 @@ public class PlayBackLogAction
     public void Reenact()
     {
         Button button;
+        GameObject subject;
         switch (type)
         {
+            case ActionType.Spawn:
+                subject = RSManager.Deserialize<GameObject>(subjectKey.ToString());
+                objectMap.Add(subjectKey, subject);
+                subject.transform.position = position;
+                subject.transform.rotation = rotation;
+                subject.transform.localScale = scale;
+                break;
             case ActionType.Movement:
+                subject = objectMap[subjectKey];
                 subject.MoveTo(position, PlaybackLog.Period);
                 subject.RotateTo(rotation, PlaybackLog.Period);
                 subject.GlobalScaleTo(scale, PlaybackLog.Period);
                 break;
-            case ActionType.Spawn:
-                
-                GameObject spawned = GameObject.Instantiate(JsonUtility.FromJson<GameObject>(serializedSubject));
-                spawned.transform.position = position;
-                spawned.transform.rotation = rotation;
-                spawned.transform.localScale = scale;
-                break;
             case ActionType.ButtonPress:
+                subject = objectMap[subjectKey];
                 button = subject.GetComponent<Button>();
                 button.PressButton(this.buttonPresser);
                 break;
             case ActionType.ButtonUnpress:
+                subject = objectMap[subjectKey];
                 button = subject.GetComponent<Button>();
                 button.UnpressButton(this.buttonPresser);
                 break;

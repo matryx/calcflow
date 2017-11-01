@@ -147,9 +147,9 @@ public class RSManager : SingletonPattern <RSManager>
 	{
 		// Serialize object 
 		byte[] 		_serializationData	= m_binarySerializer.Serialize(_object, typeof(T));
-		
-		// Invoke serialization finished object
-		if (!string.IsNullOrEmpty(_key))
+        Debug.LogError("Serializing object with id: " + _key);
+        // Invoke serialization finished object
+        if (!string.IsNullOrEmpty(_key))
 			OnSerializationFinished(_key, _object);
 		
 		return Convert.ToBase64String(_serializationData);
@@ -172,6 +172,7 @@ public class RSManager : SingletonPattern <RSManager>
 			Debug.LogError("[RS] The operation could not be completed because RSManager instance is null.");
 			return default(T);
 		}
+
 		
 		return _sharedInstance.Obj_DeserializeData<T>(_serializationDataString, _key, _targetObject);
 	}

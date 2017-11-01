@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using Extensions;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
+
 
 public class Recorder : MonoBehaviour {
 
@@ -15,6 +17,7 @@ public class Recorder : MonoBehaviour {
 
     private void Start()
     {
+        AllGameObjects.Add(gameObject.GetInstanceID());
     }
 
     [SerializeField]
@@ -65,22 +68,34 @@ public class Recorder : MonoBehaviour {
         foreach (GameObject gObj in (GameObject[])GameObject.FindObjectsOfType<GameObject>())
         {
             if (!AllGameObjects.Contains(gObj.GetInstanceID())){
-                Transform child1 = gObj.transform;
-                Transform parent1 = child1.parent;
+                AllGameObjects.Add(gObj.gameObject.GetInstanceID());
 
-                while(parent1 != null && !AllGameObjects.Contains(parent1.GetInstanceID()))
+                if (gObj.gameObject.GetComponent<UIDSystem>())
                 {
-                    child1 = parent1;
-                    parent1 = child1.parent;
+                    gObj.gameObject.EnsureOneOf<MovementLogger>();
+                    LogSpawn(gObj.gameObject);
                 }
 
-                foreach (Transform descendent in child1.GetComponentsInChildren<Transform>())
-                {
-                    AllGameObjects.Add(descendent.gameObject.GetInstanceID());
-                    descendent.gameObject.EnsureOneOf<MovementLogger>();
-                }
+                //Transform child1 = gObj.transform;
+                //Transform parent1 = child1.parent;
 
-                LogSpawn(child1.gameObject);
+                //while(parent1 != null && !AllGameObjects.Contains(parent1.GetInstanceID()))
+                //{
+                //    child1 = parent1;
+                //    parent1 = child1.parent;
+                //}
+
+                //foreach (Transform descendent in child1.GetComponentsInChildren<Transform>())
+                //{
+                //    if (child1.gameObject.GetComponent<UIDSystem>())
+                //    {
+                //        AllGameObjects.Add(descendent.gameObject.GetInstanceID());
+                //        descendent.gameObject.EnsureOneOf<MovementLogger>();
+                //        LogSpawn(child1.gameObject);
+                //    }
+                //}
+                //if(child1.gameObject.GetComponent<UIDSystem>())
+                //    LogSpawn(child1.gameObject);
             }
         }
     }
@@ -88,7 +103,7 @@ public class Recorder : MonoBehaviour {
     public static void LogSpawn(GameObject subject)
     {
         recordLog.log.Add(PlayBackLogAction.CreateSpawn(PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000), 
-                          JsonUtility.ToJson(subject), 
+                          subject, 
                           subject.transform.position, 
                           subject.transform.rotation, 
                           subject.transform.lossyScale));

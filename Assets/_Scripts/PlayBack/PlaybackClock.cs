@@ -51,10 +51,8 @@ public class PlaybackClock : Nanome.Core.Behaviour{
 
     static IEnumerator runTimer()
     {
-        print("enum started");
         while (running)
         {
-            print("enumerator functioning");
             if (CheckTimer())
             {
                 if (triggerTimer != null)
