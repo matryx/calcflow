@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class ExpressionSelector : QuickButton
 {
-    Scroll expressionScroll;
+    Scroll thisScroll;
     Expressions expressions;
     JoyStickAggregator joyStickAggregator;
 
     protected override void Start()
     {
         base.Start();
-        expressionScroll = GameObject.Find("ExpressionMenu").GetComponentInChildren<Scroll>();
+        thisScroll = transform.parent.parent.GetComponentInChildren<Scroll>();
         expressions = GameObject.Find("ExpressionMenu").GetComponentInChildren<Expressions>();
-        joyStickAggregator = expressionScroll.GetComponent<JoyStickAggregator>();
+        joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
+        thisScroll.addObject(transform.parent);
     }
 
     private void addForwarders(Transform obj)
@@ -31,17 +32,17 @@ public class ExpressionSelector : QuickButton
         Transform fakeObj = new GameObject().transform;
         switch (transform.parent.name)
         {
-            case "Constant":
+            case "ConstantAdd":
                 GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
                 cons.GetComponent<Constant>().Initialize();
                 cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
                 cons.GetComponentInChildren<ExpressionComponent>().setExpressionParent(cons.transform);
                 addForwarders(cons.transform);
 
-                expressionScroll.addToIndex(-1, emptyList, cons.transform.Find("Constant"), true);
+                thisScroll.addToIndex(-1, emptyList, cons.transform.Find("Constant"), true);
                 expressions.addExpr(cons.transform);
                 break;
-            case "Parametrization":
+            case "ParametrizationAdd":
                 GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
                 param.GetComponent<ParametricExpression>().Initialize();
                 addForwarders(param.transform);
@@ -60,10 +61,10 @@ public class ExpressionSelector : QuickButton
                     }
                 }
 
-                expressionScroll.addToIndex(-1, gchildrenParam, fakeObj, true);
+                thisScroll.addToIndex(-1, gchildrenParam, fakeObj, true);
                 expressions.addExpr(param.transform);
                 break;
-            case "VectorField":
+            case "VectorFieldAdd":
                 GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
                 vec.GetComponent<VectorFieldExpression>().Initialize();
                 addForwarders(vec.transform);
@@ -89,14 +90,14 @@ public class ExpressionSelector : QuickButton
                     }
                 }
 
-                expressionScroll.addToIndex(-1, gchildrenVec, fakeObj, true);
+                thisScroll.addToIndex(-1, gchildrenVec, fakeObj, true);
                 expressions.addExpr(vec.transform);
                 break;
         }
 
         GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
         addForwarders(sep.transform);
-        expressionScroll.addToIndex(-1, emptyList, sep.transform, true);
+        thisScroll.addToIndex(-1, emptyList, sep.transform, true);
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }

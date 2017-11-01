@@ -56,9 +56,11 @@ public class Scroll : MonoBehaviour
     bool moving = false;
     bool fading = false;
     bool adding = false;
+    bool setup = false;
 
     private void Awake()
     {
+        if (setup) return;
         setUpMenu();
     }
 
@@ -130,7 +132,7 @@ public class Scroll : MonoBehaviour
 
     public void setUpMenu()
     {
-        if (transform.parent.GetComponentInChildren<ScrollBar>()) return;
+        if (setup) return;
 
         if (scrollBar == null)
         {
@@ -159,6 +161,7 @@ public class Scroll : MonoBehaviour
 
         startPos = new Vector3(xPos, yPos, zPos);
         objectParent.localPosition = startPos;
+        setup = true;
     }
 
     private void setNumPagesAndHighestVisIndex()

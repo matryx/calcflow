@@ -43,13 +43,9 @@ public class Expressions : MonoBehaviour
 
     public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
-        //if (selectedExpression)
-        //    selectedExpression.GetComponentInChildren<Renderer>().material.color = expressionInactiveColor;
-
         if (selectedBody) selectedBody.unSelect();
         selectedExpression = expr;
         selectedBody = body;
-        //selectedExpression.GetComponentInChildren<Renderer>().material.color = expressionActiveColor;
 
         remove.gameObject.SetActive(true);
         hide.gameObject.SetActive(true);
