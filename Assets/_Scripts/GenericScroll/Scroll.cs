@@ -175,6 +175,7 @@ public class Scroll : MonoBehaviour
 
         if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == 1 && numPages > 1)
             highestVisIndex = numberOfVisibleThings - 1;
+
     }
 
     public void initializeObjects(List<Transform> objectList)
@@ -220,9 +221,17 @@ public class Scroll : MonoBehaviour
     //TODO: refactor, could probably use a better implementation
     //      - get objects count
     public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
+    //public void addToIndex(int atIndex, List<Transform> objs, bool secondToLast)
     {
         if (secondToLast) atIndex = objects.Count - 1;
         if (atIndex < 0 || atIndex > objects.Count - 1) return;
+
+        //int temp = atIndex;
+        //foreach (Transform o in objs)
+        //{
+        //    objects.Insert(temp, o);
+        //    temp++;
+        //}
 
         if (objs.Count > 0)
         {
@@ -350,6 +359,7 @@ public class Scroll : MonoBehaviour
         if (((currDirection == direction.DOWN || currDirection == direction.RIGHT) && lowestVisIndex == 0) ||
             ((currDirection == direction.UP || currDirection == direction.LEFT) && highestVisIndex == objects.Count - 1))
             return;
+
 
         if (!moving && !fading)
         {

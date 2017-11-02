@@ -28,7 +28,9 @@ public class ExpressionSelector : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        List<Transform> emptyList = new List<Transform>();
+        //List<Transform> emptyList = new List<Transform>();
+        List<Transform> toAdd = new List<Transform>();
+
         Transform fakeObj = new GameObject().transform;
         switch (transform.parent.name)
         {
@@ -39,7 +41,8 @@ public class ExpressionSelector : QuickButton
                 cons.GetComponentInChildren<ExpressionComponent>().setExpressionParent(cons.transform);
                 addForwarders(cons.transform);
 
-                thisScroll.addToIndex(-1, emptyList, cons.transform.Find("Constant"), true);
+                //thisScroll.addToIndex(-1, emptyList, cons.transform.Find("Constant"), true);
+                toAdd.Add(cons.transform.Find("Constant"));
                 expressions.addExpr(cons.transform);
                 break;
             case "ParametrizationAdd":
@@ -47,7 +50,7 @@ public class ExpressionSelector : QuickButton
                 param.GetComponent<ParametricExpression>().Initialize();
                 addForwarders(param.transform);
 
-                List<Transform> gchildrenParam = new List<Transform>();
+                //List<Transform> gchildrenParam = new List<Transform>();
                 foreach (Transform child in param.transform)
                 {
                     if (child.name == "ExpressionSet")
@@ -56,12 +59,13 @@ public class ExpressionSelector : QuickButton
                         {
                             param.GetComponent<ParametricExpression>().addExpression(gchild);
                             gchild.GetComponent<ExpressionComponent>().setExpressionParent(param.transform);
-                            gchildrenParam.Add(gchild);
+                            //gchildrenParam.Add(gchild);
+                            toAdd.Add(gchild);
                         }
                     }
                 }
 
-                thisScroll.addToIndex(-1, gchildrenParam, fakeObj, true);
+                //thisScroll.addToIndex(-1, gchildrenParam, fakeObj, true);
                 expressions.addExpr(param.transform);
                 break;
             case "VectorFieldAdd":
@@ -69,7 +73,7 @@ public class ExpressionSelector : QuickButton
                 vec.GetComponent<VectorFieldExpression>().Initialize();
                 addForwarders(vec.transform);
 
-                List<Transform> gchildrenVec = new List<Transform>();
+                //List<Transform> gchildrenVec = new List<Transform>();
                 foreach (Transform child in vec.transform)
                 {
                     switch (child.name)
@@ -79,25 +83,29 @@ public class ExpressionSelector : QuickButton
                             {
                                 vec.GetComponent<VectorFieldExpression>().addExpression(gchild);
                                 gchild.GetComponent<ExpressionComponent>().setExpressionParent(vec.transform);
-                                gchildrenVec.Add(gchild);
+                                //gchildrenVec.Add(gchild);
+                                toAdd.Add(gchild);
                             }
                             break;
                         case "Variable":
                             vec.GetComponent<VectorFieldExpression>().setRange(child);
                             child.GetComponentInChildren<ExpressionComponent>().setExpressionParent(vec.transform);
-                            gchildrenVec.Add(child);
+                            //gchildrenVec.Add(child);
+                            toAdd.Add(child);
                             break;
                     }
                 }
 
-                thisScroll.addToIndex(-1, gchildrenVec, fakeObj, true);
+                //thisScroll.addToIndex(-1, gchildrenVec, fakeObj, true);
                 expressions.addExpr(vec.transform);
                 break;
         }
 
         GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
         addForwarders(sep.transform);
-        thisScroll.addToIndex(-1, emptyList, sep.transform, true);
+        toAdd.Add(sep.transform);
+        //thisScroll.addToIndex(-1, emptyList, sep.transform, true);
+        thisScroll.addToIndex(-1, toAdd, fakeObj, true);
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }

@@ -9,17 +9,17 @@ public class ScrollBar : MonoBehaviour
     Scroll.placement placement;
 
     float scrollerHeight, scrollerWidth;
-    int numPages, currPage;
+    int numPages, currPage = 1;
     public float moveSpeed;
     Material scrollerMaterial;
 
     void Awake()
     {
-        currPage = 1;
         scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
         scrollerMaterial = scroll.GetComponent<Scroll>().scrollerMaterial;
         orientation = scroll.GetComponent<Scroll>().getOrientation();
         placement = scroll.GetComponent<Scroll>().getScrollBarPlacement();
+        currPage = 1;
 
         if (bar == null || scroller == null) initializeScrollBar();
     }
@@ -27,8 +27,12 @@ public class ScrollBar : MonoBehaviour
     public void initializeScrollBar()
     {
         if (bar && scroller) return;
+
         if (scroll == null) scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
         scrollerMaterial = scroll.GetComponent<Scroll>().scrollerMaterial;
+        orientation = scroll.GetComponent<Scroll>().getOrientation();
+        placement = scroll.GetComponent<Scroll>().getScrollBarPlacement();
+        currPage = 1;
 
         bar = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
         bar.name = "Bar";
