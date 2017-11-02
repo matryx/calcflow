@@ -1,0 +1,588 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Priority Queue</name>
+    </assembly>
+    <members>
+        <member name="T:Priority_Queue.FastPriorityQueue`1">
+            <summary>
+            An implementation of a min-Priority Queue using a heap.  Has O(1) .Contains()!
+            See https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp/wiki/Getting-Started for more information
+            </summary>
+            <typeparam name="T">The values in the queue.  Must extend the FastPriorityQueueNode class</typeparam>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.#ctor(System.Int32)">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="maxNodes">The max nodes ever allowed to be enqueued (going over this will cause undefined behavior)</param>
+        </member>
+        <member name="P:Priority_Queue.FastPriorityQueue`1.Count">
+            <summary>
+            Returns the number of nodes in the queue.
+            O(1)
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.FastPriorityQueue`1.MaxSize">
+            <summary>
+            Returns the maximum number of items that can be enqueued at once in this queue.  Once you hit this number (ie. once Count == MaxSize),
+            attempting to enqueue another item will cause undefined behavior.  O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.Clear">
+            <summary>
+            Removes every node from the queue.
+            O(n) (So, don't do this often!)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.Contains(`0)">
+            <summary>
+            Returns (in O(1)!) whether the given node is in the queue.  O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.Enqueue(`0,System.Single)">
+            <summary>
+            Enqueue a node to the priority queue.  Lower values are placed in front. Ties are broken by first-in-first-out.
+            If the queue is full, the result is undefined.
+            If the node is already enqueued, the result is undefined.
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.HasHigherPriority(`0,`0)">
+            <summary>
+            Returns true if 'higher' has higher priority than 'lower', false otherwise.
+            Note that calling HasHigherPriority(node, node) (ie. both arguments the same node) will return false
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.Dequeue">
+            <summary>
+            Removes the head of the queue and returns it.
+            If queue is empty, result is undefined
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.Resize(System.Int32)">
+            <summary>
+            Resize the queue so it can accept more nodes.  All currently enqueued nodes are remain.
+            Attempting to decrease the queue size to a size too small to hold the existing nodes results in undefined behavior
+            O(n)
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.FastPriorityQueue`1.First">
+            <summary>
+            Returns the head of the queue, without removing it (use Dequeue() for that).
+            If the queue is empty, behavior is undefined.
+            O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.UpdatePriority(`0,System.Single)">
+            <summary>
+            This method must be called on a node every time its priority changes while it is in the queue.  
+            <b>Forgetting to call this method will result in a corrupted queue!</b>
+            Calling this method on a node not in the queue results in undefined behavior
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.Remove(`0)">
+            <summary>
+            Removes a node from the queue.  The node does not need to be the head of the queue.  
+            If the node is not in the queue, the result is undefined.  If unsure, check Contains() first
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.FastPriorityQueue`1.IsValidQueue">
+            <summary>
+            <b>Should not be called in production code.</b>
+            Checks to make sure the queue is still in a valid state.  Used for testing/debugging the queue.
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.FastPriorityQueueNode.Priority">
+            <summary>
+            The Priority to insert this node at.  Must be set BEFORE adding a node to the queue (ideally just once, in the node's constructor).
+            Should not be manually edited once the node has been enqueued - use queue.UpdatePriority() instead
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.FastPriorityQueueNode.QueueIndex">
+            <summary>
+            Represents the current position in the queue
+            </summary>
+        </member>
+        <member name="T:Priority_Queue.GenericPriorityQueue`2">
+            <summary>
+            A copy of StablePriorityQueue which also has generic priority-type
+            </summary>
+            <typeparam name="TItem">The values in the queue.  Must extend the GenericPriorityQueue class</typeparam>
+            <typeparam name="TPriority">The priority-type.  Must extend IComparable&lt;TPriority&gt;</typeparam>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.#ctor(System.Int32)">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="maxNodes">The max nodes ever allowed to be enqueued (going over this will cause undefined behavior)</param>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.#ctor(System.Int32,System.Collections.Generic.IComparer{`1})">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="maxNodes">The max nodes ever allowed to be enqueued (going over this will cause undefined behavior)</param>
+            <param name="comparer">The comparer used to compare TPriority values.</param>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.#ctor(System.Int32,System.Comparison{`1})">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="maxNodes">The max nodes ever allowed to be enqueued (going over this will cause undefined behavior)</param>
+            <param name="comparer">The comparison function to use to compare TPriority values</param>
+        </member>
+        <member name="P:Priority_Queue.GenericPriorityQueue`2.Count">
+            <summary>
+            Returns the number of nodes in the queue.
+            O(1)
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.GenericPriorityQueue`2.MaxSize">
+            <summary>
+            Returns the maximum number of items that can be enqueued at once in this queue.  Once you hit this number (ie. once Count == MaxSize),
+            attempting to enqueue another item will cause undefined behavior.  O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.Clear">
+            <summary>
+            Removes every node from the queue.
+            O(n) (So, don't do this often!)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.Contains(`0)">
+            <summary>
+            Returns (in O(1)!) whether the given node is in the queue.  O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.Enqueue(`0,`1)">
+            <summary>
+            Enqueue a node to the priority queue.  Lower values are placed in front. Ties are broken by first-in-first-out.
+            If the queue is full, the result is undefined.
+            If the node is already enqueued, the result is undefined.
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.HasHigherPriority(`0,`0)">
+            <summary>
+            Returns true if 'higher' has higher priority than 'lower', false otherwise.
+            Note that calling HasHigherPriority(node, node) (ie. both arguments the same node) will return false
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.Dequeue">
+            <summary>
+            Removes the head of the queue (node with minimum priority; ties are broken by order of insertion), and returns it.
+            If queue is empty, result is undefined
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.Resize(System.Int32)">
+            <summary>
+            Resize the queue so it can accept more nodes.  All currently enqueued nodes are remain.
+            Attempting to decrease the queue size to a size too small to hold the existing nodes results in undefined behavior
+            O(n)
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.GenericPriorityQueue`2.First">
+            <summary>
+            Returns the head of the queue, without removing it (use Dequeue() for that).
+            If the queue is empty, behavior is undefined.
+            O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.UpdatePriority(`0,`1)">
+            <summary>
+            This method must be called on a node every time its priority changes while it is in the queue.  
+            <b>Forgetting to call this method will result in a corrupted queue!</b>
+            Calling this method on a node not in the queue results in undefined behavior
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.Remove(`0)">
+            <summary>
+            Removes a node from the queue.  The node does not need to be the head of the queue.  
+            If the node is not in the queue, the result is undefined.  If unsure, check Contains() first
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.GenericPriorityQueue`2.IsValidQueue">
+            <summary>
+            <b>Should not be called in production code.</b>
+            Checks to make sure the queue is still in a valid state.  Used for testing/debugging the queue.
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.GenericPriorityQueueNode`1.Priority">
+            <summary>
+            The Priority to insert this node at.  Must be set BEFORE adding a node to the queue (ideally just once, in the node's constructor).
+            Should not be manually edited once the node has been enqueued - use queue.UpdatePriority() instead
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.GenericPriorityQueueNode`1.QueueIndex">
+            <summary>
+            Represents the current position in the queue
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.GenericPriorityQueueNode`1.InsertionIndex">
+            <summary>
+            Represents the order the node was inserted in
+            </summary>
+        </member>
+        <member name="T:Priority_Queue.IFixedSizePriorityQueue`2">
+            <summary>
+            A helper-interface only needed to make writing unit tests a bit easier (hence the 'internal' access modifier)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.IFixedSizePriorityQueue`2.Resize(System.Int32)">
+            <summary>
+            Resize the queue so it can accept more nodes.  All currently enqueued nodes are remain.
+            Attempting to decrease the queue size to a size too small to hold the existing nodes results in undefined behavior
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.IFixedSizePriorityQueue`2.MaxSize">
+            <summary>
+            Returns the maximum number of items that can be enqueued at once in this queue.  Once you hit this number (ie. once Count == MaxSize),
+            attempting to enqueue another item will cause undefined behavior.
+            </summary>
+        </member>
+        <member name="T:Priority_Queue.IPriorityQueue`2">
+            <summary>
+            The IPriorityQueue interface.  This is mainly here for purists, and in case I decide to add more implementations later.
+            For speed purposes, it is actually recommended that you *don't* access the priority queue through this interface, since the JIT can
+            (theoretically?) optimize method calls from concrete-types slightly better.
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.IPriorityQueue`2.Enqueue(`0,`1)">
+            <summary>
+            Enqueue a node to the priority queue.  Lower values are placed in front. Ties are broken by first-in-first-out.
+            See implementation for how duplicates are handled.
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.IPriorityQueue`2.Dequeue">
+            <summary>
+            Removes the head of the queue (node with minimum priority; ties are broken by order of insertion), and returns it.
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.IPriorityQueue`2.Clear">
+            <summary>
+            Removes every node from the queue.
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.IPriorityQueue`2.Contains(`0)">
+            <summary>
+            Returns whether the given node is in the queue.
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.IPriorityQueue`2.Remove(`0)">
+            <summary>
+            Removes a node from the queue.  The node does not need to be the head of the queue.  
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.IPriorityQueue`2.UpdatePriority(`0,`1)">
+            <summary>
+            Call this method to change the priority of a node.  
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.IPriorityQueue`2.First">
+            <summary>
+            Returns the head of the queue, without removing it (use Dequeue() for that).
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.IPriorityQueue`2.Count">
+            <summary>
+            Returns the number of nodes in the queue.
+            </summary>
+        </member>
+        <member name="T:Priority_Queue.SimplePriorityQueue`2">
+            <summary>
+            A simplified priority queue implementation.  Is stable, auto-resizes, and thread-safe, at the cost of being slightly slower than
+            FastPriorityQueue
+            Methods tagged as O(1) or O(log n) are assuming there are no duplicates.  Duplicates may increase the algorithmic complexity.
+            </summary>
+            <typeparam name="TItem">The type to enqueue</typeparam>
+            <typeparam name="TPriority">The priority-type to use for nodes.  Must extend IComparable&lt;TPriority&gt;</typeparam>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.#ctor">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.#ctor(System.Collections.Generic.IComparer{`1})">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="comparer">The comparer used to compare TPriority values.  Defaults to Comparer&lt;TPriority&gt;.default</param>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.#ctor(System.Comparison{`1})">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="comparer">The comparison function to use to compare TPriority values</param>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.GetExistingNode(`0)">
+            <summary>
+            Given an item of type T, returns the exist SimpleNode in the queue
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.AddToNodeCache(Priority_Queue.SimplePriorityQueue{`0,`1}.SimpleNode)">
+            <summary>
+            Adds an item to the Node-cache to allow for many methods to be O(1) or O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.RemoveFromNodeCache(Priority_Queue.SimplePriorityQueue{`0,`1}.SimpleNode)">
+            <summary>
+            Removes an item to the Node-cache to allow for many methods to be O(1) or O(log n) (assuming no duplicates)
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.SimplePriorityQueue`2.Count">
+            <summary>
+            Returns the number of nodes in the queue.
+            O(1)
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.SimplePriorityQueue`2.First">
+            <summary>
+            Returns the head of the queue, without removing it (use Dequeue() for that).
+            Throws an exception when the queue is empty.
+            O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.Clear">
+            <summary>
+            Removes every node from the queue.
+            O(n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.Contains(`0)">
+            <summary>
+            Returns whether the given item is in the queue.
+            O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.Dequeue">
+            <summary>
+            Removes the head of the queue (node with minimum priority; ties are broken by order of insertion), and returns it.
+            If queue is empty, throws an exception
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.EnqueueNoLock(`0,`1)">
+            <summary>
+            Enqueue the item with the given priority, without calling lock(_queue)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.Enqueue(`0,`1)">
+            <summary>
+            Enqueue a node to the priority queue.  Lower values are placed in front. Ties are broken by first-in-first-out.
+            This queue automatically resizes itself, so there's no concern of the queue becoming 'full'.
+            Duplicates and null-values are allowed.
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.EnqueueWithoutDuplicates(`0,`1)">
+            <summary>
+            Enqueue a node to the priority queue if it doesn't already exist.  Lower values are placed in front. Ties are broken by first-in-first-out.
+            This queue automatically resizes itself, so there's no concern of the queue becoming 'full'.  Null values are allowed.
+            Returns true if the node was successfully enqueued; false if it already exists.
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.Remove(`0)">
+            <summary>
+            Removes an item from the queue.  The item does not need to be the head of the queue.  
+            If the item is not in the queue, an exception is thrown.  If unsure, check Contains() first.
+            If multiple copies of the item are enqueued, only the first one is removed. 
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.UpdatePriority(`0,`1)">
+            <summary>
+            Call this method to change the priority of an item.
+            Calling this method on a item not in the queue will throw an exception.
+            If the item is enqueued multiple times, only the first one will be updated.
+            (If your requirements are complex enough that you need to enqueue the same item multiple times <i>and</i> be able
+            to update all of them, please wrap your items in a wrapper class so they can be distinguished).
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.GetPriority(`0)">
+            <summary>
+            Returns the priority of the given item.
+            Calling this method on a item not in the queue will throw an exception.
+            If the item is enqueued multiple times, only the priority of the first will be returned.
+            (If your requirements are complex enough that you need to enqueue the same item multiple times <i>and</i> be able
+            to query all their priorities, please wrap your items in a wrapper class so they can be distinguished).
+            O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.TryFirst(`0@)">
+            Get the head of the queue, without removing it (use TryDequeue() for that).
+            Useful for multi-threading, where the queue may become empty between calls to Contains() and First
+            Returns true if successful, false otherwise
+            O(1)
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.TryDequeue(`0@)">
+            <summary>
+            Removes the head of the queue (node with minimum priority; ties are broken by order of insertion), and sets it to first.
+            Useful for multi-threading, where the queue may become empty between calls to Contains() and Dequeue()
+            Returns true if successful; false if queue was empty
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.TryRemove(`0)">
+            <summary>
+            Attempts to remove an item from the queue.  The item does not need to be the head of the queue.  
+            Useful for multi-threading, where the queue may become empty between calls to Contains() and Remove()
+            Returns true if the item was successfully removed, false if it wasn't in the queue.
+            If multiple copies of the item are enqueued, only the first one is removed. 
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.TryUpdatePriority(`0,`1)">
+            <summary>
+            Call this method to change the priority of an item.
+            Useful for multi-threading, where the queue may become empty between calls to Contains() and UpdatePriority()
+            If the item is enqueued multiple times, only the first one will be updated.
+            (If your requirements are complex enough that you need to enqueue the same item multiple times <i>and</i> be able
+            to update all of them, please wrap your items in a wrapper class so they can be distinguished).
+            Returns true if the item priority was updated, false otherwise.
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`2.TryGetPriority(`0,`1@)">
+            <summary>
+            Attempt to get the priority of the given item.
+            Useful for multi-threading, where the queue may become empty between calls to Contains() and GetPriority()
+            If the item is enqueued multiple times, only the priority of the first will be returned.
+            (If your requirements are complex enough that you need to enqueue the same item multiple times <i>and</i> be able
+            to query all their priorities, please wrap your items in a wrapper class so they can be distinguished).
+            Returns true if the item was found in the queue, false otherwise
+            O(1)
+            </summary>
+        </member>
+        <member name="T:Priority_Queue.SimplePriorityQueue`1">
+            <summary>
+            A simplified priority queue implementation.  Is stable, auto-resizes, and thread-safe, at the cost of being slightly slower than
+            FastPriorityQueue
+            This class is kept here for backwards compatibility.  It's recommended you use SimplePriorityQueue&lt;TItem, TPriority&gt;
+            </summary>
+            <typeparam name="TItem">The type to enqueue</typeparam>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`1.#ctor">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`1.#ctor(System.Collections.Generic.IComparer{System.Single})">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="comparer">The comparer used to compare priority values.  Defaults to Comparer&lt;float&gt;.default</param>
+        </member>
+        <member name="M:Priority_Queue.SimplePriorityQueue`1.#ctor(System.Comparison{System.Single})">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="comparer">The comparison function to use to compare priority values</param>
+        </member>
+        <member name="T:Priority_Queue.StablePriorityQueue`1">
+            <summary>
+            A copy of FastPriorityQueue which is also stable - that is, when two nodes are enqueued with the same priority, they
+            are always dequeued in the same order.
+            See https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp/wiki/Getting-Started for more information
+            </summary>
+            <typeparam name="T">The values in the queue.  Must extend the StablePriorityQueueNode class</typeparam>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.#ctor(System.Int32)">
+            <summary>
+            Instantiate a new Priority Queue
+            </summary>
+            <param name="maxNodes">The max nodes ever allowed to be enqueued (going over this will cause undefined behavior)</param>
+        </member>
+        <member name="P:Priority_Queue.StablePriorityQueue`1.Count">
+            <summary>
+            Returns the number of nodes in the queue.
+            O(1)
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.StablePriorityQueue`1.MaxSize">
+            <summary>
+            Returns the maximum number of items that can be enqueued at once in this queue.  Once you hit this number (ie. once Count == MaxSize),
+            attempting to enqueue another item will cause undefined behavior.  O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.Clear">
+            <summary>
+            Removes every node from the queue.
+            O(n) (So, don't do this often!)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.Contains(`0)">
+            <summary>
+            Returns (in O(1)!) whether the given node is in the queue.  O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.Enqueue(`0,System.Single)">
+            <summary>
+            Enqueue a node to the priority queue.  Lower values are placed in front. Ties are broken by first-in-first-out.
+            If the queue is full, the result is undefined.
+            If the node is already enqueued, the result is undefined.
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.HasHigherPriority(`0,`0)">
+            <summary>
+            Returns true if 'higher' has higher priority than 'lower', false otherwise.
+            Note that calling HasHigherPriority(node, node) (ie. both arguments the same node) will return false
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.Dequeue">
+            <summary>
+            Removes the head of the queue (node with minimum priority; ties are broken by order of insertion), and returns it.
+            If queue is empty, result is undefined
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.Resize(System.Int32)">
+            <summary>
+            Resize the queue so it can accept more nodes.  All currently enqueued nodes are remain.
+            Attempting to decrease the queue size to a size too small to hold the existing nodes results in undefined behavior
+            O(n)
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.StablePriorityQueue`1.First">
+            <summary>
+            Returns the head of the queue, without removing it (use Dequeue() for that).
+            If the queue is empty, behavior is undefined.
+            O(1)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.UpdatePriority(`0,System.Single)">
+            <summary>
+            This method must be called on a node every time its priority changes while it is in the queue.  
+            <b>Forgetting to call this method will result in a corrupted queue!</b>
+            Calling this method on a node not in the queue results in undefined behavior
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.Remove(`0)">
+            <summary>
+            Removes a node from the queue.  The node does not need to be the head of the queue.  
+            If the node is not in the queue, the result is undefined.  If unsure, check Contains() first
+            O(log n)
+            </summary>
+        </member>
+        <member name="M:Priority_Queue.StablePriorityQueue`1.IsValidQueue">
+            <summary>
+            <b>Should not be called in production code.</b>
+            Checks to make sure the queue is still in a valid state.  Used for testing/debugging the queue.
+            </summary>
+        </member>
+        <member name="P:Priority_Queue.StablePriorityQueueNode.InsertionIndex">
+            <summary>
+            Represents the order the node was inserted in
+            </summary>
+        </member>
+    </members>
+</doc>

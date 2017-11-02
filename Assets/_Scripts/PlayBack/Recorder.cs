@@ -102,26 +102,31 @@ public class Recorder : MonoBehaviour {
 
     public static void LogSpawn(GameObject subject)
     {
-        recordLog.log.Add(PlayBackLogAction.CreateSpawn(PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000), 
-                          subject, 
-                          subject.transform.position, 
-                          subject.transform.rotation, 
-                          subject.transform.lossyScale));
+        long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000);
+        recordLog.log.Enqueue(PlayBackLogAction.CreateSpawn(time,
+                                                            subject, 
+                                                            subject.transform.position, 
+                                                            subject.transform.rotation, 
+                                                            subject.transform.lossyScale),
+                              time);
     }
 
     public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
     {
-        recordLog.log.Add(PlayBackLogAction.CreateMovement(PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000), 
-                          subject, destination, rotation, scale));
+        long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000);
+        recordLog.log.Enqueue(PlayBackLogAction.CreateMovement(time,
+                          subject, destination, rotation, scale), time);
     }
 
     public static void LogButtonPress(GameObject subject, GameObject presser)
     {
-        recordLog.log.Add(PlayBackLogAction.CreateButtonPress(PlaybackClock.GetTime(), subject, presser));
+        long time = PlaybackClock.GetTime();
+        recordLog.log.Enqueue(PlayBackLogAction.CreateButtonPress(time, subject, presser), time);
     }
 
     public static void LogButtonUnpress(GameObject subject, GameObject presser)
     {
-        recordLog.log.Add(PlayBackLogAction.CreateButtonUnpress(PlaybackClock.GetTime(), subject, presser));
+        long time = PlaybackClock.GetTime();
+        recordLog.log.Enqueue(PlayBackLogAction.CreateButtonUnpress(time, subject, presser), time);
     }
 }

@@ -8,6 +8,8 @@ using Nanome.Maths;
 using Extensions;
 using CalcFlowUI;
 using VoxelBusters.RuntimeSerialization;
+using Nanome.Core.Daemon;
+using Priority_Queue;
 
 [Serializable]
 public class PlaybackLog
@@ -45,12 +47,26 @@ public class PlaybackLog
     }
 
     [SerializeField]
-    public List<PlayBackLogAction> log = new List<PlayBackLogAction>();
+    public SimplePriorityQueue<PlayBackLogAction> log = new SimplePriorityQueue<PlayBackLogAction>();
 
     public List<PlayBackLogAction> GetLogCopy()
     {
-        return new List<PlayBackLogAction>(log);
+        return log.ToList();
     }
+
+    public class myReverserClass : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            PlayBackLogAction first = (PlayBackLogAction) x;
+            PlayBackLogAction second = (PlayBackLogAction) y;
+
+            if (first.timeStamp > second.timeStamp) return 1;
+            if (first.timeStamp < second.timeStamp) return -1;
+            return 0;
+        }
+    }
+
 }
 [Serializable]
 public class PlayBackLogAction
@@ -155,6 +171,18 @@ public class PlayBackLogAction
         return newAction;
     }
 
+    IEnumerator Spawn()
+    {
+        GameObject subject;
+        subject = RSManager.Deserialize<GameObject>(subjectKey.ToString());
+        yield return null;
+        objectMap.Add(subjectKey, subject);
+        subject.MoveTo(position, 0);
+        subject.RotateTo(rotation, 0);
+        subject.GlobalScaleTo(scale, 0);
+    }
+
+
     public void Reenact()
     {
         Button button;
@@ -162,11 +190,7 @@ public class PlayBackLogAction
         switch (type)
         {
             case ActionType.Spawn:
-                subject = RSManager.Deserialize<GameObject>(subjectKey.ToString());
-                objectMap.Add(subjectKey, subject);
-                subject.transform.position = position;
-                subject.transform.rotation = rotation;
-                subject.transform.localScale = scale;
+                Dispatcher.queue(Spawn());
                 break;
             case ActionType.Movement:
                 subject = objectMap[subjectKey];
@@ -186,5 +210,8 @@ public class PlayBackLogAction
                 break;
         }
     }
+
+
+
 }
 
