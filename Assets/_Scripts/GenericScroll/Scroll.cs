@@ -64,17 +64,17 @@ public class Scroll : MonoBehaviour
         if (transform.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local rotation of object with Scroll script needs to be zero");
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-#endif
+            #endif
         }
 
         if (objectParent.localScale != Vector3.one || objectParent.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local scale and local rotation of Object Parent needs to be one and zero");
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-#endif
+            #endif
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
@@ -115,19 +115,23 @@ public class Scroll : MonoBehaviour
         moveObjects();
     }
 
-    private void setUpMenu()
+    public void setUpMenu()
     {
         if (transform.parent.GetComponentInChildren<ScrollBar>()) return;
 
-        scrollBar = new GameObject().transform;
-        scrollBar.name = "ScrollBar";
-        scrollBar.SetParent(transform.parent);
-        scrollBar.localScale = Vector3.one;
-        scrollBar.localPosition = Vector3.zero;
-        scrollBar.localEulerAngles = Vector3.zero;
-        scrollBar.gameObject.AddComponent<ScrollBar>();
-        scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation);
-        scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
+        if (scrollBar == null)
+        {
+            scrollBar = new GameObject().transform;
+            scrollBar.name = "ScrollBar";
+            scrollBar.SetParent(transform.parent);
+            scrollBar.localScale = Vector3.one;
+            scrollBar.localPosition = Vector3.zero;
+            scrollBar.localEulerAngles = Vector3.zero;
+            scrollBar.gameObject.AddComponent<ScrollBar>();
+            scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation);
+            scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
+            scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
+        }
 
         Vector3 startPos = transform.localPosition;
 
@@ -152,7 +156,9 @@ public class Scroll : MonoBehaviour
         scrollBar.GetComponent<ScrollBar>().setNumPages(numPages);
 
         if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == numPages)
+        {
             highestVisIndex = objects.Count - 1;
+        }
 
         if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == 1 && numPages > 1)
             highestVisIndex = numberOfVisibleThings - 1;
@@ -277,7 +283,13 @@ public class Scroll : MonoBehaviour
         {
             highestVisIndex = objects.Count - 1;
 
-            if (numPages < prevNum) lowestVisIndex = lowestVisIndex - (fixedRowOrCol * (prevNum - numPages));
+            if (highestVisIndex - lowestVisIndex + 1 <= numberOfVisibleThings - fixedRowOrCol)
+            {
+                int offsetBy = (numberOfVisibleThings / fixedRowOrCol) - 
+                               (int)Mathf.Ceil(((float)(highestVisIndex - lowestVisIndex + 1) / (float)fixedRowOrCol));
+                lowestVisIndex = lowestVisIndex - (fixedRowOrCol * offsetBy);
+            } 
+
             if (numPages == 1) lowestVisIndex = 0;
         }
 
@@ -286,6 +298,8 @@ public class Scroll : MonoBehaviour
 
     private void moveObjects()
     {
+        if (objects == null || objects.Count == 0) return;
+
         if (((currDirection == direction.DOWN || currDirection == direction.RIGHT) && lowestVisIndex == 0) ||
             ((currDirection == direction.UP || currDirection == direction.LEFT) && highestVisIndex == objects.Count - 1))
             return;

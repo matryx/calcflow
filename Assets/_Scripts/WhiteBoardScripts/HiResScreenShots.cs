@@ -30,7 +30,7 @@ public class HiResScreenShots : MonoBehaviour {
         RenderTexture.active = temp; // JC: added to avoid errors
         byte[] bytes = screenShot.EncodeToPNG();
         System.IO.File.WriteAllBytes(fileName, bytes);
-        Debug.Log(string.Format("Took screenshot to: {0}", fileName));
+        //Debug.Log(string.Format("Took screenshot to: {0}", fileName));
         takeHiResShot = false;
     }
 	void LateUpdate() {

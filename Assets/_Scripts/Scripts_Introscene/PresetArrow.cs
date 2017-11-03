@@ -25,7 +25,10 @@ public class PresetArrow : MonoBehaviour {
         }
         Vector3 position = transform.position;
 
-        transform.rotation = Quaternion.LookRotation(origin.position-position);
+        if (origin.position - position != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(origin.position - position);
+        }
 
         LineRenderer line = GetComponent<LineRenderer>();
         line.SetPosition(0, transform.position);

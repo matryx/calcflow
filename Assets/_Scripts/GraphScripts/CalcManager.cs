@@ -171,12 +171,18 @@ public class CalcManager : Nanome.Core.Behaviour
 
 
     public bool updateOverlay = false;
+    public bool updateText = false;
     // Update is called once per frame
     void Update()
     {
-        if (inputReceived)
+        if (updateText || inputReceived)
         {
             manageText();
+            updateText = false;
+        }
+
+        if (inputReceived)
+        {
             inputReceived = false;
             updateOverlay = true;
             bool isValid = expressionSet.CompileAll();

@@ -75,7 +75,6 @@ public class ExpressionSaveLoad : MonoBehaviour
         //converts the list of expressions into a serializable form.
         List<SerializableExpressionSet> sesList = expressions.Select(x => new SerializableExpressionSet(x)).ToList();
         string json = JsonHelper.ToJson(sesList);
-        print("saving to: " + fileName);
         System.IO.File.WriteAllText(Path.Combine(savePath, fileName) + jsonExtension, json);
 
         if (saveIconGenerator != null)

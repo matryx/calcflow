@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class SecondaryMenu : MonoBehaviour
 {
-    //TODO: finish implementing particle count, already made skeleton code for it
-
-    //BUG: animation doesn't happen until you actually go to animation settings and
-    //     click one of the style buttons. for some reason the button isn't being virtually pressed
-    //     even though it's supposed to be
-
     internal class SecondaryMenuResponder : FlexMenu.FlexMenuResponder
     {
         SecondaryMenu secMenu;
@@ -39,6 +33,7 @@ public class SecondaryMenu : MonoBehaviour
     {
         functionMenu.gameObject.SetActive(true);
         animationMenu.gameObject.SetActive(false);
+        saveLoadMenu.GetComponentInChildren<Scroll>().setUpMenu();
         saveLoadMenu.gameObject.SetActive(false);
         settingsMenu.gameObject.SetActive(false);
 

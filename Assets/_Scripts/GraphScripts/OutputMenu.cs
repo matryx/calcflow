@@ -109,7 +109,6 @@ public class OutputMenu : MonoBehaviour
                 calcManager.toExport = true;
                 break;
             case "Save":
-                print("save button pressed");
                 if (Saveable)
                 {
                     calcManager.saveLoadMenu.Save();

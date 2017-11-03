@@ -50,12 +50,14 @@ public class CalcInput : MonoBehaviour
             default:
                 currExpression.tokens.Insert(index, buttonID);
                 index++;
+                calcManager.inputReceived = true;
                 break;
             case "Paste":
                 string temp = GUIUtility.systemCopyBuffer;
                 List<string> tempList = ExpressionParser.Parse(temp);
                 currExpression.tokens.InsertRange(index, tempList);
                 index += tempList.Count;
+                calcManager.inputReceived = true;
                 break;
             #region control_buttons
             case "Button_del":
@@ -63,11 +65,13 @@ public class CalcInput : MonoBehaviour
                 {
                     currExpression.tokens.RemoveAt(index - 1);
                     index--;
+                    calcManager.inputReceived = true;
                 }
                 break;
             case "Button_Clear":
                 index = 0;
                 currExpression.tokens.Clear();
+                calcManager.inputReceived = true;
                 break;
             case "Button_Enter":
                 calcManager.inputReceived = true;
@@ -89,13 +93,11 @@ public class CalcInput : MonoBehaviour
             #endregion
         }
         #endregion
-        calcManager.inputReceived = true;
-
+        calcManager.updateText = true;
     }
 
     public void Initialize(CalcManager cm)
     {
-        print("registering");
         calcManager = cm;
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);
