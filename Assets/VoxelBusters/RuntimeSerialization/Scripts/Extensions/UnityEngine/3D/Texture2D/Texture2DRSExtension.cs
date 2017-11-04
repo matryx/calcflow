@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using VoxelBusters.RuntimeSerialization;
+using UnityEditor;
 
 public class Texture2DRSExtension : ObjectRSExtension 
 {
@@ -40,9 +41,9 @@ public class Texture2DRSExtension : ObjectRSExtension
 		// Serialize base properties
 		base.WriteSerializationData(_texture, _info);
 
-		// Serializing properties
-		try
-		{
+        // Serializing properties
+        try
+        {
 			_info.AddValue<int>(kWidthKey, 				_texture.width			, true);
 			_info.AddValue<int>(kHeightKey,				_texture.height			, true);
 			_info.AddValue<byte[]>(kDataKey, 			_texture.EncodeToPNG());

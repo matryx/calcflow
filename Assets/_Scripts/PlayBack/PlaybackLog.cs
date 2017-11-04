@@ -47,7 +47,7 @@ public class PlaybackLog
     }
 
     [SerializeField]
-    public SimplePriorityQueue<PlayBackLogAction> log = new SimplePriorityQueue<PlayBackLogAction>();
+    public List<PlayBackLogAction> log = new List<PlayBackLogAction>();
 
     public List<PlayBackLogAction> GetLogCopy()
     {
@@ -176,7 +176,14 @@ public class PlayBackLogAction
         GameObject subject;
         subject = RSManager.Deserialize<GameObject>(subjectKey.ToString());
         yield return null;
-        objectMap.Add(subjectKey, subject);
+        if (objectMap.ContainsKey(subjectKey))
+        {
+            objectMap[subjectKey] = subject;
+        }
+        else
+        {
+            objectMap.Add(subjectKey, subject);
+        }
         subject.MoveTo(position, 0);
         subject.RotateTo(rotation, 0);
         subject.GlobalScaleTo(scale, 0);
