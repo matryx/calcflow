@@ -13,9 +13,6 @@ public class Expressions : MonoBehaviour
     Color actionActiveColor, actionInactiveColor;
     Color expressionActiveColor, expressionInactiveColor;
 
-    //TODO: managing expressions
-    // major UI changes:
-    // - organize the expressions into tabs of the type of expression
     void Awake()
     {
         expressions = new List<Transform>();

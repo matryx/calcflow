@@ -5,6 +5,7 @@ using UnityEngine;
 public class ExpressionBody : QuickButton {
     Expressions expression;
     Transform feedBack;
+    ExpressionComponent expComp;
 
     private bool menuActive = false;
     private bool finishedScaling = false;
@@ -20,6 +21,7 @@ public class ExpressionBody : QuickButton {
         base.Start();
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
+        expComp = transform.GetComponentInParent<ExpressionComponent>();
 
         selectedScale = new Vector3(4.56999f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
@@ -50,7 +52,6 @@ public class ExpressionBody : QuickButton {
             StartCoroutine(scaleMenuUp);
         }
 
-        ExpressionComponent expComp = transform.GetComponentInParent<ExpressionComponent>();
         if (expComp == null) {
             expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
         }
@@ -78,7 +79,7 @@ public class ExpressionBody : QuickButton {
 
     public void unSelect()
     {
-        if (!transform.parent.gameObject.activeSelf) {
+        if (!expComp.getPanel().gameObject.activeSelf || !transform.parent.gameObject.activeSelf) {
             feedBack.localScale = idleScale;
             return;
         }
