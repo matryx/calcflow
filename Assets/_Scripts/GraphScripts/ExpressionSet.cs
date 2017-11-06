@@ -188,10 +188,6 @@ public class ExpressionSet
         }
     }
 
-    void SaveToFile()
-    {
-
-    }
 }
 
 [System.Serializable]

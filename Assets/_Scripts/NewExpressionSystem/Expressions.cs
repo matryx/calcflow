@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Expressions : MonoBehaviour
 {
+    public static Expressions _instance;
     Transform selectedExpression;
     ExpressionBody selectedBody;
     List<Transform> expressions;
@@ -13,8 +14,12 @@ public class Expressions : MonoBehaviour
     Color actionActiveColor, actionInactiveColor;
     Color expressionActiveColor, expressionInactiveColor;
 
+    //TODO:
+    // read through ExpressionSet and start developing new backend
+
     void Awake()
     {
+        _instance = this;
         expressions = new List<Transform>();
         remove.gameObject.SetActive(true);
         hide.gameObject.SetActive(true);

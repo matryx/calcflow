@@ -56,17 +56,17 @@ public class CalcManager : MonoBehaviour
         [SerializeField]
         internal CalcInput calcInput;
         [SerializeField]
-        internal PieceWiseControl pieceWiseControl;
+        internal PieceWiseControl pieceWiseControl; // dont need in new system
         [SerializeField]
         internal PresetMenu presetMenu;
         [SerializeField]
-        internal OutputMenu outputMenu;
+        internal OutputMenu outputMenu;  // dont need in new system
         [SerializeField]
         internal BoundsManager boundsManager;
         [SerializeField]
         internal SaveLoadMenu saveLoadMenu;
         [SerializeField]
-        internal ParticleAnimationSettings particleAnimationSettings;
+        internal ParticleAnimationSettings particleAnimationSettings;  // dont need in new system
     }
 
     [System.Serializable]
