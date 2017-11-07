@@ -1,41 +1,139 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using VoxelBusters.RuntimeSerialization;
 
-public class TextLogger : MonoBehaviour {
+public class TextLogger : Nanome.Core.Behaviour
+{
 
-    public string text = "Hello World";
-    public float offsetZ = 0;
-    public float characterSize = 1;
-    public float lineSpacing = 1;
-    public TextAnchor anchor = TextAnchor.UpperLeft;
-    public TextAlignment alignment = TextAlignment.Left;
-    public float tabSize = 4;
-    public int fontSize = 0;
-    public FontStyle fontStyle = FontStyle.Normal;
-    public bool richText = true;
-    public Font font;
-    public Color color = Color.white;
+    public float alpha;
+    public Color color;
+    public bool enableAutoSizing;
+    public bool enableCulling;
+    public bool enableKerning;
+    public bool enableWordWrapping;
+    public bool extraPadding;
+    public Color32 faceColor;
+    public TMP_FontAsset font;
+    public Material fontMaterial;
+    public float fontSize;
+    public float fontSizeMax;
+    public float fontSizeMin;
+    public FontStyles fontStyle;
+    public int fontWeight;
+    public bool ignoreVisibility;
+    public bool isOrthographic;
+    public bool isOverlay;
+    public bool isRightToLeftText;
+    public bool isVolumetricText;
+    public int layoutPriority;
+    public float lineSpacing;
+    public int maxVisibleCharacter;
+    public int maxVisibleLines;
+    public int maxVisibleWords;
+    public Color32 outlineColor;
+    public float outlineWidth;
+    public int pageToDisplay;
+    public bool richText;
+    public string text;
+    public bool tintAllSprites;
+    public float wordSpacing;
+    public Vector4 margin;
+    public bool overrideColorTags;
+    public float paragraphSpacing;
+    public float characterSpacing;
+    public bool parseCtrlCharacters;
+    public bool enableVertexGradient;
+    public TextOverflowModes overflow;
+    public float wordWrappingRatios;
+    public float mappingUvLineOffset;
+    public Material[] fontMat;
+    public bool havePropertiesChanged;
+    public bool isLinkedTextComponent;
+    public TextRenderFlags renderMode;
+    public int firstVisibleCharacter;
+    public bool ignoreRectMaskCulling;
+    public float lineSpacingAdjustment;
+    public TMP_SpriteAsset spriteAsset;
+    public VertexGradient colorGradient;
+    public bool useMaxVisibleDescender;
+    public TMP_Text linkedTextComponent;
+    public TextAlignmentOptions alignment;
+    public bool autoSizeTextContainer;
+    public Material fontSharedMaterial;
+    public VertexSortingOrder geometrySortingOrder;
+    public TextureMappingOptions horizontalMapping;
+    public bool isUsingLegacyAnimationComponent;
+    public TMP_ColorGradient colorGradientPreset;
+    public TextureMappingOptions verticalMapping;
+    public Material[] fontSharedMaterials;
+    public float characterWidthAdjustment;
 
-    // Use this for initialization
-    void Start () {
-        TextMesh tm = gameObject.AddComponent<TextMesh>();
-        tm.text = text;
-        tm.offsetZ = offsetZ;
-        tm.characterSize = characterSize;
-        tm.lineSpacing = lineSpacing;
-        tm.anchor = anchor;
-        tm.alignment = alignment;
-        tm.tabSize = tabSize;
-        tm.fontSize = fontSize;
-        tm.fontStyle = fontStyle;
-        tm.richText = richText;
-        tm.font = font;
-        tm.color = color;
+    protected void Start()
+    {
+        TMPro.TMP_Text tm = GetComponent<TextMeshPro>();
+        alpha = tm.alpha;
+        color = tm.color;
+        enableAutoSizing = tm.enableAutoSizing;
+        enableCulling = tm.enableCulling;
+        enableKerning = tm.enableKerning;
+        enableWordWrapping = tm.enableWordWrapping;
+        extraPadding = tm.extraPadding;
+        faceColor = tm.faceColor;
+        font = tm.font;
+        fontMaterial = tm.fontMaterial;
+        fontSize = tm.fontSize;
+        fontSizeMax = tm.fontSizeMax;
+        fontSizeMin = tm.fontSizeMin;
+        fontStyle = tm.fontStyle;
+        fontWeight = tm.fontWeight;
+        ignoreVisibility = tm.ignoreVisibility;
+        isOrthographic = tm.isOrthographic;
+        isOverlay = tm.isOverlay;
+        isRightToLeftText = tm.isRightToLeftText;
+        isVolumetricText = tm.isVolumetricText;
+        layoutPriority = tm.layoutPriority;
+        lineSpacing = tm.lineSpacing;
+        maxVisibleCharacter = tm.maxVisibleCharacter;
+        maxVisibleLines = tm.maxVisibleLines;
+        maxVisibleWords = tm.maxVisibleWords;
+        outlineColor = tm.outlineColor;
+        outlineWidth = tm.outlineWidth;
+        pageToDisplay = tm.pageToDisplay;
+        richText = tm.richText;
+        text = tm.text;
+        tintAllSprites = tm.tintAllSprites;
+        wordSpacing = tm.wordSpacing;
+        margin = tm.margin;
+        overrideColorTags = tm.overrideColorTags;
+        paragraphSpacing = tm.paragraphSpacing;
+        characterSpacing = tm.characterSpacing;
+        parseCtrlCharacters = tm.parseCtrlCharacters;
+        enableVertexGradient = tm.enableVertexGradient;
+        OverflowModes overflow = tm.OverflowModes overflow;
+        wordWrappingRatios = tm.wordWrappingRatios;
+        mappingUvLineOffset = tm.mappingUvLineOffset;
+        fontMat = tm.fontMat;
+        havePropertiesChanged = tm.havePropertiesChanged;
+        isLinkedTextComponent = tm.isLinkedTextComponent;
+        RenderFlags renderMode = tm.RenderFlags renderMode;
+        firstVisibleCharacter = tm.firstVisibleCharacter;
+        ignoreRectMaskCulling = tm.ignoreRectMaskCulling;
+        lineSpacingAdjustment = tm.lineSpacingAdjustment;
+        spriteAsset = tm.spriteAsset;
+        colorGradient = tm.colorGradient;
+        useMaxVisibleDescender = tm.useMaxVisibleDescender;
+        linkedTextComponent = tm.linkedTextComponent;
+        alignment = tm.alignment;
+        autoSizeTextContainer = tm.autoSizeTextContainer;
+        fontSharedMaterial = tm.fontSharedMaterial;
+        geometrySortingOrder = tm.geometrySortingOrder;
+        horizontalMapping = tm.horizontalMapping;
+        isUsingLegacyAnimationComponent = tm.isUsingLegacyAnimationComponent;
+        colorGradientPreset = tm.colorGradientPreset;
+        verticalMapping = tm.verticalMapping;
+        fontSharedMaterials = tm.fontSharedMaterials;
+        characterWidthAdjustment = tm.characterWidthAdjustment;
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }
