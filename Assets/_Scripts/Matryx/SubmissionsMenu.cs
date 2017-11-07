@@ -85,6 +85,8 @@ public class SubmissionsMenu : MonoBehaviour {
 
     public void ProcessTournament(string jsonString)
     {
+        submissions.Clear();
+
         JSONObject jsonObject = new JSONObject(jsonString);
         jsonObject.GetField("results", delegate (JSONObject results)
         {
@@ -152,8 +154,7 @@ public class SubmissionsMenu : MonoBehaviour {
         button.name = submission.getTitle();
         button.GetComponent<SubmissionContainer>().SetSubmission(submission);
 
-        string shortName = submission.getTitle().Length > maxTextLength ? submission.getTitle().Replace(submission.getTitle().Substring(maxTextLength), "...") : submission.getTitle();
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = shortName;
+        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = submission.getTitle();
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());

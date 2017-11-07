@@ -8,16 +8,19 @@ public class Matryx_Submission
     {
         this.address = address;
     }
-    public Matryx_Submission(string title, string bodyAddress)
+    public Matryx_Submission(string title, string address)
     {
         this.title = title;
-        this.bodyAddress = bodyAddress;
+        this.address = address;
     }
 
     public string address;
-    private string title;
-    private string bodyAddress;
-    private string body;
+    public string title;
+    public string bodyAddress;
+    public string body;
+    public List<string> contributors;
+    public List<string> references;
+
     //public DateTime startTime;
     //public DateTime roundDuration;
     //public int round;
