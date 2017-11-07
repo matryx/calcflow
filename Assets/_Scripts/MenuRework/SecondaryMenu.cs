@@ -84,6 +84,7 @@ public class SecondaryMenu : MonoBehaviour
                 saveLoadMenu.gameObject.SetActive(false);
                 settingsMenu.gameObject.SetActive(false);
                 tournamentMenu.gameObject.SetActive(true);
+                tournamentMenu.GetComponent<TournamentMenu>().LoadTournaments();
                 break;
         }
     }

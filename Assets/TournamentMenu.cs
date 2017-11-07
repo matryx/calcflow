@@ -8,8 +8,11 @@ public class TournamentMenu : MonoBehaviour {
     private CalcManager calcManager;
     private MultiSelectFlexPanel tournamentsPanel;
 
+    delegate void WebDelegate(string result);
+
     [SerializeField]
     private SubmissionsMenu submissionMenu;
+    private string tournamentsEndpoint = "http://13.57.11.64/v1/tournaments/";
 
     private string[] Intro = { "A", "The"};
     private string[] Setup = { "Cure for our", "Cure for The", "Solution to The", "End of", "Quest for The", "Mission to", "Beginning of our", "Promise to Create The", "Beautiful Relationship with The" };
@@ -19,7 +22,7 @@ public class TournamentMenu : MonoBehaviour {
 
     
 
-    private Dictionary<string, Matryx_Tournament> tournaments;
+    private Dictionary<string, Matryx_Tournament> tournaments = new Dictionary<string, Matryx_Tournament>();
 
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
@@ -54,33 +57,54 @@ public class TournamentMenu : MonoBehaviour {
         tournamentsPanel = GetComponentInChildren<MultiSelectFlexPanel>().Initialize();
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
 
-        LoadTournaments();
-        DisplayTournaments();
     }
 
-    private void LoadTournaments()
+    IEnumerator LoadFromURL(string url, WebDelegate webDelegate)
     {
-        tournaments = new Dictionary<string, Matryx_Tournament>();
-        System.Random random = new System.Random();
-        for (int i = 0; i < 15; i++)
+        WWW www = new WWW(url);
+        yield return www;
+        if (!String.IsNullOrEmpty(www.text))
         {
-            int indexOne = random.Next(0, Intro.Length - 1);
-            int indexTwo = random.Next(0, Setup.Length - 1);
-            int indexThree = random.Next(0, adjectives.Length - 1);
-            int indexFour = random.Next(0, this.nouns.Length - 1);
-            int indexFive = random.Next(0, this.Outro.Length - 1);
-
-            string intro = this.Intro[indexOne];
-            string setup = this.Setup[indexTwo];
-            string adjective = this.adjectives[indexThree];
-            string noun = this.nouns[indexFour];
-            string outro = this.Outro[indexFive];
-
-            string title = intro + " " + setup + " " + adjective + " " + noun + " " + outro;
-
-            Matryx_Tournament aTournament = new Matryx_Tournament(title, random.Next(10000000, 200000000).GetHashCode().ToString(), random.Next(100, 5000000));
-            tournaments.Add("" + i, aTournament);
+            webDelegate(www.text);
         }
+        else
+        {
+            Debug.Log("ERROR: " + www.error);
+        }
+    }
+
+    public void LoadTournaments()
+    {
+        if(tournaments.Keys.Count != 0)
+        {
+            return;
+        }
+
+        StartCoroutine(LoadFromURL(tournamentsEndpoint, ProcessTournaments));
+    }
+
+    private void ProcessTournaments(string jsonString)
+    {
+        JSONObject jsonObject = new JSONObject(jsonString);
+        jsonObject.GetField("results", delegate (JSONObject results)
+        {
+            List<JSONObject> jsonTournaments = null;
+            results.GetField("tournaments", delegate (JSONObject tournamentList)
+            {
+                jsonTournaments = tournamentList.list;
+                foreach(JSONObject jsonTournament in jsonTournaments)
+                {
+                    string title = jsonTournament.GetField("title").str;
+                    string address = jsonTournament.GetField("address").str;
+                    long bounty = jsonTournament.GetField("bounty").i;
+
+                    Matryx_Tournament aTournament = new Matryx_Tournament(title, address, bounty);
+                    tournaments.Add(address, aTournament);
+                }
+
+                DisplayTournaments();
+            });
+        });
     }
 
     private void DisplayTournaments()
