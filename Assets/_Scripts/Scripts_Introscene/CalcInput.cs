@@ -43,6 +43,8 @@ public class CalcInput : MonoBehaviour
 
     public void Initialize(CalcManager cm)
     {
+        print("BUTTON PRESSED");
+    
         calcManager = cm;
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);
@@ -50,12 +52,14 @@ public class CalcInput : MonoBehaviour
         letterPanel = transform.Find("LetterPanel");
     }
 
+    //called by CalcManager
     public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
         index = currExpression.tokens.Count;
     }
 
+    //called when button on keyboard pressed
     public void HandleInput(string buttonID)
     {
         #region switch

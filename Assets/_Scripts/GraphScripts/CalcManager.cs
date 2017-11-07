@@ -50,6 +50,8 @@ public class CalcManager : MonoBehaviour
     [SerializeField]
     Inputs inputs;
 
+    //some aren't needed anymore
+    //shouldn't be public anymore
     [System.Serializable]
     internal class ConnectedMenus
     {
@@ -69,6 +71,8 @@ public class CalcManager : MonoBehaviour
         internal ParticleAnimationSettings particleAnimationSettings;  // dont need in new system
     }
 
+    //no longer backboards, these are now underline (google form)
+    //shouldn't be public anymore
     [System.Serializable]
     internal class FeedBacks
     {
@@ -88,6 +92,8 @@ public class CalcManager : MonoBehaviour
         internal Renderer wFeedback;
     }
 
+    //this all has to change since it isn't one set of output anymore (multiple sets of expressions in new system)
+    //shouldn't be public anymore
     [System.Serializable]
     internal class Inputs
     {
