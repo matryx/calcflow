@@ -13,21 +13,15 @@ public class TournamentMenu : MonoBehaviour {
     private SubmissionsMenu submissionsMenu;
     private string tournamentsEndpoint = "http://13.57.11.64/v1/tournaments/";
 
-    private string[] Intro = { "A", "The"};
-    private string[] Setup = { "Cure for our", "Cure for The", "Solution to The", "End of", "Quest for The", "Mission to", "Beginning of our", "Promise to Create The", "Beautiful Relationship with The" };
-    private string[] adjectives = { "Untimely", "Fast-Approaching", "Promising", "Holy", "Perfect", "Incomprehensible", "Smart", "Advanced", "Crazy", "Hopeful", "Dreadful", "Rapidly Advancing", "Unstoppable", "Edible", "Uncontrollable", "Shameless", "Quantified", "Dangerous"};
-    private string[] nouns = { "Zika virus", "Global Warming", "Educational Model", "Unified Quantum Theory", "Neural Implant", "Life-Harboring Planet", "Boredome", "Robot Overlords", "Star Destroyer", "Designer Baby", "Brain-Computer Interface", "Death", "Mars", "Sol", "Sexbot", "Nanobot", "Evolutionary Process", "Contact Lense", "Gene Therapy"};
-    private string[] Outro = { ".", "We So Desperately Need.", "to Save Us All.", ": A Parent's Worst Nightmare.", "that Will End All Wars.", "to Revolutionize Just About Everything", ": A Journey", "that Might Kill Us All." };
-
-    
-
     private Dictionary<string, Matryx_Tournament> tournaments = new Dictionary<string, Matryx_Tournament>();
 
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
+        public FlexMenu menu;
         TournamentMenu tournamentMenu;
-        internal KeyboardInputResponder(TournamentMenu tournamentMenu)
+        internal KeyboardInputResponder(TournamentMenu tournamentMenu, FlexMenu menu)
         {
+            this.menu = menu;
             this.tournamentMenu = tournamentMenu;
         }
 
@@ -51,7 +45,7 @@ public class TournamentMenu : MonoBehaviour {
 
         scroll = GetComponentInChildren<Scroll>(true);
         flexMenu = GetComponent<FlexMenu>();
-        KeyboardInputResponder responder = new KeyboardInputResponder(this);
+        KeyboardInputResponder responder = new KeyboardInputResponder(this, flexMenu);
         flexMenu.RegisterResponder(responder);
         tournamentsPanel = GetComponentInChildren<MultiSelectFlexPanel>().Initialize();
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
@@ -124,10 +118,13 @@ public class TournamentMenu : MonoBehaviour {
 
     private void HandleInput(GameObject source)
     {
-        string name = source.name;
+        if(source.GetComponent<TournamentContainer>() != null)
+        {
+            string name = source.name;
 
-        Matryx_Tournament tournament = source.GetComponent<TournamentContainer>().GetTournament();
-        submissionsMenu.SetTournament(tournament);
-        submissionsMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
+            Matryx_Tournament tournament = source.GetComponent<TournamentContainer>().GetTournament();
+            submissionsMenu.SetTournament(tournament);
+            submissionsMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
+        }
     }
 }
