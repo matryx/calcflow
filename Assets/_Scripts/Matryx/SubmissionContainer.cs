@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Matryx_Submission
 {
-    public Matryx_Submission(EthereumAddress address)
+    public Matryx_Submission(string address)
     {
         this.address = address;
     }
@@ -14,7 +14,7 @@ public class Matryx_Submission
         this.bodyAddress = bodyAddress;
     }
 
-    public EthereumAddress address;
+    public string address;
     private string title;
     private string bodyAddress;
     private string body;

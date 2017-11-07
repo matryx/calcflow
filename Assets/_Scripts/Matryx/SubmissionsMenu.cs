@@ -1,11 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Web;
 
 public class SubmissionsMenu : MonoBehaviour {
 
     private CalcManager calcManager;
     private MultiSelectFlexPanel submissionsPanel;
+    private string tournamentEndpoint = "http://13.57.11.64/v1/tournament/";
 
     [SerializeField]
     private SubmissionMenu submissionMenu;
@@ -18,7 +21,7 @@ public class SubmissionsMenu : MonoBehaviour {
     private TMPro.TextMeshPro descriptionText;
 
     Matryx_Tournament tournament;
-    private Dictionary<string, Matryx_Submission> submissions;
+    private Dictionary<string, Matryx_Submission> submissions = new Dictionary<string, Matryx_Submission>();
 
 
     private string[] Intro = { "A", "The" };
@@ -69,46 +72,57 @@ public class SubmissionsMenu : MonoBehaviour {
 
     public void SetTournament(Matryx_Tournament tournament)
     {
+        
         if(this.tournament == null || 
-            this.tournament.descriptionAddress != tournament.descriptionAddress)
+            this.tournament.address != tournament.address)
         {
+            this.tournament = tournament;
+
             scroll.clear();
-            UpdateUI(tournament);
-            LoadSubmissions(tournament);
-            DisplaySubmissions();
+            WebLoader.Instance.Load(tournamentEndpoint + "?id=" + tournament.address, ProcessTournament);
         }
     }
 
-    private void UpdateUI(Matryx_Tournament tournament)
+    public void ProcessTournament(string jsonString)
+    {
+        JSONObject jsonObject = new JSONObject(jsonString);
+        jsonObject.GetField("results", delegate (JSONObject results)
+        {
+            results.GetField(tournament.address, delegate (JSONObject jsonTournament)
+            {
+                var title = jsonTournament.GetField("title").str;
+                var bounty = jsonTournament.GetField("bounty").f;
+                var description = jsonTournament.GetField("description").str;
+
+                tournament.title = title;
+                tournament.bounty = new long?((long)bounty);
+                tournament.description = description;
+                UpdateHeaderUI();
+
+                List<JSONObject> submissionsList = null;
+                jsonTournament.GetField("submissions", delegate (JSONObject jsonSubmissions)
+                {
+                    submissionsList = jsonSubmissions.list;
+                    foreach (JSONObject jsonSubmission in submissionsList)
+                    {
+                        string submissionAddress = jsonSubmission.GetField("address").str;
+                        string submissionTitle = jsonSubmission.GetField("title").str;
+
+                        Matryx_Submission aSubmission = new Matryx_Submission(submissionTitle, submissionAddress);
+                        submissions.Add(submissionAddress, aSubmission);
+                    }
+
+                    DisplaySubmissions();
+                });
+            });
+        });
+    }
+
+    private void UpdateHeaderUI()
     {
         titleText.text = tournament.getTitle();
         bountyText.text = "" + tournament.getBounty() + " MTX";
         descriptionText.text = "\t" + tournament.getDescription();
-    }
-
-    private void LoadSubmissions(Matryx_Tournament tournament)
-    {
-        submissions = new Dictionary<string, Matryx_Submission>();
-        System.Random random = new System.Random();
-        for (int i = 0; i < 15; i++)
-        {
-            int indexOne = random.Next(0, Intro.Length - 1);
-            int indexTwo = random.Next(0, Setup.Length - 1);
-            int indexThree = random.Next(0, adjectives.Length - 1);
-            int indexFour = random.Next(0, this.nouns.Length - 1);
-            int indexFive = random.Next(0, this.Outro.Length - 1);
-
-            string intro = this.Intro[indexOne];
-            string setup = this.Setup[indexTwo];
-            string adjective = this.adjectives[indexThree];
-            string noun = this.nouns[indexFour];
-            string outro = this.Outro[indexFive];
-
-            string description = intro + " " + setup + " " + adjective + " " + noun + " " + outro;
-
-            Matryx_Submission aSubmission = new Matryx_Submission(description, random.Next(10000000, 200000000).GetHashCode().ToString());
-            submissions.Add("" + i, aSubmission);
-        }
     }
 
     public void DisplaySubmissionUI(Matryx_Submission submission)
@@ -132,6 +146,9 @@ public class SubmissionsMenu : MonoBehaviour {
     private GameObject createButton(Matryx_Submission submission)
     {
         GameObject button = Instantiate(Resources.Load("Submission_Cell", typeof(GameObject))) as GameObject;
+        button.transform.SetParent(submissionsPanel.transform);
+        button.transform.localScale = Vector3.one;
+
         button.name = submission.getTitle();
         button.GetComponent<SubmissionContainer>().SetSubmission(submission);
 

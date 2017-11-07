@@ -2,16 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Web;
 
 public class TournamentMenu : MonoBehaviour {
 
     private CalcManager calcManager;
     private MultiSelectFlexPanel tournamentsPanel;
 
-    delegate void WebDelegate(string result);
-
     [SerializeField]
-    private SubmissionsMenu submissionMenu;
+    private SubmissionsMenu submissionsMenu;
     private string tournamentsEndpoint = "http://13.57.11.64/v1/tournaments/";
 
     private string[] Intro = { "A", "The"};
@@ -56,21 +55,6 @@ public class TournamentMenu : MonoBehaviour {
         flexMenu.RegisterResponder(responder);
         tournamentsPanel = GetComponentInChildren<MultiSelectFlexPanel>().Initialize();
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
-
-    }
-
-    IEnumerator LoadFromURL(string url, WebDelegate webDelegate)
-    {
-        WWW www = new WWW(url);
-        yield return www;
-        if (!String.IsNullOrEmpty(www.text))
-        {
-            webDelegate(www.text);
-        }
-        else
-        {
-            Debug.Log("ERROR: " + www.error);
-        }
     }
 
     public void LoadTournaments()
@@ -80,7 +64,7 @@ public class TournamentMenu : MonoBehaviour {
             return;
         }
 
-        StartCoroutine(LoadFromURL(tournamentsEndpoint, ProcessTournaments));
+        WebLoader.Instance.Load(tournamentsEndpoint, ProcessTournaments);
     }
 
     private void ProcessTournaments(string jsonString)
@@ -94,11 +78,11 @@ public class TournamentMenu : MonoBehaviour {
                 jsonTournaments = tournamentList.list;
                 foreach(JSONObject jsonTournament in jsonTournaments)
                 {
-                    string title = jsonTournament.GetField("title").str;
                     string address = jsonTournament.GetField("address").str;
+                    string title = jsonTournament.GetField("title").str;
                     long bounty = jsonTournament.GetField("bounty").i;
 
-                    Matryx_Tournament aTournament = new Matryx_Tournament(title, address, bounty);
+                    Matryx_Tournament aTournament = new Matryx_Tournament(address, title, bounty);
                     tournaments.Add(address, aTournament);
                 }
 
@@ -121,6 +105,9 @@ public class TournamentMenu : MonoBehaviour {
     private GameObject createButton(Matryx_Tournament tournament)
     {
         GameObject button = Instantiate(Resources.Load("Tournament_Cell", typeof(GameObject))) as GameObject;
+        button.transform.SetParent(tournamentsPanel.transform);
+        button.transform.localScale = Vector3.one;
+
         button.name = tournament.title;
         button.GetComponent<TournamentContainer>().SetTournament(tournament);
 
@@ -141,7 +128,7 @@ public class TournamentMenu : MonoBehaviour {
         string name = source.name;
 
         Matryx_Tournament tournament = source.GetComponent<TournamentContainer>().GetTournament();
-        submissionMenu.SetTournament(tournament);
-        submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
+        submissionsMenu.SetTournament(tournament);
+        submissionsMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
     }
 }

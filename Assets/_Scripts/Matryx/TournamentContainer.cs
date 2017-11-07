@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class Matryx_Tournament
 {
-    public Matryx_Tournament(EthereumAddress address)
+    public Matryx_Tournament(string address)
     {
         this.address = address;
     }
-    public Matryx_Tournament(string title, string descriptionAddress, long bounty)
+    public Matryx_Tournament(string address, string title, long bounty)
     {
+        this.address = address;
         this.title = title;
-        this.descriptionAddress = descriptionAddress;
         this.bounty = bounty;
     }
 
-    public EthereumAddress address;
+    public string address;
     public string title;
     public string descriptionAddress;
     public string description;
@@ -61,11 +61,6 @@ public class Matryx_Tournament
         //TODO: Implement
         return -1;
     }
-}
-
-public struct EthereumAddress
-{
-        byte[] _address;
 }
 
 public class TournamentContainer : MonoBehaviour {
