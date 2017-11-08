@@ -10,6 +10,10 @@ public class SubmissionMenu : MonoBehaviour
     private TMPro.TextMeshPro titleText;
     [SerializeField]
     private TMPro.TextMeshPro bodyText;
+    [SerializeField]
+    private Material imageMaterial;
+    [SerializeField]
+    private ImportSubmission importSubmissionButton;
 
     private string submissionEndpoint = "http://13.57.11.64/v1/submission/";
 
@@ -18,6 +22,7 @@ public class SubmissionMenu : MonoBehaviour
     public void SetSubmission(Matryx_Submission submission)
     {
         titleText.text = submission.getTitle();
+        importSubmissionButton.Disable();
 
         if (this.submission == null ||
             this.submission.address != submission.address)
@@ -45,6 +50,7 @@ public class SubmissionMenu : MonoBehaviour
                 jsonSubmission.GetField("body", delegate (JSONObject bodyObject)
                 {
                     body = bodyObject.ToString();
+
                 });
 
                 List<string> contributors = new List<string>();
@@ -73,7 +79,6 @@ public class SubmissionMenu : MonoBehaviour
 
                 // Update the display
                 UpdateSubmissionDisplay();
-                
             });
         });
     }
@@ -82,5 +87,9 @@ public class SubmissionMenu : MonoBehaviour
     {
         titleText.text = submission.title;
         bodyText.text = submission.body;
+
+        // Update the import button!
+        importSubmissionButton.submission = submission;
+        importSubmissionButton.Reenable();
     }
 }
