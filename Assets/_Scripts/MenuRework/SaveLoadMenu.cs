@@ -22,7 +22,10 @@ public class SaveLoadMenu : MonoBehaviour
 
     private List<Transform> buttons = new List<Transform>();
     public ExpressionSaveLoad loader;
-    private CalcManager calcManager;
+    //private CalcManager calcManager;
+    private CalculatorManager calcManager;
+    public static SaveLoadMenu _instance;
+
     private MultiSelectFlexPanel selectPanel;
     Dictionary<string, SavePackage> saves;
 
@@ -48,7 +51,13 @@ public class SaveLoadMenu : MonoBehaviour
     JoyStickAggregator joyStickAggregator;
     FlexMenu flexMenu;
 
-    public void Initialize(CalcManager calcManager)
+    private void Awake()
+    {
+        _instance = this;
+    }
+
+    //public void Initialize(CalcManager calcManager)
+    public void Initialize(CalculatorManager calcManager)
     {
         this.calcManager = calcManager;
 

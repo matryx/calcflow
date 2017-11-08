@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class ExpressionBody : QuickButton {
     Expressions expression;
-    Transform feedBack;
     ExpressionComponent expComp;
+    Transform feedBack;
+    TMPro.TextMeshPro textMeshPro;
 
     private bool menuActive = false;
     private bool finishedScaling = false;
@@ -20,11 +21,22 @@ public class ExpressionBody : QuickButton {
     {
         base.Start();
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
-        feedBack = transform.parent.Find("Feedback");
         expComp = transform.GetComponentInParent<ExpressionComponent>();
+        feedBack = transform.parent.Find("Feedback");
+        textMeshPro = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
 
         selectedScale = new Vector3(4.56999f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
+    }
+
+    public Transform getFeedBack()
+    {
+        return feedBack;
+    }
+
+    public TMPro.TextMeshPro getTextMeshPro()
+    {
+        return textMeshPro;
     }
 
     protected override void ButtonEnterBehavior(GameObject other)

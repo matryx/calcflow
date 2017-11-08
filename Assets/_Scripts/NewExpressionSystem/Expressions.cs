@@ -17,8 +17,6 @@ public class Expressions : MonoBehaviour
     //TODO:
     // read through ExpressionSet and start developing new backend
 
-    
-
     void Awake()
     {
         _instance = this;
@@ -43,6 +41,11 @@ public class Expressions : MonoBehaviour
     public Transform getSelectedExpr()
     {
         return selectedExpression;
+    }
+
+    public ExpressionBody getSelectedBody()
+    {
+        return selectedBody;
     }
 
     public void setSelectedExpr(Transform expr, ExpressionBody body)

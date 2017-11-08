@@ -62,7 +62,7 @@ public class CalcManager : MonoBehaviour
         [SerializeField]
         internal PresetMenu presetMenu;
         [SerializeField]
-        internal OutputMenu outputMenu;  // dont need in new system
+        internal OutputMenu outputMenu;             // dont need in new system
         [SerializeField]
         internal BoundsManager boundsManager;
         [SerializeField]
@@ -142,8 +142,8 @@ public class CalcManager : MonoBehaviour
         boundsManager = connectedMenus.boundsManager;
         saveLoadMenu = connectedMenus.saveLoadMenu;
 
-        if (connectedMenus.boundsManager != null) connectedMenus.boundsManager.Initialize(this);
-        connectedMenus.calcInput.Initialize(this);
+        //if (connectedMenus.boundsManager != null) connectedMenus.boundsManager.Initialize(this);
+        //connectedMenus.calcInput.Initialize(this);
         //tier 3
         connectedMenus.outputMenu.Initialize(this);
 
@@ -152,9 +152,9 @@ public class CalcManager : MonoBehaviour
         //Req: calcInput
         calcInput.ChangeOutput(expressionSet.expressions[X]);
         //Req: calcInput
-        connectedMenus.presetMenu.Initialize(this);
+        //connectedMenus.presetMenu.Initialize(this);
 
-        connectedMenus.saveLoadMenu.Initialize(this);
+        //connectedMenus.saveLoadMenu.Initialize(this);
 
         if (connectedMenus.particleAnimationSettings != null)
             connectedMenus.particleAnimationSettings.Initialize(this);

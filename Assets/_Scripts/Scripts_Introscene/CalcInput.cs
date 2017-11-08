@@ -29,7 +29,9 @@ public class CalcInput : MonoBehaviour
     public int index = 0;
     [HideInInspector]
 
-    private CalcManager calcManager;
+    //private CalcManager calcManager;
+    private CalculatorManager calcManager;
+    public static CalcInput _instance;
 
     private FlexMenu keyboard;
     private Transform letterPanel;
@@ -41,7 +43,13 @@ public class CalcInput : MonoBehaviour
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
 
-    public void Initialize(CalcManager cm)
+    private void Awake()
+    {
+        _instance = this;
+    }
+
+    //public void Initialize(CalcManager cm)
+    public void Initialize(CalculatorManager cm)
     {
         print("BUTTON PRESSED");
     

@@ -7,6 +7,7 @@ using System.Threading;
 
 public class CustomParametrizedSurface : MonoBehaviour
 {
+    public static CustomParametrizedSurface _instance;
 
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
@@ -83,6 +84,11 @@ public class CustomParametrizedSurface : MonoBehaviour
     public Gradient gradient;
 
     AK.ExpressionSolver solver;
+
+    private void Awake()
+    {
+        _instance = this;
+    }
 
     // Use this for initialization
     protected virtual void Start()

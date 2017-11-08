@@ -6,7 +6,10 @@ using System.Text.RegularExpressions;
 
 
 public class BoundsManager : MonoBehaviour {
-    private CalcManager calcManager;
+    //private CalcManager calcManager;
+    public static BoundsManager _instance;
+
+    private CalculatorManager calcManager;
     public TMPro.TextMeshPro tParam1, tParam2;
     public TMPro.TextMeshPro uParam1, uParam2;
     public TMPro.TextMeshPro vParam1, vParam2;
@@ -29,8 +32,13 @@ public class BoundsManager : MonoBehaviour {
 
     }
 
+    private void Awake()
+    {
+        _instance = this;
+    }
 
-    public void Initialize(CalcManager cm)
+    //public void Initialize(CalcManager cm)
+    public void Initialize(CalculatorManager cm)
     {
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);

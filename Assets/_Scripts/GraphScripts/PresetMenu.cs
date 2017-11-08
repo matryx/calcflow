@@ -23,7 +23,9 @@ public class PresetMenu : MonoBehaviour
 
     public FlexMenu menu;
     public string defaultFunction = "Astroidal Ellipse";
-    CalcManager calcManager;
+    //CalcManager calcManager;
+    CalculatorManager calcManager;
+    public static PresetMenu _instance;
 
     [SerializeField]    
     private bool cinquefoilKnot, circle, sphereOutline, hypocloid, hypocloidSurface, trefoilKnot,
@@ -38,7 +40,13 @@ public class PresetMenu : MonoBehaviour
     Scroll scroll;
     JoyStickAggregator joyStickAggregator;
 
-    public void Initialize(CalcManager cm)
+    private void Awake()
+    {
+        _instance = this;
+    }
+
+    //public void Initialize(CalcManager cm)
+    public void Initialize(CalculatorManager cm)
     {
         scroll = GetComponentInChildren<Scroll>(true);
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
