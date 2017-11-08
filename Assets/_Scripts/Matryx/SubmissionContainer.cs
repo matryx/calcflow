@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class Matryx_Submission
 {
+    public Matryx_Submission(string title, List<string> contributors, List<string> references, string body)
+    {
+        this.title = title;
+        this.contributors = contributors;
+        this.references = references;
+        this.body = body;
+    }
     public Matryx_Submission(string address)
     {
         this.address = address;

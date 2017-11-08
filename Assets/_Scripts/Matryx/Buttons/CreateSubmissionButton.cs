@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
+using TMPro;
 
 public class CreateSubmissionButton : QuickButton {
 
     [SerializeField]
-    private CreateSubmissionMenu canvasSubmissionMenu;
+    TextMeshPro removeHeadsetLabel;
+    [SerializeField]
+    private SubmitMenu canvasSubmitMenu;
     [SerializeField]
     private FlexButtonComponent submissionButtonFlexComponent;
-
 
     private Color TOGGLE_ON = new Color(83f / 255f, 198f / 255f, 236f / 255f);
     private Color TOGGLE_OFF = new Color(117f / 255f, 205f / 255f, 234f / 255f);
@@ -17,30 +19,37 @@ public class CreateSubmissionButton : QuickButton {
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        bool menuActive = canvasSubmissionMenu.gameObject.activeSelf;
-        canvasSubmissionMenu.gameObject.SetActive(!menuActive);
+        bool menuActive = canvasSubmitMenu.gameObject.activeSelf;
+        canvasSubmitMenu.gameObject.SetActive(!menuActive);
         
         if(!menuActive)
         {
+            // Adjust button colors for bringing up submit menu
             submissionButtonFlexComponent.selectedColor = TOGGLE_ON;
-
             submissionButtonFlexComponent.passiveColor = DARK_PASSIVE;
             submissionButtonFlexComponent.hoveringColor = DARK_HOVERING;
-            
+
+            // Display remove headset label on wrist
+            removeHeadsetLabel.gameObject.SetActive(true);
         }
         else
         {
+            // Adjust button colors for closing submit menu
             submissionButtonFlexComponent.selectedColor = TOGGLE_OFF;
-
             submissionButtonFlexComponent.passiveColor = LIGHT_PASSIVE;
             submissionButtonFlexComponent.hoveringColor = LIGHT_HOVERING;
+
+            // Hide remove headset label on wrist
+            removeHeadsetLabel.gameObject.SetActive(false);
         }
 
+        // Select the button
         submissionButtonFlexComponent.SetState(2);
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
+        // Deselect the button
         submissionButtonFlexComponent.SetState(1);
     }
 }

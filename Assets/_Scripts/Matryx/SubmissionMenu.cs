@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Web;
 
-public class SubmissionMenu : MonoBehaviour {
+public class SubmissionMenu : MonoBehaviour
+{
 
     [SerializeField]
     private TMPro.TextMeshPro titleText;

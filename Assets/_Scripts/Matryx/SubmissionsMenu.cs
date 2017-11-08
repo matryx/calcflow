@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Web;
 
-public class SubmissionsMenu : MonoBehaviour {
-
+public class SubmissionsMenu : MonoBehaviour
+{
     private CalcManager calcManager;
     private MultiSelectFlexPanel submissionsPanel;
     private string tournamentEndpoint = "http://13.57.11.64/v1/tournament/";
@@ -20,7 +20,15 @@ public class SubmissionsMenu : MonoBehaviour {
     [SerializeField]
     private TMPro.TextMeshPro descriptionText;
 
-    Matryx_Tournament tournament;
+    static Matryx_Tournament tournament;
+    public static Matryx_Tournament Tournament
+    {
+        get
+        {
+            return tournament;
+        }
+    }
+
     private Dictionary<string, Matryx_Submission> submissions = new Dictionary<string, Matryx_Submission>();
 
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
@@ -63,16 +71,16 @@ public class SubmissionsMenu : MonoBehaviour {
         DisplaySubmissionUI(submission);
     }
 
-    public void SetTournament(Matryx_Tournament tournament)
+    public void SetTournament(Matryx_Tournament newTournament)
     {
         
-        if(this.tournament == null || 
-            this.tournament.address != tournament.address)
+        if(tournament == null || 
+            tournament.address != newTournament.address)
         {
-            this.tournament = tournament;
+            tournament = newTournament;
 
             scroll.clear();
-            WebLoader.Instance.Load(tournamentEndpoint + "?id=" + tournament.address, ProcessTournament);
+            WebLoader.Instance.Load(tournamentEndpoint + "?id=" + newTournament.address, ProcessTournament);
         }
     }
 

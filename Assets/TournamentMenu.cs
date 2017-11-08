@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Web;
 
-public class TournamentMenu : MonoBehaviour {
-
+public class TournamentMenu : MonoBehaviour
+{
     private CalcManager calcManager;
     private MultiSelectFlexPanel tournamentsPanel;
 
     [SerializeField]
     private SubmissionsMenu submissionsMenu;
+    [SerializeField]
+    private SubmitMenu submitMenu;
     private string tournamentsEndpoint = "http://13.57.11.64/v1/tournaments/";
 
     private Dictionary<string, Matryx_Tournament> tournaments = new Dictionary<string, Matryx_Tournament>();
@@ -124,6 +126,7 @@ public class TournamentMenu : MonoBehaviour {
 
             Matryx_Tournament tournament = source.GetComponent<TournamentContainer>().GetTournament();
             submissionsMenu.SetTournament(tournament);
+            submitMenu.SetTournament(tournament);
             submissionsMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
         }
     }
