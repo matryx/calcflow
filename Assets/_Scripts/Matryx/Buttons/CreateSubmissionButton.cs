@@ -17,6 +17,19 @@ public class CreateSubmissionButton : QuickButton {
     private Color DARK_HOVERING = new Color(87f / 255f, 178f / 255f, 208f / 255f);
     private Color LIGHT_HOVERING = new Color(132f / 255f, 223f / 255f, 253f / 255f); 
 
+    public void ReturnFromSubmit()
+    {
+        // Adjust button colors for closing submit menu
+        submissionButtonFlexComponent.selectedColor = TOGGLE_OFF;
+        submissionButtonFlexComponent.passiveColor = LIGHT_PASSIVE;
+        submissionButtonFlexComponent.hoveringColor = LIGHT_HOVERING;
+
+        submissionButtonFlexComponent.SetState(1);
+
+        // Hide remove headset label on wrist
+        removeHeadsetLabel.gameObject.SetActive(false);
+    }
+
     protected override void ButtonEnterBehavior(GameObject other)
     {
         bool menuActive = canvasSubmitMenu.gameObject.activeSelf;

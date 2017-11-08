@@ -22,6 +22,11 @@ public class SubmitMenu : MonoBehaviour {
     [SerializeField]
     AddressListModifier ReferencesList;
 
+    [SerializeField]
+    GameObject submittingCanvasObject;
+    [SerializeField]
+    GameObject resultsCanvasObject;
+
     public void SetTournament(Matryx_Tournament tournament)
     {
         this.tournament = tournament;
@@ -43,6 +48,8 @@ public class SubmitMenu : MonoBehaviour {
 
     IEnumerator UploadSubmission(Matryx_Submission submission)
     {
+        submittingCanvasObject.SetActive(true);
+
         List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
         formData.Add(new MultipartFormDataSection("field1=foo&field2=bar"));
         formData.Add(new MultipartFormFileSection("my file data", "myfile.txt"));
@@ -56,15 +63,22 @@ public class SubmitMenu : MonoBehaviour {
         UnityWebRequest www = UnityWebRequest.Post(submitEndpoint, submissionFields);
         yield return www.Send();
 
+        submittingCanvasObject.SetActive(false);
+        resultsCanvasObject.SetActive(true);
+
         if (www.isError)
         {
+            resultsCanvasObject.GetComponent<ResultsMenu>().PostFailure(tournament);
             Debug.Log(www.error);
         }
         else
         {
+            resultsCanvasObject.GetComponent<ResultsMenu>().PostSuccess(tournament);
             Debug.Log("Submission uploaded successfully!");
             Dictionary<string, string> responseHeaders = www.GetResponseHeaders();
             Debug.Log("Response: " + String.Join(",", responseHeaders.Values.ToArray<string>()));
+
+            this.gameObject.SetActive(false);
         }
     }
 
