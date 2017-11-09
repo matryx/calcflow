@@ -2,8 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
+
 [RequireComponent(typeof(RayCastButton))]
 [RequireComponent(typeof(TouchButton))]
+
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class TouchRayButton : Button {
     RayCastButton rcButton;
     TouchButton touchButton;

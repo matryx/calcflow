@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
 
 
 /*
  * This is a basic FlexPanel that will highlight clicked buttons until another button is clicked.
  */
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class SelectorFlexPanel : FlexPanelComponent
 {
     public FlexActionableComponent defaultSetting;

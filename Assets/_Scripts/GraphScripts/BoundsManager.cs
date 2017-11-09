@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text.RegularExpressions;
+using VoxelBusters.RuntimeSerialization;
 
-
-
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class BoundsManager : MonoBehaviour {
     private CalcManager calcManager;
     public TMPro.TextMeshPro tParam1, tParam2;

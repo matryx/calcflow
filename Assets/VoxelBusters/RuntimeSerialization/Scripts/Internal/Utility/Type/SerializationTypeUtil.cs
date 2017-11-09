@@ -7,180 +7,182 @@ using VoxelBusters.Utility;
 
 namespace VoxelBusters.RuntimeSerialization.Internal
 {
-	internal class SerializationTypeUtil
-	{
-		#region Properties
+    internal class SerializationTypeUtil
+    {
+        #region Properties
 
-		private 	static		Dictionary<Type, RuntimeSerializableAttribute>		serializableAttributeCache;
-		private 	static 		Dictionary<Type, List<Field>>						typeMemberInfoCache;
+        private static Dictionary<Type, RuntimeSerializableAttribute> serializableAttributeCache;
+        private static Dictionary<Type, List<Field>> typeMemberInfoCache;
 
-		#endregion
+        #endregion
 
-		#region Constructor
+        #region Constructor
 
-		static SerializationTypeUtil ()
-		{
-			// Intialise
-			serializableAttributeCache	= new Dictionary<Type, RuntimeSerializableAttribute>();
-			typeMemberInfoCache			= new Dictionary<Type, List<Field>>();
-		}
+        static SerializationTypeUtil()
+        {
+            // Intialise
+            serializableAttributeCache = new Dictionary<Type, RuntimeSerializableAttribute>();
+            typeMemberInfoCache = new Dictionary<Type, List<Field>>();
+        }
 
-		#endregion
+        #endregion
 
-		#region RS Methods
+        #region RS Methods
 
-		internal static void Initialise ()
-		{
-			// Adding system extensions
-			RSExtensionManager.AddNewExtension(typeof(System.ValueType), null);
-			RSExtensionManager.AddNewExtension(typeof(System.Object), null);
-		}
-	
-		internal static void Purge (Type _type)
-		{
-			if (_type == null)
-				throw new Exception("[RS] Type cant be null.");
+        internal static void Initialise()
+        {
+            // Adding system extensions
+            RSExtensionManager.AddNewExtension(typeof(System.ValueType), null);
+            RSExtensionManager.AddNewExtension(typeof(System.Object), null);
+        }
 
-			// Clear information cached for this type
-			serializableAttributeCache.Remove(_type);
-			typeMemberInfoCache.Remove(_type);
-		}
+        internal static void Purge(Type _type)
+        {
+            if (_type == null)
+                throw new Exception("[RS] Type cant be null.");
 
-		#endregion
+            // Clear information cached for this type
+            serializableAttributeCache.Remove(_type);
+            typeMemberInfoCache.Remove(_type);
+        }
 
-		#region Type Methods
-	
-		internal static bool IsPrimitive (Type _type)
-		{
-			return (_type.IsPrimitive || _type == typeof(DateTime));
-		}
-		
-		internal static bool IsRuntimeSerializableObject (Type _objectType)
-		{
-			// Check if type supports member based serialization
-			RuntimeSerializableAttribute 	_serializableAttribute	= GetRuntimeSerializableAttribute(_objectType);
-			
-			if (_serializableAttribute != null)
-				return true;
+        #endregion
 
-			// Check if type support Extension based serialization
-			RSExtension 					_extension	= RSExtensionManager.GetExtension(_objectType);
+        #region Type Methods
 
-			return (_extension.Type != null);
-		}
+        internal static bool IsPrimitive(Type _type)
+        {
+            return (_type.IsPrimitive || _type == typeof(DateTime));
+        }
 
-		#endregion
+        internal static bool IsRuntimeSerializableObject(Type _objectType)
+        {
+            // Check if type supports member based serialization
+            RuntimeSerializableAttribute _serializableAttribute = GetRuntimeSerializableAttribute(_objectType);
 
-		#region Serializable Attribute Methods
+            if (_serializableAttribute != null)
+            {
+                return true;
+            }
 
-		internal static RuntimeSerializableAttribute GetRuntimeSerializableAttribute (Type _objectType)
-		{	
-			RuntimeSerializableAttribute _serializableAttribute;
+            // Check if type support Extension based serialization
+            RSExtension _extension = RSExtensionManager.GetExtension(_objectType);
 
-			lock (serializableAttributeCache)
-			{
-				// If cached attribute doesnt exist then use reflection to get attribute info
-				if (!serializableAttributeCache.TryGetValue(_objectType, out _serializableAttribute))
-				{
-					_serializableAttribute					= _objectType.GetAttribute<RuntimeSerializableAttribute>(false);
-					serializableAttributeCache[_objectType]	= _serializableAttribute;
-				}
-			}
+            return (_extension.Type != null);
+        }
 
-			return _serializableAttribute;
-		}
+        #endregion
 
-		#endregion
+        #region Serializable Attribute Methods
 
-		#region Fields Methods
-		
-		internal static List<Field> GetRuntimeSerializableFields (Type _objectType, RuntimeSerializableAttribute _runtimeSerializableAttribute)
-		{	
-			List<Field>		_serializableFieldList;
+        internal static RuntimeSerializableAttribute GetRuntimeSerializableAttribute(Type _objectType)
+        {
+            RuntimeSerializableAttribute _serializableAttribute;
 
-			lock (typeMemberInfoCache)
-			{
-				// If cached value doesnt exist, then use Reflection to get list of RuntimeSerializable fields
-				if (typeMemberInfoCache.TryGetValue(_objectType, out _serializableFieldList))
-					return _serializableFieldList;
+            lock (serializableAttributeCache)
+            {
+                // If cached attribute doesnt exist then use reflection to get attribute info
+                if (!serializableAttributeCache.TryGetValue(_objectType, out _serializableAttribute))
+                {
+                    _serializableAttribute = _objectType.GetAttribute<RuntimeSerializableAttribute>(false);
+                    serializableAttributeCache[_objectType] = _serializableAttribute;
+                }
+            }
 
-				bool 		_serializeAllPublicFields 		= false;
-				bool 		_serializeAllNonPublicFields	= false;
-				
-				if (_runtimeSerializableAttribute != null)
-				{
-					_serializeAllPublicFields				= _runtimeSerializableAttribute.SerializeAllPublicVariables;
-					_serializeAllNonPublicFields			= _runtimeSerializableAttribute.SerializeAllNonPublicVariables;
-				} 
-				
-				// Fetch info about public as well as non-public fields
-				FieldInfo[] _publicFieldInfoList			= _objectType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Static);
-				FieldInfo[] _nonPublicFieldInfoList			= _objectType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Static);
-				
-				// List holds both public and non-public fields which needs to be serialised
-				_serializableFieldList						= new List<Field>(_publicFieldInfoList.Length + _nonPublicFieldInfoList.Length);
-				
-				if (_serializeAllPublicFields)
-					RemoveNonSerializableFields(_publicFieldInfoList, ref _serializableFieldList);
-				else
-					AddSerializableFields(_publicFieldInfoList, ref _serializableFieldList);
+            return _serializableAttribute;
+        }
 
-				if (_serializeAllNonPublicFields)
-					RemoveNonSerializableFields(_nonPublicFieldInfoList, ref _serializableFieldList);
-				else
-					AddSerializableFields(_nonPublicFieldInfoList, ref _serializableFieldList);
-				
-				// Cache this info
-				typeMemberInfoCache[_objectType]			= _serializableFieldList;
-			}
+        #endregion
 
-			return _serializableFieldList;
-		}
+        #region Fields Methods
 
-		private static void RemoveNonSerializableFields (FieldInfo[] _fieldInfoList, ref List<Field> _serializableFieldsList)
-		{
-			int 	_count	= _fieldInfoList.Length;
+        internal static List<Field> GetRuntimeSerializableFields(Type _objectType, RuntimeSerializableAttribute _runtimeSerializableAttribute)
+        {
+            List<Field> _serializableFieldList;
 
-			for (int _iter = 0; _iter < _count; _iter++)
-			{
-				FieldInfo	_currentFieldInfo	= _fieldInfoList[_iter];
+            lock (typeMemberInfoCache)
+            {
+                // If cached value doesnt exist, then use Reflection to get list of RuntimeSerializable fields
+                if (typeMemberInfoCache.TryGetValue(_objectType, out _serializableFieldList))
+                    return _serializableFieldList;
 
-				// Constants fields should be ignored
-				if (_currentFieldInfo.IsLiteral)
-					continue;
+                bool _serializeAllPublicFields = false;
+                bool _serializeAllNonPublicFields = false;
 
-				// Consider attribute to decide if object is serializable or not
-				NonRuntimeSerializedFieldAttribute 	_ignoreAttribute	= _currentFieldInfo.GetAttribute<NonRuntimeSerializedFieldAttribute>(false);
+                if (_runtimeSerializableAttribute != null)
+                {
+                    _serializeAllPublicFields = _runtimeSerializableAttribute.SerializeAllPublicVariables;
+                    _serializeAllNonPublicFields = _runtimeSerializableAttribute.SerializeAllNonPublicVariables;
+                }
 
-				if (_ignoreAttribute != null)
-					continue;
+                // Fetch info about public as well as non-public fields
+                FieldInfo[] _publicFieldInfoList = _objectType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Static);
+                FieldInfo[] _nonPublicFieldInfoList = _objectType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.Static);
 
-				_serializableFieldsList.Add(new Field(_currentFieldInfo));
-			}
-		}
+                // List holds both public and non-public fields which needs to be serialised
+                _serializableFieldList = new List<Field>(_publicFieldInfoList.Length + _nonPublicFieldInfoList.Length);
 
-		private static void AddSerializableFields (FieldInfo[] _fieldInfoList, ref List<Field> _serializableFieldsList)
-		{
-			int 	_count	= _fieldInfoList.Length;
-			
-			for (int _iter = 0; _iter < _count; _iter++)
-			{
-				FieldInfo	_currentFieldInfo	= _fieldInfoList[_iter];
+                if (_serializeAllPublicFields)
+                    RemoveNonSerializableFields(_publicFieldInfoList, ref _serializableFieldList);
+                else
+                    AddSerializableFields(_publicFieldInfoList, ref _serializableFieldList);
 
-				// Constants fields should be ignored
-				if (_currentFieldInfo.IsLiteral)
-					continue;
-				
-				// Consider attribute to decide if object is serializable or not
-				RuntimeSerializeFieldAttribute 	_serializeAttribute	= _currentFieldInfo.GetAttribute<RuntimeSerializeFieldAttribute>(false);
+                if (_serializeAllNonPublicFields)
+                    RemoveNonSerializableFields(_nonPublicFieldInfoList, ref _serializableFieldList);
+                else
+                    AddSerializableFields(_nonPublicFieldInfoList, ref _serializableFieldList);
 
-				if (_serializeAttribute == null)
-					continue;
+                // Cache this info
+                typeMemberInfoCache[_objectType] = _serializableFieldList;
+            }
 
-				_serializableFieldsList.Add(new Field(_currentFieldInfo, _serializeAttribute));
-			}
-		}
+            return _serializableFieldList;
+        }
 
-		#endregion
-	}
+        private static void RemoveNonSerializableFields(FieldInfo[] _fieldInfoList, ref List<Field> _serializableFieldsList)
+        {
+            int _count = _fieldInfoList.Length;
+
+            for (int _iter = 0; _iter < _count; _iter++)
+            {
+                FieldInfo _currentFieldInfo = _fieldInfoList[_iter];
+
+                // Constants fields should be ignored
+                if (_currentFieldInfo.IsLiteral)
+                    continue;
+
+                // Consider attribute to decide if object is serializable or not
+                NonRuntimeSerializedFieldAttribute _ignoreAttribute = _currentFieldInfo.GetAttribute<NonRuntimeSerializedFieldAttribute>(false);
+
+                if (_ignoreAttribute != null)
+                    continue;
+
+                _serializableFieldsList.Add(new Field(_currentFieldInfo));
+            }
+        }
+
+        private static void AddSerializableFields(FieldInfo[] _fieldInfoList, ref List<Field> _serializableFieldsList)
+        {
+            int _count = _fieldInfoList.Length;
+
+            for (int _iter = 0; _iter < _count; _iter++)
+            {
+                FieldInfo _currentFieldInfo = _fieldInfoList[_iter];
+
+                // Constants fields should be ignored
+                if (_currentFieldInfo.IsLiteral)
+                    continue;
+
+                // Consider attribute to decide if object is serializable or not
+                RuntimeSerializeFieldAttribute _serializeAttribute = _currentFieldInfo.GetAttribute<RuntimeSerializeFieldAttribute>(false);
+
+                if (_serializeAttribute == null)
+                    continue;
+
+                _serializableFieldsList.Add(new Field(_currentFieldInfo, _serializeAttribute));
+            }
+        }
+
+        #endregion
+    }
 }

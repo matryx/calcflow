@@ -19,7 +19,9 @@
 using UnityEngine;
 using System.Collections;
 using System;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class FlexButtonComponent : FlexActionableComponent
 {
     public Color passiveColor;

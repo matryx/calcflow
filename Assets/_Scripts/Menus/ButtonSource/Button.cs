@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
 
 namespace CalcFlowUI
 {
+    [RuntimeSerializable(typeof(MonoBehaviour), false)]
     public class Button : MonoBehaviour
     {
         public delegate void ButtonCallBack(GameObject presser);

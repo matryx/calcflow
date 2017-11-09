@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NanoVRController;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 [RequireComponent(typeof(RayCastSender))]
 
 

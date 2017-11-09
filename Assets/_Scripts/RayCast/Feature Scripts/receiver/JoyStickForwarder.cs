@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 [RequireComponent(typeof(JoyStickReceiver))]
 
 public class JoyStickForwarder : MonoBehaviour {

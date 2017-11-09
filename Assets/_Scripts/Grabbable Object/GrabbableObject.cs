@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using NanoVRController;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class GrabbableObject : Grippable
 {
     public bool momentumOn = true;

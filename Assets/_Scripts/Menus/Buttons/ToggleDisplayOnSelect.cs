@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using CalcFlowUI;
 using System;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class ToggleDisplayOnSelect : QuickButton
 {
     public GameObject[] elements;

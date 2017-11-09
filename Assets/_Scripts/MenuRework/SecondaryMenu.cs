@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class SecondaryMenu : MonoBehaviour
 {
     internal class SecondaryMenuResponder : FlexMenu.FlexMenuResponder

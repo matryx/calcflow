@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using NanoVRController;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 [RequireComponent(typeof(RayCastReceiver))]
 public class ConstraintGrabbable : GrabbableObject {
 

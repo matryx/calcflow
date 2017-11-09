@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class TextLogger : Nanome.Core.Behaviour
 {
 
@@ -29,7 +30,7 @@ public class TextLogger : Nanome.Core.Behaviour
     public bool isVolumetricText;
     public int layoutPriority;
     public float lineSpacing;
-    public int maxVisibleCharacter;
+    public int maxVisibleCharacters;
     public int maxVisibleLines;
     public int maxVisibleWords;
     public Color32 outlineColor;
@@ -45,7 +46,7 @@ public class TextLogger : Nanome.Core.Behaviour
     public float characterSpacing;
     public bool parseCtrlCharacters;
     public bool enableVertexGradient;
-    public TextOverflowModes overflow;
+    public TextOverflowModes overflowMode;
     public float wordWrappingRatios;
     public float mappingUvLineOffset;
     public Material[] fontMat;
@@ -95,7 +96,7 @@ public class TextLogger : Nanome.Core.Behaviour
         isVolumetricText = tm.isVolumetricText;
         layoutPriority = tm.layoutPriority;
         lineSpacing = tm.lineSpacing;
-        maxVisibleCharacter = tm.maxVisibleCharacter;
+        maxVisibleCharacters = tm.maxVisibleCharacters;
         maxVisibleLines = tm.maxVisibleLines;
         maxVisibleWords = tm.maxVisibleWords;
         outlineColor = tm.outlineColor;
@@ -111,13 +112,13 @@ public class TextLogger : Nanome.Core.Behaviour
         characterSpacing = tm.characterSpacing;
         parseCtrlCharacters = tm.parseCtrlCharacters;
         enableVertexGradient = tm.enableVertexGradient;
-        OverflowModes overflow = tm.OverflowModes overflow;
+        overflowMode = tm.overflowMode;
         wordWrappingRatios = tm.wordWrappingRatios;
         mappingUvLineOffset = tm.mappingUvLineOffset;
-        fontMat = tm.fontMat;
+        fontMaterial = tm.fontMaterial;
         havePropertiesChanged = tm.havePropertiesChanged;
         isLinkedTextComponent = tm.isLinkedTextComponent;
-        RenderFlags renderMode = tm.RenderFlags renderMode;
+        renderMode = tm.renderMode;
         firstVisibleCharacter = tm.firstVisibleCharacter;
         ignoreRectMaskCulling = tm.ignoreRectMaskCulling;
         lineSpacingAdjustment = tm.lineSpacingAdjustment;
@@ -136,4 +137,5 @@ public class TextLogger : Nanome.Core.Behaviour
         fontSharedMaterials = tm.fontSharedMaterials;
         characterWidthAdjustment = tm.characterWidthAdjustment;
     }
+
 }

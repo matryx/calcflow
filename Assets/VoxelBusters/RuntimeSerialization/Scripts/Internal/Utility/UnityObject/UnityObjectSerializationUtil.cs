@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TMPro;
 using VoxelBusters.Utility;
 
 namespace VoxelBusters.RuntimeSerialization.Internal
@@ -69,9 +70,14 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 			RSExtensionManager.AddNewExtension(typeof(Color), 			new ColorRSExtension());
 			RSExtensionManager.AddNewExtension(typeof(Color32), 		new Color32RSExtension());
 			RSExtensionManager.AddNewExtension(typeof(Quaternion), 		new QuaternionRSExtension());
-		}
 
-		internal static void Reset ()
+            //CalcFlow Types
+            RSExtensionManager.AddNewExtension(typeof(TMP_Text),        new TMProExtension());
+            RSExtensionManager.AddNewExtension(typeof(TextMeshPro),     new TMProExtension());
+
+        }
+
+        internal static void Reset ()
 		{
 			uidSystemCache.Clear();
 			hierarchyMetadataCache.Clear();

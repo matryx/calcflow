@@ -2,7 +2,9 @@
 using System.Collections;
 using System;
 using CalcFlowUI;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class ToggleButtons : QuickButton {
 	public GameObject field;
 
