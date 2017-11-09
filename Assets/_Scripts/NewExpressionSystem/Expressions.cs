@@ -12,7 +12,7 @@ public class Expressions : MonoBehaviour
 
     public Transform remove, hide, flowLine;
     Color actionActiveColor, actionInactiveColor;
-    Color expressionActiveColor, expressionInactiveColor;
+    //Color expressionActiveColor, expressionInactiveColor;
 
     //TODO:
     // read through ExpressionSet and start developing new backend
@@ -28,8 +28,8 @@ public class Expressions : MonoBehaviour
         actionActiveColor = remove.Find("Body").GetComponent<Renderer>().material.color;
         actionInactiveColor = Color.gray;
 
-        ColorUtility.TryParseHtmlString("#64C3A7FF", out expressionActiveColor);
-        ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
+        //ColorUtility.TryParseHtmlString("#64C3A7FF", out expressionActiveColor);
+        //ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
     }
 
     public void addExpr(Transform exp)
@@ -46,6 +46,11 @@ public class Expressions : MonoBehaviour
     public ExpressionBody getSelectedBody()
     {
         return selectedBody;
+    }
+
+    public bool selectedNotNull()
+    {
+        return (selectedExpression != null);
     }
 
     public void setSelectedExpr(Transform expr, ExpressionBody body)

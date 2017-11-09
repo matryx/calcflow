@@ -6,7 +6,8 @@ public class ExpressionBody : QuickButton {
     Expressions expression;
     ExpressionComponent expComp;
     Transform feedBack;
-    TMPro.TextMeshPro textMeshPro;
+    TMPro.TextMeshPro textInput;
+    TMPro.TextMeshPro title;
 
     private bool menuActive = false;
     private bool finishedScaling = false;
@@ -23,7 +24,8 @@ public class ExpressionBody : QuickButton {
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         expComp = transform.GetComponentInParent<ExpressionComponent>();
         feedBack = transform.parent.Find("Feedback");
-        textMeshPro = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
+        textInput = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
+        title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>();
 
         selectedScale = new Vector3(4.56999f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
@@ -34,9 +36,14 @@ public class ExpressionBody : QuickButton {
         return feedBack;
     }
 
-    public TMPro.TextMeshPro getTextMeshPro()
+    public TMPro.TextMeshPro getTextInput()
     {
-        return textMeshPro;
+        return textInput;
+    }
+
+    public TMPro.TextMeshPro getTitle()
+    {
+        return title;
     }
 
     protected override void ButtonEnterBehavior(GameObject other)

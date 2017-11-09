@@ -19,7 +19,8 @@ public class CalculatorManager : MonoBehaviour
     Expressions expressions;
     Transform selectedExpr;
     Transform feedBack;
-    TMPro.TextMeshPro textMeshPro;
+    TMPro.TextMeshPro textInput;
+    string title;
 
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
@@ -29,7 +30,7 @@ public class CalculatorManager : MonoBehaviour
     const ExpressionSet.RangeOptions v = ExpressionSet.RangeOptions.v;
     #endregion
 
-    private Color positiveFeedback = new Color(0, 204, 54);
+    private Color positiveFeedback;
     private Color negativeFeedback = Color.red;
 
     int maxDisplayLength = 20;
@@ -50,16 +51,17 @@ public class CalculatorManager : MonoBehaviour
         paramSurface = CustomParametrizedSurface._instance;
         calcInput = CalcInput._instance;
         boundsManager = BoundsManager._instance;
-        saveLoadMenu = SaveLoadMenu._instance;
-        presetMenu = PresetMenu._instance;
+        //saveLoadMenu = SaveLoadMenu._instance;
+        //presetMenu = PresetMenu._instance;
 
         if (boundsManager != null) boundsManager.Initialize(this);
         calcInput.Initialize(this);
 
         calcInput.ChangeOutput(expressionSet.expressions[X]);
-        presetMenu.Initialize(this);
+        //presetMenu.Initialize(this);
+        //saveLoadMenu.Initialize(this);
 
-        saveLoadMenu.Initialize(this);
+        ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback);
 
         //if (connectedMenus.particleAnimationSettings != null)
         //    connectedMenus.particleAnimationSettings.Initialize(this);
@@ -100,21 +102,30 @@ public class CalculatorManager : MonoBehaviour
         calcInput.ChangeOutput(output);
     }
 
+    //BUG: strings carrying over to next expression selected
     public void manageText()
     {
         //handle variables too
-        textMeshPro = expressions.getSelectedBody().getTextMeshPro();
-        if (textMeshPro != null)
+        if (expressions.selectedNotNull())
+            textInput = expressions.getSelectedBody().getTextInput();
+
+        if (textInput != null)
         {
-            textMeshPro.text = displayText(expressionSet.expressions[X].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[X], maxDisplayLength);
+            textInput.text = displayText(expressionSet.expressions[X].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[X], maxDisplayLength);
         }
     }
 
+    //BUG: 
     public void ManageFeedback()
     {
         selectedExpr = expressions.getSelectedExpr();
-        feedBack = expressions.getSelectedBody().getFeedBack();
-        if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity["X"] ? positiveFeedback : negativeFeedback;
+        if (expressions.selectedNotNull())
+        {
+            feedBack = expressions.getSelectedBody().getFeedBack();
+            title = expressions.getSelectedBody().getTitle().text.Substring(0, 1);
+        }
+
+        if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity[title] ? positiveFeedback : negativeFeedback;
     }
 
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)
@@ -206,8 +217,8 @@ public class CalculatorManager : MonoBehaviour
             updateOverlay = true;
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
-            if (isValid)
-                paramSurface.GenerateParticles();
+            //if (isValid)
+                //paramSurface.GenerateParticles();
         }
         if (toExport)
         {
