@@ -65,29 +65,54 @@ public class SubmissionsMenu : MonoBehaviour
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
     }
 
-    public void HandleInput(GameObject sender)
+    public void HandleInput(GameObject source)
     {
-        Matryx_Submission submission = sender.GetComponent<SubmissionContainer>().GetSubmission();
-        DisplaySubmissionUI(submission);
+        if (source.name == "Load_Button")
+        {
+            LoadMoreSubmissions();
+        }
+        else
+        {
+            Matryx_Submission submission = source.GetComponent<SubmissionContainer>().GetSubmission();
+            DisplaySubmissionUI(submission);
+        }
     }
 
+    int page = 0;
     public void SetTournament(Matryx_Tournament newTournament)
     {
-        
-        if(tournament == null || 
+        if (tournament == null ||
             tournament.address != newTournament.address)
         {
             tournament = newTournament;
 
-            scroll.clear();
-            WebLoader.Instance.Load(tournamentEndpoint + "?id=" + newTournament.address, ProcessTournament);
+            ClearSubmissions();
+            WebLoader.Instance.Load(tournamentEndpoint + "?id=" + newTournament.address + "&page=" + page, ProcessTournament);
         }
+    }
+    
+    /// <summary>
+    /// Loads the next page of submissions under a tournament
+    /// </summary>
+    public void LoadMoreSubmissions()
+    {
+        page++;
+        removeLoadButton();
+        WebLoader.Instance.Load(tournamentEndpoint + "?id=" + tournament.address + "&page=" + page, ProcessTournament);
+    }
+
+    /// <summary>
+    /// Clears the list of submissions.
+    /// </summary>
+    public void ClearSubmissions()
+    {
+        page = 0;
+        submissions.Clear();
+        scroll.clear();
     }
 
     public void ProcessTournament(string jsonString)
     {
-        submissions.Clear();
-
         JSONObject jsonObject = new JSONObject(jsonString);
         jsonObject.GetField("results", delegate (JSONObject results)
         {
@@ -103,6 +128,7 @@ public class SubmissionsMenu : MonoBehaviour
                 UpdateHeaderUI();
 
                 List<JSONObject> submissionsList = null;
+                List<Matryx_Submission> newSubmissions = new List<Matryx_Submission>();
                 jsonTournament.GetField("submissions", delegate (JSONObject jsonSubmissions)
                 {
                     submissionsList = jsonSubmissions.list;
@@ -113,9 +139,10 @@ public class SubmissionsMenu : MonoBehaviour
 
                         Matryx_Submission aSubmission = new Matryx_Submission(submissionTitle, submissionAddress);
                         submissions.Add(submissionAddress, aSubmission);
+                        newSubmissions.Add(aSubmission);
                     }
 
-                    DisplaySubmissions();
+                    DisplaySubmissions(newSubmissions);
                 });
             });
         });
@@ -130,20 +157,22 @@ public class SubmissionsMenu : MonoBehaviour
 
     public void DisplaySubmissionUI(Matryx_Submission submission)
     {
-        //TODO: Write
         submissionMenu.SetSubmission(submission);
         submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
     }
 
-    public void DisplaySubmissions()
+    GameObject loadButton;
+    public void DisplaySubmissions(List<Matryx_Submission> _submissions)
     {
-        List<Transform> toAdd = new List<Transform>();
-        foreach (Matryx_Submission submission in submissions.Values)
+        foreach (Matryx_Submission submission in _submissions)
         {
             GameObject button = createButton(submission);
             button.SetActive(false);
             submissionsPanel.AddAction(button.GetComponent<FlexButtonComponent>());
         }
+
+        loadButton = createLoadButton();
+        submissionsPanel.AddAction(loadButton.GetComponent<FlexButtonComponent>());
     }
 
     private GameObject createButton(Matryx_Submission submission)
@@ -161,5 +190,33 @@ public class SubmissionsMenu : MonoBehaviour
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
 
         return button;
+    }
+
+    private GameObject createLoadButton()
+    {
+        GameObject button = Instantiate(Resources.Load("Submission_Cell", typeof(GameObject))) as GameObject;
+        button.transform.SetParent(submissionsPanel.transform);
+        button.transform.localScale = Vector3.one;
+
+        button.name = "Load_Button";
+
+        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = "Load More...";
+
+        scroll.addObject(button.transform);
+        joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
+
+        return button;
+    }
+
+    private void removeLoadButton()
+    {
+        if (loadButton != null)
+        {
+            List<Transform> loadButtonTransform = new List<Transform>();
+            loadButtonTransform.Add(loadButton.transform);
+            scroll.deleteObjects(new List<Transform>(loadButtonTransform));
+
+            Destroy(loadButton);
+        }
     }
 }

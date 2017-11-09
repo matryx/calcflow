@@ -53,17 +53,31 @@ public class TournamentMenu : MonoBehaviour
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
     }
 
-    int pageIndex = 0;
+    int page = 0;
     public void LoadTournaments()
     {
-        removeLoadButton();
-        if (tournaments.Keys.Count != 0 && pageIndex == 0)
-        {
-            return;
-        }
+        ClearTournaments();
+        WebLoader.Instance.Load(tournamentsEndpoint+page, ProcessTournaments);
+    }
 
-        WebLoader.Instance.Load(tournamentsEndpoint+pageIndex, ProcessTournaments);
-        pageIndex++;
+    /// <summary>
+    /// Loads the next page of tournaments.
+    /// </summary>
+    public void LoadMoreTournaments()
+    {
+        page++;
+        removeLoadButton();
+        WebLoader.Instance.Load(tournamentsEndpoint + page, ProcessTournaments);
+    }
+
+    /// <summary>
+    /// Clears the list of tournaments.
+    /// </summary>
+    public void ClearTournaments()
+    {
+        page = 0;
+        tournaments.Clear();
+        scroll.clear();
     }
 
     private void ProcessTournaments(string jsonString)
@@ -163,7 +177,7 @@ public class TournamentMenu : MonoBehaviour
     {
         if(source.name == "Load_Button")
         {
-            LoadTournaments();
+            LoadMoreTournaments();
         }
         else if(source.GetComponent<TournamentContainer>() != null)
         {
