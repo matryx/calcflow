@@ -38,6 +38,12 @@ public class SubmitMenu : MonoBehaviour {
         Debug.Log("Making submission...");
 
         var title = Title_InputField.text;
+        if (title == "" || title == null)
+        {
+            Title_InputField.GetComponent<Image>().color = new Color(1f, 181f / 255f, 181f / 255f);
+            return;
+        }
+
         var contributorsList = ContributorsList.GetAddressList();
         var referencesList = ReferencesList.GetAddressList();
         var bodyData = SerializeSurface();

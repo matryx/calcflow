@@ -52,7 +52,6 @@ public class AddressListModifier : MonoBehaviour {
     {
         string address = inputField.text;
 
-        ColorBlock colorBlock = new ColorBlock();
         Regex rgx = new Regex(@"(0x)?[0-9A-Fa-f]{40}");
 
         MatchCollection matchList = rgx.Matches(address);
