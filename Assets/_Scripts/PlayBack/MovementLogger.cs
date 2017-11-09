@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MovementLogger : Nanome.Core.Behaviour
 {
-    Vector3 lastPos;
+    Vector3 lastLocalPos;
     Vector3 lastScale;
     Quaternion lastRotation;
 
@@ -15,12 +15,12 @@ public class MovementLogger : Nanome.Core.Behaviour
 
     void RecordPosition()
     {
-        if (lastPos != transform.position || lastRotation != transform.rotation || lastScale != transform.lossyScale)
+        if (lastLocalPos != transform.localPosition || lastRotation != transform.rotation || lastScale != transform.lossyScale)
         {
-            lastPos = transform.position;
+            lastLocalPos = transform.localPosition;
             lastRotation = transform.rotation;
             lastScale = transform.lossyScale;
-            Recorder.LogMovement(gameObject, transform.position, transform.rotation, transform.lossyScale);
+            Recorder.LogMovement(gameObject, transform.localPosition, transform.rotation, transform.lossyScale);
         }
     }
 }

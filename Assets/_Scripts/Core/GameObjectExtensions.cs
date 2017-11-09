@@ -112,6 +112,11 @@ namespace Extensions
             LerpMover.LerpMove(gObj, destination, seconds);
         }
 
+        public static void LocalMoveTo(this GameObject gObj, Vector3 destination, float seconds)
+        {
+            LerpMover.LocalLerpMove(gObj, destination, seconds);
+        }
+
         /// <summary>
         /// Lerps the global rotation to the target rotation over a number of seconds
         /// </summary>
@@ -159,10 +164,21 @@ namespace Extensions
     public class LerpMover : Nanome.Core.Behaviour
     {
         LerpVector3 lerper;
+        bool local;
+
 
         public static void LerpMove(GameObject gObj, Vector3 destination, float seconds)
         {
-            gObj.AddComponent<LerpMover>().lerper = new LerpVector3(gObj.transform.position, destination, seconds);
+            LerpMover l = gObj.AddComponent<LerpMover>();
+            l.lerper = new LerpVector3(gObj.transform.position, destination, seconds);
+            l.local = false;
+        }
+
+        public static void LocalLerpMove (GameObject gObj, Vector3 destination, float seconds)
+        {
+            LerpMover l = gObj.AddComponent<LerpMover>();
+            l.lerper = new LerpVector3(gObj.transform.localPosition, destination, seconds);
+            l.local = true;
         }
 
         public void StopLerping()
@@ -173,14 +189,19 @@ namespace Extensions
 
         private void Update()
         {
-            if (!lerper.done())
-            {
-                transform.position = lerper.current();
-            }
-            else
+            if (lerper.done())
             {
                 Destroy(this);
             }
+
+            if (local)
+            {
+                transform.localPosition = lerper.current();
+            } else
+            { 
+                transform.position = lerper.current();
+            }
+
         }
     }
 

@@ -201,7 +201,7 @@ public class PlayBackLogAction
                 break;
             case ActionType.Movement:
                 subject = objectMap[subjectKey];
-                subject.MoveTo(position, PlaybackLog.Period);
+                subject.LocalMoveTo(position, PlaybackLog.Period);
                 subject.RotateTo(rotation, PlaybackLog.Period);
                 subject.GlobalScaleTo(scale, PlaybackLog.Period);
                 break;
