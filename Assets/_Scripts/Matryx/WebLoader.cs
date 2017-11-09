@@ -26,6 +26,7 @@ namespace Web
         private IEnumerator LoadFromURL(string url, WebDelegate webDelegate)
         {
             WWW www = new WWW(url);
+            yield return new WaitForSeconds(0.2f);
             yield return www;
             if (!String.IsNullOrEmpty(www.text))
             {

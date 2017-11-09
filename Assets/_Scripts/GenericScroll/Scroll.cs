@@ -448,7 +448,7 @@ public class Scroll : MonoBehaviour
     }
     #endregion
 
-    void Update()
+    void FixedUpdate()
     {
         if (moving && objects.Count > 0 && objects[0].localPosition == toPos) moving = false;
 

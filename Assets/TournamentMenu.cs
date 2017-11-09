@@ -13,7 +13,7 @@ public class TournamentMenu : MonoBehaviour
     private SubmissionsMenu submissionsMenu;
     [SerializeField]
     private SubmitMenu submitMenu;
-    private string tournamentsEndpoint = "http://13.57.11.64/v1/tournaments/";
+    private string tournamentsEndpoint = "http://13.57.11.64/v1/tournaments/?page=";
 
     private Dictionary<string, Matryx_Tournament> tournaments = new Dictionary<string, Matryx_Tournament>();
 
@@ -53,18 +53,22 @@ public class TournamentMenu : MonoBehaviour
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
     }
 
+    int pageIndex = 0;
     public void LoadTournaments()
     {
-        if(tournaments.Keys.Count != 0)
+        removeLoadButton();
+        if (tournaments.Keys.Count != 0 && pageIndex == 0)
         {
             return;
         }
 
-        WebLoader.Instance.Load(tournamentsEndpoint, ProcessTournaments);
+        WebLoader.Instance.Load(tournamentsEndpoint+pageIndex, ProcessTournaments);
+        pageIndex++;
     }
 
     private void ProcessTournaments(string jsonString)
     {
+        List<Matryx_Tournament> newTournaments = new List<Matryx_Tournament>();
         JSONObject jsonObject = new JSONObject(jsonString);
         jsonObject.GetField("results", delegate (JSONObject results)
         {
@@ -80,21 +84,58 @@ public class TournamentMenu : MonoBehaviour
 
                     Matryx_Tournament aTournament = new Matryx_Tournament(address, title, bounty);
                     tournaments.Add(address, aTournament);
+                    newTournaments.Add(aTournament);
                 }
 
-                DisplayTournaments();
+                DisplayTournaments(newTournaments);
             });
         });
     }
 
-    private void DisplayTournaments()
+    GameObject loadButton;
+    private void DisplayTournaments(List<Matryx_Tournament> _tournaments)
     {
         List<Transform> toAdd = new List<Transform>();
-        foreach (Matryx_Tournament tournament in tournaments.Values)
+        foreach (Matryx_Tournament tournament in _tournaments)
         {
             GameObject button = createButton(tournament);
             button.SetActive(false);
             tournamentsPanel.AddAction(button.GetComponent<FlexButtonComponent>());
+        }
+
+        loadButton = createLoadButton();
+    }
+
+    private GameObject createLoadButton()
+    {
+        GameObject button = Instantiate(Resources.Load("Tournament_Cell", typeof(GameObject))) as GameObject;
+        button.transform.SetParent(tournamentsPanel.transform);
+        button.transform.localScale = Vector3.one;
+
+        button.name = "Load_Button";
+        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = "Load More...";
+
+        TMPro.TextMeshPro matryxBountyTMP = button.transform.Find("MTX_Amount").GetComponent<TMPro.TextMeshPro>();
+        matryxBountyTMP.text = "";
+
+        scroll.addObject(button.transform);
+        joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
+
+        // Add this action to the panel
+        tournamentsPanel.AddAction(button.GetComponent<FlexButtonComponent>());
+
+        return button;
+    }
+
+    private void removeLoadButton()
+    {
+        if(loadButton != null)
+        {
+            List<Transform> loadButtonTransform = new List<Transform>();
+            loadButtonTransform.Add(loadButton.transform);
+            scroll.deleteObjects(new List<Transform>(loadButtonTransform));
+
+            Destroy(loadButton);
         }
     }
 
@@ -120,7 +161,11 @@ public class TournamentMenu : MonoBehaviour
 
     private void HandleInput(GameObject source)
     {
-        if(source.GetComponent<TournamentContainer>() != null)
+        if(source.name == "Load_Button")
+        {
+            LoadTournaments();
+        }
+        else if(source.GetComponent<TournamentContainer>() != null)
         {
             string name = source.name;
 
