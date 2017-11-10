@@ -9,7 +9,7 @@ public class ResultsMenu : MonoBehaviour {
 
 	public void PostSuccess(Matryx_Tournament tournament)
     {
-        resultsText.text = "Successfully Submitted to " + tournament.address;
+        resultsText.text = "Successfully Submitted to \n" + tournament.title;
     }
 
     public void PostFailure(Matryx_Tournament tournament)

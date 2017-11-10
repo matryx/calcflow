@@ -151,8 +151,8 @@ public class SubmissionsMenu : MonoBehaviour
     private void UpdateHeaderUI()
     {
         titleText.text = tournament.getTitle();
-        bountyText.text = "" + tournament.getBounty() + " MTX";
-        descriptionText.text = "\t" + tournament.getDescription();
+        bountyText.text = "Reward: " + tournament.getBounty() + " MTX";
+        descriptionText.text = tournament.getDescription();
     }
 
     public void DisplaySubmissionUI(Matryx_Submission submission)
