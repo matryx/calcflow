@@ -4,7 +4,7 @@ using TMPro;
 public class CreateSubmissionButton : QuickButton {
 
     [SerializeField]
-    TextMeshPro removeHeadsetLabel;
+    GameObject congratulationsMessage;
     [SerializeField]
     private SubmitMenu canvasSubmitMenu;
     [SerializeField]
@@ -27,7 +27,7 @@ public class CreateSubmissionButton : QuickButton {
         submissionButtonFlexComponent.SetState(1);
 
         // Hide remove headset label on wrist
-        removeHeadsetLabel.gameObject.SetActive(false);
+        congratulationsMessage.gameObject.SetActive(false);
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
@@ -43,7 +43,7 @@ public class CreateSubmissionButton : QuickButton {
             submissionButtonFlexComponent.hoveringColor = DARK_HOVERING;
 
             // Display remove headset label on wrist
-            removeHeadsetLabel.gameObject.SetActive(true);
+            congratulationsMessage.gameObject.SetActive(true);
         }
         else
         {
@@ -53,7 +53,7 @@ public class CreateSubmissionButton : QuickButton {
             submissionButtonFlexComponent.hoveringColor = LIGHT_HOVERING;
 
             // Hide remove headset label on wrist
-            removeHeadsetLabel.gameObject.SetActive(false);
+            congratulationsMessage.gameObject.SetActive(false);
         }
 
         // Select the button

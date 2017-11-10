@@ -108,7 +108,7 @@ public abstract class Grippable : MonoBehaviour, TriggerListener
             return;
         }
         activeGrabbers.AddLast(g);
-        g.controller.SendHapticEvent(1, 1, 0.2f);
+        g.controller.SendHapticEvent(1, 0.3f, 0.05f);
         OnRegisterController(g);
         IsGrabbed = true;
     }

@@ -10,7 +10,11 @@ public class CloseButton : QuickButton {
     protected override void ButtonEnterBehavior(GameObject other)
     {
         objectParent.GetComponent<AnimationHandler>().CloseMenu();
+        transform.parent.GetComponent<FlexActionableComponent>().SetState(2);
     }
 
-    protected override void ButtonExitBehavior(GameObject other) {}
+    protected override void ButtonExitBehavior(GameObject other)
+    {
+        transform.parent.GetComponent<FlexActionableComponent>().SetState(1);
+    }
 }

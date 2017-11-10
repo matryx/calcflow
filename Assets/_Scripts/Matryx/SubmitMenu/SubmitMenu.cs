@@ -30,7 +30,7 @@ public class SubmitMenu : MonoBehaviour {
     public void SetTournament(Matryx_Tournament tournament)
     {
         this.tournament = tournament;
-        Tournament_InputField.text = tournament.address;
+        Tournament_InputField.text = tournament.title;
     }
 
     public void MakeSubmission()
