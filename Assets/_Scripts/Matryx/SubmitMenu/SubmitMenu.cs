@@ -6,6 +6,9 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using TMPro;
 using System;
+using System.Net;
+using System.Text;
+using System.IO;
 
 public class SubmitMenu : MonoBehaviour {
 
@@ -49,43 +52,66 @@ public class SubmitMenu : MonoBehaviour {
         var bodyData = SerializeSurface();
         
         Matryx_Submission submission = new Matryx_Submission(title, contributorsList, referencesList, bodyData);
-        StartCoroutine(UploadSubmission(submission));
+        string responseFromServer = UploadSubmission(tournament, submission);
     }
 
-    IEnumerator UploadSubmission(Matryx_Submission submission)
+    string UploadSubmission(Matryx_Tournament tournament, Matryx_Submission submission)
     {
         submittingCanvasObject.SetActive(true);
 
-        List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
-        formData.Add(new MultipartFormDataSection("field1=foo&field2=bar"));
-        formData.Add(new MultipartFormFileSection("my file data", "myfile.txt"));
 
-        Dictionary<string, string> submissionFields = new Dictionary<string, string>();
-        submissionFields.Add("title", submission.title);
-        submissionFields.Add("references", "[" + String.Join(",", submission.references.ToArray()) + "]");
-        submissionFields.Add("contributors", "[" + String.Join(",", submission.contributors.ToArray()) + "]");
-        submissionFields.Add("submissionBody", submission.body);
+        WebRequest request = WebRequest.Create(submitEndpoint);
+        request.Method = "POST";
 
-        UnityWebRequest www = UnityWebRequest.Post(submitEndpoint, submissionFields);
-        yield return www.Send();
+        string referencesString = "[" + String.Join(",", submission.contributors.ToArray()) + "]";
+        string contributorsString = "[" + String.Join(",", submission.references.ToArray()) + "]";
+        string postData = "tournamentID="+tournament.address+"&title="+submission.title+"&references="+ referencesString + "&contributors=" + contributorsString + "&submissionBody="+submission.body;
+        byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+        request.ContentType = "application/x-www-form-urlencoded";
+        // Set the ContentLength property of the WebRequest.
+        request.ContentLength = byteArray.Length;
 
+        // Get the request stream.
+        Stream dataStream = request.GetRequestStream();
+        // Write the data to the request stream.
+        dataStream.Write(byteArray, 0, byteArray.Length);
+        // Close the Stream object.
+        dataStream.Close();
+
+        // Get the response.
+        WebResponse response = request.GetResponse();
+
+        // Switch out the submitting screen for the results screen.
         submittingCanvasObject.SetActive(false);
         resultsCanvasObject.SetActive(true);
+        this.gameObject.SetActive(false);
 
-        if (www.isError)
+        // Display the status.
+        if (((HttpWebResponse)response).StatusDescription == "OK")
         {
-            resultsCanvasObject.GetComponent<ResultsMenu>().PostFailure(tournament);
-            Debug.Log(www.error);
+            Debug.Log("Submission uploaded successfully!");
+            resultsCanvasObject.GetComponent<ResultsMenu>().PostSuccess(tournament);
         }
         else
         {
-            resultsCanvasObject.GetComponent<ResultsMenu>().PostSuccess(tournament);
-            Debug.Log("Submission uploaded successfully!");
-            Dictionary<string, string> responseHeaders = www.GetResponseHeaders();
-            Debug.Log("Response: " + String.Join(",", responseHeaders.Values.ToArray<string>()));
-
-            this.gameObject.SetActive(false);
+            resultsCanvasObject.GetComponent<ResultsMenu>().PostFailure(tournament);
         }
+
+        Debug.Log(((HttpWebResponse)response).StatusDescription);
+        // Get the stream containing content returned by the server.
+        dataStream = response.GetResponseStream();
+        // Open the stream using a StreamReader for easy access.
+        StreamReader reader = new StreamReader(dataStream);
+        // Read the content.
+        string responseFromServer = reader.ReadToEnd();
+        JSONObject jsonResponse = new JSONObject(responseFromServer);
+        
+        // Clean up the streams.
+        reader.Close();
+        dataStream.Close();
+        response.Close();
+        
+        return responseFromServer;
     }
 
     public string SerializeSurface()

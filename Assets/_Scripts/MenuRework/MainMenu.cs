@@ -29,7 +29,7 @@ public class MainMenu : QuickButton
         selectedScale = new Vector3(0.05f, 0.001f, 0.05f);
         idleScale = new Vector3(0.02f, 0.001f, 0.02f);
         buttonScale = new Vector3(0.003f, 0.05f, 0.07f);
-        matryxScale = new Vector3(0.003f, 0.015f, 0.1475f);
+        matryxScale = new Vector3(0.003f, 0.025f, 0.1475f);
 
         outerRing.SetParent(transform);
         innerRing.SetParent(transform);
