@@ -5,16 +5,14 @@ using UnityEngine;
 public class MatryxKeyboardButton : QuickButton {
 
     [SerializeField]
-    Transform view;
-    [SerializeField]
     RayCastButton menusButton;
     [SerializeField]
     RayCastButton matryxButton;
 
+
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        menusButton.PressButton(gameObject);
-        matryxButton.PressButton(gameObject);
+        StartCoroutine(timedPressButtons());
     }
 
     protected override void ButtonExitBehavior(GameObject other)
@@ -22,4 +20,10 @@ public class MatryxKeyboardButton : QuickButton {
 
     }
 
+    protected IEnumerator timedPressButtons()
+    {
+        menusButton.PressButton(gameObject);
+        yield return new WaitForSeconds(0.1f);
+        matryxButton.PressButton(gameObject);
+    }
 }
