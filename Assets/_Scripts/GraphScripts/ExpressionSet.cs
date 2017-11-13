@@ -17,6 +17,7 @@ public class ExpressionSet
     }
 
     public Dictionary<ExpOptions, Expression> expressions;
+    //public Dictionary<Transform, Expression> expressions;
     public Dictionary<string, RangePair> ranges;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
@@ -25,6 +26,11 @@ public class ExpressionSet
     {
         return expressions[(ExpOptions)i].expression;
     }
+
+    //string GetExpression(Transform t)
+    //{
+    //    return expressions[t].expression;
+    //}
 
     public void AddExpression(ExpOptions variable, Expression expression)
     {
@@ -114,6 +120,12 @@ public class ExpressionSet
             newEs.expressions.Add(key, new Expression(expressions[key]));
         }
 
+        //newEs.expressions = new Dictionary<Transform, Expression>();
+        //foreach (Transform key in expressions.Keys)
+        //{
+        //    newEs.expressions.Add(key, new Expression(expressions[key]));
+        //}
+
         newEs.ranges = new Dictionary<string, RangePair>();
         foreach (string key in ranges.Keys)
         {
@@ -130,6 +142,7 @@ public class ExpressionSet
         ExpressionSet newEs = new ExpressionSet();
 
         newEs.expressions = new Dictionary<ExpOptions, Expression>(expressions);
+        //newEs.expressions = new Dictionary<Transform, Expression>(expressions);
         newEs.ranges = new Dictionary<string, RangePair>((Dictionary<string, RangePair>)ranges);
         newEs.expValidity = new Dictionary<string, bool>(expValidity);
 
@@ -137,6 +150,7 @@ public class ExpressionSet
     }
 
     internal ExpressionSet (string[] rangeKeys, List<RangePair> rangePairs, ExpOptions[] ExpressionKeys, List<Expression> ExpressionValues)
+    //internal ExpressionSet (string[] rangeKeys, List<RangePair> rangePairs, Transform[] ExpressionKeys, List<Expression> ExpressionValues)
     {
         ranges = new Dictionary<string, RangePair>();
         for (int i =0; i < rangePairs.Count; i++)
@@ -149,6 +163,12 @@ public class ExpressionSet
         {
             expressions.Add(ExpressionKeys[i], ExpressionValues[i]);
         }
+
+        //expressions = new Dictionary<Transform, Expression>();
+        //for (int i = 0; i < ExpressionValues.Count; i++)
+        //{
+        //    expressions.Add(ExpressionKeys[i], ExpressionValues[i]);
+        //}
     }
 
     public bool CompileAll()
@@ -169,6 +189,12 @@ public class ExpressionSet
             expValidity[EX.ToString()] = expressions[EX].GenerateAKSolver(solver);
             isValid &= expValidity[EX.ToString()];
         }
+        //foreach (Transform EX in expressions.Keys)
+        //{
+        //    expressions[EX].compileTokens();
+        //    expValidity[EX.ToString()] = expressions[EX].GenerateAKSolver(solver);
+        //    isValid &= expValidity[EX.ToString()];
+        //}
         return isValid;
     }
 

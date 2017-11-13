@@ -19,6 +19,7 @@ public class CalculatorManager : MonoBehaviour
 
     Expressions expressions;
     Transform selectedExpr;
+    Transform selectedBody;
     Transform feedBack;
     TMPro.TextMeshPro textInput;
     string title;
@@ -59,6 +60,7 @@ public class CalculatorManager : MonoBehaviour
         if (boundsManager != null) boundsManager.Initialize(this);
         calcInput.Initialize(this);
 
+        //selectedBody = expressions.getSelectedBody().transform;
         calcInput.ChangeOutput(expressionSet.expressions[X]);
         if (outputManager != null)
         {
@@ -76,6 +78,7 @@ public class CalculatorManager : MonoBehaviour
 
     public void PresetPressed()
     {
+        //selectedBody = expressions.getSelectedBody().transform;
         calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
@@ -84,6 +87,7 @@ public class CalculatorManager : MonoBehaviour
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
+        //selectedBody = expressions.getSelectedBody().transform;
         calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         manageText();
         if (boundsManager != null) boundsManager.UpdateButtonText();
@@ -99,6 +103,7 @@ public class CalculatorManager : MonoBehaviour
         }
         paramSurface.expressionSets = ess;
         expressionSet = paramSurface.expressionSets[0];
+        //selectedBody = expressions.getSelectedBody().transform;
         calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
@@ -109,10 +114,12 @@ public class CalculatorManager : MonoBehaviour
         calcInput.ChangeOutput(output);
     }
 
-    //BUG: strings carrying over to next expression selected
     public void manageText()
     {
         //handle variables too
+        selectedExpr = expressions.getSelectedExpr();
+        selectedBody = expressions.getSelectedBody().transform;
+
         if (expressions.selectedNotNull())
         {
             textInput = expressions.getSelectedBody().getTextInput();
@@ -121,7 +128,7 @@ public class CalculatorManager : MonoBehaviour
 
         ExpressionSet.ExpOptions op = X;
 
-        switch(title)
+        switch (title)
         {
             case "X":
                 op = X;
@@ -136,8 +143,8 @@ public class CalculatorManager : MonoBehaviour
 
         if (textInput != null)
         {
+            //textInput.text = displayText(expressionSet.expressions[selectedBody].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[selectedBody], maxDisplayLength);
             textInput.text = displayText(expressionSet.expressions[op].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[op], maxDisplayLength);
-            //inputs.xInputbox.text = displayText(expressionSet.expressions[X].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[X], maxDisplayLength);
         }
     }
 
@@ -160,8 +167,6 @@ public class CalculatorManager : MonoBehaviour
         {
             test += s;
         }
-
-        //print("STRING: " + test);
 
         bool end = false;
         bool start = false;

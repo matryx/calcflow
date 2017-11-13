@@ -21,9 +21,10 @@ public class OutputManager : MonoBehaviour {
         //saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
     }
 
+    //BUG: treating all X, Y, Z expressions as same even if made new param
+    //     need to stop using ExpOptions and use transforms instead as key 
     public void HandleInput(string source)
     {
-        print("HANDLE CALLD");
         switch (source)
         {
             default:
