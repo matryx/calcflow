@@ -51,8 +51,6 @@ public class CalcInput : MonoBehaviour
     //public void Initialize(CalcManager cm)
     public void Initialize(CalculatorManager cm)
     {
-        print("BUTTON PRESSED");
-    
         calcManager = cm;
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);

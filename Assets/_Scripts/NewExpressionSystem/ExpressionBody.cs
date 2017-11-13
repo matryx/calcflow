@@ -8,7 +8,8 @@ public class ExpressionBody : QuickButton {
     Transform feedBack;
     TMPro.TextMeshPro textInput;
     TMPro.TextMeshPro title;
-
+    OutputManager outputManager;
+    
     private bool menuActive = false;
     private bool finishedScaling = false;
     private bool retracting = false;
@@ -26,6 +27,7 @@ public class ExpressionBody : QuickButton {
         feedBack = transform.parent.Find("Feedback");
         textInput = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
         title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>();
+        outputManager = expression.GetComponent<OutputManager>();
 
         selectedScale = new Vector3(4.56999f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
@@ -76,6 +78,7 @@ public class ExpressionBody : QuickButton {
         }
 
         expression.setSelectedExpr(expComp.getExpressionParent(), this);
+        outputManager.HandleInput(expComp.name);
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }

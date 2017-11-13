@@ -145,7 +145,7 @@ public class CalcManager : MonoBehaviour
         //if (connectedMenus.boundsManager != null) connectedMenus.boundsManager.Initialize(this);
         //connectedMenus.calcInput.Initialize(this);
         //tier 3
-        connectedMenus.outputMenu.Initialize(this);
+        //connectedMenus.outputMenu.Initialize(this);
 
         //Req: calcInput
         connectedMenus.pieceWiseControl.Initialize(this);

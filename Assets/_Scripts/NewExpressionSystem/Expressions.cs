@@ -14,9 +14,6 @@ public class Expressions : MonoBehaviour
     Color actionActiveColor, actionInactiveColor;
     //Color expressionActiveColor, expressionInactiveColor;
 
-    //TODO:
-    // read through ExpressionSet and start developing new backend
-
     void Awake()
     {
         _instance = this;

@@ -15,6 +15,7 @@ public class CalculatorManager : MonoBehaviour
     BoundsManager boundsManager;
     PresetMenu presetMenu;
     SaveLoadMenu saveLoadMenu;
+    OutputManager outputManager;
 
     Expressions expressions;
     Transform selectedExpr;
@@ -51,6 +52,7 @@ public class CalculatorManager : MonoBehaviour
         paramSurface = CustomParametrizedSurface._instance;
         calcInput = CalcInput._instance;
         boundsManager = BoundsManager._instance;
+        outputManager = OutputManager._instance;
         //saveLoadMenu = SaveLoadMenu._instance;
         //presetMenu = PresetMenu._instance;
 
@@ -58,6 +60,11 @@ public class CalculatorManager : MonoBehaviour
         calcInput.Initialize(this);
 
         calcInput.ChangeOutput(expressionSet.expressions[X]);
+        if (outputManager != null)
+        {
+            print("OUTPUT INIIALIZED");
+            outputManager.Initialize(this);
+        }
         //presetMenu.Initialize(this);
         //saveLoadMenu.Initialize(this);
 
@@ -69,7 +76,7 @@ public class CalculatorManager : MonoBehaviour
 
     public void PresetPressed()
     {
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
@@ -77,7 +84,7 @@ public class CalculatorManager : MonoBehaviour
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         manageText();
         if (boundsManager != null) boundsManager.UpdateButtonText();
     }
@@ -92,7 +99,7 @@ public class CalculatorManager : MonoBehaviour
         }
         paramSurface.expressionSets = ess;
         expressionSet = paramSurface.expressionSets[0];
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
@@ -107,15 +114,33 @@ public class CalculatorManager : MonoBehaviour
     {
         //handle variables too
         if (expressions.selectedNotNull())
+        {
             textInput = expressions.getSelectedBody().getTextInput();
+            title = expressions.getSelectedBody().getTitle().text.Substring(0, 1);
+        }
+
+        ExpressionSet.ExpOptions op = X;
+
+        switch(title)
+        {
+            case "X":
+                op = X;
+                break;
+            case "Y":
+                op = Y;
+                break;
+            case "Z":
+                op = Z;
+                break;
+        }
 
         if (textInput != null)
         {
-            textInput.text = displayText(expressionSet.expressions[X].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[X], maxDisplayLength);
+            textInput.text = displayText(expressionSet.expressions[op].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[op], maxDisplayLength);
+            //inputs.xInputbox.text = displayText(expressionSet.expressions[X].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[X], maxDisplayLength);
         }
     }
 
-    //BUG: 
     public void ManageFeedback()
     {
         selectedExpr = expressions.getSelectedExpr();
@@ -130,6 +155,14 @@ public class CalculatorManager : MonoBehaviour
 
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)
     {
+        string test = "";
+        foreach(string s in exp)
+        {
+            test += s;
+        }
+
+        //print("STRING: " + test);
+
         bool end = false;
         bool start = false;
         int forward = 1;
@@ -218,7 +251,7 @@ public class CalculatorManager : MonoBehaviour
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
             //if (isValid)
-                //paramSurface.GenerateParticles();
+            //paramSurface.GenerateParticles();
         }
         if (toExport)
         {
