@@ -87,6 +87,7 @@ public class SubmissionsMenu : MonoBehaviour
             tournament = newTournament;
 
             ClearSubmissions();
+            MatryxJsonRpc.Request.RunListSubmissions(tournament.address, page, ProcessTournament);
             WebLoader.Instance.Load(tournamentEndpoint + "?id=" + newTournament.address + "&page=" + page, ProcessTournament);
         }
     }
@@ -98,6 +99,7 @@ public class SubmissionsMenu : MonoBehaviour
     {
         page++;
         removeLoadButton();
+        MatryxJsonRpc.Request.RunListSubmissions(tournament.address, page, ProcessTournament);
         WebLoader.Instance.Load(tournamentEndpoint + "?id=" + tournament.address + "&page=" + page, ProcessTournament);
     }
 
@@ -111,7 +113,13 @@ public class SubmissionsMenu : MonoBehaviour
         scroll.clear();
     }
 
-    public void ProcessTournament(string jsonString)
+    public void ProcessTournament(object result)
+    {
+
+    }
+
+
+    public void ProcessTournamentOLD(string jsonString)
     {
         JSONObject jsonObject = new JSONObject(jsonString);
         jsonObject.GetField("results", delegate (JSONObject results)
