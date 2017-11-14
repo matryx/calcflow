@@ -1,7 +1,8 @@
-﻿using System.Collections;
+﻿using UnityEngine;
+
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using Web;
 
 public class SubmissionMenu : MonoBehaviour
 {
@@ -28,11 +29,23 @@ public class SubmissionMenu : MonoBehaviour
             this.submission.address != submission.address)
         {
             this.submission = submission;
-            WebLoader.Instance.Load(submissionEndpoint + "?id=" + submission.address, ProcessSubmission);
+            MatryxJsonRpc.Request.RunDetailSubmission(submission.address, ProcessSubmission);
         }
     }
 
-    void ProcessSubmission(string jsonString)
+    void ProcessSubmission(object results)
+    {
+        var rpcSubmission = (MatryxJsonRpc.Submission)results;
+        submission.title = rpcSubmission.title;
+        submission.body = rpcSubmission.body;
+        submission.contributors = rpcSubmission.contributorsList();
+        submission.references = rpcSubmission.referencesList();
+        // Update the display
+        UpdateSubmissionDisplay();
+    }
+
+    /*
+    void ProcessSubmissionOLD(string jsonString)
     {
         JSONObject jsonObject = new JSONObject(jsonString);
         jsonObject.GetField("results", delegate (JSONObject results)
@@ -77,11 +90,10 @@ public class SubmissionMenu : MonoBehaviour
                 submission.contributors = contributors;
                 submission.references = references;
 
-                // Update the display
-                UpdateSubmissionDisplay();
             });
         });
     }
+    */
 
     void UpdateSubmissionDisplay()
     {

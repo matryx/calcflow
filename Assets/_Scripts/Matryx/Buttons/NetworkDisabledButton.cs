@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Web;
 
 public class NetworkDisabledButton : MonoBehaviour
 {
@@ -19,7 +18,7 @@ public class NetworkDisabledButton : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        WebLoader.Instance.Load(networkEnableEndpoint + gameObject.name, ProcessTournaments);
+        //WebLoader.Instance.Load(networkEnableEndpoint + gameObject.name, ProcessTournaments);
     }
 
     // Update is called once per frame
@@ -49,7 +48,6 @@ public class NetworkDisabledButton : MonoBehaviour
                         button.Disable();
                     }
                 }
-                
             }
         });
     }

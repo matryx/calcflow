@@ -50,12 +50,22 @@ public class SubmitMenu : MonoBehaviour {
         var contributorsList = ContributorsList.GetAddressList();
         var referencesList = ReferencesList.GetAddressList();
         var bodyData = SerializeSurface();
-        
-        Matryx_Submission submission = new Matryx_Submission(title, contributorsList, referencesList, bodyData);
-        string responseFromServer = UploadSubmission(tournament, submission);
+
+        var rpcSubmission = new MatryxJsonRpc.Submission();
+        rpcSubmission.title = title;
+        rpcSubmission.body = bodyData;
+        rpcSubmission.contributorsList(contributorsList);
+        rpcSubmission.referencesList(referencesList);
+
+        MatryxJsonRpc.Request.RunUploadSubmission(rpcSubmission, delegate (object result)
+        {
+            Debug.Log("Submission uploaded");
+            Debug.Log(result);
+        });
     }
 
-    string UploadSubmission(Matryx_Tournament tournament, Matryx_Submission submission)
+    /*
+    string UploadSubmissionOLD(Matryx_Tournament tournament, Matryx_Submission submission)
     {
         submittingCanvasObject.SetActive(true);
 
@@ -113,6 +123,7 @@ public class SubmitMenu : MonoBehaviour {
         
         return responseFromServer;
     }
+    */
 
     public string SerializeSurface()
     {

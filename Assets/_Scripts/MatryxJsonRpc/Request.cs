@@ -52,6 +52,53 @@ namespace MatryxJsonRpc
             // Schedule query
             queue(CoroutineListTournaments(new RoutineContext(new object[] { page }, callback)));
         }
+
+        // LIST SUMBISSIONS
+        public static void RunListSubmissions(string tournamentAddress, long page, ResultDelegate callback)
+        {
+            // Spoofed datas
+            var submissions = new List<Submission>();
+            var offset = page * 25;
+            for (var i = 0; i < 25; i++)
+            {
+                var nb = offset + i;
+                var submission = new Submission();
+                submission.title = "submission" + nb + " Title:";
+                submission.body = "submission" + nb + " body from tournament: " + tournamentAddress;
+                submission.address = "submission Address 0x..." + nb;
+                submission.contributors = "Vincent,Hello";
+                submission.references = "Reference1,Reference2";
+                submissions.Add(submission);
+            }
+            callback(submissions);
+            return;
+            // Schedule query
+            queue(CoroutineListTournaments(new RoutineContext(new object[] { tournamentAddress, page }, callback)));
+        }
+
+        // DETAIL SUBMISSION
+        public static void RunDetailSubmission(string submissionAddress, ResultDelegate callback)
+        {
+            // Spoofed datas
+            var submission = new Submission();
+            submission.title = "submission" + submissionAddress + " Title:";
+            submission.body = "submission" + submissionAddress + " body";
+            submission.address = "submission Address 0x..." + submissionAddress;
+            submission.contributors = "Vincent,Hello";
+            submission.references = "Reference1,Reference2";
+            callback(submission);
+            return;
+            // Schedule query
+            queue(CoroutineListTournaments(new RoutineContext(new object[] { submissionAddress }, callback)));
+        }
+
+        // UPLOAD SUBMISSION
+        public static void RunUploadSubmission(Submission submission, ResultDelegate callback)
+        {
+            // Schedule query
+            queue(CoroutineUploadSubmission(new RoutineContext(new object[] { submission }, callback)));
+        }
+
         private static IEnumerator CoroutineListTournaments(RoutineContext context)
         {
             // Prepare
@@ -90,12 +137,6 @@ namespace MatryxJsonRpc
             context.done(tournaments);
         }
 
-        // LIST SUMBISSIONS
-        public static void RunListSubmissions(string tournamentAddress, long page, ResultDelegate callback)
-        {
-            // Schedule query
-            queue(CoroutineListTournaments(new RoutineContext(new object[] { tournamentAddress, page }, callback)));
-        }
         private static IEnumerator CoroutineListSumbissions(RoutineContext context)
         {
             // Prepare
@@ -138,12 +179,6 @@ namespace MatryxJsonRpc
             context.done(submissions);
         }
 
-        // DETAIL SUBMISSION
-        public static void RunDetailSubmission(string submissionAddress, ResultDelegate callback)
-        {
-            // Schedule query
-            queue(CoroutineListTournaments(new RoutineContext(new object[] { submissionAddress }, callback)));
-        }
         private static IEnumerator CoroutineDetailSubmission(RoutineContext context)
         {
             // Prepare
@@ -176,12 +211,6 @@ namespace MatryxJsonRpc
             context.done(submission); // TODO
         }
 
-        // UPLOAD SUBMISSION
-        public static void RunUploadSubmission(Submission submission, ResultDelegate callback)
-        {
-            // Schedule query
-            queue(CoroutineUploadSubmission(new RoutineContext(new object[] { submission }, callback)));
-        }
         private static IEnumerator CoroutineUploadSubmission(RoutineContext context)
         {
             // Prepare

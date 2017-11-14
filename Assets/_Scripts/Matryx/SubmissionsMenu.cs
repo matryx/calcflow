@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Web;
 
 public class SubmissionsMenu : MonoBehaviour
 {
@@ -85,13 +84,13 @@ public class SubmissionsMenu : MonoBehaviour
             tournament.address != newTournament.address)
         {
             tournament = newTournament;
+            UpdateHeaderUI();
 
             ClearSubmissions();
             MatryxJsonRpc.Request.RunListSubmissions(tournament.address, page, ProcessTournament);
-            WebLoader.Instance.Load(tournamentEndpoint + "?id=" + newTournament.address + "&page=" + page, ProcessTournament);
         }
     }
-    
+
     /// <summary>
     /// Loads the next page of submissions under a tournament
     /// </summary>
@@ -100,7 +99,6 @@ public class SubmissionsMenu : MonoBehaviour
         page++;
         removeLoadButton();
         MatryxJsonRpc.Request.RunListSubmissions(tournament.address, page, ProcessTournament);
-        WebLoader.Instance.Load(tournamentEndpoint + "?id=" + tournament.address + "&page=" + page, ProcessTournament);
     }
 
     /// <summary>
@@ -115,10 +113,20 @@ public class SubmissionsMenu : MonoBehaviour
 
     public void ProcessTournament(object result)
     {
-
+        var rpcSubmissions = (List<MatryxJsonRpc.Submission>)result;
+        var newSubmissions = new List<Matryx_Submission>();
+        foreach (var rpcSubmission in rpcSubmissions)
+        {
+            var submissionAddress = rpcSubmission.address;
+            var submissionTitle = rpcSubmission.title;
+            var aSubmission = new Matryx_Submission(submissionTitle, submissionAddress);
+            submissions.Add(submissionAddress, aSubmission);
+            newSubmissions.Add(aSubmission);
+        }
+        DisplaySubmissions(newSubmissions);
     }
 
-
+    /*
     public void ProcessTournamentOLD(string jsonString)
     {
         JSONObject jsonObject = new JSONObject(jsonString);
@@ -155,6 +163,7 @@ public class SubmissionsMenu : MonoBehaviour
             });
         });
     }
+    */
 
     private void UpdateHeaderUI()
     {
