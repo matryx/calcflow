@@ -57,7 +57,7 @@ public class TournamentMenu : MonoBehaviour
     public void LoadTournaments()
     {
         ClearTournaments();
-        WebLoader.Instance.Load(tournamentsEndpoint+page, ProcessTournaments);
+        MatryxJsonRpc.Request.RunListTournaments(page, ProcessTournaments);
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class TournamentMenu : MonoBehaviour
     {
         page++;
         removeLoadButton();
-        WebLoader.Instance.Load(tournamentsEndpoint + page, ProcessTournaments);
+        MatryxJsonRpc.Request.RunListTournaments(page, ProcessTournaments);
     }
 
     /// <summary>
@@ -80,7 +80,24 @@ public class TournamentMenu : MonoBehaviour
         scroll.clear();
     }
 
-    private void ProcessTournaments(string jsonString)
+    private void ProcessTournaments(object results)
+    {
+        var rpcTournaments = (List<MatryxJsonRpc.Tournament>)results;
+        var newTournaments = new List<Matryx_Tournament>();
+        foreach (var rpcTournament in rpcTournaments)
+        {
+            var address = rpcTournament.address;
+            var title = rpcTournament.title;
+            var bounty = rpcTournament.bounty;
+            Matryx_Tournament aTournament = new Matryx_Tournament(address, title, bounty);
+            tournaments.Add(address, aTournament);
+            newTournaments.Add(aTournament);
+        }
+        DisplayTournaments(newTournaments);
+    }
+
+    /*
+    private void ProcessTournamentsOLD(string jsonString)
     {
         List<Matryx_Tournament> newTournaments = new List<Matryx_Tournament>();
         JSONObject jsonObject = new JSONObject(jsonString);
@@ -105,6 +122,7 @@ public class TournamentMenu : MonoBehaviour
             });
         });
     }
+    */
 
     GameObject loadButton;
     private void DisplayTournaments(List<Matryx_Tournament> _tournaments)

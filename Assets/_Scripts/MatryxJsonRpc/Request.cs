@@ -34,6 +34,21 @@ namespace MatryxJsonRpc
         // LIST TOURNAMENT
         public static void RunListTournaments(long page, ResultDelegate callback)
         {
+            // Spoofed datas
+            var tournaments = new List<Tournament>();
+            var offset = page * 25;
+            for (var i = 0; i < 25; i++)
+            {
+                var nb = offset + i;
+                var tournament = new Tournament();
+                tournament.title = "Tournament" + nb + " Title";
+                tournament.description = "Tournament" + nb + " Description";
+                tournament.bounty = 4242424242;
+                tournament.address = "TournamentAddress 0x..." + nb;
+                tournaments.Add(tournament);
+            }
+            callback(tournaments);
+            return;
             // Schedule query
             queue(CoroutineListTournaments(new RoutineContext(new object[] { page }, callback)));
         }
