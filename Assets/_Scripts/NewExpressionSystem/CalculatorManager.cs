@@ -10,6 +10,8 @@ public class CalculatorManager : MonoBehaviour
     [HideInInspector]
     public bool inputReceived;
 
+    public static CalculatorManager _instance;
+
     CustomParametrizedSurface paramSurface;
     CalcInput calcInput;
     BoundsManager boundsManager;
@@ -48,6 +50,7 @@ public class CalculatorManager : MonoBehaviour
 
     private void Initialize()
     {
+        _instance = this;
         expressions = Expressions._instance;
 
         paramSurface = CustomParametrizedSurface._instance;
@@ -60,8 +63,7 @@ public class CalculatorManager : MonoBehaviour
         if (boundsManager != null) boundsManager.Initialize(this);
         calcInput.Initialize(this);
 
-        //selectedBody = expressions.getSelectedBody().transform;
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         if (outputManager != null)
         {
             print("OUTPUT INIIALIZED");
@@ -78,7 +80,6 @@ public class CalculatorManager : MonoBehaviour
 
     public void PresetPressed()
     {
-        //selectedBody = expressions.getSelectedBody().transform;
         calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
@@ -87,8 +88,7 @@ public class CalculatorManager : MonoBehaviour
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
-        //selectedBody = expressions.getSelectedBody().transform;
-        calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
+        calcInput.ChangeOutput(expressionSet.expressions[getExpOption()]); //need to fix
         manageText();
         if (boundsManager != null) boundsManager.UpdateButtonText();
     }
@@ -103,7 +103,6 @@ public class CalculatorManager : MonoBehaviour
         }
         paramSurface.expressionSets = ess;
         expressionSet = paramSurface.expressionSets[0];
-        //selectedBody = expressions.getSelectedBody().transform;
         calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
@@ -114,19 +113,10 @@ public class CalculatorManager : MonoBehaviour
         calcInput.ChangeOutput(output);
     }
 
-    public void manageText()
+    private ExpressionSet.ExpOptions getExpOption()
     {
-        //handle variables too
-        selectedExpr = expressions.getSelectedExpr();
-        selectedBody = expressions.getSelectedBody().transform;
-
-        if (expressions.selectedNotNull())
-        {
-            textInput = expressions.getSelectedBody().getTextInput();
-            title = expressions.getSelectedBody().getTitle().text.Substring(0, 1);
-        }
-
         ExpressionSet.ExpOptions op = X;
+        title = expressions.getSelectedBody().getTitle().text.Substring(0, 1);
 
         switch (title)
         {
@@ -141,10 +131,23 @@ public class CalculatorManager : MonoBehaviour
                 break;
         }
 
+        return op;
+    }
+
+    public void manageText()
+    {
+        //handle variables too
+        selectedExpr = expressions.getSelectedExpr();
+        selectedBody = expressions.getSelectedBody().transform;
+
+        if (expressions.selectedNotNull())
+        {
+            textInput = expressions.getSelectedBody().getTextInput();
+        }
+
         if (textInput != null)
         {
-            //textInput.text = displayText(expressionSet.expressions[selectedBody].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[selectedBody], maxDisplayLength);
-            textInput.text = displayText(expressionSet.expressions[op].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[op], maxDisplayLength);
+            textInput.text = displayText(expressionSet.expressions[getExpOption()].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[getExpOption()], maxDisplayLength);
         }
     }
 

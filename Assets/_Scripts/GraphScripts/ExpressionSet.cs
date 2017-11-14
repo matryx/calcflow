@@ -104,6 +104,7 @@ public class ExpressionSet
         expressions.Add(ExpOptions.Y, new Expression());
         expressions.Add(ExpOptions.Z, new Expression());
 
+        //need to change later
         ranges = new Dictionary<string, RangePair>();
         AddRange("t");
         AddRange("u");

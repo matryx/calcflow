@@ -5,6 +5,7 @@ using UnityEngine;
 public class ParametricExpression : MonoBehaviour
 {
     Expressions.ExpressionType type;
+    ExpressionSet expSet;
     List<Transform> expressions;
     List<Transform> variableClumps;
     List<Transform> variables;
@@ -17,6 +18,7 @@ public class ParametricExpression : MonoBehaviour
     {
         if (initialized) return;
         type = Expressions.ExpressionType.Paramet;
+        expSet = new ExpressionSet();
         expressions = new List<Transform>();
         variableClumps = new List<Transform>();
         variables = new List<Transform>();
@@ -35,6 +37,11 @@ public class ParametricExpression : MonoBehaviour
             variableClumps = new List<Transform>();
             initialized = true;
         }
+    }
+
+    public ExpressionSet getExpSet()
+    {
+        return expSet;
     }
 
     public void addExpression(Transform expr)

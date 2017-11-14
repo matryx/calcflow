@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class VectorFieldExpression : MonoBehaviour {
     Expressions.ExpressionType type;
+    ExpressionSet expSet;
     List<Transform> expressions;
     Transform range;
     bool initialized = false;
@@ -23,6 +24,11 @@ public class VectorFieldExpression : MonoBehaviour {
             expressions = new List<Transform>();
             initialized = true;
         }
+    }
+
+    public ExpressionSet getExpSet()
+    {
+        return expSet;
     }
 
     public void addExpression(Transform expr)

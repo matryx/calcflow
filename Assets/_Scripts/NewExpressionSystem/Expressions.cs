@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Expressions : MonoBehaviour
 {
+    CalculatorManager calcManager;
     public static Expressions _instance;
+    ExpressionSet selectedExpSet;
     Transform selectedExpression;
     ExpressionBody selectedBody;
     List<Transform> expressions;
@@ -17,6 +19,7 @@ public class Expressions : MonoBehaviour
     void Awake()
     {
         _instance = this;
+        calcManager = CalculatorManager._instance;
         expressions = new List<Transform>();
         remove.gameObject.SetActive(true);
         hide.gameObject.SetActive(true);
@@ -40,6 +43,11 @@ public class Expressions : MonoBehaviour
         return selectedExpression;
     }
 
+    //public ExpressionSet getSelectedExpSet()
+    //{
+    //    return selectedExpSet;
+    //}
+
     public ExpressionBody getSelectedBody()
     {
         return selectedBody;
@@ -60,6 +68,8 @@ public class Expressions : MonoBehaviour
         hide.gameObject.SetActive(true);
         flowLine.gameObject.SetActive(true);
 
+        if (!calcManager) calcManager = CalculatorManager._instance;
+
         if (expr.GetComponent<ParametricExpression>())
         {
             hide.GetComponentInChildren<Collider>().enabled = true;
@@ -67,6 +77,9 @@ public class Expressions : MonoBehaviour
 
             hide.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
             flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+
+            selectedExpSet = expr.GetComponent<ParametricExpression>().getExpSet();
+            calcManager.ChangeExpressionSet(selectedExpSet);
         }
         else if (expr.GetComponent<VectorFieldExpression>())
         {
@@ -75,6 +88,9 @@ public class Expressions : MonoBehaviour
 
             hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
             flowLine.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
+
+            selectedExpSet = expr.GetComponent<VectorFieldExpression>().getExpSet();
+            calcManager.ChangeExpressionSet(selectedExpSet);
         }
         else if (expr.GetComponent<Constant>())
         {
@@ -83,6 +99,8 @@ public class Expressions : MonoBehaviour
 
             hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
             flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+
+            //selectedExpSet?
         }
     }
 
