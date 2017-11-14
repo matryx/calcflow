@@ -109,6 +109,13 @@ namespace MatryxJsonRpc
                     Debug.Log(parsedResult);
                     j++;
                 }
+                submission.title = (string)parsedResults[0].Result;
+                submission.body = (string)parsedResults[1].Result;
+                submission.author = (string)parsedResults[2].Result;
+                submission.address = (string)parsedResults[3].Result;
+                submission.tournamentAddress = (string)parsedResults[4].Result;
+                submission.references = (string)parsedResults[5].Result;
+                submission.contributors = (string)parsedResults[6].Result;
                 // Add to list of submission
                 submissions.Add(submission);
             }
@@ -143,6 +150,13 @@ namespace MatryxJsonRpc
                 Debug.Log("Submission Parsed result: " + j);
                 Debug.Log(parsedResult);
             }
+            submission.title = (string)parsedResults[0].Result;
+            submission.body = (string)parsedResults[1].Result;
+            submission.author = (string)parsedResults[2].Result;
+            submission.address = (string)parsedResults[3].Result;
+            submission.tournamentAddress = (string)parsedResults[4].Result;
+            submission.references = (string)parsedResults[5].Result;
+            submission.contributors = (string)parsedResults[6].Result;
             // Done
             context.done(submission); // TODO
         }

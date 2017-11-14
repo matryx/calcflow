@@ -8,8 +8,6 @@ namespace MatryxJsonRpc
     public class Submission
     {
 
-        public string tournamentAddress;
-
         public string title;
         public string body;
 
@@ -19,6 +17,7 @@ namespace MatryxJsonRpc
         public string author;
 
         public string address;
+        public string tournamentAddress;
 
     }
 
