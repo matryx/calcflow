@@ -171,11 +171,11 @@ public class PlayBackLogAction
         return newAction;
     }
 
-    IEnumerator Spawn()
+    void Spawn()
     {
         GameObject subject;
         subject = RSManager.Deserialize<GameObject>(subjectKey.ToString());
-        yield return null;
+        //yield return null;
         if (objectMap.ContainsKey(subjectKey))
         {
             objectMap[subjectKey] = subject;
@@ -197,13 +197,20 @@ public class PlayBackLogAction
         switch (type)
         {
             case ActionType.Spawn:
-                Dispatcher.queue(Spawn());
+                //Dispatcher.queue(Spawn());
+                Spawn();
                 break;
             case ActionType.Movement:
-                subject = objectMap[subjectKey];
-                subject.LocalMoveTo(position, PlaybackLog.Period);
-                subject.RotateTo(rotation, PlaybackLog.Period);
-                subject.GlobalScaleTo(scale, PlaybackLog.Period);
+                if (objectMap.ContainsKey(subjectKey))
+                {
+                    subject = objectMap[subjectKey];
+                    subject.LocalMoveTo(position, PlaybackLog.Period);
+                    subject.RotateTo(rotation, PlaybackLog.Period);
+                    subject.GlobalScaleTo(scale, PlaybackLog.Period);
+                } else
+                {
+                    Debug.Log(timeStamp + " " + subjectKey);
+                }
                 break;
             case ActionType.ButtonPress:
                 subject = objectMap[subjectKey];
