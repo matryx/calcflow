@@ -10,7 +10,6 @@ public class ParametricExpression : MonoBehaviour
     List<Transform> variableClumps;
     List<Transform> variables;
     List<Transform> emptyList;
-
     Scroll scroll;
     bool initialized = false;
 
@@ -37,6 +36,23 @@ public class ParametricExpression : MonoBehaviour
             variableClumps = new List<Transform>();
             initialized = true;
         }
+    }
+
+    public string getVarTitle(Transform var)
+    {
+        if (variables.Contains(var))
+        {
+            int i = 0;
+            foreach(Transform v in variables)
+            {
+                if (v.Equals(var))
+                {
+                    return variables[i].Find("VariableTitle").GetComponentInChildren<TMPro.TextMeshPro>().text;
+                }
+                i++;
+            }
+        }
+        return "";
     }
 
     public ExpressionSet getExpSet()

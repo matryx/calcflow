@@ -23,7 +23,7 @@ public class OutputManager : MonoBehaviour {
 
     //BUG: treating all X, Y, Z expressions as same even if made new param
     //     need to stop using ExpOptions and use transforms instead as key 
-    public void HandleInput(string source)
+    public void HandleInput(string source, string range)
     {
         switch (source)
         {
@@ -39,29 +39,13 @@ public class OutputManager : MonoBehaviour {
             case "Button_Zinput":
                 calcManager.SetOutput(calcManager.expressionSet.expressions[Z]);
                 break;
-            case "umin":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["u"].Min);
+            case "VariableTitle":  //need to figure out how to do the var title
                 break;
-            case "umax":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["u"].Max);
+            case "Min":
+                calcManager.SetOutput(calcManager.expressionSet.ranges[range].Min); 
                 break;
-            case "tmin":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["t"].Min);
-                break;
-            case "tmax":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["t"].Max);
-                break;
-            case "vmin":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["v"].Min);
-                break;
-            case "vmax":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["v"].Max);
-                break;
-            case "wmin":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["w"].Min);
-                break;
-            case "wmax":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["w"].Max);
+            case "Max":
+                calcManager.SetOutput(calcManager.expressionSet.ranges[range].Max); 
                 break;
             case "GenerateMesh":
                 calcManager.toExport = true;

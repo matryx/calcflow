@@ -8,6 +8,7 @@ public class ExpressionBody : QuickButton {
     Transform feedBack;
     TMPro.TextMeshPro textInput;
     TMPro.TextMeshPro title;
+    string varTitle;
     OutputManager outputManager;
     
     private bool menuActive = false;
@@ -78,7 +79,9 @@ public class ExpressionBody : QuickButton {
         }
 
         expression.setSelectedExpr(expComp.getExpressionParent(), this);
-        outputManager.HandleInput(expComp.name);
+        if (expComp.getExpressionParent().GetComponent<ParametricExpression>()) 
+            varTitle = expComp.getExpressionParent().GetComponent<ParametricExpression>().getVarTitle(transform.parent.parent); 
+        outputManager.HandleInput(expComp.name, varTitle);
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
