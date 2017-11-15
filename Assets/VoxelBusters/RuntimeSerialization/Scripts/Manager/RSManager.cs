@@ -147,7 +147,6 @@ public class RSManager : SingletonPattern <RSManager>
 	{
 		// Serialize object 
 		byte[] 		_serializationData	= m_binarySerializer.Serialize(_object, typeof(T));
-        Debug.LogError("Serializing object with id: " + _key);
         // Invoke serialization finished object
         if (!string.IsNullOrEmpty(_key))
 			OnSerializationFinished(_key, _object);

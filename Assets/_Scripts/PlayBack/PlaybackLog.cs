@@ -58,8 +58,8 @@ public class PlaybackLog
     {
         public int Compare(object x, object y)
         {
-            PlayBackLogAction first = (PlayBackLogAction) x;
-            PlayBackLogAction second = (PlayBackLogAction) y;
+            PlayBackLogAction first = (PlayBackLogAction)x;
+            PlayBackLogAction second = (PlayBackLogAction)y;
 
             if (first.timeStamp > second.timeStamp) return 1;
             if (first.timeStamp < second.timeStamp) return -1;
@@ -93,6 +93,8 @@ public class PlayBackLogAction
     [SerializeField]
     internal GameObject buttonPresser;
 
+    internal string binaryRepresentation;
+
 
     [SerializeField]
     public ActionType type;
@@ -117,8 +119,9 @@ public class PlayBackLogAction
     }
 
 
-    internal static PlayBackLogAction CreateSpawn(long timestamp, GameObject subject , Vector3 position, Quaternion rotation, Vector3 scale)
+    internal static PlayBackLogAction CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
     {
+        int key = subject.GetInstanceID();
         PlayBackLogAction newAction = new PlayBackLogAction
         {
             type = ActionType.Spawn,
@@ -126,9 +129,9 @@ public class PlayBackLogAction
             position = position,
             rotation = rotation,
             scale = scale,
-            subjectKey = subject.GetInstanceID()
+            subjectKey = key,
+            binaryRepresentation = RSManager.Serialize(subject, key.ToString())
         };
-        RSManager.Serialize(subject, newAction.subjectKey.ToString(), eSaveTarget.FILE_SYSTEM);
         return newAction;
     }
 
@@ -174,7 +177,7 @@ public class PlayBackLogAction
     void Spawn()
     {
         GameObject subject;
-        subject = RSManager.Deserialize<GameObject>(subjectKey.ToString());
+        subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
         //yield return null;
         if (objectMap.ContainsKey(subjectKey))
         {
@@ -207,7 +210,8 @@ public class PlayBackLogAction
                     subject.LocalMoveTo(position, PlaybackLog.Period);
                     subject.RotateTo(rotation, PlaybackLog.Period);
                     subject.GlobalScaleTo(scale, PlaybackLog.Period);
-                } else
+                }
+                else
                 {
                     Debug.Log(timeStamp + " " + subjectKey);
                 }
