@@ -30,7 +30,7 @@ namespace MatryxJsonRpc
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
-        private static string mtxContractAddr = "0x7f03a2189d8502c6a72550e6f97657dae629c53b";
+        private static string mtxContractAddr = "0x72b5f408a98e857c42823ff4c8fe78b8dc165551";
         private static Contract mtxContract;
 
         // Public api
@@ -293,27 +293,21 @@ namespace MatryxJsonRpc
 
         void Start()
         {
-            /*
             StartCoroutine(InitRoutine());
-            Debug.Log("Balance Of start");
-            RunBalanceOf("0x31a8f8c08accb2923049d438f13295d5717b387b", delegate (object result)
-            {
-                Debug.Log("BalanceOfResult");
-                Debug.Log(result);
-            });
+            /*
             Debug.Log("RunListTournaments START");
             RunListTournaments(0, delegate (object result)
             {
                 Debug.Log("RunListTournaments RESULT");
                 Debug.Log(result);
             });
-            */
             Debug.Log("RunListSubmissions START");
             RunListSubmissions("42", 0, delegate (object result)
             {
                 Debug.Log("RunListSubmissions RESULT");
                 Debug.Log(result);
             });
+            */
             /*
             Debug.Log("RunDetailSubmission START");
             RunDetailSubmission("1:1", delegate (object result)

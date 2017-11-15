@@ -20,9 +20,23 @@
     },
     {
       "constant": false,
-      "inputs": [],
-      "name": "MatryxPlateform",
-      "outputs": [],
+      "inputs": [
+        {
+          "name": "_queryID",
+          "type": "uint256"
+        },
+        {
+          "name": "_response",
+          "type": "bytes32"
+        }
+      ],
+      "name": "storeQueryResponse",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
@@ -189,6 +203,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "getOwner",
+      "outputs": [
+        {
+          "name": "_deployer",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "tournamentId",
@@ -228,6 +256,20 @@
       ],
       "payable": false,
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_query",
+          "type": "bytes32"
+        }
+      ],
+      "name": "Query",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -308,5 +350,28 @@
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "QueryPerformed",
+      "type": "event"
     }
   ]
