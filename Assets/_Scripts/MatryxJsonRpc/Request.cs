@@ -20,6 +20,7 @@ using Nethereum.JsonRpc.UnityClient;
 using Nethereum.Util;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.Eth.Transactions;
+using Nethereum.Signer;
 
 namespace MatryxJsonRpc
 {
@@ -29,7 +30,7 @@ namespace MatryxJsonRpc
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
-        private static string mtxContractAddr = "0x6734c8d4f6c377007d65483b60ce0f7d4bfe7101";
+        private static string mtxContractAddr = "0x7f03a2189d8502c6a72550e6f97657dae629c53b";
         private static Contract mtxContract;
 
         // Public api
@@ -89,7 +90,7 @@ namespace MatryxJsonRpc
                 {
                     Debug.Log("Could not read tournament at index:" + (offset + i));
                     Debug.Log(e);
-                    break;
+                    //break;
                 }
             }
             Debug.Log("Fetched tournaments: " + tournaments.Count);
@@ -108,7 +109,7 @@ namespace MatryxJsonRpc
         private class SubmissionDTO
         {
             [Parameter ("uint256", "id", 1)]
-            public BigInteger id { get; set; }
+            public long id { get; set; }
             [Parameter ("string", "title", 2)]
             public string title { get; set; }
             [Parameter ("string", "body", 3)]
@@ -160,7 +161,7 @@ namespace MatryxJsonRpc
                 {
                     Debug.Log("Could not read submission at index: " + (offset + i));
                     Debug.Log(e);
-                    break;
+                    //break;
                 }
             }
             Debug.Log("Fetched submissions: " + submissions.Count);
@@ -236,8 +237,8 @@ namespace MatryxJsonRpc
             var tournamentAddress = Convert.ToInt64(submission.tournamentAddress);
             var title = submission.title;
             var body = submission.body;
-            var references = submission.references + "";
-            var contributors = submission.contributors + "";
+            var references = submission.references + "\n";
+            var contributors = submission.contributors + "\n";
             // Make input
             var transactionInput = function.CreateTransactionInput(usedAccount, tournamentAddress, title, body, references, contributors);
             transactionInput.Gas = new HexBigInteger(3000000);
@@ -300,20 +301,20 @@ namespace MatryxJsonRpc
                 Debug.Log("BalanceOfResult");
                 Debug.Log(result);
             });
-            */
             Debug.Log("RunListTournaments START");
             RunListTournaments(0, delegate (object result)
             {
                 Debug.Log("RunListTournaments RESULT");
                 Debug.Log(result);
             });
-            /*
+            */
             Debug.Log("RunListSubmissions START");
-            RunListSubmissions("1", 0, delegate (object result)
+            RunListSubmissions("42", 0, delegate (object result)
             {
                 Debug.Log("RunListSubmissions RESULT");
                 Debug.Log(result);
             });
+            /*
             Debug.Log("RunDetailSubmission START");
             RunDetailSubmission("1:1", delegate (object result)
             {
