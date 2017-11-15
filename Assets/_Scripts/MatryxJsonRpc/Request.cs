@@ -89,7 +89,7 @@ namespace MatryxJsonRpc
                 catch (Exception e)
                 {
                     Debug.Log("Could not read tournament at index:" + (offset + i));
-                    Debug.Log(e);
+                    //Debug.Log(e);
                     //break;
                 }
             }
@@ -160,7 +160,7 @@ namespace MatryxJsonRpc
                 catch (Exception e)
                 {
                     Debug.Log("Could not read submission at index: " + (offset + i));
-                    Debug.Log(e);
+                    //Debug.Log(e);
                     //break;
                 }
             }
@@ -210,7 +210,7 @@ namespace MatryxJsonRpc
             catch (Exception e)
             {
                 Debug.Log("Could not read submission at:" + submissionAddress + " tournament: " + tournamentAddress);
-                Debug.Log(e);
+                //Debug.Log(e);
                 context.done(null);
             }
         }
@@ -256,7 +256,7 @@ namespace MatryxJsonRpc
             {
                 // Error
                 Debug.Log("Could not submit submission");
-                Debug.Log(e);
+                //Debug.Log(e);
                 context.done(null);
             }
         }
@@ -282,7 +282,7 @@ namespace MatryxJsonRpc
             yield return requestAccounts.SendRequest();
             var resultsAccounts = requestAccounts.Result;
             var usedAccount = resultsAccounts[0];
-            Debug.Log("Used account:" + resultsAccounts);
+            Debug.Log("Used account:" + usedAccount);
             var function = mtxContract.GetFunction("prepareBalance");
             var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
             // Do request
@@ -301,13 +301,15 @@ namespace MatryxJsonRpc
                 Debug.Log("RunListTournaments RESULT");
                 Debug.Log(result);
             });
+            //*/
+            /*
             Debug.Log("RunListSubmissions START");
             RunListSubmissions("42", 0, delegate (object result)
             {
                 Debug.Log("RunListSubmissions RESULT");
                 Debug.Log(result);
             });
-            */
+            //*/
             /*
             Debug.Log("RunDetailSubmission START");
             RunDetailSubmission("1:1", delegate (object result)
@@ -315,7 +317,7 @@ namespace MatryxJsonRpc
                 Debug.Log("RunDetailSubmission RESULT");
                 Debug.Log(result);
             });
-            */
+            //*/
             /*
             Debug.Log("RunUploadSubmission START");
             var sub = new Submission();
