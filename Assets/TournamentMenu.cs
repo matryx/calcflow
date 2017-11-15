@@ -89,6 +89,7 @@ public class TournamentMenu : MonoBehaviour
             var title = rpcTournament.title;
             var bounty = rpcTournament.bounty;
             Matryx_Tournament aTournament = new Matryx_Tournament(address, title, bounty);
+            aTournament.description = rpcTournament.description;
             tournaments.Add(address, aTournament);
             newTournaments.Add(aTournament);
         }

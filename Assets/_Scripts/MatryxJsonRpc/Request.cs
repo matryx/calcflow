@@ -6,11 +6,15 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.IO;
+using System.Numerics;
 
+using Nethereum.ABI.Encoders;
+using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.ABI.FunctionEncoding;
 using Nethereum.ABI.Model;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexTypes;
+using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.JsonRpc.Client;
 using Nethereum.JsonRpc.UnityClient;
 using Nethereum.Util;
@@ -25,7 +29,7 @@ namespace MatryxJsonRpc
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
-        private static string mtxContractAddr = "0x0af44e2784637218dd1d32a322d44e603a8f0c6a";
+        private static string mtxContractAddr = "0x6734c8d4f6c377007d65483b60ce0f7d4bfe7101";
         private static Contract mtxContract;
 
         // Public api
@@ -34,69 +38,21 @@ namespace MatryxJsonRpc
         // LIST TOURNAMENT
         public static void RunListTournaments(long page, ResultDelegate callback)
         {
-            // Spoofed datas
-            var tournaments = new List<Tournament>();
-            var offset = page * 25;
-            for (var i = 0; i < 25; i++)
-            {
-                var nb = offset + i;
-                var tournament = new Tournament();
-                tournament.title = "Tournament" + nb + " Title";
-                tournament.description = "Tournament" + nb + " Description";
-                tournament.bounty = 4242424242;
-                tournament.address = "TournamentAddress 0x..." + nb;
-                tournaments.Add(tournament);
-            }
-            callback(tournaments);
-            return;
             // Schedule query
             queue(CoroutineListTournaments(new RoutineContext(new object[] { page }, callback)));
         }
 
-        // LIST SUMBISSIONS
-        public static void RunListSubmissions(string tournamentAddress, long page, ResultDelegate callback)
+        [FunctionOutput]
+        private class TournamentDTO
         {
-            // Spoofed datas
-            var submissions = new List<Submission>();
-            var offset = page * 25;
-            for (var i = 0; i < 25; i++)
-            {
-                var nb = offset + i;
-                var submission = new Submission();
-                submission.title = "submission" + nb + " Title:";
-                submission.body = "submission" + nb + " body from tournament: " + tournamentAddress;
-                submission.address = "submission Address 0x..." + nb;
-                submission.contributors = "Vincent,Hello";
-                submission.references = "Reference1,Reference2";
-                submissions.Add(submission);
-            }
-            callback(submissions);
-            return;
-            // Schedule query
-            queue(CoroutineListTournaments(new RoutineContext(new object[] { tournamentAddress, page }, callback)));
-        }
-
-        // DETAIL SUBMISSION
-        public static void RunDetailSubmission(string submissionAddress, ResultDelegate callback)
-        {
-            // Spoofed datas
-            var submission = new Submission();
-            submission.title = "submission" + submissionAddress + " Title:";
-            submission.body = "submission" + submissionAddress + " body";
-            submission.address = "submission Address 0x..." + submissionAddress;
-            submission.contributors = "Vincent,Hello";
-            submission.references = "Reference1,Reference2";
-            callback(submission);
-            return;
-            // Schedule query
-            queue(CoroutineListTournaments(new RoutineContext(new object[] { submissionAddress }, callback)));
-        }
-
-        // UPLOAD SUBMISSION
-        public static void RunUploadSubmission(Submission submission, ResultDelegate callback)
-        {
-            // Schedule query
-            queue(CoroutineUploadSubmission(new RoutineContext(new object[] { submission }, callback)));
+            [Parameter ("uint256", "id", 1)]
+            public BigInteger id { get; set; }
+            [Parameter ("string", "title", 2)]
+            public string title { get; set; }
+            [Parameter ("string", "description", 3)]
+            public string description { get; set; }
+            [Parameter ("uint256", "bounty", 4)]
+            public BigInteger bounty { get; set; }
         }
 
         private static IEnumerator CoroutineListTournaments(RoutineContext context)
@@ -108,75 +64,117 @@ namespace MatryxJsonRpc
             var param = (object[])context.param;
             var page = (long)param[0];
             // Loop over every needed indexes
-            var offset = page * 25;
-            for (var i = 0; i < 25; i++)
+            var offset = page * 10;
+            Debug.Log("Loading tournaments at: " + offset);
+            for (var i = 0; i < 10; i++)
             {
                 // Make input
-                var input = function.CreateCallInput(i + offset);
+                var input = function.CreateCallInput(new BigInteger(i + offset));
                 // Request the specific tournament at the index
                 var request = new EthCallUnityRequest(mtxNode);
                 yield return SimpleCall(request, input);
-                var parsedResults = function.DecodeInput(request.Result);
-                // Read results
-                var tournament = new Tournament();
-                var j = 0;
-                foreach (var parsedResult in parsedResults)
+                try
                 {
-                    Debug.Log("Tournament Parsed result: " + j);
-                    Debug.Log(parsedResult);
-                    j++;
+                    var parsedResults = function.DecodeDTOTypeOutput<TournamentDTO>(request.Result);
+                    // Read results
+                    var tournament = new Tournament();
+                    tournament.address = parsedResults.id.ToString();
+                    tournament.title = parsedResults.title;
+                    tournament.description = parsedResults.description;
+                    tournament.bounty = (long)parsedResults.bounty;
+                    // Add to list of tournaments
+                    tournaments.Add(tournament);
                 }
-                tournament.title = (string)parsedResults[0].Result;
-                tournament.description = (string)parsedResults[1].Result;
-                tournament.bounty = (long)parsedResults[2].Result;
-                tournament.address = (string)parsedResults[3].Result;
-                // Add to list of tournaments
-                tournaments.Add(tournament);
+                catch (Exception e)
+                {
+                    Debug.Log("Could not read tournament at index:" + (offset + i));
+                    Debug.Log(e);
+                    break;
+                }
             }
+            Debug.Log("Fetched tournaments: " + tournaments.Count);
             // Done
             context.done(tournaments);
+        }
+
+        // LIST SUMBISSIONS
+        public static void RunListSubmissions(string tournamentAddress, long page, ResultDelegate callback)
+        {
+            // Schedule query
+            queue(CoroutineListSumbissions(new RoutineContext(new object[] { tournamentAddress, page }, callback)));
+        }
+
+        [FunctionOutput]
+        private class SubmissionDTO
+        {
+            [Parameter ("uint256", "id", 1)]
+            public BigInteger id { get; set; }
+            [Parameter ("string", "title", 2)]
+            public string title { get; set; }
+            [Parameter ("string", "body", 3)]
+            public string body { get; set; }
+            [Parameter ("string", "references", 4)]
+            public string references { get; set; }
+            [Parameter ("string", "contributors", 5)]
+            public string contributors { get; set; }
+            [Parameter ("address", "author", 6)]
+            public string author { get; set; }
         }
 
         private static IEnumerator CoroutineListSumbissions(RoutineContext context)
         {
             // Prepare
             var function = mtxContract.GetFunction("submissionByIndex");
-            var submissions = new List<object>();
+            var submissions = new List<Submission>();
             // Parse routine params
             var param = (object[])context.param;
             var tournamentAddress = (string)param[0];
             var page = (long)param[1];
             // Loop over every needed indexes
-            var offset = page * 25;
-            for (var i = 0; i < 25; i++)
+            var offset = page * 10;
+            Debug.Log("Loading submissions at: " + offset + " in tournament: " + tournamentAddress);
+            for (var i = 0; i < 10; i++)
             {
                 // Make input
-                var input = function.CreateCallInput(tournamentAddress, i + offset);
+                var input = function.CreateCallInput(new BigInteger(Convert.ToInt64(tournamentAddress)), i + offset);
                 // Request the specific submission within tournament address at index
                 var request = new EthCallUnityRequest(mtxNode);
                 yield return SimpleCall(request, input);
-                var parsedResults = function.DecodeInput(request.Result);
                 // Read results
-                var submission = new Submission();
-                var j = 0;
-                foreach (var parsedResult in parsedResults)
+                try
                 {
-                    Debug.Log("Submission Parsed result: " + j);
-                    Debug.Log(parsedResult);
-                    j++;
+                    var parsedResults = function.DecodeDTOTypeOutput<SubmissionDTO>(request.Result);
+                    // Read results
+                    var submission = new Submission();
+                    submission.tournamentAddress = tournamentAddress;
+                    submission.address = tournamentAddress + ":" + parsedResults.id.ToString();
+                    submission.title = parsedResults.title;
+                    submission.body = parsedResults.body;
+                    submission.references = parsedResults.references;
+                    submission.contributors = parsedResults.contributors;
+                    submission.author = parsedResults.author;
+                    // Add to list of submissions
+                    submissions.Add(submission);
                 }
-                submission.title = (string)parsedResults[0].Result;
-                submission.body = (string)parsedResults[1].Result;
-                submission.author = (string)parsedResults[2].Result;
-                submission.address = (string)parsedResults[3].Result;
-                submission.tournamentAddress = (string)parsedResults[4].Result;
-                submission.references = (string)parsedResults[5].Result;
-                submission.contributors = (string)parsedResults[6].Result;
-                // Add to list of submission
-                submissions.Add(submission);
+                catch (Exception e)
+                {
+                    Debug.Log("Could not read submission at index: " + (offset + i));
+                    Debug.Log(e);
+                    break;
+                }
             }
+            Debug.Log("Fetched submissions: " + submissions.Count);
             // Done
             context.done(submissions);
+        }
+
+        // DETAIL SUBMISSION
+        public static void RunDetailSubmission(string addresses, ResultDelegate callback)
+        {
+            var parts = addresses.Split(':');
+            var tournamentAddress = parts[0];
+            var submissionAddress = parts[1];
+            queue(CoroutineDetailSubmission(new RoutineContext(new object[] { tournamentAddress, submissionAddress }, callback)));
         }
 
         private static IEnumerator CoroutineDetailSubmission(RoutineContext context)
@@ -185,80 +183,87 @@ namespace MatryxJsonRpc
             var function = mtxContract.GetFunction("submissionByAddress");
             // Parse routine params
             var param = (object[])context.param;
-            var submissionAddress = (string)param[0];
+            var tournamentAddress = (string)param[0];
+            var submissionAddress = (string)param[1];
             // Make input
-            var input = function.CreateCallInput(submissionAddress);
+            var input = function.CreateCallInput(Convert.ToInt64(tournamentAddress), Convert.ToInt64(submissionAddress));
             // Request the specific submission at address
             var request = new EthCallUnityRequest(mtxNode);
             yield return SimpleCall(request, input);
-            var parsedResults = function.DecodeInput(request.Result);
             // Read results
-            var submission = new Submission();
-            var j = 0;
-            foreach (var parsedResult in parsedResults)
+            try
             {
-                Debug.Log("Submission Parsed result: " + j);
-                Debug.Log(parsedResult);
+                var parsedResults = function.DecodeDTOTypeOutput<SubmissionDTO>(request.Result);
+                // Read results
+                var submission = new Submission();
+                submission.tournamentAddress = tournamentAddress;
+                submission.address = tournamentAddress + ":" + parsedResults.id.ToString();
+                submission.title = parsedResults.title;
+                submission.body = parsedResults.body;
+                submission.references = parsedResults.references;
+                submission.contributors = parsedResults.contributors;
+                submission.author = parsedResults.author;
+                // Done
+                context.done(submission);
             }
-            submission.title = (string)parsedResults[0].Result;
-            submission.body = (string)parsedResults[1].Result;
-            submission.author = (string)parsedResults[2].Result;
-            submission.address = (string)parsedResults[3].Result;
-            submission.tournamentAddress = (string)parsedResults[4].Result;
-            submission.references = (string)parsedResults[5].Result;
-            submission.contributors = (string)parsedResults[6].Result;
-            // Done
-            context.done(submission); // TODO
+            catch (Exception e)
+            {
+                Debug.Log("Could not read submission at:" + submissionAddress + " tournament: " + tournamentAddress);
+                Debug.Log(e);
+                context.done(null);
+            }
+        }
+
+        // UPLOAD SUBMISSION
+        public static void RunUploadSubmission(Submission submission, ResultDelegate callback)
+        {
+            // Schedule query
+            queue(CoroutineUploadSubmission(new RoutineContext(new object[] { submission }, callback)));
         }
 
         private static IEnumerator CoroutineUploadSubmission(RoutineContext context)
         {
             // Prepare
             var function = mtxContract.GetFunction("createSubmission");
+            // Get accounts
+            var requestAccounts = new EthAccountsUnityRequest(mtxNode);
+            yield return requestAccounts.SendRequest();
+            var resultsAccounts = requestAccounts.Result;
+            var usedAccount = resultsAccounts[0];
             // Parse routine params
             var param = (object[])context.param;
             var submission = (Submission)param[0];
-            var tournamentAddress = submission.tournamentAddress;
+            var tournamentAddress = Convert.ToInt64(submission.tournamentAddress);
             var title = submission.title;
             var body = submission.body;
-            var references = submission.references;
-            var contributors = submission.contributors;
+            var references = submission.references + "";
+            var contributors = submission.contributors + "";
             // Make input
-            var functionInput = function.SendTransactionAsync("", tournamentAddress, title, body, references, contributors);
-            // TODO
-            context.done(null);
-            yield return null;
+            var transactionInput = function.CreateTransactionInput(usedAccount, tournamentAddress, title, body, references, contributors);
+            transactionInput.Gas = new HexBigInteger(3000000);
+            // Do request
+            var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
+            yield return requestTransaction.SendRequest(transactionInput);
+            // Results
+            try
+            {
+                var resultsTransaction = requestTransaction.Result;
+                // Success
+                context.done(resultsTransaction);
+            }
+            catch (Exception e)
+            {
+                // Error
+                Debug.Log("Could not submit submission");
+                Debug.Log(e);
+                context.done(null);
+            }
         }
-
-        /*
-        public static void RunBalanceOf(string address, ResultDelegate callback)
-        {
-            queue(CoroutineBalanceOf(new RoutineContext(address, callback)));
-        }
-        private static IEnumerator CoroutineBalanceOf(RoutineContext context)
-        {
-            // Needed params
-            var request = new EthCallUnityRequest(mtxNode);
-            var address = (string)context.param;
-            var function = mtxContract.GetFunction("balanceOf");
-            // Run and wait for result
-            yield return SimpleCall(request, function.CreateCallInput(address));
-            // Parse result
-            var parsedResult = function.DecodeSimpleTypeOutput<long>(request.Result);
-            context.done(parsedResult);
-        }
-        */
 
         private static IEnumerator SimpleCall(EthCallUnityRequest request, CallInput input)
         {
             var block = BlockParameter.CreateLatest();
             var waiting = request.SendRequest(input, block);
-            return waiting;
-        }
-
-        private static IEnumerator SimpleTransaction(TransactionSignedUnityRequest request, TransactionInput input)
-        {
-            var waiting = request.SignAndSendTransaction(input);
             return waiting;
         }
 
@@ -269,9 +274,26 @@ namespace MatryxJsonRpc
             mtxContract = new Contract(null, abi, mtxContractAddr);
         }
 
+        IEnumerator InitRoutine()
+        {
+            // Get accounts
+            var requestAccounts = new EthAccountsUnityRequest(mtxNode);
+            yield return requestAccounts.SendRequest();
+            var resultsAccounts = requestAccounts.Result;
+            var usedAccount = resultsAccounts[0];
+            Debug.Log("Used account:" + resultsAccounts);
+            var function = mtxContract.GetFunction("prepareBalance");
+            var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
+            // Do request
+            var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
+            yield return requestTransaction.SendRequest(transactionInput);
+            var resultsTransaction = requestTransaction.Result;
+        }
+
         void Start()
         {
             /*
+            StartCoroutine(InitRoutine());
             Debug.Log("Balance Of start");
             RunBalanceOf("0x31a8f8c08accb2923049d438f13295d5717b387b", delegate (object result)
             {
@@ -279,10 +301,40 @@ namespace MatryxJsonRpc
                 Debug.Log(result);
             });
             */
+            Debug.Log("RunListTournaments START");
             RunListTournaments(0, delegate (object result)
             {
-
+                Debug.Log("RunListTournaments RESULT");
+                Debug.Log(result);
             });
+            /*
+            Debug.Log("RunListSubmissions START");
+            RunListSubmissions("1", 0, delegate (object result)
+            {
+                Debug.Log("RunListSubmissions RESULT");
+                Debug.Log(result);
+            });
+            Debug.Log("RunDetailSubmission START");
+            RunDetailSubmission("1:1", delegate (object result)
+            {
+                Debug.Log("RunDetailSubmission RESULT");
+                Debug.Log(result);
+            });
+            */
+            /*
+            Debug.Log("RunUploadSubmission START");
+            var sub = new Submission();
+            sub.tournamentAddress = "42";
+            sub.title = "UPLOADED SUB TITLE";
+            sub.body = "UPLOADED SUB BODY";
+            sub.references = "UPLOADED SUB REFERENCES";
+            sub.contributors = "UPLOADED SUB CONTRIBUTORS";
+            RunUploadSubmission(sub, delegate (object result)
+            {
+                Debug.Log("RunUploadSubmission RESULT");
+                Debug.Log(result);
+            });
+            */
         }
 
         // Coroutine param

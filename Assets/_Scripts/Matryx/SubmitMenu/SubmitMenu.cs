@@ -52,15 +52,32 @@ public class SubmitMenu : MonoBehaviour {
         var bodyData = SerializeSurface();
 
         var rpcSubmission = new MatryxJsonRpc.Submission();
+        Debug.Log("Submission: " + tournament.address + " -> " + title);
+        rpcSubmission.tournamentAddress = tournament.address;
         rpcSubmission.title = title;
         rpcSubmission.body = bodyData;
         rpcSubmission.contributorsList(contributorsList);
         rpcSubmission.referencesList(referencesList);
 
+        submittingCanvasObject.SetActive(true);
         MatryxJsonRpc.Request.RunUploadSubmission(rpcSubmission, delegate (object result)
         {
+            // Switch out the submitting screen for the results screen.
+            submittingCanvasObject.SetActive(false);
+            resultsCanvasObject.SetActive(true);
+            this.gameObject.SetActive(false);
+            // Debug
             Debug.Log("Submission uploaded");
             Debug.Log(result);
+            // Check success
+            if (result != null)
+            {
+                resultsCanvasObject.GetComponent<ResultsMenu>().PostSuccess(tournament);
+            }
+            else
+            {
+                resultsCanvasObject.GetComponent<ResultsMenu>().PostFailure(tournament);
+            }
         });
     }
 
