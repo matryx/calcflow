@@ -14,6 +14,7 @@ public class TempVariableTest : QuickButton {
     {
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
         var.GetComponent<ExpressionComponent>().setExpressionParent(param.transform);
+        var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
         param.addVariable(var.transform);
     }
 

@@ -5,8 +5,9 @@ using UnityEngine;
 public class ParametricExpression : MonoBehaviour
 {
     Expressions.ExpressionType type;
+    Expressions expressionsClass;
     ExpressionSet expSet;
-    List<Transform> expressions;
+    List<Transform> expressionsList;
     List<Transform> variableClumps;
     List<Transform> variables;
     List<Transform> emptyList;
@@ -17,13 +18,14 @@ public class ParametricExpression : MonoBehaviour
     {
         if (initialized) return;
         type = Expressions.ExpressionType.Paramet;
+        expressionsClass = Expressions._instance;
         expSet = new ExpressionSet();
-        expressions = new List<Transform>();
+        expressionsList = new List<Transform>();
         variableClumps = new List<Transform>();
         variables = new List<Transform>();
         emptyList = new List<Transform>();
 
-        scroll = FindObjectOfType<Scroll>();
+        scroll = expressionsClass.getParametricScroll();
         initialized = true;
     }
 
@@ -32,7 +34,7 @@ public class ParametricExpression : MonoBehaviour
         if (!initialized)
         {
             type = Expressions.ExpressionType.Paramet;
-            expressions = new List<Transform>();
+            expressionsList = new List<Transform>();
             variableClumps = new List<Transform>();
             initialized = true;
         }
@@ -62,7 +64,7 @@ public class ParametricExpression : MonoBehaviour
 
     public void addExpression(Transform expr)
     {
-        expressions.Add(expr);
+        expressionsList.Add(expr);
     }
 
     //NOTE: when you create a variable, make sure to add forwarder
@@ -95,7 +97,7 @@ public class ParametricExpression : MonoBehaviour
     private void addNewVariableClump(Transform var)
     {
         int lastComponentInd = (variableClumps.Count > 0) ?
-                           scroll.getIndex(variableClumps[variableClumps.Count - 1]) : scroll.getIndex(expressions[2]);
+                           scroll.getIndex(variableClumps[variableClumps.Count - 1]) : scroll.getIndex(expressionsList[2]);
 
         Transform newVarClump = new GameObject().transform;
         newVarClump.name = "Var Clump";

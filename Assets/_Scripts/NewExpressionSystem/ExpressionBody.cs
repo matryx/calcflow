@@ -7,13 +7,13 @@ public class ExpressionBody : QuickButton {
     ExpressionComponent expComp;
     Transform feedBack;
     TMPro.TextMeshPro textInput;
-    TMPro.TextMeshPro title;
-    string varTitle;
+    string title;
     OutputManager outputManager;
     
     private bool menuActive = false;
     private bool finishedScaling = false;
     private bool retracting = false;
+    private bool variable = false;
 
     private Vector3 idleScale, selectedScale;
 
@@ -24,13 +24,26 @@ public class ExpressionBody : QuickButton {
     {
         base.Start();
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
-        expComp = transform.GetComponentInParent<ExpressionComponent>();
+
         feedBack = transform.parent.Find("Feedback");
-        textInput = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
-        title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>();
+        if (!feedBack)
+        {
+            feedBack = transform.parent.parent.Find("Feedback");
+            variable = true;
+        }
+
+        expComp = (variable) ? transform.parent.GetComponentInParent<ExpressionComponent>() :
+                               transform.GetComponentInParent<ExpressionComponent>();
+
+        if (transform.parent.Find("Text_Input")) 
+            textInput = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
+
+        //BUG: null error when creating vector field expression
+        title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
         outputManager = expression.GetComponent<OutputManager>();
 
-        selectedScale = new Vector3(4.56999f, 0.04f, 0.002f);
+        selectedScale = (variable) ? new Vector3(2.16f, 0.04f, 0.002f) :
+                                     new Vector3(4.56999f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
     }
 
@@ -44,7 +57,7 @@ public class ExpressionBody : QuickButton {
         return textInput;
     }
 
-    public TMPro.TextMeshPro getTitle()
+    public string getTitle()
     {
         return title;
     }
@@ -79,9 +92,14 @@ public class ExpressionBody : QuickButton {
         }
 
         expression.setSelectedExpr(expComp.getExpressionParent(), this);
-        if (expComp.getExpressionParent().GetComponent<ParametricExpression>()) 
-            varTitle = expComp.getExpressionParent().GetComponent<ParametricExpression>().getVarTitle(transform.parent.parent); 
-        outputManager.HandleInput(expComp.name, varTitle);
+        if (variable)
+        {
+            outputManager.HandleInput(transform.parent.name, title);
+        }
+        else
+        {
+            outputManager.HandleInput(expComp.name, title);
+        }
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
@@ -104,6 +122,11 @@ public class ExpressionBody : QuickButton {
 
     public void unSelect()
     {
+        if (variable)
+        {
+
+        }
+
         if (!expComp.getPanel().gameObject.activeSelf || !transform.parent.gameObject.activeSelf) {
             feedBack.localScale = idleScale;
             return;

@@ -32,6 +32,11 @@ public class Expressions : MonoBehaviour
         //ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
     }
 
+    public Scroll getParametricScroll()
+    {
+        return transform.parent.Find("ParametrizationPanel").GetComponentInChildren<Scroll>();
+    }
+
     public void addExpr(Transform exp)
     {
         expressions.Add(exp);

@@ -114,7 +114,7 @@ public class CalculatorManager : MonoBehaviour
     private ExpressionSet.ExpOptions getExpOption()
     {
         ExpressionSet.ExpOptions op = X;
-        title = expressions.getSelectedBody().getTitle().text.Substring(0, 1);
+        title = expressions.getSelectedBody().getTitle();
 
         switch (title)
         {
@@ -155,7 +155,7 @@ public class CalculatorManager : MonoBehaviour
         if (expressions.selectedNotNull())
         {
             feedBack = expressions.getSelectedBody().getFeedBack();
-            title = expressions.getSelectedBody().getTitle().text.Substring(0, 1);
+            title = expressions.getSelectedBody().getTitle();
         }
 
         if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity[title] ? positiveFeedback : negativeFeedback;
