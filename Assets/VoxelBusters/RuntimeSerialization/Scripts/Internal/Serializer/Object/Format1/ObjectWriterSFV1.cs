@@ -178,7 +178,9 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 				Write2DArrayValue(_binaryWriter, _arrayObject, _elementTypeID);
 			}
 		}
-		
+
+        int i = 0;
+
 		private void Write1DArrayValue (RSBinaryWriter _binaryWriter, Array _arrayObject, UInt32 _elementTypeID)
 		{
 			int 					_arrayLength	= _arrayObject.Length;
@@ -190,8 +192,10 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 			if (TypeMetadata.IsPrimitive(_elementTypeID))
 			{
 				TypeCode 			_typeCode		= (TypeCode)_elementTypeID;
+                Debug.Log(_typeCode + ": " + i++ + "length: " + _arrayObject.Length);
 
-				switch(_typeCode)
+
+                switch (_typeCode)
 				{
 				case TypeCode.Boolean:
 				{
