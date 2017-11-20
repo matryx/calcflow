@@ -567,7 +567,14 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 			if (_object == null)
 				_object							= CreateInstance(_binaryReader, _serializationInfo);
 
-			ObjectReferenceCache.Add(_object, _objectReferenceID);
+            //Ethan's attempt at fixing error when using deserialize to clone object. Might cause something buggy to happen during reuse.
+            if (ObjectReferenceCache.ContainsKey(_object))
+            {
+                ObjectReferenceCache[_object] = _objectReferenceID;
+            } else
+            {
+                ObjectReferenceCache.Add(_object, _objectReferenceID);
+            }
 
 			// Read properties
 			ReadObjectGraphValuesCollection(_binaryReader, ref _nonInitializerValuesCollection);
