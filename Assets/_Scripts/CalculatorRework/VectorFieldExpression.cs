@@ -12,6 +12,7 @@ public class VectorFieldExpression : MonoBehaviour {
     void Awake () {
         if (initialized) return;
         type = Expressions.ExpressionType.VecField;
+        expSet = new ExpressionSet();
         expressions = new List<Transform>();
         initialized = true;
     }

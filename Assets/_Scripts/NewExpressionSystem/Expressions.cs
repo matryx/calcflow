@@ -48,11 +48,6 @@ public class Expressions : MonoBehaviour
         return selectedExpression;
     }
 
-    //public ExpressionSet getSelectedExpSet()
-    //{
-    //    return selectedExpSet;
-    //}
-
     public ExpressionBody getSelectedBody()
     {
         return selectedBody;
@@ -65,9 +60,22 @@ public class Expressions : MonoBehaviour
 
     public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
+        if (expr == null && body == null)
+        {
+            selectedExpression = expr;
+            //print("selected expr: " + selectedExpression);
+            selectedBody = null;
+            remove.gameObject.SetActive(false);
+            hide.gameObject.SetActive(false);
+            flowLine.gameObject.SetActive(false);
+            return;
+        }
+
         if (selectedBody) selectedBody.unSelect();
         selectedExpression = expr;
         selectedBody = body;
+
+        //print("selected expr: " + selectedExpression);
 
         remove.gameObject.SetActive(true);
         hide.gameObject.SetActive(true);
@@ -104,8 +112,6 @@ public class Expressions : MonoBehaviour
 
             hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
             flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
-
-            //selectedExpSet?
         }
     }
 

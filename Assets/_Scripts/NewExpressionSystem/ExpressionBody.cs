@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExpressionBody : QuickButton {
+public class ExpressionBody : QuickButton
+{
     Expressions expression;
     ExpressionComponent expComp;
     Transform feedBack;
     TMPro.TextMeshPro textInput;
     string title;
     OutputManager outputManager;
-    
+
     private bool menuActive = false;
     private bool finishedScaling = false;
     private bool retracting = false;
@@ -35,7 +36,7 @@ public class ExpressionBody : QuickButton {
         expComp = (variable) ? transform.parent.GetComponentInParent<ExpressionComponent>() :
                                transform.GetComponentInParent<ExpressionComponent>();
 
-        if (transform.parent.Find("Text_Input")) 
+        if (transform.parent.Find("Text_Input"))
             textInput = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
 
         //BUG: null error when creating vector field expression
@@ -74,24 +75,30 @@ public class ExpressionBody : QuickButton {
 
             scaleMenuDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.3f);
             StartCoroutine(scaleMenuDown);
+            finishedScaling = false;
+            expression.setSelectedExpr(null, null);
+            print("CALL 1");
         }
         else
         {
-            if (retracting)
+            if (retracting && backToIdle != null)
             {
                 StopCoroutine(backToIdle);
-                retracting = false;
             }
 
+            retracting = false;
             scaleMenuUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
             StartCoroutine(scaleMenuUp);
+            finishedScaling = false;
+            expression.setSelectedExpr(expComp.getExpressionParent(), this);
+            print("CALL 2");
         }
 
-        if (expComp == null) {
+        if (expComp == null)
+        {
             expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
         }
 
-        expression.setSelectedExpr(expComp.getExpressionParent(), this);
         if (variable)
         {
             outputManager.HandleInput(transform.parent.name, title);
@@ -100,6 +107,8 @@ public class ExpressionBody : QuickButton {
         {
             outputManager.HandleInput(expComp.name, title);
         }
+
+        menuActive = !menuActive;
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
@@ -117,20 +126,22 @@ public class ExpressionBody : QuickButton {
         }
 
         obj.localScale = end;
-        if (end == idleScale) obj.gameObject.SetActive(false);
+        if (end == idleScale)
+        {
+            obj.gameObject.SetActive(false);
+            finishedScaling = true;
+        }
     }
 
+    //BUG: not doing this right, scalemenudown returns null
     public void unSelect()
     {
-        if (variable)
-        {
-
-        }
-
-        if (!expComp.getPanel().gameObject.activeSelf || !transform.parent.gameObject.activeSelf) {
-            feedBack.localScale = idleScale;
-            return;
-        }
+        //if (!expComp.getPanel().gameObject.activeSelf || !transform.parent.gameObject.activeSelf) {
+        //    feedBack.localScale = idleScale;
+        //    //expression.setSelectedExpr(null, null);
+        //    return;
+        //}
+        print("CALL 3");
 
         if (!finishedScaling)
         {
@@ -147,11 +158,30 @@ public class ExpressionBody : QuickButton {
                 StartCoroutine(backToIdle);
             }
 
+            menuActive = !menuActive;
             retracting = true;
         }
 
-        finishedScaling = false;
+        expression.setSelectedExpr(null, null);
+        finishedScaling = true;
     }
 
-    void Update() { }
+    private void OnDisable()
+    {
+        if (feedBack.localScale == selectedScale)
+        {
+            feedBack.localScale = idleScale;
+            feedBack.gameObject.SetActive(false);
+            expression.setSelectedExpr(null, null);
+            print("CALL 4");
+        }
+    }
+
+    void Update()
+    {
+        //if (!expComp.getPanel().gameObject.activeSelf) {
+        //    print("switched panels");
+        //    feedBack.localScale = idleScale;
+        //}
+    }
 }
