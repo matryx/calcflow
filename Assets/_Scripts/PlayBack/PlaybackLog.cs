@@ -92,7 +92,7 @@ public class PlayBackLogAction
     internal Vector3 scale;
     [SerializeField]
     internal GameObject buttonPresser;
-
+    [SerializeField]
     internal string binaryRepresentation;
 
 

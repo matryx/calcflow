@@ -192,7 +192,6 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 			if (TypeMetadata.IsPrimitive(_elementTypeID))
 			{
 				TypeCode 			_typeCode		= (TypeCode)_elementTypeID;
-                Debug.Log(_typeCode + ": " + i++ + "length: " + _arrayObject.Length);
 
 
                 switch (_typeCode)

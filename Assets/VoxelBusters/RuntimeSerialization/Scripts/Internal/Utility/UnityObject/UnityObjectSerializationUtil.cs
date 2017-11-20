@@ -72,7 +72,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 			RSExtensionManager.AddNewExtension(typeof(Quaternion), 		new QuaternionRSExtension());
 
             //CalcFlow Types
-            RSExtensionManager.AddNewExtension(typeof(TMP_Text),        new TMProExtension());
+            //RSExtensionManager.AddNewExtension(typeof(TMP_Text),        new TMProExtension());
             RSExtensionManager.AddNewExtension(typeof(TextMeshPro),     new TMProExtension());
 
         }
