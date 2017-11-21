@@ -285,6 +285,7 @@ namespace MatryxJsonRpc
             Debug.Log("Used account:" + usedAccount);
             var function = mtxContract.GetFunction("prepareBalance");
             var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
+            transactionInput.Gas = new HexBigInteger(3000000);
             // Do request
             var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
             yield return requestTransaction.SendRequest(transactionInput);
