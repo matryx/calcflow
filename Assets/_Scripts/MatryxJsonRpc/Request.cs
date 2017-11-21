@@ -30,7 +30,7 @@ namespace MatryxJsonRpc
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
-        private static string mtxContractAddr = "0x72b5f408a98e857c42823ff4c8fe78b8dc165551";
+        private static string mtxContractAddr = "0x6ebeda3218463f092b26860ead4040e63816b38f";
         private static Contract mtxContract;
 
         // Public api
@@ -89,7 +89,7 @@ namespace MatryxJsonRpc
                 catch (Exception e)
                 {
                     Debug.Log("Could not read tournament at index:" + (offset + i));
-                    //Debug.Log(e);
+                    Debug.Log(e);
                     //break;
                 }
             }
@@ -294,7 +294,7 @@ namespace MatryxJsonRpc
         void Start()
         {
             StartCoroutine(InitRoutine());
-            /*
+            ///*
             Debug.Log("RunListTournaments START");
             RunListTournaments(0, delegate (object result)
             {
