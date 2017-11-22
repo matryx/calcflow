@@ -30,7 +30,7 @@ namespace MatryxJsonRpc
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
-        private static string mtxContractAddr = "0x6ebeda3218463f092b26860ead4040e63816b38f";
+        private static string mtxContractAddr = "0x64317628c81dd2ca1431cded1233933c985e772d";
         private static Contract mtxContract;
 
         // Public api
