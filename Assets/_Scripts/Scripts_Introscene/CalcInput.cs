@@ -62,12 +62,15 @@ public class CalcInput : MonoBehaviour
     public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
-        index = currExpression.tokens.Count;
+        index = (currExpression == null) ? 
+                0 : currExpression.tokens.Count;
     }
 
     //called when button on keyboard pressed
     public void HandleInput(string buttonID)
     {
+        if (currExpression == null) return;
+
         #region switch
         switch (buttonID)
         {

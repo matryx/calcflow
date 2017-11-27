@@ -58,12 +58,15 @@ public class Expressions : MonoBehaviour
         return (selectedExpression != null);
     }
 
+    //TODO: 
+    // (1) fix the _ on texts and maybe make them blink when active?
+    // (2) allow typing on variables
+    //     - note that each component has its own expression body 
     public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
         if (expr == null && body == null)
         {
             selectedExpression = expr;
-            //print("selected expr: " + selectedExpression);
             selectedBody = null;
             remove.gameObject.SetActive(false);
             hide.gameObject.SetActive(false);
@@ -71,11 +74,8 @@ public class Expressions : MonoBehaviour
             return;
         }
 
-        //if (selectedBody) selectedBody.unSelect();
         selectedExpression = expr;
         selectedBody = body;
-
-        //print("selected expr: " + selectedExpression);
 
         remove.gameObject.SetActive(true);
         hide.gameObject.SetActive(true);

@@ -136,7 +136,8 @@ public class CalculatorManager : MonoBehaviour
     {
         //handle variables too
         selectedExpr = expressions.getSelectedExpr();
-        if (!selectedExpr || !expressions.getSelectedBody()) return;
+        if (selectedExpr == null || expressions.getSelectedBody() == null) return;
+
         selectedBody = expressions.getSelectedBody().transform;
 
         if (expressions.selectedNotNull())

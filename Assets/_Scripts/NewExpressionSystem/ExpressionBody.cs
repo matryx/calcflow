@@ -10,6 +10,7 @@ public class ExpressionBody : QuickButton
     TMPro.TextMeshPro textInput;
     string title;
     OutputManager outputManager;
+    CalcInput calcInput;
 
     private bool thisBodyActive = false;
     private bool finishedScaling = false;
@@ -41,6 +42,7 @@ public class ExpressionBody : QuickButton
 
         title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
         outputManager = expression.GetComponent<OutputManager>();
+        calcInput = CalcInput._instance;
 
         selectedScale = (variable) ? new Vector3(2.16f, 0.04f, 0.002f) :
                                      new Vector3(4.56999f, 0.04f, 0.002f);
@@ -94,6 +96,8 @@ public class ExpressionBody : QuickButton
             expression.setSelectedExpr(expComp.getExpressionParent(), this);
         }
 
+        thisBodyActive = !thisBodyActive;
+
         if (expComp == null)
             expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
 
@@ -103,10 +107,15 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            outputManager.HandleInput(expComp.name, title);
+            if (thisBodyActive)
+            {
+                outputManager.HandleInput(expComp.name, title);
+            }
+            else
+            {
+                calcInput.ChangeOutput(null);
+            }
         }
-
-        thisBodyActive = !thisBodyActive;
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
@@ -149,6 +158,7 @@ public class ExpressionBody : QuickButton
             feedBack.gameObject.SetActive(false);
             expression.setSelectedExpr(null, null);
             thisBodyActive = false;
+            calcInput.ChangeOutput(null);
         }
     }
 
