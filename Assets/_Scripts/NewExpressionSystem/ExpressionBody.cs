@@ -11,7 +11,7 @@ public class ExpressionBody : QuickButton
     string title;
     OutputManager outputManager;
 
-    private bool menuActive = false;
+    private bool thisBodyActive = false;
     private bool finishedScaling = false;
     private bool retracting = false;
     private bool variable = false;
@@ -39,7 +39,6 @@ public class ExpressionBody : QuickButton
         if (transform.parent.Find("Text_Input"))
             textInput = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
 
-        //BUG: null error when creating vector field expression
         title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
         outputManager = expression.GetComponent<OutputManager>();
 
@@ -65,9 +64,12 @@ public class ExpressionBody : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        if (menuActive)
+        ExpressionBody selectedBody = expression.getSelectedBody();
+        if (selectedBody && selectedBody.transform != transform) selectedBody.unSelect();
+
+        if (thisBodyActive)
         {
-            if (retracting)
+            if (retracting && backToSelected != null)
             {
                 StopCoroutine(backToSelected);
                 retracting = false;
@@ -77,7 +79,6 @@ public class ExpressionBody : QuickButton
             StartCoroutine(scaleMenuDown);
             finishedScaling = false;
             expression.setSelectedExpr(null, null);
-            print("CALL 1");
         }
         else
         {
@@ -91,13 +92,10 @@ public class ExpressionBody : QuickButton
             StartCoroutine(scaleMenuUp);
             finishedScaling = false;
             expression.setSelectedExpr(expComp.getExpressionParent(), this);
-            print("CALL 2");
         }
 
         if (expComp == null)
-        {
             expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
-        }
 
         if (variable)
         {
@@ -108,7 +106,7 @@ public class ExpressionBody : QuickButton
             outputManager.HandleInput(expComp.name, title);
         }
 
-        menuActive = !menuActive;
+        thisBodyActive = !thisBodyActive;
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
@@ -133,37 +131,14 @@ public class ExpressionBody : QuickButton
         }
     }
 
-    //BUG: not doing this right, scalemenudown returns null
     public void unSelect()
     {
-        //if (!expComp.getPanel().gameObject.activeSelf || !transform.parent.gameObject.activeSelf) {
-        //    feedBack.localScale = idleScale;
-        //    //expression.setSelectedExpr(null, null);
-        //    return;
-        //}
-        print("CALL 3");
-
-        if (!finishedScaling)
-        {
-            if (menuActive)
-            {
-                StopCoroutine(scaleMenuDown);
-                backToSelected = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.5f);
-                StartCoroutine(backToSelected);
-            }
-            else
-            {
-                StopCoroutine(scaleMenuUp);
-                backToIdle = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
-                StartCoroutine(backToIdle);
-            }
-
-            menuActive = !menuActive;
-            retracting = true;
-        }
-
+        if (!finishedScaling && scaleMenuUp != null) StopCoroutine(scaleMenuUp);
+        backToIdle = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
+        StartCoroutine(backToIdle);
+        retracting = true;
         expression.setSelectedExpr(null, null);
-        finishedScaling = true;
+        thisBodyActive = false;
     }
 
     private void OnDisable()
@@ -173,15 +148,9 @@ public class ExpressionBody : QuickButton
             feedBack.localScale = idleScale;
             feedBack.gameObject.SetActive(false);
             expression.setSelectedExpr(null, null);
-            print("CALL 4");
+            thisBodyActive = false;
         }
     }
 
-    void Update()
-    {
-        //if (!expComp.getPanel().gameObject.activeSelf) {
-        //    print("switched panels");
-        //    feedBack.localScale = idleScale;
-        //}
-    }
+    void Update() { }
 }

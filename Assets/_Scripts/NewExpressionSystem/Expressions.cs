@@ -71,7 +71,7 @@ public class Expressions : MonoBehaviour
             return;
         }
 
-        if (selectedBody) selectedBody.unSelect();
+        //if (selectedBody) selectedBody.unSelect();
         selectedExpression = expr;
         selectedBody = body;
 
