@@ -131,25 +131,6 @@ public class RSManager : SingletonPattern <RSManager>
     /// <param name="_key">A key string used to identify object's serialization. An optional parameter, when supplied it is used for firing serialization finished callback.</param>
     /// <typeparam name="T">The type of the object being serialized.</typeparam>
 
-    public static string SerializeForMultiThreading<T>(T _object, string _key = null)
-    {
-        string retVal = "working...";
-#if UNITY_EDITOR
-        try
-        {
-#endif
-            retVal = Serialize<T>(_object, _key);
-#if UNITY_EDITOR
-        }
-        catch (Exception exception)
-        {
-            retVal = "ERROR";
-            Debug.Log(exception);
-        }
-#endif
-        return retVal;
-    }
-
     public static string Serialize<T> (T _object, string _key = null)
 	{
 		RSManager	_sharedInstance		= Instance;

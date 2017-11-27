@@ -11,6 +11,7 @@ using VoxelBusters.RuntimeSerialization;
 using Nanome.Core.Daemon;
 using Priority_Queue;
 using System.Threading;
+using Nanome.Core;
 
 
 [Serializable]
@@ -95,6 +96,7 @@ public class PlayBackLogAction
     [SerializeField]
     internal GameObject buttonPresser;
     [SerializeField]
+    [HideInInspector]
     internal string binaryRepresentation;
 
 
@@ -120,7 +122,22 @@ public class PlayBackLogAction
         this.type = type;
     }
 
+    //how many serializations are left before the scene is done recording.
+    public static int numRunningSerializations;
+    public static Queue<Action> spawnQueue = new Queue<Action>();
+    public static Coroutine spawner;
 
+    public static IEnumerator steadySpawn()
+    {
+        while (spawnQueue.Count != 0)
+        {
+            spawnQueue.Dequeue().Invoke();
+            yield return null;
+        }
+    }
+
+
+    //Creates a spawn PlayBackLogAction. The action will not have an accurate binaryRepresentation until later.
     internal static PlayBackLogAction CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
     {
         int key = subject.GetInstanceID();
@@ -134,17 +151,23 @@ public class PlayBackLogAction
             subjectKey = key
         };
 
-        Thread thread = new Thread(() => newAction.SerializeForSpawn(subject, key.ToString()));
-        thread.Start();
+        numRunningSerializations++;
+        //enqueue a function that will perform the serialization of the data at a later time.
+        spawnQueue.Enqueue(delegate () 
+        {
+            //Debug.Log(numRunningSerializations);
+            numRunningSerializations--;
+            newAction.SerializeForSpawn(subject, key.ToString());
+        });
+        if (spawner == null) Dispatcher.queue(steadySpawn());
         return newAction;
     }
 
+    // function that will serialize the spawn and assign the binary output to "binaryRepresentation".
     void SerializeForSpawn(GameObject subject, string key)
     {
-        Debug.Log("starting serialization");
-        binaryRepresentation = "working...";
-        binaryRepresentation = RSManager.SerializeForMultiThreading(subject, key);
-        Debug.Log("finishing serialization");
+        binaryRepresentation = "";
+        binaryRepresentation = RSManager.Serialize(subject, key);
     }
 
     internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)

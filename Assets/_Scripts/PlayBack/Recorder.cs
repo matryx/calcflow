@@ -75,7 +75,6 @@ public class Recorder : MonoBehaviour {
                     gObj.gameObject.EnsureOneOf<MovementLogger>();
                     LogSpawn(gObj.gameObject);
                 }
-
                 //Transform child1 = gObj.transform;
                 //Transform parent1 = child1.parent;
 
