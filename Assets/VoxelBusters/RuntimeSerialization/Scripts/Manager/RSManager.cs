@@ -133,7 +133,7 @@ public class RSManager : SingletonPattern <RSManager>
 
     public static string SerializeForMultiThreading<T>(T _object, string _key = null)
     {
-        string retVal = "";
+        string retVal = "working...";
 #if UNITY_EDITOR
         try
         {
@@ -143,6 +143,7 @@ public class RSManager : SingletonPattern <RSManager>
         }
         catch (Exception exception)
         {
+            retVal = "ERROR";
             Debug.Log(exception);
         }
 #endif

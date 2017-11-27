@@ -135,13 +135,16 @@ public class PlayBackLogAction
         };
 
         Thread thread = new Thread(() => newAction.SerializeForSpawn(subject, key.ToString()));
-
+        thread.Start();
         return newAction;
     }
 
     void SerializeForSpawn(GameObject subject, string key)
     {
+        Debug.Log("starting serialization");
+        binaryRepresentation = "working...";
         binaryRepresentation = RSManager.SerializeForMultiThreading(subject, key);
+        Debug.Log("finishing serialization");
     }
 
     internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
