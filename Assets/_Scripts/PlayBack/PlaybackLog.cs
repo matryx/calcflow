@@ -10,6 +10,8 @@ using CalcFlowUI;
 using VoxelBusters.RuntimeSerialization;
 using Nanome.Core.Daemon;
 using Priority_Queue;
+using System.Threading;
+
 
 [Serializable]
 public class PlaybackLog
@@ -92,7 +94,7 @@ public class PlayBackLogAction
     internal Vector3 scale;
     [SerializeField]
     internal GameObject buttonPresser;
-
+    [SerializeField]
     internal string binaryRepresentation;
 
 
@@ -129,10 +131,17 @@ public class PlayBackLogAction
             position = position,
             rotation = rotation,
             scale = scale,
-            subjectKey = key,
-            binaryRepresentation = RSManager.Serialize(subject, key.ToString())
+            subjectKey = key
         };
+
+        Thread thread = new Thread(() => newAction.SerializeForSpawn(subject, key.ToString()));
+
         return newAction;
+    }
+
+    void SerializeForSpawn(GameObject subject, string key)
+    {
+        binaryRepresentation = RSManager.SerializeForMultiThreading(subject, key);
     }
 
     internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
@@ -187,9 +196,7 @@ public class PlayBackLogAction
         {
             objectMap.Add(subjectKey, subject);
         }
-        subject.MoveTo(position, 0);
-        subject.RotateTo(rotation, 0);
-        subject.GlobalScaleTo(scale, 0);
+
     }
 
 
@@ -202,6 +209,13 @@ public class PlayBackLogAction
             case ActionType.Spawn:
                 //Dispatcher.queue(Spawn());
                 Spawn();
+                //Thread thread = new Thread(() => Spawn());
+
+                //thread.Join();
+                subject = objectMap[subjectKey];
+                subject.MoveTo(position, 0);
+                subject.RotateTo(rotation, 0);
+                subject.GlobalScaleTo(scale, 0);
                 break;
             case ActionType.Movement:
                 if (objectMap.ContainsKey(subjectKey))

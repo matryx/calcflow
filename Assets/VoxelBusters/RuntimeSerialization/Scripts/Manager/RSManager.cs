@@ -117,20 +117,39 @@ public class RSManager : SingletonPattern <RSManager>
 		}
 	
 		base.OnDestroy();
-	} 
-	
-	#endregion
+	}
 
-	#region Serialize [No Save] Methods
+    #endregion
 
-	/// <summary>
-	/// Returns serialization data of target object as Base64 string. 
-	/// After serialization, associated serialization data doesn't get saved by <see cref="RSManager">. And it is user's responsiblity to provide this data while deserializing object using method <see cref="DeserializeData"/> .
-	/// </summary>
-	/// <param name="_object">The object to be serialized.</param>
-	/// <param name="_key">A key string used to identify object's serialization. An optional parameter, when supplied it is used for firing serialization finished callback.</param>
-	/// <typeparam name="T">The type of the object being serialized.</typeparam>
-	public static string Serialize<T> (T _object, string _key = null)
+    #region Serialize [No Save] Methods
+
+    /// <summary>
+    /// Returns serialization data of target object as Base64 string. 
+    /// After serialization, associated serialization data doesn't get saved by <see cref="RSManager">. And it is user's responsiblity to provide this data while deserializing object using method <see cref="DeserializeData"/> .
+    /// </summary>
+    /// <param name="_object">The object to be serialized.</param>
+    /// <param name="_key">A key string used to identify object's serialization. An optional parameter, when supplied it is used for firing serialization finished callback.</param>
+    /// <typeparam name="T">The type of the object being serialized.</typeparam>
+
+    public static string SerializeForMultiThreading<T>(T _object, string _key = null)
+    {
+        string retVal = "";
+#if UNITY_EDITOR
+        try
+        {
+#endif
+            retVal = Serialize<T>(_object, _key);
+#if UNITY_EDITOR
+        }
+        catch (Exception exception)
+        {
+            Debug.Log(exception);
+        }
+#endif
+        return retVal;
+    }
+
+    public static string Serialize<T> (T _object, string _key = null)
 	{
 		RSManager	_sharedInstance		= Instance;
 
