@@ -125,15 +125,17 @@ public class PlayBackLogAction
     //how many serializations are left before the scene is done recording.
     public static int numRunningSerializations;
     public static Queue<Action> spawnQueue = new Queue<Action>();
-    public static Coroutine spawner;
+    public static IEnumerator spawner;
 
     public static IEnumerator steadySpawn()
     {
         while (spawnQueue.Count != 0)
         {
+
             spawnQueue.Dequeue().Invoke();
             yield return null;
         }
+        spawner = null;
     }
 
 
@@ -159,7 +161,11 @@ public class PlayBackLogAction
             numRunningSerializations--;
             newAction.SerializeForSpawn(subject, key.ToString());
         });
-        if (spawner == null) Dispatcher.queue(steadySpawn());
+        if (spawner == null)
+        {
+            spawner = steadySpawn();
+            Dispatcher.queue(spawner);
+        }
         return newAction;
     }
 
