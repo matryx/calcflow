@@ -29,7 +29,6 @@ public class CalcInput : MonoBehaviour
     public int index = 0;
     [HideInInspector]
 
-    //private CalcManager calcManager;
     private CalculatorManager calcManager;
     public static CalcInput _instance;
 
@@ -48,7 +47,6 @@ public class CalcInput : MonoBehaviour
         _instance = this;
     }
 
-    //public void Initialize(CalcManager cm)
     public void Initialize(CalculatorManager cm)
     {
         calcManager = cm;
@@ -58,7 +56,7 @@ public class CalcInput : MonoBehaviour
         letterPanel = transform.Find("LetterPanel");
     }
 
-    //called by CalcManager
+    //called by CalculatorManager
     public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
@@ -75,6 +73,8 @@ public class CalcInput : MonoBehaviour
         switch (buttonID)
         {
             default:
+                //TODO: 
+                // check if variable, if it is, call function that adds variable to keyboard scroll
                 currExpression.tokens.Insert(index, buttonID);
                 index++;
                 break;
@@ -123,7 +123,6 @@ public class CalcInput : MonoBehaviour
         calcManager.inputReceived = true;
     }
 
-    //NOTE: tested and works but calcinput is disconnected 
     private void toggleCapital()
     {
         foreach (Transform child in letterPanel)
@@ -132,15 +131,15 @@ public class CalcInput : MonoBehaviour
             {
                 child.name = (capitalized) ? child.name.ToLower() : child.name.ToUpper();
 
-                child.GetComponentInChildren<TextMesh>().text = (capitalized) ?
-                                                                 child.GetComponentInChildren<TextMesh>().text.ToLower() :
-                                                                 child.GetComponentInChildren<TextMesh>().text.ToUpper();
+                child.GetComponentInChildren<TMPro.TextMeshPro>().text = (capitalized) ?
+                                                                 child.GetComponentInChildren<TMPro.TextMeshPro> ().text.ToLower() :
+                                                                 child.GetComponentInChildren<TMPro.TextMeshPro> ().text.ToUpper();
             }
             else
             {
-                child.GetComponentInChildren<TextMesh>().text = (capitalized) ?
-                                                                 child.GetComponentInChildren<TextMesh>().text.ToUpper() :
-                                                                 child.GetComponentInChildren<TextMesh>().text.ToLower();
+                child.GetComponentInChildren<TMPro.TextMeshPro>().text = (capitalized) ?
+                                                                 child.GetComponentInChildren<TMPro.TextMeshPro>().text.ToUpper() :
+                                                                 child.GetComponentInChildren<TMPro.TextMeshPro>().text.ToLower();
             }
         }
 

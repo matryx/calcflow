@@ -59,12 +59,13 @@ public class Expressions : MonoBehaviour
     }
 
     //TODO: 
-    // (1) fix the _ on texts and maybe make them blink when active?
+    // (1) fix the _ on texts to make them blink when active
     // (2) allow typing on variables
     //     - note that each component has its own expression body 
+    //     - need to add variable list to expression set 
     public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
-        if (expr == null && body == null)
+        if (expr == null || body == null)
         {
             selectedExpression = expr;
             selectedBody = null;
@@ -115,8 +116,5 @@ public class Expressions : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-
-    }
+    void Update() { }
 }

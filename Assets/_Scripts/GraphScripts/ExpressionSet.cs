@@ -11,11 +11,8 @@ public class ExpressionSet
         X, Y, Z
     }
 
-    //public enum RangeOptions
-    //{
-    //    p, q, r, s, t, u, v, w
-    //}
-
+    //TODO: need to add variable titles somehow
+    //public LIst<string> variables = new List<string>();
     public Dictionary<ExpOptions, Expression> expressions;
     public Dictionary<string, RangePair> ranges;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
