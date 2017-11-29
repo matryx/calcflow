@@ -7,6 +7,7 @@ public class MovementLogger : Nanome.Core.Behaviour
     Vector3 lastLocalPos;
     Vector3 lastScale;
     Quaternion lastRotation;
+    Transform lastParent;
 
     private void Start()
     {
@@ -15,12 +16,24 @@ public class MovementLogger : Nanome.Core.Behaviour
 
     void RecordPosition()
     {
-        if (lastLocalPos != transform.localPosition || lastRotation != transform.rotation || lastScale != transform.lossyScale)
+        if (lastParent != transform.parent || lastLocalPos != transform.localPosition || lastRotation != transform.rotation || lastScale != transform.lossyScale)
         {
+            lastParent = transform.parent;
             lastLocalPos = transform.localPosition;
             lastRotation = transform.rotation;
             lastScale = transform.lossyScale;
-            Recorder.LogMovement(gameObject, transform.localPosition, transform.rotation, transform.lossyScale);
+
+            GameObject nextParent;
+            if (transform.parent == null)
+            {
+                nextParent = null;
+            }
+            else
+            {
+                nextParent = transform.parent.gameObject;
+            }
+
+            Recorder.LogMovement(gameObject, transform.localPosition, transform.rotation, transform.lossyScale, nextParent);
         }
     }
 }

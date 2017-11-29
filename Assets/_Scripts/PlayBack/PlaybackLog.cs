@@ -96,6 +96,8 @@ public class PlayBackLogAction
     [SerializeField]
     internal GameObject buttonPresser;
     [SerializeField]
+    internal int parentKey;
+    [SerializeField]
     [HideInInspector]
     internal string binaryRepresentation;
 
@@ -176,8 +178,9 @@ public class PlayBackLogAction
         binaryRepresentation = RSManager.Serialize(subject, key);
     }
 
-    internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
+    internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
     {
+        int parentKey = (parent == null) ? 0 : parent.GetInstanceID();
         PlayBackLogAction newAction = new PlayBackLogAction
         {
             type = ActionType.Movement,
@@ -185,7 +188,8 @@ public class PlayBackLogAction
             position = destination,
             rotation = rotation,
             scale = scale,
-            subjectKey = subject.GetInstanceID()
+            subjectKey = subject.GetInstanceID(),
+            parentKey = parentKey
         };
 
         return newAction;
@@ -256,6 +260,7 @@ public class PlayBackLogAction
                     subject.LocalMoveTo(position, PlaybackLog.Period);
                     subject.RotateTo(rotation, PlaybackLog.Period);
                     subject.GlobalScaleTo(scale, PlaybackLog.Period);
+                    subject.transform.parent = (parentKey == 0) ? null : objectMap[parentKey].transform;
                 }
                 else
                 {

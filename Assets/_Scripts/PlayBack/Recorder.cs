@@ -109,11 +109,11 @@ public class Recorder : MonoBehaviour {
                                                             subject.transform.lossyScale));
     }
 
-    public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale)
+    public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
     {
         long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000);
         recordLog.log.Add(PlayBackLogAction.CreateMovement(time,
-                          subject, destination, rotation, scale));
+                          subject, destination, rotation, scale, parent));
     }
 
     public static void LogButtonPress(GameObject subject, GameObject presser)
