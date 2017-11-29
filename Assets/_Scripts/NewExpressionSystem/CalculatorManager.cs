@@ -86,7 +86,7 @@ public class CalculatorManager : MonoBehaviour
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
-        calcInput.ChangeOutput(expressionSet.expressions[getExpOption()]); //need to fix
+        calcInput.ChangeOutput(expressionSet.expressions[getExpOption()]);
         manageText();
         if (boundsManager != null) boundsManager.UpdateButtonText();
     }
@@ -163,6 +163,7 @@ public class CalculatorManager : MonoBehaviour
         if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity[title] ? positiveFeedback : negativeFeedback;
     }
 
+    //TODO: make underscore blink
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)
     {
         string test = "";
@@ -221,7 +222,6 @@ public class CalculatorManager : MonoBehaviour
             }
             else start = true;
         }
-        //currText.text = displayList;
         return displayList;
     }
 

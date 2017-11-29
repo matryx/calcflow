@@ -60,6 +60,7 @@ public class Expressions : MonoBehaviour
 
     //TODO: 
     // (1) fix the _ on texts to make them blink when active
+    //     - hide the underscore when text block isn't active
     // (2) allow typing on variables
     //     - note that each component has its own expression body 
     //     - need to add variable list to expression set 

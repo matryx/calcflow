@@ -19,7 +19,7 @@ public class ExpressionBody : QuickButton
 
     private Vector3 idleScale, selectedScale;
 
-    private IEnumerator scaleMenuUp, scaleMenuDown;
+    private IEnumerator scaleUp, scaleDown;
     private IEnumerator backToSelected, backToIdle;
 
     protected override void Start()
@@ -69,6 +69,8 @@ public class ExpressionBody : QuickButton
         ExpressionBody selectedBody = expression.getSelectedBody();
         if (selectedBody && selectedBody.transform != transform) selectedBody.unSelect();
 
+        //grab last letter/underscore of text input
+
         if (thisBodyActive)
         {
             if (retracting && backToSelected != null)
@@ -77,10 +79,11 @@ public class ExpressionBody : QuickButton
                 retracting = false;
             }
 
-            scaleMenuDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.3f);
-            StartCoroutine(scaleMenuDown);
+            scaleDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.3f);
+            StartCoroutine(scaleDown);
             finishedScaling = false;
             expression.setSelectedExpr(null, null);
+            //remove the underscore, the last letter
         }
         else
         {
@@ -90,10 +93,11 @@ public class ExpressionBody : QuickButton
             }
 
             retracting = false;
-            scaleMenuUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
-            StartCoroutine(scaleMenuUp);
+            scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
+            StartCoroutine(scaleUp);
             finishedScaling = false;
             expression.setSelectedExpr(expComp.getExpressionParent(), this);
+            //make underscore blink using a helper function that removes underscore from text and re-adds it continuously
         }
 
         thisBodyActive = !thisBodyActive;
@@ -142,7 +146,7 @@ public class ExpressionBody : QuickButton
 
     public void unSelect()
     {
-        if (!finishedScaling && scaleMenuUp != null) StopCoroutine(scaleMenuUp);
+        if (!finishedScaling && scaleUp != null) StopCoroutine(scaleUp);
         backToIdle = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
         StartCoroutine(backToIdle);
         retracting = true;
