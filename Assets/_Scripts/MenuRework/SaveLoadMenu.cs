@@ -150,6 +150,10 @@ public class SaveLoadMenu : MonoBehaviour
     {
         GameObject button = Instantiate(Resources.Load("Screenshot", typeof(GameObject))) as GameObject;
         button.name = save.date;
+        // Parent the button's transform
+        Transform panelTransform = transform.Find("Panel");
+        button.transform.SetParent(panelTransform);
+
         initializeButton(save, button);
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());

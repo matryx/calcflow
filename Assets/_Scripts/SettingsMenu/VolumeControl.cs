@@ -5,13 +5,13 @@ using UnityEngine;
 public class VolumeControl : MonoBehaviour
 {
     Vector3 lastPos;
-    TextMesh volumeValue;
+    TMPro.TextMeshPro volumeValue;
     public ConstraintGrabbable ball;
     AudioSource[] soundFiles;
 
     void Start()
     {
-        volumeValue = transform.Find("VolumeValue").GetComponent<TextMesh>();
+        volumeValue = transform.Find("VolumeValue").GetComponent<TMPro.TextMeshPro>();
         soundFiles = GameObject.FindObjectsOfType(typeof(AudioSource)) as AudioSource[];
 
         foreach (AudioSource aud in soundFiles)

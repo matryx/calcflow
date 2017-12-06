@@ -9,10 +9,12 @@ public class MainMenu : QuickButton
     public Transform resetScene;
     public Transform home;
     public Transform menus;
+    public Transform matryx;
     public Transform outerRing, innerRing;
 
     private Vector3 idleScale, selectedScale;
     private Vector3 buttonScale;
+    private Vector3 matryxScale;
 
     private bool menuActive = false;
     private bool finishedScaling = false;
@@ -27,6 +29,7 @@ public class MainMenu : QuickButton
         selectedScale = new Vector3(0.05f, 0.001f, 0.05f);
         idleScale = new Vector3(0.02f, 0.001f, 0.02f);
         buttonScale = new Vector3(0.003f, 0.05f, 0.07f);
+        matryxScale = new Vector3(0.003f, 0.025f, 0.1475f);
 
         outerRing.SetParent(transform);
         innerRing.SetParent(transform);
@@ -38,6 +41,7 @@ public class MainMenu : QuickButton
         resetPos.gameObject.SetActive(false);
         resetScene.gameObject.SetActive(false);
         home.gameObject.SetActive(false);
+        matryx.gameObject.SetActive(false);
 
         if (menus != null)
         {
@@ -69,6 +73,8 @@ public class MainMenu : QuickButton
 
     IEnumerator ScaleButtonsDown()
     {
+        yield return StartCoroutine(ScaleTo(matryx, matryxScale, Vector3.zero, 0.1f));
+        matryx.gameObject.SetActive(false);
         yield return StartCoroutine(ScaleTo(resetScene, buttonScale, Vector3.zero, 0.1f));
         resetScene.gameObject.SetActive(false);
         yield return StartCoroutine(ScaleTo(home, buttonScale, Vector3.zero, 0.1f));
@@ -99,6 +105,9 @@ public class MainMenu : QuickButton
         yield return StartCoroutine(ScaleTo(home, Vector3.zero, buttonScale, 0.1f));
         resetScene.gameObject.SetActive(true);
         yield return StartCoroutine(ScaleTo(resetScene, Vector3.zero, buttonScale, 0.1f));
+        matryx.gameObject.SetActive(true);
+        yield return StartCoroutine(ScaleTo(matryx, Vector3.zero, matryxScale, 0.1f));
+        
     }
 
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)

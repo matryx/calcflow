@@ -248,6 +248,14 @@ public class Scroll : MonoBehaviour
         }
     }
 
+    public void clear()
+    {
+        if(objects != null)
+        {
+            deleteObjects(objects);
+        }
+    }
+
     public void deleteObjects(List<Transform> objs)
     {
         List<int> indeces = new List<int>();
@@ -440,7 +448,7 @@ public class Scroll : MonoBehaviour
     }
     #endregion
 
-    void Update()
+    void FixedUpdate()
     {
         if (moving && objects.Count > 0 && objects[0].localPosition == toPos) moving = false;
 
