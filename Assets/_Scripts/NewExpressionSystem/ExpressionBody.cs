@@ -67,7 +67,13 @@ public class ExpressionBody : QuickButton
     protected override void ButtonEnterBehavior(GameObject other)
     {
         ExpressionBody selectedBody = expression.getSelectedBody();
-        if (selectedBody && selectedBody.transform != transform) selectedBody.unSelect();
+        if (selectedBody && selectedBody.transform != transform)
+        {
+            TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+            oldTextInput.text = oldTextInput.text.Replace("_", "");
+
+            selectedBody.unSelect();
+        }
 
         //grab last letter/underscore of text input
 
@@ -150,6 +156,7 @@ public class ExpressionBody : QuickButton
         backToIdle = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
         StartCoroutine(backToIdle);
         retracting = true;
+
         expression.setSelectedExpr(null, null);
         thisBodyActive = false;
     }
@@ -160,6 +167,11 @@ public class ExpressionBody : QuickButton
         {
             feedBack.localScale = idleScale;
             feedBack.gameObject.SetActive(false);
+
+            ExpressionBody selectedBody = expression.getSelectedBody();
+            TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+            oldTextInput.text = oldTextInput.text.Replace("_", "");
+
             expression.setSelectedExpr(null, null);
             thisBodyActive = false;
             calcInput.ChangeOutput(null);
