@@ -72,7 +72,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 			RSExtensionManager.AddNewExtension(typeof(Quaternion), 		new QuaternionRSExtension());
 
             //CalcFlow Types
-            //RSExtensionManager.AddNewExtension(typeof(TMP_Text),        new TMProExtension());
+            RSExtensionManager.AddNewExtension(typeof(TMP_Text),        new TMProExtension());
             RSExtensionManager.AddNewExtension(typeof(TextMeshPro),     new TMProExtension());
 
         }
@@ -215,7 +215,8 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 		#region UID Methods
 
 		private static UIDSystem GetUIDSystem (string _hierarchyMetadata, bool _isPrefab)
-		{ 
+		{
+            Debug.Log(_hierarchyMetadata);
 			string		_trimmedHierarchyMetadata	= _hierarchyMetadata.TrimStart('/');
 			string[]	_pathComponents				= _trimmedHierarchyMetadata.Split('/');
 			int 		_pathComponentCount			= _pathComponents.Length;
