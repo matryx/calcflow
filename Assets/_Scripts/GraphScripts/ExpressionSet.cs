@@ -13,6 +13,7 @@ public class ExpressionSet
 
     //TODO: need to add variable titles somehow
     //public LIst<string> variables = new List<string>();
+    //public Dictionary<string, Variable> variables;
     public Dictionary<ExpOptions, Expression> expressions;
     public Dictionary<string, RangePair> ranges;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
@@ -404,7 +405,6 @@ public class Range : CalcOutput
         rawText = "";
         this.tokens = tokens;
     }
-
 
     public Range()
     {

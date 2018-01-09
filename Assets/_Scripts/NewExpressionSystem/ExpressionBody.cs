@@ -75,8 +75,6 @@ public class ExpressionBody : QuickButton
             selectedBody.unSelect();
         }
 
-        //grab last letter/underscore of text input
-
         if (thisBodyActive)
         {
             if (retracting && backToSelected != null)
@@ -89,7 +87,6 @@ public class ExpressionBody : QuickButton
             StartCoroutine(scaleDown);
             finishedScaling = false;
             expression.setSelectedExpr(null, null);
-            //remove the underscore, the last letter
         }
         else
         {
@@ -103,7 +100,6 @@ public class ExpressionBody : QuickButton
             StartCoroutine(scaleUp);
             finishedScaling = false;
             expression.setSelectedExpr(expComp.getExpressionParent(), this);
-            //make underscore blink using a helper function that removes underscore from text and re-adds it continuously
         }
 
         thisBodyActive = !thisBodyActive;
@@ -150,6 +146,7 @@ public class ExpressionBody : QuickButton
         }
     }
 
+    //NOTE: sets selected expression and body to be null
     public void unSelect()
     {
         if (!finishedScaling && scaleUp != null) StopCoroutine(scaleUp);
