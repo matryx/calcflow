@@ -67,8 +67,6 @@ public class ParametricExpression : MonoBehaviour
         expressionsList.Add(expr);
     }
 
-    //NOTE: when you create a variable, make sure to add forwarder
-    //      just like it's done in ExpressionSelector
     public void addVariable(Transform newVar)
     {
         if (variables.Count % 2 == 0)
@@ -87,6 +85,8 @@ public class ParametricExpression : MonoBehaviour
     {
         return type;
     }
+
+    //TODO: handle deletion of variables and re-arranging that will happen as a result
 
     private void addToVarClump(Transform var)
     {

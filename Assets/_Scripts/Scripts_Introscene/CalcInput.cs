@@ -37,10 +37,13 @@ public class CalcInput : MonoBehaviour
     bool capitalized = false;
 
     KeyboardInputResponder responder;
+    Expressions expressions;
 
     ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
+
+    List<string> nonLetters = new List<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "(", ")", "^", "/", "*", "-", "+", "." };
 
     private void Awake()
     {
@@ -53,6 +56,7 @@ public class CalcInput : MonoBehaviour
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);
+        expressions = Expressions._instance;
         letterPanel = transform.Find("LetterPanel");
     }
 
@@ -60,7 +64,7 @@ public class CalcInput : MonoBehaviour
     public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
-        index = (currExpression == null) ? 
+        index = (currExpression == null) ?
                 0 : currExpression.tokens.Count;
     }
 
@@ -73,8 +77,20 @@ public class CalcInput : MonoBehaviour
         switch (buttonID)
         {
             default:
-                //TODO: 
-                // check if variable, if it is, call function that adds variable to keyboard scroll
+                //TODO: add forwarder just like it's done in ExpressionSelector
+                //      - need access to param scroll
+
+                //creates new variable when new letter is pressed
+                if (!nonLetters.Contains(buttonID) && !calcManager.expressionSet.ranges.ContainsKey(buttonID))
+                {
+                    Transform param = expressions.getSelectedExpr();
+                    GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                    var.GetComponent<ExpressionComponent>().setExpressionParent(param);
+                    var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
+                    param.GetComponent<ParametricExpression>().addVariable(var.transform);
+                    var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
+                    calcManager.expressionSet.AddRange(buttonID);
+                }
                 currExpression.tokens.Insert(index, buttonID);
                 index++;
                 break;
@@ -132,8 +148,8 @@ public class CalcInput : MonoBehaviour
                 child.name = (capitalized) ? child.name.ToLower() : child.name.ToUpper();
 
                 child.GetComponentInChildren<TMPro.TextMeshPro>().text = (capitalized) ?
-                                                                 child.GetComponentInChildren<TMPro.TextMeshPro> ().text.ToLower() :
-                                                                 child.GetComponentInChildren<TMPro.TextMeshPro> ().text.ToUpper();
+                                                                 child.GetComponentInChildren<TMPro.TextMeshPro>().text.ToLower() :
+                                                                 child.GetComponentInChildren<TMPro.TextMeshPro>().text.ToUpper();
             }
             else
             {

@@ -59,6 +59,12 @@ public class ExpressionBody : QuickButton
         return textInput;
     }
 
+    public void setTitle(string t)
+    {
+        transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text = t;
+        title = t;
+    }
+
     public string getTitle()
     {
         return title;
