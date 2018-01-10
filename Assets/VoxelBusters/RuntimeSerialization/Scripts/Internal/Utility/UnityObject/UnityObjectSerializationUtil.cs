@@ -216,7 +216,6 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 
 		private static UIDSystem GetUIDSystem (string _hierarchyMetadata, bool _isPrefab)
 		{
-            Debug.Log(_hierarchyMetadata);
 			string		_trimmedHierarchyMetadata	= _hierarchyMetadata.TrimStart('/');
 			string[]	_pathComponents				= _trimmedHierarchyMetadata.Split('/');
 			int 		_pathComponentCount			= _pathComponents.Length;

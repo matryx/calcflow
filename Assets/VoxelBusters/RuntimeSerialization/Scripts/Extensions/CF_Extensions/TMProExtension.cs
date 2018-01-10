@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TMProExtension : RendererRSExtension 
+public class TMProExtension 
 {}
 
 

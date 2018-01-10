@@ -17,7 +17,6 @@ public class ComponentRSExtension : ObjectRSExtension
 
 	public override object CreateInstance (RuntimeSerializationInfo _info)
 	{
-        Debug.Log(_info);
 		string		_hierarchyMetadata	= _info.GetValue<string>(kHierarchyMetadataKey, true);
 		string		_componentUID		= _info.GetValue<string>(kComponentUIDKey, 		true);
 		bool		_isPrefab			= _info.GetValue<bool>(kIsPrefabKey, 			true);
