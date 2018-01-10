@@ -48,7 +48,7 @@ namespace VoxelBusters.Utility
 		#region Methods
 
 		/// <summary>
-		/// Determins default value for given type.
+		/// Determines default value for given type.
 		/// </summary>
 		/// <returns>Default value for a given type.</returns>
 		/// <param name="_type">Type.</param>
