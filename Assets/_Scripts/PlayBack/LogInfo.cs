@@ -9,7 +9,7 @@ public class LogInfo
 {
 		#region Properties
 
-		public Type ObjectType
+    public Type ObjectType
     {
         get;
         private set;
@@ -33,16 +33,8 @@ public class LogInfo
 
     #region Constructors
 
-    private LogInfo()
-    { }
-
-    internal LogInfo(Type _targetType)
+    public LogInfo()
     {
-        if (_targetType == null)
-            throw new NullReferenceException("Target object type cant be null.");
-
-        // Set properties
-        ObjectType = _targetType;
         Fields = new Dictionary<string, LogInfoEntry>();
     }
 
