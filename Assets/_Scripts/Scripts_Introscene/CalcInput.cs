@@ -38,6 +38,8 @@ public class CalcInput : MonoBehaviour
 
     KeyboardInputResponder responder;
     Expressions expressions;
+    Scroll paramScroll;
+    JoyStickAggregator joyStickAggregator;
 
     ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
@@ -58,6 +60,17 @@ public class CalcInput : MonoBehaviour
         keyboard.RegisterResponder(responder);
         expressions = Expressions._instance;
         letterPanel = transform.Find("LetterPanel");
+        paramScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
+        joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
+    }
+
+    private void addForwarders(Transform obj)
+    {
+        JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>();
+        foreach (JoyStickForwarder j in forwarders)
+        {
+            joyStickAggregator.AddForwarder(j);
+        }
     }
 
     //called by CalculatorManager
@@ -90,6 +103,7 @@ public class CalcInput : MonoBehaviour
                     param.GetComponent<ParametricExpression>().addVariable(var.transform);
                     var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
                     calcManager.expressionSet.AddRange(buttonID);
+                    addForwarders(var.transform);
                 }
                 currExpression.tokens.Insert(index, buttonID);
                 index++;
