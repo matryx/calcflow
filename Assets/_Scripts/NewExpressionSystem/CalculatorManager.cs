@@ -35,8 +35,9 @@ public class CalculatorManager : MonoBehaviour
     private Color positiveFeedback;
     private Color negativeFeedback = Color.red;
 
-    int maxDisplayLength = 20;
-    int rangeDisplayLength = 5;
+    int expressionDisplayLength = 20;
+    //TODO: decrease text size to increase range length
+    int rangeDisplayLength = 3;
 
     public bool updateOverlay = false;
     internal bool toExport = false;
@@ -136,7 +137,6 @@ public class CalculatorManager : MonoBehaviour
     {
         //handle variables too
 
-
         selectedExpr = expressions.getSelectedExpr();
         if (selectedExpr == null || expressions.getSelectedBody() == null) return;
 
@@ -145,11 +145,14 @@ public class CalculatorManager : MonoBehaviour
         if (expressions.selectedNotNull())
         {
             textInput = expressions.getSelectedBody().getTextInput();
+            //print("text input: " + textInput);
         }
 
         if (textInput != null)
         {
-            textInput.text = displayText(expressionSet.expressions[getExpOption()].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[getExpOption()], maxDisplayLength);
+            //print("HELLO");
+            int displayLength = (expressions.getSelectedBody().isVariable()) ? rangeDisplayLength : expressionDisplayLength;
+            textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
         }
     }
 
@@ -165,7 +168,6 @@ public class CalculatorManager : MonoBehaviour
         if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity[title] ? positiveFeedback : negativeFeedback;
     }
 
-    //TODO: make underscore blink
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)
     {
         string test = "";

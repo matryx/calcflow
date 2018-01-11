@@ -45,8 +45,6 @@ public class CalcInput : MonoBehaviour
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
 
-    List<string> nonLetters = new List<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "(", ")", "^", "/", "*", "-", "+", "." };
-
     private void Awake()
     {
         _instance = this;
@@ -90,21 +88,26 @@ public class CalcInput : MonoBehaviour
         switch (buttonID)
         {
             default:
-                //TODO: add forwarder just like it's done in ExpressionSelector
-                //      - need access to param scroll
-
                 //creates new variable when new letter is pressed
-                if (!nonLetters.Contains(buttonID) && !calcManager.expressionSet.ranges.ContainsKey(buttonID))
+                Transform param = expressions.getSelectedExpr();
+
+                //if typing a single letter
+                if (buttonID.Length == 1 && buttonID[0] >= 97 && buttonID[0] <= 122)
                 {
-                    Transform param = expressions.getSelectedExpr();
-                    GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-                    var.GetComponent<ExpressionComponent>().setExpressionParent(param);
-                    var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
-                    param.GetComponent<ParametricExpression>().addVariable(var.transform);
-                    var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
-                    calcManager.expressionSet.AddRange(buttonID);
-                    addForwarders(var.transform);
+                    if (expressions.getSelectedBody().isVariable()) break;
+
+                    if (param != null && buttonID.Length == 1 && !calcManager.expressionSet.ranges.ContainsKey(buttonID))
+                    {
+                        GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                        var.GetComponent<ExpressionComponent>().setExpressionParent(param);
+                        var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
+                        param.GetComponent<ParametricExpression>().addVariable(var.transform);
+                        var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
+                        calcManager.expressionSet.AddRange(buttonID);
+                        addForwarders(var.transform);
+                    }
                 }
+
                 currExpression.tokens.Insert(index, buttonID);
                 index++;
                 break;

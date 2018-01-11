@@ -21,7 +21,7 @@ public class OutputManager : MonoBehaviour {
         //saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
     }
 
-    public void HandleInput(string source, string range)
+    public void HandleInput(string source, string rangeTitle)
     {
         switch (source)
         {
@@ -41,10 +41,10 @@ public class OutputManager : MonoBehaviour {
                 //need to figure out how to do the var title
                 break;
             case "Min":
-                calcManager.SetOutput(calcManager.expressionSet.ranges[range].Min); 
+                calcManager.SetOutput(calcManager.expressionSet.ranges[rangeTitle].Min); 
                 break;
             case "Max":
-                calcManager.SetOutput(calcManager.expressionSet.ranges[range].Max); 
+                calcManager.SetOutput(calcManager.expressionSet.ranges[rangeTitle].Max); 
                 break;
             case "GenerateMesh":
                 calcManager.toExport = true;

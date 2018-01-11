@@ -95,10 +95,6 @@ public class ExpressionSet
 
         //need to change later
         ranges = new Dictionary<string, RangePair>();
-        AddRange("t");
-        AddRange("u");
-        AddRange("v");
-        AddRange("w");
     }
 
     public ExpressionSet DeepCopy()
