@@ -10,10 +10,6 @@ public class ExpressionSet
     {
         X, Y, Z
     }
-    public enum RangeOptions
-    {
-        p, q, r, s, t, u, v, w
-    }
 
     public Dictionary<ExpOptions, Expression> expressions;
     public Dictionary<string, RangePair> ranges;

@@ -5,7 +5,7 @@ using UnityEngine;
 public class Replayer : MonoBehaviour {
 
     public bool EditorReplay = false;
-    private static List<PlayBackLogAction> log;
+    private static List<PlaybackLogAction2> log;
     private static bool replay = false;
 
     public static Replayer _instance;
@@ -22,10 +22,10 @@ public class Replayer : MonoBehaviour {
     
     private void LoadReplay(string json)
     {
-        LoadReplay(JsonUtility.FromJson<PlaybackLog>(json));
+        LoadReplay(JsonUtility.FromJson<PlaybackLog2>(json));
     }
 
-    private void LoadReplay(PlaybackLog replay)
+    private void LoadReplay(PlaybackLog2 replay)
     {
         log = replay.GetLogCopy();
     }
@@ -53,7 +53,7 @@ public class Replayer : MonoBehaviour {
                 if (log[0].timeStamp <= PlaybackClock.GetTime())
                 {
                     print("popping next instruction");
-                    PlayBackLogAction item = log[0];
+                    PlaybackLogAction2 item = log[0];
                     log.RemoveAt(0);
                     item.Reenact();
                 }

@@ -10,8 +10,7 @@ public class CalcManager : Nanome.Core.Behaviour
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-    const ExpressionSet.RangeOptions u = ExpressionSet.RangeOptions.u;
-    const ExpressionSet.RangeOptions v = ExpressionSet.RangeOptions.v;
+    
     #endregion
 
     ExpressionSet currExpressionSet;

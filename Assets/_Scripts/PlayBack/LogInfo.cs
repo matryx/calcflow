@@ -5,6 +5,7 @@ using System;
 //using VoxelBusters.Utility;
 using Nanome.Core;
 
+[Serializable]
 public class LogInfo
 {
 		#region Properties
@@ -15,17 +16,14 @@ public class LogInfo
         private set;
     }
 
-    internal Dictionary<string, LogInfoEntry> Fields
-    {
-        get;
-        private set;
-    }
+    internal List<string> keys = new List<string>();
+    internal List<LogInfoEntry> entries = new List<LogInfoEntry>();
 
     public int MemberCount
     {
         get
         {
-            return Fields.Count;
+            return keys.Count;
         }
     }
 
@@ -35,7 +33,6 @@ public class LogInfo
 
     public LogInfo()
     {
-        Fields = new Dictionary<string, LogInfoEntry>();
     }
 
 
@@ -53,8 +50,8 @@ public class LogInfo
     public void AddValue(string _name, object _value, Type _valueType)
     {
         LogInfoEntry _newEntry = new LogInfoEntry(_name, _value, _valueType);
-
-        Fields.Add(_name, _newEntry);
+        keys.Add(_name);
+        entries.Add(_newEntry);
     }
 
     #endregion
@@ -88,16 +85,18 @@ public class LogInfo
 
     public bool TryGetValue(string _name, out object _value, Type _type)
     {
-        // Get appropriate serialized values container
-        Dictionary<string, LogInfoEntry> _valuesCollection = null;
-
-        _valuesCollection = Fields;
-
         // Fetch value associated with given name and check target values validity
-        LogInfoEntry _entry;
-
-        if (_valuesCollection.TryGetValue(_name, out _entry))
-        {
+        LogInfoEntry _entry = null;
+    
+        if (keys.Contains(_name))
+        {          
+            for(int i = 0; i<keys.Count; i++)
+            {
+                if (keys[i] == _name){
+                    _entry = entries[i];
+                    break;
+                }
+            }    
             if (_entry.Value != null && _type.IsInstanceOfType(_entry.Value))
                 _value = _entry.Value;
             else
@@ -114,11 +113,7 @@ public class LogInfo
 
     public bool ContainsValue(string _name)
     {
-        Dictionary<string, LogInfoEntry> _valuesCollection = null;
-
-        _valuesCollection = Fields;
-
-        return _valuesCollection.ContainsKey(_name);
+        return keys.Contains(_name);
     }
 
     #endregion

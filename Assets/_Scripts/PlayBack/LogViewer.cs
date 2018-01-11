@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class LogViewer : MonoBehaviour {
     public int numCurrentSpawns;
-    public List<PlayBackLogAction> log;
+    public List<PlaybackLogAction2> log;
     public Recorder rec;
 	// Use this for initialization
 	void Start () {

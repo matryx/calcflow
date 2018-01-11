@@ -195,21 +195,14 @@ public class PlaybackLogAction2
         return newAction;
     }
 
-    internal static PlaybackLogAction2 CreateEnable(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale, GameObject parent)
+    internal static PlaybackLogAction2 CreateEnable(long timestamp, GameObject subject)
     {
-        int parentKey = (parent == null) ? 0 : parent.GetInstanceID();
         PlaybackLogAction2 newAction = new PlaybackLogAction2
         {
             type = ActionType.Enable,
             timeStamp = timestamp,
             subjectKey = subject.GetInstanceID(),
         };
-
-        newAction._info.AddValue("position", position);
-        newAction._info.AddValue("rotation", rotation);
-        newAction._info.AddValue("scale", scale);
-        newAction._info.AddValue("parentKey", parentKey);
-
         return newAction;
     }
 
@@ -218,6 +211,17 @@ public class PlaybackLogAction2
         PlaybackLogAction2 newAction = new PlaybackLogAction2
         {
             type = ActionType.Disable,
+            timeStamp = timestamp,
+            subjectKey = subject.GetInstanceID(),
+        };
+        return newAction;
+    }
+
+       internal static PlaybackLogAction2 CreateDestroy(long timestamp, GameObject subject)
+    {
+        PlaybackLogAction2 newAction = new PlaybackLogAction2
+        {
+            type = ActionType.Destroy,
             timeStamp = timestamp,
             subjectKey = subject.GetInstanceID(),
         };
@@ -314,16 +318,7 @@ public class PlaybackLogAction2
                 if (objectMap.ContainsKey(subjectKey))
                 {
                     subject = objectMap[subjectKey];
-                    position = _info.GetValue<Vector3>("position");
-                    scale = _info.GetValue<Vector3>("scale");
-                    rotation = _info.GetValue<Quaternion>("rotation");
-                    parentKey = _info.GetValue<int>("parentKey");
-
                     subject.SetActive(true);
-                    subject.LocalMoveTo(position, 0);
-                    subject.RotateTo(rotation, 0);
-                    subject.GlobalScaleTo(scale, 0);
-                    subject.transform.parent = (parentKey == 0) ? null : objectMap[parentKey].transform;
                 }
                 else
                 {
@@ -335,6 +330,17 @@ public class PlaybackLogAction2
                 {
                     subject = objectMap[subjectKey];
                     subject.SetActive(false);
+                }
+                else
+                {
+                    Debug.Log(timeStamp + " " + subjectKey);
+                }
+                break;
+            case ActionType.Destroy:
+                if (objectMap.ContainsKey(subjectKey))
+                {
+                    subject = objectMap[subjectKey];
+                    UnityEngine.Object.Destroy(subject,0);
                 }
                 else
                 {
