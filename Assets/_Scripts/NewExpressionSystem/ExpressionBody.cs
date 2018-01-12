@@ -176,6 +176,7 @@ public class ExpressionBody : QuickButton
         thisBodyActive = false;
     }
 
+    //BUG: null feedback when adding a new variable that's offscreen
     private void OnDisable()
     {
         if (feedBack.localScale == selectedScale)

@@ -39,6 +39,7 @@ public class CalcInput : MonoBehaviour
     KeyboardInputResponder responder;
     Expressions expressions;
     Scroll paramScroll;
+    VariableShortcut variableShortcut;
     JoyStickAggregator joyStickAggregator;
 
     ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
@@ -57,6 +58,7 @@ public class CalcInput : MonoBehaviour
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);
         expressions = Expressions._instance;
+        variableShortcut = VariableShortcut._instance;
         letterPanel = transform.Find("LetterPanel");
         paramScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
         joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
@@ -88,15 +90,19 @@ public class CalcInput : MonoBehaviour
         switch (buttonID)
         {
             default:
-                //creates new variable when new letter is pressed
+                if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
+                variableShortcut.recordVarPress(buttonID);
+
                 Transform param = expressions.getSelectedExpr();
 
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] >= 97 && buttonID[0] <= 122)
                 {
+                    //prevents typing of letters when a variable body is selected
                     if (expressions.getSelectedBody().isVariable()) break;
 
-                    if (param != null && buttonID.Length == 1 && !calcManager.expressionSet.ranges.ContainsKey(buttonID))
+                    //creates new variable button when new letter pressed
+                    if (param != null && !calcManager.expressionSet.ranges.ContainsKey(buttonID))
                     {
                         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
                         var.GetComponent<ExpressionComponent>().setExpressionParent(param);
