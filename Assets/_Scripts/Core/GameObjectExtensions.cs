@@ -211,6 +211,11 @@ namespace Extensions
 
         public static void LerpRotate(GameObject gObj, Quaternion destination, float seconds)
         {
+            Quaternion badQ = new Quaternion(0,0,0,0);
+            if (destination.Equals(badQ)) {
+                Debug.Log("Impossible lerpRotation being attempted on object " + gObj.name);
+                return;
+            }
             gObj.AddComponent<LerpRotator>().lerper = new LerpQuaternion(gObj.transform.rotation, destination, seconds);
         }
 

@@ -8,6 +8,8 @@ namespace Nanome.Maths
     public abstract class Lerp<T>
     {
 
+        private static float minimumLerpTime = 0.00001f;
+
         private float startTime;
         private float totalTime;
 
@@ -25,6 +27,10 @@ namespace Nanome.Maths
         {
             startTime = now();
             totalTime = seconds;
+            if (totalTime <= minimumLerpTime)
+            {
+                totalTime = minimumLerpTime;
+            }
         }
 
         public float ratio()

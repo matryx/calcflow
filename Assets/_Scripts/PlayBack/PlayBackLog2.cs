@@ -98,6 +98,7 @@ public class PlaybackLogAction2
     public LogInfo _info = new LogInfo();
 
     [HideInInspector]
+    [SerializeField]
     internal string binaryRepresentation;
 
 
@@ -153,6 +154,12 @@ public class PlaybackLogAction2
         newAction._info.AddValue("position", position);
         newAction._info.AddValue("rotation", rotation);
         newAction._info.AddValue("scale", scale);
+        Debug.Log("subjectkey: " + key + "\nposition: " + position + " rotation: " + rotation + " scale: " + scale);
+        Debug.Log(newAction._info.MemberCount);
+        position = newAction._info.GetValue<Vector3>("position");
+        scale = newAction._info.GetValue<Vector3>("scale");
+        rotation = newAction._info.GetValue<Quaternion>("rotation");
+        Debug.Log("subjectkey: " + key + "\nposition: " + position + " rotation: " + rotation + " scale: " + scale);
 
         numRunningSerializations++;
         //enqueue a function that will perform the serialization of the data at a later time.
@@ -180,18 +187,21 @@ public class PlaybackLogAction2
     internal static PlaybackLogAction2 CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
     {
         int parentKey = (parent == null) ? 0 : parent.GetInstanceID();
+        int key = subject.GetInstanceID();
         PlaybackLogAction2 newAction = new PlaybackLogAction2
         {
             type = ActionType.Movement,
             timeStamp = timestamp,
-            subjectKey = subject.GetInstanceID(),
+            subjectKey = key,
         };
 
         newAction._info.AddValue("position", destination);
         newAction._info.AddValue("rotation", rotation);
         newAction._info.AddValue("scale", scale);
         newAction._info.AddValue("parentKey", parentKey);
-
+        Debug.Log("subjectkey: " + key + "\nposition: " + destination + " rotation: " + rotation + " scale: " + scale + " parentkey " + parentKey);
+        Debug.Log(newAction._info.MemberCount);
+        Debug.Log(newAction._info.testEntry.Name);
         return newAction;
     }
 
@@ -217,7 +227,7 @@ public class PlaybackLogAction2
         return newAction;
     }
 
-       internal static PlaybackLogAction2 CreateDestroy(long timestamp, GameObject subject)
+    internal static PlaybackLogAction2 CreateDestroy(long timestamp, GameObject subject)
     {
         PlaybackLogAction2 newAction = new PlaybackLogAction2
         {
@@ -291,6 +301,8 @@ public class PlaybackLogAction2
                 scale = _info.GetValue<Vector3>("scale");
                 rotation = _info.GetValue<Quaternion>("rotation");
 
+                Debug.Log("subjectkey: " + subjectKey + "\nposition: " + position + " rotation: " + rotation + " scale: " + scale);
+                Debug.Log(_info.MemberCount);
                 subject.MoveTo(position, 0);
                 subject.RotateTo(rotation, 0);
                 subject.GlobalScaleTo(scale, 0);
@@ -303,6 +315,9 @@ public class PlaybackLogAction2
                     scale = _info.GetValue<Vector3>("scale");
                     rotation = _info.GetValue<Quaternion>("rotation");
                     parentKey = _info.GetValue<int>("parentKey");
+                    Debug.Log("subjectkey: " + subjectKey + "\nposition: " + position + " rotation: " + rotation + " scale: " + scale + " parentkey " + parentKey);
+                    Debug.Log(_info.MemberCount);
+                    Debug.Log(_info.testEntry.Name);
 
                     subject.LocalMoveTo(position, PlaybackLog.Period);
                     subject.RotateTo(rotation, PlaybackLog.Period);
@@ -340,7 +355,7 @@ public class PlaybackLogAction2
                 if (objectMap.ContainsKey(subjectKey))
                 {
                     subject = objectMap[subjectKey];
-                    UnityEngine.Object.Destroy(subject,0);
+                    UnityEngine.Object.Destroy(subject, 0);
                 }
                 else
                 {

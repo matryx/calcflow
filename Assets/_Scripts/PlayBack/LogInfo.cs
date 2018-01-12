@@ -8,7 +8,7 @@ using Nanome.Core;
 [Serializable]
 public class LogInfo
 {
-		#region Properties
+    #region Properties
 
     public Type ObjectType
     {
@@ -16,13 +16,18 @@ public class LogInfo
         private set;
     }
 
+    [SerializeField]
     internal List<string> keys = new List<string>();
+    [SerializeField]
     internal List<LogInfoEntry> entries = new List<LogInfoEntry>();
 
+    [SerializeField]
+    public LogInfoEntry testEntry = new LogInfoEntry("testEntry", Quaternion.identity, Quaternion.identity.GetType());
     public int MemberCount
     {
         get
         {
+            Debug.Log(keys.Count == entries.Count);
             return keys.Count;
         }
     }
@@ -44,6 +49,7 @@ public class LogInfo
     public void AddValue<T>(string _name, T _value)
     {
         AddValue(_name, _value, typeof(T));
+        testEntry.Name = "testEntry1";
     }
 
 
@@ -87,16 +93,17 @@ public class LogInfo
     {
         // Fetch value associated with given name and check target values validity
         LogInfoEntry _entry = null;
-    
+
         if (keys.Contains(_name))
-        {          
-            for(int i = 0; i<keys.Count; i++)
+        {
+            for (int i = 0; i < keys.Count; i++)
             {
-                if (keys[i] == _name){
+                if (keys[i] == _name)
+                {
                     _entry = entries[i];
                     break;
                 }
-            }    
+            }
             if (_entry.Value != null && _type.IsInstanceOfType(_entry.Value))
                 _value = _entry.Value;
             else
@@ -119,37 +126,132 @@ public class LogInfo
     #endregion
 }
 
-class LogInfoEntry
+[Serializable]
+public class LogInfoEntry
 {
     #region Properties
 
+    [SerializeField]
+    private string _name;
+    [SerializeField]
+    public int intValue;
+    [SerializeField]
+    public UnityEngine.Object objectValue;
+    [SerializeField]
+    public float floatValue;
+    [SerializeField]
+    public string stringValue;
+    [SerializeField]
+    public Vector3 vector3Value;
+    [SerializeField]
+    public Quaternion quaternionValue;
+
+    [SerializeField]
+    private string _type;
+
+
     public string Name
     {
-        get;
-        private set;
-    }
-
-    public object Value
-    {
-        get;
-        private set;
+        get { return _name; }
+        internal set { _name = value; }
     }
 
     public Type Type
     {
-        get;
-        private set;
+        get
+        {
+            if (_type != null)
+            {
+                return Type.GetType(_type);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        private set { _type = value.FullName; }
     }
+
+    public object Value
+    {
+        get
+        {
+            if (_type == "int")
+            {
+                return intValue;
+            }
+            else if (_type == "float")
+            {
+                return floatValue;
+            }
+            else if (_type == "string")
+            {
+                return stringValue;
+            }
+            else if (_type == "UnityEngine.Vector3")
+            {
+                return vector3Value;
+            }
+            else if (_type == "UnityEngine.Quaternion")
+            {
+                return quaternionValue;
+            }
+            else if (_type == "UnityEngine.Object")
+            {
+                return objectValue;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private set { setValue(value); }
+    }
+
+
+    void setValue(object value)
+    {
+        if (_type == "int")
+        {
+            intValue = (int)value;
+        }
+        else if (_type == "float")
+        {
+            floatValue = (float)value;
+        }
+        else if (_type == "string")
+        {
+            stringValue = (string)value;
+        }
+        else if (_type == "UnityEngine.Vector3")
+        {
+            vector3Value = (Vector3)value;
+        }
+        else if (_type == "UnityEngine.Quaternion")
+        {
+            quaternionValue = (Quaternion)value;
+        }
+        else if (_type == "UnityEngine.Object")
+        {
+            objectValue = (UnityEngine.Object)value;
+        }
+        else
+        {
+            Debug.Log("unsupported type: " + _type);
+        }
+    }
+
 
     #endregion
 
     #region Constructors
 
-    internal LogInfoEntry(string _name, object _value, Type _type)
+    internal LogInfoEntry(string name, object value, Type type)
     {
-        Name = _name;
-        Value = _value;
-        Type = _type;
+        Name = name;
+        Type = type;
+        setValue(value);
     }
 
     #endregion
