@@ -60,8 +60,5 @@ public class VariableShortcut : MonoBehaviour
         thisScroll.deleteObjects(removeList);
     }
 
-    void Update()
-    {
-
-    }
+    void Update() { }
 }

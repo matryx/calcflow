@@ -19,9 +19,7 @@ public class CalcInput : MonoBehaviour
         }
 
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
-
     }
-
 
     [HideInInspector]
     public CalcOutput currExpression;
@@ -90,9 +88,6 @@ public class CalcInput : MonoBehaviour
         switch (buttonID)
         {
             default:
-                if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
-                variableShortcut.recordVarPress(buttonID);
-
                 Transform param = expressions.getSelectedExpr();
 
                 //if typing a single letter
@@ -100,6 +95,9 @@ public class CalcInput : MonoBehaviour
                 {
                     //prevents typing of letters when a variable body is selected
                     if (expressions.getSelectedBody().isVariable()) break;
+
+                    if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
+                    variableShortcut.recordVarPress(buttonID);
 
                     //creates new variable button when new letter pressed
                     if (param != null && !calcManager.expressionSet.ranges.ContainsKey(buttonID))

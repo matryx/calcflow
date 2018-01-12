@@ -304,6 +304,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
+    //TODO: add function that deletes single object
     public void deleteObjects(List<Transform> objs)
     {
         List<int> indeces = new List<int>();
