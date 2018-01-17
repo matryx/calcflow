@@ -117,6 +117,7 @@ public class ExpressionBody : QuickButton
             StartCoroutine(scaleUp);
             finishedScaling = false;
             expression.setSelectedExpr(expComp.getExpressionParent(), this);
+            print("EXP: " + expComp.getExpressionParent());
         }
 
         thisBodyActive = !thisBodyActive;
@@ -124,6 +125,7 @@ public class ExpressionBody : QuickButton
         if (expComp == null)
             expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
 
+        //BUG: this code isn't running when you press t in a Vec Field expression
         if (variable)
         {
             title = transform.parent.parent.Find("VariableTitle").Find("Title").GetComponent<TMPro.TextMeshPro>().text;
@@ -179,7 +181,7 @@ public class ExpressionBody : QuickButton
     //BUG: null feedback when adding a new variable that's offscreen
     private void OnDisable()
     {
-        if (feedBack.localScale == selectedScale)
+        if (feedBack && feedBack.localScale == selectedScale)
         {
             feedBack.localScale = idleScale;
             feedBack.gameObject.SetActive(false);

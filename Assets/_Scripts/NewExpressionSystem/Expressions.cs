@@ -58,13 +58,10 @@ public class Expressions : MonoBehaviour
         return (selectedExpression != null);
     }
 
-    //TODO: 
-    // (1) allow typing on variables
-    //     - note that each component has its own expression body 
-    //     - need to add variable list to expression set 
     public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
-        if (expr == null || body == null)
+        if (expr == null)
+        //if (expr == null || body == null)
         {
             selectedExpression = expr;
             selectedBody = null;

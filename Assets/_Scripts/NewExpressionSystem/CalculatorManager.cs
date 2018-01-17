@@ -115,8 +115,9 @@ public class CalculatorManager : MonoBehaviour
     private ExpressionSet.ExpOptions getExpOption()
     {
         ExpressionSet.ExpOptions op = X;
+        //title = (expressions.getSelectedBody())? expressions.getSelectedBody().getTitle() : "X";
         title = expressions.getSelectedBody().getTitle();
-
+        print("TITLE: " + title);
         switch (title)
         {
             case "X":

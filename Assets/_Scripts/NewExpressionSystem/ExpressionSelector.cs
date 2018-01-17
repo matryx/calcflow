@@ -8,10 +8,12 @@ public class ExpressionSelector : QuickButton
     Expressions expressions;
     JoyStickAggregator joyStickAggregator;
     Transform panel;
+    private CalculatorManager calcManager;
 
     protected override void Start()
     {
         base.Start();
+        calcManager = CalculatorManager._instance;
         thisScroll = transform.parent.parent.GetComponentInChildren<Scroll>();
         panel = thisScroll.transform.parent;
         expressions = GameObject.Find("ExpressionMenu").GetComponentInChildren<Expressions>();
@@ -50,6 +52,7 @@ public class ExpressionSelector : QuickButton
             case "ParametrizationAdd":
                 GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
                 param.GetComponent<ParametricExpression>().Initialize();
+                //expressions.setSelectedExpr(param.transform, null);
                 addForwarders(param.transform);
 
                 foreach (Transform child in param.transform)
@@ -71,29 +74,24 @@ public class ExpressionSelector : QuickButton
             case "VectorFieldAdd":
                 GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
                 vec.GetComponent<VectorFieldExpression>().Initialize();
+                expressions.setSelectedExpr(vec.transform, null);
                 addForwarders(vec.transform);
 
-                foreach (Transform child in vec.transform)
+                foreach (Transform child in vec.transform.Find("ExpressionSet"))
                 {
-                    switch (child.name)
-                    {
-                        case "ExpressionSet":
-                            foreach (Transform gchild in child)
-                            {
-                                vec.GetComponent<VectorFieldExpression>().addExpression(gchild);
-                                gchild.GetComponent<ExpressionComponent>().setExpressionParent(vec.transform);
-                                gchild.GetComponentInChildren<ExpressionComponent>().setPanel(panel);
-                                toAdd.Add(gchild);
-                            }
-                            break;
-                        case "Variable":
-                            vec.GetComponent<VectorFieldExpression>().setRange(child);
-                            child.GetComponentInChildren<ExpressionComponent>().setExpressionParent(vec.transform);
-                            child.GetComponentInChildren<ExpressionComponent>().setPanel(panel);
-                            toAdd.Add(child);
-                            break;
-                    }
+                    vec.GetComponent<VectorFieldExpression>().addExpression(child);
+                    child.GetComponent<ExpressionComponent>().setExpressionParent(vec.transform);
+                    child.GetComponentInChildren<ExpressionComponent>().setPanel(panel);
+                    toAdd.Add(child);
                 }
+
+                GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                var.GetComponent<ExpressionComponent>().setExpressionParent(vec.transform);
+                var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
+                var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle("t");
+                calcManager.expressionSet.AddRange("t");
+                addForwarders(var.transform);
+                toAdd.Add(var.transform);
 
                 expressions.addExpr(vec.transform);
                 break;

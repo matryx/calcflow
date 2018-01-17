@@ -37,9 +37,6 @@ public class OutputManager : MonoBehaviour {
             case "Button_Zinput":
                 calcManager.SetOutput(calcManager.expressionSet.expressions[Z]);
                 break;
-            case "VariableTitle":  
-                //need to figure out how to do the var title
-                break;
             case "Min":
                 calcManager.SetOutput(calcManager.expressionSet.ranges[rangeTitle].Min); 
                 break;

@@ -19,7 +19,7 @@ public class VariableShortcut : MonoBehaviour
         thisScroll = GetComponentInChildren<Scroll>();
     }
 
-    public void addVarShortcut(string varName)
+    private void addVarShortcut(string varName)
     {
         if (shortcuts.Count == maxLength) removeVarShortcut();
 
