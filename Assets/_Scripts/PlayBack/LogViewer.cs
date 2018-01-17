@@ -13,7 +13,7 @@ public class LogViewer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        numCurrentSpawns = PlayBackLogAction.numRunningSerializations;
+        numCurrentSpawns = PlaybackLogAction2.numRunningSerializations;
         //if (numCurrentSpawns > 0) print(numCurrentSpawns);
         log = Recorder.recordLog.GetLogCopy();
     }

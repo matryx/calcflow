@@ -79,7 +79,7 @@ public class Recorder : MonoBehaviour {
                 //Transform child1 = gObj.transform;
                 //Transform parent1 = child1.parent;
 
-                //while(parent1 != null && !AllGameObjects.Contains(parent1.GetInstanceID()))
+                //while (parent1 != null && !AllGameObjects.Contains(parent1.GetInstanceID()))
                 //{
                 //    child1 = parent1;
                 //    parent1 = child1.parent;
@@ -90,6 +90,7 @@ public class Recorder : MonoBehaviour {
                 //    if (child1.gameObject.GetComponent<UIDSystem>())
                 //    {
                 //        AllGameObjects.Add(descendent.gameObject.GetInstanceID());
+                //        descendent.gameObject.EnsureOneOf<EnableLogger>();
                 //        descendent.gameObject.EnsureOneOf<MovementLogger>();
                 //        LogSpawn(child1.gameObject);
                 //    }

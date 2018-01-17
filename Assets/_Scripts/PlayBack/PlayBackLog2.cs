@@ -32,6 +32,8 @@ public class PlaybackLog2
 
     public PlaybackLog2()
     {
+        if (!PlaybackLogAction2.objectMap.ContainsKey(0))
+            PlaybackLogAction2.objectMap.Add(0, null);
     }
 
     public static void SaveLog()
@@ -127,13 +129,17 @@ public class PlaybackLogAction2
     public static int numRunningSerializations;
     public static Queue<Action> spawnQueue = new Queue<Action>();
     public static IEnumerator spawner;
+    public static int spawnsPerFrame = 10;
 
     public static IEnumerator steadySpawn()
     {
         while (spawnQueue.Count != 0)
         {
-
-            spawnQueue.Dequeue().Invoke();
+            for (int i = 0; i < spawnsPerFrame; i++)
+            {
+                if (spawnQueue.Count == 0) break;
+                spawnQueue.Dequeue().Invoke();
+            }
             yield return null;
         }
         spawner = null;
@@ -150,16 +156,10 @@ public class PlaybackLogAction2
             timeStamp = timestamp,
             subjectKey = key
         };
-
+        newAction._info.AddValue("name", subject.name);
         newAction._info.AddValue("position", position);
         newAction._info.AddValue("rotation", rotation);
         newAction._info.AddValue("scale", scale);
-        Debug.Log("subjectkey: " + key + "\nposition: " + position + " rotation: " + rotation + " scale: " + scale);
-        Debug.Log(newAction._info.MemberCount);
-        position = newAction._info.GetValue<Vector3>("position");
-        scale = newAction._info.GetValue<Vector3>("scale");
-        rotation = newAction._info.GetValue<Quaternion>("rotation");
-        Debug.Log("subjectkey: " + key + "\nposition: " + position + " rotation: " + rotation + " scale: " + scale);
 
         numRunningSerializations++;
         //enqueue a function that will perform the serialization of the data at a later time.
@@ -199,9 +199,7 @@ public class PlaybackLogAction2
         newAction._info.AddValue("rotation", rotation);
         newAction._info.AddValue("scale", scale);
         newAction._info.AddValue("parentKey", parentKey);
-        Debug.Log("subjectkey: " + key + "\nposition: " + destination + " rotation: " + rotation + " scale: " + scale + " parentkey " + parentKey);
-        Debug.Log(newAction._info.MemberCount);
-        Debug.Log(newAction._info.testEntry.Name);
+        parentKey = newAction._info.GetValue<int>("parentKey");
         return newAction;
     }
 
@@ -265,7 +263,14 @@ public class PlaybackLogAction2
     void Spawn()
     {
         GameObject subject;
-        subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
+        try
+        {
+            subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
+        } catch (Exception e)
+        {
+            Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name"));
+            throw e;
+        }
         //yield return null;
         if (objectMap.ContainsKey(subjectKey))
         {
@@ -291,18 +296,12 @@ public class PlaybackLogAction2
         switch (type)
         {
             case ActionType.Spawn:
-                //Dispatcher.queue(Spawn());
                 Spawn();
-                //Thread thread = new Thread(() => Spawn());
-
-                //thread.Join();
                 subject = objectMap[subjectKey];
                 position = _info.GetValue<Vector3>("position");
                 scale = _info.GetValue<Vector3>("scale");
                 rotation = _info.GetValue<Quaternion>("rotation");
 
-                Debug.Log("subjectkey: " + subjectKey + "\nposition: " + position + " rotation: " + rotation + " scale: " + scale);
-                Debug.Log(_info.MemberCount);
                 subject.MoveTo(position, 0);
                 subject.RotateTo(rotation, 0);
                 subject.GlobalScaleTo(scale, 0);
@@ -315,13 +314,19 @@ public class PlaybackLogAction2
                     scale = _info.GetValue<Vector3>("scale");
                     rotation = _info.GetValue<Quaternion>("rotation");
                     parentKey = _info.GetValue<int>("parentKey");
-                    Debug.Log("subjectkey: " + subjectKey + "\nposition: " + position + " rotation: " + rotation + " scale: " + scale + " parentkey " + parentKey);
-                    Debug.Log(_info.MemberCount);
-                    Debug.Log(_info.testEntry.Name);
 
                     subject.LocalMoveTo(position, PlaybackLog.Period);
                     subject.RotateTo(rotation, PlaybackLog.Period);
                     subject.GlobalScaleTo(scale, PlaybackLog.Period);
+                    //if (!objectMap.ContainsKey(parentKey)){
+                    //    Debug.Log("movement Action\n" +
+                    //          "parentkey: " + parentKey + "\n" +
+                    //          "ParentExists: " + false);
+                    //}
+                    //Debug.Log("movement Action\n" + 
+                    //          "parentkey: " + parentKey + "\n" +
+                    //          "ParentExists: " + true + "\n" +
+                    //          "ParentName: " + ((objectMap[parentKey] != null) ? objectMap[parentKey].name : " N/A"));
                     subject.transform.parent = (parentKey == 0) ? null : objectMap[parentKey].transform;
                 }
                 else

@@ -176,15 +176,16 @@ public class LogInfoEntry
     {
         get
         {
-            if (_type == "int")
+
+            if (_type == "System.Int32")
             {
                 return intValue;
             }
-            else if (_type == "float")
+            else if (_type == "System.Single")
             {
                 return floatValue;
             }
-            else if (_type == "string")
+            else if (_type == "System.String")
             {
                 return stringValue;
             }
@@ -212,15 +213,15 @@ public class LogInfoEntry
 
     void setValue(object value)
     {
-        if (_type == "int")
+        if (_type == "System.Int32")
         {
             intValue = (int)value;
         }
-        else if (_type == "float")
+        else if (_type == "System.Single")
         {
             floatValue = (float)value;
         }
-        else if (_type == "string")
+        else if (_type == "System.String")
         {
             stringValue = (string)value;
         }

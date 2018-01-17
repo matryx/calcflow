@@ -182,6 +182,7 @@ public class RSManager : SingletonPattern <RSManager>
 		if (string.IsNullOrEmpty(_serializationDataString))
 		{
 			Debug.LogError("[RS] The operation could not be completed because serialization data is invalid.");
+            throw (new Exception());
 			return default(T);
 		}
 		
