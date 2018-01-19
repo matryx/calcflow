@@ -147,7 +147,7 @@ namespace Extensions
             transform.localScale = new Vector3(globalScale.x / transform.lossyScale.x, globalScale.y / transform.lossyScale.y, globalScale.z / transform.lossyScale.z);
         }
 
-        public static void EnsureNoneOf<T>(this GameObject gameObject) where T : MonoBehaviour
+        public static void EnsureNoneOf<T>(this GameObject gameObject) where T : Component
         {
             T[] c;
             c = gameObject.GetComponents<T>();
@@ -157,12 +157,12 @@ namespace Extensions
             }
         }
 
-        public static void RemoveComponent<T>(this GameObject gameObject, T t) where T : MonoBehaviour
+        public static void RemoveComponent<T>(this GameObject gameObject, T t) where T : Component
         {
             UnityEngine.Object.Destroy(t);
         }
 
-        public static T EnsureOneOf<T>(this GameObject gameObject) where T : MonoBehaviour
+        public static T EnsureOneOf<T>(this GameObject gameObject) where T : Component
         {
             T t = gameObject.GetComponent<T>();
             if (t == null)

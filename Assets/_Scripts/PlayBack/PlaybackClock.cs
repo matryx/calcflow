@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using Nanome.Core.Daemon;
 using System.Diagnostics;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 public class PlaybackClock : Nanome.Core.Behaviour
 {
-
     public static Stopwatch timer = new Stopwatch();
 
     public delegate void ClockCallBack();
@@ -80,26 +76,3 @@ public class PlaybackClock : Nanome.Core.Behaviour
 
 }
 
-[ExecuteInEditMode]
-public static class ExampleClass
-{
-#if UNITY_EDITOR
-    static ExampleClass()
-    {
-        UnityEngine.Debug.Log("sup");
-
-        EditorApplication.update += EditorUpdate;
-    }
-
-    static void EditorUpdate()
-    {
-
-        if ((!EditorApplication.isPlaying) || EditorApplication.isPaused)
-        {
-            UnityEngine.Debug.Log("paused");
-            PlaybackClock.timer.Stop();
-        }
-    }
-
-#endif
-}
