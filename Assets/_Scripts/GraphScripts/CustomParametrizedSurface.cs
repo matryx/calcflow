@@ -107,6 +107,12 @@ public class CustomParametrizedSurface : MonoBehaviour
         expressionSets.Add(new ExpressionSet());
     }
 
+    public void UpdateExpressionSet(List<ExpressionSet> expSet)
+    {
+        expressionSets = expSet;
+        print("COUNT: " + expressionSets.Count);
+    }
+
     public void RemoveExpressionSet(int index)
     {
         if (index < expressionSets.Count)

@@ -80,7 +80,6 @@ public class CalcInput : MonoBehaviour
     public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
-        print("CURR EXPR: " + currExpression);
         index = (currExpression == null) ?
                 0 : currExpression.tokens.Count;
     }

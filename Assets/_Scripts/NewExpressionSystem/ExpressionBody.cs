@@ -117,7 +117,6 @@ public class ExpressionBody : QuickButton
             StartCoroutine(scaleUp);
             finishedScaling = false;
             expression.setSelectedExpr(expComp.getExpressionParent(), this);
-            print("EXP: " + expComp.getExpressionParent());
         }
 
         thisBodyActive = !thisBodyActive;

@@ -24,7 +24,7 @@ public class Expressions : MonoBehaviour
     // 6 - add icons for show and flow line 
 
     //BUGS:
-    // 1 - typing letters in vector fields creating variables in parametrization tab
+    // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
 
     void Awake()
     {

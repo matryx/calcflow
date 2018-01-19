@@ -8,7 +8,9 @@ public class ExpressionSelector : QuickButton
     Expressions expressions;
     JoyStickAggregator joyStickAggregator;
     Transform panel;
+
     private CalculatorManager calcManager;
+
 
     protected override void Start()
     {
@@ -18,7 +20,6 @@ public class ExpressionSelector : QuickButton
         panel = thisScroll.transform.parent;
         expressions = GameObject.Find("ExpressionMenu").GetComponentInChildren<Expressions>();
         joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
-
         thisScroll.addObject(transform.parent);
     }
 
@@ -52,6 +53,7 @@ public class ExpressionSelector : QuickButton
             case "ParametrizationAdd":
                 GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
                 param.GetComponent<ParametricExpression>().Initialize();
+                calcManager.AddExpressionSet(param.GetComponent<ParametricExpression>().getExpSet());
                 addForwarders(param.transform);
 
                 foreach (Transform child in param.transform)
@@ -73,6 +75,7 @@ public class ExpressionSelector : QuickButton
             case "VectorFieldAdd":
                 GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
                 vec.GetComponent<VectorFieldExpression>().Initialize();
+                calcManager.AddExpressionSet(vec.GetComponent<VectorFieldExpression>().getExpSet());
                 //expressions.setSelectedExpr(vec.transform, null);
                 addForwarders(vec.transform);
 

@@ -13,6 +13,7 @@ public class CalculatorManager : MonoBehaviour
     public static CalculatorManager _instance;
 
     CustomParametrizedSurface paramSurface;
+    List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
     CalcInput calcInput;
     BoundsManager boundsManager;
     PresetMenu presetMenu;
@@ -84,6 +85,11 @@ public class CalculatorManager : MonoBehaviour
         inputReceived = true;
     }
 
+    public void AddExpressionSet(ExpressionSet ES)
+    {
+        expressionSetList.Add(ES);
+    }
+
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
@@ -115,7 +121,7 @@ public class CalculatorManager : MonoBehaviour
     private ExpressionSet.ExpOptions getExpOption()
     {
         ExpressionSet.ExpOptions op = X;
-        title = (expressions.getSelectedBody())? expressions.getSelectedBody().getTitle() : "X";
+        title = (expressions.getSelectedBody()) ? expressions.getSelectedBody().getTitle() : "X";
         //title = expressions.getSelectedBody().getTitle();
         print("TITLE: " + title);
         switch (title)
@@ -172,7 +178,7 @@ public class CalculatorManager : MonoBehaviour
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)
     {
         string test = "";
-        foreach(string s in exp)
+        foreach (string s in exp)
         {
             test += s;
         }
@@ -263,8 +269,12 @@ public class CalculatorManager : MonoBehaviour
             updateOverlay = true;
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
-            //if (isValid)
-            //paramSurface.GenerateParticles();
+            if (isValid && expressionSetList.Count > 0)
+            {
+                paramSurface.UpdateExpressionSet(expressionSetList);
+                //BUG: out of memory exception
+                //paramSurface.GenerateParticles();
+            }
         }
         if (toExport)
         {
