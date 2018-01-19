@@ -20,8 +20,6 @@ public class Recorder : MonoBehaviour {
         AllGameObjects.Add(gameObject.GetInstanceID());
     }
 
-    [SerializeField]
-    int[] testList;
     private void Update()
     {
         Recording = EditorRecord;

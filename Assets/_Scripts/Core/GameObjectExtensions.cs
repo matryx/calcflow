@@ -147,13 +147,29 @@ namespace Extensions
             transform.localScale = new Vector3(globalScale.x / transform.lossyScale.x, globalScale.y / transform.lossyScale.y, globalScale.z / transform.lossyScale.z);
         }
 
+        public static void EnsureNoneOf<T>(this GameObject gameObject) where T : MonoBehaviour
+        {
+            T[] c;
+            c = gameObject.GetComponents<T>();
+            foreach (T t in c)
+            {
+                gameObject.RemoveComponent<T>(t);
+            }
+        }
+
+        public static void RemoveComponent<T>(this GameObject gameObject, T t) where T : MonoBehaviour
+        {
+            UnityEngine.Object.Destroy(t);
+        }
+
         public static T EnsureOneOf<T>(this GameObject gameObject) where T : MonoBehaviour
         {
             T t = gameObject.GetComponent<T>();
-            if(t == null)
+            if (t == null)
             {
                 t = gameObject.AddComponent<T>();
-            } else
+            }
+            else
             {
                 Debug.Log(gameObject.name + " already contains " + typeof(T));
             }
@@ -166,16 +182,17 @@ namespace Extensions
         LerpVector3 lerper;
         bool local;
 
-
         public static void LerpMove(GameObject gObj, Vector3 destination, float seconds)
         {
+            gObj.EnsureNoneOf<LerpMover>();
             LerpMover l = gObj.AddComponent<LerpMover>();
             l.lerper = new LerpVector3(gObj.transform.position, destination, seconds);
             l.local = false;
         }
 
-        public static void LocalLerpMove (GameObject gObj, Vector3 destination, float seconds)
+        public static void LocalLerpMove(GameObject gObj, Vector3 destination, float seconds)
         {
+            gObj.EnsureNoneOf<LerpMover>();
             LerpMover l = gObj.AddComponent<LerpMover>();
             l.lerper = new LerpVector3(gObj.transform.localPosition, destination, seconds);
             l.local = true;
@@ -197,8 +214,9 @@ namespace Extensions
             if (local)
             {
                 transform.localPosition = lerper.current();
-            } else
-            { 
+            }
+            else
+            {
                 transform.position = lerper.current();
             }
 
@@ -211,11 +229,13 @@ namespace Extensions
 
         public static void LerpRotate(GameObject gObj, Quaternion destination, float seconds)
         {
-            Quaternion badQ = new Quaternion(0,0,0,0);
-            if (destination.Equals(badQ)) {
+            Quaternion badQ = new Quaternion(0, 0, 0, 0);
+            if (destination.Equals(badQ))
+            {
                 Debug.Log("Impossible lerpRotation being attempted on object " + gObj.name);
                 return;
             }
+            gObj.EnsureNoneOf<LerpRotator>();
             gObj.AddComponent<LerpRotator>().lerper = new LerpQuaternion(gObj.transform.rotation, destination, seconds);
         }
 
@@ -245,6 +265,7 @@ namespace Extensions
 
         public static void LerpLocalScale(GameObject gObj, Vector3 destination, float seconds)
         {
+            gObj.EnsureNoneOf<LerpScaler>();
             LerpScaler s = gObj.AddComponent<LerpScaler>();
             s.lerper = new LerpVector3(gObj.transform.localScale, destination, seconds);
             s.global = false;
@@ -252,6 +273,7 @@ namespace Extensions
 
         public static void LerpGlobalScale(GameObject gObj, Vector3 destination, float seconds)
         {
+            gObj.EnsureNoneOf<LerpScaler>();
             LerpScaler s = gObj.AddComponent<LerpScaler>();
             s.lerper = new LerpVector3(gObj.transform.lossyScale, destination, seconds);
             s.global = true;
@@ -270,7 +292,8 @@ namespace Extensions
                 if (!global)
                 {
                     transform.localScale = lerper.current();
-                } else
+                }
+                else
                 {
                     transform.SetGlobalScale(lerper.current());
                 }

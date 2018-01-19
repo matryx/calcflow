@@ -21,13 +21,10 @@ public class LogInfo
     [SerializeField]
     internal List<LogInfoEntry> entries = new List<LogInfoEntry>();
 
-    [SerializeField]
-    public LogInfoEntry testEntry = new LogInfoEntry("testEntry", Quaternion.identity, Quaternion.identity.GetType());
     public int MemberCount
     {
         get
         {
-            Debug.Log(keys.Count == entries.Count);
             return keys.Count;
         }
     }
@@ -49,7 +46,6 @@ public class LogInfo
     public void AddValue<T>(string _name, T _value)
     {
         AddValue(_name, _value, typeof(T));
-        testEntry.Name = "testEntry1";
     }
 
 
