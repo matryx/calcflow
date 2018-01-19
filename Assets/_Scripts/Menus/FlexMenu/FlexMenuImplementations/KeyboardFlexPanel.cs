@@ -19,6 +19,17 @@ public class KeyboardFlexPanel : FlexPanelComponent {
         sender.SetState(2);
     }
 
+    public void ChangeSelectedColor(Color newColor)
+    {
+        foreach (FlexActionableComponent button in Actions)
+        {
+            if (button is FlexButtonComponent)
+            {
+                ((FlexButtonComponent)button).selectedColor = newColor;
+            }
+        }
+    }
+
     // Use this for initialization
     void Start()
     {

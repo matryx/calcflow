@@ -39,6 +39,8 @@ public class CalcInput : MonoBehaviour
     Scroll paramScroll;
     VariableShortcut variableShortcut;
     JoyStickAggregator joyStickAggregator;
+    Color errorColor;
+    Color selectedColor;
 
     ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
@@ -60,6 +62,9 @@ public class CalcInput : MonoBehaviour
         letterPanel = transform.Find("LetterPanel");
         paramScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
         joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
+        errorColor = Color.red;
+        ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
+
     }
 
     private void addForwarders(Transform obj)
@@ -90,12 +95,17 @@ public class CalcInput : MonoBehaviour
         {
             default:
                 Transform param = expressions.getSelectedExpr();
+                letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(selectedColor);
 
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] >= 97 && buttonID[0] <= 122)
                 {
                     //prevents typing of letters when a variable body is selected
-                    if (expressions.getSelectedBody().isVariable()) break;
+                    if (expressions.getSelectedBody().isVariable())
+                    {
+                        letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
+                        break;
+                    }
 
                     if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
                     variableShortcut.recordVarPress(buttonID);
