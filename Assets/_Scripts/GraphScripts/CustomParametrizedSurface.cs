@@ -110,7 +110,6 @@ public class CustomParametrizedSurface : MonoBehaviour
     public void UpdateExpressionSet(List<ExpressionSet> expSet)
     {
         expressionSets = expSet;
-        print("COUNT: " + expressionSets.Count);
     }
 
     public void RemoveExpressionSet(int index)
@@ -208,6 +207,12 @@ public class CustomParametrizedSurface : MonoBehaviour
     public void GenerateParticles()
     {
         if (setup != null) StopCoroutine(setup);
+
+        foreach (ExpressionSet es in expressionSets)
+        {
+            if (es.ranges.Count == 0) return;
+        }
+
         setup = StartCoroutine(SetupParticles());
     }
 
@@ -241,6 +246,7 @@ public class CustomParametrizedSurface : MonoBehaviour
 
         int totalFrames = 30;
         int defaultParticlesPerES = particleCount / expressionSets.Count;
+
         //number of frames used for each expression set.
         int framesPerES = totalFrames / expressionSets.Count;
 

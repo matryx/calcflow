@@ -122,8 +122,7 @@ public class CalculatorManager : MonoBehaviour
     {
         ExpressionSet.ExpOptions op = X;
         title = (expressions.getSelectedBody()) ? expressions.getSelectedBody().getTitle() : "X";
-        //title = expressions.getSelectedBody().getTitle();
-        print("TITLE: " + title);
+
         switch (title)
         {
             case "X":
@@ -272,8 +271,7 @@ public class CalculatorManager : MonoBehaviour
             if (isValid && expressionSetList.Count > 0)
             {
                 paramSurface.UpdateExpressionSet(expressionSetList);
-                //BUG: out of memory exception
-                //paramSurface.GenerateParticles();
+                paramSurface.GenerateParticles();
             }
         }
         if (toExport)
