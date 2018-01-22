@@ -13,6 +13,7 @@ public class CalculatorManager : MonoBehaviour
     public static CalculatorManager _instance;
 
     CustomParametrizedSurface paramSurface;
+    CustomVectorField vecField;
     List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
     CalcInput calcInput;
     BoundsManager boundsManager;
@@ -54,6 +55,7 @@ public class CalculatorManager : MonoBehaviour
         expressions = Expressions._instance;
 
         paramSurface = CustomParametrizedSurface._instance;
+        vecField = CustomVectorField._instance;
         calcInput = CalcInput._instance;
         boundsManager = BoundsManager._instance;
         outputManager = OutputManager._instance;
@@ -88,6 +90,11 @@ public class CalculatorManager : MonoBehaviour
     public void AddExpressionSet(ExpressionSet ES)
     {
         expressionSetList.Add(ES);
+    }
+
+    public void SetVecFieldES(ExpressionSet ES)
+    {
+        vecField.SetES(ES);
     }
 
     public void ChangeExpressionSet(ExpressionSet ES)
@@ -268,6 +275,7 @@ public class CalculatorManager : MonoBehaviour
             updateOverlay = true;
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
+            vecField.UpdateFunctions();
             if (isValid && expressionSetList.Count > 0)
             {
                 paramSurface.UpdateExpressionSet(expressionSetList);

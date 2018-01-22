@@ -14,6 +14,7 @@ public class CustomVectorField : MonoBehaviour
         public int[] faces;
     }
 
+    public static CustomVectorField _instance;
     public Gradient gradient;
 
     public Transform vPrefab;
@@ -44,6 +45,11 @@ public class CustomVectorField : MonoBehaviour
     public enum SampleDensity { HIGH, MEDIUM, LOW};
     public SampleDensity dens = SampleDensity.LOW;
 
+    private void Awake()
+    {
+        _instance = this;
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -63,6 +69,11 @@ public class CustomVectorField : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void SetES(ExpressionSet ES)
+    {
+        es = ES;
     }
 
     void CalculateVectors()

@@ -75,7 +75,7 @@ public class ExpressionSelector : QuickButton
             case "VectorFieldAdd":
                 GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
                 vec.GetComponent<VectorFieldExpression>().Initialize();
-                calcManager.AddExpressionSet(vec.GetComponent<VectorFieldExpression>().getExpSet());
+                calcManager.SetVecFieldES(vec.GetComponent<VectorFieldExpression>().getExpSet());
                 //expressions.setSelectedExpr(vec.transform, null);
                 addForwarders(vec.transform);
 
