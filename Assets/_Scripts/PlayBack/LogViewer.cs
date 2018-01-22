@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class LogViewer : MonoBehaviour {
     public int numCurrentSpawns;
+    public bool showFullLog_ThisCausesLag = false;
     public List<PlaybackLogAction2> log;
     public Recorder rec;
 	// Use this for initialization
@@ -15,6 +16,7 @@ public class LogViewer : MonoBehaviour {
 	void Update () {
         numCurrentSpawns = PlaybackLogAction2.numRunningSerializations;
         //if (numCurrentSpawns > 0) print(numCurrentSpawns);
-        log = Recorder.recordLog.GetLogCopy();
+        if (showFullLog_ThisCausesLag)
+            log = Recorder.recordLog.GetLogCopy();
     }
 }

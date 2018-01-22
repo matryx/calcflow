@@ -50,6 +50,9 @@ public class PlaybackLog2
     public List<PlaybackLogAction2> log = new List<PlaybackLogAction2>();
     public List<PlaybackLogAction2> GetLogCopy()
     {
+        //This sort removes a bug caused by the way movement is logged. 
+        //Movement's time is logged as 1 timer period earlier than it actually happened to improve the accuracy of the lerp.
+        //This doesn't work if it gets stuck behind something that isn't logged early since the recorder goes in list order.
         log.Sort(new myReverserClass());
         return log.ToList();
     }
