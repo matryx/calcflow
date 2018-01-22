@@ -102,7 +102,7 @@ public class Recorder : MonoBehaviour {
     public static void LogSpawn(GameObject subject)
     {
         long time = PlaybackClock.GetTime() - (long)(PlaybackLog2.Period * 1000);
-        recordLog.log.Add(PlaybackLogAction2.CreateSpawn(time,
+        recordLog.Add(PlaybackLogAction2.CreateSpawn(time,
                                                             subject, 
                                                             subject.transform.position, 
                                                             subject.transform.rotation, 
@@ -112,23 +112,23 @@ public class Recorder : MonoBehaviour {
     public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
     {
         long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000);
-        recordLog.log.Add(PlaybackLogAction2.CreateMovement(time,
+        recordLog.Add(PlaybackLogAction2.CreateMovement(time,
                           subject, destination, rotation, scale, parent));
     }
 
     public static void LogEnable(GameObject subject){
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.CreateEnable(time, subject));
+        recordLog.Add(PlaybackLogAction2.CreateEnable(time, subject));
     }
 
     public static void LogDisable(GameObject subject){
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.CreateDisable(time, subject));
+        recordLog.Add(PlaybackLogAction2.CreateDisable(time, subject));
     }
 
     public static void LogDestroy(GameObject subject){
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.CreateDestroy(time, subject));
+        recordLog.Add(PlaybackLogAction2.CreateDestroy(time, subject));
     }
 
     public static void LogButtonPress(GameObject subject, GameObject presser)

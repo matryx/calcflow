@@ -17,11 +17,6 @@ using Nanome.Core;
 [Serializable]
 public class PlaybackLog2
 {
-    [SerializeField]
-    private void Start()
-    {
-    }
-
     public const float Period = .03f;
 
     [SerializeField]
@@ -53,23 +48,24 @@ public class PlaybackLog2
 
     [SerializeField]
     public List<PlaybackLogAction2> log = new List<PlaybackLogAction2>();
-
     public List<PlaybackLogAction2> GetLogCopy()
     {
+        log.Sort(new myReverserClass());
         return log.ToList();
     }
 
-    public class myReverserClass : IComparer
+    public class myReverserClass : IComparer<PlaybackLogAction2>
     {
-        public int Compare(object x, object y)
+        public int Compare(PlaybackLogAction2 x, PlaybackLogAction2 y)
         {
-            PlaybackLogAction2 first = (PlaybackLogAction2)x;
-            PlaybackLogAction2 second = (PlaybackLogAction2)y;
-
-            if (first.timeStamp > second.timeStamp) return 1;
-            if (first.timeStamp < second.timeStamp) return -1;
+            if (x.timeStamp > y.timeStamp) return 1;
+            if (x.timeStamp < y.timeStamp) return -1;
             return 0;
         }
+    }
+
+    public void Add (PlaybackLogAction2 action) {
+        log.Add(action);
     }
 
 }

@@ -10,6 +10,9 @@ public class PBT_physicsOBJ : MonoBehaviour {
 			gameObject.EnsureNoneOf<Rigidbody>();
 			gameObject.EnsureNoneOf<Collider>();
 			gameObject.EnsureNoneOf<UnityStandardAssets.Utility.AutoMoveAndRotate>();
+			gameObject.EnsureNoneOf<ChangeParent>();
+			gameObject.EnsureNoneOf<WaitAndThen>();
+			gameObject.EnsureNoneOf<RemoveComponent>();
 		}
 	}
 }
