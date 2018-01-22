@@ -22,9 +22,11 @@ public class Expressions : MonoBehaviour
     // 4 - enable underscore movement by raycast hit
     // 5 - hamburger menu for deleting/disabling variables and expressions
     // 6 - add icons for show and flow line 
+    // 7 - error message pop up when typing letter in var
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
+    // 2 - creating empty game object everytime a letter is pressed
 
     void Awake()
     {

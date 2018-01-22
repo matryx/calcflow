@@ -31,7 +31,7 @@ public class CalcInput : MonoBehaviour
     public static CalcInput _instance;
 
     private FlexMenu keyboard;
-    private Transform letterPanel;
+    private Transform letterPanel, variablePanel;
     bool capitalized = false;
 
     KeyboardInputResponder responder;
@@ -60,6 +60,7 @@ public class CalcInput : MonoBehaviour
         expressions = Expressions._instance;
         variableShortcut = VariableShortcut._instance;
         letterPanel = transform.Find("LetterPanel");
+        variablePanel = transform.Find("VariableShortcut");
         paramScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
         joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
         errorColor = Color.red;
@@ -95,6 +96,7 @@ public class CalcInput : MonoBehaviour
             default:
                 Transform param = expressions.getSelectedExpr();
                 letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(selectedColor);
+                variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(selectedColor);
 
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] >= 97 && buttonID[0] <= 122)
@@ -103,6 +105,7 @@ public class CalcInput : MonoBehaviour
                     if (expressions.getSelectedBody().isVariable())
                     {
                         letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
+                        variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
                         break;
                     }
 
