@@ -6,14 +6,15 @@ using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
 
 
-public class Recorder : MonoBehaviour {
+public class Recorder : MonoBehaviour
+{
 
     public bool EditorRecord = false;
     private static HashSet<int> AllGameObjects = new HashSet<int>();
 
     private static bool record = false;
     [SerializeField]
-    public static PlaybackLog2 recordLog= new PlaybackLog2();
+    public static PlaybackLog2 recordLog = new PlaybackLog2();
 
     private void Start()
     {
@@ -40,6 +41,7 @@ public class Recorder : MonoBehaviour {
     private static void StopRecording()
     {
         PlaybackClock.StopClock();
+        PlaybackClock.RemoveFromTimer(CheckForSpawns);
     }
 
     public static bool Recording
@@ -47,7 +49,8 @@ public class Recorder : MonoBehaviour {
         get
         {
             return record;
-        } set
+        }
+        set
         {
             if (value && !record)
             {
@@ -65,7 +68,8 @@ public class Recorder : MonoBehaviour {
     {
         foreach (GameObject gObj in (GameObject[])GameObject.FindObjectsOfType<GameObject>())
         {
-            if (!AllGameObjects.Contains(gObj.GetInstanceID())){
+            if (!AllGameObjects.Contains(gObj.GetInstanceID()))
+            {
                 AllGameObjects.Add(gObj.GetInstanceID());
 
                 if (gObj.GetComponent<UIDSystem>())
@@ -103,9 +107,9 @@ public class Recorder : MonoBehaviour {
     {
         long time = PlaybackClock.GetTime() - (long)(PlaybackLog2.Period * 1000);
         recordLog.log.Add(PlaybackLogAction2.CreateSpawn(time,
-                                                            subject, 
-                                                            subject.transform.position, 
-                                                            subject.transform.rotation, 
+                                                            subject,
+                                                            subject.transform.position,
+                                                            subject.transform.rotation,
                                                             subject.transform.lossyScale));
     }
 
@@ -116,17 +120,20 @@ public class Recorder : MonoBehaviour {
                           subject, destination, rotation, scale, parent));
     }
 
-    public static void LogEnable(GameObject subject){
+    public static void LogEnable(GameObject subject)
+    {
         long time = PlaybackClock.GetTime();
         recordLog.log.Add(PlaybackLogAction2.CreateEnable(time, subject));
     }
 
-    public static void LogDisable(GameObject subject){
+    public static void LogDisable(GameObject subject)
+    {
         long time = PlaybackClock.GetTime();
         recordLog.log.Add(PlaybackLogAction2.CreateDisable(time, subject));
     }
 
-    public static void LogDestroy(GameObject subject){
+    public static void LogDestroy(GameObject subject)
+    {
         long time = PlaybackClock.GetTime();
         recordLog.log.Add(PlaybackLogAction2.CreateDestroy(time, subject));
     }

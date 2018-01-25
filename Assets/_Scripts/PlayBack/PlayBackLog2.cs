@@ -335,15 +335,15 @@ public class PlaybackLogAction2
                 }
                 break;
             case ActionType.Enable:
-                if (objectMap.ContainsKey(subjectKey))
-                {
-                    subject = objectMap[subjectKey];
-                    subject.SetActive(true);
-                }
-                else
-                {
-                    Debug.Log(timeStamp + " " + subjectKey);
-                }
+                // if (objectMap.ContainsKey(subjectKey))
+                // {
+                //     subject = objectMap[subjectKey];
+                //     subject.SetActive(true);
+                // }
+                // else
+                // {
+                //     Debug.Log(timeStamp + " " + subjectKey);
+                // }
                 break;
             case ActionType.Disable:
                 if (objectMap.ContainsKey(subjectKey))
