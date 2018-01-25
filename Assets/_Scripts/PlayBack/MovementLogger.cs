@@ -11,7 +11,8 @@ public class MovementLogger : Nanome.Core.Behaviour
 
     private void Start()
     {
-        PlaybackClock.AddToTimer(RecordPosition);
+        if(Recorder.Recording)
+            PlaybackClock.AddToTimer(RecordPosition);
     }
 
     void RecordPosition()
@@ -35,5 +36,10 @@ public class MovementLogger : Nanome.Core.Behaviour
 
             Recorder.LogMovement(gameObject, transform.localPosition, transform.rotation, transform.lossyScale, nextParent);
         }
+    }
+
+    private void OnDestroy()
+    {
+        PlaybackClock.RemoveFromTimer(RecordPosition);
     }
 }

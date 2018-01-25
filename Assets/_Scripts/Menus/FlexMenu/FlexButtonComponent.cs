@@ -21,7 +21,7 @@ using System.Collections;
 using System;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), false)]
+[RuntimeSerializable(typeof(MonoBehaviour), true, false)]
 public class FlexButtonComponent : FlexActionableComponent
 {
     public Color passiveColor;
@@ -107,12 +107,15 @@ public class FlexButtonComponent : FlexActionableComponent
 
     protected override void StateChanged(int _old, int _new)
     {
-        if (_new == -1)
+        if (transform.Find("Body") != null)
         {
-            if (transform.Find("Body") == null) print("body not yet created");
-            if (transform.Find("Body").GetComponent<Renderer>() == null) print("component not yet created");
+            print("body not found")
+            }
+        else if (_new == -1)
+        {
             transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;
-        } else if (_new == 1)
+        }
+        else if (_new == 1)
         {
             transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
         }
