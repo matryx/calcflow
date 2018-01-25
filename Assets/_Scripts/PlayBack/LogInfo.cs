@@ -6,7 +6,7 @@ using System;
 using Nanome.Core;
 
 [Serializable]
-public class LogInfo
+public class LogInfo : ISerializationCallbackReceiver
 {
     #region Properties
 
@@ -20,6 +20,18 @@ public class LogInfo
     internal List<string> keys = new List<string>();
     [SerializeField]
     internal List<LogInfoEntry> entries = new List<LogInfoEntry>();
+    internal Dictionary<string, object> entryMap = new Dictionary<string, object>();
+
+    public void OnBeforeSerialize() { }
+    public void OnAfterSerialize() { }
+    public void OnBeforeDeserialize() { }
+    public void OnAfterDeserialize()
+    {
+        for (int i = 0; i < keys.Count; i++)
+        {
+            entryMap.Add(keys[i], entries[i].Value);
+        }
+    }
 
     public int MemberCount
     {
@@ -52,6 +64,7 @@ public class LogInfo
     public void AddValue(string _name, object _value, Type _valueType)
     {
         LogInfoEntry _newEntry = new LogInfoEntry(_name, _value, _valueType);
+        entryMap.Add(_name, _newEntry);
         keys.Add(_name);
         entries.Add(_newEntry);
     }
@@ -88,20 +101,13 @@ public class LogInfo
     public bool TryGetValue(string _name, out object _value, Type _type)
     {
         // Fetch value associated with given name and check target values validity
-        LogInfoEntry _entry = null;
+        object _entry = null;
 
-        if (keys.Contains(_name))
+        if (entryMap.ContainsKey(_name))
         {
-            for (int i = 0; i < keys.Count; i++)
-            {
-                if (keys[i] == _name)
-                {
-                    _entry = entries[i];
-                    break;
-                }
-            }
-            if (_entry.Value != null && _type.IsInstanceOfType(_entry.Value))
-                _value = _entry.Value;
+            _entry = entryMap[_name];
+            if (_entry != null && _type.IsInstanceOfType(_entry))
+                _value = _entry;
             else
                 _value = _type.DefaultValue();
 
@@ -116,14 +122,14 @@ public class LogInfo
 
     public bool ContainsValue(string _name)
     {
-        return keys.Contains(_name);
+        return entryMap.ContainsKey(_name);
     }
 
     #endregion
 }
 
 [Serializable]
-public class LogInfoEntry
+public class LogInfoEntry : ISerializationCallbackReceiver
 {
     #region Properties
 
@@ -145,6 +151,7 @@ public class LogInfoEntry
     [SerializeField]
     private string _type;
 
+    object _value;
 
     public string Name
     {
@@ -172,35 +179,7 @@ public class LogInfoEntry
     {
         get
         {
-
-            if (_type == "System.Int32")
-            {
-                return intValue;
-            }
-            else if (_type == "System.Single")
-            {
-                return floatValue;
-            }
-            else if (_type == "System.String")
-            {
-                return stringValue;
-            }
-            else if (_type == "UnityEngine.Vector3")
-            {
-                return vector3Value;
-            }
-            else if (_type == "UnityEngine.Quaternion")
-            {
-                return quaternionValue;
-            }
-            else if (_type == "UnityEngine.Object")
-            {
-                return objectValue;
-            }
-            else
-            {
-                return null;
-            }
+            return _value;
         }
 
         private set { setValue(value); }
@@ -209,34 +188,7 @@ public class LogInfoEntry
 
     void setValue(object value)
     {
-        if (_type == "System.Int32")
-        {
-            intValue = (int)value;
-        }
-        else if (_type == "System.Single")
-        {
-            floatValue = (float)value;
-        }
-        else if (_type == "System.String")
-        {
-            stringValue = (string)value;
-        }
-        else if (_type == "UnityEngine.Vector3")
-        {
-            vector3Value = (Vector3)value;
-        }
-        else if (_type == "UnityEngine.Quaternion")
-        {
-            quaternionValue = (Quaternion)value;
-        }
-        else if (_type == "UnityEngine.Object")
-        {
-            objectValue = (UnityEngine.Object)value;
-        }
-        else
-        {
-            Debug.Log("unsupported type: " + _type);
-        }
+        _value = value;
     }
 
 
@@ -252,6 +204,76 @@ public class LogInfoEntry
     }
 
     #endregion
+
+    void makeSerializable(object obj, string _type)
+    {
+        if (_type == "System.Int32")
+        {
+            intValue = (int)_value;
+        }
+        else if (_type == "System.Single")
+        {
+            floatValue = (float)_value;
+        }
+        else if (_type == "System.String")
+        {
+            stringValue = (string)_value;
+        }
+        else if (_type == "UnityEngine.Vector3")
+        {
+            vector3Value = (Vector3)_value;
+        }
+        else if (_type == "UnityEngine.Quaternion")
+        {
+            quaternionValue = (Quaternion)_value;
+        }
+        else if (_type == "UnityEngine.Object")
+        {
+            objectValue = (UnityEngine.Object)_value;
+        }
+        else
+        {
+            Debug.Log("unsupported type: " + _type);
+        }
+    }
+
+    public void OnBeforeSerialize()
+    {
+        makeSerializable(_value, _type);
+    }
+    public void OnAfterSerialize() { }
+    public void OnBeforeDeserialize() { }
+    public void OnAfterDeserialize()
+    {
+        if (_type == "System.Int32")
+        {
+            _value = intValue;
+        }
+        else if (_type == "System.Single")
+        {
+            _value = floatValue;
+        }
+        else if (_type == "System.String")
+        {
+            _value = stringValue;
+        }
+        else if (_type == "UnityEngine.Vector3")
+        {
+            _value = vector3Value;
+        }
+        else if (_type == "UnityEngine.Quaternion")
+        {
+            _value = quaternionValue;
+        }
+        else if (_type == "UnityEngine.Object")
+        {
+            _value = objectValue;
+        }
+        else
+        {
+            _value = null;
+        }
+    }
 }
 
 
