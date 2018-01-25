@@ -87,6 +87,20 @@ public class ParametricExpression : MonoBehaviour
     }
 
     //TODO: handle deletion of variables and re-arranging that will happen as a result
+    private void deleteVariable(Transform varToDelete)
+    {
+        variables.Remove(varToDelete);
+        Destroy(varToDelete);
+
+        for (int i = 0; i < variableClumps.Count; i++)
+        {
+            if (variableClumps[i].childCount != 2)
+            {
+                if(i+1 < variableClumps.Count)
+                    variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
+            }
+        }
+    }
 
     private void addToVarClump(Transform var)
     {
