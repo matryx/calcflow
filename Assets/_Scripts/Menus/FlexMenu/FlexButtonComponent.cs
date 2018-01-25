@@ -32,6 +32,7 @@ public class FlexButtonComponent : FlexActionableComponent
     private void Awake()
     {
         State = -1;
+        print("awake");
         SetState(0);
     }
 
@@ -108,6 +109,8 @@ public class FlexButtonComponent : FlexActionableComponent
     {
         if (_new == -1)
         {
+            if (transform.Find("Body") == null) print("body not yet created");
+            if (transform.Find("Body").GetComponent<Renderer>() == null) print("component not yet created");
             transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;
         } else if (_new == 1)
         {
