@@ -20,9 +20,8 @@ public class Expressions : MonoBehaviour
     // 2 - grayed out example message in constants
     // 3 - slide variable shortcuts in and out 
     // 4 - enable underscore movement by raycast hit
-    // 5 - hamburger menu for deleting/disabling variables and expressions
-    // 6 - add icons for show and flow line 
-    // 7 - error message pop up when typing letter in var
+    // 5 - hamburger menu for deleting/disabling variables and expressions - IN PROGRESS
+    // 6 - error message pop up when typing letter in var
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
