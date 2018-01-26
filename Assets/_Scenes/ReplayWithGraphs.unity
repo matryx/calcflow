@@ -11119,6 +11119,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 296326393}
+  - component: {fileID: 296326394}
   - component: {fileID: 296326392}
   - component: {fileID: 296326391}
   - component: {fileID: 296326390}
@@ -11158,6 +11159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numCurrentSpawns: 0
+  showFullLog_ThisCausesLag: 0
   log: []
   rec: {fileID: 0}
 --- !u!114 &296326388
@@ -11223,7 +11225,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd07eccebb0c9924b879f7ea1990201d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EditorRecord: 0
+  EditorRecord: 1
 --- !u!4 &296326393
 Transform:
   m_ObjectHideFlags: 0
@@ -11237,6 +11239,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &296326394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 296326385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 541c087acb8373d4494c079b7ed577ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clearAll: 0
 --- !u!1 &296641844 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1414088439360550, guid: 4ca588451bcb29d429e67239fccb8582,
@@ -67146,7 +67160,7 @@ MonoBehaviour:
   passiveColor: {r: 0.8352942, g: 0.8352942, b: 0.8431373, a: 0}
   hoveringColor: {r: 0.5176471, g: 0.8745098, b: 0.99215686, a: 1}
   selectedColor: {r: 0.2509804, g: 0.44705883, b: 0.67058825, a: 1}
-  disabledColor: {r: 0, g: 0, b: 0, a: 0}
+  disabledColor: {r: 1, g: 0, b: 0, a: 0}
 --- !u!1 &1716198306 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1935504964075116, guid: 4ca588451bcb29d429e67239fccb8582,

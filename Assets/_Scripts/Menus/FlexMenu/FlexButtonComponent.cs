@@ -29,7 +29,7 @@ public class FlexButtonComponent : FlexActionableComponent
     public Color selectedColor;
     public Color disabledColor;
 
-    private void Awake()
+    private void Start()
     {
         State = -1;
         print("awake");
@@ -107,10 +107,10 @@ public class FlexButtonComponent : FlexActionableComponent
 
     protected override void StateChanged(int _old, int _new)
     {
-        if (transform.Find("Body") != null)
+        if (transform.Find("Body") == null)
         {
-            print("body not found")
-            }
+            print("body not found: " + gameObject.name);
+        }
         else if (_new == -1)
         {
             transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;

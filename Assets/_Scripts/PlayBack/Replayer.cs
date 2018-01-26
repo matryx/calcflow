@@ -43,16 +43,16 @@ public class Replayer : MonoBehaviour {
         {
             while (true)
             {
-                print("attempting pop");
+                //print("attempting pop");
                 if (log.Count == 0)
                 {
-                    print("nothing to pop");
+                    //print("nothing to pop");
                     Replaying = false;
                     break;
                 }
                 if (log[0].timeStamp <= PlaybackClock.GetTime())
                 {
-                    print("popping next instruction");
+                    //print("popping next instruction");
                     PlaybackLogAction2 item = log[0];
                     log.RemoveAt(0);
                     item.Reenact();

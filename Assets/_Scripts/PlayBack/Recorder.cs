@@ -4,6 +4,8 @@ using UnityEditor;
 using Extensions;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
+using Extensions;
+using CalcFlowUI;
 
 
 public class Recorder : MonoBehaviour
@@ -74,9 +76,12 @@ public class Recorder : MonoBehaviour
 
                 if (gObj.GetComponent<UIDSystem>())
                 {
+                    LogSpawn(gObj);
+                    if (gObj.GetInterface<Button>() != null) {
+                        gObj.EnsureOneOf<ButtonLogger>();
+                    }
                     gObj.EnsureOneOf<EnableLogger>();
                     gObj.EnsureOneOf<MovementLogger>();
-                    LogSpawn(gObj);
                 }
                 //Transform child1 = gObj.transform;
                 //Transform parent1 = child1.parent;
@@ -141,12 +146,12 @@ public class Recorder : MonoBehaviour
     public static void LogButtonPress(GameObject subject, GameObject presser)
     {
         long time = PlaybackClock.GetTime();
-        //recordLog.log.Add(PlaybackLogAction2.CreateButtonPress(time, subject, presser));
+        recordLog.log.Add(PlaybackLogAction2.CreateButtonPress(time, subject, presser));
     }
 
     public static void LogButtonUnpress(GameObject subject, GameObject presser)
     {
         long time = PlaybackClock.GetTime();
-        //recordLog.log.Add(PlaybackLogAction2.CreateButtonUnpress(time, subject, presser));
+        recordLog.log.Add(PlaybackLogAction2.CreateButtonUnpress(time, subject, presser));
     }
 }

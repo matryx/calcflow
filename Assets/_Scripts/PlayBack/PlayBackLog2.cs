@@ -67,7 +67,8 @@ public class PlaybackLog2
         }
     }
 
-    public void Add (PlaybackLogAction2 action) {
+    public void Add(PlaybackLogAction2 action)
+    {
         log.Add(action);
     }
 
@@ -101,9 +102,6 @@ public class PlaybackLogAction2
     [HideInInspector]
     [SerializeField]
     internal string binaryRepresentation;
-
-
-
 
     internal void SetType(string type)
     {
@@ -143,7 +141,6 @@ public class PlaybackLogAction2
         }
         spawner = null;
     }
-
 
     //Creates a spawn PlayBackLogAction. The action will not have an accurate binaryRepresentation until later.
     internal static PlaybackLogAction2 CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
@@ -235,29 +232,29 @@ public class PlaybackLogAction2
         return newAction;
     }
 
-    //internal static PlaybackLogAction2 CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
-    //{
-    //    PlaybackLogAction2 newAction = new PlaybackLogAction2
-    //    {
-    //        type = ActionType.ButtonPress,
-    //        timeStamp = timestamp,
-    //        buttonPresser = presser,
-    //        subjectKey = subject.GetInstanceID()
-    //    };
-    //    return newAction;
-    //}
+    internal static PlaybackLogAction2 CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
+    {
+        PlaybackLogAction2 newAction = new PlaybackLogAction2
+        {
+            type = ActionType.ButtonPress,
+            timeStamp = timestamp,
+            subjectKey = subject.GetInstanceID()
+        };
+        newAction._info.AddValue("buttonPresser", presser);
+        return newAction;
+    }
 
-    //internal static PlaybackLogAction2 CreateButtonUnpress(long timestamp, GameObject subject, GameObject presser)
-    //{
-    //    PlaybackLogAction2 newAction = new PlaybackLogAction2
-    //    {
-    //        type = ActionType.ButtonUnpress,
-    //        timeStamp = timestamp,
-    //        buttonPresser = presser,
-    //        subjectKey = subject.GetInstanceID()
-    //    };
-    //    return newAction;
-    //}
+    internal static PlaybackLogAction2 CreateButtonUnpress(long timestamp, GameObject subject, GameObject presser)
+    {
+        PlaybackLogAction2 newAction = new PlaybackLogAction2
+        {
+            type = ActionType.ButtonUnpress,
+            timeStamp = timestamp,
+            subjectKey = subject.GetInstanceID()
+        };
+        newAction._info.AddValue("buttonPresser", presser);
+        return newAction;
+    }
 
     void Spawn()
     {
@@ -265,7 +262,8 @@ public class PlaybackLogAction2
         try
         {
             subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name"));
             throw e;
@@ -290,11 +288,13 @@ public class PlaybackLogAction2
         Vector3 position;
         Vector3 scale;
         Quaternion rotation;
+        GameObject buttonPresser;
         int parentKey;
 
         switch (type)
         {
             case ActionType.Spawn:
+                Debug.Log("spawning");
                 Spawn();
                 subject = objectMap[subjectKey];
                 position = _info.GetValue<Vector3>("position");
@@ -366,16 +366,32 @@ public class PlaybackLogAction2
                     Debug.Log(timeStamp + " " + subjectKey);
                 }
                 break;
-                //case ActionType.ButtonPress:
-                //    subject = objectMap[subjectKey];
-                //    button = subject.GetComponent<Button>();
-                //    button.PressButton(this.buttonPresser);
-                //    break;
-                //case ActionType.ButtonUnpress:
-                //    subject = objectMap[subjectKey];
-                //    button = subject.GetComponent<Button>();
-                //    button.UnpressButton(this.buttonPresser);
-                //    break;
+            case ActionType.ButtonPress:
+                if (objectMap.ContainsKey(subjectKey))
+                {
+                    subject = objectMap[subjectKey];
+                    button = subject.GetComponent<Button>();
+                    buttonPresser = _info.GetValue<GameObject>("buttonPresser");
+                    button.PressButton(buttonPresser);
+                }
+                else
+                {
+                    Debug.Log(timeStamp + " " + subjectKey);
+                }
+                break;
+            case ActionType.ButtonUnpress:
+                if (objectMap.ContainsKey(subjectKey))
+                {
+                    subject = objectMap[subjectKey];
+                    button = subject.GetComponent<Button>();
+                    buttonPresser = _info.GetValue<GameObject>("buttonPresser");
+                    button.UnpressButton(buttonPresser);
+                }
+                else
+                {
+                    Debug.Log(timeStamp + " " + subjectKey);
+                }
+                break;
         }
     }
 
