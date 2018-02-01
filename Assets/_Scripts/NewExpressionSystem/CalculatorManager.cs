@@ -158,12 +158,10 @@ public class CalculatorManager : MonoBehaviour
         if (expressions.selectedNotNull())
         {
             textInput = expressions.getSelectedBody().getTextInput();
-            //print("text input: " + textInput);
         }
 
         if (textInput != null)
         {
-            //print("HELLO");
             int displayLength = (expressions.getSelectedBody().isVariable()) ? rangeDisplayLength : expressionDisplayLength;
             textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
         }

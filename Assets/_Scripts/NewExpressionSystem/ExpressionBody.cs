@@ -22,14 +22,6 @@ public class ExpressionBody : QuickButton
     private IEnumerator scaleUp, scaleDown;
     private IEnumerator backToSelected, backToIdle;
 
-    //private void Awake()
-    //{
-    //    if (transform.parent.parent.Find("VariableTitle")) variable = true;
-
-    //    title = (variable) ? transform.parent.parent.Find("VariableTitle").Find("Title").GetComponent<TMPro.TextMeshPro>().text :
-    //                       transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
-    //}
-
     protected override void Start()
     {
         base.Start();

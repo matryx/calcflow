@@ -5,6 +5,7 @@ using UnityEngine;
 public class Expressions : MonoBehaviour
 {
     CalculatorManager calcManager;
+    Scroll paramScroll;
     public static Expressions _instance;
     ExpressionSet selectedExpSet;
     Transform selectedExpression;
@@ -31,6 +32,7 @@ public class Expressions : MonoBehaviour
     {
         _instance = this;
         calcManager = CalculatorManager._instance;
+        paramScroll = transform.parent.Find("ParametrizationPanel").GetComponentInChildren<Scroll>();
         expressions = new List<Transform>();
         remove.gameObject.SetActive(true);
         hide.gameObject.SetActive(true);
@@ -45,7 +47,7 @@ public class Expressions : MonoBehaviour
 
     public Scroll getParametricScroll()
     {
-        return transform.parent.Find("ParametrizationPanel").GetComponentInChildren<Scroll>();
+        return paramScroll;
     }
 
     public void addExpr(Transform exp)
@@ -67,6 +69,18 @@ public class Expressions : MonoBehaviour
     public bool selectedNotNull()
     {
         return (selectedExpression != null);
+    }
+
+    public void deleteExpression()
+    {
+        expressions.Remove(selectedExpression);
+
+        if (selectedExpression.GetComponent<ParametricExpression>())
+        {
+            selectedExpression.GetComponent<ParametricExpression>().deleteExpressionFromScroll(); 
+        }
+
+        Destroy(selectedExpression);
     }
 
     public void setSelectedExpr(Transform expr, ExpressionBody body)

@@ -48,6 +48,11 @@ public class ExpressionSelector : QuickButton
                 addForwarders(cons.transform);
 
                 toAdd.Add(cons.transform.Find("Constant"));
+
+                GameObject sepConst = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+                addForwarders(sepConst.transform);
+                toAdd.Add(sepConst.transform);
+
                 expressions.addExpr(cons.transform);
                 break;
             case "ParametrizationAdd":
@@ -70,6 +75,11 @@ public class ExpressionSelector : QuickButton
                     }
                 }
 
+                GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+                addForwarders(sep.transform);
+                toAdd.Add(sep.transform);
+
+                param.GetComponent<ParametricExpression>().setSeparator(sep.transform);
                 expressions.addExpr(param.transform);
                 break;
             case "VectorFieldAdd":
@@ -96,13 +106,19 @@ public class ExpressionSelector : QuickButton
                 addForwarders(var.transform);
                 toAdd.Add(var.transform);
 
+                GameObject sepVec = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+                addForwarders(sepVec.transform);
+                toAdd.Add(sepVec.transform);
+
+                //set separator
+
                 expressions.addExpr(vec.transform);
                 break;
         }
 
-        GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
-        addForwarders(sep.transform);
-        toAdd.Add(sep.transform);
+        //GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+        //addForwarders(sep.transform);
+        //toAdd.Add(sep.transform);
         thisScroll.addToIndex(-1, toAdd, fakeObj, true);
     }
 
