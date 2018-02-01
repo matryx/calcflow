@@ -159,6 +159,14 @@ namespace Extensions
 
         public static void RemoveComponent<T>(this GameObject gameObject, T t) where T : Component
         {
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                UnityEngine.Object.DestroyImmediate(t, true);
+
+                return;
+            }
+#endif
             UnityEngine.Object.Destroy(t);
         }
 

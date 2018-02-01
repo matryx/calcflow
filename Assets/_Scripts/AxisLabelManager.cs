@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class AxisLabelManager : MonoBehaviour {
@@ -10,7 +11,7 @@ public class AxisLabelManager : MonoBehaviour {
     public bool skipFirst = false;
     public bool skipLast = false;
 
-    public TextMesh[] labels;
+    public TextMeshPro[] labels;
 
     public float Min
     {
@@ -51,8 +52,9 @@ public class AxisLabelManager : MonoBehaviour {
         numLabels += skipLast ? 1 : 0;
         int i = skipFirst ? 1 : 0;
         float increment = (max - min) / numLabels;
-        foreach (TextMesh l in labels)
+        foreach (TextMeshPro l in labels)
         {
+            if (l==null) print (this.transform.GetChild(0).name);
             l.text = string.Format("{0:F3}", min + (i * increment));
             i++;
         }

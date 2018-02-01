@@ -7,15 +7,19 @@ public class EnableLogger : MonoBehaviour
 
     void OnDisable()
     {
-        Recorder.LogDisable(gameObject);
+        if (Replayer.Replaying)
+            Recorder.LogDisable(gameObject);
     }
 
     void OnEnable()
     {
-        Recorder.LogEnable(gameObject);
+        if (Replayer.Replaying)
+            Recorder.LogEnable(gameObject);
     }
 
-    void OnDestroy() {
-        Recorder.LogDestroy(gameObject);
+    void OnDestroy()
+    {
+        if (Replayer.Replaying)
+            Recorder.LogDestroy(gameObject);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using VoxelBusters.RuntimeSerialization;
 
 [RuntimeSerializable(typeof(MonoBehaviour), false)]
@@ -93,7 +94,7 @@ public class CalcManager : Nanome.Core.Behaviour
     internal class Inputs
     {
         [SerializeField]
-        internal TextMesh xInputbox, yInputbox, zInputbox,
+        internal TextMeshPro xInputbox, yInputbox, zInputbox,
                 tMinInput, tMaxInput,
                 uMinInput, uMaxInput,
                 vMinInput, vMaxInput,

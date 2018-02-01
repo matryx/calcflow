@@ -36,12 +36,14 @@ public class Recorder : MonoBehaviour
 
     private static void StartRecording()
     {
+        print ("start recording");
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
     }
 
     private static void StopRecording()
     {
+        print ("stop recording");
         PlaybackClock.StopClock();
         PlaybackClock.RemoveFromTimer(CheckForSpawns);
     }
@@ -77,7 +79,7 @@ public class Recorder : MonoBehaviour
                 if (gObj.GetComponent<UIDSystem>())
                 {
                     LogSpawn(gObj);
-                    if (gObj.GetInterface<Button>() != null) {
+                    if (gObj.GetComponent<Button>() != null) {
                         gObj.EnsureOneOf<ButtonLogger>();
                     }
                     gObj.EnsureOneOf<EnableLogger>();

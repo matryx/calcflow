@@ -32,7 +32,6 @@ public class FlexButtonComponent : FlexActionableComponent
     private void Start()
     {
         State = -1;
-        print("awake");
         SetState(0);
     }
 

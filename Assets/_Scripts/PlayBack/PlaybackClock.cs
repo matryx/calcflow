@@ -14,6 +14,7 @@ public class PlaybackClock : Nanome.Core.Behaviour
 
     public static void StartClock()
     {
+        print("clock start");
         timer.Start();
         running = true;
         Dispatcher.queue(runTimer());
@@ -26,6 +27,7 @@ public class PlaybackClock : Nanome.Core.Behaviour
 
     public static void StopClock()
     {
+        print("clock stop");
         running = false;
         timer.Stop();
     }
@@ -55,8 +57,10 @@ public class PlaybackClock : Nanome.Core.Behaviour
         {
             if (CheckTimer())
             {
-                if (triggerTimer != null)
+                if (triggerTimer != null){
+                    print (triggerTimer.GetInvocationList().Length);
                     triggerTimer.Invoke();
+                }
             }
             yield return null;
         }
