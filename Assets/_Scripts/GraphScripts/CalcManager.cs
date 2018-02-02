@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), false)]
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class CalcManager : Nanome.Core.Behaviour
 {
     #region constants

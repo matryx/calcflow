@@ -12,7 +12,7 @@ public class ManageUIDSystem : MonoBehaviour
     public bool turnOnRecursive = false;
     public bool addUIDSystem = false;
     public bool removeUIDSysten = false;
-
+    public bool updateUIDs = false;
     // Use this for initialization
     void Start()
     {
@@ -54,6 +54,16 @@ public class ManageUIDSystem : MonoBehaviour
                 obj.EnsureNoneOf<UIDSystem>();
             }
             removeUIDSysten = false;
+        }
+
+        if (updateUIDs)
+        {
+            UIDSystem[] allObjects = Resources.FindObjectsOfTypeAll<UIDSystem>();
+            foreach (UIDSystem UID in allObjects)
+            {
+                UID.UpdateUIDs(false);
+            }
+            updateUIDs = false;
         }
     }
 }

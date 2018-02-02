@@ -5,8 +5,9 @@ using UnityEngine;
 /*
  * This is a basic FlexPanel that will highlight buttons only as long as they are being pressed. 
  */
+using VoxelBusters.RuntimeSerialization;
 
-
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class KeyboardFlexPanel : FlexPanelComponent {
 
     protected override void OnActionEnd(FlexActionableComponent sender, GameObject collider)

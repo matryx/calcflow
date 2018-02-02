@@ -18,7 +18,9 @@
  */
 using UnityEngine;
 using System.Collections.Generic;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 abstract public class FlexPanelComponent : MonoBehaviour
 {
     private FlexMenu menu;

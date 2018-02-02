@@ -58,7 +58,6 @@ public class PlaybackClock : Nanome.Core.Behaviour
             if (CheckTimer())
             {
                 if (triggerTimer != null){
-                    print (triggerTimer.GetInvocationList().Length);
                     triggerTimer.Invoke();
                 }
             }

@@ -28,8 +28,11 @@ public class ClockFixer : MonoBehaviour
         }
         else if (!PlaybackClock.timer.IsRunning)
         {
-            print("unpausing");
-            PlaybackClock.timer.Start();
+            if (Recorder.Recording || Replayer.Replaying)
+            {
+                print("unpausing");
+                PlaybackClock.timer.Start();
+            }
         }
     }
 

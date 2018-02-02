@@ -21,7 +21,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class FlexMenu : MonoBehaviour
 {
     private Dictionary<string, FlexPanelComponent> panels = new Dictionary<string, FlexPanelComponent>();

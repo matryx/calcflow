@@ -294,7 +294,7 @@ public class PlaybackLogAction2
         switch (type)
         {
             case ActionType.Spawn:
-                Debug.Log("spawning");
+                //Debug.Log("spawning");
                 Spawn();
                 subject = objectMap[subjectKey];
                 position = _info.GetValue<Vector3>("position");
