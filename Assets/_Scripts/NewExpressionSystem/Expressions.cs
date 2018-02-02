@@ -88,6 +88,12 @@ public class Expressions : MonoBehaviour
         if (expr == null)
         //if (expr == null || body == null)
         {
+            if (selectedExpression.GetComponent<ParametricExpression>())
+            {
+                selectedExpression.GetComponent<ParametricExpression>().disableActions();
+
+                calcManager.RemoveExpressionSet(selectedExpression.GetComponent<ParametricExpression>().getExpSet());
+            }
             selectedExpression = expr;
             selectedBody = null;
             remove.gameObject.SetActive(false);
@@ -99,22 +105,24 @@ public class Expressions : MonoBehaviour
         selectedExpression = expr;
         selectedBody = body;
 
-        remove.gameObject.SetActive(true);
-        hide.gameObject.SetActive(true);
-        flowLine.gameObject.SetActive(true);
+        //remove.gameObject.SetActive(true);
+        //hide.gameObject.SetActive(true);
+        //flowLine.gameObject.SetActive(true);
 
         if (!calcManager) calcManager = CalculatorManager._instance;
 
         if (expr.GetComponent<ParametricExpression>())
         {
-            hide.GetComponentInChildren<Collider>().enabled = true;
-            flowLine.GetComponentInChildren<Collider>().enabled = false;
+            //hide.GetComponentInChildren<Collider>().enabled = true;
+            //flowLine.GetComponentInChildren<Collider>().enabled = false;
 
-            hide.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
-            flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+            //hide.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
+            //flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
 
             selectedExpSet = expr.GetComponent<ParametricExpression>().getExpSet();
             calcManager.ChangeExpressionSet(selectedExpSet);
+
+            expr.GetComponent<ParametricExpression>().enableActions();
         }
         else if (expr.GetComponent<VectorFieldExpression>())
         {

@@ -11,7 +11,7 @@ public class ParametricExpression : MonoBehaviour
     List<Transform> variableClumps;
     List<Transform> variables;
     List<Transform> emptyList;
-    Transform separator;
+    Transform separator, action;
     Scroll scroll;
     bool initialized = false;
 
@@ -27,6 +27,7 @@ public class ParametricExpression : MonoBehaviour
         emptyList = new List<Transform>();
 
         scroll = expressionsClass.getParametricScroll();
+        action = transform.Find("ExpressionSet").Find("Button_Xinput").Find("ActionMenu");
         initialized = true;
     }
 
@@ -39,6 +40,16 @@ public class ParametricExpression : MonoBehaviour
             variableClumps = new List<Transform>();
             initialized = true;
         }
+    }
+
+    public void enableActions()
+    {
+        action.gameObject.SetActive(true);
+    }
+
+    public void disableActions()
+    {
+        action.gameObject.SetActive(false);
     }
 
     public string getVarTitle(Transform var)

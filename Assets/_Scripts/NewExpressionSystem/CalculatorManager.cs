@@ -92,6 +92,12 @@ public class CalculatorManager : MonoBehaviour
         expressionSetList.Add(ES);
     }
 
+    public void RemoveExpressionSet(ExpressionSet ES)
+    {
+        expressionSetList.Remove(ES);
+        inputReceived = true;
+    }
+
     public void SetVecFieldES(ExpressionSet ES)
     {
         vecField.SetES(ES);

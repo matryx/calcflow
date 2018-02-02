@@ -13,13 +13,13 @@ public class ExpressionActions : QuickButton
 
     //TODO:
     // 1 - add icon to show/hide
-    // 2 - make dots show up only when expression is selected 
-    // 3 - implement button functionality
+    // 2 - implement button functionality
     //      - deleting expressions      DONE
     //      - deleting variables           
-    // 4 - make delete press open up a pop up window asking user to finalize the deletion
+    // 3 - make delete press open up a pop up window asking user to finalize the deletion
     //    - maybe make a generic popup window system?
-    // 5 - create a delete mode where user can either delete entire expression or existing variables in that expression
+    // 4 - create a delete mode where user can either delete entire expression or existing variables in that expression
+    //      - need help coming up with design for this
 
     //BUGS:
     //
