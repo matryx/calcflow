@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Extensions;
-public class PBT_physicsOBJ : MonoBehaviour {
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false)]
+public class PBT_physicsOBJ : MonoBehaviour {
 	void Update () {
 		if (Replayer.Replaying){
 			gameObject.EnsureNoneOf<ConstantForce>();

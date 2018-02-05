@@ -101,6 +101,12 @@ abstract public class FlexPanelComponent : MonoBehaviour
 
     private void StartAction(FlexActionableComponent sender, GameObject collider)
     {
+#if UNITY_EDITOR
+        if (verbose)
+        {
+            print ("FlexPanelComponent hit by " + sender.name);
+        }
+#endif
         if (menu != null)
         {
             menu.StartAction(name, sender, collider);
@@ -119,5 +125,9 @@ abstract public class FlexPanelComponent : MonoBehaviour
             OnActionEnd(sender, collider);
         }
     }
+
+#if UNITY_EDITOR
+    public bool verbose = false;
+#endif
 
 }

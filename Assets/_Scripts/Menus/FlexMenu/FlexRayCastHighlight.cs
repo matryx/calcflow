@@ -3,18 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), false)]
-public class FlexRayCastHighlight : MonoBehaviour {
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+public class FlexRayCastHighlight : MonoBehaviour
+{
     FlexActionableComponent flexActionableComponent;
     int numhitters = 0;
 
     void Start()
     {
         flexActionableComponent = GetComponent<FlexActionableComponent>();
-        RayCastReceiver receiver = transform.Find("Body").GetComponent<RayCastReceiver>();
+        Transform body = transform.Find("Body");
+        if (body != null)
+        {
+            RayCastReceiver receiver = body.GetComponent<RayCastReceiver>();
 
-        receiver.OnRayCastStart += OnRayCastStart;
-        receiver.OnRayCastEnd += OnRayCastEnd;
+            receiver.OnRayCastStart += OnRayCastStart;
+            receiver.OnRayCastEnd += OnRayCastEnd;
+        }
     }
 
     void OnRayCastEnd(RayCastSender sender)

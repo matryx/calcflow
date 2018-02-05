@@ -195,7 +195,6 @@ public class PlaybackLogAction2
         newAction._info.AddValue("rotation", rotation);
         newAction._info.AddValue("scale", scale);
         newAction._info.AddValue("parentKey", parentKey);
-        parentKey = newAction._info.GetValue<int>("parentKey");
         return newAction;
     }
 
@@ -240,7 +239,7 @@ public class PlaybackLogAction2
             timeStamp = timestamp,
             subjectKey = subject.GetInstanceID()
         };
-        newAction._info.AddValue("buttonPresser", presser);
+        newAction._info.AddValue("buttonPresser", presser.GetInstanceID());
         return newAction;
     }
 
@@ -306,9 +305,10 @@ public class PlaybackLogAction2
                 subject.GlobalScaleTo(scale, 0);
                 break;
             case ActionType.Movement:
-                if (objectMap.ContainsKey(subjectKey))
+                subject = getObject(subjectKey);
+
+                if (subject != null)
                 {
-                    subject = objectMap[subjectKey];
                     position = _info.GetValue<Vector3>("position");
                     scale = _info.GetValue<Vector3>("scale");
                     rotation = _info.GetValue<Quaternion>("rotation");
@@ -326,7 +326,14 @@ public class PlaybackLogAction2
                     //          "parentkey: " + parentKey + "\n" +
                     //          "ParentExists: " + true + "\n" +
                     //          "ParentName: " + ((objectMap[parentKey] != null) ? objectMap[parentKey].name : " N/A"));
-                    subject.transform.parent = (parentKey == 0) ? null : objectMap[parentKey].transform;
+                    if (objectMap.ContainsKey(parentKey))
+                    {
+                        subject.transform.parent = (parentKey == 0) ? null : objectMap[parentKey].transform;
+                    }
+                    else
+                    {
+                        Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent does not exist.");
+                    }
                 }
                 else
                 {
@@ -345,9 +352,10 @@ public class PlaybackLogAction2
                 // }
                 break;
             case ActionType.Disable:
-                if (objectMap.ContainsKey(subjectKey))
+                subject = getObject(subjectKey);
+
+                if (subject != null)
                 {
-                    subject = objectMap[subjectKey];
                     subject.SetActive(false);
                 }
                 else
@@ -356,9 +364,10 @@ public class PlaybackLogAction2
                 }
                 break;
             case ActionType.Destroy:
-                if (objectMap.ContainsKey(subjectKey))
+                subject = getObject(subjectKey);
+
+                if (subject != null)
                 {
-                    subject = objectMap[subjectKey];
                     UnityEngine.Object.Destroy(subject, 0);
                 }
                 else
@@ -367,11 +376,12 @@ public class PlaybackLogAction2
                 }
                 break;
             case ActionType.ButtonPress:
-                if (objectMap.ContainsKey(subjectKey))
+                subject = getObject(subjectKey);
+
+                if (subject != null)
                 {
-                    subject = objectMap[subjectKey];
                     button = subject.GetComponent<Button>();
-                    buttonPresser = _info.GetValue<GameObject>("buttonPresser");
+                    buttonPresser = getObject(_info.GetValue<int>("buttonPresser"));
                     button.PressButton(buttonPresser);
                 }
                 else
@@ -380,11 +390,14 @@ public class PlaybackLogAction2
                 }
                 break;
             case ActionType.ButtonUnpress:
-                if (objectMap.ContainsKey(subjectKey))
+                subject = getObject(subjectKey);
+
+                if (subject != null)
                 {
-                    subject = objectMap[subjectKey];
                     button = subject.GetComponent<Button>();
-                    buttonPresser = _info.GetValue<GameObject>("buttonPresser");
+
+                    buttonPresser = getObject(_info.GetValue<int>("buttonPresser"));
+
                     button.UnpressButton(buttonPresser);
                 }
                 else
@@ -396,6 +409,18 @@ public class PlaybackLogAction2
     }
 
 
+
+    GameObject getObject(int ID)
+    {
+        if (objectMap.ContainsKey(ID))
+        {
+            return objectMap[ID];
+        }
+        else
+        {
+            return null;
+        }
+    }
 
 }
 

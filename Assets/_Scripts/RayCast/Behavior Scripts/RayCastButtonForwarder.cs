@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
+
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class RayCastButtonForwarder : MonoBehaviour
 {
 
@@ -10,6 +13,12 @@ public class RayCastButtonForwarder : MonoBehaviour
 
     void Start()
     {
+        VirtualButton vSource = GetComponent<VirtualButton>();
+        if (vSource != null)
+        {
+            vSource.OnButtonEnter += target.PressButton;
+            vSource.OnButtonExit += target.UnpressButton;
+        }
         RayCastButton source = GetComponent<RayCastButton>();
         if (source != null)
         {

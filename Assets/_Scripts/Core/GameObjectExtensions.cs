@@ -162,7 +162,13 @@ namespace Extensions
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
-                UnityEngine.Object.DestroyImmediate(t, true);
+                try
+                {
+                    UnityEngine.Object.DestroyImmediate(t, true);
+                } catch (Exception e){
+                    Debug.Log ("Failed to remove object of type " + t.ToString() + " from object " + gameObject);
+                    throw(e);
+                }
 
                 return;
             }

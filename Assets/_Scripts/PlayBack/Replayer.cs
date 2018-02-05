@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Replayer : MonoBehaviour {
+public class Replayer : MonoBehaviour
+{
 
     public bool EditorReplay = false;
     private static List<PlaybackLogAction2> log;
@@ -19,7 +20,7 @@ public class Replayer : MonoBehaviour {
     {
         Replaying = EditorReplay;
     }
-    
+
     private void LoadReplay(string json)
     {
         LoadReplay(JsonUtility.FromJson<PlaybackLog2>(json));
@@ -46,6 +47,8 @@ public class Replayer : MonoBehaviour {
                 //print("attempting pop");
                 if (log.Count == 0)
                 {
+                    print("replay finished");
+
                     //print("nothing to pop");
                     Replaying = false;
                     break;
@@ -59,7 +62,6 @@ public class Replayer : MonoBehaviour {
                 }
                 else
                 {
-                    print("nothing to pop... yet");
                     break;
                 }
             }

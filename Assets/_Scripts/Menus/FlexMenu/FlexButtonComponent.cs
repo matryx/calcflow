@@ -49,22 +49,22 @@ public class FlexButtonComponent : FlexActionableComponent
         {
             rayTouchButton.OnButtonEnter -= startAction;
             rayTouchButton.OnButtonExit -= endAction;
-            return;
         }
-
-
-        RayCastButton rcButton = GetComponent<RayCastButton>();
-        if (rcButton != null)
+        else
         {
-            rcButton.OnButtonEnter -= startAction;
-            rcButton.OnButtonExit -= endAction;
-        }
+            RayCastButton rcButton = GetComponent<RayCastButton>();
+            if (rcButton != null)
+            {
+                rcButton.OnButtonEnter -= startAction;
+                rcButton.OnButtonExit -= endAction;
+            }
 
-        TouchButton touchButton = GetComponent<TouchButton>();
-        if (touchButton != null)
-        {
-            touchButton.OnButtonEnter -= startAction;
-            touchButton.OnButtonExit -= endAction;
+            TouchButton touchButton = GetComponent<TouchButton>();
+            if (touchButton != null)
+            {
+                touchButton.OnButtonEnter -= startAction;
+                touchButton.OnButtonExit -= endAction;
+            }
         }
     }
 
@@ -82,22 +82,22 @@ public class FlexButtonComponent : FlexActionableComponent
         {
             rayTouchButton.OnButtonEnter += startAction;
             rayTouchButton.OnButtonExit += endAction;
-            return;
         }
-
-
-        RayCastButton rcButton = GetComponent<RayCastButton>();
-        if (rcButton != null)
+        else
         {
-            rcButton.OnButtonEnter += startAction;
-            rcButton.OnButtonExit += endAction;
-        }
+            RayCastButton rcButton = GetComponent<RayCastButton>();
+            if (rcButton != null)
+            {
+                rcButton.OnButtonEnter += startAction;
+                rcButton.OnButtonExit += endAction;
+            }
 
-        TouchButton touchButton = GetComponent<TouchButton>();
-        if (touchButton != null)
-        {
-            touchButton.OnButtonEnter += startAction;
-            touchButton.OnButtonExit += endAction;
+            TouchButton touchButton = GetComponent<TouchButton>();
+            if (touchButton != null)
+            {
+                touchButton.OnButtonEnter += startAction;
+                touchButton.OnButtonExit += endAction;
+            }
         }
 
         if (State != 2)

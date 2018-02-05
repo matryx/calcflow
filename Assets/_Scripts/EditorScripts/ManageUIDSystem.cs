@@ -11,7 +11,8 @@ public class ManageUIDSystem : MonoBehaviour
     public bool turnOffRecursive = false;
     public bool turnOnRecursive = false;
     public bool addUIDSystem = false;
-    public bool removeUIDSysten = false;
+    public bool removeUIDSystem = false;
+    public bool resetUIDSystem = false;
     public bool updateUIDs = false;
     // Use this for initialization
     void Start()
@@ -46,14 +47,29 @@ public class ManageUIDSystem : MonoBehaviour
             addUIDSystem = false;
         }
 
-        if (removeUIDSysten)
+        if (removeUIDSystem)
         {
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
             foreach (GameObject obj in allObjects)
             {
                 obj.EnsureNoneOf<UIDSystem>();
             }
-            removeUIDSysten = false;
+            removeUIDSystem = false;
+        }
+
+        if (resetUIDSystem)
+        {
+            GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            resetUIDSystem = false;
+            foreach (GameObject obj in allObjects)
+            {
+                obj.EnsureNoneOf<UIDSystem>();
+            }
+            foreach (GameObject obj in allObjects)
+            {
+                obj.EnsureOneOf<UIDSystem>().UpdateUIDs(false);
+            }
+            print("success! UIDs fully reset");
         }
 
         if (updateUIDs)
