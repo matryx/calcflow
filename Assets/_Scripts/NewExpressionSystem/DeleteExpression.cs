@@ -5,7 +5,6 @@ using UnityEngine;
 public class DeleteExpression : QuickButton {
     Expressions expressions;
 
-	// Use this for initialization
     protected override void Start()
     {
         base.Start();
@@ -19,8 +18,5 @@ public class DeleteExpression : QuickButton {
 
     protected override void ButtonExitBehavior(GameObject other) { }
 
-    // Update is called once per frame
-    void Update () {
-		
-	}
+    void Update() { }
 }

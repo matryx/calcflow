@@ -90,6 +90,7 @@ public class CalculatorManager : MonoBehaviour
     public void AddExpressionSet(ExpressionSet ES)
     {
         expressionSetList.Add(ES);
+        inputReceived = true;
     }
 
     public void RemoveExpressionSet(ExpressionSet ES)
@@ -280,7 +281,8 @@ public class CalculatorManager : MonoBehaviour
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
             vecField.UpdateFunctions();
-            if (isValid && expressionSetList.Count > 0)
+            //if (isValid && expressionSetList.Count > 0)
+            if (isValid)
             {
                 paramSurface.UpdateExpressionSet(expressionSetList);
                 paramSurface.GenerateParticles();

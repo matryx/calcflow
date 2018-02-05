@@ -66,6 +66,11 @@ public class Expressions : MonoBehaviour
         return selectedBody;
     }
 
+    public ExpressionSet getSelectedExprSet()
+    {
+        return selectedExpSet;
+    }
+
     public bool selectedNotNull()
     {
         return (selectedExpression != null);
@@ -92,10 +97,11 @@ public class Expressions : MonoBehaviour
             {
                 selectedExpression.GetComponent<ParametricExpression>().disableActions();
 
-                calcManager.RemoveExpressionSet(selectedExpression.GetComponent<ParametricExpression>().getExpSet());
+                //calcManager.RemoveExpressionSet(selectedExpression.GetComponent<ParametricExpression>().getExpSet());
             }
             selectedExpression = expr;
             selectedBody = null;
+            selectedExpSet = null;
             remove.gameObject.SetActive(false);
             hide.gameObject.SetActive(false);
             flowLine.gameObject.SetActive(false);

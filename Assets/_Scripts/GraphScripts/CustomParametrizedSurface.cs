@@ -213,6 +213,11 @@ public class CustomParametrizedSurface : MonoBehaviour
             if (es.ranges.Count == 0) return;
         }
 
+        if (expressionSets.Count == 0)
+        {
+            //TODO: make particles reset to center
+        }
+
         setup = StartCoroutine(SetupParticles());
     }
 
