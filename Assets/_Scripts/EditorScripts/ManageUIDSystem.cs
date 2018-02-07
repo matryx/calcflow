@@ -59,14 +59,12 @@ public class ManageUIDSystem : MonoBehaviour
 
         if (resetUIDSystem)
         {
-            GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            UIDSystem[] allObjects = Resources.FindObjectsOfTypeAll<UIDSystem>();
             resetUIDSystem = false;
-            foreach (GameObject obj in allObjects)
+            foreach (UIDSystem UIDS in allObjects)
             {
+                GameObject obj = UIDS.gameObject;
                 obj.EnsureNoneOf<UIDSystem>();
-            }
-            foreach (GameObject obj in allObjects)
-            {
                 obj.EnsureOneOf<UIDSystem>().UpdateUIDs(false);
             }
             print("success! UIDs fully reset");
