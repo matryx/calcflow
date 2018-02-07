@@ -16,8 +16,10 @@ public class CustomParametrizedSurface : MonoBehaviour
     #endregion
 
     List<Particle[]> threadResults = new List<Particle[]>();
-
     public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
+
+    private List<string> emptyTokens = new List<string>();
+    ExpressionSet emptyExprSet;
 
     private float uMin, uMax;
     private float vMin, vMax;
@@ -88,6 +90,8 @@ public class CustomParametrizedSurface : MonoBehaviour
     private void Awake()
     {
         _instance = this;
+        emptyTokens.Add("0");
+        emptyExprSet = new ExpressionSet(emptyTokens);
     }
 
     // Use this for initialization
@@ -215,7 +219,12 @@ public class CustomParametrizedSurface : MonoBehaviour
 
         if (expressionSets.Count == 0)
         {
-            //TODO: make particles reset to center
+            expressionSets.Add(emptyExprSet);
+        }
+        else
+        {
+            //TODO: this line shouldn't be necessary since set list should be remade 
+            expressionSets.Remove(emptyExprSet);
         }
 
         setup = StartCoroutine(SetupParticles());

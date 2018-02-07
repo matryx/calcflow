@@ -25,7 +25,6 @@ public class ToggleExpression : QuickButton
     protected override void ButtonEnterBehavior(GameObject other)
     {
         expressionSet = expressions.getSelectedExprSet();
-        print("EXP SET: " + expressionSet);
 
         if (active)
         {

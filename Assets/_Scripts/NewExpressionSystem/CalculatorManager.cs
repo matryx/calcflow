@@ -155,8 +155,6 @@ public class CalculatorManager : MonoBehaviour
 
     public void manageText()
     {
-        //handle variables too
-
         selectedExpr = expressions.getSelectedExpr();
         if (selectedExpr == null || expressions.getSelectedBody() == null) return;
 
@@ -281,7 +279,6 @@ public class CalculatorManager : MonoBehaviour
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
             vecField.UpdateFunctions();
-            //if (isValid && expressionSetList.Count > 0)
             if (isValid)
             {
                 paramSurface.UpdateExpressionSet(expressionSetList);

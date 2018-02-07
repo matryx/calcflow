@@ -97,6 +97,23 @@ public class ExpressionSet
         ranges = new Dictionary<string, RangePair>();
     }
 
+    //CREATES EMPTY EXPRESSION SET
+    public ExpressionSet(List<string> emptyTokens)
+    {
+        if (emptyTokens.Count == 0) emptyTokens.Add("0");
+
+        expressions = new Dictionary<ExpOptions, Expression>();
+        emptyTokens.Add("x");
+        expressions.Add(ExpOptions.X, new Expression(emptyTokens));
+        emptyTokens.Remove("x");
+        expressions.Add(ExpOptions.Y, new Expression(emptyTokens));
+        expressions.Add(ExpOptions.Z, new Expression(emptyTokens));
+
+        ranges = new Dictionary<string, RangePair>();
+        ranges.Add("x", new RangePair(new Range(emptyTokens), new Range(emptyTokens)));
+        this.CompileAll();
+    }
+
     public ExpressionSet DeepCopy()
     {
         ExpressionSet newEs = new ExpressionSet();
