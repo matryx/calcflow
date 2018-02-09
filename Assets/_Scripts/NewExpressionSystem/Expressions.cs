@@ -82,10 +82,11 @@ public class Expressions : MonoBehaviour
 
         if (selectedExpression.GetComponent<ParametricExpression>())
         {
-            selectedExpression.GetComponent<ParametricExpression>().deleteExpressionFromScroll(); 
+            //deletes expression from UI
+            selectedExpression.GetComponent<ParametricExpression>().deleteExpressionFromScroll();
+            //deletes expression from graph
+            calcManager.RemoveExpressionSet(selectedExpSet);
         }
-
-        Destroy(selectedExpression);
     }
 
     public void setSelectedExpr(Transform expr, ExpressionBody body)
@@ -96,8 +97,6 @@ public class Expressions : MonoBehaviour
             if (selectedExpression.GetComponent<ParametricExpression>())
             {
                 selectedExpression.GetComponent<ParametricExpression>().disableActions();
-
-                //calcManager.RemoveExpressionSet(selectedExpression.GetComponent<ParametricExpression>().getExpSet());
             }
             selectedExpression = expr;
             selectedBody = null;
@@ -111,20 +110,10 @@ public class Expressions : MonoBehaviour
         selectedExpression = expr;
         selectedBody = body;
 
-        //remove.gameObject.SetActive(true);
-        //hide.gameObject.SetActive(true);
-        //flowLine.gameObject.SetActive(true);
-
         if (!calcManager) calcManager = CalculatorManager._instance;
 
         if (expr.GetComponent<ParametricExpression>())
         {
-            //hide.GetComponentInChildren<Collider>().enabled = true;
-            //flowLine.GetComponentInChildren<Collider>().enabled = false;
-
-            //hide.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
-            //flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
-
             selectedExpSet = expr.GetComponent<ParametricExpression>().getExpSet();
             calcManager.ChangeExpressionSet(selectedExpSet);
 
@@ -132,22 +121,22 @@ public class Expressions : MonoBehaviour
         }
         else if (expr.GetComponent<VectorFieldExpression>())
         {
-            hide.GetComponentInChildren<Collider>().enabled = false;
-            flowLine.GetComponentInChildren<Collider>().enabled = true;
+            //hide.GetComponentInChildren<Collider>().enabled = false;
+            //flowLine.GetComponentInChildren<Collider>().enabled = true;
 
-            hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
-            flowLine.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
+            //hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+            //flowLine.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
 
             selectedExpSet = expr.GetComponent<VectorFieldExpression>().getExpSet();
             calcManager.ChangeExpressionSet(selectedExpSet);
         }
         else if (expr.GetComponent<Constant>())
         {
-            hide.GetComponentInChildren<Collider>().enabled = false;
-            flowLine.GetComponentInChildren<Collider>().enabled = false;
+            //hide.GetComponentInChildren<Collider>().enabled = false;
+            //flowLine.GetComponentInChildren<Collider>().enabled = false;
 
-            hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
-            flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+            //hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+            //flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
         }
     }
 

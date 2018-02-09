@@ -12,13 +12,13 @@ public class ExpressionActions : QuickButton
     private IEnumerator scaleButtonsUp, scaleButtonsDown;
 
     //TODO:
-    // 1 - add icon to show/hide
-    // 2 - implement button functionality
+    // 1 - implement button functionality
     //      - deleting expressions      DONE
-    //      - deleting variables           
-    // 3 - make delete press open up a pop up window asking user to finalize the deletion
+    //      - deleting variables        NEED HELP WITH UI 
+    //      - toggle show and hide      DONE
+    // 2 - make delete press open up a pop up window asking user to finalize the deletion
     //    - maybe make a generic popup window system?
-    // 4 - create a delete mode where user can either delete entire expression or existing variables in that expression
+    // 3 - create a delete mode where user can either delete entire expression or existing variables in that expression
     //      - need help coming up with design for this
 
     //BUGS:

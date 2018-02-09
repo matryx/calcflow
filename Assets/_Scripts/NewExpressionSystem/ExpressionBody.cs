@@ -178,8 +178,12 @@ public class ExpressionBody : QuickButton
             feedBack.gameObject.SetActive(false);
 
             ExpressionBody selectedBody = expression.getSelectedBody();
-            TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
-            oldTextInput.text = oldTextInput.text.Replace("_", "");
+
+            if (selectedBody)
+            {
+                TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+                oldTextInput.text = oldTextInput.text.Replace("_", "");
+            }
 
             expression.setSelectedExpr(null, null);
             thisBodyActive = false;
