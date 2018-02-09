@@ -6,7 +6,10 @@ using System.IO;
 using System.Threading;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+
+//Public variables SHOULD NOT be serialized but must be serialized at this time because of the way 
+//that values were assigned through editor. Future iterations should make an effort to not require public serialization.
+[RuntimeSerializable(typeof(MonoBehaviour), true, false)]
 public class CustomParametrizedSurface : MonoBehaviour
 {
 
@@ -55,7 +58,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     private Coroutine setup;
 
     // size of a particle struct in bytes
-    private const int PARTICLE_SIZE = 2 * 12 + 16;
+    public const int PARTICLE_SIZE = 2 * 12 + 16;
     // number of threads for a group
     private const int GROUP_SIZE = 256;
 
@@ -84,7 +87,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     AK.ExpressionSolver solver;
 
     // Use this for initialization
-    protected virtual void Start()
+    protected virtual void Awake()
     {
         solver = new AK.ExpressionSolver();
         InitializeParticleSystem();
@@ -158,7 +161,7 @@ public class CustomParametrizedSurface : MonoBehaviour
             particleAnimation.SetBuffer(kID, "source", sBuffer);
             particleAnimation.SetBuffer(kID, "dest", dBuffer);
         }
-
+        Debug.Log("particle Shader: " + particleShader.ToString() );
         particleMaterial = new Material(particleShader);
         particleMaterial.SetTexture("_Sprite", particleSprite);
         particleMaterial.SetBuffer("particles", pBuffer);
