@@ -11,7 +11,7 @@ public class CalcManager : Nanome.Core.Behaviour
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-    
+
     #endregion
 
     ExpressionSet currExpressionSet;
@@ -51,6 +51,8 @@ public class CalcManager : Nanome.Core.Behaviour
 
     [SerializeField]
     Inputs inputs;
+
+    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 
     [System.Serializable]
     internal class ConnectedMenus
@@ -121,7 +123,7 @@ public class CalcManager : Nanome.Core.Behaviour
         pieceWiseControl.ForceNumberOfTabs(ess.Count);
         expressionSet = paramSurface.expressionSets[0];
         calcInput.ChangeOutput(expressionSet.expressions[X]);
-        if(boundsManager != null) boundsManager.UpdateButtonText();
+        if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
 

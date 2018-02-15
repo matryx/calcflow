@@ -314,6 +314,15 @@ public class PlaybackLogAction2
                     rotation = _info.GetValue<Quaternion>("rotation");
                     parentKey = _info.GetValue<int>("parentKey");
 
+                    if (objectMap.ContainsKey(parentKey))
+                    {
+                        subject.transform.SetParent((parentKey == 0) ? null : objectMap[parentKey].transform, false);
+                    }
+                    else
+                    {
+                        Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent does not exist.");
+                    }
+
                     subject.LocalMoveTo(position, PlaybackLog.Period);
                     subject.RotateTo(rotation, PlaybackLog.Period);
                     subject.GlobalScaleTo(scale, PlaybackLog.Period);
@@ -326,14 +335,7 @@ public class PlaybackLogAction2
                     //          "parentkey: " + parentKey + "\n" +
                     //          "ParentExists: " + true + "\n" +
                     //          "ParentName: " + ((objectMap[parentKey] != null) ? objectMap[parentKey].name : " N/A"));
-                    if (objectMap.ContainsKey(parentKey))
-                    {
-                        subject.transform.parent = (parentKey == 0) ? null : objectMap[parentKey].transform;
-                    }
-                    else
-                    {
-                        Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent does not exist.");
-                    }
+
                 }
                 else
                 {

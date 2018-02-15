@@ -146,6 +146,8 @@ public class CustomParametrizedSurface : MonoBehaviour
             dest[i].position = pos;
         }
 
+        Debug.Log(PARTICLE_SIZE);
+        Debug.Log(l);
         pBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
         sBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
         dBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
