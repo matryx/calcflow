@@ -82,17 +82,17 @@ public class Expressions : MonoBehaviour
 
         if (selectedExpression.GetComponent<ParametricExpression>())
         {
+            //deletes expression from graph
+            //have to do this first because deleting UI sets expression set to null
+            calcManager.RemoveExpressionSet(selectedExpSet);
             //deletes expression from UI
             selectedExpression.GetComponent<ParametricExpression>().deleteExpressionFromScroll();
-            //deletes expression from graph
-            calcManager.RemoveExpressionSet(selectedExpSet);
         }
     }
 
     public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
         if (expr == null)
-        //if (expr == null || body == null)
         {
             if (selectedExpression.GetComponent<ParametricExpression>())
             {
