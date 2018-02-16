@@ -6,6 +6,7 @@ using VoxelBusters.RuntimeSerialization;
 [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class CalcInput : MonoBehaviour
 {
+    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         CalcInput calcInput;
@@ -36,7 +37,7 @@ public class CalcInput : MonoBehaviour
 
     KeyboardInputResponder responder;
 
-    public void ChangeOutput(CalcOutput calcOutput) 
+    public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
         index = currExpression.tokens.Count;
@@ -91,7 +92,7 @@ public class CalcInput : MonoBehaviour
             case "Button_end":
                 index = currExpression.tokens.Count;
                 break;
-            #endregion
+                #endregion
         }
         #endregion
         calcManager.updateText = true;

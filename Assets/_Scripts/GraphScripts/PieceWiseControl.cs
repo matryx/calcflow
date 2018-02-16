@@ -44,6 +44,7 @@ public class PieceWiseControl : MonoBehaviour
 
     Vector3 distanceBetween;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         PieceWiseControl pwControl;

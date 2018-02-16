@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using NanoVRController;
 
+using VoxelBusters.RuntimeSerialization;
+
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 [RequireComponent(typeof(JoyStickReceiver))]
 public class Scroll : MonoBehaviour

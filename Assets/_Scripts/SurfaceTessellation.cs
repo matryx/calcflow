@@ -4,7 +4,9 @@ using UnityEngine;
 using AK;
 using System.Threading;
 using System.IO;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class SurfaceTessellation : MonoBehaviour { 
     public struct EquationSet {
         

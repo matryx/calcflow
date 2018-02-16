@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 public class ExpressionSet
 {
@@ -189,6 +191,7 @@ public class ExpressionSet
     }
 }
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 public abstract class CalcOutput
 {
@@ -318,6 +321,7 @@ public abstract class CalcOutput
     #endregion
 }
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 public class Expression : CalcOutput
 {
@@ -348,6 +352,7 @@ public class Expression : CalcOutput
     }
 }
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 public class RangePair
 {
@@ -367,6 +372,7 @@ public class RangePair
     }
 }
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 public class Range : CalcOutput
 {
@@ -425,6 +431,7 @@ public class Range : CalcOutput
 
 }
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 public class SerializableExpressionSet
 {
@@ -465,6 +472,7 @@ public class SerializableExpressionSet
     }
 }
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 public class SerializableRangePair
 {
@@ -483,6 +491,7 @@ public class SerializableRangePair
     }
 }
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 [System.Serializable]
 public class SerializableRange
 {

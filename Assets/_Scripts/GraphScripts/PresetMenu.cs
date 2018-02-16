@@ -6,7 +6,7 @@ using VoxelBusters.RuntimeSerialization;
 [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class PresetMenu : MonoBehaviour
 {
-
+    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         PresetMenu presetMenu;
@@ -27,13 +27,13 @@ public class PresetMenu : MonoBehaviour
     public string defaultFunction = "Astroidal Ellipse";
     CalcManager calcManager;
 
-    [SerializeField]    
+    [SerializeField]
     private bool cinquefoilKnot, circle, sphereOutline, hypocloid, hypocloidSurface, trefoilKnot,
              turnip, wavySurface, highResSphere;
-    [SerializeField]    
-    private bool astroidalEllipse, bumpySphere, dinisSurface, figure8, graysSurface, knot, mobius, 
+    [SerializeField]
+    private bool astroidalEllipse, bumpySphere, dinisSurface, figure8, graysSurface, knot, mobius,
                  radialWave, torus;
-    [SerializeField]    
+    [SerializeField]
     private bool cone, cube, cylinder, sphere, tetrahedron;
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
