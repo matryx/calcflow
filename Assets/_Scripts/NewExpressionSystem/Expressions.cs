@@ -121,12 +121,6 @@ public class Expressions : MonoBehaviour
         }
         else if (expr.GetComponent<VectorFieldExpression>())
         {
-            //hide.GetComponentInChildren<Collider>().enabled = false;
-            //flowLine.GetComponentInChildren<Collider>().enabled = true;
-
-            //hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
-            //flowLine.GetComponentInChildren<Renderer>().material.color = actionActiveColor;
-
             selectedExpSet = expr.GetComponent<VectorFieldExpression>().getExpSet();
             calcManager.ChangeExpressionSet(selectedExpSet);
         }
