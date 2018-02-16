@@ -282,6 +282,7 @@ public class CalculatorManager : MonoBehaviour
             if (isValid)
             {
                 paramSurface.UpdateExpressionSet(expressionSetList);
+                print("EXP COUNT: " + expressionSetList.Count);
                 paramSurface.GenerateParticles();
             }
         }

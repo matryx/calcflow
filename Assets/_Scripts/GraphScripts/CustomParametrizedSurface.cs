@@ -217,14 +217,12 @@ public class CustomParametrizedSurface : MonoBehaviour
             if (es.ranges.Count == 0) return;
         }
 
+        //if (!expressionSets.Contains(emptyExprSet))
+        //    expressionSets.Add(emptyExprSet);
+
         if (expressionSets.Count == 0)
         {
             expressionSets.Add(emptyExprSet);
-        }
-        else
-        {
-            //TODO: this line shouldn't be necessary since set list should be remade 
-            expressionSets.Remove(emptyExprSet);
         }
 
         setup = StartCoroutine(SetupParticles());
