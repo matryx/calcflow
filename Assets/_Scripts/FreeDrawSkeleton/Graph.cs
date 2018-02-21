@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class Graph : MonoBehaviour {
 
     //public static Graph instance = null;

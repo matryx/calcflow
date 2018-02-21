@@ -4,14 +4,16 @@ using UnityEngine;
 using System.Text.RegularExpressions;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), false)]
-public class BoundsManager : MonoBehaviour {
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+public class BoundsManager : MonoBehaviour
+{
     private CalcManager calcManager;
     public TMPro.TextMeshPro tParam1, tParam2;
     public TMPro.TextMeshPro uParam1, uParam2;
     public TMPro.TextMeshPro vParam1, vParam2;
     public TMPro.TextMeshPro wParam1, wParam2;
 
+    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         BoundsManager boundsManager;
@@ -41,7 +43,7 @@ public class BoundsManager : MonoBehaviour {
     {
         string[] q = button.name.Split(new string[] { "Paren" }, System.StringSplitOptions.None);
         string param = q[0];
-        string index = q[q.Length - 1]; 
+        string index = q[q.Length - 1];
         if (index == "1")
         {
             calcManager.expressionSet.ranges[param].Min.Exclusive = !calcManager.expressionSet.ranges[param].Min.Exclusive;
@@ -78,7 +80,7 @@ public class BoundsManager : MonoBehaviour {
         {
             UpdateSingleButtonText(wParam1, wParam2, "w");
         }
-    } 
+    }
 
 
     private void UpdateSingleButtonText(TMPro.TextMeshPro tm1, TMPro.TextMeshPro tm2, string param)

@@ -1,8 +1,8 @@
 ﻿using System.Collections;
+using VoxelBusters.RuntimeSerialization;
 
 namespace AK
 {
-	
 	public enum SymbolType
 	{
 		Empty,
@@ -16,7 +16,7 @@ namespace AK
 		StringVariable,
 		FuncCustom,
 	};
-	
+	[RuntimeSerializable(null, true, true)]
 	public class Symbol
 	{
 		public SymbolType type;

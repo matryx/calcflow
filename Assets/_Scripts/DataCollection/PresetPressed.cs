@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using CalcFlowUI;
 using System;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class PresetPressed : QuickButton
 {
     private string preset;

@@ -84,6 +84,7 @@ internal class ParticleSettingsResponder : FlexMenu.FlexMenuResponder
     }
 }
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class ParticleAnimationSettings : MonoBehaviour
 {
 

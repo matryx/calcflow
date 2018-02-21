@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using VoxelBusters.RuntimeSerialization;
 
 namespace AK
 {
+	[RuntimeSerializable(null, true, true)]
 	public class Expression
 	{
 		public Symbol root;

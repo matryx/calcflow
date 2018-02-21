@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false, false)]
 public class LookAtText : MonoBehaviour {
 
     public GameObject cam;

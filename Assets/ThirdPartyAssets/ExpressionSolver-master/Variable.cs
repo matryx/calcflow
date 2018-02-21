@@ -1,6 +1,7 @@
-﻿namespace AK
+﻿using VoxelBusters.RuntimeSerialization;
+namespace AK
 {
-
+	[RuntimeSerializable(null, true, true)]
 	public class Variable
 	{
 		public double value;
