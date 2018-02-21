@@ -40,7 +40,7 @@ public class Expressions : MonoBehaviour
 
         actionActiveColor = remove.Find("Body").GetComponent<Renderer>().material.color;
         actionInactiveColor = Color.gray;
-
+        //GameObject g = new GameObject();
         //ColorUtility.TryParseHtmlString("#64C3A7FF", out expressionActiveColor);
         //ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
     }

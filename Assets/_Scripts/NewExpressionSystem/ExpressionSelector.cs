@@ -36,7 +36,6 @@ public class ExpressionSelector : QuickButton
     {
         List<Transform> toAdd = new List<Transform>();
 
-        Transform fakeObj = new GameObject().transform;
         switch (transform.parent.name)
         {
             case "ConstantAdd":
@@ -119,7 +118,7 @@ public class ExpressionSelector : QuickButton
         //GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
         //addForwarders(sep.transform);
         //toAdd.Add(sep.transform);
-        thisScroll.addToIndex(-1, toAdd, fakeObj, true);
+        thisScroll.addToIndex(-1, toAdd, null, true);
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
