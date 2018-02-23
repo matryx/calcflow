@@ -371,6 +371,11 @@ public class RangePair
     }
 }
 
+public class VectorPiece : CalcOutput{
+	
+
+}
+
 [System.Serializable]
 public class Range : CalcOutput
 {
