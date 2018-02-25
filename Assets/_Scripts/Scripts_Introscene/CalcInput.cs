@@ -41,6 +41,7 @@ public class CalcInput : MonoBehaviour
     JoyStickAggregator joyStickAggregator;
     Color errorColor;
     Color selectedColor;
+    Transform popup;
 
     ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
@@ -65,7 +66,8 @@ public class CalcInput : MonoBehaviour
         joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
         errorColor = Color.red;
         ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
-
+        //popup = Resources.Load("DeleteConfirmation") as Transform;
+        //popup.gameObject.SetActive(false);
     }
 
     private void addForwarders(Transform obj)

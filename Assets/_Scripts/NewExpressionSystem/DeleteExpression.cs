@@ -9,8 +9,8 @@ public class DeleteExpression : QuickButton {
     JoyStickAggregator joyStickAggregator;
 
     Transform popup;
-    float distance = 1;
-    public GameObject scene_camera;
+    float distance = -4;
+    Transform deleteButton;
 
     //TODO:
     //make popup in front of meny instead of eyes so you dont have to use camera
@@ -20,6 +20,7 @@ public class DeleteExpression : QuickButton {
         base.Start();
         expressions = Expressions._instance;
         popup = transform.parent.parent.parent.Find("DeleteConfirmation");
+        deleteButton = transform.parent;
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
@@ -27,7 +28,7 @@ public class DeleteExpression : QuickButton {
         if (!popup.gameObject.activeSelf)
         {
             popup.gameObject.SetActive(true);
-            popup.position = scene_camera.transform.position + scene_camera.transform.forward * distance;
+            popup.position = deleteButton.position + deleteButton.forward * distance;
         }
 
         //expressions.deleteExpression();

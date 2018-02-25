@@ -13,13 +13,13 @@ public class ExpressionButtonsHandler : MonoBehaviour {
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {
-            print("NAME: " + name);
             buttonHandler.HandleInput(sender.name);
         }
 
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
     }
 
+    FlexMenu flex;
     Expressions expressions;
     private FlexMenu keyboard;
     KeyboardInputResponder responder;
@@ -27,13 +27,14 @@ public class ExpressionButtonsHandler : MonoBehaviour {
 
     Transform popup;
     float distance = 1;
-    public GameObject scene_camera;
 
     void Start()
     {
         expressions = Expressions._instance;
         responder = new KeyboardInputResponder(this);
         popup = transform.Find("DeleteConfirmation");
+        flex = GetComponent<FlexMenu>();
+        flex.RegisterResponder(responder);
     }
 
     public void HandleInput(string buttonID)
@@ -50,5 +51,7 @@ public class ExpressionButtonsHandler : MonoBehaviour {
         }
     }
 
-    void Update() { }
+    void Update() {
+
+    }
 }

@@ -106,9 +106,7 @@ public class CalculatorManager : MonoBehaviour
 
     public void ChangeExpressionSet(ExpressionSet ES)
     {
-        print(ES);
         expressionSet = ES;
-        //print(expressions[getExpOption()]);
         calcInput.ChangeOutput(expressionSet.expressions[getExpOption()]);
         manageText();
         if (boundsManager != null) boundsManager.UpdateButtonText();
@@ -247,9 +245,9 @@ public class CalculatorManager : MonoBehaviour
         return displayList;
     }
 
+    //TODO: Euler's fix
     string CleanRepresentation(string input)
     {
-
         switch (input)
         {
             case "pi":

@@ -193,6 +193,7 @@ public class Scroll : MonoBehaviour
     public void addObject(Transform newObj)
     {
         adding = true;
+        newObj.localScale = Vector3.zero;
         toAdd.Add(newObj);
     }
 
@@ -211,6 +212,7 @@ public class Scroll : MonoBehaviour
         foreach (Transform t in toAdd)
         {
             placeObject(t, firstNewIndex, false);
+            t.localScale = Vector3.one;
             ++firstNewIndex;
         }
 
