@@ -24,12 +24,12 @@ public class Expressions : MonoBehaviour
     // 5 - hamburger menu for deleting/disabling variables and expressions - IN PROGRESS
     // 6 - error message pop up when typing letter in var
     // 7 - figure out how to differentiate Euler's number with regular e letter (italicize?) 
+    // 8 - change add button to an icon
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
     // 2 - creating empty game object everytime a letter is pressed
     
-
     void Awake()
     {
         _instance = this;

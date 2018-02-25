@@ -41,8 +41,8 @@ public class CalcInput : MonoBehaviour
     JoyStickAggregator joyStickAggregator;
     Color errorColor;
     Color selectedColor;
-    Transform popup;
-
+    GameObject errorPopup;
+    float distance = -4;
     ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
@@ -66,8 +66,8 @@ public class CalcInput : MonoBehaviour
         joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
         errorColor = Color.red;
         ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
-        //popup = Resources.Load("DeleteConfirmation") as Transform;
-        //popup.gameObject.SetActive(false);
+        errorPopup = Instantiate(Resources.Load("Popups/VariableError")) as GameObject;
+        errorPopup.SetActive(false);
     }
 
     private void addForwarders(Transform obj)
@@ -85,6 +85,11 @@ public class CalcInput : MonoBehaviour
         currExpression = calcOutput;
         index = (currExpression == null) ?
                 0 : currExpression.tokens.Count;
+    }
+
+    public void disablePopup()
+    {
+        errorPopup.SetActive(false);
     }
 
     //called when button on keyboard pressed
@@ -106,6 +111,8 @@ public class CalcInput : MonoBehaviour
                     //prevents typing of letters when a variable body is selected
                     if (expressions.getSelectedBody().isVariable())
                     {
+                        errorPopup.SetActive(true);
+                        errorPopup.transform.position = transform.position + transform.forward * distance + new Vector3(0, -2, 0);
                         letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
                         variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
                         break;

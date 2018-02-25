@@ -193,6 +193,12 @@ public class Scroll : MonoBehaviour
     public void addObject(Transform newObj)
     {
         adding = true;
+
+        if (newObj.localScale != Vector3.one)
+        {
+            print("MAKE THE SCALE OF THE TOP HIERARCHY OF THE SCROLL OBECT VECTOR3.ONE TO AVOID SCALING ISSUES");
+        }
+
         newObj.localScale = Vector3.zero;
         toAdd.Add(newObj);
     }

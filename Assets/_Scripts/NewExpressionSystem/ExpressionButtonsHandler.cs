@@ -32,9 +32,10 @@ public class ExpressionButtonsHandler : MonoBehaviour {
     {
         expressions = Expressions._instance;
         responder = new KeyboardInputResponder(this);
-        popup = transform.Find("DeleteConfirmation");
         flex = GetComponent<FlexMenu>();
         flex.RegisterResponder(responder);
+
+        popup = transform.Find("DeleteConfirmation");
     }
 
     public void HandleInput(string buttonID)

@@ -12,9 +12,6 @@ public class DeleteExpression : QuickButton {
     float distance = -4;
     Transform deleteButton;
 
-    //TODO:
-    //make popup in front of meny instead of eyes so you dont have to use camera
-
     protected override void Start()
     {
         base.Start();
@@ -30,8 +27,6 @@ public class DeleteExpression : QuickButton {
             popup.gameObject.SetActive(true);
             popup.position = deleteButton.position + deleteButton.forward * distance;
         }
-
-        //expressions.deleteExpression();
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
