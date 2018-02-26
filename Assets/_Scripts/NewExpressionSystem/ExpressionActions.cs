@@ -16,9 +16,7 @@ public class ExpressionActions : QuickButton
     //      - deleting expressions      DONE
     //      - deleting variables        NEED HELP WITH UI 
     //      - toggle show and hide      DONE
-    // 2 - make delete press open up a pop up window asking user to finalize the deletion
-    //    - maybe make a generic popup window system?
-    // 3 - create a delete mode where user can either delete entire expression or existing variables in that expression
+    // 2 - create a delete mode where user can either delete entire expression or existing variables in that expression
     //      - need help coming up with design for this
 
     //BUGS:

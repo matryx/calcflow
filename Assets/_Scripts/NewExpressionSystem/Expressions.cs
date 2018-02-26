@@ -22,9 +22,8 @@ public class Expressions : MonoBehaviour
     // 3 - slide variable shortcuts in and out 
     // 4 - enable underscore movement by raycast hit
     // 5 - hamburger menu for deleting/disabling variables and expressions - IN PROGRESS
-    // 6 - error message pop up when typing letter in var
-    // 7 - figure out how to differentiate Euler's number with regular e letter (italicize?) 
-    // 8 - change add button to an icon
+    // 6 - figure out how to differentiate Euler's number with regular e letter (italicize?) 
+    // 7 - change add button to an icon
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)

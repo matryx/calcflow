@@ -9,7 +9,7 @@ public class DeleteExpression : QuickButton {
     JoyStickAggregator joyStickAggregator;
 
     Transform popup;
-    float distance = -4;
+    float distance = -0.04f;
     Transform deleteButton;
 
     protected override void Start()
@@ -20,12 +20,26 @@ public class DeleteExpression : QuickButton {
         deleteButton = transform.parent;
     }
 
+    IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
+    {
+        float startTime = Time.time;
+
+        while (Time.time < startTime + overTime)
+        {
+            obj.localScale = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
+            yield return null;
+        }
+
+        obj.localScale = end;
+    }
+
     protected override void ButtonEnterBehavior(GameObject other)
     {
         if (!popup.gameObject.activeSelf)
         {
             popup.gameObject.SetActive(true);
-            popup.position = deleteButton.position + deleteButton.forward * distance;
+            popup.position = deleteButton.position + new Vector3(0, -0.8f, -0.1f);
+            StartCoroutine(ScaleTo(popup, Vector3.zero, Vector3.one, 0.1f));
         }
     }
 

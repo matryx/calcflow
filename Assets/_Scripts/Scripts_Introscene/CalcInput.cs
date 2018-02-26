@@ -42,7 +42,7 @@ public class CalcInput : MonoBehaviour
     Color errorColor;
     Color selectedColor;
     GameObject errorPopup;
-    float distance = -4;
+
     ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
@@ -89,7 +89,21 @@ public class CalcInput : MonoBehaviour
 
     public void disablePopup()
     {
-        errorPopup.SetActive(false);
+        StartCoroutine(ScaleTo(errorPopup.transform, Vector3.one, Vector3.zero, 0.1f));
+    }
+
+    IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
+    {
+        float startTime = Time.time;
+
+        while (Time.time < startTime + overTime)
+        {
+            obj.localScale = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
+            yield return null;
+        }
+
+        obj.localScale = end;
+        if (end == Vector3.zero) obj.gameObject.SetActive(false);
     }
 
     //called when button on keyboard pressed
@@ -112,7 +126,8 @@ public class CalcInput : MonoBehaviour
                     if (expressions.getSelectedBody().isVariable())
                     {
                         errorPopup.SetActive(true);
-                        errorPopup.transform.position = transform.position + transform.forward * distance + new Vector3(0, -2, 0);
+                        errorPopup.transform.position = transform.position + new Vector3(0, -1.5f, -1);
+                        StartCoroutine(ScaleTo(errorPopup.transform, Vector3.zero, Vector3.one, 0.1f));
                         letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
                         variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
                         break;

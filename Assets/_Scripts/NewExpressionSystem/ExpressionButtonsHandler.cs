@@ -38,18 +38,32 @@ public class ExpressionButtonsHandler : MonoBehaviour {
         popup = transform.Find("DeleteConfirmation");
     }
 
+    IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
+    {
+        float startTime = Time.time;
+
+        while (Time.time < startTime + overTime)
+        {
+            obj.localScale = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
+            yield return null;
+        }
+
+        obj.localScale = end;
+        if (end == Vector3.zero) obj.gameObject.SetActive(false);
+    }
+
     public void HandleInput(string buttonID)
     {
         switch (buttonID)
         {
             case "Yes":
                 expressions.deleteExpression();
-                popup.gameObject.SetActive(false);
                 break;
             case "No":
-                popup.gameObject.SetActive(false);
                 break;
         }
+
+        StartCoroutine(ScaleTo(popup, Vector3.one, Vector3.zero, 0.1f));
     }
 
     void Update() {
