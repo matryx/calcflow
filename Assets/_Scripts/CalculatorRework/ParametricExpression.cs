@@ -26,7 +26,7 @@ public class ParametricExpression : MonoBehaviour
         variables = new List<Transform>();
         emptyList = new List<Transform>();
 
-        scroll = expressionsClass.getParametricScroll();
+        scroll = expressionsClass.getScroll("param");
         action = transform.Find("ExpressionSet").Find("Button_Xinput").Find("ActionMenu");
         initialized = true;
     }
@@ -40,6 +40,11 @@ public class ParametricExpression : MonoBehaviour
             variableClumps = new List<Transform>();
             initialized = true;
         }
+    }
+
+    public Scroll getScroll()
+    {
+        return scroll;
     }
 
     public void enableActions()

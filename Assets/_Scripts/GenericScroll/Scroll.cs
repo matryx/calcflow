@@ -210,6 +210,12 @@ public class Scroll : MonoBehaviour
 
         foreach (Transform t in toAdd)
         {
+            if (t == null)
+            {
+                toAdd.Clear();
+                adding = false;
+                return;
+            }
             objects.Add(t);
         }
 
@@ -231,8 +237,17 @@ public class Scroll : MonoBehaviour
     public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
     //public void addToIndex(int atIndex, List<Transform> objs, bool secondToLast)
     {
+        print("OBJECTS: " + objects);
+        print("INDEX: " + atIndex);
+
+        //BUG: objects is null here for some reason
+
         if (secondToLast) atIndex = objects.Count - 1;
-        if (atIndex < 0 || atIndex > objects.Count - 1) return;
+        if (atIndex < 0 || atIndex > objects.Count - 1)
+        {
+            return;
+        }
+
 
         //int temp = atIndex;
         //foreach (Transform o in objs)
