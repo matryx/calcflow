@@ -371,11 +371,6 @@ public class RangePair
     }
 }
 
-public class VectorPiece : CalcOutput{
-	
-
-}
-
 [System.Serializable]
 public class Range : CalcOutput
 {
@@ -417,6 +412,83 @@ public class Range : CalcOutput
 
 
     public Range()
+    {
+        rawText = "";
+        tokens = new List<string>();
+    }
+
+    public override bool GenerateAKSolver(AK.ExpressionSolver solver)
+    {
+        bool success = base.GenerateAKSolver(solver);
+        if (success)
+        {
+            val = (float)AKExpression.Evaluate();
+        }
+        return success;
+    }
+
+}
+
+[System.Serializable]
+public class PtCoord
+{
+    public AxisCoord X;
+    public AxisCoord Y;
+    public AxisCoord Z;
+
+    public PtCoord(AxisCoord x, AxisCoord y, AxisCoord z)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+    }
+
+    public PtCoord(PtCoord toCopy)
+    {
+        X = new AxisCoord(toCopy.X);
+        Y = new AxisCoord(toCopy.Y);
+        Z = new AxisCoord(toCopy.Z);
+    }
+}
+
+[System.Serializable]
+public class AxisCoord : CalcOutput
+{
+    float val;
+
+    public float Value
+    {
+        get
+        {
+            return val;
+        }
+    }
+
+    public string expression
+    {
+        get
+        {
+            return rawText;
+        }
+        set
+        {
+            rawText = value;
+        }
+    }
+
+    public AxisCoord(AxisCoord toCopy)
+    {
+        this.rawText = toCopy.rawText;
+        this.tokens = new List<string>(toCopy.tokens);
+    }
+
+    public AxisCoord(List<string> tokens)
+    {
+        rawText = "";
+        this.tokens = tokens;
+    }
+
+    public AxisCoord()
     {
         rawText = "";
         tokens = new List<string>();
