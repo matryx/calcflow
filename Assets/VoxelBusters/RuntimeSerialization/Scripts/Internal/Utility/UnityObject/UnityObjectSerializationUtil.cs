@@ -75,6 +75,8 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             RSExtensionManager.AddNewExtension(typeof(TMP_Text),        new TMProExtension());
             RSExtensionManager.AddNewExtension(typeof(TextMeshPro),     new TMProExtension());
 
+			RSExtensionManager.AddNewExtension(typeof(LineRenderer),    new LineRendererExtension());
+
         }
 
         internal static void Reset ()

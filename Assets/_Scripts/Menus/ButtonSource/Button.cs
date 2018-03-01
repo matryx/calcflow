@@ -5,7 +5,7 @@ using VoxelBusters.RuntimeSerialization;
 
 namespace CalcFlowUI
 {
-    [RuntimeSerializable(typeof(MonoBehaviour), false)]
+    [RuntimeSerializable(typeof(MonoBehaviour), false, false)]
     public class Button : MonoBehaviour
     {
         public delegate void ButtonCallBack(GameObject presser);

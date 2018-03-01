@@ -83,7 +83,7 @@ namespace AK
             AddCustomFunction("round", delegate (double p) { return System.Math.Round(p); }, true);
         }
 
-        public void AddCustomFunction(string name, int paramCount, System.Func<double[], double> func, bool enableSymbolicationTimeEvaluation = false)
+        public void AddCustomFunction(string name, int paramCount, CustomFunction.FuncMD func, bool enableSymbolicationTimeEvaluation = false)
         {
             if (paramCount > MaxCustomFunctionParamCount)
             {
@@ -92,7 +92,7 @@ namespace AK
             customFuncs[name] = new CustomFunction(name, paramCount, func, enableSymbolicationTimeEvaluation);
         }
 
-        public void AddCustomFunction(string name, int paramCount, System.Func<object[], double> func, bool enableSymbolicationTimeEvaluation = false)
+        public void AddCustomFunction(string name, int paramCount, CustomFunction.FuncMO func, bool enableSymbolicationTimeEvaluation = false)
         {
             if (paramCount > MaxCustomFunctionParamCount)
             {
@@ -101,7 +101,7 @@ namespace AK
             customFuncs[name] = new CustomFunction(name, paramCount, func, enableSymbolicationTimeEvaluation);
         }
 
-        public void AddCustomFunction(string name, System.Func<double, double> func, bool enableSymbolicationTimeEvaluation = false)
+        public void AddCustomFunction(string name, CustomFunction.Func1D func, bool enableSymbolicationTimeEvaluation = false)
         {
             customFuncs[name] = new CustomFunction(name, func, enableSymbolicationTimeEvaluation);
         }
@@ -251,11 +251,11 @@ namespace AK
                                     case SymbolType.FuncCustom:
                                         {
                                             var customFunc = (CustomFunction)funcSymbol.ptr;
-                                            if (customFunc.paramCount == 1 && customFunc.func1d != null)
+                                            if (customFunc.paramCount == 1 && (customFunc.type == CustomFunction.paramType.DOUBLEL))
                                             {
                                                 value = customFunc.Invoke(GetSymbolValue(s));
                                             }
-                                            else if (customFunc.funcmo != null)
+                                            else if (customFunc.type == CustomFunction.paramType.OBJECT)
                                             {
                                                 object[] p = new object[MaxCustomFunctionParamCount];
                                                 p[0] = (!s.IsStringType()) ? (object)GetSymbolValue(s) : (object)s.stringValue;

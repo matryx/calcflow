@@ -9,9 +9,16 @@ using VoxelBusters.RuntimeSerialization;
 
 //Public variables SHOULD NOT be serialized but must be serialized at this time because of the way 
 //that values were assigned through editor. Future iterations should make an effort to not require public serialization.
-[RuntimeSerializable(typeof(MonoBehaviour), true, false)]
-public class CustomParametrizedSurface : MonoBehaviour
+[RuntimeSerializable(typeof(MonoBehaviour), false, false)]
+public class CustomParametrizedSurface : ManualSerialize
 {
+
+    protected override void manualSerialize(){
+        
+    }
+	protected override void manualDeserialize(){
+        
+    }
 
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
@@ -47,6 +54,8 @@ public class CustomParametrizedSurface : MonoBehaviour
     public float particleSize = 0.05f;
     public Texture2D particleSprite;
     public Shader particleShader;
+
+    //private string computeShaderLoc = "ComputerShader\\Particle Animations";
     public ComputeShader particleAnimation;
 
     private Material particleMaterial;
@@ -89,8 +98,14 @@ public class CustomParametrizedSurface : MonoBehaviour
     // Use this for initialization
     protected virtual void Awake()
     {
+        InitializeVariables();
+
         solver = new AK.ExpressionSolver();
         InitializeParticleSystem();
+    }
+
+    private void InitializeVariables(){
+        //particleAnimation = Resources.Load(computeShaderLoc) as ComputeShader;
     }
 
     public MeshFilter mesh;
@@ -163,7 +178,7 @@ public class CustomParametrizedSurface : MonoBehaviour
             particleAnimation.SetBuffer(kID, "source", sBuffer);
             particleAnimation.SetBuffer(kID, "dest", dBuffer);
         }
-        Debug.Log("particle Shader: " + particleShader.ToString() );
+        Debug.Log("particle Shader: " + particleShader.ToString());
         particleMaterial = new Material(particleShader);
         particleMaterial.SetTexture("_Sprite", particleSprite);
         particleMaterial.SetBuffer("particles", pBuffer);
@@ -300,7 +315,8 @@ public class CustomParametrizedSurface : MonoBehaviour
             temp.AddRange(array);
         }
         Particle lastParticle = temp[temp.Count - 1];
-        for (int i = 0; i < missingParticles; i++) {
+        for (int i = 0; i < missingParticles; i++)
+        {
             temp.Add(lastParticle);
         }
         dest = temp.ToArray();
@@ -354,7 +370,7 @@ public class CustomParametrizedSurface : MonoBehaviour
                 string name = indexedParam[j];
                 AK.Variable var = vars[name];
 
-                var.value = threadHelper.parameterMin[name] + (float)val / (width-1) * (threadHelper.parameterMax[name] - threadHelper.parameterMin[name]);
+                var.value = threadHelper.parameterMin[name] + (float)val / (width - 1) * (threadHelper.parameterMax[name] - threadHelper.parameterMin[name]);
             }
 
             float x = (float)threadHelper.expressionList[0].Evaluate();

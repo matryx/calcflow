@@ -52,7 +52,7 @@ public class CalcManager : Nanome.Core.Behaviour
     [SerializeField]
     Inputs inputs;
 
-    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+    [RuntimeSerializable(null, true, true)]
     [System.Serializable]
     internal class ConnectedMenus
     {
@@ -72,7 +72,7 @@ public class CalcManager : Nanome.Core.Behaviour
         internal ParticleAnimationSettings particleAnimationSettings;
     }
 
-    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+    [RuntimeSerializable(null, true, true)]
     [System.Serializable]
     internal class FeedBacks
     {
@@ -92,7 +92,7 @@ public class CalcManager : Nanome.Core.Behaviour
         internal Renderer wFeedback;
     }
 
-    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+    [RuntimeSerializable(null, true, true)]
     [System.Serializable]
     internal class Inputs
     {

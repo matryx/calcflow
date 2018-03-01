@@ -9,6 +9,11 @@ namespace VoxelBusters.RuntimeSerialization
 	public interface IRuntimeSerializationCallback 
 	{
 		/// <summary>
+		/// Event triggered before <see cref="RuntimeSerializableAttribute"/> object is serialized.
+		/// </summary>
+		void OnBeforeRuntimeSerialize ();
+
+		/// <summary>
 		/// Event triggered after <see cref="RuntimeSerializableAttribute"/> object is serialized.
 		/// </summary>
 		void OnAfterRuntimeSerialize ();

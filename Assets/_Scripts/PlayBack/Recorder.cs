@@ -13,38 +13,37 @@ public class Recorder : MonoBehaviour
 
     public bool EditorRecord = false;
     private static HashSet<int> AllGameObjects = new HashSet<int>();
-
+    private static List<UIDSystem> AllUIDs = new List<UIDSystem>();
     private static bool record = false;
     [SerializeField]
     public static PlaybackLog2 recordLog = new PlaybackLog2();
 
     private void Start()
     {
-        AllGameObjects.Add(gameObject.GetInstanceID());
+        //AllGameObjects.Add(gameObject.GetInstanceID());
+        AllUIDs.Remove(gameObject.GetComponent<UIDSystem>());
     }
 
     private void Update()
     {
         Recording = EditorRecord;
-        //testList = new int[AllGameObjects.Count];
-        //AllGameObjects.CopyTo(testList);
-        //foreach(int i in ddddtestList)
-        //{
-        //    print(EditorUtility.InstanceIDToObject(i).name);
-        //}
     }
 
     private static void StartRecording()
     {
-        print ("start recording");
+        print("start recording");
         PlaybackClock.StartClock();
-        PlaybackClock.AddToTimer(CheckForSpawns);
+        foreach(UIDSystem uid in AllUIDs){
+            RecordSpawn(uid);
+        }
+        //PlaybackClock.AddToTimer(CheckForSpawns);
     }
 
     private static void StopRecording()
     {
-        print ("stop recording");
+        print("stop recording");
         PlaybackClock.StopClock();
+
         PlaybackClock.RemoveFromTimer(CheckForSpawns);
     }
 
@@ -68,23 +67,43 @@ public class Recorder : MonoBehaviour
         }
     }
 
+    public static void UIDAdded(UIDSystem uid)
+    {
+        AllUIDs.Add(uid);
+        if (Recording){
+            RecordSpawn(uid);
+        }
+    }
+
+    private static void RecordSpawn(UIDSystem uid){
+        GameObject gObj = uid.gameObject;
+        LogSpawn(gObj);
+        if (gObj.GetComponent<Button>() != null)
+        {
+            gObj.EnsureOneOf<ButtonLogger>();
+        }
+        gObj.EnsureOneOf<EnableLogger>();
+        gObj.EnsureOneOf<MovementLogger>();
+    }
+
     private static void CheckForSpawns()
     {
         foreach (GameObject gObj in (GameObject[])GameObject.FindObjectsOfType<GameObject>())
         {
-            if (!AllGameObjects.Contains(gObj.GetInstanceID()))
-            {
-                AllGameObjects.Add(gObj.GetInstanceID());
+            // if (!AllGameObjects.Contains(gObj.GetInstanceID()))
+            // {
+            //     AllGameObjects.Add(gObj.GetInstanceID());
 
-                if (gObj.GetComponent<UIDSystem>())
-                {
-                    LogSpawn(gObj);
-                    if (gObj.GetComponent<Button>() != null) {
-                        gObj.EnsureOneOf<ButtonLogger>();
-                    }
-                    gObj.EnsureOneOf<EnableLogger>();
-                    gObj.EnsureOneOf<MovementLogger>();
-                }
+            //     if (gObj.GetComponent<UIDSystem>())
+            //     {
+            //         LogSpawn(gObj);
+            //         if (gObj.GetComponent<Button>() != null)
+            //         {
+            //             gObj.EnsureOneOf<ButtonLogger>();
+            //         }
+            //         gObj.EnsureOneOf<EnableLogger>();
+            //         gObj.EnsureOneOf<MovementLogger>();
+            //     }
                 //Transform child1 = gObj.transform;
                 //Transform parent1 = child1.parent;
 
@@ -106,7 +125,7 @@ public class Recorder : MonoBehaviour
                 //}
                 //if(child1.gameObject.GetComponent<UIDSystem>())
                 //    LogSpawn(child1.gameObject);
-            }
+            //}
         }
     }
 

@@ -1,55 +1,72 @@
 ﻿using VoxelBusters.RuntimeSerialization;
 namespace AK
 {
-	[RuntimeSerializable(null, true, true)]
-	public class CustomFunction
-	{
-		public string name;
-		public System.Func<double[],double> funcmd;
-		public System.Func<object[],double> funcmo;
-		public System.Func<double,double> func1d;
-		public int paramCount;
-		public bool enableSymbolicationTimeEvaluation;
-		
-		public CustomFunction(string name, int paramCount, System.Func<double[],double> func, bool enableSymbolicationTimeEvaluation)
-		{
-			this.funcmd = func;
-			this.enableSymbolicationTimeEvaluation = enableSymbolicationTimeEvaluation;
-			this.paramCount = paramCount;
-			this.name = name;
-		}
+    [RuntimeSerializable(null, true, true)]
+    public class CustomFunction
+    {
+        public string name;
 
-		public CustomFunction(string name, int paramCount, System.Func<object[],double> func, bool enableSymbolicationTimeEvaluation)
-		{
-			this.funcmo = func;
-			this.enableSymbolicationTimeEvaluation = enableSymbolicationTimeEvaluation;
-			this.paramCount = paramCount;
-			this.name = name;
-		}
+        public delegate double FuncMD(double[] dList);
+        public delegate double FuncMO(object[] dList);
+        public delegate double Func1D(double dVal);
 
-		public CustomFunction(string name, System.Func<double,double> func, bool enableSymbolicationTimeEvaluation)
-		{
-			this.func1d = func;
-			this.enableSymbolicationTimeEvaluation = enableSymbolicationTimeEvaluation;
-			this.paramCount = 1;
-			this.name = name;
-		}
+        public enum paramType
+        {
+            OBJECT,
+            DOUBLE,
+            DOUBLEL
+        }
 
-		public double Invoke(double[] p)
-		{
-			return funcmd(p);
-		}
+        public paramType type;
 
-		public double Invoke(object[] p)
-		{
-			return funcmo(p);
-		}
+        public event FuncMD funcmd;
+        public event FuncMO funcmo;
+        public event Func1D func1d;
+        public int paramCount;
+        public bool enableSymbolicationTimeEvaluation;
 
-		public double Invoke(double x)
-		{
-			return func1d != null ? func1d(x) : funcmd(new double[]{x});
-		}
+        public CustomFunction(string name, int paramCount, FuncMD func, bool enableSymbolicationTimeEvaluation)
+        {
+            this.type = paramType.DOUBLEL;
+            this.funcmd += func;
+            this.enableSymbolicationTimeEvaluation = enableSymbolicationTimeEvaluation;
+            this.paramCount = paramCount;
+            this.name = name;
+        }
 
-	}
-	
+        public CustomFunction(string name, int paramCount, FuncMO func, bool enableSymbolicationTimeEvaluation)
+        {
+            this.type = paramType.OBJECT;
+            this.funcmo = func;
+            this.enableSymbolicationTimeEvaluation = enableSymbolicationTimeEvaluation;
+            this.paramCount = paramCount;
+            this.name = name;
+        }
+
+        public CustomFunction(string name, Func1D func, bool enableSymbolicationTimeEvaluation)
+        {
+            this.type = paramType.DOUBLE;
+            this.func1d = func;
+            this.enableSymbolicationTimeEvaluation = enableSymbolicationTimeEvaluation;
+            this.paramCount = 1;
+            this.name = name;
+        }
+
+        public double Invoke(double[] p)
+        {
+            return funcmd(p);
+        }
+
+        public double Invoke(object[] p)
+        {
+            return funcmo(p);
+        }
+
+        public double Invoke(double x)
+        {
+            return func1d != null ? func1d(x) : funcmd(new double[] { x });
+        }
+
+    }
+
 }

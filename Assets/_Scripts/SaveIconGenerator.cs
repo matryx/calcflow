@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), false, false)]
 [RequireComponent(typeof(HiResScreenShots))]
 
 public class SaveIconGenerator : MonoBehaviour {

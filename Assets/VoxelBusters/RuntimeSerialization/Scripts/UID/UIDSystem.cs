@@ -114,6 +114,7 @@ namespace VoxelBusters.RuntimeSerialization
 			CachedGameObject	= gameObject;
 			CachedTransform		= transform;
 			IsPrefab			= false;
+			Recorder.UIDAdded(this);
 		}
 
 		#endregion
