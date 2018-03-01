@@ -13,11 +13,7 @@ public class ExpressionActions : QuickButton
 
     //TODO:
     // 1 - implement button functionality
-    //      - deleting expressions      DONE
     //      - deleting variables        NEED HELP WITH UI 
-    //      - toggle show and hide      DONE
-    // 2 - create a delete mode where user can either delete entire expression or existing variables in that expression
-    //      - need help coming up with design for this
 
     //BUGS:
     //

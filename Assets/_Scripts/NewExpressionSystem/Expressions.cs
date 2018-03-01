@@ -23,7 +23,22 @@ public class Expressions : MonoBehaviour
     // 4 - enable underscore movement by raycast hit
     // 5 - hamburger menu for deleting/disabling variables and expressions - IN PROGRESS
     // 6 - figure out how to differentiate Euler's number with regular e letter (italicize?) 
-    // 7 - change add button to an icon
+
+
+    //VAR DELETE UI IDEA:
+    //make an action button that makes expression enter a delete mode
+    //if delete mode on:
+    //  - two new buttons pop up (one for deleting var one for expression)
+    //  - highlights variables, if selected, the highlight for that var turns red
+    //if delete var button selected:
+    //  - deletes var
+    //if delete expression selected:
+    //  - pull up delete confirmation, delete if confirmed, otherwise make popup disappear
+    //if delete mode off:
+    //  - delete buttons disappear
+
+    //  - need to figure out how to differentiate between expr delete and var delete button
+    //  - clicking 
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
@@ -44,7 +59,6 @@ public class Expressions : MonoBehaviour
 
         actionActiveColor = remove.Find("Body").GetComponent<Renderer>().material.color;
         actionInactiveColor = Color.gray;
-        //GameObject g = new GameObject();
         //ColorUtility.TryParseHtmlString("#64C3A7FF", out expressionActiveColor);
         //ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
     }
@@ -141,11 +155,7 @@ public class Expressions : MonoBehaviour
         }
         else if (expr.GetComponent<Constant>())
         {
-            //hide.GetComponentInChildren<Collider>().enabled = false;
-            //flowLine.GetComponentInChildren<Collider>().enabled = false;
-
-            //hide.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
-            //flowLine.GetComponentInChildren<Renderer>().material.color = actionInactiveColor;
+            //TODO: implement constants
         }
     }
 
