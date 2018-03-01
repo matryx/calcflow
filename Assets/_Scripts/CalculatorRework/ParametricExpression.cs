@@ -149,7 +149,8 @@ public class ParametricExpression : MonoBehaviour
         newVarClump.localScale = Vector3.one;
         newVarClump.localPosition = Vector3.zero;
         newVarClump.localEulerAngles = Vector3.zero;
-        scroll.addToIndex(lastComponentInd + 1, emptyList, newVarClump, false);
+        //scroll.addToIndex(lastComponentInd + 1, emptyList, newVarClump, false);
+        scroll.addToScroll(null, newVarClump, lastComponentInd + 1);
         variableClumps.Add(newVarClump);
 
         var.SetParent(newVarClump);

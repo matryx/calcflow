@@ -27,7 +27,10 @@ public class VariableShortcut : MonoBehaviour
         varButton.transform.GetComponentInChildren<TMPro.TextMeshPro>().text = varName;
         varButton.name = varName;
         shortcuts.Add(varName, varButton.transform);
-        thisScroll.addObject(varButton.transform);
+        //thisScroll.addObject(varButton.transform);
+        int objCount = thisScroll.getScrollObjectCount();
+        int atIndex = (objCount > 0) ? objCount : 0;
+        thisScroll.addToScroll(null, varButton.transform, atIndex);
         transform.GetComponent<KeyboardFlexPanel>().AddAction(varButton.transform.GetComponent<FlexActionableComponent>());
     }
 

@@ -49,6 +49,7 @@ public class Scroll : MonoBehaviour
     int numPages;
     int lowestVisIndex = 0;
     int highestVisIndex;
+    int atIndexAdd;
 
     const float transparent = 0;
     const float opaque = 1;
@@ -190,6 +191,100 @@ public class Scroll : MonoBehaviour
         }
     }
 
+    #region old executeAdd
+    //private void executeAdd()
+    //{
+    //    if (objects == null) objects = new List<Transform>();
+    //    int firstNewIndex = (objects.Count > 0) ? objects.Count : 0;
+
+
+    //    foreach (Transform t in toAdd)
+    //    {
+    //        if (t == null)
+    //        {
+    //            toAdd.Clear();
+    //            adding = false;
+    //            return;
+    //        }
+    //        objects.Add(t);
+    //    }
+
+
+    //    setNumPagesAndHighestVisIndex();
+
+    //    foreach (Transform t in toAdd)
+    //    {
+    //        placeObject(t, firstNewIndex, false);
+    //        t.localScale = Vector3.one;
+    //        ++firstNewIndex;
+    //    }
+
+    //    toAdd.Clear();
+    //    adding = false;
+    //}
+    #endregion
+
+    private void executeAdd()
+    {
+        int temp = atIndexAdd;
+
+        foreach (Transform o in toAdd)
+        {
+            objects.Insert(temp, o);
+            ++temp;
+        }
+
+        setNumPagesAndHighestVisIndex();
+
+        temp = atIndexAdd;
+        for (temp = atIndexAdd; temp < objects.Count; temp++)
+        {
+            placeObject(objects[temp], temp, false);
+            objects[temp].localScale = Vector3.one;
+        }
+
+        toAdd.Clear();
+        adding = false;
+    }
+
+    public int getScrollObjectCount()
+    {
+        if (objects == null) objects = new List<Transform>();
+        return objects.Count;
+    }
+
+    public void addToScroll(List<Transform> objs, Transform obj, int atIndex)
+    {
+        if (objects == null) objects = new List<Transform>();
+
+        if (atIndex < 0 || atIndex > objects.Count)
+        {
+            print("INDEX " + atIndex + " IS OUT OF RANGE OF SCROLL OBJECTS");
+            return;
+        }
+
+        atIndexAdd = atIndex;
+
+        if (objs != null && objs.Count > 0)
+        {
+            foreach (Transform o in objs)
+            {
+                o.localScale = Vector3.zero;
+                toAdd.Add(o);
+            }
+        }
+        else
+        {
+            obj.localScale = Vector3.zero;
+            toAdd.Add(obj);
+        }
+
+        adding = true;
+    }
+
+    //TODO: CHANGE ALL CALLS TO ADDTOINDEX TO ADDTOSCROLL
+
+    //old add implementation
     public void addObject(Transform newObj)
     {
         adding = true;
@@ -203,58 +298,16 @@ public class Scroll : MonoBehaviour
         toAdd.Add(newObj);
     }
 
-    private void executeAdd()
+    //old add implementation
+    public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
     {
         if (objects == null) objects = new List<Transform>();
-        int firstNewIndex = (objects.Count > 0) ? objects.Count : 0;
-
-        foreach (Transform t in toAdd)
-        {
-            if (t == null)
-            {
-                toAdd.Clear();
-                adding = false;
-                return;
-            }
-            objects.Add(t);
-        }
-
-        setNumPagesAndHighestVisIndex();
-
-        foreach (Transform t in toAdd)
-        {
-            placeObject(t, firstNewIndex, false);
-            t.localScale = Vector3.one;
-            ++firstNewIndex;
-        }
-
-        toAdd.Clear();
-        adding = false;
-    }
-
-    //TODO: refactor, could probably use a better implementation
-    //      - get objects count
-    public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
-    //public void addToIndex(int atIndex, List<Transform> objs, bool secondToLast)
-    {
-        print("OBJECTS: " + objects);
-        print("INDEX: " + atIndex);
-
-        //BUG: objects is null here for some reason
 
         if (secondToLast) atIndex = objects.Count - 1;
-        if (atIndex < 0 || atIndex > objects.Count - 1)
+        if (atIndex < 0 || atIndex > objects.Count)
         {
             return;
         }
-
-
-        //int temp = atIndex;
-        //foreach (Transform o in objs)
-        //{
-        //    objects.Insert(temp, o);
-        //    temp++;
-        //}
 
         if (objs.Count > 0)
         {
@@ -327,7 +380,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    //TODO: add function that deletes single object
+    //TODO: account for deleting a single object
     public void deleteObjects(List<Transform> objs)
     {
         List<int> indeces = new List<int>();

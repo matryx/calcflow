@@ -143,7 +143,8 @@ public class ExpressionSelector : QuickButton
         }
 
         thisScroll = expressions.getScroll(panelType);
-        thisScroll.addToIndex(0, toAdd, null, false);
+        thisScroll.addToScroll(toAdd, null, 0);
+        //thisScroll.addToIndex(0, toAdd, null, false);
 
         #region old switch
 
