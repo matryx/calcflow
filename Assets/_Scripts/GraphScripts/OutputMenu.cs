@@ -81,6 +81,33 @@ public class OutputMenu : MonoBehaviour
             case "Button_Zinput":
                 calcManager.SetOutput(calcManager.expressionSet.expressions[Z]);
                 break;
+            case "Button_pt1Xinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt1"].X);
+                break;
+            case "Button_pt1Yinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt1"].Y);
+                break;
+            case "Button_pt1Zinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt1"].Z);
+                break;
+            case "Button_pt2Xinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt2"].X);
+                break;
+            case "Button_pt2Yinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt2"].Y);
+                break;
+            case "Button_pt2Zinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt2"].Z);
+                break;
+            case "Button_pt3Xinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt3"].X);
+                break;
+            case "Button_pt3Yinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt3"].Y);
+                break;
+            case "Button_pt3Zinput":
+                calcManager.SetOutput(calcManager.expressionSet.ptCoords["pt3"].Z);
+                break;
             case "umin":
                 calcManager.SetOutput(calcManager.expressionSet.ranges["u"].Min);
                 break;

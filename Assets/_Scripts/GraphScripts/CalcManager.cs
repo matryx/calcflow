@@ -86,6 +86,12 @@ public class CalcManager : MonoBehaviour
         internal Renderer vFeedback;
         [SerializeField]
         internal Renderer wFeedback;
+        [SerializeField]
+        internal Renderer pt1Feedback;
+        [SerializeField]
+        internal Renderer pt2Feedback;
+        [SerializeField]
+        internal Renderer pt3Feedback;
     }
 
     [System.Serializable]
@@ -96,7 +102,10 @@ public class CalcManager : MonoBehaviour
                 tMinInput, tMaxInput,
                 uMinInput, uMaxInput,
                 vMinInput, vMaxInput,
-                wMinInput, wMaxInput;
+                wMinInput, wMaxInput,
+                pt1XInput, pt1YInput, pt1ZInput,
+                pt2XInput, pt2YInput, pt2ZInput,
+                pt3XInput, pt3YInput, pt3ZInput;
     }
 
     public void ChangeExpressionSet(ExpressionSet ES)
@@ -144,7 +153,7 @@ public class CalcManager : MonoBehaviour
         //Req: calcInput
         connectedMenus.pieceWiseControl.Initialize(this);
         //Req: calcInput
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.ptCoords["pt1"].X);
         //Req: calcInput
         connectedMenus.presetMenu.Initialize(this);
 
@@ -204,6 +213,9 @@ public class CalcManager : MonoBehaviour
         if (feedbacks.uFeedback != null) feedbacks.uFeedback.material.color = expressionSet.expValidity["u"] ? positiveFeedback : negativeFeedback;
         if (feedbacks.vFeedback != null) feedbacks.vFeedback.material.color = expressionSet.expValidity["v"] ? positiveFeedback : negativeFeedback;
         if (feedbacks.wFeedback != null) feedbacks.wFeedback.material.color = expressionSet.expValidity["w"] ? positiveFeedback : negativeFeedback;
+        if (feedbacks.pt1Feedback != null) feedbacks.pt1Feedback.material.color = expressionSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
+        if (feedbacks.pt2Feedback != null) feedbacks.pt2Feedback.material.color = expressionSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
+        if (feedbacks.pt3Feedback != null) feedbacks.pt3Feedback.material.color = expressionSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
     }
 
     public void manageText()
@@ -244,7 +256,26 @@ public class CalcManager : MonoBehaviour
             inputs.wMaxInput.text = displayText(expressionSet.ranges["w"].Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["w"].Max, rangeDisplayLength);
         }
         #endregion
-
+        #region coords
+        if (expressionSet.ptCoords.ContainsKey("pt1") && inputs.pt1XInput != null)
+        {
+            inputs.pt1XInput.text = displayText(expressionSet.ptCoords["pt1"].X.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt1"].X, rangeDisplayLength);
+            inputs.pt1YInput.text = displayText(expressionSet.ptCoords["pt1"].Y.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt1"].Y, rangeDisplayLength);
+            inputs.pt1ZInput.text = displayText(expressionSet.ptCoords["pt1"].Z.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt1"].Z, rangeDisplayLength);
+        }
+        if (expressionSet.ptCoords.ContainsKey("pt2") && inputs.pt2XInput != null)
+        {
+            inputs.pt2XInput.text = displayText(expressionSet.ptCoords["pt2"].X.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt2"].X, rangeDisplayLength);
+            inputs.pt2YInput.text = displayText(expressionSet.ptCoords["pt2"].Y.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt2"].Y, rangeDisplayLength);
+            inputs.pt2ZInput.text = displayText(expressionSet.ptCoords["pt2"].Z.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt2"].Z, rangeDisplayLength);
+        }
+        if (expressionSet.ptCoords.ContainsKey("pt3") && inputs.pt3XInput != null)
+        {
+            inputs.pt3XInput.text = displayText(expressionSet.ptCoords["pt3"].X.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt3"].X, rangeDisplayLength);
+            inputs.pt3YInput.text = displayText(expressionSet.ptCoords["pt3"].Y.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt3"].Y, rangeDisplayLength);
+            inputs.pt3ZInput.text = displayText(expressionSet.ptCoords["pt3"].Z.tokens, calcInput.index, calcInput.currExpression == expressionSet.ptCoords["pt3"].Z, rangeDisplayLength);
+        }
+        #endregion
     }
 
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)
