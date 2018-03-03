@@ -8,22 +8,31 @@ public  class UnitTestBegin : MonoBehaviour
     static void BeginTests()
     {
         //String[] arguments = Environment.GetCommandLineArgs();
-        //UnityEngine.EditorSceneManagement.EditorSceneManager.OpenScene(3);
 
-        //opens a specific scene, could open scene 1 and try to click on a menu item
-        var sceneArray = new EditorBuildSettingsScene[2];
-        sceneArray[0] = new EditorBuildSettingsScene("Assets/_Scenes/1 - IntroScene.unity", true);
-        sceneArray[1] = new EditorBuildSettingsScene("Assets/_Scenes/8 - DoubleIntegral.unity", true);
-        EditorBuildSettings.scenes = sceneArray;
+        //-------------------Build Scenes----------------------
+        var sceneArray = new EditorBuildSettingsScene[12];
+        sceneArray[0] = new EditorBuildSettingsScene("Assets/_Scenes/0 - Matryx Advertising.unity", true);
+        sceneArray[1] = new EditorBuildSettingsScene("Assets/_Scenes/1 - IntroScene.unity", true);
+        sceneArray[2] = new EditorBuildSettingsScene("Assets/_Scenes/2 - R1-R3.unity", true);
+        sceneArray[3] = new EditorBuildSettingsScene("Assets/_Scenes/3 - FreeParametrization.unity", true);
+        sceneArray[4] = new EditorBuildSettingsScene("Assets/_Scenes/4 - R3-R3.unity", true);
+        sceneArray[5] = new EditorBuildSettingsScene("Assets/_Scenes/5 - VectorField.unity", true);
+        sceneArray[6] = new EditorBuildSettingsScene("Assets/_Scenes/6 - VectorAdditionCross.unity", true);
+        sceneArray[7] = new EditorBuildSettingsScene("Assets/_Scenes/7 - Mobius Strip.unity", true);
+        sceneArray[8] = new EditorBuildSettingsScene("Assets/_Scenes/8 - DoubleIntegral.unity", true);
+        sceneArray[9] = new EditorBuildSettingsScene("Assets/_Scenes/9 - TripleIntegralRegion.unity", true);
+        sceneArray[10] = new EditorBuildSettingsScene("Assets/_Scenes/10 - ParametrizationAndVectorField.unity", true);
+        sceneArray[11] = new EditorBuildSettingsScene("Assets/_Scenes/11 - SphericalParam.unity", true);
+
+        BuildPipeline.BuildPlayer(sceneArray, "StandaloneWindows64", BuildTarget.StandaloneWindows64, BuildOptions.None);
         UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/_Scenes/1 - IntroScene.unity");
-        //locates a button on screen, so that we can find where we want to point to
 
-        //Enters play mode
+        //-------------------Enter Play Mode----------------------
         EditorApplication.ExecuteMenuItem("Edit/Play");
+
+        //Should be the first scene we load (scene 1)
         print(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
 
-        // Spoof a trigger press ---- note this probably needs to happen after the next frame so that RayCastSender has time to update()
-        // OVRInput.Button.PrimaryIndexTrigger.
 
         //could parse a JSON which declares different hand positions each update cycle, and tests interactions with gameobjects
         //read the JSON filenames ( unit tests ) in as arguments using the getArg function
@@ -31,8 +40,8 @@ public  class UnitTestBegin : MonoBehaviour
 
 
         //curve.GetComponent<TouchRayButton>().PressButton(curve);
-        print(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
-        
+
+
 
     }
 
@@ -50,31 +59,9 @@ public  class UnitTestBegin : MonoBehaviour
     }
     static private void Start()
     {
-        UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/_Scenes/11 - SphericalParam.unity");
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Assets/_Scenes/11 - SphericalParam.unity");
-
-        /*
-        GameObject curve = GameObject.Find("Parametrized Curve");
-        Vector3 targetPos = curve.transform.position;
-        GameObject rHand = GameObject.Find("RightControllerPf");
-        RayCastSender sender = rHand.GetComponent<RayCastSender>();
-
-        //set the rotation to targetPos - current rotation, or some function to get the forward vector pointing to targetPos
-        //rHand.transform.SetPositionAndRotation(new Vector3(0.1323853f, 1.618963f, 0.246521f), Quaternion.Euler(new Vector3(-10.206f, 23.222f,-12.707f)));
-        curve.GetComponent<TouchRayButton>().GetComponent<RayCastButton>().OnButtonEnter += curve.GetComponent<TouchRayButton>().GetComponent<RayCastButton>().PressButton;
-        curve.GetComponent<TouchRayButton>().GetComponent<RayCastButton>().PressButton(curve);
-        print(rHand.transform.position);
-        print(sender.TargetPoint);
-        print("editor updates");
-        */
     }
 
     static void OnEnable()
     {
-        UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/_Scenes/11 - SphericalParam.unity");
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Assets/_Scenes/11 - SphericalParam.unity");
-        GameObject curve = GameObject.Find("Parametrized Curve");
-        curve.GetComponent<TouchButton>().PressButton(curve);
-        print(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 }   
