@@ -14,6 +14,7 @@ public class ParametricExpression : MonoBehaviour
     Transform separator, action;
     Scroll scroll;
     bool initialized = false;
+    float xPos = 1.2f;
 
     void Awake()
     {
@@ -117,7 +118,7 @@ public class ParametricExpression : MonoBehaviour
         scroll.deleteObjects(expressionsList);
     }
 
-    //TODO: handle deletion of variables and re-arranging that will happen as a result
+    //NOTE: only handles one by one deletion, still needs to be tested
     private void deleteVariable(Transform varToDelete)
     {
         variables.Remove(varToDelete);
@@ -127,16 +128,36 @@ public class ParametricExpression : MonoBehaviour
         {
             if (variableClumps[i].childCount != 2)
             {
-                if(i+1 < variableClumps.Count)
+                //TODO: move to coroutine
+                variableClumps[i].GetChild(0).localPosition = new Vector3(-xPos, 0, 0);
+
+                if (i + 1 < variableClumps.Count)
+                {
                     variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
+                    variableClumps[i + 1].GetChild(0).localPosition = new Vector3(xPos, 0, 0);
+                }
             }
         }
+    }
+
+    IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)
+    {
+        float startTime = Time.time;
+
+        while (Time.time < startTime + overTime)
+        {
+            if (obj == null) break;
+            obj.localPosition = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
+            yield return null;
+        }
+
+        if (obj != null) obj.localPosition = end;
     }
 
     private void addToVarClump(Transform var)
     {
         var.SetParent(variableClumps[variableClumps.Count - 1]);
-        var.localPosition = new Vector3(1.2f, 0, 0);
+        var.localPosition = new Vector3(xPos, 0, 0);
     }
 
     private void addNewVariableClump(Transform var)
@@ -154,7 +175,7 @@ public class ParametricExpression : MonoBehaviour
         variableClumps.Add(newVarClump);
 
         var.SetParent(newVarClump);
-        var.localPosition = new Vector3(-1.2f, 0, 0);
+        var.localPosition = new Vector3(-xPos, 0, 0);
     }
 
     void Update()

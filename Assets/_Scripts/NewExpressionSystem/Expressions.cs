@@ -18,27 +18,20 @@ public class Expressions : MonoBehaviour
     //Color expressionActiveColor, expressionInactiveColor;
 
     //TODO:
-    // 2 - grayed out example message in constants
-    // 3 - slide variable shortcuts in and out 
-    // 4 - enable underscore movement by raycast hit
-    // 5 - hamburger menu for deleting/disabling variables and expressions - IN PROGRESS
-    // 6 - figure out how to differentiate Euler's number with regular e letter (italicize?) 
-
+    // 1 - slide variable shortcuts in and out 
+    // 2 - enable underscore movement by raycast hit
+    // 3 - hamburger menu for deleting/disabling variables and expressions - IN PROGRESS
+    // 4 - figure out how to differentiate Euler's number with regular e letter (italicize?) 
+    // 5 - disable e on keyboard
+    // 6 - hide should change the text color of entire expression components to gray
+    // 7 - remove outline on plus
+    // 8 - shift selected expression XYZ
+    // 9 - change separator bar to be ray and full width
 
     //VAR DELETE UI IDEA:
-    //make an action button that makes expression enter a delete mode
-    //if delete mode on:
-    //  - two new buttons pop up (one for deleting var one for expression)
-    //  - highlights variables, if selected, the highlight for that var turns red
-    //if delete var button selected:
-    //  - deletes var
-    //if delete expression selected:
-    //  - pull up delete confirmation, delete if confirmed, otherwise make popup disappear
-    //if delete mode off:
-    //  - delete buttons disappear
-
-    //  - need to figure out how to differentiate between expr delete and var delete button
-    //  - clicking 
+    //talk to Kyle
+    //for now just make it so that if user deletes variable from all expression components, hide the variable in UI 
+    //  -   but save and hide it instead of deleting it so that if user types it again it pops up with same values
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
