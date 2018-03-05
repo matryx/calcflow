@@ -118625,18 +118625,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22b256c7271e433498464a11f8e8dc5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  particleCount: 262144
+  effectStrength: 1
+  currentScale: 10
+  particleSize: 0.05
+  exclusiveModifier: 0.02
+  particleTextureLoc: Textures\particle
+  particleShaderLoc: Shaders\ParticleBillboard
+  computeShaderLoc: ComputeShader\ParticleAnimations
+  particleSprite: {fileID: 0}
+  particleShader: {fileID: 0}
+  particleAnimation: {fileID: 0}
   expressionSets: []
+  particleEffect: 0
   xAxis: {fileID: 1732240296}
   yAxis: {fileID: 1340899383}
   zAxis: {fileID: 1793279692}
-  currentScale: 10
-  particleSize: 0.05
-  particleSprite: {fileID: 2800000, guid: 121779cf5566e7b468f7f1ff757a00a4, type: 3}
-  particleShader: {fileID: 4800000, guid: 853600ecfdf3e8a428ed25e9923d904c, type: 3}
-  particleAnimation: {fileID: 7200000, guid: 0513b1405b09aba42b57f21483dece88, type: 3}
-  particleEffect: 0
-  effectStrength: 1
-  particleCount: 262144
   gradient:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 1, a: 1}
@@ -118668,7 +118672,6 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   mesh: {fileID: 2009418814}
   tessel: {fileID: 372800221}
-  exclusiveModifier: 0.02
 --- !u!1 &1985630024
 GameObject:
   m_ObjectHideFlags: 0

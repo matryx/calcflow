@@ -13,22 +13,110 @@ using VoxelBusters.RuntimeSerialization;
 public class CustomParametrizedSurface : ManualSerialize
 {
 
-    protected override void manualSerialize(){
-        
-    }
-	protected override void manualDeserialize(){
-        
-    }
+    #region Serializable Fields
+    [RuntimeSerializeField]
+    public int particleCount;
+    //Fields that are serializable on their own.
+    [RuntimeSerializeField]
+    [Range(0.1f, 2.0f)]
+    public float effectStrength = 2.0f;
+    [RuntimeSerializeField]
+    public float currentScale = 10;
+    [RuntimeSerializeField]
+    public float particleSize = 0.05f;
+    [RuntimeSerializeField]
+    public float exclusiveModifier = 0.01f;
+    [RuntimeSerializeField]
+    private float animProgress; //might be dynamic.
+    [RuntimeSerializeField]
+    private string[] kernels =
+    {
+        "None", "Gravity", "Lerp",
+        "SmoothLerp", "Explode",
+        "Swirl"
+    };
+    #endregion
+
+    #region Surrogate Fields
+    //Fields that are serializable substitutes for non-serializable field. Used to restore those fields in runtime.
+    [RuntimeSerializeField]
+    public string particleTextureLoc = "Textures\\particle";
+    [RuntimeSerializeField]
+    public string particleShaderLoc = "Shaders\\ParticleBillboard";
+    [RuntimeSerializeField]
+    public string computeShaderLoc = "ComputeShader\\ParticleAnimations";
+
+    #endregion
+
+    #region non-serializable fields
+    //Fields that are not serializable and require a surrogate for loading.
+    public Texture2D particleSprite;
+    public Shader particleShader;
+    public ComputeShader particleAnimation;
+    #endregion
+
+    #region Dynamic Fields
+    //Fields that do not need to be serialized because they are calculated during runtime.
+    private Material particleMaterial;
+    List<Particle[]> threadResults = new List<Particle[]>();
+    public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
+    private Particle[] particles;
+    private Particle[] source;
+    private Particle[] dest;
+    private ComputeBuffer pBuffer;
+    private ComputeBuffer sBuffer;
+    private ComputeBuffer dBuffer;
+    private Coroutine anim;
+    private Coroutine setup;
+    private int threadGroups;
+    public ParticleEffectList particleEffect = ParticleEffectList.None;
+
+    #endregion
+
 
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
+    // size of a particle struct in bytes
+    public const int PARTICLE_SIZE = 2 * 12 + 16;
+    // number of threads for a group
+    private const int GROUP_SIZE = 256;
     #endregion
 
-    List<Particle[]> threadResults = new List<Particle[]>();
 
-    public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
+    protected override void manualSerialize()
+    {
+
+    }
+    protected override void manualDeserialize()
+    {
+        print("this works!");
+        restoreGradient();
+    }
+
+    private void restoreGradient()
+    {
+        Gradient g;
+        GradientColorKey[] gck;
+        GradientAlphaKey[] gak;
+        g = new Gradient();
+        gck = new GradientColorKey[2];
+        gck[0].color = Color.blue;
+        gck[0].time = 0.0F;
+        gck[1].color = Color.cyan;
+        gck[1].time = 0.25F;
+        gck[2].color = Color.green;
+        gck[2].time = 0.5F;
+        gck[3].color = Color.yellow;
+        gck[3].time = 0.75F;
+        gck[4].color = Color.red;
+        gck[4].time = 1.0F;
+        g.colorKeys = gck;
+        //g.SetKeys(gck);
+        g.mode = GradientMode.Blend;
+        gradient = g;
+    }
 
     #region axis labels
     public AxisLabelManager xAxis;
@@ -36,7 +124,6 @@ public class CustomParametrizedSurface : ManualSerialize
     public AxisLabelManager zAxis;
     #endregion
 
-    public float currentScale = 10;
 
     private struct Particle
     {
@@ -45,52 +132,14 @@ public class CustomParametrizedSurface : ManualSerialize
         public Color color;
     }
 
-    private Particle[] particles;
-    private Particle[] source;
-    private Particle[] dest;
-
-    private float animProgress;
-
-    public float particleSize = 0.05f;
-    public Texture2D particleSprite;
-    public Shader particleShader;
-
-    //private string computeShaderLoc = "ComputerShader\\Particle Animations";
-    public ComputeShader particleAnimation;
-
-    private Material particleMaterial;
-    private ComputeBuffer pBuffer;
-    private ComputeBuffer sBuffer;
-    private ComputeBuffer dBuffer;
-
-    private Coroutine anim;
-    private Coroutine setup;
-
-    // size of a particle struct in bytes
-    public const int PARTICLE_SIZE = 2 * 12 + 16;
-    // number of threads for a group
-    private const int GROUP_SIZE = 256;
-
-    private int threadGroups;
-
     public enum ParticleEffectList
     {
         None, Gravity, Lerp,
         SmoothLerp, Explode,
         Swirl
     }
-    private string[] kernels =
-    {
-        "None", "Gravity", "Lerp",
-        "SmoothLerp", "Explode",
-        "Swirl"
-    };
-    public ParticleEffectList particleEffect = ParticleEffectList.None;
 
-    [Range(0.1f, 2.0f)]
-    public float effectStrength = 2.0f;
 
-    public int particleCount;
     public Gradient gradient;
 
     AK.ExpressionSolver solver;
@@ -104,8 +153,15 @@ public class CustomParametrizedSurface : ManualSerialize
         InitializeParticleSystem();
     }
 
-    private void InitializeVariables(){
-        //particleAnimation = Resources.Load(computeShaderLoc) as ComputeShader;
+    private void InitializeVariables()
+    {
+        // particleAnimation   = Instantiate(Resources.Load(computeShaderLoc)) as ComputeShader;
+        // particleShader      = Instantiate(Resources.Load(particleShaderLoc)) as Shader;
+        // particleSprite      = Instantiate(Resources.Load(particleTextureLoc)) as Texture2D;
+
+        particleAnimation   = Resources.Load(computeShaderLoc) as ComputeShader;
+        particleShader      = Resources.Load(particleShaderLoc) as Shader;
+        particleSprite      = Resources.Load(particleTextureLoc) as Texture2D;
     }
 
     public MeshFilter mesh;
@@ -436,7 +492,6 @@ public class CustomParametrizedSurface : ManualSerialize
         return samples;
     }
 
-    public float exclusiveModifier = 0.01f;
 
     private ThreadHelper SetupSolver(ExpressionSet es)
     {
