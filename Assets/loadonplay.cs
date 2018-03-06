@@ -1,34 +1,72 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.Assertions;
 using UnityEngine;
 
 public class loadonplay : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+    bool started = false;
+    float cd = 5.0f;
+    private static loadonplay instanceRef;
+    // Use this for initialization
+    private void Awake()
+    {
+        if (instanceRef == null)
+        {
+            instanceRef = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            DestroyImmediate(gameObject);
+        }
+    }
+    void Start () {
+
+
     }
 	
 	// Update is called once per frame
 	void Update () {
-        if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "8 - DoubleIntegral.unity")
-        {
+        if (started)
             return;
-        }
-
-        GameObject dub = GameObject.Find("DoubleIntegralScene");
-        // dub.GetComponent<TouchButton>().OnButtonEnter += dub.GetComponent<TouchButton>().PressButton;
-        RayCastButton rcButton = dub.GetComponent<RayCastButton>();
-        // dub.GetComponent<TouchRayButton>().onClick.invoke();
-        RayCastButton button = rcButton;
-        if (button != null)
-        {
-            button.PressButton(dub);
-        }
-        //assert this after some event?
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "8 - DoubleIntegral.unity")
-        {
-            print("Successfully switched scenes");
-        }
+        cd -= Time.deltaTime;
+        if (cd > 0)
+            return;
+        
+        StartCoroutine("UnitTest");
     }
+
+    IEnumerator UnitTest()
+    {
+        started = true;
+        bool done = false;
+        GameObject dub = GameObject.Find("DoubleIntegralScene");
+        RayCastButton rcButton = dub.GetComponent<RayCastButton>();
+        if (rcButton != null)
+        {
+            rcButton.PressButton(dub);
+         //   yield return null; yield return null;
+        }
+        if(GameResources)
+        Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "8 - DoubleIntegral");
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene(1);
+        //yield return null; yield return null;
+        Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "7 - DoubleIntegral");
+
+        GameObject test = GameObject.Find("Parametrized Curve");
+        Assert.IsNotNull(test);
+
+
+        RayCastButton test1 = test.GetComponent<RayCastButton>();
+        if (test1 != null)
+        {
+            test1.PressButton(test);
+            yield return null; yield return null;
+        }
+        Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "2 - R1-R3");
+    }
+
 }
