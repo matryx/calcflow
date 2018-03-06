@@ -251,11 +251,11 @@ namespace AK
                                     case SymbolType.FuncCustom:
                                         {
                                             var customFunc = (CustomFunction)funcSymbol.ptr;
-                                            if (customFunc.paramCount == 1 && (customFunc.type == CustomFunction.paramType.DOUBLEL))
+                                            if (customFunc.paramCount == 1 && customFunc.func1d != null)
                                             {
                                                 value = customFunc.Invoke(GetSymbolValue(s));
                                             }
-                                            else if (customFunc.type == CustomFunction.paramType.OBJECT)
+                                            else if (customFunc.funcmo != null)
                                             {
                                                 object[] p = new object[MaxCustomFunctionParamCount];
                                                 p[0] = (!s.IsStringType()) ? (object)GetSymbolValue(s) : (object)s.stringValue;

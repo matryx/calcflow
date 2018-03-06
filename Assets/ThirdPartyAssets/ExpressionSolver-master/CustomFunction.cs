@@ -19,16 +19,16 @@ namespace AK
 
         public paramType type;
 
-        public event FuncMD funcmd;
-        public event FuncMO funcmo;
-        public event Func1D func1d;
+        public FuncMD funcmd;
+        public FuncMO funcmo;
+        public Func1D func1d;
         public int paramCount;
         public bool enableSymbolicationTimeEvaluation;
 
         public CustomFunction(string name, int paramCount, FuncMD func, bool enableSymbolicationTimeEvaluation)
         {
             this.type = paramType.DOUBLEL;
-            this.funcmd += func;
+            this.funcmd = func;
             this.enableSymbolicationTimeEvaluation = enableSymbolicationTimeEvaluation;
             this.paramCount = paramCount;
             this.name = name;

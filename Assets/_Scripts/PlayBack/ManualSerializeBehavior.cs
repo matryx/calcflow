@@ -4,7 +4,7 @@ using UnityEngine;
 using Nanome.Core;
 using VoxelBusters.RuntimeSerialization;
 
-public abstract class ManualSerialize : IRuntimeSerializationCallback
+public abstract class ManualSerializeBehavior : Nanome.Core.Behaviour, IRuntimeSerializationCallback
 {
 
     /// <summary>

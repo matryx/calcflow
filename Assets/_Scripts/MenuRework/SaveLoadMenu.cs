@@ -150,7 +150,7 @@ public class SaveLoadMenu : MonoBehaviour
 
     private GameObject createButton(SavePackage save)
     {
-        GameObject button = Instantiate(Resources.Load("Screenshot", typeof(GameObject))) as GameObject;
+        GameObject button = Instantiate(Resources.Load("Prefabs\\Screenshot", typeof(GameObject))) as GameObject;
         button.name = save.date;
         initializeButton(save, button);
         scroll.addObject(button.transform);
@@ -164,7 +164,7 @@ public class SaveLoadMenu : MonoBehaviour
         Texture2D imageTexture = LoadIMG(save.imageFile);
         string imgName = save.date;
         if (imgName.Length > maxTextLength) imgName = imgName.Replace(imgName.Substring(maxTextLength), "...");
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = imgName;
+        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = imgName.Replace("-", "/").Replace("_", ":");
         button.transform.Find("Img").GetComponent<Renderer>().material.mainTexture = imageTexture;
     }
 

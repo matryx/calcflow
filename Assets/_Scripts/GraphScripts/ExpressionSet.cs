@@ -16,6 +16,7 @@ public class ExpressionSet
     public Dictionary<ExpOptions, Expression> expressions;
     public Dictionary<string, RangePair> ranges;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
+    [NonRuntimeSerializedField]
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
 
     string GetExpression(int i)
@@ -133,10 +134,10 @@ public class ExpressionSet
         return newEs;
     }
 
-    internal ExpressionSet (string[] rangeKeys, List<RangePair> rangePairs, ExpOptions[] ExpressionKeys, List<Expression> ExpressionValues)
+    internal ExpressionSet(string[] rangeKeys, List<RangePair> rangePairs, ExpOptions[] ExpressionKeys, List<Expression> ExpressionValues)
     {
         ranges = new Dictionary<string, RangePair>();
-        for (int i =0; i < rangePairs.Count; i++)
+        for (int i = 0; i < rangePairs.Count; i++)
         {
             ranges.Add(rangeKeys[i], rangePairs[i]);
         }
@@ -191,12 +192,15 @@ public class ExpressionSet
     }
 }
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(typeof(MonoBehaviour), false, false)]
 [System.Serializable]
-public abstract class CalcOutput
+public abstract class CalcOutput //: ManualSerialize
 {
+    [RuntimeSerializeField]
     public List<string> tokens;
+    [RuntimeSerializeField]
     public string rawText;
+    [NonRuntimeSerializedField]
     public AK.Expression AKExpression;
 
     public void PrintOut()
@@ -250,7 +254,7 @@ public abstract class CalcOutput
 
     public virtual bool GenerateAKSolver(AK.ExpressionSolver solver)
     {
-        try 
+        try
         {
             AKExpression = solver.SymbolicateExpression(rawText);
         }

@@ -126,7 +126,7 @@ public class ExpressionSaveLoad : MonoBehaviour
         string image = Path.Combine(imagePath, name + imageExtension);
         string save = Path.Combine(savePath, name + jsonExtension);
         List<ExpressionSet> ess = JsonHelper.FromJson<SerializableExpressionSet>(File.ReadAllText(save)).Select(x => x.ConvertToExpressionSet()).ToList();
-        SavePackage package = new SavePackage(name.Replace("-", "/").Replace("_", ":"), image, ess);
+        SavePackage package = new SavePackage(name, image, ess);
         return package;
     }
 

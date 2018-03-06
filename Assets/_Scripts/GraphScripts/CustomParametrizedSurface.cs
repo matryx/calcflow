@@ -10,10 +10,12 @@ using VoxelBusters.RuntimeSerialization;
 //Public variables SHOULD NOT be serialized but must be serialized at this time because of the way 
 //that values were assigned through editor. Future iterations should make an effort to not require public serialization.
 [RuntimeSerializable(typeof(MonoBehaviour), false, false)]
-public class CustomParametrizedSurface : ManualSerialize
+public class CustomParametrizedSurface : ManualSerializeBehavior
 {
 
     #region Serializable Fields
+    [RuntimeSerializeField]
+    public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
     [RuntimeSerializeField]
     public int particleCount;
     //Fields that are serializable on their own.
@@ -40,11 +42,11 @@ public class CustomParametrizedSurface : ManualSerialize
     #region Surrogate Fields
     //Fields that are serializable substitutes for non-serializable field. Used to restore those fields in runtime.
     [RuntimeSerializeField]
-    public string particleTextureLoc = "Textures\\particle";
+    public string particleTextureLoc = "Textures/particle";
     [RuntimeSerializeField]
-    public string particleShaderLoc = "Shaders\\ParticleBillboard";
+    public string particleShaderLoc = "Shaders/ParticleBillboard";
     [RuntimeSerializeField]
-    public string computeShaderLoc = "ComputeShader\\ParticleAnimations";
+    public string computeShaderLoc = "ComputeShaders/Particle Animations";
 
     #endregion
 
@@ -59,7 +61,6 @@ public class CustomParametrizedSurface : ManualSerialize
     //Fields that do not need to be serialized because they are calculated during runtime.
     private Material particleMaterial;
     List<Particle[]> threadResults = new List<Particle[]>();
-    public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
     private Particle[] particles;
     private Particle[] source;
     private Particle[] dest;
@@ -93,6 +94,8 @@ public class CustomParametrizedSurface : ManualSerialize
     {
         print("this works!");
         restoreGradient();
+        InitializeVariables();
+        InitializeParticleSystem();
     }
 
     private void restoreGradient()
@@ -101,7 +104,7 @@ public class CustomParametrizedSurface : ManualSerialize
         GradientColorKey[] gck;
         GradientAlphaKey[] gak;
         g = new Gradient();
-        gck = new GradientColorKey[2];
+        gck = new GradientColorKey[5];
         gck[0].color = Color.blue;
         gck[0].time = 0.0F;
         gck[1].color = Color.cyan;
@@ -145,23 +148,19 @@ public class CustomParametrizedSurface : ManualSerialize
     AK.ExpressionSolver solver;
 
     // Use this for initialization
-    protected virtual void Awake()
+    protected virtual void Start()
     {
         InitializeVariables();
-
         solver = new AK.ExpressionSolver();
         InitializeParticleSystem();
+        restoreGradient();
     }
 
     private void InitializeVariables()
     {
-        // particleAnimation   = Instantiate(Resources.Load(computeShaderLoc)) as ComputeShader;
-        // particleShader      = Instantiate(Resources.Load(particleShaderLoc)) as Shader;
-        // particleSprite      = Instantiate(Resources.Load(particleTextureLoc)) as Texture2D;
-
-        particleAnimation   = Resources.Load(computeShaderLoc) as ComputeShader;
-        particleShader      = Resources.Load(particleShaderLoc) as Shader;
-        particleSprite      = Resources.Load(particleTextureLoc) as Texture2D;
+        particleAnimation = (ComputeShader)Resources.Load(computeShaderLoc);
+        particleShader = Resources.Load(particleShaderLoc) as Shader;
+        particleSprite = Resources.Load(particleTextureLoc) as Texture2D;
     }
 
     public MeshFilter mesh;
@@ -196,7 +195,7 @@ public class CustomParametrizedSurface : ManualSerialize
     void InitializeParticleSystem()
     {
         threadGroups = Mathf.CeilToInt((float)particleCount / GROUP_SIZE);
-
+        print("PC: " + particleCount);
         int l = particleCount;
 
         particles = new Particle[l];

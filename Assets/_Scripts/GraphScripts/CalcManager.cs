@@ -191,7 +191,12 @@ public class CalcManager : Nanome.Core.Behaviour
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
             if (isValid)
-                paramSurface.GenerateParticles();
+            {
+                if (!Replayer.Replaying)
+                {
+                    paramSurface.GenerateParticles();
+                }
+            }
         }
         if (toExport)
         {

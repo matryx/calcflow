@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class HiResScreenShots : MonoBehaviour {
 	public int resWidth = 2550; 
 	public int resHeight = 3300;

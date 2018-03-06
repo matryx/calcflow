@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using UnityEngine;
+
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Replayer : MonoBehaviour
 {
@@ -58,7 +60,14 @@ public class Replayer : MonoBehaviour
                     //print("popping next instruction");
                     PlaybackLogAction2 item = log[0];
                     log.RemoveAt(0);
-                    item.Reenact();
+                    try
+                    {
+                        item.Reenact();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.Message);
+                    }
                 }
                 else
                 {

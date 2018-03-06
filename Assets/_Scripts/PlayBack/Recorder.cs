@@ -131,7 +131,7 @@ public class Recorder : MonoBehaviour
 
     public static void LogSpawn(GameObject subject)
     {
-        long time = PlaybackClock.GetTime() - (long)(PlaybackLog2.Period * 1000);
+        long time = PlaybackClock.GetTime() - (long)(PlaybackLog2.Period * 1001);
         recordLog.log.Add(PlaybackLogAction2.CreateSpawn(time,
                                                             subject,
                                                             subject.transform.position,
