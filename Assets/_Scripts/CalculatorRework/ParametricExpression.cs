@@ -11,7 +11,7 @@ public class ParametricExpression : MonoBehaviour
     List<Transform> variableClumps;
     List<Transform> variables;
     List<Transform> emptyList;
-    Transform separator, action;
+    Transform separator;
     Scroll scroll;
     bool initialized = false;
     float xPos = 1.2f;
@@ -28,8 +28,9 @@ public class ParametricExpression : MonoBehaviour
         emptyList = new List<Transform>();
 
         scroll = expressionsClass.getScroll("param");
-        action = transform.Find("ExpressionSet").Find("Button_Xinput").Find("ActionMenu");
+        //action = transform.Find("ExpressionSet").Find("Button_Xinput").Find("ActionMenu");
         initialized = true;
+
     }
 
     public void Initialize()
@@ -48,15 +49,43 @@ public class ParametricExpression : MonoBehaviour
         return scroll;
     }
 
-    public void enableActions()
+    public void setTextColor(Color c)
     {
-        action.gameObject.SetActive(true);
+        foreach(Transform t in expressionsList)
+        {
+            foreach(Transform child in t)
+            {
+                if (child.GetComponent<TMPro.TextMeshPro>())
+                {
+                    child.GetComponent<TMPro.TextMeshPro>().color = c;
+                }
+            }
+        }
+
+        foreach (Transform t in variables)
+        {
+            foreach (Transform child in t)
+            {
+                foreach(Transform gchild in child)
+                {
+                    if (gchild.GetComponent<TMPro.TextMeshPro>())
+                    {
+                        gchild.GetComponent<TMPro.TextMeshPro>().color = c;
+                    }
+                }
+            }
+        }
     }
 
-    public void disableActions()
-    {
-        action.gameObject.SetActive(false);
-    }
+    //public void enableActions()
+    //{
+    //    action.gameObject.SetActive(true);
+    //}
+
+    //public void disableActions()
+    //{
+    //    action.gameObject.SetActive(false);
+    //}
 
     public string getVarTitle(Transform var)
     {

@@ -20,14 +20,14 @@ public class Expressions : MonoBehaviour
     //TODO:
     // 1 - slide variable shortcuts in and out 
     // 2 - enable underscore movement by raycast hit
-    // 3 - hamburger menu for deleting/disabling variables and expressions - IN PROGRESS
-    // 4 - figure out how to differentiate Euler's number with regular e letter (italicize?) 
-    // 5 - disable e on keyboard
-    // 6 - hide should change the text color of entire expression components to gray
-    // 7 - remove outline on plus
-    // 8 - shift selected expression XYZ
-    // 9 - change separator bar to be ray and full width
-
+    // 3 - delete variable implementation
+    // 4 - hide should change the text color of entire expression components to gray    
+    //      - should deselect expression
+    //      - gray out feedback too
+    //      - gray out element symbol quad (material)
+    //      - hide action buttons
+    //      - gray out action button
+        
     //VAR DELETE UI IDEA:
     //talk to Kyle
     //for now just make it so that if user deletes variable from all expression components, hide the variable in UI 
@@ -116,16 +116,13 @@ public class Expressions : MonoBehaviour
     {
         if (expr == null)
         {
-            if (selectedExpression.GetComponent<ParametricExpression>())
-            {
-                selectedExpression.GetComponent<ParametricExpression>().disableActions();
-            }
+            //if (selectedExpression.GetComponent<ParametricExpression>())
+            //{
+            //    //selectedExpression.GetComponent<ParametricExpression>().disableActions();
+            //}
             selectedExpression = expr;
             selectedBody = null;
             selectedExpSet = null;
-            remove.gameObject.SetActive(false);
-            hide.gameObject.SetActive(false);
-            flowLine.gameObject.SetActive(false);
             return;
         }
 
@@ -139,7 +136,7 @@ public class Expressions : MonoBehaviour
             selectedExpSet = expr.GetComponent<ParametricExpression>().getExpSet();
             calcManager.ChangeExpressionSet(selectedExpSet);
 
-            expr.GetComponent<ParametricExpression>().enableActions();
+            //expr.GetComponent<ParametricExpression>().enableActions();
         }
         else if (expr.GetComponent<VectorFieldExpression>())
         {

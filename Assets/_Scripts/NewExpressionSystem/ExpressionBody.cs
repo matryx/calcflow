@@ -22,13 +22,10 @@ public class ExpressionBody : QuickButton
     private IEnumerator scaleUp, scaleDown;
     private IEnumerator backToSelected, backToIdle;
 
-    protected override void Start()
+    private void Awake()
     {
-        base.Start();
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
-
         feedBack = transform.parent.Find("Feedback");
-
         if (transform.parent.parent.Find("VariableTitle")) variable = true;
 
         if (!variable) title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
@@ -43,8 +40,13 @@ public class ExpressionBody : QuickButton
         calcInput = CalcInput._instance;
 
         selectedScale = (variable) ? new Vector3(0.7f, 0.04f, 0.002f) :
-                                     new Vector3(4.569993f, 0.04f, 0.002f);
+                                     new Vector3(4.3f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
+    }
+
+    protected override void Start()
+    {
+        base.Start();
     }
 
     public Transform getFeedBack()
@@ -73,7 +75,7 @@ public class ExpressionBody : QuickButton
         return variable;
     }
 
-    protected override void ButtonEnterBehavior(GameObject other)
+    private void deselectPrevBody()
     {
         ExpressionBody selectedBody = expression.getSelectedBody();
         if (selectedBody && selectedBody.transform != transform)
@@ -83,6 +85,29 @@ public class ExpressionBody : QuickButton
 
             selectedBody.unSelect();
         }
+    }
+
+    public void selectBody()
+    {
+        deselectPrevBody();
+
+        if (retracting && backToIdle != null)
+        {
+            StopCoroutine(backToIdle);
+        }
+
+        retracting = false;
+        scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
+        StartCoroutine(scaleUp);
+        finishedScaling = false;
+        expression.setSelectedExpr(expComp.getExpressionParent(), this);
+
+        thisBodyActive = true;
+    }
+
+    protected override void ButtonEnterBehavior(GameObject other)
+    {
+        deselectPrevBody();
 
         if (thisBodyActive)
         {
@@ -96,22 +121,13 @@ public class ExpressionBody : QuickButton
             StartCoroutine(scaleDown);
             finishedScaling = false;
             expression.setSelectedExpr(null, null);
+
+            thisBodyActive = false;
         }
         else
         {
-            if (retracting && backToIdle != null)
-            {
-                StopCoroutine(backToIdle);
-            }
-
-            retracting = false;
-            scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
-            StartCoroutine(scaleUp);
-            finishedScaling = false;
-            expression.setSelectedExpr(expComp.getExpressionParent(), this);
+            selectBody();
         }
-
-        thisBodyActive = !thisBodyActive;
 
         if (expComp == null)
             expComp = transform.parent.GetComponentInParent<ExpressionComponent>();

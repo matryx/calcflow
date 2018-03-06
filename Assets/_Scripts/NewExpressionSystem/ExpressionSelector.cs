@@ -10,7 +10,7 @@ public class ExpressionSelector : QuickButton
     Transform currPanel;
     Transform paramPanel, vecPanel, constPanel;
     private CalculatorManager calcManager;
-
+    Transform xButton;
 
     protected override void Start()
     {
@@ -59,6 +59,9 @@ public class ExpressionSelector : QuickButton
                     foreach (Transform gchild in child)
                     {
                         param.GetComponent<ParametricExpression>().addExpression(gchild);
+
+                        if (gchild.name == "Button_Xinput") xButton = gchild;
+
                         gchild.GetComponent<ExpressionComponent>().setExpressionParent(param.transform);
                         gchild.GetComponentInChildren<ExpressionComponent>().setPanel(currPanel);
                         toAdd.Add(gchild);
@@ -132,6 +135,8 @@ public class ExpressionSelector : QuickButton
 
         thisScroll = expressions.getScroll(panelType);
         thisScroll.addToScroll(toAdd, null, 0);
+        if (xButton) xButton.GetComponentInChildren<ExpressionBody>().selectBody();
+        xButton = null;
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }
