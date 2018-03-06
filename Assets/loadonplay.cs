@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class loadonplay : MonoBehaviour {
 
-    bool started = false;
+    public int started = 0;
     float cd = 5.0f;
     private static loadonplay instanceRef;
     // Use this for initialization
@@ -29,7 +29,7 @@ public class loadonplay : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (started)
+        if (started > 0)
             return;
         cd -= Time.deltaTime;
         if (cd > 0)
@@ -40,20 +40,19 @@ public class loadonplay : MonoBehaviour {
 
     IEnumerator UnitTest()
     {
-        started = true;
+        started = 1;
         bool done = false;
         GameObject dub = GameObject.Find("DoubleIntegralScene");
         RayCastButton rcButton = dub.GetComponent<RayCastButton>();
         if (rcButton != null)
         {
             rcButton.PressButton(dub);
-         //   yield return null; yield return null;
+            yield return null; yield return null;
         }
-        if(GameResources)
         Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "8 - DoubleIntegral");
 
         UnityEngine.SceneManagement.SceneManager.LoadScene(1);
-        //yield return null; yield return null;
+        yield return null; yield return null;
         Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "7 - DoubleIntegral");
 
         GameObject test = GameObject.Find("Parametrized Curve");
@@ -67,6 +66,8 @@ public class loadonplay : MonoBehaviour {
             yield return null; yield return null;
         }
         Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "2 - R1-R3");
+        started = 2;
     }
+
 
 }

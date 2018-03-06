@@ -1,14 +1,18 @@
 using UnityEngine;
 using UnityEditor;
+using System.Collections;
+using System.Collections.Generic;
 using System;
 
 public  class UnitTestBegin : MonoBehaviour
 {
+    public static bool end = false;
     static int ind = 0;
+    static UnitTestBegin instance;
     static void BeginTests()
     {
         //String[] arguments = Environment.GetCommandLineArgs();
-
+        instance = this;
         //-------------------Build Scenes----------------------
         var sceneArray = new EditorBuildSettingsScene[12];
         sceneArray[0] = new EditorBuildSettingsScene("Assets/_Scenes/0 - Matryx Advertising.unity", true);
@@ -40,8 +44,9 @@ public  class UnitTestBegin : MonoBehaviour
 
 
         //curve.GetComponent<TouchRayButton>().PressButton(curve);
+        GameObject g = GameObject.Find("unitTester");
 
-
+        //begin();
 
     }
 
@@ -57,11 +62,5 @@ public  class UnitTestBegin : MonoBehaviour
         }
         return null;
     }
-    static private void Start()
-    {
-    }
-
-    static void OnEnable()
-    {
-    }
+   
 }   
