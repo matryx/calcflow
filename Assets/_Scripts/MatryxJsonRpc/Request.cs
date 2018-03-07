@@ -30,8 +30,13 @@ namespace MatryxJsonRpc
     public class Request : MonoBehaviour
     {
         private static Serializer serializer = new Serializer();
-        private static string tournamentMtxExplorer = "http://54.183.167.220/tempAPI/tournament";
-        private static string roundMtxExplorer = "http://54.183.167.220/tempAPI/rounds/id/";
+        private static string sharedUrl = "http://54.183.167.220/tempAPI";
+        private static string allTournamentsEndpt = "/tournaments";
+        private static string tournamentDetailByAddressEndpt = "/tournaments/address/";
+        private static string tournamentDetailByIdEndpt = "/tournaments/id/";
+        private static string submissionDetailByAddressEndpt = "/submissions/address/";
+
+        private static string roundDetailEndpt = "http://54.183.167.220/tempAPI/rounds/id/";
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
@@ -110,11 +115,12 @@ namespace MatryxJsonRpc
             var param = (object[])context.param;
             var page = (long)param[0];
             var offset = page * 10;
-            using (WWW www = new WWW(tournamentMtxExplorer))
+            using (WWW www = new WWW(sharedUrl + allTournamentsEndpt))
             {
                 yield return www;
                 // Debug.Log(www.text);
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                Debug.Log(allTournamentsEndpt + " - " + jsonObj["message"] as string);
                 var dataObj = jsonObj["data"] as Dictionary<string, object>;
                 var tournamentList = dataObj["tournaments"] as List<object>;
                 for (int i = 0; i < 10; i++)
@@ -218,12 +224,13 @@ namespace MatryxJsonRpc
             var uniqueId = (string)param[0];
             var page = (long)param[1];
             var offset = page * 10;
-            var url = roundMtxExplorer + uniqueId;
+            var url = sharedUrl + tournamentDetailByIdEndpt + uniqueId;
             using (WWW www = new WWW(url))
             {
                 yield return www;
-                Debug.Log(www.text);
+                // Debug.Log(www.text);
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                Debug.Log(url + " - " + jsonObj["message"] as string);
                 var dataObj = jsonObj["data"] as Dictionary<string, object>;
                 var title = dataObj["title"] as string;
                 var bounty = Convert.ToDouble(dataObj["bounty"] as string);
@@ -235,8 +242,9 @@ namespace MatryxJsonRpc
                     {
                         var sub = submissionList[i + (int)offset] as Dictionary<string, object>;
                         var submission = new Submission();
-                        submission.address = sub["address"] as string;
-                        submission.title = sub["title"] as string;
+                        submission.address = uniqueId + ":" + sub["submissionAddress"] as string;
+                        submission.title = sub["submissionTitle"] as string;
+                        submission.author = sub["authorName"] as string;
                         submissions.Add(submission);
                     }
                     catch (System.ArgumentOutOfRangeException e) { break; }
@@ -290,6 +298,40 @@ namespace MatryxJsonRpc
                 Debug.Log("Could not read submission at:" + submissionAddress + " tournament: " + tournamentAddress);
                 //Debug.Log(e);
                 context.done(null);
+            }
+        }
+
+        private static IEnumerator MtxExplorerDetailSubmission(RoutineContext context)
+        {
+            var param = context.param as object[];
+            var tournamentAddress = param[0] as string;
+            var submissionAddress = param[1] as string;
+            var url = sharedUrl + submissionDetailByAddressEndpt + submissionAddress;
+            using (var www = new WWW(url))
+            {
+                yield return www;
+                Debug.Log(www.text);
+                var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                Debug.Log(url + " - " + jsonObj["message"] as string);
+                var dataObj = jsonObj["data"] as Dictionary<string, object>;
+                try
+                {
+                    var submission = new Submission();
+                    submission.tournamentAddress = tournamentAddress;
+                    submission.title = dataObj["submissionTitle"] as string;
+                    submission.address = tournamentAddress + ":" + dataObj["submissionAddress"] as string;
+                    submission.author = dataObj["submissionAuthor"] as string;
+                    submission.references = dataObj["submissionReferences"] as string;
+                    submission.contributors = dataObj["submissionCollaborators"] as string;
+                    submission.body = dataObj["submissionJson"] as string;
+                    context.done(submission);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("Could not read submission at:" + submissionAddress + " tournament: " + tournamentAddress);
+                    Debug.LogException(e);
+                    context.done(null);
+                }
             }
         }
 
