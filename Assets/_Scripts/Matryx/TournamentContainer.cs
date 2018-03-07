@@ -6,16 +6,16 @@ public class Matryx_Tournament
 {
     public Matryx_Tournament(string address)
     {
-        this.address = address;
+        this.uniqueId = address;
     }
     public Matryx_Tournament(string address, string title, long bounty)
     {
-        this.address = address;
+        this.uniqueId = address;
         this.title = title;
         this.bounty = bounty;
     }
 
-    public string address;
+    public string uniqueId;
     public string title;
     public string descriptionAddress;
     public string description;

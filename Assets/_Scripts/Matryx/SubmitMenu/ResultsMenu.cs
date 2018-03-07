@@ -14,7 +14,7 @@ public class ResultsMenu : MonoBehaviour {
 
     public void PostFailure(Matryx_Tournament tournament)
     {
-        resultsText.text = "Failure Submitting to " + tournament.address;
+        resultsText.text = "Failure Submitting to " + tournament.uniqueId;
     }
 
     public void ReturnToCalcflow()

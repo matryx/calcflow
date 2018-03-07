@@ -22,11 +22,16 @@ using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.Eth.Transactions;
 using Nethereum.Signer;
 
+using Nanome.Maths.Serializers.JsonSerializer;
+
 namespace MatryxJsonRpc
 {
 
     public class Request : MonoBehaviour
     {
+        private static Serializer serializer = new Serializer();
+        private static string tournamentMtxExplorer = "http://54.183.167.220/tempAPI/tournament";
+        private static string roundMtxExplorer = "http://54.183.167.220/tempAPI/rounds/id/";
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
@@ -40,19 +45,20 @@ namespace MatryxJsonRpc
         public static void RunListTournaments(long page, ResultDelegate callback)
         {
             // Schedule query
-            queue(CoroutineListTournaments(new RoutineContext(new object[] { page }, callback)));
+            // queue(CoroutineListTournaments(new RoutineContext(new object[] { page }, callback)));
+            queue(MtxExplorerListTournaments(new RoutineContext(new object[] { page }, callback)));
         }
 
         [FunctionOutput]
         private class TournamentDTO
         {
-            [Parameter ("uint256", "id", 1)]
+            [Parameter("uint256", "id", 1)]
             public BigInteger id { get; set; }
-            [Parameter ("string", "title", 2)]
+            [Parameter("string", "title", 2)]
             public string title { get; set; }
-            [Parameter ("string", "description", 3)]
+            [Parameter("string", "description", 3)]
             public string description { get; set; }
-            [Parameter ("uint256", "bounty", 4)]
+            [Parameter("uint256", "bounty", 4)]
             public BigInteger bounty { get; set; }
         }
 
@@ -98,27 +104,63 @@ namespace MatryxJsonRpc
             context.done(tournaments);
         }
 
+        private static IEnumerator MtxExplorerListTournaments(RoutineContext context)
+        {
+            var tournaments = new List<Tournament>();
+            var param = (object[])context.param;
+            var page = (long)param[0];
+            var offset = page * 10;
+            using (WWW www = new WWW(tournamentMtxExplorer))
+            {
+                yield return www;
+                // Debug.Log(www.text);
+                var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                var dataObj = jsonObj["data"] as Dictionary<string, object>;
+                var tournamentList = dataObj["tournaments"] as List<object>;
+                for (int i = 0; i < 10; i++)
+                {
+                    try
+                    {
+                        var tourna = tournamentList[i + (int)offset] as Dictionary<string, object>;
+                        var tournament = new Tournament();
+                        tournament.title = tourna["tournamentTitle"] as string;
+                        tournament.description = tourna["tournamentDescription"] as string;
+                        tournament.bounty = (long)Convert.ToDouble(tourna["mtx"]);
+                        tournament.address = tourna["address"] as string;
+                        tournament.id = Convert.ToInt64(tourna["tournamentID"]);
+                        // tournament.address = tournament.id.ToString();
+                        tournaments.Add(tournament);
+                    }
+                    catch (System.ArgumentOutOfRangeException e) { break; }
+                    catch (Exception e) { Debug.Log(e); }
+                }
+                Debug.Log("Fetched tournaments: " + tournaments.Count);
+                context.done(tournaments);
+            }
+        }
+
         // LIST SUMBISSIONS
         public static void RunListSubmissions(string tournamentAddress, long page, ResultDelegate callback)
         {
             // Schedule query
-            queue(CoroutineListSumbissions(new RoutineContext(new object[] { tournamentAddress, page }, callback)));
+            // queue(CoroutineListSumbissions(new RoutineContext(new object[] { tournamentAddress, page }, callback)));
+            queue(MtxExplorerListSubmissions(new RoutineContext(new object[] { tournamentAddress, page }, callback)));
         }
 
         [FunctionOutput]
         private class SubmissionDTO
         {
-            [Parameter ("uint256", "id", 1)]
+            [Parameter("uint256", "id", 1)]
             public long id { get; set; }
-            [Parameter ("string", "title", 2)]
+            [Parameter("string", "title", 2)]
             public string title { get; set; }
-            [Parameter ("string", "body", 3)]
+            [Parameter("string", "body", 3)]
             public string body { get; set; }
-            [Parameter ("string", "references", 4)]
+            [Parameter("string", "references", 4)]
             public string references { get; set; }
-            [Parameter ("string", "contributors", 5)]
+            [Parameter("string", "contributors", 5)]
             public string contributors { get; set; }
-            [Parameter ("address", "author", 6)]
+            [Parameter("address", "author", 6)]
             public string author { get; set; }
         }
 
@@ -166,6 +208,42 @@ namespace MatryxJsonRpc
             }
             Debug.Log("Fetched submissions: " + submissions.Count);
             // Done
+            context.done(submissions);
+        }
+
+        private static IEnumerator MtxExplorerListSubmissions(RoutineContext context)
+        {
+            var submissions = new List<Submission>();
+            var param = (object[])context.param;
+            var uniqueId = (string)param[0];
+            var page = (long)param[1];
+            var offset = page * 10;
+            var url = roundMtxExplorer + uniqueId;
+            using (WWW www = new WWW(url))
+            {
+                yield return www;
+                Debug.Log(www.text);
+                var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                var dataObj = jsonObj["data"] as Dictionary<string, object>;
+                var title = dataObj["title"] as string;
+                var bounty = Convert.ToDouble(dataObj["bounty"] as string);
+                var description = dataObj["description"] as string;
+                var submissionList = dataObj["submissions"] as List<object>;
+                for (int i = 0; i < 10; i++)
+                {
+                    try
+                    {
+                        var sub = submissionList[i + (int)offset] as Dictionary<string, object>;
+                        var submission = new Submission();
+                        submission.address = sub["address"] as string;
+                        submission.title = sub["title"] as string;
+                        submissions.Add(submission);
+                    }
+                    catch (System.ArgumentOutOfRangeException e) { break; }
+                    catch (Exception e) { Debug.Log(e); }
+                }
+            }
+            Debug.Log("Fetched submissions: " + submissions.Count);
             context.done(submissions);
         }
 
@@ -371,7 +449,7 @@ namespace MatryxJsonRpc
 
         void Update()
         {
-            lock(_queue)
+            lock (_queue)
             {
                 while (_queue.Count > 0)
                 {

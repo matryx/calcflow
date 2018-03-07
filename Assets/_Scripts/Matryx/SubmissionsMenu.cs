@@ -81,13 +81,13 @@ public class SubmissionsMenu : MonoBehaviour
     public void SetTournament(Matryx_Tournament newTournament)
     {
         if (tournament == null ||
-            tournament.address != newTournament.address)
+            tournament.uniqueId != newTournament.uniqueId)
         {
             tournament = newTournament;
             UpdateHeaderUI();
 
             ClearSubmissions();
-            MatryxJsonRpc.Request.RunListSubmissions(tournament.address, page, ProcessTournament);
+            MatryxJsonRpc.Request.RunListSubmissions(tournament.uniqueId, page, ProcessTournament);
         }
     }
 
@@ -98,7 +98,7 @@ public class SubmissionsMenu : MonoBehaviour
     {
         page++;
         removeLoadButton();
-        MatryxJsonRpc.Request.RunListSubmissions(tournament.address, page, ProcessTournament);
+        MatryxJsonRpc.Request.RunListSubmissions(tournament.uniqueId, page, ProcessTournament);
     }
 
     /// <summary>
