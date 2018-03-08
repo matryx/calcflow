@@ -232,10 +232,10 @@ namespace MatryxJsonRpc
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
                 Debug.Log(url + " - " + jsonObj["message"] as string);
                 var dataObj = jsonObj["data"] as Dictionary<string, object>;
-                var title = dataObj["title"] as string;
-                var bounty = Convert.ToDouble(dataObj["bounty"] as string);
-                var description = dataObj["description"] as string;
-                var submissionList = dataObj["submissions"] as List<object>;
+                var title = dataObj["tournamentTitle"] as string;
+                var bounty = Convert.ToDouble(dataObj["mtx"] as string);
+                var description = dataObj["tournamentDescription"] as string;
+                var submissionList = dataObj["recentSubmissions"] as List<object>;
                 for (int i = 0; i < 10; i++)
                 {
                     try
@@ -244,6 +244,7 @@ namespace MatryxJsonRpc
                         var submission = new Submission();
                         submission.address = uniqueId + ":" + sub["submissionAddress"] as string;
                         submission.title = sub["submissionTitle"] as string;
+                        submission.address += submission.title;
                         submission.author = sub["authorName"] as string;
                         submissions.Add(submission);
                     }
@@ -261,7 +262,7 @@ namespace MatryxJsonRpc
             var parts = addresses.Split(':');
             var tournamentAddress = parts[0];
             var submissionAddress = parts[1];
-            queue(CoroutineDetailSubmission(new RoutineContext(new object[] { tournamentAddress, submissionAddress }, callback)));
+            queue(MtxExplorerDetailSubmission(new RoutineContext(new object[] { tournamentAddress, submissionAddress }, callback)));
         }
 
         private static IEnumerator CoroutineDetailSubmission(RoutineContext context)
@@ -321,15 +322,17 @@ namespace MatryxJsonRpc
                     submission.title = dataObj["submissionTitle"] as string;
                     submission.address = tournamentAddress + ":" + dataObj["submissionAddress"] as string;
                     submission.author = dataObj["submissionAuthor"] as string;
-                    submission.references = dataObj["submissionReferences"] as string;
-                    submission.contributors = dataObj["submissionCollaborators"] as string;
-                    submission.body = dataObj["submissionJson"] as string;
+                    submission.references = (dataObj["submissionReferences"] as List<object>)[0] as string;
+                    submission.contributors = (dataObj["submissionCollaborators"] as List<object>)[0] as string;
+                    var bodyObj = (dataObj["submissionJson"] as List<object>)[0] as Dictionary<string, object>;
+                    var jsonContent = (bodyObj["Items"] as List<object>)[0] as string;
+                    submission.body = jsonContent;
                     context.done(submission);
                 }
                 catch (Exception e)
                 {
                     Debug.Log("Could not read submission at:" + submissionAddress + " tournament: " + tournamentAddress);
-                    Debug.LogException(e);
+                    Debug.Log(e);
                     context.done(null);
                 }
             }

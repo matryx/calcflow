@@ -20,10 +20,45 @@ namespace Nanome.Maths.Serializers.JsonSerializer
             // Read first string char
             var curr = context.ReadChar();
             // Until we find the opening char again
-            while (curr != open)
+            var lastIsBackslash = false;
+            while (curr != open || lastIsBackslash)
             {
-                // Append char to string
-                res.Append(curr);
+                if (lastIsBackslash)
+                {
+                    if (curr == '\"')
+                    {
+                        res.Append('\"');
+                    }
+                    if (curr == '\'')
+                    {
+                        res.Append('\'');
+                    }
+                    if (curr == 't')
+                    {
+                        res.Append('\t');
+                    }
+                    if (curr == 'r')
+                    {
+                        res.Append('\r');
+                    }
+                    if (curr == 'n')
+                    {
+                        res.Append('\n');
+                    }
+                    lastIsBackslash = false;
+                }
+                else
+                {
+                    if (curr == '\\')
+                    {
+                        lastIsBackslash = true;
+                    }
+                    else
+                    {
+                        // Append char to string
+                        res.Append(curr);
+                    }
+                }
                 // Burn read char
                 context.Burn(1);
                 // Read next to be tested
