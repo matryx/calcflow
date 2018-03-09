@@ -27,22 +27,27 @@ namespace Nanome.Maths.Serializers.JsonSerializer
                 {
                     if (curr == '\"')
                     {
+                        res.Append('\\');
                         res.Append('\"');
                     }
                     if (curr == '\'')
                     {
+                        res.Append('\\');
                         res.Append('\'');
                     }
                     if (curr == 't')
                     {
+                        res.Append('\\');
                         res.Append('\t');
                     }
                     if (curr == 'r')
                     {
+                        res.Append('\\');
                         res.Append('\r');
                     }
                     if (curr == 'n')
                     {
+                        res.Append('\\');
                         res.Append('\n');
                     }
                     lastIsBackslash = false;

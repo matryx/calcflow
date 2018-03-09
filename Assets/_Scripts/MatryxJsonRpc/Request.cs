@@ -326,7 +326,7 @@ namespace MatryxJsonRpc
                     submission.contributors = (dataObj["submissionCollaborators"] as List<object>)[0] as string;
                     var bodyObj = (dataObj["submissionJson"] as List<object>)[0] as Dictionary<string, object>;
                     var jsonContent = (bodyObj["Items"] as List<object>)[0] as string;
-                    submission.body = jsonContent;
+                    submission.body = "{ \"Items\" : [\"" + jsonContent + "\"] }";
                     context.done(submission);
                 }
                 catch (Exception e)
