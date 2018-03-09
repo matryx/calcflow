@@ -1,0 +1,72 @@
+/* -*- MACSYMA -*- */
+eval_when(batch,ttyoff:true)$
+/*ASB;LRATS 3
+5:05pm  Tuesday, 14 July 1981
+7:53pm  Saturday, 29 May 1982
+  Added a DIAGEVAL_VERSION for this file.
+1:43pm  Saturday, 12 June 1982
+  Changed loadflags to getversions, DEFINE_VARIABLE:'MODE.
+*/
+
+eval_when(translate,
+	  define_variable:'mode,
+	  transcompile:true)$
+
+put('lrats,3,'diageval_version)$
+
+define_variable(messlrats2,"Invalid argument to FULLRATSUBST:",any)$
+
+define_variable(fullratsubstflag,false,boolean)$
+
+lratsubst(listofeqns,exp):=block(
+  [partswitch:true,inflag:true,piece],
+  if not listp(listofeqns)
+  then if inpart(listofeqns,0)="="
+       then listofeqns:[listofeqns]
+       else if fullratsubstflag=true
+            then error(messlrats2,[listofeqns,exp])
+	    else error("Invalid argument to LRATSUBST:",[listofeqns,exp]),
+  for idum in listofeqns do
+      if inpart(idum,0)#"="
+      then if fullratsubstflag=true
+           then error(messlrats2,[listofeqns,exp])
+	   else error("Invalid argument to LRATSUBST:",[listofeqns,exp]),
+  lratsubst1(listofeqns,exp))$
+
+lratsubst1(listofeqns,exp):=block(
+  [dum:if listofeqns=[]
+       then exp
+       else if rest(listofeqns)=[]
+            then ratsubst(inpart(listofeqns,1,2),inpart(listofeqns,1,1),exp)
+            else lratsubst1(rest(listofeqns),
+			    if fullratsubstflag=true
+			    then fullratsubst1(inpart(listofeqns,1,2),
+					       inpart(listofeqns,1,1),
+					       exp)
+			    else ratsubst(inpart(listofeqns,1,2),
+					  inpart(listofeqns,1,1),
+					  exp))],
+  if fullratsubstflag=true and dum#exp
+  then lratsubst1(listofeqns,dum)
+  else if dum#exp
+       then dum
+       else exp)$
+
+fullratsubst1(substexp,forexp,exp):=block(
+  [dum:ratsubst(substexp,forexp,exp)],
+  if dum=exp
+  then exp
+  else fullratsubst1(substexp,forexp,dum))$
+
+fullratsubst([arglist]):=block(
+  [fullratsubstflag:true,larglistdum:length(arglist),farglist,
+   partswitch:true,inflag:true,piece],
+  if larglistdum=2
+  then if listp(farglist:first(arglist)) or inpart(farglist,0)="="
+       then lratsubst(farglist,last(arglist))
+       else error(messlrats2,arglist)
+  else if larglistdum=3
+       then apply('fullratsubst1,arglist)
+       else error(messlrats2,arglist))$
+
+eval_when(batch,ttyoff:false)$

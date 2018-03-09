@@ -1,0 +1,128 @@
+/* Load itensor */
+(if get('itensor,'version)=false then load(itensor),done);
+done;
+/* Set up a metric */
+imetric(g);
+done;
+/* Symmetries */
+decsym(s,2,0,[sym(all)],[]);
+done;
+canform(s([i,j],[])-s([j,i],[]));
+0;
+decsym(a,2,0,[anti(all)],[]);
+done;
+canform(a([i,j],[])+a([j,i],[]));
+0;
+allsym:true;
+true;
+canform(a([i,j],[])-a([j,i],[]));
+0;
+allsym:false;
+false;
+rename(a([i,j1],[])*b([],[j1,k])+a([i,j2],[])*b([],[j2,k]));
+2*a([i,%1],[])*b([],[%1,k]);
+/* Components */
+(kill(h),remcomps(h));
+done;
+components(h([],[i,j]),e([],[i,j])/p([],[]));
+done;
+h([],[a,b]);
+e([],[a,b])/p([],[]);
+/* Contractions */
+defcon(e,f,g);
+done;
+contract(e([a],[b])*f([b],[c]));
+g([a],[c]);
+dim:3;
+3;
+contract(kdelta([a],[b])*kdelta([b],[a]));
+'kdelta([],[]);
+%,kdelta;
+3;
+contract(g([i,j],[])*g([],[j,k]));
+kdelta([i],[k]);
+/* Curvature and covariant derivatives */
+(flipflag:false,rename(icurvature([s,u,n],[y])));
+ichr2([s,u],[y],n)-ichr2([s,n],[y],u)+ichr2([%1,n],[y])*ichr2([s,u],[%1])-ichr2([%1,u],[y])*ichr2([s,n],[%1]);
+canform(icurvature([l,j,k],[i])+icurvature([k,l,j],[i])+icurvature([j,k,l],[i]));
+0;
+canform(covdiff(icurvature([j,m,k],[i]),l)+covdiff(icurvature([j,l,m],[i]),k)+covdiff(icurvature([j,k,l],[i]),m));
+0;
+contract(expand(kdels([i,j,k],[l,m,n])*kdelta([l,m,n],[i1,i2,i3])));
+0;
+/* Special tensors */
+levi_civita([i,j,j],[]);
+kdelta([i,j,j],[1,2,3]);
+%,kdelta;
+0;
+contract(expand(lc2kdt('levi_civita([i,j,k],[])*a([],[j])*'levi_civita([],[k,l,n])*b([l],[])*c([n],[]))));
+a([],[n])*b([i],[])*c([n],[])-a([],[l])*c([i],[])*b([l],[]);
+contract(expand(lc2kdt('levi_civita([i,j,k],[])*a([],[j])*b([],[k])*'levi_civita([],[i,l,n])*c([l],[])*u([n],[]))));
+a([],[l])*b([],[n])*c([l],[])*u([n],[])-b([],[l])*a([],[n])*c([l],[])*u([n],[]);
+canform(contract(expand(applyb1('levi_civita([],[i,j,k])*a([j])*a([k]),lc_l,lc_u))));
+0;
+/* Frames, derivatives */
+idiff(f([],[]),k);
+f([],[],k);
+idiff(idiff(v([i],[]),k),l)-idiff(idiff(v([i],[]),l),k);
+0;
+iframe_flag:true;
+true;
+idiff(idiff(v([i],[]),k),l)-idiff(idiff(v([i],[]),l),k);
+v([i],[],k,l)-v([i],[],l,k);
+iframe_flag:false;
+false;
+undiff(v([i],[],k));
+'idiff(v([i],[]),k,1);
+ichr1([i,j,k]);
+(g([j,k],[],i)+g([i,k],[],j)-g([i,j],[],k))/2;
+rename(ichr2([i,j],[k]));
+g([],[k,%1])*(g([j,%1],[],i)-g([i,j],[],%1)+g([i,%1],[],j))/2;
+(remove(a,constant),rename(covdiff(a([j,k],[i]),i)));
+a([j,k],[%1],%1)+a([j,k],[%2])*ichr2([%2,%1],[%1])-a([j,%2],[%1])*ichr2([k,%1],[%2])-a([%2,k],[%1])*ichr2([j,%1],[%2]);
+canform(factor(canform(covdiff(v([],[i]),k,l)-covdiff(v([],[i]),l,k)))-v([],[j])*icurvature([j,k,l],[i]));
+0;
+/* TODO: flush & relatives, lorentz, conmetderiv */
+/* Exterior algebra */
+a([i])~b([j]);
+(a([i],[])*b([j],[])-a([j],[])*b([i],[]))/2;
+decsym(p,2,0,[anti(all)],[]);
+done;
+factor(canform(extdiff(p([j,k]),i)));
+(p([j,k],[],i)-p([i,k],[],j)+p([i,j],[],k))/3;
+extdiff(a([j])~b([k]),k);
+0;
+factor(a([i1])~b([i2])|a+a([i2])~b([i1])|a);
+0;
+canform(liediff(v,extdiff(a([i1]),i2))-extdiff(liediff(v,a([i1])),i2));
+0;
+decsym(g,2,0,[sym(all)],[]);
+done;
+decsym(g,0,2,[],[sym(all)]);
+done;
+canform(g([a,d],[])*g([b,e],[])*g([],[b,a],c));
+g([%1,e],[])*g([%2,d],[])*g([],[%1,%2],c);
+canform(g([],[a,d])*g([],[b,e])*g([b,a],[]));
+g([],[%1,e])*g([],[%2,d])*g([%1,%2],[]);
+canform(g([],[a,b])*A([a],[],c)*A([b],[],d));
+g([],[%1,%2])*A([%1],[],d)*A([%2],[],c);
+canform(g([],[a,b])*A([a],[],d)*A([b],[],c));
+g([],[%1,%2])*A([%1],[],d)*A([%2],[],c);
+decsym(a,0,2,[],[anti(all)]);
+done;
+canform(a([A,B],[])*a([],[B,C]));
+-a([],[%1,C])*a([%1,A],[]);
+canform(a([A,B],[])*a([],[C,B]));
+a([],[%1,C])*a([%1,A],[]);
+det(H):=block([idx1:makelist(idummy(),i,1,dim),idx2:makelist(idummy(),i,1,dim)],'kdelta(idx1,idx2)*product(H([idx2[i]],[idx1[i]]),i,1,dim)/dim!);
+det(H):=block([idx1:makelist(idummy(),i,1,dim),idx2:makelist(idummy(),i,1,dim)],'kdelta(idx1,idx2)*product(H([idx2[i]],[idx1[i]]),i,1,dim)/dim!);
+components(H([],[]),H([i],[i]));
+done;
+defcon(H,H,kdelta);
+done;
+apply(ev,[contract(apply(ev,[contract(apply(ev,[det(H),nouns,expand])),nouns])),nouns]);
+1;
+/* ic_convert: In recent versions, this test 'fails' with the correct result */
+/*ic_convert(f([a],[b])=g([],[b,c])*(B([a],[],c)-C([],[d])*g([a,d],[],c)));
+for a thru dim do (for b thru dim do f[a,b]:sum(ug[b,c]*diff(B[a],ct_coords[c]),c,1,dim)-sum(sum(ug[b,c]*C[d]*diff(lg[a,d],ct_coords[c]),c,1,dim),d,1,dim));*/
+/* TODO: torsion, nonmetricity tensors, connection coeffs */

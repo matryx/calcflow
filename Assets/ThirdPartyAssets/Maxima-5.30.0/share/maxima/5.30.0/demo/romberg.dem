@@ -1,0 +1,30 @@
+define_variable(pi,apply('ev,[%pi,numer:true]),float)$
+
+define_variable(freq,3.3,float,"the frequency in radians/second")$
+
+v(x):=(modedeclare(x,float),x*abs(sin(freq*x)))$
+
+h1(freq):=romberg('v,0,pi)$
+
+
+/* an alternative syntax is */
+
+h2(freq):=romberg(x*abs(sin(freq*x)),x,0,pi)$
+
+
+h1(5.5);
+
+h2(5.5);
+
+translate(h1,v,h2)$
+
+h1(5.5);
+
+h2(5.5);
+
+compile(functions);
+
+h1(5.5);
+
+h2(5.5);
+

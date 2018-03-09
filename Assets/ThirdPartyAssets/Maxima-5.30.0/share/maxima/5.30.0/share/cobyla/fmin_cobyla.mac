@@ -1,0 +1,110 @@
+/*
+ * COBYLA (Constrained Optimization BY Linear Approximation).
+ *
+ * This is a maxima interface to the routine COBYLA.
+ * Interface Copyright Raymond Toy 2010
+ * Interface released under the terms of the GNU General Public License.
+ *
+ * The COBYLA Fortran routines are included with permission from the author
+ * Michael J. D. Powell, 2010/10/08.  The code was obtained from
+ * http://plato.asu.edu/sub/nlores.html#general.
+ *
+ * fmin_cobyla(f, vars, init_x, [args])
+ *
+ *   f       Real function to be minimized
+ *   vars    List of variables over which to minimize
+ *   init_x  Initial guess.  Do NOT set to all zeroes.
+ *
+ * The optional arguments are all keyword arguments of the form key =
+ * value:
+ *
+ *   ineq    List of expressions for the constraints on the variables.
+ *           Each expression is assumed to be greater than or equal to 
+ *           zero.  
+ *   eq      List of expressions for the equality constraints on the 
+ *           variables.
+ *   rhobeg  Initial value of the internal RHO variable which controls 
+ *           the size of simplex.  (Defaults to 1.)
+ *   rhoend  The desired final value rho parameter.  It is approximately
+ *           the accuracy in the variables. (Defaults to 1d-6.)
+ *   iprint  Verbose output level.  (Defaults to 0.)
+ *            0 - No output
+ *            1 - Summary at the end of the calculation
+ *            2 - Each new value of RHO and SIGMA is printed, including 
+ *                the vector of variables, some function information when 
+ *                RHO is reduced.
+ *            3 - Like 2, but information is printed when F(X) is computed.
+ *   maxfun  The maximum number of function evaluations.  (Defaults to 1000).
+ *
+ * The parameter SIGMA is an internal penalty parameter, it being assumed
+ * that a change to X is an improvement if it reduces the merit function
+ *
+ *            F(X)+SIGMA*MAX(0.0,-C1(X),-C2(X),...,-CM(X))
+ *
+ * where C1, C2 are the constraint functions.  When printed the parameter 
+ * MAXCV is the MAX term above, which stands for MAXimum Constraint 
+ * Violation.                
+ *
+ * On return, a vector of four elements is given:
+ *
+ *  1:  The value of the variables giving the minimum
+ *  2:  The minimized function value
+ *  3:  The value of the constraints as a list.  The first element
+ *      is for the inequality constraints and the second element is
+ *      for the equality constraints.
+ *  4:  The number of function evaluations.
+ *
+ * You can find some examples in share/cobyla/ex.
+ *
+ * An example of minimizing x1*x2 with 1-x1^2-x2^2 >= 0:
+
+   load(fmin_cobyla);
+   fmin_cobyla(x1*x2, [x1, x2], [1,1], ineq = [1-x1^2-x2^2], iprint=1);
+ *
+ * => [[x1 = .7071058493484819, x2 = - .7071077130247994], 
+ *     - .4999999999992633, [[- 1.999955756559757e-12], []], 66]
+ *
+ * The theoretical solution is x1 = 1/sqrt(2), x2 = -1/sqrt(2).
+ */
+load("load-cobyla.lisp");
+
+/* Define the maxima function so that maxima can catch errors in 
+ * the wrong number of arguments
+ */
+fmin_cobyla(f, vars, initx, [options]) :=
+  block([constraints : assoc('constraints, options),
+	 ineq : [],
+	 eq : []],
+    /*
+     * Don't allow ineq and eq keyword args, because we use them for 
+     * %fmin_cobyla 
+     */
+    if assoc('ineq, options) # false then
+       error("Unrecognized keyword: ", 'ineq),
+    if assoc('eq, options) # false then
+       error("Unrecognized keyword: ", 'eq),
+    /*
+     * Look through constraints and separate out the equality and 
+     * inequality constraints, if any
+     */
+    if not(constraints = false) then
+      for c in constraints do
+	block([op : op(c)],
+	  if op = "=" then eq : cons(c, eq)
+	  elseif op = ">=" or op = "<=" then ineq : cons(c, ineq)
+	  else
+	    error("Contraint must be =, <=, or >=, not", op)),
+    /*
+     * Convert inequalities g(x) >= h(x) to g(x) - h(x) >= 0
+     * and g(x) <= h(x) to h(x) - g(x) >= 0 
+     */
+    ineq : map(lambda([eqn], 
+	              if op(eqn) = ">=" then 
+		   	lhs(eqn) - rhs(eqn)
+	              else
+			rhs(eqn) - lhs(eqn)),
+		ineq),
+    eq : map(lambda([eqn], lhs(eqn) - rhs(eqn)), eq),
+    options : append(['ineq = ineq, 'eq = eq], delete('constraints = constraints, options)),
+    %fmin_cobyla(f, vars, initx, options)
+);

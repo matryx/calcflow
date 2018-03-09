@@ -1,0 +1,16 @@
+
+The file SHARE1;DELTA FASL contains a function DELINT which can do integrals
+which contain Dirac delta functions.  The calls are DELINT(expr,var) and
+DELINT(expr,var,lower_limit,upper_limit).  These give the indefinite
+and definite integrals respectively.  The delta function is represented
+by DELTA(argument); the step function (which is returned by the indefinite
+integral) by THETA(argument).  These functions are not defined in the file.
+	Currently lower_limit must be lower than upper_limit. This will be
+corrected in a later version.  Currently derivatives of delta's
+are not handled.  This may be put in later.  Error checking is currently
+minimal.
+	If there is no delta function in expr whose argument depends on
+var,DELINT calls INTEGRATE.
+BATCH file: SHARE1;DELTA >
+DEMO SHARE1;DELTA DEMO.
+Comments, bugs to MPS.

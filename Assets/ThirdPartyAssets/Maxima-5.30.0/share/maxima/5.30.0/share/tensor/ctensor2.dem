@@ -1,0 +1,43 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Differential geometry in CTENSOR
+ */
+
+if get('ctensor,'version)=false then load(ctensor);
+("Prove that the Schwarzschild line element is of an empty metric")$
+("The dimension of the manifold")$
+dim:4;
+("The coordinate labels")$
+ct_coords:[x,y,z,t];
+("Rational simplification of geometrical objects")$
+(ratwtlvl:false,ratfac:true);
+("Here is the Schwarzschild metric in standard coordinates:")$
+lg:matrix([1/(1-2*m/x),0,0,0],[0,x^2,0,0],
+          [0,0,x^2*sin(y)^2,0],[0,0,0,2*m/x-1]);
+("Compute metric inverse and determine diagonality")$
+cmetric();
+("Compute and display mixed Christoffel symbols")$
+christof(mcs);
+("Compute and rationally simplify the contravariant Ricci tensor")$
+uricci(true);
+("Computes scalar curvature")$
+scurvature();
+("Compute the (3,1) Riemann tensor")$
+riemann(true);
+("Compute the covariant Riemann tensor")$
+lriemann(true);
+("Compute the contravariant Riemann tensor")$
+uriemann(true);
+("Compute the Kretchmann invariant Rijkl^2")$
+rinvariant();
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

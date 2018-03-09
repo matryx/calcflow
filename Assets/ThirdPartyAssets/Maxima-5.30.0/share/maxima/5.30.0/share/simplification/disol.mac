@@ -1,0 +1,75 @@
+/* -*-Macsyma-*- */
+eval_when(batch,ttyoff:true)$
+/*ASB;DISOL 7
+2:37pm  Wednesday, 4 November 1981
+7:53pm  Saturday, 29 May 1982
+  Added a DIAGEVAL_VERSION for this file.
+1:44pm  Saturday, 12 June 1982
+  Changed loadflags to getversions, DEFINE_VARIABLE:'MODE.
+10:23am  Sunday, 1 May 1983
+ASB;DISOL
+  Multics compatibility.
+*/
+
+eval_when(translate,
+	  define_variable:'mode,
+	  mode_declare(function(freeofl),boolean),
+	  transcompile:true)$
+
+put('disol,8,'version)$
+
+define_variable(iforp,false,boolean)$
+
+/*
+IF STATUS(FEATURE,ITS)=TRUE
+THEN SETUP_AUTOLOAD([GENUT,FASL,DSK,DGVAL],
+	            'ORPARTITIONL,'FREEOFL)$
+*/
+
+/* GNU Maxima */
+
+eval_when([batch,loadfile],
+  if get('gnauto,'diageval_version)=false
+  then load("genut"))$
+
+eval_when(translate,
+	  declare_translated(orpartitionl,elabel,disolate2,freeofl,
+			     not_atom_elabel,disolate1))$
+
+disolate(exp,[orig_iso_list]):=block(
+  [partswitch:true,iforp:true,piece,inflag:true],
+  disolate1(exp,orig_iso_list))$
+
+disolate1(exp,varlist):=block(
+  [ip0dum:inpart(exp,0)],
+  if varlist=[] then return(exp),
+  if freeofl(varlist,exp) then return(not_atom_elabel(exp)),
+  if member(exp,varlist) or member(ip0dum,varlist) then return(exp),
+  if ip0dum="*"
+  then if isolate_wrt_times
+       then disolate2("*",exp,varlist)
+       else map(lambda([dum],disolate1(dum,varlist)),exp)
+  else if ip0dum="+"
+       then disolate2("+",exp,varlist)
+       else map(lambda([dum],disolate1(dum,varlist)),exp))$
+
+not_atom_elabel(exp):=if not atom(exp) then elabel(exp) else exp$
+
+disolate2(op,exp,varlist):=block(
+  [splitdum:orpartitionl(exp,op,varlist),lsplitdum],
+  apply(op,[not_atom_elabel(first(splitdum)),
+            if inpart(lsplitdum:last(splitdum),0)=op
+	    then map(lambda([dum],disolate1(dum,varlist)),lsplitdum)
+	    else disolate1(lsplitdum,varlist)]))$
+
+elabel(exp):=block(
+  [e_labels:apply('labels,[linechar]),olddum:false],
+  for idum in e_labels do
+      if exp=apply('ev,[idum])
+      then return(olddum:idum),
+  if olddum=false
+  then if dispflag
+       then first(ldisp(exp))
+       else ?elabel(exp)
+  else  olddum)$
+eval_when(batch,ttyoff:false)$

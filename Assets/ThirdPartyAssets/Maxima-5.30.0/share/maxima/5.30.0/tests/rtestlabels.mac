@@ -1,0 +1,244 @@
+(load (stringproc),
+ kill (all),
+ nolabels: true,
+ 0);
+0;
+
+(f(x) := x,
+ g(x) := x^2,
+ h(x) := x^3,
+ m(x) ::= x,
+ n(x) ::= x^2,
+ o(x) ::= x^3,
+ tellsimpafter (foo(x), bar(x)),
+ tellsimpafter (bar(x), baz(x)),
+ L2: dispfun (g, n),
+ L3: dispfun (all),
+ L4: disprule (barrule1),
+ L5: disprule (all),
+ 0);
+0;
+
+(ensure_string (x) := if stringp (x) then x else string (x),
+ my_every (p, L) := apply ("and", map (is, map (p, L))),
+ my_some (p, L) := apply ("or", map (is, map (p, L))),
+ my_none (p, L) := apply ("and", map ("not", map (is, map (p, L)))),
+ matchdeclare (aa, symbolp, [bb, cc], true),
+ defmatch (rulep, aa: ?marrow (bb, cc)),
+ defmatch (fundefp, bb := cc),
+ defmatch (macrodefp, bb ::= cc),
+ 0);
+0;
+
+''L2;
+[g(x) := x^2, n(x) ::= x^2];
+
+''L3;
+[f(x) := x, g(x) := x^2, h(x) := x^3, m(x) ::= x, n(x) ::= x^2, o(x) ::= x^3];
+
+''L4;
+'[barrule1 : ?marrow (bar(x), baz(x))];
+
+(my_every (lambda ([x], substring (ensure_string (x), 1, 3) = ensure_string (linechar)), L5)
+ and my_every (lambda ([x], rulep(x)#false), ''L5));
+true;
+
+/* At this point, all labels are %t labels from rules, functions, and macros.
+ */
+(map (lambda ([x], rulep(x)#false or fundefp(x)#false or macrodefp(x)#false), ''labels),
+ my_every (lambda ([x], substring (ensure_string (x), 1, 3) = ensure_string (linechar)), labels)
+ and my_every (identity, %%));
+true;
+
+[%i1, %o1, %i2, %o2, %i3, %o3, %i4, %o4, %i5, %o5];
+'[%i1, %o1, %i2, %o2, %i3, %o3, %i4, %o4, %i5, %o5];
+
+/* Some tests for solve and linsolve.
+ */
+/* Test 1: nolabels = true, programmode = true, globalsolve = false
+ *  => solve & linsolve return lists of solutions
+ */
+(globalsolve: false,
+ solve (asin (cos (3*x)), x));
+[x = %pi/6];
+
+linsolve ([x + 2*y = 5, 2*x - y = 5], [x, y]);
+[x = 3, y = 1];
+
+/* Test 2: nolabels = true, programmode = false, globalsolve = false
+ *  => solve & linsolve return lists of %t labels
+ *     and each %t label is on the labels infolist
+ *     and each %t label is bound to an equation
+ */
+(programmode: false,
+ L: append (solve (asin (cos (3*x)), x), linsolve ([x + 2*y = 5, 2*x - y = 5], [x, y])),
+ my_every (lambda ([x], substring (ensure_string (x), 1, 3) = ensure_string (linechar)), L)
+  and my_every (lambda ([x], my_some (lambda ([y], buildq ([x, y], 'y = 'x)), labels)), L));
+true;
+
+''L;
+[x = %pi/6, x = 3, y = 1];
+
+/* Test 3: nolabels = true, programmode = false, globalsolve = true
+ *  => solve & linsolve return lists of %t labels
+ *     and each %t labels is on the labels infolist
+ *     and the labels returned by solve are bound to equations
+ *     and the labels returned by linsolve are bound to assignments
+ */
+(globalsolve: true,
+ L: append (solve (asin (cos (3*x)), x), linsolve ([x + 2*y = 5, 2*x - y = 5], [x, y])),
+ [my_every (lambda ([x], substring (ensure_string (x), 1, 3) = ensure_string (linechar)), L)
+   and my_every (lambda ([x], my_some (lambda ([y], buildq ([x, y], 'y = 'x)), labels)), L),
+  x, y]);
+[true, 3, 1];
+
+''L;
+'[x = %pi/6, x : 3, y : 1];
+
+/* Test 4: nolabels = true, programmode = true, globalsolve = true
+ *  => solve returns equations
+ *     linsolve assigns values and returns assignments
+ *     no %t labels generated
+ */
+(programmode: true,
+ kill (x, y),
+ save_labels: copylist (labels),
+ [linsolve ([x + 2*y = 5, 2*x - y = 5], [x, y]),
+ x, y,
+ is (equal (labels, save_labels))]);
+['[x : 3, y : 1], 3, 1, true];
+
+/* Restore the status quo ante.
+ */
+globalsolve: false;
+false;
+
+/* Now repeat all of the preceding tests,
+ * but this time with nolabels = false.
+ * %t labels should still be bound to rules, functions, and macros,
+ * but there should also be some input and output labels bound as well.
+ */
+(kill (all),
+ nolabels: false,
+ 0);
+0;
+
+(f(x) := x,
+ g(x) := x^2,
+ h(x) := x^3,
+ m(x) ::= x,
+ n(x) ::= x^2,
+ o(x) ::= x^3,
+ tellsimpafter (foonew(x), bar(x)),
+ tellsimpafter (barnew(x), baz(x)),
+ L2: dispfun (g, n),
+ L3: dispfun (all),
+ L4: disprule (barnewrule1),
+ L5: disprule (all),
+ 0);
+0;
+
+(ensure_string (x) := if stringp (x) then x else string (x),
+ my_every (p, L) := apply ("and", map (is, map (p, L))),
+ my_some (p, L) := apply ("or", map (is, map (p, L))),
+ my_none (p, L) := apply ("and", map ("not", map (is, map (p, L)))),
+ matchdeclare (aa, symbolp, [bb, cc], true),
+ defmatch (rulep, aa: ?marrow (bb, cc)),
+ defmatch (fundefp, bb := cc),
+ defmatch (macrodefp, bb ::= cc),
+ 0);
+0;
+
+''L2;
+[g(x) := x^2, n(x) ::= x^2];
+
+''L3;
+[f(x) := x, g(x) := x^2, h(x) := x^3, m(x) ::= x, n(x) ::= x^2, o(x) ::= x^3];
+
+''L4;
+'[barnewrule1 : ?marrow (barnew(x), baz(x))];
+
+(my_every (lambda ([x], substring (ensure_string (x), 1, 3) = ensure_string (linechar)), L5)
+ and my_every (lambda ([x], rulep(x)#false), ''L5));
+true;
+
+/* Now there should be some labels which are not %t labels.
+ * NOTE: the expected result (false) is observed only if this script is executed
+ * via batch("rtestlabels.mac"), because then Maxima creates input and output labels.
+ * When executed via batch(..., test), no input or output labels are created,
+ * so the test fails.
+ */
+(map (lambda ([x], rulep(x)#false or fundefp(x)#false or macrodefp(x)#false), ''labels),
+ my_every (lambda ([x], substring (ensure_string (x), 1, 3) = ensure_string (linechar)), labels)
+ and my_every (identity, %%));
+false;
+
+/* See NOTE attached to preceding example
+ */
+labels (inchar) # [] and my_every (?boundp, labels (inchar))
+ and labels (outchar) # [] and my_every (?boundp, labels (outchar));
+true;
+
+/* Repeat the tests for solve and linsolve.
+ * The outcomes should be the same as before.
+ */
+/* Test 1: nolabels = true, programmode = true, globalsolve = false
+ *  => solve & linsolve return lists of solutions
+ */
+(globalsolve: false,
+ solve (asin (cos (3*x)), x));
+[x = %pi/6];
+
+linsolve ([x + 2*y = 5, 2*x - y = 5], [x, y]);
+[x = 3, y = 1];
+
+/* Test 2: nolabels = true, programmode = false, globalsolve = false
+ *  => solve & linsolve return lists of %t labels
+ *     and each %t label is on the labels infolist
+ *     and each %t label is bound to an equation
+ */
+(programmode: false,
+ L: append (solve (asin (cos (3*x)), x), linsolve ([x + 2*y = 5, 2*x - y = 5], [x, y])),
+ my_every (lambda ([x], substring (ensure_string (x), 1, 3) = ensure_string (linechar)), L)
+  and my_every (lambda ([x], my_some (lambda ([y], buildq ([x, y], 'y = 'x)), labels)), L));
+true;
+
+''L;
+[x = %pi/6, x = 3, y = 1];
+
+/* Test 3: nolabels = true, programmode = false, globalsolve = true
+ *  => solve & linsolve return lists of %t labels
+ *     and each %t labels is on the labels infolist
+ *     and the labels returned by solve are bound to equations
+ *     and the labels returned by linsolve are bound to assignments
+ */
+(globalsolve: true,
+ L: append (solve (asin (cos (3*x)), x), linsolve ([x + 2*y = 5, 2*x - y = 5], [x, y])),
+ [my_every (lambda ([x], substring (ensure_string (x), 1, 3) = ensure_string (linechar)), L)
+   and my_every (lambda ([x], my_some (lambda ([y], buildq ([x, y], 'y = 'x)), labels)), L),
+  x, y]);
+[true, 3, 1];
+
+''L;
+'[x = %pi/6, x : 3, y : 1];
+
+/* Test 4: nolabels = true, programmode = true, globalsolve = true
+ *  => solve returns equations
+ *     linsolve assigns values and returns assignments
+ *     no %t labels generated
+ */
+(programmode: true,
+ kill (x, y),
+ save_labels: copylist (labels),
+ [linsolve ([x + 2*y = 5, 2*x - y = 5], [x, y]),
+ x, y,
+ is (equal (labels, save_labels))]);
+['[x : 3, y : 1], 3, 1, true];
+
+/* Restore the status quo ante.
+ */
+globalsolve: false;
+false;
+
+my_every (?boundp, labels);
+true;

@@ -1,0 +1,179 @@
+/* noninteractive.mac -- catch asksign and askprop queries and construct conditional expressions
+ * copyright 2007 by Robert Dodier
+ * I release this file under the terms of the GNU General Public License.
+ */
+ 
+/* Examples:
+ *
+ * throw (x); ("THROW NOT WITHIN CATCH" SUPPRESSED; THAT'S PROBABLY A BUG)
+ * asksign (x);
+ * asksign (log (x));
+ * asksign (abs (x));
+ * abs (asin (x + %i));
+ * (declare (xx, complex), abs (asin (xx + %i)));   (TRIGGERS STACK OVERFLOW)
+ * realpart (sqrt (25 - x^2 - y^2));
+ * integrate (exp(a*x), x, 0, inf);  (INCORRECT RESULT FOR A=0, NOT OUR PROBLEM)
+ * integrate (x^k, x);
+ * integrate (x^k, x, 1, b);
+ * integrate (x**a/(x + 1), x, 0, inf);
+ * integrate (x**a/(x + 1)**(5/2), x, 0, inf);
+ * integrate (exp(-%i*x) + a * exp(%i*x), x, 0, 2*%pi);
+ * integrate (sqrt (1 - s^2)/(z - s), s, -1, 1);
+ * (xmax(a, b) := (a + b + abs(a - b)) / 2, integrate (xmax (a - x, 0), x, 0, b));
+ * integrate (1 / (a^2 * cos(t)^2 + 1), t, 0, %pi);
+ * integrate (exp(- la*t) * la, t, 0, inf);
+ * integrate (sin(5*x) * exp(- s*x), x, 0, inf);
+ * integrate (1/x, x, a, 4);
+ * integrate (x^k, x, 0, 1);
+ * integrate (1 / sqrt(n + i),i,1,n);
+ * integrate (1 / (1 + a^2 * sin(x)^2), x, 0, 3*%pi);
+ * integrate (integrate (p2^2, x1, -4*%pi / kp, 4*%pi / kp), x2, 5*%pi / kp / 2, 7*%pi / kp / 2);
+ * integrate (1/log(t), t, x, 2*x);
+ * integrate ((6*cos(9*x) + 6*sin(8*x)) * (j - x), x, -%pi, %pi) / %pi; (TRIGGERS "TOO MANY CONTEXTS"; BUG IN MONSTERTRIG)
+ * integrate (cos(n*x) * sin(n*x), x, 0, t);
+ * integrate (1 / (sin(x)^2 + 1), x, 0, z);
+ * integrate (cos(x) - cos(x - c), x, 0, c/2) = %pi - c - integrate (cos (x - c), x, c, %pi / 2 + c);
+ * integrate (cot(x), x, 0, %pi/2);
+ * integrate (r, z, - sqrt (20 - r^2), sqrt (20 - r^2));
+ * integrate ((x^2 + x + 2)/(x^2 + x + c), c);
+ * specint (sqrt(t) * %e^(- p*t - a/t), t);
+ *
+ * (f(x) := x - 2 * log ((exp(x) + 1) / 2) + x**2/4,
+ *  exp (- x**2/4) * ratsimp (taylor (exp (f(x)) * (x*kb + mu)**gamma, x, 0, 4)),
+ *  integrate (%%, x, minf, inf));
+ *
+ * (aa : 3*kbt^4*x^4/(128*mu^4) - kbt^3*x^3/(16*mu^3) + 3*kbt^2*x^2/(8*mu^2) + 3*kbt*x/(2*mu) + 1,
+ *  integrate (exp(x)/(exp(x) + 1)^2*aa, x, minf, inf));
+ *
+ * (tmpp : (x2/2 + x1/2)*sin((%pi * (- x3/2 - (- x3 - x2 - x1 + 1)/2 + x2/2 + x1/2)) / 2),
+ *  integrate (integrate (integrate (tmpp, x3, 0, 1 - x1 - x2), x2, 0, 1 - x1), x1, 0, 1));
+ *
+ * limit (a * x, x, inf);
+ * limit (x^a, x, inf);
+ * limit (x^a, x, minf);
+ * declare (a, integer);
+ * limit (x^a, x, minf);
+ * tlimit (s/(1 + s^2) / sinh (s*T), s, inf);
+ * solve (x = log(a + sqrt( a^2 - r^2)), r); (MAKES A MESS; RESULTS INCORRECTLY MERGED INTO CONDITIONAL)
+ * solve (sqrt(x) + sqrt(y) = sqrt(a), y);
+ * solve (y^2 + x^2 + 2*a*e*x + a^2*e^2 = (2*a - sqrt (y^2 + x^2 - 2*a*e*x + a^2*e^2))^2, y);
+ * solve (b^(a*t) = 1, b); (ATTEMPTS DECLARE(A*T, INTEGER) => ERROR, STACK OVERFLOW)
+ * ode2 ('diff(x, t, 2) + a*x = b*sin(c*t), x, t);
+ * ode2 ('diff(x, t, 2) + a*'diff(x, t) + b*x = 0, x, t);
+ * ode2 ('diff(x, t, 2) + a*'diff(x, t) + b*x = d*sin(e*t), x, t);
+ * ode2 ('diff(y, x, 2) + a*y = c* x, y, x);
+ * ode2 ('diff(y, x, 2) + a*'diff(y, x) + b*y = c*x, y, x);
+ *
+ * gcd : spmod;
+ * expr : sin(a) / (1 - cos(a)^2*sin(t)^2);
+ * assume (cos(a) > 0, sin(a) > 0);
+ * integrate (expr, t, 0, 2*%pi);
+ *
+ * (load (simplify_sum),
+ *  sum (r/k*binom(n, r) * binom(m, k - r)/binom(n + m, k), r, 0, k),
+ *  simplify_sum (intosum (%%))); (TRIGGERS "CONTEXT ALREADY EXISTS"; THROW LEAVES CONTEXT HANGING AROUND)
+ *
+ * (load (to_poly_solve), to_poly_solve ([sqrt(x) + sqrt(y) = a , x^2=y] , [x, y]));
+ *
+ * (load (Solver), Solver ([x=2, y=3], [x], [y])); (TRIGGERS "ZERO OR NONZERO" QUERY; SOLVER HAS ITS OWN ASKSIGN-LIKE FUNCTION)
+ * (load (Solver), Solver ([x=a, y=b], [x], [y, b])); (TRIGGERS "ZERO OR NONZERO" QUERY; SOLVER HAS ITS OWN ASKSIGN-LIKE FUNCTION)
+ */
+
+within_MEVAL1 : false;
+
+MEVAL1 () :=
+  if within_MEVAL1
+  then block
+  ([r%: catch (ev (e%))],    /* by the time we get here, e% is bound by TOPLEVEL-MACSYMA-EVAL */
+    if not atom(r%) and (op(r%) = 'asksign or op(r%) = 'askprop)
+    then e%
+    else r%)
+
+  else block
+  ([r%: catch (ev (e%)),     /* by the time we get here, e% is bound by TOPLEVEL-MACSYMA-EVAL */
+    within_MEVAL1 : true],
+    if not atom(r%) and op(r%) = 'asksign
+    then block ([a%, s%, c%, L%],
+      a%: args(r%)[1],
+      s%: args(r%)[2],
+      c%:
+        if s% = 'pnz then [a% < 0, equal (a%, 0), a% > 0]
+        elseif s% = 'nz then [a% < 0, equal (a%, 0)]
+        elseif s% = 'pz then [equal (a%, 0), a% > 0]
+        elseif s% = 'pn then [a% < 0, a% > 0]
+        elseif s% = 'znz then [equal (a%, 0), not equal (a%, 0)]
+        else throw (oops_unknown (s%)),
+
+      L%: apply (enumerate_cases, [c%]),
+
+      if s% = 'pnz or s% = 'znz then c% [length(c%)]: true, /* to make final "else" */
+
+      funmake ("if", interleave (c%, L%)))
+  
+    else if not atom(r%) and op(r%) = 'askprop
+      /* FOLLOWING ASKPROP STUFF NEEDS WORK */
+      then block ([a%, s%, c%, L%],
+        a%: args(r%)[1],
+        s%: args(r%)[2],
+        c%: ['kind (a%, 'integer), true],
+        L%:
+         [block ([w%, z%: gensym()],
+            newcontext (z%),
+            apply (declare, [a%, 'integer]),
+            w%: MEVAL1(),
+            killcontext (z%),
+            w%),
+         block ([w%, z%: gensym()],
+            newcontext (z%),
+            apply (declare, [a%, 'noninteger]),
+            w%: MEVAL1(),
+            killcontext (z%),
+            w%)],
+        
+        funmake ("if", interleave (c%, L%)))
+  
+    else r%);
+
+enumerate_cases (L%) := 
+  map (lambda ([p%], assuming ([p%], MEVAL1 ())), L%);
+
+interleave (L1, L2) := flatten (map (lambda ([e1, e2], [e1, e2]), L1, L2));
+
+/* Pattern-matching rules for collapsing conditionals.
+ * These rules have the desired effect.
+ * I'm commenting them out as an experiment because sometimes
+ * it might be slightly more informative to leave 
+ * conditionals with redundant clauses as they stand
+ * (because the predicate expressions show something).
+ *
+matchdeclare ([aa, bb, cc, dd], true);
+
+simp: false;
+
+tellsimpafter (if aa then bb else bb, bb);
+
+tellsimpafter (if aa then bb elseif cc then bb else bb, bb);
+
+tellsimpafter (if aa then bb elseif cc then dd else dd, if aa then bb else dd);
+
+tellsimpafter (if aa then bb elseif cc then bb else dd, if aa or cc then bb else dd);
+
+tellsimpafter ('if aa then bb else bb, bb);
+
+tellsimpafter ('if aa then bb elseif cc then bb else bb, bb);
+
+tellsimpafter ('if aa then bb elseif cc then dd else dd, 'if aa then bb else dd);
+
+tellsimpafter ('if aa then bb elseif cc then bb else dd, 'if aa or cc then bb else dd);
+
+simp: true;
+ */
+
+load (boolsimp);
+load ("noninteractive.lisp");
+load ("asksign1.lisp");
+
+/* Remove functions and variables defined at Maxima level
+ * so that kill does not affect noninteractive.
+ */
+delete_noninteractive_stuff_from_infolists ();

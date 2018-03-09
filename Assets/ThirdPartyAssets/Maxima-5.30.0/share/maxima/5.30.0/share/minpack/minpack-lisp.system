@@ -1,0 +1,69 @@
+;;;; -*- Mode: lisp -*-
+
+;;; System to convert the Fortran code to Lisp
+
+(in-package #:cl-user)
+(require :f2cl)
+
+(defparameter *minpack-root*
+  (make-pathname :host (pathname-host *load-pathname*)
+		 :directory (pathname-directory *load-pathname*)))
+
+(mk:define-language :f2cl-lisp
+    :compiler #'f2cl:f2cl
+    :loader #'identity
+    :source-extension "f"
+    :binary-extension "lisp")
+
+
+(mk:defsystem minpack-lisp
+    :source-pathname *minpack-root*
+    :components
+    ((:module "fortran"
+	      :source-extension "f"
+	      :binary-pathname "lisp"
+	      :language :f2cl-lisp
+	      :compiler-options (:include-comments t
+				 :keep-lisp-file t
+				 :relaxed-array-decls nil
+				 :array-type :array
+				 :array-slicing t
+				 :package :minpack)
+	      :components
+	      (
+	       (:file "dpmpar")
+	       (:file "enorm")
+	       (:file "fdjac1"
+		      :depends-on ("dpmpar"))
+	       (:file "fdjac2"
+		      :depends-on ("dpmpar"))
+	       (:file "qrsolv")
+	       (:file "lmpar"
+		      :depends-on ("dpmpar" "enorm" "qrsolv"))
+	       (:file "qrfac"
+		      :depends-on ("dpmpar" "enorm"))
+	       (:file "lmdif"
+		      :depends-on ("dpmpar" "enorm" "fdjac2" "lmpar" "qrfac"))
+	       (:file "lmdif1"
+		      :depends-on ("lmdif"))
+	       (:file "lmder"
+		      :depends-on ("dpmpar" "enorm" "lmpar" "qrfac"))
+	       (:file "lmder1"
+		      :depends-on ("lmder"))
+	       (:file "dogleg"
+		      :depends-on ("dpmpar" "enorm"))
+	       (:file "qform")
+	       (:file "r1mpyq")
+	       (:file "r1updt"
+		      :depends-on ("dpmpar"))
+	       (:file "hybrd"
+		      :depends-on ("dogleg" "dpmpar" "enorm" "fdjac1"
+					    "qform" "qrfac" "r1mpyq" "r1updt"))
+	       (:file "hybrd1"
+		      :depends-on ("hybrd"))
+	       (:file "hybrj"
+		      :depends-on ("dogleg" "dpmpar" "enorm" "qform" "qrfac"
+					    "r1mpyq" "r1updt"))
+	       (:file "hybrj1"
+		      :depends-on ("hybrj"))
+	       ))))

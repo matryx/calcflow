@@ -1,0 +1,238 @@
+/* A small database of elementary unit conversions */
+
+/* Undefined and therefore treated as basic units:
+ *
+ * m kg s A K mol
+ *
+ */
+
+declare_unit_conversion
+   (Hz = 1/s,           /* hertz:   Frequency            */
+    hertz = Hz,
+    N = kg*m/s^2,       /* newton:  Force                */
+    newton = N,
+    Pa = N/m^2,         /* pascal:  Pressure             */
+    pascal = Pa,
+    J = N*m,            /* joule:   Work, energy         */
+    joule = J,
+    W = J/s,            /* watt:    Power                */
+    watt = W,
+    C = s*A,            /* coulomb: Electric charge      */
+    coulomb = C,
+    V = J/C,            /* volt:    Electromotive force  */
+    volt = V,
+    F = C^2/J,          /* farad:   Electric capacitance */
+    farad = F,
+    Ohm = J*s/C^2,      /* ohm:     Electric resistance  */
+    ohm = Ohm,
+    S = 1/Ohm,          /* siemens: Electric conductance */
+    siemens = S,
+    Wb = J/A,           /* weber:   Magnetic flux        */
+    weber = Wb,
+    T = J/m^2/A,        /* tesla:   Magnetic flux density*/
+    tesla = T,
+    H = J/A^2,          /* henry:   Inductance           */
+    henry = H,
+
+    mm = m/1000,
+    km = 1000*m,
+    Mm = 1000000*m,
+    Gm = 1000000000*m,
+
+    mg = kg/1000000,
+    g = kg/1000,
+    Mg = 1000*kg,
+    Gg = 1000000*kg,
+
+    ms = s/1000,
+    ks = 1000*s,
+    Ms = 1000000*s,
+    Gs = 1000000000*s,
+
+    mA = A/1000,
+    kA = 1000*A,
+    MA = 1000000*A,
+    GA = 1000000000*A,
+
+    mK = K/1000,
+    kK = 1000*K,
+    MK = 1000000*K,
+    GK = 1000000000*K,
+
+    mmol = mol/1000,
+    kmol = 1000*mol,
+    Gmol = 1000000*mol,
+    Mmol = 1000000000*mol,
+
+    mHz = Hz/1000,
+    kHz = 1000*Hz,
+    MHz = 1000000*Hz,
+    GHz = 1000000000*Hz,
+
+    mN = N/1000,
+    kN = 1000*N,
+    MN = 1000000*N,
+    GN = 1000000000*N,
+
+    mPa = Pa/1000,
+    kPa = 1000*Pa,
+    MPa = 1000000*Pa,
+    GPa = 1000000000*Pa,
+
+    mJ = J/1000,
+    kJ = 1000*J,
+    MJ = 1000000*J,
+    GJ = 1000000000*J,
+
+    mW = W/1000,
+    kW = 1000*W,
+    MW = 1000000*W,
+    GW = 1000000000*W,
+
+    mC = C/1000,
+    kC = 1000*C,
+    MC = 1000000*C,
+    GC = 1000000000*C,
+
+    mV = V/1000,
+    kV = 1000*V,
+    MV = 1000000*V,
+    GV = 1000000000*V,
+
+    mF = F/1000,
+    kF = 1000*F,
+    MF = 1000000*F,
+    GF = 1000000000*F,
+
+    mOhm = Ohm/1000,
+    kOhm = 1000*Ohm,
+    MOhm = 1000000*Ohm,
+    GOhm = 1000000000*Ohm,
+
+    mS = S/1000,
+    kS = 1000*S,
+    MS = 1000000*S,
+    GS = 1000000000*S,
+
+    mWb = Wb/1000,
+    kWb = 1000*Wb,
+    MWb = 1000000*Wb,
+    GWb = 1000000000*Wb,
+
+    mT = T/1000,
+    kT = 1000*T,
+    MT = 1000000*T,
+    GT = 1000000000*T,
+
+    mH = H/1000,
+    kH = 1000*H,
+    MH = 1000000*H,
+    GH = 1000000000*H,
+
+    micrometer = m/1000000,
+    micron = micrometer,
+    cm = m/100,
+    meter = m,
+    kilometer = km,
+
+    /* International Astronomical Union best estimate (2009) according to Wikipedia */
+    astronomical_unit = 149597870700 * m,
+    AU = astronomical_unit,
+
+    julian_year = (365 + 1/4) * 86400 * s,
+    light_year = julian_year * 299792458 * m / s,
+
+    parsec = 360 * 60 * 60 / (2 * %pi) * astronomical_unit,
+    pc = parsec,
+
+    microgram = kg/1000000000,
+    metric_ton = Mg,
+    kilogram = kg,
+    gram = g,
+
+    ns = s/1000000000,
+    microsecond = s/1000000,
+    
+    hectare = 100*m^2,
+    ha = hectare,
+
+    liter = m^3/1000,
+    l = liter,
+    ml = l / 1000,
+
+    candela = cd,
+    lumen = cd,
+    lux = lumen/m^2,
+
+    becquerel = 1/s,
+    Bq = becquerel,
+
+    gray = J/kg,
+    Gy = gray,
+    sievert = gray,
+    Sv = sievert,
+
+    katal = mol/s,
+    kat = katal);
+
+texput (mOhm, "{\\mathrm m\\Omega}");
+texput (Ohm, "{\\mathrm \\Omega}");
+texput (kOhm, "{\\mathrm k\\Omega}");
+texput (MOhm, "{\\mathrm M\\Omega}");
+texput (GOhm, "{\\mathrm G\\Omega}");
+
+texput (micrometer, "\\mu {\\mathrm m}");
+texput (micron, "\\mu {\\mathrm m}");
+texput (microgram, "\\mu {\\mathrm g}");
+texput (microsecond, "\\mu {\\mathrm s}");
+
+texput (metric_ton, "{\\mathrm metric\\ ton}");
+
+declare_unit_conversion
+   (feet = 3048/10000 * m,
+    /* International pound avoirdupois */
+    pound_mass = 45359237/10^8 * kg,
+    minute = 60*s,
+    hour = 3600*s,
+    day = 86400*s,
+    week = 7*86400*s,
+    month = (30 + 7/16)*86400*s,
+    year = (365 + 1/4)*86400*s,
+    Btu = 1055*J,
+    R = 5/9*K);
+   
+declare_unit_conversion
+   (inch = feet/12,
+    yard = 3*feet,
+    mile = 5280*feet,
+    gallon = 231*inch^3,
+    slug = pound_force*s^2/foot,
+    ounce = pound_mass/16,
+    /* grain = ???, */
+    /* assume gravitational acceleration = 980.665 cm/s^2 */
+    pound_force = pound_mass*196133/6096*ft/s^2,
+    acre = 55*88*yard^2,
+    psi = pound_force/inch^2,
+    cfm = feet^3/minute,
+
+    ft = feet,
+    foot = feet,
+    lbm = pound_mass,
+    oz = ounce,
+    lbf = pound_force,
+    horsepower = 550 * pound_force * foot / s,
+    hp = horsepower,
+
+    short_ton = 2000*lbm,
+    rod = 33/2*feet,
+
+    quart = gallon / 4,
+    pint = quart / 2,
+    cup = pint / 2,
+    gill = cup / 2,
+    fluid_ounce = cup / 8,
+    fl_oz = fluid_ounce,
+    tablespoon = fluid_ounce / 2,
+    teaspoon = tablespoon / 3,
+    tbsp = tablespoon,
+    tsp = teaspoon);

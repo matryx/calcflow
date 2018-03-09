@@ -1,0 +1,967 @@
+/*****************************************************************************
+ *                                                                           *
+ * ************************************************************************* *
+ * ***                                                                   *** *
+ * ***                       * simplify_sum *                            *** *
+ * ***                                                                   *** *
+ * ***   This file implements simplify_sum function for simplification   *** *
+ * ***   of sums.                                                        *** *
+ * ***   The methods used by simplify_sum:                               *** *
+ * ***     1. internal simplification using simpsum=true                 *** *
+ * ***     2. Gosper algorithm                                           *** *
+ * ***     3. rational summation with conversion to psi functions        *** *
+ * ***     4. Zeilberger algorithm                                       *** *
+ * ***     5. conversion to hypergeometrical sums, reduced by hgfred.    *** *
+ * ***                                                                   *** *
+ * ***   Author:  Andrej Vodopivec <andrejv@users.sourceforge.net>       *** *
+ * ***   Licence: GPL                                                    *** *
+ * ***                                                                   *** *
+ * ************************************************************************* *
+ *                                                                           *
+ *                                                                           *
+ * Demo:                                                                     *
+ *                                                                           *
+ * (%i6) s : simplify_sum(sum(((-1)^k*x*binom(n,k))/(x+k),k,0,n))$           *
+ * (%i7) factcomb(s);                                                        *
+ * (%o7) (n!*x!)/(x+n)!                                                      *
+ *                                                                           *
+ * (%i8) simplify_sum(sum((-1)^k*binom(x-2*k,n-k)*binom(x-k+1,k),k,0,n));    *
+ * Is  x - 2 * n   positive, negative, or zero?  pos;                        *
+ * Is  x - n + 1   positive, negative, or zero?  pos;                        *
+ * (%o8) ((-1)^n+1)/2                                                        *
+ *                                                                           *
+ * (%i9) simplify_sum(sum(binom(n,k)/(k+1),k,0,n));                          *
+ * (%o9) (2*2^n-1)/(n+1)                                                     *
+ *                                                                           *
+ * More examples with load("simplify_sum_test");                             *
+ *                                                                           *
+ *****************************************************************************/
+
+load("zeilberger")$
+load("solve_rec/solve_rec")$
+load("simplifying.lisp")$
+load("opsubst")$
+
+eval_when(batch,
+          ttyoff : true,
+          nolabels : true)$
+
+put('simplify_sum, 1.0, 'version)$
+
+define_variable(zeilberger_check, true, boolean)$
+define_variable(sum_min, 0, any)$
+define_variable(use_simpsum, true, boolean)$
+define_variable(use_harmonic, true, boolean)$
+define_variable(use_integral, true, boolean)$
+define_variable(use_gosper, true, boolean)$
+define_variable(use_ratfun, true, boolean)$
+define_variable(use_zeilberger, true, boolean)$
+define_variable(use_hypergeometric, true, boolean)$
+define_variable(use_telescoping, true, boolean)$
+
+define_variable(simplify_sum_depth, 0, fixnum)$
+define_variable(simplify_sum_max_depth, 3, fixnum)$
+
+/*******************
+ *
+ * Debugging.
+ *
+ *******************/
+
+define_variable(verbose_level, 0, fixnum)$
+
+ss_print_message(level, [mess]) :=
+  if verbose_level>=level then (
+    apply(print, mess))$
+
+/*******************
+ *
+ * simplify_sum(expr) : tries to simplify all sums in expr.
+ *
+ *******************/
+
+simplify_sum(expr) :=
+  /* Check if we have a sum - if not then simplify all arguments.       */
+  if mapatom(expr) then expr
+  else if part(expr, 0)#nounify(sum) then map(simplify_sum, expr)
+
+
+  /* Check for sum(expr, var, min, inf) */
+  else if (part(expr, 3)=-inf or part(expr, 3)=minf) and part(expr, 4)=inf then block(
+    [summand, var_, lo, hi],
+    [summand, var_, lo, hi]: args(expr),
+    simplify_sum(apply('sum, [summand, var_, 0, inf])) +
+    simplify_sum(apply('sum, [subst(var_=-var_, summand), var_, 1, inf])))
+
+  /* Check for sum(expr, var, minf, hi) */
+  else if part(expr, 3)=-inf or part(expr, 3)=minf then (
+    [summand, var_, lo, hi],
+    simplify_sum(apply('sum, [subst(var_=-var_, summand), var_, -hi, inf])))
+
+  /* Trigonometric sums */
+  else if catch(
+    scanmap(
+      lambda([u], if not atom(u) and member(part(u,0), [sin, cos, sinh, cosh]) then throw(true)),
+      expr,
+      bottomup))=true then block(
+    [sm1 : simplify_sum(split_sum(expand(exponentialize(expr))))],
+    if freeof_sum(sm1) then trigsimp(rectform(sm1))
+    else expr)
+
+  /* Sums with Fibonacci numbers */
+  else if catch(
+    scanmap(
+      lambda([u], if not atom(u) and part(u,0)=fib then throw(true)),
+      expr,
+      bottomup))=true then block(
+    [sm1: simplify_sum(split_sum(expand(fibtophi(expr))))],
+    if freeof_sum(sm1) then block(
+      [algebraic:true],
+      ratsimp(sm1))
+    else expr)
+
+  /* Check if summand is a logarighm */
+  else if not(atom(part(expr, 1))) and part(expr, 1, 0)=log and part(expr, 2)#minf and part(expr, 3)#inf then
+    log(simplify_product(apply(product, append([exp(part(expr, 1))], rest(args(expr))))))
+
+  /* Main summation code starts here */
+  else block(
+    [simpsum:false,
+     summand : ratsimp(part(expr, 1)),
+     var : part(expr, 2),
+     lo : part(expr, 3),
+     hi : part(expr, 4),
+     sm1 : expr,
+     linsolvewarn:false,
+     simplify_sum_depth:simplify_sum_depth+1,
+     ss_new_context: concat('ss_context, simplify_sum_depth)],
+
+    /*** Prevent possible infinite recursion. ***************************/
+    if simplify_sum_depth>simplify_sum_max_depth then return(expr),
+
+    /*** Simplify the summand *******************************************/
+
+    /* make sure we dont have contexts from previous runs */
+    if member(ss_new_context, contexts) then
+      killcontext(ss_new_context),
+ 
+    apply(supcontext, [ss_new_context]),
+    if lo#minf and lo#-inf then assume(var>=lo),
+    if hi#inf then assume(var<=hi),
+    summand : simplify_sum(summand),
+    killcontext(ss_new_context),
+    expr : intosum(apply(sum, [summand, var, lo, hi])),
+    
+    /*** Default maxima simplification. *********************************/
+    if use_simpsum=true then (
+      ss_print_message(1, "Trying with simpsum=true ..."),
+      sm1 : ev(apply(sum, [summand, var, lo, hi]), simpsum = true),
+      ss_print_message(1, "sum with simpsum=true returns:", sm1)),
+
+    /*** Sums with harmonic_number(n) by parts. *************************/
+    if use_harmonic=true and not freeof_sum(sm1) and hi#inf then block(
+      [a, b, harmonic_number_args: get_harmonic_number_args(summand), harmonic_part],
+      if length(harmonic_number_args)>0 then (
+        harmonic_part : apply(gen_harmonic_number, first(harmonic_number_args)),
+        [a, b]:bothcoef(summand, harmonic_part),
+        ss_print_message(1, "Trying with sum_by_parts"),
+        ss_print_message(2, "harmonic_number by parts"),
+        ss_print_message(2, "Coefficients", a, b),
+        if a#0 then
+          sm1: simplify_sum(sum_by_parts(summand-b, a, var, lo, hi)) +
+               simplify_sum(apply('sum, [b, var, lo, hi]))),
+        ss_print_message(1, "sum_by_parts returns", sm1)),
+
+    /*** Try with integral representation *******************************/
+    if use_integral=true and not freeof_sum(sm1) then (
+      ss_print_message(1, "Trying with integral representation."),
+      sm1 : sum_by_integral(summand, var, lo, hi),
+      ss_print(1, "Integral representation returns", sm1)),
+ 
+
+    /*** Now let's try the Gosper algorithm *****************************/
+    if errcatch(
+      if use_gosper and not(atom(sm1)) and not freeof_sum(sm1) then block(
+        [hi1 : ?gensym(), lo1 : ?gensym()],
+        ss_print_message(1, "Trying with Gosper ..."),
+        sm1 : block([ttyoff:true], nusum(summand, var, lo1, hi1)),
+        if freeof_sum(sm1) then (
+          ss_print_message(1, "Gosper returns:", sm1),
+          if lo=minf or lo=-inf then
+            sm1 : limit(sm1, lo1, lo)
+          else
+            sm1 : subst(lo1=lo, sm1),
+          if hi=inf then
+            sm1 : limit(sm1, hi1, hi)
+          else
+            sm1 : subst(hi1=hi, sm1),
+          if not freeof_limit(sm1) or not freeof('und, sm1) then sm1: expr)
+        else sm1 : expr)) = [] then sm1 : expr,
+
+
+    /*** Try the extended Gosper algorithm ******************************/
+    if errcatch(
+      if use_gosper and not(atom(sm1)) and not freeof_sum(sm1) then block(
+        [hi1 : ?gensym(), lo1 : ?gensym()],
+        ss_print_message(1, "Trying with extended Gosper ..."),
+        sm1 : block([ttyoff:true], extended_nusum(summand, var, lo1, hi1)),
+        if freeof_sum(sm1) then (
+          ss_print_message(1, "Extended Gosper returns:", sm1),
+          if lo=minf or lo=-inf then
+            sm1 : limit(sm1, lo1, lo)
+          else
+            sm1 : subst(lo1=lo, sm1),
+          if hi=inf then
+            sm1 : limit(sm1, hi1, hi)
+          else
+            sm1 : subst(hi1=hi, sm1),
+          if not freeof_limit(sm1) then sm1 : expr)
+        else sm1 : expr)) = [] then sm1 : expr,
+
+    /*** Try converting the sum to finite sum of psi functions **********/
+    if use_ratfun and not(atom(sm1)) and not( freeof_sum(sm1) ) and ?ratp(summand, var)
+    then block(
+      [ratfun, expr1: expr],
+      ss_print_message(1, "Trying ratfun -> psi ..."),
+      ratfun : part(expr1, 1),
+      if hi=inf and hipow(num(ratfun), var) > hipow(denom(ratfun), var)-2 then
+        error("Sum is divergent"),
+      polypart : first(divide(num(ratfun), denom(ratfun), var)),
+      expr1 : intosum(substpart(ratsimp(ratfun - polypart), expr1, 1)),
+      ss_print_message(3, "Polynomial part", polypart),
+      ss_print_message(3, "Without polynomial part", expr1),
+      /* polynomial part */
+      sm1 : simplify_sum(apply(sum, [polypart, var, lo, hi])),
+      ss_print_message(4, "Polynomial part contributes", sm1),
+      /* fractional part */
+      ratfun : part(expr1, 1),
+      sm1 : sm1 + ratfun_to_psi(ratfun, var, lo, hi)),
+    
+    /*** check for sum((-1)^n*ratfun, n, lo, inf); ****************************/
+    if use_ratfun and not(atom(sm1)) and not( freeof_sum(sm1) ) and
+      ?ratp(ratsimp(summand/(-1)^var), var) and hi = inf
+    then block(
+      [ratfun, new_var : ?gensym(), expr1],
+      ss_print_message(1, "Trying ratfun -> psi ..."),
+      expr1 : intosum(changevar(expr, new_var=var-lo+1, new_var, var)),
+      ratfun : part(expr1, 1)/(-1)^new_var,
+      if hipow(num(ratfun), new_var) <= hipow(denom(ratfun), new_var)-1 then (
+        sm1 : ratfun_to_psi(subst(new_var=2*new_var, ratfun), new_var, 1, inf) -
+              ratfun_to_psi(subst(new_var=2*new_var-1, ratfun), new_var, 1, inf))
+      else sm1 : und),
+  
+    apply(supcontext, [ss_new_context]),
+
+    /*** Zeilberger algorithm ************************************************/
+    if errcatch(
+      if use_zeilberger and not(atom(sm1)) and not freeof_sum(sm1) then block(
+        [summand:summand, var:var, lo:lo, hi:hi, nv: gensym(), supp],
+        ss_print_message(1, "Trying with Zeilberger ..."),
+        assume(var>lo), assume(var<hi),
+        support : ss_support(summand, var),
+        if atom(support[1]) and support[1]#minf then
+          [summand, var, lo, hi]: args(intosum(
+              changevar(apply('sum, [summand, var, lo, hi]), nv=var-support[1]+sum_min, nv, var)
+              ))
+        else if lo#sum_min then
+          [summand, var, lo, hi]: args(intosum(
+              changevar(apply('sum, [summand, var, lo, hi]), nv=var-lo+sum_min, nv, var)
+              )),
+        sm1 : ss_zeilb(summand, var, lo, hi),
+        ss_print_message(1, "Zeilberger method returns:", sm1)
+      )
+    ) = [] then sm1 : expr,
+
+    killcontext(ss_new_context),
+
+    if sm1=false then
+      sm1 : expr,
+
+    /*** Check if upper bound can be inf.  **********************************
+    block(
+      [expr1: factor(minfactorial(factcomb(makefact(summand)))),
+       support],
+      support: ss_support(expr1, var),
+      if support[2]<=hi then hi_hyper: inf),
+    **************************************************************************/
+      
+    /*** Convert to hypergeometrical functions. ******************************/
+    if not(atom(sm1)) and not( freeof_sum(sm1) ) and
+       use_hypergeometric=true and hi=inf and lo#-inf and lo#minf then (
+         ss_print_message(1, "Converting to hypergeometrical sum ..."),
+         sm1 : to_hypergeometric(summand, var, lo, hi),
+         ss_print_message(1, "hgfred method returns:", sm1)),
+
+
+    if sm1=false then
+      sm1 : expr,
+
+    if not(atom(sm1)) and not( freeof_sum(sm1) ) and use_telescoping=true then (
+      ss_primt_message(1, "Using telescoping ..."),
+      sm1: telescoping_sum(summand, var, lo, hi),
+      ss_primt_semmace(1, "telescoping method returns:", sm1)),
+
+    if sm1=false then
+      sm1 : expr,
+
+    sm1)$
+
+/*******************
+ *
+ * Check if we still have some sums in expr.
+ *
+ *******************/
+
+freeof_sum(expr) :=
+  if atom(expr) then true
+  else if part(expr, 0)=nounify(sum) then false
+  else if expr=[] then true
+  else xreduce("and", map(freeof_sum, args(expr)))$
+
+freeof_integrate(expr) :=
+  if atom(expr) then true
+  else if part(expr, 0)=nounify(integrate) then false
+  else if expr=[] then true
+  else xreduce("and", map(freeof_integrate, args(expr)))$
+
+freeof_limit(expr) :=
+  if atom(expr) then true
+  else if part(expr, 0)=nounify(limit) then false
+  else if expr=[] then true
+  else xreduce("and", map(freeof_limit, args(expr)))$
+
+/*******************
+ *
+ * The extended Gosper algorithm
+ *
+ *******************/
+
+ss_linearp(expr, var) := block(
+  [a,b],
+  [a,b]: bothcoeff(expand(expr), var),
+  if freeof(var, a) and freeof(var, b) then [a,b]
+  else [])$
+
+find_coeffs(expr, var) := block([coeffs],
+  coeffs: ss_linearp(expr, var),
+  if coeffs=[] then (
+    if member(part(expr, 0), ["+", "-", "*", "/", gamma, "!", binomial])
+      then apply(append, map(lambda([e], find_coeffs(e, var)), args(expr)))
+    else if part(expr, 0)="^" and freeof(var, part(expr, 2))
+      then find_coeffs(part(expr, 1), var)
+    else if part(expr, 0)="^" and freeof(var, part(expr, 1))
+      then find_coeffs(part(expr, 2), var)
+    else
+      error())
+  else
+  [coeffs[1]])$
+
+find_mfold(expr, var) := block(
+  [coeffs: find_coeffs(expr, var)],
+  coeffs: map(denom, coeffs),
+  xreduce(lambda([a,b], a*b/gcd(a,b)), coeffs))$
+
+extended_nusum(expr, var, lo, hi) := block(
+  [%m%: find_mfold(expr, var), exprm, tk, sk],
+  exprm: subst(var=%m%*var, expr),
+  tk: nusum(exprm, var, 1, var),
+  if not freeof_sum(tk) then error(),
+  sk: subst(var=var/%m%, tk),
+  apply('sum, [sk, var, hi-%m%+1, hi]) - apply('sum, [sk, var, lo-%m%, lo-1]))$
+
+/*******************
+ *
+ * This simplifies the sum using Zeilberger
+ *
+ *******************/
+
+ss_zeilb(expr, %k%, lo, hi, [in_zr]) := block(
+  [vars : delete(%k%, listofvars(expr)), %n%, eq, sm, zb, deg,
+   cond, eq_rhs, cert, %i%, expr1, ihom, support, sum_min:sum_min,
+   upper_bound_implicit : false, lower_bound_implicit : false,
+   solve_rec_warn : false, warnings:false, Gosper_in_Zeilberger:false,
+   cont],
+
+  if lo=-inf then lo:minf,
+  
+  /* Convert binomials to factorials. */
+  expr1 : factor(minfactorial(factcomb(makefact(expr)))),
+  ss_print_message(2, "Summand:", expr),
+  ss_print_message(2, "Changed to:", expr1),
+
+  /* We need expr to be hypergeometric in at least two variables. */
+  /* We prefer the second variable to appear in bounds. */
+  if length(in_zr)=0 then (
+    if length(vars)<1 then (
+      ss_print(3, "Not enough variables"),
+      return(false)),
+    if length(listofvars(hi))>0 then %n% : first(listofvars(hi))
+    else if length(listofvars(lo))>0 then %n% : first(listofvars(lo))
+    else %n% : vars[1])
+  else
+    %n% : in_zr[1],
+
+  /*  Find support. */
+  assume(%k%>lo), assume(%k%<hi),
+  support : ss_support(expr1, %k%),
+  support : [if numberp(support[1]) then ceiling(support[1]) else support[1],
+             if numberp(support[2]) then floor(support[2])   else support[2]],
+
+  if support[2]<lo or support[1]>hi then return(0),
+
+  /* Check if bounds are implicit. */
+  if ss_max(lo, support[1])=support[1] then lower_bound_implicit : true,
+  if ss_min(hi, support[2])=support[2] then upper_bound_implicit : true,
+
+  if lo=minf then lo : support[1],
+  if hi=inf then hi : support[2],
+  
+  ss_print_message(2, "Found support:", support),
+  if numberp(support[1]) then sum_min:max(support[1], lo),
+
+  /* We don't handle sums over infinite support yet! */
+  if (support[1]=minf and lower_bound_implicit) or
+     (support[2]=inf and upper_bound_implicit) then (
+    ss_print_message(3, "Support not finite!"),
+    return(false)),
+
+  /* Find the recurrence for the sum. */
+  zb : Zeilberger(expr1, %k%, %n%),
+  ss_print_message(3, "Zeilberger returns:", zb),
+  if length(zb)=0 then error(),
+  if not(listp(zb[1])) then error(),
+  deg : length(part(zb, 1, 2)),
+  cert : part(zb, 1, 1),
+  eq : part(zb, 1, 2) . makelist(sm[%n%+%i%], %i%, 0, deg-1),
+
+  /* Find the initial conditions for recurrence. */
+  cont: first(content(eq)),
+  while subst(%n%=sum_min, cont)=0 do sum_min: sum_min+1,
+
+  if subst(%n%=max(support[1], lo), cont)#0 or
+     errcatch(
+       cond : ss_zeilb_init(expr, %n%,
+         max(support[1], lo), min(support[2], hi), max(support[1], lo), deg))=[] or
+     not freeof_sum(cond) then (
+       cond : ss_zeilb_init(expr, %n%, lo, hi, sum_min, deg))
+  else (
+    sum_min: max(support[1], lo)),
+
+  /* Initial conditions should not contain sums. */
+  if not freeof_sum(cond) then (
+    ss_print_message(3, "Wrong initial conditions:", cond),
+    return(false)),
+
+  /* Find the right hand side of the sum recurrence. */
+  ihom : minfactorial(makefact(cert*expr)),
+  eq_rhs : 0,
+  
+  if not(upper_bound_implicit) then (
+    for %i%:0 thru deg-1 do (
+      eq_rhs : eq_rhs + part(zb, 1, 2, %i%+1)*
+                  apply(sum, [subst(%n%=%n%+%i%, expr), %k%, hi+1, subst(%n%=%n%+%i%, hi)])),
+    eq_rhs : eq_rhs + subst(%k%=hi+1, ihom)),
+
+  if not(lower_bound_implicit) then (
+    for %i%:0 thru deg-1 do (
+      eq_rhs : eq_rhs + part(zb, 1, 2, %i%+1)*
+                  apply(sum, [subst(%n%=%n%+%i%, expr), %k%, subst(%n%=%n%+%i%, lo), lo-1])),
+    eq_rhs : eq_rhs - subst(%k%=lo, ihom)),
+
+  eq_rhs : factor(minfactorial(factcomb(makefact(eq_rhs)))),
+
+  /* Right hand side must be free of sums. */
+  if not freeof_sum(eq_rhs) then (
+    ss_print_message(3, "Recurrence contains sums!", eq_rhs),
+    return(false)),
+
+  eq : eq = eq_rhs,
+  ss_print_message(2, "Degree of recurrence:", deg-1),
+  ss_print_message(2, "Zeilberger recurrence:", eq),
+  ss_print_message(2, "Initial conditions:", cond),
+
+  if length(in_zr)>0 then return(eq),
+
+  /* Solve the recurrence. */
+  eq : apply(solve_rec, append([eq, sm[%n%]], cond)),
+  ss_print_message(2, "Solving recurrence returns:", eq),
+  if eq=false then return(false),
+  if not freeof_sum(eq) then return(false),
+
+  eq : ratsimp(minfactorial(makefact(rhs(eq)))),
+  ss_print_message(4, "Simplified solution:", eq),
+
+  /* Check the solution. */
+  if check_sum(expr, %k%, %n%, lo, hi, deg, eq) then eq
+  else false)$
+
+ss_zeilb_init(expr, %n%, lo, hi, sum_min, deg) := block(
+  [cond],
+  cond : makelist(
+    sm[%i%] =
+    subst(%n%=%i%,
+      apply('sum, [
+        minfactorial(expr),
+        %k%, lo, hi
+      ]
+      )
+    ),
+    %i%, sum_min, sum_min + deg - 2),
+  cond : factor(minfactorial(simplify_sum(cond))),
+  cond)$
+
+/*******************
+ *
+ * This returns the recurrence for the sum.
+ *
+ *******************/
+
+summand_to_rec(expr, k, n) := block(
+  [zr, linsolvewarn:false, lo:minf, hi:inf],
+  
+  if listp(k) then (
+    lo : k[2],
+    hi : k[3],
+    k : k[1]),
+
+  supcontext(ss_context),
+
+  if errcatch(
+    zr : ss_zeilb(expr, k, lo, hi, n)
+  ) = [] then zr : 'failed,
+
+  killcontext('ss_context),
+
+  zr)$
+
+/*******************
+ *
+ * Check the result - we may get something wrong!
+ *
+ *******************/
+
+check_sum(expr, %k%, %n%, lo, hi, deg, sm) :=
+  if not zeilberger_check then true
+  else catch(
+    block(
+      [%i%, tmp_sum, real_sum, simpsum:true, sum_min:sum_min+deg],
+      for %i%:sum_min thru deg+sum_min do(
+        
+        real_sum : minfactorial(factcomb(makefact(
+              simplify_sum(subst(%n%=%i%, apply(sum, [expr, %k%, lo , hi])))
+        ))),
+        
+        tmp_sum  : minfactorial(factcomb(makefact(subst(%n%=%i%, sm)))),
+        dif : factor(rectform(real_sum - tmp_sum)),
+        if not freeof_sum(real_sum) then (
+         if dif#0 then (
+          ss_print_message(2, "Sum check failed with: ", 'i=%i%, 'tmp_sum=tmp_sum, 'dif=dif),
+          throw(false))
+        else
+          print("Warning: sum check could not be completed!")))),
+    true)$
+
+/*******************
+ *
+ * This part checks for the support of expr in %k%
+ *
+ *******************/
+
+ss_support(expr, %k%) := block(
+  if freeof(%k%, expr) or expr=%k% then [minf, inf]
+  else if member(part(expr, 0), ["+", "-"]) then
+    lreduce(ss_union, map(lambda([u], ss_support(u,%k%)), args(expr)))
+  else if part(expr, 0)="*" then
+    lreduce(ss_intersection, map(lambda([u], ss_support(u,%k%)), args(expr)))
+  else if part(expr, 0)="/" then
+    lreduce(ss_intersection, map(lambda([u], ss_support(factcomb(u),%k%)), args(expr)))
+  else if member(part(expr, 0), ["^"]) then ss_support(part(expr, 1), %k%)
+  else if part(expr, 0)=binomial then ss_support_binomial(expr, %k%)
+  else if part(expr, 0)="!" then ss_support_factorial(expr, %k%)
+  else [minf, inf])$
+
+/* we assume here that k!=0 if k<0 */
+ss_support_factorial(expr, %k%) :=
+  solve_lin_ineq(part(expr,1)>0, %k%)$
+
+ss_support_binomial(expr, %k%) := block(
+  [s1, s2],
+  s1 : solve_lin_ineq(part(expr, 2)>0, %k%),
+  s2 : solve_lin_ineq(part(expr, 2)<part(expr, 1), %k%),
+  ss_intersection(s1, s2))$
+
+/*******************
+ *
+ * solves inequality which is linear in k
+ *
+ *******************/
+
+solve_lin_ineq(eq, k) := block(
+  [eq1, bc, a, b],
+
+  if op(eq)=">" then eq1 : lhs(eq) - rhs(eq)
+  else eq1 : rhs(eq) - lhs(eq),
+
+  bc : bothcoef(expand(eq1), k), a:bc[1], b:bc[2],
+
+  if a=0 then [minf, inf]
+  else if not freeof(k, b) then [minf, inf]
+  else if not numberp(a) then [minf, inf]
+  else if a>0 then [-b/a, inf]
+  else [minf, -b/a])$
+
+ss_union(l1, l2) := [ss_min(first(l1), first(l2)), ss_max(second(l1), second(l2))]$
+ss_intersection(l1, l2) := [ss_max(first(l1), first(l2)), ss_min(second(l1), second(l2))]$
+
+ss_max(e1, e2) := block(
+  [pnz : asksign(e1-e2)],
+  if pnz='pos or pnz='zero then e1
+  else e2)$
+
+ss_min(e1, e2) := block(
+  [pnz : asksign(e1-e2)],
+  if pnz='neg or pnz='zero then e1
+  else e2)$
+
+/********************
+ *
+ * splits sum
+ *
+ ********************/
+
+expand_sum(expr, k%%, lo%%, hi%%) :=
+  if not(atom(expr)) and part(expr, 0)="+" then
+    map(lambda([u], apply(sum, [u, k%%, lo%%, hi%%])), expr)
+  else
+    apply(sum, [expr, k%%, lo%%, hi%%]);
+
+split_sum(expr) :=
+  block([sm%%: opsubst(nounify(sum)=expand_sum, expr)],
+    ev(sm%%, expand_sum))$
+
+/*******************
+ *
+ * converts sum(ratfun, var, 1, inf) to psi functions when denom(ratfun)
+ * can be completely factored with gfactor.
+ *
+ *******************/
+
+ratfun_to_psi(ratfun, var, lo, hi) := block(
+  [pf, sum: 0, denom_f : factor_with_solve(denom(ratfun), var)],
+
+  pf : partfrac(num(ratfun)/denom_f, var),
+
+  if inpart(pf, 0)="+" then pf: args(pf)
+  else pf: [pf],
+
+  ss_print_message(2, "Partial fractions", pf),
+
+  for prt in pf do block(
+    [term: numfactor(prt), exponent, a, b],
+
+    ss_print_message(3, "Working on term", prt),
+
+    prt : prt/term,
+    term : term*num(prt),
+    prt : denom(prt),
+
+    if not(atom(prt)) and part(prt,0)="^" then (
+      exponent: part(prt, 2),
+      prt: part(prt, 1))
+    else
+      exponent: 1,
+
+    ss_print_message(3, "Linear part", prt),
+
+    a: ratsimp(bothcoef(expand(prt), var)),
+    b: a[2], a: a[1],
+
+    if not( freeof(var, a) and freeof(var, b) ) then error(),
+    if hi=inf then (
+      if exponent#1 then
+        term: term*(zeta(exponent) -
+                    gen_harmonic_number(exponent, subst(var=lo-1, prt/a)))/a^exponent
+      else
+        term: -term*gen_harmonic_number(exponent, subst(var=lo-1, prt/a))/a^exponent
+    )
+    else
+      term: term*(gen_harmonic_number(exponent, subst(var=hi, prt/a)) -
+                  gen_harmonic_number(exponent, subst(var=lo-1, prt/a)))/a^exponent,
+
+    ss_print_message(3, "Corresponding term in sum", term),
+
+    sum: sum+term),
+
+  sum)$
+
+factor_with_solve(expr, n) := block(
+  [sol, fac, expr1],
+  sol : solve(expr, n),
+  expr : ratexpand(expr),
+  fac : ratcoef(expr, n, hipow(expr, n)),
+  for i:1 thru length(sol) do (
+    if not(freeof(n, rhs(sol[i]))) then error(),
+    fac : fac * (n - rhs(sol[i]))^multiplicities[i]),
+  fac)$
+
+/*******************
+ *
+ * Reduce using hgfred
+ *
+ *******************/
+
+to_hypergeometric(expr, var, lo, hi) := block(
+  [quo, upper, lower, a:[], b:[], x, c, warnings:false],
+
+  for i:1 thru 100 while subst(var=lo, expr)=0 do lo : lo+1,
+  expr:subst(var=var+lo, expr),
+
+  quo : ratsimp(shiftQuo(factor(makefact(expr)*var!), var)),
+  if not(?ratp(quo, var)) then return(false),
+  
+  ss_print_message(2, "Shift quotient", quo),
+  
+  upper : -map(rhs, solve(num(quo), var)),
+  if not(every(lambda([u], freeof(var, u)), upper)) then return(false),
+  for i:1 thru length(upper) do (
+    for j:1 thru multiplicities[i] do
+      a : cons(upper[i], a)),
+  ss_print_message(2, "a=", a),
+  
+  lower : -map(rhs, solve(denom(quo), var)),
+  if not(every(lambda([u], freeof(var, u)), lower)) then return(false),
+  for i:1 thru length(lower) do (
+    for j:1 thru multiplicities[i] do
+      b : cons(lower[i], b)),
+
+  ni_coeffs: sublist(append(upper, lower), lambda([ni], is(integerp(ni) and ni<0))),
+  if ni_coeffs#[] then block(
+    [use_simpsum:false, use_harmonic:false, use_integral:false,
+     use_ratfun:false, use_gosper:false, use_zeilberger:false,
+     use_telescoping:false, min_ni: lmin(ni_coeffs)],
+    apply('sum, [expr, var, lo, -min_ni]) + simplify_sum(apply(sum, [expr, var, -min_ni, hi])))
+  else to_hypergeometric1(expr, var, lo, hi))$
+
+
+to_hypergeometric1(expr, var, lo, hi) := block(
+  [quo, upper, lower, a:[], b:[], x, c, warnings:false],
+
+  for i:1 thru 100 while subst(var=lo, expr)=0 do lo : lo+1,
+/*  expr:subst(var=var+lo, expr),*/
+  
+  quo : ratsimp(shiftQuo(factor(makefact(expr)*var!), var)),
+  if not(?ratp(quo, var)) then return(false),
+
+  ss_print_message(2, "Shift quotient", quo),
+  quolim: limit(quo/(var+1), var, inf),
+  if freeof_limit(quolim) and abs(quolim)>1 then error("Sum is divergent!"),
+ 
+  upper : -map(rhs, solve(num(quo), var)),
+  if not(every(lambda([u], freeof(var, u)), upper)) then return(false),
+  for i:1 thru length(upper) do (
+    for j:1 thru multiplicities[i] do
+      a : cons(upper[i], a)),
+  ss_print_message(2, "a=", a),
+  
+  lower : -map(rhs, solve(denom(quo), var)),
+  if not(every(lambda([u], freeof(var, u)), lower)) then return(false),
+  for i:1 thru length(lower) do (
+    for j:1 thru multiplicities[i] do
+      b : cons(lower[i], b)),
+  ss_print_message(2, "b=", b),
+  
+  x : ratsimp(quo / apply("*", map(lambda([u], var+u), a)) *
+                    apply("*", map(lambda([u], var+u), b))),
+  ss_print_message(2, "x=", x),
+  
+  c : subst(var=0, expr),
+  ss_print_message(2, "c=", c),
+  if c=0 then return(false),
+
+  ratsimp(c*hgfred(a,b,x)))$
+
+/*******************
+ *
+ * harmonic_number and gen_harmonic_number
+ *
+ * harmonic_number(n) = sum(1/i, i, 1, n)
+ * gen_harmonic_number(n,k) = sum(1/i^k, i, 1, n)
+ *
+ *******************/
+
+define_variable(harmonic_number_expand, false, boolean)$
+
+simp_harmonic_number(x__):=
+  if x__=0 then 0
+  else if integerp(x__) and x__<1 then error("Zero to negative power computed.") 
+  else if integerp(x__) then num_harmonic_number(1, x__)
+  else if numberp(x__) and x__<-1 then block(
+    [a:-floor(x__), k%],
+    simp_harmonic_number(x__+a)-apply('sum, [1/k%, k%, x__, x__+a-1]))
+  else if numberp(x__) or imagpart(x__)#0 then psi[0](x__+1) + %gamma
+  else block(
+    [a, b, var, k%],
+    if harmonic_number_expand then (
+      [a,b]:split_integer_part(x__),
+      if harmonic_number_expand and b>0 then
+        simpfuncall('harmonic_number,a) + apply('sum, [1/k%, k%, a+1, a+b])
+      else simpfuncall('harmonic_number, x__))
+    else simpfuncall('harmonic_number, x__))$
+
+num_harmonic_number(l, h) :=
+    if h<l then 0
+    else if h=l then 1/l
+    else if h-l<50 then sum(1/i, i, l, h)
+    else block(
+        [mid: floor((l+h)/2)],
+        num_harmonic_number(l, mid) +
+        num_harmonic_number(mid+1, h))$
+
+simplifying('harmonic_number,'simp_harmonic_number)$
+
+
+simp_gen_harmonic_number(exp__, x__):=
+  if x__=0 then 0
+  else if integerp(x__) and x__<1 then error("Zero to negative power computed.")
+  else if exp__=1 then harmonic_number(x__)
+  else if x__>=inf then zeta(exp__)
+  else if integerp(x__) and integerp(exp__) then num_gen_harmonic_number(exp__, 1, x__)
+  else if integerp(x__) then sum(1/i^exp__, i, 1, x__)
+  else if (numberp(x__) and numberp(exp__)) or imagpart(x__)#0 then
+    (-1)^(exp__+1)/(exp__-1)!*(psi[exp__-1](x__+1)-psi[exp__-1](1))
+  else block(
+    [a, b, var, k%],
+    if harmonic_number_expand then (
+      [a,b]:split_integer_part(x__),
+      if harmonic_number_expand and b>0 then
+        simpfuncall('gen_harmonic_number,exp__,a) + apply('sum, [1/k%^exp__, k%, a+1, a+b])
+      else simpfuncall('gen_harmonic_number, exp__, x__))
+    else simpfuncall('gen_harmonic_number, exp__, x__))$
+
+num_gen_harmonic_number(a, l, h) :=
+    if h<l then 0
+    else if h=l then 1/l
+    else if h-l<50 then sum(1/i^a, i, l, h)
+    else block(
+        [mid: floor((l+h)/2)],
+        num_gen_harmonic_number(a, l, mid) +
+        num_gen_harmonic_number(a, mid+1, h))$
+
+simplifying('gen_harmonic_number,'simp_gen_harmonic_number)$
+
+get_harmonic_number_args(expr) :=
+  if atom(expr) then {}
+  else if part(expr, 0)=harmonic_number then {[1, part(expr, 1)]}
+  else if part(expr, 0)=gen_harmonic_number then {[part(expr, 1), part(expr, 2)]}
+  else xreduce(union, map(get_harmonic_number_args, args(expr)))$
+
+split_integer_part(expr) :=
+  if integerp(expr) then [0,expr]
+  else if atom(expr) then [expr,0]
+  else if part(expr,0)="+" then block(
+    [a:0,b:0],
+    for arg in args(expr) do (
+      if integerp(arg) then b:b+arg
+      else a:a+arg),
+    [a,b])
+  else [expr, 0]$
+
+harmonic_to_psi(expr) :=
+  opsubst([
+    harmonic_number=lambda([x__], psi[0](x__+1)+%gamma),
+    gen_harmonic_number=lambda([exp__, x__],
+      (-1)^(exp__+1)/(exp__-1)!*(psi[exp__-1](x__+1)-psi[exp__-1](1)))],
+    expr)$
+
+/*******************
+ *
+ * sum_by_parts
+ *
+ *******************/
+
+sum_by_parts(fkgk, gk, k__, m__, n__) := block(
+    [fk:fkgk/gk, j__:?gensym(), gj, oth, harmonic_number_expand:true],
+    gj: subst(k__=j__, gk),
+    oth: (subst(k__=k__+1, fk) - fk) * apply('sum, [gj, j__, m__, k__]),
+    subst(k__=n__+1, fk) * apply('sum, [gj, j__, m__, n__]) - apply('sum, [oth, k__, m__, n__]))$
+
+
+/*******************
+ *
+ * sum_by_integral:
+ * - currently only handles harmonic_number, but could be extended to other functions.
+ *
+ *******************/
+
+define_variable(sum_by_integral_transforms, [], list)$
+
+sum_by_integral(expr, var, lo, hi) :=
+  /* Integral representation of harmonic_number */
+  if catch(
+    scanmap(
+      lambda([u], if not atom(u) and member(part(u,0), [harmonic_number]) then throw(true)),
+      expr,
+      bottomup))=true then
+  block(
+    [expr1, x_:?gensym()],
+    
+    apply(supcontext, [concat('sum_by_integral, simplify_sum_depth)]),
+    assume(x_>0, x_<1, var>=lo, var<=hi),
+
+    expr1 : opsubst(harmonic_number=lambda([u], (1-x_^u)/(1-x_)), expr),
+    if errcatch(
+      expr1 : simplify_sum(split_sum(expand(apply('sum, [expr1, var, lo, hi]))))
+      ) = [] then expr1 : false,
+
+    killcontext(concat('sum_by_integral, simplify_sum_depth)),
+
+    for tr in sum_by_integral_transforms do (
+      expr1 : apply(tr, [expr1])),
+    
+    if expr1 # false then expr1: integrate(expr1, x_, 0, 1)
+    else expr1 : apply('sum, [expr, var, lo, hi]),
+    
+    if freeof_integrate(expr1) and freeof_limit(expr1) then expr1
+    else apply('sum, [expr, var, lo, hi]))
+
+  else apply('sum, [expr, var, lo, hi])$
+
+/*****
+ * recognize sums of the form sum(f(n) - f(n+1), n, a, b) where f(n)=f1(n)/f2(n) for
+ * simple functions f1 and f2.
+ ****/
+
+find_f2(expr) :=
+  if mapatom(expr) then (if subvarp(expr) then [expr] else [])
+  else if member(part(expr, 0), ["+", "-", "/", "*"]) then
+    apply(append, map(find_f2, args(expr)))
+  else [expr]$
+
+find_f1(expr, f2, var) := block(
+  [f21: ratsimp(subst(var=var+1, f2)), f1, f11, algebraic:true],
+  expr: ratsimp(expr*f2*f21),
+  f1: coeff(ratsimp(expr), f21),
+  f11: subst(var=var+1, f1),
+  expr: radcan(expr - f21*f1 + f2*f11),
+  if expr=0 then f1
+  else false)$
+
+find_quotient(expr, var) := block(
+  [f2_list, f1, quotient: false],
+  f2_list: find_f2(expr),
+  for f2 in f2_list while quotient=false do (
+    f1: find_f1(expr, f2, var),
+    if f1#false then
+      quotient: f1/f2),
+  quotient)$
+
+telescoping_sum(expr, var, lo, hi) := block(
+  [quotient: find_quotient(expr, var)],
+  if quotient#false then
+    (if lo=minf then limit(quotient, var, lo) else subst(var=lo, quotient)) -
+    (if hi=inf then limit(quotient, var, hi) else subst(var=hi+1, quotient))
+  else false)$
+
+eval_when(batch,
+          ttyoff : false,
+          nolabels : false)$

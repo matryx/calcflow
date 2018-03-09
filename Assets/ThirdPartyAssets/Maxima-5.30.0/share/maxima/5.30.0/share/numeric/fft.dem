@@ -1,0 +1,46 @@
+if ?plist(fft)=false then loadfile(fft,fasl,dsk,share)$
+if ?plist(fillarray)=false then loadfile(array,fasl,dsk,share)$
+/* set up arrays */	array([g,h,xa],float,31)$
+			(fillarray(g,[0.0]),fillarray(h,[0.0]),
+			for i from 0 thru 15 do g[i]:1.,
+			for i from 0 thru 31 do xa[i]:float(i))$
+/* define function to display them */
+			p():=plot2d([[discrete,listarray(xa),listarray(g)],[discrete,listarray(xa),listarray(h)]])$
+			p()$
+/* perform fft */	fft(g,h)$ 
+			p()$
+/* put in polar form */	recttopolar(g,h)$ 
+			p()$
+/* undo these operations */
+			polartorect(g,h)$ 
+			p()$
+			ift(g,h)$
+			p()$
+/* if you want avoid having the transform done in place,
+   copy the arrays first */
+			(fillarray(g,[0.0]),fillarray(h,[0.0]),
+			for i from 0 thru 15 do g[i]:1.)$
+			array([gt,ht],float,31)$
+			(fillarray(gt,g),fillarray(ht,h))$
+			fft(gt,ht)$
+			plot2d([[discrete,listarray(xa),listarray(gt)],[discrete,listarray(xa),listarray(ht)]])$
+/* The last part of this demo plots pretty patterns created by FFT.
+   They will only look good if your terminal supports high resolution
+   plotting.  If it doesn't I suggest you quit out here by typing
+   ^G.  This function was pinched out of some magazine put
+   out by Tektronix a year or two ago.  */
+pl&&
+plinit(nn):=(block([i:?runtime()],?sstatus(?random,i)),
+	     array([fr,fi],float,2**nn-1),n:nn)$
+plinit(8)$
+pl():=block([xaxis:false,yaxis:false,noprint:true,
+	     dateplot:false,equalscale:true],
+        apply (rearray, ['fr, 2^n - 1]),
+        apply (rearray, ['fi, 2^n - 1]),
+	    fillarray(fr,[0.0]),fillarray(fi,[0.0]),
+	    thru 2 do if random(2)=0 
+			 then fr[random(2**n)]:(-1.0)^random(2)
+			 else fi[random(2**n)]:(-1.0)^random(2),
+	    fft(fr,fi),
+	    graph2([fr,[fr[0],fr[2**n-1]]],[fi,[fi[0],fi[2**n-1]]]))$
+thru 10 do pl()$

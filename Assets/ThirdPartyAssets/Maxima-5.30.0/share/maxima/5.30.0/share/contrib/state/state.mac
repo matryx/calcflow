@@ -1,0 +1,109 @@
+/*
+This subroutine computes state variable equations
+Copyright (C) 1999  Dan Stanger
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Dan Stanger dan.stanger@ieee.org
+*/
+/* load in readfile and tree */
+/* get the filename from the user */
+/* this code works around problems caused by:
+   matrix.scalar does not simplify properly
+   1 dimensional matrixes do not simplify properly
+   empty matrixes do not remember how they were created
+*/
+f(m,n,p,q,r,s, MN, MB):=block([l,a_T, a_L,b_T,b_L,c_T,c_L],
+    /* reorder the array a_pt and turn it into the a_T and a_L matrixes  */
+    l:sortem(MN,MB),a_T:first(l),a_L:second(l),
+    b_T:-transpose(a_L).invert(transpose(a_T)),
+    b_L:ident(MN),
+    c_T:ident(MN),
+    c_L:-transpose(b_T),
+    block([
+	em:matrix(),
+	c_LLC, c_LRC, c_LGC, c_LLR, c_LRR, c_LGR, c_LLG, c_LRG, c_LGG,
+	b_TCL, b_TRL, b_TGL, b_TCR, b_TRR, b_TGR, b_TCG, b_TRG, b_TGG,
+	x:transpose(append( /* state variable vector */
+	    makelist(concat('v,pt_name[i]),i,1,m),
+	    makelist(concat('i,pt_name[i]),i,m+n+p+1,m+n+p+q))),
+	u:transpose(append(makelist(
+		if pt_V[i] = false then pt_name[i] else pt_V[i],
+		i,m+n+1,m+n+p),
+	    makelist(
+		if pt_V[i] = false then pt_name[i] else pt_V[i],
+		i,m+n+p+q+r+1,m+n+p+q+r+s))),
+	r_L,g_T,se,sx,su,e1,e2,e3,e4],
+	if length(x) = 1 then x:x[1],
+	if length(u) = 1 then u:u[1],
+	submat_m(c_LLC, c_L, 1 .. m,		1 .. q),
+	submat_m(c_LRC, c_L, 1 .. m,		(q+1) .. (q+r)),
+	submat_m(c_LGC, c_L, 1 .. m,		(q+r+1) .. (q+r+s)),
+	submat_m(c_LLR, c_L, (m+1) .. (m+n),	1 .. q),
+	submat_m(c_LRR, c_L, (m+1) .. (m+n),	(q+1) .. (q+r)),
+	submat_m(c_LGR, c_L, (m+1) .. (m+n),	(q+r+1) .. (q+r+s)),
+	submat_m(c_LLG, c_L, (m+n+1) .. (m+n+p),	1 .. q),
+	submat_m(c_LRG, c_L, (m+n+1) .. (m+n+p),	(q+1) .. (q+r)),
+	submat_m(c_LGG, c_L, (m+n+1) .. (m+n+p),	(q+r+1) .. (q+r+s)),
+
+	submat_m(b_TCL, b_T, 1 .. q,		1 .. m),
+	submat_m(b_TRL, b_T, 1 .. q,		(m+1) .. (m+n)),
+	submat_m(b_TGL, b_T, 1 .. q,		(m+n+1) .. (m+n+p)),
+	submat_m(b_TCR, b_T, (q+1) .. (q+r),	1 .. m),
+	submat_m(b_TRR, b_T, (q+1) .. (q+r),	(m+1) .. (m+n)),
+	submat_m(b_TGR, b_T, (q+1) .. (q+r),	(m+n+1) .. (m+n+p)),
+	submat_m(b_TCG, b_T, (q+r+1) .. (q+r+s),	1 .. m),
+	submat_m(b_TRG, b_T, (q+r+1) .. (q+r+s),	(m+1) .. (m+n)),
+	submat_m(b_TGG, b_T, (q+r+1) .. (q+r+s),	(m+n+1) .. (m+n+p)),
+
+	r_L:makelist(pt_name[i],i,m+n+p+q+1,m+n+p+q+r),
+	if length(r_L) > 0 then r_L:apply(diag_matrix,r_L) else r_L:em,
+	g_T:makelist(1/pt_name[i],i,m+1,m+n),
+	if length(g_T) > 0 then g_T:apply(diag_matrix,g_T) else g_T:em,
+	/* compute free response */
+	e1:mat_unblocker(
+	    matrix2([zeromatrix2(mat_nrows_m(c_LRC),mat_ncols_m(b_TRL)),c_LRC],
+		[b_TRL,zeromatrix2(mat_nrows_m(b_TRL),mat_ncols_m(c_LRC))])),
+	e2:block([e:matrix2([b_TRR,r_L], [g_T, c_LRR])],
+	    if matrixp(e) then invert(e) else 1/e),
+	e3:mat_unblocker(
+	    matrix2( [b_TCR, zeromatrix2(mat_nrows_m(b_TCR),mat_ncols_m(c_LLR))],
+		[zeromatrix2(mat_nrows_m(c_LLR),mat_ncols_m(b_TCR)),c_LLR])),
+	e4:mat_unblocker(
+	matrix2([zeromatrix2(mat_nrows_m(c_LLC),mat_ncols_m(b_TCL)),c_LLC],
+		[b_TCL,zeromatrix2(mat_nrows_m(b_TCL),mat_ncols_m(c_LLC))])),
+	sx:(e1.e2.e3),
+	if e4 # em then sx:sx-e4, /* check no link inductors */
+	sx:if matrixp(x) then sx.x else x*sx, /* if x is scalar use * mult */
+	/* compute source response */
+	e3:mat_unblocker(
+	    matrix2( [b_TGR, zeromatrix2(mat_nrows_m(b_TGR),mat_ncols_m(c_LGR))],
+		[zeromatrix2(mat_nrows_m(c_LGR),mat_ncols_m(b_TGR)),c_LGR])),
+	e4:mat_unblocker(
+	matrix2([zeromatrix2(mat_nrows_m(c_LGC),mat_ncols_m(b_TGL)),c_LGC],
+		[b_TGL,zeromatrix2(mat_nrows_m(b_TGL),mat_ncols_m(c_LGC))])),
+	su:(e1.e2.e3),
+	if e4 # em then su:su-e4,
+	su:if matrixp(u) then su.u else u*su,
+	se:sx+su,
+	/* try to remove . if its there */
+	if not matrixp(se) then subst("*",".",sx+su) else se
+    )
+)$
+state():=
+block([filename:read("enter the filename"), se],
+    /* compute the proper tree and use apply to destructure it */
+    se:apply(f,propertree(filename)))
+$

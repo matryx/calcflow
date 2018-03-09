@@ -1,0 +1,47 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * CTENSOR features for (mainly) gravitational theory
+ */
+
+if get('ctensor,'version)=false then load(ctensor);
+("A conformally flat metric helps demonstrate the curvature tensors")$
+(ratwtlvl:false,ratfac:true);
+derivabbrev:true;
+dim:4;
+ct_coords:[x,y,z,t];
+lg:a*ident(4);
+dependencies(a(t));
+("cmetric() computes the metric inverse:")$
+cmetric();
+ug;
+("christof() computes the Christoffel-symbols of the 1st and 2nd kind")$
+christof(mcs);
+("ricci() computes and optionally displays the mixed-index Ricci tensor")$
+ricci(true);
+("uricci() computes the contravariant Ricci tensor")$
+uricci(true);
+("riemann() computes the (3,1) Riemann-tensor")$
+riemann(true);
+("The covariant Riemann-tensor is obtained with lriemann()")$
+lriemann(true);
+("While uriemann() computes the contravariant Riemann tensor")$
+uriemann(true);
+("The mixed-index Einstein tensor is computed by einstein()")$
+einstein(true);
+("The covariant Einstein tensor is computed by leinstein()")$
+leinstein(true);
+("Rinvariant obtains the Kretchmann-invariant:")$
+rinvariant();
+("The Weyl tensor is empty for a conformally metric")$
+weyl(true);
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

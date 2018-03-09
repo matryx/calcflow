@@ -1,0 +1,108 @@
+/* Load ctensor */
+(if get('ctensor,'version)=false then load(ctensor),done);
+done;
+/* Test predefined metrics */
+/* Some metrics are known to fail, due to sqrt sign ambiguities. */
+testmetric(metric):=is(trigsimp((cframe_flag:true,ct_coordsys(metric),cmetric(),lg)-(cframe_flag:false,ct_coordsys(metric),lg))=zeromatrix(dim,dim));
+testmetric(metric):=is(trigsimp((cframe_flag:true,ct_coordsys(metric),cmetric(),lg)-(cframe_flag:false,ct_coordsys(metric),lg))=zeromatrix(dim,dim));
+testmetric(cartesian2d);
+true;
+testmetric(polar);
+true;
+testmetric(elliptic);
+true;
+testmetric(confocalelliptic);
+true;
+testmetric(bipolar);
+true;
+testmetric(parabolic);
+true;
+testmetric(cartesian3d);
+true;
+testmetric(polarcylindrical);
+true;
+testmetric(ellipticcylindrical);
+true;
+/* testmetric(confocalellipsoidal);
+   true; */
+/* testmetric(bipolarcylindrical);
+   true; */
+testmetric(paraboliccylindrical);
+true;
+testmetric(paraboloidal);
+true;
+/* testmetric(conical);
+   true; */
+testmetric(toroidal);
+true;
+testmetric(spherical);
+true;
+testmetric(oblatespheroidal);
+true;
+testmetric(oblatespheroidalsqrt);
+true;
+testmetric(prolatespheroidal);
+true;
+testmetric(prolatespheroidalsqrt);
+true;
+testmetric(cartesian4d);
+true;
+testmetric(spherical4d);
+true;
+testmetric(exteriorschwarzschild);
+true;
+testmetric(interiorschwarzschild);
+true;
+testmetric(kerr_newman);
+true;
+/* Use a simple metric to test other functions */
+(ct_coords:[x,y,z,t],dim:4,remove([a,d],constant),depends([a,d],x),lg:matrix([a,0,0,0],[0,x^2,0,0],[0,0,x^2*sin(y)^2,0],[0,0,0,-d]),ug:lg^^-1,christof(false),mcs[1,1,1]);
+'diff(a,x,1)/(2*a);
+(ricci(false),ric[1,1]);
+'diff(a,x,1)/(a*x)-'diff(d,x,2)/(2*d)+('diff(d,x,1))^2/(4*d^2)+'diff(a,x,1)*'diff(d,x,1)/(4*a*d);
+(uricci(false),uric[1,1]);
+('diff(a,x,1)/(a*x)-'diff(d,x,2)/(2*d)+('diff(d,x,1))^2/(4*d^2)+'diff(a,x,1)*'diff(d,x,1)/(4*a*d))/a;
+(einstein(false),ein[1,1]);
+('diff(d,x,1)*x+(1-a)*d)/(a*d*x^2);
+(riemann(false),riem[1,2,1,2]);
+-'diff(a,x,1)/(2*a*x);
+(lriemann(false),lriem[1,2,1,2]);
+-'diff(a,x,1)*x/(2*a);
+(uriemann(false),uriem[1,2,1,2]);
+-'diff(a,x,1)/(2*a^3*x^3);
+rinvariant();
+2*('diff(d,x,1))^2/(a^2*d^2*x^2)+2*('diff(a,x,1))^2/(a^4*x^2)+4*(a-1)^2/(a^2*x^4)+(2*a*d*'diff(d,x,2)-a*('diff(d,x,1))^2-'diff(a,x,1)*d*'diff(d,x,1))^2/(4*a^4*d^4);
+(weyl(false),weyl[1,2,1,2])+((2*a*d*'diff(d,x,2)-a*'diff(d,x,1)^2-'diff(a,x,1)*d*'diff(d,x,1))*x^2+(2*'diff(a,x,1)*d^2-2*a*d*'diff(d,x,1))*x+(4*a-4*a^2)*d^2)/(24*a*d^2);
+0;
+/* Test Taylor-series approximations with a simple example */
+(ratfac:true,ct_coords:[t,r,theta,phi],lg:matrix([-1,0,0,0],[0,1,0,0],[0,0,r^2,0],[0,0,0,r^2*sin(theta)^2]),h:matrix([h11,0,0,0],[0,h22,0,0],[0,0,h33,0],[0,0,0,h44]),depends(l,r),lg:lg+l*h,cmetric(false),ctayswitch:true,ctayvar:l,ctaypov:1,ctaypt:0,christof(false),ricci(false),uricci(false),einstein(false),ratsimp(ein[1,1]));
+(((h11*h22+h11^2)*('diff(l,r,1))^2*r^4+2*h33*'diff(l,r,2)*r^2)*sin(theta)^2+2*h44*'diff(l,r,2)*r^2+h33*h44*('diff(l,r,1))^2)/(4*r^4*sin(theta)^2);
+
+/* TODO: Frames, torsion, nonmetricity */
+
+/* Algebraic classification */
+(init_ctensor(),cframe_flag:true,gcd:spmod,ctrgsimp:true,ratfac:true);
+true;
+ct_coordsys(exteriorschwarzschild,all);
+done;
+(ug:lg^^-1,weyl(false),nptetrad(false),psi(false));
+done;
+psi[0];
+0;
+psi[1];
+0;
+psi[2];
+m/r^3;
+psi[3];
+0;
+psi[4];
+0;
+petrov();
+D;
+np.transpose(npi);
+matrix([0,-1,0,0],[-1,0,0,0],[0,0,0,1],[0,0,1,0]);
+/* TODO: miscellaneous stuff: findde, cograd, contragrad, dscalar, etc */
+
+(reset(ratfac),0);
+0$
+

@@ -1,0 +1,41 @@
+/* File name: vector3d.dem
+ * Demonstration and test of the vector3d package
+ * Walter Eastes: June, 2004
+ */
+load("vector3d.mac");
+
+"Let's define some vectors to use"$
+a : [ax,ay,az]; b : [bx,by,bz]; c : [cx,cy,cz];
+
+"These are vector and scalar functions of the coordinates"$
+u : [ux,uy,uz]; v : [vx,vy,vz];
+depends([ux,uy,uz,vx,vy,vz], [x,y,z]); depends([f], [x,y,z]);
+
+"Now let's prove some elementary identities"$
+is(cross(a,b) = -cross(b,a));
+is(cross(a,h*b) = cross(h*a,b));
+is(cross(a,a) = [0,0,0]);
+is( expand(cross(a, cross(b,c))) = expand((a . c)*b - (a . b)*c) );
+
+"Now some identities for the differential operators"$
+is( expand(div(cross(u,v))) = expand(curl(u) . v - u . curl(v)) );
+is( curl(curl(u)) = grad(div(u)) - laplacian(u) );
+is( div(grad(f)) = laplacian(f) );
+
+"Now let's change to spherical polar coordinates"$
+coordsys(spherical);
+
+"Define vector functions of these coordinates"$
+u : [ur,uth,uph]; v : [vr,vth,vph];
+depends([ur,uth,uph,vr,vth,vph], [r,th,ph]); depends([f], [r,th,ph]);
+
+"Now see if the differential operator identities still hold"$
+is( expand(div(cross(u,v))) = expand(curl(u) . v - u . curl(v)) );
+is( expand(curl(curl(u))) = expand(grad(div(u)) - laplacian(u)) );
+is(equal( div(grad(f)), laplacian(f) ));
+
+"Finally prove the identity in the original demo"$
+"Need these vectors first"$
+a : [ar,ath,aph]; b : [br,bth,bph];
+is( expand( cross(a,b) . cross(u,v) + cross(b,u) . cross(a,v) +
+   cross(u,a) . cross(b,v) ) = 0);

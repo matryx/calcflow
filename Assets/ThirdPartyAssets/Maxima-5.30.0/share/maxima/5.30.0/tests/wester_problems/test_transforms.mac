@@ -1,0 +1,77 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Transforms/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Transforms ---------- */
+/* Laplace and inverse Laplace transforms
+   => s/[s^2 + (w - 1)^2]   (Re s > |Im(w - 1)|)
+      [Gradshteyn and Ryzhik 17.13(33)] */
+laplace(cos((w - 1)*t), t, s);
+ilt(%, s, t);
+/* => w/(s^2 - 4 w^2)   (Re s > |Re w|)   [Gradshteyn and Ryzhik 17.13(84)] */
+laplace(sinh(w*t)*cosh(w*t), t, s);
+/* e^(-6 sqrt(s))/s   (Re s > 0)   [Gradshteyn and Ryzhik 17.13(102)] */
+laplace(erf(3/sqrt(t)), t, s);
+specint(exp(-s*t)*erf(3/sqrt(t)), t);
+/* Solve y'' + y = 4 [H(t - 1) - H(t - 2)], y(0) = 1, y'(0) = 0 where H is the
+   Heaviside (unit step) function (the RHS describes a pulse of magnitude 4 and
+   duration 1).  See David A. Sanchez, Richard C. Allen, Jr. and Walter T.
+   Kyner, _Differential Equations: An Introduction_, Addison-Wesley Publishing
+   Company, 1983, p. 211.  First, take the Laplace transform of the ODE
+   => s^2 Y(s) - s + Y(s) = 4/s [e^(-s) - e^(-2 s)]
+   where Y(s) is the Laplace transform of y(t) */
+atvalue(y(t), t = 0, 1)$
+atvalue(diff(y(t), t), t = 0, 0)$
+laplace(diff(y(t), t, 2) + y(t) =
+        4*(unit_step(t - 1) - unit_step(t - 2)), t, s);
+expand(%);
+/* Now, solve for Y(s) and then take the inverse Laplace transform
+   => Y(s) = s/(s^2 + 1) + 4 [1/s - s/(s^2 + 1)] [e^(-s) - e^(-2 s)]
+   => y(t) = cos t + 4 {[1 - cos(t - 1)] H(t - 1) - [1 - cos(t - 2)] H(t - 2)}
+   */
+solve(%, 'laplace(y(t), t, s));
+ilt(%[1], s, t);
+/* What is the Laplace transform of an infinite square wave?
+   => 1/s + 2 sum( (-1)^n e^(- s n a)/s, n = 1..infinity )
+      [Sanchez, Allen and Kyner, p. 213] */
+laplace(1 + 2*'sum((-1)^n*unit_step(t - n*a), n, 1, inf), t, s);
+/* Fourier transforms => sqrt(2 pi) delta(z)   [Gradshteyn and Ryzhik 17.23(1)]
+   */
+errcatch(fourier_int_coeffs(1, x));
+intanalysis: false$
+errcatch(fourier_int_coeffs(1, x));
+intanalysis: true$
+/* => e^(-z^2/36) / [3 sqrt(2)]   [Gradshteyn and Ryzhik 17.23(13)] */
+fourier_int_coeffs(exp(-9*x^2), x);
+/* => sqrt(2 / pi) (9 - z^2)/(9 + z^2)^2   [Gradshteyn and Ryzhik 17.23(11)] */
+fourier_int_coeffs(abs(x)*exp(-3*abs(x)), x);
+/* Mellin transforms
+   => pi cot(pi s)   (0 < Re s < 1)   [Gradshteyn and Ryzhik 17.43(5)] */
+MellinTransform(f, x, s):= integrate(f * x^(s - 1), x, 0, inf)$
+assume(0 < s, s < 1)$
+MellinTransform(1/(1 - x), x, s);
+/* => 2^(s - 4) gamma(s/2)/gamma(4 - s/2)   (0 < Re s < 1)
+      [Gradshteyn and Ryzhik 17.43(16)] */
+MellinTransform(bessel_j[3](x)/x^3, x, s);
+forget(0 < s, s < 1)$
+/* Z transforms.  See _CRC Standard Mathematical Tables_, Twenty-first Edition,
+   The Chemical Rubber Company, 1973, p. 518.
+   Z[H(t - m T)] => z/[z^m (z - 1)]   (H is the Heaviside (unit step) function)
+   */
+unit_step(t - 3);
+unit_step(t - m);
+/* ---------- Quit ---------- */
+quit();

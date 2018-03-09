@@ -1,0 +1,121 @@
+/* This function computes the fresnel F and G functions with dfloat accuracy
+over -inf,inf.  It divides the real line into 2 regions.  The first (0,4) uses
+a division of 1/100, and a taylor series.  The second region (4,inf)
+uses the asymptotic series.  This routine could be improved by using
+lazy evaluation to increase speed in the initialization.
+*/
+
+load("e:\\fresnel\\fresnel_linear_values.mac")$
+define_variable(FRESNEL_ASYMPTOTIC,4.0d0,any_check,
+   "Point to switch to asymptotic series")$
+define_variable(FRESNEL_DIVISION,100,any_check,
+   "Number of divisions")$
+define_variable(FRESNEL_X,0,any_check, "Array constant")$
+define_variable(FRESNEL_F,1,any_check, "Array constant")$
+define_variable(FRESNEL_G,2,any_check, "Array constant")$
+define_variable(FRESNEL_A,3,any_check, "Array constant")$
+array(fresnel_a,3,4*FRESNEL_DIVISION+1)$
+define_variable(fresnel_Ftaylor, 8.33333333333334d-3 *
+   (u *
+     (u *
+       (u *
+         (u *
+           (u * x0 *
+             (x0 *
+              (x0 * (9.74090910340024d+2 * f0 - 3.0601968478528d+2 * g0 * x0^2)
+               - 2.79056490122698d+2)
+              + 4.65094150204496d+2 * g0)
+             + x0^2 *
+	         (x0 * (4.87045455170012d+2 * f0 * x0 - 1.55031383401498d+2)
+                  + 9.30188300408994d+2 * g0)
+            - 1.4804406601634d+2 * f0)
+           + x0 * (6.20125533605996d+2 * g0 * x0^2 - 5.9217626406536d+2 * f0)
+          + 1.25663706143592d+2)
+         + x0 * (1.88495559215388d+2 - 5.9217626406536d+2 * f0 * x0)
+        - 1.88495559215388d+2 * g0)
+      - 3.76991118430774d+2 * g0 * x0)
+    + 1.2d+2 * f0),any_check,"Taylor series for F about x0")$
+define_variable(fresnel_Gtaylor, 8.33333333333334d-3 *
+   (u * 
+    (u *
+     (u *
+      (u *
+       (x0 *
+        (x0 *
+         (4.87045455170012d+2 * g0 * x0^2 - 9.30188300408994d+2 * f0)
+         + 2.46740110027234d+2)
+        + u *
+	  (x0 *
+	   (x0^2 *
+            (x0 *
+             (3.0601968478528d+2 * f0 * x0 - 9.74090910340024d+1)
+             + 9.74090910340024d+2 * g0)
+            - 4.65094150204496d+2 * f0)
+           + 7.89568352087148d+1)
+        - 1.4804406601634d+2 * g0)
+       + x0 * (x0 * (1.97392088021786d+2 - 6.20125533605996d+2 * f0 * x0)
+       - 5.9217626406536d+2 * g0))
+      - 5.9217626406536d+2 * g0 * x0^2 + 1.88495559215388d+2 * f0)
+     + 3.76991118430774d+2 * f0 * x0 - 1.2d+2)
+    + 1.2d+2 * g0),any_check,"Taylor series for G about x0")$
+
+fresnel_InitLinear():=block([i:0],
+   for l in fresnel_linear_values do (
+      fresnel_a[FRESNEL_X,i]:first(l),
+      block([x0:first(l),f0:second(l),g0:third(l)],
+         fresnel_a[FRESNEL_F,i]:
+            funmake(lambda,[[x],block([u:x-x0],ev(fresnel_Ftaylor))]),
+         fresnel_a[FRESNEL_G,i]:
+            funmake(lambda,[[x],block([u:x-x0],ev(fresnel_Gtaylor))])),
+      i:i+1
+   )
+)$
+fresnel_init():=block(
+   fresnel_InitLinear()
+)$
+fresnelF(z):=block([z:abs(z)],
+   if z < FRESNEL_ASYMPTOTIC then block([d:round(FRESNEL_DIVISION*z)],
+      fresnel_a[FRESNEL_F,d](z)
+   )
+   else block(
+      [ORDER:65,df:1,pz:dfloat(%pi*z),pz2:dfloat(%pi*z^2),pz2m,pzpz2,
+          m1:1,term,n:65],
+      fresnel_a[FRESNEL_A,0]:1/pz,
+      pz2m:1,
+      pzpz2:pz*pz2,
+      for m:1 thru ORDER do (
+         m1:m1*(-1),
+         df:df*(4*m-3)*(4*m-1),
+	 pz2m:pz2m*(pz2^2),
+	 term:m1*dfloat((df)/(pz*pz2m)),
+         if abs(term) > abs(fresnel_a[FRESNEL_A,m-1]) then (n:(m-1),return(n)),
+	 if abs(term/fresnel_a[FRESNEL_A,0]) < DFLOAT_EPSILON then
+             (fresnel_a[FRESNEL_A,m]:0.0d0,n:m,return(n))
+	 else fresnel_a[FRESNEL_A,m]:term
+      ),
+      sum(fresnel_a[FRESNEL_A,n-i],i,0,n)
+   )
+)$
+fresnelG(z):=block([z:abs(z)],
+   if z < FRESNEL_ASYMPTOTIC then block([d:round(FRESNEL_DIVISION*z)],
+      fresnel_a[FRESNEL_G,d](z)
+   ) else block(
+      [ORDER:65,df:1,pz:dfloat(%pi*z),pz2:dfloat(%pi*z^2),pz2m,pzpz2,
+          m1:1,term,n:65],
+      fresnel_a[FRESNEL_A,0]:1/(pz*pz2),
+      pz2m:1,
+      pzpz2:pz*pz2,
+      for m:1 thru ORDER do (
+         m1:m1*(-1),
+         df:df*(4*m-1)*(4*m+1),
+	 pz2m:pz2m*(pz2^2),
+	 term:m1*dfloat((df)/(pzpz2*pz2m)),
+         if abs(term) > abs(fresnel_a[FRESNEL_A,m-1]) then (n:(m-1),return(n)),
+	 if abs(term/fresnel_a[FRESNEL_A,0]) < DFLOAT_EPSILON then
+             (fresnel_a[FRESNEL_A,m]:0.0d0,n:m,return(n))
+	 else fresnel_a[FRESNEL_A,m]:term
+      ),
+      sum(fresnel_a[FRESNEL_A,n-i],i,0,n)
+   )
+)$
+fresnel_init()$

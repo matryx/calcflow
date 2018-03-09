@@ -1,0 +1,25 @@
+/* ODE tests - Murphy equations 1.401 - 1.500
+
+  Reference: 
+    G M Murphy, Ordinary Differential Equations and Their 
+    Solutions, Van Nostrand, 1960
+
+  First Order and of First Degree, p 224 ff
+
+*/
+/* Don't kill(all); It messes up trigsimp */
+
+/* Print ode number*/
+(pn_(n_):=print("Murphy ODE 1.",n_),true);
+true;
+
+/* 402 - Abel eqn of 1st kind.  absolute invariant K:  1/(8*a^2*b) */
+(pn_(402),a:1/3,b:-1/6,ans:contrib_ode(eqn:x^(3/2)*'diff(y,x)=a+b*x^(3/2)*y^3,y,x));
+ [x = %c*%e^((sqrt(x)*(2*y*log(sqrt(x)*y+1)-2*y*log(sqrt(x)*y-2))+2*log(sqrt(x)*y+1)-2*log(sqrt(x)*y-2)-6)/(3*sqrt(x)*y+3))];
+/* CHECKME:  Get different soln with ode1_abel */
+kill(a,b);
+done;
+
+/* 422 - Abel eqn of 2nd kind */
+(pn_(422),ans:contrib_ode(eqn:y*'diff(y,x)+x^3+y=0,y,x));
+false;

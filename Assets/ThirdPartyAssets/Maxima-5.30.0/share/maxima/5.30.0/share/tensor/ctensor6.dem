@@ -1,0 +1,34 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Algebraic classification of metrics
+ *
+ */
+
+if get('ctensor,'version)=false then load(ctensor);
+("Computing the Petrov classification of the Schwarzschild metric")$
+("We use frames, set up simplification flags")$
+(cframe_flag:true,gcd:spmod,ctrgsimp:true,ratwtlvl:false,ratfac:true);
+("We use the stock Schwarzschild frame")$
+ct_coordsys(exteriorschwarzschild,all);
+("The inverse metric tensor is needed by nptetrad()")$
+ug:invert(lg)$
+("The basis for the calculations is the Weyl tensor")$
+weyl(false);
+("We compute a Newman-Penrose null tetrad")$
+nptetrad(false);
+("Now we're ready to compute the coefficients")$
+psi(true);
+("And obtain the Petrov class")$
+petrov();
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

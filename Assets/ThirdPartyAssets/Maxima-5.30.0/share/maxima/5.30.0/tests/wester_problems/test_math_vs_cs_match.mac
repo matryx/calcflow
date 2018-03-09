@@ -1,0 +1,48 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/MathvsCS/match.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Mathematics vs Computer Science ---------- */
+/* Just how well are pattern matches between mathematically equivalent forms
+   performed? */
+matchdeclare(x, true)$
+defmatch(match, exp(x), x)$
+match(exp(y), y);
+match(%e^y,   y);
+defmatch(match, %e^x, x)$
+match(exp(y), y);
+match(%e^y,   y);
+defmatch(match, sqrt(x), x)$
+match(sqrt(y), y);
+match(y^(1/2), y);
+defmatch(match, x^(1/2), x)$
+match(sqrt(y), y);
+match(y^(1/2), y);
+defmatch(match, %i*x, x)$
+match(%i*y,         y);
+match(sqrt(-1)*y,   y);
+match((-1)^(1/2)*y, y);
+defmatch(match, sqrt(-1)*x, x)$
+match(%i*y,         y);
+match(sqrt(-1)*y,   y);
+match((-1)^(1/2)*y, y);
+defmatch(match, (-1)^(1/2)*x, x)$
+match(%i*y,         y);
+match(sqrt(-1)*y,   y);
+match((-1)^(1/2)*y, y);
+kill(x)$
+/* ---------- Quit ---------- */
+quit();

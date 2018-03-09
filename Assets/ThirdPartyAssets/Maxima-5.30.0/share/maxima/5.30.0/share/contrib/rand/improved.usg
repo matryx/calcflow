@@ -1,0 +1,108 @@
+improved.mac is from the book "Computer Algebra in Applied
+Mathematics: An introduction to MACSYMA", by Richard H Rand, Pitman
+(1984).  The version here was adapted from newimprv.bk1 by David
+Billinghurst.
+
+For given values of the parameters delta and e, either all the
+solutions are bounded (the equation is stable) or there exist
+unbounded solutions (the equation is unstable).  The regions of
+stability are separated from thos of instability by "transition
+curves".
+
+This program computes the transition curves of Mathieu's equation
+using a method due to Levy and Keller (1963) which uses Fourier series
+to solve the perturbation equations.  It is an improved version of
+recursiv.mac, as it stores intermediate results of the recursive
+functions A() and D() in arrays B[] and E[], rather than recalculating
+them each call.  Some indirection is required, and the command
+REMARRAY is the only way to delete the values of arrays B and E, and
+would also delete any associated functions.
+
+The run below, using maxima-5.9.0cvs, reproduces the results on pages
+120-121 and page 140 of the book.
+
+(C1) load("./improved.mac");
+(D1)                            ./improved.mac
+(C2) tc();
+ENTER TRANSITION CURVE NUMBER N
+0;
+ENTER DEGREE OF TRUNCATION
+10;
+                 10          8       6      4    2
+         123707 e     68687 e    29 e    7 e    e
+delta= - ---------- + -------- - ----- + ---- - --
+           409600      294912     144     32    2
+
+(D2)                                 FALSE
+(C3) tc();
+ENTER TRANSITION CURVE NUMBER N
+1;
+ENTER DEGREE OF TRUNCATION
+10;
+                 10          9        8        7        6       5    4     3
+         114299 e     12121 e     83 e     55 e     49 e    11 e    e     e
+delta= - ---------- + --------- - ------ - ------ + ----- - ----- - --- + --
+         6370099200   117964800   552960   294912   36864   4608    384   32
+
+                                                                     2
+                                                                    e    e   1
+                                                                  - -- - - + -
+                                                                    8    2   4
+
+                 10          9        8        7        6       5    4     3
+         114299 e     12121 e     83 e     55 e     49 e    11 e    e     e
+delta= - ---------- - --------- - ------ + ------ + ----- + ----- - --- - --
+         6370099200   117964800   552960   294912   36864   4608    384   32
+
+                                                                     2
+                                                                    e    e   1
+                                                                  - -- + - + -
+                                                                    8    2   4
+
+(D3)
+(C4) tc();
+ENTER TRANSITION CURVE NUMBER N
+2;
+ENTER DEGREE OF TRUNCATION
+10;
+                      10               8            6        4      2
+       4363384401463 e     1669068401 e    1002401 e    763 e    5 e
+delta= ----------------- - ------------- + ---------- - ------ + ---- + 1
+        14447384985600      7166361600      4976640      3456     12
+
+                   10             8         6       4    2
+          2499767 e        21391 e     289 e     5 e    e
+delta= - -------------- + ---------- - ------- + ---- - -- + 1
+         14447384985600   7166361600   4976640   3456   12
+
+(D4)
+(C5) tc();
+ENTER TRANSITION CURVE NUMBER N
+0;
+ENTER DEGREE OF TRUNCATION
+20;
+                                  20                         18
+       4011632808829219892175301 e     63642189915976296887 e
+delta= ----------------------------- - ------------------------
+         1789497024366772224000000       44737425609169305600
+
+                     16                 14               12           10
+   7534554811777337 e     286241141477 e     8022167579 e     123707 e
+ + -------------------- - ---------------- + -------------- - ----------
+     8182428094955520       468202291200      19110297600       409600
+
+          8       6      4    2
+   68687 e    29 e    7 e    e
+ + -------- - ----- + ---- - --
+    294912     144     32    2
+
+(D5)                                 FALSE
+
+Reference:
+
+Levy, D.M. and Keller, J.B. "Instability Intervals of Hill's
+Equation", Comm. Pure Appl. Math. 16:469-476 (1963)
+
+Local Variables: ***
+mode: Text ***
+End: ***

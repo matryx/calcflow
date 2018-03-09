@@ -1,0 +1,100 @@
+/* -*- MACSYMA -*- */
+eval_when(batch,ttyoff:true)$
+/*ASB;FACEX1 1
+4:19pm  Monday, 7 February 1983
+  Split off from FACEXP 15
+*/
+/*
+eval_when([translate,batch,loadfile],
+	  if get('facexp,'version)=false
+	  then (load('[facexp,fasl]),
+		load('[gndecl,fasl])))$
+*/
+eval_when(translate,
+	  transcompile:true,
+	  define_variable:'mode,
+	  modedeclare(function(nulllistp,freeofl),boolean))$
+
+put('facex1,1,'version)$
+
+/* GNU Maxima */
+
+/* Commented out all local SPECIAL declarations.  For other changes,
+   search for `Maxima:' below.
+
+   TODO: This file contains seemingly newer versions of some functions
+   in facexp.  So merge these files. -wj */
+
+/* This was done on 2002-09-26.  This file is now obsolete,
+  so don't use it.  Use facexp instead. */
+
+eval_when([batch,loadfile],
+  if get('gnauto,'diageval_version)=false
+  then load("genut"))$
+
+collectten(exp):=collecttermsl(exp,listoftens(exp))$
+
+collectterms(exp,[varlist]):=collecttermsl(exp,varlist)$
+
+collecttermsl(exp,varlist):=block(
+  [partswitch:true,inflag:true,piece],
+  apply('collectterms0,cons(exp,argsplit(exp,varlist))))$
+
+collectterms0(exp,thisleveldum,nextleveldum):=block(
+  [iforp:true,splitdum1,splitdum2,splitdum3,anslist:[],fdum,
+   prevdum,lsplit3,ansdum,lastdumsave,prevlastdum,
+   rthisleveldum,fthisleveldum],
+  modedeclare(lsplit3,fixnum),
+  /* DECLARE([FDUM,SPLITDUM3,ANSDUM],SPECIAL), */
+  if exp=0 then return(0),
+  if nulllistp(thisleveldum) or freeofl(thisleveldum,exp)
+  then if nulllistp(nextleveldum)
+       then return(exp)
+       else (splitdum1:orpartitionl(exp,"+",nextleveldum),
+	     return(collecttermsl(first(splitdum1),nextleveldum)
+		    +iflopmap("+",
+			      lambda([termdum],
+				     collecttermsl(termdum,nextleveldum)),
+			      last(splitdum1)))),
+  rthisleveldum:rest(thisleveldum),
+  if freeof(fthisleveldum:first(thisleveldum),exp)
+  then return(collectterms0(exp,rthisleveldum,nextleveldum)),
+  splitdum1:orpartitionl(exp,"+",thisleveldum),
+  splitdum2:orpartitionl(last(splitdum1),"+",[fthisleveldum]),
+  ansdum:collecttermsl(first(splitdum1),nextleveldum)
+	 +collectterms0(first(splitdum2),rthisleveldum,nextleveldum),
+  if inpart(splitdum3:last(splitdum2),0)#"+"
+  then return(ansdum+collecttermsl(splitdum3,nextleveldum)),
+  splitdum3:sort(maplist(lambda([term],orpartitionl(term,"*",[fthisleveldum])),
+		 splitdum3),
+		 'orderlastp),
+  lsplit3:length(splitdum3)-1,
+  prevlastdum:inpart(splitdum3,1,2),
+  prevdum:inpart(splitdum3,1,1),
+  splitdum3:rest(splitdum3),
+  for idum thru lsplit3 do
+       (if (lastdumsave:inpart(splitdum3,idum,2))=prevlastdum
+	then prevdum:prevdum+inpart(splitdum3,idum,1)
+	else (anslist:endcons([prevdum,prevlastdum],anslist),
+	      prevdum:inpart(splitdum3,idum,1),
+	      prevlastdum:lastdumsave),
+	if idum=lsplit3
+	then anslist:endcons([prevdum,prevlastdum],anslist)),
+  listtosum(maplist('lambda([dum], /* Maxima: quoted the lambda expression */
+			   if freeofl(rthisleveldum,fdum:first(dum))
+			   then collecttermsl(fdum,nextleveldum)
+				    *last(dum)
+			   else multthrusplit(last(dum),
+					      collectterms0(fdum,rthisleveldum,
+							    nextleveldum),
+					      rthisleveldum)),
+		    anslist))+ansdum)$
+
+orderlastp(exp1,exp2):=orderlessp(last(exp1),last(exp2))$
+
+
+multthrusplit(factordum,sumdum,rthisleveldum):=block(
+  [splitdum1:orpartitionl(sumdum,"+",rthisleveldum)],
+  multthru(factordum,last(splitdum1))+factordum*first(splitdum1))$
+
+eval_when(batch,ttyoff:false)$

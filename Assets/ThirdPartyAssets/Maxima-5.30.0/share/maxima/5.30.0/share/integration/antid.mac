@@ -1,0 +1,68 @@
+/*******************************************************************************
+ * File    : antid.mac
+ * License : GNU General Public License (GPL)
+ * 
+ * Implementation of the Maxima user functions:
+ *
+ *   antid (fn, var,unk)
+ *   antidiff (fn, var, unk)
+ *
+ * See the Maxima reference manual for a documentation.
+ *
+ * This file is part of Maxima -- GPL CAS based on DOE-MACSYMA
+ ******************************************************************************/
+
+nonzeroandfreeof(xargumentx, eargumente) :=
+  is(eargumente # 0 and freeof(xargumentx, eargumente))$
+
+matchdeclare(aargumenta,
+             nonzeroandfreeof(xargumentx),
+             bargumentb,
+             freeof(xargumentx))$
+
+defmatch(linear, aargumenta*xargumentx+bargumentb, xargumentx)$
+
+antid(fn, var, unk) :=
+  block( [lclvariablelcl,
+          dvariabled,
+          aargumenta,
+          bargumentb,
+          tvariablet,
+          uvariableu,
+          killer,
+          listarith:true],
+    local(killer),          
+    dvariabled : derivdegree(fn, unk, var),
+    if dvariabled = 0 then
+    (
+      tvariablet : integrate(fn, var),
+      if not freeof(nounify(integrate), tvariablet) then 
+        return([0, fn]) 
+      else
+        return([tvariablet, 0])
+    ),
+    uvariableu : diff(unk, var, dvariabled),
+    killer(eargumente) := if hipow(eargumente, uvariableu) <= 1 then
+                            eargumente else 0,
+    if linear(fn, uvariableu) = false then
+    (
+      tvariablet : expand(fn),
+      if part(tvariablet, 0) # "+" then
+        return([0, tvariablet]),
+      aargumenta : map(killer, tvariablet),
+      return (antid(aargumenta, var, unk)+[0, ratsimp(fn-aargumenta)])
+    ),
+    tvariablet : subst(diff(unk, var, dvariabled-1), lclvariablelcl,
+                   integrate(subst(lclvariablelcl, diff(unk, var, dvariabled-1),
+                             expand(aargumenta)), lclvariablelcl)),
+    if not freeof(nounify(integrate), tvariablet) or
+       is(equal(fn,ratsimp(fn-diff(tvariablet,var)))) then
+      return([0, aargumenta*uvariableu]+antid(bargumentb, var, unk)),
+    return([tvariablet, 0]+antid(ratsimp(fn-diff(tvariablet, var)),var,unk))
+  )$
+   
+antidiff(fn, var, unk) := 
+  block( [tvariablet],
+    tvariablet : antid(fn, var, unk),
+    return(part(tvariablet, 1)+'integrate(part(tvariablet, 2), var))
+  )$

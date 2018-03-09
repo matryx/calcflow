@@ -1,0 +1,1296 @@
+\documentclass[11pt]{article}
+ \setlength{\textheight}{9.4in}
+\setlength{\textwidth}{6.75in}
+\setlength{\hoffset}{-1.8cm}
+\setlength{\voffset}{-2cm}
+\title{Extension SYM de MACSYMA\\
+MANUEL DE L'UTILISATEUR}
+\author{Annick Valibouze\\
+LITP (tour 45-55)\\
+4, Place Jussieu\\
+75252 Paris Cedex 05\\
+Unit\'e associ\'ee au CNRS No 248\\
+et\\
+GDR DE CALCUL FORMEL MEDICIS\\
+\small{e-mail : avb@sysal.ibp.fr}}
+\date{19 juillet 1993}
+\hyphenation{sen-tant puis-sance men-tai-re}
+\newcommand{\indexentry}[2]{{\tt #1} & #2\\}
+\begin{document}
+\maketitle
+
+
+\newpage
+\noindent
+{\bf INTRODUCTION}\\
+Cette documentation concerne un module de manipulation de fonctions
+sym\'etriques implant\'e en CommonLisp. Ce module, nomm\'e {\tt SYM},
+se pr\'esente actuellement comme une extension du syst\`eme de calcul 
+formel {\tt MACSYMA}. 
+
+Parmi ses applications, signalons des calculs de r\'esolvantes.
+
+\section{D\'{e}finitions et notations}
+Nous consid\`ererons un anneau $\cal A$.
+\subsection{Polyn\^omes sym\'etriques}
+Nous nous donnons un entier $n > 0$.
+\subsubsection*{Action de groupe}
+Soit $S_n$ le groupe sym\'etrique de degr\'e $n$.
+
+Soit $E$ un ensemble quelconque. Notons $E^n$ l'ensemble des
+$n$-uplets d'\'el\'ements de $E$. L'action de $S_n$ sur tout $n$-uplet
+$\underline a=(a_1,\ldots,a_n)$ de $E^n$ est d\'efinie comme suit~:
+\begin{eqnarray*}
+            S_n   \times & E^n &\longrightarrow  E^n\\
+           \sigma \;\; \times & {\underline a} &  \longrightarrow 
+                      \sigma{\underline a}=(a_{\sigma (1)},\ldots,a_{\sigma (n)}).
+\end{eqnarray*}
+Soit ${\cal A}[\underline x]$ l'anneau des polyn\^omes
+en les $n$ variables
+de $\underline x=(x_1,\ldots ,x_n)$ \`a coefficients dans $\cal A$. 
+L'action de $S_n$ sur ${\cal A}(\underline x)$ est d\'efinie
+comme suit~: 
+\begin{eqnarray*}
+            S_n & \times {\cal A}[\underline x] & \longrightarrow  {\cal A}[\underline x]\\
+           \sigma & \times f  & \longrightarrow  \sigma f \;\; :\;
+                      \sigma f({\underline x})=f(\sigma{\underline x}).
+\end{eqnarray*}
+
+{\it Remarque.} L'action de $S_n$ s'\'etend \`a des ensembles $E^c$
+ou ${\cal A}[x_1,\ldots ,x_c]$ avec $c \leq n$ par simple 
+plongement de ces ensembles dans $E^n$ et ${\cal A}[\underline x]$ 
+respectivement.
+
+Soit $f$ une fonction de ${\cal A}[\underline x]$ (resp. $\underline a$ un
+$n$-uplet). Nous noterons $S_nf$ (resp. $S_n \underline a$) l'ensemble
+$\{\sigma f \;|\; \sigma \in S_n \}$ (resp. $\{\sigma\underline a \;|\;
+ \sigma
+\in S_n \}$) appel\'e l'{\it orbite} de $f$ (resp. $\underline a$)
+sous l'action de $S_n$.
+
+\subsubsection*{Partitions, polyn\^omes sym\'etriques}
+
+Soit $m$ un entier naturel.
+Une {\it partition} de $m$, est une suite 
+d\'ecroissante d'entiers naturels $i_1\geq i_2 \geq \ldots..$ appel\'ees 
+{\it parts} dont la somme est \'egale \`a $m$. Cette somme est le {\it poids}.
+de la partition et sa {\it longueur} est le nombre de ses parts non nulles.
+
+Soit $p$ un polyn\^ome de $n$ variables. Ce polyn\^ome est dit {\it
+sym\'etrique} s'il reste invariant sous l'action de $S_n$, c'est-\`a-dire si
+$S_n p =\{
+p\}$.
+
+Un polyn\^ome sym\'etrique peut-\^etre repr\'esent\'e par des
+partitions~: 
+
+
+Soient $I=(i_1,\ldots ,i_n)$ (i.e. $i_1\geq i_2\geq \ldots \geq i_n$)
+une partition de longueur inf\'erieure ou
+\'egale \`a $n$ et ${\underline x}^I$ le mon\^ome 
+$$
+{\underline x}^I = x_1^{i_1}x_2^{i_2}\ldots x_n^{i_n}.
+$$
+Une {\it forme monomiale} $M_I({\underline x})$ sur ${\underline x}$ 
+index\'ee par $I$ est la somme des mon\^omes de l'orbite de
+${\underline x}^I$ sous l'action de $S_n$ :
+$$
+M_I({\underline x}) =\sum_{J \in S_nI}{\underline x}^J.
+$$
+Les formes monomiales constituent naturellement une base d'espace vectoriel
+sur l'anneau des polyn\^omes sym\'etriques~: tout
+polyn\^ome sym\'etrique se repr\'esente comme une
+combinaison lin\'eaire finie de formes monomiales.
+
+\subsubsection*{Repr\'esentations en machine}
+
+Soit $p$ un polyn\^ome sym\'etrique sur un anneau $\cal A$.
+Supposons que $p$ soit donn\'e sur la base des formes monomiales.
+
+Dans la {\it repr\'esentation contract\'ee} de $p$
+on remplace toute forme monomiale $M_I(x)$ par $x^I$, ou par tout mon\^ome
+de $S_nx^I$, son orbite. 
+Dans sa {\it repr\'esentation partitionn\'{e}e}, on remplace tout {\it terme
+monomial}  $cM_I(x)$, o\`u $c$ est un coefficient sur $\cal A$, par la liste
+$[c,i_1,\ldots ,i_n]$ et on r\'eunit le tout dans une liste.
+
+{\it Exemple.} le polyn\^{o}me contract\'{e} associ\'{e} \`{a} 
+$3x^4 + 3y^4 -2xy^5 -2x^5y$ est 
+$3x^4 -2xy^5$ et le polyn\^{o}me partitionn\'{e} est
+[[3,4],[-2,5,1]].\\
+
+\subsection{Polyn\^omes multi-sym\'etriques}
+Nous g\'en\'eralisons ici le cas sym\'etrique.
+Nous nous donnons un entier $r >0$ et un $r$-uplet d'entiers 
+$D=(d_1, \ldots ,d_r)$.
+
+\subsubsection*{Action de groupe}
+
+Soient $E_1, E_2, \ldots ,E_r$ $r$ ensembles quelconques.
+Notons $D(E)$ le produit $E_1^{d_1}\times E_2^{d_2}\times \ldots \times E_r^{d_r}$
+
+L'action du produit de groupes  sym\'etriques 
+$S_D=S_{d_1}\times S_{d_2} \times \ldots \times S_{d_r}$ sur $D(E)$ est 
+d\'efinie naturellement comme suit~:  
+\begin{eqnarray*}
+            S_D \times& D(E) & \longrightarrow  D(E)\\
+           \sigma\;\;  \times & A  & \longrightarrow 
+         \sigma A=(\sigma_1{\underline a}_1,\ldots ,\sigma_r{\underline a}_r),
+\end{eqnarray*}
+o\`u $\sigma = (\sigma_1,\ldots ,\sigma_r)$ avec $\sigma_i \in
+S_{d_i}$. L'orbite de $A$ sous l'action de $S_D$ sera
+not\'ee $S_DA$. 
+
+De m\^eme si $X=({\underline x}_1, \ldots,{\underline x}_r)$ est un 
+$r$-uplet tel que la $i$-i\`eme composante
+${\underline x}_i$ est un $d_i$-uplet de variables, on notera ${\cal A}[X]$
+l'ensemble des polyn\^omes en les variables de $X$ et \`a coefficients dans 
+$\cal A$. 
+L'action de $S_D$ sur ${\cal A}[X]$ est d\'efinie
+comme suit~:
+\begin{eqnarray*}
+            S_D & \times {\cal A}[X] & \longrightarrow {\cal A}[X]\\
+           \sigma & \times f  & \longrightarrow \sigma f \;\; :\;
+         \sigma f(X)= f(\sigma X).
+\end{eqnarray*}
+L'orbite de $f$ sous l'action de $S_D$ sera
+not\'ee $S_Df$.
+
+\subsubsection*{Multi-partitions, Polyn\^omes multi-sym\'etriques}
+
+Une {\it multi-partition}, $I$, d'ordre $r$ est un $r$-uplet de partitions.
+Nous appellerons la {\it multi-longueur} de $I$ la liste des longueur
+des partitions qui constituent $I$.
+
+Soit $p$ un polyn\^ome de $d_1+\cdots + d_r$ variables. Ce polyn\^ome
+est dit {\it multi-sym\'etrique} s'il reste invariant par $S_D$,
+c'est-a-dire si $S_D p =\{p\}$.
+
+Un polyn\^ome multi-sym\'etrique peut-\^etre repr\'esent\'e par des
+multi-partitions~:
+
+Soient $X$ comme ci-dessus et $I=(I_1,\ldots,I_r)$ un 
+$r$-uplet de ${\bf N}^{d_1}\times \ldots \times {\bf N}^{d_r}$.
+on notera naturellement par $X^I$ le mon\^ome 
+$$
+X^I = {\underline x}_1^{I_1}\ldots{\underline
+x}_r^{I_r}. 
+$$
+Si $I$ est une multi-partition de multi-longueur inf\'erieure \`a $D$,
+nous d\'efinissons la
+{\it multi-forme monomiale} $M_I(X)$ sur $X$ 
+index\'ee par $I$ par la somme des mon\^ome de l'orbite de
+$X^I$ sous l'action de $S_D$ :
+$$
+M_I(X) =\sum_{J \in S_DI} X^J.
+$$
+
+Il est naturel de repr\'esenter un polyn\^ome multi-sym\'etrique par une
+combinaison lin\'eaire de multi-forme monomiales sur l'anneau des
+coefficients du polyn\^ome.
+\subsubsection*{R\'epresentation machine}
+Consid\'erons maintenant un polyn\^ome multi-sym\'etrique \`a
+coefficients dans un anneau $\cal A$ en les variables de $X$. 
+Ce polyn\^ome s'exprime naturellement comme
+une somme finie de $cM_I(X)$ o\`u $c \in {\cal A}$ et $M_I(X)$ est une
+multi-forme monomiale sur $X$. Une {\it forme contract\'ee}
+associ\'ee \`a un polyn\^ome multi-sym\'etrique
+consiste \`a remplacer dans ce polyn\^ome chaque $M_I(X)$ par le mon\^ome 
+$X^I$ ou bien par un autre mon\^ome de son orbite $S_DX^I$.
+
+\section{Initialisation et mode op\'eratoire}
+
+Le fichier sym.mac comporte toutes les commandes d'auto-chargement. C'est
+\'eventuellement dans ce fichier qu'il faut modifier des noms de chemins si
+l'utilisation de {\tt SYM} doit se faire d'un autre directory que celui
+o\`u il est install\'e.
+
+le fichier {\tt compile.lsp} comporte la liste des fichiers \`a
+compiler. Pour l'ex\'ecuter on peut le charger sous {\tt LISP} ou sous
+{\tt MACSYMA}
+par la commande {\tt load(``compile.lsp'').} 
+Une fois les fichiers de {\tt SYM} compil\'es on charge le module sous
+{\tt MACSYMA} avec le fichier {\tt sym.mac}~: 
+\begin{verbatim}
+load(``sym.mac'');
+\end{verbatim}
+
+Sauf en cas de pr\'{e}cision, les fonctions appel\'{e}es compl\`{e}tent les
+listes avec des valeurs formelles.
+Pour la i\`{e}me fonction sym\'{e}trique \'{e}l\'{e}mentaire, ce sera {\tt ei},
+pour la i\`{e}me fonction puissance, ce sera {\tt pi}, et pour la i\`{e}me 
+fonction compl\`ete  ce sera {\tt hi}.\\
+
+Il existe plusieurs modes d'\'evaluation de polyn\^omes sous MACSYMA :
+meval, expand, rat, ratsimp.
+SYM permet le choix du mode op\'eratoire.
+A chaque appel d'une fonction, SYM teste si le drapeau de la variable {\tt oper}
+a \'et\'e modifi\'e. Dans ce cas, le mode op\'eratoire est modifi\'e ainsi~:
+\begin{description}
+\item Si {\tt oper = meval} (par d\'efaut), on fait
+      les op\'erations avec {\tt meval} .
+\item Si {\tt oper = expand}, elles sont faites avec {\tt expand}.
+      
+\item Si {\tt oper = rat}, elles sont faites avec {\tt rat}.
+\item Si {\tt oper = ratsimp}, elles sont faites avec {\tt ratsimp}.
+
+\end{description}
+Le mode {\tt meval} est avantageux en num\'erique. Avec des valeurs
+formelles le mode {\tt rat} est souvent pr\'ef\'erable.
+
+Pour mettre le drapeau d'{\tt oper} \`a {\tt expand}, par exemple, il
+suffit d'\'ecrire :
+\begin{center}
+{\tt oper : expand;}
+\end{center}
+\section{Descriptif des fonctions disponibles}
+
+Prenons q la valeur minimale entre le degr\'{e} du polyn\^ome {\tt sym}
+ et le cardinal {\tt card}.
+On met dans {\tt lvar} les variables du polyn\^ome consid\'er\'e le
+distinguant ainsi des param\`etres \'eventuels.
+
+\subsection{Combinatoire}
+  \begin{itemize}
+    \item {\tt ARITE(DEGRE, ARITE, PUISSANCES)}
+\index{ARITE(DEGRE, ARITE, PUISSANCES)}
+applique le the'ore`me de l'arite'
+(A. Valibouze (1992) Sur l'arit\'e des fonctions, \`a para{\^ \i}tre dans 
+la revue European Journal of Combinatorics ). Cette fonction permet de
+passer d'une fonction puissance d'une  resolvante en ARITE variables 
+a une fonction puissance en DEGRE variables. Elle rajoute un
+coefficient binomial a chaque partition. On suppose que les fonctions
+puissances sont donne\'es sur la base des formes monomiales de mani\`ere
+partitionn\'ee dans la liste PUISSANCES.
+
+    \item {\tt CARD\_ORBIT(partition,n)}
+\index{CARD\_ORBIT(partition,n)}
+ $\longrightarrow$ {\tt entier}\\
+ {\tt partition} est une partition donn\'ee sous la forme 
+$[a_1,m_1,...,a_q,m_q]$ o\`u $m_i$ est la multiplicit\'e de $a_i$
+dans la partition.
+La fonction calcule le cardinal de l'orbite de la partition sous
+l'action du groupe sym\'etrique de degr\'e {\tt n}. 
+
+    \item {\tt MULTINOMIAL(r,part)} \index{MULTINOMIAL(r part)}
+ $\longrightarrow$ {\tt entier}\\
+ o\`u {\tt r} est le poids de la partition {\tt part}. Cette
+fonction ram\`ene le coefficient multinomial associ\'e : si les
+parts de la partitions {\tt part} sont $i_1, i_2, ..., i_k$, le r\'esultat de
+{\tt MULTINOMIAL} est $r!/(i_1!i_2!...i_k!)$.
+
+    \item {\tt CARD\_STAB(l,egal)}
+\index{CARD\_STAB(l,egal)}  $\longrightarrow$ {\tt entier}\\
+{\tt l} est une liste d'objets ordonn\'es et {\tt egal} est le
+test d'\'egalit\'e entre eux. Soit n la longueur de la liste {\tt l}.
+Cette  fonction calcule le cardinal du stabilisateur de {\tt l} sous
+l'action  du groupe sym\'etrique d'ordre n.
+
+ \item {\tt PERMUT(l)} \index{PERMUT(l)}
+ $\longrightarrow$ liste\\
+ ram\`ene la liste des permutations de la liste {\tt l}.
+
+\end{itemize}
+\small
+\begin{verbatim}
+ CARD_ORBIT([5,2,1,3],6);
+                                 60
+ CARD_STAB([a, a, c, b, b], eq);
+                                  4
+ CARD_STAB([1,1,2,3,3], "=");
+                                  4
+
+  arite(4,2,[[[1,2,4]],[[1,5,5],[1,2]],[[1,2,2],[1,3]]]);
+
+       [[[1, 2, 4]], [[1, 5, 5], [3, 2]], [[1, 2, 2], [3, 3]]]
+\end{verbatim}
+Ci-dessus la liste des
+fonctions puissances est $[x^2y^4,x^5y^5 + x^2,x^2y^2+x^3]$ l'arit\'e 
+est 2 et le degr\'e est 4. Cette fonction est utile aux calculs de 
+r\'esolvantes.
+\normalsize
+\subsection{Sur les polyn\^omes d'une variable}
+  \begin{itemize}
+    \item {\tt ELE2POLYNOME(cele,z)} \index{ELE2POLYNOME(cele,z)}
+$\longrightarrow$ polyn\^ome\\
+donne le polyn\^ome en {\tt z} dont les fonctions
+sym\'etriques \'el\'ementaires des racines sont dans la liste {\tt cele}.
+{\tt cele}=$[n,e_1,...,e_n]$ o\`u $n$ est le degr\'e du polyn\^ome et
+$e_i$ la $i$-i\`eme fonction sym\'etrique \'el\'ementaire.
+
+     \item {\tt POLYNOME2ELE(polyn\^ome,z)} \index{POLYNOME2ELE(polyn\^ome,z)}
+$\longrightarrow$ {\tt cele}\\
+ donne la liste {\tt cele}=$[n,e_1,...,e_n]$ o\`u $n$ est le
+degr\'e du polyn\^ome de la variable {\tt z}
+et $e_i$ la $i$-i\`eme fonction sym\'etrique 
+\'el\'ementaire des ses racines.
+\end{itemize}
+\small
+\begin{verbatim}
+ ELE2POLYNOME([2,e1,e2],z);
+                                  2
+                                 Z  - E1 Z + E2
+
+ POLYNOME2ELE(X^7-14*X^5  + 56*X^3  - 56*X + 22,X);
+ 
+                      [7, 0, - 14, 0, 56, 0, - 56, - 22] 
+
+ ELE2POLYNOME( [7, 0, - 14, 0, 56, 0, - 56, - 22],X);
+
+                          7       5       3
+                         X  - 14 X  + 56 X  - 56 X + 22
+\end{verbatim}
+\normalsize
+\subsection{Changements de repr\'esentations}
+Un polyn\^ome sym\'etrique peut \^etre donn\'e sous plusieurs formes :
+\'eetendue, contract\'ee, partitionn\'ee. Les fonctions d\'ecrites ci-dessous
+permettent de passer d'une forme \`a une autre. Certaines r\'ealisent de plus
+un test de sym\'etrie.
+
+Dans tout les cas les variables du polyn\^ome sont contenues dans la liste
+{\tt lvar}.
+\begin{itemize}
+\item {\tt TPARTPOL(polyn\^ome,lvar) \index{tpartpol(polyn\^ome,lvar)}
+$\longrightarrow$ ppart ,\\
+       PARTPOL(polyn\^ome, lvar) \index{partpol(polyn\^ome, lvar)}
+$\longrightarrow$ ppart}\\
+ ram\`{e}nent, ordonn\'e dans l'ordre lexicographique croissant et
+d\'ecroissant respectivement, le
+polyn\^{o}me partitionn\'{e} associ\'{e} au polyn\^{o}me donn\'e sous sa forme
+\'etendue. Si le polyn\^ome n'est pas sym\'etrique, la fonction
+{\tt TPARTPOL} d\'eclenche une erreur.
+
+\item {\tt TCONTRACT(polyn\^ome,lvar)\index{tcontract(polyn\^ome,lvar)}
+ $\longrightarrow$ pc}\\
+ {\tt CONTRACT(polyn\^ome,lvar)\index{contract(polyn\^ome,lvar)}
+ $\longrightarrow$ pc}\\
+agissent respectivement comme {\tt TPARTPOL} et{\tt PARTPOL} en restituant la repr\'esention contract\'ee.
+
+\item  {\tt CONT2PART(pc,lvar) \index{cont2part(pc,lvar)}
+ $\longrightarrow$ ppart }\\
+rend le polyn\^ome partitionn\'e {\tt ppart} d'un polyn\^ome sym\'etrique
+donn\'e sous une forme contract\'ee {\tt pc}.
+
+\item {\tt PART2CONT(ppart,lvar) \index{part2cont(ppart,lvar)}
+ $\longrightarrow$ pc }\\
+rend une forme contract\'ee {\tt pc} d'un polyn\^ome sym\'etrique
+donn\'e sous sa forme partitionn\'e {\tt ppart}.
+
+\item  {\tt EXPLOSE(pc,lvar) \index{explose(pc,lvar) }
+$\longrightarrow$ psym }\\
+rend la forme \'etendue {\tt psym} d'un polyn\^ome sym\'etrique
+donn\'e sous une forme contract\'ee {\tt pc}.
+
+\end{itemize}
+\small
+\begin{verbatim}
+ TPARTPOL(x^3-y,[x,y]);
+
+                         manque des monomes
+\end{verbatim}
+Soit le  polyn\^ome sym\'etrique de ${\bf Z}[x,y,z]$ dont une forme 
+contract\'ee est $2a^3bx^4y$. Nous allons lui imposer divers changements
+de repres\'entations.
+
+\small
+\begin{verbatim}
+ lvar : [x,y,z]$
+ pc : 2*a^3*b*x^4*y;  
+                                3    4
+                             2 a  b x  y
+ psym : EXPLOSE(pc,lvar);
+                         3      4      3      4      3    4   
+                      2 a  b y z  + 2 a  b x z  + 2 a  b y  z 
+             3    4        3      4      3    4
+        + 2 a  b x  z + 2 a  b x y  + 2 a  b x  y
+\end{verbatim}
+\normalsize
+Et si on lui applique la fonction {\tt CONTRACT} on retrouve une forme 
+contract\'ee~:
+\small
+\begin{verbatim}
+ CONTRACT(psym,lvar);
+                                 3    4
+                              2 a  b x  y
+ TCONTRACT(psym,lvar);
+                                 3    4
+                              2 a  b x  y
+ TPARTPOL(psym,lvar);
+                                  3
+                             [[2 a  b, 4, 1]]
+ PARTPOL(psym,lvar);
+                                  3
+                             [[2 a  b, 4, 1]]
+ ppart : CONT2PART(pc,lvar);
+                                  3
+                             [[2 a  b, 4, 1]]
+ PART2CONT(ppart,lvar);
+                                 3    4
+                              2 a  b x  y
+\end{verbatim}
+\normalsize
+
+\subsection{Les fonctions li\'ees aux partitions}
+\begin{itemize}
+\item {\tt KOSTKA(part1,part2)} \index{KOSTKA(part1,part2)}
+$\longrightarrow$ entier\\
+ (\'ecrit par P.ESPERET) ram\`ene le
+nombre de Kostka associ\'e aux partitions {\tt part1} et {\tt part2}.
+\item {\tt TREINAT(part)} \index{treinat(part)} 
+$\longrightarrow$ liste des partitions 
+inf\'erieures pour l'ordre naturel
+\`a la partition {\tt part} et de m\^eme poids.
+\item{\tt TREILLIS(n)} \index{treillis(n)} 
+$\longrightarrow$ liste des partitions de poids $n$.
+\item {\tt LGTREILLIS(n,m)} \index{lgtreillis(n,m)} 
+$\longrightarrow$ 
+liste des partitions de poids $n$ et
+de longueur  $m$.
+\item {\tt LTREILLIS(n,m)} \index{ltreillis(n,m)} 
+$\longrightarrow$ 
+liste des partitions de poids $n$ et
+de longueur inf\'erieure ou \'egale \`a  $m$.
+\end{itemize}
+\small
+\begin{verbatim}
+ KOSTKA([3,3,3],[2,2,2,1,1,1]);
+                                  6
+ LGTREILLIS(4,2);
+                           [[3, 1], [2, 2]]
+ LTREILLIS(4,2);
+                         [[4, 0], [3, 1], [2, 2]]
+ TREILLIS(4);
+                [[4], [3, 1], [2, 2], [2, 1, 1], [1, 1, 1, 1]]
+ TREINAT([5]);
+                               [[5]]
+ TREINAT([1,1,1,1,1]);
+                        [[5], [4, 1], [3, 2], [3, 1, 1],
+                    [2, 2, 1], [2, 1, 1, 1], [1, 1, 1, 1, 1]]
+ TREINAT([3,2]);
+                        [[5], [4, 1], [3, 2]]
+\end{verbatim}
+\normalsize
+\subsection{Les calculs d'orbites}
+\begin{itemize}
+\item {\tt ORBIT(polyn\^ome,lvar) \index{orbit(polyn\^ome,lvar) }
+$\longrightarrow$ $S_n$(polyn\^ome) \\}
+ram\`ene  la liste des polyn\^omes de l'orbite du polyn\^ome
+sous l'action
+du groupe sym\'etrique $S_n$. Les $n$ variables du polyn\^ome
+variables sont contenues dans la liste {\tt lvar}.
+\item {\tt MULTI\_ORBIT(polyn\^ome,[lvar$_{1}$,lvar$_{2}$,\ldots ,lvar$_{r}$])
+\index{multi\_orbit(polyn\^ome,[lvar$_{1}$,lvar$_{2}$,\ldots ,lvar$_{r}$])}
+$\longrightarrow$ ${S_D}$(polyn\^ome) }\\
+les variables de {\tt polyn\^ome} sont dans les listes de variables
+{\tt lvar$_1$,lvar$_{2}$,\ldots ,lvar$_{r}$} sur
+lesquelles on fait agir respectivement les groupes sym\'etriques
+$S_{d_1},S_{d_2},\ldots ,S_{d_r}$. Cette fonction
+ram\`ene l'orbite du polyn\^ome sous l'action du produit
+$S_D$ de ces groupes sym\'etriques.
+\end{itemize}
+\small
+\begin{verbatim}
+ ORBIT(a*x+b*y,[x,y]);
+                            [a y + b x, b y + a x]
+ ORBIT(2*x+x**2,[x,y,z]);
+                                       2         2         2
+                                     [z  + 2 z, y  + 2 y, x  + 2 x]
+ MULTI_ORBIT(a*x+b*y,[[x,y],[a,b]]);
+                                        [b y + a x, a y + b x]
+ MULTI_ORBIT(x+y+2*a,[[x,y],[a,b,c]]);
+ 
+                  [y + x + 2 c, y + x + 2 b, y + x + 2 a]
+\end{verbatim}
+\normalsize
+\subsection{Le produit contract\'e de deux polyn\^omes sym\'etriques}
+\begin{itemize}
+\item{\tt MULTSYM(ppart1, ppart2,n)\index{multsym(ppart1, ppart2,n)}
+  $\longrightarrow$ pc} \\
+calcule le produit de deux polyn\^omes
+sym\'etriques de {\tt n} variables dont {\tt part1} et {\tt part2} sont les
+formes partitionn\'ees associ\'ees.
+
+\end{itemize}
+Soient deux polyn\^omes sym\'etriques {\tt p1} et {\tt p2}. On va
+calculer le produit des polyn\^omes par une m\'ethode classique du 
+produit de deux polyn\^omes quelconques, puis on r\'ealisera
+ce produit avec {\tt MULTSYM}. On se place dans ${\bf Z}[x,y]$.
+\small
+\begin{verbatim}
+ 
+ p1 : x*y^2  + x^2*y$
+ p2 : y+x$
+ prod : expand(p1*p2);
+                              3      2  2    3
+                           x y  + 2 x  y  + x  y
+\end{verbatim}
+\normalsize
+Constatons c'est la forme \'etendue du produit obtenu avec {\tt MULTSYM}~:
+\small
+\begin{verbatim}
+ PARTPOL(prod,[x,y]);
+                                [[1, 3, 1], [2, 2, 2]]
+ ppart1 : PARTPOL(p1,[x,y]);
+                                   [[1, 2, 1]]
+ ppart2 : PARTPOL(p2,[x,y]);
+                                   [[1, 1, 0]]
+ MULTSYM(ppart1, ppart2, 2);
+                                [[1, 3, 1], [2, 2, 2]]
+\end{verbatim}
+\normalsize
+
+\subsection{Les changements de bases}
+De mani\`ere g\'en\'erale, la liste {\tt lvar} repr\'ente la liste des
+variables des polyn\^omes.
+\begin{itemize}
+\item {\tt ELEM(cele,sym,lvar) \index{elem(cele,sym,lvar)}
+  $\longrightarrow$  P(e1,..., eq)}\\
+ d\'{e}compose le polyn\^{o}me sym\'{e}trique {\tt sym} 
+en les fonctions  sym\'{e}triques \'{e}l\'{e}mentaires
+contenues dans {\tt cele} (3 drapeaux possibles).
+\item {\tt multi\_elem([cele$_{1}$, \ldots, cele$_{r}$],multi\_pc,
+[lvar$_{1}$, \ldots,lvar$_{r}$])  
+\index{MULTI\_ELEM([cele$_{1}$, \ldots, cele$_{p}$],multi\_pc,
+[lvar$_{1}$, \ldots,lvar$_{r}$])  }
+$\longrightarrow$ 
+ P(cele$_{1}$, \ldots ,cele$_{r}$)}\\
+On a un polyn\^{o}me {\tt multi\_pc} multi-sym\'{e}trique sous l'action
+de $S_D$ donn\'e par sa
+forme multi-contract\'ee.
+On le d\'ecompose
+successivement en chacun des groupes {\tt cele$_{j}$} de
+fonctions  sym\'{e}triques \'{e}l\'{e}mentaires de l'ensemble 
+${\underline x}_j$. La liste
+de variables {\tt lvar}$_j$ permet de lire le polyn\^ome. 
+On y trouve les variables de ${\underline x}_j$ intervenant dans l'expression 
+du polyn\^ome multi-contract\'e.
+
+\item {\tt PUI(cpui,sym,lvar) \index{pui(cpui,sym,lvar) }
+$\longrightarrow$ P(p1, ... ,pq)}\\
+ d\'{e}compose un polyn\^{o}me sym\'{e}trique en les 
+fonctions
+puissances (3 drapeaux possibles).
+\item {\tt multi\_pui([cpui$_{1}$, \ldots, cpui$_{p}$],multi\_pc,
+[lvar$_{1}$, \ldots,lvar$_{p}$]) 
+\index{multi\_pui([cpui$_{1}$, \ldots, cpui$_{p}$],multi\_pc,
+[lvar$_{1}$, \ldots,lvar$_{p}$]) }
+ $\longrightarrow$ 
+ P(cpui$_{1}$, \ldots ,cpui$_{p}$ )}\\
+agit comme {\tt MULTI\_ELEM} en d\'ecomposant le polyn\^ome multi-sym\'etrique
+sur les fonctions puissances.
+\end{itemize}
+
+Si le polyn\^{o}me sym\'{e}trique est sous une forme contract\'{e}e
+le drapeau {\tt elem} doit \^{e}tre \`{a} 1 (sa valeur par d\'{e}faut).
+
+Consid\'erons le polyn\^ome sym\'etrique 
+$x^4+y^4+z^4+t^4 - 2*(x*(y + z +t) + y*(z + t) + z*t)$
+dont une forme contract\'ee est $x^4 -2*y*z$.
+\small
+\begin{verbatim}
+elem:1$
+
+elem([],x**4 - 2*y*z, [x,y,z]); 
+
+                   4          2                 2
+                 e1  - 4 e2 e1  + 4 e3 e1 + 2 e2  - 2 e2 - 4 e4
+\end{verbatim}
+\normalsize
+Supposons maintenant que le nombre de variables du polyn\^ome
+sym\'etrique est 3 (i.e. $t=0$). Cette valeur 3 doit \^etre signal\'ee
+en t\^ete de la liste {\tt cele} comme suit~:
+\small
+\begin{verbatim}
+elem([3],x**4 - 2*y*z,[x,y,z]);
+
+                      4          2                 2
+                    e1  - 4 e2 e1  + 4 e3 e1 + 2 e2  - 2 e2
+\end{verbatim}
+\normalsize
+Si de plus la premi\`ere fonction sym\'etrique \'elementaire
+a une valeur particuli\`ere, $e_1=7$, on la met en deuxi\`eme
+\'el\'ement de la liste {\tt cele}~:
+\small
+\begin{verbatim}
+  ELEM([3,7],x^4-2*x*y,[x,y]);
+
+                               2
+                   28 e3 + 2 e2  - 198 e2 + 2401
+\end{verbatim}
+\normalsize
+Le $i$+1-i\`eme \'el\'ement de la liste cele doit \^etre la $i$-i\`eme
+fonction sym\'etrique \'el\'ementaire.
+
+Si le  polyn\^{o}me sym\'{e}trique est sous une forme \'etendue
+le drapeau {\tt elem} doit \^{e}tre \`{a} 2~ et s'il est 
+sous une forme partitionn\'ee le drapeau {\tt elem} doit \^{e}tre \`{a} 3~:\\
+
+\small
+\begin{verbatim}
+ elem :2$
+ ELEM([3,f1,f2,f3],x^4+y^4+z^4 - 2*(x*y + x*z + y*z),[x,y,z]);
+
+                      4          2                 2
+                    f1  - 4 f2 f1  + 4 f3 f1 + 2 f2  - 2 f2
+
+ elem:3$
+ ELEM(([],[[1, 2, 1]],[]);
+                             E1 E2 - 3 E3
+\end{verbatim}
+\normalsize
+
+Il en est de m\^{e}me pour le drapeau {\tt pui} associ\'e \`a la fonction
+{\tt PUI}.\\
+
+Pour la fonction {\tt PUI}, si des valeurs formelles doivent
+\^{e}tre rajout\'{e}es \`{a}
+{\tt cpui} on tient compte du cardinal de l'alphabet, s'il est
+fournit, pour calculer les fonctions puissances en fonction des 
+premi\`{e}res. On se sert alors de la fonction {\tt PUIREDUC} (voir
+plus loin).
+\small
+\begin{verbatim}
+  MULTI_ELEM([[2,e1,e2],[2,f1,f2]],a*x+a^2+x^3,[[x,y],[a,b]]);
+
+                                2                       3
+                     - 2 f2 + f1  + e1 f1 - 3 e1 e2 + e1
+
+  MULTI_PUI([[2,p1,p2],[2,t1,t2]],a*x+a^2+x^3,[[x,y],[a,b]]);
+    
+                                              3
+                                       3 P1 P2   P1
+                          T2 + P1 T1 + ------- - ---
+                                          2       2
+\end{verbatim}
+\normalsize
+\begin{itemize}
+\item {\tt ELE2PUI(m,cele) \index{ele2pui(m,cele) }
+$\longrightarrow$ cpui}\\
+ r\'{e}alise le passage des fonctions 
+sym\'{e}triques 
+\'{e}l\'{e}mentaires aux fonctions puissances de 1 \`{a} m.
+
+\item {\tt PUI2ELE(n,cpui) \index{pui2ele(n,cpui) }
+$\longrightarrow$ cele}\\
+ r\'{e}alise le passage des fonctions 
+puissances aux fonctions 
+sym\'{e}triques \'{e}l\'{e}mentaires. Si le drapeau {\tt pui2ele} est
+\'egal \`a 
+{\tt girard}, on r\'ecup\`ere la liste des fonctions sym\'etriques
+\'el\'ementaires de 1 \`{a} {\tt n}, et s'il est \'egal \`a {\tt close}, on
+r\'ecup\`ere la {\tt n}$^{i\grave{e}me}$ fonction sym\'etrique
+\'el\'ementaire.
+\end{itemize}
+Ci-dessous, on cherche les 3 premi\`{e}res fonctions sym\'{e}triques 
+\'{e}l\'{e}mentaires.
+   On ne donne pas de valeur aux 3 premi\`{e}res fonctions puissances. La
+   fonction rajoute donc des variables formelles.
+\small
+\begin{verbatim}
+ PUI2ELE(3,[]);
+
+                           2                      3
+                         p1    p2  p3   p1 p2   p1
+                 [3, p1, --- - --, -- - ----- + ---]
+                          2    2   3      2      6
+
+
+\end{verbatim}
+\normalsize
+Ci-dessous on cherche les 4 premi\`eres fonctions sym\'etriques 
+\'el\'ementaires en fonctions des fonctions puissances telles
+que $p_1=2$. Le cardinal
+de l'alphabet \'etant 3, la quatri\`eme fonction sym\'etrique
+\'el\'ementaire est donc nulles. Ensuite la fonction {\tt ELE2PUI}
+calcule les 3 premi\`res fonctions pussance en fonctions des 3 premi\`res 
+fonctions sym\'etriques \'el\'ementaires.
+\small
+\begin{verbatim}
+ PUI2ELE(4,[3,2]);
+                         4 - p2  p3 - 3 p2 + 4
+                 [3, 2 , ------, -------------, 0]
+                           2        3   
+ ELE2PUI(3,[]);
+                             2                            3
+                   [3, e1, e1  - 2 e2, 3 e3 - 3 e1 e2 + e1 ]
+\end{verbatim}
+\normalsize
+Ici, comme le cardinal est 2, la troisi\`{e}me fonction sym\'{e}trique
+\'{e}l\'{e}mentaire est nulle~:
+\small
+\begin{verbatim}
+ ELE2PUI(3,[2]);
+                                2           3
+                      [2, e1, e1  - 2 e2, e1  - 3 e1 e2]
+\end{verbatim}
+\normalsize
+\begin{itemize}
+\item {\tt PUIREDUC(n,cpui) \index{puireduc(n,cpui) }
+$\longrightarrow$ [card,$p_{1},p_{2},p_{3},...,p_{n}$]}\\ 
+permet d'avoir 
+les fonctions puissances jusqu'\`{a} {\tt n} connaissant celles jusqu'\`{a} 
+{\tt m}. Le cardinal est pr\'{e}cis\'{e} dans {\tt cpui}.
+\end{itemize}
+
+Si le cardinal, n, de l'alphabet est donn\'{e}, on peut
+exprimer toutes les fonctions puissances en fonction des n premi\`{e}res.
+On prend par exemple 2 pour cardinal et on demande les 3 premi\`{e}res
+fonctions puissances.
+\small
+\begin{verbatim}
+ PUIREDUC(3,[2]);
+                                       3
+                           3 p1 p2   p1
+               [2, p1, p2, ------- - ---]
+                             2        2
+
+\end{verbatim}
+\normalsize
+\begin{itemize}
+\item {\tt ELE2COMP(m , cele) \index{ele2comp(m , cele)}
+ $\longrightarrow$ ccomp}\\
+ r\'{e}alise le passage des fonctions 
+sym\'{e}triques 
+\'{e}l\'{e}mentaires aux fonctions sym\'etriques compl\`etes de 1 \`{a} m.
+\item {\tt PUI2COMP(n, cpui) \index{pui2comp(n, cpui) }
+$\longrightarrow$ ccomp}\\
+ r\'{e}alise le passage des fonctions 
+puissances aux fonctions 
+sym\'{e}triques compl\`etes de 1 \`{a} n.
+\item {\tt COMP2ELE(n, ccomp) \index{comp2ele(n, ccomp) }
+$\longrightarrow$ cele}\\
+ r\'{e}alise le passage des fonctions sym\'etriques
+compl\`etes aux fonctions 
+sym\'{e}triques \'{e}l\'{e}mentaires de 1 \`{a} n.
+\item {\tt COMP2PUI(n, ccomp)\index{comp2pui(n, ccomp)}
+ $\longrightarrow$ cpui}\\
+ r\'{e}alise le passage des fonctions sym\'etriques
+compl\`etes aux fonctions 
+puissances de 1 \`{a} n.
+\item {\tt MON2SCHUR(liste) \index{mon2schur(liste) }
+$\longrightarrow$ pc}\\
+r\'ealise le passage des formes monomiales aux fonctions de Schur. Le
+r\'esultat {\tt pc} est donc un polyn\^ome sym\'etrique donn\'e sous
+une forme contract\'ee.
+
+\item {\tt SCHUR2COMP(P,[h$i_{1}$,...,h$i_{q}$]))
+ \index{schur2comp(P,l) }
+$\longrightarrow$ liste de listes}\\
+r\'ealise le passage des fonctions de Schur, not\'ees $S_{I}$,
+aux fonctions totales. Le polyn\^ome P est un polyn\^ome en les fonctions
+totales h$i_{k}$. Il est indispensable de noter ces fonctions totales
+avec un h concat\'en\'e \`a un entier.
+
+\end{itemize}
+
+La fonction {\tt MON2SCHUR} permet d'\'ecrire une fonction
+de Schur sur la base des formes monomiales 
+repr\'esent\'ees sous leur forme contract\'ee. La fonction de Schur
+est donn\'ee par une partition. Nous allons d'abord 
+v\'erifier que la fonction de Schur associ\'e \`a la
+partition $(1^3)$ est \'egale \`a la $3^{i\grave{e}me}$
+fonction sym\'etrique \'el\'ementaire et que celle associ\'ee
+\`a la partition $(3)$ est \'egale \`a la $3^{i\grave{e}me}$ fonction
+sym\'etrique compl\`ete (ceci d\'ecoule d'un r\'esultat g\'en\'eral).
+\small
+\begin{verbatim}
+
+ MON2SCHUR([1,1,1]);
+                       x1 x2 x3
+ MON2SCHUR([3]);
+                           2        3
+               x1 x2 x3 + x1  x2 + x1
+
+ MON2SCHUR([1,2]);
+                                   2
+                    2 x1 x2 x3 + x1  x2
+\end{verbatim}
+\normalsize
+Voyons sur un exemple comment, en op\'erant circulairement sur des changements
+de bases, on recup\'ere bien sur la donn\'ee initiale.
+\small
+\begin{verbatim}
+a1 :  PUI2COMP(3,[3]);
+                                2                 3
+                         p2   p1   p3   p1 p2   p1
+                 [3, p1, -- + ---, -- + ----- + ---]
+                          2    2   3      2      6
+a2 : COMP2ELE(3, a1);
+                      2                      3
+                    p1    p2  p3   p1 p2   p1
+            [3, p1, --- - --, -- - ----- + ---]
+                     2    2   3      2      6
+a3 : ELE2PUI(3,a2);
+                       [3, p1, p2, p3]
+
+a4 : COMP2PUI(3,[]);
+                          2                     3
+         [3, h1, 2 h2 - h1 , 3 h3 - 3 h1 h2 + h1 ]
+
+a5 : PUI2ELE(3,a4);
+                     2                        3
+           [3, h1, h1  - h2, h3 - 2 h1 h2 + h1 ]
+
+a6 : ELE2COMP(3,a5);
+                       [3, h1, h2, h3]
+\end{verbatim}
+\normalsize
+Ci-dessous on montre comment exprimer une fonction de Schur sur les
+bases des formes monomiales (en {\tt c48}), des fonctions compl\`etes
+(en {\tt c50}), des fonctions sym\'etriques \'el\'ementaires (en {\tt c51})
+et des fonctions puissances (en {\tt c52}).
+\small
+\begin{verbatim}
+(c48)  MON2SCHUR([1,2]);
+
+                           2
+(d48)       2 x1 x2 x3 + x1  x2
+
+(c49) COMP2ELE(3,[]);
+
+                     2                        3
+(d49)      [3, h1, h1  - h2, h3 - 2 h1 h2 + h1 ]
+
+(c50) ELEM(d49,d48,[x1,x2,x3]);
+
+(d50)             h1 h2 - h3
+
+(c51) ELEM([],d48,[x1,x2,x3]);
+
+(d51)             e1 e2 - e3
+
+(c52) PUI([],d48,[x1,x2,x3]);
+
+                3
+              p1    p3
+(d52)         --- - --
+              3    3
+
+(c53) SCHUR2COMP(h1*h2-h3,[h1,h2,h3]);
+
+
+(d53) 				    s	  
+				     1, 2
+
+(c54) SCHUR2COMP(a*h3,[h3]);
+
+(d54)                                 s  a
+                                       3
+
+\end{verbatim}
+\normalsize
+On a, en derni\`eres instructions, d\'ecompos\'e $h_{1}h_{2}-h_{3}$ 
+et $h_{3}$ sur la base des fonctions de Schur.
+\subsection{Les r\'esolvantes}
+  Soit $p$ un polyn\^ome d'un variable $x$ et de degr\'e $n$ sur un
+anneau $A$.
+Soit $f \in A[x_1,x_2,\ldots ,x_n]$ une fonction de transformation et
+$S_nf$ l'orbite de la fonction $f$ sur l'action du groupe sym\'etrique
+$S_n$. Alors la r\'esolvante de $p$ par $f$, not\'ee $f_*(p)$,
+est le polyn\^ome unitaire :
+\begin{eqnarray*}
+f_*(p)(y) = \prod_{h\in S_nf} (y- h(\alpha_1,\ldots ,\alpha_n)),
+\end{eqnarray*}
+o\`u $\alpha_1,\ldots ,\alpha_n$ sont les racines de $p$.\\
+
+Si la fonction de transformation est 
+\begin{enumerate}
+\item un polyn\^ome d'une variable ,
+\item un polyn\^ome lin\'eaire,
+\item une polyn\^ome lin\'eaire dont les coefficients non nuls sont altern\'es,
+\item une polyn\^ome lin\'eaire avec que des coefficients unitaires,
+\item un polyn\^ome sym\'etrique en les variables qui apparaissent dans son
+expression,
+\item un mon\^ome dont le coefficient est 1,
+\item la fonction de la r\'esolvante de Cayley ,
+\item de Lagrange,
+\item un polyn\^ome quelconque,
+\end{enumerate}
+alors chaque r\'esolvante associ\'ee est respectivement appel\'ee
+{\it r\'esolvante }
+\begin{enumerate}
+\item {\it unitaire},
+\item {\it lin\'eaire},
+\item {\it altern\'ee},
+\item {\it somme},
+\item {\it sym\'etrique},
+\item {\it produit},
+\item {\it de Cayley},
+\item {\it de Lagrange},
+\item {\it g\'en\'erale}.
+\end{enumerate}
+
+Comme nous le verrons plus, il existe encore d'autres r\'esolvantes
+(di\'edrale, de Klein, ...).
+
+Nous d\'efinissons l'{\it arit\'e} d'une fonction comme le nombre de
+variables qui apparaissent dans son expression. En g\'en\'eral si une fonction
+est d'arit\'e $k$ nous notons $f(x_1,\ldots,x_k)$ \`a la place de
+$f(x_1,\ldots ,x_k ,\ldots ,x_n)$.
+
+Donnons des exemples pour chacun de ces cas :
+
+\begin{enumerate}
+\item $f(x)=x^7-x+1$ d'arit\'e 1,
+\item $f(x_1,x_2) = x_1+3x_2$ d'arit\'e 2,
+\item $f(x_1,x_2,x_3,x_4) = x_1 -x_2 + 3x_3-3x_4$ d'arit\'e 4,
+\item $f(x_1,x_2,x_3) = x_1+x_2+x_3$ d'arit\'e 3,
+\item $f(x_1,x_2,x_3) = 3x_1x_2 + 3x_2x_3 +3x_1x_3$ d'arit\'e 3,
+\item $f(x_1,x_2) =x_1x_2$ d'arit\'e 2,
+\item $f(x_1,x_2,x_3,x_4,x_5)=(x_1x2+x_2x_3+x_3x_4+x_4x_5+x_5x_1 -
+        (x_1x_3+x_3x_5+x_5x_2+x_2x_4+x_4x_1))^2$
+\item $f(x_1,x_2,x_3) = \epsilon x_1 + \epsilon^2 x_2 + \epsilon^3
+x_3$, o\`u $\epsilon$ est une racine troisi\`eme de l'unit\'e,
+\item $f(x_1,x_2,x_3) = x_1 +2x_2x_3$ d'arit\'e 3.
+\end{enumerate}
+Il est clair qu'une r\'esolvante somme ou produit est \'egalement
+sym\'etrique et qu'une r\'esolvante somme ou altern\'ee est
+\'egalement lin\'eaires.
+
+Les calculs de ces r\'esolvantes se r\'ealisent de deux mani\`eres. Ou bien 
+avec la fonction {\tt RESOLVANTE} ou bien avec un nom sp\'ecifique 
+pr\'ec\'ed\'e de {\tt RESOLVANTE\_}. La liste des fonctions possibles est 
+donc :
+
+\begin{itemize}
+\item {\tt RESOLVANTE\_PRODUIT\_SYM(p,x)} 
+\index{RESOLVANTE\_PRODUIT\_SYM(p,x)} qui calcule la liste toutes les 
+r\'esolvantes produit du polyn\^ome {\tt p(x)}
+\item {\tt RESOLVANTE\_UNITAIRE(p,q,x)} 
+  \index{RESOLVANTE\_UNITAIRE(p,q,x)}
+qui calcule la r\'esolvante du 
+polyn\^ome {\tt p(x)} par le polyn\^ome {\tt q(x)}
+Soit $\prod_{p(\alpha)=0}(y-q(\alpha))$
+\item {\tt RESOLVANTE\_ALTERNEE1(p,x)} 
+  \index{RESOLVANTE\_ALTERNEE1(p,x)}
+qui calcule la transformation de 
+p(x) de degr\'e $n$ par la fonction $\prod_{1\leq i<j\leq n-1} (x_i-x_j)$
+\item {\tt RESOLVANTE\_KLEIN(p,x)} 
+  \index{RESOLVANTE\_KLEIN(p,x)}
+qui calcule la transformation de
+{\tt p(x)} par la fonction $x_1x_2+x_3$ et appel\'ee ainsi car elle
+est associ\'ee au groupe de Klein,
+\item {\tt RESOLVANTE\_KLEIN3(p,x)} qui calcule la transformation de
+{\tt p(x)} par la fonction $x_1x_2x_4+x_4$
+  \index{RESOLVANTE\_KLEIN3(p,x)}
+\item {\tt RESOLVANTE\_VIERER(p,x)} 
+  \index{RESOLVANTE\_VIERER(p,x)}
+qui calcule la transformation de
+{\tt p(x)} par la fonction $x_1x_2-x_3x_4$
+\item {\tt RESOLVANTE\_DIEDRALE(p,x)} 
+  \index{RESOLVANTE\_DIEDRALE(p,x)}
+qui calcule la transformation de
+{\tt p(x)} par la fonction $x_1x_2+x_3x_4$
+  \index{RESOLVANTE\_BIPARTITE(p,x)}
+ \index{RESOLVANTE\_BIPARTITE(p,x)} qui calcule la transformation de
+{\tt p(x)} par la fonction $x_1x_2\ldots x_{n/2}+x_{n/2+1}\ldots x_n$.
+Le degr\'e de $p$ doit n\'ecessairement \^etre pair
+\item {\tt RESOLVANTE(p,x,f,[x1,x2,...,xk])} 
+  \index{RESOLVANTE(p,x,f,[x1,x2,...,xk])}
+qui calcule la transformation de
+{\tt p(x)} par la fonction {\tt f} d'arit\'e {\tt k} et de variables 
+{\tt x1,x2,...,xk} ; (L'arit\'e d'une fonction est le nombre minimum de 
+variables n\'ecessaire pour l'\'ecrire).
+
+
+\end{itemize}
+Il est essentiel pour
+l'efficacit\'e des calculs de ne mettre dans la liste des variables de
+{\tt f} que celle qui apparaissent effectivement dans son expression.
+Avant d'appeler la fonction {\tt resolvante}, selon le type de
+r\'esolvante calcul\'ee on peut mettre un drapeau \`a la
+variable {\tt resolvante}
+afin d'utiliser l'algorithme le plus adapt\'e.
+Selon les cas des r\'esolvantes cit\'es plus haut nous devrons mettre
+le drapeau de la variable {\tt resolvante} respectivement \`a 
+\begin{enumerate}
+\item unitaire,
+\item lineaire,
+\item alternee,
+\item somme,
+\item symetrique,
+\item produit,
+\item Cayley
+\item lagrange,
+\item generale.
+\end{enumerate}
+On peut g\'en\'eraliser la notion de r\'esolvante par la
+transformation de $r$ polyn\^ome par une fonction d\'ependant de
+$r$ blocs de variables :
+\begin{itemize}
+\item {\tt DIRECT} \index{direct}
+      ([$P_1,P_2,\ldots,P_r$],y,f,[$lvar_1,lvar_2,\ldots ,lvar_r$])
+$\longrightarrow$ $f_*(P_1,P_2, \ldots, P_r)(y)$ \\
+qui, \'etant donn\'e les $r$ polyn\^omes $P_1, \ldots, P_r$ en la variable
+$y$ de 
+degr\'es respectifs $d_1, \ldots , d_r$, ram\`ene
+le polyn\^ome produit des $(y - h(a^{(1)}, \ldots, a^{(p)}))$ o\`u
+$a^{(i)}$ est le $d_i$-uplet des racines de $P_i$ pour $i$ allant de 1
+\`a $r$ et o\`u $h$ parcoure toute l'orbite de la fonction $f$ sous 
+l'action du produit de groupes sym\'etriques
+$S_{d_1}\times \cdots \times S_{d_r}$. Dans $lvar_i$ on met les variables
+de $f$ qui apparaisent effectivement dans son expression. C'est \`a dire
+que $lvar_i$ peut comporter moins de $d_i$ variables. La fonction
+{\tt direct} se chargera d'en d\'eduire l'action du groupe
+sym\'etrique $S_{d_i}$.
+\end{itemize}
+{\it Exemples}.
+\small
+\begin{verbatim}
+  resolvante:unitaire;
+  RESOLVANTE(x^7-14*x^5  + 56*x^3  - 56*X + 22,x,x^3-1,[x]);
+
+        7      6        5         4          3   
+      Y  + 7 Y  - 539 Y  - 1841 Y  + 51443 Y  
+
+				  2
+                        + 315133 Y  + 376999 Y + 125253  
+
+ resolvante : lineaire$
+ RESOLVANTE(x^4-1,x,x1+2*x2+3*x3,[x1,x2,x3]);
+    24       20         16            12       
+   Y   + 80 Y   + 7520 Y   + 1107200 Y   
+                               8	      4
+                   + 49475840 Y  + 344489984 Y + 655360000
+                                                      
+ resolvante : generale$
+ RESOLVANTE(x^4-1,x,x1+2*x2+3*x3,[x1,x2,x3]);
+    24       20         16            12       
+   Y   + 80 Y   + 7520 Y   + 1107200 Y   
+                               8	      4
+                   + 49475840 Y  + 344489984 Y + 655360000
+
+ RESOLVANTE(x^4-1,x,x1+2*x2+3*x3,[x1,x2,x3,x4]);
+    24       20         16            12       
+   Y   + 80 Y   + 7520 Y   + 1107200 Y   
+                               8	      4
+                   + 49475840 Y  + 344489984 Y + 655360000
+
+ DIRECT([x^4-1],x,x1+2*x2+3*x3,[[x1,x2,x3]]);
+
+    24       20         16            12       
+   Y   + 80 Y   + 7520 Y   + 1107200 Y   
+                               8	      4
+                   + 49475840 Y  + 344489984 Y + 655360000
+
+ resolvante_diedrale(x^5-3*x^4+1,x);
+   15       12       11       10        9         8         7        6
+  X   - 21 X   - 81 X   - 21 X   + 207 X  + 1134 X  + 2331 X  - 945 X
+
+                     5          4          3          2
+             - 4970 X  - 18333 X  - 29079 X  - 20745 X  - 25326 X - 697
+\end{verbatim}
+\normalsize
+Nous constatons ainsi que la fonction {\tt DIRECT} est une g\'en\'eralisation
+de la fonction r\'esolvante.
+\small
+\begin{verbatim} 
+ resolvante : lineaire$
+ RESOLVANTE(x^4-1,x,x1+2*x2,[x1,x2]);
+                           12       8        4
+                          Y   + 13 Y  + 611 Y  - 625
+ DIRECT([x^4-1],x,x1+2*x2,[[x1,x2,x3]]);
+                           12       8        4
+                          Y   + 13 Y  + 611 Y  - 625
+\end{verbatim}
+\normalsize
+Le r\'esultat de ce dernier calcul eut \'et\'e le m\^eme avec
+\begin{verbatim} 
+DIRECT([x^4-1],x,x1+2*x2,[[x1,x2]]);
+\end{verbatim}
+Comme de plus il est
+plus efficace, il est conseiller de ne pas donner les variables 
+n'intervenant pas dans l'expression de la fonction de transformation.
+\small
+\begin{verbatim} 
+ resolvante:lineaire$
+ RESOLVANTE(x^4-1,x,x1+x2+x3,[x1,x2,x3]);
+                                 4
+                                Y  - 1
+ resolvante:symetrique$
+
+ RESOLVANTE(x^4-1,x,x1+x2+x3,[x1,x2,x3]);
+                                 4
+                                Y  - 1
+ resolvante:lineaire$
+ RESOLVANTE(x^4+x+1,x,x1-x2,[x1,x2]);
+               12      8       6        4        2
+              Y   + 8 Y  + 26 Y  - 112 Y  + 216 Y  + 229
+ resolvante:alternee$
+ RESOLVANTE(x^4+x+1,x,x1-x2,[x1,x2]);
+                12      8       6        4        2
+              Y   + 8 Y  + 26 Y  - 112 Y  + 216 Y  + 229
+ resolvante:generale$
+ RESOLVANTE(x^4+x+1,x,x1-x2,[x1,x2]);
+               12      8       6        4        2
+              Y   + 8 Y  + 26 Y  - 112 Y  + 216 Y  + 229 
+\end{verbatim}
+\normalsize
+Nous calculons ci-dessous une image directe de deux mani\`eres diff\'erentes.
+La premi\`ere met en \'evidence les calculs interm\'ediaires
+utilis\'es par la fonction {\tt DIRECT}.
+On peut changer le drapeau de {\tt direct}. On a {\tt puissances} par
+d\'efaut ce qui veut dire que l'on utilise la fonction {\tt MULTI\_PUI}. Si
+on fait~: {\tt direct : elementaire}, la fonction {\tt DIRECT} utilise 
+la fonction {\tt MULTI\_ELEM}
+g\'en\'eralement moins performante.
+\small
+\begin{verbatim}
+
+ l :  PUI_DIRECT(MULTI_ORBIT(a*x+b*y,[[x,y],[a,b]]),[[x,y],[a,b]],[2,2]);
+
+                                    2  2
+                 [a x, 4 a b x y + a  x ]
+
+ m: MULTI_ELEM([[2,e1,e2],[2,f1,f2]],l[1],[[x,y],[a,b]]);
+
+                           e1 f1
+
+ n: MULTI_ELEM([[2,e1,e2],[2,f1,f2]],l[2],[[x,y],[a,b]]);
+
+                            2             2     2   2
+              8 e2 f2 - 2 e1  f2 - 2 e2 f1  + e1  f1
+
+ PUI2ELE(2,[2,m,n]);
+
+                                       2           2
+              [2, e1 f1, - 4 e2 f2 + e1  f2 + e2 f1 ]
+ 
+ ELE2POLYNOME(%,y);
+
+                    2                         2           2
+                   y  - e1 f1 y - 4 e2 f2 + e1  f2 + e2 f1
+
+ DIRECT([z^2  - e1* z + e2, z^2  - f1* z + f2], z, b*v + a*u, 
+              [[u, v], [a, b]]);
+
+                    2                         2           2
+                   y  - e1 f1 y - 4 e2 f2 + e1  f2 + e2 f1
+
+\end{verbatim}
+\normalsize
+\begin{itemize}
+\item{\tt PUI\_DIRECT($[f_1, \ldots, f_q]$,[$lvar_1,\ldots ,lvar_p$],
+[$d_1,d_2,...,d_p$])}\\
+\index{pui\_direct}
+ Soit $f$ un polynome en $r$ blocs de variables $lvar_1,\ldots ,lvar_r$
+  Soit $c_i$ le nombre de variables dans $lvar_i$  et $S_C$ le produit des $r$
+  groupes sym\'etriques $S_{c_i}$ de degr\'es respectifs
+  $c_1,...,c_r$. Ce groupe agit
+  naturellement sur $f$.
+  La liste {\tt ORBITE} est l'orbite, not\'ee $S_Cf$, de la fonction $f$ 
+  sous  l'action de $S_C$. (Cette liste peut \^etre obtenue avec la fonction 
+  {\tt MULTI\_ORBIT}).
+  Les $d_i$ sont des entiers tels que 
+  $c_1\leq d_1\;, c_2 \leq d_2 \;,\ldots ,c_p\leq d_p$.
+  Notons $S_D$ le produit des groupes sym\'etriques 
+$S_{d_1} \times S_{d_2} \times \ldots \times S_{d_p}$.\\
+
+  La fonction {\tt PUI\_DIRECT} ram\`ene les $N$ premi\`eres fonctions 
+  puissances de l'orbite $S_Df$ de la fonction $f$
+  d\'eduites des fonctions puissances de l'orbite $S_Cf$ o\`u 
+  $N$ est le cardinal de $S_Df$.
+
+  Le r\'esultat est rendu sous forme multi-contract\'ee par rapport \`a $S_D$.
+ (i.e. on ne conserve qu'un \'el\'ement par orbite sous l'action de $S_D$).
+\end{itemize}
+\small
+\begin{verbatim}
+ L:[[x,y],[a,b]]$
+
+ pui_direct ([b*y + a*x, a*y + b*x],L,[2,2]);
+
+                                2  2
+             [a x, 4 a b x y + a  x ]
+
+  pui_direct([b*y + a*x, a*y + b*x], L,[3,2]);
+
+                         2  2     2    2        3  3
+  [2 A X, 4 A B X Y + 2 A  X , 3 A  B X  Y + 2 A  X ,
+
+        2  2  2  2      3    3        4  4
+    12 A  B  X  Y  + 4 A  B X  Y + 2 A  X ,
+
+        3  2  3  2      4    4        5  5
+    10 A  B  X  Y  + 5 A  B X  Y + 2 A  X ,
+
+        3  3  3  3       4  2  4  2      5    5        6  6
+    40 A  B  X  Y  + 15 A  B  X  Y  + 6 A  B X  Y + 2 A  X ]
+
+ pui_direct ([y+x+2*c, y+x+2*b, y+x+2*a],[[x,y],[a,b,c]],[2,3]);
+
+                             2              2
+      [3 x + 2 a, 6 x y + 3 x  + 4 a x + 4 a , 
+
+              2                   3        2       2        3
+           9 x  y + 12 a x y + 3 x  + 6 a x  + 12 a  x + 8 a ]
+
+
+\end{verbatim}
+\normalsize
+Evidemment, on retrouve le m\^eme r\'esultat ainsi 
+\small
+\begin{verbatim}
+
+ pui_direct([y+x+2*a],[[x,y],[a]],[2,3]);
+
+                             2              2
+      [3 x + 2 a, 6 x y + 3 x  + 4 a x + 4 a , 
+
+              2                   3        2       2        3
+           9 x  y + 12 a x y + 3 x  + 6 a x  + 12 a  x + 8 a ]
+\end{verbatim}
+\normalsize
+\newpage
+\section*{Signification des objets }
+
+{\tt card}
+ est le cardinal de l'ensemble des variables sur lequel on travaille.\\
+
+{\tt $e_i$} : i\`{e}me fonction sym\'{e}trique \'{e}l\'{e}mentaire.\\
+
+{\tt $p_i$} : i\`{e}me fonction puissance.\\
+
+{\tt $h_i$} : i\`{e}me fonction compl\`ete.\\
+
+{\tt ele} = [$e_{1},e_{2},e_{3},...,e_{n}$] , $n$ intervenant dans le
+descriptif des fonctions.\\
+
+{\tt cele} = [card,$e_{1},e_{2},e_{3},...,e_{n}$]\\
+
+{\tt pui} = [$p_{1},p_{2},p_{3},...,p_{m}$] , $m$ intervenant dans le
+descriptif des fonctions.\\
+
+{\tt cpui} = [card,$p_{1},p_{2},p_{3},...,p_{m}$].\\
+
+{\tt ccomp} = [card,$h_{1},h_{2},h_{3},...,h_{m}$].\\
+
+{\tt sym} :  polyn\^{o}me sym\'{e}trique sans pr\'{e}cision sur
+sa repr\'{e}sentation.\\
+
+{\tt fmc} :  forme monomiale contract\'{e}e.\\
+
+{\tt part} :  partition.\\
+
+{\tt tc} :  terme contract\'{e}.\\
+
+{\tt tpart} : terme partitionn\'{e}.\\
+
+{\tt psym} : polyn\^{o}me sym\'{e}trique sous sa forme \'etendue.\\
+
+{\tt pc} : polyn\^{o}me sym\'etrique sous une forme contract\'{ee}.\\
+
+{\tt multi\_pc} : polyn\^{o}me multisym\'etrique sous une forme
+multicontract\'{ee} sous $S_D$.\\
+
+{\tt ppart} : polyn\^{o}me sym\'etrique sous sa forme partitionn\'{ee}.\\
+
+{\tt P($x_1, \ldots , x_q$)} :  polyn\^{o}me en $x_1, \ldots , x_q$.\\
+
+{\tt lvar} : liste de variables.\\
+
+$[lvar_1, \ldots,lvar_r]$ : liste de listes de variables.
+
+\include{docsymidx}
+\tableofcontents 
+\end{document}

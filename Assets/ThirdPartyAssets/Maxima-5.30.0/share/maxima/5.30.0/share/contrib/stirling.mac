@@ -1,0 +1,77 @@
+/* Copyright 2006 by Barton Willis
+
+  This is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License,
+  http://www.gnu.org/copyleft/gpl.html.
+
+ This software has NO WARRANTY, not even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+/* See A&S 6.1.37 and 6.1.40
+
+stirling(e) replaces all gamma functions in the expression 'e' with the zeroth
+order Stirling expansion.
+
+stirling(e, n) replaces all gamma functions in the expression 'e' with the O(1/x^(2n)) 
+Stirling expansion. 
+
+stirling(e, n, pred) replaces all expressions of the form gamma(q) in 'e' with
+the O(1/x^(2n)) Stirling expansion provided pred(q) evaluates to true. When 
+pred(q) is false, the Stirling expansion is not applied to a term of the form 
+gamma(q). If you want to use the optional argument 'pred,' you must specify 
+the value of 'n.'
+
+Examples:
+
+(%i1) stirling(gamma(%alpha+x)/gamma(x),1);
+(%o1) %e^(-%alpha)*x^(1/2-x)*(x+%alpha)^(x+%alpha-1/2)
+
+(%i2) taylor(%,x,inf,1);
+(%o2) x^%alpha+(x^%alpha*%alpha^2-x^%alpha*%alpha)/(2*x)+...
+
+(%i3) map('factor,%);
+(%o3) x^%alpha+((%alpha-1)*%alpha*x^(%alpha-1))/2
+
+The function 'stirling' knows the difference between the variable 'gamma' and
+the function gamma:
+
+(%i4) stirling(gamma(gamma));
+(%o4) sqrt(2)*sqrt(%pi)*gamma^(gamma-1/2)*%e^(-gamma)
+
+To conditionally apply a Stirling expansion, give 'stirling' a third
+argument; for example, to apply the expansion only when the argument to 
+the gamma function is a symbol, you may use:
+
+(%i5) stirling(gamma(a) / gamma(a+b),1, symbolp);
+(%o5) (sqrt(2)*sqrt(%pi)*a^(a-1/2)*%e^(-a))/gamma(b+a)
+
+To apply the Stirling expansion only when the argument to gamma does
+not depend on the symbol 'a,' you may use:
+
+(%i6) stirling(gamma(a) / gamma(a+b), 5, lambda([s], freeof('a,s)));
+(%o6) gamma(a)/gamma(b+a)
+
+To use this code, the file 'opsubst.lisp' must be in your search path.
+
+
+*/
+
+load("opsubst"); 
+
+stirling(z, [a]) := block([n, s, acc : 0, %m, pred, zerobern : true],
+
+       n : if a = [] then 1 else first(a),
+
+       pred : if (a = [] or length(a) < 2) then buildq([],lambda([s], true)) else 
+          if length(a) = 2 then second(a) else
+           error("The function 'stirling' requires one or two arguments"),
+
+       if integerp(n) and n > -1 then (
+          n : n - 1,
+          for %m from 1 thru n do (
+               acc : acc + bern(2*%m)/(2*%m *(2*%m-1)*s^(2*%m-1))),
+          acc : exp(-s)* s^(s-1/2) * sqrt(2*%pi) * exp(acc),
+          opsubst(buildq([acc,pred], lambda([s], if pred(s) then acc else funmake(gamma, [s]))), 'gamma, z))
+       else error("The second argument to 'stirling' must be a nonnegative integer"));
+

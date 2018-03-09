@@ -1,0 +1,85 @@
+composite.mac is from "The Use of Symbolic Computation in Perturbation
+Analysis" by R. H. Rand in Symbolic Computation in Fluid Mechanics and
+Heat Transfer ed H.H.Bau (ASME 1988) (http://tam.cornell.edu/Rand.html)
+
+The routine performs the Method of Composite Expansions.  Given a
+differential equation
+
+       ey''+a(x)y'+b(x)y=0 
+
+with boundary conditions y(0)=y0 and y(1)=y1
+
+where:
+	e << 1
+	a(x) and b(x) are analytic functions of x
+	a(x) > 0 on 0 <= x <= 1
+
+The function composite() is called without arguments.  The user is
+prompted for:
+ - a(x)
+ - b(x)
+ - y0
+ - y1
+ - the truncation order
+
+The example in the paper is from Nayfeh, p425
+
+    e*y'' + (2*x+1)*y' +2*y = 0
+    y(0) = alpha
+    y(1) = beta
+
+The results from maxima-5.9.0-cvs match those in the paper.
+
+(C1) load("./composit.mac");
+(D1)                            ./composit.mac
+(C2) composite();
+The d.e. is: ey''+a(x)y'+b(x)y=0
+with b.c. y(0)=y0 and y(1)=y1
+enter a(x) > 0 on [0,1]
+2*x+1;
+enter b(x)
+2;
+enter y0
+alpha;
+enter y1
+beta;
+The d.e. is: ey''+( 2 x + 1 )y'+( 2 )y=0
+with b.c. y(0)= ALPHA and y(1)= BETA
+enter truncation order
+3;
+                                                                       2
+                                                                      x  + x
+                    3             2                                 - ------
+        85312 BETA e    928 BETA e    16 BETA e                         e
+(D2) (- ------------- - ----------- - --------- - 3 BETA + ALPHA) %E
+             243            27            3
+
+    3             6               5               4               3
+ - e  (5120 BETA x  + 15360 BETA x  + 21504 BETA x  + 17408 BETA x
+
+               2
+ + 16032 BETA x  + 9888 BETA x - 85312 BETA)
+
+         7           6           5           4          3          2
+/(31104 x  + 108864 x  + 163296 x  + 136080 x  + 68040 x  + 20412 x  + 3402 x
+
+           2            4             3             2
+          e  (128 BETA x  + 256 BETA x  + 336 BETA x  + 208 BETA x - 928 BETA)
+ + 243) - --------------------------------------------------------------------
+                        5         4         3         2
+                   864 x  + 2160 x  + 2160 x  + 1080 x  + 270 x + 27
+
+              2
+   e (8 BETA x  + 8 BETA x - 16 BETA)   3 BETA
+ - ---------------------------------- + -------
+            3       2                   2 x + 1
+        24 x  + 36 x  + 18 x + 3
+
+References:
+
+A. Neyfeh, Perturbation Methods, Wiley (1973)
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

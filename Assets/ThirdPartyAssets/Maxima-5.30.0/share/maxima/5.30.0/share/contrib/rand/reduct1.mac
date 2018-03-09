@@ -1,0 +1,159 @@
+/* Filename reduct1.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/*program number 10: reduction1(), a liapunov-schmidt reduction for
+  steady state bifurcations in one differential equation depending
+  on one independent variable. see page 170 in "perturbation methods,
+  bifurcation theory and computer algebra". */
+
+
+  
+
+/*this file contains reduction1(), a function to perform a liapunov-
+  schmidt reduction for steady state bifurcations of nonlinear d.e.'s
+  of the form y'' + f(y,y',alpha) = 0. y = y(x) is defined on a real
+  interval with dirichlet or neumann boundary conditions and f depends 
+  only linearly on alpha.
+  it also contains these additional functions:
+  setup() allows to enter the problem.
+  g_poly(i,j) calculates the coefficient of amp^i lam^j in the bifurcation
+  equation.
+  w_poly(i,j) calculates the coefficient of amp^i lam^j in w(x;amp,lam).
+  project(exp) ensures that <cfun,exp>=0.
+  neumannbc(exp) accounts for neumann boundary conditions.
+  g_eq() assembles the bifurcation equation. */
+
+
+reduction1():=block(
+	   setup(),
+	   order:read("to which order do you want to calculate"),
+	   for i:2 thru order-1 do  w_poly(i,0),
+	   for i:1 thru order-2 do  w_poly(i,1),
+	   for i:1 thru order do g_poly(i,0),
+	   for i:1 thru order-1 do g_poly(i,1),
+	   g_eq())$
+
+
+
+setup():=(
+/*the function setup asks for the variables of the d.e., the bifurcation
+point, the critical eigenfunction, the x-interval, the boundary
+conditions and the differential equation. */
+assume_pos:true,
+ls_list:[],
+y:read("enter dependent variable"),
+print("use x as the independent variable and alpha as a parameter to vary"),
+cal:read("enter the critical bifurcation value alpha"),
+print("we define lam = alpha - ",cal),
+cfun: read("enter the critical eigenfunction"),
+depends([zw,y,w],[amp,lam,x]),
+len:read("what is the length of the x-interval"),
+norm:integrate(cfun^2,x,0,len),
+print("specify the boundary conditions"),
+print("your choice for the b.c. on y at x=0 and x=",len),
+print("enter 1 for y=0, 2 for y'=0"),
+bcl:read("b.c. at 0?"),
+bcr:read("b.c. at",len,"?"),
+eq:diff(y,x,2) +
+	 read("the d.e. is of the form y'' + f(y,y',alpha) = 0,enter f"),
+eqlam:ev(eq,alpha=lam+cal),
+print(eqlam),
+database:[diff(w,amp)=0,diff(w,lam)=0],
+sub:y=amp*cfun+w,
+temp1:ev(eqlam,sub,diff),
+nullans:read("do you know apriori that some taylor coefficents are zero, y/n")
+)$
+
+					
+g_poly(i,j):=block(
+/* this is a function to determine a particular taylor coefficient of the 
+bifurcation equation g(amp,lam) =0. it requires knowledge about the taylor
+coefficients of w(amp,lam). this knowledge is stored in the list database */
+	  ls_list:cons([k=i,l=j],ls_list),
+	  if nullans = y then (
+			       zeroans:read("is g_poly(",i,",",j,") identically 
+zero, y/n"),
+			       if zeroans = y then  return(bifeq[i,j]:0)),
+	  temp2:diff(temp1,amp,i,lam,j),	
+	  derivsubst:true,
+/*this differential of w will be annihilated by the projection onto the
+critical eigenfunction, hence we set it to zero already here */
+	  temp3:subst('diff(w,amp,i,lam,j)=0,temp2),
+/* here we insert all knowledge gained through w_poly */
+	  d_base_length:length(database),
+	  for ii thru d_base_length do 
+	             temp3:ev(subst(database[d_base_length+1-ii],temp3),diff),
+	  derivsubst:false,
+	  temp4:ev(temp3,amp=0,lam=0,w=0),
+/*projection onto cfun, the critical eigenfunction */
+          temp5:trigreduce(cfun*temp4),
+	  bifeq[i,j]:ratsimp(integrate(temp5,x,0,len))
+	  )$
+
+
+  
+
+w_poly(i,j):=block( 
+/* this function allows to determine iteratively any particular taylor
+coefficient of the function w(amp,lam). the result is fed into database.*/
+	  if nullans = y then (
+		   zeroans:read("is diff(w,amp,",i,",lam,",j,") identically zero
+, y/n"),
+			   if zeroans = y then 
+			            (addbase:['diff(w,amp,i,lam,j)=0],
+				     database:append(database,addbase),
+				     return(addbase))),
+	  temp2:diff(temp1,amp,i,lam,j),
+	  derivsubst:true,
+/*we substitute zw for the unknown taylor coefficient and solve
+an o.d.e. for zw in temp7 */
+	  temp3:subst(diff(w,amp,i,lam,j)=zw,temp2),
+/*now we insert all knowledge gained through previous iterations*/
+	  d_base_length:length(database),
+	  for ii thru d_base_length do
+	             temp3:ev(subst(database[d_base_length+1-ii],temp3),diff),
+	  derivsubst:false,
+	  temp4:ev(temp3,amp=0,lam=0,w=0),
+          temp5:trigreduce(temp4),
+/*this ensures that the r.h.s. fo the d.e. temp6 is orthogonal to
+the solution of the homogeneous equation */
+	  temp6:project(temp5),
+	  temp7:ode2(temp6,zw,x),
+/*satisfy boundary conditions*/
+	  if bcl*bcr=1 then temp8:bc2(temp7,x=0,zw=0,x=len,zw=0)
+	                else
+			     temp8:neumannbc(temp7),
+/*make sure that <cfun,w>= 0*/
+	  temp9:project(temp8),
+	  addbase:['diff(w,amp,i,lam,j)=rhs(temp9)],
+	  database:append(database,addbase),
+	  print(addbase))$
+
+
+project(exp):=(
+	  pro1:ev(exp,zw=0),
+	  pro2:integrate(pro1*cfun,x,0,len)/norm,
+	  expand(exp-pro2*cfun))$
+neumannbc(exp):=(
+	  rexp:rhs(exp),
+	  nbc1:diff(rexp,x),
+	  if bcl=1 and bcr=2 then nbc2:solve([ev(rexp,x=0),ev(nbc1,x=len)],
+		[%k1,%k2]),
+	  if bcl=2 and bcr=1 then nbc2:solve([ev(rexp,x=len),ev(nbc1,x=0)],
+		[%k1,%k2]),
+	  if bcl=2 and bcr=2 then nbc2:solve([ev(nbc1,x=len),ev(nbc1,x=0)],
+		[%k1,%k2]),
+	  ev(exp,nbc2))$
+g_eq():=  sum(ev(amp^k*lam^l/k!*bifeq[k,l],ls_list[n]),n,1,length(ls_list))$

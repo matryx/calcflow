@@ -1,0 +1,62 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Indicial tensor basics
+ */
+
+if get('itensor,'version)=false then load(itensor);
+
+("Tensors are indexed objects. To show a tensor use ishow()")$
+ishow(g([a,b],[c,i],i2,i1))$
+
+("Tensor components can be assigned using components().
+As an example, consider a conformally flat metric:")$
+
+declare(e,constant);
+remcomps(g);
+imetric(g);
+components(g([i,j],[]),e([i,j],[])*p([],[]));
+components(g([],[i,j]),e([],[i,j])/p([],[]));
+ishow(g([i,j],[]))$
+ishow(g([],[i,j]))$
+
+("Tensor components can also be assigned as MAXIMA functions:")$
+t(l1,l2):=c*a(l1,l2)+b(l1,l2)$
+ishow(t([i,k],[]))$
+ishow(t([],[j,m]))$
+
+("Here is the Euler equation")$
+Eu(l1,l2):=d_t*v(l1,[])+v([],[j])*v(l1,[],j)+
+           1/rho([])*diff(p([],[]),l1[1])+diff(phi([],[]),l1[1])$
+ishow(Eu([i],[]))$
+("Another definition can be given using the metric g")$
+Eu(l1,l2):=block([j1:idummy()], if l2=[] then
+             d_t* v(l1,[])+v([],[j1])*v(l1,[],j1)+
+             1/rho([])*diff(p([],[]),l1[1])+diff(phi([],[]),l1[1])
+           else d_t*v([],l2)+v([],[j1])*v([],l2,j1)+
+             g([],[l2[1],j1])*(diff(p([],[]),j1)/rho([])+diff(phi([],[]),j1)))$
+ishow(Eu([i],[]))$
+ishow(Eu([],[i]))$
+("The dummy index character can be changed from % using idummyx:")$
+idummyx:n$
+ishow(Eu([i],[]))$
+
+("The indices() command lists the free and dummy indices")$
+indices(Eu([i],[]));
+
+("The variable icounter controls the dummy index numbering")$
+icounter;
+icounter:100;
+ishow(Eu([i],[]))$
+
+idummyx:"%"$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

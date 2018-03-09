@@ -1,0 +1,741 @@
+(C5) BATCH(OPTVAR, DEMO60, DSK,STOUTE);
+
+(C6) /* This macsyma batch file illustrates how to use the
+functions in OPTVAR > or OPTVAR LISP to help solve classical
+variational or optimal control problems.  These functions
+use the calculus of variations and Pontryagin's
+Maximum-Principle to derive the governing differential and
+algebraic equations; and this demonstration also shows how
+the governing equations may be solved using the built-in
+SOLVE function and/or the functions in the SHARE files  ODER
+LISP, and DESOLN LISP.  For more details, see the
+corresponding SHARE text files OPTVAR USAGE, ODER USAGE, or
+DESOLN USAGE.
+
+The illustrative examples here are intentionally elementary.
+For a more thorough discussion of the mathematical
+principles demonstrated here, and for results with more
+difficult examples, see the the ALOHA project technical
+report by David Stoutemyer, "Computer algebraic manipulation
+for the calculus of variations, the maximum principle, and
+automatic control", University of Hawaii, 1974.
+
+Many classical variational problems are analagous to special
+cases of choosing a path which minimizes the transit time
+through a region for which the speed is a function of
+position.  There are applications in, optics, acoustics,
+hydrodynamics, and routing of aircraft or ships. In the
+two-dimensional case, assuming the path may be represented
+by a single-valued function, Y(X), the transit time between
+Y(A) and Y(B) is given by the integral of
+Q(X,Y)*SQRT(1+'D(y,x)**2), from X=A to X=B, where D is an
+alias for DIFF and Q(X,Y) is the reciprocal of the speed,
+and where we have used the fact that 'D(arclength,X) =
+SQRT(1+'D(Y,X)**2).  For simplicity, assume Q independent of
+X.  We may use the function EL, previously loaded by
+LOADFILE(OPTVAR,LISP,DSK, SHARE), to derive the associated
+Euler-Lagrange equation together with an associated energy
+and/or momentum integral if they exist: */
+
+EL(Q(Y)*SQRT(1+'D(Y,X)**2), Y, X);
+
+					 DY 2
+				   Q(Y) (--)
+		     DY 2                DX
+(E6)      Q(Y) SQRT((--)  + 1) - --------------- = K
+		     DX                DY 2         0
+				 SQRT((--)  + 1)
+				       DX
+
+		     DY
+		Q(Y) --
+	 D           DX             DY 2       D
+(E7)     -- --------------- = SQRT((--)  + 1) (-- Q(Y))
+	 DX       DY 2              DX         DY
+	    SQRT((--)  + 1)
+		  DX
+TIME= 844 MSEC.
+(D7)                        [E6, E7]
+
+(C8) /* To expand the Euler-Lagrange equation: */
+
+DEPENDENCIES(Y(X))$
+TIME= 4 MSEC.
+
+(C9) %TH(2)[2], EVAL, D;
+TIME= 300 MSEC.
+	      2                    2
+	     D Y             DY 2 D Y
+	Q(Y) ---       Q(Y) (--)  ---
+	       2             DX     2
+	     DX                   DX
+(D9) --------------- - --------------
+	   DY 2          DY 2     3/2
+     SQRT((--)  + 1)   ((--)  + 1)
+	   DX            DX
+
+					 DY 2       D
+				 = SQRT((--)  + 1) (-- Q(Y))
+					 DX         DY
+
+(C10) /* The routines in the SHARE file ODE LISP, previously
+loaded, may solve an expanded first or second order
+quasi-linear ordinary differential equations; so the
+equation must be linear in its highest- order derivative.
+The Euler-Lagrange equation is always of this form, but when
+given a second-order equation, the ODE solver often returns
+with a first-order equation which we must quasi-linearize
+before proceeding; so it is usually most efficient to take
+advantage of a first integral when one exists, even though
+it requires a certain amount of manipulation.  The SOLVE
+function is currently somewhat weak with fractional powers;
+so we must massage the above energy integral before solving
+for 'D(Y,X): */
+
+%TH(3)[1] * SQRT(1+'D(Y,X)**2), EXPAND, EVAL;
+TIME= 211 MSEC.
+				    DY 2
+(D10)               Q(Y) = K  SQRT((--)  + 1)
+			    0       DX
+
+(C11) SOLVE(%/K[0], 'D(Y,X));
+SOLUTION
+
+				 2        2
+			   SQRT(Q (Y) - K  )
+		    DY                   0
+(E11)               -- = - -----------------
+		    DX            K
+				   0
+
+				2        2
+			  SQRT(Q (Y) - K  )
+		     DY                 0
+(E12)                -- = -----------------
+		     DX          K
+				  0
+TIME= 1543 MSEC.
+(D12)                      [E11, E12]
+
+(C13) ODE2(EV(%[2],EVAL), Y, X);
+TIME= 9982 MSEC.
+		       /
+		       [          1
+	       X - K  (I (-----------------) DY)
+		    0  ]        2        2
+		       /  SQRT(Q (Y) - K  )
+					0
+(D13)        - --------------------------------- = C
+			      K
+			       0
+
+(C14) /* We must specify Q(Y) to proceed further.  Q(Y)=1 is
+associat- ed with the Euclidian shortest path (a straight
+line), Q(Y)=SQRT(Y) is associated with the stationary
+Jacobian-action path of a projectile (a parabola), Q(Y)=Y is
+associated with the minimum-surface body of revolution (a
+hyperbolic cosine), and Q(Y)=1/SQRT(Y) is associated with
+the minimum-time path of a falling body, starting at Y=0,
+measured down, (a cycloid).  Of these, the cycloid presents
+the most difficult integration.  In fact, I have never seen
+the the integration for this case performed directly except
+by macsyma: */
+
+SUBST(Q(Y)=1/SQRT(Y), %) $
+TIME= 2961 MSEC.
+
+(C15) %,INTEGRATE;
+TIME= 2468 MSEC.
+			 1     2
+		    SQRT(- + K  )
+			 Y    0
+(D15) - (X - K  (-------------------
+	      0    2  1     2      4
+		 K   (- + K  ) - K
+		  0   Y    0      0
+
+	       1     2                   1     2
+      LOG(SQRT(- + K  ) - K )   LOG(SQRT(- + K  ) + K )
+	       Y    0      0             Y    0      0
+    + ----------------------- - -----------------------))/K
+		   3                         3             0
+	       2 K                       2 K
+		  0                         0
+
+    = C
+
+(C16) /* This equation may be simplified by combining the
+LOGs and clearing some fractions, but it is transcendental
+in Y; so there is no hope for a closed-form representation
+for Y(X).  For completeness we should try the other
+alternative for 'D(Y,X), but it turns out to lead to the
+same result.
+
+Most authors solve this problem by introducing the change of
+variable 'D(Y,X)=TAN(T), useful also for other Q(Y), which
+leads to the para- metric representation: Y=K[0]*COS(T)**2,
+X=C+K[0]*(T+SIN(T)*COS(T)). Solving the former for T and
+substituting into the latter gives the representation
+equivalent to that found directly by macsyma.
+
+Some straightforward investigation reveals that  C  is the
+initial value of  X,  but the equation is transcendental in
+K[0], so K[0] cannot be determined analytically.  However,
+it may be determined to arbitrary numerical accuracy by an
+iterative algorithm such as that described in the SHARE file
+ZEROIN USAGE.
+
+To prove that the above solution is a strong global minimum,
+we must prove that such a minimum exists and that no other
+answer gives a smaller value to the functional.  This may be
+done by the direct approach of Caratheodory,  or by checking
+the classical Weierstrass, Weierstrass-Erdman, Legendre, and
+and Jacobi necessary and sufficient conditions.  Computer
+algebraic manipulation can assist these investigations, but
+they are beyond the scope of this demonstration.  Instead,
+to keep the demonstration brief, we will now consider other
+kinds of problems.
+
+Stationary values of a functional may be subject to
+algebraic or differential constraints of the form
+F(X,Y(X),'D(Y,X))=0 and/or isoperimetric constraints of the
+form INTEGRATE(F(X,Y(X),'D(Y,X)),X,A,B) = J, where J is a
+given constant. Sometimes it is possible to eliminate one or
+more constraints, substituting them into the functional and
+any remaining constraints; but if not, we may use Lagrange
+multipliers.  For example, suppose we wish to determine the
+curve that a string of given length assumes to minimize its
+potential energy.  The potential energy is 
+INTEGRATE(Y*SQRT(1+'D(Y,X)**2), X, A, B), whereas the length
+is INTEGRATE(SQRT(1+'D(Y,X)**2), X, A, B); so letting MULT
+be the Lagrange multiplier, our augmented functional is of
+the form that we have been studying, with Q(Y)=Y+MULT.
+Consequently, we may simply substitute this in the general
+integral that we found before: */
+
+SUBST(Q(Y)=Y+MULT, %TH(3))$
+TIME= 119 MSEC.
+
+(C17) /* Type  NONZERO;  in response to the question
+generated by the following statement: */
+
+%,INTEGRATE;
+IS  K   ZERO OR NONZERO?
+     0
+
+NONZERO;
+TIME= 1310 MSEC.
+				   2
+			 (Y + MULT)         Y + MULT
+	 X - K  LOG(SQRT(----------- - 1) + --------)
+	      0                2               K
+			     K                  0
+			      0
+(D17)  - -------------------------------------------- = C
+			      K
+			       0
+
+(C18) /* to get Y as a function of X: */
+
+(%*K[0]+X)/K[0];
+TIME= 92 MSEC.
+			   2                    X + K  C
+		 (Y + MULT)         Y + MULT         0
+(D18)   LOG(SQRT(----------- - 1) + --------) = --------
+		       2               K           K
+		     K                  0           0
+		      0
+
+(C19) EXP(LHS(%))=EXP(RHS(%));
+TIME= 29 MSEC.
+					       X + K  C
+						    0
+					       --------
+			 2                        K
+	       (Y + MULT)         Y + MULT         0
+(D19)     SQRT(----------- - 1) + -------- = %E
+		     2               K
+		   K                  0
+		    0
+
+(C20) SOLVE((%*K[0]-Y-MULT)**2, Y);
+SOLUTION
+
+(E20) Y
+
+	      X            2 X             X
+	    - -- - C       --- + 2 C       -- + C
+	      K            K               K
+	       0            0               0
+	 %E          (K  %E          - 2 %E       MULT + K )
+		       0                                  0
+       = ---------------------------------------------------
+				  2
+TIME= 8342 MSEC.
+(D20)                         [E20]
+
+(C21) %,EVAL,EXPAND,RATPRODEXPAND:TRUE;
+TIME= 450 MSEC.
+			 X             X
+		       - -- - C        -- + C
+			 K             K
+			  0             0
+		 K  %E            K  %E
+		  0                0
+(D21)       [Y = -------------- + ----------- - MULT]
+		       2               2
+
+(C22) /* We may rewrite the above expression as: */
+
+K[0]*COSH(X/K[0]+C) - MULT $
+TIME= 65 MSEC.
+
+(C23) /* We may substitute this into the integral constraint
+to get 1 equation relating the constant K[0] and C to the
+given length L: */
+
+SQRT(1+D(%,X)**2);
+TIME= 99 MSEC.
+			      2 X
+(D23)                SQRT(SINH (-- + C) + 1)
+				K
+				 0
+
+(C24) /* This is simply COSH(X/K[0]+C), so: */
+
+L = INTEGRATE(COSH(X/K[0]+C), X, A, B);
+
+TIME= 1787 MSEC.
+                        K  C + B            K  C + A
+                         0                   0
+(D24)       L = K  SINH(--------) - K  SINH(--------)
+                 0         K         0         K
+                            0                   0
+
+(C25) /* Given A, B, Y(A), and Y(B), we may substitute into
+the general solution to get two more relations among K[0], C
+and MULT, but the three equations are transcendental; so a
+numerical solution is generally necessary.
+
+For completeness, we should also investigate the case of
+K[0]=0, which yields the solution  Y=0; but for brevity, we
+will omit that analysis.
+
+The functional may include derivatives of higher that first
+order.  For example, including the small-deflection energy
+of bending, shear, and an elastic foundation, the elastic
+energy of a nonuniform beam with loading  W(X)  is the
+integral of the following function: */
+
+A(X)*'D(Y,X,2)**2 + B(X)*'D(Y,X)**2 + C(X)*Y**2 + W(X)*Y$
+TIME= 98 MSEC.
+
+(C26) /* to get the Euler-Lagrange equation: */
+
+EL(%, Y, X);
+
+			 2          2
+	 D         DY   D          D Y
+(E26)    -- 2 B(X) -- - --- 2 A(X) --- = 2 C(X) Y + W(X)
+	 DX        DX     2          2
+			DX         DX
+TIME= 929 MSEC.
+(D26)                         [E26]
+
+(C27) /* If the shear & foundation energy are negligible, as
+is often the case, we may solve this differential equation,
+for specific A(X) and  W(X), by two successive applications
+of ODE2.  For example: */
+
+%[1], EVAL,A(X)=X, B(X)=0, C(X)=0, W(X)=1, 'D(Y,X,2)=DY2$
+TIME= 341 MSEC.
+
+(C28) DEPENDENCIES(DY2(X))$
+TIME= 4 MSEC.
+
+(C29) EV(%TH(2),D,EVAL);
+TIME= 159 MSEC.
+			  2
+			 D DY2       DDY2
+(D29)                - 2 ----- X - 4 ---- = 1
+			    2         DX
+			  DX
+
+(C30) ODE2(%, DY2, X);
+TIME= 894 MSEC.
+			       X   K2   K1
+(D30)                 DY2 =  - - + -- - --
+			       4   X    2
+
+(C31) ODE2(SUBST([K1=K3,K2=K4,DY2='D(Y,X,2)],%), Y, X);
+TIME= 1972 MSEC.
+				      3         2
+	     K4 X (24 - 24 LOG(X)) + X  + 6 K3 X
+(D31) Y =  - ------------------------------------ + K2 X
+			      24
+
+							+ K1
+
+(C32) /* Now let's impose the boundary conditions
+Y='D(Y,X)=0 at X=1, Y=0, 'D(Y,X)=1 at X=2: */
+
+IC(%, X=1, Y=0, 'D(Y,X)=0);
+TIME= 4634 MSEC.
+				       3         2
+	      K4 X (24 - 24 LOG(X)) + X  + 6 K3 X
+(D33) [Y =  - ------------------------------------
+			       24
+
+			    (4 K3 + 1) X   12 K4 - 3 K3 - 1
+			  + ------------ + ----------------]
+				 8                12
+
+(C34) IC(SUBST([K3=K1,K4=K2],FIRST(%)), X=2, Y=0,
+'D(Y,X)=1);
+TIME= 3087 MSEC.
+		  49 X (24 - 24 LOG(X))    3
+(D35) [Y =  - ( - --------------------- + X
+		     72 LOG(2) - 48
+
+				      4 (110 LOG(2) - 57)
+			 2       (1 - -------------------) X
+    6 (110 LOG(2) - 57) X               18 LOG(2) - 12
+  - ----------------------)/24 + ---------------------------
+	18 LOG(2) - 12                        8
+
+	    588         3 (110 LOG(2) - 57)
+     - -------------- + ------------------- - 1
+       72 LOG(2) - 48     18 LOG(2) - 12
+  + -------------------------------------------]
+			12
+
+(C36) /* as another specific beam example: */
+
+%TH(8),EVAL,A(X)=1,B(X)=2,C(X)=1,W(X)=1$
+TIME= 271 MSEC.
+
+(C37) %[1],D;
+TIME= 180 MSEC.
+			2       4
+		       D Y     D Y
+(D37)                4 --- - 2 --- = 2 Y + 1
+			 2       4
+		       DX      DX
+
+(C38) /* We cannot treat this as 2 successive second-order
+equations, but the function DESOLVE in the SHARE file
+DESOLN, already loaded, is applicable to some linear
+arbitrary-order constant coefficient equations.  First we
+must convert the equation so that the dependency of  Y  is
+explicitly indicated: */
+
+CONVERT(%, Y, X);
+TIME= 217 MSEC.
+		2              4
+	       D              D
+(D38)       4 (--- Y(X)) - 2 (--- Y(X)) = 2 Y(X) + 1
+		 2              4
+	       DX             DX
+
+(C39) /* DESOLVE requires all boundary conditions to be at
+X=0, and it works best if they are specified before calling
+the function. However, we may overcome this restriction, as
+illustrated by the following example, where the beam has
+zero slope and deflection at both ends: */
+
+(ATVALUE(Y(X),X=0,0), ATVALUE('D(Y(X),X),X=0,0),
+ATVALUE('D(Y(X),X,2),X=0,K1), ATVALUE('D(Y(X),X,3),X=0,K2))$
+TIME= 77 MSEC.
+
+(C40) DESOLVE(%TH(2), Y(X));
+TIME= 5740 MSEC.
+				   - X              - X
+	     (2 K2 - 2 K1 + 1) X %E      (K2 + 1) %E
+(D40) Y(X) = ------------------------- + --------------
+			 8                     4
+
+					X              X
+		  (2 K2 + 2 K1 - 1) X %E    (K2 - 1) %E    1
+		+ ----------------------- - ------------ - -
+			     8                   4         2
+
+(C41) IC(SUBST(Y(X)=Y,%), X=1, Y=0, 'D(Y,X)=0);
+TIME= 4435 MSEC.
+		  2                    2
+	     2 (%E  - 2 %E - 1)   2 (%E  - 2 %E + 1)
+(D42) [Y = ((------------------ + ------------------ + 1) X
+		  2                   2
+	      2 %E  + 4 %E - 2      %E  + 2 %E - 1
+
+		2
+	      %E  - 2 %E + 1        - X
+	     (-------------- + 1) %E
+		2
+    - X       %E  + 2 %E - 1
+  %E   )/8 + --------------------------
+			 4
+
+	      2                    2
+	 2 (%E  - 2 %E - 1)   2 (%E  - 2 %E + 1)          X
+  + (( - ------------------ + ------------------ - 1) X %E )
+	      2                   2
+	  2 %E  + 4 %E - 2      %E  + 2 %E - 1
+
+	 2
+       %E  - 2 %E + 1        X
+      (-------------- - 1) %E
+	 2
+       %E  + 2 %E - 1            1
+ /8 - ------------------------ - -]
+		 4               2
+
+(C43) /* We may also treat problems with more than one
+dependent variable.  For example, the charge, Q, and
+displacement from equilibrium, Y, of a simple
+electromagnetic loudspeaker, with M, K, L, S, E(T), and T
+denoting mass, spring constant, inductance, electro-
+magnetic work coefficient, voltage, and time, respectively,
+are given by the stationary value of the integral of the
+function in the first argument of EL below.  (ref. S.H.
+Crandall, D.C. Karnop, E.F. Kurtz Jr., & D.C. Pridmore-
+Brown, "Dynamics of Mechanical and Electromechanical
+Systems", McGraw-Hill). */
+
+EL((M*'D(Y,T)**2 - K*Y**2 + L*'D(Q,T)**2)/2 + S*'D(Q,T)*Y +
+E(T)*Q,
+   [Y, Q], T);
+
+		      D    DY   DQ
+(E43)                 -- M -- = -- S - K Y
+		      DT   DT   DT
+
+		     D           DQ
+(E44)                -- (S Y + L --) = E(T)
+		     DT          DT
+TIME= 1437 MSEC.
+(D44)                      [E43, E44]
+
+(C45) /* We may simplify these equations, replacing 'D(Q,T)
+with the current, I; and we may introduce linear mechanical
+resistance B and linear electrical resistance R as follows:
+*/
+
+%, EVAL, 'D(Q,T)=I, S*I=S*I-B*'D(Y,T), E(T)=E(T)-R*I;
+TIME= 477 MSEC.
+       D    DY        DY              D
+(D45) [-- M -- =  - B -- - K Y + I S, -- (S Y + I L)
+       DT   DT        DT              DT
+
+					       = E(T) - I R]
+
+(C46) /* DESOLVE  also works for some systems of arbitrary-
+order constant-coefficient equations; so let's try it with
+the following parameter values, excitation E(T), and initial
+conditions: */
+
+SUBST([M=2,K=1,B=1,S=1,L=1,E(T)=SIN(T),R=1], %)$
+TIME= 491 MSEC.
+
+(C47) CONVERT(%,
+[Y,I], T)$
+TIME= 466 MSEC.
+
+(C48) (ATVALUE(Y(T),T=0,0), ATVALUE(I(T),T=0,0),
+ATVALUE('D(Y(T),T),T=0,0))$
+TIME= 53 MSEC.
+
+(C49) DESOLVE(%TH(2), [Y(T),I(T)]);
+TIME= 10117 MSEC.
+			   SQRT(3) T        SQRT(3) T
+		       SIN(---------)   COS(---------)
+		- T/2          2                2
+(D50) [Y(T) = %E      (-------------- - --------------)
+			  SQRT(3)             3
+
+				    - T/2
+	    2 SIN(T)   COS(T)   8 %E
+	  - -------- - ------ + ---------,
+	       5         5         15
+
+				SQRT(3) T        SQRT(3) T
+			    SIN(---------)   COS(---------)
+		  - T/2             2                2
+	 I(T) = %E      ( - -------------- - --------------)
+			       SQRT(3)             3
+
+				    - T/2
+	    3 SIN(T)   COS(T)   8 %E
+	  + -------- - ------ + ---------]
+	       5         5         15
+
+(C51) /* The functional may also have more than 1 independ-
+ent variable.  For example, the general 2-dimensional linear
+elliptic partial differential equation is equivalent to the
+variational problem:*/
+
+EL(A*'D(U,X)**2 + B*'D(U,Y)**2 + C*U**2 + E*'D(U,X) +
+F*'D(U,Y) + G*U,  U, [X,Y]);
+
+	  D       DU        D       DU
+(E51)     -- (2 B -- + F) + -- (2 A -- + E) = 2 C U + G
+	  DY      DY        DX      DX
+TIME= 1160 MSEC.
+(D51)                         [E51]
+
+(C52) /* Analytic solutions to even the simplest cases of
+this equation are rare, but computer algebraic
+manipulation has been used to construct series solutions to
+such equations.
+
+Many variational optimization problems are easier to treat
+using Pontryagin's Maximum-Principle than by the calculus of
+varia- tions.  This is particularly true of optimal control
+problems.
+
+As an elementary example, suppose that we have a unit mass
+at an arbitrary position X[0] with arbitrary velocity V[0]
+at time T=0, and we wish to vary the force  F, subject to
+the constraint -1 <= F <= 1, such that the mass arrives at
+position X=0 with velocity V=0, in minimum time.  The force
+equals the rate of change of momentum; so the motion is
+governed by the pair of first-order differential equations:
+*/
+
+['D(V,T)=F, 'D(X,T)=V]$
+TIME= 24 MSEC.
+
+(C53) /* Using this list as the argument to the function HAM
+results in output of the Hamiltonian followed by
+differential equations for the so-called Auxiliary
+variables, together with their solution when- ever the
+differential equation is of the trivial form: 'D(aux[i],t) =
+0, as is often the case: */
+
+HAM(%);
+
+(E53)                    AUX  V + AUX  F
+			    2        1
+
+			D
+(E54)                   -- AUX  = - AUX
+			DT    1        2
+
+			   D
+(E55)                      -- AUX  = 0
+			   DT    2
+
+(E56)                       AUX  = C
+			       2    2
+TIME= 339 MSEC.
+(D56)                 [E53, E54, E55, E56]
+
+(C57) /* We may substitute the given solution to the last
+differential equation into the one before it, then use
+either DESOLVE or ODE2: */
+
+%[4],EVAL$
+TIME= 25 MSEC.
+
+(C58) ODE2(EV(%TH(2)[2],%,EVAL), AUX[1], T);
+TIME= 465 MSEC.
+(D58)                    AUX  = C - C  T
+			    1        2
+
+(C59) /* Now we may substitute the values of the auxiliary
+variables into the Hamiltonian: */
+
+%TH(3)[1], %, EVAL$
+TIME= 126 MSEC.
+
+(C60) SUBST(%TH(3), %);
+TIME= 35 MSEC.
+(D60)                  C  V + F (C - C  T)
+			2             2
+
+(C61) /* According to the maximum principle, we should vary
+F to maximize this expression for all values of T in the
+time-interval of interest.  Considering the constraints on
+F, clearly F should be SIGN(C-C[2]*T).  (We could use the
+function  STAP in the SHARE file OPTMIZ >  or OPTMIZ LISP
+to determine this.)
+
+We have found that every optimal control is  F=1  and/or
+F=-1, with at most one switch between them, when T=C/C[2].
+Since  F  is piecewise constant, we may combine the two
+first-order equations of motion and solve them as follows:
+*/
+
+ODE2('D(X,T,2)=F, X, T);
+TIME= 618 MSEC.
+			     2
+			  F T
+(D61)                 X = ---- + K2 T + K1
+			   2
+
+(C62) /* Now we may choose the constants of integration
+to sat- isfy any given boundary conditions.  For example,
+suppose that we start with  V=0  and  X=1  at  T=0.  Assume
+we start with  F=-1: */
+
+IC(SUBST(F=-1,%), T=0, X=1, 'D(X,T)=0);
+TIME= 635 MSEC.
+				    2
+				   T
+(D63)                     [X = 1 - --]
+				   2
+
+(C64) /* Assuming that we terminate with  F=+1: */
+
+IC(SUBST(F=1,%TH(2)), T=TFINAL, X=0, 'D(X,T)=0);
+TIME= 4104 MSEC.
+			     2               2
+		       TFINAL               T
+(D65)             [X = ------- - T TFINAL + --]
+			  2                 2
+
+(C66) /* To determine  TFINAL  and the time  T  at which  F
+switches sign, we may impose the condition that the two
+solutions must agree in position and velocity at that time:
+*/
+
+SUBST(%, FIRST(%TH(2)));
+TIME= 36 MSEC.
+		      2               2        2
+		TFINAL               T        T
+(D66)           ------- - T TFINAL + -- = 1 - --
+		   2                 2        2
+
+(C67) SOLVE([%, D(%,T)]);
+TIME= 1309 MSEC.
+(D67) [[TFINAL = 2.0, T = 1.0], [TFINAL = - 2.0, T = - 1.0]]
+
+(C68) /* For the first of these solutions,  0 < T < TFINAL;
+so the assumption that  F  switches from  -1  to  1  is
+justified.  F is now completely determined as a function of
+time, but to represent it with our expression
+SIGN(C-C[2]*T): */
+
+SOLVE(SUBST(%[1], C-C[2]*T), C);
+SOLUTION
+
+(E68)                        C = C
+				  2
+TIME= 106 MSEC.
+(D68)                         [E68]
+
+(C69) /* As is always the case, one of the integration
+constants for the auxiliary equations is redundant; so we
+may set C[2] and C to the same arbitrary negative constant,
+such as -1.
+
+It is important to remember that so far, we have only
+determined an EXTREMAL control.  To prove that it is an
+OPTIMAL control, we must prove that an optimal control
+exists and that no more-optimal extremal control exists.
+However, such considerations are beyond the scope of this
+demonstration.  */
+
+
+TIME= 78843 MSEC.
+
+(C70) CLOSEFILE(OPTVAR,OUT60)$

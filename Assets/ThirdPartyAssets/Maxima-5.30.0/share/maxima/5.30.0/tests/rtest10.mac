@@ -1,0 +1,132 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+kill(all);
+done$
+n!/(n+1)!;
+n!/(n+1)!$
+minfactorial(%);
+1/(n+1)$
+(n+1)^2*n!^2;
+(n+1)^2*n!^2$
+factcomb(%);
+(n+1)!^2$
+qunit(17);
+sqrt(17)+4$
+expand(%*(sqrt(17)-4));
+1$
+cf([1,2,-3]+[1,-2,1]);
+[1,1,1,2]$
+cfdisrep(%);
+''(cfdisrep(cf(8/5)))$
+cflength:4;
+4$
+cf(sqrt(3));
+[1,1,2,1,2,1,2,1,2]$
+cfexpand(%);
+matrix([265,97],[153,56])$
+ev(%[1,2]/%[2,2],numer);
+1.7321428571428572$
+cf([1,2,-3]+[1,-2,1]);
+[1,1,1,2]$
+cfdisrep(%);
+''(cfdisrep(cf(8/5)))$
+cflength:4;
+4$
+cf(sqrt(3));
+[1,1,2,1,2,1,2,1,2]$
+cfexpand(%);
+matrix([265,97],[153,56])$
+ev(%[1,2]/%[2,2],numer);
+1.7321428571428572$
+
+(foop1(L1, L2) := length(L1) <= length(L2) and L1 = makelist (L2[i], i, 1, length(L1)),
+ foop(L1, L2) := foop1(L1, L2) or last(L1) # 1 and foop1 (reverse (append ([1, last(L1) - 1], rest (reverse (L1)))), L2), 
+ ratepsilon : 1b-16,
+ 0);
+0;
+
+(expr: 2^(1/3),
+ cf(expr),
+ foop (%%, cf(rat(bfloat(expr)))));
+true;
+
+(expr: 8^(1/4),
+ cf(expr),
+ foop (%%, cf(rat(bfloat(expr)))));
+true;
+
+(expr: 12^(1/5),
+ cf(expr),
+ foop (%%, cf(rat(bfloat(expr)))));
+true;
+
+(expr : 2^(1/3) + 3^(1/4) + 4^(1/5),
+ cf(expr),
+ foop (%%, cf(rat(bfloat(expr)))));
+true;
+
+(expr : sqrt(2) + 2^(2/3) + sqrt(17) - 11^(7/5),
+ cf(expr),
+ foop (%%, cf(rat(bfloat(expr)))));
+true;
+
+cflength:1;
+1$
+cf(sqrt(8));
+[2, 1, 4]$
+cflength:3;
+3$
+cf(sqrt(8));
+[2, 1, 4, 1, 4, 1, 4]$
+
+(reset (ratepsilon), 0);
+0;
+
+declare(j,even);
+done$
+featurep(j,integer);
+true$
+map(f,x+a*y+b*z);
+f(b*z)+f(a*y)+f(x)$
+map(lambda([u],partfrac(u,x)),x+1/(x^3+4*x^2+5*x+2));
+1/(x+2)-1/(x+1)+1/(x+1)^2+x$
+map(ratsimp,x/(x^2+x)+(y^2+y)/y);
+y+1/(x+1)+1$
+map("=",[a,b],[-0.5,3]);
+[a = -0.5,b = 3]$
+fullmap(g,a+b*c);
+g(b)*g(c)+g(a)$
+map(g,a+b*c);
+g(b*c)+g(a)$
+fullmapl("+",[3,[4,5]],[[a,1],[0,-1.5]]);
+[[a+3,4],[4,3.5]]$
+exp1:(a^2+2*a+1)*y+x^2;
+(a^2+2*a+1)*y+x^2$
+scanmap(factor,%);
+(a+1)^2*y+x^2$
+u*v^(a*x+b)+c;
+u*v^(a*x+b)+c$
+scanmap('f,%);
+f(f(f(u)*f(f(v)^f(f(f(a)*f(x))+f(b))))+f(c))$
+append([y+x,0,-3.2],[2.5e+20,x]);
+[y+x,0,-3.2,2.5e+20,x]$
+my_union(x,y):=if x = [] then y
+       else (if member(t:first(x),y) then my_union(rest(x),y)
+		 else cons(t,my_union(rest(x),y)));
+my_union(x,y):=if x = [] then y
+       else (if member(t:first(x),y) then my_union(rest(x),y)
+		 else cons(t,my_union(rest(x),y)))$
+my_union([a,b,1,1/2,x^2],[-x^2,a,y,1/2]);
+[b,1,x^2,-x^2,a,y,1/2]$
+bernpoly(x,5);
+x^5-5*x^4/2+5*x^3/3-x/6$
+maplist(numfactor,%);
+[1,-5/2,5/3,-1/6]$
+apply(min,%);
+-5/2$
+factcomb(3*x/(2*3^x*x!));
+3^(1-x)/(2*(x-1)!)$

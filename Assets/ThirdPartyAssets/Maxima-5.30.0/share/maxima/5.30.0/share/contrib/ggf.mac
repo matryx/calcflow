@@ -1,0 +1,73 @@
+/*
+ggf.mac v1.0 for Maxima (tested with Maxima 5.9.1).
+
+Compute the generating function (if it is a fraction of two
+polynomials) of a sequence, its first terms being given.
+
+Usage:
+  ggf(Terms);
+    Terms - list of first terms of the sequence (integer or rational)
+
+Examples:
+  ggf(makelist(fib(n),n,0,40));
+  ggf(makelist(2*fib(n+1)-fib(n),n,0,40));
+
+Flags:
+  GGFINFINITY
+    default: 3 - when computing the continued fraction of the
+    generating function, a partial quotient having a degree
+    (strictly) greater than GGFINFINITY will be discarded and
+    the current convergent will be considered as the exact value
+    of the generating function; most often the degree of all
+    partial quotients will be 0 or 1; if you use a greater value,
+    then you should give enough terms in order to make the
+    computation accurate enough.
+  GGFCFMAX
+    default: 24 - when computing the continued fraction of the
+    generating function, if no good result has been found (see
+    the GGFINFINITY flag) after having computed GGFCFMAX partial
+    quotients, the generating function will be considered as
+    not being a fraction of two polynomials and the function will
+    exit. Put freely a greater value for more complicated
+    generating functions.
+
+Results:
+  The solution is returned as a fraction of two polynomials.
+  If no solution has been found, it returns with DONE.
+
+History:
+  2005-09 Thomas Baruchel - version 1.0
+
+--
+
+Copyright (C) 2005  Thomas Baruchel
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+GGFINFINITY: 3;
+GGFCFMAX: 24;
+
+ggf(l) := block([p0:0, q0:1, p1:1, q1:0, x, p, q:1, i],
+  p : sum(l[i]*x^(i-1),i,1,length(l)),
+  for i:1 thru GGFCFMAX do if block([j:lopow(p,x),k:lopow(q,x),a,p2,q2],
+    if abs(j-k) > GGFINFINITY then return(true)
+      else a : x^(j-k) * coeff(p,x,j)/coeff(q,x,k),
+    p2 : a*p1 + p0, q2 : a*q1 + q0,
+    p0 : p1, q0 : q1, p1 : p2, q1 : q2,
+    p : rat(p - a*q),
+    if p = 0 then return(true),
+    p2 : p, p : q, q : p2, false)
+    then return(ratsimp(p1/q1)));

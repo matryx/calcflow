@@ -1,0 +1,292 @@
+/* Routines for computing:  */
+/* a) application of a lin. op. on a hyp. seq. */
+/* b) shift quotient of a hyp. seq. */
+
+/* RISC Institute, Linz, Austria */
+/* by Fabrizio Caruso            */
+
+
+dependent(expr,var) :=
+  block([res,count],
+    if(expr=var) then
+      return(true)
+    else
+      if(atom(expr)) then
+        return(false)
+      else
+        (
+        res:false,
+    
+        for count:1 unless (res=true)or(count>length(expr)) do
+           (
+           res : dependent(part(expr,count),var)
+
+           ),
+        return(res)
+        )
+);
+       
+
+poly2list(pol) :=
+   block(
+   if atom(pol) or not(zb_operatorp(pol,"*")) then
+     return([pol])
+   else
+     return(cons(first(pol),poly2list(pol/first(pol))))
+   );
+
+extractConstant(polyList,var) :=
+   block([resConst, resDep,i],
+   resDep : 1,
+   resConst : 1,
+   for i : 1 thru length(polyList) do
+      if (atom(polyList[i]) and polyList[i]=var) or 
+         (not(atom(polyList[i])) and dependent(polyList[i],var)) then
+         resDep : resDep * polyList[i]
+      else
+         resConst : resConst * polyList[i],
+   return([resDep,resConst])
+   );
+
+
+/* It computes the rat. factor out of the appl. of a lin. op. to a hyp. seq. */
+niceForm(hyp,var,parName,ord,sumVar) :=
+    block(
+    [shQuo,numConst,denConst,num,den,res,i],    
+
+    res:parName[ord],
+    shQuo : shiftQuoHypCheck(hyp,var),
+    if second(shQuo) = NO_HYP then
+      return([])
+    else shQuo : first(shQuo),
+
+    numConst : extractConstant(poly2list(factor(num(shQuo))),sumVar),
+    denConst : extractConstant(poly2list(factor(denom(shQuo))),sumVar),
+
+    num : numConst[1],
+    den : denConst[1],
+
+    shQuo : num/den,
+    for i : ord step -1 thru 1 do
+      res : xthru(parName[i-1] + factor(shiftFactPoly(shQuo,var,i-1))*res),
+
+    return([res,numConst[2],denConst[2]])
+);
+
+
+/* It computes the rat. factor out of the appl. of a lin. op. to a hyp. seq. */
+niceFormDB(hyp,var,parName,ord) :=
+    block(
+    [shQuo,num,den,res,i],    
+
+    res:parName[ord],
+    shQuo : shiftQuo(hyp,var),
+    print("Shift quotient computed!"),
+    print("Order : ", ord),
+    for i : ord step -1 thru 1 do
+      (
+      res : xthru(parName[i-1] + shiftFactPoly(shQuo,n,i-1)*res),
+      print("i : ", i)
+      ),
+    return(res)
+    );
+
+
+/*
+removeBinomial(expr) :=
+  if atom(expr) then
+    expr
+  else
+    if zb_op(expr) = binomial then
+      first(expr)!/second(expr)!/(first(expr)-second(expr))!
+    else
+      apply(zb_op(expr),makelist(removeBinomial(part(expr,i)),i,1,length(expr)));
+*/
+
+removeBinomial(expr) :=
+  block([],
+    
+  if mapatom(expr) then
+    return(expr)
+  else
+    if zb_op(expr) = binomial then
+      return(first(expr)!/second(expr)!/(first(expr)-second(expr))!)
+    else
+      if zb_op(expr) = "-" then
+        return(-removeBinomial(first(expr)))
+      else
+      
+        map(removeBinomial, expr)
+  );
+
+shiftFactPoly(expr,k,j) :=
+  if atom(expr) then
+    subst(k+j,k,expr)
+  else
+  if zb_op(expr) = "/" then
+     shiftFactPoly(first(expr),k,j)*shiftFactPoly(second(expr),k,j)^(-1) 
+  else
+  if zb_op(expr) = "*" then
+     product(shiftFactPoly(part(expr,i__),k,j),i__,1,length(expr)) 
+  else
+  if zb_op(expr) = "^" then
+     if integerp(second(expr)) then 
+         shiftFactPoly(first(expr),k,j)^second(expr)
+     else 
+        0
+  else
+    expand(subst(k+j,k,expr));     
+   
+
+shiftQuo(expr,k) :=
+  block([sq_res],
+    sq_res : shiftQuoHypCheck(expr,k),
+    if second(sq_res) = HYP then
+      return(first(sq_res))
+    else
+      return(subst(k+1,k,first(sq_res))/first(sq_res))
+    );
+
+
+shiftQuoOnlyHyp(expr,k) :=
+  block([sq_res],
+  sq_res : shiftQuoHypCheck(expr,k),
+  if second(sq_res) = HYP then
+    return(first(sq_res))
+  else
+    return([])
+  );
+
+
+isPolynomial(expr,k) :=
+  if freeof(k,expr) or expr=k or expr=-k or constantp(expr) then
+     true
+  else
+    if zb_op(expr) = "^" then
+      ( freeof(k,second(expr)) and isPolynomial(first(expr),k) )
+    else
+      if zb_op(expr) = "-" then
+        isPolynomial(first(expr),k)
+      else
+        if zb_op(expr) = "*" or zb_op(expr)= "+" or zb_op(expr) = "-" then
+           apply("and", makelist(isPolynomial(part(expr,i),k),i,1,length(expr)))
+        else
+           false;
+         
+
+
+rationalp(expr,k) :=
+  if not(isPolynomial(expr,k)) and
+     not(zb_op(expr) = "/" and
+                 isPolynomial(expand(num(expr)),k) and
+                 isPolynomial(expand(denom(expr)), k)) then
+     (
+     if zb_op(expr) = "-" then
+       rationalp(first(expr),k)
+     else
+       false
+     )
+  else
+     true;
+
+shiftQuoHypCheck(expr,k) :=
+  block([xthru_expr,sq_res],
+    xthru_expr : xthru(removeBinomial(expr)),
+    sq_res : shiftQuoHypCheckAux(xthru_expr,k,HYP),
+    
+    if rationalp(sq_res[1],k) then
+      return(sq_res)
+    else
+      return([sq_res[1],NO_HYP])
+
+);
+       
+
+shiftQuoHypCheckAux(expr,k,hyp_flag) :=
+block([sq_num,sq_den,sq_base,sq_exp],
+  if hyp_flag = NO_HYP then
+    return([expr,NO_HYP])
+  else
+  if freeof(k,expr) then
+     return([1,HYP])
+  else
+     if expr = k then
+       return([(k+1)/k,HYP])
+     else
+     if zb_op(expr) = "*" then
+       return(product(shiftQuoHypCheckAux(part(expr,i__),k,hyp_flag),
+              i__,1,length(expr)))
+     else
+     if zb_op(expr) = "/" then
+       (
+       sq_num : shiftQuoHypCheckAux(first(expr),k,hyp_flag),
+       sq_den : shiftQuoHypCheckAux(second(expr),k,hyp_flag),
+       return([first(sq_num)/first(sq_den),second(sq_num)*second(sq_den)])
+       )
+     else
+     if zb_op(expr) = "^" then
+       (
+       if (freeof(k, second(expr))) then
+         (
+         sq_base : shiftQuoHypCheckAux(first(expr), k, hyp_flag),
+         if sq_base[2]=NO_HYP then return([expr, NO_HYP])
+         else return([sq_base[1]^second(expr), hyp_flag])
+         )
+       else if (freeof(k, first(expr))) then
+         (
+         sq_exp: bothcoef(expand(second(expr)), k),
+         if not(freeof(k, second(sq_exp))) then return([expr, NO_HYP])
+         else return([first(expr)^first(sq_exp), hyp_flag])
+         )
+       else return([expr, NO_HYP])
+       )
+     else
+     if zb_op(expr) = "!" then
+        if not(integerp(leadCoeff(first(expr),k))) then
+           return([expr,NO_HYP])
+        else
+          if leadCoeff(first(expr),k)>0 then           
+            return(
+                [product(factor(first(expr)+i__),i__,1,leadCoeff(first(expr),k)),
+                hyp_flag])
+          else
+             [
+             1/product(factor(first(expr)-i__+1), 
+                     i__,1,-leadCoeff(first(expr),k)),hyp_flag]
+/*
+     else
+     if zb_op(expr) = binomial then
+        (
+        sq_num : shiftQuoHypCheckAux(factorial(first(expr)),k,hyp_flag),
+        sq_den : shiftQuoHypCheckAux(factorial(first(expr)-second(expr)),
+                                  k,hyp_flag)*   
+                 shiftQuoHypCheckAux(factorial(second(expr)),
+                                  k,hyp_flag),
+        if second(sq_num) = HYP and second(sq_den)=HYP then
+          return([first(sq_num)/first(sq_den),HYP])
+        else
+          return([expr,NO_HYP])
+
+        )
+*/
+     else
+       if zb_op(expr) = "-" then block(
+         return(shiftQuoHypCheckAux(-expr, k, hyp_flag))
+       )
+       else
+       if zb_op(expr) = "+" then
+         return([shiftFactPoly(expr,k,1)/expr,hyp_flag])
+       else
+         (
+         if warnings then print("Unknown operator : ", zb_op(expr)),
+         return([expr,NO_HYP])
+         )
+);
+
+
+
+
+
+
+
+

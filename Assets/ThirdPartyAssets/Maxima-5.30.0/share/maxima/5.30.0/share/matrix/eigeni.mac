@@ -1,0 +1,178 @@
+/*-*-macsyma-*-*/
+/*	this is the file eigen > dsk:share;.
+	this is the source code for the new eigen package and it is
+	macsyma batchable, i.e. batch(eigen,>,dsk,share);.  if you do not want
+	to waste time (and/or paper...) the fastloadable version is on the file
+	eigen fasl dsk:share;.  you can load the latter using macsyma's 
+	loadfile command, i.e. loadfile(eigen,fasl,dsk,share);. the functions
+	are described in the file eigen usage dsk:share;, and the demo file in
+	which the functions are demonstrated is eigen demo dsk:share;.     */
+
+eval_when(translate_file,
+          modedeclare([hermitianmatrix,nondiagonalizable,knowneigvals,
+                       knowneigvects],boolean,
+		      [index1,index2,index3,index4,dimnsn,count,
+	               %rnum],fixnum))$
+
+sstatus(feature,eigen)$
+
+hermitianmatrix:false$
+
+nondiagonalizable:false$
+
+knowneigvals:false$
+
+knowneigvects:false$
+
+listeigvects:[]$
+
+listeigvals:[]$
+
+conjugate(x):=sublis('[%i=-%i],x)$
+
+innerproduct(x,y):=block([listarith],listarith:true,ratsimp(conjugate(x).y))$
+
+unitvector(x):=block([listarith,intrn],listarith:true,intrn:innerproduct(x,x),intrn:sqrt(intrn),x/intrn)$
+
+columnvector(x):=transpose(matrix(x))$
+
+
+gramschmidt(x):=
+		block([listarith,dimnsn,listall,intern,count,denom,unit,index1,index2],
+		listarith:true,dimnsn:length(x),listall:[part(x,1)],
+		count:1,if dimnsn=1 then return(x)
+		else (for index1:2 thru dimnsn do
+		(unit:part(x,index1),for index2 thru count do
+		(intern:part(listall,index2),denom:innerproduct(intern,intern),
+		unit:factor(ratsimp(unit-innerproduct(intern,unit)*intern/denom))),
+		count:count+1,listall:endcons(unit,listall)),
+		return(listall)))$
+
+
+eigenvalues(mat):=
+		block([dimnsn,listall,solution,multiplicities,solveexplicit,
+	        dummy:?gensym(),index2],
+		listall:[],
+		solveexplicit:true,
+		dimnsn:length(mat),
+		solution:block([programmode:true],
+	                       solve(charpoly(mat,dummy),dummy)),
+		if solution=[] then 
+		(print("solve is unable to find the roots of characteristic polynomial."),
+		return(listall))
+		else (for index2 thru dimnsn do
+		(dimnsn:dimnsn-part(multiplicities,index2)+1,
+		listall:endcons(rhs(part(solution,index2)),listall)),
+		listall:endcons(multiplicities,[listall]),
+		return(listall)))$
+
+
+eigenvectors(mat):=
+		block([equations,unknowns,solution,listall,eigvals,dimnsn,count,vectr,
+		index3,index4,index2,index1,notknwn,matrx,mmatrx,unit,multiplicities,
+		%rnum,realonly,interm,intern],
+		local(notknwn),unknowns:[],dimnsn:length(mat),count:dimnsn,
+		if knowneigvals then eigvals:listeigvals
+		else eigvals:eigenvalues(mat),
+		if eigvals=[] then (nondiagonalizable:true,return(eigvals))
+		else (multiplicities:part(eigvals,2),
+		for index1 thru dimnsn do unknowns:endcons(notknwn[index1],unknowns),
+		vectr:columnvector(unknowns),matrx:mat.vectr,nondiagonalizable:false,
+		listall:[eigvals],realonly:false,
+		for index1 thru count do 
+		 (count:count-part(multiplicities,index1)+1,
+		  mmatrx:matrx-part(eigvals,1,index1)*vectr,
+		  equations:[],
+		  for index2 thru dimnsn do equations:cons(mmatrx[index2,1],equations),%rnum:0,
+		  solution:algsys(equations,unknowns),interm:map(rhs,solution[1]),
+		  unit:[],if %rnum#part(multiplicities,index1) then nondiagonalizable:true,
+		  for index3 thru %rnum do
+		   (intern:substvectk(%rnum_list,index3,interm),
+                    unit:append(unit,[intern])),
+
+		  if hermitianmatrix and %rnum>1 then unit:gramschmidt(unit),
+		  listall:append(listall,unit)),
+
+		return(listall)))$
+
+
+meigenvectors(mat):=
+		block([eigvals:if knowneigvals then listeigvals
+		                               else eigenvalues(mat),
+		       dimnsn:length(mat),
+		       unit],
+		if eigvals=[] then (nondiagonalizable:true,return(eigvals)),
+		nondiagonalizable:false,
+		cons(eigvals,
+		     apply('append,
+		            apply('map,
+			           cons(lambda([val,multiplicity],
+		      unit:args(transpose(%meig(echelon(mat-val*ident(dimnsn)),
+			                        dimnsn))),
+		      if multiplicity#length(unit) then nondiagonalizable:true,
+		      if hermitianmatrix then gramschmidt(unit) else unit),
+					eigvals)))))$
+
+%meig(mat,dimnsn):=
+      if mat=matrix() then matrix()
+		      else
+      if mat[1,1]=0 then addcol(ematrix(dimnsn,1,1,1,1),
+                                (%meig(submatrix(dimnsn,mat,1),
+				       dimnsn-1),
+				 addrow(matrix(0*%%[1]),%%)))
+		    else (%meig(submatrix(1,mat,1),dimnsn-1),
+		          addrow(-rest(mat[1]).%%,%%))$
+
+/* the first arg is of the form [r1,r2,r3]
+    we want to construct [r1=0,r2=1,r3=0] for example. */		
+
+substvectk(l,n,exp):=
+ block([sub_list:[],j:0],
+       for var in l do
+       (j:j+1,
+        sub_list:cons(var = if j=n then 1 else 0,sub_list)),
+       sublis(sub_list,exp))$
+
+
+uniteigenvectors(mat):=
+		block([listuevec,listall,index1,unit],
+		if knowneigvects then listuevec:listeigvects
+		else listuevec:eigenvectors(mat),
+		if listuevec=[] then return(listuevec)
+		else (listall:[part(listuevec,1)],
+		for index1:2 thru length(listuevec) do 
+		(unit:part(listuevec,index1),
+		unit:ratsimp(unitvector(unit)),
+		listall:endcons(unit,listall)),
+		return(listall)))$
+
+
+similaritytransform(mat):=
+		block([listvec,listuevec],
+		listuevec:uniteigenvectors(mat),
+		if nondiagonalizable then return(listuevec)
+		else (listvec:delete(part(listuevec,1),listuevec),
+		rightmatrix:transpose(apply(matrix,listvec)),
+		if hermitianmatrix then leftmatrix:conjugate(transpose(rightmatrix))
+		else leftmatrix:rightmatrix^^-1,
+		return(listuevec)))$
+
+
+conj(x):=conjugate(x)$
+
+inprod(x,y):=innerproduct(x,y)$
+
+uvect(x):=unitvector(x)$
+
+covect(x):=columnvector(x)$
+
+gschmit(x):=gramschmidt(x)$
+
+eivals(mat):=eigenvalues(mat)$
+
+eivects(mat):=eigenvectors(mat)$
+
+ueivects(mat):=uniteigenvectors(mat)$
+
+simtran(mat):=similaritytransform(mat)$
+

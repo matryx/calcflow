@@ -1,0 +1,98 @@
+(
+  kill(all),
+  load(solve_rec),
+  test_solve_rec([eq]) := block(
+    [sol:apply(solve_rec,eq)],
+    ev(radcan(minfactorial(rhs(first(eq))-lhs(first(eq)))), subst(":=", "=", sol))),
+  test_solve_rec_rat([eq]) := block(
+    [sol:apply(solve_rec_rat,eq)],
+    ev(radcan(minfactorial(rhs(first(eq))-lhs(first(eq)))), subst(":=", "=", sol))),
+  0
+);
+0;
+
+test_solve_rec(a[n]=n/(n+1)*a[n-1], a[n]);
+0;
+
+test_solve_rec(a[n]=n/(n+1)*a[n-1], a[n], a[1]=1);
+0;
+
+test_solve_rec((n+1)*(2*n+1)*a[n+1]-(n+3)*(2*n-1)*a[n], a[n]);
+0;
+test_solve_rec(a[n]=n*a[n-1]/(n-2)+1, a[n]);
+0;
+
+test_solve_rec(a[n+1]=n*a[n]/(n-3) + 1/(n-5), a[n]);
+0;
+
+test_solve_rec(a[n]=a[n-1]-a[n-2]+(n^2-1)/4^n, a[n]);
+0;
+
+test_solve_rec(a[n]=a[n-1]-a[n-2]+(n^2-1)/4^n, a[n], a[1]=1);
+0;
+
+test_solve_rec(a[n]=a[n-1]-a[n-2]+(n^2-1)/4^n, a[n], a[1]=1, a[2]=1);
+0;
+
+test_solve_rec(a[n]=2*a[n-1]-a[n-2]+n, a[n]);
+0;
+
+test_solve_rec(a[n]=3*a[n-1]-3*a[n-2]+a[n-3]+n+n*2^n, a[n]);
+0;
+
+test_solve_rec(a[n+4]-a[n+3]-13*a[n+2]+a[n+1]+12*a[n]+n^2+2^(2*n+1)-1, a[n]);
+0;
+
+test_solve_rec(a[n]=a[n+1]-a[n-1]-1, a[n]);
+0;
+
+test_solve_rec(a[n]-4*a[n-1]+5*a[n-2]-2*a[n-3]=2^n, a[n], a[0]=1, a[1]=9, a[2]=33);
+0;
+
+test_solve_rec((n+4)*s[n+2] + s[n+1] - (n+1)*s[n], s[n]);
+0;
+
+test_solve_rec(9*(n+2)*s[n+2] - 3*(n+4)*s[n+1] - 2*(n+3)*s[n], s[n]);
+0;
+
+test_solve_rec(a[x+2]-2*(x+5)*(x-4)/((x+6)*(x-3))*a[x+1]+(x+4)*(x-5)/((x+6)*(x-3))*a[x], a[x]);
+0;
+
+test_solve_rec(2*x*(x+1)*y[x] - (x^2+3*x-2)*y[x+1] + (x-1)*y[x+2], y[x]);
+0;
+
+test_solve_rec(2*x*(x+1)*y[x] - (x^2+3*x-2)*y[x+1] + (x-1)*y[x+2], y[x], y[1]=1, y[3]=3);
+0;
+
+test_solve_rec((-n-5)*s[n+3]+(6*n+22)*s[n+2]+(-9*n-17)*s[n+1]+4*n*s[n],s[n]);
+0;
+
+test_solve_rec((n+3)*s[n+2]-3*(n+2)*s[n+1]+2*(n+1)*s[n],s[n]);
+0;
+
+test_solve_rec((x^6+5*x^5+5*x^4-5*x^3-6*x^2)*z[x+2]+(2*x^4+7*x^3+9*x^2+6*x)*z[x+1]+(x^2+4*x+3)*z[x], z[x]);
+0;
+
+test_solve_rec(n*(n+1)*a[n+2]-2*n*(n+k+1)*a[n+1]+(n+k)*(n+k+1)*a[n], a[n]);
+0;
+
+test_solve_rec(a[n+2]-(2*n+1)*a[n+1]+(n^2-u)*a[n], a[n]), hyper_factor_solve=true, assume_pos=true;
+0;
+
+test_solve_rec((n^2-n-2)*f[n+2]+(-n^3-3*n^2+2*n+8)*f[n+1]+(2*n^3+4*n^2-2*n-4)*f[n], f[n]);
+0;
+
+test_solve_rec((n^5+8*n^4+23*n^3+29*n^2+16*n+4)*f[n+2]+(-n^6-9*n^5-32*n^4-61*n^3-65*n^2-36*n-8)*f[n+1]+(-n^6-8*n^5-21*n^4-23*n^3-9*n^2)*f[n], f[n]);
+0;
+
+test_solve_rec((2*n^6+18*n^5+57*n^4+74*n^3+32*n^2-3*n)*f[n+3]+(-2*n^7-24*n^6-115*n^5-285*n^4-386*n^3-275*n^2-95*n-18)*f[n+2]+(2*n^6+26*n^5+123*n^4+280*n^3+326*n^2+181*n+36)*f[n+1]+(2*n^7+24*n^6+111*n^5+255*n^4+308*n^3+187*n^2+45*n)*f[n], f[n]);
+0;
+
+test_solve_rec_rat(a[x+2]-2*(x+5)*(x-4)/((x+6)*(x-3))*a[x+1]+(x+4)*(x-5)/((x+6)*(x-3))*a[x], a[x]);
+0;
+
+test_solve_rec_rat(a[x+2]-2*((x-99)*(x+101))/((x-98)*(x+102))*a[x+1]+((x-100)*(x+100))/((x-98)*(x+102))*a[x], a[x]);
+0;
+
+test_solve_rec((x+4)*a[x+3] + (x+3)*a[x+2] - x*a[x+1] + (x^2-1)*a[x]=(x+2)/(x+1), a[x]);
+0;

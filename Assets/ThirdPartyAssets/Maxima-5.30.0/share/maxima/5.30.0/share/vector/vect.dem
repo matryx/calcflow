@@ -1,0 +1,54 @@
+
+/* DEMO FILE. */
+
+/* until translated and compiled, use .MC file in DOE MACSYMA */
+if get('vect,'version)=false then load("vect")$
+
+/* First, we establish p, q, f, and g as vector entities:*/
+
+declare([p, q, f, g], nonscalar) $
+/* To attempt to prove the following vector identity:*/
+(p~q).(f~g) + (q~f).(p~g) + (f~p).(q~g) = 0;
+/* Evidently default simplifications are not drastic
+enough, so let us try: */
+vectorsimp(%), expandall;
+/* Now, to determine the expansion of: */
+example: laplacian(%pi*(s+h)) = div(3*s*p);
+vectorsimp(example), expandall:true;
+/* Now, suppose we wish to find the specific representation of this
+equation in parabolic coordinates.  On MC, LOAD("SHARE;VECT ORTH");
+gives access to numerous orthogonal curvilinear coordinate definitions.
+On UNIX and VMS systems, load('vect_orth);.  One of
+these is for parabolic coordinates:
+*/
+
+parabolic: [[(u^2-v^2)/2, u*v], u, v];
+
+/*First, we use the function scalefactors to derive a set of global
+scale factors, then we use the function express to express its
+argument in the corresponding coordinate system:*/
+
+scalefactors(parabolic) $
+example:express(example);
+
+/*Suppose that s is dependent upon both u and v, h is dependent upon
+only u, and p is dependent only upon v.  To expand the above
+derivatives, taking advantage of these simplifications:*/
+
+depends([s,h],u, [s,p],v) $
+example,diff,factor;
+
+/* Now, suppose that we are given the following gradient, in parabolic
+coordinates:*/
+example: [(2*u*v**3+3*u**3*v)/(v**2+u**2),
+   (2*u**2*v**2+u**4)/(u**2+v**2)];
+
+/*To determine the corresponding scalar potential, relative to the
+potential at point [0,0]:*/
+
+potential(example);
+
+/*There is an analagous function named VECTORPOTENTIAL that computes the
+vector potential associated with a given curl vector.*/
+
+

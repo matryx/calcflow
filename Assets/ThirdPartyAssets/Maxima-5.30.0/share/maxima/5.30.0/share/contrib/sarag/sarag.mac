@@ -1,0 +1,34 @@
+/* Code by Fabrizio Caruso */
+
+dir : "./sarag/";
+
+modLoad(modName) :=
+  load(concat(dir,modName));
+
+modLoad("sarag_initialization.mac");
+
+modLoad("settings.mac");
+
+modLoad("aliases.mac");
+
+modLoad("constants.mac");
+
+modLoad("lowLevel.mac");
+
+modLoad("sarag_linear_algebra.mac");
+
+modLoad("rootCounting.mac");
+
+modLoad("rootIsolation.mac");
+
+modLoad("signDetermination.mac");
+
+modLoad("intervalArithmetic.mac");
+
+modLoad("topology.mac");
+
+modLoad("certificateOfPositivity.mac");
+
+modLoad("multiCertificateOfPositivity.mac");
+
+

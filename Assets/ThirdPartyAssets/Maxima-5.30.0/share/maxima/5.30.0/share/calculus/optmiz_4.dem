@@ -1,0 +1,36 @@
+load('optmiz);
+/*
+We have already seen how STAP finds poles of the objective or gradient
+only by accident.  The following examples are included as reminders
+about other limitations of using calculus to find extrema:*/
+stapoints(x, [], x**3-y**2) ;
+/* Lagrange multipliers require the constraints to have con-
+tinuous tangents, and this is violated for the above example at X=0,
+Y=0, where the objective is a minimum.  A direct use of elimination
+would fail too, because it results in an undefined derivative at the
+minimum.  In such cases, each piece between discontinuities must be
+considered a separate constraint.
+
+The next example has a minimum at X=0, Y=0, where the two
+active constraints are parallel, making them linearly dependent.
+Such cusps or "wiskers" on the feasible region violate the so-called
+"constraint-qualification" requirement; so the extremum is not found:*/
+stapoints(x, [-y, y-x**3]) ;
+/* The following example doesn't have a strictly feasible point;
+so it violates Slater's condition; and the extremum at X=0 is not
+found: */
+stapoints(x, x**2) ;
+/* Finally, it is important to remember that unbounded regions
+may have nonstationary or asymptotically stationary points
+at infinity, which STAP will not find.  Such situations are usually
+obvious from qualitative considerations, provided the objective and
+constraints are not too complicated and numerous, but the macsyma LIMIT
+function can be of help.  However, it is important to remember that a
+multivariate limit depends upon the way it is taken.  This is
+illustrated by the following example, where you will have to type
+NONZERO; in response to two interrupts: */
+peano:  (y - c - (a*x)**2)*(y - c - (b*x)**2) ;
+limit(peano, y, inf);
+limit(peano, x, inf);
+radcan(ev(peano, y=c+(a**2+b**2)*x**2/2));
+limit(%, x, inf);

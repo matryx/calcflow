@@ -1,0 +1,966 @@
+/* ezunits: yet another units package for Maxima
+ * This program copyright 2008 by Robert Dodier.
+ * I release this program under the terms of the
+ * GNU General Public License.
+ */
+
+(kill (all), load (ezunits), 0);
+0;
+
+a`m^3;
+a`(m^3);
+
+(a`m)^3;
+(a^3)`(m^3);
+
+%pi/a`m;
+(%pi/a)`m;
+
+%pi/(a`m);
+(%pi/a)`(1/m);
+
+unit_kg: 1`kg;
+1`kg;
+
+50*unit_kg;
+50`kg;
+
+%pi*(a`m);
+%pi*a`m;
+
+a*b`m*kg;
+(a*b)`(m*kg);
+
+a/b`m/kg;
+(a/b)`(m/kg);
+
+a`m + b`m;
+(a + b)`m;
+
+a`m - b`m;
+(a - b)`m;
+
+a`m - a`m;
+0`m;
+
+a`m + b`kg;
+(a`m) + (b`kg);
+
+(a`m)*(b`m);
+(a*b)`(m^2);
+
+(a`m)/(b`kg);
+(a/b)`(m/kg);
+
+(a`m)*(b`m)*(c`m);
+(a*b*c)`(m^3);
+
+(a`m)*exp(sin(z))*(b`m);
+(exp(sin(z))*a*b)`(m^2);
+
+(a`m)/(b`s)/(c`kg);
+(a/(b*c))`(m/(s*kg));
+
+(a`m)/((b`s)*(c`kg));
+(a/(b*c))`(m/(s*kg));
+
+a`m + b`m + c`m;
+(a + b + c)`m;
+
+(a`m)*(b`m)*(c`m)*(d`m);
+a*b*c*d`m^4;
+
+(a`kg/m^2)/(b`kg/m^2);
+a/b;
+
+(a`kg*m/s)/(b`kg*m/s);
+a/b;
+
+1729 ` 1;
+1729;
+
+0 ` kg/m^3;
+0 ` kg/m^3;
+
+/* next one has result = unknown;
+ * substitute narrower test on "=" instead of equal
+ * pending simplification rule for equal applied to unitful expressions
+is (equal (0 ` m, 0 ` kg));
+false;
+ */
+
+is (0 ` m = 0 ` kg);
+false;
+
+/* begin addt'l stuff adapted from Cliff Yapp's email
+ * to the Maxima mailing list 2005/05/21.
+ */
+a`s + c;
+(a`s) + c;
+
+a + c`s;
+a + (c`s);
+
+a`kg/s + c;
+(a`(kg/s)) + c;
+
+a`kg/s + c`kg/s;
+(a + c)`(kg/s);
+
+a`kg/s - c`kg/s + d`kg/s;
+(a - c + d)`kg/s;
+
+a`kg*m/s^2 + c;
+(a`(kg*m/s^2)) + c;
+
+a`kg*m/s^2 + c`kg*m/s^2;
+(a + c)`(kg*m/s^2);
+
+a`kg*m/s^2 + c`kg*m/s^2 - d`kg*m/s^2;
+(a + c - d)`(kg*m/s^2);
+
+a`kg/s + c`kg/s + d`kg*m/s^2;
+(a + c)`(kg/s) + d`(kg*m/s^2);
+
+a`kg/s + c`kg*m/s^2 + d`kg*m/s^2;
+a`kg/s + (c + d)`kg*m/s^2;
+
+(N: kg*m/s^2, 0);
+0;
+
+(J: N*m, 0);
+0;
+
+a`kg/s + b`N + c`kg/s + d`N + e`kg/s;
+(a + c + e)`kg/s + (b + d)`kg*m/s^2;
+
+1/60`kg/s + a`kg/s + b`kg/s + c`kg/s^2 + d`kg/s^2;
+(1/60 + a + b)`kg/s + (c + d)`kg/s^2;
+
+a/60`kg/s + a`kg/s + b`kg/s + c`kg/s^2 + d`kg/s^2;
+(a/60 + a + b)`kg/s + (c + d)`kg/s^2;
+
+(a/60)`kg/s + a*b`kg/s;
+(a/60 + a*b)`kg/s;
+
+a`kg*m/s^2 + b`N*J + c`kg/s + d`N*J - e`kg*m/s^2;
+(a - e)`kg*m/s^2 + c`kg/s + (b + d)`kg^2*m^3/s^4;
+
+sin(1`s);
+sin(1`s);
+
+-1`1/s;
+-1`1/s;
+
+sin(1`kg/s);
+sin(1`kg/s);
+/* end stuff adapted from Cliff Yapp's email
+ */
+
+(remvalue (J, N), 0);
+0;
+
+/* foo(a`s) fails nondimensional_not1 test, due to presence of a`s within.
+ * => No rule triggered here.
+ */
+(a`b)*(c`d)*foo(e`f);
+''(block ([simp: false], (a`b)*(c`d)*foo(e`f)));
+
+(F: C*(5/9) + 32, 0);
+0;
+
+212`F;
+100`C;
+
+32`F;
+0`C;
+
+-40`F;
+-40`C;
+
+/* deg and rad are units ad hoc; neither one is defined */
+
+deg: rad*%pi/180;
+rad*%pi/180;
+
+90`deg;
+%pi/2`rad;
+
+a`%pi;
+a*%pi;
+
+sin(135`deg);
+sin(3*%pi/4`rad);
+
+sin(135`deg), rad=1;
+sqrt(2)/2;
+
+(declare ([C1, C2], constant), 0);
+0;
+
+/* Constants for Planck's law */
+[declare_constvalue (%C2, 14390.0), declare_constvalue (%C1, 3.742E+8)];
+[14390.0, 3.742E+8];
+
+(C1: %C1`W*micron^4/m^2, C2: %C2`micron*K, l: %l`micron, T: %T`K, 0);
+0;
+
+/* "infeval=true" is a work-around for simplification strangeness:
+ * after load("units.mac")$ kill(all)$ load("units.mac")$
+ * the simplifier doesn't try so hard to use tellsimpafter rules,
+ * but it can be coaxed by re-evaluation via ''expr or infeval=true.
+ */
+expr: C1/(l^5*(exp(C2/(l*T)) - 1)), infeval=true;
+%C1/(%l^5*(%e^(%C2/(%l*%T))-1)) ` W/(m^2*micron);
+
+ev (expr, constvalue);
+3.742E+8/(%l^5*(%e^(14390.0/(%l*%T))-1)) ` W/(m^2*micron);
+
+qty(%), %T=6000;
+3.742E+8 / (%l^5 * (%e^(2.398333333333333/%l) - 1));
+
+/* Now try this -- should yield a skewed bump.
+ * plot2d (%, [%l, 0.05, 3]);
+ */
+
+declare ([a1, b1, c1], dimensional);
+done;
+
+a1 + b1 + c1;
+a1 + b1 + c1;
+
+expand_dimensional (a1 + b1 + c1);
+'qty(a1)`'units(a1) + 'qty(b1)`'units(b1) + 'qty(c1)`'units(c1);
+
+declare_units ('[a1, b1, c1], mph);
+mph;
+
+a1: 50`mph;
+50`mph;
+
+catch (b1: 50`gpf);
+oops ('b1, 50`gpf);
+
+b1: c1;
+c1;
+
+a1 + b1 + c1;
+2*c1 + 50`mph;
+
+(declare_qty ('a1, 100), declare_qty ('b1, 200), declare_qty ('c1, 300));
+300;
+
+a1 + b1 + c1;
+2*c1 + 50 ` mph;
+
+expand_dimensional (a1 + b1 + c1);
+650 ` mph;
+
+c1 + 1000`mph;
+c1 + 1000`mph;
+
+expand_dimensional (c1 + 1000`mph);
+1300`mph;
+
+expand_dimensional (c1 + 1000`kg);
+300`mph + 1000`kg;
+
+expand_dimensional ((a1 + 500`mph)/(b1 - 100`mph));
+11/4;
+
+map (declare_units, [aa, bb, cc, dd, ee, ff, gg], [m, kg, s, K, feet, in, acre]);
+[m, kg, s, K, feet, in, acre];
+
+catch (aa: bb);
+oops ('aa, bb);
+
+catch (bb: aa);
+oops ('bb, aa);
+
+catch (cc: a1);
+''(oops ('cc, a1));
+
+catch (apply (lambda ([ff], cc^2), [gg]));
+oops ('ff, gg);
+
+units (aa*bb*cc*dd*ee*ff*gg);
+m*kg*s*K*feet*in*acre;
+
+[aa: %aa`m, bb: %bb`kg, cc: %cc`s, dd: %dd`K, ee: %ee`feet, ff: %ff`in, gg: %gg`acre];
+[%aa`m, %bb`kg, %cc`s, %dd`K, %ee`feet, %ff`in, %gg`acre];
+
+ff: ee*(12`in)/(1`feet);
+12*%ee`in;
+
+gg: ff^2*((1`yard)/(36`in))^2*(1`acre)/(55*88`yard^2);
+%ee^2/43560`acre;
+
+declare_units (foo, m/s^2);
+m/s^2;
+
+units (foo (p, q));
+m/s^2;
+
+qty (foo (p, q));
+'qty (foo (p, q));
+
+aa: expand_dimensional (foo (p, q) * cc * (100`s));
+100 * qty (foo (p, q)) * %cc ` m;
+
+declare_units (bar, kg/acre);
+kg/acre;
+
+bb: bar[n] * gg;
+(%ee^2/43560 ` acre) * bar[n];
+
+expand_dimensional (bb);
+%ee^2 * 'qty (bar [n]) / 43560 ` kg;
+
+catch (cc: bar[k]);
+oops ('cc, bar[k]);
+
+cc: bar[11] * (57 ` s/kg) * (10 ` acre);
+bar[11] * (570 ` acre*s/kg);
+
+expand_dimensional (cc);
+570 * qty(bar[11]) ` s;
+
+kill (aa, bb, cc, dd, ee, ff, gg);
+done;
+
+/* Unit conversions */
+
+0 ` kg/m^2 `` lbm/acre;
+0 ` lbm/acre;
+
+0 ` degC `` degF;
+32 ` degF;
+
+100 ` degC `` degF;
+212 ` degF;
+
+-40 ` degF `` degC;
+-40 ` degC;
+
+1 ` acre*ft `` m^3;
+60228605349/48828125 ` m^3;
+
+declare_unit_conversion (h = hour, d = day);
+done;
+
+/* Stefan-Boltzmann constant */
+56697/10000/10^8 ` W/m^2/K^4 `` Btu/h/ft^2/R^4;
+304821971/178031250000000000 ` Btu/h/ft^2/R^4;
+
+declare_unit_conversion (MMBtu = 10^6*Btu, kW = 1000*W, kWh = kW*h, MWh = 1000*kWh);
+done;
+
+1 ` MMBtu `` MWh;
+211/720 ` MWh;
+
+1 ` MMBtu/d `` kW;
+5275/432 ` kW;
+
+(load (physical_constants), 0);
+0;
+
+map (lambda ([x], featurep (x, physical_constant)), [%c, %mu_0, %e_0, %Z_0, %G, %h, %h_bar]);
+[true, true, true, true, true, true, true];
+
+map (constantp, [%c, %mu_0, %e_0, %Z_0, %G, %h, %h_bar]);
+[true, true, true, true, true, true, true];
+
+map (units, [%c, %mu_0, %e_0, %Z_0, %G, %h, %h_bar]);
+''([m/s, N/A^2, s^2*A^2/(m^2*N), m*N/(s*A^2), m^3/(kg*s^2), J*s, J*s]);
+
+[dimensions (1), dimensions (1729), dimensions (%e)];
+[1, 1, 1];
+
+[dimensions (0 ` m/s), dimensions (0 ` kg/m^3), dimensions (0 ` W/kg)];
+[length/time, mass/length^3, length^2/time^3];
+
+dimensions (foobar);
+'dimensions (foobar);
+
+dimensions_as_list (foobar);
+'dimensions_as_list ('dimensions (foobar));
+
+fundamental_units (foobar);
+'fundamental_units (foobar);
+
+map (dimensions, [%c, %mu_0, %e_0, %Z_0, %G, %h, %h_bar]);
+[length/time,
+ length*mass/(current^2*time^2),
+ current^2*time^4/(length^3*mass),
+ length^2*mass/(current^2*time^3),
+ length^3/(mass*time^2),
+ length^2*mass/time,
+ length^2*mass/time];
+
+fundamental_dimensions;
+[length, mass, time, current, temperature, quantity, luminous_intensity];
+
+map (dimensions_as_list, [%c, %mu_0, %e_0, %Z_0, %G, %h, %h_bar]);
+[[1, 0, - 1, 0, 0, 0, 0],
+ [1, 1, - 2, - 2, 0, 0, 0],
+ [- 3, - 1, 4, 2, 0, 0, 0],
+ [2, 1, - 3, - 2, 0, 0, 0],
+ [3, - 1, - 2, 0, 0, 0, 0],
+ [2, 1, - 1, 0, 0, 0, 0],
+ [2, 1, - 1, 0, 0, 0, 0]];
+
+map (fundamental_units, [%c, %mu_0, %e_0, %Z_0, %G, %h, %h_bar]);
+[m/s,
+ kg*m/(s^2*A^2),
+ s^4*A^2/(kg*m^3),
+ kg*m^2/(s^3*A^2),
+ m^3/(kg*s^2),
+ kg*m^2/s,
+ kg*m^2/s];
+
+/* examples from message from ed romana to mailing list 2007-12-02, -12-03 */
+
+e : 1/sqrt (%mu_0 * %e_0);
+1/sqrt (%mu_0 * %e_0);
+
+[e, %c], constvalue;
+[299792458 ` m/s, 299792458 ` m/s];
+
+/* Helium sound velocity at 27 C, He(Cp/Cv)=5/3, 4gr/mol */
+e : sqrt (5/3 * %R/(4 ` g/mol) * (27 ` degC `` K));
+sqrt(%R*(2001/16 ` mol*K/g));
+
+expand_dimensional (e);
+sqrt(2001)*sqrt('qty(%R))/4 ` sqrt(J)/sqrt(g);
+
+dimensions (e);
+length / time;
+
+e : constvalue (e);
+sqrt(2079657309)/(125*2^(7/2)) ` sqrt(J)/sqrt(g);
+
+dimensions (e);
+length / time;
+
+u : fundamental_units (e);
+m/s;
+
+e : e `` u;
+10^(3/2)*sqrt(2079657309)/(125*2^(7/2))  ` m/s;
+
+e, numer;
+1019.719890214955 ` m/s;
+
+/* decomposing units into multiple units of different "size" */
+
+xx : 1000 ` m `` [foot];
+[1250000/381 ` foot];
+
+xx : map (lambda ([x], x `` m), xx);
+[1000 ` m];
+
+xx : 1000 ` m `` [foot, inch];
+[3280 ` foot, 1280/127 ` inch];
+
+xx : map (lambda ([x], x `` m), xx);
+[124968/125 ` m, 32/125 ` m];
+
+apply ("+", xx);
+1000 ` m;
+
+(declare_unit_conversion (hairs_breadth = 1/100 * inch),
+ xx : 1000 ` m `` [foot, inch, hairs_breadth]);
+[3280 ` foot, 10 ` inch, 1000/127 ` hairs_breadth];
+
+xx : map (lambda ([x], x `` m), xx);
+[124968/125 ` m, 127/500 ` m, 1/500 ` m];
+
+apply ("+", xx);
+1000 ` m;
+
+xx : 10^9 ` s `` [year, month, day, hour, minute, s];
+[31 ` year, 8 ` month, 7 ` day, 19 ` hour, 46 ` minute, 40 ` s];
+
+xx : map (lambda ([x], x `` s), xx);
+[978285600 ` s, 21038400 ` s, 604800 ` s, 68400 ` s, 2760 ` s, 40 ` s];
+
+apply ("+", xx);
+1000000000 ` s;
+
+xx : 10^7 ` m^2 `` [mile^2, acre, yard^2, feet^2, inch^2];
+[3 ` mile^2, 551 ` acre, 260 ` yard^2, 4 ` feet^2, 388096/16129 ` inch^2];
+
+xx : map (lambda ([x], x `` m^2), xx);
+[121405692672/15625 ` m^2, 174204522558/78125 ` m^2, 16983837/78125 ` m^2, 145161/390625 ` m^2, 6064/390625 ` m^2];
+
+apply ("+", xx);
+10000000 ` m^2;
+
+86400 ` s `` [hour, minute, s];
+[24 ` hour, 0 ` minute, 0 ` s];
+
+60 ` s `` [hour, minute, s];
+[0 ` hour, 1 ` minute, 0 ` s];
+
+1 ` s `` [hour, minute, s];
+[0 ` hour, 0 ` minute, 1 ` s];
+
+86401 ` s `` [day, hour, minute, s];
+[1 ` day, 0 ` hour, 0 ` minute, 1 ` s];
+
+xx : n ` m `` [yard, foot, inch];
+[floor(1250*n/1143) ` yard,
+ floor(3*(1250*n/1143-floor(1250*n/1143))) ` foot,
+ 12*(3*(1250*n/1143-floor(1250*n/1143)) -floor(3*(1250*n/1143-floor(1250*n/1143)))) ` inch];
+
+xx : ev (xx, n = 100);
+[109 ` yard, 1 ` foot, 128/127 ` inch];
+
+xx : map (lambda ([x], x `` m), xx);
+[124587/1250 ` m, 381/1250 ` m, 16/625 ` m];
+
+apply ("+", xx);
+100 ` m;
+
+declare_units (xyz, kg);
+kg;
+
+xx : xyz `` [metric_ton, kg, mg];
+xyz `` [metric_ton, kg, mg];
+
+expand_dimensional (xx);
+[floor('qty(xyz)/1000) ` metric_ton,
+ floor(1000*('qty(xyz)/1000-floor('qty(xyz)/1000))) ` kg,
+ 1000000*(1000*('qty(xyz)/1000-floor('qty(xyz)/1000))
+  - floor(1000*('qty(xyz)/1000-floor('qty(xyz)/1000)))) ` mg];
+
+ev (xx, xyz = (1729 + 42/99) ` kg, nouns);
+[1 ` metric_ton, 729 ` kg, 14000000/33 ` mg];
+
+/* needs more work to get rule for diff to apply to verb ... oh well. */
+'diff (x (t) ` inch, t ` year, 1);
+'diff (x (t), t, 1) ` inch / year;
+
+'integrate (f (x) ` N, x ` m, 1 ` m, 10 ` m);
+('integrate (f (x), x, 1, 10)) ` N*m;
+
+'integrate (f (x) ` N, x ` m, 1 ` inch, 10 ` inch);
+('integrate (f (x), x, 127/5000, 127/500)) ` N*m;
+
+/* small example from mma mailing list circa 2009-05-29 */
+
+block ([R, w, L, x, y, z], kill (x), R : x ` Ohm, w : z ` Hz, L : y ` H, (R + w*L) `` Ohm);
+(x + y*z) ` Ohm;
+
+/* test new definitions of pound_mass, gallon, slug */
+
+((1 ` pound_force)/(1 ` pound_mass), [dimensions (%%), %% `` cm/s^2]);
+[length/time^2, ''(980665/1000) ` cm/s^2];
+
+(kill (xx), xx ` gallon `` inch^3);
+231*xx ` inch^3;
+
+xx ` gallon/acre `` feet;
+''(231*xx/(55*88*3^2)/(12^2)/12) ` feet;
+
+[dimensions (slug), dimensions (slug/pound_mass)];
+[mass, 1];
+
+1 ` slug/pound_mass `` 1;
+196133/6096; /* approx 32.something */
+
+/* some examples suggested by Jeff Hankin; thanks, Jeff. */
+
+dimensions (W / (K * m));
+length*mass/(temperature*time^3);
+
+dimensions (lux);
+luminous_intensity / length^2;
+
+dimensions (parsec);
+length;
+
+bfloat (1 ` pc `` m);
+3.085677581491367b16 ` m;
+
+dimensions (kat);
+quantity / time;
+
+bfloat (300 ` mile `` AU);
+3.227340053309997b-6 ` AU;
+
+10^6 ` pc `` AU;
+648000000000/%pi ` AU;
+
+70 ` mile/hour `` parsec / julian_year;
+4762373*%pi/467493345937500 ` parsec/julian_year;
+
+/* still more examples */
+
+/* assignment to a unit symbol causes trouble;
+ * maybe rhs of "`" should never be evaluated.
+ * For now, just remvalue all unit symbols.
+ */
+(apply (remvalue, known_units ()), 0);
+0;
+
+(kill (xx), xx : 1 ` ml*lux*katal/(gray*Bq), dimensions (xx));
+luminous_intensity * quantity * time^2 / length;
+
+fundamental_units (xx);
+cd * mol * s^2 / m;
+
+(kill (uu), uu ` horsepower*julian_year/tbsp `` GJ/liter);
+50133999444908841*uu/31501953125000 ` GJ/liter;
+
+'f(uu) ` MW `` short_ton*(lbf/lbm)*mile/hour `` Btu/hour;
+720000000*'f(uu)/211 ` Btu/hour;
+
+1 ` W `` Btu/julian_year `` newton*foot/hour `` lbf*m/s `` W;
+1 ` W;
+
+/* units ad hoc; no fundamental units or dimensions, just conversions */
+
+declare_unit_conversion (1`elephant=10`cow, 1`cow=10`goat, 1`goat = 2`dog, 1`dog=3`cat);
+done;
+
+1 ` elephant/m `` cat/inch;
+381/25 ` cat/inch;
+
+dimensions (1 ` goat/hour);
+'dimensions(cat) / time;
+
+/* convert argument of trig function */
+
+sin (45 ` degree);
+1/sqrt(2);
+
+cos (180 ` degree);
+-1;
+
+tan (135 ` degree);
+-1;
+
+sec (-45 ` degree);
+sqrt(2);
+
+csc (30 ` degree);
+2;
+
+cot (60 ` degree);
+1/sqrt(3);
+
+sin (30 ` kg);
+sin (30 ` kg);
+
+cos (100 ` m);
+cos (100 ` m);
+
+is (abs (ev (sin (40 ` degree), numer) - 0.642787609686539) < 1e-12);
+true;
+
+is (abs (ev (cot (80 ` degree), numer) - 0.176326980708465) < 1e-12);
+true;
+/* Hydrostatics examples from:
+ * http://www.ce.siue.edu/mrossow/Worked_examples_Internet_text-only/Data_files-html/Hydrostatics_list_of_examples.html
+ * via: http://designerunits.com/examples/sites/ce.siue/hydrostatics
+ */
+
+(gee :(980 + 2/3) ` cm/s^2, p_AB : (10^3`kg/m^3) * gee * (5`m) `` kPa);
+1471/30 ` kPa;
+
+w : p_AB * 4 ` m `` kN/m;
+2942/15 ` kN/m;
+
+(kill (F_A), e : (F_A`kN) * (3`m) - w*(3`m)*(3`m)/2, solve (first (e), F_A));
+[F_A = 1471/5];
+
+p : ((200 ` N)/(%pi*r^2) + (900 ` kg/m^3) * (200 ` mm) * %pi * r^2 * gee / (%pi * r^2)) `` kPa, r = (25 ` mm)/2;
+(1280/%pi + 4413/2500) ` kPa;
+
+ratsimp (W : (p * %pi * r^2) `` kN), r = (300 ` mm)/2;
+(39717*%pi + 28800000)/1000000 ` kN;
+
+ratsimp (W * 1/(200 ` N) `` 1);
+(39717*%pi + 28800000)/200000;
+
+p_B : (10^3 ` kg/m^3) * gee * (2 ` m + 3 ` m) `` kPa;
+1471/30 ` kPa;
+
+w_B : p_B * 4 ` m `` kN/m;
+2942/15 ` kN/m;
+
+1/2 * w_B * (2`m + 3`m);
+1471/3 ` kN;
+
+1/3*(2 ` m + 3 ` m);
+5/3 ` m;
+
+
+/* Miscellaneous examples from: "Metric Units and Conversion Charts"
+ * by Theodore Wildi (www.wildi-theo.com) ISBN 0-7803-1050-0
+ * via: http://designerunits.com/examples/sites/wildi-theo/chartschapter04
+ */
+
+(400 ` lbm) * (3 ` cm/s^2);
+1200 ` lbm*cm/s^2;
+
+(400 ` lbm) * (3 ` cm/s^2) `` N;
+136077711/25000000 ` N;
+
+(declare_unit_conversion (ozf = lbf/16), (6 ` ozf)/(3 ` kg) `` m/s^2);
+8896443230521/16000000000000 ` m/s^2;
+
+(4 ` mile) * (3 ` feet) * (2 ` mm) * (20 ` kg/foot^3) `` kg;
+1056000/127 ` kg;
+
+(150 ` lbm) * (2*%pi/(1`day))^2 * (4000 ` mile) `` N;
+63366854089*%pi^2/270000000000 ` N;
+
+(if get ('physical_constants, 'version) = false then load (physical_constants),
+ declare_unit_conversion (1 ` eV = (1 ` V) * constvalue (%%e) `` J),
+ vv : solve (Ek = 1/2 * m * v^2, v),
+ v1 : ev (second (vv), Ek = 1`eV, m = 1`lbm));
+v = sqrt(2) ` sqrt(eV)/sqrt(lbm);
+
+map (dimensions, v1);
+'dimensions(v) = length/time;
+
+map (lambda ([x], x `` cm/year), v1);
+v `` cm/year = 39447*sqrt(1602176487)/(15625*2^(5/2)*sqrt(45359237)) ` cm/year;
+
+(declare_unit_conversion (gauss = tesla/10^4, G = gauss, kG = 1000*G, mph = mile/hour), (10 ` kG) * (6 ` inch) * (60 ` mph) `` V);
+1596771/390625 ` V;
+
+(declare_unit_conversion (1 ` cmil = %pi * ((1/1000 ` inch) / 2)^2, microohm = Ohm/10^6),
+ (172/100 ` microohm*cm) * (8/10 ` mile) / (10400 ` cmil) `` Ohm);
+544896/(41275*%pi) ` Ohm;
+
+(declare_unit_conversion (cal_tc = 4184/1000 * J, Btu_tc = 105435026444/10^8 * J, ton = 2000 * lbm),
+ (3 ` ton) * (1000 ` degF `` R - 70 ` degF `` R) * (9/100 ` cal_tc/g/K),
+ En : %% `` cal_tc);
+12655227123/100 ` cal_tc;
+
+En `` MJ;
+6618683785329/12500000000 ` MJ;
+
+En `` Btu_tc;
+1203397051878000/2396250601 ` Btu_tc;
+
+((3/10 ` Btu*inch/hour/foot^2/R) * (150 ` m^2) * ((20 ` degC `` K) - (-15 ` degC `` K)) / (8 ` cm),
+ loss : %% `` Btu/hour);
+4921875/508 ` Btu/hour;
+
+loss `` kW;
+184625/65024 ` kW;
+
+(kill (p, V, n, R, T, foo),
+ solve ([p*V = n*R*T, n = m/M], [p, n]),
+ ev (first (first (%%)), R=constvalue (%R), m=5`oz, M=40`g/mol, V=678`inch^3, T=72`degF``K),
+ foo : rhs (%%) `` Pa);
+2506412710065636911/3199803664896 ` Pa;
+
+(declare_unit_conversion (atm = 101325/1000*kPa), 
+ foo `` atm);
+358058958580805273/46317158049369600 ` atm;
+
+(ev (nu * rho * d / eta, nu = 5 ` mph, rho = 1 ` kg/liter, d = 7/8 ` inch, eta = 8*10^-6 ` lbf*s/foot^2),
+ Re : %% `` 1);
+14984331321600000/115538223773;
+
+620 ` degC `` K;
+17863/20 ` K;
+
+23 ` degF `` K;
+5363/20 ` K;
+
+23 ` degF `` degC;
+-5 ` degC;
+
+(87 ` degF `` R - 60 ` degF `` R) `` K;
+15 ` K;
+
+/* from: http://www.kc9aop.net/Doc/link_pages/motors_and_mechanical.htm
+ * via: http://designerunits.com/examples/sites/kc9aop/motors_and_mechanical
+ */
+
+(declare_unit_conversion ('Hz[S] = 2*%pi*Hz, rpm = 2*%pi/(60*s)),
+ omega_mech : ev (2/npoles * 60 ` 'Hz[S] `` rpm, npoles = 2));
+3600 ` rpm;
+
+(40 ` hp)/(1725 ` rpm) `` lbf*foot;
+8800/(23*%pi) ` foot*lbf;
+
+compute_conversion_factor (hp/rpm, lbf*foot);
+16500/%pi;
+
+(declare_unit_conversion (radian=1),
+ (70 ` lbf)*(3 ` feet)/(1 ` radian) `` lbf*foot);
+210 ` lbf*foot;
+
+(30 ` hp)/(1725 ` rpm) `` lbf*foot;
+6600/(23*%pi) ` foot*lbf;
+
+(230 ` V)*(4 ` A)*82/100 `` hp;
+37720000000000000/37284993579113511 ` hp;
+
+(1725 ` rpm)*(31/10 ` lbf*foot) `` hp;
+713*%pi/2200 ` hp;
+
+omega_mech : ev (2/npoles * 50 ` 'Hz[S] `` rpm, npoles = 4);
+1500 ` rpm;
+
+/* from: http://www.ibiblio.org/harris/500milemail.html
+ * "The case of the 500-mile email" -- a pleasant diversion
+ */
+
+declare_unit_conversion (1 ` lightsecond = constvalue (%c) * (1 ` s), millilightsecond = lightsecond/1000);
+done;
+
+3 ` millilightsecond `` mile;
+149896229/268224 ` mile;
+
+block ([fpprec : 16], 3b0 ` millilightsecond `` mile);
+5.588471911536626b2 ` mile;
+
+/* subscripts applied to unitful expressions */
+
+(kill (x, k), (x ` kg/m^2)[k]);
+x[k] ` kg/m^2;
+
+([1, 2, 3] ` m/s^2)[3];
+3 ` m/s^2;
+
+(kill (foo, i), declare_units (foo, MJ/cd), foo[i]);
+/* verify that foo[i] not expanded to qty(foo[i]) ` MJ/cd or anything else */
+foo[i];
+
+/* "@" applied to unitful expressions */
+
+(kill (foo, a, b, c), defstruct (foo (a, b, c)), 0);
+0;
+
+(kill (m), block ([x : new (foo ('x1, %pi, 17)) ` m/s], [x@a, x@b, x@c], ev (%%)));
+[x1 ` m/s, %pi ` m/s, 17 ` m/s];
+
+/* realpart/imagpart applied to unitful expressions
+ * ev(..., nouns) seems to be necessary to work around noun/verb strangeness ... sigh
+ */
+
+(kill (x), x : (17 - %e*%i) ` s*A/kg, ['realpart (x), 'imagpart (x)], ev (%%, nouns));
+[17 ` s*A/kg, -%e ` s*A/kg];
+
+/* examples derived from dissertation of Andrew John Kennedy */
+
+/* statistics of a list of numbers x:
+ * mean has same units as x
+ * variance has units = (units(x))^2
+ * std deviation has same units as x
+ * skewness is dimensionless
+ * covariance has units = units(x) * units(y)
+ * correlation is dimensionless
+ */
+
+(kill (x, n), x : [2 ` kg/m^2, 3 ` kg/m^2, 5 ` kg/m^2, 7 ` kg/m^2, 11 ` kg/m^2], n : length (x), 0);
+0;
+
+(kill (mean_x), mean_x : apply ("+", x) / n);
+28/5 ` kg/m^2;
+
+(kill (mean_x2, var_x), mean_x2 : apply ("+", map (lambda ([x1], x1^2), x)) / n, var_x : mean_x2 - mean_x^2);
+256/25 ` kg^2/m^4;
+
+(kill (std_x), std_x : sqrt (var_x));
+16/5 ` kg/m^2;
+
+(kill (mean_x3, skewness_x),
+  mean_x3 : apply ("+", map (lambda ([x1], x1^3), x)) / n,
+  moment3_x : mean_x3 - 3 * mean_x2 * mean_x + 2 * mean_x^3,
+  skewness_x : moment3_x / std_x^3);
+1197/2048;
+
+(kill (y, m), y : [13 ` s*A, 17 ` s*A, 19 ` s*A, 23 ` s*A, 29 ` s*A], m : length (y), is (m = n));
+true;
+
+(kill (mean_y), mean_y : apply ("+", y) / m);
+101/5 ` s*A;
+
+(kill (mean_y2, var_y, std_y), mean_y2 : sum (y[i]^2, i, 1, m) / m, var_y : mean_y2 - mean_y^2, std_y : sqrt (var_y));
+2*sqrt(186)/5 ` s*A;
+
+(kill (mean_xy, covar_xy), mean_xy : sum (x[i] * y[i], i, 1, n) / n, covar_xy : mean_xy - mean_x * mean_y);
+432/25 ` kg*s*A/m^2;
+
+(kill (corr_xy), corr_xy : covar_xy / std_x / std_y);
+27/(2*sqrt(186));
+
+/* TODO: differentiation via secant approximation:
+ * diff(f(x), x) = (f(x + h) - f(x - h))/(2 h)
+ *  => diff has units = units(f) / units(x)
+ */
+
+/* TODO: integration via trapezoid rule:
+ * integral(f(x), x, a, b) = (h/2) (f(a) + 2 f(a + h) + ... + 2 f(b - h) + f(b)), h = (b - a)/n
+ *  => integral has units = units(x) * units(f)
+ */
+
+/* TODO: root finding via Newton-Raphson algorithm:
+ * x[n + 1] = x[n] - f(x[n])/f'(x[n])
+ *  => each x[n] has same units as x[1]
+ */
+
+/* solve for units of variable in equation
+ * see: http://groups.google.com/group/sage-support/browse_thread/thread/a60c943c224dfe87#
+ */
+
+(kill (eqn, H_l, h_c, T_a, T_l),
+ eqn : H_l = h_c * (T_a - T_l),
+ declare_units (H_l, calorie/cm^2/minute),
+ declare_units ([T_a, T_l], K),
+ declare (h_c, dimensional),
+ eqn : units (eqn));
+calorie/(cm^2*minute) = 'units(h_c)*K;
+
+solve (eqn, units (h_c));
+['units(h_c) = calorie/(cm^2*minute*K)];
+
+/* tickles bug in tellsimpafter: this example triggers an error
+ * unless built-in simplifications are applied so that MRAT is
+ * simplified away by the time GREAT is called.
+ */
+(kill (a, b, c, x), block ([x : (rat (1) ` a) * (1 ` b + c)], expand (x)));
+1 ` a*b + c ` a;
+
+/* "*" rule now splits arguments into 3 types:
+ * dimensional, nondimensional, and terms not known to be either one.
+ * Thanks to Stefan Karrmann for suggesting it.
+ */
+(kill (a, b, c, d, e, f, g, h, foo, bar),
+  exp (a ` b) * (c ` d) * (e ` f) * g * h);
+exp (a ` b) * (c * e * g * h ` d * f);
+
+(c ` d) * (e ` f) * g * h;
+c * e * g * h ` d * f;
+
+(c ` d) * (e ` f) * (g ` h);
+c * e * g ` d * f * h;
+
+foo (a ` b) * bar (c ` d) * (e ` f) * (g ` h) * 2 * %pi;
+foo (a ` b) * bar (c ` d) * (2 * %pi * e * g ` f * h);
+
+sin (a ` b) * bar (c ` d) * (e ` f) * (g ` h) * 2 * %pi;
+bar (c ` d) * (2 * %pi * e * g * sin (a ` b) ` f * h);
+
+exp (a ` b) + c ` d + e ` d + g + h;
+exp (a ` b) + (c + e) ` d  + g + h;
+
+c ` d + e ` d + g + h;
+(c + e) ` d  + g + h;
+
+c ` d + e ` d;
+(c + e) ` d;
+
+foo (a ` b) + c ` d + e ` d + 2 + %pi;
+(c + e) ` d + foo (a ` b) + 2 + %pi;
+
+

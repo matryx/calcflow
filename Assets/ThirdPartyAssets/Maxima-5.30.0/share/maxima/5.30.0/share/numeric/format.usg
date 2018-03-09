@@ -1,0 +1,117 @@
+Pretty printing of floating point numbers.
+Do LOADFILE(FORMAT,FASL,DSK,SHARE);
+
+Nothing is changed unless you do FLOATFORMAT:TRUE; (default is FALSE)
+Then all floating point numbers are printed in a field of FLOATWIDTH
+character positions (default 10) with FLOATPREC significant figures
+(default 3) and FLOATINT (default 1) figures before the decimal point.
+(FLOATINT may also be a list of 3 integers, in which the first gives the
+no. of digits before the decimal point and the other two specify the
+range of powers of 10 for which the "E" format is not used.)
+
+Alternately you can do FLOATFORMAT:'F; in which case the "E" notation
+is not used and FLOATFRAC figures appear after the decimal point.
+The total width is again FLOATWIDTH.
+
+In either case if FLOATWIDTH is 0, then only the digits themselves will
+be part of the number.  (I.e there will be no leading spaces.)
+
+The printing is also governed by FLOATOPTIONS (default FALSE).  This
+may be set to a list of items, which should be any of:
+"+"	print + for positive integers
+LEFT	place sign in leftmost column instead of by leftmost digit
+0	print trailing zeros
+E	force E format for fixed precision output
+E.g. FLOATOPTIONS:['"+",'E];
+
+If you specify too large a precision, or small a width, then the number
+will appear in the default manner.
+
+Currently the Macsyma displayer (the guy that prints D and E lines),
+PRINT and CONCAT will use this method of printing floating point numbers.
+SAVE, STRING and STRINGOUT do not, so there should be no loss of precision
+in doing a SAVE followed by a LOADFILE or a STRINGOUT followed by a
+BATCH.
+
+For fuller documentation do :PRINT LIBDOC;FFORMA >
+which documents the Fortran-style-FORMAt package (written by JONL), and 
+is the support for the formatter herein discussed.
+There might be a better user interface provided if there is a consensus
+on how it should be done.
+
+Example:
+LOADFILE(FORMAT,FASL,DSK,SHARE);
+FLOATFORMAT:TRUE;
+PI:EV(%PI,NUMER);
+ 				           3.14
+FOR I FROM -10 THRU 10 DO PRINT(10^I*PI);
+  3.14E-10 
+   3.14E-9 
+   3.14E-8 
+   3.14E-7 
+   3.14E-6 
+   3.14E-5 
+   3.14E-4 
+   0.00314 
+    0.0314 
+     0.314 
+      3.14 
+      31.4 
+   3.14E+2 
+   3.14E+3 
+   3.14E+4 
+   3.14E+5 
+   3.14E+6 
+   3.14E+7 
+   3.14E+8 
+   3.14E+9 
+  3.14E+10 
+FLOATOPTIONS:['E];
+FOR I FROM -10 THRU 10 DO PRINT(10^I*PI);
+  3.14E-10 
+   3.14E-9 
+   3.14E-8 
+   3.14E-7 
+   3.14E-6 
+   3.14E-5 
+   3.14E-4 
+   3.14E-3 
+   3.14E-2 
+   3.14E-1 
+   3.14E+0 
+   3.14E+1 
+   3.14E+2 
+   3.14E+3 
+   3.14E+4 
+   3.14E+5 
+   3.14E+6 
+   3.14E+7 
+   3.14E+8 
+   3.14E+9 
+  3.14E+10 
+FLOATFORMAT:'F;
+FLOATOPTIONS:FALSE;
+FOR I FROM -10 THRU 10 DO PRINT(10^I*PI);
+      0.00 
+      0.00 
+      0.00 
+      0.00 
+      0.00 
+      0.00 
+      0.00 
+      0.00 
+      0.03 
+      0.31 
+      3.14 
+     31.42 
+    314.16 
+   3141.59 
+  31415.93 
+ 314159.26 
+3141592.66 
+31415926.5 
+3.14159265E+8 
+3.14159265E+9 
+3.14159265E+10 
+
+Comments etc. to CFFK@MC

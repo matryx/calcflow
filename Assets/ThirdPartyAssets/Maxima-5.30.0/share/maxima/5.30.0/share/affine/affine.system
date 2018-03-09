@@ -1,0 +1,30 @@
+;;; -*- Mode:Lisp; Package:CL-MAXIMA; Syntax:COMMON-LISP; Base:10 -*-;;;
+
+(in-package :maxima)
+
+(mk:defsystem "affine"
+    :source-extension "lisp"
+    :source-pathname (maxima-load-pathname-directory)
+    :binary-pathname (maxima-objdir "share" "affine")
+    :components ((:file "sys-declaim" :load-only t)
+		 (:file "compat")
+		 (:file "amacros")
+		 (:file "polybas")
+		 (:file "sparsemat")
+		 (:file "aquotient")
+		 (:file "new-rat")
+		 (:file "polya")
+		 (:file "ndotsimp")
+		 (:file "polyb")
+		 (:file "polysmp")
+		 (:file "sub-proj")
+		 (:file "polyc")
+		 (:file "polyd")
+		 (:file "sheafa")
+		 (:file "sheafb")
+		 (:file "sheafc")
+		 (:file "dim-3")
+		 (:file "todd-coxeter")
+		 (:file "modsimp")))
+
+;;; affine.system ends here

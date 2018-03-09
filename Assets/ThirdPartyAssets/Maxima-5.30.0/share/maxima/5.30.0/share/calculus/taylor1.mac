@@ -1,0 +1,35 @@
+/* find the taylor series of a function of x which is defined implicitly
+ by a polynomial equation in x and y, if there is a unique branch at a particular
+ pt. 
+ implicit_taylor(f,pt,deg,init_a0) where F is the implicit defining equation,
+ pt is the value of x around which we wish to form the expansion, deg is the
+ highest degree of x to appear in the expansion, and init_a0 is the inital value
+ of y at point, for the branch for which we will form the expansion.
+
+(C2) implicit_taylor(y^3+x*y^2+x*y+y-2,0,10,1);
+	      10	 9	   8	    7	    6	    5	    4	 3
+       83787 X	   2847 X    5853 X    189 X    21 X    23 X    15 X    X
+(D2) - --------- + ------- + ------- - ------ - ----- + ----- - ----- - --
+       134217728   8388608   4194304   65536    32768   2048    1024    32
+
+								      2
+								   3 X	  X
+								 + ---- - - + 1
+								    16	  2
+
+*/
+
+implicit_taylor(f,pt,deg,init_a0):=
+ block([n:deg,ratwtlvl:deg,ratweights:[],expansion,res,ans:[],eqns],
+  ratweight(x,1),
+  expansion:sum((x-pt)^i*concat(a,i),i,0,n),
+  res:sublis([y=expansion],f),
+  res:ratsimp(res),
+  eqns:create_list(coeff(res,x,i),i,1,n),
+  ans:[a0=init_a0], 
+  eqns:sublis(ans,eqns),
+  for i:1 thru n do (ans:append(ans,solve(eqns[i],concat(a,i))),
+                   eqns: sublis(ans,eqns)),
+  sublis(ans,expansion));
+
+

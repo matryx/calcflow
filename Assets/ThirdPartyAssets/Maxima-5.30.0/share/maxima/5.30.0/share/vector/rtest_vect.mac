@@ -1,0 +1,138 @@
+/*******************************************************************************
+ *
+ *          Examples for the package vect
+ *
+ ******************************************************************************/
+
+kill(all);
+done;
+
+(load("vect.mac"),done);
+done;
+
+declare([a,b,c,d],nonscalar);
+done;
+
+/* ---------- Check some rules for vectors  ----------------------------------*/
+
+/* This does not simplify to zero, because we have removed the property 
+ * commutative for the operator "." */
+a . b - b . a;
+0;
+
+a ~ b + b ~ a;
+0;
+
+vectorsimp(a.(b+c)-(a.b+a.c)),expandall:true;
+0;
+
+vectorsimp(a~(b+c)-(a~b+a~c)),expandall:true;
+0;
+
+vectorsimp(a~(b~c)-(b*(a.c)-c*(a.b))),expandall:true;
+0;
+
+/* Lagrange's identity does not simplify as expected */
+vectorsimp((a~b).(c~d)-((a.c)*(b.d)-(b.c)*(a.d))),expandall:true;
+0;
+
+/* Does not simplify to the expected result. */
+vectorsimp((3*a-2*b)~(2*a+b)),expandall:true;
+7*(a~b);
+
+/* ---------- Check some rules for the gradient ------------------------------*/
+
+declare([u,v],scalar, c,constant);
+done;
+depends([u,v],[x,y,z]);
+[u(x,y,z), v(x,y,z)];
+
+grad c;
+0;
+
+grad (c*u);
+c*grad u;
+
+vectorsimp(grad (u+v)),expandall:true;
+grad u + grad v;
+
+/* ---------- Check some rules for the divergence ----------------------------*/
+
+div c;
+0;
+
+div (c*u);
+c*div u;
+
+vectorsimp(div (u+v)),expandall:true;
+div u + div v;
+
+/* The error is a . grad u -> a grad u */
+vectorsimp(div (u*a)) - (u*div a + (grad u) . a),expandall:true;
+0;
+
+/* There is no rule do expand the following */
+vectorsimp(div (a ~ b)),expandall:true;
+b . curl a - a . curl b;
+
+/* ---------- Check some rules for the curl ----------------------------------*/
+
+curl c;
+0;
+
+curl (c*u);
+c* curl u;
+
+vectorsimp(curl (a+b)),expandall:true;
+curl a + curl b;
+
+vectorsimp(curl (a*u)),expandall:true;
+u*curl a + grad u ~ a;
+
+vectorsimp(curl (a ~ b)),expandall:true;
+b . grad a - a . grad b + a * div b - b * div a;
+
+/* ---------- Combinations of the operators ----------------------------------*/
+
+div curl a;
+0;
+curl grad u;
+0;
+vectorsimp(curl curl a),expandall:true;
+grad div a - laplacian a;
+
+/* ---------- Examples from bug reports --------------------------------------*/
+
+/* Bud ID: 838301 - vect negate cross product simplification 
+ * a and b are declare to be nonscalar, c to be constant 
+ */
+
+c*(a ~ b);
+c * (a ~ b);
+c*(b ~ a);
+-c * (a ~ b);
+
+/* Bug ID: 1212598 - bug in the VECT.MAK - VECTORSIMP cross product 
+ * a,b,c,d are declared to be nonscalar
+ */
+
+vectorsimp( (b+2*a) ~ (c+d) ),expandall:true;
+b ~ d+b ~ c+2*a ~ d+2*a ~ c;
+
+
+/* Bug ID: 2806446 - ev_diff in vect.mac */
+
+potential([y*z,x*z,x*y],[x,y,z]);
+x*y*z;
+
+/* Bug ID: 2011228 -vect redefines "." as commutative, was:Matrix multiplication
+ * Two examples which does not work when "." is declared commutative
+ */
+
+invert(matrix([-2, -2, 1], [3, 1, 1], [3, 3, 1]));
+matrix([-1/5,1/2,-3/10],[0,-1/2,1/2],[3/5,0,2/5]);
+
+(a : matrix([1,2],[6,7]), b : matrix([1,2],[1,6]), done);
+done;
+a.b-b.a;
+matrix([-10,-2],[-24,10]);

@@ -1,0 +1,108 @@
+/* augmented Lagrangian method for constrained optimization
+ *
+ * copyright Robert Dodier, October 2005
+ * Released under the terms of the GNU General Public License
+ *
+ * See http://www-fp.mcs.anl.gov/otc/Guide/OptWeb/continuous/constrained/nonlinearcon/auglag.html
+ * and http://www.cs.ubc.ca/spider/ascher/542/chap10.pdf
+ *
+ * This implementation minimizes the augmented Lagrangian by
+ * applying LBFGS (a quasi-Newton algorithm).
+ *
+ * Function: augmented_lagrangian_method (FOM, xx, constraints, yy, [optional_args])
+ *
+ * FOM           = figure of merit expression
+ * xx            = list of variables over which to minimize
+ * constraints   = list of expressions to be held equal to zero
+ * yy            = list of initial guesses for xx
+ *
+ * optional_args = more arguments of the form symbol = value
+ *                 optional arguments recognized are:
+ *
+ *                 niter           = number of iterations of the augmented Lagrangian algorithm
+ *                 lbfgs_tolerance = tolerance supplied to LBFGS
+ *                 iprint          = IPRINT parameter supplied to LBFGS
+ *                 %lambda         = initial value of %lambda
+ *
+ * LBFGS (to solve grad L = 0) has to be loaded before calling augmented_lagrangian_method.
+ *
+ * Example 1:
+ *
+   load (lbfgs);
+   load (augmented_lagrangian);
+   FOM: x^2 + 2*y^2;
+   xx: [x, y];
+   C: [x + y - 1]; 
+   yy: [1, 1];
+   augmented_lagrangian_method (FOM, xx, C, yy, niter = 20);
+ *
+ *  => [[x = 0.6661347183787, y = 0.33306735918935], %lambda = [- 1.331471514325457]]
+ *
+ * Example 2:
+ * same as Example 1, but with gradient computed by Lisp functions
+ * Construct Lisp functions suitable for this example via translate
+ *
+   load (lbfgs);
+   load (augmented_lagrangian);
+   FOM: x^2 + 2*y^2;
+   xx: [x, y];
+   C: [x + y - 1]; 
+   yy: [1, 1];
+   F(x, y) := ''FOM;
+   F1(x, y) := ''(diff(F(x, y), x));
+   F2(x, y) := ''(diff(F(x, y), y));
+   translate (F, F1, F2);
+   :lisp (mremprop '|$f| 'mexpr)
+   :lisp (mremprop '|$f1| 'mexpr)
+   :lisp (mremprop '|$f2| 'mexpr)
+   augmented_lagrangian_method ('[F(x, y), [F1(x, y), F2(x, y)]], xx, C, yy, niter = 20);
+ *
+ *  => [[x = 0.6661347183787, y = 0.33306735918935], %lambda = [- 1.331471514325457]]
+ */
+
+/* fboundp detects various kinds of Maxima functions */
+fboundp (a) :=
+    ?fboundp (a) # false
+ or ?mget (a, ?mexpr) # false
+ or ?get (a, ?mfexpr\*) # false
+ or ?mget (a, ?mmacro) # false;
+
+if not fboundp (lbfgs) then load (lbfgs);
+
+with_parameters ([L]) ::= buildq ([a : subst (":", "=",  ev (L [1])), e : rest (L)], block (a, splice (e)));
+
+augmented_lagrangian_method (FOM, xx, constraints, yy, [optional_args]) := 
+
+  block ([n, augmented_lagrangian, %lambda, %nu, FOM_augment,
+          niter : 10, lbfgs_tolerance : 1e-4, iprint : [1, 1]],
+
+  nconstraints: length (constraints),
+
+  FOM_augment :
+      apply ("+", makelist (%lambda[i] * constraints[i], i, 1, nconstraints))
+    + (1/2) * apply ("+", makelist (%nu[i] * constraints[i]^2, i, 1, nconstraints)),
+
+  if listp (FOM)
+    then block ([FOM_proper, FOM_grad],
+        FOM_proper : first (FOM) + FOM_augment,
+        FOM_grad : second (FOM) + map (lambda ([x], diff (FOM_augment, x)), xx),
+        augmented_lagrangian : [FOM_proper, FOM_grad])
+    else augmented_lagrangian: FOM + FOM_augment,
+
+  %lambda: makelist (1, i, 1, nconstraints),
+
+  %nu: makelist (1, i, 1, nconstraints),
+
+  with_parameters (optional_args,
+
+    for i:1 thru niter do
+    
+      (soln: lbfgs (augmented_lagrangian, xx, yy, lbfgs_tolerance, iprint),
+    
+      yy: map (rhs, soln),
+
+      %lambda: %lambda + apply ("+", %nu * map (lambda ([c], subst (soln, c)), constraints)),
+      
+      %nu : 2 * %nu),
+
+    [map ("=", xx, yy), '%lambda = %lambda]));

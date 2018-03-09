@@ -1,0 +1,528 @@
+/* ODE tests - Murphy equations 1.1 - 1.100
+
+  Reference: 
+    G M Murphy, Ordinary Differential Equations and Their 
+    Solutions, Van Nostrand, 1960
+
+  First Order and of First Degree, p 224 ff
+
+*/
+/* Don't kill(all); It messes up trigsimp */
+
+/* Print ode number*/
+(pn_(n_):=print("Murphy ODE 1.",n_),true);
+true;
+
+/*   1 */
+(pn_(1),ans:contrib_ode(eqn:'diff(y,x)=a*f(x),y,x));
+ [y=a*'integrate(f(x),x)+%c];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/*   2 */
+(pn_(2),ans:contrib_ode(eqn:'diff(y,x)=x+sin(x)+y,y,x));
+[y = %e^x*(%e^-x*(-sin(x)-cos(x))/2+(-x-1)*%e^-x+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/*   3 */
+(pn_(3),ans:contrib_ode(eqn:'diff(y,x)=x^2+3*cosh(x)+2*y,y,x));
+[y=%e^(2*x)*(-%e^-(3*x)*(3*%e^(2*x)+1)/2-(2*x^2+2*x+1)*%e^-(2*x)/4+%c)];
+ans:expand(ans[1]);
+y = %c*%e^(2*x)-3*%e^x/2-%e^-x/2-x^2/2-x/2-1/4;
+[method,ode_check(eqn,ans)];
+[linear,0];
+
+/* 4 */
+(pn_(4),ans:contrib_ode(eqn:'diff(y,x)=a+b*x+c*y,y,x));
+[y=(-b*(c*x+1)*%e^-(c*x)/c^2-a*%e^-(c*x)/c+%c)*%e^(c*x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 5 */
+(pn_(5),ans:contrib_ode(eqn:'diff(y,x)=a*cos(b*x+c)+k*y,y,x));
+[y=%e^(k*x)*(a*%e^-(k*x)*(b*sin(b*x+c)-k*cos(b*x+c))/(k^2+b^2)+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 6 */
+(pn_(6),ans:contrib_ode(eqn:'diff(y,x)=a*sin(b*x+c)+k*y,y,x));
+[y=%e^(k*x)*(a*%e^-(k*x)*(-k*sin(b*x+c)-b*cos(b*x+c))/(k^2+b^2)+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 7 */
+(pn_(7),assume(c>0,k>c),ans:contrib_ode(eqn:'diff(y,x)=a+b*exp(k*x)+c*y,y,x),forget(c>0,k>c),ans);
+[y = %e^(c*x)*(b*%e^((k-c)*x)/(k-c)-a*%e^-(c*x)/c+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 8 */
+(pn_(8),ans:contrib_ode(eqn:'diff(y,x)=x*(x^2-2*y),y,x));
+[y = %e^-x^2*((x^2-1)*%e^x^2/2+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 9 NOTE: Case a=2 is special */
+(pn_(9),ans:contrib_ode(eqn:'diff(y,x)=x*(exp(-x^2)-a*y),y,x));
+[y = %e^-(a*x^2/2)*(%e^(a*x^2/2-x^2)/(a-2)+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+ans:contrib_ode(eqn:'diff(y,x)=x*(exp(-x^2)-2*y),y,x);
+[y=(x^2/2+%c)*%e^-x^2];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 10 */
+(pn_(10),ans:contrib_ode(eqn:'diff(y,x)=x^2*(a*x^3+b*y),y,x));
+[y = (%c-a*(3*b*x^3+9)*%e^-(b*x^3/3)/(3*b^2))*%e^(b*x^3/3)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 11(i)  n#-1*/
+(pn_(11),assume(not equal(n,-1)),ans:contrib_ode(eqn:'diff(y,x)=a*x^n*y,y,x),forget(not equal(n,-1)),ans);
+[y = %c*%e^(a*x^(n+1)/(n+1))];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 11(ii) n=-1*/
+ans:contrib_ode(eqn:'diff(y,x)=a*x^-1*y,y,x);
+[y = %c*%e^(a*log(x))];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 12 */
+(pn_(12),ans:contrib_ode(eqn:'diff(y,x)=cos(x)*sin(x)+y*cos(x),y,x));
+[y = (%e^-sin(x)*(-sin(x)-1)+%c)*%e^sin(x)];
+ans:expand(ans[1]);
+y = %c*%e^sin(x)-sin(x)-1;
+[method,ode_check(eqn,ans)];
+[linear,0];
+
+/* 13 */
+(pn_(13),ans:contrib_ode(eqn:'diff(y,x)=exp(sin(x))+y*cos(x),y,x));
+[y = (x+%c)*%e^sin(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 14 */
+(pn_(14),ans:contrib_ode(eqn:'diff(y,x)=y*cot(x),y,x));
+[y = %c*sin(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 15 */
+(pn_(15),ans:contrib_ode(eqn:'diff(y,x)=1-y*cot(x),y,x));
+[y = (%c-cos(x))/sin(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 16 */
+(pn_(16),ans:contrib_ode(eqn:'diff(y,x)=x*csc(x)-y*cot(x),y,x));
+[y = (x^2/2+%c)/sin(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 17 */
+(pn_(17),ans:contrib_ode(eqn:'diff(y,x)=(2*csc(2*x)+cot(x))*y,y,x));
+[y = %c*sin(x)/(csc(2*x)+cot(2*x))];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 18 */
+(pn_(18),ans:contrib_ode(eqn:'diff(y,x)=sec(x)-y*cot(x),y,x));
+[y = (%c-log(1-sin(x)^2)/2)/sin(x)];
+ans:subst(cos(x)^2,1-sin(x)^2,ans[1]);
+y = (%c-log(cos(x)))/sin(x);
+[method,ode_check(eqn,ans)];
+[linear,0];
+
+/* 19 */
+(pn_(19),ans:contrib_ode(eqn:'diff(y,x)=exp(x)*sin(x)+y*cot(x),y,x));
+[y = (%e^x+%c)*sin(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 20 */
+(pn_(20),ans:contrib_ode(eqn:'diff(y,x)+csc(x)+2*y*cot(x)=0,y,x));
+[y = (cos(x)+%c)/sin(x)^2];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 21 */
+(pn_(21),ans:contrib_ode(eqn:'diff(y,x)=2*csc(2*x)*sec(x)^2-2*y*cot(2*x),y,x));
+[y=(4*sin(2*x)/(sin(2*x)^2+cos(2*x)^2+2*cos(2*x)+1)+%c)/sin(2*x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 22 */
+(pn_(22),ans:contrib_ode(eqn:'diff(y,x)=2*(cot(x)^2*cos(2*x)-y*csc(2*x)),y,x));
+[y = (csc(2*x)+cot(2*x))*(log(sin(x)^2+cos(x)^2+2*cos(x)+1)
+       +log(sin(x)^2+cos(x)^2-2*cos(x)+1)+cos(2*x)+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 23 */
+(pn_(23),ans:contrib_ode(eqn:'diff(y,x)=2*csc(2*x)*(sin(x)^3+y),y,x),ans:map(lambda([e],map(trigrat,e)),ans));
+[y=-((sin(2*x)-2*%c*sin(x))/(2*cos(x)))];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 24 */
+(pn_(24),ans:contrib_ode(eqn:'diff(y,x)=2*csc(2*x)*(1-tan(x)^2+y),y,x),ans:map(lambda([e],map(trigrat,e)),ans));
+[y=(%c*sin(2*x)-2)/(cos(2*x)+1)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 25 */
+(pn_(25),ans:contrib_ode(eqn:'diff(y,x)=y*sec(x),y,x));
+[y = %c*(tan(x)+sec(x))];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 26 */
+(pn_(26),ans:contrib_ode(eqn:'diff(y,x)+tan(x)=(1-y)*sec(x),y,x));
+[y=(x+%c)/(tan(x)+sec(x))];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 27 */
+(pn_(27),ans:contrib_ode(eqn:'diff(y,x)=y*tan(x),y,x));
+[y=%c*sec(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 28 */
+(pn_(28),ans:contrib_ode(eqn:'diff(y,x)=cos(x)+y*tan(x),y,x));
+[y=sec(x)*((sin(2*x)/2+x)/2+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 29 */
+(pn_(29),ans:contrib_ode(eqn:'diff(y,x)=cos(x)-y*tan(x),y,x));
+[y=(x+%c)/sec(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 30 */
+(pn_(30),ans:contrib_ode(eqn:'diff(y,x)=sec(x)-y*tan(x),y,x));
+[y=(tan(x)+%c)/sec(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 31 */
+(pn_(31),ans:contrib_ode(eqn:'diff(y,x)=sin(2*x)+y*tan(x),y,x));
+[y=(%c-2*cos(x)^3/3)*sec(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 32 */
+(pn_(32),ans:contrib_ode(eqn:'diff(y,x)=sin(2*x)-y*tan(x),y,x));
+[y=(%c-2*cos(x))/sec(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 33 */
+(pn_(33),ans:contrib_ode(eqn:'diff(y,x)=sin(x)+2*y*tan(x),y,x));
+[y=(%c-cos(x)^3/3)*sec(x)^2];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 34 */
+(pn_(34),ans:contrib_ode(eqn:'diff(y,x)=2*(1+sec(2*x)+y*tan(2*x)),y,x));
+[y = sec(2*x)*((2*sin(2*x)+4*x)/2+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 35 */
+(pn_(35),ans:contrib_ode(eqn:'diff(y,x)=csc(x)+3*y*tan(x),y,x));
+[y=sec(x)^3*(log(sin(x))-sin(x)^2/2+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 36 */
+(pn_(36),ans:contrib_ode(eqn:'diff(y,x)=(a+cos(log(x))+sin(log(x)))*y,y,x));
+[y=%c*%e^(x*(sin(log(x))+cos(log(x)))/2+x*(sin(log(x))-cos(log(x)))/2+a*x)];
+(assume(x>0),ans:map(trigrat,ans[1]),forget(x>0),ans);
+y=%c*%e^(x*sin(log(x))+a*x);
+[method,ode_check(eqn,ans)];
+[linear,0];
+
+/* 37 */
+(pn_(37),ans:contrib_ode(eqn:'diff(y,x)=6*exp(2*x)-y*tanh(x),y,x));
+[y=(%e^(3*x)+3*%e^x+%c)/cosh(x)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 38 - too general*/
+/* 39 - too general */
+
+/* 41  Riccati */
+
+/* 42  Riccati */
+(pn_(42),ans:contrib_ode(eqn:'diff(y,x)+1-x=(x+y)*y,y,x));
+[y = -(%e^-(2*x)*(%e^(2*x)*(sqrt(2)*sqrt(%pi)*%c*erf((%i*x-2*%i)/sqrt(2))
+       +sqrt(2)*%e^2*sqrt(%pi))+2*%i*%c*%e^(x^2/2+2)))
+ / (sqrt(2)*sqrt(%pi)*%c*erf((%i*x-2*%i)/sqrt(2))+sqrt(2)*%e^2*sqrt(%pi)) ];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 43  Riccati */
+(pn_(43),ans:contrib_ode(eqn:'diff(y,x)=(x+y)^2,y,x));
+[[x=%c-atan(sqrt(%t)),y=-x-sqrt(%t)],[x=atan(sqrt(%t))+%c,y=sqrt(%t)-x]];
+solve(ans[1][1],sqrt(%t));
+[sqrt(%t)=-tan(x-%c)];
+ans[1]:ev(ans[1][2],%[1]);
+y=tan(x-%c)-x;
+solve(ans[2][1],sqrt(%t));
+[sqrt(%t)=tan(x-%c)];
+ans[2]:ev(ans[2][2],%[1]);
+y=tan(x-%c)-x;
+[method,ode_check(eqn,ans[1]),ode_check(eqn,ans[2])];
+[lagrange,0,0];
+
+/* 44  Riccati */
+(pn_(44),ans:contrib_ode(eqn:'diff(y,x)=(x-y)^2,y,x));
+[[x = log(sqrt(%t)+1)/2-log(sqrt(%t)-1)/2+%c,y = x-sqrt(%t)],[x=-log(sqrt(%t)+1)/2+log(sqrt(%t)-1)/2+%c,y=x+sqrt(%t)]];
+solve(ans[1][2],sqrt(%t));
+[sqrt(%t) = x-y];
+ans[1][1],%[1];
+x=log(-y+x+1)/2-log(-y+x-1)/2+%c;
+expand(2*(%-%c));
+2*x-2*%c = log(-y+x+1)-log(-y+x-1);
+map(exp,%);
+%e^(2*x-2*%c) = (-y+x+1)/(-y+x-1);
+ans[1]:first(solve(%,y));
+y=((x-1)*%e^(2*x-2*%c)-x-1)/(%e^(2*x-2*%c)-1);
+solve(ans[2][2],sqrt(%t));
+[sqrt(%t) = y-x];
+ans[2][1],%[1];
+x=-log(y-x+1)/2+log(y-x-1)/2+%c;
+expand(2*(%-%c));
+2*x-2*%c = log(y-x-1)-log(y-x+1);
+map(exp,%);
+%e^(2*x-2*%c)=(y-x-1)/(y-x+1);
+ans[2]:first(solve(%,y));
+y=((x-1)*%e^(2*x-2*%c)-x-1)/(%e^(2*x-2*%c)-1);
+[method,ode_check(eqn,ans[1]),ode_check(eqn,ans[2])];
+[lagrange,0,0];
+
+/* 45 */
+(pn_(45),ans:contrib_ode(eqn:'diff(y,x)=3*(1-x+y)+(x-y)^2,y,x));
+[y = (x*(%c*%e^x+1)-2*%c*%e^x-1)/(%c*%e^x+1) ];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 46 riccati */
+(pn_(46),ans:contrib_ode(eqn:'diff(y,x)=2*x-(1+x^2)*y+y^2,y,x));
+[y = ((x^2+1)*'integrate(%e^(x^3/3+x),x)-%e^(x^3/3+x)+%c*x^2+%c)/('integrate(%e^(x^3/3+x),x)+%c)];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 47 Riccati */
+(pn_(47),ans:contrib_ode(eqn:'diff(y,x)=x*(2+x^3)-(2*x^2-y)*y,y,x));
+[y=(%c*x^3+x^2-%c)/(%c*x+1)];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 48 Riccati */
+(pn_(48),ans:contrib_ode(eqn:'diff(y,x)=1+x*(2-x^3)+(2*x^2-y)*y,y,x));
+[y = (x^2*(%c*%e^(2*x)+1)+%c*%e^(2*x)-1)/(%c*%e^(2*x)+1) ];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 49 Riccati */
+(pn_(49),ans:contrib_ode(eqn:'diff(y,x)=cos(x)-(sin(x)-y)*y,y,x));
+[y = (%e^cos(x)*sin(x)*'integrate(%e^-cos(x),x)+%c*%e^cos(x)*sin(x)-1)/(%e^cos(x)*'integrate(%e^-cos(x),x)+%c*%e^cos(x))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 50 Riccati 
+   Fails as can't solve 'diff(z,x,2) - sin(2*x)*'diff(z,x) + cos(2*x)*z = 0
+*/
+(pn_(50),ans:contrib_ode(eqn:'diff(y,x)=cos(2*x)+(sin(2*x)+y)*y,y,x));
+[[y=-'diff(%u,x,1)/%u,-'diff(%u,x,1)*sin(2*x)+%u*cos(2*x)+'diff(%u,x,2) = 0]];
+
+/* 51 Riccati */
+
+/* 52 Riccati */
+(pn_(52),ans:contrib_ode(eqn:'diff(y,x)=(3+x-4*y)^2,y,x));
+[y = (x*(2*%c*%e^(4*x)+2)+5*%c*%e^(4*x)+7)/(8*%c*%e^(4*x)+8) ];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 53 Riccati */
+(pn_(53),ans:contrib_ode(eqn:'diff(y,x)=(1+4*x+9*y)^2,y,x));
+ [y = -((x*(12*%c*%e^(12*%i*x)+12)+(2*%i*%c+3*%c)*%e^(12*%i*x)-2*%i+3)
+          /(27*%c*%e^(12*%i*x)+27))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 54 Riccati */
+
+/* 55 Riccati and separable*/
+assume(a>0,b>0);
+[a>0,b>0];
+(pn_(55.1),ans:contrib_ode(eqn:'diff(y,x)=a+b*y^2,y,x));
+[atan(sqrt(b)*y/sqrt(a))/(sqrt(a)*sqrt(b)) = x+%c];
+solve(ans[1],y);
+[y = sqrt(a)*tan(sqrt(a)*sqrt(b)*x+%c*sqrt(a)*sqrt(b))/sqrt(b)];
+[method,ode_check(eqn,%[1])];
+[separable,0];
+forget(a>0,b>0);
+[a>0,b>0];
+
+assume(a>0,b<0);
+[a>0,b<0];
+(pn_(55.2),ans:contrib_ode(eqn:'diff(y,x)=a+b*y^2,y,x));
+[log(-((sqrt(a)*sqrt(-b)-b*y)/(b*y+sqrt(a)*sqrt(-b))))/(2*sqrt(a)*sqrt(-b))=x+%c];
+solve(%[1],y);
+[y=-((sqrt(a)*sqrt(-b)*%e^(2*sqrt(a)*sqrt(-b)*x+2*%c*sqrt(a)*sqrt(-b))+sqrt(a)*sqrt(-b))/(b*%e^(2*sqrt(a)*sqrt(-b)*x+2*%c*sqrt(a)*sqrt(-b))-b))];
+[method,ode_check(eqn,%[1])];
+[separable,0];
+forget(a>0,b<0);
+[a>0,b<0];
+
+/* 57 Riccati */
+
+/* 58 Riccati */
+
+/* 61 Riccati */
+
+/* 62 Riccati - See Kamke 1.27 */
+/* (pn_(62),ans:contrib_ode(eqn:'diff(y,x)=1+a*(x-y)*y,y,x)); */
+
+/* 63 Riccati */
+
+/* 64 */
+(pn_(64),ans:contrib_ode(eqn:'diff(y,x)=x*y*(3+y),y,x));
+[-((log(y+3)-log(y))/3)=x^2/2+%c];
+map(exp,3*ans[1]);
+y/(y+3) = %e^(3*(x^2/2+%c));
+ans:first(solve(%,y));
+y=-3*%e^(3*x^2/2+3*%c)/(%e^(3*x^2/2+3*%c)-1);
+[method,ode_check(eqn,%)];
+[separable,0];
+
+/* 65 Riccati */
+(pn_(65),ans:contrib_ode(eqn:'diff(y,x)=1-x-x^3+(1+2*x^2)*y-x*y^2,y,x));
+[y = (x^2*%e^x+%e^x+x*(%c-%e^x))/(x*%e^x-%e^x+%c) ];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 66 Riccati */
+(pn_(66),ans:contrib_ode(eqn:'diff(y,x)=x*(2+x^2*y-y^2),y,x));
+[y = %e^-(x^4/4)*(x^2*%e^(x^4/4)*(sqrt(%pi)*%c*erf(x^2/2)+sqrt(%pi))
+     +2*%c)/(sqrt(%pi)*%c*erf(x^2/2)+sqrt(%pi))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 67 Riccati */
+(pn_(67),ans:contrib_ode(eqn:'diff(y,x)=x+(1-2*x)*y-(1-x)*y^2,y,x));
+[y = (%e^x+%c*x+%c)/(%e^x+%c*x)];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 68 */
+(pn_(68),ans:contrib_ode(eqn:'diff(y,x)=a*x*y^2,y,x));
+[-1/(a*y)=x^2/2+%c];
+ans:first(solve(ans[1],y));
+y=-2/(a*x^2+2*%c*a);
+[method,ode_check(eqn,ans)];
+[separable,0];
+
+/* 70 Riccati */
+
+/* 72 Riccati */
+(pn_(72),ans:contrib_ode(eqn:'diff(y,x)=sin(x)*(2*sec(x)^2-y^2),y,x));
+[[y='diff(%u,x,1)/(%u*sin(x)),2*%u*sec(x)^2*sin(x)^3-'diff(%u,x,2)*sin(x)+'diff(%u,x,1)*cos(x)=0]];
+
+/* 73 Riccati - FIXME 2006-12-11 - Runs forever */
+/* (pn_(73),ans:contrib_ode(eqn:'diff(y,x)+4*csc(x)=(3-cot(x))*y+sin(x)*y^2,y,x));
+[[y=-'diff(%u,x,1)/(%u*sin(x)),-4*%u*csc(x)*sin(x)^2-'diff(%u,x,1)*((3-cot(x))*sin(x)+cos(x))+'diff(%u,x,2)*sin(x)=0]]; */
+
+/* 74 */
+(pn_(74),ans:contrib_ode(eqn:'diff(y,x)=y*sec(x)+(sin(x)-1)^2,y,x));
+[y = (tan(x)+sec(x))*(-8*(log(sin(x)^2/(cos(x)+1)^2+1)/4
+                               -log(sin(x)/(cos(x)+1)+1)/2
+                               +sin(x)/((cos(x)+1)
+                                       *(2*sin(x)^2/(cos(x)+1)^2+2)))
+                           +8*(-log(sin(x)^2/(cos(x)+1)^2+1)/8
+                              +log(sin(x)/(cos(x)+1)+1)/4
+                              -((sin(x)^3/(cos(x)+1)^3-sin(x)^2/(cos(x)+1)^2
+                                                     +sin(x)/(cos(x)+1))
+                               /(4*sin(x)^4/(cos(x)+1)^4
+                                +8*sin(x)^2/(cos(x)+1)^2+4)))
+                           +2*(log(sin(x)/(cos(x)+1)+1)
+                              -log(sin(x)^2/(cos(x)+1)^2+1)/2)+%c)];
+/* y = (tan(x)+sec(x))/(%c+sin(x)) ??? */
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 75 */
+(pn_(75),ans:contrib_ode(eqn:'diff(y,x)+tan(x)*(1-y^2)=0,y,x));
+[-((log(y+1)-log(y-1))/2) = log(sec(x))+%c];
+map(exp,2*ans[1]);
+(y-1)/(y+1)=%e^(2*(log(sec(x))+%c));
+ans:first(solve(%,y));
+y=-((%e^(2*%c)*sec(x)^2+1)/(%e^(2*%c)*sec(x)^2-1));
+[method,ode_check(eqn,ans)];
+[separable,0];
+
+/* 76 Riccati */
+
+/* 78 Abel */
+(pn_(78),ans:contrib_ode(eqn:'diff(y,x)+(a*x+y)*y^2=0,y,x));
+false;
+
+/* 79 Abel */
+(pn_(79),ans:contrib_ode(eqn:'diff(y,x)+(a*exp(x)+y)*y^2=0,y,x));
+false;
+
+/* 88 */
+(pn_(88),ans:contrib_ode(eqn:'diff(y,x)+2*x*y*(1+a*x^2*y^2)=0,y,x));
+[y=%e^-x^2/sqrt(%c-a*(2*x^2+1)*%e^-(2*x^2)/2)];
+[method,ode_check(eqn,ans[1])];
+[bernoulli,0];
+
+/* 91 */
+(pn_(91),ans:contrib_ode(eqn:'diff(y,x)+(tan(x)+y^2*sec(x))*y=0,y,x));
+[y=1/(sec(x)*sqrt(2*sin(x)+%c))];
+[method,ode_check(eqn,ans[1])];
+[bernoulli,0];
+
+/* 92 */
+(pn_(92),ans:contrib_ode(eqn:'diff(y,x)+y^3*sec(x)*tan(x)=0,y,x));
+[1/(2*y^2)=1/cos(x)+%c];
+ans:first(solve(ans[1],y));
+y=-sqrt(cos(x)/(%c*cos(x)+1))/sqrt(2);
+[method,ode_check(eqn,ans)];
+[separable,0];
+
+/* 93 - Generic Abel equation */
+
+/* 94 */
+(pn_(94),ans:contrib_ode(eqn:'diff(y,x)=(tan(x)+y^3*sec(x))*y,y,x));
+[y=sec(x)/(%c-3*(tan(x)^3/3+tan(x)))^(1/3)];
+[method,ode_check(eqn,ans[1])];
+[bernoulli,0];
+
+/* 95 */
+/* (pn_(95),ans:contrib_ode(eqn:'diff(y,x)=a*x^(n/(1-n))+b*y^n,y,x)); */
+
+/* 96 - Too general */
+/* 97 - Too general */
+/* 98 - Too general */
+
+/* 99 */
+(pn_(99),ans:contrib_ode(eqn:'diff(y,x)=sqrt(y),y,x));
+[2*sqrt(y)=x+%c];
+[method,ode_check(eqn,ans[1])];
+[separable,0];
+
+/* 100 */
+(pn_(100),ans:contrib_ode(eqn:'diff(y,x)=a+by+sqrt(c+d*y),y,x));
+[((-2*by-2*a)*log(sqrt(d*y+c)+by+a)+2*sqrt(d*y+c))/d = x+%c];
+[method,ode_check(eqn,ans[1])];
+[separable,0];

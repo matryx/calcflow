@@ -1,0 +1,101 @@
+setup_autoload("lodsav",lodesave)$
+
+/* try transformations for dependent variables. */
+dvtrns(a,wb,wc,wr,ro,lam1):=block([neq,alpha],
+   if tp=12 or tp=13 or tp=30 then (ldf6(1),dvt60(dum),return(neq)),
+   neq:f, wro:ro, i:1, tblspt(a,wb,wc,x,n), 
+   if swro=1 or tp<60 then go(ll2),
+   if eqpt6(wb,wc)=t then (wro:1,lam1:ratsimp(-pc/pa),inflam:det),
+   if not integerp(wro) then wro:wro-1/2,
+   if wro=swro then wro:wro-1, owro:wro,
+ll1,   neq:dvtexp(wb,wc,wr,wro,lam1), inflam:n,
+   if swsv=tdv then neq:dvtexp(wb,wc,wr,1,lam1),
+   if neq#f then (wexp:part(neq,1),
+   if coeff(wexp,u,1)=0 then (swro:wro, return(neq))),
+   if wro>1 then (wro:wro-1,go(ll1)), swro:wro, 
+   if owro>1 then (neq:dvtexp(wb,wc,wr,owro,lam1),return(neq))
+               else  return(neq),
+ll2, if i< nspt then (alpha:spt[i], neq:dvtmxp(a,wb,wc,wr,alpha)),
+   wexp:part(neq,1), w1:coeff(wexp,dux1,1),w2:coeff(wexp,u),
+   w3:calca(w1,w2,x),w3:subst(spt[i],x,w3),
+   if coeff(wexp,u,1)=0 or w3#0 then return(neq) else (i:i+1,go(ll2)),
+   return(f) )$
+
+/* eq=k54 y"+(a*x+b)*y'+(c*x+d)*y=0 */
+eqpt6(wb,wc):=block([], if dega=0 and degb=1 and degc=1 then
+   (wb:expand(wb), wc:expand(wc), pa:coeff(wb,x,1), pb:coeff(wb,x,0),
+    pc:coeff(wc,x,1), pd:coeff(wc,x,0), return(t)) else return(f))$
+
+/* dvtexp do y=exp(l*x^r)*u. */
+dvtexp(wb,wc,wr,r,lam1):=block([l,de],
+   if swsv=tdv or inflam=det then l:lam1,
+   w1:2*r*x^(r-1)*l+wb, w3:wr*%e^(-l*x^r),
+   w2:r^2*x^(2*r-2)*l^2+(r*(r-1)*x^(r-2)+r*wb*x^(r-1))*l+wc,
+   w1:ratsimp(w1),w2:ratsimp(w2),w3:ratsimp(w3),
+   if swsv=tdv or inflam=det then (de:dux2+w1*dux1+w2*u=w3,lam:l) 
+                                 else  de:degenc(w1,w2,w3), 
+   if de=f then return(de) else (vtr:y=%e^(lam*x^r)*u, return(de)))$
+
+/* dvtmxp do y=(x-alpha)^l*u. */
+dvtmxp(a,wb,wc,wr,alpha):=block([l,de],
+   xa:x-alpha, w1:ratsimp((2*l+xa*wb)/xa),
+   w2:ratsimp((l^2+(wb*xa-1)*l+xa^2*wc)/xa^2),w3:ratsimp(wr/xa^l),
+   de:degenc(w1,w2,w3), if de=f then return(de),
+   vtr:y=xa^lam*u, return(de))$
+
+degenc(w1,w2,w3):=block([wc1,wc2,dwc1,dwc2],
+   wc:num(w2),wq:expand(wc), deg:hipow(wq,x), 
+  ll,co:coeff(wq,x,deg), deg:deg-1,
+   if freeof(l,co) then if deg>=0 then go(ll) else return(f),
+   ws:solve(co,l), lg:length(ws),
+   if lg=1 then (lam1:part(ws[1],2), lam2:lam1)
+           else (lam1:part(ws[1],2), lam2:part(ws[2],2)),
+   if lg=1 and lam1=0 then return(f),
+   wc1:subst(lam1,l,wq), wc2:subst(lam2,l,wq),
+   dwc1:hipow(wc1,x),        dwc2:hipow(wc2,x),
+   if dwc1<dwc2 then (lam:lam1,clam:lam2) else
+   if dwc1>dwc2 then (lam:lam2,clam:lam1) else
+   if dwc1=dwc2 then (if wc1=0 then (lam:lam1,clam:lam2) else 
+                     (lam:min(lam1,lam2),clam:max(lam1,lam2))),
+   if lam=0 then lam:clam,wp:ratsubst(lam,l,w1),wr:ratsubst(lam,l,w3),
+   wq:ratsubst(lam,l,w2),de:dux2+wp*dux1+wq*u=wr, return(de))$
+
+ldf6(i):=block([],if ldsw[6,1]#y then (ldsw[6,i]:y,
+   if i=1 then load(pdvt60)))$
+
+lodesave([pdvtr,fasl],dvtexp,dvtmxp,degenc,dvtrns,eqpt6,ldf6);
+
+dvt60(dum):=block([],if tp=11 then vtr:y=u/cos(x), 
+   if tp=12 then vtr:y=u/sin(x), if tp=13 then vtr:y=sqrt(cos(x))*u,
+   if 10<tp and tp<14 then (neq:dux2+fp*ux1+fq*u=fr,return(neq)),
+   if tp=30 then (w1:ratsimp(2/(x*log(x))+wb),
+      w2:ratsimp(-1/(x^2*log(x))+wb/(x*log(x))+wc),
+      w3:ratsimp(wr/log(x)),
+      if freeof(log(x),w1*q1+w2*q2+w3) or w2=0 then 
+      (vtr:y=log(x)*u,neq:dux2+w1*dux1+w2*u=w3, return(neq))))$
+ 
+lodesave([pdvt60,fasl],dvt60);
+
+gptm(wb,wc):=block([],rptm:f,
+   if gpt078(wb,wc)#f then go(ll),
+   if gpt128(wb,wc)#f then go(ll),
+   if gpt442(wb,wc)#f then go(ll) else return(f),
+ ll,rptm:y, return(t))$
+
+gpt078(wb,wc):=block([],w1:wc-wb^2/4-diff(wb,x)/2, w1:ratsimp(w1),
+   if freeof(x,w1) then (vtr:y=%e^(-integrate(wb/2,x))*u,
+                         neq:dux2+w1*u=0,return(t)) 
+                   else return(f))$
+
+gpt128(wb,wc):=block([],w1:ratsimp(wc*x),w2:ratsimp(wb-2/x),
+   if w1=w2 then (vtr:y=u/x,neq:dux2+w1*dux1=0,
+                  return(t)) else return(f))$
+
+gpt442(wb,wc):=block([], if wc=0 then return(f),
+   w1:ratsimp(-1/wc),w2:ratsimp(-wb/wc),w3:w2-x,
+   if hipow(w3,x)#0 then return(f), wf:ratsimp(w2/w1), 
+   w1:integrate(wf,x), w3:%e^(-w1), w4:integrate(w3,x), 
+   y1:w2,y2:y1*w4, ys:k1*y1+k2*y2)$
+
+lodesave([pgptm,fasl],gptm,gpt078,gpt128,gpt442);
+

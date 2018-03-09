@@ -1,0 +1,666 @@
+/*-------------------------------------
+
+Package relatif aux polynomes de Berntein multivaries
+
+Auteur: Richard Leroy
+
+Cree le 01/07/07
+
+-----------------------------------------*/
+
+
+nonneg(L,d,k):=
+  block([i,bool],
+  bool:true,
+  for i:1 thru length(L) do
+  (
+  if L[i]<0 then bool:false 
+  ),
+  return(bool)
+  );
+
+/*-------------------------------------
+
+Procedure : pos
+
+Entree : 	Liste L des coefficients de Bernstein d'un polynome P
+		degre d de P
+		dimension k
+
+Sortie :	True si L verifie le certificat de positivite, false sinon
+
+---------------------------------------*/
+
+pos(L,d,k):=
+  block([i,som,bool],
+  som:sommets(d,k),
+  bool:true,
+  for i:1 thru length(L) do
+  (
+  if L[i]<0 then bool:false
+  ),
+  for i:1 thru length(som) do
+  (
+  if L[som[i]]<=0 then bool:false
+  ),
+  return(bool)
+  );
+
+
+
+compositions_leq(gamm):=
+  block([k,l],
+  k:length(gamm),
+  if k = 1 then return(makelist([i],i,0,gamm[1])) else
+	(
+	l:compositions_leq(rest(gamm,1)),
+	return(create_list(cons(i,l[j]),i,0,gamm[1],j,1,length(l)))
+	)
+  );
+
+compositions(n,k):=
+  block([i,res,l],
+  if k=1 then return([[n]]) else
+  res:[],
+    for i : 0 thru n do
+    (
+    par:makelist(cons(i,l),l,compositions(n-i,k-1)),
+    res:append(par,res)
+    ),
+  return(res)
+  );
+
+
+
+mulcoeff(pol,vars,alpha):=
+  block([par,res,coe],
+  if length(vars)=1 then return(coeff(pol,vars[1],alpha[1])) else
+  	(	
+  	return(mulcoeff(coeff(pol,vars[1],alpha[1]),rest(vars,1),rest(alpha,1)))
+  	)
+  );
+
+
+simplex2bar(simpl,vars):= 
+  block([i,j,len,res,l],
+  res:[],
+  len: length(simpl[1]),
+  for i : 1 thru len do
+    (
+    eq:sum(l[j]*simpl[j+1][i],j,0,len)-vars[i],
+    res:endcons(eq,res)
+    ),
+  res:endcons(sum(l[j],j,0,len)-1,res),
+  res:linsolve(res,makelist(l[j],j,0,len)),
+  return(makelist(second(res[j]),j,1,len+1))
+  );
+
+
+
+
+/*-------------------------------------
+
+Procedure : dominant
+
+Entree : 	polynome P
+		liste vars des variables
+
+Sortie :	exposant du monome dominant de P (pour l'ordre lexicographique sur les variables)	
+
+---------------------------------------*/
+
+dominant(P,vars):=
+  block([i,l,expo,c,d],
+  l:length(vars),
+  expo:[],
+  c:P,
+  for i : 1 thru l do
+  	(
+  	d:hipow(c,vars[i]),
+  	c:coeff(c,vars[i],d),
+  	expo:endcons(d,expo)
+  	),
+  return(expo)
+  );
+
+/*-------------------------------------
+
+Procedure : sparse_pol
+
+Entree : 	polynome P
+		liste vars des variables
+
+Sortie :	liste des exposants des monomes intervenant dans P
+
+---------------------------------------*/
+
+sparse_pol(P,vars):=
+  block([i,k,reste,d,mon,c],
+  k:length(vars),
+  reste:P,
+  expo:[],
+  while not(reste=0) do
+	(
+	d:dominant(reste,vars),
+	c:mulcoeff(reste,vars,d),
+	reste:reste-c*product(vars[i]**d[i],i,1,k),
+	expo:endcons(d,expo)
+	),
+  return(expo)
+  );
+
+
+
+
+sparse_standard2bern(P,vars,d):=
+  block([alph,bet,gamm,i,deg,coeff,res,k,mon,multg,multa],
+  k:length(vars),
+  res:[],
+  expo:sparse_pol(P,vars),
+  for gamm in compositions(d,k+1) do
+  	(
+  	multg:apply(multinomial_coeff,gamm),
+  	coeff:0,
+  		for alph in expo do
+  			(
+  			bet:gamm-cons(0,alph),
+  			if apply(min,bet) >= 0 then
+  				(
+  				deg:sum(alph[a],a,1,length(alph)),
+  				multa:apply(multinomial_coeff,bet),
+  				coeff:coeff+mulcoeff(P,vars,alph)*multa/multg
+  				)
+  			),
+  	res:endcons(coeff,res)
+  	),
+  return(res)
+  );
+
+
+monom2bern(P,V,vars,d):=
+	block([i,j,k,aff,g,varbis,vc],
+	k:length(vars),
+	varbis:makelist(concat(vc,i),i,1,k),
+	aff:transpose(apply(matrix,rest(V,1))).varbis+V[1],
+	g:expand(subst(makelist(vars[i]=aff[i,1],i,1,k),P)),
+	return(sparse_standard2bern(g,varbis,d))
+	);
+
+
+/*-------------------------------------
+
+Procedure : deCasteljau
+
+Entree : 	polynome dans la base de bernstein
+		simplexe
+		degre
+		point interieur M du simplexe
+
+Sortie :	liste des ecritures du polynome dans les bases de Berstein associee aux
+		sous-simplexes definis par M
+
+---------------------------------------*/
+
+deCasteljau(simpl,ber,deg,M):=
+  block([i,j,k,alpha,bet,var,l,cmp,res],local(bcastel),
+  k:length(simpl)-1,
+  var:varCasteljau,
+  bet:subst( makelist( var[j]=M[j],j,1,k), simplex2bar(simpl,var)),
+  j:1,
+  for alpha in compositions(deg,k+1) do
+  (
+  bcastel[alpha]:ber[j],
+  j:j+1
+  ),
+  for l:1 thru deg do
+    (
+    cmp:compositions(deg-l,k+1),
+    for alpha in cmp do
+       (
+       bcastel[alpha]:sum(bet[i+1]*
+                bcastel[append(rest(alpha,-length(alpha)+i),[alpha[i+1]+1],
+                         rest(alpha,i+1))],i,0,k)
+       )
+    ),
+   /*
+   res:makelist([subst([simpl[j+1]=M],simpl),makelist(bcastel[append(rest(alpha,-length(alpha)+j),[0],rest(alpha,j+1))],alpha,compositions(deg,k+1))],j,0,k),
+   */
+   res:makelist([subst([simpl[j+1]=M],simpl),makelist(bcastel[append(makelist(alpha[i],i,1,j),[0],makelist(alpha[i],i,j+2,k+1))],alpha,compositions(deg,k+1))],j,0,k),
+  return(res)
+  );
+
+/*-------------------------------------
+
+Procedure : deCasteljauarete
+
+Entree : 	polynome dans la base de bernstein
+		simplexe
+		degre
+		indiices i,j des points M_i, M_j definissant une arete du simplexe
+		nombre reel dans ]0,1[ : le point situe sur l'arete est
+		M = (1-x)*M_i + x*M_j
+
+Sortie :	liste des ecritures du polynome dans les bases de Berstein associee aux deux
+		sous-simplexes definis par M
+
+---------------------------------------*/
+
+deCasteljauarete(simpl,ber,deg,i,j,x):=
+  block([k,alpha,bet,gamm,l,cmp,res,M,p,l,L,dprime,indi,resi,resj],local(bcastel),
+  k:length(simpl)-1,
+  M:(1-x)*simpl[i]+x*simpl[j],
+  if k<2 then return(deCasteljau(simpl,ber,deg,M)),
+  p:1,
+  cmp:compositions(deg,k+1),
+  for alpha in cmp do
+  (
+  bcastel[alpha]:ber[p],
+  p:p+1
+  ),
+  cmp:compositions(deg,k),
+  for l:1 thru deg do
+    cmp:append(cmp,compositions(deg-l,k-1)),
+  for bet in cmp do
+    (
+    dprime:deg-sum(bet[l],l,1,length(bet)),
+    L:[],
+    for gamm:0 thru dprime do
+      (
+      indi:append(makelist(bet[p],p,1,i-1),[dprime-gamm],makelist(bet[p],p,i,j-2),[gamm],makelist(bet[p],p,j-1,k-1)),
+      L:append(L,[bcastel[indi]])
+      ),
+    C:deCasteljau([[0],[1]],L,dprime,[x]),
+    for gamm:0 thru dprime do
+      (
+      indi:append(makelist(bet[p],p,1,i-1),[dprime-gamm],makelist(bet[p],p,i,j-2),[gamm],makelist(bet[p],p,j-1,k-1)),
+      resi[indi]:C[1][2][gamm+1],
+      resj[indi]:C[2][2][gamm+1]
+      )
+    ),
+  res:[[subst([simpl[i]=M],simpl),makelist(resi[alpha],alpha,compositions(deg,k+1))],[subst([simpl[j]=M],simpl),makelist(resj[alpha],alpha,compositions(deg,k+1))]],
+  return(res)
+  );
+
+/*-------------------------------------
+
+Procedure : sommets
+
+Entree : 	degre d
+		dimension k
+
+Sortie :	liste des indiices correspondant aux d*e_i dans la liste des alpha parcourue
+		dans l'ordre lexicographique
+
+---------------------------------------*/
+
+sommets(d,k):=
+  block([i,j,som,indii],
+  som:[1],
+  indii:1,
+  for j:0 thru k-1 do
+  (
+  indii:indii+sum(binomial(d-i+k-1-j,k-1-j),i,1,d-1)+1,
+  som:endcons(indii,som)
+  ),
+  return(som)
+  );
+
+/*-------------------------------------
+
+Procedure : norm
+
+Entree : 	vecteur u d'un R^k
+
+Sortie :	||u||^2
+
+---------------------------------------*/
+
+norm(u):=
+  block([i],
+  return(sum(u[i]^2,i,1,length(u)))
+  );
+
+/*-------------------------------------
+
+Procedure : diam
+
+Entree : 	Simplexe V
+
+Sortie :	Indice des sommets de V qui realisent le diametre de V
+
+---------------------------------------*/
+
+diam(V):=
+  block([i,j,k,m,L,indi,r,q],
+  k:length(V)-1,
+  L:create_list(norm(V[i]-V[j]), i, 1, k+1, j, 1, k+1),
+  indi:1,
+  m:L[1],
+  for i:2 thru length(L) do
+  	(
+  	if L[i]>m then
+  	(
+  	indi:i,
+  	m:L[i]
+  	)
+  	),
+  r:mod(indi,k+1),
+  q:quotient(indi,k+1),
+  if r = 0 then return([min(k+1,q),max(k+1,q)]) else return([min(r,q+1),max(r,q+1)])
+  );
+
+monmin2(L):=
+  block([m,i,j],
+  m:L[1],
+  j:1,
+  for i:2 thru length(L) do
+  (
+  if L[i]<m then
+	(m:L[i],
+  	j:i)
+  ),
+  return([m,j])
+  );
+
+/*-------------------------------------
+
+Procedure : random_color
+
+Entree : 	aucune
+
+Sortie :	code d'une couleur aleatoire
+
+---------------------------------------*/
+
+random_color():=
+  block([randcol],
+  randcol:['1,'2,'3,'4,'5,'6,'7,'8,'9,'0,'A,'B,'C,'D,'E,'F],
+    concat("#",randcol[random(16)+1],randcol[random(16)+1],randcol[random(16)+1],randcol[random(16)+1],randcol[random(16)+1],randcol[random(16)+1])
+  );
+
+/*-------------------------------------
+
+Procedure : visual
+
+Entree : 	Sortie de "certificat" ou de "minimum" en dimension 2,
+		Simplexe utilise en entree dans "certificat" ou "minimum"
+
+Sortie :	Visualisation graphique du decoupage du simplexe
+		Nombre de sous-simplexes impliques dans l'entree.
+
+---------------------------------------*/
+load(draw);
+
+
+
+
+
+drawMultiCertificate(L,s):=
+  block([gone],
+  if length(L[1]) = 2 then
+  (
+  gone:append([pic_width=s,pic_height=s,xtics=false,ytics=false,axis_bottom=false,axis_left=false,axis_top=false,axis_right=false,colorbox=false],flatten(makelist([fill_color=random_color(),polygon(L[i][1])],i,1,length(L))))
+  )
+  else
+  (
+  gone:append([pic_width=s,pic_height=s,xtics=false,ytics=false,axis_bottom=false,axis_left=false,axis_top=false,axis_right=false,colorbox=false,fill_color=red],flatten(makelist([polygon(L[i])],i,1,length(L))))
+  ),
+  apply(draw2d,gone),
+  concat(length(L)," subsimplices.")
+  );
+
+
+wxdrawMultiCertificate(L,s):=
+  block([gone],
+  if length(L[1]) = 2 then
+  (
+  gone:append([pic_width=s,pic_height=s,xtics=false,ytics=false,axis_bottom=false,axis_left=false,axis_top=false,axis_right=false,colorbox=false],flatten(makelist([fill_color=random_color(),polygon(L[i][1])],i,1,length(L))))
+  )
+  else
+  (
+  gone:append([pic_width=s,pic_height=s,xtics=false,ytics=false,axis_bottom=false,axis_left=false,axis_top=false,axis_right=false,colorbox=false,fill_color=red],flatten(makelist([polygon(L[i])],i,1,length(L))))
+  ),
+  apply(wxdraw2d,gone),
+  concat(length(L)," subsimplices.")
+  );
+
+num2list(n,b):=block([lst:[],a:n],
+ for i:1 while a#0 do (
+   lst:cons(?mod(a,b),lst),
+   a:(a-lst[1])/b
+   ),
+ return(lst)
+);
+
+standard_mid(k,d):=
+	block([M,m,n,y,i,j,color,t,s],
+	t:[],
+	s:matrix(makelist(1/d,i,1,d)),
+	for n:0 thru d^k-1 do
+	(
+	y:num2list(n,d),
+	y:append(makelist(0,i,1,k-length(y)),y),
+	color:0,
+	for i:0 thru d-1 do
+		(
+		m[i,0]:color,
+		for j:1 thru k do
+			(
+			(if y[j]=i then color:color+1),
+			m[i,j]:color
+			)
+		),
+	t:cons(apply(matrix,makelist(makelist(m[i,j],j,0,k),i,0,d-1)),t)
+	),
+	return(t)
+	);
+
+standard(V,d):=
+	block([t,k,T,i,j,l],
+	k:length(V)-1,
+	T:standard_mid(k,d),
+	return(makelist(makelist(sum(V[t[i,j]+1],i,1,d)/2,j,1,k+1),t,T))
+	);
+
+
+standard_triang(V,P,vars,d,l):=
+	block([i,j,k,T,L,res,t],
+	k:length(V)-1,
+	res:[],
+	T:standard(V,l),
+	for t in T do
+		(
+		i:monom2bern(P,t,vars,d),
+		res:cons([t,i],res)
+		),
+	return(res)
+	);
+	
+bound(P,var,d):=
+	block([i,j,k,c,tau],
+	k:length(var),
+	c:coeffs(P,var,d),
+	tau:length(num2list(max(apply(max,c),-apply(min,c)),2)),
+	return(2^(-(tau+1)*d^(k+1))*d^(-(k+1)*d^k)*binomial(d+k,k+1)^(-d^k*(d-1)))
+	);
+
+
+coeffs(P,var,D):=
+	block([i,j,a,k,v],
+	k:length(var),
+	apply(append,makelist(makelist(subst(makelist(v=0,v,var),ratcoeff(P,product(var[i]^(a[i]),i,1,k))),a,compositions(D-j,k)),j,0,D)
+	));
+
+
+
+
+sec_diff(V,B,d):=
+	block([i,j,k,alpha,bet,gam,var,l,cmp,res,e],local(bcastel),
+	res:[],
+	k:length(V)-1,
+	e:makelist(0,i,0,k),
+	j:1,
+	for i:0 thru k do
+	(
+	e[i+1]:append(makelist(0,j,0,i-1),[1],makelist(0,j,i+1,k))
+	),
+	for alpha in compositions(d,k+1) do
+	(
+	bcastel[alpha]:B[j],
+	j:j+1
+	),
+	for gam in compositions(d-2,k+1) do
+	(
+	for j:1 thru k do
+			(
+			res:endcons(bcastel[gam+e[1]+e[j]]+bcastel[gam+e[k+1]+e[j+1]]-bcastel[gam+e[k+1]+e[j]]-bcastel[gam+e[1]+e[j+1]],res)
+			),
+		for i:1 thru k do
+		(
+			for j:i+1 thru k do
+			(
+			res:endcons(bcastel[gam+e[i+1]+e[j]]+bcastel[gam+e[i]+e[j+1]]-bcastel[gam+e[i]+e[j]]-bcastel[gam+e[i+1]+e[j+1]],res)
+			)
+		)
+	),
+	res:max(apply(max,res),-apply(min,res)),
+	return(res)
+	);
+
+
+
+
+
+
+/*-------------------------------------
+
+Procedure : certificat
+
+Entree : 	Liste L des coefficients de Bernstein d'un polynome P positif sur V
+		degre d de P
+		simplexe V
+
+Sortie :	Certificat de positivite de P sur V
+
+---------------------------------------*/
+
+multiCertificate(P,V,vars,d,sub,cert):=
+  block([k,bool,actif,passif,alpha,a,v,arete,w,N,Delta,m,N0,L,s,res],
+  k:length(V)-1,
+  res:[],
+  L:monom2bern(P,V,vars,d),
+  bool:apply(cert,[L,d,k]),
+  if bool then return([[V,L]]),
+  N:0,
+  s:sommets(d,k),
+  actif:[[V,L]],
+  passif:[],
+  Delta:sec_diff(V,L,d),
+  m:bound(P,vars,d),
+  N0:sqrt(d)*k*(k+2)*sqrt(k*(k+1)*(k+3))*sqrt(Delta)/(24*sqrt(m)),
+  while length(actif)>0 and 2^N <= N0 do
+  (
+  a:[],
+  for v in actif do
+  	(
+  	if apply(cert,[v[2],d,k]) then passif:endcons(v,passif)
+  	else
+  	(
+	for i:1 thru k+1 do
+		(
+		l:v[2][s[i]],
+		if l<=0 then
+			(
+			res:([v[1][i],l]),
+			return()
+			)
+		),
+	if length(res)>0 then
+		(
+		return()
+		),
+	W:apply(sub,[v[1],v[2],d]),
+	a:append(a,W)	
+	)
+	),
+	actif:a,
+	N:N+1
+ ),
+if length(res)>0 then return(res),
+if length(actif)=0 then return(passif)
+else
+	(
+	v:actif[1][1],
+	alpha:monmin2(actif[1][2])[2],
+	alpha:compositions(d,k+1)[alpha],
+	N:sum(alpha[i]*v[i],i,1,k+1)/d,
+	return([N,subst(makelist(vars[i]=N[i],i,1,k),P)])
+	)
+);
+
+
+bisection_castel(V,L,d):=
+	block([arete,w,k,c,j,alpha,N,W,w,res],
+	res:[],
+	k:length(V)-1,
+	c:compositions(d,k+1),
+	i:monmin2(L)[2],
+	alpha:c[i],
+	j:[],
+	for l:1 thru length(alpha) do
+		(
+		if not(alpha[l]=0) then j:endcons([l,alpha[l]],j)
+		),
+	if length(j)=2 then return(deCasteljauarete(V,L,d,j[1][1],j[2][1],j[1][2]/d))
+	else
+	(
+	N:sum(alpha[i]*V[i],i,1,k+1)/d,
+	return(deCasteljau(V,L,d,N))
+	)		
+	);
+
+
+
+
+
+
+
+bisection(V,L,d):=	
+	block([arete,w],
+	arete:diam(V),
+	return(deCasteljauarete(V,L,d,min(arete[1],arete[2]),max(arete[1],arete[2]),1/2))
+	);
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

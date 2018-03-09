@@ -1,0 +1,98 @@
+***************************************************************
+*   Notes by importer to Maxima:                              *
+*    This package originally included a modified pois2m.lisp  *
+*    file.  This file can not be included in Maxima due to    *
+*    the presence of a Macsyma Inc. copyright in the code.    *
+*    As of the inital import of the code, it does not work    *
+*    with the current Maxima.                                 *
+***************************************************************
+
+
+ANNOUNCEMENT
+  Announcing the availability of FORMAT a heirarchical expression
+formatter for Macsyma*. 
+
+From the abstract of the documentation:
+  "A package for formatting algebraic expressions in Macsyma* ...
+It provides facilities for user-directed hierarchical structuring of
+expressions, as well as for directing simplifications to selected
+subexpressions.  It emphasizes a semantic rather than syntactic description
+of the desired form.  The package also provides utilities for obtaining efficiently
+the coefficients of polynomials, trigonometric sums and power series."
+
+Some examples may be clearer than words:
+
+/* A Basic rearrangement: */
+(c1) format((a+b*x)*(c-x)^2,%poly(x),%factor);
+        3                2                        2
+(d1) b x  - (2 b c - a) x  + c (b c - 2 a) x + a c
+
+/* A `mathematical' alternative to map or substpart...*/
+(c2) format((1+2*a+a^2)*b + a*(1+2*b+b^2),%sum,%product,%factor);
+              2          2
+(d2) a (b + 1)  + (a + 1)  b
+
+/* Focussing simplifications */
+(c3) foo:X^2*SIN(Y)^4-2*X^2*SIN(Y)^2+X^4*COS(Y)^4-2*X^4*COS(Y)^2+X^4+X^2+1$
+
+(c4) trigsimp(foo);
+        4    2     4         4    2       4
+(d4) (x  + x ) cos (y) - 2 x  cos (y) + x  + 1
+
+/* That helps, but this is better: */
+(c5) format(foo,%poly(x),trigsimp);
+       4    4       2    4
+(d5) x  sin (y) + x  cos (y) + 1
+
+The package is written in Lisp, but should run under DOE & Macsyma Inc's
+versions of Macsyma.
+
+FILES & INSTALLATION:
+   You  have  a  couple  of  options  for installation.  FORMAT uses the
+COEFLIST module for functions to  separate polynomials, trig series  and
+series into a `coefficient list' representation.  One version of
+COEFLIST uses an enhanced version of the Richard Fateman's Poisson
+package to manipulate trig series.   This version of Poisson is (I
+think) more robust and adds more flexibility in the kinds of poisson
+series that can be manipulated.  However, it is only 99.44% compatible.
+It's up to you. See pois2m.ps & decide.
+
+If you want to run FORMAT without loading the alternate poisson
+package, you need these files:
+
+format.lisp          ; the source to the FORMAT procedure
+coeflist.lisp        ; source for coefficient list extraction.
+autoload-m.macsyma   ; autoloading definitions
+
+If you want to use the poisson package, use these files:
+
+format.lisp          ; the source to the FORMAT procedure
+coeflistp.lisp       ; source for coefficient list extraction (using Pois2m).
+pois2m.lisp          ; enhanced Poisson package.
+autoload-mp.macsyma  ; autoloading definitions
+
+Also see the Documentation files:
+ format.ps           ; documentation for FORMAT & COEFLIST (12 pages, Postscript) 
+ pois2m.ps           ; description of enhanced pois2m (2 pages, Postscript) 
+and the Demo files:
+ format.demo
+ coeflist.demo
+ pois2.demo
+
+In anycase, 
+  1) put the files somewhere where macsyma will find them, (eg.
+in a directory in the (macsyma variable) FILE_SEARCH list; or prepend
+the directory containing the files to FILE_SEARCH),  
+  2) compile them w/ compile_file("format.lisp"); etc.
+  3) have your macsyma-init file load the appropriate autoload-m file so
+that macsyma will know where to find the procedures.
+  
+If you are using a Schelter's DOE macsyma, there are a few declarations
+at the top of FORMAT.LISP and COEFLIST.LISP that will first need to be
+commented/uncommented.
+
+
+DISCLAIMER: The use of commercial products or their names implies no
+endorsement by NIST, the Dept. of Commerce or  the U.S. Government.
+
+CONTACT:  Bruce Miller; miller@cam.nist.gov

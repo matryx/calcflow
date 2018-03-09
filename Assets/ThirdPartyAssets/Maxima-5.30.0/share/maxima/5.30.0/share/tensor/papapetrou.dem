@@ -1,0 +1,46 @@
+/* Copyright (C) 2007 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Computing Papapetrou's metric
+ *
+ */
+("Papapetrou's metric is a nonsymmetric metric.")$
+if get('ctensor,'version)=false then load(ctensor);
+("We start with the covariant metric tensor.")$
+ratfac:true;
+dim:4;
+ct_coords:[r,u,v,t];
+lg:ident(4);
+lg[1,1]:-A;
+lg[2,2]:-r^2;
+lg[3,3]:-r^2*sin(u)^2;
+lg[4,4]:C;
+lg[1,4]:W;
+lg[4,1]:-W;
+depends([A,C,W],[r]);
+cmetric();
+("Let us review the contravariant and covariant metric tensor:")$
+ug;
+lg;
+("And let us calculate the connection coefficients.")$
+("Note that Gamma(a,b,c)=Gamma(b,a,c) is no longer true!")$
+derivabbrev:true;
+("The next calculation can take quite a bit of time.")$
+christof(mcs);
+("We can also calculate the Ricci tensor for this metric.")$
+ricci(true);
+("Some components have a particularly simple relationship, e.g.,")$
+ratsimp(ric[3,3]/ric[2,2]);
+("For more information, see Moffat & Boal,")$
+("Phys. Rev. D Vol. 11 No. 6, p1375.")$
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */
+

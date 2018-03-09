@@ -1,0 +1,99 @@
+/* batch (bode)$ 
+ * (load will fail with an error due to presence of a :lisp construct below) 
+ */
+
+/* bode.mac -- functions to draw Bode gain and phase plots
+ *
+ * copyright Robert Dodier, October 2005
+ * Released under the terms of the GNU General Public License
+ *
+ * Examples (1 through 7 from http://www.swarthmore.edu/NatSci/echeeve1/Ref/Bode/BodeHow.html, 8 from Ron Crummett)
+ *
+   H1 (s) := 100 * (1 + s) / ((s + 10) * (s + 100));
+   H2 (s) := 1 / (1 + s/omega0);
+   H3 (s) := 1 / (1 + s/omega0)^2;
+   H4 (s) := 1 + s/omega0;
+   H5 (s) := 1/s;
+   H6 (s) := 1/((s/omega0)^2 + 2 * zeta * (s/omega0) + 1);
+   H7 (s) := (s/omega0)^2 + 2 * zeta * (s/omega0) + 1;
+   H8 (s) := 0.5 / (0.0001 * s^3 + 0.002 * s^2 + 0.01 * s);
+  
+   bode_gain (H1 (s), [w, 1/1000, 1000]);
+   bode_phase (H1 (s), [w, 1/1000, 1000]);
+   bode_gain (H2 (s), [w, 1/1000, 1000]), omega0 = 10;
+   bode_phase (H2 (s), [w, 1/1000, 1000]), omega0 = 10;
+   bode_gain (H3 (s), [w, 1/1000, 1000]), omega0 = 10;
+   bode_phase (H3 (s), [w, 1/1000, 1000]), omega0 = 10;
+   bode_gain (H4 (s), [w, 1/1000, 1000]), omega0 = 10;
+   bode_phase (H4 (s), [w, 1/1000, 1000]), omega0 = 10;
+   bode_gain (H5 (s), [w, 1/1000, 1000]);
+   bode_phase (H5 (s), [w, 1/1000, 1000]);                              <-- carg causes an asksign here (sigh)
+   bode_gain (H6 (s), [w, 1/1000, 1000]), omega0 = 10, zeta = 1/10;
+   bode_phase (H6 (s), [w, 1/1000, 1000]), omega0 = 10, zeta = 1/10;
+   bode_gain (H7 (s), [w, 1/1000, 1000]), omega0 = 10, zeta = 1/10;
+   bode_phase (H7 (s), [w, 1/1000, 1000]), omega0 = 10, zeta = 1/10;
+   bode_gain (H8 (s), [w, 1/1000, 1000]);
+   block ([bode_phase_unwrap : false], bode_phase (H8 (s), [w, 1/1000, 1000]));
+   block ([bode_phase_unwrap : true], bode_phase (H8 (s), [w, 1/1000, 1000]));
+ */
+
+/* If running 5.9.2, need to download plot.lisp from cvs main branch
+ */
+  "http://cvs.sourceforge.net/viewcvs.py/*checkout*/maxima/maxima/src/plot.lisp";
+/* since 5.9.2 branch does not have the logx stuff.
+ * 5.9.3 will have logx, so this is just a temporary measure.
+ * Uncomment next two lines to load plot.lisp.
+ */
+/* load("/tmp/plot.lisp"); */     /* change /tmp if you put plot.lisp someplace else */
+/* plot_options : cons ([logx, false], plot_options); */
+
+/* If running 5.9.2, uncomment next line to load conjugate from share/linearalgebra */
+/* load (conjugate); */
+
+/*:lisp (defun $charfun (p) (let* (($prederror nil) (q (mevalp p))) (cond ((eq q t) 1) ((eq q nil) 0) (t `(($charfun) ,p)))))*/
+/* If running 5.9.2, uncomment preceding :lisp to define charfun (characteristic function).
+ */
+
+bode_phase_unwrap : false;
+
+bode_grid : false;
+
+log10 (x) := log (x) / log (10);
+
+carg_unwrapped (z) := block ([a: carg (z)], charfun (a < 0) * (2*%pi + a) + (1 - charfun (a < 0)) * a);
+
+bode_gain (H, range, [plot_opts]) := block ([omega, L, s, my_preamble],
+  omega : first (range),
+  L : block ([listdummyvars : false], listofvars (H)),
+  if length (L) # 1
+    then throw (oops (msg = "bode_gain: failed to identify a unique variable", expr = H, variables = L))
+    else s : first (L),
+
+  my_preamble : concat ("set nokey; set title \"Bode gain plot for ", string (H), "\""),
+  if bode_grid then my_preamble : concat (my_preamble, "; set grid"),
+
+  H : subst (%i * omega, s, H),
+
+  buildq ([plot_opts],
+    plot2d (10 * log10 (cabs (H * conjugate (H))), range,
+    [logx, true], [gnuplot_preamble, my_preamble], splice (plot_opts))),
+  ev (%%));
+
+bode_phase (H, range, [plot_opts]) := block ([omega, L, s, my_preamble],
+  omega : first (range),
+  L : block ([listdummyvars : false], listofvars (H)),
+  if length (L) # 1
+    then throw (oops (msg = "bode_phase: failed to identify a unique variable", expr = H, variables = L))
+    else s : first (L),
+
+  my_preamble : concat ("set nokey; set title \"Bode phase plot for ", string (H), "\""),
+  if bode_grid then my_preamble : concat (my_preamble, "; set grid"),
+
+  H : subst (%i * omega, s, H),
+
+  if bode_phase_unwrap
+    then buildq ([plot_opts],
+      plot2d (180/%pi * carg_unwrapped (H), range, [logx, true], [gnuplot_preamble, my_preamble], splice (plot_opts)))
+    else buildq ([plot_opts],
+      plot2d (180/%pi * carg (H), range, [logx, true], [gnuplot_preamble, my_preamble], splice (plot_opts))),
+  ev (%%));

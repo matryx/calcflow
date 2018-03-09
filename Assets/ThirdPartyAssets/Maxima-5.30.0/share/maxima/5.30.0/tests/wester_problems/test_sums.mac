@@ -1,0 +1,103 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Sums/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Sums ---------- */
+load(nusum1)$
+/* Simplify the sum below to sum(x[i]^2, i = 1..n) - sum(x[i], i = 1..n)^2/n */
+xbar: sum(x[j], j, 1, n) / n;
+sum((x[i] - xbar)^2, i, 1, n);
+niceindices(sumexpand(expand(%)));
+remvalue(xbar)$
+/* Derivation of the least squares fitting of data points (x[i], y[i]) to a
+   line y = m x + b.  See G. Keady, ``Using Maple's linalg package with Zill
+   and Cullen _Advanced Engineering Mathematics_, Part II: Vectors, Matrices
+   and Vector Calculus'', University of Western Australia,
+   ftp://maths.uwa.edu.au/pub/keady/ */
+f: sum((y[i] - m*x[i] - b)^2, i, 1, n)$
+solve([diff(f, m) = 0, diff(f, b) = 0], [m, b]);
+remvalue(f)$
+load("nusum1")$
+/* Indefinite sum => (-1)^n binomial(2 n, n).  See Herbert S, Wilf,
+   ``IDENTITIES and their computer proofs'', University of Pennsylvania. */
+closedform(indefsum((-1)^k * binomial(2*n, k)^2, k));
+/* Check whether the full Gosper algorithm is implemented
+   => 1/2^(n + 1) binomial(n, k - 1) */
+closedform(indefsum(binomial(n, k)/2^n - binomial(n + 1, k)/2^(n + 1), k));
+factcomb(makefact(%));
+/* Dixon's identity (check whether Zeilberger's algorithm is implemented).
+   Note that the indefinite sum is equivalent to the definite
+   sum(..., k = -min(a, b, c)..min(a, b, c)) => (a + b + c)!/(a! b! c!)
+   [Wilf] */
+closedform(indefsum((-1)^k * binomial(a+b, a+k) * binomial(b+c, b+k)
+                           * binomial(c+a, c+k), k));
+/* Telescoping sum => g(n + 1) - g(0) */
+closedform(sum(g(k + 1) - g(k), k, 0, n));
+/* => n^2 (n + 1)^2 / 4 */
+closedform(sum(k^3, k, 1, n));
+/* See Daniel I. A. Cohen, _Basic Techniques of Combinatorial Theory_, John
+   Wiley and Sons, 1978, p. 60.  The following two sums can be derived directly
+   from the binomial theorem:
+   sum(k^2 * binomial(n, k) * x^k, k = 1..n) = n x (1 + n x) (1 + x)^(n - 2)
+   => n (n + 1) 2^(n - 2)   [Cohen, p. 60] */
+closedform(sum(k^2 * binomial(n, k), k, 1, n));
+/* => [2^(n + 1) - 1]/(n + 1)   [Cohen, p. 83] */
+closedform(sum(binomial(n, k)/(k + 1), k, 0, n));
+/* Vandermonde's identity => binomial(n + m, r)   [Cohen, p. 31] */
+closedform(sum(binomial(n, k) * binomial(m, r - k), k, 0, r));
+/* => Fibonacci[2 n]   [Cohen, p. 88] */
+closedform(sum(binomial(n, k) * fib(k), k, 0, n));
+/* => Fibonacci[n] Fibonacci[n + 1]   [Cohen, p. 65] */
+closedform(sum(fib(k)^2, k, 1, n));
+factor(ratsimp(%));
+ratsimp(% - fibtophi(fib(n) * fib(n + 1)));
+/* => 1/2 cot(x/2) - cos([2 n + 1] x/2)/[2 sin(x/2)]
+   See Konrad Knopp, _Theory and Application of Infinite Series_, Dover
+   Publications, Inc., 1990, p. 480. */
+closedform(sum(sin(k*x), k, 1, n));
+factor(trigreduce(rectform(%)));
+halfangles(% - 1/2*cot(x/2) - cos((2*n + 1)*x/2)/(2*sin(x/2)));
+/* => sin(n x)^2/sin x   [Gradshteyn and Ryzhik 1.342(3)] */
+closedform(sum(sin((2*k - 1)*x), k, 1, n));
+/* => Fibonacci[n + 1]   [Cohen, p. 87] */
+closedform(sum(binomial(n - k, k), k, 0, floor(n/2)));
+/* => pi^2 / 6 + zeta(3) =~ 2.84699 */
+closedform(sum(1/k^2 + 1/k^3, k, 1, inf));
+/* sfloat(%); */
+bfloat(%);
+/* => pi^2/12 - 1/2 (log 2)^2   [Gradshteyn and Ryzhik 0.241(2)] */
+closedform(sum(1/(2^k*k^2), k, 1, inf));
+/* => pi/12 sqrt(3) - 1/4 log 3   [Knopp, p. 268] */
+closedform(sum(1/((3*k + 1)*(3*k + 2)*(3*k + 3)), k, 0, inf));
+/* => 1/2 (2^(n - 1) + 2^(n/2) cos(n pi/4))   [Gradshteyn and Ryzhik 0.153(1)]
+   */
+closedform(sum(binomial(n, 4*k), k, 0, inf));
+/* => 1   [Knopp, p. 233] */
+closedform(sum(1/(sqrt(k*(k + 1)) * (sqrt(k) + sqrt(k + 1))), k, 1, inf));
+/* => 1/sqrt([1 - x y]^2 - 4 x^2)   (| x y | < 1 and -1 <= x < 1).
+      From Evangelos A. Coutsias, Michael J. Wester and Alan S. Perelson, ``A
+      Nucleation Theory of Cell Surface Capping'', draft. */
+'sum('sum(binomial(n, k)*binomial(n - k, n - 2*k)*x^n*y^(n - 2*k),
+          k, 0, floor(n/2)),
+     n, 0, inf);
+/* An equivalent summation to the above is: */
+'sum('sum(n!/(k!^2*(n - 2*k)!)*(x/y)^k*(x*y)^(n - k), n, 2*k, inf), k, 0, inf);
+closedform(%);
+/* => pi/2   [Knopp, p. 269] */
+'sum('product(k/(2*k - 1), k, 1, m), m, 2, inf);
+closedform(%);
+/* ---------- Quit ---------- */
+quit();

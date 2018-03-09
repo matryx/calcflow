@@ -1,0 +1,56 @@
+/* copyright 2007 by Robert Dodier
+ * I release this file under the terms of the GNU General Public License.
+ */
+
+wilcoxon (X, C) := block ([X1, X0, X10, R, n1, n0, Rsum, W],
+
+    X1 : X [C = 1, 1],
+    X0 : X [C = 0, 1],
+    n1 : nrows (X1),
+    n0 : nrows (X0),
+    if n1 = 0 or n0 = 0
+        then 1/2
+        else
+           (X10 : append (elements (X1), elements (X0)),
+            R : ranks (X10),
+            Rsum : sum (R[i], i, 1, n1),
+            W : (Rsum - n1 * (n1 + 1) / 2) / (n1 * n0)));
+
+ranks (L) := block ([n : length (L), x, dx, runs, %ranks, L1, L2], 
+    makelist ([L[i], i], i, 1, n),
+    sort (%%, lambda ([x, y], orderlessp (first (x), first (y)))),
+    [L1 : map (first, %%), L2 : map (second, %%)],
+    makelist ([L2[i], i], i, 1, n),
+    sort (%%, lambda ([x, y], orderlessp (first (x), first (y)))),
+    %ranks : map (second, %%),
+    runs : find_runs_nontrivial (L1),
+    for e in runs do block ([avg_rank],
+        avg_rank : (1/second(e)) * sum (%ranks [L2[i]], i, first(e), first(e) + second(e) - 1),
+        for i : first(e) thru first(e) + second(e) - 1 do %ranks [L2[i]] : avg_rank),
+    %ranks);
+
+find_runs (x) := 
+    if x = [] then []
+    else block ([dx, ii, di],
+        dx : makelist (x[i] - x[i - 1], i, 2, length (x)),
+        ii : cons (1, 1 + ev (sublist_indices (dx, lambda ([x], x # 0 and x # 0.0 and x # 0b0)))),
+        di : endcons (length (x) + 1 - last (ii), makelist (ii[i + 1] - ii[i], i, 1, length (ii) - 1)),
+        makelist ([ii[i], di[i]], i, 1, length (di)));
+
+find_runs_nontrivial (x) :=
+   (find_runs (x),
+    sublist (%%, lambda ([e], second (e) > 1)));
+
+permute (L, p) :=
+    map
+       (second,
+        sort
+           (map (lambda ([x, i], [i, x]), L, p),
+            lambda ([a, b], orderlessp (first(a),  first(b)))));
+
+inverse_permutation (p) :=
+    map
+       (second,
+        sort
+           (makelist ([p[i], i], i, 1, length (p)),
+            lambda ([a, b], orderlessp (first(a), first(b)))));

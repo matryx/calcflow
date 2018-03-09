@@ -1,0 +1,58 @@
+(kill (all), load (eigen), 0);
+0;
+
+(x : matrix ([1, 2, 3], [9, 18, 30], [12, 48, 60]),
+ y : gramschmidt (x),
+ expand (y, 0, 0));
+''([[1,2,3],[-3^2/(2*7),-3^2/7,3*5/(2*7)],[-2^4*3/5,2^3*3/5,0]]);
+
+map (innerproduct, [y[1], y[2], y[3]], [y[2], y[3], y[1]]);
+[0, 0, 0];
+
+(kill (x),
+ ip (f, g) := integrate (f * g, 'x, a, b),
+ ev (y : gramschmidt ([1, sin(x), cos(x)], ip), a= -%pi/2, b=%pi/2));
+[1, sin(x), (%pi*cos(x) - 2)/%pi];
+
+map (ip, [y[1], y[2], y[3]], [y[2], y[3], y[1]]), a= -%pi/2, b=%pi/2;
+[0, 0, 0];
+
+(load("nchrpl"),0);
+0$
+
+mattrace(matrix());
+0$
+
+mattrace(matrix([]));
+0$
+
+mattrace(matrix([a,b],[c,d]));
+a + d$
+
+mattrace(matrix([a,b],[c,d],[p,q]));
+a + d$
+
+/* Regression test for SF bug 2721670 */
+(a[1,1] : 42, mattrace(matrix([1,2],[5,6])));
+7$
+
+(remarray(a),0);
+0$
+
+/* from mailing list 2009-08-17 "bugs on wxMaxima 5.19.1" */
+
+block ([D1, uv], local (dmatrix),
+ /* diag_matrix and diag involve loading big blobs of stuff, and diagmatrix isn't suitable ... sigh. */
+ dmatrix (L) := block ([M, n : length (L)], M : zeromatrix (n, n), for i thru n do M[i, i] : L[i], M),
+ D1 : matrix ([3, 2, 1, -5], [-1, 2, 1, -3], [5, -1, 2, 4], [3, 1, -1, 5]),
+ uv : similaritytransform (D1),
+ /* ratsimp or radcan could help here, but ratsimp simplifies leftmatrix . D1 . rightmatrix
+  * incorrectly ... sigh. Also mat_norm could help but it's embedded in a big blob ... sigh.
+  */
+ float (dmatrix (uv[1][1]) - leftmatrix . D1 . rightmatrix),
+ expand (%%),
+ matrixmap (cabs, %%),
+ maplist (lmax, %%),
+ lmax (%%),
+ is (%% < 1e-10));
+true;

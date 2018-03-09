@@ -1,0 +1,123 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Programming/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Programming and Miscellaneous ---------- */
+/* How easy is it to substitute x for a + b in the following expression?
+   => (x + c)^2 + (d - x)^2 */
+expr: (a + b + c)^2 + (d - a - b)^2;
+ratsubst(x, a + b, expr);
+factorsum(%);
+subst(b = x - a, expr);
+remvalue(expr)$
+/* How easy is it to substitute r for sqrt(x^2 + y^2) in the following
+   expression? => x/r */
+x/sqrt(x^2 + y^2);
+subst(sqrt(x^2 + y^2) = r, %);
+/* Change variables so that the following transcendental expression is
+   converted into a rational expression   [Vernor Vinge]
+   => (r - 1)^4 (u^4 - r u^3 - r^3 u + r u + r^4)/[u^4 (2 r - 1)^2] */
+q: (1/r^4 + 1/(r^2 - 2*r*cos(t) + 1)^2
+          - 2*(r - cos(t))/(r^2 * (r^2 - 2*r*cos(t) + 1)^(3/2))) /
+   (1/r^4 + 1/(r - 1)^4 - 2*(r - 1)/(r^2 * (r^2 - 2*r + 1)^(3/2)));
+assume(r > 1, u >= r - 1, u > 0);
+subst([r^2 - 2*r*cos(t) + 1 = u^2, cos(t) = (r^2 - u^2 + 1)/(2*r)], q);
+factor(scanmap(factor, %));
+forget(r > 1, u >= r - 1, u > 0)$
+/* Establish a rule to symmetrize a differential operator:   [Stanly Steinberg]
+   f g'' + f' g' -> (f g')' */
+defrule(symmetrize, f(x)*diff(g(x), x, 2) + diff(f(x), x)*diff(g(x), x),
+                    'diff(f(x)*'diff(g(x), x), x));
+q: f(x)*diff(g(x), x, 2) + diff(f(x), x)*diff(g(x), x);
+apply1(q, symmetrize);
+/* => 2 (f g')' + f g */
+apply1(2*q + f(x)*g(x), symmetrize);
+apply1(expand(2*q + f(x)*g(x)), symmetrize);
+matchdeclare(x, true)$
+defrule(symmetrize, f(x)*diff(g(x), x, 2) + diff(f(x), x)*diff(g(x), x),
+                    'diff(f(x)*'diff(g(x), x), x));
+q: f(y)*diff(g(y), y, 2) + diff(f(y), y)*diff(g(y), y);
+apply1(q, symmetrize);
+apply1(2*q + f(y)*g(y), symmetrize);
+matchdeclare(f, true, g, true)$
+defrule(symmetrize, f(x)*diff(g(x), x, 2) + diff(f(x), x)*diff(g(x), x),
+                    'diff(f(x)*'diff(g(x), x), x));
+q: ff(x)*diff(gg(x), x, 2) + diff(ff(x), x)*diff(gg(x), x);
+errcatch(apply1(q, symmetrize));
+remvalue(q)$
+/* Infinite lists: [1 2 3 4 5 ...] * [1 3 5 7 9 ...]
+   => [1 6 15 28 45 66 91 ...] */
+l1: [1, 2, 3, 4, 5]$
+l2: [1, 3, 5, 7, 9]$
+l1 * l2;
+remvalue(l1, l2)$
+/* Write a simple program to compute Legendre polynomials */
+p[n](x):= ratsimp(1/(2^n*n!) * diff((x^2 - 1)^n, x, n));
+/* p[0](x) = 1,   p[1](x) = x,   p[2](x) = (3 x^2 - 1)/2,
+   p[3](x) = (5 x^3 - 3 x)/2,   p[4](x) = (35 x^4 - 30 x^2 + 3)/8 */
+for i:0 thru 4 do display(p[i](x))$
+/* p[4](1) = 1 */
+p[4](1);
+/* Now, perform the same computation using a recursive definition */
+pp[0](x):= 1$
+pp[1](x):= x$
+pp[n](x):= ratsimp(((2*n - 1)*x*pp[n - 1](x) - (n - 1)*pp[n - 2](x))/n);
+for i:0 thru 4 do disp('pp[i](x) = pp[i](x))$
+pp[4](1);
+remarray(p, pp)$
+/* Iterative computation of Fibonacci numbers */
+myfib(n):= block([i, j, k, f],
+           if n < 0 then
+              error('undefined)
+           else if n < 2 then
+              n
+           else
+             (j: 0,   k: 1,
+              for i:2 thru n do
+                (f: j + k,   j: k,   k: f),
+              f))$
+/* Convert the function into FORTRAN syntax */
+errcatch(apply('gentran, [%]));
+/* Create a list of the first 11 values of the function. */
+makelist(myfib(i), i, 0, 10);
+remfunction(myfib)$
+/* Define the function p(x) = x^2 - 4 x + 7 such that p(lambda) = 0 for
+   lambda = 2 +- i sqrt(3) and p(A) = [[0 0], [0 0]] for A = [[1 -2], [2 3]]
+   (the lambda are the eigenvalues and p(x) is the characteristic polynomial of
+   A)   [Johnson and Reiss, p. 184] */
+p(x):= x^2 - 4*x + 7;
+ratsimp(p(2 + %i*sqrt(3)));
+p(matrix([1, -2], [2, 3]));
+remfunction(p)$
+/* Define a function to be the result of a calculation */
+-log(x^2 - 2^(1/3)*x + 2^(2/3))/(6 * 2^(2/3))
+   + atan((2*x - 2^(1/3))/(2^(1/3) * sqrt(3))) / (2^(2/3) * sqrt(3))
+   + log(x + 2^(1/3))/(3 * 2^(2/3));
+define(f(x), %);
+expr: f(y);
+/* Display the top-level structure of a nasty expression, hiding the
+   lower-level details. */
+reveal(%, 1);
+reveal(expr, 2);
+remvalue(expr)$
+remfunction(f)$
+/* Convert the following expression into TeX or LaTeX */
+declare(x, complex)$
+y = sqrt((exp(x^2) + exp(-x^2))/(sqrt(3)*x - sqrt(2)));
+tex(%);
+remove(x, complex)$
+/* ---------- Quit ---------- */
+quit();

@@ -1,0 +1,29 @@
+load("linearalgebra");
+
+m : matrix([1,2],[1,2]);
+
+nullspace(m);
+
+columnspace(m);
+
+ptriangularize(m-z*ident(2),z);
+
+m : matrix([1,2,3],[4,5,6],[7,8,9]) - z * ident(3);
+
+mm : ptriangularize(m,z);
+
+algebraic : true;
+
+tellrat(mm[3,3]);
+
+mm : ratsimp(mm);
+
+nullspace(mm);
+
+m : matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]);
+
+column_space(m);
+
+apply('orthogonal_complement, args(nullspace(transpose(m))));
+
+untellrat(z);

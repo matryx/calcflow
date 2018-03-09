@@ -1,0 +1,123 @@
+/* Filename benard.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /*program number 13: contains the building blocks to perform steady
+  state bifurcations for more partial differential equations. see pages
+  198-202 in "perturbation methods, bifurcation theory and computer
+  algebra" */
+
+
+
+
+/*the following functions can be used to perform a liapunov-schmidt reduction
+  for the 2d benard problem */
+
+/*setup() allows the problem to be entered,
+  g_poly(i,j) calculates the coefficient of amp^i lam^j in the bifurcation
+  equation g(amp,lam),
+  w_poly(i,j) determines a differential equation, whose solution is the
+  coefficient of amp^i lam^j in w(amp,lam),
+  feedw() allows this solution to be entered into the list database,
+  int(exp) finds multiple definite integrals effectively,
+  vfun(list,value) creates the substitution list 
+		[list[1] = value, list[2] = value ...]
+*/
+
+setup():=( 
+       n:read("enter the number of differential equations"),
+       y:read("enter the dependent variables as a list"),
+       space:read("enter number of spatial coordinates"),
+       xvar:read("enter the spatial coordinates as a list"),
+       alpha:read("enter the bifurcation parameter"),
+       cal:read("enter the critical bifurcation value"),
+       print("we define lam = ",alpha - cal),
+       cfun:read("enter the critical eigenfunction as a list"),
+       afun:read("enter the adjoint critical eigenfunction as alist"),
+       kill(w),
+       w:makelist(concat(w,i),i,1,n),
+       zwlist:makelist(concat(zw,i),i,1,n),
+       depends(append(zwlist,w,y),append([amp,lam],xvar)),
+       eqs:makelist(read("enter the differential equation number",i),i,1,n),
+       eqlam:ev(eqs,ev(alpha) = lam + cal),
+       print("enter the lower left corner of the",n,"dimensional space 
+						interval"),
+       lbound:read("[",x[1],"=...,]"),
+       print("enter the upper right corner of the",n,"dimensional space 
+						interval"),
+       ubound:read("[",x[1],"=...,]"),
+       wnull:vfun(w,0),
+       sub:maplist("=",y,amp*cfun+w),
+       database:map(lambda([u],diff(u,amp)=0),w),
+       zwnull:vfun(zwlist,0),
+       norm:int(afun.cfun),
+       temp1:ev(eqlam,sub,diff),
+       eqlam
+       )$
+
+
+
+g_poly(i,j):=block(
+       wmax_diff:map(lambda([u],'diff(u,amp,i,lam,j) = 0),w),
+       temp2:diff(temp1,amp,i,lam,j),
+       derivsubst:true,
+       temp3:subst(wmax_diff,temp2),
+       m:length(database),
+       for i thru m do temp3:ev(subst(database[m+1-i],temp3),diff),
+       derivsubst:false,
+       temp4:expand(ev(temp3,amp=0,lam=0,wnull)),
+       temp5:ratsimp(temp4.afun),
+       bifeq:int(temp5))$
+
+
+
+
+w_poly(i,j):=block(
+       wmax_diff:map(lambda([u],'diff(u,amp,i,lam,j) = concat(z,u)),w),
+       temp2:diff(temp1,amp,i,lam,j),
+       derivsubst:true,
+       temp3:subst(wmax_diff,temp2),
+       m:length(database),
+       for i thru m do temp3:ev(subst(database[m+1-i],temp3),diff),
+       derivsubst:false,
+       temp4:expand(ev(temp3,amp=0,lam=0,wnull)),
+       temp5:int(ev(temp4,zwnull).afun),
+       temp6:temp4-temp5/norm*cfun,  
+       for i thru space do temp7:trigreduce(temp6,xvar[i]),
+       w_de:ratsimp(temp7 ),
+       print("now solve the equations",w_de,"=0! they are given in w_de"),
+       print("call feedw() to proceed"))$ 
+
+
+
+feedw():=(
+       addbase:[],
+       result:makelist((print("enter",zwlist[k]),read()),k,1,n),
+       f2:int(result.afun),
+       if ratsimp(f2)=0 
+	        then 
+                     addbase:map("=",makelist('diff(w[u],amp,i,lam,j),u,1,n),
+							result)
+	        else (ortho_result:ratsimp(result- f2/norm*cfun),
+/*projection q*/
+		     addbase:map("=",makelist('diff(w[u],amp,i,lam,j),u,1,n),
+						ortho_result)),
+       database:append(database,addbase),
+       addbase)$
+
+ 
+int(exp):=(%int:exp,for i thru space do %int:integrate(trigreduce(%int,
+					xvar[i]),xvar[i]),
+			ratsimp(ev(%int,ubound)-ev(%int,lbound)))$
+
+vfun(list,value):=map(lambda([u],u=value),list)$

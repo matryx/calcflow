@@ -1,0 +1,59 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Indicial tensor simplification and symmetries
+ */
+
+if get('itensor,'version)=false then load(itensor);
+
+("Take a tensor s. Remove any symmetry rules")$
+remsym(s,2,0);
+exp:ishow(s([i,j],[])-s([j,i],[]))$
+
+("The canform function applies symmetry rules. None yet defined")$
+ishow(canform(exp))$
+
+("We tell MAXIMA that s is symmetric using decsym")$
+decsym(s,2,0,[sym(all)],[])$
+canform(exp);
+
+("The flag allsym causes all tensors to be treated as symmetric")$
+allsym:true;
+canform(a([i,j],[])-a([j,i],[]));
+
+("But this setting can lead to incorrect results, so it's off by default")$
+allsym:false;
+
+("The function rename can be used on dummy indices")$
+exp:ishow(a([i,j1],[])*b([],[j1,k])+a([i,j2],[])*b([],[j2,k]))$
+ishow(rename(exp))$
+
+("The variable idummyx controls the dummy name, icounter is the counter")$
+idummyx:n;
+ishow(rename(exp))$
+
+("To simplify tensor expressions, use rename, canform and canten")$
+declare(e,constant);
+("In this example, we want to drop terms higher order in l")$
+(ratfac:false,ratvars(l),ratweight(l,1),ratwtlvl:1);
+remcomps(g);
+imetric(g);
+components(g([i,j],[]),e([i,j],[])+2*l*p([i,j],[]));
+components(g([],[i,j]),e([],[i,j])-2*l*p([],[i,j]));
+ishow(g([i,j],[]))$
+ishow(g([],[i,j]))$
+exp:ishow(icurvature([s,u,n],[y]))$
+exp:ev(exp)$
+("Look the number of terms with nterms")$
+nterms(exp);
+ishow(canform(contract(rename(ratexpand(exp)))))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

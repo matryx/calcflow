@@ -1,0 +1,413 @@
+/***************************************
+ *
+ * This file contains some examples for simplify_sum function
+ *
+ * Use:
+ *   load("simplify_sum");
+ *   load("simplify_sum_test");
+ *
+ ***************************************/
+
+test_sum(sm, ass, use_gamma, smp, [comment]) := block(
+  [product_use_gamma : use_gamma, cs, f],
+  if length(ass)>0 then apply(assume, ass),
+  cs : simplify_sum(sm),
+  for f in smp do cs : apply(f, [cs]),
+  print("|----------------------------------------------------------|"),
+  if length(comment)>0 then apply(print, comment),
+  if length(ass)>0 then print("Assuming:", ass),
+  print(sm = cs),
+  print("|----------------------------------------------------------|"),
+  if length(ass)>0 then apply(forget, ass)
+  )$
+
+test_sum(
+  sum(r/k*binomial(n,r)*binomial(m,k-r)/binomial(n+m,k),r,0,k),
+  [n>k, m>k-1, m>k],
+  true,
+  [makefact, minfactorial]
+)$
+
+test_sum(
+  sum(binomial(n,k)/(k+1), k, 0, n),
+  [],
+  true,
+  []
+);
+
+test_sum(
+  sum((-1)^k * binomial(a+b, a+k) * binomial(b+c, b+k) * binomial(c+a, c+k), k, -a, a),
+  [a<b, a<c],
+  true,
+  [factcomb]
+)$
+
+test_sum(
+  sum((-1)^k * binomial(n,k)*x/(x+k), k, 0, n),
+  [],
+  true,
+  [factcomb]
+)$
+
+test_sum(
+  sum((-1)^k * binomial(2*n, k)^2, k, 0, 2*n),
+  [],
+  false,
+  []
+)$
+
+test_sum(
+  sum((binomial(3*k+1,k)*binomial(3*(n-k),n-k))/(3*k+1), k, 0, n),
+  [],
+  false,
+  []
+)$
+
+test_sum(
+  sum(binomial(n, k) * binomial(m, r - k), k, 0, r),
+  [m>r, n>r],
+  true,
+  [factcomb]
+)$
+
+test_sum(
+  sum(binomial(2*n,2*k), k, 0, n),
+  [n>0],
+  true,
+  []
+)$
+
+test_sum(
+  sum((-1)^k*binomial(x-2*k,n-k)*binomial(x-k+1,k),k,0,n),
+  [x>2*n, x>2*n-1, x>n-1],
+  true,
+  []
+)$
+
+test_sum(
+  sum((-1)^s*binomial(2*m, s)^3, s, 0, 2*m),
+  [],
+  false,
+  []
+)$
+
+test_sum(
+  sum((-1)^k*binomial(k,n-k), k, 0, n),
+  [],
+  true,
+  [rectform, trigreduce]
+)$
+
+test_sum(
+  sum(binomial(n,k)^2*binomial(3*n+k,2*n), k, -inf, inf),
+  [n>0],
+  false,
+  []
+)$
+
+test_sum(
+  sum((-1)^k*binomial(n-k,k)*2^(n-2*k), k, 0, n),
+  [],
+  true,
+  []
+)$
+
+test_sum(
+  sum(binomial(x,k)*binomial(y,k), k, 0, y),
+  [x>y],
+  true,
+  [factcomb]
+)$
+
+test_sum(
+  sum((-1)^(n-k)*binomial(n,k)*binomial(k+b,k), k, 0, n),
+  [b>0],
+  true,
+  [factcomb]
+)$
+
+test_sum(
+  sum(binomial(n+k,k)/2^k,k,0,n),
+  [],
+  true,
+  []
+)$
+
+test_sum(
+  sum((2^(4*k)*binomial(2*n-2*k,n-k))/(2*k*(2*k+1)*binomial(2*k,k)), k, 1, n),
+  [],
+  true,
+  []
+)$
+
+test_sum(
+  sum(k^2 * binomial(n, k), k, 1, n),
+  [],
+  true,
+  []
+)$
+
+test_sum(
+  sum(2^(n-k)*binomial(n+k,2*k),k,-inf,inf),
+  [n>0],
+  true,
+  []
+)$
+
+test_sum(
+  sum(((-1)^k*binomial(2*k,k)*binomial(n,k))/4^k,k,0,n),
+  [],
+  true,
+  []
+)$
+
+test_sum(
+  sum((-1)^k*binomial(2*k,k)*binomial(2*n,k)*binomial(4*n-2*k,2*n-k),k,0,2*n),
+  [],
+  true,
+  []
+)$
+
+test_sum(
+  sum(binomial(l+j,j)*(-1)^(n-l-j)*binomial(n+1,l+j+1),l,0,n-j),
+  [j>0],
+  true,
+  []
+)$
+
+test_sum(
+  sum(binomial(n,4*k),k,0,inf),
+  [],
+  true,
+  [rectform]
+)$
+
+(assume(n>0), declare(n, integer), 0);
+0;
+
+test_sum(
+  sum(binomial(n, k)/binomial(2*n, k)/k!*(2*x)^k, k, 0, inf),
+  [],
+  true,
+  []
+  );
+0;
+
+(kill(n), 0);
+0;
+
+test_sum(
+  sum((n^2+n+1)/(n^4-2*n^2+1),n,2,inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+test_sum(
+  sum(1/n/(2*n+1),n,1,inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+test_sum(
+  sum(1/(5*n^2-1),n,1,inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+test_sum(
+  sum(1/(5*n^2-3),n,1,inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+
+test_sum(
+  sum(1/(n^2+1),n,1,inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+test_sum(
+  sum(1/n/(n+a), n, 1, inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+test_sum(
+  sum((-1)^(n+1)/n, n, 1, inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+test_sum(
+  sum((-1)^k*(k+5)/(2*k+1)/(2*k+3), k, 1, inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+test_sum(
+  sum((-1)^(k+1)/(2*k-1)^3, k, 1, inf),
+  [],
+  true,
+  [ratsimp, multthru]
+)$
+
+test_sum(
+  sum(x^n/n!, n, 0, inf),
+  [],
+  false,
+  []
+)$
+
+test_sum(
+  -sum(((-1)^i*x^(2*i))/i,i,1,inf),
+  [],
+  false,
+  []
+)$
+
+test_sum(
+  sum(n/((n+1)*2^n),n,1,inf),
+  [],
+  false,
+  [ratsimp]
+)$
+
+test_sum(
+  sum(n/((2*n+1)*2^n),n,0,inf),
+  [],
+  false,
+  [ratsimp]
+)$
+
+test_sum(
+  sum((4^(-i-1)*(-1)^i*x^(i+1))/(i+1),i,0,inf),
+  [],
+  false,
+  []
+)$
+
+
+test_sum(
+  'sum('sum(n!/(k!^2*(n - 2*k)!)*(x/y)^k*(x*y)^(n - k), n, 2*k, inf), k, 0, inf),
+  [x*y<1],
+  false,
+  [lambda([u], scanmap(factor, u, 'bottomup))]
+), use_zeilberger=false$
+
+test_sum(
+  sum(1/k, k, 1, n),
+  [],
+  false,
+  []
+)$
+
+test_sum(
+  sum(k*harmonic_number(k),k,1,n),
+  [],
+  false,
+  [ratsimp]
+);
+
+test_sum(
+  sum(k^2*harmonic_number(k),k,1,n),
+  [],
+  false,
+  [ratsimp]
+);
+
+test_sum(
+  sum(k^2*harmonic_number(n+k),k,1,n),
+  [],
+  false,
+  [lambda([u], u:ev(u, harmonic_number_expand=true), ratsimp(u))]
+);
+
+test_sum(
+  sum(((-4)^k*binomial(k,m)*binomial(n+k,2*k))*n/(n+k),k,m,n),
+  [m>1, n>0],
+  false,
+  [factcomb, radcan],
+  "With sum_min=m"
+), sum_min=m;
+
+
+test_sum(
+  sum(harmonic_number(n)/2^n, n, 1, inf),
+  [],
+  false,
+  []
+);
+
+test_sum(
+  sum(harmonic_number(n)/n/(n+1), n, 1, inf),
+  [],
+  false,
+  []
+);
+
+test_sum(
+  sum(n*harmonic_number(n)/2^n, n, 1, inf),
+  [],
+  false,
+  []
+);
+
+test_sum(
+  sum(harmonic_number(n)/n/2^n, n, 1, inf),
+  [],
+  false,
+  [],
+  "With sum_by_integral_transforms=[logcontract]"
+), sum_by_integral_transforms=[logcontract];
+
+test_sum(
+  sum(n^2*harmonic_number(2*n)/2^n, n, 1, inf),
+  [],
+  false,
+  []
+);
+
+
+test_sum(
+  sum(((x-1)^(2*n+1)*(x+1)^(-2*n-1))/(2*n+1),n,0,inf),
+  [x<1, x>0],
+  false,
+  [rootscontract, lambda([u], scanmap(factor, u)), ratsimp]
+);
+
+test_sum(
+  sum(-1/(2*k)+1/(2*2*k+1)+1/(2*2*k+3), k, 1, inf),
+  [],
+  false,
+  [ratsimp]
+);
+
+test_sum(
+  sum(k*(k/2)!,k,1,n),
+  [],
+  false,
+  []
+);
+
+test_sum(
+  sum(i*fib(i-1)/2^i,i,1,inf),
+  [],
+  false,
+  []
+);
+
+test_sum(
+  sum(1/sqrt(k)/sqrt(k+1)/(sqrt(k)+sqrt(k+1)),k,1,inf),
+  [],
+  false,
+  []
+);

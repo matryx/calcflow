@@ -1,0 +1,41 @@
+(kill (all),
+ if not ?fboundp ('bffac) then load ("bffac"),
+ float_approx_equal_tolerance : 1e-13,
+ 0);
+0;
+
+(float_near_zero (x) := is (abs(x) < float_approx_equal_tolerance),
+ 0);
+0$
+
+/* Easy standard values of zeta */
+bfzeta (0, 10);
+''(bfloat(-1/2))$
+
+bfzeta (1, 10);
+inf$
+
+float_near_zero (bfzeta(-2, 10));
+true$
+
+/* zeta(2) = %pi^2/6 (A&S 23.2.24) */
+float_near_zero (bfzeta(2, 14) - %pi^2/6);
+true$
+
+/* zeta(4) = %pi^4/90 (A&S 23.2.25) */
+float_near_zero (bfzeta(4, 15) - %pi^4/90);
+true$
+
+/* Don't die horribly with arguments we can't evaluate zeta for */
+bfzeta (x, 10);
+'bfzeta (x, 10)$
+
+bfzeta (0, fpp);
+'bfzeta (0, fpp)$
+
+bfzeta (%i, fpp);
+'bfzeta (%i, fpp)$
+
+/* Check the first zero is in the right place */
+float_near_zero (bfzeta (1/2+%i*14.13472514173469379045b0, 16));
+true$

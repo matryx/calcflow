@@ -1,0 +1,434 @@
+;; -*- Mode: lisp -*-
+
+;;; System to convert the Fortran code to Lisp
+;;;
+;;; How to convert the Fortran code to Lisp for maxima.
+;;;
+;;; 1. Get f2cl, which is available via quicklisp:
+;;;      (ql:quickload "f2cl")
+;;; 2. Run
+;;;     (mk:oos "lapack-lisp" :compile :force t)
+;;;
+;;; This should generate all of the Lisp code.
+
+(mk:define-language :f2cl-lisp
+    :compiler #'f2cl:f2cl
+    :loader #'identity
+    :source-extension "f"
+    :binary-extension "lisp")
+
+(defparameter *lapack-root*
+  (make-pathname :host (pathname-host *load-pathname*)
+		 :directory (pathname-directory *load-pathname*)))
+
+(mk:defsystem "lapack-package"
+  :source-pathname *lapack-root*
+  :depends-on ("blas-package")
+  :components
+  ((:module lapack
+	    :components
+	    (:file "lapack-package"))))
+
+(mk:defsystem "lapack-lisp"
+  :source-pathname (merge-pathnames "./lapack/" *lapack-root*)
+  :binary-pathname (merge-pathnames "./lapack/" *lapack-root*)
+  :depends-on ("lapack-package" "blas-lisp")
+  :components
+  (
+   (:module fortran
+	    :binary-pathname "."
+	    :language :f2cl-lisp
+	    :compiler-options (:package :lapack
+			       :float-format double-float)
+	    :compile-only t
+	    :components
+	    ((:file "dgeev"
+		    :depends-on ("dlartg" "dlapy2" "dgebak" "dtrevc" "dhseqr"
+					  "dorghr" "dlacpy" "dgehrd" "dgebal"
+					  "dlascl" "dlange" "dlabad" "dlamch"
+					  "ilaenv"))
+	     (:file "dgebak")
+ 	     (:file "dgebal")
+ 	     (:file "dgehrd"
+		    :depends-on ("dlahrd" "dlarfb" "dgehd2" "ilaenv"))
+ 	     (:file "dhseqr"
+		    :depends-on ("dlarfx" "dlarfg" "dlapy2" "dlacpy" "dlanhs"
+					  "dlabad" "dlamch" "dlahqr" "ilaenv"
+					  "dlaset"))
+ 	     (:file "dlabad")
+ 	     (:file "dlacpy")
+ 	     (:file "dlamch"
+		    :depends-on ("dlamc2" "dlamc3" "dlamc4" "dlamc5"))
+	     (:file "dlamc1"
+		    :depends-on ("dlamc3"))
+	     (:file "dlamc2"
+		    :depends-on ("dlamc1" "dlamc3" "dlamc4" "dlamc5"))
+	     (:file "dlamc3")
+	     (:file "dlamc4")
+	     (:file "dlamc5")
+ 	     (:file "dlange"
+		    :depends-on ("dlassq"))
+ 	     (:file "dlapy2")
+ 	     (:file "dlartg"
+		    :depends-on ("dlamch"))
+ 	     (:file "dlascl"
+		    :depends-on ("dlamch"))
+ 	     (:file "dorghr"
+		    :depends-on ("dorgqr" "ilaenv"))
+	     (:file "dtrevc"
+		    :depends-on ("dlabad" "dlamch" "dlaln2"))
+ 	     (:file "ilaenv"
+		    :depends-on ("ieeeck"))
+	     (:file "dlahrd"
+		    :depends-on ("dlarfg"))
+	     (:file "dlarfb")
+	     (:file "dgehd2"
+		    :depends-on ("dlarfg" "dlarf"))
+	     (:file "dlaset")
+	     (:file "dlahqr"
+		    :depends-on ("dlanhs" "dlarfg" "dlanv2" "dlabad" "dlamch"))
+	     (:file "dlanhs"
+		    :depends-on ("dlassq"))
+	     (:file "dlarfg"
+		    :depends-on ("dlapy2" "dlamch"))
+	     (:file "dlarfx")
+	     (:file "dlassq")
+	     (:file "dorgqr"
+		    :depends-on ("dorg2r" "dlarft" "dlarfb" "ilaenv"))
+	     (:file "dlaln2"
+		    :depends-on ("dladiv"
+				 "dlamch"))
+	     (:file "ieeeck")
+	     (:file "dlarf")
+	     (:file "dlanv2"
+		    :depends-on ("dlapy2" "dlamch"))
+	     (:file "dorg2r"
+		    :depends-on ("dlarf"))
+	     (:file "dlarft")
+	     (:file "dladiv")
+
+	     ;; DGEEVX
+	     (:file "dgeevx"
+		    :depends-on ("dlartg" "dlapy2" "dgebak" "dtrsna" "dtrevc"
+					  "dhseqr" "dorghr" "dlacpy" "dgehrd"
+					  "dgebal" "dlascl" "dlange" "dlabad"
+					  "dlamch" "ilaenv"))
+	     (:file "dtrsna"
+		    :depends-on ("dtrexc" "dlacon" "dlaqtr"
+					  "dlacpy" "dlapy2" "dlamch"))
+	     (:file "dtrexc"
+		    :depends-on ("dlaexc"))
+	     (:file "dlacon")
+	     (:file "dlaqtr"
+		    :depends-on ("dladiv" "dlaln2" "dlange" "dlamch"))
+	     (:file "dlaexc"
+		    :depends-on ("dlasy2" "dlanv2" "dlarfg" "dlamch" "dlange"
+					  "dlacpy" "dlartg"))
+	     (:file "dlasy2"
+		    :depends-on ("dlamch"))
+
+	     ;; DGESV
+	     (:file "dgesv"
+		    :depends-on ("dgetrf" "dgetrs"))
+	     (:file "dgetrf"
+		    :depends-on ("dgetf2" "dlaswp" "ilaenv"))
+	     (:file "dgetrs"
+		    :depends-on ("dlaswp"))
+	     (:file "dgetf2")
+	     (:file "dlaswp")
+
+	     ;; DGESDD
+	     (:file "dgesdd"
+		    :depends-on ("dorglq" "dgelqf" "dorgbr" "dormbr" "dorgqr"
+					  "dlacpy" "dbdsdc" "dgebrd" "dlaset"
+					  "dgeqrf" "dlascl" "dlange" "dlamch"
+					  "ilaenv"))
+	     (:file "dbdsdc"
+		    :depends-on ("dlasr" "dlasda" "dlasd0" "dlamch" "dlascl"
+					 "dlanst" "dlaset" "dlasdq"
+					 "dlartg" "ilaenv"))
+	     (:file "dgebrd"
+		    :depends-on ("dlabrd" "dgebd2" "ilaenv"))
+	     (:file "dgelqf"
+		    :depends-on ("dgelq2" "dlarfb" "dlarft" "ilaenv"))
+	     (:file "dorgbr"
+		    :depends-on ("dorglq" "dorgqr" "ilaenv"))
+	     (:file "dorglq"
+		    :depends-on ("dorgl2" "dlarfb" "dlarft" "ilaenv"))
+	     (:file "dorgl2"
+		    :depends-on ("dlarf"))
+	     (:file "dormbr"
+		    :depends-on ("dormqr" "dormlq" "ilaenv"))
+	     (:file "dlasdq"
+		    :depends-on ("dlasr" "dbdsqr" "dlartg"))
+	     (:file "dlanst"
+		    :depends-on ("dlassq"))
+	     (:file "dlasd0"
+		    :depends-on ("dlasdt" "dlasd1" "dlasdq"))
+	     (:file "dlasda"
+		    :depends-on ("dlasd6" "dlaset" "dlasdq" "dlasdt"))
+	     (:file "dlasr")
+	     (:file "dlabrd"
+		    :depends-on ("dlarfg"))
+	     (:file "dgebd2"
+		    :depends-on ("dlarf" "dlarfg"))
+	     (:file "dgelq2"
+		    :depends-on ("dlarf" "dlarfg"))
+	     (:file "dormqr"
+		    :depends-on ("dorm2r" "dlarfb" "dlarft" "ilaenv"))
+	     (:file "dormlq"
+		    :depends-on ("dorml2" "dlarfb" "dlarft" "ilaenv"))
+	     (:file "dgeqrf"
+		    :depends-on ("dgeqr2" "dlarfb" "dlarft" "ilaenv"))
+	     (:file "dbdsqr"
+		    :depends-on ("dlasq1" "dlasv2" "dlas2" "dlasr" "dlartg"
+					  "dlamch"))
+	     (:file "dlasq1"
+		    :depends-on ("dlas2" "dlasrt" "dlasq2" "dlascl"))
+	     (:file "dlasv2"
+		    :depends-on ("dlamch"))
+	     (:file "dlas2")
+	     (:file "dlasdt")
+	     (:file "dlasd1"
+		    :depends-on ("dlasd2" "dlasd3" "dlamrg" "dlascl"))
+	     (:file "dlasrt")
+	     (:file "dlasq2"
+		    :depends-on ("dlasq3" "ilaenv" "dlasrt" "dlamch"))
+	     (:file "dlasd2"
+		    :depends-on ("dlamrg" "dlacpy" "dlaset" "dlapy2" "dlamch"
+					  "dlamrg"))
+	     (:file "dlasd3"
+		    :depends-on ("dlasd4" "dlacpy" "dlascl" "dlamch"))
+	     (:file "dlamrg")
+	     (:file "dlasd6"
+		    :depends-on ("dlasd7" "dlasd8"))
+	     (:file "dorml2")
+	     (:file "dgeqr2"
+		    :depends-on ("dlarf" "dlarfg"))
+	     (:file "dorm2r"
+		    :depends-on ("dlarf"))
+	     (:file "dlasd4"
+		    :depends-on ("dlasd5" "dlaed6"))
+	     (:file "dlasd7"
+		    :depends-on ("dlapy2" "dlamch" "dlamrg"))
+	     (:file "dlasd8"
+		    :depends-on ("dlasd4" "dlaset" "dlascl" "dlamch"))
+	     (:file "dlasq3"
+		    :depends-on ("dlasq4" "dlasq5" "dlasq6" "dlamch"))
+	     (:file "dlasq4")
+	     (:file "dlasq5")
+	     (:file "dlasq6"
+		    :depends-on ("dlamch"))
+	     (:file "dlasd5")
+	     (:file "dlaed6"
+		    :depends-on ("dlamch"))
+
+	     ;; DGESVD
+	     (:file "dgesvd"
+		    :depends-on ("dorglq" "dgelqf" "dormbr" "dorgqr" "dlacpy"
+					  "dbdsqr" "dorgbr" "dgebrd" "dlaset"
+					  "dgeqrf" "dlascl" "dlange" "dlamch"
+					  "ilaenv"))
+
+	     ;; For condition numbers of the singular vectors
+	     (:file "ddisna")
+	     
+	     (:file "zlange"
+		    :depends-on ("zlassq"))
+	     (:file "zlassq")
+	     ;; Complex eigen problems
+	     (:file "zgeev"
+		    :depends-on ("zhseqr" "zlange" "zlascl" "zgebal" "zlacpy" "zunghr"
+					  "ztrevc" "zgebak" "zgehrd"))
+	     (:file "zhseqr"
+		    :depends-on ("zlaqr0" "zlaset" "zlahqr" "zlacpy"))
+	     (:file "zlange"
+		    :depends-on ("zlassq"))
+	     (:file "zlascl"
+		    :depends-on ("disnan"))
+	     (:file "zgebal")
+	     (:file "zlacpy"
+		    :depends-on ("disnan"))
+	     (:file "zunghr"
+		    :depends-on ("zungqr"))
+	     (:file "ztrevc"
+		    :depends-on ("zlatrs"))
+	     (:file "zgebak"
+		    :depends-on ("zlatrs"))
+	     (:file "zlatrs"
+		    :depends-on ("zladiv"))
+	     (:file "zungqr"
+		    :depends-on ("zung2r" "zlarft" "zlarfb"))
+	     (:file "disnan"
+		    :depends-on ("dlaisnan"))
+	     (:file "dlaisnan")
+	     (:file "zlassq")
+	     (:file "zladiv")
+	     (:file "zung2r"
+		    :depends-on ("zlarf"))
+	     (:file "zlarft"
+		    :depends-on ("zlacgv"))
+	     (:file "zlarfb"
+		    :depends-on ("ilazlr" "ilazlc" "zlacgv"))
+	     (:file "ilazlr")
+	     (:file "ilazlc")
+	     (:file "zlacgv")
+	     (:file "zlarf"
+		    :depends-on ("ilazlc" "ilazlr"))
+	     (:file "zlaqr0"
+		    :depends-on ("zlahqr" "zlaqr3" "zlaqr4" "zlaqr5" "zlacpy"))
+	     (:file "zlaset")
+	     (:file "zlaqr3"
+		    :depends-on ("zgehrd" "zunmhr" "zlahqr" "ztrexc" "zlarfg"
+					  "zlaqr4" "zlacpy" "zlaset"))
+	     (:file "zlaqr4"
+		    :depends-on ("zlaqr2" "zlahqr" "zlacpy" "zlaqr5"))
+	     (:file "zlaqr5"
+		    :depends-on ("zlaqr1" "zlarfg" "zlaset" "zlacpy"))
+	     (:file "zlaqr1")
+	     (:file "zlaqr2"
+		    :depends-on ("zunmhr" "ztrexc" "zlacpy" "zlaset"))
+	     (:file "zlarfg"
+		    :depends-on ("dlapy3" "zladiv"))
+	     (:file "zlahqr"
+		    :depends-on ("zlarfg" "zladiv"))
+	     (:file "zgehrd"
+		    :depends-on ("zlahr2" "zgehd2" "zlarfb"))
+	     (:file "zunmhr"
+		    :depends-on ("zunmqr"))
+	     (:file "ztrexc"
+		    :depends-on ("zlartg" "zrot" "zunm2r"))
+	     (:file "dlapy3")
+	     (:file "zlartg")
+	     (:file "zrot")
+	     (:file "zunmqr"
+		    :depends-on ("zunm2r" "zlarft" "zlarfb"))
+	     (:file "zlahr2"
+		    :depends-on ("zlacgv" "zlacpy"))
+	     (:file "zgehd2"
+		    :depends-on ("zlarfg" "zlarf"))
+	     (:file "zunm2r")
+	     ))))
+
+(mk:defsystem blas-package
+  :source-pathname *lapack-root*
+  :components
+  ((:module blas
+	    :components
+	    ((:file "blas-package")))))
+
+(mk:defsystem blas-lisp
+  :source-pathname (merge-pathnames "./blas/" *lapack-root*)
+  :source-extension "f"
+  :language :f2cl-lisp
+  :depends-on ("blas-package")
+  :components
+  ((:module fortran
+	    :binary-pathname "."
+	    :compiler-options (:package :blas
+			       :float-format double-float)
+	    :compile-only t
+	    :components
+	    ((:file "daxpy")
+	     (:file "dcopy")
+	     (:file "ddot")
+	     (:file "dnrm2")
+	     (:file "dscal")
+	     (:file "idamax")
+
+	     (:file "dasum")
+	     (:file "dcabs1")
+	     (:file "dgbmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dgemm"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dgemv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dger"
+		    :depends-on ("xerbla"))
+	     (:file "drot")
+	     (:file "drotg")
+	     (:file "dsbmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dspmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dspr"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dspr2"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dswap")
+	     (:file "dsymm"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsymv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsyr"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsyr2"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsyr2k"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsyrk"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtbmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtbsv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtpmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtpsv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtrmm"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtrmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtrsm"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtrsv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dzasum"
+		    :depends-on ("dcabs1"))
+	     (:file "dznrm2")
+	     (:file "icamax")
+	     (:file "isamax")
+	     (:file "izamax"
+		    :depends-on ("dcabs1"))
+	     (:file "lsame")
+	     (:file "xerbla")
+
+	     ;; Complex versions.
+	     (:file "zaxpy"
+		    :depends-on ("dcabs1"))
+	     (:file "zcopy")
+	     (:file "zdotc")
+	     (:file "zdotu")
+	     (:file "zdscal")
+	     (:file "zgbmv")
+	     (:file "zgemm")
+	     (:file "zgemv")
+	     (:file "zgerc")
+	     (:file "zgeru")
+	     (:file "zhbmv")
+	     (:file "zhemm")
+	     (:file "zhemv")
+	     (:file "zher")
+	     (:file "zher2")
+	     (:file "zher2k")
+	     (:file "zherk")
+	     (:file "zhpmv")
+	     (:file "zhpr")
+	     (:file "zhpr2")
+	     (:file "zrotg")
+	     (:file "zscal")
+	     (:file "zswap")
+	     (:file "zsymm")
+	     (:file "zsyr2k")
+	     (:file "zsyrk")
+	     (:file "ztbmv")
+	     (:file "ztbsv")
+	     (:file "ztpmv")
+	     (:file "ztpsv")
+	     (:file "ztrmm")
+	     (:file "ztrmv")
+	     (:file "ztrsm")
+	     (:file "ztrsv")
+	     ))))

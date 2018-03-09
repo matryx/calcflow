@@ -1,0 +1,24 @@
+eval_when([translate,batch,demo,load,loadfile],
+matchdeclare(n,integerp))$
+
+tellsimpafter(sin(n*%pi/10),usin(n))$
+tellsimpafter(cos(n*%pi/10),ucos(n))$
+tellsimpafter(tan(n*%pi/10),usin(n)/ucos(n))$
+tellsimpafter(cot(n*%pi/10),ucos(n)/usin(n))$
+tellsimpafter(sec(n*%pi/10),1/ucos(n))$
+tellsimpafter(csc(n*%pi/10),1/usin(n))$
+
+usin(n):= block([yuk:remainder(remainder(n,10)+10,10),
+                 sgn:if remainder(remainder(n,20)+20,20)>=10 then -1 else 1],
+if yuk=1 or yuk=9 then sgn*(sqrt(5)-1)/4 else
+if yuk=2 or yuk=8 then sgn*(sqrt(5)-1)*sqrt(sqrt(5)+5)/(4*sqrt(2)) else
+if yuk=3 or yuk=7 then sgn*(sqrt(5)+1)/4 else
+if yuk=4 or yuk=6 then sgn*sqrt(sqrt(5)+5)/(2*sqrt(2)))$
+
+ucos(n):= block([yuk:remainder(remainder(n,10)+10,10),
+                 sgn:if remainder(remainder(n,20)+20,20)>5 and
+                        remainder(remainder(n,20)+20,20)<15 then -1 else 1],
+if yuk=1 or yuk=9 then sgn*sqrt(sqrt(5)+5)/(2*sqrt(2)) else
+if yuk=2 or yuk=8 then sgn*(sqrt(5)+1)/4 else
+if yuk=3 or yuk=7 then sgn*(sqrt(5)-1)*sqrt(sqrt(5)+5)/(4*sqrt(2)) else
+if yuk=4 or yuk=6 then sgn*(sqrt(5)-1)/4)$

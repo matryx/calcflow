@@ -1,0 +1,25 @@
+load("functs");
+[a,b,c,d,e];  rempart(%,[3,4]);  /*  RATMX:TRUE; */
+/* Find out whether these functions are linearly dependent or
+	linearly independent. */  [sin(x),cos(x),sin(x-1)];
+/* The Wronskian matrix */  wronskian(%,x);
+/* The Wronskian determinant is zero.  Thus the three given
+	functions are linearly dependent. */  expand(determinant(%));
+
+(2-3*%i)/(%i+4);  conjugate(%);
+matrix([1,0,5*%i],[-2*%i,2,0],[1,1+%i,0]);
+conjugate(%);  expand(adjoint(%th(2)));  tracematrix(%th(3));
+(2+%i)/(3-%i);  rational(%);  
+logand(15,5); logxor(5,6);  logor(4,9);
+/* uprobe([foo,bar]);  uprobe([functs,demo,share]); */
+
+nonzeroandfreeof(z,y+4); /* 3*z+(y+1)*z+y^2;
+ This expression is re-formed first as linear in z, then as
+	quadratic in y  linear(%,z);  quadratic(%th(2),y); */
+gcdivide(a*x-b*x,a*x+b*x);  gcdivide(a^2-b^2,a^2-2*a*b+b^2);
+lcm(expand((x+y)^3),2,4,5,25,x^2-y^2);
+arithmetic(0,17,7);  geometric(8,8,5);  harmonic(1,2,3,4);
+arithsum(7/2,43/20,11);  geosum(1,-21/10,6);  geosum(1,21/10,6);
+geosum(2,1/2,inf);  gaussprob(223/100);  gd(69/200);  agd(%pi/6);
+vers(19*%pi/90);  covers(19*%pi/90);  exsec(13*%pi/45);
+hav(47*%pi/200);  combination(9,3);  permutation(9,3);

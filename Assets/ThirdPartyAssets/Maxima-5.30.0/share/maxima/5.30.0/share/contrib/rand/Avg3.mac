@@ -1,0 +1,62 @@
+ /* Mathieu's equation: third order averaging */
+
+ /* setup */
+ depends([a,psi],t);
+ depends([w1,w2,v1,v2,u1,u2],[abar,psibar,t]);
+ depends([abar,psibar],t);
+ x:a*cos(t+psi);
+ xd:-a*sin(t+psi);
+ f:-4*x*(del1+e*del2+e^2*del3+cos(2*t));
+ de1:[diff(a,t)=-e*sin(t+psi)*f,diff(psi,t)=-e/a*cos(t+psi)*f];
+ transf:[a=abar+e*w1+e^2*v1+e^3*u1,psi=psibar+e*w2+e^2*v2+e^3*u2];
+ de2:de1,transf,diff$
+ de3:solve(%,[diff(abar,t),diff(psibar,t)])$
+ de4:taylor(de3,e,0,3)$
+ for i:0 thru 3 do eq[i]:coeff(de4,e,i);
+ neweq[0]:eq[0];
+ kill(abar,psibar);
+
+ /* first order averaging */
+ ws1:eq[1]$
+ ws2:expand(trigreduce(expand(ws1)))$
+ ws3:integrate(ws2,t)$
+ ws4:ws3,%integconst1:0,%integconst2:0$
+ ws5:ws4-ratcoef(ws4,t)*t$
+ ws6:solve(part(ws5,1),[w1,w2]);
+ ws7:ws1,ws6,diff;
+ neweq[1]:expand(trigreduce(expand(ws7)));
+
+ /* second order averaging */
+ vs1:eq[2],ws6,diff$
+ vs2:expand(trigreduce(expand(vs1)))$
+ vs3:integrate(vs2,t)$
+ vs4:vs3,%integconst3:0,%integconst4:0$
+ vs5:vs4-ratcoef(vs4,t)*t$
+ vs6:solve(part(vs5,1),[v1,v2]);
+ vs7:vs1,vs6,diff$
+ neweq[2]:expand(trigreduce(expand(vs7)));
+
+ /* third order averaging */
+ us1:eq[3],ws6,vs6,diff$
+ us2:expand(trigreduce(expand(us1)))$
+ us3:integrate(us2,t)$
+ us4:us3,%integconst5:0,%integconst6:0$
+ us5:us4-ratcoef(us4,t)*t$
+ us6:solve(part(us5,1),[u1,u2]);
+ us7:us1,us6,diff$
+ neweq[3]:expand(trigreduce(expand(us7)));
+
+ neweqs:sum(neweq[i]*e^i,i,0,3);
+
+ depends([xbar,ybar],t);
+ depends([abar,psibar],t);
+ [xbar = abar*cos(psibar),ybar = -abar*sin(psibar)];
+ diff(%,t);
+ ev(%,neweqs);
+ trigexpand(%);
+ expand(%);
+ trigsimp(%);
+ taylor(%,e,0,3);
+ ev(%,sin(psibar) = -ybar/abar,cos(psibar) = xbar/abar);
+ factor(%);
+

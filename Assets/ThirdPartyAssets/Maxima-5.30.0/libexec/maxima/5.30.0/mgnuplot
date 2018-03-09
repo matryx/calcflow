@@ -1,0 +1,115 @@
+#!/bin/sh
+# comment \
+exec wish "$0" "$@"
+
+
+#set gnuPlotstream [open {|  gnuplot /d19/staff/wfs/tmp/jo } w]
+set gnuPlotstream [open {|  gnuplot  } r+]
+
+
+proc sendgnu com {
+    global gnuPlotstream
+    puts stdout $com ; flush stdout
+    puts $gnuPlotstream $com ; flush $gnuPlotstream
+}
+
+set ii 0
+while {$ii < $argc} {
+ switch -exact "X[lindex $argv $ii]"  {
+    X-parametric3d {
+    sendgnu "set parametric\n" 
+    sendgnu "set data style lines\n"
+    sendgnu "set hidden\n"
+    set ii [expr {$ii + 1}]
+    sendgnu "splot '[lindex $argv $ii]'\n" }
+    X-plot2d {
+    set ii [expr {$ii + 1}]
+    sendgnu "set data style lines"
+    sendgnu "plot '[lindex $argv $ii]'\n" 
+    }
+    X-title {
+    set ii [expr {$ii + 1}]
+    sendgnu "set title '[lindex $argv $ii]'\n" }
+    
+    }
+    set ii [expr {$ii +1}]
+    }
+      
+set xrot 60
+set zrot 30
+
+
+text .text
+.text configure -height 4 -width 40
+
+proc getoptions {} {
+#    unlink gnu-optionsxx
+    set tmp gnu-optionsxx
+    exec rm -f $tmp
+    sendgnu "save '$tmp'\n"
+    while {[file exists $tmp] <= 0} {exec sleep 0}
+    set at [.fra.options nearest 0]
+    set f [ open gnu-optionsxx ]
+    .fra.options delete 0 end
+    while { [gets $f line] >= 0 } {
+	.fra.options insert end [lrange $line 0 end ]}
+    .fra.options yview $at	
+    }
+
+frame .fra -bd 2
+label .fra.label -text "Current Set Options"
+scrollbar .fra.scroll -command ".fra.options yview"    
+listbox .fra.options -yscrollcommand ".fra.scroll set" -relief sunken -bd 2
+pack .fra.label
+pack .fra.options -side left
+pack .fra.scroll -side right -fill y
+bind .fra.options <Double-1> "set selected_option  \[lindex \[selection get\] 0\]"
+frame .option_edit
+
+proc msg a {global $a
+ sendgnu [format "%s\n\nreplot\n" [expr $$a]] ;
+ set $a ""
+ getoptions}
+ 
+proc mkOption_edit {a b} {
+    global $b
+   label $a.label -text "Edit: "
+   entry $a.entry -width 20 -relief sunken -bd 2 -textvariable $b
+    bind $a.entry  <Return> "msg  $b"
+   pack $a.label $a.entry -side left -padx 1m -pady 2m
+}
+
+mkOption_edit .option_edit selected_option
+
+
+getoptions
+
+button .exit -text "Exit" -command {
+    sendgnu  "exit\n"
+    destroy .
+}
+
+button .save -text "save gnuplot.out" -command {
+    sendgnu "save 'gnuplot.out'\n"
+ }
+
+scale .rotxscale -label "xrotation"  \
+   -orient horizontal -length 200 -from 0 -to 180 \
+    -command gnuPlotsetview -tickinterval 60
+scale .rotzscale -label "zrotation" \
+    -orient horizontal -length 200 -from 0 -to 360 \
+    -command gnuPlotsetview -tickinterval 120
+
+set initted 0
+.rotxscale set $xrot
+.rotzscale set $zrot
+
+proc gnuPlotsetview value  {
+    global initted
+    if { $initted < 2 } { set initted [expr {$initted + 1}]} \
+    else \
+    {sendgnu [format "set view %d,%d\nreplot\n" [.rotxscale get] [.rotzscale get]]}}
+
+pack .exit   .rotxscale .rotzscale .fra .option_edit .save
+
+

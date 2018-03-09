@@ -1,0 +1,41 @@
+/* Filename <name>.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /*
+(d5) This program generates the Taylor series solution
+
+
+to the 1st order ODE:
+
+
+                    Y' = F(X,Y)
+
+
+for an arbitrary initial condition at X = 0.
+
+
+To call it, type:
+
+
+                      SOLUTION()
+
+*/
+
+solution():=(input(),u:z,v:f,
+	 for i thru m do (u:u+evaluate(v)*x^i/i!,v:deriv(v)),output())$
+input():=(m:read("ENTER DEGREE OF TRUNCATION"),
+      f:read("ENTER RIGHT HAND SIDE OF ODE Y'=F(X,Y)"),print(" "),
+      print("Y' =",f),print(" "),z:read("ENTER INITIAL VALUE OF Y"))$
+deriv(g):=diff(g,x)+diff(g,y)*f$
+evaluate(g):=ev(g,x:0,y:z)$
+output():=print("Y =",u)$

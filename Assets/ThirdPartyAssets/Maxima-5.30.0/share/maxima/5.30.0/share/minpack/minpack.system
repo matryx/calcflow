@@ -1,0 +1,70 @@
+;;;; -*- Mode: lisp -*-
+
+;;; System to compile minpack and the maxima interface
+
+(in-package #-gcl #:cl-user #+gcl "CL-USER")
+
+
+(mk:defsystem minpack
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "minpack")
+  :depends-on ("minpack-package")
+  :components
+  ((:module "lisp"
+	    :source-extension "lisp"
+	    :binary-pathname "."
+	    :components
+	    (
+	     (:file "dpmpar")
+	     (:file "enorm")
+	     (:file "fdjac1"
+		    :depends-on ("dpmpar"))
+	     (:file "fdjac2"
+		    :depends-on ("dpmpar"))
+	     (:file "qrsolv")
+	     (:file "lmpar"
+		    :depends-on ("dpmpar" "enorm" "qrsolv"))
+	     (:file "qrfac"
+		    :depends-on ("dpmpar" "enorm"))
+	     (:file "lmdif"
+		    :depends-on ("dpmpar" "enorm" "fdjac2" "lmpar" "qrfac"))
+	     (:file "lmdif1"
+		    :depends-on ("lmdif"))
+	     (:file "lmder"
+		    :depends-on ("dpmpar" "enorm" "lmpar" "qrfac"))
+	     (:file "lmder1"
+		    :depends-on ("lmder"))
+	     (:file "dogleg"
+		    :depends-on ("dpmpar" "enorm"))
+	     (:file "qform")
+	     (:file "r1mpyq")
+	     (:file "r1updt"
+		    :depends-on ("dpmpar"))
+	     (:file "hybrd"
+		    :depends-on ("dogleg" "dpmpar" "enorm" "fdjac1"
+					  "qform" "qrfac" "r1mpyq" "r1updt"))
+	     (:file "hybrd1"
+		    :depends-on ("hybrd"))
+	     (:file "hybrj"
+		    :depends-on ("dogleg" "dpmpar" "enorm" "qform" "qrfac"
+					  "r1mpyq" "r1updt"))
+	     (:file "hybrj1"
+		    :depends-on ("hybrj"))
+	     ))))
+
+(mk:defsystem minpack-package
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "minpack")
+  :source-extension "lisp"
+  :components
+  ((:file "minpack-package")))
+
+(mk:defsystem minpack-interface
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "minpack")
+  :source-extension "lisp"
+  :depends-on ("minpack")
+  :components
+  ((:file "minpack-interface")))
+
+

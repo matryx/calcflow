@@ -1,0 +1,90 @@
+	To use this package LOADFILE(FORMA1,FASL,DSK,SHARE);.
+
+
+	This package is for the pretty printing of floating point
+numbers  in MACSYMA.  The printing routine has variable precision
+feature, and displays a variable number of decimal digits to the left of
+the decimal point while displaying a fixed number of digits to the right
+of the decimal point. The advantage of this kind of printing is that it
+looks most natural to the eye, and because most floating point numbers
+encountered (of the third kind) in everyday usage is between 1,000,000.0
+and 0.000,001 in magnitude, using this routine, the magnitude of the
+number is readily discerned from the length of the display.
+
+For example using the defaults for the parameters of the routine, 
+
+				   I
+FOR I FROM -10 THRU 10 DO PRINT(10  %PI)
+
+prints as follows:
+
+
+3.14E-10 
+3.14E-9 
+3.14E-8 
+3.14E-7 
+3.14E-6 
+3.14E-5 
+0.000314 
+0.00314 
+0.0314 
+0.314 
+3.14 
+31.41 
+314.15 
+3141.5 
+31415.9 
+314159.2 
+3.14E+6 
+3.14E+7 
+3.14E+8 
+3.14E+9 
+3.14E+10 
+
+	In the above example, the number is displayed with 3 non-zero
+digits most of the time.  For a number greater than 9.99, more digits
+are used so the display becomes longer.  The routine also has the
+feature that it eliminates trailing zeros at the right of the decimal
+point.
+
+	Note that what is displayed has no relation to what is
+internally stored in the system.  The internal representation of a
+floating point number has a certain precision that only depends on the
+word length used for storing the floating point number.  Displaying the
+floating point number in its full precision may always be restored by
+turning off the pretty printing routine.
+
+	The routine works by repeatedly multiplying or dividing a
+floating point number, until the number is in the interval [1.0 10.0) .
+At that point the routine explodes the number.  Since the routine keeps
+the number of left or right decimal shifts it makes, the number may be
+reconstructed.  The parameters are:
+
+	Macsyma parameter:
+
+FLOATFORMAT [True]	If true, turns routine on.  If false, turns
+			routine off.
+
+	Lisp parameters [defaults]:
+
+FLOATFRAC [2]	Number of digits right of decimal point in E notation.
+
+FLOATMAX [6]	All numbers >= 10^floatmax in magnitude are converted to
+		E notation.
+
+FLOATBIGBIG [1]	Number of digits right of decimal point for numbers less
+		than or equal to  10^flotmax  and greater than  10^3  in
+		magnitude.
+
+FLOATBIG [2]	Number of digits right of decimal point for numbers less
+		than or equal to  10^3  and greater than  1.0  in
+		magnitude.
+
+FLOATSMALL [3]	Number of non-zero digits right of decimal point for
+		numbers less than or equal to  1.0  and greater than
+		10^floatmin  in magnitude.
+
+FLOATMIN [-4]	All numbers < 10^floatmin  in magnitude are converted to
+		E notation.
+
+Comments to:  bern@dm.

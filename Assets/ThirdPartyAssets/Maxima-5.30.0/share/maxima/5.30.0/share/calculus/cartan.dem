@@ -1,0 +1,41 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Cartan algebra of exterior forms
+ */
+
+("The Cartan package implements index-free exterior calculus")$
+if get('cartan,'version)=false then load(cartan);
+derivabbrev:true;
+("Initialize the package by supplying the list of coordinates")$
+init_cartan([x,y,z]);
+("The basis will be stored in cartan_basis")$
+cartan_basis;
+("Let us define a vector as a list of elements")$
+vr:[v1,v2,v3];
+("This is an example of a 1-form")$
+f1:x~dy+z~dz;
+("This one is a 2-form")$
+f2:dz~f1;
+("Contraction with a vector space is denoted by the | operator")$
+vr|f1;
+("The exterior derivative of a form is computed by ext_diff")$
+ext_diff(f1);
+ext_diff(f3(x,y,z)~dx);
+("Let use define vr now as a vector field over the coordinates")$
+depends(v1,[x,y,z],v2,[x,y,z],v3,[x,y,z]);
+("The Lie derivative of a form with respect to a scalar")$
+lie_diff(vr,f2);
+("Let us define another vector field")$
+depends(w1,[x,y,z],w2,[x,y,z],w3,[x,y,z]);
+wr:[w1,w2,w3];
+("And compute its Lie-derivative")$
+lie_diff(vr,wr);

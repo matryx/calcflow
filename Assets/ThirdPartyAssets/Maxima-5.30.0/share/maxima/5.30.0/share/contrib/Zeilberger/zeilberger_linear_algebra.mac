@@ -1,0 +1,12 @@
+/* List of independent variables produced by the linear solver */
+ind_vars(solver) ::= 
+  buildq([],
+         if solver=linsolve then 
+           %rnum_list
+         else 
+            if solver=fast_linsolve then
+               %rnum_list
+            else
+               %rnum_list       
+        );
+

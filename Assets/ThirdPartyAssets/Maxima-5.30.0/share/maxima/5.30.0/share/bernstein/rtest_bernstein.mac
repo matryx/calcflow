@@ -1,0 +1,149 @@
+(kill(all), load("bernstein"),0);
+0$
+
+[errcatch(bernstein_poly()), 
+ errcatch(bernstein_poly(2)), 
+ errcatch(bernstein_poly(5,6)), 
+ errcatch(bernstein_poly(false,false,false,false))];
+[[],[],[],[]]$
+
+bernstein_poly(0,0,x);
+1$
+
+[bernstein_poly(0,1,x), bernstein_poly(1,1,x)];
+[1-x,x]$
+
+[bernstein_poly(0,2,x), bernstein_poly(1,2,x),bernstein_poly(2,2,x)];
+[(1-x)^2,2*(1-x)*x,x^2]$
+
+bernstein_poly(5,1,x);
+0$
+
+bernstein_poly(-1,1,x);
+0$
+
+bernstein_poly(k,n,0);
+kron_delta(k,0)$
+
+bernstein_poly(k,n,1);
+kron_delta(k,n)$
+
+expand(makelist(sum(bernstein_poly(k,n,x),k,0,n),n,0,15));
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]$
+
+makelist(sum(bernstein_poly(k,n,1/5 + %i),k,0,n),n,0,25);
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]$
+
+map(lambda([s], is(abs(1-s) < 1.0e-10)), makelist(sum(bernstein_poly(k,n,0.4 + %i),k,0,n),n,0,12));
+[true,true,true,true,true,true,true,true,true,true,true,true,true]$
+
+(fpprec : 54, map(lambda([s], is(abs(1-s) < 1.0e-50)), makelist(sum(bernstein_poly(k,n,1.4b0- %i/5),k,0,n),n,0,12)));
+[true,true,true,true,true,true,true,true,true,true,true,true,true]$
+
+/* derivatives */
+(reset(fpprec), listarith : true,0);
+0$
+
+(q : block([bernstein_explicit : false,k,n,x], makelist(diff(bernstein_poly(k,n,x),v),v,[k,n,x]))
+    -block([bernstein_explicit : true,k,n,x], makelist(diff(bernstein_poly(k,n,x),v),v,[k,n,x])),
+ expand(subst([k=5,n=8],q)));
+[0,0,0]$
+
+/* integrals */ 
+
+(assume(k +1 > 0),0);
+0$
+
+block([expand_hypergeometric : true, bernstein_explicit : false,i1,i2],
+  i1 :  integrate(bernstein_poly(k,n,x),x,0,z),
+  i2 : integrate(bernstein_poly(12,18,x),x,0,z),
+  expand(subst([k=12,n=18], i1-i2)));
+0$
+
+block([expand_hypergeometric : true, bernstein_explicit : false,i1,i2],
+  i1 :  integrate(bernstein_poly(k,n,x),x,0,z),
+  i2 : integrate(bernstein_poly(5,5,x),x,0,z),
+  expand(subst([k=5,n=5], i1-i2)));
+0$
+
+(declare(kk,integer, nn, integer, z, complex),0);
+0$
+
+conjugate(bernstein_poly(kk,nn,z));
+bernstein_poly(kk,nn,conjugate(z))$
+
+
+conjugate(bernstein_poly(k,n,z));
+conjugate(bernstein_poly(k,n,z))$
+
+(remove(z,complex,kk,integer, nn,integer),0);
+0$
+
+bernstein_approx(f(x),[x],1);
+f(1)*x+f(0)*(1-x)$
+
+bernstein_approx(f(x),[x],3);
+f(1)*x^3+3*f(2/3)*(1-x)*x^2+3*f(1/3)*(1-x)^2*x+f(0)*(1-x)^3$
+
+bernstein_approx(f(x,y),[x,y],1);
+f(1,1)*x*y+f(0,1)*(1-x)*y+f(1,0)*x*(1-y)+f(0,0)*(1-x)*(1-y)$
+
+bernstein_approx(f(x,y),[x,y],2);
+f(1,1)*x^2*y^2+2*f(1/2,1)*(1-x)*x*y^2+f(0,1)*(1-x)^2*y^2+2*f(1,1/2)*x^2*(1-y)*y+4*f(1/2,1/2)*(1-x)*x*(1-y)*y+2*f(0,1/2)*(1-x)^2*(1-y)*y+f(1,0)*x^2*(1-y)^2+2*f(1/2,0)*(1-x)*x*(1-y)^2+f(0,0)*(1-x)^2*(1-y)^2$
+
+errcatch(multibernstein_poly(2,3,x));
+[]$
+
+errcatch(multibernstein_poly([2],[3],x));
+[]$
+
+errcatch(multibernstein_poly([1,2,3],[u,n,k],[8]));
+[]$
+
+errcatch(multibernstein_poly(2,3,false, false));
+[]$
+
+expand(multibernstein_poly([2,4,5],[7,8,9],[x,y,z]) - xreduce("*", map('bernstein_poly, [2,4,5],[7,8,9],[x,y,z])));
+0$
+
+multibernstein_poly([9,q,p],[8,q,p],[x,y,z]);
+0$
+
+multibernstein_poly([q,p,r,9],[l,s,s,5],[w,x,y,z]);
+0$
+
+q : bernstein_expand(x*y+1,[x,y]);
+2*x*y+(1-x)*y+x*(1-y)+(1-x)*(1-y)$
+
+ratexpand(q);
+x*y+1$
+
+q : bernstein_expand(x*y+a,[x,y]);
+(a+1)*x*y+a*(1-x)*y+a*x*(1-y)+a*(1-x)*(1-y)$
+
+ratexpand(q);
+x*y+a$
+
+q : bernstein_expand(x*y+a,[x]);
+x*(y+a)+a*(1-x)$
+
+ratexpand(q);
+x*y+a$
+
+q : bernstein_expand(x^2 + y^2 + x + y - 42,[x,y]);
+-38*x^2*y^2-79*(1-x)*x*y^2-40*(1-x)^2*y^2-79*x^2*(1-y)*y-164*(1-x)*x*(1-y)*y-83*(1-x)^2*(1-y)*y-40*x^2*(1-y)^2
+-83*(1-x)*x*(1-y)^2-42*(1-x)^2*(1-y)^2$
+
+ratexpand(q);
+x^2 + y^2 + x + y - 42$
+
+q : bernstein_expand(sqrt(5) * x^2 + (1 - %pi) * y^2 + 2*%e * x+ y - 42,[x,y]);
+(-2*%pi+2*%e+sqrt(5)-39)*x^2*y^2+2*(-2*%pi+%e-39)*(1-x)*x*y^2+(-2*%pi-39)*(1-x)^2*y^2+2*(2*%e+sqrt(5)-83/2)*x^2*(1-y)*y
++4*(%e-83/2)*(1-x)*x*(1-y)*y-83*(1-x)^2*(1-y)*y+(2*%e+sqrt(5)-42)*x^2*(1-y)^2+2*(%e-42)*(1-x)*x*(1-y)^2-42*(1-x)^2*(1-y)^2$
+
+ratexpand(q);
+-2*%pi*y^2+2*y^2+y+sqrt(5)*x^2+2*%e*x-42$
+
+(forget(k+1 > 0), remvalue(q),0);
+0$
+

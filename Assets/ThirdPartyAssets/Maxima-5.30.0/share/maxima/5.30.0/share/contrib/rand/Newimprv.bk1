@@ -1,0 +1,39 @@
+/* Filename <name>.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /*   This program uses recursive functions to find 
+the transition curves in Mathieu's equation.  To call it,
+type:
+                        TC()
+*/
+
+tc():=(input(),sign:1,find(),IF n > 0 THEN (sign:-1,find()))$
+input():=(n:read("ENTER TRANSITION CURVE NUMBER N"),
+      m:read("ENTER DEGREE OF TRUNCATION"))$
+find():=(delta:n^2/4,for i thru m do delta:delta+d[i]*e^i,
+     print("delta=",delta),print(" "))$
+a[j,k]:=IF j < 0 OR k < 0 THEN 0
+   ELSE (IF j = 0 AND k = n THEN 1
+	     ELSE (IF j = 0 THEN 0
+		       ELSE (IF k = n THEN 0
+				 ELSE (IF k = 0
+					   THEN (-a[j-1,2]/2
+					   -sum(d[i]*a[j-i,0],i,1,j))
+					   /(n^2/4)
+					   ELSE (-(a[j-1,k-2]
+					   +a[j-1,k+2]+sign*a[j-1,2-k])
+					   /2
+					   -sum(d[i]*a[j-i,k],i,1,j))
+					   /((n^2-k^2)/4)))))$
+d[j]:=IF n = 0 THEN -a[j-1,2]/2
+   ELSE -(a[j-1,n-2]+a[j-1,n+2]+sign*a[j-1,2-n])/2$

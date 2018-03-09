@@ -1,0 +1,95 @@
+
+/*
+This subroutine computes pade approximants of multivariable functions */
+Copyright (C) 1999  Dan Stanger
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Dan Stanger dan.stanger@internut.com
+*/
+
+/* this macro was defined as length did not work correctly on arrays.
+   put it in your startup file as autoload
+newArray1(a,i)::=buildq([a,i],(array(a,i),put(a,arrayinfo(a),"arrayinfo")));
+alength(x):=block([l:get(x,"arrayinfo")],if listp(l) then first(third(l)) else
+   error(x," was not declared with newArray1"))$
+*/
+
+pade2(f,IndVarList, pointlist, norderlist,dorderlist):=
+block([atlist,TransIndVarList,transindvar,NumIndVar,norder,
+	dorder,torder,makeIndexList,makeIndexListAux],
+   NumIndVar:length(IndVarList),
+   newArray1(transindvar,NumIndVar),
+   newArray1(norder,length(norderlist)),
+   newArray1(dorder,length(dorderlist)),
+   newArray1(torder,max(length(norderlist),length(dorderlist))),
+   atlist:maplist(lambda([l,r],l=r),IndVarList,pointlist),
+   fillarray(norder,norderlist),
+   fillarray(dorder,dorderlist),
+   fillarray(torder,norderlist+dorderlist),
+   TransIndVarList:maplist(lambda([l,r],l-r),IndVarList,pointlist),
+   fillarray(transindvar,TransIndVarList),
+
+   makeIndexListAux:lambda([x,c],
+      block([l:[]],for i:0 thru c do
+	 block([y:copylist(x)],push(i,y),push(y,l)),l)),
+   makeIndexList:lambda([order],
+      block([l],l:makeIndexListAux([],order[0]),
+	 for j:1 thru (alength(order)-1) do
+	    block([l1:[]],
+	       for i in l do
+		  block(l1:append(l1,makeIndexListAux(i,order[j])),l:l1)),
+		  sort(l))),
+   block([nindexlist:makeIndexList(norder),
+	  dindexlist:rest(makeIndexList(dorder)),
+	  tindexlist:makeIndexList(torder),
+	  dcoeff, ncoeff, rcoeff, lcoeff, p],
+      newArray1(dcoeff,length(dindexlist)),
+      newArray1(ncoeff,length(nindexlist)),
+      newArray1(rcoeff,length(tindexlist)),
+      newArray1(lcoeff,length(tindexlist)),
+      p:block([den:1,num:0,i:1],
+	 for d in dindexlist do
+	    block(den:den+dcoeff[i]*
+		apply("*",maplist("^",TransIndVarList,d)),i:i+1),
+	 i:0,
+	 for n in nindexlist do
+	    block(num:num+ncoeff[i]*
+		apply("*",maplist("^",TransIndVarList,n)),i:i+1),
+	num/den),
+      block([i:0,lf:[f],lp:[p]],
+	 for r in tindexlist do
+	    block([l:[]],
+		maplist(lambda([x,y],l:append([x,y],l)),IndVarList,r),
+		rcoeff[i]:at(apply('diff,append(lf,l)),atlist),
+		lcoeff[i]:at(apply('diff,append(lp,l)),atlist),
+		i:i+1)),
+      block([l:[],v:[],s],
+         for i:0 thru alength(rcoeff)-1 do
+		l:append([lcoeff[i]=rcoeff[i]],l),
+	 for i:0 thru alength(ncoeff)-1 do
+		v:append(v,[ncoeff[i]]),
+	 for i:1 thru alength(dcoeff) do
+		v:append(v,[dcoeff[i]]),
+         s:solve(l,v),
+	 at(p,first(s))))
+);
+  
+/* here is a example and the result
+pade2(exp(x+y),[x,y],[0,0],[1,1],[1,1])
+
+((((x * y)/4) + (y/2) + (x/2) + 1)/(((x * y)/4) - (y/2) - (x/2) + 1))
+
+*/

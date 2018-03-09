@@ -1,0 +1,77 @@
+/* ODE tests - Murphy equations 2.401 - 2.423
+
+  Reference: 
+    G M Murphy, Ordinary Differential Equations and Their 
+    Solutions, Van Nostrand, 1960, pp 15-23
+
+    First Order and Second or Higher Degree, p278 ff
+*/
+
+/* Don't kill(all); It messes up trigsimp */
+
+/* Eliminate parameter t from singular solution */
+(elim_(ans,x,y,t):=block([s],s:first(solve(ans[2],t)),s:solve(ev(ans[1],s),y),s[1]),done);
+done;
+
+/* Print ode number*/
+(pn_(n_):=print("Murphy ODE 2.",n_),true);
+true;
+
+/* 402 */
+(pn_(402),ans:contrib_ode(eqn:log('diff(y,x))+x*'diff(y,x)+a=y,y,x));
+[y = %c*x+a+log(%c),[-y+%t*x+log(%t)+a=0,(%t*x+1)/%t=0]];
+/* Eliminate parameter t from singular solution */
+(s:first(solve((ans[2])[2],%t)),s:first(solve(ev(first(ans[2]),s),y)));
+y = log(-1/x)+a-1;
+[method,ode_check(eqn,ans[1]),ode_check(eqn,s)];
+[clairault,0,0];
+
+/* 405 */
+(pn_(405),ans:contrib_ode(eqn:log('diff(y,x))+a*(x*'diff(y,x)-y)=0,y,x));
+[y = (%c*a*x+log(%c))/a,[a*(%t*x-y)+log(%t) = 0,(%t*a*x+1)/%t = 0]];
+/* Eliminate parameter t from singular solution */
+/* (s:first(solve((ans[2])[2],%t)),s:first(solve(ev(first(ans[2]),s),y))); */
+s:elim_(ans[2],x,y,%t);
+y=(log(-1/(a*x))-1)/a;
+[method,ode_check(eqn,ans[1]),ode_check(eqn,s)];
+[clairault,0,0];
+
+/* 408 */
+(pn_(408),ans:contrib_ode(eqn:'diff(y,x)*log('diff(y,x))-(1+x)*'diff(y,x)+y=0,y,x));
+[y = %c*x-%c*log(%c)+%c,[y-%t*(x+1)+%t*log(%t) = 0,log(%t)-x = 0]];
+/* Eliminate parameter %t from singular solution */
+(s:first(solve((ans[2])[2],%t)),s:first(solve(ev(first(ans[2]),s),y)));
+y = %e^x;
+[method,ode_check(eqn,ans[1]),ode_check(eqn,s)];
+[clairault,0,0];
+
+/* 409 */
+(pn_(409),ans:contrib_ode(eqn:log('diff(y,x)*x-y)='diff(y,x),y,x));
+[y=%c*x-%e^%c,[log(%t*x-y)-%t=0,-((-y+%t*x-x)/(%t*x-y))=0]];
+/* eliminate parameter %t from singular solution */
+(s:first(solve((ans[2])[2],%t)),s:first(solve(ev(first(ans[2]),s),y)));
+y = x*log(x)-x;
+[method,ode_check(eqn,ans[1]),ode_check(eqn,s)];
+[clairault,0,0];
+
+/* 410 */
+(pn_(410),ans:contrib_ode(eqn:'diff(y,x)*log('diff(y,x)+sqrt(1+'diff(y,x)^2))-sqrt(1+'diff(y,x)^2)-x*'diff(y,x)+y=0,y,x));
+[y=%c*x-%c*log(sqrt(%c^2+1)+%c)+sqrt(%c^2+1),[y-%t*x+%t*log(sqrt(%t^2+1)+%t)-sqrt(%t^2+1)=0,log(sqrt(%t^2+1)+%t)-x=0]];
+ans[2]:radcan(ans[2]);
+[y-%t*x+%t*log(sqrt(%t^2+1)+%t)-sqrt(%t^2+1)=0,log(sqrt(%t^2+1)+%t)-x=0];
+ans[2]:ans[2],log(sqrt(%t^2+1)+%t)=asinh(%t);
+[y-%t*x+%t*asinh(%t)-sqrt(%t^2+1) = 0,asinh(%t)-x = 0];
+solve(ans[2][2],%t);
+[%t = sinh(x)];
+trigsimp(ev(ans[2][1],%[1]));
+y-cosh(x)=0;
+ans[2]:first(solve(%,y));
+y=cosh(x);
+[method,ode_check(eqn,ans[1]),radcan(exponentialize((ode_check(eqn,ans[2]))))];
+[clairault,0,0];
+
+/* 416 - requires pdiff package */
+block([use_pdiff:true],pn_(416),contrib_ode(eqn:f(x*'diff(y,x)-y)=g('diff(y,x)),y,x));
+[f(%c*x-y)=g(%c)];
+method;
+clairault;

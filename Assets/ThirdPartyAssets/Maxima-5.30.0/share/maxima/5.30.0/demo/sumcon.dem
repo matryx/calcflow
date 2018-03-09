@@ -1,0 +1,16 @@
+gensumindex:0$
+y:sum(a[i]*x^i,i,0,inf);
+y1:diff(y,x);
+y2:diff(y1,x);
+(x^2+1)*y2+3*x*y1+2*y;
+expand(%);
+factor(%);
+intosum(%)$
+bashindices(%);
+changevar(%,(j4-2)-j,j,j4);
+niceindices(%);
+sumcontract(%);
+factor(%);
+part(%,1);
+%/x^i=0;
+solve(%,a[i+2]);

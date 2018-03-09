@@ -1,0 +1,389 @@
+.TH MAXIMA 1L "September 10, 2005"
+.ds Ps P\s-2OST\s+2S\s-2CRIPT\s+2
+.ds Ts T\s-2RAN\s+2S\s-2CRIPT\s+2
+.if t .ds Te T\\h'-0.1667m'\\v'0.20v'E\\v'-0.20v'\\h'-0.125m'X
+.if n .ds Te TeX
+.if t .ds La L\\h'-0.36m'\\v'-0.15v'\\s-2A\\s+2\\h'-0.15m'\\v'0.15v'T\\h'-0.1667m'\\v'0.20v'E\\v'-0.20v'\\h'-0.125m'X
+.if n .ds La LaTeX
+.ds Fl "F\s-2ranz\s+2\ L\s-2isp\s+2
+.ds Ml "M\s-2ACLISP\s+2
+.ds Cl "Common L\s-2isp\s+2
+.ds Li "L\s-2isp\s+2
+.ds Ky "GNU Common L\s-2isp\s+2
+.ds Pr c:/maxima
+.ds Vr 5.30.0
+
+.SH NAME
+Maxima \- Common Lisp version of MACSYMA symbolic mathematics package
+released under the GNU Public License
+.LP
+Xmaxima \- A graphical version of Maxima
+.SH SYNOPSIS
+.B maxima
+[\fIoptions\fR]
+.LP
+.B xmaxima 
+[\fIoptions\fR]
+.SH DESCRIPTION
+Maxima is a version of the MIT-developed MACSYMA system, modified to run under
+\*(Cl.  It is an interactive expert system and programming environment
+for symbolic and numerical mathematical manipulation.  Written in
+\*(Li, it allows differentiation, integration, solution of linear or
+polynomial equations, factoring of polynomials, expansion of functions
+in Laurent or Taylor series, computation of Poisson series, matrix and
+tensor manipulations, and two- and three-dimensional graphics.
+Procedures may be written using an ALGOL-like syntax, and both
+\*(Li-like functions and pattern matching facilities are provided.
+Files containing Maxima
+objects may be read from and written to disk files. Pre-written
+Maxima commands may be read from a file and executed, allowing batch-mode
+use.
+.SH OPTIONS
+.TP
+\fB\-b\fR \fIfile\fR, \fB\-\-batch=\fR\fIfile\fR
+Process \fIfile\fR in noninteractive mode.
+.TP
+\fB\-\-batch-lisp=\fR\fIfile\fR
+Process Lisp file \fIfile\fR in noninteractive mode.
+.TP
+\fB\-\-batch-string=\fR\fIstring\fR
+Process \fIstring\fR in noninteractive mode.
+.TP
+\fB\-d\fR, \fB\-\-directories\fR
+Display Maxima directory information.
+.TP
+\fB\-\-disable\-readline\fR
+Disable readline support.
+.TP
+\fB\-g\fR, \fB\-\-enable\-lisp\-debugger\fR
+Enable Lisp debugger.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display a brief usage summary.
+.TP
+\fB\-\-init=\fR\fIstring\fR
+Load the Maxima and Lisp initialization files \fR\fIstring\fR.mac and \fR\fIstring\fR.lisp at startup.
+.TP
+\fB\-\-init-mac=\fR\fIfile\fR
+Load the Maxima initialization file \fR\fIfile\fR at startup.
+.TP
+\fB\-\-init-lisp=\fR\fIfile\fR
+Load the Lisp initialization file \fR\fIfile\fR at startup.
+.TP
+\fB\-l\fR \fIlisp\fR, \fB\-\-lisp=\fR\fIlisp\fR 
+Use Lisp implementation \fIlisp\fR. Use \fB\-\-list-avail\fR to see the
+list of possible values.
+.TP
+\fB\-\-list-avail\fR
+List the available Lisp and Maxima versions.
+.TP
+\fB\-p\fR \fIlisp_file\fR, \fB\-\-preload-lisp=\fR\fIlisp_file\fR
+Preload \fIlisp_file\fR.
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress Maxima start-up message.
+.TP
+\fB\-r\fR \fIstring\fR, \fB\-\-run-string=\fR\fIstring\fR
+Process \fIstring\fR in interactive mode.
+.TP
+\fB\-s\fR \fIport\fR, \fB\-\-server=\fR\fIport\fR
+Connect Maxima to server on \fIport\fR.
+Note that this does not create a Maxima server; Maxima is the client.
+.TP
+\fB\-u\fR \fIversion\fR, \fB\-\-use-version=\fR\fIversion\fR 
+Launch Maxima version \fIversion\fR. Use \fB\-\-list-avail\fR to see
+the list of possible values.
+.TP
+\fB\-\-userdir=\fR\fIdirectory\fR 
+Use \fIdirectory\fR for user directory (default is $HOME/maxima for Windows, $HOME/.maxima for others)
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+Print extra information from the Maxima wrapper script.
+.TP
+\fB\-\-version\fR
+Print the (default) installed version.
+.TP
+\fB\-\-very\-quiet\fR
+Suppress expression labels and the Maxima start-up message.
+.TP
+\fB\-X\fR \fILisp options\fR, \fB\-\-lisp-options=\fR\fILisp options\fR
+Options to be given to the underlying Lisp.
+.SH INTRODUCTORY INSTRUCTIONS
+Upon initialization,
+.I maxima
+prints a startup message, then a command line prompt:
+.LP
+.B (%i1)
+.LP
+All Maxima commands must be concluded with either:
+.TP
+1)
+a semicolon (in which case the result of the command is echoed on a display
+line, prefaced by
+.B %o
+with an appended sequence number), or
+.TP
+2)
+a dollar sign (which suppresses printing of a display line).
+.LP
+.SH EXAMPLE
+.LP
+(%i1) diff(sin(x),x);
+.LP
+(%o1)                         cos(x)
+.LP
+(%i2) integrate(%o1,x);
+.LP
+(%o2)                         sin(x)
+.LP
+The user types in commands which create
+.I "Maxima objects"
+(such as functions and system variables) and which manipulate these objects.
+.LP
+On UNIX it may be preferable to run Maxima under Gnu Emacs or XEmacs.
+You can do this by invoking shell mode in
+.IR emacs ,
+and then invoking
+.IR maxima .
+Preferably, install
+.I maxima.el
+from the
+distribution and use the command:
+.IP
+.B M-x maxima
+.LP
+The main advantage of working inside
+.I emacs
+is that it provides a complete history of input/output.
+If you execute the command
+.IP
+.B display2d: false
+.LP
+you will be able to use your output as input,
+by simply killing and yanking.
+.LP
+\*(Li is built into Maxima.
+The function to_lisp() enters the Lisp read-eval-print loop. The
+\*(Li function (run) may be used to return to Maxima. Alternatively,
+single \*(Li commands may be invoked by starting a command line with
+\fB:lisp\fR. 
+.SH BUILT-IN HELP
+The reference manual can be accessed from the Maxima input prompt.
+A description of a given command can be obtained by typing the command
+.LP
+\fBdescribe(command);\fR
+.LP
+or, simply,
+.LP
+\fB ? command\fR
+.LP
+searches the list of functions for the string \fIcommand\fR.
+Demonstration files provide complete examples of problems solved with Maxima,
+and may be accessed with the command
+\fBdemo(command);\fR.
+A library of user-contributed command files is also provided (the
+.IR "share library" ),
+directed toward a variety of problems.
+.SH OTHER DOCUMENTATION
+The reference manual is provided in both info and html formats.
+.SH COMMAND PRIMER
+.LP
+This list includes only commands which the beginner might find
+useful to know about prior to studying the reference manual
+and other texts.
+.TP
+.B batch("myfile");
+Execute the contents of file
+.IR myfile ,
+which is assumed to contain Maxima commands.
+.TP
+.B closefile("myfile");
+Close session file opened by a writefile command (see below).
+.TP
+.B demo("myfile");
+Execute the contents of file
+.IR myfile ,
+which is assumed to contain Maxima
+commands, one line at a time.
+.TP
+.B ev(infolists);
+Print the contents of all of the available information lists.
+.TP
+.B functions;
+Print a list of the names of currently defined functions.
+.TP
+.B infolists;
+Print a list of the various available information lists.
+.TP
+.B kill(objectlist);
+Eliminate the object(s) contained within parentheses;
+.I kill(all)
+Delete all objects created by the user, restoring Maxima
+to its initial state.
+.TP
+.B quit();
+Leave Maxima.
+.TP
+.B reset();
+Reset all Maxima control parameters to their default states.
+.TP
+.B values;
+Print a list of the names of currently assigned scalar values.
+.TP
+.B writefile("myfile");
+Write record of session to file
+.IR myfile ;
+only one file at a time can be open, and the
+.I closefile
+command must be invoked prior to leaving Maxima
+to flush the buffer.
+.SH PLOTTING COMMANDS
+Maxima is capable of producing 2- and 3-dimensional plots. Here is a
+simple 2-dimensional example
+.LP
+.B plot2d (sin(x), [x, -2*%pi, 2*%pi]);
+.LP
+and a simple 3-dimensional example
+.LP
+.B plot3d (2^(-u^2 + v^2), [u, -5, 5], [v, -7, 7]);
+.LP
+By default plots are made by the
+.I
+gnuplot
+plotting package.
+Plots can be made by other means; see "? plot_options".
+For more information about plotting, see "? plot".
+.SH FILES
+.TP 1.0i
+.I \*(Pr/lib/maxima/\*(Vr/binary-\fIlisp\fR
+Compiled files for lisp implementation \fIlisp\fR
+.TP 1.0i
+.I \*(Pr/info
+primary documentation directory, containing info files which
+are used for the 'describe' command, and also for viewing under emacs
+or other info viewer.
+.TP 1.0i
+.I \*(Pr/share/maxima/\*(Vr/doc/html
+HTML version of info documentation.
+.TP 1.0i
+.I \*(Pr/share/maxima/\*(Vr/demo
+Maxima demo files.
+.TP 1.0i
+.I \*(Pr/share/maxima/\*(Vr/emacs
+Elisp files for use with Emacs or XEmacs.
+.TP 1.0i
+.I \*(Pr/share/maxima/\*(Vr/share
+Contributed external packages.
+.TP 1.0i
+.I \*(Pr/share/maxima/\*(Vr/doc/share
+Documentation for contributed external packages.
+.TP 1.0i
+.I \*(Pr/share/maxima/\*(Vr/src
+Complete Maxima source.
+.TP 1.0i
+.I \*(Pr/share/maxima/\*(Vr/tests
+Test suite.
+.TP 1.0i
+.I \*(Pr/share/maxima/\*(Vr/xmaxima
+Xmaxima support files.
+.TP 1.0i
+.I \*(Pr/libexec/maxima/\*(Vr/
+Maxima utility scripts.
+.SH ENVIRONMENT VARIABLES
+.TP
+\fBMAXIMA_USERDIR\fR
+Points to a directory for user customization files. Maxima's default search
+paths include \fBMAXIMA_USERDIR\fR. Default value: \fB$HOME/.maxima\fR.
+.TP
+\fBMAXIMA_PREFIX\fR
+Maxima looks for its input files in the directory configured at
+compile time, \*(Pr. Maxima can be relocated to a different directory
+as long as the
+.I maxima
+script maintains the same relative position with
+respect to the Maxima input files. If, for some reason, the
+.I maxima
+script needs to be relocated independently, \fBMAXIMA_PREFIX\fR needs to be
+set to point to the top of the tree holding the input files.
+.TP
+\fBMAXIMA_DIRECTORY\fR
+\fBMAXIMA_DIRECTORY\fR is equivalent to \fBMAXIMA_PREFIX\fR. It is
+included only for backward compatibility with older versions of Maxima.
+.LP
+Maxima uses several other environment variables for communication
+between the
+.I maxima
+script and the lisp image. All such variables start
+with \fIMAXIMA_\fR. They should not need to be modified by the user.
+.SH CUSTOMIZATION FILES
+.TP
+\fBmaximarc\fR
+\fBmaximarc\fR is sourced by the
+.I maxima
+script at startup. It should
+be located in \fB$MAXIMA_USERDIR\fR (see above). \fBmaximarc\fR can be
+used, \fIe.g.\fR, to change the user's default lisp implementation
+choice to CMUCL by including the line "MAXIMA_LISP=cmucl".
+.TP
+\fBmaxima-init.lisp\fR
+At startup, Maxima will load the lisp file \fBmaxima-init.lisp\fR if
+it is found in the search path. For user customization,
+\fBmaxima-init.lisp\fR should be placed in the \fB$MAXIMA_USERDIR\fR
+(see above). Since Maxima typically has a system
+\fBmaxima-init.lisp\fR in the Maxima share directory, the user may
+want to copy the contents of the system \fBmaxima-init.lisp\fR into
+his/her custom file.
+Alternatively, the user can load a Lisp initialization file with
+another name or location by means of the \fB\-\-init-lisp\fR or \fB\-\-init\fR
+command-line options.
+.TP
+\fBmaxima-init.mac\fR
+At startup, Maxima will load the file \fBmaxima-init.mac\fR if
+it is found in the search path.  For user customization,
+\fBmaxima-init.mac\fR should be placed in the \fB$MAXIMA_USERDIR\fR
+(see above).
+Alternatively, the user can load a Maxima initialization file with
+another name or location by means of the \fB\-\-init-mac\fR or \fB\-\-init\fR
+command-line options.
+.SH REFERENCES
+Old Reference:  
+.I "MACSYMA Reference Manual"
+(volumes 1 and 2).
+The Mathlab Group,
+Laboratory for Computer Science, MIT.
+Version 10.
+January 1983.
+.LP
+Newer references: 
+.I http://maxima.sourceforge.net
+.SH BUGS
+Maxima is a complex system. It includes both known and unknown bugs.
+Use at your own risk. The Maxima bug database is available at
+.LP
+http://sourceforge.net/tracker/?atid=104933&group_id=4933&func=browse
+.LP
+New bug reports are always appreciated. Please include the output of
+the Maxima function "build_info()" with the report.
+.SH AUTHORS
+
+MACSYMA (Project MAC's SYmbolic MAnipulation System) was developed by
+the Mathlab group of the MIT Laboratory for Computer Science
+(originally known as Project MAC), during the years 1969-1972.  Their
+work was supported by grants NSG 1323 of the National Aeronautics and
+Space Administration, N00014-77-C-0641 of the Office of Naval
+Research, ET-78-C-02-4687 of the U.S. Department of Energy, and
+F49620-79-C-020 of the U.S. Air Force.  MACSYMA was further modified
+for use under the UNIX operating system (for use on DEC VAX computers
+and Sun workstations), by Richard Fateman and colleagues at the
+University of California at Berkeley; this version of MACSYMA is known
+as VAXIMA.  The present version stems from a re-working of the public
+domain MIT MACSYMA for \*(Ky, prepared by William Schelter, University
+of Texas at Austin until his passing away in 2001.  It contains
+numerous additions, extensions and enhancements of the original.  The
+original version of this manual page was written by R. P. C. Rodgers,
+UCSF School of Pharmacy, San Francisco, CA 94143
+(rodgers@maxwell.mmwb.ucsf.edu) in 1989. It was extensively revised by
+James Amundson in 2002.
+
+Maxima is now developed and maintained by the Maxima project at <http://maxima.sourceforge.net>.
+.\"

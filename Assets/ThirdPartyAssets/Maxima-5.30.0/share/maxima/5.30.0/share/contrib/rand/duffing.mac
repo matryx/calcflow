@@ -1,0 +1,49 @@
+/* Filename duffing.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /*
+
+(d4) This program computes a perturbation solution for
+
+
+the periodic response of Duffing's equation.
+
+
+Call it by typing:
+
+
+                     DUFFING(N)
+
+
+where N is the order of truncation.
+*/
+
+duffing(n):=(setup1(n),setup2(n),
+	for i thru n do
+	    (step1(i),step2(i),step3(i),step4(i),step5(i),output1(i)),
+	output2(n))$
+setup1(n):=(w:1,for i thru n do w:w+k[i]*e^i,x:a*cos(t),
+       for i thru n do x:x+y[i](t)*e^i)$
+setup2(n):=(temp1:diff(x,t,2)+x/w^2+e*x^3/w^2-e*f*cos(t)/w^2,
+       temp1:taylor(temp1,e,0,n),for i thru n do eq[i]:coeff(temp1,e,i))$
+step1(i):=temp1
+      :expand(trigreduce(expand(ev(eq[i],makelist([e[j],f[j]],j,1,i-1),
+				   diff))))$
+step2(i):=(f[i]:solve(coeff(temp1,cos(t)),k[i]),temp1:ev(temp1,f[i]))$
+step3(i):=(temp1:ode2(temp1,y[i](t),t),
+  temp1:subst(a[i],%k1,temp1),temp1:subst(b[i],%k2,temp1))$
+step4(i):=(temp2:rhs(temp1),temp2:diff(temp2,t),
+      temp2:solve([ev(rhs(temp1),t:0),ev(temp2,t:0)],[a[i],b[i]]))$
+step5(i):=e[i]:ev(temp1,temp2)$
+output1(i):=(print(expand(e[i])),print(" "))$
+output2(n):=(print("w=",ev(w,makelist([f[j]],j,1,n))),print(" "))$

@@ -1,0 +1,425 @@
+declare (x, real);
+done;
+
+conjugate(-1);
+-1$
+
+conjugate(6);
+6$
+
+conjugate(-2/3);
+-2/3$
+
+conjugate(sqrt(5));
+sqrt(5)$
+
+conjugate(sqrt(3) + sqrt(7));
+sqrt(3) + sqrt(7)$
+
+conjugate(5.6);
+5.6$
+
+conjugate(-5.6);
+-5.6$
+
+conjugate(5.6 * %i);
+-%i * 5.6$
+
+conjugate(8.23b3);
+8.23b3$
+
+conjugate(1.4b0 + %i * 5.7b0);
+1.4b0 - %i * 5.7b0$
+
+conjugate(sqrt(7 + %i * 8));
+sqrt(7 - %i * 8);
+
+conjugate(log(1 - %i));
+log(1 + %i)$
+
+conjugate(%e);
+%e$
+
+conjugate(-%e);
+-%e$
+
+conjugate(%pi);
+%pi$
+
+conjugate(%phi);
+%phi$
+
+conjugate(x);
+x$
+
+conjugate(-x);
+-x$
+
+conjugate(1+x*(1+x));
+1+x*(1+x)$
+
+conjugate(sqrt(1+x^2));
+sqrt(1+x^2)$
+
+conjugate(x+abs(x));
+x+abs(x)$
+
+conjugate(cos(x));
+cos(x)$
+
+conjugate(sin(x));
+sin(x)$
+
+conjugate(tan(x));
+tan(x)$
+
+conjugate(sec(x));
+sec(x)$
+
+conjugate(cot(x));
+cot(x)$
+
+conjugate(csc(x));
+csc(x)$
+
+conjugate(cosh(x));
+cosh(x)$
+
+conjugate(sinh(x));
+sinh(x)$
+
+conjugate(tanh(x));
+tanh(x)$
+
+conjugate(sech(x));
+sech(x)$
+
+conjugate(coth(x));
+coth(x)$
+
+conjugate(csch(x));
+csch(x)$
+
+conjugate(exp(x));
+exp(x)$
+
+conjugate(sqrt(x));
+conjugate(sqrt(x))$
+
+conjugate(abs(x))$
+abs(x)$
+
+(declare(z,complex),0);
+0$
+
+conjugate(conjugate(z));
+z$
+
+conjugate(conjugate(conjugate(z)));
+conjugate(z)$
+
+conjugate(5*z);
+5 * conjugate(z);
+
+conjugate(5 + z);
+5 + conjugate(z);
+
+conjugate(5 + 7 * z);
+5 + 7 * conjugate(z);
+
+conjugate(%i * z);
+-%i * conjugate(z)$
+
+conjugate(x + z);
+x + conjugate(z)$
+
+conjugate(x * z);
+x * conjugate(z)$
+
+conjugate(cos(z));
+cos(conjugate(z))$
+
+conjugate(sin(z));
+sin(conjugate(z))$
+
+conjugate(tan(z));
+tan(conjugate(z))$
+
+conjugate(sec(z));
+sec(conjugate(z))$
+
+conjugate(cot(z));
+cot(conjugate(z))$
+
+conjugate(csc(z));
+csc(conjugate(z))$
+
+conjugate(cosh(z));
+cosh(conjugate(z))$
+
+conjugate(sinh(z));
+sinh(conjugate(z))$
+
+conjugate(tanh(z));
+tanh(conjugate(z))$
+
+conjugate(sech(z));
+sech(conjugate(z))$
+
+conjugate(coth(z));
+coth(conjugate(z))$
+
+conjugate(csch(z));
+csch(conjugate(z))$
+
+conjugate(exp(z));
+exp(conjugate(z))$
+
+conjugate(realpart(z));
+realpart(z)$
+
+conjugate(imagpart(z));
+imagpart(z)$
+
+conjugate(x+z);
+x+conjugate(z)$
+
+conjugate(x*z);
+x*conjugate(z)$
+
+conjugate(%i * z);
+-%i * conjugate(z)$
+
+conjugate(cos(x*z));
+cos(x*conjugate(z))$
+
+(assume(imagpart(z) > 0),0);
+0$
+
+conjugate(log(z));
+log(conjugate(z))$
+
+conjugate(sqrt(z));
+sqrt(conjugate(z))$
+
+conjugate(log(5 + z));
+log(5 + conjugate(z))$
+
+(declare(w,complex),0);
+0$
+
+(assume(realpart(w) > 0),0);
+0$
+
+conjugate(log(w));
+log(conjugate(w))$
+
+conjugate(sqrt(w));
+sqrt(conjugate(w))$
+
+conjugate(log(7 + w));
+log(7 + conjugate(w))$
+
+(declare(q,complex),0);
+0$
+
+conjugate(q^2);
+conjugate(q)^2$
+
+conjugate(1/q);
+1/conjugate(q)$
+
+conjugate(1 + q + q^2);
+1 + conjugate(q) + conjugate(q)^2$
+
+conjugate(q*(1+q));
+conjugate(q) * (1 + conjugate(q))$
+
+conjugate((1+q)/(1-q));
+(1 + conjugate(q))/(1 - conjugate(q))$
+
+declare (p0, even, q1, odd, pq, rational, qp, irrational, rr, real, ii, imaginary);
+done;
+
+conjugate (p0 + q1 + pq + qp + rr + ii);
+p0 + q1 + pq + qp + rr - ii;
+
+/* conjugate of  sums and products */
+
+conjugate(sum(cos(k),k,1,n));
+sum(cos(k),k,1,n)$
+
+conjugate(prod(cos(k),k,1,n));
+prod(cos(k),k,1,n)$
+
+conjugate(sum(log(k + %i), k, m, n));
+sum(log(k - %i), k, m, n)$
+ 
+conjugate(prod(log(k + %i), k, m, n));
+prod(log(k - %i), k, m, n)$
+
+/* conjugate of asin */
+
+(assume(x > -1, x < 1),0);
+0$
+
+conjugate(asin(x));
+asin(x)$
+
+conjugate(asin(-x));
+asin(-x)$
+
+conjugate(asin(x + %i));
+asin(x - %i)$
+
+conjugate(asin(x - %i));
+asin(x + %i)$
+
+conjugate(asin(x + %i * y));
+asin(x - %i * y)$
+
+conjugate(asin(x - %i * y));
+asin(x + %i * y)$
+
+/* Collections */
+
+conjugate([]);
+[]$
+
+conjugate([5]);
+[5]$
+
+conjugate([[%i]]);
+[[-%i]]$
+
+conjugate(set());
+set()$
+
+conjugate(set(1,2));
+set(1,2)$
+
+conjugate(set(8, set(8, set(32 - %i))));
+set(8, set(8, set(32 + %i)))$
+
+conjugate(matrix());
+matrix()$
+
+conjugate(matrix([]));
+matrix([])$
+
+conjugate(matrix([1,2,%i]));
+matrix([1,2,-%i])$
+
+conjugate(matrix([matrix([%i])]));
+matrix([matrix([-%i])])$
+
+/* logs */
+
+conjugate(log(x));
+conjugate(log(x))$
+
+conjugate(log(x + %i));
+log(conjugate(x) - %i)$
+
+conjugate(log(-1 + %i));
+log(-1 - %i)$
+
+(assume(x > 0, notequal(www,0)), 0);
+0$
+
+conjugate(log(-x));
+log(x) - %i * %pi$
+
+conjugate(log(-x + %i * www));
+log(-x - %i * www)$
+
+(forget(x > 0, notequal(www,0)),0);
+0$
+
+/* exponentials */
+
+conjugate(exp(x));
+exp(x)$
+
+conjugate(exp(y - %i * x));
+exp(y + %i * x)$
+
+(declare(z,complex),0);
+0$
+
+conjugate(exp(z));
+exp(conjugate(z))$
+
+(declare(n,integer,z,complex),0);
+0$
+
+conjugate(z^n);
+conjugate(z)^n$
+
+conjugate(z^b);
+conjugate(z^b)$
+
+conjugate(cosh(z));
+cosh(conjugate(z))$
+
+conjugate(sinh(z));
+sinh(conjugate(z))$
+
+conjugate(sinh(cosh(z)));
+sinh(cosh(conjugate(z)))$
+
+/* Test for bug 1491486 */
+
+conjugate((1+%i)^%i);
+1/(1-%i)^%i$
+
+(declare(z,complex),0);
+0$
+
+/* Test for bug 1489285 */
+
+is(imagpart(conjugate(z)) # z);
+true$
+
+(forget(z,complex),0);
+0$
+
+/* Test for bug 1488344 */
+
+matrixp(conjugate(genmatrix(a,100,100)));
+true$
+
+/* Test for bug 1488359 */
+
+is(op(conjugate(f[6](x))) = 'conjugate);
+true$
+
+/* Tests for bug 1639890  */
+(assume(notequal(y,0)),0);
+0$
+
+conjugate(log(-1 + %i * y));
+log(-1 - %i * y)$
+
+conjugate(log(x + %i * y));
+log(x - %i * y)$
+
+conjugate(log(%pi + %i * y));
+log(%pi - %i * y)$
+
+(forget(notequal(y,0)),0);
+0$
+
+
+/* Test for bug (conjugate of atan) fixed by CVS revisions 1.9 and 1.11 */
+
+conjugate(atan(x));
+atan(x);
+
+/* Bug ID: 2886564 - conjugate(atan2(y,x)) not simplified */
+
+conjugate(atan2(y,x));
+atan2(y,x);
+
+kill (values);
+done;

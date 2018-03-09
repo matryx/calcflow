@@ -1,0 +1,141 @@
+
+     This package may be broken.  Please use the VECT package on 
+the SHARE directory. - JPG 6/5/78
+
+     This is a package of vector operators designed to make vector
+operations convenient.  Several vector operators are included.
+The coordinate system may be specified by the user.  Included in
+the system are Cartesian, cylindrical and spherical coordinates in
+three dimensions.  Rectangular and polar coordinates are included
+in two dimensions. The user is able to specify a new system to be
+used, such as elliptical, in either two or three dimensions.  A
+function is included to change from any coordinate system to another
+predefined system, or to another new system.  This system is designed
+only to handle orthogonal curvilinear coordinate systems.
+
+    The vectors used in the system may be either lists or
+one-dimensional matrices.  When an operation on a vector returns a
+vector, then a one-dimensional matrix is returned if the arguments
+are matrices.  If any argument is a list, then a list is returned.
+When an operation on a scalar returns a vector, then the value of
+the global variable "vector" determines the form of the answer.
+When vector has a value of "list", a list is returned.  Otherwise
+a one-dimensional matrix is returned.  When a two-dimensional sys-
+tem is specified, a scalar may be used where a vector is required,
+in which case the scalar is considered to be a vector pointing out
+of the plane.
+
+Future Extensions:
+
+    Currently only three pre-defined three-dimensional coordinate
+systems are included.  Eight additional systems that lead to sep-
+arable forms for the wave equation are: elliptic cylinder, prolate
+spheroidal, oblate spheroidal, parabolic-cylinder, parabolic, coni-
+cal, ellipsoidal, and paraboloidal.
+
+1.  Description of Global Variables.
+
+ Global		Initial
+Variable	 Value		Explanation
+--------	-------		-----------
+
+coordsystem	cartesian	Coordinate system to be used.
+
+dimension	3		Number of dimensions of coordinate
+				system.
+
+coordvar	[x, y, z]	Variables varying along axes of
+				coordinate system being used.
+
+scalefactor	[1, 1, 1]	Scale factors associated with
+				coordinate system being used.
+
+vector		list		Vectors to be used are lists, rather
+				than one-dimensional matrices.
+
+2.  Description of Pre-defined Coordinate Systems.
+
+Coordsystem	Dimension	Coordvar	Scalefactor
+-----------	---------	--------	-----------
+
+rectangular	2		[x, y]		[1, 1]
+polar		2		[r, th]		[1, r]
+cartesian	3		[x, y, z]	[1, 1, 1]
+cylindrical	3		[r, ph, z]	[1, r, 1]
+spherical	3		[r, th, ph]	[1, r, r*SIN(th)]
+
+coordsystem(arg)  Specifies that coordinate system arg is to be set
+		up to be used by the vector operators in this package.
+		When arg is one of the values possible in the preced-
+		ing table for the global variable coordsystem, the
+		specified coordinate system is set up.  All the global
+		variables are changed to new values as indicated by
+		the table.
+
+3. Specification of Other Coordinate Systems.
+
+  A)  First Method.
+
+	Coordsystem(arg) specifies that coordinate system arg is to
+	be set up.  When arg is not one of the pre-defined systems,
+	then the program asks the user to specify the new values of
+	the global variables.  Thus any coordinate system may be
+	specified by the user.
+
+  B)  Second Method.
+
+	The user may also set the values of the global variables di-
+	rectly.  This may be useful in, for example, a BATCH file
+	if the user does not desire to type the new coordinate sys-
+	tem each time the program is BATCHed.  The variable
+	coordsystem should be set to a name corresponding to the
+	coordinate system being specified.  The global variables
+	dimension, coordvar and scalefactor must be set to appropriate
+	values.  Note that just setting coordsystem does not cause
+	other global variables to be changed.
+
+4.  Descripton of Vector Operators Available.
+
+Operation	Explanation
+---------	-----------
+
+vectorp(a)	A predicate that returns TRUE if a is a matrix or a
+		list.  Thus A is characterized by both magnitude and
+		direction, quantities computed from the components of
+		a.
+
+a cross b	Cross product of arguments a and b.
+
+grad s		Gradient of scalar s, or the vector with a magnitude
+		and direction of the maximum directional derivative.
+
+div v		Divergence of vector v, or the scalar product of the
+		vector v with the outward drawn normal.
+
+curl a		Curl of vector a, or the vector product of vector a
+		with the outward drawn normal.
+
+laplacian a	The Laplacian of a, or the divergence of the gradient 
+		of a.  If a is a scalar, then the result is a scalar.
+		The Laplacian of vector a is defined as
+		grad div a - curl curl a.
+
+v dotdel b	Directional derivative of vector v in the direction of
+		b.  Result is a scalar if b is a scalar, and is a
+		vector if b is a vector.  Christoffel symbols are
+		used if defined.
+
+christoffel	Defines the Christoffel symbols for use with the
+		directional derivative, dotdel.
+curlgrad s	Curl of the gradient of scalar a, which is zero.
+
+graddiv v	Gradient of the divergence of vector v.
+
+divcurl v	Divergence of the curl of vector v, which is zero.
+
+curlcurl v	Curl of the curl of vector v.
+
+
+    This system has been written by Martin Cole.  Suggested improve-
+ments may be incorporated into this package.  Any comments or sug-
+gestions should be mailed to MSC@MIT-MC.

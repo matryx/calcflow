@@ -1,0 +1,168 @@
+Suggested MACSYMA Homework No.3,    Richard Rand
+     
+This homework involves using perturbations to treat the nonlinear
+boundary value problem (in the small e limit) :
+     
+(1)               v'' - e x v' (1+v) = 1     on  0 < x < 1
+     
+with the boundary conditions:
+     
+(2)               v(0) = v(1) = 0
+     
+1. Solve to order 2 in e by expanding v in a truncated power series in
+e:
+     
+                  v = f[0](x) + f[1](x) e + f[2](x) e^2
+     
+Use MACSYMA in the interactive (non-programming) mode to find equations
+on the subscripted variables f[0],f[1] and f[2].  Use DEPENDS(F,X).
+Then solve these equations recursively using ODE2.  Evaluate the
+arbitrary constants %K1 and %K2 at each step by using the boundary
+conditions (2).
+     
+Plot your resulting expression for v(x) for e=0 and e=10 on the same
+graph.
+     
+2.  Write a program in the form of a BATCH file to accomplish the above
+task to arbitrary order n in e.
+     
+The program should:
+i)   Use READ to obtain the truncation order n from the keyboard.
+ii)  Expand v in a truncated power series:
+     
+                   v = f[0] + f[1] e + ... + f[n] e^n
+     
+Use subscripted variables f[i] to SUM the series and DEPENDS(F,X).
+iii) Substitute v into (1) and TAYLOR(...,e,0,n) in order to facilitate
+collecting terms.  Use a FOR I:0 THRU N DO loop to store the
+coefficient of e^i in EQ[I].
+iv)  Prepare a list (now empty) to hold your intermediate results,
+i.e., your soon-to-be-derived values for f[0], f[1], ..., by writing:
+     RESULTS:[];
+v)   Now set up another DO loop, the main loop, which does the
+following for each step of the recursive process:
+     a) Plug RESULTS into EQ[I]. (Of course this will be lame for I=0,
+the first time thru.)
+     b) Use ODE2 to solve EQ[I] for f[i].
+     c) Use the boundary conditions (2) to evaluate the arbitrary
+constants %K1 and %K2.
+     d) APPEND your value of f[i] to the list of RESULTS.
+vi)  Finally plug RESULTS into your expansion for the variable v (cf.
+step ii).
+     
+Run your program using BATCH("/ima/yourname/filename.filetype");
+Enter n=2 and cf. with your previously obtained expression for v (in
+part 1.)  Run it again with n=4 and plot n=2 and n=4 for e=10 on the
+same graph.
+-----------------------------------------------------------
+
+/* nonlinear bvp        */
+/* ima hw3 28 june 89   */
+     
+n:read("enter truncation order");
+depends(f,x);
+v:sum(f[i]*e^i,i,0,n);
+de:diff(v,x,2)-e*x*diff(v,x)*(1+v)=1;
+de1:taylor(de,e,0,n);
+for i:0 thru n do eq[i]:coeff(de1,e,i);
+results:[];
+/* main loop */
+for i:0 thru n do (
+   eq1[i]:ev(eq[i],results,diff),
+   sol:ode2(eq1[i],f[i],x),
+   rhs:rhs(sol),
+   bc:[ev(rhs,x=0),ev(rhs,x=1)],
+   const:solve(bc,[%k1,%k2]),
+   sol1:ev(sol,const),
+   print(sol1),
+   results:append(results,[sol1]));
+v1:ev(v,results);
+-----------------------------------------------------------
+Suggested MACSYMA Homework No.4        R.Rand
+     
+This homework investigates the use of computer algebra to
+facilitate a coordinate transformation (i.e. a change of
+dependent variables) in a system of ode's.
+     
+1. Given a system of 2 autonomous ode's,
+     
+(1)       x1' = f1(x1,x2),   x2' = f2(x1,x2)
+     
+and a transformation of variables
+     
+(2)       x1 = g1(y1,y2),    x2 = g2(y1,y2)
+     
+it is desired to find the resulting system of 2 ode's
+on y1 and y2.
+     
+Write a program to accomplish this.  Your program should
+consist of a single function, TRANSFORM(), which should be
+written outside of MACSYMA using an editor and BATCHed in.
+It should READ the functions fi and gi from the keyboard.
+     
+Hint:  Plug (2) into (1) and SOLVE for [diff(y1,t),diff(y2,t)].
+     
+As a check on your program, try it on:
+     
+(3)       u' = -v + u^3 + u v^2,   v' = u + u^2 v + v^3
+     
+with the change of variables to polar coordinates:
+     
+(4)       u = r cos h,          v = r sin h
+     
+which should yield the result:
+     
+(5)       r' = r^3,             h' = 1
+     
+2. Now you will apply your program to the problem of determining
+the stabilty of the origin in the system:
+     
+(6)       x' = -y + x^2 y,      y' = x + x^2 y
+     
+Use your program to perform the near-identity transformation:
+     
+          x = u + a30 u^3 + a21 u^2 v + a12 u v^2 + a03 v^3
+(7)
+          y = v + b30 u^3 + b21 u^2 v + b12 u v^2 + b03 v^3
+     
+where aij and bij are as yet undetermined constants.  After obtaining
+the transformed ode's, eliminate terms of degree 4 and higher by using
+     
+          TAYLOR( ... ,[u,v],0,3)
+     
+Next use your program again to transform to polar coordinates (4).
+Accomplish trigonometric simplification by using TRIGSIMP then
+TRIGREDUCE and finally EXPAND.
+Then select the coefficients aij and bij so that the resulting ode's
+are in the form:
+     
+(8)        r' = k1 r^3 + ...,   h' = 1 + k2 r^2 + ...
+     
+i.e., by requiring the coefficients of sin(2h),cos(2h),sin(4h),cos(4h)
+to vanish.
+     
+The sign of k1 will determine the stability of the origin.
+
+--------------------------------------------------------------------
+/* hw4 ima 29 june 89 */
+/* transform 2 ode's  */
+     
+transform():=(
+x1:read("enter symbol for original variable 1"),
+x2:read("enter symbol for original variable 2"),
+y1:read("enter symbol for new variable 1"),
+y2:read("enter symbol for new variable 2"),
+print("the original eqs are of the form ",
+x1,"= f1(",x1,",",x2,"), ",
+x2,"= f2(",x1,",",x2,")"),
+f1:read("enter f1(",x1,",",x2,")"),
+f2:read("enter f2(",x1,",",x2,")"),
+print("the transformation is of the form ",
+x1,"= g1(",y1,",",y2,"), ",
+x2,"= g2(",y1,",",y2,")"),
+g1:read("enter g1(",y1,",",y2,")"),
+g2:read("enter g2(",y1,",",y2,")"),
+depends([x1,x2,y1,y2],t),
+eqs:ev([diff(x1,t)=f1,diff(x2,t)=f2],ev([x1=g1,x2=g2]),diff),
+unk:[diff(y1,t),diff(y2,t)],
+neweqs:solve(eqs,unk))$

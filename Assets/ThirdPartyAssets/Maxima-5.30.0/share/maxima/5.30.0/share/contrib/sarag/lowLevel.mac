@@ -1,0 +1,196 @@
+/* ------------------------------------------------------------------- */
+/* SARAG - Low Level Routines                                          */
+/* by Fabrizio Caruso                                                  */
+
+/* ------------------------------------------------------ */
+/* Polynomial related functions */
+
+/* It expands a polynomial if ASSUME_EXPANDED is false */
+expandIf(pol)::=
+  buildq([pol],
+  if ASSUME_EXPANDED then
+    pol
+  else
+    ratexpand(pol));
+
+
+/* Degree of a polynomial (MACRO) */
+degree(poly,indet) ::=
+  buildq([poly,indet],if poly = 0 then -1 else hipow(poly,indet));
+
+
+/* Leading coefficient of a polynomial */
+leadCoeff(poly,indet)::=
+   buildq([poly,indet],
+          ratcoeff(poly,indet,degree(poly,indet)));
+
+
+/* Leading term of a polynomial */
+leadTerm(poly,indet)::=
+   buildq([poly,indet],
+          indet^degree(poly,indet));
+
+/* Leading monomial of a polynomial */
+leadMono(poly,indet)::=
+   buildq([poly,indet],
+          leadCoeff(poly,indet)*leadTerm(poly,indet));
+
+/* Tail of a polynomial */
+Tail(poly,indet) ::=
+   buildq([poly,indet],
+          poly-leadMono(poly,indet));
+
+
+/* ------------------------------------------------------ */
+/* Sign function */
+
+sgn(val) ::=
+  buildq([val], if val = 0 then 0 else if val < 0 then -1 else 1); 
+
+
+/* ------------------------------------------------------ */
+/* Array-related routines */
+
+/* Number of dimensions */
+numOfDim(ar) :=
+  second(arrayinfo(ar));
+
+/* Array degree */
+arrayDegree(ar) :=
+  first(third(arrayinfo(ar)));
+
+/* Array length */
+arrayLength(ar) :=
+  first(third(arrayinfo(ar)))+1;
+
+/* Number of rows */
+numOfRows(ar) :=
+  first(third(arrayinfo(ar)))+1;
+
+/* Number of columns */
+numOfCols(ar) :=
+  second(third(arrayinfo(ar)))+1;
+
+/* It makes a polynomial out of a list */
+list2poly(lst,var) :=
+  sum(lst[i]*var^(i-1),i,1,length(lst));
+
+poly2list(pol,var) :=
+    makelist(coeff(pol,var,i),i,0,degree(pol,var));
+
+matrix2list(mtx) :=
+    makelist(mtx[i],i,1,length(mtx));
+    
+
+/* list of lists -> bidimensional array */
+list2array(lst) :=
+  block([nRows,nCols,i,j,res],
+   nRows : length(lst),
+   nCols : length(lst[1]),
+   res : make_array( 'any,nRows,nCols ),
+   for i : 1 thru nRows do 
+     for j : 1 thru nCols do
+       res[i-1,j-1] : lst[i][j],
+   return(res)
+   ); 
+
+
+
+/* bidimensional array -> list of lists */
+array2list(arr) :=
+  block([nRows,nCols,i,j,newRow,res],
+   nRows : first(third(arrayinfo(arr)))+1,
+   nCols : second(third(arrayinfo(arr)))+1,
+   res : [],
+
+   for i : 1 thru nRows do
+     (
+     newRow : [],
+     for j : 1 thru nCols do
+       newRow : endcons(arr[i-1,j-1],newRow),
+
+     res : endcons(newRow,res)
+     ),
+   return(res)
+   );
+
+
+array2singleList(arr) :=
+  makelist(arr[j],j,0,first(third(arrayinfo(arr))));
+
+
+singleList2array(lst) := 
+  block([res,i],
+  res:make_array('any,length(lst)),
+  for i : 1 thru length(lst) do
+     res[i-1] : lst[i],
+  return(res)
+  );
+
+
+poly2array(pol,var) :=
+  singleList2array(poly2list(pol,var));
+
+array2poly(arr,var) :=
+  list2poly(array2singleList(arr),var);
+
+
+/* ------------------------------------------------------ */
+/* List manipulation */
+
+/* It removes the zeroes from a list */
+trimZeros(seq) :=
+  if seq = [] then
+    [] 
+  else
+    if first(seq) = 0 then
+      trimZeros(rest(seq))
+    else
+      cons(first(seq),trimZeros(rest(seq)));
+
+
+
+/* Mergesort of two sorted lists wrt to a given total ordering*/
+
+mergeSorted(lhs,rhs,ordering) :=
+  block([i,j,k,lhsLen,rhsLen,res],
+  lhsLen : length(lhs),
+  rhsLen : length(rhs),
+  i : 1,
+  j : 1,
+  res : [],
+  while (i<= lhsLen) and (j<= rhsLen) do
+    (
+
+    if ordering(lhs[i],rhs[j]) then
+      (
+      res : endcons(lhs[i],res),
+      i : i + 1
+      )
+    else
+      if lhs[i]=rhs[j] then
+        (
+        res : endcons(lhs[i],res),
+        i : i + 1,
+        j : j + 1
+        )
+      else
+        (
+        res : endcons(rhs[j],res),
+        j : j + 1
+        )
+     ),
+  if i<= lhsLen then
+    res : append(res, makelist(lhs[k],k,i,lhsLen))
+  else 
+     if j <= rhsLen then
+        res : append(res, makelist(rhs[k],k,j,rhsLen)),
+  return(res)
+       
+ );
+ 
+ /* adds zeros to a list */
+ 
+ padWithZeros(seq,size) :=
+  append(seq,makelist(0,i,1,size-length(seq)));
+

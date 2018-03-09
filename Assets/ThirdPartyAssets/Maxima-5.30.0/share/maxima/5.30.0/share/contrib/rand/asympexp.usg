@@ -1,0 +1,125 @@
+asympexp.mac is from "The Use of Symbolic Computation in Perturbation
+Analysis" by R. H. Rand in Symbolic Computation in Fluid Mechanics and
+Heat Transfer ed H.H.Bau (ASME 1988) (http://tam.cornell.edu/Rand.html)
+
+The routine approximates definite integrals of the form
+
+         b
+       /
+       |           x phi(t)
+       |   f(t) %e         dt
+       |
+       /
+         a       
+
+in the limit as x approaches infinity.
+
+The idea of the method is that exp(x*phi(t)) makes its largest
+contribution to the integral in the neighbourhood of the point t=c at
+which phi(t) is maximum.
+
+Example 1.
+----------
+
+The modified Bessel function of the first kind can be expressed as
+
+
+               %pi
+              /
+           1  |            x cos(t)
+  I (x) =  -  | cos(n*t) %e         dt
+   n      %pi |
+              /
+               0
+
+The results below from maxima-5.9.0-cvs match those in the paper.
+
+(C1) load("./asympexp.mac");
+(D1)                            ./asympexp.mac
+(C2) asymptotic();
+The integrand is of the form: f(t) exp(x phi(t))
+enter f(t)
+cos(n*t);
+enter phi(t)
+cos(t);
+enter the lower limit of integration
+0;
+enter the upper limit of integration
+%pi;
+                            COS(t) x
+The integrand is COS(n t) %E
+integrated from 0 to %PI
+enter value of t at which phi = COS(t)  is maximum
+0;
+enter truncation order
+4;
+                               4          2  3          3          4  2
+(D2) SQRT(2) SQRT(%PI) (98304 x  - 49152 n  x  + 12288 x  + 12288 n  x
+
+          2  2         2         6            4            2
+ - 30720 n  x  + 6912 x  - 2048 n  x + 17920 n  x - 33152 n  x + 7200 x
+
+        8         6          4          2            x          9/2
+ + 256 n  - 5376 n  + 31584 n  - 51664 n  + 11025) %E /(196608 x   )
+(C3) time(d2);
+Time:
+(D3)                                [2.223]
+
+
+Example 2.
+----------
+
+The second example from the paper is Stirling's formula for the gamma function
+
+               infinity
+              /
+              |  1     -t+x*log(t)
+  Gamma(x) =  |  -  %e            dt
+              |  t
+              /
+               0
+
+or by setting u = t/x
+
+                  infinity
+                 /
+                 |  1     x(log(u)-u)
+  Gamma(x) =  x  |  -  %e            du
+                 |  u
+                 /
+                0
+
+The results below from maxima-5.9.0-cvs match those in the paper.
+
+(C4) asymptotic();
+The integrand is of the form: f(t) exp(x phi(t))
+enter f(t)
+1/t;
+enter phi(t)
+log(t)-t;
+enter the lower limit of integration
+0;
+enter the upper limit of integration
+inf;
+                   (LOG(t) - t) x
+                 %E
+The integrand is ----------------
+                        t
+integrated from 0 to INF
+enter value of t at which phi = LOG(t) - t  is maximum
+1;
+enter truncation order
+4;
+                                 4           3         2                   - x
+     SQRT(2) SQRT(%PI) (2488320 x  + 207360 x  + 8640 x  - 6672 x - 571) %E
+(D4) -------------------------------------------------------------------------
+                                            9/2
+                                   2488320 x
+(C5) time(d4);
+Time:
+(D5)                               [10.045]
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

@@ -18,9 +18,6 @@ public class CustomParametrizedSurface : MonoBehaviour
 
     public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
 
-    private float uMin, uMax;
-    private float vMin, vMax;
-
     #region axis labels
     public AxisLabelManager xAxis;
     public AxisLabelManager yAxis;
@@ -89,7 +86,6 @@ public class CustomParametrizedSurface : MonoBehaviour
     {
         solver = new AK.ExpressionSolver();
         InitializeParticleSystem();
-        //InitializeCorrespondingPoint();
     }
 
     public MeshFilter mesh;

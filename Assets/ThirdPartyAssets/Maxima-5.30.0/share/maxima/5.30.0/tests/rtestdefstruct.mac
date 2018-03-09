@@ -1,0 +1,92 @@
+kill (all);
+done;
+
+defstruct (mumble ());
+[mumble ()];
+
+f: new (mumble);
+mumble ();
+
+defstruct (bar (aa, bb), baz (aa), quux (aa));
+[bar (aa, bb), baz (aa), quux (aa)];
+
+defstruct (foo (aa, bb, cc = bar (2, 3), dd = baz (5), ee = quux (7)));
+[foo (aa, bb, bar (2, 3), baz (5), quux (7))];
+
+f: new (foo);
+foo (aa, bb, bar (2, 3), baz (5), quux (7));
+
+g: f@cc;
+bar (2, 3);
+
+g@bb: blurf (11);
+blurf (11);
+
+f;
+foo (aa, bb, bar (2, blurf (11)), baz (5), quux (7));
+
+g: new (''f);
+foo (aa, bb, bar (2, blurf (11)), baz (5), quux (7));
+
+g@bb: [1, 2, 3];
+[1, 2, 3];
+
+g;
+foo (aa, [1, 2, 3], bar (2, blurf (11)), baz (5), quux (7));
+
+f;
+foo (aa, bb, bar (2, blurf (11)), baz (5), quux (7));
+
+f@4@1: %pi - 3;
+%pi - 3;
+
+f;
+foo (aa, bb, bar (2, blurf (11)), baz (%pi - 3), quux (7));
+
+structures;
+[mumble(), bar(aa, bb), baz(aa), quux(aa), foo(aa, bb, bar(2, 3), baz(5), quux(7))];
+
+map (lambda ([a], ?get (op (a), ?defstruct\-template)), structures);
+[mumble(), bar(aa, bb), baz(aa), quux(aa), foo(aa, bb, cc, dd, ee)];
+
+kill (mumble, foo, bar, baz);
+done;
+
+errcatch (new (baz));
+[];
+
+structures;
+[quux(aa)];
+
+new (quux);
+quux (aa);
+
+/* begin stuff to test parallel multiple assignment */
+
+[a, b, c]: [x, y, z];
+[x, y, z];
+
+[x, y, z]: [11, 22, 33];
+[11, 22, 33];
+
+[''a, ''b, ''c];
+[11, 22, 33];
+
+[x, y, z]: x*y*z;
+[7986, 7986, 7986];
+
+[x, y, z];
+[7986, 7986, 7986];
+
+[aa, bb]: [bb, 2*aa];
+[bb, 2*aa];
+
+([aa, bb]: [bb, 2*aa], [aa, bb]: [bb, 2*aa], [aa, bb]: [bb, 2*aa], [aa, bb]: [bb, 2*aa]);
+[4*bb, 8*aa];
+
+(kgcd (a, b) := (while b#0 do [a, b]: [b, remainder (a, b)], abs(a)), 0);
+0;
+
+kgcd (123456, 123);
+''(gcd (123456, 123));
+
