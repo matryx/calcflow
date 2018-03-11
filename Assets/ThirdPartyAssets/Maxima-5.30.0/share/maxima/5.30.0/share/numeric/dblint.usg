@@ -1,0 +1,60 @@
+The file SHARE1;DBLINT FASL contains a double-integral routine which was
+written in top-level macsyma and then translated and compiled to
+machine code. It uses the Simpson's Rule method (see note below) in
+both the x and y directions to calculate
+
+/B /S(X)
+|  |
+|  |    F(X,Y) DY DX .
+|  |
+/A /R(X)
+
+The function F(X,Y) must be a translated or compiled function of two
+variables, and R(X) and S(X) must each be a translated or compiled
+function of one variable, while A and B must be floating point
+numbers. The routine has two global variables which determine the
+number of divisions of the x and y intervals: DBLINT_X and DBLINT_Y,
+both of which are initially 10, and can be changed independently to
+other integer values [there are 2*DBLINT_X+1 points computed in the x
+direction, and 2*DBLINT_Y+1 in the y direction].
+
+The routine subdivides the x axis and then for each value of x it
+first computes r(x) and s(x); then the y axis between r(x) and s(x) is
+subdivided and the integral along the y axis is performed using
+Simpson's Rule; then the integral along the x axis is done using
+Simpson's Rule with the function values being the y-integrals. This
+procedure may be numerically unstable for a great variety of reasons,
+but is reasonably fast: avoid using it on highly oscillatory functions
+and functions with singularities (poles or branch points in the
+region).  The y integrals depend on how far apart r(x) and s(x) are,
+so if the distance s(x)-r(x) varies rapidly with x, there may be
+substantial errors arising from truncation with different step-sizes
+in the various y integrals. One can increase dblint_x and dblint_y in
+an effort to improve the coverage of the region, at the expense of
+computation time. The function values are not saved, so if the
+function is very time-consuming, you will have to wait for
+re-computation if you change anything (sorry).
+
+It is required that the functions F, R, and S be either translated or
+compiled prior to calling DBLINT. This will result in orders of
+magnitude speed improvement over interpreted code in many cases! Ask
+LPH (or GJC) about using these numerical aids.  The file SHARE1;DBLINT
+DEMO can be run in batch or demo mode to illustrate the usage on a
+sample problem.
+Please send all bug notes and questions to LPH@MIT-MC.
+
+Note: Simpson's Rule specifies that
+
+/X[2*N]
+|
+|       F(X) DX = H/3* (F(X[0]) + 
+|                                                                     
+/X[0]                   4*(F(X[1])+F(X[3])+...+F(X[2*N-1])) + 
+                  
+                        2*(F(X[2])+F(X[4])+...+F(X[2*N-2])) +
+
+                        F(X[2*N]))
+
+in one dimension, where H is the distance between the equally spaced
+X[N]'s, and DBLINT_X=N. The error in this formulation is of order
+H^5*N*DIFF(F(X),X,4) for some X in (X[0],X[2*N]).

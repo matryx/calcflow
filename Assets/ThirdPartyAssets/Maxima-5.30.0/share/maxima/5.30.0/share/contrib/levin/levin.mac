@@ -1,0 +1,412 @@
+/*               COPYRIGHT NOTICE
+ 
+Copyright (C) 2006-2007 Michel Van den Bergh
+ 
+This program is free software; you can redistribute
+it and/or modify it under the terms of the
+GNU General Public License as published by
+the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+ 
+This program is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details at
+http://www.gnu.org/copyleft/gpl.html
+*/
+
+/* The latest version of this package can be found at
+          http://www.bertold.org/levin
+*/
+
+
+
+/*
+0.0->0.1 Some suggestions by Richard Fateman incorporated
+0.1->0.2 Now much faster. Zero entries are allowed.
+0.2->0.2.1 Disable bflevin_u_sum for series with non rational terms
+0.2->0.3 Argument treatment somewhat more robust. Added GPL header.
+0.3->0.4 Extra checks on arguments.
+         Variable lower bound for levin_u_sum is treated correctly.
+0.4->0.5 Got rid of ugly hacks and simply renamed parameters to "non-obvious"
+         (-)__ names (see discussion on list). This simulates lexical scoping 
+         as long as the user does not use such names.
+0.5->0.6 Faster again (for series with rational terms)!
+         "levin" can now compute progagation of rounding errors.
+         "bflevin_u_sum" now works for series with non rational terms.
+0.6->0.7 Propagation of rounding errors is computed in lower precision.
+         This gains some time.
+         Added disclaimer about optimization.
+*/
+
+/* Semantic note: all functions evaluate all their arguments. 
+   levin_u_sum and bflevin_u_sum perform one round of ev(-) on their
+   first argument. This is to make (bf)levin_u_sum('(...),...) behave as
+   expected. Without this, some regression tests fail. Since we simulate
+   lexical scope using "non-obvious" parameter names, the use of ev seems
+   ok. I.e. in normal situations there is no risk of ev evaluating things
+   in the wrong scope. 
+*/
+
+/* Disclaimer: The following code is a proof of concept. It works
+   reliably but is highly non optimized with regard to speed and memory
+   usage. The necessary optimizations are quite straight forward however. 
+*/
+
+levin_options["debug"]:false;  /* when true gives some extra output; should
+                                        really be a loglevel */
+levin_options["min_terms"]:5;    /* bflevin_u_sum starts with 5 terms */
+levin_options["max_terms"]:640;         /* bflevin_u_sum tries up to 5*2^7 terms
+                                         before bailing out */
+levin_options["min_precision"]:16;  /* bflevin_u_sum will start with this
+                                           precision */
+levin_options["max_precision"]:1000;  /* bflevin_u_sum will not increase the
+                                           precision up above this value*/
+
+/* see:  "Mathematical Properties of a
+New Levin-Type Sequence Transformation"
+by Ernst Joachim Weniger
+Formula: (2.18)
+arXiv:math-ph/0306063 */
+
+/* s     : array with partial sums of a series
+   k+1   : number of partial sums to use
+   n     : index of first partial sum to be used;
+           in other words, we use: s[n],...,s[n+k]
+   beta  : translation parameter; this parameter can be used to avoid division
+           by zero; for accurate error estimates it currently has to be
+           an integer;
+   omega : an array of remainder estimates;
+           depending on omega one gets a different type of levin
+           transform; omega should not contain zero entries 
+           or we get a division by zero
+   mode  : levin_numeric or levin_algebraic, for levin_numeric the return
+           value is a list [result,variance]. For levin_algebraic the
+           return value is just the result. 
+   s__variance     : in numeric mode an array with variances for the elements
+                     of s
+   omega__variance : in numeric more an array with variances for the elements
+                     of omega
+
+   Note 1 : All variances are assumed to be in units of 10^(-2*fpprec).
+   
+   Note 2 : The computation of propagation of variance is not quite
+   mathematically correct since we are assuming that the errors on the
+   s[j] and omega[j] are all independent.  However my tests indicate that this 
+   method is reasonably accurate. Note that the correct computation of 
+   propagation of variance is O(N^2).  
+*/
+
+
+levin(s__,k__,n__,beta__,omega__,mode__,s__variance__,omega__variance__):=
+       block([i__,j__,l__,numerator__,denominator__,result__,result__variance__,
+             coeffs__,numerator__variance__,denominator__variance__
+             ],
+  local(coeffs__),
+  coeffs__[l__]:=((-1)^l__)*binomial(k__,l__)*(beta__+n__+l__)^(k__-1),
+/* the following sums will be rewritten recursively */
+  numerator__:sum(coeffs__[j__]*
+             (
+                   s__[n__+j__]/omega__[n__+j__]
+             ),
+             j__,0,k__),
+  denominator__:sum(coeffs__[j__]*
+             (
+                   1/omega__[n__+j__]
+             ),
+             j__,0,k__),
+  result__:errcatch(numerator__/denominator__),
+  if result__=[] then (
+     print (
+"*** levin has zero denominator ***"
+     ),
+     return(levin_failed)
+  ),
+  result__:result__[1],
+  if mode__=levin_numeric then (
+        block([fpprec:16], /* start lower precision block */
+
+/* the following formulas are not optimized yet, they are written with an
+   emphasis on readability, the sums will be rewritten recursively */
+
+     numerator__variance__:sum(coeffs__[j__]^2*
+        (
+           (1/omega__[n__+j__])^2 * s__variance__[n__+j__] +
+           (s__[n__+j__]/omega__[n__+j__]^2)^2 * omega__variance__[n__+j__]             ),
+             j__,0,k__),
+     denominator__variance__:sum(coeffs__[j__]^2*
+        (
+           (1/omega__[n__+j__]^2)^2 * omega__variance__[n__+j__]
+        ),
+             j__,0,k__),
+     result__variance__: 
+              (     (1/denominator__^2) * numerator__variance__   +
+                   (numerator__/denominator__^2)^2 * denominator__variance__
+              )
+     ) /* end lower precision block */
+  ),
+  if mode__=levin_algebraic then 
+     return(result__)
+  else
+     return([result__,result__variance__])
+);
+
+
+
+
+
+/* Here we delete zero entries and compute the partial sums. We also
+   set omega such that we get the levin_u transform.  In addition we 
+   set beta=0 and n=1. Perhaps we should try several different values
+   for beta in case division by zero occurs. */
+
+levin_u(a__,terms__,[mode__]):=block([i__,j__,l__,n__,beta__,last__,
+                            omega__,t__,b__,t__variance__,omega__variance__
+                            ],
+  local(omega__,t__,b__,t__variance__,omega__variance__),
+  n__:1,
+  beta__:0,
+  if mode__#[] then mode__:mode__[1] else mode__:levin_algebraic,
+  /* remove zeros */
+  j__:0,
+  for i__:0 thru terms__-1 do (
+      if sign(abs(subvar(a__,i__)))#zero then ( 
+      b__[j__]:subvar(a__,i__),
+      j__:j__+1
+    ) /* else (
+      if levin_options["debug"] then print("ommitting zero term with index ",i)
+    )*/
+  ),
+  last__:j__-1,
+  if last__<0 then (
+    if mode__=levin_algebraic then
+         return(0)            /* best effort */
+    else
+         return([bfloat(0),bfloat(0)])
+  ),
+  if last__=0 then (
+     if mode__=levin_algebraic then
+        return(b__[0])       /* best effort */
+     else
+        return([bfloat(b__[0]),bfloat(0)])
+  ),
+  if mode__=levin_algebraic then (
+    omega__[l__]:=l__*b__[l__],
+    t__[l__]:=t__[l__-1]+b__[l__],
+    t__[-1]:0,
+    omega__variance__[l__]:=0,
+    t__variance__[l__]:=0
+  ) else (
+    omega__[l__]:=l__* bfloat(b__[l__]),
+    t__[l__]:=t__[l__-1]+ bfloat(b__[l__]),
+    t__[-1]:0,
+    block([fpprec:16], /* start lower precision block */
+       omega__variance__[l__]:=l__^2*b__[l__]^2,  
+       t__variance__[l__]:=t__variance__[l__-1]+(abs(bfloat(b__[l__])))^2,
+       t__variance__[-1]:0
+    ) /* end lower precision block */
+  ),
+  levin(t__,last__-n__,n__,beta__,omega__,mode__,
+                               t__variance__,omega__variance__)
+);
+
+levin_u_complex(a__,terms__,[mode__]):=block([n__,re__,im__,
+                                        re_result__,im_result__],
+  local(re__,im__),
+  if mode__#[] then mode__:mode__[1] else mode__:levin_algebraic,
+  if mode__=levin_algebraic then (
+    return(levin_u(a__,terms__,mode__))
+  ) else (
+/*    im__[n__]:=imagpart(arrayapply(a__,[n__])), This give bindstack overflow.
+                                                  Why???
+    re__[n__]:=realpart(arrayapply(a__,[n__])), */
+    for n__:0 thru terms__-1 do (
+        im__[n__]:imagpart(arrayapply(a__,[n__])),
+        re__[n__]:realpart(arrayapply(a__,[n__]))
+    ),
+    re_result__:levin_u(re__,terms__,mode__),
+    im_result__:levin_u(im__,terms__,mode__),
+    return([re_result__[1]+%i*im_result__[1],re_result__[2]+im_result__[2]])
+  )
+);
+  
+
+
+
+
+
+
+/* Robert Dodier: */
+levin_check_lvalue(e__):=(symbolp(e__) or (subvarp(e__) and levin_check_lvalue(part(e__,0)))) and not stringp(e__);
+
+/* User friendly version.
+
+   Example
+                               3899836039
+   levin_u_sum(1/n^2,n,1,10) = ---------- = 1.644934081345832
+                               2370816000
+                       1968329
+   sum(1/n^2,n,1,10) = ------- = 1.549767731166541
+                       1270080
+
+   sum(1/n^2,n,1,inf) = %pi^2/6 = 1.644934066848226
+
+   If mode=levin_numeric then a floating point error estimate is
+   returned (the square root of the variance). It is *not* an estimate
+   for the error of the result. 
+*/
+
+
+levin_u_sum(a__,index_var__,start__,terms__,[mode__]):=
+                            block([n__,c__,result__,ratprint:ratprint,
+                            float2bf:float2bf],
+  local(c__),
+  ratprint:false,
+  float2bf:true,
+  if mode__#[] then mode__:mode__[1]
+                              else mode__:levin_algebraic,
+  if not(integerp(terms__)) or not(constantp(terms__)) or terms__<0 then (
+     print (
+"*** levin_u_sum needs a positive constant integral number of terms ***"
+     ),
+     return(levin_u_sum_failed)
+  ),
+  if not(levin_check_lvalue(index_var__)) then (
+     print (
+"**** ",index_var," is not an lvalue ***"
+     ),
+     return(levin_u_sum_failed)
+  ),
+  result__:for n__:0 thru terms__-1 do (
+             c__[n__]:subst(start__+n__,index_var__,a__),
+             c__[n__]:ev(c__[n__]),  /* remove one round of quoting */
+                                    /* this is the plot2d convention */
+             if mode__=levin_numeric and not(constantp(c__[n__])) then (
+                     print(
+"*** levin_u_sum needs constant terms in numeric mode. ***"
+                     ),
+                     return(levin_u_sum_failed)
+              )
+   ) ,
+   if result__=levin_u_sum_failed then return(levin_u_sum_failed),
+   result__:levin_u_complex(c__,terms__,mode__),
+   if mode__=levin_algebraic then
+       return(result__)
+   else
+      return([result__[1],bfloat(sqrt(result__[2])*10^(-fpprec))])
+);
+
+/* Numerical version. This function makes a crude attempt to compute
+   an indefinite sum numerically with precision given by fpprec.
+   If you suspect something is wrong put levin_options["debug"]:true.
+*/
+
+bflevin_u_sum(a__,index_var__,start__):=block([fpprec:fpprec,fpprec_save__,
+           precision_overshoot_high__, precision_overshoot_low__, 
+           non_constant__, state__, terms__, new__, error__,
+           actual_precision__, approx__, approx_old__,
+           result__,increasing_accuracy__,increasing_terms__,comparing__,
+           rational__,ratprint:ratprint,float2bf:float2bf,c__],
+  local(c__,log10__),
+  log10__(x):=bfloat(log(x)/log(10)),
+  ratprint:false,
+  float2bf:true,
+  if not(levin_check_lvalue(index_var__)) then (
+     print (
+"**** ",index_var__," is not an lvalue ***"
+     ),
+     return(bflevin_u_sum_failed)
+  ),
+  fpprec_save__:fpprec,
+  precision_overshoot_high__:fix((3/2)*fpprec_save__), /* I know this is much
+                               too high in algebraic mode */
+  precision_overshoot_low__:min(precision_overshoot_high__-1,fpprec_save__+6),
+  fpprec:min(levin_options["max_precision"],max(levin_options["min_precision"],precision_overshoot_high__)),
+  terms__:levin_options["min_terms"],
+  non_constant__:false,
+  state__:increasing_accuracy__,
+  result__:do (
+    rational__:true,
+    for n__:0 thru terms__-1 do ( /* perhaps we may need to recompute things
+                              as the user may have used bfloat and the
+                              precision might have been increased */
+             c__[n__]:subst(start__+n__,index_var__,a__),
+             c__[n__]:ev(c__[n__]), /* remove one round of quoting */
+                                    /* this is the plot2d convention */
+             if not(constantp(c__[n__])) then (
+                     print(
+"*** bflevin_u_sum does not work  for series with non constant terms. ***"
+                     ),
+                   non_constant__:true,
+                   return(failed)
+                   ),
+             if not(ratnump(c__[n__])) then rational__:false
+    ),  
+    if non_constant__ then return(bflevin_u_sum_failed),
+    if rational__ then (
+        approx__:bfloat(levin_u(c__,terms__,levin_algebraic)),
+        if not constantp(approx__) then return (approx__),
+        actual_precision__:fpprec
+    )  else (
+       new__:levin_u_complex(c__,terms__,levin_numeric),
+       if not constantp(new__) then return (new__),
+       approx__:new__[1],
+       error__:sqrt(new__[2]),
+       if equal(approx__,bfloat(0)) then actual_precision__:fpprec,
+               /* assume that a zero is accurate, what else can we do? */
+       actual_precision__:-fix((log10__(error__/abs(approx__))))+fpprec
+    ),
+    if levin_options["debug"] then print (
+"==============================","
+state=       ",state__,"
+precision=   ",fpprec,"
+terms=       ",terms__,"
+rational=    ",rational__,"
+result=      ",approx__,"
+fp_accuracy= ",actual_precision__
+    ),
+    if state__=increasing_accuracy__ then (
+         if actual_precision__>=precision_overshoot_low__ then (
+             state__:comparing__
+          )   
+           else ( 
+             fpprec:fpprec+precision_overshoot_high__-actual_precision__,
+             if fpprec> levin_options["max_precision"] then (
+               print (
+ "*** required precision too high ***"
+               ),
+               return(bflevin_u_sum_failed)
+             )
+          )
+    ) else if state__=increasing_terms__ then  (
+          approx_old__:approx__,
+          if 2*terms__>levin_options["max_terms"] then (
+             print (
+"*** bflevin_u_sum did not obtain the required precision using ",terms__," terms ***"
+             ),
+             return(bflevin_u_sum_failed)
+          ),
+          terms__:2*terms__,
+          state__:increasing_accuracy__
+    ) else if state__=comparing__ then (
+       if constantp(approx_old__) then (
+          if equal(approx_old__,bfloat(0)) and equal(approx__,bfloat(0))
+                             then return(bfloat(0)),
+          if levin_options["debug"] then
+          print("difference=  ",approx_old__-approx__), 
+          if abs(approx_old__-approx__)/
+                         max(abs(approx_old__),abs(approx__))
+                  <10^(-fpprec_save__-1) then return(approx__)
+         
+       ),
+       state__:increasing_terms__
+    )
+  ),
+  fpprec:fpprec_save__,
+  bfloat(result__)
+);
+
+
+
+

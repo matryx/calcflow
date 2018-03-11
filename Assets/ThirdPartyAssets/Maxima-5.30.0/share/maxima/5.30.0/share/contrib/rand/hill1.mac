@@ -1,0 +1,41 @@
+/* Filename hill1.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /*
+(d4) This program generates truncated Hill's determinants
+
+
+for Mathieu's equation.  To call it, type one of:
+
+
+            MAKEAEVEN(P)
+
+
+        or  MAKEBEVEN(P)
+
+
+        or  MAKEAODD(P)
+
+
+where P is the truncation size.
+
+*/
+
+makeaeven(p):=(icaeven(),for k from 2 thru p do (w:eqeven(),v:u,u:w),u)$
+makebeven(p):=(icbeven(),for k from 3 thru p do (w:eqeven(),v:u,u:w),u)$
+makeaodd(p):=(icaodd(),for k from 3 thru p do (w:eqodd(),v:u,u:w),u)$
+eqeven():=(d-k^2)*u-e^2/4*v$
+eqodd():=(d-(2*k-1)^2/4)*u-e^2/4*v$
+icaeven():=(u:d*(d-1)-e^2/2,v:d)$
+icbeven():=(u:(d-1)*(d-4)-e^2/4,v:d-1)$
+icaodd():=(u:(d-1/4+e/2)*(d-9/4)-e^2/4,v:d-1/4+e/2)$

@@ -1,0 +1,16 @@
+load('optmiz);
+
+/* exponentials, hyperbolic functions, and trig functions may
+often be converted to the required form by using the multiple-argument
+formulas together with equality constraints such as the sum of the
+squares of the sine and cosine equals 1.  For example: */
+trigexpand: exptsubst: true ;
+cos(2*x) + sin(x)*exp(2*y) - exp(y);
+subst([sin(x)=s, cos(x)=c, %e**y=e], %);
+stapoints(%, [], s**2+c**2-1) ;
+/* For any of the above answers, we may use LOG(E) or ?ATAN(S,C)
+to compute the corresponding values of the original decision
+variables, where E, S, or C are the right-hand-sides of the
+appropriate components of the chosen component of STAPTS.
+*/
+"end of this demo"$

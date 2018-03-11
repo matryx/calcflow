@@ -1,0 +1,1428 @@
+/*               COPYRIGHT NOTICE
+
+Copyright (C) 2006,2012 Mario Rodriguez Riotorto
+
+This program is free software; you can redistribute
+it and/or modify it under the terms of the
+GNU General Public License as published by
+the Free Software Foundation; either version 2 
+of the License, or (at your option) any later version. 
+
+This program is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the 
+GNU General Public License for more details at
+http://www.gnu.org/copyleft/gpl.html
+*/
+
+
+/*             INTRODUCTION
+
+This is a Maxima package for some classical statistical inference
+procedures.
+
+*/
+
+put('stats, 1, 'version) $
+
+if not get('descriptive, 'version)
+   then load("descriptive")$
+
+if not get('distrib, 'version)
+   then load("distrib")$
+
+load("inference_result")$
+load("numstats")$
+
+
+stats_numer : true$
+
+/* This is the mean test. The first argument 'x' is a list or a column matrix  */
+/* of expressions (one sample)                                                 */
+/* Admits the following options:                                               */
+/*   'mean=0: this is the value of the mean to be checked.                     */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid      */
+/*            values are: 'twosided, 'greater and 'less.                       */
+/*   'dev='unknown: this is the value of the standard deviation when it is     */
+/*            known; valid values are: 'unknown, an expression or a positive   */
+/*            number                                                           */
+/*   'conflevel=95/100: confidence level of the confidence interval; valid     */
+/*           values are: a symbol or an expression which takes a value in (0,1)*/
+/*   'asymptotic=false: whether it performs an exact t-test or an asymptotic   */
+/*           one; valid values are true and false                              */
+/*                                                                             */
+/* The output of this function is an 'inference_result' object with the        */
+/* following results:                                                          */
+/*   1. 'mean_estimate= sample estimate for the mean                           */
+/*   2. 'conf_level= confidence level                                          */
+/*   3. 'conf_interval= confidence interval                                    */
+/*   4. 'method= assumption about the standard deviations, asymptotic.         */
+/*   5. 'hypotheses= null hypothesis and alternative                           */
+/*   6. 'statistic= statistic used in the procedure                            */
+/*   7. 'distribution= distribution and its parameters                         */
+/*   8. 'p_value= p-value of the sample statistic                              */
+test_mean(x,[select]):= 
+block([numer:stats_numer, options, defaults, m, n, coef, cinterval, aux,
+       statistic, method, distribution, hypo, pvalue, listarith:true],
+
+  /* controlling sample format */
+  if not listofexpr(x) and not (matrixp(x) and length(x[1]) = 1 and every('identity,map('listofexpr,args(x))))
+     then error("Sample 'x' should be a list with expressions or a column matrix")
+     else n: length(x),
+
+  /* updating and controlling options */
+  options:  ['mean, 'alternative, 'dev,     'conflevel, 'asymptotic],
+  defaults: [0,     'twosided,    'unknown,  95/100,     false],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[2],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+  if member(sign(defaults[3]), ['neg, 'zero, 'nz])
+     then error("Option 'dev' can't be negative nor zero"),
+  if numberp(defaults[4]) and (defaults[4] <= 0 or defaults[4] >= 1)
+     then error("Option 'conflevel' can't be outside interval (0,1)"),
+  if not member(defaults[5],[true, false])
+     then error("Option 'asymptotic' must be true or false"),
+
+  /* mean estimate */
+  m: mean(x),
+  if listp(m) then m: m[1],
+
+  /* coef: standard_deviation / sqrt(n) */
+  if /*standard_deviation*/ defaults[3] = 'unknown
+     then (coef: std1(x) / sqrt(n),
+           if listp(coef) then coef: coef[1])
+     else coef: defaults[3] / sqrt(n),
+
+  /* method */
+  method: concat(if /*asymptotic*/ defaults[5] = true
+                     then "Large sample z-test. "
+                     else "Exact t-test. ",
+                  if /*standard_deviation*/ defaults[3] = 'unknown
+                     then "Unknown variance."
+                     else "Known variance."),
+
+  /* confidence interval (one and two-sided), distribution and */
+  /* p-value for alternative=less                              */
+  if float(coef) = 0.0
+  then statistic: distribution: pvalue: cinterval: hypo: 'undefined
+  else(
+    /* statistic */
+    statistic: (m - defaults[1]) / coef,
+    if /*alternative*/ defaults[2] = 'twosided
+       then statistic: abs(statistic),
+    if /*asymptotic*/ defaults[5] = false and
+       /*standard_deviation*/ defaults[3] = 'unknown
+       then (distribution: ['student_t, n-1],
+             pvalue: cdf_student_t(statistic,n-1),
+             if /*alternative*/ defaults[2] = 'greater
+                then cinterval: [m - quantile_student_t(defaults[4], n-1) * coef,'inf]
+                else if /*alternative*/ defaults[2] = 'less
+                        then cinterval: ['minf, m + quantile_student_t(defaults[4], n-1) * coef]
+                        else cinterval: m + [-1,1] * quantile_student_t((1 + defaults[4])/2, n-1) * coef)
+       else (distribution: ['normal, 0, 1],
+             pvalue: cdf_normal(statistic,0,1),
+             if /*alternative*/ defaults[2] = 'greater
+                then cinterval: [m - quantile_normal(defaults[4],0,1) * coef, 'inf]
+                else if /*alternative*/ defaults[2] = 'less
+                        then cinterval: ['minf, m + quantile_normal(defaults[4],0,1) * coef]
+                        else cinterval: m + [-1,1] * quantile_normal((1 + defaults[4])/2,0,1) * coef),
+
+    /* hypotheses, pvalue (for alternative=greater and alternative=twosided) */
+    aux: string(defaults[1]),
+    if /*alternative*/ defaults[2] = 'greater
+       then (hypo: concat("H0: mean = ", aux," , H1: mean > ", aux),
+             pvalue: 1 - pvalue )
+       else if /*alternative*/ defaults[2] = 'less
+               then  hypo: concat("H0: mean = ", aux, " , H1: mean < ", aux)
+               else (hypo: concat("H0: mean = ", aux, " , H1: mean # ", aux),
+                     pvalue: 2 * (1 - pvalue) ) ),
+
+  /* result as an 'inference_result' object*/
+  inference_result("MEAN TEST",
+                 [  ['mean_estimate, m],
+                    ['conf_level, defaults[4]],
+                    ['conf_interval, cinterval],
+                    ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue]  ],
+                 [1,2,3,4,5,6,7,8])    )$
+
+
+
+
+
+
+
+
+
+/* This is the difference of means test. The first two arguments 'x1' and 'x2' */
+/* are lists or column matrices with expressions, generally numbers.           */
+/* Admits the following options:                                               */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid      */
+/*            values are: 'twosided, 'greater (m1>m2) and less (m1<m2).        */
+/*   'dev1='unknown: this is the value of the standard deviation of the x1     */
+/*            sample when it is known; valid values are: 'unknown, a symbol or */
+/*            a positive number                                                */
+/*   'dev2='unknown: this is the value of the standard deviation of the x2     */
+/*            sample when it is known; valid values are: 'unknown, a symbol or */
+/*            a positive number                                                */
+/*   'varequal=false: whether variances are equal or not                       */
+/*   'conflevel=95/100: confidence level of the confidence interval; valid     */
+/*           values are: a symbol or an expression which takes a value in (0,1)*/
+/*   'asymptotic=false: whether it performs an exact t-test or an asymptotic   */
+/*           one; valid values are true and false                              */
+/*                                                                             */
+/* The output of this function is an 'inference_result' object                 */
+/* with the following results:                                                 */
+/*   1. 'diff_estimate= difference of means estimate (m1-m2)                   */
+/*   2. 'conf_level= confidence level                                          */
+/*   3. 'conf_interval= confidence interval                                    */
+/*   4. 'method: assumptions about the standard deviations, asymptotic.         */
+/*   5. 'hypotheses: null hypothesis and alternative                            */
+/*   6. 'statistic: statistic used in the procedure                             */
+/*   7. 'distribution: distribution and its parameters                          */
+/*   8. 'p_value: p-value of the sample statistic                               */
+test_means_difference(x1,x2,[select]):= 
+block([numer:stats_numer, options, defaults, dm, n1, n2, v1, v2, coef, cinterval, aux, df,
+       statistic, method, distribution, hypo, pvalue, listarith:true],
+
+  /* controlling sample format */
+  if not listofexpr(x1) and not (matrixp(x1) and length(x1[1]) = 1 and every('identity,map('listofexpr,args(x1))))
+     then error("Sample 'x1' should be a list with expressions or a column matrix")
+     else n1: length(x1),
+  if not listofexpr(x2) and not (matrixp(x2) and length(x2[1]) = 1 and every('identity,map('listofexpr,args(x2))))
+     then error("Sample 'x2' should be a list with expressions or a column matrix")
+     else n2: length(x2),
+
+  /* updating and controlling options */
+  options:  ['alternative, 'dev1,    'dev2,    'varequal, 'conflevel, 'asymptotic],
+  defaults: ['twosided,    'unknown, 'unknown, false,      95/100,     false],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[1],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+  if member(sign(defaults[2]), ['neg, 'zero, 'nz]) or
+     member(sign(defaults[3]), ['neg, 'zero, 'nz])
+     then error("Option 'dev' can't be negative nor zero"),
+  /* in the next two lines, ignorance is contagious */
+  if defaults[2] = 'unknown then defaults[3]: 'unknown,
+  if defaults[3] = 'unknown then defaults[2]: 'unknown,
+  if not member(defaults[4],[true, false])
+     then error("Option 'varequal' must be true or false"),
+  if numberp(defaults[5]) and (defaults[5] <= 0 or defaults[5] >= 1)
+     then error("Option 'conflevel' can't be outside interval (0,1)"),
+  if not member(defaults[6],[true, false])
+     then error("Option 'asymptotic' must be true or false"),
+
+  /* difference of means estimate */
+  dm: mean(x1) - mean(x2),
+  if listp(dm) then dm: dm[1],
+
+  /* coef: standard_deviation / sqrt(n) */
+  if /*standard deviations*/ not defaults[2] = 'unknown
+     then coef: sqrt(defaults[2]^2 / n1 + defaults[3]^2 / n2)
+     else (v1: var1(x1),
+           if listp(v1) then v1: v1[1],
+           v2: var1(x2),
+           if listp(v2) then v2: v2[1],
+           if /*varequal*/ defaults[4] = true and 
+              /*asymptotic*/ defaults[6] = false
+              then coef: sqrt(((n1-1)*v1 + (n2-1)*v2) / (n1+n2-2) * (1/n1+1/n2))
+              else coef: sqrt(v1 / n1 + v2 / n2)),
+  if listp(coef) then coef: coef[1],
+
+  /* method and Welch approximation */
+  method: concat(if /*asymptotic*/ defaults[6] = true
+                     then "Asymptotic z-test (for large samples). "
+                     else "Exact t-test. ",
+                  if /*standard deviations*/ defaults[2] = 'unknown
+                     then if /*varequal*/ defaults[4] = true
+                             then "Unknown equal variances"
+                             else "Welch approx."
+                     else "Known variances."),
+
+  if float(coef) = 0.0
+    then statistic: distribution: pvalue: cinterval: hypo: 'undefined
+    else (
+      /* statistic */
+      statistic: dm / coef,
+      if /*alternative*/ defaults[1] = 'twosided
+         then statistic: abs(statistic), 
+
+      if /*asymptotic*/ defaults[6] = false and 
+         /*standard deviations*/ defaults[2] = 'unknown and 
+         /*varequal*/ defaults[4] = false
+         then /* Welch approximation */
+              df: (v1/n1+v2/n2)^2 / ((v1/n1)^2/(n1-1) + (v2/n2)^2/(n2-1))
+         else df: n1 + n2 - 2,
+
+      /* confidence interval, distribution and p-value */
+      if /*asymptotic*/ defaults[6] = false and
+         /*standard deviations*/ defaults[2] = 'unknown
+         then (distribution: ['student_t, df],
+               pvalue: cdf_student_t(statistic,df),
+               /* two or one-sided confidence interval */
+               if /*alternative*/ defaults[1] = 'greater
+                 then cinterval: [dm-quantile_student_t(defaults[5], df) * coef,'inf]
+                 else if /*alternative*/ defaults[1] = 'less
+                        then cinterval: ['minf, dm+quantile_student_t(defaults[5], df) * coef]
+                        else cinterval: dm + [-1,1] * quantile_student_t((1 + defaults[5])/2, df) * coef )
+         else (distribution: ['normal, 0, 1],
+               pvalue: cdf_normal(statistic, 0, 1),
+               if /*alternative*/ defaults[1] = 'greater
+                 then cinterval: [dm-quantile_normal(defaults[5],0,1) * coef,'inf]
+                 else if /*alternative*/ defaults[1] = 'less
+                        then cinterval: ['minf, dm+quantile_normal(defaults[5],0,1) * coef]
+                        else cinterval: dm + [-1,1] * quantile_normal((1 + defaults[5])/2, 0, 1) * coef ),
+
+      /* hypotheses, pvalue (for alternative=greater and alternative=twosided) */
+      if /*alternative*/ defaults[1] = 'greater
+         then (hypo: "H0: mean1 = mean2 , H1: mean1 > mean2",
+               pvalue: 1 - pvalue )
+         else if /*alternative*/ defaults[1] = 'less
+                 then hypo: "H0: mean1 = mean2 , H1: mean1 < mean2"
+                 else (hypo: "H0: mean1 = mean2 , H1: mean1 # mean2",
+                       pvalue: 2 * (1 - pvalue) ) ),
+
+  /* result as an 'inference_result' object*/
+  inference_result("DIFFERENCE OF MEANS TEST",
+                 [  ['diff_estimate, dm],
+                    ['conf_level, defaults[5]],
+                    ['conf_interval, cinterval],
+                    ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue]  ],
+                 [1,2,3,4,5,6,7,8])     )$
+
+
+
+
+
+
+
+
+/* This is the variance test for a normal population. The first argument 'x'   */
+/* is a list or a column matrix of expressions (one sample)                    */
+/* Admits the following options:                                               */
+/*   'mean='unknown: this is the value of the population's mean when it is     */
+/*            known; valid values are: 'unknown, a symbol or a number          */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid      */
+/*            values are: 'twosided, 'greater and 'less.                       */
+/*   'variance=1: this is the value of the variance to be checked.             */
+/*   'conflevel=95/100: confidence level of the confidence interval; valid     */
+/*           values are: a symbol or an expression which takes a value in (0,1)*/
+/*                                                                             */
+/* The output of this function is an 'inference_result' object with the        */
+/* following results:                                                          */
+/*   1. 'var_estimate= variance estimate                                       */
+/*   2. 'conf_level= confidence level                                          */
+/*   3. 'conf_interval= confidence interval                                    */
+/*   4. 'method: method and assumptions                                         */
+/*   5. 'hypotheses: null hypothesis and alternative                            */
+/*   6. 'statistic: statistic used in the procedure                             */
+/*   7. 'distribution: distribution and its parameters                          */
+/*   8. 'p_value: p-value of the sample statistic                               */
+test_variance(x,[select]):= 
+block([numer:stats_numer, options, defaults, s2, n, coef, df, cinterval, aux,
+       statistic, method, distribution, hypo, pvalue, listarith:true],
+
+  /* controlling sample format */
+  if not listofexpr(x) and not (matrixp(x) and length(x[1]) = 1 and every('identity,map('listofexpr,args(x))))
+     then error("Sample 'x' should be a list with expressions or a column matrix")
+     else n: length(x),
+
+  /* updating and controlling options */
+  options:  ['mean,    'alternative, 'variance, 'conflevel],
+  defaults: ['unknown, 'twosided,    1,          95/100],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[2],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+  if member(sign(defaults[3]), ['neg, 'zero, 'nz])
+     then error("Option 'variance' can't be nonpositive"),
+  if numberp(defaults[4]) and (defaults[4] <= 0 or defaults[4] >= 1)
+     then error("Option 'conflevel' can't be outside interval (0,1)"),
+
+  /* sample statistic's numerator (coef), degrees of freedom, */
+  /* confidence interval, distribution and variance estimate  */
+  if /*mean*/ defaults[1] = 'unknown
+     then (s2: var1(x),
+           if listp(s2) then s2: s2[1],
+           df: n - 1)
+     else (s2: mean((x - defaults[1])^2),
+           df: n),
+  coef: df * s2,
+
+  /* distribution, confidence interval and statistic */
+  distribution: ['chi2, df],
+  if /*alternative*/ defaults[2] = 'greater
+     then cinterval: [coef / quantile_chi2(defaults[4],df), 'inf]
+     else if /*alternative*/ defaults[2] = 'less
+             then cinterval: [0, coef / quantile_chi2(1-defaults[4],df)]
+             else cinterval: coef / [quantile_chi2((1+defaults[4])/2,df),
+                                     quantile_chi2((1-defaults[4])/2,df)],
+  statistic: coef / defaults[3],
+
+  /* method */
+  method: concat("Variance Chi-square test. ",
+                  if /*mean*/ defaults[1] = 'unknown
+                     then "Unknown mean."
+                     else "Known mean."),
+
+  /* hypotheses, pvalue */
+  pvalue: cdf_chi2(statistic,df), /* pvalue for alternative=less */
+  aux: string(defaults[3]),
+  if /*alternative*/ defaults[2] = 'greater
+     then (hypo: concat("H0: var = ", aux, " , H1: var > ", aux),
+           pvalue: 1 - pvalue )
+     else if /*alternative*/ defaults[2] = 'less
+             then hypo: concat("H0: var = ", aux," , H1: var < ", aux)
+             else (hypo: concat("H0: var = ", aux," , H1: var # ", aux),
+                   if /* compares the sample statistics to the median */
+                      statistic <= quantile_chi2(1/2,df)
+                     then pvalue: 2 * pvalue
+                     else pvalue: 2 * (1 - pvalue) ),
+
+  /* result as an 'inference_result' object*/
+  inference_result("VARIANCE TEST",
+                 [  ['var_estimate, s2],
+                    ['conf_level, defaults[4]],
+                    ['conf_interval, cinterval],
+                    ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue]  ],
+                 [1,2,3,4,5,6,7,8])    )$
+
+
+
+
+
+
+
+/* This is the variance ratio test. The first two arguments 'x1' and 'x2'       */
+/* are lists or column matrices with expressions, generally numbers.            */
+/* Admits the following options:                                                */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid       */
+/*            values are: 'twosided, 'greater (m1>m2) and less (m1<m2).         */
+/*   'mean1='unknown: this is the value of the mean in the x1 sample when it    */
+/*            is known; valid values are: 'unknown, a symbol or number          */
+/*   'mean2='unknown: this is the value of the mean in the x2 sample when it    */
+/*            is known; valid values are: 'unknown, a symbol or number          */
+/*   'conflevel=95/100: confidence level of the confidence interval; valid      */
+/*           values are: a symbol or an expression which takes a value in (0,1) */
+/*                                                                              */
+/* The output of this function is an 'inference_result' object                  */
+/* with the following results:                                                  */
+/*   1. 'ratio_estimate= variance ratio estimate (variance1/variance2)          */
+/*   2. 'conf_level= confidence level                                           */
+/*   3. 'conf_interval= confidence interval                                     */
+/*   4. 'method: assumptions about the means.                                   */
+/*   5. 'hypotheses: null hypothesis and alternative                            */
+/*   6. 'statistic: statistic used in the procedure                             */
+/*   7. 'distribution: distribution and its parameters                          */
+/*   8. 'p_value: p-value of the sample statistic                               */
+test_variance_ratio(x1,x2,[select]):= 
+block([numer:stats_numer, options, defaults, v1, v2, vr, n1, n2, t1, t2, df1, df2,
+       cinterval, aux, statistic, method, distribution, hypo, pvalue, listarith:true],
+
+  /* controlling sample format */
+  if not listofexpr(x1) and not (matrixp(x1) and length(x1[1]) = 1 and every('identity,map('listofexpr,args(x1))))
+     then error("Sample 'x1' should be a list with expressions or a column matrix")
+     else (n1: length(x1)),
+  if not listofexpr(x2) and not (matrixp(x2) and length(x2[1]) = 1 and every('identity,map('listofexpr,args(x2))))
+     then error("Sample 'x2' should be a list with expressions or a column matrix")
+     else n2: length(x2),
+
+  /* updating and controlling options */
+  options:  ['alternative, 'mean1,   'mean2,  'conflevel],
+  defaults: ['twosided,    'unknown, 'unknown, 95/100],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[1],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+  /* in the next two lines, ignorance about the means is contagious */
+  if defaults[2] = 'unknown then defaults[3]: 'unknown,
+  if defaults[3] = 'unknown then defaults[2]: 'unknown,
+  if numberp(defaults[4]) and (defaults[4] <= 0 or defaults[4] >= 1)
+     then error("Option 'conflevel' can't be outside interval (0,1)"),
+
+  /* method */
+  method: concat("Variance ratio F-test. ",
+                  if /*means*/ defaults[2] = 'unknown
+                     then "Unknown means."
+                     else "Known means."),
+  v1: var1(x1),
+  v2: var1(x2),
+
+  if float(v2) = 0.0
+    then vr: statistic: distribution: pvalue: cinterval: hypo: 'undefined
+  else (
+    /* variance ratio estimate, degrees of freedom, */
+    if /*means*/ defaults[2] = 'unknown
+       then (vr: v1 / v2,
+             if listp(vr) then vr: vr[1],
+             df1: n1 - 1,
+             df2: n2 - 1)
+       else (t1: mean((x1 - defaults[2])^2),
+             t2: mean((x2 - defaults[3])^2),
+             vr: t1 / t2,
+             df1: n1,
+             df2: n2),
+
+    /* distribution, confidence interval and statistic */
+    distribution: ['f, df1, df2],
+    if /*alternative*/ defaults[1] = 'greater
+       then cinterval: [vr / quantile_f(defaults[4],df1,df2), 'inf]
+       else if /*alternative*/ defaults[1] = 'less
+               then cinterval: [0, vr / quantile_f(1-defaults[4],df1,df2)]
+               else cinterval: vr / [quantile_f((1+defaults[4])/2,df1,df2),
+                                     quantile_f((1-defaults[4])/2,df1,df2)],
+    statistic: vr,
+
+    /* hypotheses, pvalue */
+    pvalue: cdf_f(statistic,df1,df2), /* pvalue for alternative=less */
+    if /*alternative*/ defaults[1] = 'greater
+       then (hypo: "H0: var1 = var2 , H1: var1 > var2",
+             pvalue: 1 - pvalue )
+       else if /*alternative*/ defaults[1] = 'less
+               then hypo: "H0: var1 = var2 , H1: var1 < var2"
+               else (hypo: "H0: var1 = var2 , H1: var1 # var2",
+                     if /* compares the sample statistics to the median */
+                        statistic <= quantile_f(1/2,df1,df2)
+                       then pvalue: 2 * pvalue
+                       else pvalue: 2 * (1 - pvalue))),
+
+  /* result as an 'inference_result' object*/
+  inference_result("VARIANCE RATIO TEST",
+                 [  ['ratio_estimate, vr],
+                    ['conf_level, defaults[4]],
+                    ['conf_interval, cinterval],
+                    ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue]  ],
+                 [1,2,3,4,5,6,7,8])     )$
+
+
+
+
+
+
+
+/* This is the non parametric sign test for the median. Argument 'x' is a         */
+/* list or column matrix with expressions, generally numbers.                     */
+/* Admits the following option:                                                   */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid         */
+/*            values are: 'twosided, 'greater (med1>median) and less (med1<median)*/
+/*   'median=0: the median value to be checked                                    */
+/*                                                                                */
+/* The output of this function is an 'inference_result' object                    */
+/* with the following results:                                                    */
+/*   1. 'med_estimate= median estimate                                            */
+/*   2. 'method= assumptions about the means.                                     */
+/*   3. 'hypotheses= null hypothesis and alternative                              */
+/*   4. 'statistic= statistic used in the procedure                               */
+/*   5. 'distribution= distribution and its parameters                            */
+/*   6. 'p_value= p-value of the sample statistic                                 */
+test_sign(x,[select]):= 
+block([numer:stats_numer, options, defaults, med, n, npos, aux, xm,
+       statistic, method, distribution, hypo, pvalue, listarith:true],
+
+  /* controlling sample format */
+  if not listofexpr(x) and not (matrixp(x) and length(x[1]) = 1 and every('identity,map('listofexpr,args(x))))
+     then error("Sample 'x' should be a list with expressions or a column matrix"),
+
+  /* updating and controlling options */
+  options:  ['alternative, 'median],
+  defaults: ['twosided,    0],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[1],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+
+  /* median estimate */
+  med: median(x),
+  if listp(med) then med: med[1],
+
+  /* statistic */
+  xm: x - defaults[2],
+  if matrixp(xm) then xm: transpose(xm)[1],
+  statistic: apply("+", map(lambda([z], if is(z<0) then 1 else 0), xm)),
+  npos: apply("+", map(lambda([z], if is(z>0) then 1 else 0), xm)),
+  n: statistic + npos,
+
+  /* method */
+  method: "Non parametric sign test.",
+
+  /* distribution */
+  distribution: ['binomial, n, 1/2],
+
+  /* hypotheses, pvalue */
+  aux: string(defaults[2]),
+  if /*alternative*/ defaults[1] = 'greater
+     then (hypo: concat("H0: median = ", aux," , H1: median > ", aux),
+           pvalue: 1 - cdf_binomial(statistic,n,1/2) )
+     else if /*alternative*/ defaults[1] = 'less
+             then (hypo: concat("H0: median = ", aux," , H1: median < ", aux),
+                   pvalue: cdf_binomial(statistic,n,1/2) )  
+             else (hypo: concat("H0: median = ", aux," , H1: median # ", aux),
+                   if statistic < n/2
+                      then pvalue: 2 * cdf_binomial(statistic,n,1/2)
+                      else pvalue: 2 * (1 - cdf_binomial(statistic,n,1/2)) ),
+
+  /* result as an 'inference_result' object*/
+  inference_result("SIGN TEST",
+                 [  ['med_estimate, med],
+                    ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue]  ],
+                 [1,2,3,4,5,6]) )$
+
+
+
+
+
+
+/* This is the signed rank test to make inferences about the median of a        */
+/* continuous population. Argument 'x' is a list or column matrix with          */
+/* expressions, generally numbers. Performs normal approximation if the         */
+/* sample size is >20, or if there are zeroes or ties. (Cuadras, 13.2;          */
+/* R, wilcox.test.R)                                                            */
+/* Admits the following option:                                                 */
+/*   'median=0: this is the value of the median to be checked.                  */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid       */
+/*            values are: 'twosided, 'greater (med1>med2) and less (med1<med2). */
+/* The output of this function is an 'inference_result' object                  */
+/* with the following results:                                                  */
+/*   1. 'med_estimate= median estimate                                          */
+/*   2. 'method= assumptions about the means.                                   */
+/*   3. 'hypotheses= null hypothesis and alternative                            */
+/*   4. 'statistic= statistic used in the procedure                             */
+/*   5. 'distribution= distribution and its parameters                          */
+/*   6. 'p_value= p-value of the sample statistic                               */
+test_signed_rank(x,[select]):= 
+block([numer:stats_numer, options, defaults, n, aux, med, zeroes:false,
+       pos, nequal, npositive, rank, ties:[], sigma, mu, noties, statistic,
+       method, distribution, hypo, pvalue, listarith:true],
+
+  /* controlling sample format */
+  if not listofexpr(x) and not (matrixp(x) and length(x[1]) = 1 and every('identity,map('listofexpr,args(x))))
+     then error("Sample 'x' should be a list with expressions or a column matrix")
+     else n: length(x),
+
+  /* updating and controlling options */
+  options:  ['median, 'alternative],
+  defaults: [0,       'twosided],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[2],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+
+  /* sample size and median estimate */
+  n: length(x),
+  med: median(x),
+  if listp(med) then med: med[1],
+
+  /* statistic */
+  x: x - defaults[1], /* sustract the median to be checked */
+  /* drop zeroes */
+  x: sublist(x, lambda([z], is(float(z) # 0.0))),
+  if length(x) < n
+    then (zeroes: true,
+          n: length(x)),
+  x: sort(makelist([x[k],abs(x[k])],k,1,n),
+          lambda([u,v], orderlessp(u[2], v[2]))),
+  statistic: 0,
+  pos:1,
+  while pos <= n do
+     (nequal: 1,
+      if x[pos][1] > 0
+         then npositive: 1
+         else npositive: 0,
+      rank: pos,
+      while pos+nequal <= n and x[pos+nequal][2] = x[pos][2] do
+        (if x[pos+nequal][1] > 0 then npositive: npositive + 1,
+         rank: rank + pos + nequal,
+         nequal: nequal + 1),
+      statistic: statistic + npositive * rank / nequal,
+      pos: pos + nequal,
+      ties: cons(nequal, ties)),
+
+  /* pvalue, method, distribution */
+  noties: every(lambda([z],z=1), ties),
+  mu: n * (n + 1) / 4,
+  if n < 20 and noties and not zeroes
+    then (/* performs exact test */
+          method: "Exact test",
+          distribution: ['signed_rank, n],
+          if /*alternative*/ defaults[2] = 'twosided
+            then (if statistic > mu
+                   then pvalue: 1 - cdf_signed_rank(statistic-1, n)
+                   else pvalue: cdf_signed_rank(statistic, n),
+                  pvalue: min(2*pvalue, 1) )
+            else if /*alternative*/ defaults[2] = 'greater
+                   then pvalue: 1 - cdf_signed_rank(statistic-1, n)
+                   else pvalue: cdf_signed_rank(statistic, n) )
+    else (/* asymptotic test */
+          method: "Asymptotic test",
+          if not noties then method: concat(method, ". Ties"),
+          if zeroes then method: concat(method, ". Zeroes"),
+          sigma: sqrt(mu * (2*n + 1) / 6 - apply("+",ties^3-ties) / 48),
+          if /*alternative*/ defaults[2] = 'twosided
+            then (pvalue: cdf_normal(statistic, mu + signum(statistic - mu)/2, sigma),
+                  pvalue: 2 * min(pvalue, 1 - pvalue),
+                  distribution: ['normal, mu + signum(statistic - mu)/2, sigma])
+            else if /*alternative*/ defaults[2] = 'greater
+                   then (pvalue: 1 - cdf_normal(statistic, mu+1/2, sigma),
+                         distribution: ['normal, mu + 1/2, sigma] )
+                   else pvalue: (cdf_normal(statistic, mu-1/2, sigma),
+                                 distribution: ['normal, mu-1/2, sigma]   )),
+
+  /* hypotheses */
+  aux: string(defaults[1]),
+  if /*alternative*/ defaults[2] = 'greater
+     then hypo: concat("H0: med = ", aux," , H1: med > ", aux)
+     else if /*alternative*/ defaults[2] = 'less
+             then hypo: concat("H0: med = ", aux," , H1: med < ", aux)
+             else hypo: concat("H0: med = ", aux," , H1: med # ", aux),
+
+  /* result as an 'inference_result' object*/
+  inference_result("SIGNED RANK TEST",
+                 [  ['med_estimate, med],
+                    ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue] ],
+                 [1,2,3,4,5,6])     )$
+
+
+
+
+
+
+
+/* This is the Wilcoxon-Mann-Whitney test to compare the medians of two         */
+/* independent samples taken from two continuous populations. The first two     */
+/* arguments 'x1' and 'x2' are lists or column matrices with expressions,       */
+/* generally numbers. Performs normal approximation if any of the sample sizes  */
+/* is >10, or if there are ties. (Cuadras, 13.3; R, wilcox.test.R)              */
+/* Admits the following option:                                                 */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid       */
+/*            values are: 'twosided, 'greater (med1>med2) and less (med1<med2). */
+/* The output of this function is an 'inference_result' object                  */
+/* with the following results:                                                  */
+/*   1. 'method= type of test.                                                   */
+/*   2. 'hypotheses: null hypothesis and alternative                             */
+/*   3. 'statistic: statistic used in the procedure                              */
+/*   4. 'distribution: sample statistic distribution.                            */
+/*   5. 'p_value: p-value of the sample statistic                                */
+test_rank_sum(x1,x2,[select]):= 
+block([numer:stats_numer, options, defaults, n1, n2, n, aux, ordered, pos, nequal, nfirst, rank, ties:[],
+       sigma, mu, noties, statistic, method, distribution, hypo, pvalue, listarith:true],
+
+  /* controlling sample format */
+  if not listofexpr(x1) and not (matrixp(x1) and length(x1[1]) = 1 and every('identity,map('listofexpr,args(x1))))
+     then error("Sample 'x1' should be a list with expressions or a column matrix")
+     else (n1: length(x1)),
+  if not listofexpr(x2) and not (matrixp(x2) and length(x2[1]) = 1 and every('identity,map('listofexpr,args(x2))))
+     then error("Sample 'x2' should be a list with expressions or a column matrix")
+     else n2: length(x2),
+
+  /* updating and controlling options */
+  options:  ['alternative],
+  defaults: ['twosided],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[1],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+
+  /* sample sizes */
+  n1: length(x1),
+  n2: length(x2),
+  n: n1 + n2,
+
+  /* statistic W: both samples are combined in one    */
+  /* ordered list and ranks of the second sample are  */
+  /* added. In case of ties, ranks of equal numbers   */
+  /* are averaged and the p value is computed by the  */
+  /* normal approximation. [Cuadras, p. 13.13]        */
+  statistic: 0,
+  ordered: sort(append(makelist([x1[i],1],i,1,n1),
+                       makelist([x2[i],2],i,1,n2)),
+                lambda([u,v], orderlessp(u[1], v[1]))),
+  pos:1,
+  while pos <= n do
+     (nequal: 1,
+      if ordered[pos][2] = 2
+         then nfirst: 0
+         else nfirst: 1,
+      rank: pos,
+      while pos+nequal <= n and ordered[pos+nequal][1] = ordered[pos][1] do
+         (if ordered[pos+nequal][2] = 1 then nfirst: nfirst + 1,
+          rank: rank + pos + nequal,
+          nequal: nequal + 1),
+      statistic: statistic + nfirst * rank / nequal,
+      pos: pos + nequal,
+      ties: cons(nequal, ties)),
+  /* convert to Mann-Whitney statistic */
+  statistic: statistic - n1 * (n1 + 1) / 2,
+
+  /* pvalue, method, distribution */
+  noties: every(lambda([z],z=1), ties),
+  mu: n1 * n2 / 2,
+  if n1 < 10 and n2 < 10 and noties
+    then (/* performs exact test */
+          method: "Exact test",
+          distribution: ['rank_sum, n1, n2],
+          if /*alternative*/ defaults[1] = 'twosided
+            then (if statistic > mu
+                   then pvalue: 1 - cdf_rank_sum(statistic-1, n1, n2)
+                   else pvalue: cdf_rank_sum(statistic, n1, n2),
+                  pvalue: min(2*pvalue, 1) )
+            else if /*alternative*/ defaults[1] = 'greater
+                   then pvalue: 1 - cdf_rank_sum(statistic-1, n1, n2)
+                   else pvalue: cdf_rank_sum(statistic, n1, n2) )
+    else (/* asymptotic test */
+          method: "Asymptotic test",
+          if not noties then method: concat(method, ". Ties"),
+          sigma: sqrt(mu / 6 * (n + 1 - apply("+",ties^3-ties) / (n * (n-1)))),
+          if /*alternative*/ defaults[1] = 'twosided
+            then (pvalue: cdf_normal(statistic, mu + signum(statistic - mu)/2, sigma),
+                  pvalue: 2 * min(pvalue, 1 - pvalue),
+                  distribution: ['normal, mu + signum(statistic - mu)/2, sigma])
+            else if /*alternative*/ defaults[1] = 'greater
+                   then (pvalue: 1 - cdf_normal(statistic, mu+1/2, sigma),
+                         distribution: ['normal, mu + 1/2, sigma] )
+                   else (pvalue: cdf_normal(statistic, mu-1/2, sigma),
+                         distribution: ['normal, mu-1/2, sigma]   )),
+
+  /* hypotheses */
+  if /*alternative*/ defaults[1] = 'greater
+     then hypo: "H0: med1 = med2 , H1: med1 > med2"
+     else if /*alternative*/ defaults[1] = 'less
+             then hypo: "H0: med1 = med2 , H1: med1 < med2"
+             else hypo: "H0: med1 = med2 , H1: med1 # med2",
+
+  /* result as an 'inference_result' object*/
+  inference_result("RANK SUM TEST",
+                 [  ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue] ],
+                 [1,2,3,4,5])     )$
+
+
+
+
+
+
+
+
+/* This is the proportions test. The first argument 'x' is the number of        */
+/* successes, the second number 'n>=x' is the number of trials.                 */
+/* It admits the following options:                                             */
+/*   'proportion=1/2: this is the value of the proportion to be checked.        */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid       */
+/*            values are: 'twosided, 'greater and 'less.                        */
+/*   'conflevel=95/100: confidence level of the confidence interval; valid      */
+/*           values are: a symbol or an expression which takes a value in (0,1) */
+/*   'asymptotic=false: whether it performs an exact test based on the binomial */
+/*           distribution, or an asymptotic one based on the normal.            */
+/*   'correct=true: whether Yates correction must be applied in case of the     */
+/*           asymptotic calculation of the confidence interval.                 */
+/*                                                                             */
+/* The output of this function is an 'inference_result' object with the        */
+/* following results:                                                          */
+/*   1. 'sample_proportion= sample estimate for the mean                       */
+/*   2. 'conf_level= confidence level                                          */
+/*   3. 'conf_interval= confidence interval                                    */
+/*   4. 'method= type of test and whether Yates correction is applied.         */
+/*   5. 'hypotheses= null hypothesis and alternative                           */
+/*   6. 'statistic= statistic used in the procedure                            */
+/*   7. 'distribution= statistic's distribution and its parameters             */
+/*   8. 'p_value= p-value of this test                                         */
+test_proportion(x,n,[select]):= 
+block([numer:stats_numer, options, defaults, aux, phat, method, statistic,
+       distribution, cinterval, hypo, pvalue, alpha, pl:0, pu:1, stdev],
+
+  /* controlling input data */
+  if integerp(x) and integerp(n) and (n < x or x < 0)
+     then error("Input data must be 0 <= x <= n"),
+
+  /* updating and controlling options */
+  options:  ['proportion, 'alternative, 'conflevel, 'correct, 'asymptotic],
+  defaults: [1/2,         'twosided   ,  95/100,     true,    false],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if numberp(defaults[1]) and (defaults[1] <= 0 or defaults[1] >= 1)
+     then error("Option 'proportion' is not correct"),
+  if not member(defaults[2],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+  if numberp(defaults[3]) and (defaults[3] <= 0 or defaults[3] >= 1)
+     then error("Option 'conflevel' can't be outside interval (0,1)"),
+  if not member(defaults[4],[true, false])
+     then error("Option 'correct' must be true or false"),
+  if not member(defaults[5],[true, false])
+     then error("Option 'asymptotic' must be true or false"),
+
+  /* proportion estimate */
+  phat: x/n,
+
+  /* method */
+  method: concat(if /*asymptotic*/ defaults[5] = true
+                     then "Asymptotic test"
+                     else "Exact binomial test",
+                 if /*correct*/ defaults[4] and defaults[5]
+                     then " with Yates correction."
+                     else "."),
+
+  /* exact test */
+  if /*asymptotic*/ defaults[5] = false
+     then (statistic: x,
+           distribution: ['binomial, n, defaults[1]],
+           if /*alternative*/ defaults[2] = 'twosided
+              then (alpha: (1 - defaults[3])/2,
+                    if x # 0
+                      then pl: quantile_beta(alpha, x, n-x+1),
+                    if x # n
+                      then pu: quantile_beta(1-alpha, x+1, n-x),
+                    cinterval: [pl, pu],
+                    block([m: n * defaults[1],
+                           d: pdf_binomial(x, n, defaults[1]),
+                           y: 0],
+                      if sign(x - m) = 'zero
+                        then pvalue: 1
+                      elseif x < m
+                        then (for k: ceiling(m) thru n do
+                                if pdf_binomial(k, n, defaults[1]) <= d
+                                  then y: y+1,
+                              pvalue: cdf_binomial(x, n, defaults[1]) +
+                                      1 - cdf_binomial(n-y, n, defaults[1]))
+                        else (for k: 0 thru floor(m) do
+                                if pdf_binomial(k, n, defaults[1]) <= d
+                                  then y: y+1,
+                              pvalue: cdf_binomial(y-1, n, defaults[1]) +
+                                      1 - cdf_binomial(x-1, n, defaults[1]))))
+           elseif /*alternative*/ defaults[2] = 'less
+              then (if x # n
+                      then pu: quantile_beta(defaults[3], x+1, n-x),
+                    cinterval: [0, pu],
+                    pvalue: cdf_binomial(x, n, defaults[1]))
+              else ( /* alternative is greater */
+                    if x # 0
+                      then pl: quantile_beta(1 - defaults[3], x, n-x+1),
+                    cinterval: [pl, 1],
+                    pvalue: 1 - cdf_binomial(x-1, n, defaults[1])))
+
+     else (/* asymptotic test*/
+           statistic: phat,
+           stdev: sqrt((phat*(1-phat))/n),
+           distribution: ['normal, defaults[1], stdev],
+
+           /* calculate pvalue */
+           if defaults[2] = 'twosided
+             then /* alternative is twosided */
+                  pvalue: 2*(1-cdf_normal(defaults[1]+abs(phat-defaults[1]), defaults[1], stdev))
+           elseif defaults[2] = 'less
+             then /* alternative is less */
+                  pvalue: cdf_normal(phat, defaults[1], stdev)
+             else /* alternative is greater */
+                   pvalue: 1 - cdf_normal(phat, defaults[1], stdev),
+
+           /* calculate Wilson score confidence interval */
+           block([z, yates, z22n, pc, pl:0, pu:1],
+             if defaults[2] = 'twosided
+               then z: quantile_normal((1 + defaults[3])/2, 0 ,1)
+               else z: quantile_normal(defaults[3], 0 ,1),
+             if defaults[4] /* Yates correction */
+                then yates: min(1/2, abs(x - n * defaults[1]))
+                else yates: 0,
+             z22n: z*z/(2*n),
+             if defaults[2] = 'twosided or defaults[2] = 'greater
+               then (pc: phat - yates/n,
+                     if pc > 0
+                       then pl: (pc+z22n-z*sqrt((pc*(1-pc))/n + z22n/(2*n))) / (1+2*z22n)),
+             if defaults[2] = 'twosided or defaults[2] = 'less
+               then (pc: phat + yates/n,
+                     if pc < 1
+                       then pu: (pc+z22n+z*sqrt((pc*(1-pc))/n + z22n/(2*n))) / (1+2*z22n)),
+             cinterval: [pl, pu] )),
+
+  /* hypotheses */
+  aux: string(defaults[1]),
+  if /*alternative*/ defaults[2] = 'greater
+     then hypo: concat("H0: p = ", aux," , H1: p > ", aux)
+  elseif /*alternative*/ defaults[2] = 'less
+     then hypo: concat("H0: p = ", aux," , H1: p < ", aux)
+     else hypo: concat("H0: p = ", aux," , H1: p # ", aux),
+
+  /* result as an 'inference_result' object*/
+  inference_result("PROPORTION TEST",
+                 [  ['sample_proportion, phat],
+                    ['conf_level, defaults[3]],
+                    ['conf_interval, cinterval],
+                    ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue]  ],
+                 [1,2,3,4,5,6,7,8])    )$
+
+
+
+
+
+
+
+/* Test for the difference of two proportions. The first and second arguments,   */
+/* 'x1' and 'n1>=x1', are the number of successes and total number of trials in  */
+/* the first sample, respectively; and the third and fourth arguments,           */
+/* 'x2' and 'n2>=x2', are the corresponding numbers in the second sample.        */
+/* This is an asymptotic test which requieres n1 and n2 to be both >= 10,        */
+/* and both samples are considered independent.                                  */
+/* It admits the following options:                                              */
+/*   'alternative='twosided: this is the alternative hypothesis H1; valid        */
+/*            values are: 'twosided, 'greater and 'less.                         */
+/*   'conflevel=95/100: confidence level of the confidence interval; valid       */
+/*           values are: a symbol or an expression which takes a value in (0,1)  */
+/*   'correct=true: whether Yates correction must be applied or not              */
+/*                                                                               */
+/* The output of this function is an 'inference_result' object with the          */
+/* following results:                                                            */
+/*   1. 'proportions= list with the two sample proportions                       */
+/*   2. 'conf_level= confidence level                                            */
+/*   3. 'conf_interval= confidence interval                                      */
+/*   4. 'method= name of the test and/or warning message in case of n1 or n2<10  */
+/*   5. 'hypotheses= null hypothesis and alternative                             */
+/*   6. 'statistic= statistic used in the procedure, namely the difference p1-p2 */
+/*   7. 'distribution= statistic's asymptotic distribution and its parameters    */
+/*   8. 'p_value= p-value of this test                                           */
+test_proportions_difference(x1,n1,x2,n2,[select]) :=
+block([numer:stats_numer, options, defaults, aux, phat, difphat, method,
+       cinterval, hypo, sd, yates: 1/2, width],
+
+  /* controlling input data */
+  if integerp(x1) and integerp(n1) and (n1 < x1 or x1 < 0)
+     then error("Input data must be 0 <= x1 <= n1"),
+  if integerp(x2) and integerp(n2) and (n2 < x2 or x2 < 0)
+     then error("Input data must be 0 <= x2 <= n2"),
+
+  /* updating and controlling options */
+  options:  ['alternative, 'conflevel, 'correct],
+  defaults: ['twosided   ,  95/100,    true],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[1],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+  if numberp(defaults[2]) and (defaults[2] <= 0 or defaults[2] >= 1)
+     then error("Option 'conflevel' can't be outside interval (0,1)"),
+  if not member(defaults[3],[true, false])
+     then error("Option 'correct' must be true or false"),
+
+  /* proportions estimates */
+  phat: [x1/n1, x2/n2],
+  difphat: phat[1] - phat[2],
+
+  /* method */
+  method: concat("Asymptotic test.",
+                 if defaults[3]
+                   then " Yates correction."
+                   else "",
+                 if integerp(n1) and n1 < 10 or integerp(n2) and n2 < 10
+                   then " Warning: small sample."
+                   else ""),
+
+  /* confidence interval */
+  if not defaults[3] /* don't apply Yates correction */
+    then yates: 0,
+  yates: min(yates, abs(difphat) / (1/n1 + 1/n2)),
+  if /*alternative*/ defaults[1] = 'twosided
+    then aux: quantile_normal((1 + defaults[2])/2, 0, 1)
+    else aux: quantile_normal(defaults[2], 0, 1),
+  width: aux * sqrt((phat[1]*(1-phat[1]))/n1 + (phat[2]*(1-phat[2]))/n2) +
+           yates * (1/n1 + 1/n2),
+  if /*alternative*/ defaults[1] = 'twosided
+    then cinterval : [max(difphat - width, -1), min(difphat + width, 1)]
+  elseif defaults[1] = 'greater
+    then cinterval : [max(difphat - width, -1), 1]
+    else cinterval : [-1, min(difphat + width, 1)],
+
+  /* hypotheses */
+  if /*alternative*/ defaults[1] = 'greater
+     then hypo: concat("H0: p1 = p2 , H1: p1 > p2")
+  elseif /*alternative*/ defaults[1] = 'less
+     then hypo: concat("H0: p1 = p2 , H1: p1 < p2")
+     else hypo: concat("H0: p1 = p2 , H1: p1 # p2"),
+
+  /* distribution and p-value */
+  aux: (x1+x2)/(n1+n2),
+  sd: sqrt(aux * (1-aux) * (1/n1 + 1/n2)),
+  distribution: ['normal, 0, sd],
+  if /*alternative*/ defaults[1] = 'twosided
+    then pvalue : 2 * (1 - cdf_normal(abs(difphat), 0, sd))
+  elseif defaults[1] = 'greater
+    then pvalue : 1 - cdf_normal(difphat, 0, sd)
+    else pvalue : cdf_normal(difphat, 0, sd),
+
+  /* result as an 'inference_result' object*/
+  inference_result("DIFFERENCE OF PROPORTIONS TEST",
+                 [  ['proportions, phat],
+                    ['conf_level, defaults[2]],
+                    ['conf_interval, cinterval],
+                    ['method, method],
+                    ['hypotheses, hypo],
+                    ['statistic, difphat],
+                    ['distribution, distribution],
+                    ['p_value, pvalue]  ],
+                 [1,2,3,4,5,6,7,8])  ) $
+
+
+
+
+
+simple_linear_regression(dat,[select]):=block([numer:stats_numer, options, defaults, n, aux, 
+         means, covar, corr, resvar, adc, a, b, pred, res, sig2, aconfint,
+         coef, bconfint, vconfint,
+         statistic, distribution, hypo, pvalue, listarith:true],
+  
+  /* controlling sample format */
+  if not matrixp(dat) then dat: apply('matrix,dat),
+  if length(dat[1]) # 2  or not every('identity,map('listofexpr,args(dat)))
+     then error("Sample must contain pairs of expressions")
+     else (n: length(dat)),
+
+  if n < 3 then error("Sample size must be greater than 2"),
+
+  /* updating and controlling options */
+  options:  ['alternative, 'conflevel, 'regressor],
+  defaults: ['twosided,    95/100,     'x],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if not member(defaults[1],['twosided, 'greater, 'less])
+     then error("Option 'alternative' is not correct"),
+  if numberp(defaults[2]) and (defaults[2] <= 0 or defaults[2] >= 1)
+     then error("Option 'conflevel' can't be outside interval (0,1)"),
+  if not symbolp(defaults[3])
+     then error("Name of independent variable must be a symbol"),
+
+  /* estimations */
+  means: mean(dat),
+  covar: cov(dat),
+  corr: covar[1,2] / sqrt(covar[1,1] * covar[2,2]),
+  b: covar[1,2] / covar[1,1],
+  a: means[2] - b * means[1],
+
+  /* computing predictions, residuals, residual variance and adc */
+  pred: transpose(a + b * col(dat,1))[1],
+  res: transpose(col(dat,2))[1] - pred,
+  sig2: mean(res^2),        /* ml estimator for sigma^2 */
+  resvar: n * sig2 / (n-2), /* residual variance */
+  adc: 1 - (1-1/n) * resvar / covar[2,2],
+
+  /* two sided confidence interval for a */
+  aconfint: a + [-1,1] * quantile_student_t((1 + defaults[2])/2, n-2) *
+                sqrt(apply("+",transpose(col(dat,1))[1]^2) * resvar / (n^2 * covar[1,1])),
+
+  /* confidence interval for b and hypothesis test.            */
+  /* Note that at this moment, there is not any option for the */
+  /* alternative hypothesis, it is always considered two-sided.*/
+  /* I maintain these conditionals here in case there are      */
+  /* changes in future releases.                               */
+  if float(resvar) = 0.0
+    then /* data on the straight line */
+         bconfint: statistic: hypo: statistic: distribution: pvalue: 'undefined
+    else (
+      coef: sqrt(resvar / (n * covar[1,1])),
+      statistic: b / coef,
+      if /*alternative*/ defaults[1] = 'twosided
+         then statistic: abs(statistic),
+      if /*alternative*/ defaults[1] = 'greater
+         then (bconfint: [b - quantile_student_t(defaults[2], n-2) * coef,'inf],
+               hypo: "H0: b = 0 ,H1: b > 0",
+               pvalue: 1 - cdf_student_t(statistic,n-2) )
+         else if /*alternative*/ defaults[1] = 'less
+                 then (bconfint: ['minf, b + quantile_student_t(defaults[2], n-2) * coef],
+                       hypo: "H0: b = 0 ,H1: b < 0",
+                       pvalue: cdf_student_t(statistic,n-2) )
+                 else /* twosided alternative */
+                       (bconfint: b + [-1,1] * quantile_student_t((1 + defaults[2])/2, n-2) * coef,
+                       hypo: "H0: b = 0 ,H1: b # 0",
+                       pvalue: 2 * (1 - cdf_student_t(statistic,n-2))  ),
+      distribution: ['student_t, n-2] ),
+
+  /* two sided confidence interval for sigma^2 */
+  vconfint: (n-2) * resvar / [quantile_chi2((1+defaults[2])/2,n-2),
+                                     quantile_chi2((1-defaults[2])/2,n-2)],
+
+  /* result as an 'inference_result' object*/
+  inference_result("SIMPLE LINEAR REGRESSION",
+                 [  ['model, a + b * defaults[3] /* = regressor name */],
+                    ['means, means],
+                    ['variances, [covar[1,1], covar[2,2]]],
+                    ['correlation, corr],
+                    ['adc, adc],
+                    ['a_estimation, a],
+                    ['a_conf_int, aconfint],
+                    ['b_estimation, b],
+                    ['b_conf_int, bconfint],
+                    ['hypotheses, hypo],
+                    ['statistic, statistic],
+                    ['distribution, distribution],
+                    ['p_value, pvalue],
+                    ['v_estimation, resvar],
+                    ['v_conf_int, vconfint],
+                    ['cond_mean_conf_int, 
+                        a + b*defaults[3] + 
+                        [-1,1] * quantile_student_t((1 + defaults[2])/2, n-2)* 
+                                 sqrt(resvar * (1/n+(means[1]-defaults[3])^2/(covar[1,1]*n)))],
+                    ['new_pred_conf_int,
+                        a + b*defaults[3] + 
+                        [-1,1] * quantile_student_t((1 + defaults[2])/2, n-2)* 
+                                 sqrt(resvar * ((n+1)/n+(means[1]-defaults[3])^2/(covar[1,1]*n)))],
+                    ['residuals, sort(args(transpose(matrix(pred,res))),
+                                      lambda([x,y], orderlessp(x,y)) )] ],
+                 [1,4,14,9,10,11,12,13])     )$
+
+
+
+
+
+
+/* Multivariate linear regression, y_i=b_0+b_1*x_1i+...+b_k*x_ki+u_i, where     */
+/* u_i are N(0,sigma) iid random variables. Argument dat must be a matrix       */
+/* with more than one column.                                                   */
+/* Admits the following options:                                                */
+/*   'conflevel=95/100: confidence level of the confidence intervals; valid     */
+/*           values are: a symbol or an expression which takes a value in (0,1) */
+/* The output of this function is an 'inference_result' object                  */
+/* with the following results:                                                  */
+/*   1. 'b_estimation= coefficient estimates                                    */
+/* - 2. 'b_covariances= covariance matrix of coefficient estimates              */
+/* - 3. 'b_conf_int= confidence intervals of coefficient estimates              */
+/*   4. 'b_statistics= statistics for testing coefficient                       */
+/*   5. 'b_p_values= p-values for coefficient tests                             */
+/*   6. 'b_distribution= probability distribution for coefficient tests         */
+/*   7. 'v_estimation= unbiased variance estimator                              */
+/*   8. 'v_conf_int= variance confidence interval                               */
+/*   9. 'v_distribution= probability distribution for variance test             */
+/* -10. 'covariances= data covariance matrix                                    */
+/* -11. 'residuals= residuals                                                   */
+/*  12. 'adc= adjusted determination coefficient                                */
+/* -13. 'aic= akaike's information criterion                                    */
+/* -14. 'bic= bayes's information criterion                                     */
+/* Items marked with the minus sign are kept hidden.                            */
+linear_regression(dat,[select]) := 
+ block(
+    [numer:stats_numer, options, defaults, n, p, aux, x, y, covb, q, b, r,
+     df, sR2, sumsquares, Rbar, ci, t, pv, s2, aic, bic],
+
+  /* controlling sample format */
+  if not matrixp(dat) then dat: apply('matrix,dat),
+  if length(dat[1]) < 2  or not every('identity,map('listofexpr,args(dat)))
+     then error("Sample must be a matrix or a list of lists of equal length"),
+
+  /* updating and controlling options */
+  options:  ['conflevel],
+  defaults: [95/100],
+  for i in select do(
+     aux: ?position(lhs(i),options),
+     if numberp(aux) and aux <= length(options) and aux >= 1
+        then defaults[aux]: rhs(i)),
+  if numberp(defaults[1]) and (defaults[1] <= 0 or defaults[1] >= 1)
+     then error("Option 'conflevel' can't be outside interval (0,1)"),
+
+  /* sample size */
+  n: length(dat),
+  /* number or regressors */
+  p: length(dat[1]) - 1,
+  /* responses */
+  y: col(dat, p+1),
+  /* regressor */
+  x: addcol(apply(matrix, makelist([1],k,n)), submatrix(dat, p+1)),
+  /* coefficients */
+  b: block([xt: transpose(x)],
+       covb: invert(xt . x),
+       covb . (xt . y)),
+  b: transpose(b)[1],
+  /* residuals */
+  r: y - x . b,
+  r: transpose(r)[1],
+  /* degrees of freedom */
+  df: n-p-1,
+  /* unbiased variance estimator */
+  sumsquares: r . r,
+  sR2: sumsquares / df,
+  /* covariance matrix of estimators */
+  covb: sR2 * covb,
+  q: makelist(covb[j,j],j,length(covb)),
+  /* adjusted coefficient of determination */
+  Rbar: 1 - sR2/first(var1(y)),
+  /* confidence intervals for coefficients */
+  aux: quantile_student_t((1+defaults[1])/2, df) * sqrt(q),
+  ci: makelist(b[k]+[-1,1]*aux[k],k,1,length(b)),
+  /* statistic contrasts */
+  t: b / sqrt(q),
+  /* p-values */
+  pv: 2*(1-map(lambda([z], cdf_student_t(abs(z),df)), t)),
+  /* confidence interval for the variance */
+  s2: df*sR2*[1,1] / [quantile_chi2((1+defaults[1])/2,df),
+                      quantile_chi2((1-defaults[1])/2,df)],
+  /* AIC and BIC */
+  aic: n*log(sumsquares/n) + 2*(p+1),
+  bic: n*log(sumsquares/n) + log(n)*(p+1),
+
+  /* result as an 'inference_result' object */
+  inference_result("LINEAR REGRESSION MODEL",
+                 [  ['b_estimation, b],
+                    ['b_covariances, covb],
+                    ['b_conf_int, ci],
+                    ['b_statistics, t],
+                    ['b_p_values, pv],
+                    ['b_distribution, ['student_t, df]],
+                    ['v_estimation, sR2],
+                    ['v_conf_int, s2],
+                    ['v_distribution, ['chi2, df]],
+                    ['residuals, r],
+                    ['adc, Rbar], /* adjusted determination coefficient */
+                    ['aic, aic],
+                    ['bic, bic] ],
+                 [1,4,5,6,7,8,9,11]) )$
+
+
+
+
+
+
+
+
+
+
+
+/***************************************/
+/*  SPECIAL PROBABILITY DISTRIBUTIONS  */
+/***************************************/
+
+
+/*        SOME AUXILIARY FUNCTIONS  TO BE          */
+/*  USED BY THE SPECIAL PROBABILITY DISTRIBUTIONS  */
+
+
+/* If m and n are positive integers, it returns 1.
+   If at least one of them is not a positive integer, the 
+   function returns -1. If there is not enough information, the
+   output is 0 */
+controlw(m,n):=
+   if integerp(m) and sign(m)='pos and
+      integerp(n) and sign(n)='pos
+      then 1
+      else if numberp(m) and not integerp(m) or
+              numberp(n) and not integerp(n) or 
+              member(sign(m),['neg,'zero,'nz]) or
+              member(sign(n),['neg,'zero,'nz])
+              then -1
+              else 0  $
+
+
+/*    SIGNED RANK DISTRIBUTION     */
+
+
+/* R: dsignrank(x,n) */
+pdf_signed_rank(x,n):=block([cp:controli(n),t],
+   if cp=-1 then error("Illegal parameter"),
+   if cp=0 then return(funmake('pdf_signed_rank,[x,n])),
+   t: n * (n+1) / 2,
+   if sign(x)='neg or numberp(x) and not integerp(x) or sign(x-t)='pos
+      then return(0),
+   if numberp(x) and integerp(x) and numberp(n)
+      then (/* take advantage of the symmetry */
+            if x > t/2 then x: t - x,
+            return(?signed_rank_recursion(x,n) / 2^n)),
+   funmake('pdf_signed_rank,[x,n])  )$
+
+/* R: psignrank(x,n) */
+cdf_signed_rank(x,n):=block([cp:controli(n),t,xbis,sum:0],
+   if cp=-1 then error("Illegal parameter"),
+   if cp=0 then return(funmake('cdf_signed_rank,[x,n])),
+   t: n * (n+1) / 2,
+   if sign(x)='neg then return(0),
+   if sign(x-t)='pos then return(1),
+   if numberp(x) and numberp(n)
+      then (/* take advantage of the symmetry */
+            if x > t/2
+              then xbis: t - floor(x) - 1
+              else xbis: floor(x),
+            for k:0 thru xbis do
+              sum: sum + ?signed_rank_recursion(k,n),
+            sum: sum / 2^n,
+            if x > t/2 then sum: 1 - sum,
+            return(sum)),
+   funmake('cdf_signed_rank,[x,n])  )$
+
+
+/*    RANK SUM DISTRIBUTION     */
+
+
+/* R: dwilcox(x,m,n) */
+pdf_rank_sum(x,m,n):=block([cp:controlw(m,n),t],
+   if cp=-1 then error("Illegal parameter"),
+   if cp=0 then return(funmake('pdf_rank_sum,[x,m,n])),
+   t: m * n,
+   if sign(x)='neg or numberp(x) and not integerp(x) or sign(x-t)='pos
+      then return(0),
+   if numberp(x) and integerp(x) and numberp(m) and numberp(n)
+      then (/* take advantage of the symmetry */
+            if x > t/2 then x: t - x,
+            return(?rank_sum_recursion(x,m+n,m) / binomial(m+n,m))),
+   funmake('pdf_rank_sum,[x,m,n])  )$
+
+/* R: pwilcox(x,m,n) */
+cdf_rank_sum(x,m,n):=block([cp:controlw(m,n),t,xbis,sum:0],
+   if cp=-1 then error("Illegal parameter"),
+   if cp=0 then return(funmake('cdf_rank_sum,[x,m,n])),
+   t: m * n,
+   if sign(x)='neg then return(0),
+   if sign(x-t)='pos then return(1),
+   if numberp(x) and numberp(m) and numberp(n)
+      then (/* take advantage of the symmetry */
+            if x > t/2
+              then xbis: t - floor(x) - 1
+              else xbis: floor(x),
+            for k:0 thru xbis do
+              sum: sum + ?rank_sum_recursion(k,m+n,m),
+            sum: sum / binomial(m+n,m),
+            if x > t/2 then sum: 1 - sum,
+            return(sum)),
+   funmake('cdf_rank_sum,[x,m,n])  )$

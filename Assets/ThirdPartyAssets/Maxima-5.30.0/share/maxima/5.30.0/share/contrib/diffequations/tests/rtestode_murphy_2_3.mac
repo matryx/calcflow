@@ -1,0 +1,39 @@
+/* ODE tests - Murphy equations 2.201 - 2.300
+
+  Reference: 
+    G M Murphy, Ordinary Differential Equations and Their 
+    Solutions, Van Nostrand, 1960, pp 15-23
+
+    First Order and Second or Higher Degree, p278 ff
+*/
+
+/* Don't kill(all); It messes up trigsimp */
+
+/* Eliminate parameter t from singular solution */
+(elim_(ans,x,y,t):=block([s],s:first(solve(ans[2],t)),s:solve(ev(ans[1],s),y),s[1]),done);
+done;
+
+/* Print ode number*/
+(pn_(n_):=print("Murphy ODE 2.",n_),true);
+true;
+
+/* 252 */
+/*(pn_(252),ans:contrib_ode(eqn:a^2*(b^2-(c*x-a*y)^2)*'diff(y,x)^2+2*a*b^2*c*'diff(y,x)+c^2*(b^2-(c*x-a*y)^2)=0,y,x));*/
+
+/* 285 */
+(pn_(285),ans:contrib_ode(eqn:'diff(y,x)^3+a*x*'diff(y,x)-a*y=0,y,x));
+[y=(%c*a*x+%c^3)/a,y=-2*x*sqrt(-a*x)/(3*sqrt(3)),y=2*x*sqrt(-a*x)/(3*sqrt(3))];
+[method,ode_check(eqn,ans[1]),ode_check(eqn,ans[2]),ode_check(eqn,ans[3])];
+[clairault,0,0,0];
+
+/* 286 */
+(pn_(286),ans:contrib_ode(eqn:'diff(y,x)^3-(a+b*x)*'diff(y,x)+b*y=0,y,x));
+[y=(%c*b*x+%c*a-%c^3)/b,y=-2*(b*x+a)^(3/2)/(3*sqrt(3)*b),y=2*(b*x+a)^(3/2)/(3*sqrt(3)*b)];
+[method,ode_check(eqn,ans[1]),ode_check(eqn,ans[2]),ode_check(eqn,ans[3])];
+[clairault,0,0,0];
+
+/* 297 */
+(pn_(297),ans:contrib_ode(eqn:'diff(y,x)^3-'diff(y,x)^2+x*'diff(y,x)-y=0,y,x));
+[y=%c*x+%c^3-%c^2,y=-((sqrt(1-3*x)*(6*x-2)-9*x+2)/27),y=(sqrt(1-3*x)*(6*x-2)+9*x-2)/27];
+[method,ode_check(eqn,ans[1]),ode_check(eqn,ans[2]),ode_check(eqn,ans[3])];
+[clairault,0,0,0];

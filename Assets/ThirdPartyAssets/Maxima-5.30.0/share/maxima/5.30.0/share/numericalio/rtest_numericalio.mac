@@ -1,0 +1,491 @@
+/* Test read/write array */
+
+(kill (all),
+ l :
+   [7, 12, FOO, 45, 91,
+    2, -8, 123, -9, -1,
+    8, 18, Bar, -5, 17,
+    6, 13, -57, 28, 53,
+
+    2.5, 19.7, 1.2, 9.1, 1.7,
+    3.5, -8.2, 3.1, 7.2, 7.1,
+    5.4, -5.3, 9.8, 1.8, 6.2,
+    0.8, 52.9, 7.1, 0.2, 1.8,
+
+    baz, 79, 112, 173, 311,
+    18, 97, 211, 317, 113,
+    29, 32, 925, 512, 713,
+    87, 53, 133, 127, 158],
+ a : make_array ('any, 3, 4, 5),
+ fillarray (a, l),
+
+ /* Note that this makes b the same size as a,
+  * despite the different arguments ... <sigh>
+  */
+ array (b, 2, 3, 4),
+
+ fillarray (b, l),
+
+ a2 : make_array ('any, 3, 4, 5),
+ array (b2, 2, 3, 4),
+ 0);
+0;
+
+(read_array (file_search ("array.data"), a2),
+ is (equal (a, a2)));
+true;
+
+(read_array (file_search ("array.data"), b2),
+ is (equal (b, b2)));
+true;
+
+(write_data (a2, sconcat (maxima_tempdir, "/tmp-lisp-array.data")),
+ a3: make_array('any, 3, 4, 5),
+ read_array (sconcat (maxima_tempdir, "/tmp-lisp-array.data"), a3), 
+ is (equal (a2, a3)));
+true;
+
+(write_data (b2, sconcat (maxima_tempdir, "/tmp-maxima-array.data")),
+ array (b3, 2, 3, 4),
+ read_array (sconcat (maxima_tempdir, "/tmp-maxima-array.data"), b3),
+ is (equal (b2, b3)));
+true;
+
+/* Test read/write comma-separated data */
+
+(kill (all),
+ l_nested :
+  [[KEY, XX, YY, ZZ, FOO, Bar, baz],
+   [aa46, 7, 7, 16, FOO3, 2.71, 2.88],
+   [aA31, 31, 61, 25, 916, 6.10, 741],
+   [AA22, 61, 40, 13, 32.75, Bar2, 9.12],
+   [AA16, 19, 25, 31, FOO7, 4.80, 697],
+   [AA16, 13, 49, 7, 5.67, 2.54, 4.54],
+   [AA58, 19, 28, 43, 4.04, 0.90, baz8],
+   [AA34, 16, 22, 19, 4.87, 4.90, 2.85],
+   [AA52, 28, 34, 7, FOO9, Bar4, 293],
+   [AA52, 10, 43, 13, 12.125, 5.69, 0.00],
+   [AA40, 7, 25, 40, 3.15, 7.54, 6.11]],
+ m : apply(matrix, l_nested),
+ 0);
+0;
+
+(m2 : read_matrix (file_search ("rectangular.csv")),
+ is (m = m2));
+true;
+
+(m3 : read_matrix (file_search ("really-csv.data"), 'comma),
+ is (m = m3));
+true;
+
+(m4 : read_matrix (file_search ("really-space-separated.csv"), 'space),
+ is (m = m4));
+true;
+
+(write_data (m2, sconcat (maxima_tempdir, "/tmp-matrix.csv")),
+ m5 : read_matrix(sconcat (maxima_tempdir, "/tmp-matrix.csv")),
+ is (m2 = m5));
+true;
+
+(write_data (m2, sconcat (maxima_tempdir, "/tmp-matrix.data", 'comma)),
+ m6 : read_matrix(sconcat (maxima_tempdir, "/tmp-matrix.data", 'comma)),
+ is (m2 = m6));
+true;
+
+(write_data (m2, sconcat (maxima_tempdir, "/tmp-matrix-2.csv", 'space)),
+ m7 : read_matrix(sconcat (maxima_tempdir, "/tmp-matrix-2.csv", 'space)),
+ is (m2 = m7));
+true;
+
+(array (a, 10, 6),
+ read_array (file_search ("rectangular.data"), a),
+ write_data (a, sconcat (maxima_tempdir, "/tmp-array.csv")),
+ array (a2, 10, 6),
+ read_array (sconcat (maxima_tempdir, "/tmp-array.csv"), a2),
+ is (equal (a, a2)));
+true;
+
+/* Test read/write variable-length lines */
+
+(kill (all),
+ l_nested :
+  [[aa46,7,7,16,FOO3],
+   [aA31,31,61,25,9.16,513],
+   [AA16,13,49,7,5.67,2.54,4.54],
+   [AA52,7,FOO9,Bar4,2.93],
+   [AA40,7,25,40,3.15,7.54,0.00],
+   [aa46,1325,7,16,FOO3,2.71,2.88],
+   [aA31,31,61,25,9.16],
+   [AA58,19,28,43,4.04,0.90,baz8],
+   [AA34,16,175.25,2.85],
+   [AA40,7,25],
+   [AA22,617,40,Bar2,9.12],
+   [zz7b,12375e-003,12375s-003,12375d-003,123b-001],
+   [w23q,123.375e-001,123.375s-001,123.375d-001,123.456b-001],
+   [q32w,12375E-003,12375S-003,12375D-003,123B-001],
+   [t5u7,123.375E-001,123.375S-001,123.375D-001,123.456B-001],
+   [q129,"Foo","BAR","Foo \\ BAR \"baz quux\""]],
+ l : flatten (l_nested),
+ h[aa46] : [7,7,16,FOO3],
+ h[aA31] : [31,61,25,9.16,513],
+ h[AA16] : [13,49,7,5.67,2.54,4.54],
+ h[AA52] : [7,FOO9,Bar4,2.93],
+ h[AA40] : [7,25,40,3.15,7.54,0.00],
+ h[aa46] : [1325,7,16,FOO3,2.71,2.88],
+ h[aA31] : [31,61,25,9.16],
+ h[AA58] : [19,28,43,4.04,0.90,baz8],
+ h[AA34] : [16,175.25,2.85],
+ h[AA40] : [7,25],
+ h[AA22] : [617,40,Bar2,9.12],
+ h[zz7b] : [12375e-003,12375s-003,12375d-003,123b-001],
+ h[w23q] : [123.375e-001,123.375s-001,123.375d-001,123.456b-001],
+ h[q32w] : [12375E-003,12375S-003,12375D-003,123B-001],
+ h[t5u7] : [123.375E-001,123.375S-001,123.375D-001,123.456B-001],
+ h[q129] : ["Foo","BAR","Foo \\ BAR \"baz quux\""],
+ 0);
+0;
+
+(l2 : read_list (file_search ("ragged.data")),
+ is (l = l2));
+true;
+
+(l2_nested: read_nested_list (file_search ("ragged.data")),
+ is (l_nested = l2_nested));
+true;
+
+(read_hashed_array (file_search ("ragged.data"), h2),
+ is (equal (h, h2)));
+true;
+
+(AA16: 16,
+ AA22: 22,
+ aA31: 31,
+ AA34: 34,
+ AA40: 40,
+ aa46: 46,
+ AA52: 52,
+ AA58: 58,
+ FOO3: 13,
+ 
+ FOO9: 27.25,
+ Bar4: %pi,
+ baz8: -5.75,
+ Bar2: -1217,
+ is (ev (l) = ev (l2)));
+true;
+
+/* Test read/write rectangular (same number of items on each line) data */
+
+(kill (all),
+ l_nested :
+  [[KEY, XX, YY, ZZ, FOO, Bar, baz],
+   [aa46, 7, 7, 16, FOO3, 2.71, 2.88],
+   [aA31, 31, 61, 25, 916, 6.10, 741],
+   [AA22, 61, 40, 13, 32.75, Bar2, 9.12],
+   [AA16, 19, 25, 31, FOO7, 4.80, 697],
+   [AA16, 13, 49, 7, 5.67, 2.54, 4.54],
+   [AA58, 19, 28, 43, 4.04, 0.90, baz8],
+   [AA34, 16, 22, 19, 4.87, 4.90, 2.85],
+   [AA52, 28, 34, 7, FOO9, Bar4, 293],
+   [AA52, 10, 43, 13, 12.125, 5.69, 0.00],
+   [AA40, 7, 25, 40, 3.15, 7.54, 6.11]],
+ m : apply (matrix, l_nested),
+ for i:1 thru length (l_nested)
+  do h [l_nested [i] [1]] : rest (l_nested [i]),
+ l: flatten (l_nested),
+ 0);
+0;
+
+(m2: read_matrix (file_search ("rectangular.data")),
+ is (m = m2));
+true;
+
+(read_hashed_array (file_search ("rectangular.data"), h2),
+ is (equal (h, h2)));
+true;
+
+(l2_nested : read_nested_list (file_search ("rectangular.data")),
+ is (l_nested = l2_nested));
+true;
+
+(l2 : read_list (file_search ("rectangular.data")),
+ is (l = l2));
+true;
+
+(write_data (m2, sconcat (maxima_tempdir, "/tmp-matrix.data")),
+ l3_nested : read_nested_list (sconcat (maxima_tempdir, "/tmp-matrix.data")),
+ is (l2_nested = l3_nested));
+true;
+
+(write_data (h2, sconcat (maxima_tempdir, "/tmp-hashed-array.data")),
+ read_hashed_array (sconcat (maxima_tempdir, "/tmp-hashed-array.data"), h3),
+ is (equal (h2, h3)));
+true;
+
+(write_data (l2_nested, sconcat (maxima_tempdir, "/tmp-nested-list.data")),
+ m3 : read_matrix (sconcat (maxima_tempdir, "/tmp-nested-list.data")),
+ is (m2 = m3));
+true;
+
+(write_data (l2, sconcat (maxima_tempdir, "/tmp-list.data")),
+ l3 : read_list (sconcat (maxima_tempdir, "/tmp-list.data")),
+ is (l2 = l3));
+true;
+
+(KEY: -2.5,
+ XX: 3.25,
+ YY: 1.75,
+ ZZ: 5.5,
+ FOO: %pi,
+ Bar: 175,
+ baz: 2119,
+ 
+ aa46: 46,
+ aA31: 31,
+ AA22: 22,
+ AA16: 16,
+ AA58: 58,
+ AA34: 34,
+ AA52: 52,
+ AA40: 40,
+ 
+ FOO3: 611,
+ Bar2: 1917,
+ FOO7: 6,
+ baz8: -5,
+ FOO9: -1.5,
+ Bar4: -3.75,
+
+ is (ev (m) = ev (m2)));
+true;
+
+/* Test read/write with different separator characters */
+
+(kill (all),
+ l_nested :
+  [[false],
+   [false, false],
+   [false, false, false],
+   [false, false, false, false],
+   [Foo],
+   [Foo, false],
+   [false, Foo],
+   [Foo, false, false],
+   [false, Foo, false],
+   [false, false, Foo],
+   [Foo, BAR, false],
+   [Foo, false, BAR],
+   [false, Foo, BAR],
+   [Foo, BAR, baz, embedded\ space\ and\ \$p\*cia\!\ c\#\@rs],
+   [12.34, Foo, 12375e-3, BAR, 1234b-2, baz, 1234],
+   ["tab	space comma, semicolon; pipe| dollar$", "quux \"blart\"", ?a\-lisp\-symbol]],
+ 0);
+0;
+
+(l_nested_2 : read_nested_list (file_search ("semicolon.data"), 'semicolon),
+ is (l_nested = l_nested_2));
+true;
+
+(l_nested_3 : read_nested_list (file_search ("pipe.data"), 'pipe),
+ is (l_nested = l_nested_3));
+true;
+
+(write_data (l_nested_2, sconcat (maxima_tempdir, "/tmp-tab.data"), 'tab),
+ l_nested_4: read_nested_list (sconcat (maxima_tempdir, "/tmp-tab.data"), 'tab),
+ is (l_nested = l_nested_4));
+true;
+
+/* Test read/write on streams (instead of files) */
+
+(kill (all),
+ 0);
+0;
+
+(a1 : make_array ('any, 3, 4, 5),
+ read_array (file_search ("array.data"), a1),
+ a2 : make_array ('any, 3, 4, 5),
+ s : openr (file_search ("array.data")),
+ read_array (s, a2),
+ close (s),
+ is (equal (a1, a2)));
+true;
+
+(s : openw (sconcat (maxima_tempdir, "/tmp-lisp-array.data")),
+ write_data (a2, s),
+ close (s),
+ a3 : make_array ('any, 3, 4, 5),
+ s : openr (sconcat (maxima_tempdir, "/tmp-lisp-array.data")),
+ read_array (s, a3),
+ close (s),
+ is (equal (a1, a3)));
+true;
+
+(b1 : array (b, 2, 3, 4),
+ read_array (file_search ("array.data"), b1),
+ b2 : array (b, 2, 3, 4),
+ s : openr (file_search ("array.data")),
+ read_array (s, b2),
+ close (s),
+ is (equal (b1, b2)));
+true;
+
+(s : openw (sconcat (maxima_tempdir, "/tmp-maxima-array.data")),
+ write_data (b2, s),
+ close (s),
+ b3 : array (b, 2, 3, 4),
+ s : openr (sconcat (maxima_tempdir, "/tmp-maxima-array.data")),
+ read_array (s, b3),
+ close (s),
+ is (equal (b1, b3)));
+true;
+
+(m1 : read_matrix (file_search ("rectangular.data")),
+ s : openr (file_search ("rectangular.data")),
+ m2 : read_matrix (s),
+ close (s),
+ is (m1 = m2));
+true;
+
+(s : openw (sconcat (maxima_tempdir, "/tmp-matrix.data")),
+ write_data (m2, s),
+ close (s),
+ s : openr (sconcat (maxima_tempdir, "/tmp-matrix.data")),
+ m3 : read_matrix (s),
+ close (s),
+ is (m1 = m3));
+true;
+
+(l1 : read_list (file_search ("ragged.data")),
+ s : openr (file_search ("ragged.data")),
+ l2 : read_list (s),
+ close (s),
+ is (l1 = l2));
+true;
+
+(s : openw (sconcat (maxima_tempdir, "/tmp-list.data")),
+ write_data (l2, s),
+ close (s),
+ s : openr (sconcat (maxima_tempdir, "/tmp-list.data")),
+ l3 : read_list (s),
+ close (s),
+ is (l1 = l3));
+true;
+
+(l1 : read_nested_list (file_search ("ragged.data")),
+ s : openr (file_search ("ragged.data")),
+ l2 : read_nested_list (s),
+ close (s),
+ is (l1 = l2));
+true;
+
+(s : openw (sconcat (maxima_tempdir, "/tmp-nested-list.data")),
+ write_data (l2, s),
+ close (s),
+ s : openr (sconcat (maxima_tempdir, "/tmp-nested-list.data")),
+ l3 : read_nested_list (s),
+ close (s),
+ is (l1 = l3));
+true;
+
+(read_hashed_array (file_search ("ragged.data"), h1),
+ s : openr (file_search ("ragged.data")),
+ read_hashed_array (s, h2),
+ close (s),
+ is (equal (h1, h2)));
+true;
+
+(s : openw (sconcat (maxima_tempdir, "/tmp-hashed-array.data")),
+ write_data (h2, s),
+ close (s),
+ s : openr (sconcat (maxima_tempdir, "/tmp-hashed-array.data")),
+ read_hashed_array (s, h3),
+ close (s),
+ is (equal (h1, h3)));
+true;
+
+/* Write and read binary data */
+
+(assume_external_byte_order (lsb),
+ read_binary_list (file_search ("test-binary.f8-lsb")));
+[-1.125, 0.375, 3.750, -7.875, 2.625];
+
+(assume_external_byte_order (msb),
+ read_binary_list (file_search ("test-binary.f8-msb")));
+[-1.125, 0.375, 3.750, -7.875, 2.625];
+
+(tmp_msb : sconcat (maxima_tempdir, "/tmp-binary.f8-msb"),
+ tmp_lsb : sconcat (maxima_tempdir, "/tmp-binary.f8-lsb"),
+ L : makelist (11.0^(3*i), i, 1, 98),
+ L4 : append ([?most\-negative\-double\-float], - reverse (L), [- 1.0], -1 / L, [?least\-negative\-normalized\-double\-float, 0.0, ?least\-positive\-normalized\-double\-float], reverse (1 / L), [1.0], L, [?most\-positive\-double\-float]),
+ 0);
+0;
+
+(assume_external_byte_order (lsb),
+ write_binary_data (L4, tmp_lsb));
+done;
+
+(L4b : read_binary_list (tmp_lsb),
+ is (L4b = L4));
+true;
+
+(assume_external_byte_order (msb),
+ write_binary_data (L4, tmp_msb));
+done;
+
+(L4c : read_binary_list (tmp_msb),
+ is (L4c = L4));
+true;
+
+(A4 : make_array (any, 3, 7, 19),
+ fillarray (A4, L4),
+ 0);
+0;
+
+(tmp2_msb : sconcat (maxima_tempdir, "/tmp2-binary.f8-msb"),
+ tmp2_lsb : sconcat (maxima_tempdir, "/tmp2-binary.f8-lsb"),
+ assume_external_byte_order (msb),
+ write_binary_data (A4, tmp2_msb));
+done;
+
+(A4b : make_array (any, 3, 7, 19),
+ read_binary_array (tmp2_msb, A4b),
+ is (A4b = A4b));
+true;
+
+(assume_external_byte_order (lsb),
+ write_binary_data (A4, tmp2_lsb));
+done;
+
+(A4c : make_array (any, 3, 7, 19),
+ read_binary_array (tmp2_lsb, A4c),
+ is (A4c = A4));
+true;
+
+/* Read specific number of data via optional argument */
+
+(l1 : read_list (file_search ("ragged.data")),
+ l2 : read_list (file_search ("ragged.data"), false, 20));
+''(makelist (l1 [i], i, 1, 20));
+
+(s : openr (file_search ("ragged.data")),
+ l2 : read_list (s, false, 20),
+ l3 : read_list (s, false, 12),
+ l4 : read_list (s),
+ close (s),
+ [length (l2), length (l3), length (l4), append (l2, l3, l4)]);
+''([20, 12, length (l1) - (20 + 12), l1]);
+
+(assume_external_byte_order (lsb),
+ l1 : read_binary_list (tmp2_lsb),
+ l2 : read_binary_list (tmp2_lsb, 50));
+''(makelist (l1 [i], i, 1, 50));
+
+(s : openr_binary (tmp2_lsb),
+ l2 : read_binary_list (s, 50),
+ l3 : read_binary_list (s, 30),
+ l4 : read_binary_list (s),
+ close (s),
+ [length (l2), length (l3), length (l4), append (l2, l3, l4)]);
+''([50, 30, length (l1) - (50 + 30), l1]);
+
+/* NEED ADDITIONAL TESTS HERE FOR PARTIAL READS TO PRODUCE ARRAYS */

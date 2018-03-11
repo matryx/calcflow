@@ -1,0 +1,54 @@
+C fortran code generated from runge.template
+      program runge
+      implicit real (k,m)
+c
+c  Input
+c
+      write(6,*) 'Initial Value of p'
+      read(5,*) p
+      write(6,*) ' p = ', p
+      write(6,*) 'Initial Value of q'
+      read(5,*) q
+      write(6,*) ' q = ', q
+      write(6,*) 'Value of m'
+      read(5,*) m
+      write(6,*) ' m = ', m
+      write(6,*) 'Value of k0'
+      read(5,*) k0
+      write(6,*) ' k0 = ', k0
+      write(6,*) 'Value of b'
+      read(5,*) b
+      write(6,*) ' b = ', b
+      write(6,*) 'Step Size of t'
+      read(5,*) hh
+      write(6,*) ' Step Size of t = ', hh
+      write(6,*) 'Final Value of t'
+      read(5,*) tp
+      write(6,*) ' Final Value of t = ', tp
+c
+c  Initialization
+c
+      tt=0.0
+<<
+      gentran( literal(tab, "write(9,*) ' h = ", eval(h), "'", cr),
+	        literal(tab, "write(9,*) ' d = ", eval(d), "'", cr) )$
+>>
+      write(9,901) c
+901   format(' c= ',e20.10)
+      write(9,910) tt, q, p
+910   format(' ',3e20.10)
+c
+c  Loop
+c
+<<
+      gentran( unless tt >= tf do
+               (
+		     rsetq(pn, ev(pn,expand)),
+		     rsetq(q, ev(qn,expand)),
+		     p : pn,
+		     tt : tt + hh,
+		     literal(tab, "write(9,910) tt, q, p", cr)
+               ) )$
+>>
+      stop
+      end

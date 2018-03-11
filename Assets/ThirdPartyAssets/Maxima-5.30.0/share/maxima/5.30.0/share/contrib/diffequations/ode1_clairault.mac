@@ -1,0 +1,126 @@
+/* ode1_clairault.mac
+
+  Solve Clairault's equation f(x*y'-y)=g(y')
+
+  References: 
+ 
+  Daniel Zwillinger, Handbook of Differential Equations, 3rd ed
+  Academic Press, (1997), pp 216-218 
+
+
+  Copyright (C) 2004 David Billinghurst		 
+  		       								 
+  This program is free software; you can redistribute it and/or modify	 
+  it under the terms of the GNU General Public License as published by	 
+  the Free Software Foundation; either version 2 of the License, or		 
+  (at your option) any later version.					 
+ 		       								 
+  This program is distributed in the hope that it will be useful,		 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of		 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 
+  GNU General Public License for more details.				 
+ 		       								 
+  You should have received a copy of the GNU General Public License	
+  along with this program; if not, write to the Free Software 		 
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+put('ode1_clairault,001,'version)$
+
+/* Attempt to separate expression exp into f(x)+g(y)
+   Returns [f(x),g(y)] is this is possible
+           false otherwise 
+   Adapted from SEPARABLE() in ode2.mac */ 
+
+plusseparable(eq,x,y) := block( 
+  [u,xpart:[],ypart:[],flag:false,inflag:true],
+  eq:expand(eq),
+  if atom(eq) or not(inpart(eq,0)="+") then eq: [eq],
+  for u in eq do
+    if freeof(x,u) then 
+      ypart: cons(u,ypart) 
+    else if freeof(y,u) then 
+      xpart: cons(u,xpart) 
+    else 
+      return(flag: true),
+  if flag = true then return(false),
+  if xpart = [] then xpart: 0 else xpart: apply("+",xpart),
+  if ypart = [] then ypart: 0 else ypart: apply("+",ypart),
+  return([xpart,ypart])
+)$
+
+/* If we can write eqn as f(x*y'-y)=g(y') then the solution 
+   is given implicitly by f(x*%c-y)=g(%c)
+
+   A singular solution may exist 
+   
+ */
+ode1_clairault(eq,y,x) := block(
+  [ans,%c,de,%f,%g,%p,%r,_t,sep],
+  /* substitute %p=y', %r=x*y'-y */
+  de: expand(lhs(eq)-rhs(eq)),
+  de: subst(%p,'diff(y,x),de),
+  de: ratsimp(subst((%r+y)/%p,x,de)),
+  if not(freeof(x,y,de)) then (
+    ode_disp2("     Expression not free of x and y: ",de),
+    return(false)
+  ),
+  sep:plusseparable(de,%r,%p),
+  if is(sep=false) then 
+    /* Perhaps de is const+f(%p)*%r */
+    sep:plusseparable(ratsimp(de/%r),%r,%p),
+  if is(sep#false) then (
+    %f: sep[1], 
+    %g:-sep[2]
+  )
+  else (
+    ode_disp2("     Expression free of x and y but can't write as f(%r)=g(%p): ",de),
+    /* Don't give up yet */
+    _t:solve(de,%r),
+    if _t=[] then return(false),
+    ode_disp2("     Solving for %r: ",_t),
+    %f:%r,
+    %g:rhs(_t[1]),
+    if not(freeof(%r,%g)) then return(false)
+  ),
+  /* Next line added to avoid testsuite failures 2003-01-02
+     Guessed the fix and should analyse it further */
+  if ( is(%f=0) ) then return(false),
+  ode_disp2("     %f: ",%f),
+  ode_disp2("     %g: ",%g),
+  method: 'clairault,
+  ans:subst(x*%c-y,%r,%f)=subst(%c,%p,%g),
+  /* Try and solve for y */
+  _t:solve(ans,y),
+  if length(_t)=0 then ans:[ans] else ans:_t,
+  ans:append(ans,ode1_clairault_singular(eq,y,x)),
+  return(ans)
+)$
+
+/* Is there a singular solution to Clairault equation eq:f(x*p-y)-g(p)=0 ?
+
+     Differentiate eq wrt x to get 'diff(y,x,2)*eq2=0
+     If possible, eliminate 'diff(y,x) between eq and eq2.  
+     else return parametric solution in variable %t
+*/
+
+ode1_clairault_singular(eq,y,x) := block(
+  [expr,eq2,%t,ans,u],
+  eq:lhs(eq)-rhs(eq),
+  expr:subst(u,y,eq),
+  depends(u,x),
+  expr:diff(expr,x),
+  remove(u,dependency),
+  expr:subst(y,u,expr),
+  expr:expand(expr),
+  eq2:ratsimp(ratcoeff(expr,'diff(y,x,2))),
+  if not(freeof('diff(y,x,2),eq2)) then return([]),
+  expr: ratsimp(expr-eq2*'diff(y,x,2)),
+  if not(is(expr=0)) then return([]),
+  /* Try and eliminate t */
+  eq:subst(%t,'diff(y,x),eq),
+  eq2:subst(%t,'diff(y,x),eq2),
+  ans:eliminate([eq,eq2],[%t]),
+  if ( not(freeof(%t,ans)) or (ans=1) ) then return([[eq=0,eq2=0]]),
+  return(solve(ans,y))
+)$

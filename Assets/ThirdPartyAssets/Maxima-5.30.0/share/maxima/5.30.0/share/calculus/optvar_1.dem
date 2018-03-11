@@ -1,0 +1,45 @@
+load('optvar)$
+depends(y,x)$
+/*
+The functional may include derivatives of higher that first
+order.  For example, including the small-deflection energy
+of bending, shear, and an elastic foundation, the elastic
+energy of a nonuniform beam with loading  W(X)  is the
+integral of the following function: */
+a(x)*'d(y,x,2)**2 + b(x)*'d(y,x)**2 + c(x)*y**2 + w(x)*y$
+/* to get the Euler-Lagrange equation: */
+eq:el(%, y, x);
+/* If the shear & foundation energy are negligible, as
+is often the case, we may solve this differential equation,
+for specific A(X) and  W(X), by two successive applications
+of ODE2.  For example: */
+first(eq),d,infeval,a(x)=x, b(x)=0, c(x)=0, w(x)=1$
+bb:%,'d(y,x,3)='d(dy2,x),'d(y,x,4)='d(dy2,x,2);
+
+dependencies(dy2(x))$
+ev(bb,d,eval);
+ode2(%, dy2, x);
+ode2(subst([%k1=%k3,%k2=%k4,dy2='d(y,x,2)],%), y, x);
+/* Now let's impose the boundary conditions
+Y='D(Y,X)=0 at X=1, Y=0, 'D(Y,X)=1 at X=2: */
+ic2(%, x=1, y=0, 'd(y,x)=0);
+ic2(subst([%k3=%k1,%k4=%k2],%), x=2, y=0, 'd(y,x)=1);
+/* as another specific beam example: */
+eq,eval,a(x)=1,b(x)=2,c(x)=1,w(x)=1$
+first(%),d;
+/* We cannot treat this as 2 successive second-order
+equations, but the function DESOLVE in the SHARE file
+DESOLN, already loaded, is applicable to some linear
+arbitrary-order constant coefficient equations.  First we
+must convert the equation so that the dependency of  Y  is
+explicitly indicated: */
+convert(%, y, x);
+/* DESOLVE requires all boundary conditions to be at
+X=0, and it works best if they are specified before calling
+the function. However, we may overcome this restriction, as
+illustrated by the following example, where the beam has
+zero slope and deflection at both ends: */
+(atvalue(y(x),x=0,0), atvalue('d(y(x),x),x=0,0),
+atvalue('d(y(x),x,2),x=0,%k1), atvalue('d(y(x),x,3),x=0,%k2))$
+desolve(%th(2), y(x));
+ic2(subst(y(x)=y,%), x=1, y=0, 'd(y,x)=0);

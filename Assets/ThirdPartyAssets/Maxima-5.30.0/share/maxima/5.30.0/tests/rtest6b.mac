@@ -1,0 +1,40 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+1/(x^2+2);
+1/(x^2+2)$
+substpart(3/2,%,2,1,2);
+1/(x^(3/2)+2)$
+27*y^3+54*x*y^2+36*x^2*y+y+8*x^3+x+1;
+27*y^3+54*x*y^2+36*x^2*y+y+8*x^3+x+1$
+substpart(factor(piece),%,[1,2,3,5]);
+(3*y+2*x)^3+y+x+1$
+1/x+y/x-1/z;
+-1/z+y/x+1/x$
+substpart(xthru(piece),%,[2,3]);
+(y+1)/x-1/z$
+substpart("+",%,1,0);
+-1/z+y+x+1$
+ratsimp((k^2*x^2-1)*(cos(x)+eps)/(3*k+n[1])/(5*k-n[2]));
+((k^2*x^2-1)*cos(x)+eps*k^2*x^2-eps)/(15*k^2+(5*n[1]-3*n[2])*k-n[1]*n[2])$
+factor(%);
+(k*x-1)*(k*x+1)*(cos(x)+eps)/((3*k+n[1])*(5*k-n[2]))$
+substpart(ratsimp(piece),%,1,[1,2]);
+(k^2*x^2-1)*(cos(x)+eps)/((3*k+n[1])*(5*k-n[2]))$
+-substpart(-piece,%,1,1);
+-((1-k^2*x^2)*(cos(x)+eps)/((3*k+n[1])*(5*k-n[2])))$
+a+b/(x*(y+(a+b)*x)+1);
+b/(x*(y+(b+a)*x)+1)+a$
+substpart(multthru(piece),%,1,2,1);
+b/(x*y+(b+a)*x^2+1)+a$
+x . 'diff(f(x),x,2);
+x . 'diff(f(x),x,2)$
+substinpart(d^2,%,2);
+x . d^2$
+substinpart(f1,f[1](x+1),0);
+f1(x+1)$

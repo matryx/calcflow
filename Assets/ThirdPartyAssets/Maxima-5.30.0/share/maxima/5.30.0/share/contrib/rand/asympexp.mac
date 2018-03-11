@@ -1,0 +1,63 @@
+/* Filename asympexp.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: "The Use of Symbolic Computation             *
+   *                 in Perturbation Analysis"                   *
+   *		     by Rand in Symbolic Computation             *
+   *		     in Fluid Mechanics and Heat Transfer        *
+   *                 ed H.H.Bau (ASME 1988)                      *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/* asymptotic expansion of integrals */
+asymptotic():=(
+block(
+/* input the problem from the keyboard */
+print("The integrand is of the form: f(t) exp(x phi(t))"),
+f:read("enter f(t)"),
+phi:read("enter phi(t)"),
+a:read("enter the lower limit of integration"),
+b:read("enter the upper limit of integration"),
+print("The integrand is",f*%e^(x*phi)),
+print("integrated from",a,"to",b),
+c:read("enter value of t at which phi =",phi," is maximum"),
+/* set up limits of integration for later use */
+if c=a then (lowerlim:0, upperlim:inf)
+   else if c=b then (lowerlim:minf, upperlim:0)
+       else (lowerlim:minf, upperlim:inf),
+/* move origin to t=c with u=t-c */
+f1:ev(f,t=u+c),
+phi1:ev(phi,t=u+c),
+trunc:read("enter truncation order"),
+/* determine lowest non-constant term in taylor series
+   for phi about u=0 */
+phi2:taylor(phi1,u,0,2),
+phic:ev(phi,t=c),
+keypower:lopow(phi2-phic,u),
+if keypower=1 then trunc1:2*trunc else
+   if keypower=2 then trunc1:6*trunc else
+      (print("phi does not behave like t-",c,
+             "or (t-",c,")^2 near t=",c),
+       return("program aborted")),
+phi3:taylor(phi1,u,0,trunc1),
+phikey:coeff(phi3,u,keypower)*u^keypower,
+phirest:phi3-phikey-phic,
+/* set flag so integration routine assumes x is positive */
+assume_pos:true,
+integrand:taylor(f1*%e^(x*phirest),u,0,trunc1),
+/* set u = s/x^(1/keypower) */
+integrand2:ev(integrand,u=s/x^(1/keypower)),
+/* set x = 1/xx in order to truncate */
+integrand3:taylor(ev(integrand2,x=1/xx),xx,0,trunc),
+/* return to x again */
+integrand4:ev(integrand3,xx=1/x),
+approx:%e^(x*phic)/x^(1/keypower)
+       *integrate(integrand4*%e^(ev(phikey,u=s)),s,lowerlim,upperlim),
+approx2:factor(approx)))$
+

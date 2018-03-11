@@ -1,0 +1,146 @@
+;;; -*- Mode: lisp; Package: CL-USER -*-
+
+
+;;; Defsystem for COLNEW.  Everything should compile from the Lisp
+;;; sources.  See colnew-lisp.system for how to create the Lisp
+;;; sources from the original Fortran.
+(in-package #-gcl #:cl-user #+gcl "CL-USER")
+
+;; Defsystem for colnew.
+(mk:defsystem colnew
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "colnew"
+					  (concatenate 'string "binary-" maxima::*maxima-lispname*))
+  :source-extension "lisp"
+  :components
+  ((:module package
+	    :source-pathname ""
+	    :components
+	    ((:file "colnew-package")))
+   (:module lisp
+	    :depends-on ("package")
+	    :components
+	    (
+	     ;; Linpack routines needed by colnew
+	     (:file "dgesl"
+		    :depends-on ("daxpy" "ddot"))
+	     (:file "dgefa"
+		    :depends-on ("idamax" "dscal" "daxpy"))
+	     ;; BLAS routines needed by above
+	     (:file "daxpy")
+	     (:file "ddot")
+	     (:file "dscal")
+	     (:file "idamax")
+	     ;; Simple compatibility to define all of the needed
+	     ;; common blocks in one place.
+	     (:file "compat")
+	     ;; COLNEW itself, broken down into one subroutine per
+	     ;; file.
+	     (:file "colnew"
+		    :depends-on ("compat" "consts" "newmsh" "contrl"))
+	     (:file "contrl"
+		    :depends-on ("compat" "lsyslv" "skale" "errchk" "newmsh"))
+	     (:file "skale"
+		    :depends-on ("compat"))
+	     (:file "newmsh"
+		    :depends-on ("compat" "approx" "horder"))
+	     (:file "consts"
+		    :depends-on ("compat" "vmonde" "rkbas"))
+	     (:file "errchk")
+	     (:file "lsyslv"
+		    :depends-on ("compat" "vwblok" "gblock" "gderiv" "fcblok"
+					  "sbblok" "dmzsol"))
+	     (:file "gderiv")
+	     (:file "vwblok"
+		    :depends-on ("compat" "dgesl" "dgefa"))
+	     (:file "gblock"
+		    :depends-on ("compat" "dgesl"))
+	     (:file "appsln")
+	     (:file "approx"
+		    :depends-on ("compat"))
+	     (:file "rkbas"
+		    :depends-on ("compat"))
+	     (:file "vmonde"
+		    :depends-on ("compat"))
+	     (:file "horder")
+	     (:file "dmzsol"
+		    :depends-on ("factrb" "shiftb"))
+	     (:file "fcblok"
+		    :depends-on ("factrb" "shiftb"))
+	     (:file "factrb")
+	     (:file "shiftb")
+	     (:file "sbblok"
+		    :depends-on ("subfor" "subbak"))
+	     (:file "subfor")
+	     (:file "subbak")))))
+
+(mk:defsystem colnew-if
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "colnew"
+					  (concatenate 'string "binary-" maxima::*maxima-lispname*))
+  :source-extension "lisp"
+  :depends-on ("colnew")
+  :components
+  ((:file "colnew-if")))
+
+;;; Here are some sample tests of colnew.  They all work and produce
+;;; results that match the Fortran code.
+;;;
+;;; Note that because each test uses the same common block names and
+;;; function names, you need to be careful when running more than one
+;;; test in the same session.  It might be best to restart maxima
+;;; between tests.
+
+;; Test problem 1.  This works.  Use (colnew::*main*) to run the test.
+(mk:defsystem colnew-ex1
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "colnew"
+					  (concatenate 'string "binary-" maxima::*maxima-lispname*))
+  :source-extension "lisp"
+  :depends-on ("colnew")
+  :components
+  ((:module ex1
+	    :components
+	    ((:file "prob1"
+		    :depends-on ("fsub" "dfsub" "gsub" "dgsub" "exact"))
+	     (:file "fsub")
+	     (:file "gsub")
+	     (:file "dfsub")
+	     (:file "dgsub")
+	     (:file "exact")))))
+
+;; Test problem 2.  This works.  Use (colnew::*main*) to run the test.
+(mk:defsystem colnew-ex2
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "colnew"
+					  (concatenate 'string "binary-" maxima::*maxima-lispname*))
+  :source-extension "lisp"
+  :depends-on ("colnew")
+  :components
+  ((:module ex2
+	    :components
+	    ((:file "prob2"
+		    :depends-on ("fsub" "dfsub" "gsub" "dgsub" "solutn"))
+	     (:file "fsub")
+	     (:file "gsub")
+	     (:file "dfsub")
+	     (:file "dgsub")
+	     (:file "solutn")))))
+
+;; Test problem 3.  This works.  Use (colnew::*main*) to run the test.
+(mk:defsystem colnew-ex3
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "colnew"
+					  (concatenate 'string "binary-" maxima::*maxima-lispname*))
+  :source-extension "lisp"
+  :depends-on ("colnew")
+  :components
+  ((:module ex3
+	    :components
+	    ((:file "prob3"
+		    :depends-on ("fsub" "dfsub" "gsub" "dgsub" "solutn"))
+	     (:file "fsub")
+	     (:file "gsub")
+	     (:file "dfsub")
+	     (:file "dgsub")
+	     (:file "solutn")))))

@@ -1,0 +1,216 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+kill(functions,arrays,values);
+done$
+ev(sin(x),exponentialize);
+-%i*(%e^(%i*x)-%e^-(%i*x))/2$
+taylor(sin(x)/x,x,0,4);
+''(taylor(1-x^2/6+x^4/120,x,0,4))$
+ev(cos(x)^2-sin(x)^2,sin(x)^2 = 1-cos(x)^2);
+2*cos(x)^2-1$
+(sqrt(-4)+sqrt(2.25))^2;
+(2*%i+1.5)^2$
+expand(%);
+6.0*%i-1.75$
+expand(sqrt(2*%i));
+(-1)^(1/4)*sqrt(2)$
+kill(all);
+done$
+sin(x)+cos(y)+(w+1)^2+'diff(sin(w),w);
+cos(y)+sin(x)+'diff(sin(w),w,1)+(w+1)^2$
+ev(%,sin,expand,diff,x = 2,y = 1);
+cos(w)+w^2+2*w+cos(1)+sin(2)+1;
+ev(x+y,x:a+y,y:2);
+y+a+2$
+'diff(y^2+x*y+x^2,x,2,y,1);
+'diff(y^2+x*y+x^2,x,2,y,1)$
+ev(%,diff);
+0$
+exp:2*x-3*y = 3;
+2*x-3*y = 3$
+-3*x+2*y = -4;
+2*y-3*x = -4$
+solve([exp,%]);
+[[y = -1/5,x = 6/5]]$
+ev(exp,%);
+3 = 3$
+x+1/x > gamma(1/2);
+x+1/x > sqrt(%pi)$
+ev(%,numer,x = 1/2);
+2.5 > 1.772453850905516;
+/* tops 20 :2.5 > 1.77245384$ */
+ev(%,pred);
+true$
+zeroequiv(sin(2*x)-2*sin(x)*cos(x),x);
+true$
+zeroequiv(%e^x+x,x);
+false$
+zeroequiv(log(a*b)-log(a)-log(b),a);
+dontknow$
+(1/(x+y)^4-3/(y+z)^3)^2;
+(1/(y+x)^4-3/(z+y)^3)^2$
+expand(%,2,0);
+-6/((y+x)^4*(z+y)^3)+9/(z+y)^6+1/(y+x)^8$
+expand(a . (b+c . (d+e)+f));
+a . f+a . c . e+a . c . d+a . b$
+expand((x+1)^3);
+x^3+3*x^2+3*x+1$
+exp:(x+1)^7;
+(x+1)^7$
+expand(%);
+x^7+7*x^6+21*x^5+35*x^4+35*x^3+21*x^2+7*x+1$
+expand(exp,7,7);
+x^7+7*x^6+21*x^5+35*x^4+35*x^3+21*x^2+7*x+1$
+ev(a*(b+c)+a*(b+c)^2,expop:1);
+a*(c+b)^2+a*c+a*b$
+ratexpand((2*x-3*y)^3);
+-27*y^3+54*x*y^2-36*x^2*y+8*x^3$
+exp:(x-1)/(x+1)^2+1/(x-1);
+(x-1)/(x+1)^2+1/(x-1)$
+expand(%);
+x/(x^2+2*x+1)-1/(x^2+2*x+1)+1/(x-1)$
+ratexpand(exp);
+2*x^2/(x^3+x^2-x-1)+2/(x^3+x^2-x-1)$
+sin(x/(x^2+x)) = %e^((log(x)+1)^2-log(x)^2);
+sin(x/(x^2+x)) = %e^((log(x)+1)^2-log(x)^2)$
+ratsimp(%);
+sin(1/(x+1)) = %e*x^2$
+b*(a/b-x)+b*x+a;
+b*x+b*(a/b-x)+a$
+ratsimp(%);
+2*a$
+((x-1)^(3/2)-(x+1)*sqrt(x-1))/sqrt(x-1)/sqrt(x+1);
+((x-1)^(3/2)-sqrt(x-1)*(x+1))/(sqrt(x-1)*sqrt(x+1))$
+ratsimp(%);
+-2/sqrt(x+1)$
+ev(x^(a+1/a),ratsimpexpons);
+x^((a^2+1)/a)$
+(log(x^2+x)-log(x))^a/log(x+1)^(a/2);
+(log(x^2+x)-log(x))^a/log(x+1)^(a/2)$
+radcan(%);
+log(x+1)^(a/2)$
+log(a^(2*x)+2*a^x+1)/log(a^x+1);
+log(a^(2*x)+2*a^x+1)/log(a^x+1)$
+radcan(%);
+2$
+(%e^x-1)/(%e^(x/2)+1);
+(%e^x-1)/(%e^(x/2)+1)$
+radcan(%);
+%e^(x/2)-1$
+kill(all);
+done$
+combine(a/x+b/x+a/y+b/y);
+(b+a)/y+(b+a)/x$
+x/(x-y)^2-1/(x-y)-f(x)/(x-y)^3;
+-1/(x-y)+x/(x-y)^2-f(x)/(x-y)^3$
+multthru((x-y)^3,%);
+-(x-y)^2+x*(x-y)-f(x)$
+ratexpand(%);
+-y^2+x*y-f(x)$
+((a+b)^10*s^2+2*a*b*s+(a*b)^2)/(a*b*s^2);
+((b+a)^10*s^2+2*a*b*s+a^2*b^2)/(a*b*s^2)$
+multthru(%);
+2/s+a*b/s^2+(b+a)^10/(a*b)$
+multthru(a . (b+c . (d+e)+f));
+a . f+a . c . (e+d)+a . b$
+((x+2)^20-2*y)/(x+y)^20+(x+y)^-19-x/(x+y)^20;
+1/(y+x)^19+((x+2)^20-2*y)/(y+x)^20-x/(y+x)^20$
+xthru(%);
+((x+2)^20-y)/(y+x)^20$
+2/(x+2)-2/(x+1)+1/(x+1)^2;
+2/(x+2)-2/(x+1)+1/(x+1)^2$
+ratsimp(%);
+-x/(x^3+4*x^2+5*x+2)$
+partfrac(%,x);
+2/(x+2)-2/(x+1)+1/(x+1)^2$
+sort(args(factor(2^63-1)));
+''(sort([7^2,73,127,337,92737,649657]))$
+factor(z^2*(x+2*y)-4*x-8*y);
+(2*y+x)*(z-2)*(z+2)$
+x^2*y^2+2*x*y^2+y^2-x^2-2*x-1;
+x^2*y^2+2*x*y^2+y^2-x^2-2*x-1$
+block([dontfactor:[x]],factor(%/36/(y^2+2*y+1)));
+(x^2+2*x+1)*(y-1)/(36*(y+1))$
+factor(%e^(3*x)+1);
+(%e^x+1)*(%e^(2*x)-%e^x+1)$
+factor(x^4+1,a^2-2);
+(x^2-a*x+1)*(x^2+a*x+1)$
+factor(x^3+x^2*y^2-x*z^2-y^2*z^2);
+-((y^2+x)*(z-x)*(z+x))$
+(x+2)/(x+3)/(x+b)/(x+c)^2;
+(x+2)/((x+3)*(x+b)*(x+c)^2)$
+ratsimp(%);
+(x+2)/(x^4+(2*c+b+3)*x^3+(c^2+(2*b+6)*c+3*b)*x^2+((b+3)*c^2+6*b*c)*x+3*b*c^2)$
+partfrac(%,x);
+-((c^2-4*c-b+6)/((c^4+(-2*b-6)*c^3+(b^2+12*b+9)*c^2+(-6*b^2-18*b)*c+9*b^2)
+	       *(x+c)))
+ -((c-2)/((c^2+(-b-3)*c+3*b)*(x+c)^2))
+ +(b-2)/(((b-3)*c^2+(6*b-2*b^2)*c+b^3-3*b^2)*(x+b))
+ -(1/(((b-3)*c^2+(18-6*b)*c+9*b-27)*(x+3)))$
+map('factor,%);
+-((c^2-4*c-b+6)/((c-3)^2*(c-b)^2*(x+c)))-((c-2)/((c-3)*(c-b)*(x+c)^2))
+				      +(b-2)/((b-3)*(c-b)^2*(x+b))
+				      -(1/((b-3)*(c-3)^2*(x+3)))$
+exp:ratsimp((x^5-1)/(x-1));
+x^4+x^3+x^2+x+1$
+subst(a,x,%);
+a^4+a^3+a^2+a+1$
+factor(exp,%);
+(x-a)*(x-a^2)*(x-a^3)*(x+a^3+a^2+a+1)$
+factor(x^12+1);
+(x^4+1)*(x^8-x^4+1)$
+factor(x^99+1);
+(x+1)*(x^2-x+1)*(x^6-x^3+1)*(x^10-x^9+x^8-x^7+x^6-x^5+x^4-x^3+x^2-x+1)
+     *(x^20+x^19-x^17-x^16+x^14+x^13-x^11-x^10-x^9+x^7+x^6-x^4-x^3+x+1)
+     *(x^60+x^57-x^51-x^48+x^42+x^39-x^33-x^30-x^27+x^21+x^18-x^12-x^9+x^3+1)$
+ev((x+1)*((u+v)^2+a*(w+z)^2),expand);
+a*x*z^2+a*z^2+2*a*w*x*z+2*a*w*z+a*w^2*x+v^2*x+2*u*v*x+u^2*x+a*w^2+v^2+2*u*v
+       +u^2$
+factorsum(%);
+(x+1)*(a*(z+w)^2+(v+u)^2)$
+sqfr(4*x^4+4*x^3-3*x^2-4*x-1);
+(2*x+1)^2*(x^2-1)$
+gfactor(x^4-1);
+(x-1)*(x+1)*(x-%i)*(x+%i)$
+factor(y^20-7*y^19+11*y^18-8*y^17+59*y^16-461*y^15+1694*y^14+198*y^13-3541*
+ y^12+2818*y^11-33327*y^10-11272*y^9-56656*y^8-12672*y^7+433664*y^6+472064*y^5
+ +241664*y^4+131072*y^3+720896*y^2+1835008*y+1048576);
+(y^8-y^7-11*y^6-19*y^5+101*y^4+76*y^3-176*y^2+64*y+256)
+      *(y^12-6*y^11+16*y^10-39*y^9-19*y^8-75*y^7-315*y^6+300*y^5-304*y^4
+	    +2496*y^3+4096*y^2+6144*y+4096)$
+	      
+/* sf bug 1650226 */
+factor(156*x^7+4808*x^6-182041*x^5-1266489*x^4+43104271*x^3+29839285*x^2-2542327662*x+7826952672);
+(x-16)*(x+14)*(x+49)*(2*x-11)*(2*x+21)*(3*x-49)*(13*x-63)$
+
+/* sf bug 681191 */
+gfactor(x^4+y^4);
+(y^2-%i*x^2)*(y^2+%i*x^2)$
+
+/* sf bug 696804 */
+factor(expand((35*x*y^2+19*x^2+25) * (35*x*y^2+25*x^2+19)));
+(35*x*y^2+19*x^2+25) * (35*x*y^2+25*x^2+19)$
+
+/* bug reported on mailing list circa 2007-11-27; bignum in exponent */
+
+is (errcatch (rat (x^(2^128))) = []);
+false;
+
+/* [ 1943756 ] ezgcd() never returns. */
+ezgcd(n^2+(-2*d+c+b+2)*n+d^2+(-c-b-2)*d+c+b+1, -n^2+(2*d-c-b-2)*n-d^2+(c+b+2)*d+(-b-1)*c-b-1);
+[1,n^2+(-2*d+c+b+2)*n+d^2+(-c-b-2)*d+c+b+1,
+       -n^2+(2*d-c-b-2)*n-d^2+(c+b+2)*d+(-b-1)*c-b-1];
+
+/* [ 1980715 ] wrong radcan-simplification */
+radcan(3^(1/6)*9^(1/3));
+3^(5/6);
+
+radcan(81^(1/5)*9^(1/3));
+3*3^(7/15);
+

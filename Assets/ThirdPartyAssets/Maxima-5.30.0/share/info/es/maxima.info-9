@@ -1,0 +1,1806 @@
+This is maxima.info, produced by makeinfo version 4.13 from maxima.texi.
+
+Ver. 5.30 Este es el Manual de Maxima en versión Texinfo
+
+   Copyright 1994, 2001 William F. Schelter
+
+START-INFO-DIR-ENTRY
+* Maxima: (maxima).  Un sistema de cálculo simbólico
+END-INFO-DIR-ENTRY
+
+
+File: maxima.info,  Node: Funciones y variables para to_poly_solve,  Prev: to_poly_solve,  Up: to_poly_solve
+
+78.1 Funciones y variables para to_poly_solve
+=============================================
+
+Los paquetes `to_poly' y `to_poly_solve' son experimentales, siendo
+posible que las especificaciones de sus funciones puedan cambiar en el
+futuro, o que algunas de estas funciones puedan ser incorporadas a
+otras partes de Maxima.
+
+   Los paquetes `to_poly' y `to_poly_solve', junto con su documentación,
+fue escrito por Barton Willis de la Universidad de Nebraska en Kearney.
+
+ -- Operador: %and
+     El operador `%and' es una conjunción lógica. Maxima simplifica una
+     expresión `%and' a `true', `false' o a una expresión lógicamente
+     equivalente, pero simplificada. El operador `%and' es asociativo,
+     conmutativo e idempotente. Así, cuando `%and' devuelva una forma
+     nominal, sus argumentos no serán redundantes; por ejemplo,
+
+          (%i1) a %and (a %and b);
+          (%o1)                       a %and b
+
+     Si uno de los argumentos de la conjunción es la negación de otro
+     argumento, `%and' devuelve `false':
+
+           (%i2) a %and (not a);
+           (%o2) false
+
+     Si cualquiera de los argumentos vale `false', la conjunción
+     devuelve `false', incluso cuando haya algún otro argumento que sea
+     una expresión no booleana; por ejemplo,
+
+          (%i2) a %and (not a);
+          (%o2)                         false
+
+     Los argumentos de la expresión `%and' que sean inecuaciones se
+     reducen con la simplificación de Fourier; el método que se aplica
+     dispone de un pre-procesador que convierte algunas, pero no todas,
+     las inecuaciones no lineales a lineales. Por ejemplo, el método de
+     simplificación de Fourier simplifica `abs(x) + 1 > 0' a `true':
+
+          (%i4) (x < 1) %and (abs(x) + 1 > 0);
+          (%o4)                         x < 1
+
+     Notas
+        * La variable opcional `prederror' no altera la simplificación
+          de las expresiones `%and'.
+
+        * Para evitar errores en la precedencia de las operaciones, se
+          recomienda utilizar paréntesis en las expresiones combinadas
+          en las que aparezcan los operadores `%and',  `%or' y `not' .
+
+        * Los operadores `and' y `or', tal como están programados en
+          Maxima, no conocen las propiedades asociativa ni conmutativa.
+
+
+     Limitaciones La conjunción `%and' simplifica inecuaciones
+     locamente, no globalmente, lo que significa que conjunciones tales
+     como
+
+          (%i5) (x < 1) %and (x > 1);
+          (%o5)                 (x > 1) %and (x < 1)
+
+     no simplifican a `false'. Además, las rutinas de eliminación de
+     Fourier ignoran los hechos almacenados en la base de datos.
+
+          (%i6) assume(x > 5);
+          (%o6)                        [x > 5]
+          (%i7) (x > 1) %and (x > 2);
+          (%o7)                 (x > 1) %and (x > 2)
+
+     Por último, las inecuaciones no lineales que no se puedan reducir
+     de manera sencilla a formas lineales, no se simplifican.
+
+     No está soportada la distributividad de `%and' respecto de `%or',
+     ni la negación respecto de `%and'.
+
+     Para hacer uso de este operador, ejecútese `load(to_poly_solve)'.
+
+     Véanse también `%or', `%if', `and', `or' y `not'.
+
+
+ -- Operador: %if ( <bool>, <a>, <b>)
+     El operador `%if' es un condicional. La condición <bool> debe
+     tomar un valor lógico; cuando sea `true', se devolverá el segundo
+     argumento, y cuando valga `false', el segundo. En cualquier otro
+     caso, se obtiene una forma nominal.
+
+     En Maxima, las expresiones con desigualdades o igualdades no
+     adquieren valores lógicos; por ejemplo, 5 < 6 no se simplifica a
+     `true', ni 5 = 6 `false'. Sin embargo, en la condición de una
+     sentencia `%if', Maxima intenta determinar el valor lógico de la
+     expresión de forma automática. Véase un ejemplo:
+
+          (%i1) f : %if(x # 1, 2, 8);
+          (%o1)                 %if(x - 1 # 0, 2, 8)
+          (%i2) [subst(x = -1,f), subst(x=1,f)];
+          (%o2)                        [2, 8]
+
+     Si en la condición aparece una inecuación, Maxima la reduce con
+     una simplificación de Fourier.
+
+     Notas
+        bullet Si la condición no se reduce a un valor lógico, Maxima
+          devuelve una forma nominal:
+               (%i3) %if(42,1,2);
+               (%o3)                     %if(42, 1, 2)
+
+        bullet El operador `if' de Maxima es n-ario, pero el operador
+          `%if' no lo es.
+
+     Por último, las inecuaciones no lineales que no se puedan reducir
+     de manera sencilla a formas lineales, no se simplifican.
+
+     Para hacer uso de este operador, ejecútese `load(to_poly_solve)'.
+
+ -- Operador: %or
+     El operador `%or' es una disyunción lógica. Maxima simplifica una
+     expresión `%or' a `true', `false' o a una expresión lógicamente
+     equivalente, pero simplificada. El operador `%or' es asociativo,
+     conmutativo e idempotente. Así, cuando `%or' devuelva una forma
+     nominal, sus argumentos no serán redundantes; por ejemplo,
+
+          (%i1) a %or (a %or b);
+          (%o1)                        a %or b
+
+     Si uno de los argumentos de la disyunción es la negación de otro
+     argumento, `%or' devuelve `true':
+
+          (%i2) a %or (not a);
+          (%o2)                         true
+
+     Si cualquiera de los argumentos vale `true', la disyunción devuelve
+     `true', incluso cuando haya algún otro argumento que sea una
+     expresión no booleana; por ejemplo,
+
+          (%i3) 42 %or true;
+          (%o3)                         true
+
+     Los argumentos de la expresión `%or' que sean inecuaciones se
+     reducen con la simplificación de Fourier. Por ejemplo, el método
+     de simplificación de Fourier simplifica `abs(x) + 1 > 0' a `true':
+
+          (%i4) (x < 1) %or (abs(x) + 1 > 0);
+          (%o4)                         true
+
+     Notas
+        * La variable opcional `prederror' no altera la simplificación
+          de las expresiones `%or'.
+
+        * Para evitar errores en la precedencia de las operaciones, se
+          recomienda utilizar paréntesis en las expresiones combinadas
+          en las que aparezcan los operadores `%and',  `%or' y `not' .
+
+        * Los operadores `and' y `or', tal como están programados en
+          Maxima, no conocen las propiedades asociativa ni conmutativa.
+
+
+     Limitaciones La conjunción `%or' simplifica inecuaciones
+     locamente, no globalmente, lo que significa que disyunciones tales
+     como
+
+           (%i1) (x < 1) %or (x >= 1);
+           (%o1) (x > 1) %or (x >= 1)
+
+     no simplifican a `true'. Además, las rutinas de eliminación de
+     Fourier ignoran los hechos almacenados en la base de datos.
+
+          (%i2) assume(x > 5);
+          (%o2)                        [x > 5]
+          (%i3) (x > 1) %and (x > 2);
+          (%o3)                 (x > 1) %and (x > 2)
+
+     Por último, las inecuaciones no lineales que no se puedan reducir
+     de manera sencilla a formas lineales, no se simplifican.
+
+     No está soportada la distributividad de `%or' respecto de `%and',
+     ni la negación respecto de `%or'.
+
+     Para hacer uso de este operador, ejecútese `load(to_poly_solve)'.
+
+     Véanse también `%and', `%if', `and', `or' y `not'.
+
+
+ -- Función: complex_number_p (<x>)
+     La función `complex_number_p' devuelve `true' si su argumento es
+     de cualquiera de las formas `a + %i * b', `a', `%i b' o `%i',
+     donde `a' y `b' son racionales o decimales en coma flotante, de
+     precisión doble o arbitraria (bigfloats); para cualesquiera otros
+     argumentos, `complex_number_p' devuelve `false'.
+
+     Ejemplo:
+
+          (%i1) map('complex_number_p,[2/3, 2 + 1.5 * %i, %i]);
+          (%o1)                  [true, true, true]
+          (%i2) complex_number_p((2+%i)/(5-%i));
+          (%o2)                         false
+          (%i3) complex_number_p(cos(5 - 2 * %i));
+          (%o3)                         false
+
+     Véase también `isreal_p'.
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+ -- Función: compose_functions (<l>)
+     La función `compose_functions(l)' devuelve una expresión lambda
+     que es la composición de las funciones presentes en la lista <l>.
+     Las funciones se aplican de derecha a izquierda.
+
+     Ejemplo:
+
+          (%i1) compose_functions([cos, exp]);
+                                                  %g151
+          (%o1)             lambda([%g151], cos(%e     ))
+          (%i2) %(x);
+                                            x
+          (%o2)                       cos(%e )
+
+     Si la lista está vacía devuelve la función identidad:
+
+          (%i3) compose_functions([]);
+          (%o3)                lambda([%g152], %g152)
+          (%i4)  %(x);
+          (%o4)                           x
+
+     Notas
+        * Cuando Maxima detecta que un miembro de la lista no es un
+          símbolo o expresión lambda, la función `funmake' (no
+          `compose_functions') muestra un mensaje de error:
+               (%i5) compose_functions([a < b]);
+
+               funmake: first argument must be a symbol, subscripted symbol,
+               string, or lambda expression; found: a < b
+               #0: compose_functions(l=[a < b])(to_poly_solve.mac line 40)
+                -- an error. To debug this try: debugmode(true);
+
+        * Para evitar conflictos de nombres, la variable independiente
+          se determina con la función `new_variable':
+               (%i6) compose_functions([%g0]);
+               (%o6)              lambda([%g154], %g0(%g154))
+               (%i7) compose_functions([%g0]);
+               (%o7)              lambda([%g155], %g0(%g155))
+          Aunque las variables dependientes sean diferentes, Maxima es
+          capaz de determinar que las expresiones lambda son
+          semánticamente equivalentes:
+               (%i8) is(equal(%o6,%o7));
+               (%o8)                         true
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+ -- Función: dfloat (<x>)
+     La función `dfloat' es similar a `float', pero `dfloat' aplica
+     `rectform' cuando `float' no puede evaluar a un número decimal de
+     coma flotante de doble precisión. Ejemplo:
+
+          (%i1) float(4.5^(1 + %i));
+                                         %i + 1
+          (%o1)                       4.5
+          (%i2) dfloat(4.5^(1 + %i));
+          (%o2)        4.48998802962884 %i + .3000124893895671
+
+     Notas
+
+        * La forma rectangular de una expresión puede no ser la más
+          adecuada para cálculos numéricos
+
+        * El identificador `float' es al mismo tiempo una variable
+          opcional, cuyo valor por defecto es `false' y el nombre de
+          una función.
+
+     Véanse también `float' y `bfloat'.
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+
+ -- Función: elim (<l>, <x>)
+     La función `elim' elimina las variables que se indican en el
+     conjunto o lista `x' del conjunto o lista de ecuaciones en `l'.
+     Cada elemento de `x' debe ser un símbolo, mientras que los
+     elementos de `l' pueden ser ecuaciones o expresiones que se suponen
+     igualadas a cero.
+
+     La función `elim' devuelve una lista formada por dos listas; la
+     primera está formada por las expresiones con las variables
+     eliminadas y la segunda es la lista de pivotes o, en otras
+     palabras, es la lista de expresiones que `elim' ha utilizado para
+     proceder con la eliminación.
+
+     Ejemplo:
+
+     Eliminación entre ecuaciones lineales. Eliminando `x' e `y' se
+     obtiene una única ecuación `2 z - 7 = 0'; las ecuaciones `y + 7 =
+     0' y `z - z + 1 = 1' se han utilizado como pivotes.
+
+          (%i1) elim(set(x + y + z = 1, x - y  - z = 8, x - z = 1),
+                     set(x,y));
+          (%o1)            [[2 z - 7], [y + 7, z - x + 1]]
+
+     Eliminando las tres variables de estas ecuaciones se triangulariza
+     el sistema lineal:
+
+          (%i2) elim(set(x + y + z = 1, x - y  - z = 8, x - z = 1),
+                     set(x,y,z));
+          (%o2)           [[], [2 z - 7, y + 7, z - x + 1]]
+
+     Las ecuaciones no necesitan ser lineales:
+
+          (%i3) elim(set(x^2 - 2 * y^3 = 1,  x - y = 5), [x,y]);
+                               3    2
+          (%o3)       [[], [2 y  - y  - 10 y - 24, y - x + 5]]
+
+     El usuario no puede controlar el orden en el que se eliminan las
+     variables. El algoritmo utiliza una heurística con la que intenta
+     escoger el mejor pivote y el mejor orden de eliminación.
+
+     Notas
+
+        * Al contrario que la función relacionada `eliminate', la
+          función `elim' no llama a la función `solve' cuando el número
+          de ecuaciones iguala al de variables.
+
+        * La función `elim' trabaja aplicando resultantes; la variable
+          opcional `resultant' determina qué algoritmo va a utilizar
+          Maxima.  Con `sqfr', Maxima factoriza cada resultante y
+          suprime ceros múltiples.
+
+        * `elim' triangulariza un conjunto de ecuaciones polinómicas no
+          lineales; el conjunto solución del conjunto triangularizado
+          puede ser mayor que el conjunto de soluciones del conjunto no
+          triangularizado, por lo que las ecuaciones triangularizadas
+          pueden tener soluciones falsas.
+
+
+     Véanse también `elim_allbut', `eliminate_using', `eliminate' y
+     `resultant'.
+
+     Para hacer uso de esta función, ejecútese `load(to_poly)'.
+
+
+ -- Función: elim_allbut (<l>, <x>)
+     Es similar a `elim', excepto por el hecho de que elimina todas las
+     variables que aparecen en la lista de ecuaciones `l' que no están
+     en `x'.
+
+     Ejemplo:
+
+          (%i1) elim_allbut([x+y = 1, x - 5*y = 1],[]);
+          (%o1)                 [[], [y, y + x - 1]]
+          (%i2) elim_allbut([x+y = 1, x - 5*y = 1],[x]);
+          (%o2)                [[x - 1], [y + x - 1]]
+
+     Para hacer uso de esta función, ejecútese `load(to_poly)'.
+
+     Véanse también `elim', `eliminate_using', `eliminate' y
+     `resultant'.
+
+
+ -- Función: eliminate_using (<l>, <e>, <x>)
+     Elmina el símbolo `x' de la lista o conjunto de ecuaciones `l'
+     haciendo uso del pivote `e'.
+
+     Ejemplos:
+
+          (%i1) eq : [x^2 - y^2 - z^3 , x*y - z^2 - 5, x - y + z];
+                         3    2    2     2
+          (%o1)      [- z  - y  + x , - z  + x y - 5, z - y + x]
+          (%i2) eliminate_using(eq,first(eq),z);
+                  3              2      2      3    2
+          (%o2) {y  + (1 - 3 x) y  + 3 x  y - x  - x ,
+                                  4    3  3       2  2             4
+                                 y  - x  y  + 13 x  y  - 75 x y + x  + 125}
+          (%i3) eliminate_using(eq,second(eq),z);
+                  2            2       4    3  3       2  2             4
+          (%o3) {y  - 3 x y + x  + 5, y  - x  y  + 13 x  y  - 75 x y + x
+                                                                     + 125}
+          (%i4) eliminate_using(eq, third(eq),z);
+                  2            2       3              2      2      3    2
+          (%o4) {y  - 3 x y + x  + 5, y  + (1 - 3 x) y  + 3 x  y - x  - x }
+
+     Para hacer uso de esta función, ejecútese `load(to_poly)'.
+
+     Véanse también `elim', `elim_allbut', `eliminate' y `resultant'.
+
+
+ -- Función: fourier_elim ([<eq1>, <eq2>, ...], [<var1>, <var>, ...])
+     La instrucción `fourier_elim([eq1,eq2,...], [var1,var2,...]'
+     aplica el algoritmo de eliminación de Fourier para resolver el
+     sistema de inecuaciones lineales `[eq1,eq2,...]' respecto de las
+     variables `[var1,var2,...]'.
+
+     Ejemplos:
+
+          (%i1) fourier_elim([y-x < 5, x - y < 7, 10 < y],[x,y]);
+          (%o1)            [y - 5 < x, x < y + 7, 10 < y]
+          (%i2) fourier_elim([y-x < 5, x - y < 7, 10 < y],[y,x]);
+          (%o2)        [max(10, x - 7) < y, y < x + 5, 5 < x]
+
+     Eliminando primero respecto de x y luego respecto de y, se
+     obtienen límites inferior y superior para x que dependen de y, y
+     límites numéricos para y.  Si se eliminan en orden inverso, se
+     obtienen los límites de y en función de x, y los de x son números.
+
+     De ser necesario, `fourier_elim' devuelve una disyunción de listas
+     de ecuaciones:
+
+          (%i3) fourier_elim([x # 6],[x]);
+          (%o3)                  [x < 6] or [6 < x]
+
+     Si no existe solución, `fourier_elim' devuelve `emptyset', y si la
+     solución son todos los reales, `fourier_elim' devuelve
+     `universalset':
+
+          (%i4) fourier_elim([x < 1, x > 1],[x]);
+          (%o4)                       emptyset
+          (%i5) fourier_elim([minf < x, x < inf],[x]);
+          (%o5)                     universalset
+
+     En caso de que las inecuaciones no sean lineales, `fourier_elim'
+     devuelve una lista de inecuaciones simplificadas:
+
+          (%i6) fourier_elim([x^3 - 1 > 0],[x]);
+                         2                             2
+          (%o6) [1 < x, x  + x + 1 > 0] or [x < 1, - (x  + x + 1) > 0]
+          (%i7) fourier_elim([cos(x) < 1/2],[x]);
+          (%o7)                  [1 - 2 cos(x) > 0]
+
+     En lugar de una lista de inecuaciones, el primer argumento pasado a
+     `fourier_elim' puede ser una conjunción o disyunción lógica.
+
+          (%i8) fourier_elim((x + y < 5) and (x - y >8),[x,y]);
+                                                        3
+          (%o8)            [y + 8 < x, x < 5 - y, y < - -]
+                                                        2
+          (%i9) fourier_elim(((x + y < 5) and x < 1) or  (x - y >8),[x,y]);
+          (%o9)          [y + 8 < x] or [x < min(1, 5 - y)]
+
+     La función `fourier_elim' soporta los operadores de desigualdad
+     `<', `<=', `>', `>=', `#' y `='.
+
+     La rutina de eliminación de Fourier dispone de un preprocesador que
+     convierte algunas inecuaciones no lineales formadas con las
+     funciones del valor absoluto, mínimo y máximo a inecuaciones
+     lineales. Además, el preprocesador admite algunas expresiones que
+     son productos o cocientes de términos lineales:
+
+          (%i10) fourier_elim([max(x,y) > 6, x # 8, abs(y-1) > 12],[x,y]);
+          (%o10) [6 < x, x < 8, y < - 11] or [8 < x, y < - 11]
+           or [x < 8, 13 < y] or [x = y, 13 < y] or [8 < x, x < y, 13 < y]
+           or [y < x, 13 < y]
+          (%i11) fourier_elim([(x+6)/(x-9) <= 6],[x]);
+          (%o11)           [x = 12] or [12 < x] or [x < 9]
+          (%i12) fourier_elim([x^2 - 1 # 0],[x]);
+          (%o12)      [- 1 < x, x < 1] or [1 < x] or [x < - 1]
+
+     Para hacer uso de esta función, ejecútese `load(fourier_elim)'.
+
+
+ -- Función: isreal_p (<e>)
+     El predicado `isreal_p' devuelve `true' si `e' representa un
+     número real y `false' si no representa un punto de la recta; en
+     cualquier otro caso devuelve una forma nominal.
+
+          (%i1) map('isreal_p, [-1, 0, %i, %pi]);
+          (%o1)               [true, true, false, true]
+
+     Las variables de Maxima se interpretan como números reales:
+
+          (%i2) isreal_p(x);
+          (%o2)                         true
+
+     La función `isreal_p' consulta los hechos almacenados en la base
+     de datos:
+          (%i3) declare(z,complex)$
+
+          (%i4) isreal_p(z);
+          (%o4)                      isreal_p(z)
+
+     Limitaciones Con frecuencia, `isreal_p' devuelve una forma nominal
+     cuando debería devolver `false'; por ejemplo, la función
+     logarítmica no toma valores reales en toda la recta real, por lo
+     que  `isreal_p(log(x))' debería devolver `false', sin embargo:
+
+          (%i5) isreal_p(log(x));
+          (%o5)                   isreal_p(log(x))
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+     Véase también `complex_number_p'.
+
+
+ -- Función: new_variable (<type>)
+     Devuelve un símbolo de la forma `%[z,n,r,c,g]k', siendo `k' un
+     número entero. Los valores admisibles para <type> son `integer',
+     `natural_number', `real', `natural_number' y `general'. Por número
+     natural se entiende entero negativo, de manera que el ceero es un
+     número natural.
+
+     Cuando <type> no es de ninguno de los tipos indicados más arriba,
+     <type> toma por defecto el valor `general'. Para enteros, números
+     naturales y números complejos, Maxima añade esta información a la
+     base de datos de forma automática.
+
+          (%i1) map('new_variable,
+                    ['integer, 'natural_number, 'real, 'complex, 'general]);
+          (%o1)          [%z144, %n145, %r146, %c147, %g148]
+          (%i2) nicedummies(%);
+          (%o2)               [%z0, %n0, %r0, %c0, %g0]
+          (%i3) featurep(%z0, 'integer);
+          (%o3)                         true
+          (%i4) featurep(%n0, 'integer);
+          (%o4)                         true
+          (%i5) is(%n0 >= 0);
+          (%o5)                         true
+          (%i6) featurep(%c0, 'complex);
+          (%o6)                         true
+
+     Es recomendable que al argumento de `new_variable' se le aplique
+     el operador de comilla simple para evitar su evaluación, de esta
+     manera se evitan errores como el siguiente:
+
+          (%i7) integer : 12$
+
+          (%i8) new_variable(integer);
+          (%o8)                         %g149
+          (%i9) new_variable('integer);
+          (%o9)                         %z150
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+     Véase también `nicedummies'.
+
+
+ -- Función: nicedummies
+     La función `nicedummies' reescribe los índices, comenzando por
+     cero, de las variables de una expresión qua hayan sido
+     introducidas por `new_variable':
+
+          (%i1) new_variable('integer) + 52 * new_variable('integer);
+          (%o1)                   52 %z136 + %z135
+          (%i2) new_variable('integer) - new_variable('integer);
+          (%o2)                     %z137 - %z138
+          (%i3) nicedummies(%);
+          (%o3)                       %z0 - %z1
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+     Véase también `new_variable'.
+
+
+ -- Función: parg (<x>)
+     La función `parg' es una versión con capacidades simplificadoras
+     de la función de argumento complejo `carg':
+
+          (%i1) map('parg,[1,1+%i,%i, -1 + %i, -1]);
+                                  %pi  %pi  3 %pi
+          (%o1)               [0, ---, ---, -----, %pi]
+                                   4    2     4
+
+     Si el argumento pasado a la función `parg' no es una constante, se
+     devolverá una forma nominal:
+
+          (%i2) parg(x + %i * sqrt(x));
+          (%o2)                 parg(x + %i sqrt(x))
+
+     Si `sign' detecta que la entrada es un número real negativo o
+     positivo, `parg' devuelve una forma no nominal aunque la entrada
+     no sea una constante:
+
+          (%i3) parg(abs(x));
+          (%o3) 0
+          (%i4) parg(-x^2-1);
+          (%o4)                          %pi
+
+     La función `sign' suele ignorar las variables declaradas complejas
+     (`declare(x,complex)'); en tales casos, `parg' puede retornar
+     valores incorrectos:
+
+          (%i1) declare(x,complex)$
+
+          (%i2) parg(x^2 + 1);
+          (%o2) 0
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+     Véanse también `carg', `isreal_p'.
+
+
+ -- Función: real_imagpart_to_conjugate (<e>)
+     La función `real_imagpart_to_conjugate' reemplaza todas las
+     llamadas a `realpart' y `imagpart' presentes en una expresión por
+     llamadas a `conjugate', obteniendo otra expresión equivalente:
+
+          (%i1) declare(x, complex)$
+
+          (%i2) real_imagpart_to_conjugate(realpart(x) +  imagpart(x) = 3);
+                    conjugate(x) + x   %i (x - conjugate(x))
+          (%o2)     ---------------- - --------------------- = 3
+                           2                     2
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+
+ -- Función: rectform_log_if_constant (<e>)
+     La función `rectform_if_constant' convierte todos los términos de
+     la forma `log(c)' a `rectform(log(c))', siendo `c' una expresión
+     constante o declarada como tal.
+
+          (%i1) rectform_log_if_constant(log(1-%i) - log(x - %i));
+                                           log(2)   %i %pi
+          (%o1)            - log(x - %i) + ------ - ------
+                                             2        4
+          (%i2) declare(a,constant, b,constant)$
+
+          (%i3) rectform_log_if_constant(log(a + %i*b));
+                                 2    2
+                            log(b  + a )
+          (%o3)             ------------ + %i atan2(b, a)
+                                 2
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+
+ -- Función: simp_inequality (<e>)
+     La función `simp_inequality' aplica ciertas simplificaciones a
+     conjunciones y disyunciones de inecuaciones.
+
+     Limitaciones La función `simp_inequality' está limitada en al
+     menos dos aspectos; en primer lugar, las simplificaciones son
+     locales:
+
+          (%i1) simp_inequality((x > minf) %and (x < 0));
+          (%o2) (x>1) %and (x<1)
+
+     En segundo lugar, `simp_inequality' no tiene en cuenta los hechos
+     de la base de datos:
+
+          (%i2) assume(x > 0)$
+
+          (%i3) simp_inequality(x > 0);
+          (%o3)                         x > 0
+
+     Para hacer uso de esta función, ejecútese `load(fourier_elim)'.
+
+
+ -- Función: standardize_inverse_trig (<e>)
+     Esta función aplica las identidades `cot(x) = atan(1/x)' y
+     `acsc(x) = asin(1/x)' y similares con `asec', `acoth' y `acsch'.
+     Consúltese Abramowitz y Stegun, ecuaciones 4.4.6 a 4.4.8 y 4.6.4 a
+     4.6.6.
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+
+ -- Función: subst_parallel (<l>, <e>)
+     Dada la ecuación o lista de ecuaciones <l> y la expresión <e>,
+     sustituye en paralelo en <e> los miembros izquierdos de las
+     ecuaciones por los derechos:
+
+          (%i1) load(to_poly_solve)$
+
+          (%i2) subst_parallel([x=y,y=x], [x,y]);
+          (%o2)                        [y, x]
+
+     Compárese el resultado anterior con las sustituciones hechas en
+     serie:
+
+          (%i3) subst([x=y,y=x],[x,y]);
+          (%o3)                        [x, x]
+
+     La función `subst_parallel' es similar a `sublis', excepto por el
+     hecho de que `subst_parallel' permite la sustitución de expresiones
+     no atómicas:
+
+          (%i4) subst_parallel([x^2 = a, y = b], x^2 * y);
+          (%o4)                          a b
+          (%i5) sublis([x^2 = a, y = b], x^2 * y);
+
+                                                                       2
+          sublis: left-hand side of equation must be a symbol; found: x
+           -- an error. To debug this try: debugmode(true);
+
+     Las sustituciones hechas por `subst_parallel' son literales, no
+     semánticas, por lo que `subst_parallel' no reconoce que x * y sea
+     una subexpresión de x^2 * y:
+
+          (%i6) subst_parallel([x * y = a], x^2 * y);
+                                         2
+          (%o6)                         x  y
+
+     La función `subst_parallel' realiza todas las sustituciones antes
+     de proceder a la simplificación, lo que permite sustituciones en
+     expresiones condicionales que podrín producir errores en caso de
+     simplificar antes de sustituir:
+
+          (%i7) subst_parallel([x = 0], %if(x < 1, 5, log(x)));
+          (%o7)                           5
+          (%i8) subst([x = 0], %if(x < 1, 5, log(x)));
+
+          log: encountered log(0).
+           -- an error. To debug this try: debugmode(true);
+
+     Para hacer uso de esta función, ejecútese
+     `load(to_poly_solve_extra.lisp)'.
+
+     Véanse también `subst', `sublis' y `ratsubst'.
+
+
+ -- Función: to_poly (<e>, <l>)
+     La función `to_poly' intenta convertir la ecuación <e> en un
+     sistema de polinomios, junto con restricciones en forma de
+     desigualdades. Las soluciones del sistema polinómico que cumplan
+     las restricciones son, a su vez, las soluciones de la ecuación <e>.
+     Dicho de manera informal, `to_poly' intenta pasar a forma de
+     polinomio la ecuación <e>; un ejemplo ayudará a aclarar su
+     comportamiento:
+
+          (%i1) load(to_poly_solve)$
+
+          (%i2) to_poly(sqrt(x) = 3, [x]);
+                                      2
+          (%o2) [[%g130 - 3, x = %g130 ],
+                                %pi                               %pi
+                             [- --- < parg(%g130), parg(%g130) <= ---], []]
+                                 2                                 2
+
+     Las condiciones `-%pi/2<parg(%g6),parg(%g6)<=%pi/2' dicen que
+     `%g6' está en el rango de la función radical; cuando eso se
+     cumpla, el conjunto de ecuaciones de `sqrt(x) = 3' coincide con el
+     de `%g6-3,x=%g6^2'.
+
+     Para convertir a forma polinómica una expresión trigonométrica, es
+     necesario introducir una sustitución no algebraica; tal sustitución
+     se devuelve en la tercera lista de la respuesta de `to_poly':
+
+          (%i3) to_poly(cos(x),[x]);
+                          2                                 %i x
+          (%o3)    [[%g131  + 1], [2 %g131 # 0], [%g131 = %e    ]]
+
+     Los términos constantes no se transforman a polinomios a menos que
+     el número uno se introduzca en la lista de variables:
+
+          (%i4) to_poly(x = sqrt(5),[x]);
+          (%o4)                [[x - sqrt(5)], [], []]
+          (%i5) to_poly(x = sqrt(5),[1,x]);
+                                      2
+          (%o5) [[x - %g132, 5 = %g132 ],
+                                %pi                               %pi
+                             [- --- < parg(%g132), parg(%g132) <= ---], []]
+                                 2                                 2
+
+     Para generar un polinomio que tenga sqrt(5) + sqrt(7) como raíz
+     puede hacerse lo siguiente:
+
+          (%i6) first(elim_allbut(first(to_poly(x = sqrt(5) + sqrt(7),
+                                                [1,x])), [x]));
+                                    4       2
+          (%o6)                   [x  - 24 x  + 4]
+
+     Para hacer uso de esta función, ejecútese `load(to_poly)'.
+
+     Véase también `to_poly_solve'.
+
+
+ -- Función: to_poly_solve (<e>, <l>, [options])
+     La función `to_poly_solve' intenta resolver las ecuaciones <e> de
+     incógnitas <l>. El argumento <e> puede ser una única ecuación, o
+     una lista o conjunto de ecuaciones; de forma similar, <l> puede
+     ser un símbolo o una lista o conjunto de símbolos. Cuando uno de
+     los elementos de <e> no sea una igualdad, como x^2 -1, se supodrá
+     que es igual a cero.
+
+     La estrategia básica de `to_poly_solve' consiste en utilizar
+     `to_poly' para convertir la entrada a su forma polinomial e invocar
+     posteriormente `algsys'. Así, las variables opcionales que afectan
+     a `algsys', especialmente `algexact', también afectan a
+     `to_poly_solve'. El valor por defecto de `algexact' es `false',
+     pero para `to_poly_solve' se recomienda que tome el valor `true'.
+     La función `to_poly_solve' no asigna localmente a `algexact' el
+     valor `true', lo que imposibilitaría encontrar soluciones
+     aproximadas cuando `algsys' sea incapaz de encontrar las exactas.
+
+     Cuando `to_poly_solve' consigue determinar el conjunto de
+     soluciones, cada miembro del conjunto de soluciones es una lista
+     en un objeto  `%union':
+
+          (%i1) load(to_poly_solve)$
+
+          (%i2) to_poly_solve(x*(x-1) = 0, x);
+          (%o2)               %union([x = 0], [x = 1])
+
+     Cuando `to_poly_solve' es incapaz de determinar el conjunto de
+     soluciones, devuelve una forma nominal de `%solve' y muestra un
+     mensaje de aviso:
+
+          (%i3) to_poly_solve(x^k + 2* x + 1 = 0, x);
+
+          Nonalgebraic argument given to 'to_poly'
+          unable to solve
+                                    k
+          (%o3)            %solve([x  + 2 x + 1 = 0], [x])
+
+     A veces se puede obtener la solución haciendo una sustitución en
+     `%solve':
+
+          (%i4) subst(k = 2, %);
+          (%o4)                   %union([x = - 1])
+
+     Especialmente en el caso de las funciones trigonométricas, los
+     resultados pueden incorporar números enteros arbitrarios de la
+     forma `%zXXX', siendo `XXX' un índice entero:
+
+          (%i5) to_poly_solve(sin(x) = 0, x);
+          (%o5)   %union([x = 2 %pi %z33 + %pi], [x = 2 %pi %z35])
+
+     Para inicializar los índices, hágase uso de `nicedummies':
+
+          (%i6) nicedummies(%);
+          (%o6)    %union([x = 2 %pi %z0 + %pi], [x = 2 %pi %z1])
+
+     En ocasiones, se introducen números complejos arbitrarios de la
+     forma `%cXXX', o reales de la forma `%rXXX'. La función
+     `nicedummies' inicializa estos identificadores a cero.
+
+     También a veces, la solución incorpora versiones simplificadas de
+     los operadores lógicos `%and', `%or' y `%if', que representan,
+     respectivamente, la conjunción, la disyunción y la implicación:
+
+          (%i7) sol : to_poly_solve(abs(x) = a, x);
+          (%o7) %union(%if(isnonnegative_p(a), [x = - a], %union()),
+                                %if(isnonnegative_p(a), [x = a], %union()))
+          (%i8) subst(a = 42, sol);
+          (%o8)             %union([x = - 42], [x = 42])
+          (%i9) subst(a = -42, sol);
+          (%o9)                       %union()
+
+     El conjunto vacío se representa por `%union'.
+
+     La función `to_poly_solve' es capaz de resolver algunas ecuaciones
+     con potencias racionales, potencias no racionales, valores
+     absolutos, funciones trigonométricas y funciones del mínimo y del
+     máximo.  También puede resolver algunas ecuaciones resolubles en
+     términos de la función W de Lambert:
+
+          (%i1) load(to_poly_solve)$
+
+          (%i2) to_poly_solve(set(max(x,y) = 5, x+y = 2), set(x,y));
+          (%o2)      %union([x = - 3, y = 5], [x = 5, y = - 3])
+          (%i3) to_poly_solve(abs(1-abs(1-x)) = 10,x);
+          (%o3)             %union([x = - 10], [x = 12])
+          (%i4) to_poly_solve(set(sqrt(x) + sqrt(y) = 5, x + y = 10),
+                              set(x,y));
+                               3/2               3/2
+                              5    %i - 10      5    %i + 10
+          (%o4) %union([x = - ------------, y = ------------],
+                                   2                 2
+                                          3/2                 3/2
+                                         5    %i + 10        5    %i - 10
+                                    [x = ------------, y = - ------------])
+                                              2                   2
+          (%i5) to_poly_solve(cos(x) * sin(x) = 1/2,x,
+                              'simpfuncs = ['expand, 'nicedummies]);
+                                                   %pi
+          (%o5)              %union([x = %pi %z0 + ---])
+                                                    4
+          (%i6) to_poly_solve(x^(2*a) + x^a + 1,x);
+                                                  2 %i %pi %z81
+                                                  -------------
+                                            1/a         a
+                            (sqrt(3) %i - 1)    %e
+          (%o6) %union([x = -----------------------------------],
+                                            1/a
+                                           2
+                                                            2 %i %pi %z83
+                                                            -------------
+                                                      1/a         a
+                                    (- sqrt(3) %i - 1)    %e
+                               [x = -------------------------------------])
+                                                     1/a
+                                                    2
+          (%i7) to_poly_solve(x * exp(x) = a, x);
+          (%o7)              %union([x = lambert_w(a)])
+
+     En el caso de inecuaciones lineales, `to_poly_solve' aplica
+     automáticamente la eliminación de Fourier:
+
+          (%i8) to_poly_solve([x + y < 1, x - y >= 8], [x,y]);
+                                         7
+          (%o8) %union([x = y + 8, y < - -],
+                                         2
+                                                                        7
+                                           [y + 8 < x, x < 1 - y, y < - -])
+                                                                        2
+
+     Los argumentos opcionales deben tener forma de ecuación;
+     generalmente, el orden de estas opciones no reviste importancia.
+
+        * `simpfuncs = l', siendo `l' una lista de funciones, aplica la
+          composición de los elementos de `l' a cada solución:
+               (%i1) to_poly_solve(x^2=%i,x);
+                                              1/4             1/4
+               (%o1)       %union([x = - (- 1)   ], [x = (- 1)   ])
+               (%i2) to_poly_solve(x^2= %i,x, 'simpfuncs = ['rectform]);
+                                     %i         1             %i         1
+               (%o2) %union([x = - ------- - -------], [x = ------- + -------])
+                                   sqrt(2)   sqrt(2)        sqrt(2)   sqrt(2)
+
+          A veces, una simplificación puede anular una simplificación
+          anterior:
+               (%i3) to_poly_solve(x^2=1,x);
+               (%o3)              %union([x = - 1], [x = 1])
+               (%i4) to_poly_solve(x^2= 1,x, 'simpfuncs = [polarform]);
+                                                       %i %pi
+               (%o4)            %union([x = 1], [x = %e      ]
+
+          Maxima no comprueba que los elementos de la lista de
+          funciones `l' sean todos simplificaciones:
+               (%i5) to_poly_solve(x^2 = %i,x, 'simpfuncs = [lambda([s],s^2)]);
+               (%o5)                   %union([x = %i])
+
+          Para convertir cada solución a real de doble precisión hágase
+          uso de `simpfunc = ['dfloat]':
+               (%i6) to_poly_solve(x^3 +x + 1 = 0,x,
+                                   'simpfuncs = ['dfloat]), algexact : true;
+               (%o6) %union([x = - .6823278038280178],
+               [x = .3411639019140089 - 1.161541399997251 %i],
+               [x = 1.161541399997251 %i + .3411639019140089])
+
+        * Con la opción `use_grobner = true' se aplica la función
+          `poly_reduced_grobner' a las ecuaciones antes de intentar
+          resolverlas.  En primer lugar, esta opción proporciona una
+          manera de soslayar algunas debilidades de la función `algsys':
+
+               (%i7) to_poly_solve([x^2+y^2=2^2,(x-1)^2+(y-1)^2=2^2],[x,y],
+                                   'use_grobner = true);
+                                   sqrt(7) - 1      sqrt(7) + 1
+               (%o7) %union([x = - -----------, y = -----------],
+                                        2                2
+                                                sqrt(7) + 1        sqrt(7) - 1
+                                           [x = -----------, y = - -----------])
+                                                     2                  2
+               (%i8) to_poly_solve([x^2+y^2=2^2,(x-1)^2+(y-1)^2=2^2],[x,y]);
+               (%o8)                       %union()
+
+        * `maxdepth = k', siendo `k' un positivo entero, controla el
+          nivel de recursión. El valor por defecto es cinco. Cuando se
+          excede el nivel de recursión se obtiene un mensaje de error:
+               (%i9) to_poly_solve(cos(x) = x,x, 'maxdepth = 2);
+
+               Unable to solve
+               Unable to solve
+               (%o9)        %solve([cos(x) = x], [x], maxdepth = 2)
+
+        * Con `parameters = l', siendo `l' una lista de símbolos, el
+          programa intenta encontrar una solución válida para todos los
+          miembros de la lista `l':
+               (%i10) to_poly_solve(a * x = x, x);
+               (%o10)                   %union([x = 0])
+               (%i11) to_poly_solve(a * x = x, x, 'parameters = [a]);
+               (%o11) %union(%if(a - 1 = 0, [x = %c111], %union()),
+                                              %if(a - 1 # 0, [x = 0], %union()))
+          En `(%o2)', el programa introduce una variable ficticia; para
+          reinicializarla, úsese la función `nicedummies':
+               (%i12) nicedummies(%);
+               (%o12) %union(%if(a - 1 = 0, [x = %c0], %union()),
+                                              %if(a - 1 # 0, [x = 0], %union()))
+
+     `to_poly_solve' utiliza información almacenada en el array
+     `one_to_one_reduce' para resolver ecuaciones de la forma  f(a) =
+     f(b). La asignación `one_to_one_reduce['f,'f] : lambda([a,b],
+     a=b)' le dice a `to_poly_solve' que el conjunto de soluciones de
+     f(a) = f(b) es igual al conjunto de soluciones de a=b:
+          (%i13) one_to_one_reduce['f,'f] : lambda([a,b], a=b)$
+
+          (%i14) to_poly_solve(f(x^2-1) = f(0),x);
+          (%o14)             %union([x = - 1], [x = 1])
+
+     De forma más general, la asignación `one_to_one_reduce['f,'g] :
+     lambda([a,b], w(a,b)=0' le indica a `to_poly_solve' que el cojunto
+     de soluciones de f(a) = f(b) es igual al conjunto de soluciones de
+     w(a,b) = 0:
+          (%i15) one_to_one_reduce['f,'g] : lambda([a,b], a = 1 + b/2)$
+
+          (%i16) to_poly_solve(f(x) - g(x),x);
+          (%o16)                   %union([x = 2])
+
+     Además, `to_poly_solve' utiliza información almacenada en el array
+     `function_inverse' para resolver ecuaciones de la forma f(a) = b.
+     La asignación `function_inverse['f] : lambda([s], g(s))' le dice a
+     `to_poly_solve' que el conjunto de soluciones de f(x) = b es igual
+     al conjunto de soluciones de x = g(b):
+          (%i17) function_inverse['Q] : lambda([s], P(s))$
+
+          (%i18) to_poly_solve(Q(x-1) = 2009,x);
+          (%o18)              %union([x = P(2009) + 1])
+          (%i19) function_inverse['G] : lambda([s], s+new_variable(integer));
+          (%o19)       lambda([s], s + new_variable(integer))
+          (%i20) to_poly_solve(G(x - a) = b,x);
+          (%o20)             %union([x = b + a + %z125])
+
+     Notas
+
+        * Las incógnitas a resolver no necesitan ser símbolos, lo cual
+          es cierto cuando `fullratsubst' es capaz de hacer las
+          sustituciones de forma apropiadas:
+               (%i1) to_poly_solve([x^2 + y^2 + x * y = 5, x * y = 8],
+                                   [x^2 + y^2, x * y]);
+                                                 2    2
+               (%o1)           %union([x y = 8, y  + x  = - 3])
+
+        * Cuando las ecuaciones involucran conjugados de complejos, el
+          programa añade automáticamente las ecuaciones conjugadas:
+               (%i1) declare(x,complex)$
+
+               (%i2) to_poly_solve(x + (5 + %i) * conjugate(x) = 1, x);
+                                                  %i + 21
+               (%o2)              %union([x = - -----------])
+                                                25 %i - 125
+               (%i3) declare(y,complex)$
+
+               (%i4) to_poly_solve(set(conjugate(x) - y = 42 + %i,
+                                       x + conjugate(y) = 0), set(x,y));
+                                          %i - 42        %i + 42
+               (%o4)        %union([x = - -------, y = - -------])
+                                             2              2
+
+        * Cuando las funciones involucran valores absolutos,
+          `to_poly_solve' consulta los hechos de la base de datos para
+          decidir si los argumentos de los valores absolutos son
+          números complejos:
+               (%i1) to_poly_solve(abs(x) = 6, x);
+               (%o1)              %union([x = - 6], [x = 6])
+               (%i2) declare(z,complex)$
+
+               (%i3) to_poly_solve(abs(z) = 6, z);
+               (%o3) %union(%if((%c11 # 0) %and (%c11 conjugate(%c11) - 36 =
+                                                      0), [z = %c11], %union()))
+
+          Esta es la única situación en la que `to_poly_solve' consulta
+          la base de datos; si una incógnita se declara, por ejemplo,
+          como entero, `to_poly_solve' lo ignora.
+
+     Para hacer uso de esta función, ejecútese `load(to_poly_solve)'.
+
+     Véase también `algexact', `resultant', `algebraic' y `to_poly'.
+
+
+
+File: maxima.info,  Node: unit,  Next: zeilberger,  Prev: to_poly_solve,  Up: Top
+
+79 unit
+*******
+
+* Menu:
+
+* Introducción a units::
+* Funciones y variables para units::
+
+
+File: maxima.info,  Node: Introducción a units,  Next: Funciones y variables para units,  Prev: unit,  Up: unit
+
+79.1 Introducción a units
+=========================
+
+El paquete `unit' permite al usuario hacer cambios de unidades y llevar
+a cabo el análisis dimensional de las ecuaciones. La forma de operar de
+este paquete es radicalmente diferente de la del paquete original de
+Maxima; mientras que en el paquete original era tan solo una lista de
+definiciones, aquí se utiliza un conjunto de reglas que permiten
+seleccionar al usuario en qué unidades debe devolverse la expresión
+final.
+
+   Junto con el análisis dimensional, el paquete aporta una serie de
+herramientas para controlar las opciones de conversión y simplificación.
+Además de la conversión automática adaptable a las necesidades del
+usuario, el paquete `unit' permite hacer conversiones a la manera
+tradicional.
+
+   Nota: Cuando los factores de conversión no son exactos, Maxima los
+transformará a fracciones como consecuencia de la metodología utilizada
+para simplificar las unidades. Los mensajes de aviso concernientes a
+estas transformaciones están desactivados por defecto en el caso de las
+unidades (lo habitual es que estén activados en otros contextos) debido
+a que al ser una operación muy frecuente, serían un estorbo.  El estado
+previo de la variable `ratprint' queda restaurado tras la conversión de
+las unidades, de manera que se mantendrá la opción seleccionada por el
+usuario; en caso de que éste necesite ver dichos avisos, podrá hacer la
+asignación `unitverbose:on' para reactivarlos desde el proceso de
+conversión de unidades.
+
+   El paquete `unit' se aloja en el directorio `share/contrib/unit' y
+se ajusta a las convenciones de Maxima para la carga de paquetes:
+
+     (%i1) load("unit")$
+     *******************************************************************
+     *                       Units version 0.50                        *
+     *          Definitions based on the NIST Reference on             *
+     *              Constants, Units, and Uncertainty                  *
+     *       Conversion factors from various sources including         *
+     *                   NIST and the GNU units package                *
+     *******************************************************************
+
+     Redefining necessary functions...
+     WARNING: DEFUN/DEFMACRO:
+              redefining function TOPLEVEL-MACSYMA-EVAL ...
+     WARNING: DEFUN/DEFMACRO: redefining function MSETCHK ...
+     WARNING: DEFUN/DEFMACRO: redefining function KILL1 ...
+     WARNING: DEFUN/DEFMACRO: redefining function NFORMAT ...
+     Initializing unit arrays...
+     Done.
+
+   Los avisos del tipo `WARNING' son normales y no deben interpretarse
+como errores; tan solo indican que el paquete `unit' está redefiniendo
+funciones que ya estaban definidas en Maxima. Esto es necesario para
+que las unidades se gestionen de forma correcta. El usuario debe tener
+en cuenta que si otros paquetes han cambiado las definiciones de estas
+funciones, tales cambios serán ignorados por el proceso de carga de
+`unit'.
+
+   El paquete `unit' también carga el fichero de Lisp
+`unit-functions.lisp', el cual contiene las funciones Lisp necesarias.
+
+   El autor principal de este paquete es Clifford Yapp, quien ha
+recibido ayuda y asistencia, entre otros, de Barton Willis y Robert
+Dodier.
+
+
+File: maxima.info,  Node: Funciones y variables para units,  Prev: Introducción a units,  Up: unit
+
+79.2 Funciones y variables para units
+=====================================
+
+ -- Función: setunits (<list>)
+     El paquete `unit' no utiliza por defecto dimensiones derivadas,
+     pero convierte todas las unidades a las siete fundamentales en
+     unidades MKS.
+
+          (%i2) N;
+                                               kg m
+          (%o2)                                ----
+                                                 2
+                                                s
+          (%i3) dyn;
+                                             1      kg m
+          (%o3)                           (------) (----)
+                                           100000     2
+                                                     s
+          (%i4) g;
+                                              1
+          (%o4)                             (----) (kg)
+                                             1000
+          (%i5) centigram*inch/minutes^2;
+                                            127        kg m
+          (%o5)                       (-------------) (----)
+                                       1800000000000     2
+                                                        s
+
+     Este es el comportamiento que se desea en ciertos casos. Si el
+     usuario necesita utilizar otras unidades, habrá de utilizar la
+     instrucción `setunits':
+          (%i6) setunits([centigram,inch,minute]);
+          (%o6)                                done
+          (%i7) N;
+                                      1800000000000   %in cg
+          (%o7)                      (-------------) (------)
+                                           127            2
+                                                      %min
+          (%i8) dyn;
+                                         18000000   %in cg
+          (%o8)                         (--------) (------)
+                                           127          2
+                                                    %min
+          (%i9) g;
+          (%o9)                             (100) (cg)
+          (%i10) centigram*inch/minutes^2;
+                                              %in cg
+          (%o10)                              ------
+                                                  2
+                                              %min
+
+     La especificación de las variables es relativamente flexible.  Por
+     ejemplo, si se quiere volver a utilizar kilogramos, metros y
+     segundos como unidades por defecto, podemos hacer:
+          (%i11) setunits([kg,m,s]);
+          (%o11)                               done
+          (%i12) centigram*inch/minutes^2;
+                                            127        kg m
+          (%o12)                      (-------------) (----)
+                                       1800000000000     2
+                                                        s
+
+     Las unidades derivadas también se controlan con esta misma
+     instrucción:
+          (%i17) setunits(N);
+          (%o17)                               done
+          (%i18) N;
+          (%o18)                                 N
+          (%i19) dyn;
+                                              1
+          (%o19)                           (------) (N)
+                                            100000
+          (%i20) kg*m/s^2;
+          (%o20)                                 N
+          (%i21) centigram*inch/minutes^2;
+                                              127
+          (%o21)                        (-------------) (N)
+                                         1800000000000
+
+     Téngase en cuenta que el paquete `unit' reconoce que la
+     combinación de masa, longitud e inversa del cuadrado del tiempo da
+     lugar a una fuerza, convirtiéndola a newtons. Esta es la forma
+     general en la que trabaja Maxima. Si el usuario prefiere dinas a
+     newtons, tan solo tendrá que hacer lo siguiente:
+          (%i22) setunits(dyn);
+          (%o22)                               done
+          (%i23) kg*m/s^2;
+          (%o23)                          (100000) (dyn)
+          (%i24) centigram*inch/minutes^2;
+                                            127
+          (%o24)                         (--------) (dyn)
+                                          18000000
+
+     Para desactivar una unidad se utiliza la instrucción `uforget':
+          (%i26) uforget(dyn);
+          (%o26)                               false
+          (%i27) kg*m/s^2;
+                                               kg m
+          (%o27)                               ----
+                                                 2
+                                                s
+          (%i28) centigram*inch/minutes^2;
+                                            127        kg m
+          (%o28)                      (-------------) (----)
+                                       1800000000000     2
+                                                        s
+     Esto también hubiese funcionado con `uforget(N)' o
+     `uforget(%force)'.
+
+     Véase también `uforget'. Para hacer uso de esta función ejecútese
+     `load("unit")'.
+
+ -- Función: uforget (<list>)
+     Por defecto, el paquete `unit' convierte todas las unidades a las
+     siete fundamentales del sistema MKS. Este comportamiento puede
+     alterarse mediante la instrucción `setunits'. Después, si el
+     usuario quiere restaurar el comportamiento por defecto podrá
+     hacerlo para una dimensión determinada haciendo uso de la
+     instrucción `uforget':
+          (%i13) setunits([centigram,inch,minute]);
+          (%o13)                               done
+          (%i14) centigram*inch/minutes^2;
+                                              %in cg
+          (%o14)                              ------
+                                                  2
+                                              %min
+          (%i15) uforget([cg,%in,%min]);
+          (%o15)                      [false, false, false]
+          (%i16) centigram*inch/minutes^2;
+                                            127        kg m
+          (%o16)                      (-------------) (----)
+                                       1800000000000     2
+                                                        s
+
+     La instrucción `uforget' opera sobre dimensiones, no sobre
+     unidades, de modo que valdrá para cualquier unidad de una
+     dimensión concreta. La propia dimensión es una argumento válido
+     para esta función.
+
+     Véase también `setunits'. Para hacer uso de esta función ejecútese
+     `load("unit")'.
+
+ -- Función: convert (<expr>, <list>)
+     La función `convert' permite conversiones de una sola vez sin
+     alterar el entorno global de ejecución. Acepta tanto un único
+     argumento como una lista de unidades a utilizar en las
+     conversiones. Cuando se realiza una llamada a `convert' se ignora
+     el sistema global de evaluación, con el fin de evitar que el
+     resultado deseado sea nuevamente transformado.  Como consecuencia
+     de esto, en los cálculos con decimales, los avisos de tipo `rat'
+     se harán visibles si la variable global `ratprint' vale `true'.
+     Otra propiedad de `convert' es que permite al usuario hacer
+     conversiones al sistema fundamental de dimensiones incluso cuando
+     el entorno ha sido ajustado para simplificar a una dimensión
+     derivada.
+          (%i2) kg*m/s^2;
+                                               kg m
+          (%o2)                                ----
+                                                 2
+                                                s
+          (%i3) convert(kg*m/s^2,[g,km,s]);
+                                               g km
+          (%o3)                                ----
+                                                 2
+                                                s
+          (%i4) convert(kg*m/s^2,[g,inch,minute]);
+
+          `rat' replaced 39.37007874015748 by 5000/127 = 39.37007874015748
+                                        18000000000   %in g
+          (%o4)                        (-----------) (-----)
+                                            127           2
+                                                      %min
+          (%i5) convert(kg*m/s^2,[N]);
+          (%o5)                                  N
+          (%i6) convert(kg*m^2/s^2,[N]);
+          (%o6)                                 m N
+          (%i7) setunits([N,J]);
+          (%o7)                                done
+          (%i8) convert(kg*m^2/s^2,[N]);
+          (%o8)                                 m N
+          (%i9) convert(kg*m^2/s^2,[N,inch]);
+
+          `rat' replaced 39.37007874015748 by 5000/127 = 39.37007874015748
+                                           5000
+          (%o9)                           (----) (%in N)
+                                           127
+          (%i10) convert(kg*m^2/s^2,[J]);
+          (%o10)                                 J
+          (%i11) kg*m^2/s^2;
+          (%o11)                                 J
+          (%i12) setunits([g,inch,s]);
+          (%o12)                               done
+          (%i13) kg*m/s^2;
+          (%o13)                                 N
+          (%i14) uforget(N);
+          (%o14)                               false
+          (%i15) kg*m/s^2;
+                                          5000000   %in g
+          (%o15)                         (-------) (-----)
+                                            127       2
+                                                     s
+          (%i16) convert(kg*m/s^2,[g,inch,s]);
+
+          `rat' replaced 39.37007874015748 by 5000/127 = 39.37007874015748
+                                          5000000   %in g
+          (%o16)                         (-------) (-----)
+                                            127       2
+                                                     s
+
+     Véanse también `setunits' y `uforget'.  Para hacer uso de esta
+     función ejecútese `load("unit")'.
+
+ -- Variable opcional: usersetunits
+     Valor por defecto: ninguno
+
+     En caso de que el usuario desee que el comportamiento por defecto
+     del paquete `unit' sea distinto del descrito, puede hacer uso del
+     fichero `maxima-init.mac' y de la variable global `usersetunits'.
+     El paquete `unit' comprobará al ser cargado si se le ha dado a esta
+     variable una lista de unidades; en caso afirmativo, aplicará
+     `setunits' a las unidades de esta lista y las utilizará por
+     defecto. Una llamada a la función `uforget' permitirá retornar al
+     comportamiento establecido por defecto por el usuario. Por
+     ejemplo, si en el archivo `maxima-init.mac' se tiene el siguiente
+     código:
+          usersetunits : [N,J];
+
+     observaríamos el siguiente comportamiento:
+          (%i1) load("unit")$
+          *******************************************************************
+          *                       Units version 0.50                        *
+          *          Definitions based on the NIST Reference on             *
+          *              Constants, Units, and Uncertainty                  *
+          *       Conversion factors from various sources including         *
+          *                   NIST and the GNU units package                *
+          *******************************************************************
+
+          Redefining necessary functions...
+          WARNING: DEFUN/DEFMACRO: redefining function
+           TOPLEVEL-MACSYMA-EVAL ...
+          WARNING: DEFUN/DEFMACRO: redefining function MSETCHK ...
+          WARNING: DEFUN/DEFMACRO: redefining function KILL1 ...
+          WARNING: DEFUN/DEFMACRO: redefining function NFORMAT ...
+          Initializing unit arrays...
+          Done.
+          User defaults found...
+          User defaults initialized.
+          (%i2) kg*m/s^2;
+          (%o2)                                  N
+          (%i3) kg*m^2/s^2;
+          (%o3)                                  J
+          (%i4) kg*m^3/s^2;
+          (%o4)                                 J m
+          (%i5) kg*m*km/s^2;
+          (%o5)                             (1000) (J)
+          (%i6) setunits([dyn,eV]);
+          (%o6)                                done
+          (%i7) kg*m/s^2;
+          (%o7)                           (100000) (dyn)
+          (%i8) kg*m^2/s^2;
+          (%o8)                     (6241509596477042688) (eV)
+          (%i9) kg*m^3/s^2;
+          (%o9)                    (6241509596477042688) (eV m)
+          (%i10) kg*m*km/s^2;
+          (%o10)                   (6241509596477042688000) (eV)
+          (%i11) uforget([dyn,eV]);
+          (%o11)                           [false, false]
+          (%i12) kg*m/s^2;
+          (%o12)                                 N
+          (%i13) kg*m^2/s^2;
+          (%o13)                                 J
+          (%i14) kg*m^3/s^2;
+          (%o14)                                J m
+          (%i15) kg*m*km/s^2;
+          (%o15)                            (1000) (J)
+
+     De no haber hecho uso de `usersetunits', las entradas iniciales
+     hubiesen sido convertidas a unidades MKS y cualquier llamada a
+     `uforget' hubiese retornado también a MKS. Sin embargo, las
+     preferencias establecidas por el usuario se respetan en ambos
+     casos. Para eliminar las preferencias del usuario y volver a
+     utilizar las establecidas por defecto por el paquete `unit', debe
+     utilizarse la instrucción `dontusedimension'. La función `uforget'
+     puede restaurar nuevamente las preferencias del usuario, pero sólo
+     si `usedimension' mantiene su valor. Alternativamente,
+     `kill(usersetunits)'  eliminará completamente cualquier vestigio
+     de las preferencias del usuario durante la sesión actual. Véanse a
+     continuación algunos ejemplos de aplicación de estas opciones:
+          (%i2) kg*m/s^2;
+          (%o2)                                  N
+          (%i3) kg*m^2/s^2;
+          (%o3)                                  J
+          (%i4) setunits([dyn,eV]);
+          (%o4)                                done
+          (%i5) kg*m/s^2;
+          (%o5)                           (100000) (dyn)
+          (%i6) kg*m^2/s^2;
+          (%o6)                     (6241509596477042688) (eV)
+          (%i7) uforget([dyn,eV]);
+          (%o7)                          [false, false]
+          (%i8) kg*m/s^2;
+          (%o8)                                  N
+          (%i9) kg*m^2/s^2;
+          (%o9)                                  J
+          (%i10) dontusedimension(N);
+          (%o10)                             [%force]
+          (%i11) dontusedimension(J);
+          (%o11)                         [%energy, %force]
+          (%i12) kg*m/s^2;
+                                               kg m
+          (%o12)                               ----
+                                                 2
+                                                s
+          (%i13) kg*m^2/s^2;
+                                                   2
+                                               kg m
+          (%o13)                               -----
+                                                 2
+                                                s
+          (%i14) setunits([dyn,eV]);
+          (%o14)                               done
+          (%i15) kg*m/s^2;
+                                               kg m
+          (%o15)                               ----
+                                                 2
+                                                s
+          (%i16) kg*m^2/s^2;
+                                                   2
+                                               kg m
+          (%o16)                               -----
+                                                 2
+                                                s
+          (%i17) uforget([dyn,eV]);
+          (%o17)                         [false, false]
+          (%i18) kg*m/s^2;
+                                               kg m
+          (%o18)                               ----
+                                                 2
+                                                s
+          (%i19) kg*m^2/s^2;
+                                                   2
+                                               kg m
+          (%o19)                               -----
+                                                 2
+                                                s
+          (%i20) usedimension(N);
+          Done.  To have Maxima simplify to this dimension, use
+          setunits([unit]) to select a unit.
+          (%o20)                               true
+          (%i21) usedimension(J);
+          Done.  To have Maxima simplify to this dimension, use
+          setunits([unit]) to select a unit.
+          (%o21)                               true
+          (%i22) kg*m/s^2;
+                                               kg m
+          (%o22)                               ----
+                                                 2
+                                                s
+          (%i23) kg*m^2/s^2;
+                                                   2
+                                               kg m
+          (%o23)                               -----
+                                                 2
+                                                s
+          (%i24) setunits([dyn,eV]);
+          (%o24)                               done
+          (%i25) kg*m/s^2;
+          (%o25)                          (100000) (dyn)
+          (%i26) kg*m^2/s^2;
+          (%o26)                    (6241509596477042688) (eV)
+          (%i27) uforget([dyn,eV]);
+          (%o27)                           [false, false]
+          (%i28) kg*m/s^2;
+          (%o28)                                 N
+          (%i29) kg*m^2/s^2;
+          (%o29)                                 J
+          (%i30) kill(usersetunits);
+          (%o30)                               done
+          (%i31) uforget([dyn,eV]);
+          (%o31)                          [false, false]
+          (%i32) kg*m/s^2;
+                                               kg m
+          (%o32)                               ----
+                                                 2
+                                                s
+          (%i33) kg*m^2/s^2;
+                                                   2
+                                               kg m
+          (%o33)                               -----
+                                                 2
+                                                s
+
+     Desafortunadamente, esta amplia variedad de opciones puede resultar
+     confusa en un primer momento, pero una vez se practica un poco con
+     ellas, el usuario comprobará que tiene un control absoluto sobre
+     su entorno de trabajo.
+
+
+ -- Función: metricexpandall (<x>)
+     Reconstruye automáticamente las listas globales de unidades
+     creando todas los múltiplos y submúltiplos métricos necesarios. El
+     argumento numérico <x> se utiliza para especificar cuántos
+     prefijos numéricos quiere utilizar el usuario. Los argumentos son
+     los siguientes:
+                         0 - none. Only base units
+                         1 - kilo, centi, milli
+          (por defecto)  2 - giga, mega, kilo, hecto, deka, deci, centi,
+                             milli, micro, nano
+                         3 - peta, tera, giga, mega, kilo, hecto, deka,
+                             deci, centi, milli, micro, nano, pico,
+                             femto
+                         4 - todos
+
+     Normalmente, Maxima no definirá el juego completo de múltiplos y
+     submúltiplos, lo que implica un número muy grande de unidades, pero
+     `metricexpandall' puede utilizarse para reconstruir la lista. La
+     variable fundamental del paquete `unit' es `%unitexpand'.
+
+ -- Variable opcional: %unitexpand
+     Valor por defecto: `2'
+
+     Es el valor suministrado a `metricexpandall' durante la carga del
+     paquete `unit'.
+
+
+File: maxima.info,  Node: zeilberger,  Next: Índice de Funciones y Variables,  Prev: unit,  Up: Top
+
+80 zeilberger
+*************
+
+* Menu:
+
+* Introducción a zeilberger::
+* Funciones y variables para zeilberger::
+
+
+File: maxima.info,  Node: Introducción a zeilberger,  Next: Funciones y variables para zeilberger,  Prev: zeilberger,  Up: zeilberger
+
+80.1 Introducción a zeilberger
+==============================
+
+El paquete `zeilberger' implementa el algoritmo de Zeilberger para la
+suma hipergeométrica definida y el algoritmo de Gosper para la suma
+hipergeométrica indefinida. Además, hace uso del método de optimización
+por filtrado desarrollado por Axel Riese.
+
+   El autor de este paquete es Fabrizio Caruso.
+
+   Antes de hacer uso de las funciones aquí definidas, ejecútese la
+sentencia `load (zeilberger)'.
+
+80.1.0.1 El problema de la suma indefinida
+..........................................
+
+El paquete `zeilberger' implementa el algoritmo de Gosper para la suma
+hipergeométrica indefinida.  Dado el término general hipergeométrico
+F_k de índice k, se plantea el problema de encontrar su antidiferencia
+hipergeométrica, esto es, el término hipergeométrico tal que
+
+   F_k = f_(k+1) - f_k.
+
+80.1.0.2 El problema de la suma definida
+........................................
+
+El paquete `zeilberger' implementa el algoritmo de Zeilberger para la
+suma hipergeométrica definida.  Dados el término hipergeométrico propio
+F_(n,k), de índices n y k, y el entero positivo d, se plantea el
+problema de encontrar una expresión recurrente lineal de orden d con
+coeficientes polinomiales en n y una función racional R en n y k tales
+que
+
+   a_0 F_(n,k) + ... + a_d F_(n+d),k = Delta_K(R(n,k) F_(n,k))
+
+   donde Delta_k es el k-ésimo operador diferencia hacia adelante, esto
+es, Delta_k(t_k) := t_(k+1) - t_k.
+
+80.1.1 Niveles de información
+-----------------------------
+
+Hay versiones extendidas de los nombres de las instrucciones, que se
+construyen añadiendo uno de los siguientes prefijos:
+
+`Summary'
+     Tan solo muestra un sumario al final
+
+`Verbose'
+     Alguna información en los niveles intermedios
+
+`VeryVerbose'
+     Más información
+
+`Extra'
+     Aún más información, incluida alguna sobre el sistema lineal en el
+     algoritmo de Zeilberger.
+
+   Por ejemplo: `GosperVerbose', `parGosperVeryVerbose',
+`ZeilbergerExtra', `AntiDifferenceSummary'.
+
+
+File: maxima.info,  Node: Funciones y variables para zeilberger,  Prev: Introducción a zeilberger,  Up: zeilberger
+
+80.2 Funciones y variables para zeilberger
+==========================================
+
+ -- Función: AntiDifference (<F_k>, <k>)
+     Returns the hypergeometric anti-difference of F_k, if it exists.
+     Otherwise `AntiDifference' returns `no_hyp_antidifference'.
+
+ -- Función: Gosper (<F_k>, <k>)
+     Devuelve, si existe, el elemento racional asociado a <F_k>, esto
+     es, la función racional que verifica
+
+     F_k = R(k+1) F_(k+1) - R(k) F_k,
+
+     En caso de no existir este elemento, `Gosper' devuelve
+     `no_hyp_sol'.
+
+ -- Función: GosperSum (<F_k>, <k>, <a>, <b>)
+     Devuelve la suma de los términos F_k desde <k> = <a> hasta <k> =
+     <b> si F_k tiene una antidiferencia hipergeométrica. En caso
+     contrario, `GosperSum' devuelve `nongosper_summable'.
+
+     Ejemplos:
+
+          (%i1) load (zeilberger)$
+          (%i2) GosperSum ((-1)^k*k / (4*k^2 - 1), k, 1, n);
+          Dependent equations eliminated:  (1)
+                                     3       n + 1
+                                (n + -) (- 1)
+                                     2               1
+          (%o2)               - ------------------ - -
+                                            2        4
+                                2 (4 (n + 1)  - 1)
+          (%i3) GosperSum (1 / (4*k^2 - 1), k, 1, n);
+                                          3
+                                    - n - -
+                                          2       1
+          (%o3)                  -------------- + -
+                                          2       2
+                                 4 (n + 1)  - 1
+          (%i4) GosperSum (x^k, k, 1, n);
+                                    n + 1
+                                   x          x
+          (%o4)                    ------ - -----
+                                   x - 1    x - 1
+          (%i5) GosperSum ((-1)^k*a! / (k!*(a - k)!), k, 1, n);
+                                          n + 1
+                          a! (n + 1) (- 1)              a!
+          (%o5)       - ------------------------- - ----------
+                        a (- n + a - 1)! (n + 1)!   a (a - 1)!
+          (%i6) GosperSum (k*k!, k, 1, n);
+          Dependent equations eliminated:  (1)
+          (%o6)                     (n + 1)! - 1
+          (%i7) GosperSum ((k + 1)*k! / (k + 1)!, k, 1, n);
+                            (n + 1) (n + 2) (n + 1)!
+          (%o7)             ------------------------ - 1
+                                    (n + 2)!
+          (%i8) GosperSum (1 / ((a - k)!*k!), k, 1, n);
+          (%o8)                  NON_GOSPER_SUMMABLE
+
+
+ -- Función: parGosper (<F_{n,k}>, <k>, <n>, <d>)
+     Intenta calcular una recurrecia de orden <d> para <F_{n,k}>.
+
+     El algoritmo devuelve una secuencia [s_1, s_2, ..., s_m] de
+     soluciones, cada una de las cuales tiene la forma
+
+     [R(n, k), [a_0, a_1, ..., a_d]].
+
+     La función `parGosper' devuelve `[]' si no encuentra ninguna
+     recurrencia.
+
+ -- Función: Zeilberger (<F_{n,k}>, <k>, <n>)
+     Intenta calcular la suma hipergeométrica indefinida de <F_{n,k}>.
+
+     La función `Zeilberger' invoca en primer lugar a `Gosper', y en
+     caso de no encontrar una solución, llama después a `parGosper' con
+     los órdenes 1, 2, 3, ..., hasta `max_ord'. Si `Zeilberger'
+     encuentra una solución antes de alcanzar `max_ord', se detiene su
+     ejecución y devuelve el resultado.
+
+     El algoritmo devuelve una secuencia [s_1, s_2, ..., s_m] de
+     soluciones, cada una de las cuales tiene la forma
+
+     [R(n, k), [a_0, a_1, ..., a_d]].
+
+     La función `Zeilberger' devuelve `[]' si no encuentra ninguna
+     solución.
+
+     La función `Zeilberger' llama a `Gosper' sólo si
+     `Gosper_in_Zeilberger' tiene el valor `true'.
+
+ -- Variable opcional: max_ord
+     Valor por defecto: 5
+
+     `max_ord' es el máximo orden de recurrencia que ensayará la
+     función `Zeilberger'.
+
+ -- Variable opcional: simplified_output
+     Valor por defecto: `false'
+
+     Si `simplified_output' vale `true', las funciones del paquete
+     `zeilberger' tratan de presentar las soluciones simplificadas.
+
+ -- Variable opcional: linear_solver
+     Valor por defecto: `linsolve'
+
+     La variable `linear_solver' guarda el nombre de la función que se
+     utilizará para resolver el sistema de ecuaciones del algoritmo de
+     Zeilberger.
+
+ -- Variable opcional: warnings
+     Valor por defecto: `true'
+
+     Si `warnings' vale `true', las funciones del paquete `zeilberger'
+     emiten mensajes de aviso durante su ejecución.
+
+ -- Variable opcional: Gosper_in_Zeilberger
+     Valor por defecto: `true'
+
+     Si `Gosper_in_Zeilberger' vale `true', la función `Zeilberger'
+     llama a la función `Gosper' antes de llamar a `parGosper'.  En
+     caso contrario, `Zeilberger' invoca inmediatamente a `parGosper'.
+
+ -- Variable opcional: trivial_solutions
+     Valor por defecto: `true'
+
+     Si `trivial_solutions' vale `true', la función `Zeilberger'
+     devuelve soluciones triviales.
+
+ -- Variable opcional: mod_test
+     Valor por defecto: `false'
+
+     Si `mod_test' vale `true', la función `parGosper' ejecuta una
+     prueba modular para descartar sistemas sin soluciones.
+
+ -- Variable opcional: modular_linear_solver
+     Valor por defecto: `linsolve'
+
+     La variable `modular_linear_solver' guarda el nombre de la función
+     que deberá ser llamada por la prueba modular de `parGosper' para
+     resolver sistemas lineales.
+
+ -- Variable opcional: ev_point
+     Valor por defecto: `big_primes[10]'
+
+     La variable `ev_point' guarda el valor para el que debe evaluarse
+     <n> durante la ejecución de la prueba modular de `parGosper'.
+
+ -- Variable opcional: mod_big_prime
+     Valor por defecto: `big_primes[1]'
+
+     La variable `mod_big_prime' guarda el módulo utilizado por la
+     prueba modular de `parGosper'.
+
+ -- Variable opcional: mod_threshold
+     Valor por defecto: 4
+
+     La variable `mod_threshold' es el máximo orden que ensaya la
+     prueba modular de `parGosper'.
+
+
+
+Local Variables:
+coding: iso-8859-1
+End:

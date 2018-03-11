@@ -1,0 +1,102 @@
+/* Filename average.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/*program number 7: average(), allows one to perform first and second order
+  averaging. see page 114 in "perturbation methods, bifurcation theory 
+  and computer algebra". */
+
+
+
+/* program to perform 1st or 2nd order averaging 
+   on an n-dimensional system of nonautonomous ode's */
+
+/* averaging is performed by converting trig terms to
+   complex exponentials, then killing exponentials   */
+
+average():=block(
+      choice1:read("do you want to enter a new problem? (y/n)"),
+      if choice1 = n then go(jump1),
+      kill(x),
+      print("are you considering a weakly nonlinear oscillator of the form"),
+      choice2:read("z'' + omega0^2 z = eps f(z,zdot,t) ? (y/n)"),
+      if choice2 = n then go(jump2),
+		
+/* enter data for single oscillator problem */
+      n:2,
+      omega0:read("enter omega0"),
+      f:read("enter f(z,zdot,t)")*eps,
+/* does f(z,zdot,t) depend explicitly on t? */
+      test:diff(f,t),
+      if test=0 then omega1:omega0 
+            else(
+      	    omega:read("enter the forcing frequency"),
+            k:read("enter the order of the subharmonic resonance"),
+            omega1:omega/k),
+/* van der pol transformation */
+      zsub:[z=cos(omega1*t)*x1-sin(omega1*t)*x2,
+               zdot=-omega1*sin(omega1*t)*x1-omega1*cos(omega1*t)*x2],
+/* substitute zsub into transformed eqs */
+/* scale time so that averaging occurs over period 2 pi */
+      vf:ev([-1/omega1^2*(eps*kapomega/k^2*z + f)*sin(omega1*t),
+             -1/omega1^2*(eps*kapomega/k^2*z + f)*cos(omega1*t)],
+             zsub,t=tau/omega1,infeval),
+      vf:ev(vf,tau=t),
+      if omega1 # omega0 
+      then print("we write eps*kapomega =",omega^2-k^2*omega0^2)
+            else vf:ev(vf,kapomega=0),
+      vf2:expand(exponentialize(vf)),
+      for i:1 thru 2 do vf2[i]:map(factor,vf2[i]),
+      x:[x1,x2],
+      go(jump1),
+
+
+jump2,
+/* enter data for general problem of n ode's */
+      n:read("enter number of differential equations"),
+      x:makelist(concat('x,i),i,1,n),	 
+      print("the ode's are of the form:"),
+      print("dx/dt = eps f(x,t)"),
+      print("where x =",x),
+      print("scale time t such that averaging occurs over 2 pi"),
+      vf:makelist(read("enter rhs(",i,")=eps*...")*eps,i,1,n),
+      for i:1 thru n do print("d",x[i],"/dt =",vf[i]),
+      vf2:expand(exponentialize(vf)),
+      for i:1 thru n do vf2[i]:map(factor,vf2[i]),
+
+
+jump1,
+/* averaging */
+      m:read("do you want first or second order averaging?  (1/2)"),
+      coefvfeps1:coeff(vf2,eps),
+      coefvfeps2:coeff(vf2,eps,2),
+      g1bar:demoivre(apply1(coefvfeps1,killexp)),
+      if m=1 then result:eps*g1bar
+                else(
+                g1tilde:coefvfeps1-g1bar,
+                w1:integrate(g1tilde,t),
+      remarray(jacob),
+      jacob[i,j] := diff(g1tilde[i],x[j]),
+      jacg1tilde:genmatrix(jacob,n,n),
+      g2bar:demoivre(apply1(expand(jacg1tilde.w1)+coefvfeps2,killexp)),	
+      result:eps*g1bar+eps^2*g2bar),
+/* replace x by y */
+      for i:1 thru n do result:subst(concat('y,i),concat('x,i),result),
+      result)$
+
+
+/* auxiliary functions to kill exponential terms */
+      contains_t(exp):= not freeof(t,exp)$
+      matchdeclare(q,contains_t)$
+      defrule(killexp,exp(q),0)$

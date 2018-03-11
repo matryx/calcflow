@@ -1,0 +1,88 @@
+/*
+ * Maximum entropy estimate for a transportation problem.  Based on an
+ * example from Kostas Oikonomou.
+ *
+ * There are 5 cities connected by two highways:
+ *
+ *  1 ----- 2 ----- 3 ----- 4
+ *  |               |
+ *  5---------------+
+ *
+ * So cities 1,2,3,4 are connected by one highway, and there's another
+ * highway from 1 to 5 to 3.
+ *
+ * The number of cars the left cities 1, 2, and 4 is known.  The
+ * number of cars that travelled the highway segment from 2 to 3 is
+ * also known, and finally it is known that at least a certain number
+ * travelled the 5 to 3 segment.  Given this inofrmation, we want to
+ * know the most likely number (fraction) of cars that travelled
+ * between each pair of cities on that day.  This is the 5x5 matrix C
+ * = [c[i,j]] where c[i,i] represents the fraction of cars that left
+ * city i and return to it.  Our information is:
+ *
+ * sum(c[i,j], j, 1, 5) = r[i] for i = 1, 2, 4
+ *
+ * c[1,3] + c[1,4] + c[2,4] = s[2,3] and 
+ * c[1,3] + c[5,3] + c[1,4] >= s[5,3].
+ *
+ * Suppose (r1,r2,r4) = (.13,.25,.1) and (s23,s53) = (0.11, .07).
+ * Then the maximum entropy solution is
+ * 
+ * matrix([.030790, .030790, .018816, .018816, .030790],
+ *        [.059210, .059210, .059210, .059210, .059210],
+ *        [.052,    .052,    .052,    .052,    .052   ],
+ *        [.02,     .02,     .02,     .02,     .02    ],
+ *        [.052,    .052,    .052,    .052,    .052   ],
+ */
+
+HH(X) := -xreduce("+",map(lambda([x],x*log(x)),X));
+
+C : 
+[c11,c12,c13,c14,c15,
+c21,c22,c23,c24,c25,
+c31,c32,c33,c34,c35,
+c41,c42,c43,c44,c45,
+c51,c52,c53,c54,c55]$
+
+cars(r,s) := 
+  fmin_cobyla(-HH(C) , 
+              C,
+	      makelist(1/25,k,1,25),
+	      constraints =
+               [xreduce("+",C)=1,
+	   	c11+c12+c13+c14+c15=r[1],
+		c21+c22+c23+c24+c25=r[2],
+		c41+c42+c43+c44+c45=r[3],
+		c13+c14+c23+c24=s[1],
+		c13+c53+c14>=s[2]
+		],
+	      iprint=1,
+	      rhobeg = .1,
+	      rhoend = 1d-9
+);
+
+cars([.13,.25,.1],[.11,.07]);
+/*
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =  944   F =-3.141900E+00    MAXCV = 1.082467E-15
+   X = 3.078947E-02   3.078947E-02   1.881578E-02   1.881579E-02   3.078948E-02
+       5.921053E-02   5.921052E-02   3.618421E-02   3.618421E-02   5.921053E-02
+   5.199999E-02   5.200000E-02   5.200001E-02   5.200001E-02
+   5.200000E-02   2.000001E-02   2.000000E-02   2.000000E-02
+   2.000000E-02   2.000000E-02   5.200000E-02   5.199999E-02
+   5.199998E-02   5.200000E-02   5.200001E-02
+
+(%o19) [[c11 = .03078947216080049, c12 = .03078947258983758, 
+c13 = .01881578424530663, c14 = .01881579235550251, c15 = .03078947864855278, 
+c21 = .05921052755891571, c22 = .05921051666669622, c23 = .03618421394514965, 
+c24 = .03618420945404111, c25 = .05921053237519735, c31 = .05199998745697864, 
+c32 = .05199999998006931, c33 = .05200001440859302, c34 = .05200000844126493, 
+c35 = .05200000226927205, c41 = .02000000599466734, c42 = .01999999747226151, 
+c43 = .01999999589953518, c44 = .02000000095933785, c45 = .01999999967419817, 
+c51 = .05200000159627225, c52 = .05199999448887869, c53 = 0.0519999846606873, 
+c54 = .05199999603531405, c55 = .05200001066267089], - 3.141900424608619, 
+944, 0]
+*/
+

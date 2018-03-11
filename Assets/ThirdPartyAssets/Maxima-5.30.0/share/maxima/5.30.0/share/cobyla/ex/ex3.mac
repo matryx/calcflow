@@ -1,0 +1,34 @@
+/*
+ * 3D ellipsoid calculation
+ *
+ * f = x1*x2*x3
+ * 1-x1^2-2*x2^2-3*x3^2 >= 0
+ *
+ * True solution: x1=1/sqrt(3), x2=1/sqrt(6), x3=-1/3
+ */
+
+fmin_cobyla(x1*x2*x3, [x1, x2, x3], [1,1,1], constraints = [1-x1^2-2*x2^2-3*x3^2>=0], iprint=1);
+
+/* Output
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   94   F =-7.856742E-02    MAXCV = 5.935807E-12
+   X = 5.773509E-01   4.082474E-01  -3.333336E-01
+[[x1 = .5773509172259506,x2 = .4082474453988019,
+          x3 = -0.333333649184014],-.07856742013203198, 94, 0]
+
+*/
+
+/* True output
+
+       Output from test problem 3 (3D ellipsoid calculation)
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   94   F =-7.856742E-02    MAXCV = 5.935807E-12
+   X = 5.773509E-01   4.082474E-01  -3.333336E-01
+
+*/
+
+

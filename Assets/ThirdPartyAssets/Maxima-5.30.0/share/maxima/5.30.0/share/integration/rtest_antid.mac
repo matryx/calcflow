@@ -1,0 +1,64 @@
+/*******************************************************************************
+ * File    : rtest_antid.mac
+ * License : GNU General Public License (GPL)
+ * 
+ * Examples for testing the functions
+ *
+ *   antid (fn, var,unk)
+ *   antidiff (fn, var, unk)
+ *
+ * See the Maxima reference manual for a documentation.
+ *
+ * This file is part of Maxima -- GPL CAS based on DOE-MACSYMA
+ ******************************************************************************/
+
+kill(all);
+done;
+
+(load(antid), done);
+done;
+
+/* Examples taken from the Maxima reference manual */
+
+expr: exp (z(x)) * diff (z(x), x) * y(x);
+%e^z(x)*y(x)*'diff(z(x),x,1);
+
+antid (expr, x, z(x));
+[%e^z(x)*y(x),-%e^z(x)*'diff(y(x),x,1)];
+
+antidiff (expr, x, z(x));
+%e^z(x)*y(x)-'integrate(%e^z(x)*'diff(y(x),x,1),x);
+
+antid (expr, x, y(x));
+[0,%e^z(x)*y(x)*'diff(z(x),x,1)];
+
+antidiff (expr, x, y(x));
+'integrate(%e^z(x)*y(x)*'diff(z(x),x,1),x);
+
+/* Example taken from the demo file antid.dem 
+ * Derivate two times a function and get back the antiderivate.
+*/
+
+g : diff(%e^u(x)*sin(u(x)), x, 2);
+%e^u(x)*sin(u(x))*'diff(u(x),x,2)+%e^u(x)*cos(u(x))*'diff(u(x),x,2)
+                                 +2*%e^u(x)*cos(u(x))*('diff(u(x),x,1))^2;
+
+ratsimp(antidiff(antidiff(g, x, u(x)), x, u(x)));
+%e^u(x)*sin(u(x));
+
+/* Bug report ID: 2541376 - antidiff bug
+ * 
+ * This example does not give the expected simple answer, because of
+ * factors exp(a*log(f(x)+1)), which do not simplify to (f(x)+1)^a.
+ * But the answer is correct and the algorithm no longer loops forever.
+ */
+
+(assume(notequal(a,0)), done);
+done;
+
+antidiff(diff(f(x) * (1 + f(x))^a,x), x, f(x));
+-'integrate(((a+1)*f(x)*%e^(a*log(f(x)+1))+(-a-1)*f(x)*(f(x)+1)^a)
+             *'diff(f(x),x,1)
+             /(f(x)+1),x)
+ +a*(a*f(x)-1)*%e^(a*log(f(x)+1))/(a^2+a)
+ +(a*f(x)-1)*%e^(a*log(f(x)+1))/(a^2+a)+(f(x)+1)^a/a;

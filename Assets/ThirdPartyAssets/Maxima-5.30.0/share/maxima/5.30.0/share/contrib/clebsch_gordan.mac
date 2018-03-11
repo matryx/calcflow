@@ -1,0 +1,93 @@
+/* This program computes the 3j, 6j, 9j symbols of Wigner, associated 
+with the irreducible representations of the group SU(2).
+These functions are used in quantum mechanics for addition of angular
+momenta. 
+References are Landau and Lifshitz t. 3: Quantum Mechanics (Pergamon) 
+               Messiah Quantum Mechanics (Dover) 
+               Edmonds Angular momentum in quantum Mechanics (Princeton University Press)
+Page and equation numbers refer to the french edition of Landau and Lifshitz "Mecanique Quantique" (Mir) and Messiah "Mecanique Quantique" (Dunod). 
+GPL (v2)  Licence 2007,2011  
+*/ 
+
+
+/* computes the Clebsch-Gordan coefficient <j1,j2,m1,m2|j,m> */ 
+clebsch_gordan(j1,j2,m1,m2,j,m):=block([u,v,w,k,k1,k2],
+/* Check that j1,j2,j are admissible */ 
+if ((j1<0) or (j2<0) or (j<0)) then return(0),
+if (not(integerp(2*j1)) or not(integerp(2*j2)) or not(integerp(2*j))) then return(0), 
+if (not(integerp(j1+j2+j))) then return(0),
+if ((j>(j1+j2)) or (j<abs(j1-j2))) then return(0),
+if (not(integerp(2*m1)) or not(integerp(2*m2)) or (not(integerp(2*m)))) then return(0), 
+if ((abs(m1)>j1) or (abs(m2)>j2) or (abs(m)>j)) then return(0),
+if (m#(m1+m2)) then return(0), 
+u:sqrt((j1+j2-j)!*(j+j1-j2)!*(j+j2-j1)!*(2*j+1)/(j+j1+j2+1)!),
+/* A&S Eq. (27.9.1) p. 1006. Note that A&S misleadingly uses the terminology Wigner coefficients */
+k1:max(j2-j-m1,j1+m2-j,0),
+k2:min(j1+j2-j,j1-m1,j2+m2),
+v:sum((-1)^k/(k!*(j1+j2-j-k)!*(j1-m1-k)!*(j2+m2-k)!*(j-j2+m1+k)!*(j-j1-m2+k)!),k,k1,k2), 
+w:sqrt((j1+m1)!*(j1-m1)!*(j2+m2)!*(j2-m2)!*(j+m)!*(j-m)!),
+return(rootscontract(radcan(u*v*w)))
+)$
+
+/* Computes Racah's triangle function */ 
+racah_delta(a,b,c):=block([],
+(a+b-c)!*(b+c-a)!*(c+a-b)!/(a+b+c+1)!
+)$
+
+/* Computes Wigner's 3j symbol. Messiah (op.cit. p.908, Eq.12) */ 
+
+wigner_3j(j1,j2,j3,m1,m2,m3):=block([],
+(-1)^(j1-j2-m3)/sqrt(2*j3+1)*clebsch_gordan(j1,j2,m1,m2,j3,-m3)
+)$ 
+
+  /* Computes Racah's V coefficient. Messiah (op. cit. p. 908, footnote 4)*/ 
+racah_v(a,b,c,a1,b1,c1):=block([],
+(-1)^(c-c1)/sqrt(2*c+1)*clebsch_gordan(a,b,a1,b1,c,-c1)
+)$
+
+
+/* Computes Wigner's 6j symbol */ 
+wigner_6j(j1,j2,j3,j4,j5,j6):=block([u,t1t2,t,v],
+/* Check that j1,j2,j3,j4,j5,j6 are admissible */
+if ((j1<0) or (j2<0) or (j3<0)or (j4<0) or (j5<0) or (j6<0)) then return(0),
+if (not(integerp(2*j1)) or not(integerp(2*j2)) or not(integerp(2*j3)) or not(integerp(2*j4)) or not(integerp(2*j5)) or not(integerp(2*j6))) then return (0),
+if (not(integerp(j1+j2+j3)) or not(integerp(j4+j5+j3)) or not(integerp(j4+j2+j6)) or (not(integerp(j1+j5+j6)))) then return(0), 
+/* Triangle inequalities */ 
+if (abs(j1-j2)>j3 or j3>j1+j2) then return(0),
+if (abs(j5-j4)>j3 or j3>j4+j5) then return(0),
+if (abs(j5-j6)>j1 or j1>j5+j6) then return(0),
+if (abs(j4-j6)>j2 or j2>j4+j6) then return(0),
+/* L. D. Landau E.M. Lifschitz Mecanique Quantique (Mir) p. 513 Eq. (108,10)
+with J1=j4,J2,j5,J3=j6
+   A. Messiah Mecanique Quantique t. 2 (Dunod) p. 915, Eq. (36) */   
+u:sqrt(racah_delta(j1,j2,j3)*racah_delta(j1,j5,j6)*racah_delta(j4,j2,j6)*racah_delta(j4,j5,j3)),
+t1:max(j1+j2+j3,j1+j5+j6,j4+j2+j6,j4+j5+j3),
+t2:min(j1+j2+j4+j5,j2+j3+j5+j6,j1+j3+j4+j6),
+v:sum((-1)^t*(t+1)!/((t-j1-j2-j3)!*(t-j1-j5-j6)!*(t-j4-j2-j6)!*(t-j4-j5-j3)!*(j1+j2+j4+j5-t)!*(j2+j3+j5+j6-t)!*(j1+j3+j4+j6-t)!),t,t1,t2),
+rootscontract(radcan(u*v))  
+)$
+
+/* Racah's W coefficient, Messiah (op. cit.) p. 913, Eq. (30) */ 
+racah_w(j1,j2,j5,j4,j3,j6):=block([],
+(-1)^(j1+j2+j4+j5)*wigner_6j(j1,j2,j3,j4,j5,j6)
+)$ 
+
+/* Computes Wigner's 9j symbol. Adapted from njsym.maple by B. G. Wybourne */ 
+wigner_9j(a,b,c,d,e,f,h,i,j):=block([x,xmin,xmax,result],
+/* Angular momentum is half-integer */  
+ if (not(integerp(2*a)) or not(integerp(2*b)) or not(integerp(2*c)) or not(integerp(2*d))) then return(0), 
+if (not(integerp(2*e)) or not(integerp(2*f)) or not(integerp(2*h)) or not(integerp(2*i)) or not(integerp(2*j))) then return(0), 
+/* Triangle inequalities */  
+ if (abs(a-d)>h or h>a+d) then return(0),
+ if (abs(i-j)>h or h>i+j) then return(0),
+ if (abs(b-e)>i or i>b+e) then return(0),
+ if (abd(d-e)>f or f>d+e) then return(0),
+ if (abs(c-f)>j or j>c+f) then return(0),
+ if (abs(c-a)>b or b>c+a) then return(0), 
+ xmax:min(a+j,i+d,b+f),
+ xmin:max(abs(a-j),abs(i-d),abs(b-f)),
+/* A. Messiah  Mecanique Quantique t. 2 (Dunod) p. 917, Eq. (41) */
+ result:sum(((-1)^(2*x))*(2*x + 1)*wigner_6j(a,d,h,i,j,x)*wigner_6j(b,e,i,d,x,f)
+*wigner_6j(c,f,j,x,a,b),x,xmin,xmax),
+return(rootscontract(radcan(result)))  
+)$

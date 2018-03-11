@@ -1,0 +1,44 @@
+/* Fichier sym.mac
+                     Version 02 Mars 1999 sans autoload
+
+;       ***************************************************************
+;       *                    MODULE SYM                               *
+;       *       MANIPULATIONS DE FONCTIONS SYMETRIQUES                *
+;       *        (version02: Commonlisp pour Maxima)                  *
+;       *                                                             *
+;       *                ----------------------                       *
+;       *                  Annick VALIBOUZE                           *
+;       *                    GDR MEDICIS                              *
+;       *  (Mathe'matiques Effectives, De'veloppements Informatiques, *
+;       *           Calculs et Ingenierie, Syste`mes)                 *
+;       *         Laboratoire LIP6 (Equipe Calcul Formel)             *
+;       *                 Universite' Paris 6,                        *
+;       *        4 place Jussieu, 75252 Paris cedex 05.               *
+;       *              e-mail : avb@sysal.ibp.fr                      *
+;       ***************************************************************
+*/
+
+
+/* valeurs par defauts qui ne doivent pas ecraser celles deja donnees
+par l'utilisateur */
+
+if ev(schur2comp)='schur2comp then schur2comp : pol;
+if ev(direct)='direct then direct : puissances;
+if ev(oper)='oper then  oper :  meval; 
+if ev(kak)='kak then  kak : 1;
+if ev(elem)='elem then elem : 1;
+if ev(pui)='pui then pui: 1;
+if ev(pui2ele)='pui2ele then pui2ele : girard;
+if ev(somrac)='somrac then somrac: puissances;
+if ev(resulsym)='resulsym then resulsym: 14;
+
+print(resolvante);
+if ev(resolvante)='resolvante then resolvante: generale;
+print(resolvante);
+if ev(directnew)='directnew then directnew: parallele ;
+
+print("");
+print("NOTE: To compile the system do");
+print("load(\"sym/compile\");");
+
+block (load ("load-sym-lisp-files"), 'done);

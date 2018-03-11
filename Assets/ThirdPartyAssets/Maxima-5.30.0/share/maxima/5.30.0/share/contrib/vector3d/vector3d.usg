@@ -1,0 +1,69 @@
+
+                         VECTOR3D
+
+The vector3d package adds functions for doing vector algebra and calculus
+in orthogonal coordinate systems in three dimensions.  It provides the
+vector or cross product and the differential operators grad, div, curl,
+and laplacian.
+
+This package provides an alternative to vect and vector.  Unlike those 
+packages, vector3d does not require vectors to be declared nonscalar,
+does not require the coordinate transformation to be given explicitly,
+does not need express() to display the components, and does not need an 
+array of simplification options.  Usually, expand() is enough to collapse
+complex chains of vector operators into recognizable form.
+
+On the other hand, vector3d does not do as much as the other packages.
+The operators that work on vectors do not work with abstract vectors;
+they must be defined as three element lists even if the list elements
+are unbound.  It does assume but not check that the coordinate system
+is orthogonal but works just from the scale factors.  Therefore,
+conversion from one coordinate system to another is not available.
+Potentials and Christoffel symbols are not implemented either.
+
+Definitions for vector3d
+
+     coordsys(sys)
+sets the orthogonal coordinate system to be used, default cartesian.
+If sys is not one of cartesian, cylindrical, or spherical, then the
+user is asked for the names of the three coordinate variables and for
+the three scale factors.  The coordinate variables for the already
+defined systems are [x,y,z] for cartesian, [r,ph,z] for cylindrical,
+and [r,th,ph] for spherical.  Note that ph is the polar angle in this
+spherical polar system.  There is nothing stopping you from setting the
+scale factors scalef:[ , , ] and coordinate variables coordvar:[ , , ]
+yourself and not using this function.
+
+     cross(a,b)
+returns the vector or cross product of the two vectors a and b.
+
+     curl(u)
+returns the vector curl (del cross u) of the vector u, each component of
+which is a function of the coordinates.  If it is not given explicitly,
+do something like
+     u : [ux,uy,uz]; depends([ux,uy,uz],[x,y,z]);
+to establish it.
+
+     div(u)
+returns the scalar divergence (del dot u) of the vector u.
+
+     grad(f)
+returns the vector gradient (del f) of the scalar f, which is a function
+of the coordinates.  Use depends([f],[x,y,z]), for example, to establish
+the functional dependence if it is not given explicitly already.
+
+     laplacian(u)
+If u is a scalar function of the coordinates, then the scalar laplacian
+(div(grad(u)) is returned.  If u is a vector function, then the vector
+laplacian (del squared u) is returned.
+
+     a . b, a + b, a * s
+The dot product of vectors a and b returns a scalar, and is available
+outside this package.  The vector sum of two vectors and the product
+of a vector and a scalar are likewise available and compatible with the
+other operators.
+
+Walter Eastes  (eastes@infinet.com)
+
+June, 2004
+

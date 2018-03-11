@@ -1,0 +1,62 @@
+ README: Maxima numericalio
+
+ Robert Dodier 
+ robert_dodier@users.sourceforge.net
+ 2004/01/29
+
+ TOC
+
+ 0. Known bugs
+ 1. Manifest
+ 2. Instructions
+ 3. Description
+
+
+ 0. Known bugs are:
+
+    - numericalio doesn't gracefully handle file system errors
+      (path component does not exist, permissions problems, etc.)
+
+    - return values are not consistent; should consistently return
+      true or some object for success and false for failure
+
+    - empty sublist in nested list should yield an empty line,
+      but nothing (not even an empty line) is printed
+
+ 
+ 1. Files in this package are:
+
+ README                        -- this document
+
+ numericalio.lisp              -- numericalio functions
+
+ is_equal_array.lisp           -- scripts and data for testing
+ my_flatten.mac
+ ragged.mac
+ ragged.data
+ rectangular.mac
+ rectangular.data
+ array.mac
+ array.data
+ csv.mac
+ rectangular.csv
+ really-csv.data
+ really-space-separated.csv
+
+
+ 2. To use numericalio:
+
+ (C1) load("numericalio.lisp")$
+
+ To execute the test scripts:
+
+ (C1) batchload("ragged.mac")$
+ (C2) batchload("rectangular.mac")$
+ (C3) batchload("array.mac")$
+ (C4) batchload("csv.mac")$
+
+ Test scripts assume the current working directory is writable.
+
+
+ 3. For a description of functions, see: numericalio.lisp
+ The header comment describes the functions.

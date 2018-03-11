@@ -1,0 +1,32 @@
+/*-*-MACSYMA-*-*/
+
+eval_when([translate,batch,demo],
+          if not(member('macro,properties(load_package))) then load(packg))$
+
+herald_package(basic)$
+
+
+/* These are basic macros, nothing in here should call anything
+   complicated. PUSH and POP here are the simple version
+   which do not hack once-only evaluation. 
+   I might say that these macros are around mostly so
+   that the code for implementing the more complicated
+   macros, including the once-only stuff, can be simpler.
+*/
+
+prog1(statement1,[statements])::=
+ buildq([statement1,statements,local:?gentemp()],
+        lambda([local],splice(statements),local)(statement1))$
+
+symbolcheck(x):=
+ if symbolp(x) then x else error("arg must be a symbol",x)$
+
+push(c,l)::=(symbolcheck(l),buildq([c,l],l:cons(c,l)))$
+
+pop(l)::=(symbolcheck(l),buildq([l],prog1(first(l),l:rest(l))))$
+
+/* TR_EV is a pretty sorry way to get optimization
+   by Translation-time evaluation. User directed constant-folding
+   you might call it. TR_EV has other uses. */
+
+tr_ev(x)::=buildq([x],?meval(x))$

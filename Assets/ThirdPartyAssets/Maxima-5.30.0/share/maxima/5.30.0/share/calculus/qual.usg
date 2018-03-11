@@ -1,0 +1,120 @@
+
+File SHARE;QUAL > contains MACSYMA functions for qualitative analysis
+of an expression, file QUAL DEMO contains a demonstration, and file
+QUAL OUT contains the output from executing the demo.  Written by
+David R. Stoutemyer, login name STOUTE.  Suggestions, together with
+successful or unsuccessful examples of its use will be gratefully 
+acknowledged.
+
+To use the functions do
+	ALLOC(2);
+	BATCH(QUAL,>,SHARE);
+
+Top-level usage is of the form
+	QUAL(<expression>, <variables>);
+
+<expression> is any given expression.
+
+<variables> is a given indeterminate or list of indeterminates.  If
+    omitted, this argument defaults to all of the indeterminates in the
+    first argument.
+
+QUAL returns a list of E-labels of displayed equations, each of the
+form  <property name> = <property value>, where   <property name> is
+one of the second-level function names below, and <property value>
+is the value returned by that function.  These second-level functions
+may also be used directly.  Usage is of the form
+
+	REVELATION(<expression>, <minimum>, <maximum>);
+	BOUNDS(<expression>);
+	SLOPES(<expression>, <variables>);
+	CURVATURE(<expression>, <variables>);
+	SYMMETRY(<expression>, <variables>);
+	PERIODS(<expression>, <variables>);
+	ZEROSANDPOLES(<expression>, <variables>);
+	STATIONARYPOINTS(<expression>, <variables>);
+	LIMITS(<expression>, <variables>);
+
+<expression>, <variables>, and their defaults are as for QUAL.
+
+REVELATION automatically prints successive levels of the
+structure of its first argument.  No printout occurs if
+<minimum> exceeds the number of print characters of <expression>, and
+printout ceases when the output of a level exceeds <maximum> print
+characters.  Omitted trailing arguments have defaults:  200 for
+<minimum> and 300 for <maximum>.
+
+BOUNDS returns a list of two expressions which are respectively a
+lower bound and upper bound for the expression, computed by symbolic
+interval analysis with indeterminates treated as real variables.
+BOUNDS makes use of global bounds previously established for
+indeterminates by statements of the form
+
+	ASSUME(<variable> <relational operator> <value>);
+
+where <variable> is an indeterminate; <relational operator> is one
+of <, <=, >=, or >; and <value> is any expression, including MINF
+or INF for minus and plus infinity respectively.  As a convenience,
+previously unestablished indeterminate bounds are globally set to MINF
+and INF respectively, when first needed, with a warning message.  In
+practice, bounds other than numbers, MINF, and INF usually lead to 
+messy results, especially for indeterminates that occur in products,
+quotients, or exponentiations.  Note also that although interval
+analysis is relatively fast, it often does not give tight bounds when
+any indeterminate occurs more than once in an expression.
+
+SLOPES returns a list of items of the form  <type>(<variable>), one
+for each <variable> in <variables>.  <type> is DECREASING,
+NONINCREASING, CONSTANT, NONDECREASING, INCREASING, or UNKNOWN,
+according to how<expression>  is determined to vary with <variable>.
+The method is symbolic interval analysis on the first derivatives;
+so as with BOUNDS, the result depends upon global bounds established 
+by ASSUME, and the result may be weaker than necessary.
+
+CURVATURE returns STRICTLYCONCAVE, CONCAVE, CONCAVEANDCONVEX, CONVEX,
+STRICTLYCONVEX, NEITHERCONCAVENORCONVEX, or UNKNOWN, according to how
+expression> is determined to behave in the domain implied by
+previously ASSUMEd global bounds on the
+indeterminates.  Interval analysis is used to test for definiteness or
+semidefiniteness of the Hessian matrix of second derivatives; so the
+result may be weaker than necessary.
+
+SYMMETRY returns a list of items of the form  <type>(<variable>),
+one for each  <variable> in <variables>.  <type> is ODD, NONEVEN,
+NONODD, EVEN, NEITHER, or UNKNOWN, according to the determined symmetry of
+<expression> with respect to <variable>, with other variables
+arbitrary.
+
+PERIODS return a list of equations of the form PERIOD(<variable>) =
+<expression>, according to the determined periodicity with respect to
+<variable>, while other variables are arbitrary.
+A risghthand side 0 means the first argument of
+PERIODS is independent of the corresponding variable; a righthand side
+INF means nonperiodic; and a righthand side UNKNOWN means periodicity
+could not be determined.
+
+ZEROSANDPOLES  returns a list of the E-labels of two equations, of respective
+forms
+	ZEROS = <list of equations>,
+	POLES = <list of equations>,
+
+where the solutions of each equation in a list are where zeros or
+poles occur respectively.
+
+STATIONARYPOINTS returns a list of the E-labels of three equations,
+of respective forms
+
+	STATIONARYPOINTS = <list of lists of equations>,
+	CORRESPONDING EXPRESSION VALUES = <list of expressions>,
+	CORRESPONDING TYPES = <list of types>,
+
+Each list of equations gives the values of the variables
+for one stationary point, the corresponding expression gives the value of the first argument to STATIONARYPOINTS evaluated
+at the stationary point, and the corresponding type is one of
+MAXIMUM, NONMINIMUM, UNKNOWN, NONMAXIMUM,
+MINIMUM, SADDLE, or UNKNOWN.
+
+LIMITS returns a list of E-labels of equations of the form
+	LIMITAS(<variable>,<bound>) = <value>,
+
+where <bound> is an upper or lower bound established by ASSUME.

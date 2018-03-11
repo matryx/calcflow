@@ -1,0 +1,197 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+(kill(all),matchdeclare(a,true));
+done$
+(\^rule1_retval : tellsimp(sin(a)^2,1-cos(a)^2), 0);
+0;
+sin(y)^2;
+1-cos(y)^2$
+kill(rules);
+done$
+nonzeroandfreeof(x,e):=is(e # 0 and freeof(x,e));
+nonzeroandfreeof(x,e):=is(e # 0 and freeof(x,e))$
+matchdeclare(a,nonzeroandfreeof(x),b,freeof(x));
+done$
+defmatch(linear,a*x+b,x);
+linear$
+linear(3*z+(y+1)*z+y^2,z);
+[b = y^2,a = y+4,x = z]$
+matchdeclare([a,f],true);
+done$
+constinterval(l,h):=constantp(h-l);
+constinterval(l,h):=constantp(h-l)$
+matchdeclare(b,constinterval(a));
+done$
+matchdeclare(x,atom);
+done$
+block(remove(integrate,outative),defmatch(checklimits,'integrate(f,x,a,b)),
+      declare(integrate,outative));
+done$
+'integrate(sin(t),t,x+%pi,x+2*%pi);
+'integrate(sin(t),t,x+%pi,x+2*%pi)$
+checklimits(%);
+[b = x+2*%pi,a = x+%pi,x = t,f = sin(t)]$
+'integrate(sin(t),t,0,x);
+'integrate(sin(t),t,0,t)$
+checklimits(%);
+false$
+(kill(all),matchdeclare(x,freeof(%i)));
+done$
+%iargs:false;
+false$
+(sinrule_retval : tellsimp(sin(%i*x),%i*sinh(x)), 0);
+0;
+trigexpand(sin(x+%i*y));
+sin(x)*cos(%i*y)+%i*cos(x)*sinh(y)$
+%iargs:true;
+true$
+errcatch(0^0);
+[]$
+ev((\^rule2_retval : tellsimp(0^0,1), 0),simp:false);
+0;
+0^0;
+1$
+remrule ("^", first (\^rule2_retval));
+"^"$
+(\^rule3_retval : tellsimp(sin(x)^2,1-cos(x)^2), 0);
+0;
+(sin(x)+1)^2;
+(sin(x)+1)^2$
+expand(%);
+2*sin(x)-cos(x)^2+2$
+sin(x)^2;
+1-cos(x)^2$
+kill(rules);
+done$
+matchdeclare(a,true);
+done$
+(\^rule4_retval : tellsimp(sin(a)^2,1-cos(a)^2), 0);
+0;
+sin(y)^2;
+1-cos(y)^2$
+kill(rules);
+done$
+(kill(all),nonzeroandfreeof(x,e):=is(e # 0 and freeof(x,e)));
+nonzeroandfreeof(x,e):=is(e # 0 and freeof(x,e))$
+matchdeclare(a,nonzeroandfreeof(x),b,freeof(x));
+done$
+defmatch(linear,a*x+b,x);
+linear$
+linear(3*z+(y+1)*z+y^2,z);
+[b = y^2,a = y+4,x = z]$
+matchdeclare([a,f],true);
+done$
+constinterval(l,h):=constantp(h-l);
+constinterval(l,h):=constantp(h-l)$
+matchdeclare(b,constinterval(a));
+done$
+matchdeclare(x,atom);
+done$
+block(remove(integrate,outative),defmatch(checklimits,'integrate(f,x,a,b)),
+      declare(integrate,outative));
+done$
+'integrate(sin(t),t,x+%pi,x+2*%pi);
+'integrate(sin(t),t,x+%pi,x+2*%pi)$
+checklimits(%);
+[b = x+2*%pi,a = x+%pi,x = t,f = sin(t)]$
+'integrate(sin(t),t,0,x);
+'integrate(sin(t),t,0,t)$
+checklimits(%);
+false$
+remvalue(a,b,f,x);
+[a,b,f,x]$
+(kill(all),matchdeclare([a,a1,a2],true));
+done$
+oneless(x,y):=is(x = y-1);
+oneless(x,y):=is(x = y-1)$
+let(a1*a2!,a1!,oneless,a2,a1);
+?mtext(a1*a2!,?\ \-\-\>\ ,a1!,?\ where\ ,oneless(a2,a1))$
+ev(let(a1!/a1,(a1-1)!),letrat);
+?mtext(a1!/a1,?\ \-\-\>\ ,(a1-1)!)$
+ev(letsimp(n*m!*(n-1)!/m),letrat);
+(m-1)!*n!$
+let(sin(a)^2,1-cos(a)^2);
+?mtext(sin(a)^2,?\ \-\-\>\ ,1-cos(a)^2)$
+sin(x)^4;
+sin(x)^4$
+letsimp(%);
+cos(x)^4-2*cos(x)^2+1$
+matchdeclare([a,a1,a2],true);
+done$
+oneless(x,y):=is(x = y-1);
+oneless(x,y):=is(x = y-1)$
+let(a1*a2!,a1!,oneless,a2,a1);
+?mtext(a1*a2!,?\ \-\-\>\ ,a1!,?\ where\ ,oneless(a2,a1))$
+ev(let(a1!/a1,(a1-1)!),letrat);
+?mtext(a1!/a1,?\ \-\-\>\ ,(a1-1)!)$
+ev(letsimp(n*m!*(n-1)!/m),letrat);
+(m-1)!*n!$
+let(sin(a)^2,1-cos(a)^2);
+?mtext(sin(a)^2,?\ \-\-\>\ ,1-cos(a)^2)$
+sin(x)^4;
+sin(x)^4$
+letsimp(%);
+cos(x)^4-2*cos(x)^2+1$
+pfeformat:true;
+true$
+poissimp(sin(x)^2);
+1/2-1/2*cos(2*x)$
+(2*a^2-b)*cos(x+2*y)-(a*b+5)*sin(u-4*x);
+(2*a^2-b)*cos(2*y+x)+(a*b+5)*sin(4*x-u)$
+exp1:outofpois(poisexpt(%,2));
+1/2*(2*a^2-b)^2*cos(4*y+2*x)-(2*a^2-b)*(-a*b-5)*sin(2*y+5*x-u)
+			    +(2*a^2-b)*(-a*b-5)*sin(2*y-3*x+u)
+			    -1/2*(-a*b-5)^2*cos(8*x-2*u)+1/2*(-a*b-5)^2
+			    +1/2*(2*a^2-b)^2$
+printpois(%);
+done$
+
+ratsimp(outofpois(poisint(exp1,y)));
+''(ratsimp(((-1)*(2*a^2-b)*(-5-a*b)*cos(u-3*x+2*y))/2+((2*a^2-b)*(-5-a*b)*cos(-u+5*x+2*y))/2+((2*a^2-b)^2*sin(2*x+4*y))/8))$
+
+ratsimp(outofpois(poissimp(%)));
+''(ratsimp(1/8*(2*a^2-b)^2*sin(4*y+2*x)+1/2*(2*a^2-b)*(-a*b-5)*cos(2*y+5*x-u)
+			    -1/2*(2*a^2-b)*(-a*b-5)*cos(2*y-3*x+u)))$
+
+poissimp(sin(x)^5+cos(x)^5);
+1/16*sin(5*x)+1/16*cos(5*x)-5/16*sin(3*x)+5/16*cos(3*x)+5/8*sin(x)+5/8*cos(x)$
+
+pfeformat:false;
+false$
+
+/* test for bug [ 1648352 ] rules and pattern bug */
+
+(kill (foo, bar),
+ matchdeclare (aa, true, gg, lambda([yy], evenp(yy) and (yy > 1))),
+ let (foo(aa)^gg, (1 - bar(aa)^2)^(gg/2)),
+ 0);
+0;
+
+letsimp (foo(x)^2);
+1 - bar(x)^2;
+
+letsimp (foo(x)^3);
+foo(x)^3;
+
+letsimp (foo(x)^4);
+bar(x)^4 - 2*bar(x)^2 + 1;
+
+/* letsimp confused by debug stuff in expression car
+ * mailing list 2012-12-23: "let(simp) behaves different when loaded from batch file"
+ */
+(kill (test),
+ test() := block([expr],
+   local (F),
+   expr : diff(f(x), x),
+   F(xx) := at(expr, [x = xx]),
+   let(at(diff(f(x),x),[x=0]),5),
+   letsimp(F(0))),
+ test ());
+5;
+

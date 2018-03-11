@@ -1,0 +1,121 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+/* -*- Mode: MACSYMA -*- */
+/* batch("me:test6a.mac");
+It asked is a pos answred yes
+   and is i+1 zero or nonzero and I answered nonzero 
+  so should add assume (a>0,not(equal(i+1,0)))  */
+kill(all);
+done;
+risch(x^2*erf(x),x);
+(%pi*x^3*erf(x)+(sqrt(%pi)*x^2+sqrt(%pi))*%e^-x^2)/(3*%pi);
+ev(diff(%,x),ratsimp);
+x^2*erf(x);
+assume(a>0);
+[a>0];
+'integrate(%e^(sqrt(a)*sqrt(y)),y,0,4);
+'integrate(%e^(sqrt(a)*sqrt(y)),y,0,4);
+changevar(%,y-z^2/a,z,y);
+/* on lispm -2*('integrate(z*%e^abs(z),z,-2*sqrt(a),0))/a; */
+- 'integrate(2*z*%e^abs(z)/a,z,-2*sqrt(a),0);
+x+y/z^2;
+y/z^2+x;
+part(%,1,2,2);
+2;
+remvalue(x);
+[false];
+'integrate(f(x),x,a,b)+x;
+'integrate(f(x),x,a,b)+x;
+part(%,1,1);
+f(x);
+x^2+2*x = y^2;
+x^2+2*x = y^2;
+exp:%+1;
+x^2+2*x+1 = y^2+1;
+lhs(%);
+x^2+2*x+1;
+part(exp,2);
+y^2+1;
+part(%,1);
+y^2;
+27*y^3+54*x*y^2+36*x^2*y+y+8*x^3+x+1;
+27*y^3+54*x*y^2+36*x^2*y+y+8*x^3+x+1;
+part(%,2,[1,3]);
+54*y^2;
+sqrt(piece/54);
+abs(y);
+x+y+w*z;
+w*z+y+x;
+inpart(%,3,2);
+z;
+'limit(f(x)^g(x+1),x,0,minus);
+'limit(f(x)^g(x+1),x,0,minus);
+inpart(%,1,2);
+g(x+1);
+'limit(f(x)^g(x+1),x,0,minus);
+'limit(f(x)^g(x+1),x,0,minus);
+is(inpart(%,0) = nounify(limit));
+true;
+dpart(x+y/z^2,1,2,1);
+y/?mbox(z)^2+x;
+exp:expand((b+a)^4);
+b^4+4*a*b^3+6*a^2*b^2+4*a^3*b+a^4;
+(b+a)^2*(y+x)^2;
+(b+a)^2*(y+x)^2;
+expand(%);
+b^2*y^2+2*a*b*y^2+a^2*y^2+2*b^2*x*y+4*a*b*x*y+2*a^2*x*y+b^2*x^2+2*a*b*x^2+a^2*x^2;
+exp:exp/%;
+(b^4+4*a*b^3+6*a^2*b^2+4*a^3*b+a^4)/(b^2*y^2+2*a*b*y^2+a^2*y^2+2*b^2*x*y+4*a*b*x*y+2*a^2*x*y+b^2*x^2+2*a*b*x^2+a^2*x^2);
+factor(%);
+(b+a)^2/(y+x)^2;
+dpart(exp,2,4);
+(b^4+4*a*b^3+6*a^2*b^2+4*a^3*b+a^4)/(b^2*y^2+2*a*b*y^2+a^2*y^2+?mbox(2*b^2*x*y)+4*a*b*x*y+2*a^2*x*y+b^2*x^2+2*a*b*x^2+a^2*x^2);
+part(exp,2,4);
+2*b^2*x*y;
+
+op(x+y);
+"+"$
+
+operatorp(x+y,"+");
+true$
+operatorp(x+y,["+"]);
+true$
+operatorp(x+y,["*"]);
+false$
+operatorp(x+y,"*");
+false$
+
+subst(a,x+y,x+(x+y)^2+y);
+y+x+a^2;
+subst(-%i,%i,a+b*%i);
+a-%i*b;
+subst(x,y,x+y);
+2*x;
+subst(x = 0,diff(sin(x),x));
+1;
+errcatch(ev(diff(sin(x),x),x = 0));
+[];
+(assume(not(equal(i,-1))),0);
+0$
+ev(integrate(x^i,x),i = -1);
+log(x);
+errcatch(subst(-1,i,integrate(x^i,x)));
+[];
+matrix([a,b],[c,d]);
+matrix([a,b],[c,d]);
+subst("[",matrix,%);
+[[a,b],[c,d]];
+ratsubst(a,x*y^2,x^4*y^8+x^4*y^3);
+a*x^3*y+a^4;
+1+cos(x)+cos(x)^2+cos(x)^3+cos(x)^4;
+cos(x)^4+cos(x)^3+cos(x)^2+cos(x)+1;
+ratsubst(1-sin(x)^2,cos(x)^2,%);
+sin(x)^4-3*sin(x)^2+cos(x)*(2-sin(x)^2)+3;
+ratsubst(1-cos(x)^2,sin(x)^2,sin(x)^4);
+cos(x)^4-2*cos(x)^2+1;

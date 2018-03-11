@@ -1,0 +1,88 @@
+/* Copyright (C) 2008 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Deriving the field equations from the action for Brans-Dicke cosmology
+ *
+ */
+("Deriving the field equations in FLRW cosmology for the Brans-Dicke action" )$
+if get('ctensor,'version)=false then load(ctensor);
+if get('itensor,'version)=false then load(itensor);
+("The first step is to construct a symmetrized Riemann tensor.")$
+("For this, we employ an auxiliary symmetrized metric.")$
+remsym(g,2,0);
+remsym(g,0,2);
+remsym(gg,2,0);
+remsym(gg,0,2);
+remcomps(gg);
+imetric(gg);
+icurvature([a,b,c],[e])*gg([d,e],[])$
+contract(rename(expand(%)))$
+%,ichr2$
+contract(rename(expand(%)))$
+canform(%)$
+contract(rename(expand(%)))$
+("We now reexpress gg by symmetrizing g using kdels and simplify:")$
+components(gg([a,b],[]),kdels([a,b],[u,v])*g([u,v],[])/2);
+components(gg([],[a,b]),kdels([u,v],[a,b])*g([],[u,v])/2);
+%th(5),gg$
+("Some of the following simplifications may take some time...")$
+contract(rename(expand(%th(2))))$
+contract(canform(%))$
+("Now we can switch to the real metric:")$
+imetric(g);
+contract(rename(expand(%th(3))))$
+("At last, we got the covariant Riemann tensor.")$
+remcomps(R);
+components(R([a,b,c,d],[]),%th(3));
+("What we really need, though, is the curvature scalar:")$
+g([],[a,b])*R([a,b,c,d])*g([],[c,d])$
+contract(rename(canform(%)))$
+contract(rename(canform(%)))$
+components(R([],[]),%);
+("Before going further, we establish the symmetry properties of g.")$
+decsym(g,2,0,[sym(all)],[]);
+decsym(g,0,2,[],[sym(all)]);
+("Now we can construct the Brans-Dicke action.")$
+L1:1/(16*%pi)*(('R([],[])))*sqrt(-determinant(g))$
+L2:1/(16*%pi)*(w*gg([],[a,b])*f([],[],a)*f([],[],b)/f([],[]))*sqrt(-determinant(g))$
+L0:radcan(-f([],[])*L1+L2)$
+L0:contract(ev(L0,R))$
+("We construct and simplify the 2nd order Euler-Lagrange equation:")$
+canform(contract(canform(rename(contract(expand(diff(L0,g([],[m,n]))-idiff(diff(L0,g([],[m,n],k)),k)+idiff(rename(idiff(contract(diff(L0,g([],[m,n],k,l))),k),1000),l)))))))$
+ishow(e([m,n],[])=canform(%*16*%pi/sqrt(-determinant(g))))$
+("We build a ctensor program to calculate tensor components:")$
+EQ:ic_convert(%th(2))$
+("Now we set up the FLRW metric of cosmology:")$
+ct_coords:[t,r,u,v];
+lg:ident(4);
+lg[2,2]:-a^2/(1-k*r^2);
+lg[3,3]:-a^2*r^2;
+lg[4,4]:-a^2*r^2*sin(u)^2;
+("Let's not forget that the scalar field is also a function of time.")$
+dependencies(a(t),f(t));
+cmetric();
+derivabbrev:true;
+christof(false);
+("We can at last evaluate the Euler-Lagrange equation...")$
+e:zeromatrix(4,4);
+("This is definitely going to take a little time...")$
+ev(EQ);
+ug.e$
+subst(f,f([],[]),%)$
+expand(radcan(%/f));
+("As a last step, let us calculate the Hamiltonian associated with f.")$
+ic_convert(L([],[])=L0)$
+ev(%)$
+L:factor(subst(f,f([],[]),L));
+P:subst(diff(f,t),ft,diff(subst(ft,diff(f,t),L),ft));
+H:ratsimp(P*diff(f,t)-L);
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

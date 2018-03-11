@@ -1,0 +1,244 @@
+/*-*-Macsyma-*-*/
+/*    (c) Copyright 1984 the Regents of the University of California.
+          All Rights Reserved.
+          This work was produced under the sponsorship of the
+          U.S. Department of Energy.  The Government retains
+          certain rights therein.                                     */
+
+eval_when([translate,batch,demo],
+	  load_package(sharem,"autolo"))$
+
+herald_package(defstm)$
+
+eval_when([batch,demo,loadfile],matchfix("{","}"))$
+
+assess_mode(x):=
+   if not(symbolp(x)) then
+      if part(x,0)='mode and length(x)=2 and
+	 symbolp(part(x,1)) and symbolp(part(x,2))
+	then part(x,2)
+      else error("if slot name identifier is not a symbol, it must be of the following form:
+mode(type,slot_name)[= default value] , not",x)$
+
+name_of_slot_id(x):=if symbolp(x) then x else part(x,1)$
+
+mode_declare(function(equal_op),boolean)$
+
+equal_op(x):=if not(atom(x)) and part(x,0)="=" then true$
+
+slot_type(types,index):=if listp(types) then types[index] else types$
+
+obtain_default_value_for_mode(mode):=
+   caseq(mode,
+	 [fixnum,rational],0,
+	 [boolean],false,
+	 [float,number],0.0,
+	 [list],[],
+	 otherwise,buildq([],'%undefined%))$
+
+%aux_alterant%(alt,extend_name,slot_names,quan,mode_type,obj,args):=
+  (mode_declare([slot_names,args],list,quan,fixnum),
+   block([result:[]],
+      mode_declare(result,list),
+      for ele in args do
+	 block([nom],
+	    cond(not equal_op(ele),
+		 error("alterant argument must specify a value:",ele),
+
+		 not(member(nom:lhs(ele),slot_names)),
+		 error("incorrect slot specifier to",alt,":",nom),
+
+		 true,
+		 for i thru quan do
+		    if slot_names[i]=nom then
+		       return(result:endcons(buildq([i,val:rhs(ele),
+						     type:slot_type(mode_type,i)],
+						extend_set(temp,i,mode_identity(type,val))),
+					     result)))),
+      if length(result)=0 then false
+      else
+	 buildq([result,obj,alt,extend_name],
+	    block([temp:obj],
+	       alter_extend_check(temp,'alt,'extend_name),
+	       splice(result),
+	       mode_identity(extend_name,temp)))))$
+
+%aux_constructor%(construct,slot_names,defaults,quan,mode_type,name,args):=
+  (mode_declare([slot_names,defaults,args],list,quan,fixnum),
+   block([inits:?copy\-tree(defaults)],
+      mode_declare(inits,list),
+      for ele in args do
+	 block([nom],
+	    cond(not equal_op(ele),
+		 error("constructor argument must specify a value:",ele),
+
+		 not(member(nom:lhs(ele),slot_names)),
+		 error("incorrect slot specifier to",construct,":",nom),
+
+		 true,
+		 for i thru quan do
+		    if slot_names[i]=nom then
+		       return(inits[i]:buildq([val:rhs(ele),
+					       type:slot_type(mode_type,i)],
+					  mode_identity(type,val))))),
+      buildq([inits,name],
+	  mode_identity(name,make_extend('name,splice(inits))))))$
+
+define_variable(%%existing_structures%%,[],list,
+    "hack to allow the properties of only those structures in a file being
+     translated to appear in the runtime portion of the translated output.")$
+
+def_structure(name,options,[slots])::=
+ (mode_declare([options,slots],list),
+  block([construct:concat('make_,name),alt:concat('alter_,name),mode_type:'any,
+	 conc:false,include:false,included_values:false,first:false,quan,
+	 slot_num:1,default_value:buildq([],'%undefined%),inc_modes],
+     mode_declare([quan,slot_num],fixnum),
+     if not(symbolp(name)) then
+	 error("first argument to def_structure must be a name",name),
+     quan:length(slots),
+     for option in options do
+	if not(atom(option)) and lhs(option)='mode then
+	   block([value:rhs(option)],
+	      mode_type:value,
+	      default_value:obtain_default_value_for_mode(mode_type)),
+     for option in options do
+       if atom(option) then
+	  caseq(option,
+		[but_first,include,mode],error("the",option,"option to def_structure must have a value"),
+		[conc_name],conc:concat(name,"_"),
+		[constructor,alterant],'done,
+		otherwise,error("unknown option to def_structure",option))
+       else
+	  block([value:rhs(option)],
+	   block([multiple_valuesp:listp(value),selector:lhs(option)],
+	      mode_declare(multiple_valuesp,boolean),
+	      if member(selector,'[constructor,alterant,conc_name,but_first,mode]) then
+		 if multiple_valuesp then
+		    error("only the include option to def_structure can have a list as its rhs:",option)
+		 else
+		    if not(symbolp(value)) then
+		       error("rhs of option",selector,"must be a name"),
+	      caseq(selector,
+		    [constructor],construct:value,
+		    [alterant],alt:value,
+		    [conc_name],conc:value,
+		    [but_first],first:value,
+		    [include],
+		    block([],
+		      include:if multiple_valuesp then first(value) else value,
+		      if not(symbolp(include)) then
+			 error("first element of rhs list for include option to def_structure must be a name",include),
+		      inc_modes:get(include,'mode_types),
+		      if multiple_valuesp then
+			 block([n_slots:length(value)-1],
+			    mode_declare(n_slots,fixnum),
+			    if get(include,'n_args)#n_slots then
+			      error("incorrect number of slot initializations given to include option of def_structure"),
+			    included_values:
+			      block([defaults:makelist(default_value,m,1,n_slots),
+				     specs:rest(value),names:get(include,'slot_names)],
+				 slot_num:slot_num+n_slots,
+				 for i thru n_slots do
+				    block([arg:specs[i]],
+				       block([eqp:equal_op(arg)],
+					  mode_declare(eqp,boolean),
+					  block([name_spec:if eqp then lhs(arg) else arg],
+					     block([typ:assess_mode(name_spec),
+						    t:name_of_slot_id(name_spec)],
+						if not(member(t,names)) then
+						   error(arg,"is a bad slot name for",include)
+						else
+						   catch(for m thru n_slots do
+							    if t=names[m] then
+							      block([dm:slot_type(inc_modes,m)],
+								 if typ and typ#dm then
+								   error("mode spec for included slot disagrees with slot from original structure"),
+								 throw(if eqp then
+									  (defaults[m]:buildq([val:rhs(arg)],val),
+									   apply('mode_identity,[dm,rhs(arg)]))))))))),
+				 defaults))),
+		    [mode],'done,
+		    otherwise,error("unknown option to def_structure",selector)))),
+     block([defaults:makelist(default_value,m,1,quan),
+	    slot_names:[],ret_macros:[],accessors:[]],
+	for i thru quan do
+	  block([slot:slots[i]],
+	     block([eqp:equal_op(slot)],
+		mode_declare(eqp,boolean),
+		block([nom_spec:if eqp then lhs(slot) else slot],
+		   block([type:assess_mode(nom_spec),typed],
+		      mode_declare(typed,boolean),
+		      if typed:is(type#false) then
+			 (if atom(mode_type) and type#mode_type then
+			     mode_type:makelist(mode_type,m,1,quan),
+			  if listp(mode_type) then
+			    (mode_type[i]:type,
+			     defaults[i]:obtain_default_value_for_mode(type))),
+		      slot_names:endcons(name_of_slot_id(nom_spec),slot_names),
+		      if eqp then
+			 (defaults[i]:buildq([val:rhs(slot)],val),
+			  apply('mode_identity,
+				[if typed then type else slot_type(mode_type,i),
+				 defaults[i]])))))),
+	accessors:if conc=false then slot_names
+		  else makelist(concat(conc,slot_names[k]),k,1,quan),
+	block([arg:if first=false then '%x_%
+		   else buildq([funct:first],funct(%x_%))],
+	  for j thru quan do
+	    (ret_macros:endcons(buildq([slot_num,element:accessors[j],arg,
+					name,lamode:slot_type(mode_type,j)],
+				   element(%x_%)::=
+				      buildq([%x_%],
+					mode_identity(lamode,reference_an_extend(arg,'element,'name,slot_num)))),
+				ret_macros),
+	     slot_num:slot_num+1)),
+       if include#false then
+	  (accessors:append(get(include,'accessors),accessors),
+	   slot_names:append(get(include,'slot_names),slot_names),
+	   mode_type:cond(listp(mode_type),
+			  append(if listp(inc_modes) then inc_modes
+				 else makelist(inc_modes,m,1,get(include,'n_args)),
+				 mode_type),
+
+			  listp(inc_modes),
+			  append(inc_modes,makelist(mode_type,m,1,quan)),
+
+			  mode_type#inc_modes,
+			  append(makelist(inc_modes,m,1,get(include,'n_args)),
+				 makelist(mode_type,m,1,quan))),
+	   defaults:append(if included_values=false then get(include,'defaults)
+			   else included_values,
+			   defaults),
+	   quan:length(defaults)),
+       push(name,%%existing_structures%%),
+       put(name,quan,'n_args),
+       put(name,defaults,'defaults),
+       put(name,accessors,'accessors),
+       put(name,slot_names,'slot_names),
+       put(name,mode_type,'mode_types),
+       if alt#false then
+	 ret_macros:cons(buildq([alt,slot_names,quan,mode_type,name],
+			    alt(%obj_%,[%args_%])::=
+				%aux_alterant%('alt,'name,'slot_names,quan,
+					       'mode_type,%obj_%,%args_%)),
+			 ret_macros),
+       if construct#false then
+	 ret_macros:cons(buildq([construct,slot_names,defaults,quan,mode_type,name],
+			    construct([%args_%])::=
+				 %aux_constructor%('construct,'slot_names,'defaults,
+						   quan,'mode_type,'name,%args_%)),
+			 ret_macros),
+       buildq([name,ret_macros],(splice(ret_macros),'name)))))$
+
+initialize_structure_list():=%%existing_structures%%:[]$
+
+save_runtime_structure_info(file):=
+ block([path:?merge\-pathname\-defaults('?"=.lsp",?stripdollar(file))],
+    block([nfile:?intern(?namestring(path)),
+	   name:concat(?intern(?pathname\-name(path))),
+	   version_no:?pathname\-version(path)],
+       put(name,if version_no=false then '%unknown% else version_no,'version),
+       apply('save,append([nfile,name,'"{"],%%existing_structures%%)),
+       %%existing_structures%%:[],
+       compile_lisp_file(nfile)))$

@@ -1,0 +1,1451 @@
+(kill(all),0);
+0$
+
+/*
+ * This is a set of test integrals for testing various parts of the 
+ * integration routines. 
+ */
+
+/*
+ * We're testing irinte now, which handles things like x^m*sqrt(R^(2*p+1))
+ * for integral values of m and p. 
+ */
+R:c*x^2+b*x+a;
+c*x^2+b*x+a;
+
+/*
+ * Tests of den1den1, 1/x/sqrt(R)
+ */
+
+/* G&R a < 0, del < 0 */
+integrate(1/x/sqrt(x^2-1),x);
+-asin(1/abs(x));
+
+/* G&R a > 0, del > 0 */
+integrate(1/x/sqrt(x^2+1),x);
+-asinh(1/abs(x));
+
+/* G&R a > 0, del = 0 */
+/*integrate(1/x/sqrt(x^2-2*x+1),x);*/
+
+/* G&R a < 0, del < 0 */
+integrate(1/x/sqrt(-6+5*x-x^2),x);
+asin(5*x/abs(x)-12/abs(x))/sqrt(6);
+
+/* Last case */
+integrate(1/x/sqrt(-x^2+x-1),x);
+%i*asinh(x/(sqrt(3)*abs(x))-2/(sqrt(3)*abs(x)));
+
+
+/*
+ * Test of denn, 1/sqrt(R^(2*p+1))
+ */
+
+(assume(4*a*c-b^2>0), assume(c > 0), assume(a > 0), assume(b > 0), 
+ assume(R > 0), 0);
+0;
+
+/* 1/sqrt(R), repeated roots */
+integrate(1/sqrt(c*x^2+b*x+b^2/4/c),x);
+log(x+b/(2*c))/sqrt(c);
+
+/* 1/sqrt(R^(2*p+1), p > 0, repeated roots */
+integrate(1/sqrt(c*x^2+b*x+b^2/4/c)^3,x);
+-1/(2*c^(3/2)*(x+b/(2*c))^2);
+
+
+/*
+ * 1/sqrt(R), distinct roots, 
+ * G&R 2.261 case c > 0, del > 0
+ */
+integrate(1/sqrt(R),x);
+1/sqrt(c)*asinh((2*c*x+b)/sqrt(4*a*c-b^2));
+
+/*
+ * 1/sqrt(R^3), distinct roots,
+ * G&R 2.264 eq. 5 
+ */
+factor(integrate(1/R^(3/2),x));
+2*(2*c*x+b)/((4*a*c-b^2)*sqrt(c*x^2+b*x+a));
+
+/* 
+ * General case.
+ * 1/sqrt(R^(2*p+1),
+ * G&R 2.263 eq. 3, for reduction; eq 4 for explicit solution.
+ */
+factor(integrate(1/R^(5/2),x));
+2*(2*c*x+b)*(8*c^2*x^2+8*b*c*x+12*a*c-b^2)
+	 /(3*(4*a*c-b^2)^2*(c*x^2+b*x+a)^(3/2));
+/*
+ * Tests of den1denn, 1/x/sqrt(R^(2*p+1))
+ */
+
+/*
+ * G&R 2.268 gives the general solution for this:
+ *
+ * integrate(1/x/sqrt(R^(2*n+1)),x) =
+ *   1/(2*n-1)/a/sqrt(R^(2*n-1))
+ *   - b/2/a*integrate(1/sqrt(R^(2*n+1)),x)
+ *   + 1/a*integrate(1/x/sqrt(R^(2*n-1)),x)
+ *
+ * For this example, n = 1
+ *
+ * integrate(1/x/sqrt(R^3),x) =
+ *   1/a/sqrt(R)
+ *   - b/2/a*integrate(1/sqrt(R^3),x)
+ *   + 1/a*integrate(1/x/sqrt(R),x)
+ *
+ * and we already know the answers to the other two integrals.
+ */
+integrate(1/x/sqrt(R^3),x);
+-asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	/a^(3/2)
+	-2*b*c*x/(a*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	-b^2/(a*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))+1/(a*sqrt(c*x^2+b*x+a));
+
+/*
+ * Tests of nummdenn x^m/sqrt(R^(2*p+1))
+ */
+
+/*
+ * See G&R 2.264, eq 2:
+ *
+ * integrate(x/sqrt(R),x) =
+ *   sqrt(R)/c - b/(2*c)*integrate(1/sqrt(R),x)
+ */
+integrate(x/sqrt(R),x);
+sqrt(''R)/c-b*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(2*c^(3/2));
+
+/*
+ * See G&R 2.264, eq 3:
+ *
+ * integrate(x^2/sqrt(R),x) =
+ *   (x/(2*c)-3*b/(4*c^2))*sqrt(R) 
+ *     + (3*b^2/(8*c^2) - a/(2*c))*integrate(1/sqrt(R),x)
+ */
+integrate(x^2/sqrt(R),x);
+-a*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(2*c^(3/2))
+	+3*b^2*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(8*c^(5/2))
+	+x*sqrt(c*x^2+b*x+a)/(2*c)-3*b*sqrt(c*x^2+b*x+a)/(4*c^2);
+
+ 
+/*
+ * Test of repeated roots
+ */
+integrate(x^2/sqrt(c*x^2+b*x+b^2/4/c),x);
+b^2*log(x+b/(2*c))/(4*c^(5/2))+x^2/(2*sqrt(c))-b*x/(2*c^(3/2));
+
+integrate(x^2/sqrt(c*x^2+b*x+b^2/4/c)^3,x);
+log(x+b/(2*c))/c^(3/2)+b*x/(c^(5/2)*(x+b/(2*c))^2)
+			      +3*b^2/(8*c^(7/2)*(x+b/(2*c))^2);
+
+integrate(x^2/sqrt(c*x^2+b*x+b^2/4/c)^5,x);
+-1/(2*c^(5/2)*(x+b/(2*c))^2)+b/(3*c^(7/2)*(x+b/(2*c))^3)
+				    -b^2/(16*c^(9/2)*(x+b/(2*c))^4);
+
+/*
+ * Test denmnumn sqrt(R^(2*p+1))/x^m.
+ */
+
+integrate(sqrt(R)/x,x);
+-sqrt(a)*asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))
+			+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	 +b*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(2*sqrt(c))+sqrt(c*x^2+b*x+a);
+
+integrate(sqrt(R^3)/x,x),radexpand:all;
+-a^(3/2)*asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))
+			+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	 +3*a*b*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(4*sqrt(c))
+	 -b^3*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(16*c^(3/2))
+	 +(c*x^2+b*x+a)^(3/2)/3+b*x*sqrt(c*x^2+b*x+a)/4
+	 +b^2*sqrt(c*x^2+b*x+a)/(8*c)+a*sqrt(c*x^2+b*x+a);
+
+integrate(sqrt(R)/x^2,x);
+-b*asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	 /(2*sqrt(a))
+	 +sqrt(c)*asinh((2*c*x+b)/sqrt(4*a*c-b^2))-sqrt(c*x^2+b*x+a)/x;
+
+integrate(sqrt(R^3)/x^2,x),radexpand:all;
+-3*sqrt(a)*b
+	  *asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	 /2
+	 +3*a*sqrt(c)*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/2
+	 +3*b^2*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(8*sqrt(c))
+	 -(c*x^2+b*x+a)^(3/2)/x+3*c*x*sqrt(c*x^2+b*x+a)/2
+	 +9*b*sqrt(c*x^2+b*x+a)/4;
+
+/* Same as above, but test a = 0 (nonconstquadenum) */
+integrate(sqrt(R-a)/x,x);
+b*log(2*sqrt(c)*sqrt(c*x^2+b*x)+2*c*x+b)/(2*sqrt(c))+sqrt(c*x^2+b*x);
+
+integrate(sqrt((R-a)^3)/x,x),radexpand:all;
+-b^3*log(2*sqrt(c)*sqrt(c*x^2+b*x)+2*c*x+b)/(16*c^(3/2))
+	 +(c*x^2+b*x)^(3/2)/3+b*x*sqrt(c*x^2+b*x)/4+b^2*sqrt(c*x^2+b*x)/(8*c);
+
+integrate(sqrt(R-a)/x^2,x);
+sqrt(c)*log(2*sqrt(c)*sqrt(c*x^2+b*x)+2*c*x+b)-2*sqrt(c*x^2+b*x)/x;
+
+integrate(sqrt((R-a)^3)/x^2,x),radexpand:all;
+3*b^2*log(2*sqrt(c)*sqrt(c*x^2+b*x)+2*c*x+b)/(8*sqrt(c))
+	 +(c*x^2+b*x)^(3/2)/(2*x)+3*b*sqrt(c*x^2+b*x)/4;
+
+integrate(sqrt((R-a)^3)/x^3,x),radexpand:all;
+3*b*sqrt(c)*log(2*sqrt(c)*sqrt(c*x^2+b*x)+2*c*x+b)/2
+	 +(c*x^2+b*x)^(3/2)/x^2-3*b*sqrt(c*x^2+b*x)/x;
+
+/*
+ * Test denmdenn 1/sqrt(R^(2*p+1))/x^m
+ */
+integrate(1/sqrt(R)/x^2,x);
+b*asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	 /(2*a^(3/2))
+	 -sqrt(c*x^2+b*x+a)/(a*x);
+
+integrate(1/sqrt(R)/x^3,x);
+c*asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	 /(2*a^(3/2))
+	 -3*b^2
+	   *asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	  /(8*a^(5/2))+3*b*sqrt(c*x^2+b*x+a)/(4*a^2*x)
+	 -sqrt(c*x^2+b*x+a)/(2*a*x^2);
+
+integrate(1/sqrt(R^3)/x^2,x);
+3*b*asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	 /(2*a^(5/2))
+	 -8*c^2*x/(a*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	 +3*b^2*c*x/(a^2*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	 -1/(a*x*sqrt(c*x^2+b*x+a))-4*b*c/(a*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	 +3*b^3/(2*a^2*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	 -3*b/(2*a^2*sqrt(c*x^2+b*x+a));
+
+integrate(1/sqrt(R^3)/x^3,x);
+3*c*asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	 /(2*a^(5/2))
+	 -15*b^2
+	    *asinh(b*x/(sqrt(4*a*c-b^2)*abs(x))+2*a/(sqrt(4*a*c-b^2)*abs(x)))
+	  /(8*a^(7/2))+13*b*c^2*x/(a^2*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	 -15*b^3*c*x/(4*a^3*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	 +5*b/(4*a^2*x*sqrt(c*x^2+b*x+a))-1/(2*a*x^2*sqrt(c*x^2+b*x+a))
+	 +13*b^2*c/(2*a^2*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	 -15*b^4/(8*a^3*(4*a*c-b^2)*sqrt(c*x^2+b*x+a))
+	 -3*c/(2*a^2*sqrt(c*x^2+b*x+a))+15*b^2/(8*a^3*sqrt(c*x^2+b*x+a));
+
+/* Same as above, but test the case of a = 0 (test noconstquad) */
+integrate(1/sqrt(R-a)/x^2,x);
+4*c*sqrt(c*x^2+b*x)/(3*b^2*x)-2*sqrt(c*x^2+b*x)/(3*b*x^2);
+
+integrate(1/sqrt(R-a)/x^3,x);
+-16*c^2*sqrt(c*x^2+b*x)/(15*b^3*x)+8*c*sqrt(c*x^2+b*x)/(15*b^2*x^2)
+					  -2*sqrt(c*x^2+b*x)/(5*b*x^3);
+
+integrate(1/sqrt((R-a)^3)/x^2,x),radexpand:all;
+-32*c^3*x/(5*b^4*sqrt(c*x^2+b*x))+4*c/(5*b^2*x*sqrt(c*x^2+b*x))
+					 -2/(5*b*x^2*sqrt(c*x^2+b*x))
+					 -16*c^2/(5*b^3*sqrt(c*x^2+b*x));
+
+integrate(1/sqrt((R-a)^3)/x^3,x),radexpand:all;
+256*c^4*x/(35*b^5*sqrt(c*x^2+b*x))-32*c^2/(35*b^3*x*sqrt(c*x^2+b*x))
+					  +16*c/(35*b^2*x^2*sqrt(c*x^2+b*x))
+					  -2/(7*b*x^3*sqrt(c*x^2+b*x))
+					  +128*c^3/(35*b^4*sqrt(c*x^2+b*x));
+
+/*
+ * Test nummnumn x^m*sqrt(R^(2*p+1))
+ */
+
+integrate(sqrt(R),x);
+a*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(2*sqrt(c))
+	-b^2*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(8*c^(3/2))
+	+x*sqrt(c*x^2+b*x+a)/2+b*sqrt(c*x^2+b*x+a)/(4*c);
+
+integrate(x*sqrt(R),x);
+-a*b*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(4*c^(3/2))
+	+b^3*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(16*c^(5/2))
+	+(c*x^2+b*x+a)^(3/2)/(3*c)-b*x*sqrt(c*x^2+b*x+a)/(4*c)
+	-b^2*sqrt(c*x^2+b*x+a)/(8*c^2);
+
+integrate(x^2*sqrt(R),x);
+a*(5*b^2-4*a*c)*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(32*c^(5/2))
+	-b^2*(5*b^2-4*a*c)*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(128*c^(7/2))
+	+x*(c*x^2+b*x+a)^(3/2)/(4*c)-5*b*(c*x^2+b*x+a)^(3/2)/(24*c^2)
+	+(5*b^2-4*a*c)*x*sqrt(c*x^2+b*x+a)/(32*c^2)
+	+b*(5*b^2-4*a*c)*sqrt(c*x^2+b*x+a)/(64*c^3);
+
+integrate(x^3*sqrt(R),x);
+-7*a*b*(5*b^2-4*a*c)*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(320*c^(7/2))
+	+7*b^3*(5*b^2-4*a*c)*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(1280*c^(9/2))
+	+a^2*b*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(10*c^(5/2))
+	-a*b^3*asinh((2*c*x+b)/sqrt(4*a*c-b^2))/(40*c^(7/2))
+	+x^2*(c*x^2+b*x+a)^(3/2)/(5*c)-7*b*x*(c*x^2+b*x+a)^(3/2)/(40*c^2)
+	-2*a*(c*x^2+b*x+a)^(3/2)/(15*c^2)+7*b^2*(c*x^2+b*x+a)^(3/2)/(48*c^3)
+	-7*b*(5*b^2-4*a*c)*x*sqrt(c*x^2+b*x+a)/(320*c^3)
+	+a*b*x*sqrt(c*x^2+b*x+a)/(10*c^2)
+	-7*b^2*(5*b^2-4*a*c)*sqrt(c*x^2+b*x+a)/(640*c^4)
+	+a*b^2*sqrt(c*x^2+b*x+a)/(20*c^3);
+
+/* Integration is not correct: invalid 'false' term in results - ID: 3470668 */
+(assume(4*a*c > 1), 0);
+0;
+
+integrate(x^4 / (a*x^2 + x + c)^(5/2), x);
+'integrate(x^4 / (a*x^2 + x + c)^(5/2), x);
+
+(forget(4*a*c > 1), 0);
+0;
+
+/*------------------------------------------------------------------------------*/
+/*
+ * I (rtoy) have not verified any of these, except for the cases so marked.
+ */
+
+/*
+ * Sample integrals from MIT LCS TR-092, Wang's thesis on definite integration
+ */
+
+/* p. 59 */
+/* Verified by doing the indefinite integral and taking limits */
+/* Tests mtoinf and zmtorat */
+factor(integrate((x^2+a1*x+b1)/(x^4+10*x^2+9),x,minf,inf));
+%pi*(b1+3)/12;
+
+/* p. 62 */
+/*
+ * Evaluating the indefinite integral and taking appropriate limits 
+ * gives the equivalent answer
+ */
+/* Tests ztoinf and zmtorat */
+factor(integrate((x^2+a1*x+b1)/(x^4+10*x^2+9),x,0,inf));
+(%pi*b1+3*log(3)*a1+3*%pi)/24;
+
+/*
+ * p. 62 
+ *
+ * Wang gives 2*%pi/3/sqrt(3), which is equivalent.  Why doesn't maxima
+ * know that atan(sqrt(3)) is %pi/3?
+ */
+/* Verified by doing evaluating indefinite integral */
+/* Tests ztoinf and zmtorat */
+integrate(1/(x^2+x+1),x,0,inf);
+2*sqrt(3)*atan(sqrt(3))/3;
+
+/* p. 64 */
+/*
+ * Using contour integration, we see this has poles at %i and 2*%i.  The
+ * residues are 0 and -%i/3, respectively, so the integral is 2*%pi/3.
+ */
+/* Tests ztoinf and zmtorat */
+integrate((x-%i)/((x-2*%i)*(x^2+1)),x,minf,inf);
+2*%pi/3;
+
+/* p. 64 */
+/* Tests ztoinf and zmtorat */
+integrate((x-%i)/((x-2*%i)*(x^2+1)),x,0,inf);
+(6*%i*log(2)+6*%pi)/18;
+
+/* 
+ * p. 67 
+ * 
+ * Wang gives 4*%pi/9/sqrt(3)-1/2, which is equivalent.
+ */
+
+/* Verified via indefinite integral */
+/* Tests ztoinf and zmtorat */
+integrate(1/(x^2+x+1)^3,x,0,inf);
+(8*sqrt(3)*%pi-27)/54;
+
+
+/* p. 70 */
+/* Verified via indefinite integral */
+/* Tests ztoinf and batapp */
+integrate(1/((1+x)*sqrt(x)),x,0,inf);
+%pi;
+
+/* p. 71 */
+/*
+ * First, we need assume(k < 0, k+1>0).  Then we also need to tell
+ * maxima k is not an integer.  Then maxima can evaluate this integral. 
+ */
+/* Tests ztoinf and batapp */
+(assume(kj<0,kj+1>0,exp(kj)<1),0);
+0;
+(declare(kj,noninteger),0);
+0;
+integrate(x^kj/(x+3),x,0,inf);
+3^kj*beta(kj+1,-kj);
+
+/* p. 74 */
+/* I think Wang meant the integral from a to inf, not 0 to inf. */
+/* 
+ * Tests parse-integrand, method-by-limits, dintegrate,
+ * method-radical-poly, intsubs.
+ */
+integrate(1/(x^2*sqrt(x^2-a^2)),x,a,inf);
+1/a^2;
+
+/* p. 76 */
+/*
+ * Wang gives 1024/6567561 
+ *
+ * This particular integral matches form III with M = 6, N = 6, A = B
+ * = C = 1.
+ *
+ * Based on his procedure, the case N>=M holds, and the integral is 
+ *
+ * H*diff(U(1,1+z2,1+z3),z2,6)
+ *
+ * evaluated at z2=z3=0, where U(a,b,c) = 1/(sqrt(c)*(b/2+sqrt(a*c)))
+ * and H = (-1)^N*sqrt(%pi)/2/gamma(3/2+N).  If we substitute the
+ * values in, we find the answer is 2048/6567561.
+ *
+ * Thus, Wang's answer is wrong.
+ */
+/* 
+ * Tests method-by-limits, dintegrate, method-radical-poly, intsubs.
+ */
+integrate(x^6/(x^2+x+1)^(15/2),x,0,inf);
+2048/6567561;
+
+/* p. 79 */
+/* 
+ * The single pole in the upper half plane is %i, and the residue of
+ * exp(%i*x)/(x^2+1) is -%i/2*exp(-1), so the integral is as given.
+ */
+/* Tests mtoinf, mtosc */
+integrate(cos(x)/(x^2+1),x,minf,inf);
+%e^(-1)*%pi;
+
+/* p. 79 */
+/* 
+ * The single pole in the upper half plane is %i, and the residue of
+ * x*exp(%i*x)/(x^2+1) is exp(-1)/2, so the integral is as given.
+ */
+/* Tests mtoinf, mtosc */
+integrate(x*sin(x)/(x^2+1),x,minf,inf);
+%e^(-1)*%pi;
+
+/* p. 79 */
+/* This follows from the above example.  Besides the function is odd. */
+integrate(x*cos(x)/(x^2+1),x,minf,inf);
+0;
+
+/* p. 79 */
+/*
+ * Wang gives 
+ * %pi/2*((-1/sqrt(3)-%i)*%e^((sqrt(3)-%i)/2) + (%i-1/sqrt(3))*%e^((-sqrt(3)-%i)/2))
+ *
+ * That can't be right because the result has real and imaginary parts.
+ *
+ * Maxima calculates this correctly.
+ */
+/* Tests mtoinf, mtosc */
+integrate(x*cos(x)/(x^2+x+1),x,minf,inf);
+%e^-(sqrt(3)/2)*(3*%pi*sin(1/2)-sqrt(3)*%pi*cos(1/2))/3;
+
+/* p. 80 */
+/* Tests mtoinf, mtosc */
+integrate(1/(%e^(%i*x)*(x^2+1)),x,minf,inf);
+%e^(-1)*%pi;
+
+/* p. 80 */
+/* 
+ * Wang gives %pi/%e
+ *
+ * I think Wang's answer is wrong.
+ *
+ * If we exponentialize the integrand, we get 
+ *
+ * %i*exp(-2*%i*x)/2/(x^2+1) - %i/2/(x^2+1).
+ *
+ * The integral of the second term is obviously %i*%pi/2.  The
+ * integral of the first term can be down via residues, using the
+ * residue at x = -%i, which is -exp(-2)/4.  Thus, the integral should
+ * be %i*%pi*exp(-2)/2-%i*%pi/2.  (We need to change the sign of the
+ * residue because we traverse the real axis in the opposite
+ * direction.)
+ */
+/* Tests mtoinf, mtosc */
+integrate(sin(x)/(%e^(%i*x)*(x^2+1)),x,minf,inf);
+-%e^(-2)*(%e^2-1)*%i*%pi/2;
+
+/* p. 80 */
+/*
+ * Wang gives %pi/%e^2
+ *
+ * I think Wang's answer is wrong.
+ *
+ * Using the same derivation as above, we get
+ *
+ * %i/2/(x^2+1)*(exp(-3*%i*x)-exp(-%i*x).
+ *
+ * We use the lower half plane and compute the residue at x = -%i,
+ * which is exp(-3)*(exp(2)-1)/4.  Thus, the integral is
+ * -%i*%pi*exp(-3)*(exp(2)-1)/2.
+ */
+/* Tests mtoinf, mtosc */
+integrate(sin(x)/(%e^(2*%i*x)*(x^2+1)),x,minf,inf);
+-%e^(-3)*(%e^2-1)*%i*%pi/2;
+
+/* Integration of products of sin(nz)/(nz) sometimes fails - ID: 3497046 */
+integrate(sin(z)/z*sin(3*z)/(3*z)*sin(5*z)/(5*z)*sin(7*z)/(7*z),z,minf,inf);
+44*%pi/315;
+
+/* p. 83 */
+/*
+ * Wang gives 3*gamma(3/7)*cos(3*%pi/14)/(7*9^(3/7))
+ *
+ * I've verified the derivation and the value, so I think this is right.
+ */
+/* Tests ztoinf, scaxn */
+integrate(cos(9*x^(7/3)),x,0,inf);
+3*gamma(3/7)*cos(3*%pi/14)/(7*9^(3/7));
+
+
+/* p. 83 */
+/*
+ * Wang gives 3*gamma(3/7)*sin(3*%pi/14)/(7*9^(3/7))
+ *
+ * Verified.
+ */
+/* Tests ztoinf, scaxn */
+integrate(sin(9*x^(7/3)),x,0,inf);
+3*gamma(3/7)*sin(3*%pi/14)/(7*9^(3/7));
+
+
+/* p. 85 */
+/*
+ * Wang gives gamma((2*%i+4)/3)/3/(%i/2)^((2*%i+4)/3)
+ *
+ * I think this is right, in a sense.  The final formula he gives is
+ * wrong, but the derivation leading up to it is correct, except that
+ * he has the wrong value for integrate(x^m*exp(k*x^n),x,0,inf).
+ *
+ * However, Wang also says these integrals only converge if
+ * n-realpart(m)>1, and we have n=3 and realpart(m)=2, so we don't
+ * satisfy the convergence criterion.
+ */
+/*
+integrate(x^(3/2*%i+3)/exp(%i*x^3/2),x,0,inf);
+(-sqrt(3)*%i/2-1/2)*2^((2*%i+4)/3)*gamma((2*%i+4)/3)/3;
+*/
+
+/* p. 86 */
+/*
+ * We can verify this by integrate(exp(%i*s*x)/sqrt(x),x,0,inf) and
+ * taking the imaginary part.  This satisfies the convergence
+ * criteria, and maxima returns the value
+ * sqrt(%pi)/sqrt(s)*exp(%i*%pi/4).  Thus, we get the answer below.
+ */
+/* Tests ztoinf, sconvert, ggr */
+(assume(s > 0), 0);
+0;
+ratsimp(integrate(sin(s*x)/sqrt(x),x,0,inf));
+sqrt(%pi)/(sqrt(2)*sqrt(s));
+
+/* p. 87 */
+/* Tests ztoinf, ssp */
+(assume(r>0),0);
+0;
+
+integrate(sin(r*x)/x,x,0,inf);
+%pi/2;
+
+/* p. 87 */
+/* Tests ztoinf, ssp */
+(assume(q>0),0);
+0;
+integrate(sin(q*x)^2/x^2,x,0,inf);
+%pi*q/2;
+
+/* p. 92 */
+/*
+ * We can verify this integral by using
+ * integrate(x^k*log(x)^2/(x^2+1),x,0,inf), and the evaluate the
+ * result at k = 0.  The integral is a bit messy in terms of a beta
+ * function, the digamma, and trigamma functions.  But maxima can
+ * evaluate these at k = 0 and the result is %pi^3/8.
+ *
+ */
+/* Tests method-by-limits, zto1, batap-inf */
+integrate(log(x)^2/(x^2+1),x,0,inf);
+%pi^3/8;
+
+/* p. 93 */
+/*
+ * Wang gives 
+ *
+ * log(3)*3^k*beta(k+1,-k) + 3^k*diff(beta(r,-k),r) - diff(beta(k+1,r),r)
+ *
+ * where the first derivative is evaluated at r=1+k and the second at r=-k.
+ *
+ * Actually, we can have maxima compute it for us, because we want the
+ * derivative of x^k*beta(k+1,-k) which is
+ *
+ * log(3)*3^k*beta(k+1,-k)+3^k*(psi[0](k+1)-psi[0](-k))*beta(k+1,-k)
+ *
+ * Some simple numerical evaluations for k=-1/2 and k=-1/3 indicates
+ * that this result is probably correct.
+ */
+/* Tests method-by-limits, zto1, batap-inf */
+integrate(x^kj*log(x)/(x+3),x,0,inf);
+3^kj*(psi[0](kj+1)-psi[0](-kj))*beta(kj+1,-kj)+log(3)*3^kj*beta(kj+1,-kj);
+
+/*
+ * This is the same integral as above, using the substitution 
+ * y=log(x).  See also Bug 1451351.
+ */
+/* Tests method-by-limits, zto1, batap-inf */
+integrate(x*exp((kj+1)*x)/(exp(x)+3),x,minf,inf);
+3^kj*(psi[0](kj+1)-psi[0](-kj))*beta(kj+1,-kj)+log(3)*3^kj*beta(kj+1,-kj);
+
+/* p. 94
+ *
+ * subres/red gcd gets a "quotient is not exact" error.  spmod works better.
+ *
+ * The substitution y=1/x produces the same integral with a negative
+ * sign, so the answer must be zero.
+ */
+/* Tests method-by-limits, dintlog */
+
+integrate((atan(x^(1/3)) + atan(x^(-1/3)))*log(x)/(x^2+1),x,0,inf);
+0;
+
+/* p. 95 */
+/*
+ * Wang gives %pi/sin(5*%pi/7)
+ *
+ * Based on his thesis, integration by parts for
+ * integrate(log(1+x^(7/2))/x^2,0,inf) gives
+ *
+ *                  |inf
+ * -log(1+x^(7/2))/x|    - integrate(-1/x*7/2*x^(5/2)/(1+x^(7/2)),x,0,inf)
+ *                  |0
+ *
+ * = 7/2*integrate(x^(3/2)/(x^(7/2)+1),x,0,inf)
+ *
+ * Use the substitution (maxima doesn't do this) x = y^2 to get
+ *
+ * = 7*integrate(y^4/(y^7+1),y,0,inf)
+ *
+ * = %pi/sin(5*%pi/7)
+ *
+ * gcd:red gives a "quotient is not exact" error, so use
+ * spmod.  We need intanalysis false to give the routine a chance.
+ * (If true, we return the integral unevaluated.  I think this is
+ * because solve fails to find the roots of x^(7/2)+1=0 correctly.)
+ */
+/* Tests method-by-limits, dintlog, dintbypart, ztoinf, batapp */
+(intanalysis:false, 0);
+0;
+
+integrate(log(x^(7/2)+1)/x^2,x,0,inf);
+/*%pi/sin(5*%pi/7);*/
+/* The result of the integral is beta(5/7,2/7). This simplifies to 
+   %pi/sin(5*%pi/z). Because we have introduced a symmetry rule for
+   the beta function, Maxima first simplifies to beta(2/7,5/7). 
+   The equivalent result is %pi/sin(2*%pi/7). 03/2009 (DK) */
+%pi/sin(2*%pi/7);
+
+(intanalysis:true, 0);
+0;
+
+/* p. 97 */
+/* Verified via indefinite integral */
+/* Tests dintegrate, method-by-limits, method-radical-poly */
+factor(integrate(1/(exp(x/3)*(5/exp(x/3)+7)),x,0,inf));
+3*(log(12)-log(7))/5;
+
+/* p. 97 */
+/* Verified via indefinite integral */
+integrate(exp(x/4)/(9*exp(x/2)+4),x,minf,inf);
+%pi/3;
+
+/* p. 99 */
+/* Wang says %pi 
+ *
+ * Not sure if this is right or not.  Maxima is using rectzto%pi2 to
+ * evaluate this integral.
+ *
+ * If we follow Wang's derivation, we need to find q(z) such that
+ * q(z)-q(z+2*%i*%pi) = z.  We find that q(z) = %i/(4*%pi)*z^2+z/2.
+ *
+ * R(z) = 1/((z-1/z)/2-%i.  We need to find the poles of R(z) such
+ * that 0 <= Im(z) < 2*%pi.  In this case, the (only) pole is z = %i.
+ * We need to then find the residue of q(z)/(sinh(z)-%i) at z =
+ * glog(%i) = %i*%pi/2.  Maxima says the residue is -%i/2.  Hence the
+ * value of the integral is 2*%i*%pi*(-%i/2) = %pi.
+ */
+/* Tests mtoinf, rectzto%pi2 */
+integrate(x/(sinh(x)-%i),x,minf,inf);
+%pi;
+
+
+/* p. 101 */
+/* Tests ztoinf, ggr */
+integrate(exp(-x^2),x,0,inf);
+sqrt(%pi)/2;
+
+/* p. 102 */
+/*
+ * The substitution y=s*t produces 1/sqrt(s)*integrate(y^(-1/2)*exp(-y),y,0,inf), 
+ * which is gamma(1/2)/sqrt(s).
+ */
+/* Tests ztoinf, ggr */
+integrate(1/sqrt(t)/exp(s*t),t,0,inf);
+sqrt(%pi)/sqrt(s);
+
+/*
+ * Write this as imagpart(integrate(exp(%i*s*x)/exp(x),x)).  Evaluate
+ * the result at x=inf and at x=0.  We get the expected answer.
+ */
+
+integrate(sin(s*x)/exp(x),x,0,inf);
+s/(s^2+1);
+
+/* p. 103 */
+/*
+ * There's a typo in Wang's thesis.  He has the integrand as
+ * exp(-s*t)*x^(1/3)*log(x).  I changed the x's to t's.
+ *
+ * Also, Wang says the answer is
+ *
+ * -gamma(1/3)*(log(s)-psi(4/3))/(6*s^(4/3))
+ *
+ * Assuming psi(4/3) is maxima's digamma function, psi[0](4/3), this
+ * result is 1/2 of the result maxima produces.
+ *
+ * Consider integrate(t^(z+1/3)*exp(-s*t),t,0,inf).  Differentiating
+ * this wrt to z gives us the integral we're looking for, when we
+ * evaluate the result at z = 0.
+ *
+ * But this integral is equal to
+ * 1/s^(z+4/3)*integrate(y^(z+1/3)*exp(-y),y,0,inf), which is a Gamma
+ * function.  Thus, we have
+ *
+ * gamma(z+4/3)/s^(z+4/3)
+ *
+ * Differentiate wrt to z:
+ *
+ * s^(-z-4/3)*(psi[0](z+4/3)-log(s))*gamma(z+4/3)
+ *
+ * Evaluate at z = 0:
+ *
+ * gamma(1/3)*(psi[0](4/3)-log(s))/(3*s^(4/3))
+ *
+ * This is the answer we get below, once we evaluate psi[0](4/3).
+ * Wang's thesis is off by a factor of 2.
+ */
+integrate(exp(-s*t)*t^(1/3)*log(t),t,0,inf);
+gamma(1/3)*(-3*log(3)/2-%pi/(2*sqrt(3))-%gamma+3)/(3*s^(4/3))
+	-gamma(1/3)*log(s)/(3*s^(4/3));
+
+/* p. 106 */
+/* Verified via indefinite integral */
+ratsimp(integrate(1/(x^2-3),x,0,1) - sqrt(3)*log(2-sqrt(3))/6);
+0$
+
+/* p. 109 */
+/* Verified via indefinite integral */
+integrate(cos(x)^2-sin(x),x,0,2*%pi);
+%pi;
+
+/* p. 109 */
+/*
+ * Wang says 2*%pi
+ *
+ * Evaluation of the indefinite integral says 0.
+ */
+integrate(exp(2*%i*x)/(exp(%i*x)+3),x,0,2*%pi);
+0;
+
+/* p. 110 */
+/*
+ * Wang gives the equivalent 6/5*gamma(2/3)*gamma(3/4)/gamma(5/12)
+ */
+integrate(cos(x)^(1/3)*sin(x)^(1/2),x,0,%pi/2);
+beta(3/4,2/3)/2;
+
+/* p. 112 */
+/*
+ * Wang gives the equivalent 18/7*sqrt(%pi)*gamma(2/3)/gamma(1/6)
+ */
+integrate(cos(x)^(1/3)*sin(x)^2,x,-%pi/2,%pi/2);
+beta(2/3,3/2);
+
+/* p. 112 */
+integrate(cos(x)^3*sin(x)^2,x,3*%pi/2,3*%pi);
+2/15;
+
+/* p. 114 */
+/*
+ * Wang gives -%i/3*plog((3+%i*sqrt(7))/4)
+ *
+ * The rectform is -atan(sqrt(7)/3)/3, which is -acos(3/4)/3, 
+ * which is -1/3*(%pi/2-asin(3/4))=-%pi/6+asin(3/4)/3.  
+ * Maxima gives an answer with the opposite sign.
+ *
+ * But we can evaluate the indefinite integral to be
+ *
+ *   -asin(3/x)/3.
+ *
+ * Hence the answer should be %pi/6-asin(3/4)/3.
+ *
+ * Wang's thesis is wrong.
+ */
+integrate(1/(x*sqrt(x^2-9)),x,3,4);
+%pi/6-asin(3/4)/3;
+
+
+/* p. 114 */
+/* Verified via indefinite integral */
+logcontract(integrate(1/((x+1)*sqrt(4-x^2)),x,0,2) - sqrt(3)*log(sqrt(3)+2)/3);
+0$
+
+/* p. 120 */
+/*
+ * Maxima asks if k is an integer, but it doesn't matter,
+ * and I don't know how to tell maxima that k isn't an integer.
+ *
+ */
+(assume(k1>0),declare(k1,noninteger),0);
+0;
+/*
+ * This is not such a good integral to use.  log(x) is negative over
+ * the integration limits, so integrand is complex.  Let's change the
+ * integrand to be (-log(x))^k1, instead, which is real-valued.
+ *
+ * In this case, it's easy to see that the substitution y=-log(x)
+ * gives as a gamma function.
+ */
+/*
+integrate(log(x)^k1,x,0,1);
+(-1)^k1*gamma(k1+1);
+*/
+integrate((-log(x))^k1,x,0,1);
+k1*gamma(k1);
+
+/* p. 120 */
+integrate(sqrt(log(x))/x^2,x,1,inf);
+sqrt(%pi)/2;
+
+/* p. 120 */
+/*
+ * Wang says -sqrt(%pi)/sqrt(4/3) = -sqrt(3)*sqrt(%pi)/2.
+ *
+ * This is wrong.  Clearly, the integrand is positive, so the integral
+ * must be positive.
+ *
+ * The issue is that radexpand is true so the Risch integrator is
+ * doing something not quite right and getting the sign wrong.  If we
+ * set radexpand to false, we get the correct answer.
+ */
+radexpand:false;
+false;
+
+integrate(x^(1/3)/sqrt(-log(x)),x,0,1);
+sqrt(3)*sqrt(%pi)/2;
+
+domain:complex;
+complex;
+
+/* [ 1731624 ] asked about sign of yx in integral containing only z */
+integrate(exp(sqrt(x^3)),x,0,1);
+2*((-1)^(1/3)*gamma_incomplete(2/3,-1)-(-1)^(1/3)*gamma(2/3))/3;
+/* with radexpand:true and domain:real we get
+   integrate(exp(sqrt(x^3)),x)  ->  -2*gamma_incomplete(2/3,-x^(3/2))/3
+   (which is not correct) due to invalid simplification in 
+   integrate-exp-special
+*/
+
+domain:real;
+real;
+
+radexpand:true;
+true;
+
+/* p. 121 */
+/*
+ * Wang gives 4*diff(beta(r,3/2),r)
+ * evaluated at r = 1.
+ *
+ * Maxima says 4*factor(ratsimp(subst(1,r,diff(makegamma(beta(r,3/2)),r))))
+ * = 16*(3*log(2)-4)/9.  Good.
+ */
+factor(integrate(sqrt(1-sqrt(x))*log(x)/sqrt(x),x,0,1));
+16*(3*log(2)-4)/9;
+
+/*------------------------------------------------------------------------------*/
+
+/* Problems from Moses' thesis, Appendix D, problems proposed by McIntosh */
+
+/* Problem 1 */
+/*
+ * Answer = 1/a*asin(a/r/sqrt(2*h)) 
+ *
+ * (This answer seems wrong.  The derivative has the wrong sign?)
+ */
+(assume(h>0),0);
+0;
+
+ratsimp(integrate(1/r/sqrt(2*h*r^2-a^2),r) + asin(a/sqrt(2)/sqrt(h)/abs(r))/a);
+0$
+
+/* Problem 2 */
+/*
+ * Answer = -1/sqrt(a^2-eps^2)*asin(sqrt(a^2+eps^2)/sqrt(2*h)/r)
+ */
+/*
+integrate(1/sqrt(2*h*r^2-a^2-eps^2),r);
+*/
+
+/* Problem 3 */
+/*
+ * Answer = 1/2/a*asin((h*r^2-a^2)/r^2/sqrt(h^2-2*k*a^2))
+ * h^2 > 2*a^2*k
+ *
+ */
+(assume(h^2>2*a^2*k),0);
+0;
+factor(integrate(1/r/sqrt(2*h*r^2-a^2-2*k*r^4),r));
+1/2/a*asin((h*r^2-a^2)/r^2/sqrt(h^2-2*k*a^2));
+
+/* Problem 4 */
+/*
+ * Answer = 1/2/sqrt(a^2+eps^2)*asin((h*r^2-(a^2+eps^2))/r^2/sqrt(h^2-2*k*(a^2+eps^2)))
+ * h^2 > 2*(a^2+eps^2)*k
+ *
+ * Maxima doens't get stuck anymore, but I can't figure out the magic
+ * assume expression so that integrate doesn't ask questions anymore.
+ */
+/*
+(assume(2*eps^2*k+2*a^2*k-h^2 < 0),0);
+0;
+integrate(1/r/sqrt(2*h*r^2-a^2-eps^2-2*k*r^4),r);
+1/2/sqrt(a^2+eps^2)*asin((h*r^2-(a^2+eps^2))/r^2/sqrt(h^2-2*k*(a^2+eps^2)));
+*/
+
+/* Problem 5 */
+/*
+ * Answer = 1/a*asin((k*r-a^2)/r/sqrt(k^2+2*h*a^2))
+ * k^2+2*h*a^2 > 0
+ *
+ * This answer seems wrong.  The derivative doesn't match.
+ *
+ * Maxima's answer has a derivative that matches.
+ */
+factor(integrate(1/r/sqrt(2*h*r^2-a^2-2*k*r),r));
+-asin((k*r+a^2)/(sqrt(k^2+2*a^2*h)*r))/a;
+
+/* Problem 6 */
+/*
+ * Answer = 1/(a^2+eps^2)*asin((k*r-(a^2+eps^2))/r/sqrt(k^2+2*h*(a^2+eps^2)))
+ * k^2+2*h*a^2 > 0
+ *
+ * Same issue as problem 5.
+ *
+ * Maxima's answer has a derivative that matches.
+ */
+
+factor(integrate(1/r/sqrt(2*h*r^2-a^2-eps^2-2*k*r),r));
+-asin((k*r+eps^2+a^2)/(sqrt(k^2+(2*eps^2+2*a^2)*h)*r))/sqrt(eps^2+a^2);
+
+/* Problem 7 */
+integrate(x/sqrt(2*e*x^2-a^2),x);
+sqrt(2*e*x^2-a^2)/(2*e);
+
+/* Problem 8 */
+integrate(x/sqrt(2*e*x^2-a^2-eps^2),x);
+sqrt(2*e*x^2-eps^2-a^2)/(2*e);
+
+/* Problem 9 */
+/*
+ * Answer is 1/2/sqrt(2*k)*asin((2*k*r^2-e)/sqrt(e^2-2*k*a^2))
+ * e^2>2*k*a^2
+ *
+ */
+(assume(e^2>2*k*a^2,k>0,e>0),0);
+0;
+factor(integrate(r/sqrt(2*e*r^2-a^2-2*k*r^4),r));
+1/2/sqrt(2*k)*asin((2*k*r^2-e)/sqrt(e^2-2*k*a^2));
+
+/* Problem 10 */
+/*
+ * Answer is 1/2/sqrt(2*k)*asin((2*k*r^2-e)/sqrt(e^2-2*k*(a^2+eps^2)))
+ * e^2>2*k*a^2
+ *
+ * For some reason, maxima returns
+ * -%i*asinh((2*k*r^2-e)/sqrt((2*eps^2+2*a^2)*k-e^2))/(2*sqrt(2)*sqrt(k))
+ *
+ * Using the fact that asin(%i*x) = %i*asinh(x), we see that the
+ * answer is identical.
+ */
+(assume(2*eps^2*k+2*a^2*k-e^2>0),0);
+0;
+factor(integrate(r/sqrt(2*e*r^2-a^2-eps^2-2*k*r^4),r));
+-%i*asinh((2*k*r^2-e)/sqrt((2*eps^2+2*a^2)*k-e^2))/(2*sqrt(2)*sqrt(k));
+
+
+/* Problem 11 */
+/*
+ * Answer is sqrt(2*E*r^2-a^2-2*k*r)/2*E
+ *            + 1/(2*h*E*sqrt(-2*E))*asin((2*E*r+k)/sqrt(k^2-2*E-a^2)
+ * E < 0
+ */
+(assume(E<0,k^2+2*E*a^2>0,k>0),0);
+0;
+integrate(r/sqrt(2*E*r^2-a^2-2*k*r),r);
+sqrt(2*E*r^2-2*k*r-a^2)/(2*E)-k*asin((4*E*r-2*k)/sqrt(4*k^2+8*a^2*E))
+				      /(2*sqrt(2)*sqrt(-E)*E);
+
+/* Bug 1741705 */
+factor(integrate(1/(sin(x)^2+1),x,0,8));
+(atan(sqrt(2)*sin(8)/cos(8))+3*%pi)/sqrt(2);
+
+ratsimp(integrate(1/(sin(x)^2+1),x,-8,0));
+(atan(sqrt(2)*sin(8)/cos(8))+3*%pi)/sqrt(2);
+
+ratsimp(integrate(1/(sin(x/3)^2+1),x,0,24));
+(3*atan(sqrt(2)*sin(8)/cos(8))+9*%pi)/sqrt(2);
+
+ratsimp(integrate(1/(sin(x-3)^2+1),x,3,11));
+(atan(sqrt(2)*sin(8)/cos(8))+3*%pi)/sqrt(2);
+
+/* defint log(sqrt(q^2-1)+1) asks about YX - ID: 924868 */
+integrate( log(sqrt(q^2-1)+1),q,0,1);
+'integrate( log(sqrt(q^2-1)+1),q,0,1);
+/*  should be 
+ *  ((4*asinh(1)+(2-sqrt(2))*%i*%pi+(-2^(3/2)))/2^(3/2));
+ */
+
+/* Bug 1748168 */
+integrate(1/(2+cos(x)),x,-%pi/2,%pi/2);
+(2/9)*sqrt(3)*%pi;
+
+/* Bug 1781537 */
+integrate(cos(x-c),x,c,%pi/2+c);
+1;
+
+integrate(cos(x)^3/sin(x)^4,x,1,2);
+1/sin(2)-1/(3*sin(2)^3)-1/sin(1)+1/(3*sin(1)^3);
+
+/* [ 1828956 ] Integration yields wrong results */
+/* assume & integrate - ID: 3522750 */
+(assume(x>0,l>x),0);
+0;
+integrate(integrate((acos(x/l)+acos(y/l)-%pi/2)/(2*%pi),y,0,sqrt(l^2-x^2)),x,0,l);
+l^2/(4*%pi);
+is(l>x);
+true;
+(forget(x>0,l>x),0);
+0;
+
+/* principal value integral */
+/* [ 657382 ] defint/limit infinite loop */
+
+/* Because of changes to timesin this does no longer work 
+integrate(1/(1-x^5), x, 0, inf);
+0-(2*sqrt(2*sqrt(5)+10)*atan((sqrt(5)-3)*sqrt(2*sqrt(5)+10)/(4*sqrt(5)))
+        +2*sqrt(10-2*sqrt(5))*atan(sqrt(10-2*sqrt(5))*(sqrt(5)+3)/(4*sqrt(5)))
+        -sqrt(2)*sqrt(sqrt(5)+5)*%pi-sqrt(2)*sqrt(5-sqrt(5))*%pi)
+        /20;
+*/        
+
+integrate(1/x, x, minf, inf);
+0;
+
+/* #2513 wrong principle value integral */
+integrate(1/((x-1)*(x-2)),x,0,3);
+-2*log(2);
+
+/* integrate(sin(x)^2/x,x,minf,inf) gives not zero - ID: 3480954 */
+integrate(sin(x)^2/x,x,minf,inf);
+0;
+
+/* [ 1051437 ] Trig integral error */
+integrate(2*cot(x)^2*cos(2*x)/(csc(2*x)+cot(2*x)), x);
+log(sin(x)^2+cos(x)^2+2*cos(x)+1) + log(sin(x)^2+cos(x)^2-2*cos(x)+1) + cos(2*x);
+
+/* [ 1960200 ] integrate function raises "too many contexts" error */
+float(rectform(integrate(integrate(x^2*y^2*(sin(2.*x)+%i*cos(2.*y))*exp(%i*20.*x)*exp(%i*30.*y),x,-1,-10),y,-5,15)));
+6.127592006717518 - 40.62195392101798 * %i;
+
+/* [ 2210087 ] integrate((x+1)^2.0,x) loops endlessly */
+integrate((x+1)^2.0,x);
+.3333333333333333*(x+1)^3.0;
+
+integrate(x^3/(1 + + 4*x^2 + 6*x^4 + 4*x^6 + x^8 ), x, 0, inf);
+1/12;
+
+/* [ 1668087 ] integrate(1/cosh(x/R)^4,x,-inf,inf) = 0 */
+/* already assumed a>0 */
+integrate(1/cosh(x/a)^4,x,-inf,inf);
+4*a/3;
+
+/* [ 1309432 ] integrate(1/cosh(a*x)^2,x,-inf,inf); */
+/* already assumed a>0 */
+integrate(1/cosh(x/a)^2,x,-inf,inf);
+2*a;
+
+/* [ 1860487 ] MONSTERTRIG endless recursion */
+integrate (x*(cos(2*x) + sin(x)), x);
+(2*x*sin(2*x)+cos(2*x))/4+sin(x)-x*cos(x);
+
+/* [ 1631094 ] integrate(sin(n*x)*x, x) => linear time when n is an integer */
+integrate(sin(1000000000*x)*x, x);
+(sin(1000000000*x)-1000000000*x*cos(1000000000*x))/1000000000000000000;
+
+/* [ 1847543 ] Integration problem of a special periodic function */
+integrate( 1/(11/10+sin(2*%pi*x)), x);
+10*atan((22*sin(2*%pi*x)/(cos(2*%pi*x)+1)+20)/(2*sqrt(21)))
+        /(sqrt(21)*%pi);
+
+/* [ 1054472 ] defint(log(1+exp(A+B*cos(phi))),phi,0,%pi) wrong */
+
+/* Commenting this example out
+ * There is a problem: The integral does not return the noun form, but
+ * gives an error: "sign: argument cannot be imaginary; found %i".
+ * If we execute this integral within the testsuite, 
+ * this integral seems to loop endlessly
+
+integrate(log(1+exp(cos(phi))),phi,0,%pi);
+'integrate(log(1+exp(cos(phi))),phi,0,%pi);
+
+*/
+
+/* atan2 function is a special case in lisp function INTEGRATOR.
+   There were no regression tests for it. */
+integrate(atan2(y,x),x);
+y*log(y^2+x^2)/2+x*atan(y/x);
+
+integrate(atan2(y,x),y);
+y*atan(y/x)-(x*log(y^2/x^2+1)/2);
+
+/* Bug ID: 3023997 - integrate(x*atan2(x,y),x) -> noun form
+ * We have generalized the special case for the atan2 function.
+ */
+integrate(y*atan2(y,x),y);
+y^2*atan(y/x)/2-(x^2*y-x^3*atan(y/x))/(2*x);
+
+/* [ 2501765 ] integrate((-14*x^2-32)/(x^4+3*x^2+1)^2,x,0,inf); */
+integrate(1/(x^4+3*x^2+1)^2,x,0,inf);
+(sqrt(3-sqrt(5))*(3*sqrt(2)*sqrt(5)+15*sqrt(2))*%pi
+  +sqrt(sqrt(5)+3)*(15*sqrt(2)-3*sqrt(2)*sqrt(5))*%pi)
+/400;
+
+/* integrate(exp(-x^n),x,0,1) bug for n >2 - ID: 3469184 */
+integrate(exp(-t^4),t,0,1);
+(gamma(1/4)-gamma_incomplete(1/4,1))/4;
+
+integrate(exp(sqrt(x)),x,1,5);
+2*(sqrt(5)*%e^sqrt(5)-%e^sqrt(5));
+
+ /* [ 1899352 ] integrate asks about (y-1)(y+1) after assume(y^2>1) */
+(assume(y^2>1),0);
+0;
+ratsimp(integrate(log(x^2+y^2),x,0,1));
+log(y^2+1)+2*atan(1/y)*y-2;
+(forget(y^2>1),0);
+0;
+
+/* integrate(sqrt(t)*log(t)^(1/2),t,0,1) wrong sign - ID: 2847436 */
+integrate(sqrt(t)*log(t)^(1/2),t,0,1);
+sqrt(2)*sqrt(%pi)*%i/(3^(3/2));
+
+
+/* Integrals of the type: c*z^w*log(z)^m*exp(-t^s) for 0 to inf */
+
+integrate(exp(-t),t,0,inf);
+1;
+integrate(exp(-t^2),t,0,inf);
+sqrt(%pi)/2;
+integrate(exp(-t^3),t,0,inf);
+gamma(1/3)/3;
+integrate(exp(-t^4),t,0,inf);
+gamma(1/4)/4;
+
+integrate(t*exp(-t),t,0,inf);
+1;
+integrate(t^2*exp(-t),t,0,inf);
+2;
+integrate(t^3*exp(-t),t,0,inf);
+6;
+integrate(t^4*exp(-t),t,0,inf);
+24;
+
+integrate(t*exp(-t^2),t,0,inf);
+1/2;
+integrate(t^2*exp(-t^2),t,0,inf);
+sqrt(%pi)/4;
+integrate(t^3*exp(-t^2),t,0,inf);
+1/2;
+integrate(t^4*exp(-t^2),t,0,inf);
+3*sqrt(%pi)/8;
+
+integrate(t^-2*exp(-t^-2),t,0,inf);
+sqrt(%pi)/2;
+integrate(t^-3*exp(-t^-2),t,0,inf);
+1/2;
+integrate(t^-4*exp(-t^-2),t,0,inf);
+sqrt(%pi)/4;
+
+integrate(t^(1/2)*exp(-t^2),t,0,inf);
+gamma(3/4)/2;
+integrate(t^(1/3)*exp(-t^2),t,0,inf);
+gamma(2/3)/2;
+integrate(t^(2/3)*exp(-t^2),t,0,inf);
+gamma(5/6)/2;
+
+integrate(exp(-t)*log(t),t,0,inf);
+-%gamma;
+integrate(t*exp(-t)*log(t),t,0,inf);
+1-%gamma;
+integrate(t^2*exp(-t)*log(t),t,0,inf);
+3-2*%gamma;
+
+integrate(t*exp(-t)*log(t)^2,t,0,inf);
+(%pi^2+6*%gamma^2-12*%gamma)/6;
+integrate(t*exp(-t^(1/2))*log(t)^2,t,0,inf);
+8*%pi^2+48*%gamma^2-176*%gamma+96;
+integrate(t*exp(-t^2)*log(t),t,0,inf);
+-%gamma/4;
+
+
+/* Integrals of the type: c*z^w*log(z)^m*exp(-t^s) for x to inf */
+
+(assume(x>0),done);
+done;
+
+/* Expand Gamma and Incomplete Gamma functions */
+gamma_expand:true;
+true;
+
+integrate(exp(-t),t,x,inf);
+%e^-x;
+integrate(exp(-t^2),t,x,inf);
+sqrt(%pi)*erfc(abs(x))/2;
+integrate(exp(-t^3),t,x,inf);
+gamma_incomplete(1/3,x^3)/3;
+integrate(exp(-t^4),t,x,inf);
+gamma_incomplete(1/4,x^4)/4;
+
+integrate(t*exp(-t),t,x,inf);
+(x+1)*%e^-x;
+integrate(t^2*exp(-t),t,x,inf);
+(x^2+2*x+2)*%e^-x;
+integrate(t^3*exp(-t),t,x,inf);
+(x^3+3*x^2+6*x+6)*%e^-x;
+integrate(t^4*exp(-t),t,x,inf);
+(x^4+4*x^3+12*x^2+24*x+24)*%e^-x;
+
+integrate(t*exp(-t^2),t,x,inf);
+%e^-x^2/2;
+integrate(t^2*exp(-t^2),t,x,inf);
+%e^-x^2*(sqrt(%pi)*%e^x^2*erfc(x)+2*x)/4;
+integrate(t^3*exp(-t^2),t,x,inf);
+(x^2+1)*%e^-x^2/2;
+integrate(t^4*exp(-t^2),t,x,inf);
+%e^-x^2*(3*sqrt(%pi)*%e^x^2*erfc(x)+4*x^3+6*x)/8;
+
+integrate(t^-2*exp(-t^-2),t,x,inf);
+-sqrt(%pi)*(erfc(1/x)-1)/2;
+integrate(t^-3*exp(-t^-2),t,x,inf);
+%e^-(1/x^2)*(%e^(1/x^2)-1)/2;
+integrate(t^-4*exp(-t^-2),t,x,inf);
+-%e^-(1/x^2)*(sqrt(%pi)*(erfc(1/x)-1)*x*%e^(1/x^2)+2)/(4*x);
+
+integrate(t^(1/2)*exp(-t^2),t,x,inf);
+gamma_incomplete(3/4,x^2)/2;
+integrate(t^(1/3)*exp(-t^2),t,x,inf);
+gamma_incomplete(2/3,x^2)/2;
+integrate(t^(2/3)*exp(-t^2),t,x,inf);
+gamma_incomplete(5/6,x^2)/2;
+
+integrate(exp(-t)*log(t),t,x,inf);
+-%e^-x*((%e^x-1)*log(x)+(%gamma-hypergeometric_regularized([1,1],[2,2],-x)*x)
+                        *%e^x);
+integrate(t*exp(-t)*log(t),t,x,inf);
+-%e^-x*((%e^x-x-1)*log(x)+(-hypergeometric_regularized([2,2],[3,3],-x)*x^2
+                          +%gamma-1)
+                          *%e^x);
+integrate(t^2*exp(-t)*log(t),t,x,inf);
+-%e^-x*((2*%e^x-x^2-2*x-2)*log(x)+(-4*hypergeometric_regularized(
+                                      [3,3],[4,4],-x)*x^3
+                                  +2*%gamma-3)
+                                  *%e^x);
+
+integrate(t*exp(-t)*log(t),t,x,inf);
+-%e^-x*((%e^x-x-1)*log(x)+(-hypergeometric_regularized([2,2],[3,3],-x)*x^2
+                          +%gamma-1)
+                          *%e^x);
+integrate(t*exp(-t^(1/2))*log(t),t,x,inf);
+%e^-sqrt(x)*((-12*%e^sqrt(x)+6*x+12)*log(x)+sqrt(x)*(2*x+12)*log(x)
+                                           +(144
+                                            *hypergeometric_regularized(
+                                             [4,4],[5,5],-sqrt(x))*x^2
+                                            -24*%gamma+44)
+                                            *%e^sqrt(x));
+
+/* Integrals of the type: c*z^r*log(z)^n*(1-z)^s*log(1-z)^m */
+
+integrate(t*log(t)*(1-t)*log(1-t),t,0,1);
+(3*%pi^2-37)/-108;
+integrate(t^2*log(t)*(1-t)*log(1-t),t,0,1);
+(3*%pi^2-37)/-216;
+integrate(t^2*log(t)^2*(1-t)*log(1-t),t,0,1);
+(576*zeta(3)+56*%pi^2-1317)/3456;
+integrate(t^2*log(t)^2*(1-t)^2*log(1-t),t,0,1);
+(72000*zeta(3)+9400*%pi^2-191243)/1080000;
+integrate(t^2*log(t)^2*(1-t)^2*log(1-t)^2,t,0,1);
+(3384000*zeta(3)+6000*%pi^4+747800*%pi^2-12135541)/-16200000;
+
+/* integrate -> too many contexts - ID: 2838268 */
+integrate(t*cos(1.0*t),t);
+t*sin(t)+cos(t);
+
+/* definite integral - bad answer - ID: 2880886 */
+integrate(cos(x)^2 * (1 + sin(x)^2)^-3,x,0,%pi/2);
+7*%pi/2^(11/2);
+
+(forget(x>0),gamma_expand:false,done);
+done;
+
+/* BUG ID: 2906049 - integration failure with option integrate_use_rootsof
+ * This example is more simple than the example in the bug report.
+ */
+%rnum:0;
+0;
+integrate((a*x^2+b*x+c)/(d*x^3+a*x^2+b),x),integrate_use_rootsof:true;
+'lsum((c+%r1*b+%r1^2*a)*log(x-%r1)/(3*%r1^2*d+2*%r1*a),%r1,
+            rootsof(d*x^3+a*x^2+b));
+
+/* fourier integral incorrect - ID: 2875784 */
+integrate(cos(x)*sin(x)/x, x, minf, inf);
+%pi/2;
+
+integrate(exp(%i*x)*sin(x)/x, x, minf, inf);
+%pi/2;
+
+integrate(exp(-%i*x)*sin(x)/x, x, minf, inf);
+%pi/2;
+
+/* Bug ID: 655270 - Incomplete integration
+ */
+integrate(sin(3*asin(x)),x);
+(4*x^4-6*x^2+1)/-4;
+integrate(sin(4*asin(x)),x);
+(15*((1-x^2)^(3/2)/5-x^2*(1-x^2)^(3/2)/5)
+       +sqrt(1-x)*sqrt(x+1)*(93*x^4-106*x^2+13))/-60;
+       
+/* Bug ID: 3029610 - integrate and %e_to_numlog
+*/
+integrate((exp(3/2*log(x))+1)/sqrt(x),x);
+2*(x^2/4+sqrt(x));
+
+integrate(3*sqrt(x)*exp(3/2*log(x)),x);
+x^3;
+
+/* someday this should return 2*%pi */
+/* that would require handling the discontinuity in
+   gamma_incomplete(0, exp(%i*x))				*/
+integrate(exp(cos(x))*cos(sin(x)),x,0,2*%pi);
+'integrate(exp(cos(x))*cos(sin(x)),x,0,2*%pi);
+
+/* Bug ID: 3039452 - integrate(sqrt(t^c)/(t*(b*t^c+a)),t) hangs
+ */
+/* These assumptions are already present. Consider to delete it more early.
+assume(a>0,b>0);
+[a>0,b>0]; */
+integrate(sqrt(t^c)/(t*(b*t^c+a)),t);
+2*atan(sqrt(b)*%e^(c*log(t)/2)/sqrt(a))/(sqrt(a)*sqrt(b)*c);
+forget(a>0,b>0);
+[a>0,b>0];
+
+/* Bug ID: 3045559 integrate(exp(-u^2), u, minf, x) => incorrect gamma_incomple
+ */
+integrate(exp(-u^2),u,minf,x);
+sqrt(%pi)*erf(x)/2+sqrt(%pi)/2;
+
+/* integration error - ID: 3085498 */
+integrate(sqrt(1-cos(t)),t,0,2*%pi);
+2^(5/2);
+
+/* incorrect integration - ID: 3153533 */
+assume(x>2);
+[x>2];
+integrate(1/(x-z),z,1,x-1);
+log(x-1);
+forget(x>2);
+[x>2];
+
+/* integrate(x^2*exp(x)/(1+exp(x))^2, x, minf, inf); - ID: 3158526 */
+integrate(x^2*exp(x)/(1+exp(x))^2, x, minf, inf);
+%pi^2/3;
+
+/* integrate(abs(sin(x)),x,0,2*%pi) wrong result - ID: 3165872 */
+integrate(abs(sin(x)),x,0,2*%pi);
+'integrate(abs(sin(x)),x,0,2*%pi);
+
+/* integrate(sin(2x)atan(sin(x)),x) - ID: 3199708 */
+integrate(sin(2*x)*atan(sin(x)),x,0,%pi/2);
+%pi/2 - 1;
+
+/* wrong integration answer - ID: 2989983 */
+integrate(cos(w+T)/(1+1/2*cos(T))^2,T,0,2*%pi);
+-8*%pi*cos(w)/3^(3/2);
+
+/* wrong sign for integral of e^(-1/x^2) - ID: 3211937 */
+integrate(%e^(-1/x^2),x,0,1);
+%e^-1*(sqrt(%pi)*%e*erf(1)+1)-sqrt(%pi);
+
+/* definite integration introduces xy variable - ID: 3292707 */
+integrate((log((2-x)/2)+log(2))/(1-x), x, 0, 1);
+li[2](2)-(6*log(2)^2-6*log(-2)*log(2)+%pi^2)/6;
+
+/* Incorrect integral of log(1+a/(x*t)^2) - ID: 3291160 */
+integrate(log(1+7/(x^2)),x,1,inf);
+(14*atan(sqrt(7))-sqrt(7)*log(8))/sqrt(7);
+
+/* Wrong sign in exponential integral - ID: 3517785 */
+integrate(1/(%e^(2*t)*sqrt(1-1/%e^(2*t))), t, 0, inf);
+1;
+
+/* integral from minf to inf of an absolute value combo fails - ID: 3313531 */
+integrate(abs(x - 1) + abs(x + 1) - 2*abs(x),x,minf,inf);
+2;
+
+/* definite integration - ID: 3315476 */
+integrate(1/2^x, x, 0, 1);
+1/(2*log(2));
+
+/* discontinuities in integral */
+/* error in integrating exp(-x)*sinh(sqrt(x)) - ID: 3292033 */
+integrate(exp(sqrt(x)-x), x, 0, inf);
+%e^(1/4)*gamma_incomplete(1,1/4)-%e^(1/4)*gamma_incomplete(1/2,1/4)/2
+                                       +%e^(1/4)*(sqrt(%pi)+2)/2
+                                       +%e^(1/4)*sqrt(%pi)/2-%e^(1/4);
+/* equivalent to:
+   %e^(1/4)*gamma_incomplete(1,1/4)-%e^(1/4)*gamma_incomplete(1/2,1/4)/2
+                                       +%e^(1/4)*sqrt(%pi);			
+*/
+
+/* integrate(log(t)*log(t+1),t,0,1) gives Lisp error - ID: 3381012 */
+integrate(log(t)*log(t+1),t,0,1);
+-2*log(2)-%pi^2/12+2;
+
+/* integrate(log(2*sin(t/2)),t,0,%pi) contains false - ID: 3381037 */
+integrate(log(2*sin(t/2)),t,0,%pi);
+2*((8*%i*li[2](%i)+8*%i*li[2](-%i)-4*%pi*log(2)+%i*%pi^2)/8
+ +%pi*log(2)/2-%i*%pi^2/12);
+/* above result is really zero */
+
+/* integrate error - ID: 3388801 */
+integrate( sqrt((x-474)^2/(107669-(x-474)^2)+1), x, 181, 474);
+sqrt(107669)*%i*log(2*sqrt(107669)*%i)
+ - sqrt(107669)*%i*log(4*sqrt(5455)*%i-586);
+
+/* integrate erf fails - ID: 3454370 */
+integrate( erf(x+a)-erf(x-a), x, minf, inf);
+4*a;
+
+/* Wrong result for definite integral - ID: 3538167 */
+integrate(cos(3*x)/(5-4*cos(x)),x,0,2*%pi);
+%pi/12;

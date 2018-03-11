@@ -1,0 +1,9 @@
+
+newton(exp,var,x0,eps):=
+	block([xn,s,numer],
+	numer:true,
+	s:diff(exp,var),
+	xn:x0,
+  loop, if abs(subst(xn,var,exp))<eps then return(xn),
+	xn:xn-subst(xn,var,exp)/subst(xn,var,s),
+	go(loop) )$

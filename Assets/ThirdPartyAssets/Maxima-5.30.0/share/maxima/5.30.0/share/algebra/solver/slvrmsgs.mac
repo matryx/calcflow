@@ -1,0 +1,145 @@
+/******************************************************************************/
+/*                                                                            */
+/* SLVRMSGS.MAC                                                               */
+/*                                                                            */
+/* Copyright (C) 2000 : Eckhard Hennig, Ralf Sommer                           */
+/* This library is free software; you can redistribute it and/or modify it    */
+/* under the terms of the GNU Library General Public License as published     */
+/* by the Free Software Foundation; either version 2 of the License, or (at   */
+/* your option) any later version.                                            */
+/*                                                                            */
+/* This library is distributed in the hope that it will be useful, but        */
+/* WITHOUT ANY WARRANTY; without even the implied warranty of                 */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          */
+/* Library General Public License for more details.                           */
+/*                                                                            */
+/* You should have received a copy of the GNU Library General Public          */
+/* License along with this library; if not, write to the Free Software        */
+/* Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                  */
+/******************************************************************************/
+/* Author(s)    : Eckhard Hennig, Ralf Sommer                                 */
+/* Project start: 17.01.1995                                                  */
+/* Completed    : 17.01.1995                                                  */
+/* Last change  : 24.01.1995                                                  */
+/* Time         : 16.38                                                       */
+/******************************************************************************/
+/* Changes      : |                                                           */
+/******************************************************************************/
+
+put( 'SLVRMSGS, 1, 'Version )$
+
+SetVersion(
+  /* KEY    = */ 'SLVRMSGS,
+  'MODULE      = "SLVRMSGS",
+  'DESCRIPTION = "SOLVER error and program messages",
+  'AUTHORS     = "Eckhard Hennig, Ralf Sommer",
+  'DATE        = "17.01.1995",
+  'LASTCHANGE  = "24.01.1995",
+  'TIME        = "16:38",
+  'PLAN        = ""
+)$
+
+/******************************************************************************/
+/* Last change: 24.01.1995                                                    */
+/* Time       : 16:38                                                         */
+/* By         : Eckhard Hennig                                                */
+/* Description: Version property added.                                       */
+/******************************************************************************/
+/* Last change: 17.01.1995                                                    */
+/* Time       : 18:47                                                         */
+/* By         : Eckhard Hennig, Ralf Sommer                                   */
+/* Description: Solver messages moved from AI's MESSAGES.MAC to SLVRMSGS.MAC  */
+/******************************************************************************/
+
+
+/******************************************************************************/
+/* Definition of error messages for SLVRTBOX                                  */
+/******************************************************************************/
+
+ErrMsg["Ignore"]        : "Ignoring error and continuing..."$
+ErrMsg["FatalErr"]      : "Fatal error, aborting."$
+ErrMsg["InvMsgLvl"]     : "Invalid MsgLevel. [ 'OFF, 'SHORT, 'DETAIL ]"$
+ErrMsg["InvVerbMode"]   :
+  "Invalid value for Solver_Verbose. [ 'FALSE, 'TRUE, 'ALL ]"$
+
+
+/******************************************************************************/
+/* Definition of error and program messages for SOLVER                        */
+/******************************************************************************/
+
+SolverMsg["VarsAre"]    : "The variables to be solved for are"$
+SolverMsg["ParsAre"]    : "The parameters are"$
+SolverMsg["NoEqOrVar"]  : "No equations or variables found."$
+SolverMsg["NoEqTerm"]   :
+  "No equations left after applying immediate assignments. Solver terminated."$
+SolverMsg["TrySolve4"]  : "Trying to solve for"$
+SolverMsg["Solve4Exp"]  : "in order to solve for the expression"$
+SolverMsg["SubstPwrs"]  : "Searching for multiples of exponents."$
+SolverMsg["Subst"]      : "Substituting new symbol for"$
+SolverMsg["SrchImmed"]  : "Searching for immediate assignments."$
+SolverMsg["NoImmed"]    : "No immediate assignments found."$
+SolverMsg["Assign"]     : "Assigning"$
+SolverMsg["Incons"]     : "Inconsistent equations:"$
+SolverMsg["Assum"]      : "Assuming"$
+SolverMsg["AssmFnd"]    : "Assumption already found in list:"$
+SolverMsg["SrchLinEq"]  : "Searching for linear equations..."$
+SolverMsg["wrt"]        : "  ...with respect to:"$
+SolverMsg["NoLinEqs"]   : "No linear equations found."$
+SolverMsg["Found"]      : "Found"$
+SolverMsg["LinEqs"]     : "linear equations in"$
+SolverMsg["LinVars"]    : "variables."$
+SolverMsg["SolvLinEq"]  : "Solving linear equations."$
+SolverMsg["Solutions"]  : "The solutions are"$
+SolverMsg["FreeVar2Par"]: "Free variable appended to parameter list:"$
+SolverMsg["Chk4RemEq"]  : "Checking for remaining equations."$
+SolverMsg["AllSolved"]  : "All variables solved for. No equations left."$
+SolverMsg["NoEqLeft"]   :
+  "No equations left to determine the remaining unknowns"$
+SolverMsg["EqLeft"]     :
+  "All variables solved for although some equations are left."$
+SolverMsg["Eqs"]        : "equation(s) and"$
+SolverMsg["Vars"]       : "variable(s) left."$
+SolverMsg["EqsAre"]     : "The equations are"$
+SolverMsg["EqIs"]       : "The equation is"$
+SolverMsg["ValStrat"]   : "Applying valuation strategy."$
+SolverMsg["TrySolveEq"] : "Trying to solve equation"$
+SolverMsg["ForVar"]     : "for"$
+SolverMsg["Valuation"]  : "Valuation:"$
+SolverMsg["CheckSol"]   : "Checking if equation was solved correctly."$
+SolverMsg["SolOK"]      : "Solution is correct."$
+SolverMsg["SolNotOK"]   : "Solution is not correct."$
+SolverMsg["AppTrans"]   : "Applying transformation"$
+SolverMsg["ResTrans"]   : "The transformation yields"$
+SolverMsg["RetryTrans"] : "Retrying with transformed equation."$
+SolverMsg["TransFail"]  : "Transformation failed."$
+SolverMsg["TransSolv"]  : "The transformation has solved the equation."$
+SolverMsg["GiveUp"]     : "Cannot solve equation. Giving up."$
+SolverMsg["SolRes"]     : "The solution is"$
+SolverMsg["NotUnique"]  :
+  "The solution is not unique. Tracing paths separately."$
+SolverMsg["SolsLost"]   :
+  "Not all solutions have been determined explicitly. Some may be lost."$
+SolverMsg["Dropped"]    : "Dropping solution:"$
+SolverMsg["Contradict"] : 
+  "This solution contradicts with the remaining equations:"$
+SolverMsg["ConsChk"]    : "Checking for inconsistencies..."$
+SolverMsg["NoneFnd"]    : "... none found."$
+SolverMsg["Solution"]   : "Solution"$
+SolverMsg["ConsSol"]    : "Consistent solutions for"$
+SolverMsg["NoConsSol"]  : "No consistent solutions found for"$
+SolverMsg["NoValidSol"] : "No valid solution could be determined for"$
+SolverMsg["PostPr"]     : "Postprocessing results."$
+SolverMsg["SolSet"]     : "Solution set"$
+SolverMsg["NoSol"]      : "Cannot determine an explicit solution for"$
+SolverMsg["SolSetDrp"]  : "Invalid solution set dropped."$
+SolverMsg["Dump"]       : ">>> Dumping solutions to"$
+
+ErrMsg["SolvrTerm"]     : "Solver terminated."$
+ErrMsg["EqsNotLst"]     : "List of equations expected."$
+ErrMsg["VarNotLst"]     : "List of variables expected."$
+ErrMsg["ParNotLst"]     : "List of parameters expected."$
+ErrMsg["VarParConfl"]   : "Variables and parameters must be disjoint sets."$
+ErrMsg["InvIncPar"]     :
+  "Invalid assignment. 'ASK, 'BREAK, or 'IGNORE expected."$
+ErrMsg["InvDelPref"]    : "Expected \">\", \">=\", \"<\", or \"<=\"."$
+

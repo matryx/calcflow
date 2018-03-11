@@ -1,0 +1,64 @@
+/* File name: vector3d.mac
+ * Package providing vector algebra and differential calculus operations
+ * on three dimensional vectors in orthogonal coordinate systems.
+ * Implements cross product of two vectors, div, curl, and laplacian
+ * of vector functions of the coordinates. and grad and laplacian
+ * of scalar functions of the coordinates.  The vector arguments must
+ * be three element lists.
+ * Walter Eastes: June, 2004
+ * Copyright updated: July, 2007
+ */
+
+/*
+Copyright (C) 2004-2007 by Walter Eastes
+
+These routines are free software; you can redistribute them and/or modify
+them under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+*/
+
+coordsys(sys):=
+(  if sys=cartesian then (scalef : [1,1,1], coordvar : [x,y,z])
+   else if sys=cylindrical then (scalef : [1,r,1], coordvar : [r,ph,z])
+   else if sys=spherical then (scalef : [1,r*sin(ph),r], coordvar : [r,th,ph])
+   else (scalef : read("Scale factors"), coordvar : read("Coordinates"))
+)$
+
+coordsys(cartesian)$
+
+cross(a,b) :=
+   [ a[2]*b[3]-a[3]*b[2], a[3]*b[1]-a[1]*b[3], a[1]*b[2]-a[2]*b[1] ] $
+
+div(v) :=
+(  diff(scalef[2]*scalef[3]*v[1], coordvar[1]) +
+   diff(scalef[3]*scalef[1]*v[2], coordvar[2]) +
+   diff(scalef[1]*scalef[2]*v[3], coordvar[3])
+) / (scalef[1]*scalef[2]*scalef[3]) $
+
+curl(a) :=
+[  (diff(scalef[3]*a[3], coordvar[2]) -
+    diff(scalef[2]*a[2], coordvar[3])) / (scalef[2]*scalef[3]),
+
+   (diff(scalef[1]*a[1], coordvar[3]) -
+    diff(scalef[3]*a[3], coordvar[1])) / (scalef[3]*scalef[1]),
+
+   (diff(scalef[2]*a[2], coordvar[1]) -
+    diff(scalef[1]*a[1], coordvar[2])) / (scalef[1]*scalef[2])
+]$
+
+grad(f) :=
+[  diff(f,coordvar[1]) / scalef[1],
+   diff(f,coordvar[2]) / scalef[2],
+   diff(f,coordvar[3]) / scalef[3]
+]$
+
+laplacian(v) :=
+   if listp(v) then grad(div(v)) - curl(curl(v))
+   else
+   (  diff(diff(v,coordvar[1]) * scalef[2]*scalef[3]/scalef[1], coordvar[1]) +
+      diff(diff(v,coordvar[2]) * scalef[3]*scalef[1]/scalef[2], coordvar[2]) +
+      diff(diff(v,coordvar[3]) * scalef[1]*scalef[2]/scalef[3], coordvar[3])
+   ) / (scalef[1]*scalef[2]*scalef[3])
+$
+

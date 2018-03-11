@@ -1,0 +1,72 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/VectorAnalysis/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Vector Analysis ---------- */
+/* Vector norm => sqrt(15) */
+mat_norm([1 + %i, -2, 3*%i]);
+load(vect)$
+/* Cross product: (2, 2, -3) x (1, 3, 1) => (11, -5, 4) */
+vect_express([2, 2, -3] ~ [1, 3, 1]);
+declare([a, b, c, d, f, g], nonscalar)$
+/* (a x b) . (c x d) => (a . c) (b . d) - (a . d) (b . c) */
+(a ~ b) . (c ~ d);
+vectorsimp(%), expandall;
+/* => (2 y z^3 - 2 x^2 y^2 z,   x y,   2 x y^2 z^2 - x z) */
+vect_express(curl [x*y*z, x^2*y^2*z^2, y^2*z^3]);
+ev(%, diff);
+/* DEL . (f x g) => g . (DEL x f) - f . (DEL x g) */
+div (f ~ g);
+vectorsimp(%), expandall;
+remove([a, b, c, d, f, g], nonscalar)$
+/* Express DEL . a in spherical coordinates (r, theta, phi) for
+   a = (a_r(r, theta, phi), a_theta(r, theta, phi), a_phi(r, theta, phi)).
+   Here, phi is in the x-y plane and theta is the angle with the z-axis.
+   => 1/r^2 d/dr[r^2 a_r] + 1/[r sin(theta)] d/dtheta[sin(theta) a_theta]
+      + 1/[r sin(theta)] da_phi/dphi
+   => da_r/dr + (2 a_r)/r + 1/r da_theta/dtheta + a_theta/[r tan(theta)]
+      + 1/[r sin(theta)] da_phi/dphi
+   See Keith R. Symon, _Mechanics_, Third Edition, Addison-Wesley Publishing
+   Company, 1971, p. 103. */
+vect_coordsys(spherical)$
+vect_coords;
+depends([a_r, a_theta, a_phi], [r, theta, phi]);
+vect_express(div [a_r, a_phi, a_theta]);
+expand(ev(%, 'diff));
+remove([a_r, a_theta, a_phi], dependency)$
+/* Express dR/dt in spherical coordinates (r, theta, phi) where R is the
+   position vector r*Rhat(theta, phi) with Rhat being the unit vector in the
+   direction of R => (dr/dt, r dtheta/dt, r sin(theta) dphi/dt)
+   [Symon, p. 98] */
+depends([r, theta, phi], t, rhat, [theta, phi])$
+vect_express(diff([r*rhat, 0, 0], t));
+remove([r, theta, phi, rhat], dependency, ".", commutative)$
+vect_coordsys(cartesian3d)$
+/* Scalar potential => x^2 y + y + 2 z^3 */
+scalar_potential([2*x*y, x^2 + 1, 6*z^2]);
+/* Vector potential => (x y z, x^2 y^2 z^2, y^2 z^3) is one possible solution.
+   See Harry F. Davis and Arthur David Snider, _Introduction to Vector
+   Analysis_, Third Edition, Allyn and Bacon, Inc., 1975, p. 97. */
+vector_potential([2*y*z^3 - 2*x^2*y^2*z, x*y, 2*x*y^2*z^2 - x*z]);
+vect_express(curl(%))$
+ratsimp(ev(%, diff));
+/* Orthogonalize the following vectors (Gram-Schmidt).  See Lee W. Johnson and
+   R. Dean Riess, _Introduction to Linear Algebra_, Addison-Wesley Publishing
+   Company, 1981, p. 104 => [[0 1 2 1], [0 -1 1 -1], [2 1 0 -1]]^T */
+[[0, 1, 2, 1], [0, 1, 3, 1], [1, 1, 1, 0], [1, 3, 6, 2]];
+gramschmidt(%);
+/* ---------- Quit ---------- */
+quit();

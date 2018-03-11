@@ -1,0 +1,382 @@
+/*  
+  GRAPHS - graph theory package for Maxima
+  Copyright (C) 2007-2011 Andrej Vodopivec <andrej.vodopivec@gmail.com>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or	 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+*/
+
+define_variable(gp_file_out, "out.txt", any)$
+define_variable(gp_file_in, "in.txt", any)$
+define_variable(draw_graph_program, 'spring_embedding, any)$
+define_variable(draw_graph_terminal, 'screen, any)$
+define_variable(graphs_plot_size, [400,400], list)$
+
+if draw_loaded#true then load("draw")$
+
+circular_positions(G) := block(
+  [v_list, numer : true, n : graph_order(G)],
+  v_list : vertices(G),
+  makelist(
+    [v_list[i+1],
+    [2+cos(2*i*%pi/n), 2+sin(2*i*%pi/n)]],
+    i, 0, graph_order(G)-1))$
+
+write_file(G) := block(
+  [display2d:false, file, e],
+  file : openw(gp_file_in),
+  printf(file, "graph {"),
+  for e in edges(G) do (
+    printf(file, "~s -- ~s~%", e[1], e[2])),
+  printf(file, "}"),
+  close(file),
+  'done)$
+
+read_file() := block(
+  [lst : read_list(gp_file_out),
+   v_pos : [], v, x, y],
+  while length(lst)>0 do (
+    v : first(lst), lst : rest(lst),
+    if v = 'node then (
+      v : first(lst), lst : rest(lst),
+      x : first(lst), lst : rest(lst),
+      y : first(lst), lst : rest(lst),
+      v_pos : cons([v, [x, y]], v_pos))),
+  v_pos)$
+
+graphviz_positions(G, program) := block(
+  [command],
+  write_file(G),
+  if program = 'dot then
+    command : concat("dot -Tplain \"",
+      gp_file_in, "\" > \"", gp_file_out, "\"")
+  else if program = 'twopi then
+    command : concat("twopi -Tplain \"",
+      gp_file_in, "\" > \"", gp_file_out, "\"")
+  else if program = 'circo then
+    command : concat("circo -Tplain \"",
+      gp_file_in, "\" > \"", gp_file_out, "\"")
+  else if program = 'fdp then
+    command : concat("fdp -Tplain \"",
+      gp_file_in, "\" > \"", gp_file_out, "\"")
+  else
+    command : concat("neato -Tplain \"",
+      gp_file_in, "\" > \"", gp_file_out, "\""),
+  system(command),
+  read_file())$
+
+
+/* taken from augmented_lagrangian */
+with_parameters ([L]) ::= buildq (
+  [a : subst (":", "=",  ev (L [1])), e : rest (L)],
+  block (a, splice (e)) );
+
+draw_graph(G, [options]) := block(
+  [
+   maperror : false, mapprint : false,
+   wxplot_size : graphs_plot_size,
+   program : draw_graph_program, 
+   show_id : false, show_label : false, show_weight : false,
+   vertex_color : 'red, text_color : 'blue, edge_color : 'black,
+   show_vertex_color : 'blue, show_edge_color : 'blue,
+   vertex_type : 7, show_vertex_type : 7,
+   vertex_size : 2, show_vertex_size : 2,
+   edge_type : solid, show_edge_type : solid,
+   edge_width : 1, show_edge_width : 2,
+   head_length : 0.07, head_angle : 15,
+   vertices:[], edges:[], v_pos, vertex_labels:[], edge_weights:[],
+   show_vertices : [], show_edges : [], show_path : [],
+   label_alignment : 'center, label_padding: "  ",
+   command, x_max, y_max, gp_options,
+   terminal : draw_graph_terminal, file_name : "graph",
+   gp_file_in : temp_filename(gp_file_in),
+   gp_file_out : temp_filename(gp_file_out),
+   redraw : false, directed : false,
+   fixed_vertices : [],
+   spring_embedding_depth : 50,
+   vertex_colors : [red, blue, "dark-green", orange, purple, cyan, brown],
+   edge_colors : [red, blue, "dark-green", orange, purple, cyan, brown],
+   vertex_partition : [],
+   vertex_coloring : [],
+   vertex_sizes : [],
+   vertex_types : [],
+   edge_partition : [],
+   edge_coloring : [],
+   edge_types : [],
+   edge_widths : [],
+   dimension : 2,
+   transform : false,
+   scene,
+   loops : [],
+   normalize_positions : true
+  ],
+
+  if not(is_graph(G)) and not(is_digraph(G)) then
+    error("First argument to `draw_graph' is not a graph:", G),
+
+  if get('wxmaxima, 'version)#false then (
+    terminal : 'wxmaxima,
+    if (assoc('terminal, options))=false then (
+      vertex_size : 1.2,
+      show_vertex_size : 1.2)),
+  if is_digraph(G) then directed : true,
+
+  if assoc('show_id, options)=true or assoc('show_label, options)=true then (
+    vertex_size : 3,
+    show_vertex_size : 3,
+    vertex_colors : ["light-red", "light-blue", "light-green", orange, purple, cyan, brown],
+    show_vertex_color : "light-blue",
+    vertex_color : "light-red"),
+
+  with_parameters(options,
+
+    /* Get vertex positions */
+    v_pos : get_positions(G),
+    if redraw='continue or redraw=true or v_pos=false then (
+      if member(program, ['neato, 'dot, 'twopi, 'fdp, 'circo]) then
+        v_pos : graphviz_positions(G, program)
+      else if program = 'spring_embedding then
+        v_pos : spring_embedding(G, spring_embedding_depth, fixed_vertices, dimension,
+          if redraw='continue then true else false)
+      else if program = 'planar_embedding then block(
+        [embedding : planar_embedding(G), c],
+        if embedding=false then
+          error("The graph is not a 2-connected planar graph")
+        else (
+          c : embedding[1],
+          for i:2 thru length(embedding) do (
+            if length(embedding[i])>length(c) then c:embedding[i]),
+          v_pos : spring_embedding(G, spring_embedding_depth, c, 2,
+            if redraw='continue then true else false)))
+      else
+        v_pos : apply(program, [G]),
+      set_positions(v_pos, G)),
+    dimension : length(second(first(v_pos))),
+
+    /* Normalize positions into [-1,1]x[-1,1] */
+    if normalize_positions=true and length(v_pos)>1 and dimension=2 then block(
+      [x_list : map(first, map(second, v_pos)),
+       y_list : map(second, map(second, v_pos)),
+       x_min, x_max, y_min, y_max],
+      x_min : lmin(x_list),
+      x_max : lmax(x_list),
+      y_min : lmin(y_list),
+      y_max : lmax(y_list),
+
+      if (x_min#x_max) and (y_min#y_max) then
+        v_pos : map(
+          lambda([u],
+            [u[1],
+             [(u[2][1] - (x_min + x_max)/2) / (x_max - x_min),
+              (u[2][2] - (y_min + y_max)/2) / (y_max - y_min)]]),
+           v_pos)),
+
+    /* Setup edges */
+    if show_path#[] then show_edges: vertices_to_path(show_path),
+    if edge_coloring=true then edge_coloring: edge_coloring(G),
+    if show_edges#[] then (
+      for e in edges(G) do
+        if not(member(e, show_edges)) then
+          edges : cons(e, edges),
+      edge_partition : [edges, show_edges],
+      edge_widths : [edge_width, show_edge_width],
+      edge_types : [edge_type, show_edge_type],
+      edge_colors : [edge_color, show_edge_color])
+    else if edge_coloring#[] then block(
+      [ch:first(edge_coloring), coloring:second(edge_coloring)],
+      edge_partition : makelist(
+        map(first, sublist(coloring, lambda([u], is(second(u)=c)))),
+        c, 1, ch))
+    else if edge_partition=[] then (
+      edge_colors : [edge_color],
+      edge_types : [edge_type],
+      edge_widths : [edge_width],
+      edge_partition : [edges(G)]),
+
+    edges : apply(append,
+      map(lambda([c,t,w,edg],
+        append(['color=c, 'line_type=t, 'line_width=w],
+          map(lambda([u],
+             block([p1:assoc(u[1], v_pos), p2:assoc(u[2], v_pos)],
+               if directed=true then
+                 vector(p1, p2-p1)
+               else
+                 points([p1, p2]))),
+             edg))),
+       makelist(edge_colors[mod(i, length(edge_colors))+1], i, 0, length(edge_partition)-1),
+       if edge_types=[] then makelist(edge_type, i, 1, length(edge_partition)) else edge_types,
+       if edge_widths=[] then makelist(edge_width, i, 1, length(edge_partition)) else edge_widths,
+       edge_partition)),
+
+    /* Setup vertices */
+    if vertex_coloring=true then vertex_coloring: vertex_coloring(G),
+    if show_vertices#[] then block(
+      [show_vertices1 : flatten(show_vertices)],
+      for v in vertices(G) do
+        if not(member(v, show_vertices1)) then
+          vertices : cons(v, vertices),
+      if not listp(show_vertices[1]) then (
+        vertex_colors : [vertex_color, show_vertex_color],
+        vertex_sizes : [vertex_size, show_vertex_size],
+        vertex_types : [vertex_type, show_vertex_type]),
+      if listp(show_vertices[1]) then
+        vertex_partition : cons(vertices, show_vertices)
+      else
+        vertex_partition : [vertices, show_vertices])
+    else if vertex_coloring#[] then block(
+      [ch:first(vertex_coloring), coloring:second(vertex_coloring)],
+      vertex_partition : makelist(
+        map(first, sublist(coloring, lambda([u], is(second(u)=c)))),
+        c, 1, ch))
+    else if vertex_partition=[] then (
+      vertex_colors : [vertex_color],
+      vertex_sizes : [vertex_size],
+      vertex_types : [vertex_type],
+      vertex_partition : [vertices(G)]),
+
+    vertices : apply(append,
+      map(lambda([c,t,s,vrt],
+          if vrt=[] then []
+          else ['color=c, 'point_type=t, 'point_size=s, points(map(lambda([u], assoc(u, v_pos)), vrt))]),
+        makelist(vertex_colors[mod(i, length(vertex_colors))+1], i, 0, length(vertex_partition)-1),
+        if vertex_types=[] then makelist(vertex_type, i, 1, length(vertex_partition)) else vertex_types,
+        if vertex_sizes=[] then makelist(vertex_size, i, 1, length(vertex_partition)) else vertex_sizes,
+        vertex_partition)),
+
+    /* Setup vertex labels or ids */
+    if show_id=true then (
+      for v in vertices(G) do block(
+        [p : assoc(v, v_pos)],
+        vertex_labels : cons([printf(false, "~a~a~a", label_padding, v, label_padding), p[1], p[2]],
+                             vertex_labels)))
+    else if show_label=true then (
+      for v in vertices(G) do block(
+        [p : assoc(v, v_pos)],
+        vertex_labels : cons([printf(false, "~a~a~a", label_padding,
+                                     get_vertex_label(v, G), label_padding),
+                              p[1], p[2]],
+                             vertex_labels))),
+    if length(vertex_labels) > 0 then
+      vertex_labels : [apply(label, vertex_labels)],
+
+    /* Setup loops */
+    if dimension=2 then
+      loops : map(lambda([x], block([pos: assoc(x, v_pos)], ellipse(pos[1], pos[2]+0.05,0.05,0.05,0,360))),
+        loops),
+      
+    /* Setup edge wieghts */
+    if show_weight=true then (
+      for e in edges(G) do block(
+        [p1 : assoc(e[1], v_pos), p2 : assoc(e[2], v_pos)],
+        edge_weights : cons([printf(false, "~a", get_edge_weight(e, G)),
+                             (2*p1[1]+p2[1])/3, (2*p1[2]+p2[2])/3],
+                            edge_weights))),
+    if length(edge_weights) > 0 then
+      edge_weights : [apply(label, edge_weights)],
+
+    /* Check if we are in wxmaxima */
+    if terminal='wxmaxima then (
+      if dimension=3 then command : wxdraw3d else command : wxdraw2d)
+    else (
+      if dimension=3 then command : draw3d else command : draw2d),
+    
+    if terminal#'wxmaxima then
+      gp_options : ['terminal = terminal, 'file_name = file_name]
+    else gp_options : [],
+
+    /* plot the graph */
+    scene : append(
+       [
+        'point_type = 0,
+        'line_type = edge_type,
+        'line_width = edge_width,
+        'points_joined = true,
+        'head_length = head_length,
+        'head_angle = head_angle,
+        'axis_3d = false,
+        'xtics = false,
+        'ytics = false,
+        'ztics = false,
+        'transparent=true
+       ],
+        loops,
+        edges,
+       [
+        'points_joined = false,
+        'point_size = vertex_size,
+        'point_type = vertex_type
+       ],
+        vertices,
+       [
+        'color = text_color,
+        'label_alignment = label_alignment
+       ],
+        vertex_labels,
+        edge_weights,
+       [
+        'axis_top = false,
+        'axis_bottom = false,
+        'axis_left = false,
+        'axis_right = false,
+        'ytics = false,
+        'xtics = false
+       ],
+        gp_options),
+
+      if transform=false then (
+        apply(command, scene),
+        'done)
+      else
+        scene))$
+
+draw_graph_list(grlist, [options]) :=
+  if get('wxmaxima, 'version)=false then block(
+    [scenes],
+    scenes: map(lambda([g],
+        apply(gr2d,
+          append(
+            apply(draw_graph,
+              append([g, transform=true], options))))),
+      grlist),
+    apply(draw, append(['columns=length(grlist)], scenes)))
+  else (
+    if length(grlist)<4 then block(
+      [scenes, wxplot_size: 2.0/3 * [length(grlist), 1] * graphs_plot_size],
+      scenes: map(lambda([g],
+          apply(gr2d,
+            append(
+              apply(draw_graph,
+                append([g, transform=true], options))))),
+        grlist),
+      apply(wxdraw, append(scenes, ['columns=length(grlist)])))
+    else block(
+      [display_graphics:false, wxplot_size: 2*graphs_plot_size/3],
+      ldisp(
+        map(lambda([g],
+            apply(wxdraw2d,
+              append(
+                apply(draw_graph,
+                  append([g, transform=true], options))))),
+          grlist))),
+    'done)$
+
+vertices_to_path(lst) := block(
+  [path : []],
+  while length(lst)>1 do (
+    path : cons([lst[1], lst[2]], path),
+    lst : rest(lst)),
+  path)$
+
+vertices_to_cycle(lst) := vertices_to_path(append(lst, [first(lst)]))$

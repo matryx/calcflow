@@ -1,0 +1,190 @@
+(kill(all),0);
+0$
+
+1 . 1, dotconstrules : true;
+1$
+
+is(op(1 . x) = "."),  dotconstrules : false, dot1simp : false;
+true;
+
+(1/3) . (2/3);
+2/9$
+
+1.1 . 1.1;
+1.21$
+
+bfloat_approx_equal(1.1 . 1.1b0, 1.21b0);
+true;
+
+3.1 . 5;
+15.5$
+
+1 . x;
+x$
+
+x . 1$
+x$
+
+0 . x$
+0$
+
+x . 0$
+0$
+
+/*--- dotident ---*/
+
+x . dotident;
+x$
+
+dotident . x;
+x$
+
+x^^0;
+''(dotident)$
+
+x^^0, dotident : id;
+id$
+
+/*--- exponent rules ----*/
+
+a^^2 . a^^5;
+a^^7$
+
+a^^2 . a^^-2;
+''(dotident)$
+
+(1+x).(1+x)^^-1;
+''(dotident)$
+
+(1 + x - x^2).(1 + x - x^2)^^-1;
+''(dotident)$
+
+(1 + x - x^2)^^2 .(1 + x - x^2)^^-2;
+''(dotident)$
+
+/*--- dotdistrib ---*/
+
+a . (b + c), dotdistrib : true;
+a . b + a . c$
+
+a . (b - c), dotdistrib : true;
+a . b - a . c$
+
+a . (b +  c / 5), dotdistrib : true;
+a . b + a . c / 5$
+
+/*--- dotexptsimp ---*/
+
+is(equal(a . a, a^^2)), dotexptsimp : false, prederror : false;
+unknown$
+
+is(equal(a . a, a^^2)), dotexptsimp : true;
+true$
+
+a . a, dotexptsimp : true;
+a^^2$
+
+a . a - a^^2;
+0$
+
+a^^5 . a^^7;
+a^^12$
+
+is(equal(a.a,a * a)), prederror : false;
+unknown$
+
+is(equal(a.b, b. a)),prederror : false;
+unknown$
+
+is(equal(a^^2, a^2)),prederror : false;
+unknown$
+
+is(equal(a.b.a, a^^2 . b)),prederror : false;
+unknown$
+
+/*  See SF Bug # 771061 */
+
+expand((vt . a^^(-1) . u+1)^^(-2));
+((vt.a^^(-1).u)^^2+2*(vt.a^^(-1).u)+1)^^(-1)$
+
+(a + 1)^^(-1) . (a + 1)^^(-1), expon:2;
+(a^^2+2*a+1)^^(-1)$
+
+(a + b)^^2, expand;
+a^^2 + a.b + b . a + b^^2$
+
+(a + b)^^-2, expand;
+(a^^2 + a . b + b . a + b^^2)^^-1$
+
+(a - b)^^2, expand;
+a^^2 - a . b - b . a + b^^2$
+
+(5 * a + 7 *b)^^2, expand;
+25 * a^^2 + 35 * a . b + 35 * b . a + 49 * b^^2$
+
+(a . b)^^2, expand, dotexptsimp : false;
+''(block([dotexptsimp : false], a . b . a . b))$
+
+(a . b)^^-1, expand, dotexptsimp : false;
+(a . b)^^-1$
+
+a.b.a.b, dotexptsimp : true;
+(a.b)^^2$
+
+/*--- See SF Bug # 629716 ---*/
+
+expand((x.y)^^2 . y - x.y.x.y^^2), dotexptsimp : false;
+0$
+
+5 * a . b - a . (5 * b);
+0$
+
+(5 * a) . b - 5 * (a . b);
+0$
+
+a . (5 * b) - 5 *(a . b);
+0$
+
+/*--- declared scalars---*/
+
+(declare(alpha, scalar),0);
+0$
+
+alpha . x, dotscrules : true;
+alpha * x$
+
+(alpha . a) . b, dotscrules : true;
+alpha * a . b$
+
+a . (alpha . b), dotscrules : true;
+alpha * a . b$
+
+/*--- dotassoc ---*/
+
+is(equal(a . (b . c) , (a . b) . c)), dotassoc : true, prederror : false;
+true$
+
+is(equal(a . (b . c) , (a . b) . c)), dotassoc : false, prederror : false;
+unknown$
+
+(declare(".", commutative),0);
+0$
+
+is(equal(a . b, b . a));
+true$
+
+is(equal(a . (b . (c .d)), (a.b) . (c.d)));
+true$
+
+(remove(".",commutative),0);
+0$
+
+
+
+
+
+
+ 
+
+
+

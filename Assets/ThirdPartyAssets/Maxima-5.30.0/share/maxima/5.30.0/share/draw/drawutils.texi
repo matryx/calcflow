@@ -1,0 +1,168 @@
+\input texinfo
+
+@c makeinfo drawutils.texi         to make .info
+@c texi2html drawutils.texi        to make .html
+@c texi2pdf drawutils.texi         to make .pdf
+
+
+
+
+@setfilename drawutils.info
+@settitle drawutils
+
+@ifinfo 
+@macro var {expr}
+<\expr\>
+@end macro
+@end ifinfo
+
+
+
+
+
+@node Top, Introduction to drawutils, (dir), (dir)
+@top
+@menu
+* Introduction to drawutils::
+* Vector fields::
+* Function and variable index::
+@end menu
+
+
+@node Introduction to drawutils, Vector fields, Top, Top
+@section Introduction to drawutils
+
+
+
+Package @code{drawutils} contains user contributed code based on the @code{draw} package.
+
+
+
+
+
+
+
+
+
+
+
+@node Vector fields, Function and variable index, Introduction to drawutils, Top
+@section Vector fields
+
+By Donald J. Bindner (2010)
+
+Functions for plotting vector fields in 2D and 3D.
+
+
+@deffn {Function} plot_vector_field (@var{F}, @var{X}, @var{Y}, ... )
+Draws a 2D vector field.
+
+Arguments:
+
+@itemize @bullet
+
+@item
+@var{F}: a vector containing field components.
+
+@item
+@var{X}: name and bounds of first coordinate.
+
+@item
+@var{Y}: name and bounds of second coordinate.
+
+@end itemize
+
+Optional parameters:
+
+@itemize @bullet
+@item
+Those defined in the @code{draw} package.
+@item
+@var{scale=1}: auto-scaling of arrows (default).
+
+@item
+@var{scale=0}: no auto-scaling.
+
+@item
+@var{scale=*}: adjust arrows shorter -- numbers between 0 and 1 or longer -- numbers greater than 1.
+
+@end itemize
+
+Examples:
+
+@example
+(%i1) load(drawutils)$
+(%i2) plot_vector_field([-y,x], [x,-1,1], [y,-1,1])$
+(%i3) plot_vector_field([-y,x], [x,-1,1], [y,-1,1],
+                        scale=0)$
+@end example
+
+@end deffn
+
+
+@deffn {Function} plot_vector_field3d (@var{F}, @var{X}, @var{Y}, @var{Z},  ... )
+Draws a 3D vector field.
+
+Arguments:
+
+@itemize @bullet
+
+@item
+@var{F}: a vector containing field components.
+
+@item
+@var{X}: name and bounds of first coordinate.
+
+@item
+@var{Y}: name and bounds of second coordinate.
+
+@item
+@var{Z}: name and bounds of third coordinate.
+
+@end itemize
+
+Optional parameters:
+
+@itemize @bullet
+@item
+Those defined in the @code{draw} package.
+@item
+@var{scale=1}: auto-scaling of arrows (default).
+
+@item
+@var{scale=0}: no auto-scaling.
+
+@item
+@var{scale=*}: adjust arrows shorter -- numbers between 0 and 1 or longer -- numbers greater than 1.
+
+@end itemize
+
+Examples:
+
+@example
+(%i1) load(drawutils)$
+(%i2) plot_vector_field3d([-y,x,z], [x,-1,1], [y,-1,1], [z,-1,1])$
+(%i3) plot_vector_field3d([-y,x,z], [x,-1,1], [y,-1,1], [z,-1,1],
+                          scale=0)$
+@end example
+
+@end deffn
+
+
+
+
+
+
+
+
+
+
+
+
+
+@node Function and variable index,  , Vector fields, Top
+@appendix Function and variable index
+@printindex fn
+@c @printindex vr
+
+@bye

@@ -1,0 +1,376 @@
+/* ============================================================== */
+/* file: ezgcd.dem   */
+/*  execution Ok,  up to the command commentified :  <--------- loop! loop! */
+/*  Very long or loop, I don't know ? Is it due to GC problem ???    */
+
+nolabels:true$
+time:all$
+/* this is the run for case 1 of ez gcd paper. */
+
+ d:rat(u+y+1,y)$
+ f:(-2+d)*(u+y+2)$
+ g:d*(u^2-3*u*y^2-1)^2$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ d:rat(a+u+y+1,y)$
+ f:(-2+d)*(a+u+y+2)$
+ g:d*(u^2-3*u*y^2-1)^2$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ d:rat(b+a+u+y+1,y)$
+ f:(-2+d)*(b+a+u+y+2)$
+ g:d*(u^2-3*u*y^2-1)^2$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ d:rat(c+b+a+u+y+1,y)$
+ f:(-2+d)*(c+b+a+u+y+2)$
+ g:d*(u^2-3*u*y^2-1)^2$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+
+
+
+
+/* this is the run for case 2. table 1 of ez gcd paper */
+
+ n:2$
+ d:z^n+y^n+1$
+ f:rat(d*(z^n+y^n-2))$
+ g:rat(d*(z^n+y^n+2))$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ n:3$
+ d:z^n+x^n+y^n+1$
+ f:rat(d*(z^n+x^n+y^n-2))$
+ g:rat((z^n+x^n-y^n+2)*d)$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ n:4$
+ d:a^n+z^n+x^n+y^n+1$
+ f:rat(d*(a^n+z^n+x^n+y^n-2))$
+ g:rat((a^n+z^n+x^n-y^n+2)*d)$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ n:5$
+ d:b^n+a^n+z^n+x^n+y^n+1$
+ f:rat(d*(b^n+a^n+z^n+x^n+y^n-2))$
+ g:rat((b^n+a^n+z^n+x^n-y^n+2)*d)$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+
+ n:6$
+ d:c^n+b^n+a^n+z^n+x^n+y^n+1$
+ f:rat(d*(c^n+b^n+a^n+z^n+x^n+y^n-2))$
+ g:rat((c^n+b^n+a^n+z^n+x^n-y^n+2)*d)$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+
+ n:7$
+ d:p^n+c^n+b^n+a^n+z^n+x^n+y^n+1$
+ f:rat(d*(p^n+c^n+b^n+a^n+z^n+x^n+y^n-2))$
+ g:rat((p^n+c^n+b^n+a^n+z^n+x^n-y^n+2)*d)$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+
+
+
+
+
+/* this is the run for case 2, table 2 of ezgcd paper */
+
+ n:2$
+ d:z^n+y^n+1$
+ f:rat(d*(z^n+y^n-2))$
+ g:rat(d*(z^(n-1)+y^(n-1)+2))$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ n:3$
+ d:z^n+x^n+y^n+1$
+ f:rat(d*(z^n+x^n+y^n-2))$
+ g:rat((z^(n-1)+x^(n-1)-y^(n-1)+2)*d)$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ n:4$
+ d:a^n+z^n+x^n+y^n+1$
+ f:rat(d*(a^n+z^n+x^n+y^n-2))$
+ g:rat((a^(n-1)+z^(n-1)+x^(n-1)-y^(n-1)+2)*d)$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ n:5$
+ d:b^n+a^n+z^n+x^n+y^n+1$
+ f:rat(d*(b^n+a^n+z^n+x^n+y^n-2))$
+ g:rat((b^(n-1)+a^(n-1)+z^(n-1)+x^(n-1)-y^(n-1)+2)*d)$
+ezgcdswitch:true$
+ gcdswitch:false$
+ 
+gcd(f,g);
+ n:6$
+ d:c^n+b^n+a^n+z^n+x^n+y^n+1$
+ f:rat(d*(c^n+b^n+a^n+z^n+x^n+y^n-2))$
+ g:rat((c^(n-1)+b^(n-1)+a^(n-1)+z^(n-1)+x^(n-1)-y^(n-1)+2)*d)$
+ gcd(f,g);
+
+ n:7$
+ d:p^n+c^n+b^n+a^n+z^n+x^n+y^n+1$
+ f:rat(d*(p^n+c^n+b^n+a^n+z^n+x^n+y^n-2))$
+ g:rat((p^(n-1)+c^(n-1)+b^(n-1)+a^(n-1)+z^(n-1)+x^(n-1)-y^(n-1)
++2)*d)$
+ gcd(f,g);  /*   <-------------- loop! loop!  */
+
+/* i let the rest of file */
+
+
+
+/* this is the run for case 3 of the ez gcd paper */
+
+ d:rat(x^2*y^2+1)$
+ f:d*(x*y+2)^2$
+ g:(x^2-y^2-1)*d$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ d:rat(a^2+x^2*y^2+1)$
+ f:d*(x*y+a+2)^2$
+ g:(a^2+x^2-y^2-1)*d$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ d:rat(b^2+a^2+x^2*y^2+1)$
+ f:d*(x*y+a+b+2)^2$
+ g:(b^2+a^2+x^2-y^2-1)*d$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+ d:rat(c^2+b^2+a^2+x^2*y^2+1)$
+ f:d*(x*y+a+b+c+2)^2$
+ g:(c^2+b^2+a^2+x^2-y^2-1)*d$
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+
+
+
+
+
+/* this is the run for case 4 of the ez gcd paper */
+
+ kill(all)$
+ m:1$
+ n:2$
+ a:z-x*y+1$
+ b:z+3*x-y$
+ f:rat(a^m*b^n)$
+ g:rat(a^n*b^m)$
+ 
+ezgcdswitch:true$
+ gcdswitch:false$
+ gcd(f,g);
+ezgcdswitch:false$
+ 
+ gcd(f,g);
+ gcdswitch:true$
+ 
+ gcd(f,g);
+ezgcdswitch:true$
+ gcdswitch:false$
+
+ kill(all)$
+ m:1$
+ n:3$
+ a:z-x*y+1$
+ b:z+3*x-y$
+ f:rat(a^m*b^n)$
+ g:rat(a^n*b^m)$
+ 
+ gcd(f,g);
+ezgcdswitch:false$
+ 
+ gcd(f,g);
+ gcdswitch:true$
+ 
+ gcd(f,g);
+ezgcdswitch:true$
+ gcdswitch:false$
+
+ kill(all)$
+ m:1$
+ n:4$
+ a:z-x*y+1$
+ b:z+3*x-y$
+ f:rat(a^m*b^n)$
+ g:rat(a^n*b^m)$
+ 
+ gcd(f,g);
+ezgcdswitch:false$
+ 
+ gcd(f,g);
+ gcdswitch:true$
+ gcd(f,g);
+ezgcdswitch:true$
+ gcdswitch:false$
+
+ kill(all)$
+ m:2$
+ n:4$
+ a:z-x*y+1$
+ b:z+3*x-y$
+ f:rat(a^m*b^n)$
+ g:rat(a^n*b^m)$
+ 
+ gcd(f,g);
+ezgcdswitch:false$
+ 
+ gcd(f,g);
+ gcdswitch:true$
+ 
+ gcd(f,g);
+ezgcdswitch:true$
+ gcdswitch:false$
+
+
+
+/* this is the run for case 5 of the ez gcd paper */
+ kill(all)$
+ d:rat((z+1)*(y+1)-3)$
+ f:d*(z-2)*(y-2)$
+ g:d*(z+2)*(y+2)$
+ 
+ gcd(f,g);
+ezgcdswitch:false$
+ 
+ gcd(f,g);
+ gcdswitch:true$
+ 
+ gcd(f,g);
+ezgcdswitch:true$
+ gcdswitch:false$
+ kill(all)$
+ d:rat((z+1)*(y+1)*(x+1)-3)$
+ f:d*(z-2)*(y-2)*(x-2)$
+ g:d*(z+2)*(y+2)*(x+2)$
+ 
+ gcd(f,g);
+ezgcdswitch:false$
+ 
+ gcd(f,g);
+ gcdswitch:true$
+ 
+ gcd(f,g);
+ezgcdswitch:true$
+ gcdswitch:false$
+ kill(all)$
+ d:rat((z+1)*(y+1)*(x+1)*(a+1)-3)$
+ f:d*(z-2)*(y-2)*(x-2)*(a-2)$
+ g:d*(z+2)*(y+2)*(x+2)*(a+2)$
+ 
+ gcd(f,g);
+ezgcdswitch:false$
+ 
+ gcd(f,g);
+ gcdswitch:true$
+ 
+ gcd(f,g);
+ezgcdswitch:true$
+ gcdswitch:false$
+ kill(all)$
+ d:rat((z+1)*(y+1)*(x+1)*(a+1)*(b+1)-3)$
+ f:d*(z-2)*(y-2)*(x-2)*(a-2)*(b-2)$
+ g:d*(z+2)*(y+2)*(x+2)*(a+2)*(b+2)$
+ 
+ gcd(f,g);
+ezgcdswitch:false$
+ 
+ gcd(f,g);
+ gcdswitch:true$
+ 
+ gcd(f,g);
+ezgcdswitch:true$
+ gcdswitch:false$

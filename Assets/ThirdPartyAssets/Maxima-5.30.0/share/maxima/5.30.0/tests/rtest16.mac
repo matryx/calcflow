@@ -1,0 +1,2425 @@
+(kill (all), values);
+[];
+
+/* make sure things work after a reset().  ID: 1986726 and ID: 2787047
+ *
+ * display2d is a resetable option variable. We save the value of display2d
+ * and restore it after the reset. This allows to run the testsuite in both
+ * display modes.
+ */
+(save:display2d, done);
+done$
+(reset(),0);
+0;
+(display2d:save, done);
+done$
+
+/* Tests from Bug 1036900 */
+/* These bugs were fixed in limit.lisp rev 1.7, 2004/10/04 */
+limit(7^n/8^n,n,inf);
+0$
+limit(7^(n^2)/8^n,n,inf);
+inf$
+limit((10^n+9^n+8^n)^(1/n),n,inf);
+10$
+limit(4^n/2^(2*n),n,inf);
+1$
+
+/* Test from Bug 1052308 */
+/* Fixed in limit.lisp rev 1.11 */
+assume(equal(zz,0));
+[equal(zz,0)]$
+limit(erf(nn*zz), nn, inf);
+0$
+limit(tanh(nn*zz), nn, inf);
+0$
+limit(nn^zz, nn, 0);
+1$
+
+/* From A. Reiner.  Fixed in buildq.lisp rev. 1.4.
+   Exposed a bug caused by the dynamical scope of VARLIST. */
+buildq([foo:sin(baz+bar)],1);
+1$
+
+buildq([foo:[sin(baz+bar),sin(baz-bar)]],+splice(foo));
+sin(baz+bar)+sin(baz-bar)$
+
+/* Fixed in series.lisp rev 1.5, 04 Feb 2004.  
+   First case returned second result */
+powerseries(1/sqrt(1+x),x,0);
+2*'sum(x^i1/beta(1/2-i1,i1+1),i1,0,inf);
+powerseries(sqrt(1+x),x,0);
+2*('sum(x^i2/beta(3/2-i2,i2+1),i2,0,inf))/3;
+
+/* sf bug 1730044 - powerseries(1+x^n,x,0) wrong */
+powerseries(1+x^n, x, 0);
+('sum(x^(i3*n)/beta(2-i3,i3+1),i3,0,inf))/2;
+
+(declare(n, integer), powerseries(1/(1+x^n), x, 0));
+'sum((-1)^i4*x^(i4*n),i4,0,inf);
+
+
+/* Examples from SF bug report [ 1722156 ] powerseries((x+1)/(1-2*x^2), x, 0);
+ * tnx Dan Gildea
+ */
+
+gensumnum : 0;
+0;
+
+/* two simple roots */
+powerseries((1)/((1-2*x)*(1-3*x)), x, 0);
+'sum((3^(i1+1)+(-2*2^i1))*x^i1,i1,0,inf);
+
+/* fibonacci */
+powerseries((1)/(1-x-x^2), x, 0);
+-'sum((-2*(sqrt(5)-1)^(-i2-1)*2^i2/sqrt(5)
+ -2*(sqrt(5)+1)^(-i2-1)*(-2)^i2/sqrt(5))
+ *x^i2,i2,0,inf);
+
+/* 1 1 2 2 4 4 8 8 */
+factor(powerseries((1+x)/(1-2*x^2), x, 0));
+/*
+'sum( (-1*(1/-(1/sqrt(2)))*(1/sqrt(2)-1)*(1/-(4/sqrt(2)))*(1/-(1/sqrt(2)))^i3 + 
+      -1*(1/(1/sqrt(2)))*(-1/sqrt(2)-1)*(1/(4/sqrt(2)))*(1/(1/sqrt(2)))^i3 ) * x^i3,i3,0,inf);
+*/
+
+'sum(2^(i3/2-3/2)*((sqrt(2)-1)*(-1)^i3+sqrt(2)+1)*x^i3,i3,0,inf);
+
+/* multiple root */
+powerseries((1+x)/(1-x)^2, x, 0);
+'sum(2*(i4+1)*x^i4-x^i4,i4,0,inf);
+
+/* numerator higher order poly than denom */
+powerseries((1+x^3)/(1-x-x^2), x, 0);
+-2*x
+ *'sum((-2*(sqrt(5)-1)^(-i5-1)*2^i5/sqrt(5)
+   -2*(sqrt(5)+1)^(-i5-1)*(-2)^i5/sqrt(5))
+   *x^i5,i5,0,inf)
+  -x+1;
+
+/* zero root in denom */
+powerseries((1)/((1-2*x)*(x)), x, 0);
+('sum(2^i6*x^i6,i6,0,inf))/x;
+
+/* one simple and one repeated root in denom */
+powerseries((1+x+x^2)/((1-2*x)*(1+x)^2), x, 0);
+'sum(7*2^i7*x^i7/9+(i7+1)*(-1)^i7*x^i7/3-(-1)^i7*x^i7/9,i7,0,inf);
+
+/* gcd of exps is two */
+powerseries((1-x^2)/(1-4*x^2+x^4), x, 0);
+'sum((-1*(1/(2-sqrt(3)))*(sqrt(3)-1)*(1/(2*(2-sqrt(3))-4))*(1/(2-sqrt(3)))^i8 +
+      -1*(1/(sqrt(3)+2))*(-sqrt(3)-1)*(1/(2*(sqrt(3)+2)-4))*(1/(sqrt(3)+2))^i8 )*x^(2*i8), 
+      i8, 0, inf);
+
+/* Bug 1281737, fixed in limit.lisp rev 1.15 */
+limit(atan(x)/(1/exp(1)-exp(-(1+x)^2)),x,inf,plus);
+%e*%pi/2;
+
+/* Verify that extended functionality of rhs/lhs works as advertised */
+
+(kill (x, y, aa, bb, cc), infix("@@"), 0);
+0;
+
+map (lhs, [aa < bb, aa <= bb, aa = bb, aa # bb, equal (aa, bb), notequal (aa, bb), aa >= bb, aa > bb]);
+[aa, aa, aa, aa, aa, aa, aa, aa];
+
+map (rhs, [aa < bb, aa <= bb, aa = bb, aa # bb, equal (aa, bb), notequal (aa, bb), aa >= bb, aa > bb]);
+[bb, bb, bb, bb, bb, bb, bb, bb];
+
+map (lhs, [foo(x) := 2*x, bar(y) ::= 3*y, '(aa : bb), '(aa :: bb), ?marrow(aa, bb)]);
+['(foo(x)), '(bar(y)), aa, aa, aa];
+
+map (rhs, [foo(x) := 2*x, bar(y) ::= 3*y, '(aa : bb), '(aa :: bb), ?marrow(aa, bb)]);
+[2*x, 3*y, bb, bb, bb];
+
+[lhs (aa @@ bb), lhs (aa @@ bb @@ cc), rhs (aa @@ bb), rhs (aa @@ bb @@ cc)];
+[aa, aa @@ bb, bb, cc];
+
+map (lhs, [aa + bb, aa - bb, aa * bb, aa / bb, sin(aa), log(aa)]);
+[aa + bb, aa - bb, aa * bb, aa / bb, sin(aa), log(aa)];
+
+map (rhs, [aa + bb, aa - bb, aa * bb, aa / bb, sin(aa), log(aa)]);
+[0, 0, 0, 0, 0, 0];
+
+kill ("@@");
+done;
+
+/* Verify that grind treats nouns correctly. string calls MSIZE in src/grind.lisp.
+ */
+
+kill (all);
+done;
+
+string ('(integrate(f(x), x) + integrate(g(x), x, minf, inf) + diff(u, x) + sum(h(x), x, 1, n)));
+"sum(h(x),x,1,n)+integrate(g(x),x,minf,inf)+integrate(f(x),x)+diff(u,x)";
+
+string ('integrate(f(x), x) + 'integrate(g(x), x, minf, inf) + 'diff(u, x) + 'sum(h(x), x, 1, n));
+"'sum(h(x),x,1,n)+'integrate(g(x),x,minf,inf)+'integrate(f(x),x)+'diff(u,x,1)";
+
+/* GREAT puts nounified atoms before others, it appears ... */
+string (%a%a + %b%b + nounify(%c%c) + nounify(%d%d) + %e%e + %f%f);
+"%d%d+%c%c+%f%f+%e%e+%b%b+%a%a";
+
+string (sin(x) * cos(x) + tan(x));
+"tan(x)+cos(x)*sin(x)";
+
+string ('foo(x, y, z) / bar(a, b, c) + 'baz(%pi - 'quux(%e ^ mumble(%i))));
+"'foo(x,y,z)/bar(a,b,c)+'baz(%pi-'quux(%e^mumble(%i)))";
+
+/* It's conceivable that someday nounified arithmetic operators would be treated differently by grind.
+ * If/when that happens, revise this example accordingly.
+ */
+string ('"+"(a, b, '"."(c, d), '"^"(e, f)));
+"'?mplus(a,b,'?mnctimes(c,d),'?mexpt(e,f))";
+
+/* Bug 626697 */
+limit(atan2(y,x),y,minf);
+-%pi/2;
+
+/* Bug 1548643 */
+limit(abs(sqrt(1-1/x)-1),x,0);
+inf;
+
+/* Bug 671574 */
+limit(x*atan(x)/(x+1),x,inf);
+%pi/2;
+limit(x*atan(x)-log(x),x,inf);
+inf;
+
+/* Bug 1152668 */
+numer:true;
+true;
+limit(sin(x)/x,x,0);
+1;
+limit(sin(x)/x,x,0,plus);
+1;
+limit(sin(x)/x,x,0,minus);
+1;
+numer:false;
+false;
+
+/* #2504 wrong answer for simple limit, limit(sin(x)+1/x, x, inf)=0 */
+limit(1/x + sin(x), x, inf);
+ind;
+
+/* Bug 593344 */
+limit(abs(infinity));
+inf;
+
+/* Bug 626721 */
+logarc(atan2(y,x));
+-%i*log((%i*y+x)/sqrt(x^2+y^2));
+rectform(ev(%,x=-1,y=1));
+3*%pi/4; 
+
+/* Bug 1469411 */
+limit(t^2*exp(-4*t/3-8*exp(-t)),t,inf);
+0;
+
+/*
+ * From bug 535363, but this isn't really fixed.  The fix for 1469411
+ * broke this test, so we're adding it to make sure we don't break it.
+ * 
+*/
+
+limit(exp(-1/x)/x^4,x,0,'plus);
+0;
+
+/* Bug 1594330 */
+limit(x*(atan(x)-%pi/2),x,inf);
+-1;
+
+/* [ 1498047 ] limit(a/n,n,inf); */
+limit(a/n, n, inf);
+0;
+
+/*
+ * Bug [ 1661490 ] An integral gives a wrong result.
+ */
+(assume(a>0, b>0, sqrt(sqrt(b^2+a^2)-a)*(sqrt(b^2+a^2)+a)^(3/2)-b^2>0),0);
+0;
+radcan(integrate(exp(-(a+%i*b)*x^2),x,minf,inf)/(sqrt(%pi)/sqrt(a+%i*b)));
+1;
+
+/*
+ * [ 1663704 ] integrate(sin(r*x)^7/x^4,x,0,inf) -> r^3*false
+ *
+ * Should return the integral instead of producing false.
+ */
+integrate(sin(a*x)^7/x^4,x,0,inf);
+'integrate(sin(a*x)^7/x^4,x,0,inf);
+
+/* we have assumed a>0 */
+integrate(%e^(-a*r)*sin(k*r),r,0,inf);
+k/(k^2+a^2);
+
+/*
+ * [ 1646761 ] limit atanh @ -1 / 1 all wrong...
+ */
+/* Limit at 1 is (complex) infinity).  But one-sided limit can be inf (real infinity). */
+limit(atanh(x),x,1);
+infinity;
+limit(atanh(x),x,1,'minus);
+inf;
+limit(atanh(x),x,-1);
+infinity;
+limit(atanh(x),x,-1,'plus);
+minf;
+
+/* There shouldn't be an error message printed out here.  Need to look at output to see. */
+limit(2*atanh(x),x,1);
+infinity;
+limit(2*atanh(x),x,1,'minus);
+inf;
+
+limit(atanh(a-1)-log(a)/2,a,0,'plus),logarc:true;
+-log(2)/2;
+
+/* [ 1606731 ] limit of algebraic when algebraic : true */
+limit(x*(sqrt(1+x^2)-x),x,inf), algebraic : true, gcd : subres;
+1/2;
+
+/* [ 1097982 ] limit(x/(x^(log(x)))); returns wrong answer */
+limit(x/(x^log(x)), x, inf);
+0;
+
+/* [ 1039965 ] limit(4^n/2^(2*n),n,inf) is wrong */
+limit(4^n/2^(2*n),n,inf);
+1;
+
+/* [ 1731127 ] limit((1 + 1/x)*(sqrt(x + 1) + 1), x, inf) => 0 (not inf) */
+limit((1 + 1/x)*(sqrt(x + 1) + 1), x, inf);
+inf;
+
+/* [ 1593083 ] tlimit(t^2*exp(-4*t/3-8*exp(-t)),t,inf) gives error */
+tlimit(t^2*exp(-4*t/3-8*exp(-t)),t,inf);
+0;
+
+/* [ 1786774 ] tlimit((5^x + 3^x)^(1/x), x, inf) => Error */
+tlimit((5^x + 3^x)^(1/x), x, inf);
+5;
+
+/* [ 1603900 ] taylor/tlimit (4^n+1)/2^(2*n) internal error */
+tlimit((4^n+1)/2^(2*n),n,inf);
+1;
+
+/* [ 1281736 ] limit((x/log(x))*(x^(1/x)-1),x,inf) - wrong result */
+limit((x/log(x))*(x^(1/x)-1),x,inf);
+1;
+
+/* [ 1036901 ] tlimit(7^(n^2)/8^n,n,inf); wrong result */
+tlimit(7^(n^2)/8^n, n, inf);
+inf;
+
+/* [ 1665657 ] limit fails to find easy limit */
+limit(x/(x-1)-1/log(x),x,1,plus);
+1/2;
+
+/* [ 611411 ] limit asks sign of IND */
+limit(abs(sin(x)),x,inf);
+ind;
+
+/* [ 1629723 ] bug in limit, asks sign of IND, encountered in integrator */
+limit(abs(sin(x))/x, x, inf);
+0;
+
+/* [ 782099 ] limit returns expression in IND */
+limit(sinh(exp(%i*x)),x,inf);
+ind;
+
+/* [ 1528607 ] limit(a^x,x,inf) can't solve for a : abs(a) < 1 */
+limit((-2/3)^x,x,inf);
+0;
+
+limit(signum(x), x, 0, plus);
+1;
+
+limit(signum(x), x, 0, minus);
+-1;
+
+limit((-1/%pi)^x,x,inf);
+0;
+
+tlimit(exp(%i*t), t, inf);
+ind;
+
+tlimit(exp(-t+%i*t),t,inf);
+0;
+
+/* [ 1811503 ] computing a wrong result */
+limit((((1+1/x)^(x^2))+1)^(1/x),x,inf);
+%e;
+
+/* [ 1760232 ] limit(1/n * n!^(1/n), n, inf); */
+limit(1/n * n!^(1/n), n, inf);
+%e^-1;
+
+/* Apparently wrong limit with factorial - ID: 3198530 */
+limit(1/(2+1/factorial(n)),n,inf);
+1/2;
+
+limit(t*(erf((t))-1),t,inf);
+0;
+
+limit(exp(x)*(sin(1/x+exp(-x))-sin(1/x+exp(-x^2))), x, inf);
+1;
+
+/* it would be nice to handle this someday
+  limit(n - exp(psi[0](n)), n, inf);
+  1/2;
+*/
+
+limit(x*gamma(x), x, 0);
+1;
+
+/* [ 744679 ] limit overflows memory? */
+(assume(a>1), limit((a^(1/n)+1)^n/2^n, n, inf));
+'sqrt(a);
+
+/* [ 702512 ] limit(1/(1/a*2^(%i*a)+1),a,inf) =&gt; UND */
+limit(1/(1/a*2^(%i*a)+1),a,inf);
+1;
+
+/* [ 923407 ] limit(atan(sqrt(x))/sqrt(x),x,0) wrong */
+limit(atan(sqrt(x))/sqrt(x),x,0);
+1;
+
+/* [ 1102908 ] limit/atan/exp returns complex expr with wrong principal val */
+limit(atan(x)/(1/exp(1)-exp(-(1+x)^2)),x,inf,plus);
+%e*%pi/2;
+
+limit( (3^(1/x) + 5^(1/x))^x, x, 0, minus);
+3;
+
+limit( (3^(1/x) + 5^(1/x))^x, x, 0, plus);
+5;
+
+limit( (3^(1/x) + 5^(1/x))^x, x, 0);
+und;
+
+/* [ 1852415 ] limit(sqrt(1-%e^(-x^2)), x, inf) = 0 */
+limit(sqrt(1-%e^(-x^2)), x, inf);
+1;
+
+/* [ 1515712 ] tlimit (x*atan(x)/(x+1),x,inf) => 3 %pi/2, etc */
+tlimit(x*atan(x)/(x+1),x,inf);
+%pi/2;
+
+tlimit(x*(atan(x)-%pi/2),x,inf);
+-1;
+
+tlimit(atan(x^-1), x, 0, minus);
+-%pi/2;
+
+/* [ 1973399 ] F(x) := 1/%pi*(atan(x) + %pi/2) */
+(assume(c>0), limit(((1/%pi)*(atan(n/%pi) + %pi/2))^n, n, inf));
+%e^(-1);
+
+/* [ 1103515 ] limit(atan2(x,-1),x,0) wrong */
+limit(atan2(x,-1), x, 0, minus);
+-%pi;
+
+limit(atan2(x,-1), x, 0, plus);
+%pi;
+
+limit(atan2(x,-1), x, 0);
+und;
+/* ideally should be ind */
+
+/* limit of atan2 - ID: 3539699 */
+limit(atan2(x^2-2,x^3-3*x), x, sqrt(2), minus);
+-%pi;
+
+limit(atan2(x^2-2,x^3-3*x), x, sqrt(2), plus);
+%pi;
+
+limit(atan2((x^2-2), x^3-2*x), x, sqrt(2), minus);
+atan(1/sqrt(2))-%pi;
+
+limit(atan2((x^2-2), x^3-2*x), x, sqrt(2), plus);
+atan(1/sqrt(2));
+
+limit(atan2(-(x^2-2), x^3-2*x), x, sqrt(2), minus);
+%pi-atan(1/sqrt(2));
+
+limit(atan2(-(x^2-2), x^3-2*x), x, sqrt(2), plus);
+-atan(1/sqrt(2));
+
+limit(floor(x), x, 5, minus);
+4;
+
+limit(floor(x), x, 5, plus);
+5;
+
+/* [ 1587235 ] limit(floor(x),x,1) wrong */
+limit(floor(x),x,0);
+und;
+
+/* [ 1885377 ] wrong limit evaluation in 5.14.0 */
+limit((3/4)^(5*n+1), n, inf);
+0;
+
+limit(-%e^x/x, x, inf);
+minf;
+
+/* [ 2083561 ] Limit of the Wallis product */
+limit((%pi*4^N*N!^2)/(2*2^(2*N)*gamma(N+1/2)*gamma(N+3/2)), N, inf);
+%pi/2;
+
+/* wrong limit(log(gamma(x+1))/x,x,0) - ID: 2727078 */
+limit(log(gamma(x+1))/x, x, 0);
+-%gamma;
+
+/* log has a branch cut on negative real axis */
+limit(log(-1+x*%i), x, 0, plus);
+%i*%pi;
+
+limit(log(-1+x*%i), x, 0, minus);
+-%i*%pi;
+
+limit((log(y+h)-log(y))/h,h,0,plus);
+1/y;
+
+/* limit of incomplete gamma */
+/* function simplim%gamma_incomplete in gamma.lisp */
+
+/* sin(x^2)/(x^2) improper integral incorrect? - ID: 3397562 */
+limit( gamma_incomplete(-1/2, -%i*x^2), x, inf);
+0;
+
+/* should be complex infinity */
+limit( gamma_incomplete(2, -%i*x), x, inf);
+'limit(gamma_incomplete(2,-%i*x),x,inf);
+
+/* Error integrating exp(-x)*sinh(sqrt(x)) with domain: complex - ID: 3529144 */
+/* need taylor expansion of gamma_incomplete(1/2, x) at x=0 */
+limit(gamma_incomplete(1/2,(1-2*sqrt(x))^2/4)*(1-2*sqrt(x))
+                 /(sqrt((1-2*sqrt(x))^2)), x, 1/4, minus),domain:complex;
+sqrt(%pi);
+
+limit(gamma_incomplete(1/2,(1-2*sqrt(x))^2/4)*(1-2*sqrt(x))
+                 /(sqrt((1-2*sqrt(x))^2)), x, 1/4, plus),domain:complex;
+-sqrt(%pi);
+
+/* [ 635606 ] limit(abs(log(x))) internal error, UND */
+limit(abs(log(x)), x, 0);
+inf;
+
+limit(exp(-x)*(x*sin(x)+cos(x)), x, inf);
+0;
+
+/* tex(t[1]) shouldn't change t to true */
+tex (t[1], false);
+"$$t_{1}$$
+"; /* tex output contains embedded newline */
+
+/* tex(x[1]^2) shouldn't get confused by debug info in expression CAR */
+(foo : x[1]^2, tex (foo, false));
+"$$x_{1}^2$$
+"; /* tex output contains embedded newline */
+
+/* [ 2084910 ] limit bugs */
+limit((%pi*N^(2*N+1)*2^(2*N))/((2*N-1)^(2*N)*(2*%e*N+%e)), N, inf);
+%pi/2;
+
+/* [ 1977992 ] no limit calculation */
+limit(abs(sin(x))/sqrt(1-cos(x)), x, 0);
+sqrt(2);
+
+/* [ 1973399 ] F(x) := 1/%pi*(atan(x) + %pi/2) */
+/* only works with taylor_logexpand:true */
+limit( ((1/%pi)*(atan(n/%pi) + %pi/2))^n, n, inf);
+%e^-1;
+
+/* limit(x*expintegral_ei(x),x,0) --> Error - ID: 2801821 */
+limit(x*expintegral_ei(x), x, 0);
+0;
+
+/* Limit of the factorial function - 4 problems - ID: 2841504 */
+limit(factorial(x),x,-2,plus);
+minf;
+
+/* Calculus mistake: wrong answer: limit - ID: 3534858 */
+limit((sin(x)-tan(x))/(x*(cos(x)-1)),x,0);
+1;
+
+limit(1/psi[1](x), x, inf);
+inf;
+
+/* limit of psi[i] - ID: 2843705 */
+limit(psi[i](x),x,inf);
+'limit(psi[i](x),x,inf);
+
+/* tests for gruntz limit algorithm */
+gruntz(exp(x), x, inf);
+inf;
+
+gruntz(exp(-x), x, inf);
+0;
+
+gruntz( (x + 2^x) / 3^x, x, inf);
+0;
+
+gruntz( x^2/(x + 2*x^2), x, inf);
+1/2;
+
+gruntz( x/x^log(x), x, inf);
+0;
+
+gruntz( (2^x)/(x + exp(x)) , x, 0, plus);
+1;
+
+gruntz( (erf(x))/sqrt(1-cos(x)) , x, 0, minus);
+-2*sqrt(2)/sqrt(%pi);
+
+gruntz( (erf(x))/sqrt(1-cos(x)) , x, 0, plus);
+2*sqrt(2)/sqrt(%pi);
+
+gruntz( x*(x^(1/x)-1)/log(x), x, inf);
+1;
+
+gruntz( (x*x^(1/x)-x)/log(x), x, inf);
+1;
+
+gruntz(exp(-1/x)/x^6,x,0,plus);
+0;
+
+/* limit gives the wrong answer - ID: 3410704 */
+limit(sqrt(t^2+4)*(((t+2/t^2)^2+4)^(3/2)-(t+2/t^2)^3-4*(t+2/t^2))
+	 /(sqrt((t+2/t^2)^2+4)*((t^2+4)^(3/2)-t^3-4*t)), t, inf);
+1;
+
+/* Inaccurate Limit Evaluation - ID: 3276461 */
+radcan(limit((-4*x^2-10*x+24)/((4*x+8)^(1/3)+2), x, -4));
+66;
+
+/*
+ * Bug [ 1854888 ] hgfred([5],[5], 1) doesn't simplify
+ */
+hgfred([5],[5],1);
+%e;
+
+/*
+ * Bug [ 1858964 ] hgfred([7],[-1], x) --/--> error
+ */
+hgfred([7],[-1],x);
+und;
+
+/*
+ * Bug [ 1858939 ] hgfred([-1],[-2],x) --> error
+ */
+hgfred([-1],[-2],x);
+/* Because of revision 1.110 of hyp.lisp gen_laguerre simplifies
+   -gen_laguerre(1,-3,x)/2; */
+1+x/2;
+
+/*
+ * Tests for the :: operator
+ */
+a:b;
+b$
+
+a::3;
+3$
+
+b;
+3$
+
+p:concat('p,1);
+p1$
+
+p::5;
+5$
+
+p1;
+5$
+
+kill(all);
+done$
+
+/* Bug [ 1860250 ] erf(-inf) --> -erf(inf) */
+
+erf(-inf);
+-1$
+
+erf(inf);
+1$
+
+erf(-x) + erf(x);
+0$
+
+erf(a-b) + erf(b-a);
+0$
+
+/* Bug [ 1950653 ] bessel_j not simplified 
+ * A few additional related tests added too.
+ */
+
+bessel_j(1/2,%pi),besselexpand:true;
+0;
+bessel_y(1/2,%pi/2),besselexpand:true;
+0;
+
+/* Bug [ 2149714 ] fpprintprec does not work correctly
+*/
+
+fpprec:16;
+16;
+
+block([fpprintprec:5], string(1.23b0));
+"1.23b0";
+
+block([fpprintprec:5], string(1.2345b0));
+"1.2345b0";
+
+block([fpprintprec:5], string(1.23456789b0));
+"1.2345b0";
+
+block([fpprintprec:25], string(1.2345678901234567890123456789b0));
+"1.234567890123457b0";
+
+/*
+ * Bug 2142758: integrate(sqrt(2-2*x^2)*(sqrt(2)*x^2+sqrt(2))/(4-4*x^2),x,0,1)
+ */
+integrate(sqrt(2-2*x^2)*(sqrt(2)*x^2+sqrt(2))/(4-4*x^2),x,0,1);
+3*%pi/8;
+
+
+integrate(sqrt(1-x^2)*(x^2+1)/(2-2*x^2),x,0,1);
+3*%pi/8;
+
+integrate(sqrt(1-x^2)*(x^2+1)/(1-x^2),x,0,1);
+3*%pi/4;
+
+/*
+ * Bug [ 2208303 ] Problem with jacobi_dn and elliptic_kc
+ */
+jacobi_dn(elliptic_kc(m)*t,m);
+jacobi_dn(elliptic_kc(m)*t,m);
+
+/*
+ * Bug [ 2180110 ] GCL do not signal an overflow converting bigfloat to float
+ */
+errcatch(float(2b400));
+[];
+
+errcatch(float(bfloat(2^1024)));
+[];
+
+/*
+ * Bug [ 2055235 ] Plot leaves range with jacobi functions
+ *
+ * Actually jacobi_cn(100, .7) is computed inaccurately.  Just check that abs(jacobi_cn(100,.7)) < 1
+ */
+
+is(abs(jacobi_cn(100.0, 0.7)) < 1);
+true$
+
+/*
+ * Bug [ 1658067 ] jacobi_sn(elliptic_kc(1-m)*%i/2,m) isn't simplified
+ */
+jacobi_sn(elliptic_kc(1-m)*%i/2,m);
+%i*m^(1/4)$
+
+jacobi_sc(elliptic_kc(m)+u,m);
+-jacobi_cs(u,m)/sqrt(1-m)$
+
+/*
+ * Bug [ 2505945 ] - hgfred([2,-1/2],[3],-x^2);
+ *
+ * Shouldn't signal from diff about non-variable second arg.
+ *
+ * The expected value here is computed from
+ * factor(ratsimp(subst([z=-x^2],hgfred([2,-1/2],[3],z))))
+ */
+factor(ratsimp(hgfred([2,-1/2],[3],-x^2)));
+4*(3*x^4*sqrt(x^2+1)+x^2*sqrt(x^2+1)-2*sqrt(x^2+1)+2)/(15*x^4)$
+
+/*
+ * Bug 2534420: asinh(%i*2b0) causes error
+ */
+is(abs(asinh(%i*2b0)-expand(bfloat(asinh(%i*2)))) < 3b-17);
+true;
+
+/*
+ * Bug 2543079: bfloat(gamma(3/4)/gamma(1/4)) is wrong.
+ */
+bfloat(gamma(3/4)/gamma(1/4));
+3.379891200336424b-1;
+
+/*
+ * Bug 2582034 - hgfred([a/2,-a/2],[1/2],z) causes error
+ */
+(assume(zn<0), done);
+done;
+
+hgfred([a/2,-a/2],[1/2],zn);
+((%i*sqrt(zn)+sqrt(1-zn))^a+(sqrt(1-zn)-%i*sqrt(zn))^a)/2$
+ 
+/*
+ * Bug 2618401 - bfloat produces incorrect answer
+ */
+is(abs(bfloat((sqrt(2)+2)*%pi^(3/2)/(8*gamma(3/4)^2))-float((sqrt(2)+2)*%pi^(3/2)/(8*gamma(3/4)^2))) < 1d-15);
+true;
+
+/* (-1.0b0)^(1/3) vs (-1.0d0)^(1/3) - ID: 619927 */
+(-1b0)^(1/3);
+-1.0b0;
+
+(-1.0)^(1/3);
+-1.0;
+
+domain:complex;
+complex;
+
+(-1b0)^(1/3);
+1.0b0*(-1)^(1/3);
+
+(-1.0)^(1/3);
+1.0*(-1)^(1/3);
+
+domain:real;
+real;
+
+(-1b0)^(1/3),domain:complex,m1pbranch:true;
+1.0b0*(sqrt(3)*%i/2+1/2);
+
+(-1.0)^(1/3),domain:complex,m1pbranch:true;
+ 1.0*(sqrt(3)*%i/2+1/2);
+
+
+/*
+ * Bug [ 2688847 ] float of rats rounds incorrectly
+ */
+float((2^60-1)/2^60)-1;
+0.0;
+float((2^1000-1)/2^1000)-1;
+0.0;
+
+/*
+ * Bug [ 2687962 ] hgfred([-3/2,1],[-1/2],-t) division by zero
+ *
+ * Solution from functions.wolfram.com
+ */
+ratsimp(hgfred([-3/2,1],[-1/2], t));
+1+3*t-3*t^(3/2)*atanh(sqrt(t));
+
+/*
+ * Bug 2793827: internal error in integrate
+ */
+(assume(n>0),declare(n,integer),0);
+0;
+
+integrate((g32475^n*(g32475*n-n-1)/(g32475-1)^2+1/(g32475-1)^2)/(1-g32475)
+ -(g32475^(2*n+1)*(g32475*n-n-1)/(g32475-1)^2+g32475^(n+1)/(g32475-1)^2)
+  /(1-g32475),g32475,0,1);
+(n+1)^2/2-1/2;
+
+kill(all);
+done;
+
+/*
+ * Bug 609464 : 1+%e,numer and %e^%e,numer
+ *
+ * The simplifier has been extended to handle %e like other constants.
+ * In addition functions with arguments which involve %e simplify
+ * accordingly.
+ */
+
+%e,numer;
+2.7182818284590451;
+
+%e+1,numer;
+3.7182818284590451;
+
+%e^%e,numer;
+15.154262241479262;
+
+%e^x,numer;
+%e^x;
+
+sin(%e),numer;
+0.41078129050290885;
+
+sin(%e+1),numer;
+-0.54525155669233449;
+
+/* Do not simplify, when %e is the base of an expression and %enumer FALSE*/
+
+sin(%e^(2*x+1)),numer;
+sin(%e^(2*x+1));
+
+sin(%e^(%e^(2*x+1))),numer;
+sin(%e^(%e^(2*x+1)));
+
+/* Additionally simplifications when %enumer TRUE */
+
+%enumer:true;
+true;
+
+sin(%e^x),numer;
+sin(2.7182818284590451^x);
+
+sin(%e^(%e^(2*x+1))),numer;
+sin(2.7182818284590451^(2.7182818284590451^(2*x+1)));
+
+%enumer:false;
+false;
+
+/*
+ * Bug ID: 2797885 - "problem with integration"
+ *
+ * integrate(exp(%i*x)*sin(x),x) generates a Lisp error.
+ *
+ * This is a special case for the integrand: exp(a*x)*sin(b*x),
+ * with a^2+b^2 equal to zero.
+ */
+
+/* This is the general case for an integral with exp and sin or cos */
+integrate(exp(a*x)*sin(b*x),x);
+%e^(a*x)*(a*sin(b*x)-b*cos(b*x))/(b^2+a^2);
+
+integrate(exp(a*x)*cos(b*x),x);
+%e^(a*x)*(b*sin(b*x)+a*cos(b*x))/(b^2+a^2);
+
+/* Now the special case with a=%i and b=1 */
+expand(integrate(exp(%i*x)*sin(x),x));
+%i*x/2-%e^(2*%i*x)/4;
+
+expand(integrate(exp(x)*sin(%i*x),x));
+%i*%e^(2*x)/4-%i*x/2;
+
+expand(integrate(exp(%i*x)*cos(x),x));
+x/2-%i*%e^(2*%i*x)/4;
+
+expand(integrate(exp(x)*cos(%i*x),x));
+%e^(2*x)/4+x/2;
+
+/* Bug ID: 932076 -  ode2( 'diff(y,x)=%i*y+sin(x), y, x) => div by 0
+ *
+ * This bug is related to the Bug ID: 2797885 - "problem with integration"
+ */
+
+ode2('diff(y,x)-%i*y-sin(x),y,x);
+y = (%c-%i*(x-%i*%e^-(2*%i*x)/2)/2)*%e^(%i*x);
+
+/*
+ * Bug ID: 826623 "simplifer returns %i*%i"
+ * 
+ * Some examples to show simplification of expressions of the form
+ * (a*b*...)^q*(a*b*...)^r, where q+r=1
+ */
+
+sqrt(-%i)*sqrt(-%i)*%i;
+1;
+
+sqrt(a*b)*sqrt(a*b)*a*b;
+a^2*b^2;
+
+(a*b*c)^(3/4)*(a*b*c)^(1/4)*c;
+a*b*c^2;
+
+/*
+ * Bug ID: 2792493 "hgfred([1],[-5.2],x);"
+ */
+hgfred([1],[-5.2],x);
+%f[1,1]([-6.2],[-5.2],-x)*%e^x$
+
+/*
+ * Bug ID: 1315837 limit(?foo)
+ * Bug ID: 1119228 limit(1/zeraoa)
+ */
+
+limit(?foo);
+?foo;
+limit(true);
+true;
+limit(false);
+false;
+limit(1/zeroa);
+inf;
+limit(1/zerob);
+minf;
+
+/* BUG ID: 721575 2/sqrt(2) doesn\'t simplify */
+2/sqrt(2);
+sqrt(2);
+
+(1/2)*sqrt(2);
+1/sqrt(2);
+
+sqrt(2)*(1/2);
+1/sqrt(2);
+
+/* BUG ID 2029041 a*sqrt(2)/2 unsimplified */
+
+a*sqrt(2)/2;
+a/sqrt(2);
+
+/* BUG ID 1923119 1/sqrt(8)-sqrt(8)/8 */
+
+1/sqrt(8)-sqrt(8)/8;
+0;
+
+/* BUG ID 1927178 integrate(sin(t),t,%pi/4,3*%pi/4) */
+
+integrate(sin(t),t,%pi/4,3*%pi/4);
+sqrt(2);
+
+/* BUG ID: 1480562 2*a*2^k isn't simplified to a*2^(k+1) */
+
+2*a*2^k;
+a*2^(k+1);
+
+a*2^k*2;
+a*2^(k+1);
+
+/* Some examples to show simplification of expressions
+ * with floating point and bigfloat numbers after improvement
+ * of plusin
+ */
+
+(4.0*x-4.0*x);
+0.0;
+(4.0*x-3.0*x);
+1.0*x;
+(4.0*x-3.0*x)/2;
+0.5*x;
+
+(4.0b0*x-4.0*x);
+0.0b0;
+(4.0b0*x-3.0*x);
+1.0b0*x;
+(4.0b0*x-3.0*x)/2;
+0.5b0*x;
+
+/* BUG ID: 1996354 unsimplifed result from expand */
+
+expand((%e^(-2*sqrt(2))*(%e^(2*sqrt(2))+2*%e^sqrt(2)+1)^2)/16
+       +(%e^(-2*sqrt(2))*(%e^(2*sqrt(2))-2*%e^sqrt(2)+1)^2)/16
+       -(%e^(-2*sqrt(2))*(%e^(2*sqrt(2))-1)^2)/8);
+1;
+
+/* BUG ID: 631216 - "horner([...],x)/FIX" 
+   horner now maps over lists, matrices and equations.
+ */
+
+horner(x^2+x=a*x^2+b*x);
+x*(x+1) = x*(a*x+b);
+horner([x^2+x,x^3+x,x^4+x]);
+[x*(x+1),x*(x^2+1),x*(x^3+1)];
+
+/* BUG ID: 2699862 "derivative of polylogarithm"
+ * The noun form is not put on the property list, but NIL. The routine 
+ * sdiffgrad generates a noun form, when the derivative is not known.
+ */
+
+diff(li[n](x),n);
+'diff(li[n](x),n);
+
+diff(li[n*x](x),x);
+'diff(li[n*x](x),x);
+
+diff(li[n](x),x,1,n,1);
+'diff(li[n-1](x),n)/x;
+
+/* Not reported as a bug, but the same problem for the function psi */
+
+diff(psi[n](x),n);
+'diff(psi[n](x),n);
+
+diff(psi[n*x](x),x);
+'diff(psi[n*x](x),x);
+
+diff(psi[n](x),x,1,n,1);
+'diff(psi[n+1](x),n);
+
+/* BUG ID: 2824909 " exp(%i*%pi/4) not simplified" 
+ * Check the simplification of exp(%i*%pi/4) and exp(-%i*pi/4)
+ */
+
+exp(%i*%pi/4);
+1/sqrt(2)+%i/sqrt(2);
+exp(-%i*%pi/4);
+1/sqrt(2)-%i/sqrt(2);
+
+/*
+ * Bug ID: 2831259 - bfloat() underflow bug
+ */
+fpprec:500;
+500;
+float(0b0);
+0.0;
+
+/*
+ * BUG ID: 2835098 - SIGN-PREP strangeness
+ */
+ 
+block ([?limitp : true], sign (foo (x)));
+pnz;
+
+integrate(sqrt(2*m*(E[n]-U(x))),x,-x[0],x[0])=(n-1/2)*%pi*hbar;
+sqrt(2)*'integrate(sqrt(m*(E[n]-U(x))),x,-x[0],x[0]) = %pi*hbar*(n-1/2);
+
+integrate(f(x),x,x[0],x[1]);
+'integrate(f(x),x,x[0],x[1]);
+
+/*
+ * BUG ID: 2840566 - defint fails to determine if one of its limit is real
+ */
+ 
+(assume(b>0,c>0),done);
+done;
+ 
+integrate(x,x,0,sqrt(b^2+(b-c)^2));
+(c^2-2*b*c+2*b^2)/2;
+
+/*
+ * BUG ID: 2842060 - unsimplified result from integrate
+ */
+ 
+/* The result for a general symbol x */
+integrate(1/x/sqrt(x^2-1),x);
+-asin(1/abs(x));
+
+(assume(x>0), done);
+done;
+ 
+/* abs(x) simplifies to x for x>0 */
+integrate(1/x/sqrt(x^2-1),x);
+-asin(1/x);
+
+(forget(x>0), done);
+done;
+
+/* 
+ * Bug ID: 2820202 - rootscontract(%i/2) 
+ */
+rootscontract(%i/2);
+%i/2;
+
+/* 
+ * Bug ID: 1797296 - Crazy results when doing limit of 'diff
+ */
+limit('diff(x+1,x),x,2);
+'limit('diff(x+1,x),x,2);
+
+limit('integrate(x+1,x),x,2);
+'limit('integrate(x+1,x),x,2);
+
+limit(integrate(f(t),t,0,x),x,0,plus);
+'limit(integrate(f(t),t,0,x),x,0,plus);
+
+limit(integrate(t,t,0,x)/x,x,inf);
+inf;
+
+(assume(a>2), limit(integrate(t/log(t),t,2,a)/a,a,inf));
+inf;
+
+/* limit(1/inf-1/minf) => 0+0 - ID: 903074 */
+limit(1/inf-1/minf);
+0;
+
+/* 1-arg limit: limit(a*inf-inf) => minf - ID: 1385306 */
+limit(a*inf-inf);
+minf+inf;
+/* ideally should be inf, if two infs represent same var */
+
+/* limit(1 - (-1/2)^inf) --> inf - ID: 2853506 */
+limit(1 - (-1/2)^inf);
+1-(-1)^inf/2^inf;
+/* ideally should be 1 */
+
+/* definition of derivative in terms of limit */
+limit((sin(3*(x+h)) - sin(3*(x)))/h, h, 0, plus);
+3*cos(3*x);
+
+/* limit incorrect for -x/sqrt(1-x^2) - ID: 2869955 */
+limit(-x/sqrt(1-x^2), x, 1, minus);
+minf;
+
+/* limit(%i*log(a),a,0) nounform (%i*und problem) - ID: 816797 */
+limit(%i*log(x),x,0);
+infinity;
+
+/* limit(sqrt(x),x,minf) not fully evaluated - ID: 2901855 */
+limit(sqrt(x), x, minf);
+infinity;
+
+/* limit bug - ID: 3101075 */
+limit((2+cos(x))/(x^3*sin(x))-3/x^4,x,0,plus);
+1/60;
+
+/* #2527 exponent too big in limit */
+limit ((cosh(sqrt(x+1))-cosh(sqrt(x)))^(1/sqrt(x)),x,inf );
+%e;
+
+/* #2561 limit(log(x^2),x,-20) gives 2*log(-20) */
+limit(log(x^2),x,-20),logexpand:false;
+log(400);
+
+/* #2412 Problems with integral (x/(exp(x)+1),x,0,inf) */
+limit(-x*log(%e^x+1)-li[2](-%e^x)+x^2/2, x, inf);
+%pi^2/6;
+
+/* Bug ID: 2872738 - sign(-(1/n)*(-1)^n)
+ * We got the error because of the simplification
+ *  (-1)^n*(-1) -> (-1)^(n+1) and not -(-1)^n
+ * The other case 
+    (-1)*(-1)^n simplifies already to -(-1)^n
+ * Adding tests for both cases.
+ */
+kill(all);
+done;
+sign(-(1/n)*(-1)^n);
+pn;
+(-1)*(-1)^n;
+-(-1)^n;
+(-1)^n*(-1);
+-(-1)^n;
+
+/* The initial problem which triggers this bug */
+declare(n,integer);
+done;
+limit ((sin(n*x) - n*x*cos(n*x))/n^2, x, %pi);
+-%pi*(-1)^n/n;
+
+/* #2503 Declaring x as an integer changes result of limit from 3 to inf */
+limit((2^n+3^n)^(1/n), n,inf);
+3;
+
+/* Bug ID: 2835634 - logcontract broken
+ * Bug ID: 1467368 - logcontract returns unsimplified expr
+ */
+logcontract(log(x)-log(2));
+log(x/2);
+/* Check that we do not break the following again */
+logcontract(log(%e*k)-log(%e^-1*k));
+2;
+log(%e^2),logexpand:false;
+2;
+
+/* Bug ID: 2880923 - realpart --> floating-point-overflow
+ */
+sign(exp(2009));
+pos;
+realpart(sqrt(4*%e^2009-3)-1);
+sqrt(4*%e^2009-3)-1;
+sqrt(4*exp(2009));
+2*%e^(2009/2);
+
+/* Bug ID: 640332 - Need to specdisrep more systematically
+   Add the examples of the bug report.
+ */
+ratdisrep(diff(rat(x),rat(x)));
+1;
+diff(x,rat(x));
+1;
+outofpois(diff(intopois(sin(x)),x));
+cos(x);
+taylor(intopois(sin(x)),x,0,3);
+x-x^3/6;
+ratsimp(intopois(sin(x)));
+sin(x);
+
+/* Bug ID: 627759 - Ratdisrep of aggregates 
+ */
+ratdisrep(rat(x=y));
+x = y;
+ratdisrep(rat([x=a,y=b]));
+[x = a,y = b];
+ratdisrep(rat(matrix([a,b],[c,d])));
+matrix([a,b],[c,d]);
+
+/* Bug ID: 711885 - Rootscontract with imaginaries fails
+ */
+(oldvalue:radexpand, radexpand:false, done);
+done;
+
+rootscontract(((sqrt(3)*%i+1)^(3/2)-4*%i)/sqrt(sqrt(3)*%i+1));
+((sqrt(-3)+1)^(3/2)-4*%i)/sqrt(sqrt(-3)+1);
+
+/* It is a problem of the simplifier. Show that it works */
+sqrt(1/(1+sqrt(-3)));
+1/sqrt(sqrt(-3)+1);
+
+(radexpand:oldvalue, done);
+done;
+
+/* BUG ID: 767556 - Distributing operations over =
+ * The operators "." and "^^" distribute over equations.
+ */
+
+x . (a=b);
+x . a = x . b;
+
+(a=b)^^x;
+a^^x = b^^x;
+
+/* A more complicated example */
+x . ((2*a+b . c) = x . (y + z))^^w;
+x . (b . c+2*a)^^w = x . (x . (z+y))^^w;
+
+/* Bug ID: 593351 - limit/sin(inf)etc. should give 0, not IND
+ */
+
+limit(cos(1/x)*sin(x)-sin(x),x,inf);
+0;
+limit(cos(1/x)*sin(x)-sin(x)+a,x,inf);
+a;
+
+/* Bug ID: 2914176 - Conversion of rational to bfloat is inaccurate
+ *
+ * The difference should be 1/262144, but we don't check for that.
+ */
+(oldfpprec:fpprec, fpprec:5, done);
+done;
+is(bfloat((2^20+1)/(2^20-1)) - 1b0 > 0);
+true;
+
+/* Related to the fix for 2914176.  Didn't handle the ratio 0/1 */
+is(equal(0b0, 0));
+true;
+
+(fpprec:oldfpprec, done);
+done;
+
+/* Bug ID:2933882 - Power function: 0^a not fully implemented
+ * Show some simplifications of 0^a
+ */
+
+assume(a>0);
+[a>0];
+0^a;
+0;
+errcatch(0^-a);
+[];
+0^(a+%i);
+0;
+0^(1/2+%i);
+0;
+errcatch(0^(-1/2+%));
+[];
+errcatch(0^%i);
+[]; 
+
+forget(a>0);
+[a>0];
+
+/* Bug ID: 2938078 - Crash on attached input
+ */
+ 
+declare(n,integer, j,noninteger);
+done;
+assume(equal(x,n), equal(y,j), equal(z,i));
+[equal(x, n), equal(y, j), equal(z,i)];
+
+featurep(x,integer);
+true;
+featurep(x,noninteger);
+false;
+featurep(y,integer);
+false;
+featurep(y,noninteger);
+true;
+
+diff(z+1,z);
+1;
+
+remove(n,integer, j,noninteger);
+done;
+forget(equal(x,n), equal(y,j), equal(z,i));
+[equal(x, n), equal(y, j), equal(z, i)];
+
+/* Bug ID:  2948800 - integrate((1-cos(2*x)^2)^2/x^4,x,0,inf) wrong
+ */
+ 
+integrate((1-cos(2*x)^2)^2/x^4,x,0,inf);
+8*%pi/3;
+
+assume(a>0);
+[a>0];
+
+/* The more general type with an argument a*x and a positive */
+integrate((1-cos(a*x)^2)^2/x^4,x,0,inf);
+%pi*a^3/3;
+
+forget(a>0);
+[a>0];
+
+/* Bug ID: 1376392 - limit(x/(2+sin(1/x)), x, 0); wrong result
+ */
+ 
+limit(x/(2+sin(1/x)),x,0);
+0;
+ 
+/* Bug ID: 1106912 - limit(x/sin(x)^2,x,inf)
+   I think the limit is not defined because the func is not defined
+   for all x > any constant.
+ */
+limit(x/sin(x)^2,x,inf);
+und;
+
+/* Bug ID: 777564 - subtraction "-"(a,b) should work/FIX */
+
+"-"();
+0;
+
+"-"(a);
+-a;
+
+"-"(2*a);
+-2*a;
+
+"-"(a+b);
+-b-a;
+
+"-"(a+b+c);
+-c-b-a;
+
+"-"(100,20,10);
+70;
+
+map("-",[a,x,100],[b,y,20]);
+[a-b,x-y,80];
+
+map("-",[a,x,100],[b,y,20],[c,z,10]);
+[-c-b+a,-z-y+x,70];
+
+/* Bug ID: 910270 - 1/+3*x parses as 1/(+3*x)
+ * Show that the "+" operator can be used as a prefix operator too.
+ */
+1/+3*x;
+x*1/3;
+1/+x/3;
+1/(3*x);
+a^+b*c;
+c*a^b;
+
+/* Bug ID: 2961822 - sinh(0.0b0) causes Maxima to abort
+ */
+sinh(0.0b0);
+0.0b0;
+
+/* Bug ID: 1219846 - properties of translated functions
+ * The property noun is already present
+ */
+kill(f);
+done;
+f(x):=x;
+f(x):=x;
+properties(f);
+[function,noun];
+translate(f);
+[f];
+properties(f);
+[transfun,function,noun];
+kill(f);
+done;
+
+/* Bug ID: 2968344 - gamma_incomplete(1.0, 4.368265444147715e+19) fails
+ */
+gamma_incomplete(1.0, 4.368265444147715e+19);
+0.0;
+
+/* Bug ID: 643254 - orderlessp([rat(x)], [rat(x)])
+ */
+orderlessp([rat(x)],[rat(x)]);
+false;
+
+/* Bug ID: 781657 - binomial(x,x) => 1, but binomial(-1,-1) => 0
+ * binomial(x,x) simplifies to 1 only if the sign of x is known not to be 
+ * negative.
+ */
+is(equal(binomial(x,x),1));
+'unknown;
+is(equal(binomial(x^2,x^2),1));
+true;
+
+/* Bug ID: 811522 - redundant question in limit
+ * b is assumed to be zero. Maxima now can deduce from the database 
+ * that b-2 is an even number.
+ */
+assume(equal(b,0));
+[equal(b,0)];
+limit(r^(b-2)*(x-r)^2,r,0);
+'limit(r^(b-2)*(x-r)^2,r,0);
+forget(equal(b,0));
+[equal(b,0)];
+
+/* Bug ID:856209 - inconsistency between facts() and facts(v)
+ * Show that facts(expr) now works more general.
+ */
+assume(z+a>0,b>z);
+[a+z>0,b>z];
+facts(a);
+[a+z>0];
+facts(b);
+[b>z];
+facts(z);
+[a+z>0,b>z];
+facts(a+z);
+[a+z>0];
+forget(z+a>0,b>z);
+[a+z>0,b>z];
+
+/* Bug ID: 840848 - trigreduce doesn't enter unknown functions
+ */
+trigexpand(f(sin(2*x)));
+f(2*cos(x)*sin(x));
+trigreduce(%);
+f(sin(2*x));
+
+/* Bug ID: 2954472 - rectform with large floats gives bad answer
+*/
+is(abs(rectform(1e160/(1e160+%i))-1) < 1e-160);
+true;
+
+is(abs(rectform(1e160/(1e160+3/2*%i))-1) < 1.5e-160);
+true;
+
+/* Bug ID: 2953369 - Definite Integration of 1/(a-b*cos(x)) wrong
+ *
+ * For simplicity we test the equivalent integrate(1/(1-r*cos(x)),x,0,%pi).
+ */
+/* These assumes are to answer the questions integrate (from routine unitcir) will ask */
+(assume(r>0,r<1,abs(sqrt(1-r^2)-1)/r-1 < 0, sqrt(1-r^2)-r+1>0), 0);
+0;
+integrate(1/(1-r*cos(x)),x,0,%pi);
+%pi/sqrt(1-r^2);
+
+/* Bug ID: 2907727 - Incorrect Integral with option integrate_use_rootsof
+ * :true
+ */
+%rnum:0;
+0;
+integrate((d*x^2+2*c*x+3*b)/(g*r*x^3+d*x^2+c*x+b), x), integrate_use_rootsof:true;
+lsum((%r1^2*d+2*%r1*c+3*b)*log(x-%r1)/(3*%r1^2*g*r+2*%r1*d+c),%r1,
+             rootsof(g*r*x^3+d*x^2+c*x+b));
+
+/* Bug ID: 2880797 - bad answer in integrate(sqrt(sin(t)^2+cos(t)^2),t,0,2*%pi)
+ *
+ */
+integrate(sqrt(sin(t)^2+cos(t)^2),t,0,2*%pi);
+2*%pi;
+
+/* Bug ID: 2980551 - Inconsistent simplification of exp(x*%i*%pi)
+ *
+ * These examples show consistent simplification for x an expression which
+ * can contain float or bigfloat values
+ */
+
+exp(2*%i*%pi);
+1;
+
+exp((2+x)*%i*%pi);
+exp(x*%i*%pi);
+
+exp(2*%i*%pi+x*%i*%pi);
+exp(x*%i*%pi);
+
+log(exp((2+x)^2*%i*%pi));
+(2+x)^2*%i*%pi;
+
+exp(2.0*%i*%pi);
+1.0;
+
+exp((2.0+x)*%i*%pi);
+exp(1.0*x*%i*%pi);
+
+exp(2.0*%i*%pi+x*%i*%pi);
+exp(1.0*x*%i*%pi);
+
+log(exp((2.0+x)^2*%i*%pi));
+(2.0+x)^2*%i*%pi;
+
+exp(2.0b0*%i*%pi);
+1.0b0;
+
+exp((2.0b0+x)*%i*%pi);
+exp(1.0b0*x*%i*%pi);
+
+exp(2.0b0*%i*%pi+x*%i*%pi);
+exp(1.0b0*x*%i*%pi);
+
+log(exp((2.0b0+x)^2*%i*%pi));
+(2.0b0+x)^2*%i*%pi;
+
+exp(3/2*%pi*%i);
+-%i;
+exp(1.5*%pi*%i);
+-1.0*%i;
+exp(1.5b0*%pi*%i);
+-1.0b0*%i;
+
+exp((3/2+x)*%pi*%i);
+-%i*exp(%i*%pi*x);
+exp((1.5+x)*%pi*%i);
+-%i*exp(1.0*%i*%pi*x);
+exp((1.5b0+x)*%pi*%i);
+-%i*exp(1.0b0*%i*%pi*x);
+
+/* Bug ID: 2781127 - bfpsi0 of complex
+ *
+ * (The result was not in rectangular form but it should be.)
+ */
+bfpsi0(4.5 + %i,15);
+2.43845477527606b-1*%i + 1.41875534014717b0;
+
+/* Bug ID: 2988190 - atan2(1b20,-1b0); badly wrong
+ * It's really a bug in atan for x < -1, so test both.
+ */
+(fpprec:16, atan(-1b20));
+-1.570796326794897b0;
+atan2(1b20,-1b0);
+1.570796326794897b0;
+
+/*
+ * Bug ID: 2991924 - Incorrect integration of rational functions
+ */
+integrate(1/(x^4-2),x,0,1) - integrate(1/(x^2-sqrt(2))/(x^2+sqrt(2)),x,0,1);
+0;
+
+integrate(1/(x^6-4),x,0,1) - integrate(1/(x^3-2)/(x^3+2),x,0,1);
+0;
+
+/* BUG ID:  2113751 - Incomprehensible behavior of coeff()
+ */
+coeff(2*%e^x, x, 0);
+2*%e^x;
+
+/* For numerical tests */
+closeto(e,tol):=block([numer:true,abse],abse:abs(e),if(abse<tol) then true else abse);
+closeto(e,tol):=block([numer:true,abse],abse:abs(e),if(abse<tol) then true else abse);
+
+/* Bug ID: 2997276 - zeta(3),numer; gives Lisp error 
+ * 
+ * Also add a test for complex rational argument, which wasn't handled
+ * correctly either.
+ *
+ * Some Lisp implementations fail these tests because things like
+ * (cl:expt 2d0 3) only gives single-float accuracy (but with
+ * double-float precision).
+ */
+closeto(zeta(3)-1.202056903159594,1e-15), numer:true;
+true;
+closeto(zeta(3+%i)-(1.10721440843141 - .1482908671781754*%i), 1e-15);
+true;
+/*
+ * Reported on mailing list 2011-05-22 by Thomas Dean:
+ *
+ * plot2d(abs(zeta(1/2+x*%i)),[x,0,36]) causes a Lisp error with
+ * clisp.
+ *
+ */
+closeto(abs(zeta(1/2+.5*%i)) - 1.06534921249378, 1e-14);
+true;
+
+/* Bug ID: 2997401 - float(log(200!)) produces an error
+ *
+ */
+closeto(float(log(200!))-863.2319871924054, 1e-15);
+true;
+
+closeto(float(log((1+200!)/7))-861.2860770433501, 1e-15);
+true;
+
+/* Additional tests */
+closeto(float(log(-1))-float(%pi)*%i, 1e-15);
+true;
+
+closeto(float(log((1+200!)/(-7))) - (3.141592653589793*%i + 861.2860770433501), 1e-14);
+true;
+
+closeto(float(log((1+200!)+(1+199!)*%i))- (.004999958333958322*%i + 863.2319996922491), 1e-15);
+true;
+
+closeto(float(log((1+200!)/7+(1+199!)/11*%i)) - (.003181807444342708*%i + 869.9736929490153), 1e-15);
+true;
+
+/* Bug ID: 221642 limit needs %piargs to be true
+ * The implementation of simp-%atan and simpatan2 has been revised.
+ * We get more limits independent of the value of %piargs.
+ */
+%piargs:false;
+false;
+limit(atan2(0,y),y,0,plus);
+atan(0);
+limit(atan2(0,y),y,0,minus);
+%pi;
+limit(atan2(x,0),x,0,plus);
+%pi/2;
+limit(atan2(x,0),x,0,minus);
+-%pi/2;
+reset(%piargs);
+[%piargs];
+
+/* Bug ID: 2306402 - scalarp bug
+ * Bug ID: 1985748 - array and scalar declarations yield inconsistent results
+ * Examples from the bug report to show consistent behavior of scalarp
+ */
+ 
+declare(x,scalar);
+done;
+scalarp(foo(x));
+true;
+scalarp(foo(1));
+true;
+scalarp(foo(x,1));
+true;
+
+scalarp(x);
+true;
+scalarp(x[1]);
+true;
+array(x,5);
+x;
+scalarp(x);
+true;
+scalarp(x[1]);
+true;
+nonscalarp(x);
+false;
+
+kill(x);
+done;
+
+/* Bug ID:1723548 - gradef for variables: not used in diff
+ * Show that the total differential of f works in expressions too.
+ */
+depends(f,[x,y]);
+[f(x,y)];
+diff(f);
+'diff(f,y,1)*del(y)+'diff(f,x,1)*del(x)$
+diff(3*f);
+3*'diff(f,y,1)*del(y)+3*'diff(f,x,1)*del(x)$
+diff(a*f);
+a*'diff(f,y,1)*del(y)+a*'diff(f,x,1)*del(x)+f*del(a)$
+remove(f,dependency);
+done;
+
+/* Bug ID: 1089719 addrow creates strange matrix
+ */
+m:matrix([0,0]);
+matrix([0,0]);
+m:addrow(m,m);
+matrix([0,0],[0,0])$
+m[1,1]:11;
+11;
+m;
+matrix([11,0],[0,0])$
+kill(m);
+done;
+
+/* Bug ID: 1663385 - declare multiplicative - wrong simplification
+ */
+declare(f,additive,f,multiplicative);
+done;
+f(a*b+c);
+f(a)*f(b)+f(c);
+kill(f);
+done;
+
+/* Bug ID: 816808 - subst(in)part of rat -- internal errs
+ */
+substpart(x,2/3,2);
+2/x;
+substinpart(4,2/3,2);
+1/2;
+
+/* Bug ID: 1117533 - letsimp complains about assignment to %pi
+ */
+matchdeclare(a,true);
+done;
+(let(%pi*a,foo(a)),done);
+done;
+letsimp(%pi*x);
+foo(x);
+remlet(%pi*a);
+done;
+
+/* Bug ID: 3002971 - limit fails where rat+subst works
+ */
+limit(min(x,x+2,sin(x)/x),x,0);
+0;
+limit(max(x,x+2,sin(x)/x),x,0);
+2;
+
+/* Bug ID: 2805600 depends() partially prevents diff() to work
+ */
+depends(t,x);
+[t(x)];
+diff(f(t),z);
+0;
+remove(t,dependency);
+done;
+
+/* Bug ID: 1184718 - AT needs soime basic simplifications
+ */
+'at(2,x=0);
+2;
+
+/* Bug ID: 2998227 - spurious at(0,A=0)
+ */
+taylor(integrate(gamma(x+1),x,0,A),A,0,3),nouns;
+A-%gamma*A^2/2+(6*%gamma^2+%pi^2)*A^3/36;
+
+/* Bug ID: 3010829 - numerical evaluation of elliptic_ec fails for argument > 1
+ */
+closeto(elliptic_ec(2.0)-(.5990701173677959*%i+0.599070117367796), 1.5e-15);
+true;
+
+/* Bug ID: 1929287 - 0.0 + [0] ---> [0]
+ */
+0.0+[0];
+[0.0];
+0.0b0+[0];
+[0.0b0];
+0.0+matrix([0,1/2,1,x]);
+matrix([0.0,0.5,1.0,x]);
+0.0b0+matrix([0,1/2,1,x]);
+matrix([0.0b0,5.0b-1,1.0b0,x]);
+
+/* Bug ID: 2996106 - at(diff(f(x,y),x,1,y,1),[x=a,y=b]) is wrong
+ */
+at(diff(f(x,y),x,1,y,1),[x=a,y=b]);
+'at('diff(f(x,y),x,1,y,1),[x = a,y = b]);
+
+/* Bug ID: 1969790 - limits and subscripts
+ */
+limit(mu[inf],x,inf);
+mu[inf];
+
+/* Bug report ID: 2556133 - "at" should do parallel substitutions
+ */
+errcatch(at(atan2(y^2+1,x),[y=%i,x=0]));
+[];
+errcatch(at(atan2(y^2+1,x),[x=0,y=%i]));
+[];
+
+/* Bug report ID: 2014941 - compositions of 'at'
+ */
+at(at(diff(f(x),x),[x=b]),[b=y]);
+'at('at('diff(f(x),x,1),[x = b]),[b = y]);
+
+at(diff(f(x,y),x,1,y,1),[x=a,y=b]) - at(diff(f(x,y),x,1,y,1),[y=b,x=a]);
+0;
+
+/* Bug report ID: 1677217 - composistions of 'at'
+ */
+depends(y,[x,z]);
+[y(x,z)];
+at(at(diff(y,x),x=a),z=b);
+'at('at('diff(y,x,1),x = a),z = b);
+remove(y,dependency);
+done;
+
+/* Bug report ID: 3023978 - integrate(x^x+x,x) is wrong
+ */
+integrate(x^x+x,x);
+'integrate(exp(x*log(x)),x)+x^2/2;
+
+/* Bug report ID: 2465066 - unsimplified result from integrate
+ */
+matchdeclare(x, symbolp);
+done;
+(tellsimpafter('integrate(f(x),x), g(x)),done);
+done;
+integrate(5*f(x) + 7,x);
+5*g(x)+7*x;
+kill(rules);
+done;
+
+/* Bug report ID: 2789110 - solve, tan and atan depend on order of variables
+ */
+solve(tan(x - atan(a/b)) = 0, x);
+[x = atan(a/b)];
+solve(tan(x - atan(b/a)) = 0, x);
+[x = atan(b/a)];
+
+/* Bug report ID: 1961494 - translated functions & values list
+ */
+(kill(all), f():= x:2, translate(f));
+[f];
+f();
+2;
+values;
+[x];
+kill(f,x);
+done;
+/* The value of x has been removed. */
+x;
+'x;
+
+/* Bug report ID: 3025038 - gruntz needs logexpand:true
+ */
+gruntz( (x + 2^x) / 3^x, x, inf),logexpand:false;
+0;
+
+/* Bug report ID: 2977217 - maxima can not integrate x*exp(-1/2*(x-m)^2)
+ */
+integrate(x*exp(-1/2*(x-m)^2),x);
+%i*(sqrt(2)*%i*gamma_incomplete(1,(m-x)^2/2)*(m-x)^2/(x-m)^2
+   -%i*gamma_incomplete(1/2,(m-x)^2/2)*m*(m-x)/abs(x-m))/sqrt(2);
+
+/* Bug report ID: 2996542 - log(x) integration is incorrect
+ */
+assume(a>0);
+[a>0];
+integrate(log(x),x,0,a);
+a*log(a)-a;
+forget(a>0);
+[a>0];
+
+/* Bug report ID: 3062883 - diff does not recognize indirect dependencies 
+ *                          in expressions
+ */
+
+depends([a,b],x,x,t);
+[a(x),b(x),x(t)];
+diff(-a,t);
+-'diff(a,x,1)*'diff(x,t,1);
+diff(a*b,t);
+a*'diff(b,x,1)*'diff(x,t,1)+'diff(a,x,1)*b*'diff(x,t,1);
+remove([a,b,x],dependency);
+done;
+
+/* Bug report ID: 3080397 - laplace(unit_step(-t),t,s) generates an error.
+ */
+laplace(unit_step(-t),t,s);
+0;
+
+/* Bug report ID: 3081820 - lbfgs causes error
+ *
+ * Still generates an error, but a different error that maxima
+ * signals.
+ */
+block([V:0.75, a:24, b:68, e],
+  C(r) := 2*%pi*b*r^2 + 4*a*%pi*r + 2*b*V/r + a*V/(%pi*r^2),
+  load(lbfgs),
+  /* This should signal an error that we catch */
+  e : errcatch(lbfgs(C(r), [r], [1], 1e-4, [1,0])),
+  [e, error]);
+[[], ["Evaluation of gradient at ~M failed.  Bad initial point?~%", [0.0]]];
+
+/* Bug report ID: 875089 - defint(f(x)=g(x),x,0,1) -> false = false
+ *
+ * We distribute defint more early in the code of bags to get a correct result.
+ */
+ defint(f(x)=g(x),x,0,1);
+ 'integrate(f(x),x,0,1)='integrate(g(x),x,0,1);
+ 
+/* Bug report ID: 2796194 - error doing a Fourier transform
+ * The following integral is divergent, but gives a noun form.
+ * The Lisp error is no longer present.
+ */
+(assume(equal(x,0)),done);
+done;
+
+integrate(%pi*exp(-2*%pi*t)*exp(2*%pi*x*t*%i),t,minf,inf);
+%pi*'integrate(%e^(2*%i*%pi*t*x-2*%pi*t),t,minf,inf);
+
+(forget(equal(x,0)),done);
+done;
+
+/* Bug reported on the mailing list
+ * <http://www.math.utexas.edu/pipermail/maxima/2010/023024.html>
+ * integrate(cos(2*x)*cos(x),x) is wrong.
+ *
+ * Add a few more test that are similar to test the part of
+ * monstertrig that deals with trig1(m*x)*trig2(n*x) where trig1 and
+ * trig2 are either sin or cos.
+ */
+integrate(cos(2*x)*cos(x),x);
+sin(3*x)/6+sin(x)/2;
+
+integrate(sin(2*x)*sin(x),x);
+sin(x)/2-sin(3*x)/6;
+
+integrate(cos(2*x)*sin(x),x);
+cos(x)/2-cos(3*x)/6;
+
+integrate(sin(x)*cos(2*x),x);
+cos(x)/2-cos(3*x)/6;
+
+/* Bug ID: 3111568 - subsequent calls to gradef hide variable dependencies
+ */
+gradef(f,x,g);
+f;
+gradef(f,y,h);
+f;
+dependencies;
+[f(y,x)];
+kill(f);
+done;
+
+/* Bug ID: 3118770 - %edispflag:true causes a bug
+ */
+%edispflag:true;
+true;
+integrate(x/(%e)^(2*x), x, 0, 1);
+1/4-3/(4*%e^2);
+reset(%edispflag);
+[%edispflag];
+
+/* Bug ID: 3067098 - The command timer for a Lisp function
+ * Check that the function trisplit does not go away, when we collect
+ * timing statistics for this function and call later kill(all).
+ */
+timer(?trisplit);
+[?trisplit];
+kill(all);
+done;
+rectform(1+%i);
+1+%i;
+
+/* Bug ID: 3133916 - scanmap(minfactorial,a!) infinite loop
+ */
+scanmap(minfactorial, a!);
+a!;
+
+/* Bug ID: 3131324 - simplification of sqrt
+ */
+sqrt(x^3)/sqrt(x^3);
+1;
+
+/* Bug ID: 1285104 - trigsimp and trigreduce & square roots
+ */
+
+trigreduce(sqrt(r^2*sin(x)^2+r^2*cos(x)^2));
+abs(r);
+trigreduce(sqrt(r^2*sin(x)^2+r^2*cos(x)^2)),radexpand:all;
+r;
+radexpand:false;
+false;
+trigreduce(sqrt(r^2*sin(x)^2+r^2*cos(x)^2));
+sqrt(r^2);
+reset(radexpand);
+[radexpand];
+
+/* Bug ID: 917283 - Comment syntax confused
+ * Show that nested comments work as expected.
+ */
+a/*/**/*/+b;
+a+b;
+a/*/**/*/+/*/**/*/b;
+a+b;
+
+/* Bug ID: 3138054 -  bfloat problem / FIX -
+ */
+exp(gamma(1/3)),bfloat;
+1.45696199392313b1;
+
+/* Bug ID: 3288989 - Lisp functions and linear display
+ * Show that we do not get a Lisp error.
+ */
+grind(?cdr([a,b,c]));
+done;
+
+/* Bug ID: 3291590 - Problems with fast arrays
+ */
+(a:make_array(hashed), done);
+done;
+a[100]:100;
+100;
+a[x]:sin(x);
+sin(x);
+a[x*y]:x^2+y;
+y+x^2;
+
+/* Cutting out these two examples.
+ * The ordering of the lists is different depending on the underlying Lisp.
+ *
+ * arrayinfo(a);
+ * [hash_table,1,100,x,x*y];
+ * listarray(a);
+ * [100,sin(x),y+x^2];
+ */
+
+(f:make_array(functional, 'factorial, hashed), done);
+done;
+f[10];
+3628800;
+
+(a: make_array(fixnum, 2, 2), done);
+done;
+listarray(a);
+[0, 0, 0, 0];
+
+use_fast_arrays:true;
+true;
+
+(array(a, any, 2, 2), done);
+done;
+arrayinfo(a);
+[declared, 2, [2, 2]];
+(array(a, fixnum, 2, 2), done);
+done;
+arrayinfo(a);
+[declared, 2, [2, 2]];
+(array(a, flonum, 2, 2), done);
+done;
+arrayinfo(a);
+[declared, 2, [2, 2]];
+(array(a, hashed), done);
+done;
+arrayinfo(a);
+[hash_table, 1];
+
+reset(use_fast_arrays);
+[use_fast_arrays];
+kill(a);
+done;
+
+/* Bug ID: 3247367 - expand returns unsimplified
+ */
+sqrt(2)+sqrt(2);
+2^(3/2);
+sqrt(2)+sqrt(2)+sqrt(2);
+3*sqrt(2);
+sqrt(2)+sqrt(2)+sqrt(2)+sqrt(2);
+2^(5/2);
+sqrt(2)+sqrt(2)+sqrt(2)+sqrt(2)+sqrt(2);
+5*sqrt(2);
+
+2*sqrt(2)+3*sqrt(2);
+5*sqrt(2);
+3*sqrt(2)+2*sqrt(2);
+5*sqrt(2);
+3*sqrt(2)+2*sqrt(2)+sqrt(2);
+3*2^(3/2);
+sqrt(2)+3*sqrt(2)+2*sqrt(2);
+3*2^(3/2);
+
+sqrt(1/2)+sqrt(1/2);
+sqrt(2);
+sqrt(1/2)+sqrt(1/2)+sqrt(1/2);
+3/sqrt(2);
+sqrt(1/2)+sqrt(1/2)+sqrt(1/2)+sqrt(1/2);
+2^(3/2);
+sqrt(1/2)+sqrt(1/2)+sqrt(1/2)+sqrt(1/2)+sqrt(1/2);
+5/sqrt(2);
+
+2*sqrt(1/2)+3*sqrt(1/2);
+5/sqrt(2);
+3*sqrt(1/2)+2*sqrt(1/2);
+5/sqrt(2);
+3*sqrt(1/2)+2*sqrt(1/2)+sqrt(1/2);
+3*sqrt(2);
+sqrt(1/2)+3*sqrt(1/2)+2*sqrt(1/2);
+3*sqrt(2);
+
+2^(1/5)+2^(1/5);
+2^(6/5);
+2^(1/5)+2^(1/5)+2^(1/5);
+3*2^(1/5);
+2^(1/5)+2^(1/5)+2^(1/5)+2^(1/5);
+2^(11/5);
+2^(1/5)+2^(1/5)+2^(1/5)+2^(1/5)+2^(1/5);
+5*2^(1/5);
+
+(1/2)^(1/5)+(1/2)^(1/5);
+2^(4/5);
+(1/2)^(1/5)+(1/2)^(1/5)+(1/2)^(1/5);
+3/2^(1/5);
+(1/2)^(1/5)+(1/2)^(1/5)+(1/2)^(1/5)+(1/2)^(1/5);
+2^(9/5);
+(1/2)^(1/5)+(1/2)^(1/5)+(1/2)^(1/5)+(1/2)^(1/5)+(1/2)^(1/5);
+5/2^(1/5);
+
+2*(1/2)^(1/5)+3*(1/2)^(1/5);
+5/2^(1/5);
+3*(1/2)^(1/5)+2*(1/2)^(1/5);
+5/2^(1/5);
+
+2^sin(x)+2^sin(x);
+2^(sin(x)+1);
+2^sin(x)+2^sin(x)+2^sin(x);
+3*2^sin(x);
+2^sin(x)+2^sin(x)+2^sin(x)+2^sin(x);
+2^(sin(x)+2);
+2^sin(x)+2^sin(x)+2^sin(x)+2^sin(x)+2^sin(x);
+5*2^sin(x);
+
+(1/2)^sin(x)+(1/2)^sin(x);
+2^(1-sin(x));
+(1/2)^sin(x)+(1/2)^sin(x)+(1/2)^sin(x);
+3/2^sin(x);
+(1/2)^sin(x)+(1/2)^sin(x)+(1/2)^sin(x)+(1/2)^sin(x);
+2^(2-sin(x));
+(1/2)^sin(x)+(1/2)^sin(x)+(1/2)^sin(x)+(1/2)^sin(x)+(1/2)^sin(x);
+5/2^sin(x);
+
+(1-sqrt(5))^3-4*(1-sqrt(5))^2+8, expand;
+0;
+1/sqrt(2)+1/sqrt(2)+1/sqrt(2);
+3/sqrt(2);
+2^(9/5)+2^(4/5);
+3*2^(4/5);
+3*sqrt(2)+2*sqrt(2);
+5*sqrt(2);
+2*sqrt(2)+3*sqrt(2);
+5*sqrt(2);
+(1-sqrt(5))^3, expand;
+16-8*sqrt(5);
+p : z^3-2^(3/2)*%i*z^2-4*z^2+2^(5/2)*%i*z+2*z;
+z^3-2^(3/2)*%i*z^2-4*z^2+2^(5/2)*%i*z+2*z;
+divide(p, (z-2-sqrt(2)*%i),z);
+[z^2+(-sqrt(2)*%i-2)*z,0];
+2^a + 3*2^(a+1);
+7*2^a;
+2^(3/5)+2^(-2/5);
+3/2^(2/5);
+2^(3/5+x)+2^(-2/5+x);
+3*2^(x-2/5);
+
+/* -----------------------------------------------------------------------------
+ * Bug ID: 1439566 - zerobern & bernpoly
+ * Show that the option variable zerobern does not change the results.
+ * -------------------------------------------------------------------------- */
+zerobern:false;
+false;
+bernpoly(x,3);
+x^3-3*x^2/2+x/2$
+bernpoly(x,5);
+x^5-5*x^4/2+5*x^3/3-x/6$
+reset(zerobern);
+[zerobern];
+
+/* Show that bern no longer fails with zerobern:false.
+ *
+ * The compared values are from A&S p810, Table 23.2.
+ */
+bern(28);
+-23749461029/870$
+bern(40);
+-261082718496449122051/13530$
+euler(16);
+19391512145$
+
+zerobern:false;
+false$
+bern(17);
+-7709321041217/510$
+bern(24);
+596451111593912163277961/282$
+euler(10);
+370371188237525$
+
+reset(zerobern);
+[zerobern]$
+
+/* -----------------------------------------------------------------------------
+ * Bug ID: 2905929 - gcdex
+ * -------------------------------------------------------------------------- */
+q0[2] : 6;
+6$
+ratdisrep(gcdex(x-7, x-8));
+[1,-1,1]$
+
+is(equal(gcdex(z^2-1, 0, z), [1,0,z^2-1]));
+true;
+
+is(equal(gcdex(0, z^2-1, z), [0, 1, z^2-1]));
+true;
+
+/* Examples from the Maxima Manual */
+is(equal(gcdex(x^2+1, x^3+4), [-(x^2+4*x-1)/17,(x+4)/17,1]));
+true$
+is(equal(gcdex(x*(y+1), y^2-1, x), [0,1/(y^2-1),1]));
+true$
+
+kill(q0);
+done;
+
+/* -----------------------------------------------------------------------------
+ * Bug ID: 3389830 - Error break in rtest15 with linear display
+ *
+ * Show that we do not get an error with grind for a prefix and a postfix
+ * Operator when displaying the definition of a function or a macro.
+ * This is a test of the function msz-mdef in grind.lisp.
+ * -------------------------------------------------------------------------- */
+(postfix("f"), prefix("g"), done);
+done$
+grind("f"(x):=x);
+done$
+grind("f"(x)::=x);
+done$
+grind("g"(x):=x);
+done$
+grind("g"(x)::=x);
+done$
+
+/* -----------------------------------------------------------------------------
+ * Bug ID: 3396631 - equal terms produce different results
+ * Correcting a bug in plusin revision 23.08.2011
+ * -------------------------------------------------------------------------- */
+5*sqrt(5)+2*sqrt(3)+6*sqrt(5);
+11*sqrt(5)+2*sqrt(3)$
+5*sqrt(5)+4*sqrt(3)+6*sqrt(5);
+11*sqrt(5)+4*sqrt(3)$
+5*sqrt(5)+3*sqrt(5)+5*sqrt(3)+3*sqrt(3)+2*sqrt(75)+2*sqrt(45);
+14*sqrt(5)+2*3^(5/2)$
+5*sqrt(5)+5*sqrt(3)+3*sqrt(3)+2*sqrt(75)+2*sqrt(45)+3*sqrt(5);
+14*sqrt(5)+2*3^(5/2)$
+5*sqrt(5)+5*sqrt(3)+2*sqrt(75)+2*sqrt(45)+3*sqrt(5)+3*sqrt(3);
+14*sqrt(5)+2*3^(5/2)$
+
+/* -----------------------------------------------------------------------------
+ * Bug ID 3437268: expand doesn't fully expand
+ * Check the expected results after revision 14.11.2011 of simp.lisp.
+ * -------------------------------------------------------------------------- */
+-3*a/sqrt(2)+sqrt(2)*a+a/sqrt(2);
+0$
+expand(-(atan((sqrt(2)*sin(8))/cos(8))+3*%pi)/sqrt(2)
+        +atan((sqrt(2)*sin(8))/cos(8))/sqrt(2)
+        +sqrt(2)*%pi
+        +%pi/sqrt(2));
+0$
+
+/*
+ * SF Bug: elliptic_e error observed - ID: 3438911
+ *
+ * Test the bug by using the identity:
+ * elliptic_e(%pi,m) = 2*elliptic_ec(m)
+ *
+ * There's also a bug in elliptic_f.  We test this using the identity:
+ * elliptic_f(%pi,m) = 2*elliptic_kc(m)
+ */
+
+closeto(e,tol):=block([numer:true,abse],abse:abs(e),if(abse<tol) then true else abse);
+closeto(e,tol):=block([numer:true,abse],abse:abs(e),if(abse<tol) then true else abse);
+
+closeto(elliptic_e(float(%pi), .1) - 2*elliptic_ec(.1), 1e-15);
+true;
+closeto(elliptic_e(float(%pi), .9) - 2*elliptic_ec(.9), 1e-15);
+true;
+closeto(elliptic_e(bfloat(%pi), .1b0) - 2*elliptic_ec(.1b0), 1e-16);
+true;
+closeto(elliptic_e(bfloat(%pi), .9b0) - 2*elliptic_ec(.9b0), 1e-16);
+true;
+
+closeto(elliptic_f(float(%pi), .1) - 2*elliptic_kc(.1), 1e-15);
+true;
+closeto(elliptic_f(float(%pi), .9) - 2*elliptic_kc(.9), 1e-15);
+true;
+closeto(elliptic_f(bfloat(%pi), .1b0) - 2*elliptic_kc(.1b0), 1e-16);
+true;
+closeto(elliptic_f(bfloat(%pi), .9b0) - 2*elliptic_kc(.9b0), 1e-16);
+true;
+
+/*
+ * Bug 3509430: limit of tanh(x) at 0 makes no sense
+ */
+limit(tanh(x), x, 0);
+0;
+
+/*
+ * Bug 3526111 - float erf (%i) not working
+ */
+
+closeto(float(erf(%i)) - 1.650425758797543*%i, 1e-15);
+true;
+
+/*
+ * Bug 3529992: Shi (sinh integral) wrong branch, integrate inconsistent
+ */
+closeto(float(expintegral_shi(1/2) - 0.50699674981966719583), 3e-16);
+true;
+
+/* integrate changes k[0] --> k(0) - ID: 3530767 */
+integrate(x * (x^2 + k[0])/(1 + x^2),x);
+((k[0]-1)*log(x^2+1))/2+x^2/2$
+
+/* polarform error on simple case - ID: 3517034 */
+polarform((a+1)/2 - a/2 - 1/2);
+0$
+
+polarform((a+1)/2 - a/2 - 0.5);
+0.0$
+
+polarform((a+1)/2 - a/2 - 0.5b0);
+0.0b0$
+
+
+/* #2531 Integration with inf */
+errcatch(integrate((1+1/x)^(1/2),x,1,inf));
+[];
+
+error;
+["defint: integral is divergent."];
+
+
+
+/*
+ * ID: 3440046: elliptic_f(0.5,1) signals error
+ *
+ * Add a few more tests for invalid values.
+ */
+closeto(elliptic_f(0.5,1)-elliptic_f(1/2,1), 1e-15);
+true;
+
+closeto(elliptic_f(0.5b0,1) - bfloat(elliptic_f(1/2,1)), 1b-16);
+true;
+
+errcatch(elliptic_f(2.0,1));
+[];
+
+errcatch(elliptic_f(2b0,1));
+[];
+
+/*
+ * Bug 3428734:  integrate(bessel_y(1,z),z)  with ?z : 1
+ */
+
+(?z:1, 0);
+0;
+
+integrate(bessel_y(1,z),z);
+-bessel_y(0,z);
+
+integrate(bessel_j(1,z),z);
+-bessel_j(0,z);
+
+integrate(bessel_k(1,z),z);
+-bessel_k(0,z);
+
+integrate(bessel_i(1,z),z);
+bessel_i(0,z);
+
+/*
+ * Bug 3381301: log(-1.0b0) has small realpart
+ */
+realpart(log(-1b0));
+0;
+
+/*
+ * Bug 3559064: elliptic_f(2,1) is wrong.
+ */
+errcatch(elliptic_f(2,1));
+[];
+
+/* bug 2535: stack exhausted when computing limit(log(..)) */
+
+limit(log(-1/3125*((-1/2*sqrt(5) + 1/2)^n - (1/2*sqrt(5) +
+1/2)^n)^9*sqrt(5))/log(-1/5*((-1/2*sqrt(5) + 1/2)^(8*n) - (1/2*sqrt(5) +
+1/2)^(8*n))*((-1/2*sqrt(5) + 1/2)^n - (1/2*sqrt(5) + 1/2)^n) -
+1/5*((-1/2*sqrt(5) + 1/2)^(9*n) - (1/2*sqrt(5) +
+1/2)^(9*n))*sqrt(5)),n,inf);
+'limit(log(-1/3125*((-1/2*sqrt(5) + 1/2)^n - (1/2*sqrt(5) +
+1/2)^n)^9*sqrt(5))/log(-1/5*((-1/2*sqrt(5) + 1/2)^(8*n) - (1/2*sqrt(5) +
+1/2)^(8*n))*((-1/2*sqrt(5) + 1/2)^n - (1/2*sqrt(5) + 1/2)^n) -
+1/5*((-1/2*sqrt(5) + 1/2)^(9*n) - (1/2*sqrt(5) +
+1/2)^(9*n))*sqrt(5)),n,inf);
+
+/*
+ * Bug 2528: A variable should be real if it is both real and complex
+ */
+(declare(foo, real), declare(foo, complex), 0);
+0$
+
+[realpart(foo), imagpart(foo)];
+[foo, 0]$
+
+(kill(foo), 0);
+0$

@@ -1,0 +1,60 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * MAXIMA CTENSOR demo: The Petrov classification of the Kerr metric.
+ *
+ */
+
+("Attempt to compute the Petrov classification of the Kerr metric.")$
+("First, we need to load modules and define the metric:")$
+if get('ctensor,'version)=false then load(ctensor);
+init_ctensor();
+gcd:spmod;
+ct_coords:[t,r,h,p]$
+declare([a,m],constant)$
+s(r,h):=r^2+(a*cos(h))^2$
+d(r):=a^2-2*m*r+r^2$
+dim:4$
+fri:matrix(
+  [sqrt(d(r)/s(r,h)), 0, 0, -sqrt(d(r)/s(r,h))*a*sin(h)^2],
+  [0, sqrt(s(r,h)/d(r)), 0, 0],
+  [0, 0, sqrt(s(r,h)), 0 ],
+  [-a/sqrt(s(r,h))*sin(h), 0, 0, (s(r,h)+(a*sin(h))^2)*sin(h)/sqrt(s(r,h))]);
+("We need aggressive simplification to ensure that the result is correct.")$
+ctrgsimp:true;
+ratfac:true;
+cframe_flag:true;
+cmetric(false);
+ug:invert(lg)$
+nptetrad(false);
+("Verify the tetrad")$
+trigsimp(np.transpose(npi));
+christof(false);
+lriemann(false);
+ricci(false);
+weyl(false);
+/*
+("Since we use a tetrad frame, the Weyl tensor was computed in the tetrad
+  base. We need the Weyl tensor in the coordinate base to compute the
+  Newman-Penrose coefficients, so we must do a conversion first. Please
+  be patient; this is not very efficient and will take a while:")$
+for i thru dim do for j thru dim do for k thru dim do for l thru dim do
+    w2[i,j,k,l]:weyl[i,j,k,l];
+for i thru dim do for j thru dim do for k thru dim do for l thru dim do
+    weyl[i,j,k,l]:sum(sum(sum(sum(w2[ii,jj,kk,ll]*fri[ii,i]*fri[jj,j]*
+                  fri[kk,k]*fri[ll,l],ii,1,dim),jj,1,dim),kk,1,dim),ll,1,dim);
+*/
+("Now we are ready to compute the Newman-Penrose coefficients:")$
+psi(true);
+petrov();
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

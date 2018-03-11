@@ -1,0 +1,84 @@
+/*  
+  GRAPHS - graph theory package for Maxima
+  Copyright (C) 2007-2011 Andrej Vodopivec <andrej.vodopivec@gmail.com>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or	 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+*/
+
+dimacs_export(gr, file, [comments]) := block(
+  [fl, str],
+  str: apply(dimacs_export_string, cons(gr, comments)),
+  fl:openw(file),
+  printf(fl, str),
+  close(fl))$
+
+dimacs_export_string(gr, [comments]) := block(
+  [str:"", names:hash_table(), i:1],
+  if not(is_graph_or_digraph(gr)) then error("dimacs_export: first argument is not a graph:", gr),
+  for v in sort(vertices(gr)) do (
+    set_hash(v, names, i),
+    i:i+1),
+  str : sconcat(str, printf(false, "c graph exported from MAXIMA~%")),
+  for c in comments do (
+    str: sconcat(str, printf(false, "c ~a~%", c))),
+  if is_graph(gr) then
+    str: sconcat(str, printf(false, "p edge ~a ~a~%", graph_order(gr), graph_size(gr)))
+  else
+    str: sconcat(str, printf(false, "p arc ~a ~a~%", graph_order(gr), graph_size(gr))),
+  for v in vertices(gr) do (
+    if get_vertex_label(v, gr)#false then
+      str: sconcat(str, printf(false, "n ~a ~a~%", get_hash(v, names), get_vertex_label(v, gr)))),
+  for e in edges(gr) do block(
+    [u:get_hash(first(e), names), v:get_hash(second(e), names), u1, v1],
+    if is_graph(gr) then
+      [u1,v1] : [min(u,v), max(u,v)]
+    else
+      [u1,v1] : [u, v],
+    if get_edge_weight(e, gr)=1 then
+      str: sconcat(str, printf(false, "e ~a ~a~%", u1, v1))
+    else
+      str: sconcat(str, printf(false, "e ~a ~a ~a~%", u1, v1, get_edge_weight(e, gr)))),
+  str)$
+
+dimacs_import(file, [mv]) := block(
+  [n, fl, line, elist:[], t, e, v_labels:[], g, dir:false],
+  if length(mv)=1 and integerp(mv[1]) then mv:mv[1]
+  else mv:1,
+  fl:openr(file),
+  l:readline(fl),
+  while l#false do (
+    t:tokens(l),
+    if length(t) > 0 then (
+      if t[1]="p" then (
+        n:read_string(third(t)),
+        dir:second(t),
+        if dir="edges" or dir="edge" then dir:false
+        else dir:true)
+      else if t[1]="n" and length(t)>=3 then
+        v_labels:cons([read_string(second(t))-mv, third(t)], v_labels)
+      else if t[1]="e" then (
+        e : map(lambda([u], read_string(u)-mv), [second(t), third(t)]),
+        if length(t)=3 then
+          elist:cons(e, elist)
+        else
+          elist:cons([e, read_string(fourth(t))], elist))
+      else if t[1]#"c" then error("import_dimacs: wrong file format")),
+    l:readline(fl)),
+  close(fl),
+  if not(integerp(n)) then error("import_dimacs: wrong file format"),
+  g : create_graph(n,elist,'directed=dir),
+  for v in v_labels do set_vertex_label(v[1], v[2], g),
+  g)$

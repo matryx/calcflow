@@ -1,0 +1,256 @@
+/* genut.mac -*- mode: Maxima; -*- */
+
+/* Copyright (C) 2002 Wolfgang Jenkner <wjenkner@inode.at>
+ *
+ * This file is part of GNU Maxima.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Commentary:
+ * Utility functions needed for stopex, facexp, facex1, declin and disol. 
+ *
+ * History:
+ * The original version seems to be lost. However, the headers of
+ * some of the files above (and of rncomb.mac) suggest the following
+ * story (please tell me if you know more about it):
+ *
+ * The files mentioned above were developed by ASB (who is this/are they?)
+ * at least between November 1981 and May 1983.  The now missing functions
+ * used to live in a file called GENUT (also written by ASB?).  This file
+ * (or at least the functionality it implements) became part of the Symbolics
+ * branch of Macsyma but it didn't get into DOE Macsyma (although they were
+ * aware of its existence since they did have the files depending on it).
+ *
+ * Note that facexp contains also some functions (mentioned at the end of
+ * facexp.usg) which rely on some tensor package called DIAGEVAL to which
+ * GENUT seems to be somehow related.  However, in this case, neither the
+ * package itself nor any description seems to be extant in Maxima.
+ *
+ * v. 0.1 (March 2002): 
+ *   First public version.
+ *
+ * v. 1.0 = CVS:1.1 (June 2002): 
+ *   Changes for translation.
+ *   Rewrote some functions and added comments.
+ *   Added missing functions for declin.
+ *   Except for bug fixes, genut seems to be complete.  Note that, as
+ *   far as I can tell, the tensor manipulation functions mentioned
+ *   above were never, and will never be, supported by genut. 
+ *
+ *   For more recent changes, please see the file `ChangeLog' in the
+ *   top-level directory of the Maxima distribution.
+ */
+
+/* Note that we have to use upper case for function or variable names
+   which are to be used by old code (because FOO is translated to $FOO
+   and foo to |$foo|). */
+
+eval_when(translate,
+          declare_translated(orpartition,orpartitionl,nonumfactor,
+                             genut_prodmap,listofops_nonratl,setlist,
+                             predpartition),
+          mode_declare(function(nulllistp,freeofl,zerolistp,lcpred),boolean))$
+
+nulllistp(exp) :=
+  is(exp=[])$
+
+zerolistp(list) :=
+  catch(for exp in list do if exp#0 then throw(false),true)$
+
+freeofl(varl,exp) :=
+  catch(for var in varl do if not freeof(var,exp) then throw(false),true)$
+
+/* Note that PARTITION(EXP,VAR) gives an error when EXP is atomic.
+   This is quite reasonable since the function can't know which kind
+   of neutral element it is supposed to return.
+   The argument list of ORPARTITION supplies an operator and hence
+   this missing piece of information.  More generally, EXP is somehow
+   coerced to have OP as main operator.  Otherwise this function behaves
+   just like PARTITION. */
+
+orpartition(exp,op,var) :=
+  if not(atom(exp)) and inpart(exp,0)=op
+  then partition(exp,var)
+  else if freeof(var,exp)
+       then [exp,apply(op,[])]
+       else [apply(op,[]),exp]$
+
+/* Same thing for a list of variables. */
+
+orpartitionl(exp,op,varl) :=
+  block([free,notfree,partit],
+    free:exp,
+    notfree:apply(op,[]),
+    for var in varl do
+      (partit:orpartition(free,op,var),
+      free:first(partit),
+      notfree:if op="["
+              then append(notfree,last(partit))
+              else apply(op,[notfree,last(partit)])),
+      [free,notfree])$
+
+orpartitionlist(list,op,[vars]) :=
+  block([partitl:map(lambda([exp],orpartitionl(exp,op,vars)),list)],
+    [map('first,partitl),map('last,partitl)])$
+
+ldelete(varl,exp) :=
+  (for var in varl do exp:delete(var,exp),exp)$
+
+listtosum(list) :=
+  apply("+",list)$
+
+listtoprod(list) :=
+  apply("*",list)$
+
+/* The following mimics the behaviour of APPEND.  Note, however, that
+   INTERSECT_LIST takes exactly two arguments */
+
+intersect_list(exp1,exp2) :=
+  (if atom(exp1)
+  then error(concat("argument value `", exp1, "' to `intersect_list' was atomic")),
+  if atom(exp2)
+  then error(concat("argument value `", exp2, "' to `intersect_list' was atomic")),
+  block([op:inpart(exp1,0)],
+  if op#inpart(exp2,0)
+  then error("Arguments to `intersect_list' are not compatible."),
+  block([inflag:true,cap:[]],
+    for term in exp1 do
+      if member(term,exp2)
+      then cap:endcons(term,cap),
+    apply(op,cap))))$
+
+setlist(lst,l1,l2) :=
+  (l1::first(lst),l2::last(lst))$
+
+nonumfactor(exp) :=
+  if numberp(exp)
+  then exp
+  else factor(exp)$
+
+/* If a non-trivial factorisation is not found you might prefer to retain
+   the expression in its original shape.  Recall that you can arrange for
+   this function to be called instead of NONUMFACTOR by setting FACSUM's
+   AUTOMATIC property: put('facsum,'nonumfactor_alt,'automatic) */
+
+nonumfactor_alt(exp) :=
+  block([dum:nonumfactor(exp)],
+  if atom(dum) or inpart(dum,0)="+"
+  then exp
+  else dum)$
+
+/* Better not. Aliasing is too weird, e.g, DECLARE(FOO,NOUN) would
+   be displayed as DECLARE(FOO, FORMAL).
+alias(FORMAL,NOUN);
+*/
+
+/* LST is an alternating list of operators and associated functions.
+   OP_FCN_LIST is used to pass LST to recursive calls to OPMAP. */
+
+/* The change from ampersand symbols to CL strings breaks opmap (the call to
+?getf in particular).
+
+opmap(exp,lst) :=
+  if atom(exp)
+  then exp
+  else block([fun:?getf(?cdr(lst),inpart(exp,0))],
+    if fun#false
+    then block([op_fcn_list:lst],
+      apply(fun,[exp]))
+    else exp)$
+*/
+
+opmap(exp, lst) := block([op_fcn_list : lst, e_op, x, fun : false, inflag : true],
+  if mapatom(exp) then exp
+  else (
+    e_op : op(exp),
+    while lst # [ ] do (
+      x : first(lst),
+      lst : rest(lst),
+      if x = e_op and lst # [ ] then (
+        fun : first(lst),
+        lst : [ ])),
+      if fun = false then exp else apply(fun, [exp])))$
+
+iflopmap(op,fun,exp) :=
+  if op="*"
+  then genut_prodmap(fun,exp)
+  else if atom(exp)
+       then exp
+       else if inpart(exp,0)=op
+            then map(fun,exp)
+            else apply(fun,[exp])$
+
+genut_prodmap(fun,exp):=
+  if atom(exp)
+  then exp
+  else block([mop:inpart(exp,0)],
+         if mop="*" 
+         then map(lambda([exp],genut_prodmap(fun,exp)),exp)
+         else if mop="^" and askinteger(inpart(exp,2))='yes
+              then substinpart(genut_prodmap(fun,inpart(exp,1)),exp,1)
+              else apply(fun,[exp]))$
+
+/* Returns a list of the sub-expressions of EXP which have one of the
+   operators in OPL as main operator. */
+
+listofops_nonrat(exp,[opl]) :=
+  listofops_nonratl(exp,opl,[])$
+
+listofops_nonratl(exp,opl,lst) :=
+  block(if atom(exp) then return(lst),
+    if member(inpart(exp,0), opl)
+    then return(cons(exp,lst))
+    else for expdum in exp do
+      lst:listofops_nonratl(expdum,opl,lst),
+    lst)$
+
+/* Extracts a common factor from the list of expressions EXPL and
+   returns it as first element COMMON of a list.  The second element
+   is a list OTHER such that EXPL = COMMON * OTHER. */ 
+
+explicitfactor(expl) :=
+  block([vars:map(lambda([dum],?gensym()),expl),common,other],
+    setlist(orpartitionl(factor(expl . vars),"*",vars),'common,'other),
+    [common,map(lambda([var],coeff(other,var)),vars)])$
+
+/* Don't ask.  It's only used once, in declin.mac. */
+
+lcpred(linp,is_op,exp) :=
+  if atom(exp)
+  then false
+  else if apply(is_op,[exp])
+       then true
+       else if inpart(exp,0)="*"
+            then is(length(last(predpartition(exp,is_op)))=1)
+            else if inpart(exp,0)="+"
+                 then is(first(predpartition(exp,linp))=[])
+                 else false$
+
+/* The following two functions are copied from rncomb.mac */
+
+rloiewl(op,exp):=block(
+  [partswitch:true,inflag:true,piece],
+  if inpart(exp,0)=op
+  then args(exp)
+  else [exp])$
+
+predpartition(list,predicate):=block(
+  [nolist:[],yeslist:[]],
+  for idum in reverse(list) do
+      if mode_identity(boolean,apply(predicate,[idum]))
+      then yeslist:cons(idum,yeslist)
+      else nolist:cons(idum,nolist),
+  [nolist,yeslist])$
+
+/* a sort of `provide' */
+put('gnauto,true,'diageval_version)$
+
+/* genut.mac ends here */

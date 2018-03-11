@@ -1,0 +1,367 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+/* rtest3 */						
+kill(all);
+done;
+for a from -3 step 7 thru 26 do ldisplay(a);
+done$
+s:0;
+0$
+for i while i <= 10 do s:s+i;
+done$
+s;
+55$
+series:1;
+1$
+term:exp(sin(x));
+%e^sin(x)$
+for p unless p > 7 do
+    (term:diff(term,x)/p,series:series+subst(x = 0,term)*x^p);
+done$
+series;
+x^7/90-x^6/240-x^5/15-x^4/8+x^2/2+x+1$
+poly:0;
+0$
+for i thru 5 do (for j from i step -1 thru 1 do poly:poly+i*x^j);
+done$
+poly;
+5*x^5+9*x^4+12*x^3+14*x^2+15*x$
+guess:-3.0;
+-3.0$
+for i thru 10 do
+    (guess:subst(guess,x,0.5*(x+10/x)),
+     if abs(guess^2-10) < 5.0e-5 then return(guess));
+-3.162280701754386;
+/* -3.1622806$ */
+for count from 2 next 3*count thru 20 do ldisplay(count);
+done$
+x:1000;
+1000$
+thru 10 while x # 0 do x:0.5*(x+5/x);
+done$
+x;
+2.282429035887867$
+remvalue(x);
+[x]$
+newton(f,guess):=block([numer,y],local(f,df,x,guess),numer:true,
+       define(df(x),diff(f(x),x)),
+       do (y:df(guess),if y = 0 then error("derivative at",guess,"is zero"),
+	   guess:guess-f(guess)/y,
+	   if abs(f(guess)) < 5.0e-6 then return(guess)));
+newton(f,guess):=block([numer,y],local(f,df,x,guess),numer:true,
+       define(df(x),diff(f(x),x)),
+       do (y:df(guess),if y = 0 then error("derivative at",guess,"is zero"),
+	   guess:guess-f(guess)/y,
+	   if abs(f(guess)) < 5.0e-6 then return(guess)))$
+sqr(x):=x^2-5.0;
+sqr(x):=x^2-5.0$
+newton(sqr,1000);
+2.236068027062195; 
+for f in [log,rho,atan] do ldisp(f(1.0));
+done$
+ev(concat(e,linenum-1),numer);
+e10$
+kill(functions,values,arrays);
+done$
+done;
+done$
+exp:diff(x*f(x),x);
+x*'diff(f(x),x,1)+f(x)$
+f(x):=sin(x);
+f(x):=sin(x)$
+ev(exp,diff);
+sin(x)+x*cos(x)$
+x;
+x$
+x:3;
+3$
+x;
+3$
+'x;
+x$
+f(x):=x^2;
+f(x):=x^2$
+'f(2);
+'f(2)$
+ev(%,f);
+4$
+'(f(2));
+f(2)$
+f(2);
+4$
+sum(i!,i,1,4);
+33$
+'sum(i!,i,1,4);
+'sum(i!,i,1,4)$
+remvalue(x);
+[x]$
+'integrate(f(x),x,a,b);
+'integrate(x^2,x,a,b)$
+for i thru 5 do s:s+i^2;
+done$
+exp:s;
+s+55$
+ev(%,s:0);
+55$
+ev(exp);
+s+110$
+exp:'sum(g(i),i,0,n);
+'sum(g(i),i,0,n)$
+z*%e^z;
+z*%e^z$
+ev(%,z:x^2);
+x^2*%e^x^2$
+subst(x^2,z,exp);
+'sum(g(i),i,0,n)$
+a:%;
+'sum(g(i),i,0,n)$
+a+1;
+'sum(g(i),i,0,n)+1$
+kill(a,y);
+done$
+a;
+a$
+declare(integrate,noun);
+done$
+integrate(y^2,y);
+integrate(y^2,y)$
+''integrate(y^2,y);
+y^3/3$
+f(y):=diff(y*log(y),y,2);
+f(y):=diff(y*log(y),y,2)$
+f(y):=1/y;
+f(y):=1/y$
+c10;
+c10$
+(x+y)^3;
+(y+x)^3$
+diff(%,x);
+3*(y+x)^2$
+y:x^2+1;
+x^2+1$
+
+/* begin fix */
+kill(all);
+done;
+ ev(%e^x*sin(x)^2,exponentialize);
+ -%e^x*(%e^(%i*x)-%e^-(%i*x))^2/4;
+  integrate(%,x);
+-((%e^((2*%i+1)*x)/(2*%i+1)+%e^((1-2*%i)*x)/(1-2*%i)-2*%e^x)/4); 
+ ev(%,demoivre);
+ -((%e^x*(%i*sin(2*x)+cos(2*x))/(2*%i+1)
+      +%e^x*(cos(2*x)-%i*sin(2*x))/(1-2*%i)-2*%e^x)
+      /4);
+ ans:ev(%,ratexpand);
+ -%e^x*sin(2*x)/5-%e^x*cos(2*x)/10+%e^x/2;
+ ev(ans,x:1,numer)-ev(ans,x:0,numer);
+ 0.5779160182042402;
+ (fpprec : 35, 0);
+ 0;
+ ev(ans,x:1,bfloat)-ev(ans,x:0,bfloat);
+ 5.7791601820424019599988308251707781b-1;
+ integrate(%e^x*sin(x)^2,x);
+ -(((2*%e^x*sin(2*x)+%e^x*cos(2*x)-5*%e^x)/10));
+ trigreduce(%);
+ -((2*%e^x*sin(2*x)+%e^x*cos(2*x)-5*%e^x)/10);
+ % - ans,ratsimp;
+ 0 ;
+ reset (fpprec);
+ [fpprec];
+
+/* end fix*/
+
+ev(sin(x),%emode);
+sin(x)$
+sin(%pi/12)+tan(%pi/6);
+sin(%pi/12)+1/sqrt(3)$
+ev(%,numer);
+0.8361693142921465;
+/* tops 20 : 0.83616931$ */
+sin(1);
+sin(1)$
+ev(sin(1),numer);
+0.8414709848078965$
+beta(1/2,2/5);
+beta(1/2,2/5)$
+ev(%,numer);
+3.679093980405881;
+/* tops 20: 3.67909265$ */
+diff(atanh(sqrt(x)),x);
+1/(2*(1-x)*sqrt(x))$
+fpprec:25;
+25$
+sin(5.0b-1);
+4.794255386042030002732879b-1$
+(reset (fpprec), 0);
+0;
+/*begin fix */
+ exp:cos(x)^2-sin(x)^2;
+ cos(x)^2-sin(x)^2$
+ ev(%,x:%pi/3);
+ -1/2$
+ diff(exp,x);
+ -4*cos(x)*sin(x)$
+ integrate(exp,x);
+ (sin(2*x)/2+x)/2-(x-sin(2*x)/2)/2$
+ expand(%);
+ sin(2*x)/2$
+ trigexpand(%);
+ cos(x)*sin(x)$
+ trigreduce(%);
+ sin(2*x)/2$
+ diff(%,x);
+ cos(2*x)$
+ %-exp,trigreduce,ratsimp;
+  0;
+/*end fix*/
+sech(x)^2*sinh(x)*tanh(x)/coth(x)^2+cosh(x)^2*sech(x)^2*tanh(x)/coth(x)^2
+				   +sech(x)^2*tanh(x)/coth(x)^2;
+sech(x)^2*sinh(x)*tanh(x)/coth(x)^2+cosh(x)^2*sech(x)^2*tanh(x)/coth(x)^2
+				   +sech(x)^2*tanh(x)/coth(x)^2$
+trigsimp(%);
+(sinh(x)^5+sinh(x)^4+2*sinh(x)^3)/cosh(x)^5$
+/* These are from the trgsmp.dem file.  
+ * I (rtoy) hand-verified these results (using maxima, of course)
+ */
+(1-sin(x)^2)*cos(x)/cos(x)^2+tan(x)*sec(x)^2;
+(1-sin(x)^2)*cos(x)/cos(x)^2+tan(x)*sec(x)^2$
+trigsimp(%);
+(sin(x)+cos(x)^4)/cos(x)^3$
+
+tan(x)^2+sec(x)^2/(1-tan(x)*sec(x));
+tan(x)^2+sec(x)^2/(1-tan(x)*sec(x))$
+trigsimp(%);
+(sin(x)^4+sin(x)^3-1)/(cos(x)^2*sin(x)-cos(x)^4)$
+
+(sin(x)^4-6*cos(x)^2*sin(x)^2+4*(cos(x)^2-sin(x)^2)+8*sin(x)+cos(x)^4+3)/(8*cos(x)^3);
+(sin(x)^4-6*cos(x)^2*sin(x)^2+4*(cos(x)^2-sin(x)^2)+8*sin(x)+cos(x)^4+3)/(8*cos(x)^3)$
+trigsimp(%);
+(sin(x)+cos(x)^4)/cos(x)^3$
+
+
+sech(x)^2*sinh(x)*tanh(x)/coth(x)^2+cosh(x)^2*sech(x)^2*tanh(x)/coth(x)^2+sech(x)^2*tanh(x)/coth(x)^2;
+sech(x)^2*sinh(x)*tanh(x)/coth(x)^2+cosh(x)^2*sech(x)^2*tanh(x)/coth(x)^2+sech(x)^2*tanh(x)/coth(x)^2$
+trigsimp(%);
+(sinh(x)^5+sinh(x)^4+2*sinh(x)^3)/cosh(x)^5$
+
+-sech(x)^5*(sinh(x)^5+2*(sinh(x)^4+6*cosh(x)^2*sinh(x)^2+cosh(x)^4)-13*(sinh(x)^3+3*cosh(x)^2*sinh(x))+10*cosh(x)^2*sinh(x)^3-8*(sinh(x)^2+cosh(x)^2)+5*cosh(x)^4*sinh(x)+34*sinh(x)+6)/16;
+-sech(x)^5*(sinh(x)^5+2*(sinh(x)^4+6*cosh(x)^2*sinh(x)^2+cosh(x)^4)-13*(sinh(x)^3+3*cosh(x)^2*sinh(x))+10*cosh(x)^2*sinh(x)^3-8*(sinh(x)^2+cosh(x)^2)+5*cosh(x)^4*sinh(x)+34*sinh(x)+6)/16$
+trigsimp(%);
+-((sinh(x)^5+sinh(x)^4-2*sinh(x)^3)/cosh(x)^5)$
+
+cos(x)*(sec(x)^2*tan(x)+1)-sec(x)^2*sin(x)-cos(x);
+cos(x)*(sec(x)^2*tan(x)+1)-sec(x)^2*sin(x)-cos(x)$
+trigsimp(%);
+0$
+
+v*cos(x)*sec(x)^2*tan(x)+(-v*sec(x)^2-2*'diff(v,x))*sin(x)+'diff(v,x)*cos(x)*sec(x)+'diff(v,x,2)*cos(x);
+v*cos(x)*sec(x)^2*tan(x)+(-v*sec(x)^2-2*'diff(v,x))*sin(x)+'diff(v,x)*cos(x)*sec(x)+'diff(v,x,2)*cos(x)$
+trigsimp(%);
+-2*'diff(v,x,1)*sin(x)+'diff(v,x,2)*cos(x)+'diff(v,x,1)$
+
+triginverses : all;
+all;
+
+sinh(acosh(x));
+sqrt(x-1)*sqrt(x+1);
+
+sinh(atanh(x));
+x/(sqrt(1-x)*sqrt(x+1));
+
+cosh(asinh(x));
+sqrt(x^2+1);
+
+cosh(atanh(x));
+1/(sqrt(1-x)*sqrt(x+1));
+
+tanh(asinh(x));
+x/sqrt(x^2+1);
+
+tanh(acosh(x));
+sqrt(x-1)*sqrt(x+1)/x;
+
+/* A few checks to see that triginverses false disables the above transformations */
+triginverses: false;
+false;
+
+cos(acosh(x));
+cos(acosh(x));
+
+triginverses : all;
+all;
+
+/* SF bug # 1981518, Calling desolve inside a "for...do" makes it loop endlessly
+ * (protect against endless loop by throw--catch in case bug is triggered)
+ */
+catch (block ([foo:1],
+ for i thru 3 do (ilt (1/s, s, t),
+ if foo > 3 then throw ('i = i) else foo : foo + 1)));
+done;
+
+/* bug reported to mailing list 2009-05-09
+ * unexpected behavior in for loop with variable step
+ */
+
+block ([L : []], for r:0 thru 7 step +2 do L : cons (r, L), L);
+[6, 4, 2, 0];
+
+block ([L : []], for r:7 thru 0 step -2 do L : cons (r, L), L);
+[1, 3, 5, 7];
+
+block ([L : [], r0 : 0, r1 : 7, s : +2], for r:r0 thru r1 step s do L : cons (r, L), L);
+[6, 4, 2, 0];
+
+block ([L : [], r0 : 7, r1 : 0, s : -2], for r:r0 thru r1 step s do L : cons (r, L), L);
+[1, 3, 5, 7];
+
+/* step is evaluated once at start of loop, so these loops are defined */
+
+block ([L : [], s : +2], for i:1 thru 10 step s do L : cons (s : -s, L), L);
+[-2, 2, -2, 2, -2];
+
+block ([L : [], s : -2], for i:10 thru 1 step s do L : cons (s : -s, L), L);
+[2, -2, 2, -2, 2];
+
+/* bug reported to mailing list 2009-05-13 "reset ( radexpand,  domain )"
+ *
+ * display2d is a resetable option variable. We save the value of display2d
+ * and restore it after the reset. This allows to run the testsuite in both
+ * display modes.
+ */
+(save:display2d, done);
+done$
+(reset (), [radexpand, domain]);
+[true, real];
+(display2d:save, done);
+done$
+
+[radexpand, domain] : [all, complex];
+[all, complex];
+
+reset (radexpand, domain);
+[radexpand, domain];
+
+[radexpand, domain];
+[true, real];
+
+([foo, bar, baz] : [1, 2, 3],
+ /* should ignore these non-defmvar's */
+ reset (foo, bar, baz));
+[];
+
+/* verify that ORDFNA can handle CRE.
+ */
+(kill (a, b), [doallmxops, doscmxops] : [false, false], 0);
+0;
+
+b*matrix([rat(a)]);
+b*matrix([''(rat(a))]);
+
+(reset (doallmxops, doscmxops), 0);
+0;

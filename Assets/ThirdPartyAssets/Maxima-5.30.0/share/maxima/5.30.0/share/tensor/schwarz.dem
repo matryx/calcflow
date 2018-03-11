@@ -1,0 +1,86 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Obtaining the Schwarzschild metric with MAXIMA's CTENSOR
+ *
+ */
+kill(allbut(props));
+
+("Finding the Schwarzschild solution of the Einstein vacuum equations" )$
+
+showtime:all;
+if get('ctensor,'version)=false then load(ctensor);
+(ratwtlvl:false,ratfac:true);
+("Specify the dimension of the manifold and the coordinate labels.")$
+(dim:4,ct_coords:[r,th,ph,t]);
+("Enter the general static spherically symmetric metric.")$
+lg:matrix([a,0,0,0],[0,r^2,0,0],[0,0,r^2*sin(th)^2,0],[0,0,0,-d]);
+ug:invert(lg)$
+("Specify functional dependencies")$
+depends([a,d],r);
+("computes inverse metric and specifies diagonality")$
+ug:invert(lg);
+("computes the mixed Christoffel symbols but not display them")$
+christof(false);
+("computes and ratsimps Ricci tensor")$
+uricci(false);
+("computes and displays the Einstein tensor")$
+einstein(true);
+
+("List of the non-zero components of the rank 2 Einstein tensor")$
+exp:findde(ein,2);
+
+("Now begin to solve the field equations")$
+exp1:ode2(last(exp),a,r);
+
+("A kludge to get the solution (the 1,1 component) explicitly")$
+solve(exp1,r);
+resultlist:solve(%,a)$
+h:ev(part(resultlist,1),eval);
+("To cast the solution into standard form")$
+h1:h,exp(%c) = 1/(2*m),factor;
+("Now to find the 4,4 component")$
+ev(first(exp),h1,diff,factor);
+ode2(num(%),d,r);
+expand(radcan(%));
+h2:ev(%,%c = 1);
+("h1 and h2 should be the solution and to check")$
+sol:[h1,h2];
+exp,sol,diff,ratsimp;
+
+kill(allbut(props));
+if get('ctensor,'version)=false then load(ctensor);
+(dim:4,ct_coords:[r,th,ph,t]);
+
+("Enter the Schwarzschild metric in standard coordinates.")$ 
+lg:matrix([1/(1-2*m/r),0,0,0],[0,r^2,0,0]
+  ,[0,0,r^2*sin(th)^2,0],[0,0,0,(2*m/r-1)]);
+ug:invert(lg)$
+
+("Compute and display mixed Christoffel symbols")$
+christof(all);
+uricci(true);
+("computes scalar curvature")$
+scurvature();
+("computes Riemann tensor")$
+lriemann(true);
+("computes contravariant Riemann tensor")$
+uriemann(false);
+("computes the Kretchmann invariant Rijkl^2")$
+rinvariant();
+diagmetric:true;
+("Compute the covariant form of geodesic equations")$
+cgeodesic(true);
+
+block([title: "Schwarzschild Potential for Mass M=2",m:2.],
+plot3d([r*cos(th),r*sin(th),ug[1,1]],[r,.4,4.],[th,-%pi,%pi],['grid,50,15]));
+showtime:false;
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

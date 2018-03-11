@@ -1,0 +1,551 @@
+@device(dover)
+@make(lcspr)
+@font(TimesRoman12)
+@libraryfile(symbols)
+@modify(heading,above 2)
+@Begin(titlepage)
+@begin(titlebox)
+Massachusetts Institute of Technology
+
+Mathlab Group
+Laboratory for Computer Science
+Cambridge, Massachusetts 02139
+@begin(MajorHeading)
+A Brief Overview of MACSYMA
+@end(MajorHeading)
+
+@value(date)
+@end(titlebox)
+@CopyrightNotice(Massachusetts Institute of Technology)
+
+@end(titlepage)
+
+        MACSYMA is a large, interactive computer system, designed to
+assist mathematicians, scientists, and engineers in solving
+mathematical problems.  It has a wide range of algebraic manipulation
+capabilities where a user supplies symbolic inputs and MACSYMA yields
+symbolic results. In addition a user has, at his disposal, an
+extensive numerical subroutine library (IMSL) and plotting package.
+
+        The MACSYMA system has been under continual development at MIT
+since 1969 under the direction of Professor Joel Moses.  
+Over 100 man years of effort have gone into the development of MACSYMA.  The
+current system consists of about 230,000 words of LISP code, as well as
+hundreds of pages of MACSYMA code written by its users.
+
+        MACSYMA is extensively used by hundreds of researchers from government
+laboratories, universities, and private companies throughout the U.S. There are
+users in Europe and Canada as well.  Many
+of these users spend a substantial portion of every day logged in.  MACSYMA's
+funding is supplied almost exclusively by its user community.
+
+        This brief overview is intended to acquaint the reader with the
+nature of MACSYMA as a large, interactive mathematical computing environment.
+It sketches the range of capabilities available and introduces a number of 
+issues arising in symbolic manipulation.
+
+        Various commands are necessary to get connected to MACSYMA.
+Once these commands have been carried out, the user is presented with a
+MACSYMA "C-line", or command line, at which point he may enter his expressions.
+C-lines are typed by the user, and D-lines, or display lines,
+are MACSYMA's response.  A line
+may be terminated either by a ";" or a "$".  If the latter is used, the
+display is suppressed.  Expressions are entered in linear form, using 
+ALGOL-like notation; and MACSYMA redisplays them in conventional 
+two-dimensional mathematical notation.
+
+@begin(example)
+
+This is MACSYMA 302
+
+(C1) X/(X^3+1);
+                             X
+(D1)                       ------
+                            3
+                           X  + 1
+@end(example)
+
+        Note that the result in line D1 is a symbolic expression
+that can be passed around and manipulated as a data structure.
+For example, the user can add it to itself.  At MACSYMA's command
+level, "%" refers to the expression designated by the last D-line.
+@begin(example)
+
+(C2) %+%;
+                            2 X
+(D2)                       ------
+                            3
+                           X  + 1
+@end(example)
+
+        Notice the simplification.  MACSYMA could have left the
+result as a sum but instead recognized that the summands were
+identical and added them together.  MACSYMA automatically performs many
+such "obvious" simplifications.
+
+        MACSYMA accepts transcendental functions as well as simple
+rational functions and can apply identities about such functions to
+produce simpler forms.  Take, for example, the simplification in line D4 below
+where the symbols %PI, %E, and %I are MACSYMA's version of the corresponding
+mathematical constants pi, e = the base of the natural logarithm, and the 
+square root of -1.
+@begin(example)
+
+(C3) SIN(X);
+(D3)                       SIN(X)
+@hinge
+
+(C4) SIN(X-%PI/2);
+(D4)                      - COS(X)
+@end(example)
+
+        An important requirement for an algebraic manipulation system
+is the ability to represent expressions in several different forms.
+For example, the expression in line C5 can be written either as shown in
+D5 or as in D6.  Unlike some other systems, MACSYMA permits the user
+to represent his expressions in whatever form is convenient and provides
+a host of explicit transformations to convert between them, e.g. the
+EXPAND command in line C6.
+
+@begin(example)
+
+(C5) (X+3)^10;
+                                10
+(D5)                     (X + 3)
+@hinge
+
+(C6) EXPAND(%);
+      10       9        8         7          6 
+(D6) X   + 30 X  + 405 X  + 3240 X  + 17010 X  
+
+              5           4           3           2
+     + 61236 X  + 153090 X  + 262440 X  + 295245 X 
+
+
+     + 196830 X + 59049
+@end(example)
+
+        Part of MACSYMA's mathematical knowledge is the ability to
+differentiate.
+
+@begin(example)
+
+(C7) DIFF(D6,X);
+         9        8         7          6           5
+(D7) 10 X  + 270 X  + 3240 X  + 22680 X  + 102060 X
+
+               4           3           2
+     + 306180 X  + 612360 X  + 787320 X  + 590490 X 
+
+
+     + 196830
+@end(example)
+
+        Looking at the first term, this answer appears to be correct,
+but the other terms are more complicated.  One can easily check the
+answer by factoring.  FACTOR is guaranteed to find the factorization of
+any multivariate rational function (over the real integers) if it exists.
+@begin(example)
+
+(C8) FACTOR(%);
+                                  9
+(D8)                    10 (X + 3)
+@end(example)
+
+        Another built-in mathematical ability is indefinite integration much
+of which is performed algorithmically. 
+The integration package, called SIN (for @u[S]ymbolic @u[In]tegrator),
+was written by Joel Moses and incorporates the non-algebraic case of the Risch
+integration algorithm.  Consider the expression defined in D1:
+
+@begin(example)
+
+(C9) D1;
+                             X
+(D9)                       ------       
+                            3
+                           X  + 1
+@hinge
+
+(C10) INTEGRATE(%,X);
+                                2 X - 1
+              2            ATAN(-------)
+         LOG(X  - X + 1)        SQRT(3)    LOG(X + 1)
+(D10)    --------------- + ------------- - ----------
+                 6            SQRT(3)           3
+@end(example)
+
+        In contrast with numerical problem solving, in symbolic
+manipulation one can often check one's answers by applying the 
+inverse operator, in this case differentiation.
+@begin(example)
+
+(C11) DIFF(%,X);
+              2               2 X - 1           1
+(D11) ------------------ + -------------- - ---------
+                  2            2            3 (X + 1)
+         (2 X - 1)         6 (X  - X + 1)
+      3 (---------- + 1)
+             3
+@end(example)
+
+        This answer is not identical to the integrand.  The reason
+is that MACSYMA merely differentiated term by term.  As stated earlier,
+MACSYMA automatically applies only those simplification rules which are
+"obvious" and always desirable.  A given rule may sometimes make an 
+expression smaller and sometimes larger.  In such cases, MACSYMA leaves
+the decision to the user.  In this case the integrand can be recovered by
+rational simplification of the result with the RATSIMP command.
+@begin(example)
+
+(C12) RATSIMP(%);
+                             X
+(D12)                      ------
+                            3
+                           X  + 1
+@end(example)
+
+    The SIN program is familiar with several special functions, such
+as the error function, and tries to write integrals in terms of them when
+possible.  When no such "closed form" answer can be obtained, INTEGRATE
+simply returns a symbolic form of the integral.  Here, the example is
+a definite integration from 1 to 2.  For handling such cases, MACSYMA
+also provides numerical integration via the ROMBERG algorithm.
+@begin(example)
+
+(C13) INTEGRATE(%E^X^3,X,1,2);
+
+                          2
+                         /     3
+                         [    X
+(D13)                    I  %E   dX
+                         ]
+                         /
+                          1
+@hinge
+
+(C14) ROMBERG(%E^X^3,X,1,2);
+
+(D14)                    275.51098
+@end(example)
+
+        When computing exact solutions is intractable, one can often 
+resort to series approximations.  MACSYMA has an excellent Taylor series
+program.  One can obtain truncated series representations for SIN(X) and COS(X)
+as follows.  The arguments to the TAYLOR command are the expression to
+be expanded, the variable of expansion, the point around which the 
+expansion is to be done, and the highest degree term to be retained.
+@begin(example)
+
+(C15) TAYLOR(SIN(X),X,0,5);
+                         3    5
+                        X    X
+(D15)/T/            X - -- + --- + . . .
+                        6    120
+@hinge
+
+
+(C16) TAYLOR(COS(X),X,0,5);
+                         2    4
+                        X    X
+(D16)/T/            1 - -- + -- + . . .
+                        2    24
+@end(example)
+
+        A truncated series is denoted by the "/T/" next to the line
+label and the trailing dots.  MACSYMA retains certain information
+about such expressions, such as the "quality" of the approximation, so
+that when several series are combined, no terms are computed beyond the
+degree of the approximation.  In the example below, the X@+(4) and X@+(5)
+in the input series would produce a term in X@+(9); but, since the inputs
+are only good to the fifth degree, no higher order terms are computed.
+Here, the %TH(n) refers to the nth to last line.
+@begin(example)
+
+(C17) %*%TH(2);
+                         3      5
+                      2 X    2 X
+(D17)/T/          X - ---- + ---- + . . .
+                       3      15
+@end(example)
+
+        Actually, the term "Taylor series" is only an historic artifact.
+The TAYLOR program can also handle functions with poles and branch points 
+and automatically generates Laurent series when appropriate.
+@begin(example)
+
+(C18) TAYLOR(1/(COS(X)-SEC(X))^3,X,0,5);
+                                              2          4
+           1     1       11      347    6767 X    15377 X
+(D18)/T/ - -- + ---- + ------ - ----- - ------- - -------- + ...
+            6      4        2   15120   604800    7983360
+           X    2 X    120 X
+@end(example)
+
+        The SOLVE command is used to find the roots of certain 
+polynomial equations.  Not all equations can be solved in terms of
+simple radicals, but whenever SOLVE can find exact roots, it
+returns them as a list.  Here, the equation has 6 roots.
+
+@begin(example)
+
+(C19) SOLVE(X^6-1);
+
+           SQRT(3) %I + 1      SQRT(3) %I - 1           
+(D19) [X = --------------, X = --------------, X = - 1, 
+                2                   2                   
+
+            SQRT(3) %I + 1        SQRT(3) %I - 1
+      X = - --------------, X = - --------------, X = 1]
+                 2                     2
+@end(example)
+
+                One can check that these are in fact roots by plugging
+in for X and simplifying.  The simplest way to do this is with the ","
+syntax.  The expression to the left of the comma is simplified in the
+environment defined by the items to the right of the comma.  Here, 
+the input to SOLVE is simplified in an environment in which the first
+equation is true.  After expansion, the result is 0.
+@begin(example)
+
+(C20) X^6-1,FIRST(%);
+                                            6
+                            (SQRT(3) %I + 1)
+(D20)                       ----------------- - 1
+                                   64
+
+@hinge
+(C21) EXPAND(%);
+(D21)                                0
+@end(example)
+
+        SOLVE also works on systems of equations.  The result is a list
+of a list of solutions, since there may be more than one solution set in
+general.
+@begin(example)
+
+(C22) SOLVE([A*X+B*Y=0,C*X+D*Y=1],[X,Y]);
+
+                                B                A
+(D22)                 [[X = ---------, Y = - ---------]]
+                            B C - A D        B C - A D
+@end(example)
+
+        These are just a few of the mathematical functions defined
+in MACSYMA.  There are many more, but the examples above
+hopefully illustrate the type of capabilities available.  In addition to
+algebraic expressions, MACSYMA also deals with other symbolic data types,
+viz. vectors, matrices, tensors, equations and inequalities, strings, and even
+code.  When entering a matrix, for example, one applies the MATRIX command to 
+the rows of the matrix to be constructed.
+@begin(example)
+
+(C23) MATRIX([A,B,C],[D,E,F],[G,H,I]);
+
+                        [ A  B  C ]
+                        [         ]
+(D23)                   [ D  E  F ]
+                        [         ]
+                        [ G  H  I ]
+@end(example)
+
+        All the usual matrix operations are defined, e.g. transpose,
+determinant, inverse, echelon form, triangular form, etc.  In the following
+lines, the above matrix is multiplied by its transpose.
+
+@begin(example)
+
+(C24) TRANSPOSE(%);
+                        [ A  D  G ]
+                        [         ]
+(D24)                   [ B  E  H ]
+                        [         ]
+                        [ C  F  I ]
+
+@hinge
+(C25) %.%TH(2);
+      [   2    2    2                                     ]
+      [  G  + D  + A     G H + D E + A B  G I + D F + A C ]
+      [                                                   ]
+(D25) [                    2    2    2                    ]
+      [ G H + D E + A B   H  + E  + B     H I + E F + B C ]
+      [                                                   ]
+      [                                     2    2    2   ]
+      [ G I + D F + A C  H I + E F + B C   I  + F  + C    ]
+@end(example)
+
+        The operator "." denotes matrix multiplication.  If the "*"
+operator had been used, the matrices would have been multiplied 
+element by element.
+@begin(example)
+
+(C26) MATRIX([X^2,X,1],[Y^2,Y,1],[Z^2,Z,1]);
+                        [  2       ]
+                        [ X   X  1 ]
+                        [          ]
+(D26)                   [  2       ]
+                        [ Y   Y  1 ]
+                        [          ]
+                        [  2       ]
+                        [ Z   Z  1 ]
+@end(example)
+
+        This is the familiar Vandermonde matrix.  Its determinant has
+the interesting property that it is the product of the differences of
+the variables involved.  This is a property that would not normally be
+observed in a purely numerical system.
+@begin(example)
+
+(C27) DETERMINANT(%);
+               2       2    2     2      2
+(D27)     - Y Z  - X (Y  - Z ) + Y  Z + X  (Y - Z)
+
+@hinge
+(C28) FACTOR(%);
+(D28)            - (Y - X) (Z - X) (Z - Y)
+@end(example)
+
+        All the operations presented so far have been concerned with 
+the form of their arguments.  However, certain other operations and
+simplifications depend not only on the form but also the meaning of
+the symbols involved.  For example, MACSYMA returns the 
+expression in line C29 unchanged.  Although the variable N may look like an 
+integer to us, MACSYMA sees it as just an ordinary symbol that can take 
+on any value.  By declaring N to be an odd integer, one can get MACSYMA
+to simplify D29 to 0.
+@begin(example)
+
+(C29) COS(N*%PI/2);
+                             %PI N
+(D29)                    COS(-----)
+                               2
+
+@hinge
+(C30) DECLARE(N,ODD)$
+
+(C31) COS(N*%PI/2);
+(D31)                        0
+@end(example)
+
+        Note that what the user has told MACSYMA is partial information
+about N, not a specific value.  Similarly, one can declare partial 
+information about functions.
+@begin(example)
+
+(C32) F(X+Y);
+(D32)                     F(Y + X)
+
+@hinge
+(C33) DECLARE(F,LINEAR)$
+
+(C34) F(X+Y);
+(D34)                   F(Y) + F(X)
+@end(example)
+
+        MACSYMA has many simplification rules built in.  As was remarked
+earlier, not all these rules are automatically applied.  However, the user
+can enable most rules by setting a "switch" to TRUE.  For example, the rule
+which converts trigonometric functions of sums to expressions
+involving only trigonometric functions of terms is called TRIGEXPAND
+and can be enabled as shown in line C36.
+@begin(example)
+
+(C35) COS(X+Y);
+(D35)                    COS(Y + X)
+
+@hinge
+(C36) TRIGEXPAND:TRUE$
+
+(C37) COS(X+Y);
+(D37)          COS(X) COS(Y) - SIN(X) SIN(Y)
+
+@hinge
+(C38) TRIGEXPAND:FALSE$
+@end(example)
+
+        Setting TRIGEXPAND to FALSE turns the rule off again.  In contrast
+with such dormant rules, which must be explicitly turned on, there are
+also default rules, which the user can turn off.
+@begin(example)
+
+(C39) %E^(%I*%PI);
+(D39)                       - 1
+
+@hinge
+(C40) %EMODE:FALSE$
+
+(C41) %E^(%I*%PI);
+                            %I %PI
+(D41)                     %E
+@end(example)
+
+        Users can also define rules of their own.  For example,
+in order to define the exponential simplification rule above,
+one could use the TELLSIMP command.  After defining this rule,
+the previous simplification occurs, but this time due to the
+user-defined rule not the built-in one.
+@begin(example)
+
+(C42) TELLSIMP(%E^(%I*%PI),-1)$
+
+(C43) %E^(%I*%PI);
+(D43)                       - 1
+@end(example)
+
+        MACSYMA is also a full programming language, allowing
+recursive function definitions, conditionals, iterations, block
+statements, etc.  As an example, consider the task of defining
+the factorial function.  MACSYMA already has a factorial operator,
+as shown, but factorial is a good simple example.  (Note, incidentally,
+that there is no limit on the size of integers.)  To define a function,
+one uses the ":=" operator.
+@begin(example)
+
+(C44) 100!;
+(D44) 933262154439441526816992388562667004907159682643816214#
+
+685929638952175999932299156089414639761565182862536979208272#
+
+23758251185210916864000000000000000000000000
+
+@hinge
+(C45) FAC(N):=IF N=0 THEN 1 ELSE N*FAC(N-1);
+(D45)   FAC(N) := IF N = 0 THEN 1 ELSE N FAC(N - 1)
+
+(C46) FAC(5);
+(D46)                       120
+@end(example)
+
+        This programming ability has been of great value to MACSYMA.
+A significant percentage of the available mathematical capabilities
+were written in the MACSYMA language by users.
+
+        Although MACSYMA uses single precision floating point arithmetic
+as the default, it also has the capability of unlimited precision 
+arithmetic.  For example, to get 50 digits of %PI, one can simply set
+the precision variable to 50 and then use BFLOAT.
+@begin(example)
+
+(C47) FPPREC:50$
+
+(C48) BFLOAT(%PI);
+(D48) 3.1415926535897932384626433832795028841971693993751B0
+@end(example)
+
+        MACSYMA's numerical capabilities are currently quite powerful,
+and the future holds even more promise in this direction.  The IMSL subroutine 
+library has recently become available as part of MACSYMA.  In addition,
+there is a FORTRAN to MACSYMA translator which can modify
+already existing FORTRAN code for use with MACSYMA.
+
+        There is an extensive plotting package to
+help users view the results of their numerical computations.
+The package's capabilities include two-dimensional, contour, parametric,
+and three-dimensional plotting.
+
+        In summary, MACSYMA is a large interactive system for
+solving mathematical problems requiring computer-based algebraic
+manipulation, numerical computation, or plotting.  There is a 
+large amount of mathematical knowledge already built-in, and MACSYMA
+is an "operator-based" system for use as a extremely sophisticated
+calculating tool.

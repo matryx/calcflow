@@ -1,0 +1,125 @@
+
+This file describes how to use a MACSYMA analytic optimization package
+written by David R. Stoutemyer, (login name: STOUTE), Electrical
+Engineering Department, University of Hawaii, April, 1974. The package
+is designed to find the stationary points of a multivariate objective
+function, either unconstrained or subject to equality &/or inequality
+constraints.  Suggestions, questions, and interesting successful or
+unsuccessful examples are welcome.
+
+                         OTHER RELEVANT FILES:
+   OPTMIZ >  is a MACSYMA batch file containing the functions and 
+      option settings for optimization.
+   OPTMIZ DEMO  is a MACSYMA batch file demonstrating various ways
+      of using the optimization functions.
+   OPTMIZ OUTPUT  is a text file listing  OPTMIZ DEMO together with the
+      output that it produces when executed.
+
+                                USAGE:
+In MACSYMA, first type
+
+               BATCH(OPTMIZ, ">", DSK, SHARE2);
+
+Next, if interested in executing the demonstration with
+opportunities for interaction, type
+
+               DEMO(OPTMIZ, DEMO, DSK, SHARE2);
+
+or if interested in executing the demonstration without
+opportunities for interaction, type
+
+               BATCH(OPTMIZ, DEMO, DSK, SHARE2);
+
+Alternatively, or afterward, to try an example of your own, type
+
+               STAP(OBJECTIVE, LEZEROS, EQZEROS, DECISIONVARS);
+
+OBJECTIVE is an expression denoting the objective function or the
+   label of such an expression.
+LEZEROS is a list of expressions which are constrained to be less
+   than or equal to zero.  Use [] if no such constraints.
+EQZEROS is a list of expressions which are constrained to equal zero, or
+   the label of such a list.  Use [] if there are no such constraints.
+DECISIONVARS is a list of the decision variables or the label of
+   such a list.  May use [] if all variables in objective and
+   constraints are decision variables.
+
+For convenience, brackets may be omitted from one-expression lists, and
+   trailing [] arguments may be omitted.
+
+Global variables that you may wish to inspect, particularly in the 
+   event of an error interrupt, or if a suspected stationary point
+   is not found, or if you have interrupted an analysis that is
+   taking an unexpectedly long time to execute:
+      LAGRANGIAN  is the Lagrangian expression,
+      GRAD  is a list of components of the gradient of the Lagrangian,
+      GRADSUB  is GRAD evaluated at a stationary point.
+      STAPTS is a list of lists of equations, with each
+         equation representing one component of a solution in the form
+         decisionvariable = expression.
+      BHESS  is the Hessian matrix  with respect to the decision and
+         slack variables, minus EIGEN times the
+         identity matrix, bordered to the right with columns consisting
+         of gradients of the expressions constrained to be less than
+         or equal to zero, then gradients of the expressions constrained
+         to equal zero, bordered symmetrically below with the
+         transpose of these gradients, and bordered diagonally below
+         to the right with a zero matrix.  (reference:  Paul A.
+         Samuelson, Foundations of
+         Economic Analysis, Harvard University Press, Cambridge, 
+         Massachusetts, 1953, pp. 362-365, 376-378; or Caratheodory,
+         Variationsrechnung und partielle Differentialgleichungen
+         Erster Ordnung, Leipzig und Berlin, 1935, pp. 164-189.)
+      BHESSSUB  is BHESS evaluated at a stationary point.
+      CPOLYSUB  is the polynomial in EIGEN formed by evaluating the
+         determinant of BHESSSUB.
+      EIGENS  is a list of the labels of the solutions to CPOLYSUB = 0.
+         The stationary point is a minimum if all of the solutions
+         are positive, a saddlepoint if some are positive and some are 
+         negative, a MACSYMUM if all are negative, a non-minimum if some
+         are zero and the rest are negative, a non-maximum if some are
+         zero and the rest are positive, and completely undetermined if
+         all are zero.
+      DECSLKMULTS is a list of the decision variables, slack variables,
+         and lagrange multipliers.
+      NDEC  is the number of decision variables.
+      NEQZ  is the number of equality constraints.
+      NLEZ  is the number of inequality constraints, which is also the
+         number of slack variables.
+      NTOT  is the order of the bordered Hessian matrix.
+
+ROOTSEPSILON may affect the accuracy of results computed by  SOLVE
+   and REALROOTS  within STAP.  The default value of 1.0E-7 for this
+   macsyma global variable is as small as practical for pdp-10 single-
+   precision floating-point arithmetic.  Larger values save cpu time.
+
+                       LIMITATIONS:
+The class of functions that may be used and the practical limitations
+on the number of decision variables and constraints is primarily 
+dependent upon the capabilities of the built-in SOLVE function,  which
+is still under development.  As of April, 1974, SOLVE attempts to find
+   1.  all of the exact closed-form solutions to a single equation,
+which may involve the elementary transcendental functions, or 
+   2. the exact solution to full-rank simultaneous equations in which
+the unknowns enter linearly, or
+   3.  all of the real solutions to simultaneous multivariate
+polynomial equations.
+
+   The third case involves elimination, followed by the solution of a
+single polynomial equation and back substitution.  When the single
+polynomial equation is univariate, it is solved by an iterative
+floating-point algorithm, which will usually introduce some roundoff
+error, as revealed by slightly non-zero components in GRADSUB.  This
+roundoff error could cause ill-conditioned solutions to be missed. 
+However, integer roots are found exactly provided ROOTSEPSILON is less
+than 1.  Also, the back substitution may introduce some complex
+solutions even though only real roots of the single polynomial
+equation are computed.
+   As explained in OPTMIZ DEMO or OPTMIZ OUTPUT, SOLVE sometimes works
+for problems with rational gradients, and many problems with fractional
+powers exponential, trigonometric, or hyperbolic functions may be
+converted to the proper form.
+   SOLVE has succeeded on systems as complicated as 5 dense fully
+quadratic equations in 5 unknowns, such as would come from an
+unconstrained 5-variable cubic objective that contained most of the 
+possible terms.

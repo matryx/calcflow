@@ -1,0 +1,16 @@
+
+On MC, LOAD("spangl")$ to batch MC:SHARE1;SPANGL MACSYM. 
+On a lispm, LOAD("NIMBUS:>MACSYMA>SHARE>SPANGLES.MACSYMA")$
+(lispm LOAD still needs work).
+
+Then trigfun(rational*%PI) will range-reduce so that 0 < rational < %PI/4,
+and will then convert to an equivalent algebraic expression, whenever this 
+can be done without nesting radicals.  E.g.
+
+  TAN(17*%PI/24) becomes   - (SQRT(2) - 1) (SQRT(3) + SQRT(2)) .
+
+This set of rules is similar to SHARE1;NTRIG, except that NTRIG produces 
+some nested radicals, misses some non-nested radicals, doesn't range-reduce, 
+and leaves surds in denominators.  Also, SPANGL uses %PHI (the golden ratio) 
+in cases where NTRIG uses SQRT(5).  If people dislike this enough, I'll 
+(grumpily) change it to use SQRT(5). - RWG

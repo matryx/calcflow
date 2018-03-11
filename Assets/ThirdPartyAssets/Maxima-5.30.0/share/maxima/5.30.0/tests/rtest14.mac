@@ -1,0 +1,1960 @@
+jn(3,4);
+jn(3,4); /*0.1320341839226408 ;*/
+j0(1);
+j0(1); /*0.7651976865579665 ;*/
+bessel_j(0,1.0);
+0.7651976865579665 ;
+
+/* BESSEL is gone. This makes sure it's gone. */
+bessel(2,3);
+bessel(2,3)$
+
+bessel(2,3.0);
+bessel(2, 3.0);
+
+bessel_j(3,2.0);
+0.1289432494744021;
+
+bessel_j(-5,x);
+-bessel_j(5,x);
+bessel_j(-n,x);
+bessel_j(-n,x);
+
+diff(bessel_j(0,x),x);
+-bessel_j(1,x);
+diff(bessel_j(1,x),x);
+(bessel_j(0,x)-bessel_j(2,x))/2;
+diff(bessel_y(0,x),x);
+-bessel_y(1,x);
+diff(bessel_y(1,x),x);
+(bessel_y(0,x)-bessel_y(2,x))/2;
+diff(bessel_i(0,x),x);
+bessel_i(1,x);
+diff(bessel_i(1,x),x);
+(bessel_i(2,x)+bessel_i(0,x))/2;
+diff(bessel_k(0,x),x);
+-bessel_k(1,x);
+diff(bessel_k(1,x),x);
+-((bessel_k(2,x)+bessel_k(0,x))/2);
+
+besselexpand:true;
+true$
+
+bessel_j(1/2,x);
+sqrt(2/%pi)*sin(x)/sqrt(x);
+bessel_j(-1/2,x);
+sqrt(2/%pi)*cos(x)/sqrt(x);
+
+bessel_j(3/2,x);
+(sqrt(2)*sqrt(x)*(sin(x)/x^2-cos(x)/x))/sqrt(%pi);
+
+bessel_j(5/2,x);
+(sqrt(2)*sqrt(x)*((3/x^3-1/x)*sin(x)-(3*cos(x))/x^2))/sqrt(%pi)$
+
+ratsimp(bessel_j(-3/2,x) - (2*(-1/2)/x*bessel_j(-1/2,x)-bessel_j(1/2,x)));
+0$
+
+ratsimp(bessel_j(-5/2,x) - (2*(-3/2)/x*bessel_j(-3/2,x)-bessel_j(-1/2,x)));
+0$
+
+ratsimp(bessel_y(1/2,x) + sqrt(2/%pi)*cos(x)/sqrt(x));
+0$
+
+ratsimp(bessel_y(-1/2,x) - sqrt(2/%pi)*sin(x)/sqrt(x));
+0$
+
+ratsimp(bessel_y(3/2,x) - (2*(1/2)/x*bessel_y(1/2,x)-bessel_y(-1/2,x)));
+0$
+
+ratsimp(bessel_y(5/2,x) - (2*(3/2)/x*bessel_y(3/2,x)-bessel_y(1/2,x)));
+0$
+
+ratsimp(bessel_y(-3/2,x) - (2*(-1/2)/x*bessel_y(-1/2,x)-bessel_y(1/2,x)));
+0$
+
+ratsimp(bessel_y(-5/2,x) - (2*(-3/2)/x*bessel_y(-3/2,x)-bessel_y(-1/2,x)));
+0$
+
+bessel_i(1/2,x);
+sqrt(2*x/%pi)*sinh(x)/x;
+
+bessel_i(-1/2,x);
+sqrt(2*x/%pi)*cosh(x)/x;
+
+ratsimp(bessel_i(3/2,x) - (-2*(1/2)/x*bessel_i(1/2,x)+bessel_i(-1/2,x)));
+0$
+
+ratsimp(bessel_i(5/2,x) -(-2*(3/2)/x*bessel_i(3/2,x)+bessel_i(1/2,x)));
+0$
+
+ratsimp(bessel_i(-3/2,x) -(2*(-1/2)/x*bessel_i(-1/2,x)+bessel_i(1/2,x)));
+0$
+
+ratsimp(bessel_i(-5/2,x) - (2*(-3/2)/x*bessel_i(-3/2,x)+bessel_i(-1/2,x)));
+0$
+
+ratsimp(bessel_k(1/2,x) - sqrt(%pi/2)*%e^(-x)/sqrt(x));
+0$
+
+ratsimp(bessel_k(-1/2,x)- sqrt(%pi/2)*%e^(-x)/sqrt(x));
+0$
+
+ratsimp(bessel_k(3/2,x) - (2*(1/2)/x*bessel_k(1/2,x)+bessel_k(-1/2,x)));
+0$
+
+ratsimp(bessel_k(5/2,x) -(2*(3/2)/x*bessel_k(3/2,x)+bessel_k(1/2,x)));
+0$
+
+ratsimp(bessel_k(-3/2,x) -(-2*(-1/2)/x*bessel_k(-1/2,x)+bessel_k(1/2,x)));
+0$
+
+ratsimp(bessel_k(-5/2,x) -(-2*(-3/2)/x*bessel_k(-3/2,x)+bessel_k(-1/2,x)));
+0$
+
+(assume(p>0),true);
+true$
+(assume(4*p+a>0),true);
+true$
+besselexpand:false;
+false$
+
+specint(t^(1/2)*%e^(-a*t/4)*%e^(-p*t),t);
+sqrt(%pi)/(2*(p+a/4)^(3/2));
+
+prefer_whittaker:true;
+true$
+
+/*
+ * Reference:  Table of Integral Transforms.
+ */
+
+/*
+ * f24p146:
+ *
+ * t^(v-1)*exp(-t^2/(8*a))
+ *     -> gamma(v)*2^v*a^(v/2)*exp(a*p^2)*D[-v](2*p*sqrt(a))
+ *
+ * We have v = 7/4, a = b/4 so the result should be
+ *
+ *   gamma(7/4)*2^(7/4)*(b/4)^(7/8)*exp(b*p^2/4)*D[-7/4](p*sqrt(b))
+ *     = 3/4*gamma(3/4)*b^(7/8)*exp(b*p^2/4)*D[-7/4](p*sqrt(b))
+ *
+ * But
+ *
+ *   D[v](z) = 2^(v/2+1/4)*z^(-1/2)*%w[v/2+1/4,1/4](z^2/2)
+ *
+ * and
+ *
+ *   %w[k,u](z) = gamma(-2*u)/gamma(1/2-u-k)*%m[k,u](z)
+ *                 + gamma(2*u)/gamma(1/2+u-k)*%m[k,-u](z)
+ *
+ * Thus,
+ *
+ *   D[-7/4](p*sqrt(b)) = %w[-5/8,1/4](b*p^2/2)/(2^(5/8)*b^(1/4)*sqrt(p))
+ *
+ * and
+ *
+ *   %w[-5/8,1/4](b*p^2) 
+ *     = 8/3/gamma(3/8)*%m[-5/8,-1/4](b*p^2/2)
+ *         - 2*sqrt(%pi)/gamma(7/8)*%m[-5/8,1/4](b*p^2/2)
+ *
+ * And finally the transform is
+ *
+ * 3*gamma(3/4)*b^(5/8)*exp(b*p^2/4)/(4*2^(5/8)*sqrt(p))
+ *   *(8*sqrt(%pi)/3/gamma(3/8)*%m[-5/8,-1/4](b*p^2/2)
+ *      - 2*sqrt(%pi)/gamma(7/8)*%m[-5/8,1/4](b*p^2/2))
+ */
+(assume(b>0),true);
+true$
+
+specint(t^(3/4)*%e^(-t^2/2/b)*%e^(-p*t),t);
+
+/*
+-sqrt(%pi)*b^(5/8)
+          *(3*gamma(3/8)*gamma(3/4)*%e^(b*p^2/4)*%m[-5/8,1/4](b*p^2/2)
+           -4*gamma(3/4)*gamma(7/8)*%e^(b*p^2/4)
+             *%m[-5/8,-1/4](b*p^2/2))
+ /(2*2^(5/8)*gamma(3/8)*gamma(7/8)*sqrt(p))$
+ */
+
+3*gamma(3/4)*b^(7/8)
+ *%e^(b*p^2/4)
+ *(2^(19/8)*sqrt(%pi)*%m[-5/8,-1/4](b*p^2/2)/(3*gamma(3/8)*b^(1/4)*sqrt(p))
+  -2^(3/8)*sqrt(%pi)*%m[-5/8,1/4](b*p^2/2)/(gamma(7/8)*b^(1/4)*sqrt(p)))
+ /4;
+
+/*
+ * Sec. 4.5, formula (33):
+ *
+ * t^(-1/2)*exp(-2*sqrt(a)*sqrt(t)) ->
+ *    sqrt(%pi)/sqrt(p)*exp(a/p)*erfc(sqrt(a)/sqrt(p))
+ */
+ratsimp(specint(t^(-1/2)*%e^(-2*a^(1/2)*t^(1/2))*%e^(-p*t),t));
+-sqrt(%pi)*(erf(sqrt(a)/sqrt(p))-1)*%e^(a/p)/sqrt(p)$
+
+/*
+ * The Laplace transform of sin(a*t)*cosh(b*t^2) can be derived by
+ * expressing sin and cosh in terms of exponential functions.  We end
+ * up with terms of the form:
+ *
+ *   exp(+/-%i*a*t)*exp(+/-b*t^2)
+ *
+ * All of these can be computed using formula 24, p. 146 of Tables of
+ * Integral Transforms, which handle functions of the form
+ * t^(v-1)*exp(-t^2/8/a).
+ *
+ * But, we have terms of the form exp(b*t^2-p*t+%i*a*t).  I don't
+ * think this converges, so the Laplace transform doesn't exist if b >
+ * 0.
+ * 
+ */
+/*
+radcan(specint(sin(a*t)*cosh(b*t^2)*%e^(-p*t),t));
+-%e^-((p^2+2*%i*a*p+a^2)/(4*b))*(sqrt(%pi)*%e^((2*%i*a*p+a^2)/(2*b))*erf((%i 
+ *p+a)/(2*sqrt(b)))-sqrt(%pi)*%e^(a^2/(2*b))*erf((%i*p-a)/(2*sqrt(b)))+sqrt 
+ (%pi)*%i*%e^((p^2+2*%i*a*p)/(2*b))*erf((p+%i*a)/(2*sqrt(b)))-sqrt(%pi)*%i*%e 
+ ^(p^2/(2*b))*erf((p-%i*a)/(2*sqrt(b)))+(sqrt(%pi)*%i-sqrt(%pi)*%i*%e^(%i*a 
+ *p/b))*%e^(p^2/(2*b))-sqrt(%pi)*%e^((2*%i*a*p+a^2)/(2*b))+sqrt(%pi)*%e^(a^2/ 
+ (2*b)))/(8*sqrt(b)) $
+*/
+
+/*
+ * Sec 4.14, formula (27):
+ *
+ * t^(1/2)*bessel_j(1,2*a^(1/2)*t^(1/2)) ->
+ *    sqrt(a)/p^2*exp(-a/p)
+ */
+
+specint(t^(1/2)*bessel_j(1,2*a^(1/2)*t^(1/2))*%e^(-p*t),t);
+sqrt(a)*%e^-(a/p)/p^2$
+
+/*
+ * Sec 4.14, formula (3):
+ *
+ * t^2*bessel_j(v,a*t) ->
+ *    ((v^2-1)/r^3 + 3*p*(p+v*r)/r^5)*(a/R)^v
+ *
+ * where r = sqrt(p^2+a^2), R = p + r;
+ *
+ * (Maxima can't currently compute this transform for general v due to a bug
+ * in hyp.lisp.)
+ * This bug is no longer present after correction of legf24 in hyp.lisp.
+ */
+factor(ratsimp(specint(t^2*bessel_j(1,a*t)*%e^(-p*t),t)));
+3*a*p/(p^2+a^2)^(5/2) $
+
+(/* This is the Laplace transform of the Struve H function, see
+  http://dlmf.nist.gov/Draft/ST/about_ST.8.13.html */    
+ 2/(%pi*p)-2*p*log(p/(sqrt(p^2+1)-1))/(%pi*sqrt(p^2+1)),
+ /* And this should be the same as the specint of the next test below */
+ -diff(%%,p),
+ ev(fullratsimp(%%),logexpand:all));
+-((sqrt(p^2+1)*(2*p^2*log(sqrt(p^2+1)-1)-2*p^2*log(p))-2*p^2-2) /(%pi*p^6+2*%pi*p^4+%pi*p^2))$
+
+(ev(fullratsimp(specint(t*struve_h(1,t)*%e^(-p*t),t)),logexpand:all),
+ ratsimp(%%/%));
+1$
+
+/*
+ *
+ * From the comments for hstf in hypgeo.lisp:
+ *
+ * struve_h(1,t) = 2/sqrt(%pi)*(t/2)^2/gamma(1+3/2)*%f[1,2]([1],[3/2,5/2],-t^2/4)
+ *
+ * So
+ *
+ * struve_h(1,sqrt(t)) = 2/(3*%pi)*t*%f[1,2]([1],[3/2,5/2],-t/4)
+ *
+ * and the integrand is
+ *
+ * 2/(3*%pi)*t^(5/2)*exp(-p*t)*%f[1,2]([1],[3/2,5/2],-t/4).
+ *
+ * From the f19p220, the Laplace transform of this, with s = 7/2,
+ * c=-1/4, k = 1, is
+ *
+ * 2/(3*%pi)*gamma(7/2)/p^(7/2)*%f[2,2]([1,7/2],[3/2,5/2],-1/4/p)
+ *
+ * From the derivation of SPLITPFQ, we can simplify this
+ * hypergeometric function.
+ *
+ * %f[2,2]([1,7/2],[3/2,5/2],z) =
+ *
+ *      1
+ *     sum z^k/poch(5/2,k)*binomial(1,k) *diff(%f[2,2]([1,5/2],[3/2,5/2],z,k)
+ *     k=0
+ * 
+ * But %f[2,2]([1,5/2],[3/2,5/2],z) = %f[1,1]([1],[3/2],z) 
+ * and Maxima knows how to compute this.
+ */
+ratsimp(specint(t^(3/2)*struve_h(1,t^(1/2))*%e^(-p*t),t));
+-%e^-(1/(4*p))*(sqrt(%pi)*sqrt(p)
+				*(8*%i*erf(%i/(2*sqrt(p)))*p
+				 -%i*erf(%i/(2*sqrt(p))))
+		      -2*p*%e^(1/(4*p)))
+	/(8*sqrt(%pi)*p^(9/2)) $
+
+/* Trivial result because %ibes is not bessel_i
+   After specializing the pattern match of arbpow1 we get a more
+   correct noun form. The result is adjusted. DK. 
+ */ 
+specint(t*%ibes[0](a*t/2)*%ibes[1](a*t/2)*%e^(-p*t),t);
+/* %ibes[0](a*t/2)*%ibes[1](a*t/2)/p^2 $ */
+specint(t*%ibes[0](a*t/2)*%ibes[1](a*t/2)*%e^(-p*t),t);
+
+/*
+ * t^(3/4)*bessel_j(1/2,t)*bessel_j(1/4,t)
+ *
+ * Luke gives
+ *
+ * bessel_j(u,t)*bessel_j(v,t)
+ *    = (z/2)^(u+v)/gamma(u+1)/gamma(v+1)
+ *        * %f[2,3]([(u+v+1)/2,(u+v+2)/2],[u+1,v+1,u+v+1],-z^2)
+ *
+ * So the integrand is
+ *
+ * 8/2^(3/4)/sqrt(%pi)/gamma(1/4)*t^(3/2)*%f[2,3]([7/8,11/8],[3/2,5/4,7/4],-t^2)
+ *
+ * f19p220 gives
+ *
+ * t^(3/2)*%f[2,3]([7/8,11/8],[3/2,5/4,7/4],-t^2)
+ *
+ *    -> gamma(5/2)*p^(-5/2)
+ *         *%f[4,3]([7/8,11/8,5/2/2,(5/2+1)/2],[3/2,5/4,7/4],-4/p^2)
+ *    =  gamma(5/2)*p^(-5/2)
+ *         $%f[2,1]([7/8,11/8],[3/2],-4/p^2)
+ *
+ * And we know %f[2,1]([7/8,11/8],[3/2],z) is
+ *
+ * -2*(1/(sqrt(z)+1)^(3/4)-1/(1-sqrt(z))^(3/4))/(3*sqrt(z))
+ *
+ * Applying all of this gives the expected answer below.
+ */
+
+specint(t^(3/4)*bessel_j(1/2,t)*bessel_j(1/4,t)*%e^(-p*t),t);
+(2^(1/4)*%i*(1/((2*%i)/p+1)^(3/4)-1/(1-(2*%i)/p)^(3/4)))/(gamma(1/4)*p^(3/2))$
+
+/*
+ * Not sure this is right.  We can convert bessel_y to bessel_j,
+ * multiply them together and use the results for products of bessel_j
+ * functions.
+ *
+ * bessel_y(1/2,sqrt(t)) = -bessel_j(-1/2,sqrt(t))
+ *
+ * And maxima should be able to compute the transform of 
+ *
+ * t^(5/2)*bessel_j(-1/2,sqrt(t))^2
+ *
+ * Or note that bessel_y(1/2,sqrt(t)) =
+ * -sqrt(2/%pi)*cos(sqrt(t))/t^(1/4).  Then the integrand becomes
+ *
+ * 2/%pi*t^2*cos(sqrt(t))^2
+ *
+ * And maxima should know how to compute the transform of this.
+ *
+ * Unfortunately, the transforms of these two approaches don't agree.
+ * Yuck!
+ * After revision 1.65 of hypgeo.lisp it works as expected.
+ */
+result:factor(ratsimp(specint(t^(5/2)*bessel_y(1/2,t^(1/2))^2*%e^(-p*t),t)));
+%e^-(1/p)*(16*p^3*%e^(1/p)-18*p^2*%e^(1/p)+4*p*%e^(1/p)
+                                +15*sqrt(%pi)*%i*erf(%i/sqrt(p))*p^(5/2)
+                                -20*sqrt(%pi)*%i*erf(%i/sqrt(p))*p^(3/2)
+                                +4*sqrt(%pi)*%i*erf(%i/sqrt(p))*sqrt(p))
+       /(4*%pi*p^6);
+
+/* This is equal to the Laplace transform of 2/%pi*t^2*cos(sqt(t))^2 */
+expand(result-specint(t^(5/2)*bessel_y(1/2,t^(1/2))^2*%e^(-p*t),t)),
+   besselexpand:true;
+ 0;
+
+/*
+ * See formula (42), p. 187:
+ *
+ * t^(lam-1)*bessel_j(2*u,2*sqrt(a)*sqrt(t))*bessel_j(2*v,2*sqrt(a)*sqrt(t))
+ *
+ *    -> 2*gamma(lam+u+v)*a^(u+v)/gamma(2*u+1)/gamma(2*v+1)/p^(lam+u+v)
+ *        *%f[3,3]([u+v+1/2,u+v+1,lam+u+v],[2*u+1,2*v+1,2*u+2*v+1],-4*a/p)
+ *
+ * with Re(lam + u + v) > 0.
+ *
+ * So, we have lam = 3/2, u=v=1/4, a = 1/4, we get
+ *
+ * 4/%pi/p^2*%f[3,3]([1,3/2,2],[3/2,3/2,2],-1/p)
+ *  = 4/%pi/p^2*%f[1,1]([1],[3/2],-1/p)
+ *
+ * And %f[1,1]([1],[3/2],-1/p) is 
+ *
+ *     -sqrt(%pi)*%i*erf(%i*sqrt(1/p))*%e^-(1/p)/(2*sqrt(1/p))
+ *
+ * So, the final result is:
+ *
+ * -2*%i*erf(%i/sqrt(p))*%e^-(1/p)/(sqrt(%pi)*p^(3/2))
+ *
+ * But we also have 
+ *
+ * bessel_j(u,t)*bessel_j(v,t)
+ *    = (z/2)^(u+v)/gamma(u+1)/gamma(v+1)
+ *        * %f[2,3]([(u+v+1)/2,(u+v+2)/2],[u+1,v+1,u+v+1],-z^2)
+ *
+ * So bessel_j(1/2,sqrt(t))^2 is
+ *
+ *    2/%pi*%f[2,3]([1,3/2],[3/2,3/2,2],-t)*sqrt(t)
+ * 
+ * So the integrand is
+ *
+ *    2/%pi*t*%f[2,3]([1,3/2],[3/2,3/2,2],-t)
+ *     = 2/%pi*t*%f[1,2]([1],[3/2,2],-t)
+ *
+ * f19p220 then gives us the desired transform:
+ *
+ *    t*%f[1,2]([1],[3/2,2],-t)
+ *      -> gamma(2)*p^(-2)*%f[2,2]([1,2],[3/2,2],-1/p)
+ *
+ *      = p^(-2)*%f[1,1]([1],[3/2],-1/p)
+ *
+ * So the final answer is
+ *
+ *    -%i*erf(%i/sqrt(p))*%e^-(1/p)/(sqrt(%pi)*p^(3/2))
+ *
+ * Hmm.  This differs from formula 42 above.  I think there's a bug in
+ * formula 42, and it should be divided by 2.
+ *
+ * If we use the expression for the product of Bessel functions and
+ * f19p220, we can easily derive the result of formula 42, except,
+ * we're missing the factor of 2.  So, I think formula 42 is wrong.
+ */
+
+specint(t^(1/2)*bessel_j(1/2,t^(1/2))^2*%e^(-p*t),t);
+-%i*erf(%i/sqrt(p))*%e^-(1/p)/(sqrt(%pi)*p^(3/2)) $
+
+/*
+ * See formula (8), section 4.16 of Table of Integral Transforms:
+ *
+ * t^u*bessel_i(v,a*t) -> gamma(u+v+1)*s^(-u-1)*assoc_legendre_p(u,-v,p/s)
+ *
+ * where s = sqrt(p^2-a^2);
+ */
+factor(ratsimp(specint(t^(1/2)*bessel_i(1,t)*%e^(-p*t),t)));
+3*sqrt(%pi)*assoc_legendre_p(1/2,-1,p/sqrt(p^2-1))/(4*(p^2-1)^(3/4))$
+
+/*
+ * hankel_1(2/3,sqrt(t)) = bessel_j(2/3,sqrt(t))+%i*bessel_y(2/3,sqrt(t))
+ *
+ * Formula (34) below gives:
+ *
+ * t^(u-1/2)*bessel_j(2*v,2*sqrt(a)*sqrt(t)) ->
+ *   gamma(u+v+1/2)/sqrt(a)/gamma(2*v+1)*p^(-u)*exp(-a/p/2)*%m[u,v](a/p)
+ *
+ * Formula (50) gives
+ *
+ * t^(u-1/2)*bessel_y(2*v,2*sqrt(a)*sqrt(t)) ->
+ *   1/sqrt(a)*p^(-u)*exp(-a/p/2)*
+ *     (tan((u-v)*%pi)*gamma(u+v-1/2)/gamma(2*v+1) * %m[u,v](a/p)
+ *       - sec((u-v)*%pi)*%w[u,v](a/p))
+ *
+ * But A&S 13.1.34 says
+ *
+ * %w[k,u](z) = gamma(-2*u)/gamma(1/2-u-k)*%m[k,u](z) 
+ *               + gamma(2*u)/gamma(1/2+u-k)*%m[k,-u](z)
+ *
+ */
+
+ratsimp(specint(t*hankel_1(2/3,t^(1/2))*%e^(-p*t),t));
+/* Because of revision 1.110 of hyp.lisp Maxima knows in addition 
+ *    hgfred([7/3],[5/3],-1/(4*x)), 
+ * the result is in terms of the bessel_i function.
+
+-4*%i*gamma(1/3)*%m[-3/2,1/3](-1/(4*p))*%e^-(1/(8*p))/(3*(-1)^(5/6)*sqrt(3) 
+ *gamma(2/3)*p^(3/2))+4*gamma(1/3)*%m[-3/2,1/3](-1/(4*p))*%e^-(1/(8*p))/(3*( 
+ -1)^(5/6)*gamma(2/3)*p^(3/2))-8*%i*gamma(2/3)*%m[-3/2,-1/3](-1/(4*p))*%e^- 
+ (1/(8*p))/(3*(-1)^(1/6)*sqrt(3)*gamma(1/3)*p^(3/2)) $ */
+ 
+(((-1)^(1/6)*2^(2/3)*sqrt(3)*%i-3*(-1)^(1/6)*2^(2/3))
+        *gamma(1/3)^2*gamma(5/6)*bessel_i(11/6,-1/(8*p))
+        +10*(-1)^(5/6)*sqrt(3)*4^(2/3)*%i*gamma(1/6)*gamma(2/3)^2
+           *bessel_i(7/6,-1/(8*p))
+        +(45*(-1)^(1/6)*2^(2/3)-5*(-1)^(1/6)*2^(2/3)*3^(3/2)*%i)
+         *gamma(1/3)^2*gamma(5/6)*bessel_i(5/6,-1/(8*p))
+        +((9*(-1)^(1/6)*2^(5/3)-(-1)^(1/6)*2^(5/3)*3^(3/2)*%i)
+         *bessel_i(-1/6,-1/(8*p))
+         +(5*(-1)^(1/6)*2^(5/3)*sqrt(3)*%i-15*(-1)^(1/6)*2^(5/3))
+          *bessel_i(-7/6,-1/(8*p)))
+         *gamma(1/3)^2*gamma(5/6)
+        +(((-1)^(5/6)*sqrt(3)*4^(2/3)*%i*bessel_i(-11/6,-1/(8*p))
+         -5*(-1)^(5/6)*3^(3/2)*4^(2/3)*%i*bessel_i(-5/6,-1/(8*p)))
+         *gamma(1/6)
+         -2*(-1)^(5/6)*3^(3/2)*4^(2/3)*%i*gamma(1/6)*bessel_i(1/6,-1/(8*p)))
+         *gamma(2/3)^2)
+        *%e^-(1/(8*p))
+        /(15*2^(13/3)*4^(1/3)*gamma(1/3)*gamma(2/3)*p^(7/2))/-1;
+ 
+/*
+ * hankel_2(2,t) = bessel_j(3/4,t)-%i*bessel_y(3/4,t)
+ *
+ * Sec 4.14, formula (9):
+ *
+ * t^u*bessel_j(v,a*t) -> gamma(u+v+1)*r^(-u-1)*assoc_legendre_p(u,-v,p/r)
+ *
+ * where r = sqrt(p^2+a^2)
+ *
+ * Sec 4.14, formula (48)
+ *
+ * t^u*bessel_y(v,a*t) 
+ *    -> r^(-u-1)*(gamma(u+v+1)*cot(v*%pi)*assoc_legendre_p(u,-v,p/r)
+ *                  -gamma(u-v+1)*csc(v*%pi)*assoc_legendre_p(u,v,p/r))
+ *
+ * So, 
+ *
+ * t^(1/2)*bessej_j(3/4,t) 
+ *    -> gamma(9/4)*r^(-3/2)*assoc_legendre_p(1/2,-3/4,p/r)
+ *    =  5*gamma(1/4)/16*r^(-3/2)*assoc_legendre_p(1/2,-3/4,p/r)
+ *
+ * t^(1/2)*bessel_y(3/4,t) 
+ *    -> r^(-3/2)*(gamma(9/4)*cot(3/4*%pi)*assoc_legendre_p(1/2,-3/4,p/r)
+ *                  -gamma(3/4)*csc(3/4*%pi)*assoc_legendre_p(1/2,3/4,p/r))
+ *    =  r^(-3/2)*(-gamma(9/4)*assoc_legendre_p(1/2,-3/4,p/r)
+ *                  -gamma(3/4)*sqrt(2)*assoc_legendre_p(1/2,3/4,p/r))
+ */
+
+ratsimp(specint(t^(1/2)*hankel_2(3/4,t)*%e^(-p*t),t));
+''(ratsimp(5*gamma(1/4)/16/(p^2+1)^(3/4)*assoc_legendre_p(1/2,-3/4,p/sqrt(p^2+1))
++sqrt(2)*%i*assoc_legendre_p(1/2,3/4,p/sqrt(p^2+1))*gamma(3/4)
+       /(p^2+1)^(3/4)
+       +5*%i*gamma(1/4)*assoc_legendre_p(1/2,-3/4,p/sqrt(p^2+1))
+   /(16*(p^2+1)^(3/4))))$
+
+/*
+ * hankel_1(1,t) = bessel_j(1/2,t)+%i*bessel_y(1/2,t)
+ *
+ * So,
+ *
+ * t^(3/2)*bessel_j(1/2,t)
+ *     -> gamma(3/2+1/2+1)*r^(-5/2)*assoc_legendre_p(3/2,-1/2,p/r)
+ *     =  2*r^(-5/2)*assoc_legendre_p(3/2,-1/2,p/r)
+ * t^(3/2)*bessel_y(1/2,t) 
+ *     -> r^(-5/2)*(gamma(3/2+1/2+1)*cot(%pi/2)*assoc_legendre_p(3/2,-1/2,p/r)
+ *                  -gamma(3/2-1/2+1)*csc(%pi/2)*assoc_legendre_p(3/2,1/2,p/r))
+ *     =  -r^(-5/2)*assoc_legendre_p(3/2,1/2,p/r))
+ *
+ * assoc_legendre_p(3/2,+/-1/2,z) can be expressed in terms of 
+ * hypergeometric functions (A&S 8.1.2).
+ *
+ * assoc_legendre_p(3/2,-1/2,z) 
+ *   = 1/gamma(3/2)*((z+1)/(z-1))^(-1/4)*F(-3/2,5/2;3/2;(1-z)/2)
+ *   = sqrt(2)*(z-1)^(1/4)*z*(z+1)^(1/4)/sqrt(%pi)
+ *
+ * assoc_legendre_p(3/2,1/2,z) 
+ *   = 1/gamma(-1/2)*((z+1)/(z-1))^(1/4)*F(-3/2,5/2;-1/2;(1-z)/2)
+ *   = sqrt(2)*z*(2*z^2-3)/(sqrt(%pi)*(z-1)^(1/4)*(z+1)^(5/4))
+ *
+ *
+ * So the result should be
+ * 
+ * t^(3/2)*bessel_j(1/2,t)
+ *    -> 4*p/(sqrt(2)*sqrt(%pi)*(p^2+1)^2)
+ *
+ * t^(3/2)*bessel_y(1/2,t)
+ *    -> -sqrt(2)*(p-1)*(p+1)/(sqrt(%pi)*(p^2+1)^2)
+ */
+
+ratsimp(specint(t^(3/2)*hankel_1(1/2,t)*%e^(-p*t),t));
+-((sqrt(%pi)*(sqrt(2)*%i*p^2-2*sqrt(2)*p-sqrt(2)*%i))/(%pi*p^4+2*%pi*p^2+%pi))$
+
+/*
+ * Formula 2, p 105:
+ *
+ * t^(u-1)*bessel_y(v,a*t)
+ *    -> -2/%pi*gamma(u+v)*(a^2+p^2)^(-u/2)
+ *         *assoc_legendre_q(u-1,-v,p/sqrt(a^2+p^2))
+ *
+ * for a > 0, Re u > |Re v|
+ *
+ * We have u = 5/2, v = 1, so the result is
+ *
+ *    -4/%pi/(p^2+a^2)*assoc_legendre_q(3/2,-1,p/sqrt(p^2+a^2))
+ *
+ * The expected result is not correct. 
+ * With gamma(1+5/2) = 15*sqrt(%pi)/8 we get:
+ * 
+ * 15/(4*sqrt(%pi))*(p^2+a^2)^(-5/4)*assoc_legendre_q(3/3,1,p/sqrt(p^2+a^2))
+ *
+ * That is the result of Maxima too. The example is correct.
+ */
+factor(specint(t^(5/2-1)*bessel_y(1,a*t)*%e^(-p*t),t));
+-15*assoc_legendre_q(3/2,-1,p/sqrt(p^2+a^2))/(4*sqrt(%pi)*(p^2+a^2)^(5/4));
+
+/*
+ * A&S 13.1.32:
+ *
+ *   %m[k,u](t) = exp(-t/2)*t^(u+1/2)*M(1/2+u-k,1+2*u,t)
+ *
+ * So 
+ *
+ *   %m[1/2,1](t) = exp(-t/2)*t^(3/2)*M(1,3,t)
+ *
+ * and the integrand is:
+ *
+ *   t^(3/2)*%m[1/2,1](t)*exp(-p*t)
+ *      = t^3*M(1,3,t)*exp(-(p+1/2)*t)
+ *      = t^3*M(1,3,t)*exp(-p'*t)
+ *
+ * f19p220 will give us the Laplace transform of t^3*M(1,3,t):
+ *
+ *   gamma(4)/p'^4*F(1,4;3;1/p')
+ * 
+ * But p' = p+1/2, so the final result is
+ *
+ *   32*(6*p-1)/(2*p-1)^2/(2*p+1)^3
+ * 
+ */
+ratsimp(specint( t^(3/2)*%m[1/2,1](t)*%e^(-p*t),t));
+''(ratsimp(32*(6*p-1)/(2*p-1)^2/(2*p+1)^3));
+
+(assume(p>a),true);
+true;
+/*
+ * exp(a*t)*t^2*erf(sqrt(t))*exp(-p*t)
+ * 
+ * A&S 7.1.21 gives erf(z) = 2/sqrt(%pi)*z*M(1/2,3/2,-z^2) so 
+ * erf(sqrt(t)) = 2/sqrt(%pi)*sqrt(t)*M(1/2,3/2,-t)
+ *
+ * Therefore, the integrand, with p' = p-a, is
+ *
+ *   2/sqrt(%pi)*t^(5/2)*M(1/2,3/2,-t)*exp(-p'*t)
+ *
+ * Applying f19p220, the Laplace transform is
+ *
+ *   2/sqrt(%pi)*gamma(7/2)/p'^(7/2)*F(1/2,7/2;3/2;-1/p')
+ *
+ * Maxima can compute F(1/2,7/2;3/2;-1/p') and substituting p'=p-a
+ * gives us the desired answer.
+ *
+ * 15*(1/sqrt(1/(p-a)+1)-2/(3*(p-a)*(1/(p-a)+1)^(3/2))
+ *                      +1/(5*(p-a)^2*(1/(p-a)+1)^(5/2)))
+ *  /(4*(p-a)^(7/2))
+ */
+specint(%e^(a*t)*t^2*erf(t^(1/2))*%e^(-p*t),t);
+15*(1/sqrt(1/(p-a)+1)-2/(3*(p-a)*(1/(p-a)+1)^(3/2))
+                     +1/(5*(p-a)^2*(1/(p-a)+1)^(5/2)))
+ /(4*(p-a)^(7/2)) $
+
+/*
+ * Laplace transforms from Tables of Integral Transforms
+ */
+
+/*
+ * p 182, (1)
+ *
+ * bessel_j(v,a*t) -> r^(-1)*(a/R)^v
+ *
+ * where r = sqrt(p^2+a^2) and R = p + r
+ */
+(assume(v>0),true);
+true$
+
+radcan(specint(bessel_j(v,a*t)*exp(-p*t),t));
+a^v/(sqrt(p^2+a^2)*(sqrt(p^2+a^2)+p)^v)$
+
+/*
+ * (5)
+ * bessel_j(v,a*t)/t -> v^(-1)*(a/R)^v
+ *
+ * (Maxima doesn't recognize that gamma(v)/gamma(v+1) is 1/v.)
+ */
+radcan(specint(bessel_j(v,a*t)/t*exp(-p*t),t));
+a^v*gamma(v)/((sqrt(p^2+a^2)+p)^v*gamma(v+1))$
+
+/*
+ * (7)
+ * t^v*bessel_j(v,a*t) -> 2^v/sqrt(%pi)*gamma(v+1/2)*a^v*r^(-2*v-1)
+ *
+ * Maxima doesn't recognize the relationship between gamma(2*v+1) and
+ * gamma(v+1).
+ */
+radcan(specint(t^v*bessel_j(v,a*t)*exp(-p*t),t));
+a^v*gamma(2*v+1)/((p^2+a^2)^((2*v+1)/2)*2^v*gamma(v+1))$
+
+/*
+ * (9)
+ * t^u*bessel_j(v,a*t) -> gamma(u+v+1)*r^(-u-1)*P(u,-v,p/r)
+ */
+(assume(v+u+1>0),true);
+true$
+(assume(a>0),true);
+true$
+
+radcan(specint(t^u*bessel_j(v,a*t)*exp(-p*t),t));
+/* This is not the correct answer: see the formula above which is correct.
+   We had a bug in the routine legf24 in hyp.lisp.
+assoc_legendre_p(-u-1,-v,p/sqrt(p^2+a^2))*gamma(v+u+1)
+	/((p^2+a^2)^((u+1)/2))$
+ */
+
+assoc_legendre_p(u,-v,p/sqrt(p^2+a^2))*gamma(v+u+1)
+   /((p^2+a^2)^((u+1)/2))$
+
+/*
+ * (25)
+ * bessel_j(0,2*sqrt(a)*sqrt(t)) -> exp(-a/p)/p
+ */
+specint(bessel_j(0,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+%e^-(a/p)/p$
+
+/*
+ * (27)
+ * sqrt(t)*bessel_j(1,2*sqrt(a)*sqrt(t)) -> sqrt(a)*p^(-2)*exp(-a/p)
+ */
+specint(sqrt(t)*bessel_j(1,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+sqrt(a)*%e^-(a/p)/p^2$
+
+/*
+ * (29)
+ * t^(-1/2)*bessel_j(1,2*sqrt(a)*sqrt(t)) ->
+ *    sqrt(%pi)/sqrt(p)*exp(-a/2/p)*bessel_i(v/2,a/2/p)
+ */
+specint(t^(-1/2)*bessel_j(1,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+sqrt(%pi)*bessel_i(1/2,a/(2*p))*%e^-(a/(2*p))/sqrt(p)$
+
+/*
+ * (30)
+ * t^(v/2)*bessel_j(v,2*sqrt(a)*sqrt(t)) ->
+ *    a^(v/2)/p^(v+1)*exp(-a/p)
+ */
+specint(t^(v/2)*bessel_j(v,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+a^(v/2)*p^(-v-1)*%e^-(a/p)$
+
+/*
+ * (31)
+ * t^(-v/2)*bessel_j(v,2*sqrt(a)*sqrt(t)) ->
+ *    exp(%i*v*%pi)*p^(v-1)/a^(v/2)/gamma(v)*exp(-a/p)*
+ *     gamma_greek(v,a/p*exp(-%i*%pi)
+ *
+ * gamma_greek is the incomplete gamma function.
+ */
+specint(t^(-v/2)*bessel_j(v,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+p^(v-1)*%e^-(a/p)*v*gamma_greek(v,-a/p)/(a^(v/2)*(-1)^v*gamma(v+1))$
+
+/*
+ * (32)
+ * t^(v/2-1)*bessel_j(v,2*sqrt(a)*sqrt(t)) ->
+ *    a^(-v/2)*gamma_greek(v,a/p)
+ */
+specint(t^(v/2-1)*bessel_j(v,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+v*gamma(v)*gamma_greek(v,a/p)/(a^(v/2)*gamma(v+1))$
+
+/*
+ * (34)
+ * t^(u-1/2)*bessel_j(2*v,2*sqrt(a)*sqrt(t)) ->
+ *   gamma(u+v+1/2)/sqrt(a)/gamma(2*v+1)*p^(-u)*exp(-a/p/2)*%m[u,v](a/p)
+ *
+ * A&S 13.1.32 gives
+ *
+ *   %m[k,u](z) = exp(-z/2)*z^(u+1/2)*M(1/2+u-k,1+2*u,z)
+ *
+ * A&S 13.1.27 (Kummer Transformation):
+ *
+ *   M(a,b,z) = exp(z)*M(b-a,b,-z)
+ *
+ * So
+ *
+ *   %m[k,u](z) = exp(z/2)*z^(u+1/2)*M(1/2+u+k,1+2*u,-z)
+ *
+ * But %m[-k,u](-z) = exp(z/2)*(-z)^(u+1/2)*M(1/2+u+k,1+2*u,-z)
+ *
+ * Therefore
+ *
+ *   %m[k,u](z) = (-1)^(u+1/2)*%m[-k,u](-z)
+ *
+ * So the Laplace transform can also be written as
+ *
+ *   gamma(u+v+1/2)/sqrt(a)/gamma(2*v+1)*p^(-u)*exp(-a/p/2)
+ *     *%m[-u,v](-a/p)*(-1)^(v+1/2)
+ *
+ * Which is the answer we produce.
+ */
+prefer_whittaker:true;
+true$
+(assume(2*v+2*u+1>0),true);
+true$
+
+specint(t^(u-1/2)*bessel_j(2*v,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+%m[-u,v](-a/p)*%e^-(a/(2*p))*(-1)^(-v-1/2)*gamma(v+u+1/2)
+	 /(sqrt(a)*p^u*gamma(2*v+1))$
+
+/*
+ * (35)
+ * t^(u-1)*bessel_j(2*v,2*sqrt(a)*sqrt(t)) ->
+ *    gamma(u+v)*a^v/gamma(2*v+1)/p^(u+v)*%f[1,1](u+v,2*v+1,-a/p)
+ */
+prefer_whittaker:false;
+false$
+(assume(v+u>0),true);
+true$
+
+specint(t^(u-1)*bessel_j(2*v,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+a^v*p^(-v-u)*gamma(v+u)*%f[1,1]([v+u],[2*v+1],-a/p)/gamma(2*v+1)$
+
+/*
+ * (45)
+ * bessel_y(v,a*t) ->
+ *    a^v*cot(v*%pi)/r*R^(-v)-a^(-v)*csc(v*%pi)/r*R^v
+ * For |Re v| < 1.
+ *
+ */
+expand(factor(radcan(specint(exp(-p*t)*bessel_y(1/6,a*t),t))));
+sqrt(3)*a^(1/6)/(sqrt(p^2+a^2)*(sqrt(p^2+a^2)+p)^(1/6))
+	-2*(sqrt(p^2+a^2)+p)^(1/6)/(a^(1/6)*sqrt(p^2+a^2))$
+
+(assume(v1 > 0, v1 < 1), true);
+true$
+expand(factor(radcan(specint(exp(-p*t)*bessel_y(v1,a*t),t))));
+a^v1*cot(%pi*v1)/(sqrt(p^2+a^2)*(sqrt(p^2+a^2)+p)^v1)
+       -(sqrt(p^2+a^2)+p)^v1/(a^v1*sqrt(p^2+a^2)*sin(%pi*v1)) $
+
+
+/*
+ * (42)
+ *
+ * t^(lam-1)*bessel_j(2*u,2*sqrt(a)*sqrt(t))*bessel_j(2*v,2*sqrt(a)*sqrt(t)) ->
+ *    gamma(lam+u+v)/gamma(2*u+1)/gamma(2*v+1)*a^(u+v)/p^(lam+u+v)
+ *      *%f[3,3]([u+v+1/2,u+v+1,lam+u+v],[2*u+1,2*v+1,2*u+2*v+1],-4*a/p)
+ *
+ */
+(assume(u>0,v>0,lam>0),true);
+true$
+specint(t^(lam-1)*bessel_j(2*u,2*sqrt(a)*sqrt(t))*bessel_j(2*v,2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+a^(v+u)*p^(-v-u-lam)*gamma(v+u+lam)
+	      *%f[3,3]([v+u+1/2,v+u+1,v+u+lam],[2*u+1,2*v+1,2*v+2*u+1],-4*a/p)
+	/(gamma(2*u+1)*gamma(2*v+1))$ 
+
+
+/*
+ * (44)
+ *
+ * bessel_y(0,a*t) -> -2/%pi/sqrt(p^2+a^2)*asinh(p/a)
+ *
+ * Maxima returns 
+ *
+ * -2/%pi/sqrt(p^2+a^2)*legendre_q(0,p/sqrt(p^2+a^2))
+ *
+ * But legendre_q(0,p/r) = log((1+p/r)/(1-p/r))/2, where r = sqrt(p^2+a^2). 
+ * This simplifies to log((1+p/r)/a) = log(p/a+sqrt(1+(p/a)^2)) = asinh(p/a).
+ *
+ * So we have -2/%pi/sqrt(p^2+a^2)*asinh(p/a).
+ *
+ * With revision 1.64 of hypgeo.lisp we simplify the Legendre Q function. 
+ * The result is equivalent to the above formula. 
+ */
+specint(bessel_y(0,a*t)*exp(-p*t),t);
+
+/*-2/%pi/sqrt(p^2+a^2)*legendre_q(0,p/sqrt(p^2+a^2)) $*/
+
+ -log((sqrt(p^2+a^2)+p)/(sqrt(p^2+a^2)-p))/(%pi*sqrt(p^2+a^2));
+
+/*
+ * (46)
+ *
+ * t*bessel_y(0,a*t)
+ *     -> 2/%pi/(p^2+a^2)*(1-p/sqrt(p^2+a^2)*log((p+sqrt(p^2+a^2))/a))
+ *
+ * Maxima returns
+ *
+ *    -2/%pi/(p^2+a^2)*legendre_q(1,p/sqrt(p^2+a^2))
+ *
+ * But
+ *     legendre_q(1,p/r) = p/r/2*log((r+p)/(r-p)) - 1
+ *                       = p/r*log((p+r)/a) - 1
+ *
+ * So, the transform is
+ *
+ *     -2/%pi/(p^2+a^2)*(p/r*log((p+r)/a) - 1)
+ *
+ *       = 2/%pi/(p^2+a^2)*(1-p/sqrt(p^2+a^2)*log((p+sqrt(p^2+a^2))/a))
+ *
+ * The Legendre Q function simplifes accordingly.
+ */
+factor(specint(t*bessel_y(0,a*t)*exp(-p*t),t));
+/*-2/%pi/(p^2+a^2)*legendre_q(1,p/sqrt(p^2+a^2)) $*/
+
+(p*log((sqrt(p^2+a^2)+p)/(sqrt(p^2+a^2)-p))-2*sqrt(p^2+a^2))
+    /(-%pi*(p^2+a^2)^(3/2));
+
+/*
+ * (47)
+ *
+ * t*bessel_y(1,a*t)
+ *     -> -2/%pi/(p^2+a^2)*(p/a+a/sqrt(p^2+a^2)*log((p+sqrt(p^2+a^2))/a)
+ *
+ * Maxima returns
+ *   -4/%pi/(p^2+a^2)*assoc_legendre_q(1,-1,p/r)
+ *
+ * But
+ *
+ *   assoc_legendre_q(1,-1,z) 
+ *      = sqrt(1-z^2)/2/(z^2-1)*((z^2-1)*log((1+z)/(1-z)) - 2*z)
+ *
+ * So
+ *
+ *   assoc_legendre_q(1,-1,p/r) 
+ *      = (a/r)/2*(-(r/a)^2)*(-(a/r)^2*log((R/a)^2)-2*p/r)
+ *      = 1/2*(p/a+a/r*log(R/a))
+ *
+ * where R = p + r
+ *
+ * Finally, the transform is
+ *
+ * -2/%pi/(p^2+a^2)*(p/a+a/r*log(R/a))
+ *
+ * as expected.
+ *  
+ */
+factor(specint(t*bessel_y(1,a*t)*exp(-p*t),t));
+/*-4/%pi/(p^2+a^2)*assoc_legendre_q(1,-1,p/sqrt(p^2+a^2))$*/
+
+(a^2*log((sqrt(p^2+a^2)+p)/(sqrt(p^2+a^2)-p))+2*p*sqrt(p^2+a^2))
+        /(%pi*a*(p^2+a^2)^(3/2));
+
+
+/*
+ * Some tests for step7
+ */
+
+/*
+ * F(s,s+1/2;2*s+1;z) can be transformed to F(s,s+1/2;2*s+2;z) via
+ * A&S 15.2.6.  And we know that F(s,s+1/2;2*s+1;z) =
+ * 2^(2*s)/(1+sqrt(1-z))^(2*s).
+ *
+ * A&S 15.2.6 says 
+ * F(a,b;c+n;z) = poch(c,n)/poch(c-a,n)/poch(c-b,n)*(1-z)^(c+n-a-b)
+ *                 *diff((1-z)^(a+b-c)*F(a,b;c;z),z,n)
+ *
+ * F(s,s+1/2;2*s+2;z)
+ *    = poch(2*s+1,1)/poch(s+1,1)/poch(s+1/2,1)*(1-z)^(3/2)
+ *       *diff((1-z)^(-1/2)*F(s,s+1/2;2*s+1;z),z,1)
+ *
+ * 
+ */
+
+hgfred([s,s+1/2],[2*s+2],z)
+  -(2*s+1)/(s+1)/(s+1/2)*(1-z)^(3/2)*diff((1-z)^(-1/2)
+    *hgfred([s,s+1/2],[2*s+1],z),z);
+0$
+
+/*
+ * F(s,s+1/2;2*s+1;z) can be transformed to F(s+2,s+1/2;2*s+1;z) via
+ * A&S 15.2.3:
+ *    F(a+n,b;c;z) = z^(1-a)/poch(a,n)*diff(z^(a+n-1)*F(a,b;c;z),z,n)
+ *
+ * F(s+2,s+1/2;2*s+1,z) 
+ *    = z^(1-s)/s/(s+1)*diff(z^(s+1)*F(s,s+1/2;2*s+1;z),z,2)
+ */
+
+hgfred([s+2,s+1/2],[2*s+1],z)
+  - z^(1-s)/s/(s+1)*diff(z^(s+1)*hgfred([s,s+1/2],[2*s+1],z),z,2);
+0$
+
+/* Tests for Airy functions */
+closeto(e,tol):=block([numer:true,abse],abse:abs(e),if(abse<tol) then true else abse);
+closeto(e,tol):=block([numer:true,abse],abse:abs(e),if(abse<tol) then true else abse);
+
+/* Derivatives of Airy functions */
+diff(airy_ai(x),x);
+airy_dai(x);
+diff(airy_dai(x),x);
+x*airy_ai(x);
+diff(airy_bi(x),x);
+airy_dbi(x);
+diff(airy_dbi(x),x);
+x*airy_bi(x);
+
+/* Integrals of Airy functions */
+integrate(airy_ai(z),z);
+hypergeometric([1/3],[2/3,4/3],z^3/9)*z/(3^(2/3)*gamma(2/3))
+   -3^(1/6)*gamma(2/3)*hypergeometric([2/3],[4/3,5/3],z^3/9)*z^2/(4*%pi);
+integrate(airy_dai(z),z);
+airy_ai(z);
+integrate(airy_bi(z),z);
+3^(2/3)*gamma(2/3)*hypergeometric([2/3],[4/3,5/3],z^3/9)*z^2/(4*%pi)
+   +hypergeometric([1/3],[2/3,4/3],z^3/9)*z/(3^(1/6)*gamma(2/3));
+integrate(airy_dbi(z),z);
+airy_bi(z);
+
+/* A&S 10.4.1  Airy functions satisfy the Airy differential equation */
+diff(airy_ai(x),x,2)-x*airy_ai(x);
+0;
+diff(airy_bi(x),x,2)-x*airy_bi(x);
+0;
+
+/* A&S 10.4.4  Normalization of Airy Ai function */
+(c1:3^(-2/3)/gamma(2/3), closeto(airy_ai(0)-c1,1.0e-15));
+true;
+closeto(airy_bi(0)/sqrt(3)-c1,1.0e-15);
+true;
+
+/* A&S 10.4.5  Normalization of Airy Bi function */
+(c2:3^(-1/3)/gamma(1/3),closeto(-airy_dai(0)-c2,1.0e-15));
+true;
+closeto(airy_dbi(0)/sqrt(3)-c2,1.0e-14);
+true;
+
+/* Exact values A&S 10.4.4 and 10.4.5 */
+airy_ai(0);
+1/(3^(2/3)*gamma(2/3));
+airy_dai(0);
+-(1/(3^(1/3)*gamma(1/3)));
+airy_bi(0);
+1/(3^(1/6)*gamma(2/3));
+airy_dbi(0);
+3^(1/6)/gamma(1/3);
+
+/* A&S 10.4.10 - Wronskian */
+AS_10_4_10(z):=expand(airy_ai(z)*airy_dbi(z)-airy_bi(z)*airy_dai(z)-1/%pi);
+AS_10_4_10(z):=expand(airy_ai(z)*airy_dbi(z)-airy_bi(z)*airy_dai(z)-1/%pi);
+closeto(AS_10_4_10(1),1.0e-15);
+true;
+closeto(AS_10_4_10(1+%i),1.0e-15);
+true;
+closeto(AS_10_4_10(%i),1.0e-15);
+true;
+closeto(AS_10_4_10(-1+%i),2.0e-15);
+true;
+closeto(AS_10_4_10(-1),1.0e-15);
+true;
+closeto(AS_10_4_10(-1-%i),2.0e-15);
+true;
+closeto(AS_10_4_10(-%i),1.0e-15);
+true;
+closeto(AS_10_4_10(1-%i),1.0e-15);
+true;
+
+/* A&S 10.4.14 - only for z>0 ? */
+AS_10_4_14(z):=block([y:(2/3)*(z)^(3/2)],airy_ai(z)-(sqrt(z/3)*bessel_k(1/3,y)/%pi));
+AS_10_4_14(z):=block([y:(2/3)*(z)^(3/2)],airy_ai(z)-(sqrt(z/3)*bessel_k(1/3,y)/%pi));
+closeto(AS_10_4_14(1),1.0e-15);
+true;
+closeto(AS_10_4_14(2),1.0e-15);
+true;
+closeto(AS_10_4_14(5),1.0e-15);
+true;
+closeto(AS_10_4_14(10),1.0e-15);
+true;
+
+/* A&S 10.4.15 - only for z<0 ? */
+AS_10_4_15(z):=block([y:(2/3)*(-z)^(3/2)],airy_ai(z)-(1/3)*sqrt(-z)*(bessel_j(1/3,y)+bessel_j(-1/3,y)));
+AS_10_4_15(z):=block([y:(2/3)*(-z)^(3/2)],airy_ai(z)-(1/3)*sqrt(-z)*(bessel_j(1/3,y)+bessel_j(-1/3,y)));
+closeto(AS_10_4_15(-1),1.0e-15);
+true;
+closeto(AS_10_4_15(-2),1.0e-15);
+true;
+closeto(AS_10_4_15(-5),1.0e-14);
+true;
+closeto(AS_10_4_15(-10),1.0e-15);
+true;
+
+/* A&S 10.4.16 - only for z>0 ? */
+AS_10_4_16(z):=block([y:(2/3)*(z)^(3/2)],airy_dai(z)+(z/sqrt(3))*bessel_k(2/3,y)/%pi);
+AS_10_4_16(z):=block([y:(2/3)*(z)^(3/2)],airy_dai(z)+(z/sqrt(3))*bessel_k(2/3,y)/%pi);
+closeto(AS_10_4_16(1),1.0e-15);
+true;
+closeto(AS_10_4_16(2),1.0e-15);
+true;
+closeto(AS_10_4_16(5),1.0e-15);
+true;
+closeto(AS_10_4_16(10),1.0e-15);
+true;
+
+/* A&S 10.4.17 - only for z<0 ?, Appears to be a sign error in A&S */
+AS_10_4_17(z):=block([y:(2/3)*(-z)^(3/2)],airy_dai(z)-(z/3)*(bessel_j(-2/3,y)-bessel_j(2/3,y)));
+AS_10_4_17(z):=block([y:(2/3)*(-z)^(3/2)],airy_dai(z)-(z/3)*(bessel_j(-2/3,y)-bessel_j(2/3,y)));
+closeto(AS_10_4_17(-1),1.0e-15);
+true;
+closeto(AS_10_4_17(-2),1.0e-15);
+true;
+closeto(AS_10_4_17(-5),1.0e-14);
+true;
+closeto(AS_10_4_17(-10),1.0e-15);
+true;
+
+/* Test that complex float arguments are evaluated */
+airy_ai(%i);
+airy_ai(%i);
+floatnump(realpart(airy_ai(1.0*%i)));
+true;
+
+kill(c1,c2,AS_10_4_10,AS_10_4_14,AS_10_4_15,AS_10_4_16,AS_10_4_17);
+done;
+
+/* End of Airy function tests */
+
+/* Numerical tests of gamma function. */
+
+/* A&S Table 1.1, to 15 DP */
+closeto(gamma(1/2)-1.772453850905516,2e-15);
+true;
+closeto(gamma(1/3)-2.678938534707748,3.0e-15);
+true;
+closeto(gamma(7/4)-0.919062526848883,1e-15);
+true;
+
+/* Complex values.  Checked against A&S Table 6.7 to 12 DP */
+closeto(gamma(1+%i)-(0.49801566811836-0.15494982830181*%i),1e-14);
+true;
+closeto(gamma(1+5*%i)-(-0.00169966449436-0.00135851941753*%i),1e-14);
+true;
+closeto(gamma(2+3*%i)-(-0.08239527266561+0.09177428743526*%i),1e-14);
+true;
+
+/* Test numerical evaluation of Bessel functions
+ * When the order is 0, and the arg is a float, we should produce a number.
+ */
+closeto(bessel_j(0,1.0) - .7651976865579666, 1e-14);
+true;
+
+closeto(bessel_y(0,1.0) - .08825696421567691, 1e-14);
+true;
+
+closeto(bessel_i(0,1.0) - 1.266065877752009, 1e-14);
+true;
+
+closeto(bessel_k(0,1.0) - .4210244382407085, 1e-14);
+true;
+
+/*
+ * Tests for failed cases to see if we're returning the noun forms
+ */
+/* fail-on-f24p146test */
+specint(t^(-3/2)*exp(-t^2/8/a)*exp(-p*t),t);
+'specint(t^(-3/2)*exp(-t^2/8/a)*exp(-p*t),t);
+
+/* fail-on-f35p147test
+   Because we modified the construction of a noun form, we get a sligthly
+   different noun form as result. DK. */
+specint((2*t)^(-3/2)*exp(-2*sqrt(a)*sqrt(t))*exp(-p*t),t);
+/*'specint(exp(-p*t -2*sqrt(a)*sqrt(t))/(8*t^(3/2)),t);*/
+'specint(%e^(-p*t-2*sqrt(a)*sqrt(t))/(2*sqrt(2)*t^(3/2)),t);
+
+/* fail-on-f29p146test */
+specint(t^(v-1)*exp(1/8/t)*exp(-p*t),t);
+'specint(t^(v-1)*exp(1/8/t)*exp(-p*t),t);
+
+/* fail-in-arbpow (aka f1p137test) */
+specint(t^(-1)*exp(-p*t),t);
+'specint(exp(-p*t)/t,t);
+
+/* fail-in-f2p105vcond */
+(assume(p>3),0);
+0;
+
+specint(8*t^1*exp(3*t)*bessel_y(3,t)*exp(-p*t),t);
+'specint(8*bessel_y(3,t)*t*%e^(3*t-p*t),t)$
+
+/* fail-in-f50cond */
+specint(8*t^1*exp(3*t)*bessel_y(8,7*sqrt(t))*exp(-p*t),t);
+'specint(8*bessel_y(8,7*sqrt(t))*t*%e^(3*t-p*t),t);
+
+/* fail-in-dionarghyp-y */
+specint(8*t^1*exp(3*t)*bessel_y(8,7*t^(3/2))*exp(-p*t),t);
+'specint(8*bessel_y(8,7*t^(3/2))*t*%e^(3*t-p*t),t);
+
+/* The additionally phase factor in the calculation vanish, because of
+   the modificaton of the transformation to Bessel J in the code. DK.
+*/
+(assume(t>0,v2>1), radcan(specint(bessel_i(-v2,t)*exp(-p*t),t)));
+/*'specint((%e^((%i*%pi*v2-2*p*t)/2)*bessel_i(-v2,t))/(-1)^(v2/2),t);*/
+'(specint(bessel_i(-v2,t)*exp(-p*t),t));
+
+/* Verify fix for [ 1877522 ] erf(1.0),nouns wrong; causes plot2d(erf) to fail
+ */
+erf(1.0), nouns;
+0.8427007929497148;
+
+erf(1.0), erf;
+0.8427007929497148;
+
+erf(1.0);
+0.8427007929497148;
+
+/* [ 789059 ] simpexpt problem: sign called on imag arg */
+(-(-1)^(1/6))^(1/2);
+sqrt(-(-1)^(1/6));
+
+/* Further tests of bessel functions */
+/* The following numerical values are evaluated with the evaluation tool
+   of the website wwww.functions.wolfram.com with a precision of 16 digits
+   1998-2008 Wolfram Research, Inc. */
+
+(test_bessel(actual, ref, digits) := closeto(realpart(actual)-realpart(ref), 10^(-digits)) and closeto(imagpart(actual)-imagpart(ref), 10^(-digits)), 0);
+0;
+
+/* Numerical values for the bessel functions J with negative order */
+
+test_bessel(bessel_j(-1,-2.0),0.5767248077568734, 15);
+true;
+
+test_bessel(bessel_j(-1,2.0), -0.5767248077568734, 15);
+true;
+
+test_bessel(bessel_j(-1,-1.5), 0.5579365079100996, 15);
+true;
+
+test_bessel(bessel_j(-1,1.5), -0.5579365079100996, 15);
+true;
+
+test_bessel(bessel_j(-1.5, -2.0), -0.3956232813587035*%i, 15);
+true;
+
+test_bessel(bessel_j(-1.5, 2.0), -0.3956232813587035, 15);
+true;
+
+test_bessel
+  (bessel_j(-1.8, -1.5),- 0.2033279902093184 - 0.1477264320209275 * %i,15);
+true;
+
+test_bessel(bessel_j(-1.8, 1.5), -0.251327217627129314,15);
+true;
+
+test_bessel(bessel_j(-2,-1.5), 0.2320876721442147, 15);
+true;
+
+test_bessel(bessel_j(-2,1.5), 0.2320876721442147, 15);
+true;
+
+test_bessel(bessel_j(-2.5,-1.5), -1.315037204805194 * %i,15);
+true;
+
+test_bessel(bessel_j(-2.5,1.5), 1.315037204805194,15);
+true;
+
+test_bessel
+  (bessel_j(-2.3,-1.5), 0.5949438455752484 - 0.8188699527453657 * %i,14);
+true;
+
+test_bessel(bessel_j(-2.3,1.5), 1.012178926325313, 14);
+true;
+
+/* Numerical values for the bessel functions J with positiv order */
+
+test_bessel(bessel_j(1.5,1.0), 0.2402978391234270, 15);
+true;
+
+test_bessel(bessel_j(1.5,-1.0), -0.2402978391234270 * %i, 15);
+true;
+
+test_bessel(bessel_j(1.8,1.0), 0.1564953153109239, 14);
+true;
+
+test_bessel
+  (bessel_j(1.8,-1.0), 0.1266073696266034 - 0.0919856383926216 * %i, 15);
+true;
+
+test_bessel(bessel_j(2.0,1.0), 0.1149034849319005,15);
+true;
+
+test_bessel(bessel_j(2.0,-1.0),0.1149034849319005,15);
+true;
+
+test_bessel(bessel_j(2.5,1.0),0.04949681022847794,15);
+true;
+
+test_bessel(bessel_j(2.5,-1.0),0.04949681022847794 * %i,15);
+true;
+
+/* Numerical values for the bessel functions J with complex arg 
+   and positive or negative order*/
+
+test_bessel
+  (bessel_j(0,1.0+%i),0.9376084768060293 - 0.4965299476091221 * %i,15);
+true;
+
+test_bessel
+  (bessel_j(1,1.0+%i),0.6141603349229036 + 0.3650280288270878 * %i,15);
+true;
+
+test_bessel
+  (bessel_j(-1,1.0+%i),-0.6141603349229036 - 0.3650280288270878 * %i,14);
+true;
+
+test_bessel
+  (bessel_j(2,1.0+%i),0.0415798869439621 + 0.2473976415133063 * %i,15);
+true;
+
+test_bessel
+  (bessel_j(-2,1.0+%i),0.0415798869439621 + 0.2473976415133063 * %i,15);
+true;
+
+test_bessel
+  (bessel_j(2.3,1.0+%i),-0.0141615213034667 + 0.1677798241687935 * %i,15);
+true;
+
+test_bessel
+  (bessel_j(-2.3,1.0+%i),0.1920598664138632 - 0.5158676904105332 * %i,14);
+true;
+
+/******************************************************************/
+/* Numerical values for the bessel functions Y with negativ order */
+
+test_bessel
+  (bessel_y(-1,-2.0),-0.1070324315409375 + 1.1534496155137468 * %i,14);
+true;
+
+test_bessel(bessel_y(-1,2.0),0.1070324315409375,15);
+true;
+
+test_bessel
+  (bessel_y(-1,-1.5),-0.4123086269739113 + 1.1158730158201993 * %i,15);
+true;
+
+test_bessel(bessel_y(-1,1.5),0.4123086269739113,15);
+true;
+
+test_bessel(bessel_y(-1.5, -2.0),0.4912937786871623 * %i,15);
+true;
+
+test_bessel(bessel_y(-1.5, 2.0),-0.4912937786871623,15);
+true;
+
+test_bessel
+  (bessel_y(-1.8, -1.5),-0.6777414340388011 + 0.0857519944018923 * %i,14);
+true;
+
+test_bessel(bessel_y(-1.8, 1.5),-0.8377344836401481,14);
+true;
+
+test_bessel
+  (bessel_y(-2,-1.5),-0.9321937597629739 + 0.4641753442884295 * %i,15);
+true;
+
+test_bessel(bessel_y(-2,1.5),-0.9321937597629739,14);
+true;
+
+test_bessel(bessel_y(-2.5,-1.5),0.1244463597983876 * %i,14);
+true;
+
+test_bessel(bessel_y(-2.5,1.5),0.1244463597983876,15);
+true;
+
+test_bessel
+  (bessel_y(-2.3,-1.5),-0.3148570865836879 + 0.7565240896444820 * %i,14);
+true;
+
+test_bessel(bessel_y(-2.3,1.5),-0.5356668704355646,14);
+true;
+
+/* Numerical values for the bessel functions Y with positiv order */
+
+test_bessel(bessel_y(1.5,1.0),-1.102495575160179,14);
+true;
+
+test_bessel(bessel_y(1.5,-1.0),-1.102495575160179 * %i,14);
+true;
+
+test_bessel(bessel_y(1.8,1.0),-1.382351995367631,14);
+true;
+
+test_bessel
+  (bessel_y(1.8,-1.0),-1.1183462564605324 - 0.5593113771009602 * %i,14);
+true;
+
+test_bessel(bessel_y(2.0,1.0),-1.650682606816254,14);
+true;
+
+test_bessel
+  (bessel_y(2.0,-1.0),-1.650682606816254 + 0.229806969863801 * %i,14);
+true;
+
+test_bessel(bessel_y(2.5,1.0),-2.876387857462161,14);
+true;
+
+test_bessel(bessel_y(2.5,-1.0),2.876387857462161 * %i,14);
+true;
+
+
+/* Numerical values for the bessel functions Y with complex arg 
+   and positive or negative order*/
+
+test_bessel
+  (bessel_y(0,1.0+%i),0.4454744889360325 + 0.7101585820037345 * %i,15);
+true;
+
+test_bessel
+  (bessel_y(1,1.0+%i),-0.6576945355913452 + 0.6298010039928844 * %i,15);
+true;
+
+test_bessel
+(bessel_y(-1,1.0+%i),0.6576945355913452 - 0.6298010039928844 * %i,15);
+true;
+
+test_bessel
+  (bessel_y(2,1.0+%i),-0.4733680205344934 + 0.5773369575804951 * %i,14);
+true;
+
+test_bessel
+  (bessel_y(-2,1.0+%i),-0.4733680205344934 + 0.5773369575804951 * %i,14);
+true;
+
+test_bessel
+  (bessel_y(2.3,1.0+%i),-0.2476879981252862 + 0.7595467103431256 * %i,15);
+true;
+
+test_bessel
+  (bessel_y(-2.3,1.0+%i),-0.1570442638685963 + 0.5821870838327466 * %i,14);
+true;
+
+
+/******************************************************************/
+/* Numerical values for the bessel functions I with negativ order */
+
+test_bessel(bessel_i(-1,-2.0),-1.590636854637329,15);
+true;
+
+test_bessel(bessel_i(-1,2.0),1.590636854637329,15);
+true;
+
+test_bessel(bessel_i(-1,-1.5),-0.9816664285779076,15);
+true;
+
+test_bessel(bessel_i(-1,1.5),0.9816664285779076,15);
+true;
+
+test_bessel(bessel_i(-1.5, -2.0),0.9849410530002364 * %i,14);
+true;
+
+test_bessel(bessel_i(-1.5, 2.0),0.9849410530002364,14);
+true;
+
+test_bessel
+  (bessel_i(-1.8, -1.5),0.2026903980307014 + 0.1472631941876387 * %i,15);
+true;
+
+test_bessel(bessel_i(-1.8, 1.5),0.2505391103524365,15);
+true;
+
+test_bessel(bessel_i(-2,-1.5),0.3378346183356807,15);
+true;
+
+test_bessel(bessel_i(-2,1.5),0.3378346183356807,15);
+true;
+
+test_bessel(bessel_i(-2.5,-1.5),-0.8015666610717216*%i,14);
+true;
+
+test_bessel(bessel_i(-2.5,1.5),0.8015666610717216,14);
+true;
+
+test_bessel
+  (bessel_i(-2.3,-1.5),0.3733945265830230 - 0.5139334755917659 * %i,15);
+true;
+
+test_bessel(bessel_i(-2.3,1.5),0.6352567117441516,15);
+true;
+
+/* Numerical values for the bessel functions Y with positiv order */
+
+test_bessel(bessel_i(1.5,1.0),0.2935253263474798,15);
+true;
+
+test_bessel(bessel_i(1.5,-1.0),-0.2935253263474798*%i,13);
+true;
+
+test_bessel(bessel_i(1.8,1.0),0.1871011888310777,15);
+true;
+
+test_bessel
+  (bessel_i(1.8,-1.0),0.1513680414320980 - 0.1099753194812967 * %i,14);
+true;
+
+test_bessel(bessel_i(2.0,1.0),0.1357476697670383,15);
+true;
+
+test_bessel(bessel_i(2.0,-1.0),0.1357476697670383,15);
+true;
+
+test_bessel(bessel_i(2.5,1.0),0.05709890920304825,15);
+true;
+
+test_bessel(bessel_i(2.5,-1.0),0.05709890920304825 * %i,15);
+true;
+
+
+/* Numerical values for the bessel functions Y with complex arg 
+   and positive or negative order*/
+
+test_bessel
+  (bessel_i(0,1.0+%i),0.9376084768060293 + 0.4965299476091221 * %i,15);
+true;
+
+test_bessel
+  (bessel_i(1,1.0+%i),0.3650280288270878 + 0.6141603349229036 * %i,15);
+true;
+
+test_bessel
+  (bessel_i(-1,1.0+%i),0.3650280288270878 + 0.6141603349229036 * %i,15);
+true;
+
+test_bessel
+  (bessel_i(2,1.0+%i),-0.0415798869439621 + 0.2473976415133063 * %i,15);
+true;
+
+test_bessel
+  (bessel_i(-2,1.0+%i),-0.0415798869439621 + 0.2473976415133063 * %i,15);
+true;
+
+test_bessel
+  (bessel_i(2.3,1.0+%i),-0.0635524383467825 + 0.1559221140952053 * %i,15);
+true;
+
+test_bessel
+  (bessel_i(-2.3,1.0+%i),-0.4053256245784623 - 0.3724481230406298 * %i,14);
+true;
+
+/******************************************************************/
+/* Numerical values for the bessel functions I with negativ order */
+
+test_bessel
+  (bessel_k(-1,-2.0),-0.139865881816522-4.997133057057809*%i,14);
+true;
+
+test_bessel(bessel_k(-1,2.0),0.139865881816522,14);
+true;
+
+test_bessel
+  (bessel_k(-1,-1.5),-0.277387800456844 - 3.083996040296084*%i,14);
+true;
+
+test_bessel(bessel_k(-1,1.5),0.2773878004568438,15);
+true;
+
+test_bessel(bessel_k(-1.5, -2.0),-3.2741902342766302*%i,13);
+true;
+
+test_bessel(bessel_k(-1.5, 2.0),0.1799066579520922,15);
+true;
+
+test_bessel
+  (bessel_k(-1.8, -1.5),0.3929372194683435 - 1.0725774293000646*%i,15);
+true;
+
+test_bessel(bessel_k(-1.8, 1.5),0.4856971141526263,15);
+true;
+
+test_bessel
+  (bessel_k(-2,-1.5),0.5836559632566508 - 1.0613387550916862*%i,14);
+true;
+
+test_bessel(bessel_k(-2,1.5),0.5836559632566508,15);
+true;
+
+test_bessel
+  (bessel_k(-2.3,-1.5),0.465598659425186 - 1.354876241730594*%i,14);
+true;
+
+test_bessel(bessel_k(-2.3,1.5),0.7921237520153218,15);
+true;
+
+/* Numerical values for the bessel functions Y with positiv order */
+
+test_bessel(bessel_k(1.5,1.0),0.9221370088957891,14);
+true;
+
+/* kein Wert von function-site !? Ist das eine Nullstelle??? */
+test_bessel(bessel_k(1.5,-1.0),0,13);
+true;
+
+test_bessel(bessel_k(1.8,1.0),1.275527037541854,15);
+true;
+
+test_bessel
+  (bessel_k(1.8,-1.0),1.0319230501560911 + 0.1619402612577788*%i,14);
+true;
+
+test_bessel(bessel_k(2.0,1.0),1.624838898635177,14);
+true;
+
+test_bessel(bessel_k(2.0,-1.0),1.624838898635177 - 0.426463882082061*%i,14);
+true;
+
+test_bessel(bessel_k(2.5,1.0),3.227479531135262,14);
+true;
+
+test_bessel(bessel_k(2.5,-1.0),-3.406861044815549*%i,14);
+true;
+
+/* Numerical values for the bessel functions Y with complex arg 
+   and positive or negative order*/
+
+test_bessel
+  (bessel_k(0,1.0+%i),0.0801977269465178 - 0.3572774592853303*%i,15);
+true;
+
+test_bessel
+  (bessel_k(1,1.0+%i),0.0245683055237403 - 0.4597194738011894 * %i,15);
+true;
+
+test_bessel
+  (bessel_k(-1,1.0+%i),0.0245683055237403 - 0.4597194738011894 * %i,15);
+true;
+
+test_bessel
+  (bessel_k(2,1.0+%i),-0.3549534413309312 - 0.8415652386102600 * %i,13);
+true;
+
+test_bessel
+  (bessel_k(-2,1.0+%i),-0.3549534413309312 - 0.8415652386102600 * %i,13);
+true;
+
+test_bessel
+  (bessel_k(2.3,1.0+%i),-0.6635905911278042 - 1.0258894849569300 * %i,15);
+true;
+
+test_bessel
+  (bessel_k(-2.3,1.0+%i),-0.6635905911278042 - 1.0258894849569300 * %i,13);
+true;
+
+kill(closeto, test_bessel);
+done;
+
+/* Numerical tests of the Bessel functions using the Wronskians
+
+   The Wronskians combines different types of Bessel functions and 
+   Bessel functions with negative and positve order.
+   The results are very simple. Therefore the numerical calculation of the
+   Wronskians is a good test for the different parts of the algorithmen.  
+
+   Based on code by Dieter Kaiser.
+*/
+
+/* Test the Wronskian.  wf is the Wronskian function.  w_true is simplified Wronskian.
+ * eps is the max absolute error allowed, and the Wronskian is tested
+ * for values of the arg between -zlimit and zlimit.
+ */ 
+(test_wronskian(wf, w_true, eps, zlimit) :=
+block([badpoints : [], 
+       ratprint : false,
+       abserr : 0,
+       maxerr : -1],
+  for order:-1 thru 1 step 1/10 do
+  (
+    for z: -zlimit thru zlimit step 1 do
+    (
+      if notequal(z,0.0) then
+      (
+        result : float(rectform(wf(float(order),z))),
+        answer : float(rectform(w_true(float(order),z))),
+        abserr : abs(result - answer),
+	maxerr : max(maxerr, abserr),
+        if abserr > eps then
+        (
+          badpoints : cons([[order, z], result, answer, abserr], badpoints)
+        ) 
+      )
+    )
+  ),
+  /* 
+   * For debugging, if there are any bad points, return the maximum error 
+   * found as the first element.
+   */
+  if badpoints # [] then
+    cons(maxerr, badpoints)
+  else
+    badpoints
+), 0);
+0;
+
+/*******************************************************************************
+
+   Wronskian w_jj 
+
+   A&S 9.1.15 : J[n+1](z)*J[-n](z)+J[n](z)*J[-(n+1)](z) = -2*sin(n*pi)/(pi*z)
+   
+*******************************************************************************/
+
+w_jj(n,z) := bessel_j(n+1,z)*bessel_j(-n,z) + bessel_j(n,z)*bessel_j(-n-1,z);
+w_jj(n,z) := bessel_j(n+1,z) *bessel_j(-n,z) + bessel_j(n,z)*bessel_j(-n-1,z);
+
+/* Calculation of w_jj for real argument */
+
+test_wronskian('w_jj, lambda([n,z], -2.0*sin(n*%pi)/(z*%pi)), 1e-14, 10);
+[];
+
+
+/* Calculation of w_jj for complex argument */
+
+test_wronskian(lambda([n,z], expand(w_jj(n,%i*z))), 
+               lambda([n,z],-2.0*sin(n*%pi)/(%i*z*%pi)),
+               1e-8, 10);
+[];
+
+/*******************************************************************************
+
+   Wronskian w_jy
+
+   A&S 9.1.16: J[n+1](z)*Y[n](z)-J[n](z)*Y[n+1,z] = 2/(pi*z)
+
+*******************************************************************************/
+
+w_jy(n,z) := bessel_j(n+1,z)*bessel_y(n,z) - bessel_j(n,z)*bessel_y(n+1,z);
+w_jy(n,z) := bessel_j(n+1,z)*bessel_y(n,z) - bessel_j(n,z)*bessel_y(n+1,z);
+
+/* Calculation of w_yj for real argument */
+
+test_wronskian(w_jy, lambda([n,z], 2.0/(z*%pi)), 1e-14, 10);
+[];
+
+
+/* Calculation of w_jy for complex argument */
+
+test_wronskian(lambda([n,z], w_jy(n,z*%i)), lambda([n,z],2.0/(z*%i*%pi)), 1e-8, 10);
+[];
+
+/*******************************************************************************
+
+   Wronskian w_ii
+
+   A&S 9.6.14: I[n](z)*I[-(n+1)](z)-I[n+1](z)*I[-n](z) = -2*sin(n*pi)/(pi*z)
+
+*******************************************************************************/
+
+w_ii(n,z) := bessel_i(n,z)*bessel_i(-n-1,z) - bessel_i(n+1,z)*bessel_i(-n,z);
+w_ii(n,z) := bessel_i(n,z)*bessel_i(-n-1,z) - bessel_i(n+1,z)*bessel_i(-n,z);
+
+/* Calculation of w_ii for real argument */
+
+test_wronskian(w_ii, lambda([n,z],-2.0*sin(n*%pi)/(z*%pi)), 1e-10, 5);
+[];
+
+/* Calculation of w_ii for complex argument */
+
+test_wronskian(lambda([n,z], w_ii(n,z*%i)), 
+               lambda([n,z], -2.0*sin(n*%pi)/(z*%i*%pi)), 
+               1e-10, 5);
+[];
+
+/*******************************************************************************
+
+   Test Wronskian w_ik
+
+   A&S 9.6.15: I[n](z)*K[n+1](z)+I[n+1](z)*K[n](z) = 1/z
+
+*******************************************************************************/
+
+w_ik(n,z) := bessel_i(n,z)*bessel_k(n+1,z) + bessel_i(n+1,z)*bessel_k(n,z);
+w_ik(n,z) := bessel_i(n,z)*bessel_k(n+1,z) + bessel_i(n+1,z)*bessel_k(n,z);
+
+/* Calculation of w_ik for real argument */
+
+test_wronskian(w_ik, lambda([n,z], 1/z), 1e-10, 5);
+[];
+
+/* Calculation of w_ik for complex argument */
+
+test_wronskian(lambda([n,z], w_ik(n,z*%i)), lambda([n,z], 1/(z*%i)), 1e-12, 5);
+[];
+
+/******************************************************************************
+
+    Integrals of Bessel functions
+
+*******************************************************************************/
+
+integrate(bessel_j(0,x),x);
+x*(bessel_j(0,x)*(2-%pi*struve_h(1,x))+%pi*bessel_j(1,x)*struve_h(0,x))/2;
+
+integrate(bessel_j(1,x),x);
+-bessel_j(0,x);
+
+integrate(bessel_j(2,x),x);
+hypergeometric([3/2],[5/2,3],-x^2/4)*x^3/24;
+
+integrate(bessel_j(1/2,x),x);
+ 2^(3/2)*hypergeometric([3/4],[3/2,7/4],-x^2/4)*x^(3/2)/(3*sqrt(%pi));
+
+/* http://functions.wolfram.com/Bessel-TypeFunctions/BesselY/21/01/01/ */
+integrate(bessel_y(0,x),x);
+%pi*x*(bessel_y(1,x)*struve_h(0,x)+bessel_y(0,x)*struve_h(-1,x))/2;
+
+integrate(bessel_y(1,x),x);
+-bessel_y(0,x);
+
+integrate(bessel_y(2,x),x);
+%pi*x*(bessel_y(1,x)*struve_h(0,x)+bessel_y(0,x)*struve_h(-1,x))/2-2*bessel_y(1,x);
+
+integrate(bessel_y(3,x),x);
+-2*bessel_y(2,x)-bessel_y(0,x);
+
+integrate(bessel_y(10,x),x);
+%pi*x*(bessel_y(1,x)*struve_h(0,x)+bessel_y(0,x)*struve_h(-1,x))/2
+  -2*'sum(bessel_y(2*i+1,x),i,0,4);
+
+integrate(bessel_y(11,x),x);
+-2*'sum(bessel_y(2*i,x),i,1,5)-bessel_y(0,x);
+
+integrate(bessel_i(0,x),x);
+x*(bessel_i(0,x)*(%pi*struve_l(1,x)+2)-%pi*bessel_i(1,x)*struve_l(0,x))/2;
+
+integrate(bessel_i(1,x),x);
+bessel_i(0,x);
+
+/* http://functions.wolfram.com/Bessel-TypeFunctions/BesselK/21/01/01/ */
+integrate(bessel_k(0,x),x);
+%pi*x*(bessel_k(1,x)*struve_l(0,x)+bessel_k(0,x)*struve_l(-1,x))/2;
+
+integrate(bessel_k(1,x),x);
+-bessel_k(0,x);
+
+integrate(bessel_k(7,x),x);
+2*(-bessel_k(6,x)+bessel_k(4,x)-bessel_k(2,x))+bessel_k(0,x);
+
+integrate(bessel_k(8,x),x);
+%pi*(struve_l(0,x)*bessel_k(1,x)+struve_l(-1,x)*bessel_k(0,x))*x/2
+ +2*(-bessel_k(7,x)+bessel_k(5,x)-bessel_k(3,x)+bessel_k(1,x))$
+
+/******************************************************************************
+
+    Check the handling of realpart and impagpart for special case 
+    of the order and arg of the Bessel functions.
+
+*******************************************************************************/
+
+/* Check for the Bessel J function */
+
+(f(n,x):=[realpart(bessel_j(n,x)),imagpart(bessel_j(n,x))],done);
+done;
+
+(declare(n,integer),assume(x>0),done);
+done;
+
+f(n,x);
+[bessel_j(n,x),0];
+f(n,-x);
+[bessel_j(n,-x),0];
+
+f(n+1/2,x);
+[bessel_j(n+1/2,x),0];
+f(n+1/2,-x);
+[0,-%i*bessel_j(n+1/2,-x)];
+
+(declare(n_even,even),declare(n_odd,odd),%iargs:false,done);
+done;
+
+f(n_even,%i);
+[bessel_j(n_even,%i),0];
+f(n_odd,%i);
+[0,-%i*bessel_j(n_odd,%i)];
+
+f(n_even,x*%i);
+[bessel_j(n_even,x*%i),0];
+f(n_odd,x*%i);
+[0,-%i*bessel_j(n_odd,x*%i)];
+
+f(n_even,(x+1)^2*%i);
+[bessel_j(n_even,(x+1)^2*%i),0];
+f(n_odd,(x+1)^2*%i);
+[0,-%i*bessel_j(n_odd,(x+1)^2*%i)];
+
+(declare(j,imaginary),done);
+done;
+
+f(n_even,(x+1)^2*j);
+[bessel_j(n_even,(x+1)^2*j),0];
+f(n_odd,(x+1)^2*j);
+[0,-%i*bessel_j(n_odd,(x+1)^2*j)];
+
+/* Check the handling of realpart and imagpart for the Bessel I function */
+
+(f(n,x):=[realpart(bessel_i(n,x)),imagpart(bessel_i(n,x))],done);
+done;
+
+f(n,x);
+[bessel_i(n,x),0];
+f(n,-x);
+[bessel_i(n,-x),0];
+
+f(n+1/2,x);
+[bessel_i(n+1/2,x),0];
+f(n+1/2,-x);
+[0,-%i*bessel_i(n+1/2,-x)];
+
+f(n_even,%i);
+[bessel_i(n_even,%i),0];
+f(n_odd,%i);
+[0,-%i*bessel_i(n_odd,%i)];
+
+f(n_even,x*%i);
+[bessel_i(n_even,x*%i),0];
+f(n_odd,x*%i);
+[0,-%i*bessel_i(n_odd,x*%i)];
+
+f(n_even,(x+1)^2*%i);
+[bessel_i(n_even,(x+1)^2*%i),0];
+f(n_odd,(x+1)^2*%i);
+[0,-%i*bessel_i(n_odd,(x+1)^2*%i)];
+
+f(n_even,(x+1)^2*j);
+[bessel_i(n_even,(x+1)^2*j),0];
+f(n_odd,(x+1)^2*j);
+[0,-%i*bessel_i(n_odd,(x+1)^2*j)];
+
+/* Check the handling of realpart and imagpart for the Bessel K function */
+
+(f(n,x):=[realpart(bessel_k(n,x)),imagpart(bessel_k(n,x))],done);
+done;
+
+f(n,x);
+[bessel_k(n,x),0];
+f(n,-x);
+[realpart(bessel_k(n,-x)),imagpart(bessel_k(n,-x))];
+
+f(n+1/2,x);
+[bessel_k(n+1/2,x),0];
+f(n+1/2,-x);
+[0,-%i*bessel_k(n+1/2,-x)];
+
+f(n_even,%i);
+[realpart(bessel_k(n_even,%i)),imagpart(bessel_k(n_even,%i))];
+f(n_odd,%i);
+[realpart(bessel_k(n_odd,%i)),imagpart(bessel_k(n_odd,%i))];
+
+
+/* Check the handling of realpart and imagpart for the Bessel Y function */
+
+(f(n,x):=[realpart(bessel_y(n,x)),imagpart(bessel_y(n,x))],done);
+done;
+
+f(n,x);
+[bessel_y(n,x),0];
+f(n,-x);
+[realpart(bessel_y(n,-x)),imagpart(bessel_y(n,-x))];
+
+f(n+1/2,x);
+[bessel_y(n+1/2,x),0];
+f(n+1/2,-x);
+[0,-%i*bessel_y(n+1/2,-x)];
+
+f(n_even,%i);
+[realpart(bessel_y(n_even,%i)),imagpart(bessel_y(n_even,%i))];
+f(n_odd,%i);
+[realpart(bessel_y(n_odd,%i)),imagpart(bessel_y(n_odd,%i))];
+
+/* %iargs is false, so transformation disabled */
+bessel_j(v, %i*x);
+bessel_j(v, %i*x);
+
+bessel_i(v, %i*x);
+bessel_i(v, %i*x);
+
+/* Set %iargs to true to enable transformation */
+(%iargs:true, bessel_j(v, %i*x));
+(%i*x)^v/x^v*bessel_i(v,x);
+
+bessel_i(v, %i*x);
+(%i*x)^v/(x^v)*bessel_j(v, x);
+
+imagpart(bessel_j(2,%i*3.0));
+0;
+realpart(bessel_j(3,%i*3.0));
+0;
+
+imagpart(bessel_i(2,%i*3.0));
+0;
+realpart(bessel_i(3,%i*3.0));
+0;

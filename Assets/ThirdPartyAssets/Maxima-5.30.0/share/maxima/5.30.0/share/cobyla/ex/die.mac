@@ -1,0 +1,110 @@
+/*
+ * Maximum entropy estimate.  Based on an example from Kostas 
+ * Oikonomou.
+ *
+ * Given a possibly unfair die where each side n has a probability 
+ * of occurrence of xn, find the most likely value if it is known 
+ * that the average value is av.
+ *
+ * Let the probabilities be x1, x2, x3, x4, x5, x6.  The criterion for 
+ * most likely is maximizing the entropy H(X) = sum(-x*log(x), all X).
+ * We are subject to the constraints x1+x2+x3+x4+x5+x6 = 1, of course, 
+ * and to x1+2*x2+3*x3+4*x4+5*x5+6*x6 = av, since we know the average 
+ * value.  And, of course, since these are probabilities, 0 <= xn <= 1.
+ *
+ * This example shows how to get equality constraints when fmin_coblya
+ * normally wants inequality constraints.  If we want g(x) = 0, we can use 
+ * the inequality constraints g(x) >= 0 and -g(x) >= 0.
+ *
+ */
+
+HH(X) := -xreduce("+",map(lambda([x],x*log(x)),X));
+
+/*
+ * Although we want xn >= 0, the algorithm sometimes sets xn = 0, which 
+ * causes problems when we evaluate xn*log(xn).  So, instead of xn >= 0, 
+ * we use xn >= 1d-9.  (That is, xn - 1d-9 >= 0.)
+ */ 
+die(av) :=
+  fmin_cobyla(-HH([x1,x2,x3,x4,x5,x6]),
+  	      [x1,x2,x3,x4,x5,x6],
+	      makelist(1/6,k,1,6),
+	      iprint=1,
+	      constraints= [
+               	x1 >= 1d-9, x2 >= 1d-9, x3 >= 1d-9, x4 >= 1d-9, x5 >= 1d-9, x6 >= 1d-9,
+               	x1<=1, x2<=1, x3<=1, x4<=1, x5<=1, x6<=1,
+		x1+x2+x3+x4+x5+x6-1 = 0,
+		1*x1+2*x2+3*x3+4*x4+5*x5+6*x6=av]);
+
+
+/*
+ * If the faces are all equally likely, the average would be 7/2.
+ * Here's what the maximum-entropy result would be:
+ */
+
+die(7/2);
+/*
+   Normal return from subroutine COBYLA
+
+   NFVALS =  146   F =-1.791759E+00    MAXCV = 1.110223E-15
+   X = 1.666669E-01   1.666665E-01   1.666660E-01   1.666672E-01   1.666669E-01
+       1.666665E-01
+
+[[x1 = .1666669204062052,x2 = .1666665386187796,
+          x3 = .1666659607581757,x4 = 0.166667233111882,
+          x5 = 0.166666894995565,x6 = .1666664521093927],-1.791759469225061,
+         146, 0]
+
+We see that the probabilities are close to 1/6, as expected.
+*/
+
+/*
+ * A more interesting test is if the average is 4.5
+ */
+die(4.5);
+/*
+   Normal return from subroutine COBYLA
+
+   NFVALS =  160   F =-1.613581E+00    MAXCV = 1.154632E-14
+   X = 5.435361E-02   7.877099E-02   1.141600E-01   1.654467E-01   2.397745E-01
+       3.474942E-01Evaluation took 0.0500 seconds (0.0500 elapsed) using 1.443 MB.
+[[x1 = .05435294488099255,x2 = .07877230426143854,
+          x3 = 0.1141598558557,x4 = .1654458115488451,x5 = .2397748678844901,
+          x6 = .3474942155685333],-1.613581098146268,
+         142, 0]
+*/
+
+/*
+ * The obvious values for die(1) is x1=1 all others are 0.
+ * For die(6), we must have x6 = 1, and all other are 0.
+ */
+
+die(1);
+/*
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   58   F =-1.491961E-08    MAXCV = 8.823530E-10
+   X = 1.000000E+00   1.176470E-10   1.176471E-10   1.176471E-10   1.176471E-10
+       1.176471E-10Evaluation took 0.1100 seconds (0.1400 elapsed) using 4.477 MB.
+[[x1 = .9999999985294118,x2 = 1.176470448838174e-10,
+          x3 = 1.176470617973713e-10,x4 = 1.176470548584774e-10,
+          x5 = 1.176470500879878e-10,x6 = 1.176470604963287e-10],
+         -1.4919606548618195e-8,
+         58, 0]
+*/
+
+die(6);
+/*
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   56   F =-3.569971E-08    MAXCV = 6.818184E-10
+   X = 3.181816E-10   3.181817E-10   3.181817E-10   3.181817E-10   3.181816E-10
+       1.000000E+00
+[[x1 = 3.18181639022419e-10,x2 = 3.181816702474416e-10,
+          x3 = 3.181817014724642e-10,x4 = 3.181816546349303e-10,
+          x5 = 3.181815921848852e-10,x6 = .9999999990909101],
+         -3.5699705929961904e-8,
+         56, 0]
+*/

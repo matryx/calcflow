@@ -1,0 +1,77 @@
+vandpol.mac is from the book "Computer Algebra in Applied Mathematics:
+An introduction to MACSYMA", by Richard H Rand, Pitman (1984).
+
+The van der Pol equation is 
+
+  x''(T) + x - e*(1-x^2)*x'(T) = 0
+
+
+This program uses Lindstedt's method to find the limit cycle, the
+asymptotically stable periodic solution.  Time is "stretched" using
+the transformation 
+  t = w(e)*T
+where
+  w(e) = 1 + k[1]*e + k[2]*e^2 + ...
+We then expand x(t) as a power series in e
+  x(t) = y[0](t) + e*y[1] + e^2*y[2] + ...
+substitute this into the de and equate coefficients of e
+
+The original code produces an error.  A small patch (below) is
+required to get the code to run with maxima-5.9.0cvs. (A similar patch
+is needed for duffing.mac).
+
+The run below, using maxima-5.9.0cvs, reproduces the result on pages
+81-82 of the book.
+
+(C1) load("./vandpol.mac");
+(D1)                             ./vandpol.mac
+(C2) vanderpol(6);
+        3 SIN(t)   SIN(3 t)
+y (t) = -------- - --------
+ 1         4          4
+
+          5 COS(5 t)   3 COS(3 t)   COS(t)
+y (t) = - ---------- + ---------- - ------
+ 2            96           16         8
+
+        7 SIN(7 t)   35 SIN(5 t)   21 SIN(3 t)   7 SIN(t)
+y (t) = ---------- - ----------- + ----------- - --------
+ 3         576           576           256         256
+
+        61 COS(9 t)   2149 COS(7 t)   1085 COS(5 t)   47 COS(3 t)   73 COS(t)
+y (t) = ----------- - ------------- + ------------- - ----------- + ---------
+ 4         20480         110592           27648          1536         12288
+
+          5533 SIN(11 t)   7457 SIN(9 t)   110621 SIN(7 t)   52885 SIN(5 t)
+y (t) = - -------------- + ------------- - --------------- + --------------
+ 5           7372800          1228800          6635520          2654208
+
+                                                  2591 SIN(3 t)   12971 SIN(t)
+                                                - ------------- - ------------
+                                                     294912         4423680
+
+       6        4    2
+   35 e     17 e    e
+w= ------ + ----- - -- + 1
+   884736   3072    16
+
+
+The required patch is
+
+--- vandpol.mac.orig	2004-02-14 11:48:48.478448000 +1100
++++ vandpol.mac	2004-02-14 11:57:35.626449600 +1100
+@@ -43,7 +43,8 @@
+       IF i = 1 THEN f[i]:solve(coeff(temp1,cos(t)),k[i])
+ 	  ELSE f[i]:solve([coeff(temp1,cos(t)),coeff(temp1,sin(t))],
+ 			  [k[i],b[i-1]]),temp1:ev(temp1,f[i]))$
+-step3(i):=temp1:ev(ode2(temp1,y[i](t),t),%k1:a[i],%k2:b[i])$
++step3(i):=(temp1:ode2(temp1,y[i](t),t),
++  temp1:subst(a[i],%k1,temp1),temp1:subst(b[i],%k2,temp1))$
+ step4(i):=(temp2:rhs(temp1),temp2:diff(temp2,t),
+       temp2:solve(ev(temp2,t:0),a[i]))$
+ step5(i):=e[i]:ev(temp1,temp2)$
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

@@ -1,0 +1,12 @@
+;;; -*- Mode: lisp -*-
+
+(mk:defsystem draw
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "draw")
+  :source-extension "lisp"
+  :components
+  ((:file "grcommon")
+   (:file "gnuplot")
+   (:file "vtk")
+   (:file "picture")  ))
+

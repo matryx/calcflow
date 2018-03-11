@@ -1,0 +1,428 @@
+
+/* -------------------------------------- */
+
+isListCertLess(lhs,rhs) :=
+  isListLess(first(lhs),first(rhs));
+
+
+/* Order Isolating with certificates List */
+isListCertSort(isListCert) := 
+  sort(isListCert,isListCertLess);
+
+
+subInterval(checkSub,bigInt) :=
+  is(first(checkSub)>=first(bigInt) and
+     second(checkSub)<=second(bigInt));
+
+subIntervalInSet(intSet,bigInt) :=
+  block([found,i],
+  found : false,
+  if intSet=[] then
+    return(false),
+  i : 1,
+
+  while not(found) and i<= length(intSet) do
+    (
+    if subInterval(part(intSet,i),bigInt) then
+      found : true
+    else 
+      i : i + 1
+    ),
+  return(found)
+  
+  );
+
+
+
+/* Yun's square free decomposition algorithm */
+squareFreeFactor(pol,var) :=
+  block([g,res,c],
+  res : [],
+
+  g : gcd(pol,diff(pol,var),var),
+  q : g,
+
+  c : ratexpand(pol/q),
+  d : ratexpand(diff(pol,var)/g-diff(c,var)),
+  while not(degree(c,var)=0) do
+    (
+    q : gcd(c,d),
+    res : endcons(q,res),
+    c : ratexpand(c/q),
+    d : ratexpand(d/q-diff(c,var))
+    ),
+  return(res)
+  );
+
+
+
+bernsteinSplitWithZ(bcoeff,l,r,m) :=
+  block([
+        p : length(bcoeff)-1,
+        bern_first,
+        bern_second,
+        reduced_l,
+        reduced_r,
+        b : make_array('any),
+        i,j,nnorm,dnorm,ratnorm],
+  
+
+  ratnorm : (r-m)/(r-l),
+  nnorm : num(ratnorm),
+  dnorm : denom(ratnorm),
+  
+  b : make_array('any,p+1),
+  for i : 0 thru p do
+    b[i] : bcoeff[i+1],
+
+  bern_first : [dnorm^p * b[0]],
+  bern_second : [dnorm^p * b[p]],
+
+  for i : 1 thru p do
+    (
+
+    for j: 0 thru p-i do
+       b[j] : nnorm*b[j] + (dnorm-nnorm)*b[j+1], 
+
+    bern_first : endcons(dnorm^(p-i) * b[0],bern_first),
+
+    bern_second : cons(dnorm^(p-i)*b[p-i],bern_second)
+
+    ),
+
+  return([bern_first,bern_second])
+  );
+
+
+
+
+bernsteinMerge(lhs,rhs):=
+  block([extB,normfact,lhsNorm],
+
+  extB:bernsteinSplitWithZ(lhs[3],lhs[1][1],lhs[1][2],rhs[1][2])[1],
+
+  degP: length(lhs[3])-1,
+  leftEnd: lhs[1][1],
+  rightEnd: lhs[1][2],
+  middlePoint :rhs[1][2],
+
+  ratnorm : (rightEnd-middlePoint)/(rightEnd-leftEnd),
+  dnorm : denom(ratnorm),
+  
+  if signChanges(extB)=0 then
+    return([[lhs[1][1],rhs[1][2]],lhs[2],extB/dnorm^degP])
+  else
+    return(false)
+  );
+
+
+
+/* It compresses a certificate by checking the positivity */
+/* on adjacient intervals */ 
+/* resList contains items of the form */
+/* [[leftEnd,rightEnd],normFact,bernCoeff]] */
+
+compressCertificate(certList) :=
+  block([isList,resList,extBCoeff,firstItem,secondItem,degP,lhsNorm,
+         dnorm,ratnorm,leftEnd,rightEnd,middlePoint],
+    degP: length(certList[1][3]),
+    resList : [],
+    isList : certList,
+    while (length(isList)>1) do
+      (
+      firstItem : first(isList),
+      secondItem : second(isList),
+
+      merged:bernsteinMerge(firstItem,secondItem),
+
+      if not(merged=false) then
+        (        
+        extBCoeff: merged[3],
+        lhsNorm: lst_gcd(extBCoeff),
+
+        isList : rest(isList,2),
+
+        isList : cons(merged,isList)
+        )
+      else
+        (
+
+        resList : append(resList,[first(isList)]),
+        isList: rest(isList)
+        )
+      
+      ),
+    if length(isList)=1 then
+      resList : endcons(first(isList),resList),
+  return(resList)
+  );
+
+
+
+/* Certification of positivity for a square free polynomial and */
+/* for a polynomial with no roots in the considered interval    */
+deCasteljauNoCheckCertificateBetweenVerbose(pol,var,
+                       search_interval,verbosity) :=
+  block([sfList,sfCert,i,j,intUnion,noCertificate,
+         searchLeftEnd:search_interval[1],
+         searchRightEnd:search_interval[2],
+         sg,
+         degP:degree(pol,var),
+         res,bernIntSet,item,bernInt,noSubInt,
+         bcoeff,normFact,bsplit,leftEnd,rightEnd,middlePoint],
+
+  res : [],  
+
+  bCoeff : bernsteinCoeffList(pol,var,searchLeftEnd,searchRightEnd),
+  sg: sgn(bCoeff[1]),
+  normFact : apply(sarag_lcm,map(denom,bCoeff)),
+  bCoeff : normFact*bCoeff,
+  bernIntSet : [[search_interval,normFact,bCoeff]],
+
+  certificate:true,
+  while not(bernIntSet=[]) and certificate do
+    (
+    item : first(bernIntSet),
+    bernIntSet : rest(bernIntSet),
+    
+    bernInt : first(item),
+    normFact : second(item),
+    bCoeff : third(item),    
+
+    leftEnd : first(bernInt),
+    rightEnd : second(bernInt),
+ 
+    if first(bCoeff)=0 then
+     (
+     certificate:false,
+     res:[0,[leftEnd]],
+     return(res)
+     )
+    else
+     ( 
+     if last(bCoeff)=0 then
+      (
+      certificate:false,
+      res:[0,[rightEnd]],
+      return(res)
+      )
+     else
+      ( 
+      if first(bCoeff)*last(bCoeff)<0 then
+       (       
+       certificate:false,
+       res:[0,[leftEnd,rightEnd]], 
+       return(res)
+       )
+      )
+     ),
+    
+     sgnCh:signChanges(bCoeff),
+     if sgnCh=0 and certificate then
+        (
+        res : endcons([[leftEnd,rightEnd],normFact,bCoeff],res)
+        )
+     else
+        (    
+        middlePoint : (leftEnd+rightEnd)/2,
+        bsplit : bernsteinSplitWithZ(bCoeff,leftEnd,rightEnd,middlePoint), 
+
+        lhsSplit : first(bsplit),
+        lhsNorm : lst_gcd(lhsSplit),
+
+        rhsSplit : second(bsplit),
+        rhsNorm : lst_gcd(rhsSplit),
+
+        ratnorm : (rightEnd-middlePoint)/(rightEnd-leftEnd),
+        dnorm : denom(ratnorm),
+       
+        bernIntSet : endcons([[leftEnd,middlePoint],
+                             normFact/lhsNorm*dnorm^degP,
+                             lhsSplit/lhsNorm],bernIntSet),
+        bernIntSet : endcons([[middlePoint,rightEnd],
+                             normFact/rhsNorm*dnorm^degP,
+                             rhsSplit/rhsNorm],bernIntSet)
+
+        ) /* else */
+   ), /* while */
+  if certificate then
+    (
+    if COMPRESS_CERTIFICATE then
+      return([sg,compressCertificate(isListCertSort(res))])
+    else
+      return([sg,isListCertSort(res)])
+    )
+  else
+    return(res)
+); 
+
+
+/* Certification of positivity for a generic polynomial */
+deCasteljauCertificateBetweenVerbose(pol,var,search_interval,verbosity) :=
+  block([sqFreeCert,sfCert,i,j,intUnion,noCertificate,
+         res,sqFree,item,bernInt,noSubInt,
+         bcoeff,normFact,bsplit,leftEnd,rightEnd,middlePoint,exPol],
+
+  exPol:expandIf(pol),
+  searchLeftEnd : first(search_interval),
+  searchRightEnd : second(search_interval),
+
+  sqFree: SQUARE_FREE_ALGORITHM(exPol,var),
+  sqFreeCert: deCasteljauNoCheckCertificateBetweenVerbose(sqFree,var,
+                                                    search_interval,verbosity),
+       
+  if first(sqFreeCert)=0 then
+    (
+    certificate: false,
+    if verbosity>=NORMAL then
+      print("no certificate"),
+    return([0,sqFreeCert[2],sqFree])
+    )
+  else
+    return(
+           deCasteljauNoCheckCertificateBetweenVerbose(exPol,var,
+           search_interval,verbosity)
+           )
+
+ );
+
+
+
+
+localBernsteinProof(poly,local_cert,printFlag):=
+  block([cert_sgn,sgnCh],
+ sgnCh:signChanges(local_cert[3]),
+ if sgnCh=0 then
+   cert_sgn:sgn(local_cert[3][1])
+ else
+   cert_sgn:0,
+  if cert_sgn=0 then
+    (
+    if printFlag then
+      (
+      sprint("It has a zero in ",local_cert[1]),
+      print("because in this interval it has ")
+      )
+    else
+      print("since in this interval it has "),
+    print("the following Bernstein coefficients ", 
+            (1/local_cert[2])*local_cert[3])
+    )
+  else
+    if cert_sgn= 1 then
+      (
+      if printFlag then
+        (
+        sprint("It is positive in ",local_cert[1]),
+        print("because in this interval it has ")
+        )
+      else
+        print("because in this interval it has "),
+      print("the following Bernstein coefficients ", 
+            (1/local_cert[2])*local_cert[3])
+      )
+    else
+      if cert_sgn=-1 then
+        (
+        if printFlag then
+          (
+          sprint("It is negative in ",local_cert[1]),
+          print("because in this interval it has ")
+          )
+        else
+          print("because in this interval it has "),
+        print("the following Bernstein coefficients ",
+              (1/local_cert[2])*local_cert[3])
+        ),
+  return(true)
+  );
+
+
+
+bernsteinProof(poly,var,search_interval,cert):=
+  block([i,exPol],
+  exPol:expandIf(pol),
+  
+  if cert[1]=0 then
+     (
+     sprint("The polynomial ", exPol, " has a zero in ", 
+            search_interval, "."),
+     if length(cert[2])= 1 then /* root found */
+       print("In fact it is zero for ", var, " = ", cert[2][1])
+
+     else
+       (
+       if expand(cert[3])=exPol then
+         ( /* square-free, interval found */
+
+         print("In fact it has value ",
+                subst(cert[2][1], var, exPol), " for ", var, " = ", cert[2][1]),
+         print("and it has value ",
+                subst(cert[2][2], var, exPol), " for ", var, " = ", cert[2][2])
+         )
+       else
+         ( /* non-square-free, interval found */
+
+         print("In fact its square-free part ", cert[3]),
+         print("has value ", subst(cert[2][1],var,cert[3]), 
+               " for ", var, " = ", cert[2][1]),
+         print("and  has value ", 
+               subst(cert[2][2],var,cert[3])," for ", var, " = ",  cert[2][2])
+         )
+       )
+     )
+  else
+    if cert[1]=1 then
+      (
+      sprint("The polynomial ", exPol, " is positive in ", 
+              search_interval),
+      if length(cert[2])>1 then
+        (
+        sprint("."),
+        print("In fact we have that:  "), 
+        for i: 1 thru length(cert[2]) do
+          (
+          sprint("(",i,")"),
+          localBernsteinProof(poly,cert[2][i],true)
+          )
+        )
+      else
+        localBernsteinProof(poly,cert[2][1],false)
+      )
+    else
+      (
+      sprint("The polynomial ", exPol, " is negative in ", 
+              search_interval),
+      if length(cert[2])>1 then
+        (
+        sprint("."),
+        print("In fact we have: "),
+        for i: 1 thru length(cert[2]) do
+          (
+          sprint("(",i,")"),
+          localBernsteinProof(poly,cert[2][i],true)
+          )
+        )
+      else
+        localBernsteinProof(poly,cert[2][1],false)      
+      ),
+  print(""),
+ 
+  if cert[1]=0 then
+    return(1)
+  else 
+    return(length(cert[2]))
+ );
+
+
+certificateProofBetween(pol,var, search_interval):=
+  bernsteinProof(pol,var,search_interval, certificateBetween(pol,var,search_interval));
+
+
+
+certificateProof([args]):=
+  if length(args)=2 then
+    certificateProofBetween(args[1],args[2],
+                            [DEFAULT_LEFT_END, DEFAULT_RIGHT_END])
+  else
+    certificateProofBetween(args[1],args[2], args[3]);

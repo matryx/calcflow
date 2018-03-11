@@ -1,0 +1,70 @@
+/* -*-Macsyma-*- */
+eval_when(batch,ttyoff:true)$
+/*ASB;RNCOMB 2
+12:32pm  Friday, 14 January 1983
+  Created.
+12:00pm  Saturday, 15 January 1983
+  At JPG's suggestion, removed dependence on GENUT by bringing in copies of
+    PREDPARTITION and RLOIEWL.
+10:02am  Sunday, 16 January 1983
+  LCM name changed to LCM_L to avoid name conflict with LCM in SHARE;FUNCTS >
+*/
+
+eval_when(translate,
+	  transcompile:true,
+	  define_variable:'mode)$
+
+put('rncomb,2,'version)$
+
+rncombine(exp):=block(
+  [partswitch:true,inflag:true,piece,pfeformat:true],
+  exp:rloiewl("+",combine(exp)),
+  pfeformat:false,
+  rncombine1(exp))$
+
+lcm_l(list):=
+  if list=[]
+  then 1
+  else block([rlist:rest(list),flist:first(list),frlist,
+	      partswitch:true,inflag:true,piece],
+	     if rlist=[]
+             then flist
+	     else lcm_l(cons(flist*(frlist:first(rlist))/gcd(flist,frlist),
+			     rest(rlist))))$
+
+rncombine1(list):=block(
+  [flist,splitdum,lsplitdum,flist_denom],
+  if list=[] then return(0),
+  flist:first(list),
+  if length(list)=1
+  then return(if inpart(num(flist),0)="+"
+	      then rncombine1(args(num(flist)))/denom(flist)
+	      else flist),
+  flist_denom:(flist_denom:denom(flist))/numfactor(flist_denom),
+  splitdum:predpartition(rest(list),
+			 lambda([dum],numberp(denom(dum)/flist_denom))),
+  if (lsplitdum:last(splitdum))#[]
+  then flist:denomthru(cons(flist*flist_denom,lsplitdum*flist_denom))/flist_denom,
+  flist+rncombine1(first(splitdum)))$
+
+denomthru(exp):=block(
+  [lcmdum:lcm_l(maplist('denom,exp))],
+  apply("+",lcmdum*exp)/lcmdum)$
+
+/* Functions from DGVAL;GENUT FASL: */
+
+rloiewl(op,exp):=block(
+  [partswitch:true,inflag:true,piece],
+  if inpart(exp,0)=op
+  then args(exp)
+  else [exp])$
+
+predpartition(list,predicate):=block(
+  [nolist:[],yeslist:[]],
+  for idum in reverse(list) do
+      if mode_identity(boolean,apply(predicate,[idum]))
+      then yeslist:cons(idum,yeslist)
+      else nolist:cons(idum,nolist),
+  [nolist,yeslist])$
+
+eval_when(batch,ttyoff:false)$

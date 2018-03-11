@@ -1,0 +1,9 @@
+gentranlang:fortran;
+gentran( type("implicit real*8", "a-h","o-z"),
+      type("real*8", m(4,4)),
+      for i:1 thru 4 do
+	  for j:1 thru 4 do
+	      if i=j
+		 then m[i,j] : 1.0
+		 else m[i,j] : 0.0,
+	type("integer", i,j));

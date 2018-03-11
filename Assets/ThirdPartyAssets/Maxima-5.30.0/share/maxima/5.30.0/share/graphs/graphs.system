@@ -1,0 +1,16 @@
+;;; -*- Mode: lisp -*-
+
+(mk:defsystem graphs
+  :source-pathname (maxima::maxima-load-pathname-directory)
+  :binary-pathname (maxima::maxima-objdir "share" "contrib" "graphs")
+  :source-extension "lisp"
+  :components
+  ((:file "graph_core")
+   (:file "spring_embedding")
+   (:file "isomorphism")
+   (:file "matching")
+   (:file "graph6")
+   (:file "demoucron")
+   (:file "dijkstra")
+   (:file "wiener_index")))
+

@@ -1,0 +1,139 @@
+/*  mnewton.mac v1.1 for Maxima (tested with Maxima 5.9.0).
+
+Multiple nonlinear functions solution using the Newton method.
+
+Usage:
+  mnewton(FuncList, VarList, GuessList);
+    FuncList  - list of functions to solve.
+    VarList   - list of variable names.
+    GuessList - list of initial approximations.
+
+Flags:
+  newtonepsilon
+    default: [10.0^(-fpprec/2)] - precision to determine when the
+    process has converged towards the solution. 
+  newtonmaxiter
+    default: [50] - maximum number of iterations to stop the process
+    if this one does not converge or if it converges too much slowly.
+
+Results:
+  The solution is returned in the same format that SOLVE() returns.
+  If the solution isn't found, [] is returned.
+
+History:
+  2003-11 Salvador Bosch Perez - version 1.0
+
+--
+
+Copyright (C) 2003  Salvador Bosch Perez
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+newtonepsilon:10.0^(-16/2)$ /* Default vaule is 10.0^-8 */
+newtonmaxiter:50$
+newtondebug:false$
+
+solve_by_lu(eqs, vars, field) := block(
+    [M, b, n : length(vars), sol],
+    M : augcoefmatrix(eqs, vars),
+    b : -col(M, n+1),
+    M : submatrix(M, n+1),
+    sol : linsolve_by_lu(M, b, field),
+    map("=", vars, first(args(transpose(sol[1]))))
+)$
+
+mnewton(FuncList, VarList, GuessList):=
+  block([nfunc, Solutions, Increments, solved:false, h, DF, numer:numer,
+         i, j, k, keepfloat:true, ratprint:false, field : 'complexfield, float2bf : true],
+    local(h),
+
+    if (not(listp(FuncList))) then FuncList: [FuncList],    
+    if (not(listp(VarList))) then VarList: [VarList],    
+    if (not(listp(GuessList))) then GuessList: [GuessList],    
+
+    /* Decide which field to use */
+    if bfloatp(newtonepsilon) then field : 'bigfloatfield,
+
+    if field = 'bigfloatfield then
+       FuncList : map(lambda([u], lhs(u)-rhs(u)), bfloat(FuncList))
+    else (
+       numer : true,
+       FuncList : map(lambda([u], lhs(u)-rhs(u)), float(FuncList))),
+
+    /* Depuration of the function arguments */   
+    nfunc:length(FuncList),
+    if length(VarList) # nfunc then (
+      print("mnewton: incorrect number of variable names (", nfunc,
+            "functions but", length(VarList), "variable names)."),
+      return(false)
+    ),
+    if length(GuessList) # nfunc then (
+      print("mnewton: incorrect number of approach values (", nfunc,
+            "variables but", length(GuessList), "approximation values)."),
+      return(false)
+    ),
+    /* apply(kill, VarList), */
+
+    DF: zeromatrix (nfunc, nfunc),
+    h : makelist (h[i], i, 1, nfunc),
+    for i:1 thru nfunc do
+      for j:1 thru nfunc do
+        DF[i][j] : diff (FuncList[i], VarList[j]),  /* Jacobian matrix */
+
+    if field = 'complexfield then
+      GuessList: float (GuessList)
+    else
+      GuessList: bfloat(GuessList),
+      
+    if newtondebug
+       then print ("DEBUG: initial GuessList:", GuessList),
+
+    /* Solution of the functions system */
+    for k:1 thru newtonmaxiter do (
+      Solutions:map("=", VarList, GuessList),
+
+      /* Solve 0 = F(x) + DF(x) h for h.
+       */
+      block
+        ([DFx: subst (Solutions, DF),
+        Fx: subst (Solutions, FuncList)],
+        Increments: solve_by_lu (transpose (DFx . h + Fx)[1], h, field)),
+
+      GuessList:GuessList + map ('rhs, Increments),
+      if field = 'complexfield then
+        GuessList: float (GuessList)
+      else
+        GuessList: bfloat(GuessList),
+
+      if newtondebug
+         then print ("DEBUG: Increments:", Increments, "GuessList:", GuessList),
+
+      solved:true,
+      for i:1 thru nfunc do
+        solved: solved and abs (rhs (Increments[i])) < newtonepsilon,
+      if solved then return(0)
+    ),
+
+    /* Return of solution or error */
+    if solved = false then (
+      print("mnewton: the process doesn't converge or it converges too slowly."),
+      return([])
+    ),
+    Solutions:map("=", VarList, GuessList),
+    if newtondebug
+       then print ("DEBUG: subst (Solutions, FuncList) =>", subst (Solutions, FuncList)),
+    return([Solutions])
+  )$

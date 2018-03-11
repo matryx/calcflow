@@ -1,0 +1,50 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * CTENSOR basics
+ */
+
+if get('ctensor,'version)=false then load(ctensor);
+("To select a stock metric, use ct_coordsys")$
+verbose:false;
+ct_coordsys(spherical);
+
+("The metric tensor is stored in the array lg")$
+lg;
+
+("A call to cmetric() sets up the inverse and other properties")$
+cmetric();
+ug;
+diagmetric;
+
+("Most metrics are available also as a frame base")$
+cframe_flag:true;
+ct_coordsys(spherical);
+
+("The inverse frame base is in the array fri; lfg is the frame metric")$
+fri;
+lfg;
+
+("Now, cmetric computes the frame base, and also the metric")$
+cmetric();
+fr;
+ufg;
+lg;
+
+("You can also supply a set of transformation rules to ct_coordsys")$
+ct_coordsys([r*cos(theta)*cos(phi),r*cos(theta)*sin(phi),
+             r*sin(theta),[r,theta,phi]]);
+cmetric();
+fri;
+lg:trigsimp(lg);
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

@@ -1,0 +1,30 @@
+/*-*-macsyma-*-*/
+base(pol):=if atom(pol) or inpart(pol,0) # "^" then pol else inpart(pol,1)$
+
+rateigenvectors(mat,[var]):=
+     block([scalarmatrixp:false,
+	    listarith:algebraic:inflag:true,
+	    ans:[],
+	    tellrats:tellrat(),
+	    id:ident(length(mat))],
+	   var:if var=[] then 'lambda else var[1],
+	   for pol in 'false*factor(charpoly(mat,var)) do
+	    if not(freeof(var,pol))
+	     then (rat(base(pol),var),
+		   tellrat(%%/coeff(%%,var,hipow(%%,var))),
+		   ans:cons(cons(pol,args(transpose(%rateig(echelon(mat-var*id),id)))),
+			    ans)),
+	   apply('tellrat,tellrats),
+	   ans)$
+
+%rateig(mat,id):=
+      if mat=-mat then id
+ else if mat*id=id then zeromatrix(length(mat),0)
+ else if mat[1,1]=0 then addcol(col(id,1),
+				 (id:submatrix(id,1))
+				.
+				 %rateig(submatrix(rest(mat,-1),1),
+					 rest(id)))
+ else  addrow(matrix(-rest(mat[1])),id:submatrix(1,id,1))
+      .
+       %rateig(submatrix(1,mat,1),id)$

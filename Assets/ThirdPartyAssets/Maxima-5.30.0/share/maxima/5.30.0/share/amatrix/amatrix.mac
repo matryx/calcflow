@@ -1,0 +1,333 @@
+/* copyright 2007 by Robert Dodier
+ * I release this file under the terms of the GNU General Public License.
+ */
+
+/* operations on amatrix objects */
+
+matchdeclare ([A%, A1%, A2%], amatrixp);
+matchdeclare ([X%, X1%, X2%], lambda ([e], not amatrixp (e)));
+
+/* troublesome ??: tellsimp (is (A%), amatrixmap (is, A%)); */
+
+tellsimpafter (A% < X%, amatrixmap (buildq ([X%], lambda ([a%], a% < X%)), A%));
+tellsimpafter (A% <= X%, amatrixmap (buildq ([X%], lambda ([a%], a% <= X%)), A%));
+tellsimpafter (A% = X%, amatrixmap (buildq ([X%], lambda ([a%], a% = X%)), A%));
+tellsimpafter (equal (A%, X%), amatrixmap (buildq ([X%], lambda ([a%], equal (a%, X%))), A%));
+tellsimpafter (notequal (A%, X%), amatrixmap (buildq ([X%], lambda ([a%], notequal (a%, X%))), A%));
+tellsimpafter (A% # X%, amatrixmap (buildq ([X%], lambda ([a%], a% # X%)), A%));
+tellsimpafter (A% >= X%, amatrixmap (buildq ([X%], lambda ([a%], a% >= X%)), A%));
+tellsimpafter (A% > X%, amatrixmap (buildq ([X%], lambda ([a%], a% > X%)), A%));
+
+tellsimpafter (X% < A%, amatrixmap (buildq ([X%], lambda ([a%], X% < a%)), A%));
+tellsimpafter (X% <= A%, amatrixmap (buildq ([X%], lambda ([a%], X% <= a%)), A%));
+tellsimpafter (X% = A%, amatrixmap (buildq ([X%], lambda ([a%], X% = a%)), A%));
+tellsimpafter (equal (X%, A%), amatrixmap (buildq ([X%], lambda ([a%], equal (X%, a%))), A%));
+tellsimpafter (notequal (X%, A%), amatrixmap (buildq ([X%], lambda ([a%], notequal (X%, a%))), A%));
+tellsimpafter (X% # A%, amatrixmap (buildq ([X%], lambda ([a%], X% # a%)), A%));
+tellsimpafter (X% >= A%, amatrixmap (buildq ([X%], lambda ([a%], X% >= a%)), A%));
+tellsimpafter (X% > A%, amatrixmap (buildq ([X%], lambda ([a%], X% > a%)), A%));
+
+tellsimpafter (A1% < A2%, amatrixmap ("<", A1%, A2%));
+tellsimpafter (A1% <= A2%, amatrixmap ("<=", A1%, A2%));
+tellsimpafter (A1% = A2%, amatrixmap ("=", A1%, A2%));
+tellsimpafter (equal (A1%, A2%), amatrixmap ('equal, A1%, A2%));
+tellsimpafter (notequal (A1%, A2%), amatrixmap ('notequal, A1%, A2%));
+tellsimpafter (A1% # A2%, amatrixmap ("#", A1%, A2%));
+tellsimpafter (A1% >= A2%, amatrixmap (">=", A1%, A2%));
+tellsimpafter (A1% > A2%, amatrixmap (">", A1%, A2%));
+
+tellsimpafter (not A%, amatrixmap ("not", A%));
+tellsimpafter (A1% and A2%, amatrixmap (lambda ([a1%, a2%], a1% and a2%), A1%, A2%));
+tellsimpafter (A1% or A2%, amatrixmap (lambda ([a1%, a2%], a1% or a2%), A1%, A2%));
+
+/* implementation */
+
+defstruct (amatrix (nr, r0, rinc, nc, c0, cinc, storage));
+
+elements (m) := create_list (get_element (m, i, j), i, 1, m@nr, j, 1, m@nc);
+
+make_matrix  (nr, nc, [a]) := block
+  ([aa : ?gensym()],
+    ?putprop (aa, 1, '?refcount),
+
+    if a = []
+    then a : make_array (fixnum, nr*nc)
+    /* ELSE STORAGE ARRAY IS SPECIFIED; SHOULD VERIFY HERE THAT
+     * (1) IT IS 1-DIMENSIONAL, AND (2) IT IS BIG ENOUGH
+     */
+    else a : a[1],
+
+    ?putprop (aa, a, '?storage_array),
+    new (amatrix (nr, 0, 1, nc, 0, nr, aa)));
+
+/* DECLARING A% SYMBOLP CAUSES TROUBLE IF STORAGE GENSYM IS EVALUATED ...
+ * CONSIDER ATTACHING ARRAY TO GENSYM AS A PROPERTY INSTEAD OF A VALUE (SIGH)
+ */
+matchdeclare
+   (a%, symbolp,
+    [LI%, LI1%, LI2%], integer_listp,
+    [MB%, MB1%, MB2%], putative_boolean_amatrixp,
+    [ii%, jj%, i0%, j0%, u%, v%, x%, y%], integerp);
+
+integer_listp (e) := not atom(e) and op(e) = "[" and every (integerp, e);
+putative_boolean_amatrixp (e) :=
+  not atom(e)
+    and op(e) = amatrix
+    and every (lambda ([x], not atom(x) or booleanp(x)), elements (e));
+booleanp (e) := is (e = true or e = false);
+
+/* USEFUL FOR DEBUGGING
+announce_rules_firing : true;
+ */
+
+incprop (aa, bb) := ?putprop (aa, ?get (aa, bb) + 1, bb);
+
+decprop (aa, bb) := ?putprop (aa, ?get (aa, bb) - 1, bb);
+
+simp : false;
+
+get_element (m%, ii%, jj%) :=
+    get_element_internal (m%@nr, m%@r0, m%@rinc, m%@nc, m%@c0, m%@cinc, m%@storage, ii%, jj%);
+
+get_element_internal (u%, i0%, x%, v%, j0%, y%, a%, ii%, jj%) := block
+
+  ([a% : ?get (a%, '?storage_array),
+    i% : (i0% + ii% - 1)*x% + (j0% + jj% - 1)*y%],
+
+    if ii% < 1 or jj% < 1 or ii% > u% or jj% > v%
+    then error ("Matrix index out of bounds")
+    else ?aref (a%, i%));
+
+/* one integer */
+
+tellsimpafter
+    (amatrix (1, i0%, x%, v%, j0%, y%, a%) [ii%],
+     get_element_internal (1, i0%, x%, v%, j0%, y%, a%, 1, ii%));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, 1, j0%, y%, a%) [ii%],
+     get_element_internal (u%, i0%, x%, 1, j0%, y%, a%, ii%, 1));
+
+/* integers both */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [ii%, jj%],
+     get_element_internal (u%, i0%, x%, v%, j0%, y%, a%, ii%, jj%));
+
+/* one 'all */
+
+tellsimpafter
+    (amatrix (1, i0%, x%, v%, j0%, y%, a%) [all],
+    (incprop (a%, '?refcount),
+     amatrix (1, i0%, x%, v%, j0%, y%, a%)));
+     
+tellsimpafter
+    (amatrix (u%, i0%, x%, 1, j0%, y%, a%) [all],
+    (incprop (a%, '?refcount),
+     amatrix (u%, i0%, x%, 1, j0%, y%, a%)));
+     
+/* 'all and an integer */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [all, jj%],
+    (incprop (a%, '?refcount),
+     amatrix (u%, i0%, x%, 1, j0% + jj% - 1, y%, a%)));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [ii%, all],
+    (incprop (a%, '?refcount),
+     amatrix (1, i0% + ii% - 1, x%, v%, j0%, y%, a%)));
+
+/* 'all both */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [all, all],
+    (incprop (a%, '?refcount),
+     amatrix (u%, i0%, x%, v%, j0%, y%, a%)));
+
+/* one list of integers */
+
+tellsimpafter
+    (amatrix (1, i0%, x%, v%, j0%, y%, a%) [LI%],
+     submatrix_by_indices (1, i0%, x%, v%, j0%, y%, a%, [1], LI%));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, 1, j0%, y%, a%) [LI%],
+     submatrix_by_indices (u%, i0%, x%, 1, j0%, y%, a%, LI%, [1]));
+
+/* list of integers and an integer */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [ii%, LI%],
+     submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, [ii%], LI%));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [LI%, jj%],
+     submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI%, [jj%]));
+
+/* list of integers and 'all */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [all, LI%],
+     submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, makelist (i, i, 1, u%), LI%));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [LI%, all],
+     submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI%, makelist (i, i, 1, v%)));
+
+/* lists of integers both */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [LI1%, LI2%],
+     submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI1%, LI2%));
+
+/* one amatrix of booleans */
+
+tellsimpafter
+    (amatrix (1, i0%, x%, v%, j0%, y%, a%) [MB%],
+     submatrix_by_indices_and_flags (1, i0%, x%, v%, j0%, y%, a%, [1], MB%));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, 1, j0%, y%, a%) [MB%],
+     submatrix_by_flags_and_indices (u%, i0%, x%, 1, j0%, y%, a%, MB%, [1]));
+
+/* amatrix of booleans and an integer */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [ii%, MB%],
+     submatrix_by_indices_and_flags (u%, i0%, x%, v%, j0%, y%, a%, [ii%], MB%));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [MB%, jj%],
+     submatrix_by_flags_and_indices (u%, i0%, x%, v%, j0%, y%, a%, MB%, [jj%]));
+
+/* amatrix of booleans and 'all */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [all, MB%],
+     submatrix_by_all_and_flags (u%, i0%, x%, v%, j0%, y%, a%, MB%));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [MB%, all],
+     submatrix_by_flags_and_all (u%, i0%, x%, v%, j0%, y%, a%, MB%));
+
+/* amatrix of booleans and a list of integers */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [LI%, MB%],
+     submatrix_by_indices_and_flags (u%, i0%, x%, v%, j0%, y%, a%, LI%, MB%));
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [MB%, LI%],
+     submatrix_by_flags_and_indices (u%, i0%, x%, v%, j0%, y%, a%, MB%, LI%));
+
+/* amatrix of booleans both */
+
+tellsimpafter
+    (amatrix (u%, i0%, x%, v%, j0%, y%, a%) [MB1%, MB2%],
+     submatrix_by_flags_and_flags (u%, i0%, x%, v%, j0%, y%, a%, MB1%, MB2%));
+
+simp : true;
+
+submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI1%, LI2%) := block
+   ([M0 : amatrix (u%, i0%, x%, v%, j0%, y%, a%),
+     M : make_matrix (length (LI1%), length (LI2%)),
+     ?\*afterflag : false],
+    /* Do this the simple way.
+     * Probably some special cases could be faster.
+     */
+    for i:1 thru nrows(M)
+        do for j:1 thru ncols(M)
+            do M[i, j] : get_element (M0, LI1%[i], LI2%[j]),
+    M);
+
+submatrix_by_indices_and_flags (u%, i0%, x%, v%, j0%, y%, a%, LI%, MB%) := block
+   ([LI2% : sublist_indices (elements (MB%), lambda ([x], is (is(x) = true)))],
+    submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI%, LI2%));
+
+submatrix_by_flags_and_indices (u%, i0%, x%, v%, j0%, y%, a%, MB%, LI%) := block
+   ([LI1% : sublist_indices (elements (MB%), lambda ([x], is (is(x) = true)))],
+    submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI1%, LI%));
+
+submatrix_by_all_and_flags (u%, i0%, x%, v%, j0%, y%, a%, MB%) := block
+  ([LI1% : makelist (i, i, 1, u%),
+    LI2% : sublist_indices (elements (MB%), lambda ([x], is (is(x) = true)))],
+    submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI1%, LI2%));
+
+submatrix_by_flags_and_all (u%, i0%, x%, v%, j0%, y%, a%, MB%) := block
+  ([LI1% : sublist_indices (elements (MB%), lambda ([x], is (is(x) = true)))],
+    LI2% : makelist (i, i, 1, v%),
+    submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI1%, LI2%));
+   
+submatrix_by_flags_and_flags (u%, i0%, x%, v%, j0%, y%, a%, MB1%, MB2%) := block
+  ([LI1% : sublist_indices (elements (MB1%), lambda ([x], is (is(x) = true))),
+    LI2% : sublist_indices (elements (MB2%), lambda ([x], is (is(x) = true)))],
+    submatrix_by_indices (u%, i0%, x%, v%, j0%, y%, a%, LI1%, LI2%));
+
+t(m):=
+    (incprop (m@storage, '?refcount),
+     amatrix
+        (m@nc, m@c0,
+         if m@rinc = 1 then m@nr else 1,
+         m@nr, m@r0,
+         if m@cinc = 1 then m@nc else 1,
+         m@storage));
+
+compute_index1 (aa, i, j) :=
+    if i < 1 or j < 1 or i > aa@nr or j > aa@nc
+    then error ("Matrix index out of bounds")
+    else 1 + (aa@r0 + i - 1)*aa@rinc + (aa@c0 + j - 1)*aa@cinc;
+    
+compute_index0 (aa, i, j) :=
+    if i < 0 or j < 0 or i >= aa@nr or j >= aa@nc
+    then error ("Matrix index out of bounds")
+    else (aa@r0 + i)*aa@rinc + (aa@c0 + j)*aa@cinc;
+
+/* REVISIT THE FOLLOWING !! IT IS BROKEN AS IT STANDS !! */
+copy_amatrix (m) :=
+    if atom(m) or op(m) # 'amatrix
+    then copy (m)
+    else 
+       (incprop (m@storage, '?refcount),
+        amatrix (m@nr, m@r0, m@rinc, m@nc, m@c0, m@cinc, m@storage));
+        /* copy(m) copies everything but the storage array -- that's just what we want */
+        /* comment out until storage is actually an array
+        block ([m2 : copy(m)], m2@refcount : m2@refcount + 1, m2);
+         */
+
+copy_array (a) := if ?arrayp (a) then ?copy\-seq (a) else ?copy\-tree (a);
+
+if not ?get ('amatrix, 'present) then load ("amatrix.lisp");
+
+/* SHOULD TRY TO MERGE THIS WITH EXISTING MEAN FUNCTION IN SHARE PACKAGE DESCRIPTIVE */
+amatrix_mean (x) := block
+  ([m : nrows(x),
+    n : ncols(x)],
+    if n=1
+        then 1/m * sum (x [i], i, 1, m)
+        else makelist (mean (x [all, j]), j, 1, n));
+
+matchdeclare (A%, amatrixp);
+tellsimp (mean (A%), amatrix_mean (A%));
+
+/* FOLLOWING NEEDED MOSTLY FOR TESTING ALTHOUGH IT WOULD BE OK TO LEAVE IT IN */
+
+random_matrix (nr, nc) := block
+  ([M : make_matrix (nr, nc), A],
+    A : ?get (M@storage, '?storage_array),
+    for i from 0 thru nr*nc-1
+        do A[i] : floor (random (256.0)) / 256.0,
+    M);
+
+new2old_matrix (M) := genmatrix (lambda ([i, j], get_element (M, i, j)), nrows(M), ncols(M));
+
+old2new_matrix (M) := block ([nr, nc, M2],
+    nr : length (M),
+    nc : length (M [1]),
+    M2 : make_matrix (nr, nc),
+    for i thru nr
+        do for j thru nc
+            do M2 [i, j] : M [i, j],
+    M2);
+            
+

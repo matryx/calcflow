@@ -1,0 +1,94 @@
+/* kill(all); */
+/* done; */
+
+/* PRIMALITY TESTS */
+
+/* 0 and 1 are not primes */
+primep(0);
+false;
+
+primep(1);
+false;
+
+primep(2);
+true;
+
+primep(6);
+false;
+
+/* this are checkd from the list of small primes */
+primep(1741);
+true;
+
+primep(8989);
+false;
+
+/* this is the deterministic primality test */
+primep(1738727);
+true;
+
+primep(5178997768267);
+false;
+
+next_prime(100002100000);
+100002100043;
+
+prev_prime(100002100042);
+100002099971;
+
+/* FACTORING TESTS */
+
+ifactors(1);
+[];
+
+/* trial divisions */
+ifactors(226800);
+[[2,4],[3,4],[5,2],[7,1]];
+
+/* limiting to factors */
+ev( ifactors(226800), factors_only:true );
+[2,3,5,7];
+
+/* this should be found by Pollard rho */
+ifactors(5178997768267);
+[[183823,1],[28173829,1]];
+
+/* disable Pollard rho to test ECM */
+(save_prt : pollard_rho_tests, pollard_rho_tests : 0);
+0;
+
+/* this should be found by ECM */
+ifactors(5178997768267);
+[[183823,1],[28173829,1]];
+
+(pollard_rho_tests : save_prt, 0);
+0;
+
+/* MODULAR POWERS AND INVERSE */
+
+power_mod(2^64,2,2^64-2^34+1);
+240518168561;
+
+inv_mod(42,2^64-2^34+1);
+18007535864707547137;
+
+/* negative exponents */
+power_mod(3,-1,41);
+14;
+
+inv_mod(3,41);
+14;
+
+power_mod(2^64,-2,2^64-2^34+1);
+18446743816011514066;
+
+inv_mod(2^128,2^64-2^34+1);
+18446743816011514066;
+
+/* zero divisors */
+inv_mod(3,42);
+false;
+
+power_mod(3,-1,42);
+false;
+

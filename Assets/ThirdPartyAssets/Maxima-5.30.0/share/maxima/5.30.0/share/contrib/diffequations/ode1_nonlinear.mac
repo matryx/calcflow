@@ -1,0 +1,90 @@
+/* ode1_nonlinear.mac
+
+  Driver routine for first order nonlinear ODE routines
+
+
+  Copyright (C) 2004 David Billinghurst		 
+  		       								 
+  This program is free software; you can redistribute it and/or modify	 
+  it under the terms of the GNU General Public License as published by	 
+  the Free Software Foundation; either version 2 of the License, or		 
+  (at your option) any later version.					 
+ 		       								 
+  This program is distributed in the hope that it will be useful,		 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of		 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 
+  GNU General Public License for more details.				 
+ 		       								 
+  You should have received a copy of the GNU General Public License	
+  along with this program; if not, write to the Free Software 		 
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+put('ode1_nonlinear,001,'version)$
+
+if get('ode1_clairault,'version)=false then
+  load("ode1_clairault.mac")$
+if get('ode1_lagrange,'version)=false then
+  load("ode1_lagrange.mac")$
+if get('ode1_riccati,'version)=false then
+  load("ode1_riccati.mac")$
+if get('ode1_lie,'version)=false then
+  load("ode1_lie.mac")$
+if get('ode1_factor,'version)=false then
+  load("ode1_factor.mac")$
+if get('ode1_abel,'version)=false then
+  load("ode1_abel.mac")$
+
+
+ode1_nonlinear(de,y,x):=block(
+  [q,q2],
+
+  ode_disp("       in ode1_nonlinear"),
+
+  ode_disp("       -> ode1_factor"),
+  q:ode1_factor(de,y,x),
+  if (is(q#false)) then return(q),
+
+  ode_disp("       -> ode1_clairault"),
+  q:ode1_clairault(de,y,x),
+  if (is(q#false)) then return(q),
+
+  ode_disp("       -> ode1_lagrange"),
+  q:ode1_lagrange(de,y,x),
+  if (is(q#false)) then return(q),
+
+  /* Sometimes ode1_lie() can solve Riccati equations 
+     that are only partially solved by ode1_riccati()  */
+  ode_disp("       -> ode1_riccati"),
+  q:ode1_riccati(de,y,x),
+  if (is(q#false)) then return( block(
+    if not(freeof(%u,q)) then (
+      q2:ode1_lie_wrapper(de,y,x),
+      if (is(q2#false)) then q:q2
+    ),
+    [q])
+  ),
+
+  ode_disp("       -> ode1_abel"),
+  q:ode1_abel(de,y,x),
+  /* Give up if return [] */
+  if (q=[]) then return(false),
+  if (is(q#false)) then return(q),
+
+  ode_disp("       -> ode1_lie"),
+  q:ode1_lie_wrapper(de,y,x),
+  if (is(q#false)) then return([q]),
+
+  return(false)
+)$
+
+/* Wrapper for ode1_lie() */
+ode1_lie_wrapper(de,y,x) := block(
+  [phi],
+  phi:solve(lhs(de)-rhs(de),'diff(y,x)),
+  if (is(phi=[])) then 
+     false
+  else
+    phi:rhs(first(phi)),
+    ode1_lie(phi,y,x)
+)$

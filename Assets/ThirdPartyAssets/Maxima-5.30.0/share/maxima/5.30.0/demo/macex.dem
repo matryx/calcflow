@@ -1,0 +1,115 @@
+/* ==================================================================== */
+/* file: macex.dem     */
+/* At some point, we get the message: DISPLACE undefined */
+
+
+/* This is a demo of Macsyma's macroexpanding commands and the use of
+the macroexpansion switch.  */
+
+(showtime:all,macroexpansion:false)$
+
+/* First we need a macro to play with.  Let's define a caseq statement
+of the form:
+
+caseq(<var>,[<keys1>],<stmt1>,
+            [<keys2>],<stmt2>,
+	    ....,
+	    [<keysn>],<stmtn>)
+
+where the first <stmt> that has <var> as a member of the associated
+<keys> is the one chosen to execute.  */
+
+caseq(var,[pairs])::=
+     if length(pairs)<=2
+        then buildq([var,keys:first(pairs),statement:last(pairs)],
+		    if member(var,'keys) then statement)
+        else buildq([var,keys:first(pairs),
+	                 statement:first(rest(pairs)),
+  		         pairs:rest(rest(pairs))],
+		    if member(var,'keys) 
+		       then statement
+		       else caseq(var,splice(pairs)))$
+
+/* let's use our caseq macro to define a simple predicate.  */
+
+variablep(x)::=buildq([x],caseq(x,[a,b,c,d,e],true));
+
+/* to make sure it works.  */
+
+display(variablep(var1),variablep(var2)),var1:'a,var2:'z;
+
+/* we can see what variablep is expanding into.  */
+
+macroexpand(variablep(some_form));
+
+/* we can also watch the expansion by stages.  */
+
+macroexpand1(variablep(some_form));
+
+macroexpand1(''%);
+
+/* we might also create simple typep macro using caseq.  */
+
+
+typep(x)::=buildq([x],caseq(x,[1,2,3,4,5,6,7,8,9,0], 'digit,
+			      [a,b,c,d,e,f,g,h,i,j], 'variable,
+			      ["+","-","*","/","^"], 'operator))$
+
+/* let's see what things are expanding into.  */
+
+macroexpand(typep(test));
+
+/* the nested caseq doesn't expand because macroexpand and
+macroexpand1 only look at the top level function.  to expand all
+levels we can do:  */
+
+scanmap('macroexpand,'(typep(test)));
+
+/* let's test it just to make sure it works.  */
+
+ev(%,test="*");
+
+/* compare the time it just took to evaluate the macro when expanded
+to the time it takes to expand it from scratch and then eval.  */
+
+ev(typep(test),test="*");
+
+/* this is why we can save time by using the macroexpansion switch.  */
+
+form:'(typep(a));
+
+ev(form);
+
+macroexpansion:expand;
+
+ev(form);
+
+/* there's no savings on the first call after macroexpansion has been
+reset, but there is on all subsequent calls.  */
+
+ev(form);
+
+/* macroexpand also uses the saved expansion. */
+
+macroexpand(''form);
+
+/* note that form still displays nicely.  */
+
+form;
+
+/* if we set macroexpansion to displace however, each macro call will
+be completely replaced by the equivalent code.  */
+
+/* (macroexpansion:displace,ev(form));
+
+form;
+*/
+/*  note that once the call is displaced, the original call cannot be
+retrieved by resetting macroexpansion.  */
+
+/* (macroexpansion:false,ev(form));
+
+form;
+*/ 
+showtime:false$
+

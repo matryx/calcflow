@@ -1,0 +1,42 @@
+/*-*-MACSYMA-*-*/
+
+eval_when([translate,batch,demo],
+          if get('sharem,'version)=false then load(autolo))$
+
+herald_package(contrl)$
+
+/* cond and caseq */
+
+eval_when([translate,batch,demo,loadfile],
+
+cond([pair_sequence])::=
+ if pair_sequence=[] then buildq([],false)
+ else
+  block([pred:pop(pair_sequence),
+	 form:if pair_sequence=[] then error("odd number of cond args")
+	      else pop(pair_sequence)],
+    if pred=true then buildq([form],form)
+    else buildq([pred,form,pair_sequence],
+	    if pred then form else cond(splice(pair_sequence))))
+)$
+
+caseq(exp,[pairs])::=
+ block([predt,statement],
+  cond(not atom(exp),
+       buildq([g:?gentemp(),exp,pairs],block([g:exp],caseq(g,splice(pairs)))),
+
+       pairs=[],buildq([],false),
+
+       (predt:pop(pairs),if listp(predt) and length(predt)=1 then predt:predt[1],pairs=[]),
+       error("odd number of caseq case args"),
+       
+       true,
+       (statement:pop(pairs),
+        if member(predt,'[otherwise,true]) then buildq([statement,exp],statement)
+	else
+	   buildq([condition:if listp(predt) then
+				buildq([exp,predt],member(exp,'predt))
+			     else buildq([exp,predt],exp='predt),
+		   statement,exp,pairs],
+              if condition then statement
+	      else caseq(exp,splice(pairs))))))$

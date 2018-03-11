@@ -1,0 +1,49 @@
+;;;; -*- Mode: lisp -*-
+
+;;; System to convert the Fortran code to Lisp
+;;;
+;;; You need to have at least f2cl1.l rev 1.222 to be able to convert
+;;; these files because previous versions of f2cl didn't handle
+;;; IMPLICIT DOUBLE PRECISION.
+;;;
+;;; To convert the files, do this, from a running maxima:
+;;;
+;;; :lisp (load "share/cobyla/cobyla-lisp.system")
+;;; :lisp (mk:oos "cobyla-lisp" :compile :force t)
+;;;
+;;; This will convert the Fortran files and place them share/cobyla/lisp.
+;;;
+
+(in-package #:cl-user)
+(require :f2cl)
+
+(defparameter *cobyla-root*
+  (make-pathname :host (pathname-host *load-pathname*)
+		 :directory (pathname-directory *load-pathname*)))
+
+(mk:define-language :f2cl-lisp
+    :compiler #'f2cl:f2cl
+    :loader #'identity
+    :source-extension "f"
+    :binary-extension "lisp")
+
+(mk:defsystem cobyla-lisp
+  :source-pathname *cobyla-root*
+  :components
+  ((:module fortran
+	    :source-extension "f"
+	    :binary-pathname "lisp"
+	    :language :f2cl-lisp
+	    :compile-only t
+	    :compiler-options (:include-comments t
+			       :package :cobyla)
+	    :components
+	    ((:file "cobyla"
+		    :depends-on ("cobylb"))
+	     (:file "cobylb"
+		    :depends-on ("trstlp" "calcfc"))
+	     (:file "trstlp")
+	     ;; This file isn't really needed, but it's useful to
+	     ;; compile this up so that nice code is generated for
+	     ;; calling calcfc.
+	     (:file "calcfc")))))

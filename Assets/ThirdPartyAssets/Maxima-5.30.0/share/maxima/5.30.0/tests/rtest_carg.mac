@@ -1,0 +1,203 @@
+/*******************************************************************************
+ *
+ *          carg function
+ *
+ * The examples show what a Maxima user can expect from the carg function.
+ * Examples are taken from functions.wolfram.com.
+ *
+ ******************************************************************************/
+
+/* ---------- Initialization ------------------------------------------------ */
+
+kill(all);
+done;
+
+declare([z,z1,z2],complex, n,integer);
+done;
+
+/* ---------- Specific values ----------------------------------------------- */
+
+assume(x>0);
+[x>0];
+
+carg(x);
+0;
+carg(-x);
+%pi;
+carg(%i*x);
+%pi/2;
+carg(-%i*x);
+-%pi/2;
+
+forget(x>0);
+[x>0];
+
+carg(x+%i*y);
+atan2(y,x);
+
+/* ---------- Values at fixed points ---------------------------------------- */
+
+carg(1);
+0;
+
+carg(-1);
+%pi;
+
+carg(%i);
+%pi/2;
+
+carg(-%i);
+-%pi/2;
+
+carg(1+%i);
+%pi/4;
+
+carg(-1+%i);
+3*%pi/4;
+
+carg(-1-%i);
+-3*%pi/4;
+
+carg(1-%i);
+-%pi/4;
+
+carg(sqrt(3)+%i);
+%pi/6;
+
+carg(1+%i*sqrt(3));
+%pi/3;
+
+carg(-1+%i*sqrt(3));
+2*%pi/3;
+
+carg(-sqrt(3)+%i);
+5*%pi/6;
+
+carg(-sqrt(3)-%i);
+-5*%pi/6;
+
+carg(-1-%i*sqrt(3));
+-2*%pi/3;
+
+carg(1-%i*sqrt(3));
+-%pi/3;
+
+carg(sqrt(3)-%i);
+-%pi/6;
+
+carg(2);
+0;
+
+carg(-2);
+%pi;
+
+carg(%pi);
+0;
+
+carg(3*%i);
+%pi/2;
+
+carg(-2*%i);
+-%pi/2;
+
+carg(2+%i);
+atan(1/2);
+
+/* --- Values at infinities ------------------------------------------------- */
+
+carg([inf,-inf,minf,-minf,%i*inf,%i*minf,infinity]);
+[0,%pi,%pi,0,%pi/2,-%pi/2,ind];
+
+/* ---------- Parity -------------------------------------------------------- */
+
+/* Add examples for Parity */
+
+/* ---------- Mirror symmetry ----------------------------------------------- */
+
+/* Add examples for Mirror symmetry */
+
+/* ---------- Homogeneity --------------------------------------------------- */
+
+assume(a>0);
+[a>0];
+
+carg(a*z);
+carg(z);
+
+carg(a*(x+%i*y));
+atan2(y,x);
+
+forget(a>0);
+[a>0];
+
+/* ---------- Transformations ----------------------------------------------- */
+
+/* ----- Argument involving complex characteristics ------------------------- */
+
+carg(abs(z));
+0;
+
+carg(z/abs(z));
+carg(z);
+carg(x/abs(x));
+atan2(0,x);
+
+/* Maxima does not simplify the following examples */
+
+carg(signum(z));
+carg(z);
+carg(signum(x));
+atan2(0,x);
+
+
+/* ----- Argument involving basic arithemtic operations --------------------- */
+
+/* Add more examples for sums, products and quotients */
+
+/* ----- Power of arguments -------------------------------------------------- */
+
+carg(sqrt(z));
+carg(z)/2;
+carg(sqrt(x+%i*y));
+1/2*atan2(y,x);
+
+assume(x>0);
+[x>0];
+carg(x^z);
+atan2(sin(log(x)*'imagpart(z)),cos(log(x)*'imagpart(z)));
+forget(x>0);
+[x>0];
+
+carg(z^a);
+atan2(sin(a*'carg(z)),cos(a*'carg(z)));
+
+carg(z1^z2);
+atan2(sin('carg(z1)*'realpart(z2)+log(abs(z1))*'imagpart(z2)),
+      cos('carg(z1)*'realpart(z2)+log(abs(z1))*'imagpart(z2)));
+
+/* ----- Exponent of arguments ---------------------------------------------- */
+
+carg(exp(x+%i*y));
+atan2(sin(y),cos(y));
+
+/* ---------- Complex characteristics --------------------------------------- */
+
+realpart(carg(x+%i*y));
+atan2(y,x);
+
+imagpart(carg(x+%i*y));
+0;
+
+abs(carg(x+%i*y));
+sqrt(atan2(y,x)^2);
+
+carg(carg(x+%i*y));
+atan2(0,atan2(y,x));
+
+conjugate(carg(x+%i*y));
+atan2(y,x);
+
+signum(carg(x+%i*y));
+signum(atan2(y,x));
+
+/* ---------- End of file rtest_carg.mac ------------------------------------ */

@@ -1,0 +1,56 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/ZeroEquivalence/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Determining Zero Equivalence ---------- */
+/* The following expressions are all equal to zero */
+sqrt(997) - (997^3)^(1/6);
+sqrt(999983) - (999983^3)^(1/6);
+radcan(%);
+(2^(1/3) + 4^(1/3))^3 - 6*(2^(1/3) + 4^(1/3)) - 6;
+radcan(%);
+cos(x)^3 + cos(x)*sin(x)^2 - cos(x);
+trigsimp(%);
+/* See Joel Moses, ``Algebraic Simplification: A Guide for the Perplexed'',
+   _Communications of the Association of Computing Machinery_, Volume 14,
+   Number 8, August 1971, 527--537.  This expression is zero if Re(x) is
+   contained in the interval ((4 n - 1)/2 pi, (4 n + 1)/2 pi) for n an integer:
+   ..., (-5/2 pi, -3/2 pi), (-pi/2, pi/2), (3/2 pi, 5/2 pi), ... */
+expr: log(tan(1/2*x + %pi/4)) - asinh(tan(x));
+radcan(exponentialize(logcontract(logarc(expr))));
+q: logcontract(trigsimp(halfangles(trigexpand(logarc(expr)))));
+assume(-%pi/2 < x, x < %pi/2)$
+trigsimp(q);
+forget(-%pi/2 < x, x < %pi/2)$
+/* Use a roundabout method---show that expr is a constant equal to zero */
+dexpr: diff(expr, x);
+radcan(exponentialize(dexpr));
+q: factor(trigreduce(dexpr));
+assume(-%pi/2 < x, x < %pi/2)$
+ratsimp(q);
+forget(-%pi/2 < x, x < %pi/2)$
+ev(expr, x = 0);
+remvalue(expr, dexpr, q)$
+log((2*sqrt(r) + 1)/sqrt(4*r + 4*sqrt(r) + 1));
+logcontract(radcan(%));
+(4*r + 4*sqrt(r) + 1)^(sqrt(r)/(2*sqrt(r) + 1))
+   * (2*sqrt(r) + 1)^(1/(2*sqrt(r) + 1)) - 2*sqrt(r) - 1;
+radcan(%);
+/* [Gradshteyn and Ryzhik 9.535(3)] */
+2^(1 - z)*gamma(z)*zeta(z)*cos(z*%pi/2) - %pi^z*zeta(1 - z);
+ratsimp(%);
+/* ---------- Quit ---------- */
+quit();

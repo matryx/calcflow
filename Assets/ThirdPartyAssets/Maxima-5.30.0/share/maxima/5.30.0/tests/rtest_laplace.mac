@@ -1,0 +1,652 @@
+/* rtest_laplace.mac -- test cases for Laplace transform
+ * Copyright 2012 by Robert Dodier.
+ * I release this work under terms of the GNU General Public License.
+ */
+
+(kill (all),
+ mycontext : newcontext (gensym ()),
+ declare (n, integer),
+ /* attempt to forestall asksign queries */
+ assume (a > 0, b > 0, c > 0),
+ assume (n > 0, q > 0),
+ assume_pos_pred : lambda ([e], true),
+ assume_pos : true,
+ assuming (e1, e2) ::= buildq ([e1, e2], block ([foo, c1 : newcontext (gensym ())], assume (e1), foo : e2, killcontext (c1), foo)),
+ 0);
+0;
+
+/* cases handled by LAPLACE in src/laplac.lisp */
+
+/* 0 */
+
+laplace (0, u, v);
+0;
+
+/* constant */
+
+laplace (1, u, v);
+1/v;
+
+laplace (7, u, v);
+7/v;
+
+laplace (a, u, v);
+a/v;
+
+/* exp */
+
+laplace (exp (- u), u, v);
+1/(1 + v);
+
+laplace (exp (- 7*u), u, v);
+1/(7 + v);
+
+laplace (exp (- a*u), u, v);
+1/(a + v);
+
+laplace (exp (- u - b), u, v);
+exp (- b) / (1 + v);
+
+laplace (exp (- a*u - b), u, v);
+exp (- b) / (a + v);
+
+/* sin */
+
+laplace (sin (u), u, v);
+1/(1 + v^2);
+
+laplace (sin (7*u), u, v);
+7/(49 + v^2);
+
+laplace (sin (a*u), u, v);
+a/(a^2 + v^2);
+
+/* cos */
+
+laplace (cos (u), u, v);
+v/(1 + v^2);
+
+laplace (cos (7*u), u, v);
+v/(49 + v^2);
+
+laplace (cos (a*u), u, v);
+v/(a^2 + v^2);
+
+/* sinh */
+
+laplace (sinh (u), u, v);
+1/(v^2 - 1);
+
+laplace (sinh (7*u), u, v);
+7/(v^2 - 49);
+
+laplace (sinh (a*u), u, v);
+a/(v^2 - a^2);
+
+/* cosh */
+
+laplace (cosh (u), u, v);
+v/(v^2 - 1);
+
+laplace (cosh (7*u), u, v);
+v/(v^2 - 49);
+
+laplace (cosh (a*u), u, v);
+v/(v^2 - a^2);
+
+/* log */
+
+(laplace (log (u), u, v), if equal (%%, (-1/v)*(log (v) + %gamma)) then true else %%);
+true;
+
+(laplace (log (7*u), u, v), ev (if equal (%%, (1/abs(7))*(-1/(v/7)*(log (v/7) + %gamma))) then true else %%, logexpand = super));
+true;
+
+(laplace (log (a*u), u, v), ev (if equal (%%, (1/abs(a))*(-1/(v/a)*(log (v/a) + %gamma))) then true else %%, logexpand = super));
+true;
+
+/* diff */
+
+laplace ('diff (foo (u), u), u, v);
+v * 'laplace (foo (u), u, v) - foo (0);
+
+laplace ('diff (foo (u), u, 2), u, v);
+'laplace (foo (u), u, v) * v^2 - foo (0) * v - 'at ('diff (foo (u), u, 1), u = 0);
+
+laplace ('diff (foo (u), u, 3), u, v);
+'laplace (foo (u), u, v) * v^3 - foo (0) * v^2 - 'at ('diff (foo (u), u), u = 0) * v - 'at ('diff (foo (u), u, 2), u = 0);
+
+laplace ('diff (foo (u), u, n), u, v);
+'laplace (foo (u), u, v) * v^n - 'sum ('at ('diff (foo (u), u, k), u = 0) * v^((n - 1) - k), k, 0, n - 1);
+
+/* integrate */
+
+laplace ('integrate (foo (w), w, 0, u), u, v);
+(1/v)*'laplace (foo (u), u, v);
+
+/* sum */
+
+laplace ('sum (foo (u, i), i, 0, n), u, v);
+'sum ('laplace (foo (u, i), u, v), i, 0, n);
+
+/* erf */
+
+laplace (erf (u), u, v);
+exp (v^2/4) * (1 - erf (v/2)) / v;
+
+laplace (erf (7*u), u, v);
+exp (v^2/196) * (1 - erf (v/14)) / v;
+
+laplace (erf (a*u), u, v);
+exp (v^2/(4*a^2)) * (1 - erf (v/(2*a))) / v;
+
+/* inverse transform */
+
+laplace ('ilt (foo (v), v, u), u, v);
+foo (v);
+
+/* delta */
+
+laplace (delta (u), u, v);
+1;
+
+laplace (delta (u - 7), u, v);
+exp (- 7*v);
+
+laplace (delta (u - a), u, v);
+exp (- a*v);
+
+laplace (delta (7*u), u, v);
+1/7;
+
+laplace (delta (a*u), u, v);
+1/abs(a);
+
+laplace (delta (a*u - b), u, v);
+exp (- b*v/a) / abs (a);
+
+/* cases which specint handles
+ * I haven't verified the following rules -- these tests only verify that
+ * laplace returns the result advertised in specint's comments.
+ */
+
+/* Algorithm 1: Laplace transform of c*t^v*exp(-s*t+e*f) */
+
+/* Algorithm 1.1: Laplace transform of c*t^v*exp(-a*t^2)
+ * t^(v-1)*exp(-t^2/8/a)
+ *   -> gamma(v)*2^v*a^(v/2)*exp(a*p^2)*D[-v](2*p*sqrt(a))
+ */
+
+/* Algorithm 1.2: Laplace transform of c*t^v*exp(-a*sqrt(t))
+ * (2*t)^(v-1)*exp(-2*sqrt(a)*sqrt(t))
+ *    -> gamma(2*v)*p^(-v)*exp(a/p/2)*D[-2*v](sqrt(2*a/p))
+ */
+
+/* Algorithm 1.3: Laplace transform of t^v*exp(1/t)
+ * t^(v-1)*exp(-a/t/4)
+ *    -> 2*(a/p/4)^(v/2)*bessel_k(v, sqrt(a)*sqrt(p))
+ */
+
+/* Algorithm 1.4: Laplace transform of exp(exp(-t))
+ * exp(-a*exp(-t))
+ *   -> a^(-p)*gamma(p,a)
+ */
+
+laplace (exp (-a * exp (-u)), u, v);
+gamma_greek(v,a)/a^v$
+
+/* Algorithm 1.5: Laplace transform of exp(exp(t))
+ * exp(-a*exp(t))
+ *   -> a^(-p)*gamma_incomplete(-p,a)
+ * (specint code doesn't match formula; code appears to be correct)
+ */
+
+laplace (exp (-a * exp (u)), u, v);
+a^v * gamma_incomplete (-v, a);
+
+/* Algorithm 2: Laplace transform of u(t)*%e^(-p*t).
+ * Laplace transform of asin(w)
+ * Laplace transform of atan(w)
+ * Laplace transform of two Bessel J functions
+ * Laplace transform of two hankel_1 functions
+ * Laplace transform of two hankel_2 functions
+ * Laplace transform of hankel_1 * hankel_2
+ * Laplace transform of two Bessel Y functions
+ * Laplace transform of two Bessel K functions
+ * Laplace transform of Bessel K and Bessel Y functions
+ * Laplace transform of Bessel I and Bessel J functions
+ * Laplace transform of Bessel I and Hankel 1 functions
+ * Laplace transform of Bessel I and Hankel 2 functions
+ * Laplace transform of Bessel Y and Bessel J functions
+ * Laplace transform of Bessel K and Bessel J functions
+ * Laplace transform of Hankel 1 and Bessel J functions
+ * Laplace transform of Hankel 2 and Bessel J functions
+ * Laplace transform of Bessel Y and Hankel 1 functions
+ * Laplace transform of Bessel Y and Hankel 2 functions
+ * Laplace transform of Bessel K and Hankel 1 functions
+ * Laplace transform of Bessel K and Hankel 2 functions
+ * Laplace transform of Bessel I and Bessel Y functions
+ * Laplace transform of Bessel I and Bessel K functions
+ * Laplace transform of Struve H function
+ * Laplace transform of Struve L function
+ * Laplace transform of little Lommel s function
+ * Laplace transform of Lommel S function
+ * Laplace transform of Bessel Y function
+ * Laplace transform of Bessel K function
+ * Laplace transform of Parabolic Cylinder function
+ * Laplace transform of Incomplete Gamma function
+ * Laplace transform of Batemann function
+ * Laplace transform of Bessel J function
+ * Laplace transform of Gamma greek function
+ * Laplace transform of Hankel 1 function
+ * Laplace transform of Hankel 2 function
+ * Laplace transform of Whittaker M function
+ * Laplace transform of Whittaker M function
+ * Laplace transform of the Generalized Laguerre function, %l[v1,v2](w)
+ * Laplace transform for the Generalized Laguerre function
+ * Laplace transform for the Laguerre function
+ * Laplace transform of Gegenbauer function
+ * Laplace transform of Chebyshev function of the first kind
+ * Laplace transform of Chebyshev function of the second kind
+ * Laplace transform for the Hermite function, hermite(index1,arg1)
+ * Laplace transform of %p[v1,v2](w), Associated Legendre P function
+ * Laplace transform of Associated Legendre P function
+ * Laplace transform of %p[v1,v2,v3](w), Jacobi function
+ * Laplace transform of Jacobi P function
+ * Laplace transform of Associated Legendre function of the second kind
+ * Laplace transform of Associated Legendre function of the second kind
+ * Laplace transform of %p[v1](w), Legendre P function
+ * Laplace transform of Legendre P function
+ * Laplace transform of Whittaker W function
+ * Laplace transform of Whittaker W function
+ * Laplace transform of square of Bessel J function
+ * Laplace transform of square of Hankel 1 function
+ * Laplace transform of square of Hankel 2 function
+ * Laplace transform of square of Bessel Y function
+ * Laplace transform of square of Bessel K function
+ * Laplace transform of two Bessel I functions
+ * Laplace transform of Bessel I. We use I[v](w)=%i^n*J[n](%i*w).
+ * Laplace transform of square of Bessel I function
+ * Laplace transform of Erf function
+ * Laplace transform of the logarithmic function.
+ * Laplace transform of Erfc function
+ * Laplace transform of expintegral_ei.
+ * Laplace transform of expintegral_e1
+ * Laplace transform of expintegral_e
+ * Laplace transform of expintegral_si
+ * Laplace transform of expintegral_shi
+ * Laplace transform of expintegral_ci
+ * Laplace transform of expintegral_chi
+ * Laplace transform of Complete elliptic integral of the first kind
+ * Laplace transform of Complete elliptic integral of the first kind
+ * Laplace transform of Complete elliptic integral of the second kind
+ * Laplace transform of Complete elliptic integral of the second kind
+ * Laplace transform of %f[v1,v2](w1,w2,w3), Hypergeometric function
+ * Laplace transform of Hypergeometric function
+ * Laplace transform of c * t^v * (a+t)^w
+ * Laplace transform of c * t^v
+ */
+
+/* Algorithm 2.1: Laplace transform of c*t^v*%e(-p*t)
+ *
+ * Table of Integral Transforms
+ *
+ * p. 137, formula 1:
+ *
+ * t^u*exp(-p*t)
+ *   -> gamma(u+1)*p^(-u-1)
+ */
+
+/* Algorithm 2.2: Laplace transform of c*t^v*(1+t)^w
+ */
+
+/* Algorithm 2.3: Laplace transform of the Logarithmic function
+ *
+ *    c*t^(v-1)*log(a*t)
+ *       -> c*gamma(v)*s^(-v)*(psi[0](v)-log(s/a))
+ *
+ * This is the formula for an expression with log(t) scaled like 1/a*F(s/a).
+ *
+ * For the following cases we have to add further algorithm:
+ *    log(1+a*x), log(x+a), log(x)^2.
+ */
+
+/* Algorithm 2.4: Laplace transfom of the Whittaker function
+ *
+ * Test for Whittaker W function.  Simplify this if possible, or
+ * convert to Whittaker M function.
+ *
+ * We have r * %w[i1,i2](a)
+ *
+ * Formula 16, p. 217
+ *
+ * t^(v-1)*%w[k,u](a*t)
+ *   -> gamma(u+v+1/2)*gamma(v-u+1/2)*a^(u+1/2)/
+ *          (gamma(v-k+1)*(p+a/2)^(u+v+1/2)
+ *        *2f1(u+v+1/2,u-k+1/2;v-k+1;(p-a/2)/(p+a/2))
+ */
+
+/* Algorithm 2.5: Laplace transfom of bessel_k(0,a*t)
+ *
+ * The general algorithm handles the Bessel K function for an order |v|<1.
+ * but does not include the special case v=0. Return the Laplace transform:
+ *
+ *   bessel_k(0,a*t) --> acosh(s/a)/sqrt(s^2-a^2)
+ */
+
+laplace (bessel_k (0, a*u), u, v);
+acosh (v / a) / sqrt (v^2 - a^2);
+
+/* Algorithm 3: Laplace transform of a hypergeometric function
+ * Table of Laplace transforms, p 220, formula 19:
+ *
+ * If m + k <= n + 1, and Re(s) > 0, the Laplace transform of
+ *
+ *    t^(s-1)*%f[m,n]([a1,...,am],[p1,...,pn],(c*t)^k)
+ * is
+ *
+ *    gamma(s)/p^s*%f[m+k,n]([a1,...,am,s/k,(s+1)/k,...,(s+k-1)/k],[p1,...,pm],(k*c/p)^k)
+ *
+ * with Re(p) > 0 if m + k <= n, Re(p+k*c*exp(2*%pi*%i*r/k)) > 0 for r
+ * = 0, 1,...,k-1, if m + k = n + 1.
+ */
+
+/* Algorithm 4: SPECIAL HANDLING OF Bessel Y for an integer order
+ *
+ * This is called for one Bessel Y function, when the order is an integer.
+ */
+
+/* Algorithm 4.1: Laplace transform of t^n*bessel_y(v,a*t)
+ *                v is an integer and n>=v
+ *
+ * Table of Integral Transforms
+ *
+ * Volume 2, p 105, formula 2 is a formula for the Y-transform of
+ *
+ *    f(x) = x^(u-3/2)*exp(-a*x)
+ *
+ * where the Y-transform is defined by
+ *
+ *    integrate(f(x)*bessel_y(v,x*y)*sqrt(x*y), x, 0, inf)
+ *
+ * which is
+ *
+ *    -2/%pi*gamma(u+v)*sqrt(y)*(y^2+a^2)^(-u/2)
+ *          *assoc_legendre_q(u-1,-v,a/sqrt(y^2+a^2))
+ *
+ * with a > 0, Re u > |Re v|.
+ *
+ * In particular, with a slight change of notation, we have
+ *
+ *    integrate(x^(u-1)*exp(-p*x)*bessel_y(v,a*x)*sqrt(a), x, 0, inf)
+ *
+ * which is the Laplace transform of x^(u-1/2)*bessel_y(v,x).
+ *
+ * Thus, the Laplace transform is
+ *
+ *    -2/%pi*gamma(u+v)*sqrt(a)*(a^2+p^2)^(-u/2)
+ *          *assoc_legendre_q(u-1,-v,p/sqrt(a^2+p^2))
+ */
+
+/* Algorithm 4.2: Laplace transform of t^n*bessel_y(v, a*sqrt(t))
+ *
+ * Table of Integral Transforms
+ *
+ * p. 188, formula 50:
+ *
+ * t^(u-1/2)*bessel_y(2*v,2*sqrt(a)*sqrt(t))
+ *    -> a^(-1/2)*p^(-u)*exp(-a/2/p)
+ *       * [tan((u-v)*%pi)*gamma(u+v+1/2)/gamma(2*v+1)*M[u,v](a/p)
+ *          -sec((u-v)*%pi)*W[u,v](a/p)]
+ */
+
+/* other examples which might or might not be special cases of stuff above
+ * collected from various tables:
+ */
+
+/* http://en.wikipedia.org/wiki/Laplace_transform */
+
+/* linearity */
+
+laplace (a * foo (u) + b * bar (u) + c * baz (u), u, v);
+a * 'laplace (foo (u), u, v) + b * 'laplace (bar (u), u, v) + c * 'laplace (baz (u), u, v);
+
+/* frequency differentiation */
+
+laplace (u * foo (u), u, v);
+- 'diff ('laplace (foo (u), u, v), v);
+
+laplace (u^2 * foo (u), u, v);
+'diff ('laplace (foo (u), u, v), v, 2);
+
+laplace (u^3 * foo (u), u, v);
+- 'diff ('laplace (foo (u), u, v), v, 3);
+
+laplace (u^n * foo (u), u, v);
+(- 1)^n * 'diff ('laplace (foo (u), u, v), v, n);
+
+/* frequency integration */
+
+laplace (foo (u) / u, u, v);
+'integrate ('laplace (foo (u), u, v), u, v, inf);
+
+/* time scaling */
+
+laplace (foo (a * u), u, v);
+(1 / a) * 'at ('laplace (foo (u), u, v), v = v / a);
+
+/* frequency shifting */
+
+assuming (v - a > 0, laplace (exp (a * u) * foo (u), u, v));
+'at ('laplace (foo (u), u, v), v = v - a);
+
+(laplace (exp (a * u) * cosh (u), u, v), if equal (%%,  (v - a) / ((v - a)^2 - 1)) then true else %%);
+true;
+
+/* time shifting */
+
+laplace (foo (u - a) * unit_step (u - a), u, v);
+exp (- a * v) * 'laplace (foo (u), u, v);
+
+laplace (sinh (u - a) * unit_step (u - a), u, v);
+exp (-a * v) / (v^2 - 1);
+
+/* convolution */
+
+laplace ('integrate (foo (w) * bar (u - w), w, 0, u), u, v);
+'laplace (bar (u), u, v) * 'laplace (foo (u), u, v);
+
+(laplace ('integrate (erf (w) * sinh (u - w), w, 0, u), u, v), if equal (%%, laplace (erf (u), u, v) * laplace (sinh (u), u, v)) then true else %%);
+true;
+
+/* conjugate */
+
+declare ([u, v], complex);
+done;
+
+laplace (conjugate (foo (u)), u, v);
+conjugate ('at ('laplace (foo (u), u, v), v = conjugate (v)));
+
+/* erf is entire => conjugate commutes with erf */
+
+laplace (conjugate (erf (u)), u, v);
+exp (v^2/4) * (1 - erf (v/2)) / v;
+
+/* sqrt and log are not entire => conjugate does not commute */
+
+laplace (conjugate (sqrt (u)), u, v);
+sqrt (%pi) * conjugate (1 / conjugate (v) ^ (3/2)) / 2;
+
+laplace (conjugate (log (u)), u, v);
+(- conjugate (log (conjugate (v))) - %gamma) / v;
+
+remove ([u, v], complex);
+done;
+
+/* unit step */
+
+laplace (unit_step (u), u, v);
+1/v;
+
+laplace (unit_step (u - a), u, v);
+exp (- a*v) / v;
+
+/* ramp */
+
+laplace (u * unit_step (u), u, v);
+1/v^2;
+
+/* integer power */
+
+makefact (laplace (u^n, u, v));
+n!/v^(n + 1);
+
+makefact (laplace ((u - a)^n * unit_step (u - a), u, v));
+n! * exp (- a*v) / v^(n + 1);
+
+makefact (laplace (u^n * exp (- b*u), u, v));
+n! / (v + b)^(n + 1);
+
+makefact (ratsimp (laplace ((u - a)^n * exp (- b*(u - a)) * unit_step (u - a), u, v)));
+n!/(v + b)^(n + 1) * exp (- a*v);
+
+/* general power */
+
+laplace (u^q, u, v);
+gamma (q + 1) / v^(q + 1);
+
+/* root */
+
+laplace (u^(1/n), u, v);
+gamma (1/n + 1) / v^(1/n + 1);
+
+(laplace (u^(1/n) * exp(-b*u), u, v),
+ if ratsimp (%% - gamma (1/n + 1) / (v + b)^(1/n + 1)) = 0 then true else %%);
+true;
+
+/* exponential approach */
+
+(laplace (1 - exp (- a*u), u, v), if equal (%%, a/(v * (v + a))) then true else %%);
+true;
+
+/* decaying waves */
+
+(laplace (exp (- a*u) * sin (b*u), u, v), if equal (%%, b / ((v + a)^2 + b^2)) then true else %%);
+true;
+
+(laplace (exp (- a*u) * cos (b*u), u, v), if equal (%%, (v + a) / ((v + a)^2 + b^2)) then true else %%);
+true;
+
+/* Bessel function */
+
+block ([foo, bar],
+ foo : laplace (bessel_j (n, a*u), u, v),
+ bar : (sqrt (v^2 + a^2) - v)^n / (a^n * sqrt (v^2 + a^2)),
+ makelist (makelist (ev (ratsimp (foo - bar), a = aa, n = nn), nn, 0, 4), aa, [1/5, 1/3, 1/2, 1, 2, 3, 5]),
+ map (lambda ([e], zeroequiv (e, v)), flatten (%%)),
+ every (%%));
+true;
+
+/* http://tutorial.math.lamar.edu/Classes/DE/Laplace_Table.aspx */
+
+/* http://www.vibrationdata.com/math/Laplace_Transforms.pdf */
+
+/* combined shifting and scaling */
+
+(assuming (v - a*b > 0,
+ laplace (exp (a * b * u) * foo (a * u), u, v)));
+1/a * 'at ('laplace (foo (u), u, v), v = v/a - b);
+
+laplace (exp (a * b * u) * cosh (a * u), u, v);
+''(ev (1/a * 'at ('laplace (foo (u), u, v), v = v/a - b), 'laplace (foo (u), u, v) = v/(v^2 - 1), nouns, ratsimp));
+
+/* doublet */
+
+laplace ('diff (delta (u), u), u, v);
+v;
+
+/* etc */
+
+laplace (u, u, v);
+1/v^2;
+
+makefact (laplace (u^(n - 1)/(n - 1)!, u, v));
+1/v^n;
+
+makefact (laplace (u^n, u, v));
+n! / v^(n + 1);
+
+laplace (u^(a - 1) / gamma (a), u, v);
+1/v^a;
+
+(mycompare (actual, expected) := if ratsimp (actual - expected) = 0 then true else actual, 0);
+0;
+
+mycompare
+ (laplace (u * exp (-a * u), u, v),
+  1/(v + a)^2);
+true;
+
+mycompare
+ (makefact (laplace (u^(n - 1)/(n - 1)! * exp (-a * u), u, v)),
+  1/(v + a)^n);
+true;
+
+mycompare
+ (laplace (1 - exp (-a * u), u, v),
+  a / (v * (v + a)));
+true;
+
+mycompare
+ (laplace (1/(b - a) * (exp (-a * u) - exp (-b * u)), u, v),
+  1/((v + a)*(v + b)));
+true;
+
+mycompare
+ (laplace (1/(a*b) + exp (-a * u)/(a * (a - b)) + exp (-b * u)/(b * (b - a)), u, v),
+  1/(v * (v + a) * (v + b)));
+true;
+
+mycompare
+ (laplace (1/(a - b) * (a * exp (-a * u) - b * exp (-b * u)), u, v),
+  v/((v + a) * (v + b)));
+true;
+
+mycompare
+ (laplace ((1 - a*u) * exp (-a * u), u, v),
+  v / (v + a)^2);
+true;
+
+mycompare
+ (laplace (1/a^2  * (1 - (1 + a*u) * exp (-a * u)), u, v),
+  1/(v * (v + a)^2));
+true;
+
+mycompare
+ (laplace (sin (a * u + b), u, v),
+  (sin (b) * v + cos (b) * a) / (v^2 + a^2));
+true;
+
+mycompare
+ (laplace (u * cos (a*u), u, v),
+  (v^2 - a^2)/(v^2 + a^2)^2);
+true;
+
+mycompare
+ (laplace (1/a^2 * (1 - cos (a*u)), u, v),
+  1/(v * (v^2 + a^2)));
+true;
+
+/* resume here with eq 2.24 */
+
+/* http://www.stanford.edu/~boyd/ee102/laplace-table.pdf */
+
+/* miscellany */
+
+/* bug reported to mailing list 2012-11-25: laplace prevents user-defined simplification */
+
+(kill (foo), tellsimpafter ('laplace (foo (w), w, x), FOO (x)), laplace (foo (w), w, x));
+FOO (x);
+
+(remove (n, integer), killcontext (mycontext));
+done;

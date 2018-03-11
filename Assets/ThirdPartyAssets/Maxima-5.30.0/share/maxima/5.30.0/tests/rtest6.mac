@@ -1,0 +1,29 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+
+
+integrate(x^(5/4)/(x+1)^(5/2),x,0,inf);
+beta(9/4,1/4);
+gradef(q(x),sin(x^2));
+q(x);
+diff(log(q(r(x))),x);
+'diff(r(x),x,1)*sin(r(x)^2)/q(r(x));
+integrate(%,x);
+log(q(r(x)));
+
+?nformat(?complex(1,2));
+2*%i + 1;
+?nformat(?/(1,2)); /* ?/(1,2) equivalent to (/ 1 2) in Lisp */
+1/2$
+
+?typep(interval(1,2),?ri);
+true$
+is(part(?complex(1,2),0)="+");
+true$
+

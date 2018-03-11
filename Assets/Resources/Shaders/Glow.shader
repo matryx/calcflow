@@ -19,6 +19,7 @@ Shader "Custom/Glow"
 			float2 _MainTex_TexelSize;
 			#pragma vertex vert
 			#pragma fragment frag
+			#pragma only_renderers d3d11
 			#include "UnityCG.cginc"
 
 			struct v2f

@@ -1,0 +1,1961 @@
+/*-*MACSYMA-*-*/
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Comments:
+ *
+ * The ctensor package was downcased, cleaned up, and moving frames
+ * functionality was added by Viktor Toth (http://www.vttoth.com/).
+ *
+ * As of November, 2004, the naming conventions in this package now
+ * correspond with the naming conventions in commercial MACSYMA.
+*/
+
+if get('ctensor,'version)#false then error("CTENSOR already loaded!")$
+
+/***********************************
+  PACKAGE INITIALIZATION
+ ***********************************/
+tensorkill:true$
+define_variable(dim,4,fixnum,"The dimension of the problem.")$
+define_variable(diagmetric,false,boolean,
+  "True if the metric entered is a diagonal matrix.")$
+define_variable(ctrgsimp,false,boolean,
+  "Apply trigonometric simplifications (TRIGSIMP).")$
+define_variable(cframe_flag,false,boolean,
+  "Perform computations in a moving frame.")$
+define_variable(ctorsion_flag,false,boolean,"Apply torsion")$
+define_variable(cnonmet_flag,false,boolean,"Apply nonmetricity")$
+define_variable(derivabbrev,true,boolean)$
+define_variable(ctayswitch,false,boolean)$
+define_variable(ratchristof,true,boolean)$
+define_variable(rateinstein,true,boolean)$
+define_variable(ratriemann,true,boolean)$
+define_variable(ratweyl,true,boolean)$
+
+init_ctensor():=
+(
+  tensorkill:true,
+  dim:4,
+  diagmetric:false,
+  setflags(),
+  kill(ct_coords,lg,ug,lcs,mcs,geod,ric,uric,tracer,ein,lein,
+        riem,lriem,uriem,kinvariant,lfg,ufg,fr,fri,fb,tr,kt,nm,nmc),
+  lfg:diagmatrix(dim,1),
+  lfg[1,1]:-1,
+  done
+)$
+
+_ug():=if cframe_flag then 'ufg else 'ug;
+_lg():=if cframe_flag then 'lfg else 'lg;
+
+/***********************************
+  HELPER FUNCTIONS
+ ***********************************/
+setflags():=(derivabbrev:true,ctayswitch:false,
+  ratchristof:true,rateinstein:true,ratriemann:true,ratweyl:true)$
+
+readvalue(message,pred,[badboy]):=
+  block([value],
+    loop,
+    value:read(message),
+    if apply(pred,[value])=true then return(value),
+    if badboy#[] then apply('print,badboy),
+    go(loop))$
+
+modedeclare(function(yesp),boolean)$
+yesp([messages]):=block
+(
+    [reply],
+    loop,
+    reply:apply('read,messages),
+    if member(reply,['yes,'ye,'y,'yes,'yes,'y]) then return(true),
+    if member(reply,['no,'n,'no,'no,'n]) then return(false),
+    print("Please reply YES or NO."),
+    go(loop)
+)$
+
+resimp(exp):=apply('ev,[exp,'noeval,'simp])$
+
+kdelt(i,j):=(modedeclare([i,j],fixnum),if i = j then 1 else 0)$
+
+/* Optional Taylor-series approximation */
+ctaylor(x):=
+  if ctayswitch then ratdisrep(taylor(x,ctayvar,ctaypt,ctaypov-1)) else x$
+
+/* This function transforms second-rank covariant tensors given the components
+   and the transformation law, which is in the form Yi=Yi(X1,...,Xdim) */
+ctransform(qxyz):=block
+(
+  [ttemp,omtemp,vartemp,newtemp],
+  for i thru dim do
+    for j thru dim do 
+  (
+    ttemp[i,j]:qxyz[i,j],
+    for k thru dim do ttemp[i,j]:subst(omtemp[k],ct_coords[k],ttemp[i,j])
+  ),
+  for i thru dim do vartemp[i]:read("Transform #",i),
+  for i thru dim do
+    for j thru dim do
+      for k thru dim do ttemp[i,j]:subst(vartemp[k],omtemp[k],ttemp[i,j]),
+  for a thru dim do
+    for b thru dim do newtemp[a,b]:txyzsum(vartemp,ct_coords,a,b,ttemp),
+  genmatrix(newtemp,dim,dim)
+)$
+
+txyzsum(vartemp,ct_coords,a,b,ttemp):=block(
+  [temp:0],
+  for i from 1 thru dim do
+    for j from 1 thru dim do
+      temp:temp+diff(vartemp[i],ct_coords[a])*diff(vartemp[j],ct_coords[b])*
+                                ttemp[i,j],
+  temp
+)$
+
+/* Check diagonality of a matrix or (2D) array */
+diagmatrixp(mat,nlim):=
+(
+  modedeclare(nlim,fixnum),
+  block
+  (
+    [diagflag:true],
+    for i thru nlim do
+      for j thru nlim do
+        if i#j and mat[i,j]#0 then return(diagflag:false),
+    diagflag
+  )
+)$
+    
+/* Check symmetry of a matrix or (2D) array */
+symmetricp(m,n):=
+(
+  modedeclare(n,fixnum),
+  block
+  (
+    [symflag:true],
+    if n#1 then for i thru n-1 do
+      for j from i+1 thru n do
+        if m[j,i]#m[i,j] then return(symflag:false),
+    symflag
+  )
+)$
+      
+/* Count the number of terms in a (2D) array */
+ntermst(f):=for i thru dim do for j thru dim do print([[i,j],nterms(f[i,j])])$
+
+/* Display the contents of a tensor */
+cdisplay(_t,[_k]):=block
+(
+  [_len,_tmp,_i,_j,_n],
+  if member(_t,arrays) then
+  (
+    _tmp : funmake(arrayinfo, [_t]),
+    _len : ev(_tmp)[2] - length(_k),
+    if _len > 2 then
+    (
+       for _n thru dim do apply(cdisplay,append([_t],append(_k,[_n])))
+    )
+    else if _len = 2 then block
+    (
+      [_tmp:zeromatrix(dim,dim)],
+      for _i thru dim do for _j thru dim do
+        _tmp[_i,_j]:arrayapply(_t,append(_k,[_i,_j])),
+      disp((if length(_k) > 0 then arrayapply(nounify(_t),_k)
+            else nounify(_t))=_tmp)
+    )
+    else if _len = 1 then (true)
+    else print("Array is empty")
+  )
+  else disp(_t=ev(_t)),
+  done
+)$
+
+/* Delete an element */
+deleten(l,n):=
+(
+  modedeclare(n,fixnum),
+  block
+  (
+    [len],
+    modedeclare(len,fixnum),
+    if l = [] then l
+    else
+    (
+      len:length(l),
+      if n>len or n<1 then error("Second argument out of range")
+      else if n=1 then rest(l)
+      else if n=len then rest(l,-1)
+      else append(rest(l,n-len-1),rest(l,n))
+    )
+  )
+)$
+
+/***********************************
+  SETTING UP THE METRIC
+ ***********************************/
+csetup():=block
+(
+  [],
+  if not tensorkill then 
+    error("Type KILL(ALL)\; and then TENSORKILL:TRUE\;
+           before you enter a new metric."),
+  tensorkill:false, 
+  setflags(),
+  dim:mode_identity(fixnum,
+    readvalue("Enter the dimension of the coordinate system:",
+              lambda([v], if integerp(v) then block
+                          (
+                            [u:v],
+                            modedeclare(u,fixnum),
+                            if u>0 then true
+                          )
+                    ),
+                    "Must be a positive integer!")
+  ),
+  ct_coords:if dim=2 then [x,y]
+    else if dim = 3 then [x,y,z]
+    else if dim = 4 then [x,y,z,t] 
+    else read("Enter a list containing the names of the coordinates in order"),
+  if yesp("Do you wish to change the coordinate names?") then
+    ct_coords:
+      read("Enter a list containing the names of the coordinates in order"),
+  if length(ct_coords)#dim then
+    error("Length of the coordinate list is not equal to the dimension"),
+
+   readvalue("Do you want to
+1. Enter a new metric?
+2. Enter a metric from a file?
+3. Approximate a metric with a Taylor series?",
+             lambda([opt], if opt = 1 then(newmet(),true)
+                           else if opt = 2 then(filemet(),true)
+                           else if opt = 3 then(sermet(),true)
+                           else false
+                   ),
+             "Invalid option, please enter 1, 2, or 3."
+            ),
+  done
+)$
+
+/* Enter a new metric by hand */
+newmet():=block
+(
+  [],
+  lg:entermatrix(dim,dim),
+  read("Enter functional dependencies with DEPENDS or 'N' if none"),
+  if yesp("Do you wish to see the metric?") then disp(lg),
+  cmetric()
+)$
+
+/* Read a metric from a file */
+filemet():=block
+(
+  [file,fpos],
+  file:read("Specify the file as [filename1,filename2,directory]?"),
+  fpos:(print("What is the ordinal position of the metric in this file?"),
+  read("(Note, the name LG must be assigned to your metric in the file)")),
+  apply(batch,[file,off,fpos,fpos]),cmetric()
+)$
+
+/* Approximate the metric with a Taylor series */
+sermet():=block
+(
+  [],
+  ctayswitch:true,
+  ctayvar:read("Enter expansion parameter"),
+  ctaypov:read("Enter minimum power to drop"),
+  ctaypt:read("Enter the point to expand the series around"),
+  if yesp("Is the metric in a file?") then filemet() else newmet()
+)$
+
+/* Computing the frame field from the inverse frame field (user-defined) */
+tmetric(disp):=block(
+  [],
+  /* fr are the contravariant frame vector components. fri are covariant.
+     i.e.,
+                 i
+     fr[a,i] = e   ,   fri[a,i] = e
+                (a)                (a)i
+  */
+  fr:lfg.(transpose(fri)^^(-1)),
+  ufg:lfg^^(-1),
+  lg:transpose(lfg.fri).fri,
+
+  if ctrgsimp then lg:trigsimp(lg)
+  else lg:ratsimp(lg),
+  if ratfac then lg:factor(lg),
+  if disp then ldisplay(lg)
+);
+
+/* Computing the contravariant metric or the frame field */
+cmetric([dis]):=if cframe_flag then tmetric(if dis#[] then dis[1] else false)
+                else block
+(
+  [],
+  if length(lg)#dim or length(transpose(lg))#dim then
+    error("The rank of the metric is not equal to the dimension of the space"),
+/*  else if not symmetricp(lg,dim) then
+    error("The metric tensor must be symmetric!"),*/
+
+  diagmetric:diagmatrixp(lg,dim),
+  gdet:factor(determinant(lg)),
+  ug:ident(length(first(lg))),
+  if diagmetric then for ii:1 thru length(first(lg)) do ug[ii,ii]:1/lg[ii,ii]
+  else ug:block([detout:true],transpose(lg^^(-1))),
+  if ratfac then ug:ratsimp(ug),
+  if dis#[] and dis[1]#false then
+    if yesp("Do you wish to see the metric inverse?") then ldisp(ug),
+  ug:resimp(ug),
+  done
+)$
+
+ct_coordsys(coordinate_system, [extra_args]):=
+(
+  if coordinate_system='cartesian2d then
+  (
+    dim:2,
+    ct_coords:[x,y],
+    if cframe_flag then
+    (
+      fri:ident(2),
+      lfg:ident(2)
+    )
+    else lg:ident(2)
+  )
+  else if coordinate_system='polar then
+  (
+    dim:2,
+    ct_coords:[r,phi],
+    assume(r>=0),
+    if cframe_flag then
+    (
+      fri:matrix([cos(phi),-sin(phi)*r],
+                 [sin(phi), cos(phi)*r]),
+      lfg:ident(2)
+    )
+    else lg:matrix([1,0],[0,r^2])
+  )
+  else if coordinate_system='elliptic then
+  (
+    dim:2,
+    ct_coords:[u,v],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([e*sinh(u)*cos(v),-e*cosh(u)*sin(v)],
+                 [e*cosh(u)*sin(v), e*sinh(u)*cos(v)]),
+      lfg:ident(2)
+    )
+    else lg:matrix([e^2*(cosh(u)^2-cos(v)^2),                         0],
+                   [                       0,  e^2*(cosh(u)^2-cos(v)^2)])
+  )
+  else if coordinate_system='confocalelliptic then
+  block(
+    [tmp:sqrt((u^2-1)*(1-v^2))],
+    dim:2,
+    ct_coords:[u,v],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([            e*v,             e*u],
+                 [e*u*(1-v^2)/tmp, e*v*(1-u^2)/tmp]),
+      lfg:ident(2)
+    )
+    else lg:matrix([e^2*(u^2-v^2)/(u^2-1), 0],
+                   [0, e^2*(v^2-u^2)/(v^2-1)])
+  )
+  else if coordinate_system='bipolar then
+  block(
+    [tmp:(cosh(v)-cos(u))^2],
+    dim:2,
+    ct_coords:[u,v],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([   -e*sin(u)*sinh(v)/tmp, e*(1-cos(u)*cosh(v))/tmp],
+                 [e*(cos(u)*cosh(v)-1)/tmp,    -e*sin(u)*sinh(v)/tmp]),
+      lfg:ident(2)
+    )
+    else lg:matrix([e^2/tmp,0],[0,e^2/tmp])
+  )
+  else if coordinate_system='parabolic then
+  (
+    dim:2,
+    ct_coords:[u,v],
+    if cframe_flag then
+    (
+      fri:matrix([u,-v],[v,u]),
+      lfg:ident(2)
+    )
+    else lg:matrix([u^2+v^2, 0], [0, u^2+v^2])
+  )
+  else if coordinate_system='cartesian3d then
+  (
+    dim:3,
+    ct_coords:[x,y,z],
+    if cframe_flag then
+    (
+      fri:ident(3),
+      lfg:ident(3)
+    )
+    else lg:ident(3)
+  )
+  else if coordinate_system='polarcylindrical then
+  (
+    dim:3,
+    ct_coords:[r,theta,z],
+    if cframe_flag then
+    (
+      fri:matrix([cos(theta), -r*sin(theta), 0],
+                 [sin(theta),  r*cos(theta), 0],
+                 [         0,             0, 1]),
+      lfg:ident(3)
+    )
+    else lg:matrix([1, 0, 0], [0, r^2, 0], [0, 0, 1])
+  )
+  else if coordinate_system='ellipticcylindrical then
+  (
+    dim:3,
+    ct_coords:[u,v,z],
+    if cframe_flag then
+    (
+      fri:matrix([e*sinh(u)*cos(v), -e*cosh(u)*sin(v), 0],
+                 [e*cosh(u)*sin(v),  e*sinh(u)*cos(v), 0],
+                 [               0,                 0, 1]),
+      lfg:ident(3)
+    )
+    else lg:matrix([e^2*(sin(v)^2+sinh(u)^2),                        0, 0],
+                   [                       0, e^2*(sin(v)^2+sinh(u)^2), 0],
+                   [                       0,                        0, 1])
+  )
+  else if coordinate_system='confocalellipsoidal then
+  (
+    dim:3,
+    ct_coords:[u,v,w],
+    declare([e,f,g],constant),
+    if cframe_flag then
+    (
+      fri:matrix([-sqrt((v-e^2)*(w-e^2)/(f^2-e^2)/(g^2-e^2)/(e^2-u))/2,
+                  -sqrt((u-e^2)*(w-e^2)/(f^2-e^2)/(g^2-e^2)/(e^2-v))/2,
+                  -sqrt((u-e^2)*(v-e^2)/(f^2-e^2)/(g^2-e^2)/(e^2-w))/2],
+
+                 [ sqrt((v-f^2)*(w-f^2)/(f^2-e^2)/(g^2-f^2)/(u-f^2))/2,
+                   sqrt((u-f^2)*(w-f^2)/(f^2-e^2)/(g^2-f^2)/(v-f^2))/2,
+                   sqrt((u-f^2)*(v-f^2)/(f^2-e^2)/(g^2-f^2)/(w-f^2))/2],
+
+                 [-sqrt((v-g^2)*(w-g^2)/(g^2-e^2)/(g^2-f^2)/(g^2-u))/2,
+                  -sqrt((u-g^2)*(w-g^2)/(g^2-e^2)/(g^2-f^2)/(g^2-v))/2,
+                  -sqrt((u-g^2)*(v-g^2)/(g^2-e^2)/(g^2-f^2)/(g^2-w))/2]),
+      lfg:ident(3)
+    )
+    else lg:matrix([(v-u)*(w-u)/4/(e^2-u)/(u-f^2)/(u-g^2), 0, 0],
+                   [0, (v-u)*(w-v)/4/(v-e^2)/(v-f^2)/(v-g^2), 0],
+                   [0, 0, (w-u)*(w-v)/4/(e^2-w)/(w-f^2)/(w-g^2)])
+  )
+  else if coordinate_system='bipolarcylindrical then
+  block(
+    [tmp:(cosh(v)-cos(u))^2],
+    dim:3,
+    ct_coords:[u,v,z],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([e*sin(u)*sinh(v)/tmp,  e*(1-cos(u)*cosh(v))/tmp,     0],
+                 [e*(cos(u)*cosh(v)-1)/tmp, -e*sin(u)*sinh(v)/tmp,     0],
+                 [                   0,                         0, e/tmp]),
+      lfg:ident(3)
+    )
+    else lg:matrix([e^2/tmp, 2*e^2*sin(u)*sinh(v)*(1-cos(u)*cosh(v))/tmp, 0],
+                   [2*e^2*sin(u)*sinh(v)*(1-cos(u)*cosh(v))/tmp, e^2/tmp, 0],
+                   [                                        0, 0, e^2/tmp^2])
+  )
+  else if coordinate_system='paraboliccylindrical then
+  (
+    dim:3,
+    ct_coords:[u,v,z],
+    if cframe_flag then
+    (
+      fri:matrix([u,-v,0],[v,u,0],[0,0,1]),
+      lfg:ident(3)
+    )
+    else lg:matrix([u^2+v^2, 0, 0],[0, u^2+v^2, 0],[0, 0, 1])
+  )
+  else if coordinate_system='paraboloidal then
+  (
+    dim:3,
+    ct_coords:[u,v,phi],
+    if cframe_flag then
+    (
+      fri:matrix([-sin(phi)*u*v, cos(phi)*v, cos(phi)*u],
+                 [ cos(phi)*u*v, sin(phi)*v, sin(phi)*u],
+                 [            0,          u,         -v]),
+      lfg:ident(3)
+    )
+    else lg:matrix([u^2*v^2, 0, 0],[0, u^2+v^2, 0], [0, 0, u^2+v^2])
+  )
+  else if coordinate_system='conical then
+  (
+    dim:3,
+    ct_coords:[u,v,w],
+    declare([e,f],constant),
+    if cframe_flag then
+    (
+      fri:matrix([v*w/e/f, u*w/e/f, u*v/e/f],
+                 [-u*w/sqrt((f^2-e^2)*(u^2-e^2)/(e^2-v^2))/e,
+                  -v*w/sqrt((f^2-e^2)*(v^2-e^2)/(e^2-u^2))/e,
+                       sqrt((u^2-e^2)*(v^2-e^2)/(e^2-f^2))/e],
+                 [ u*w/sqrt((f^2-e^2)*(u^2-f^2)/(v^2-f^2))/f,
+                   v*w/sqrt((f^2-e^2)*(v^2-f^2)/(u^2-f^2))/f,
+                       sqrt((u^2-f^2)*(v^2-f^2)/(f^2-e^2))/f]),
+      lfg:ident(3)
+    )
+    else lg:matrix([(v-u)*(v+u)*w^2/((u-e)*(u+e)*(u-f)*(u+f)), 0, 0],
+                   [0, (u-v)*(u+v)*w^2/((v-e)*(v+e)*(v-f)*(v+f)), 0],
+                   [0,                                         0, 1])
+  )
+  else if coordinate_system='toroidal then
+  (
+    dim:3,
+    ct_coords:[u,v,phi],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([-e*sin(phi)*sinh(v)/(cosh(v)-cos(u)),
+                     -e*cos(phi)*sin(u)*sinh(v)/(cosh(v)-cos(u))^2,
+                         -e*cos(phi)*(cos(u)*cosh(v)-1)/(cosh(v)-cos(u))^2],
+                 [ e*cos(phi)*sinh(v)/(cosh(v)-cos(u)),
+                     -e*sin(phi)*sin(u)*sinh(v)/(cosh(v)-cos(u))^2,
+                         -e*sin(phi)*(cos(u)*cosh(v)-1)/(cosh(v)-cos(u))^2],
+                 [ 0, e*(cos(u)*cosh(v)-1)/(cosh(v)-cos(u))^2,
+                         -e*sin(u)*sinh(v)/(cosh(v)-cos(u))^2]),
+      lfg:ident(3)
+    )
+    else lg:matrix([e^2*sinh(v)^2/(cosh(v)-cos(u))^2, 0,          0],
+                   [0,           e^2/(cosh(v)-cos(u))^2,          0],
+                   [0,           0,          e^2/(cosh(v)-cos(u))^2])
+  )
+  else if coordinate_system='spherical then
+  (
+    dim:3,
+    ct_coords:[r,theta,phi],
+    assume(r>=0),
+    if cframe_flag then
+    (
+      fri:matrix([1,0,0],[0,r,0],[0,0,r*sin(theta)]),
+      lfg:ident(3)
+    )
+    else lg:matrix([1,0,0],[0,r^2,0],[0,0,r^2*sin(theta)^2])
+  )
+  else if coordinate_system='oblatespheroidal then
+  (
+    dim:3,
+    ct_coords:[u,v,phi],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([abs(e)*sqrt(sin(v)^2+sinh(u)^2), 0, 0],
+                 [0, abs(e)*sqrt(sin(v)^2+sinh(u)^2), 0],
+                 [0,      0, abs(e)*cosh(u)*abs(cos(v))]),
+      lfg:ident(3)
+    )
+    else lg:matrix([e^2*(sin(v)^2+sinh(u)^2), 0, 0],
+                   [0, e^2*(sin(v)^2+sinh(u)^2), 0],
+                   [0, 0,   e^2*cosh(u)^2*cos(v)^2])
+  )
+  else if coordinate_system='oblatespheroidalsqrt then
+  (
+    dim:3,
+    ct_coords:[u,v,phi],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([abs(e)*sqrt((u^2-v^2)/(u^2-1)), 0, 0],
+                 [0, abs(e)*sqrt((u^2-v^2)/(u^2-1)), 0],
+                 [0,                     0, abs(e*u*v)]),
+      lfg:ident(3)
+    )
+    else lg:matrix([e^2*(u^2-v^2)/(u^2-1), 0, 0],
+                   [0, e^2*(u^2-v^2)/(u^2-1), 0],
+                   [0,           0, e^2*u^2*v^2])
+  )
+  else if coordinate_system='prolatespheroidal then
+  (
+    dim:3,
+    ct_coords:[u,v,phi],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([abs(e)*sqrt(sin(v)^2+sinh(u)^2), 0, 0],
+                 [0, abs(e)*sqrt(sin(v)^2+sinh(u)^2), 0],
+                 [          0, 0, abs(e*sinh(u)*sin(v))]),
+      lfg:ident(3)
+    )
+    else lg:matrix([e^2*(sin(v)^2+sinh(u)^2), 0, 0],
+                   [0, e^2*(sin(v)^2+sinh(u)^2), 0],
+                   [0,   0, e^2*sin(v)^2*sinh(u)^2])
+  )
+  else if coordinate_system='prolatespheroidalsqrt then
+  (
+    dim:3,
+    ct_coords:[u,v,phi],
+    declare(e,constant),
+    if cframe_flag then
+    (
+      fri:matrix([abs(e)*sqrt((v^2-u^2)/(1-u^2)), 0, 0],
+                 [0, abs(e)*sqrt((v^2-u^2)/(v^2-1)), 0],
+                 [0,   0, abs(e)*sqrt((1-u^2)*(v^2-1))]),
+      lfg:ident(3)
+    )
+    else lg:matrix([e^2*(v^2-u^2)/(1-u^2), 0, 0],
+                   [0, e^2*(v^2-u^2)/(v^2-1), 0],
+                   [0, 0,   e^2*(1-u^2)*(v^2-1)])
+  )
+  else if coordinate_system='ellipsoidal then
+  (
+    dim:3,
+    ct_coords:[r,theta,phi],
+    declare([a,b,c],constant),
+    if cframe_flag then error("No frame fields yet")
+    else lg:matrix(
+      [(a^2*cos(phi)^2+b^2*sin(phi)^2)*sin(theta)^2+c^2*cos(theta)^2,
+           (a^2*cos(phi)^2+b^2*sin(phi)^2-c^2)*r*cos(theta)*sin(theta),
+               (b^2-a^2)*cos(phi)*sin(phi)*r*sin(theta)^2],
+      [(a^2*cos(phi)^2+b^2*sin(phi)^2-c^2)*r*cos(theta)*sin(theta),
+           r^2*((a^2*cos(phi)^2+b^2*sin(phi)^2)*cos(theta)^2+c^2*sin(theta)^2),
+               (b^2-a^2)*cos(phi)*sin(phi)*r^2*cos(theta)*sin(theta)],
+      [(b^2-a^2)*cos(phi)*sin(phi)*r*sin(theta)^2,
+           (b^2-a^2)*cos(phi)*sin(phi)*r^2*cos(theta)*sin(theta),
+               (a^2*sin(phi)^2+b^2*cos(phi)^2)*r^2*sin(theta)^2])
+  )
+  else if coordinate_system='cartesian4d then
+  (
+    dim:4,
+    ct_coords:[x,y,z,t],
+    if cframe_flag then fri:ident(4)
+    else lg:ident(4),
+    if cframe_flag then lfg:ident(4)
+  )
+  else if coordinate_system='spherical4d then
+  (
+    dim:4,
+    ct_coords:[r,theta,eta,phi],
+/*    declare(kurv,constant),*/
+    if cframe_flag then
+    (
+      fri:matrix([1 /* sqrt(1/(1-kurv*r^2)) */, 0, 0,  0],
+                 [        0, r,            0,          0],
+                 [        0, 0, r*sin(theta),          0],
+                 [        0, 0, 0, r*sin(eta)*sin(theta)]),
+      lfg:ident(4)
+    )
+    else lg:matrix([1 /* /(1-kurv*r^2) */, 0, 0,                    0],
+                   [0,            r^2, 0,                           0],
+                   [0,              0, r^2*sin(theta)^2,            0],
+                   [0,              0, 0, r^2*sin(eta)^2*sin(theta)^2])
+  )
+  else if coordinate_system='exteriorschwarzschild then
+  (
+    declare(m,constant),
+    assume(r>2*m),
+    dim:4,
+    ct_coords:[t,r,theta,phi],
+    if cframe_flag then
+    (
+      fri:matrix(
+        [sqrt((r-2*m)/r),              0,0,           0],
+        [              0,sqrt(r/(r-2*m)),0,           0],
+        [              0,              0,r,           0],
+        [              0,              0,0,sin(theta)*r]),
+        lfg:ident(4),
+        lfg[1,1]:-1
+    )
+    else lg:matrix(
+      [(2*m-r)/r,        0,  0,               0],
+      [        0,r/(r-2*m),  0,               0],
+      [        0,        0,r^2,               0],
+      [        0,        0,  0,sin(theta)^2*r^2])
+  )
+  else if coordinate_system='interiorschwarzschild then
+  (
+    dim:4,
+    ct_coords:[t,z,u,v],
+    declare([m],constant),
+    assume(t<2*m),
+    if cframe_flag then
+    (
+      fri:matrix(
+        [sqrt(t/(2*m-t)),               0, 0,        0],
+        [              0, sqrt((2*m-t)/t), 0,        0],
+        [              0,               0, t,        0],
+        [              0,               0, 0, sin(u)*t]),
+      lfg:ident(4),
+      lfg[1,1]:-1
+    )
+    else lg:matrix([-t/(2*m-t),         0,   0,            0],
+                   [         0, (2*m-t)/t,   0,            0],
+                   [         0,         0, t^2,            0],
+                   [         0,         0,   0, sin(u)^2*t^2])
+  )
+  else if coordinate_system='kerr_newman then
+  (
+    dim:4,
+    declare([a,m,e],constant),
+    rho:sqrt(r^2+(a*cos(theta))^2),
+    delta:a^2-2*m*r+r^2+e^2,
+    ct_coords:[ct,r,theta,phi],
+    if cframe_flag then
+    (
+      fri:matrix(
+        [sqrt(delta)/rho,  0,   0, -a*sqrt(delta)*sin(theta)^2/rho],
+        [0,  rho/sqrt(delta),   0,                               0],
+        [0,                0, rho,                               0],
+        [-a*sin(theta)/rho,0,   0,        (r^2+a^2)*sin(theta)/rho]),
+      lfg:ident(4),
+      lfg[1,1]:-1
+    )
+    else lg:matrix(
+      [(a^2*sin(theta)^2-delta)/rho^2,0,          0,
+                                  a*sin(theta)^2*(delta-r^2-a^2)/rho^2],
+      [0,                         rho^2/delta,    0,                 0],
+      [0,                                   0,rho^2,                 0],
+      [a*sin(theta)^2*(delta-r^2-a^2)/rho^2,0,0,
+               ((r^2+a^2)^2-a^2*delta*sin(theta)^2)*sin(theta)^2/rho^2])
+  )
+
+  /* Now some undocumented metrics from metrics.mac and other sources */
+
+  else if coordinate_system='standard then
+  (
+    dim:4,
+    remove([a,d],constant),
+    depends([a,d],x),
+    ct_coords:[x,y,z,t],
+    if cframe_flag then error("No frames implementation")
+    else lg:matrix([a,0,0,0],[0,x^2,0,0],[0,0,x^2*sin(y)^2,0],[0,0,0,d])
+  )
+  else if coordinate_system='nondiagonal3d then
+  (
+    dim:3,
+    ct_coords:[x,y,z],
+    if cframe_flag then error("No frames implementation")
+    else lg:lg:matrix([x^2,y,0],[y,y^2,0],[0,0,z])
+  )
+  else if coordinate_system='alternateflat4d then
+  (
+    dim:4,
+    ct_coords:[x,y,z,t],
+    if cframe_flag then error("No frames implementation")
+    else lg:matrix([1-t^2,0,0,1-t*x],[0,1,0,0],[0,0,1,0],[1-t*x,0,0,1-x^2])
+  )
+  else if coordinate_system='eddington_finkelstein then
+  (
+    dim:4,
+    ct_coords:[r,theta,phi,v],
+    if cframe_flag then error("No frame fields yet")
+    else lg:matrix([0,   0,                0,         1],
+                   [0, r^2,                0,         0],
+                   [0,   0, sin(theta)^2*r^2,         0],
+                   [1,   0,                0, (2*m-r)/r])
+  )
+  else if coordinate_system='isotropicschwarzschild then
+  (
+    dim:4,
+    ct_coords:[t,r,theta,phi],
+    if cframe_flag then
+    (
+      fri:matrix(
+        [(1-m/2/r)/(1+m/2/r),      0, 0, 0],
+        [0,              (1+m/2/r)^2, 0, 0],
+        [0, 0,            (1+m/2/r)^2*r, 0],
+        [0, 0, 0, (1+m/2/r)^2*r*sin(theta)]),
+      lfg:ident(4),
+      lfg[1,1]:-1
+    )
+    else lg:matrix([-((1-m/2/r)/(1+m/2/r))^2,      0, 0, 0],
+                   [ 0,                  (1+m/2/r)^4, 0, 0],
+                   [ 0, 0,              (1+m/2/r)^4*r^2, 0],
+                   [ 0, 0, 0, (1+m/2/r)^4*r^2*sin(theta)^2])
+  )
+  else if coordinate_system='vacuum then
+  (
+    dim:4,
+    ct_coords:[x,y,z,t],
+    if cframe_flag then error("No frames implementation")
+    else lg:matrix([0,1,a*(2*y-t),1],[1,0,a*(2*x-t),1],
+                   [a*(2*y-t),a*(2*x-t),-6*a^2*(y+x)^2
+	                +2*a^2*(2*x-t)*(2*y-t)-3/2,-a*(y+x+2*t)],
+                   [1,1,-a*(y+x+2*t),1/2])
+  )
+  else if coordinate_system='bondi then
+  (
+    dim:4,
+    ct_coords:[x,y,z,t],
+    dependencies(a(x,y,t),b(x,y,t),c(x,y,t),d(x,y,t)),
+    if cframe_flag then error("No frames implementation")
+    else lg:matrix([0,0,0,%e^(2*b)],[0,-%e^(2*a)*x^2,0,%e^(2*a)*d*x^2],
+                   [0,0,-%e^(-2*a)*x^2*sin(y)^2,0],
+                   [%e^(2*b),%e^(2*a)*d*x^2,0,%e^(2*b)*c/x-%e^(2*a)*d^2*x^2])
+  )
+  else if coordinate_system='brans_dicke then
+  (
+    dim:4,
+    ct_coords:[x,y,z,t],
+    if cframe_flag then error("No frames implementation")
+    else lg:at(matrix([a,0,0,0],[0,a*x^2,0,0],
+                      [0,0,a*x^2*sin(y)^2,0],[0,0,0,-d]),
+                      [d=((1-b/x)/(1+b/x))^(2/l),
+           a=(1+b/x)^4*((1-b/x)/(1+b/x))^(2*(l-c-1)/l),
+           p=((1-b/x)/(1+b/x))^(c/l)])
+        /* ell:l=sqrt((c+1)^2-c*(1-w*c/2)) */
+  )
+  else if coordinate_system='lapides then
+  (
+    /* RICCI FLAT METRIC FROM QUANTUM GRAVITY-FOUND BY ALAN
+       LAPIDES- LOS ALAMOS APRIL 1982- PRESUME IT IS ONE OF
+       THE HARRISON METRICS  */
+    dim:4,
+    ct_coords:[x,y,z,t],
+    if cframe_flag then error("No frames implementation")
+    else lg:at(matrix([1/c,0,0,0],[0,c*a,0,0],[0,0,c*b,0],[0,0,0,c*a]),
+               [c=%e^-(2*atan(sinh(t))),a=(cosh(t)^2-sin(y)^2)^2/cosh(t)^2,
+                b=cosh(t)^2*sin(y)^2])
+  )
+  else if coordinate_system='kantowski_sachs then
+  (
+    dim:4,
+    ct_coords:[r,theta,phi,t],
+    if cframe_flag then error("No frames implementation")
+    else
+    (
+      lg:matrix([X(t)^2,0,0,0],[0,Y(t)^2,0,0],
+                [0,0,Y(t)^2*sin(theta)^2,0],[0,0,0,-N^2]),
+      if member('misner,extra_args) then
+        lg:at(lg,[X(t)=exp(2*sqrt(3)*b(t)),Y(t)=exp(-2*sqrt(3)*o(t))]))
+  )
+
+  else if listp(coordinate_system) then
+  (
+    dim:length(coordinate_system)-1,
+    ct_coords:coordinate_system[dim+1],
+    if cframe_flag then
+    (
+      lfg:ident(dim),
+      fri:zeromatrix(dim,dim),
+      for i thru dim do for j thru dim do
+        fri[i,j]:diff(coordinate_system[i],ct_coords[j])
+    )
+    else
+    (
+      lg:zeromatrix(dim,dim),
+      for i thru dim do for j thru i do
+      (
+        lg[i,j]:sum(diff(coordinate_system[k%],ct_coords[i])*
+                    diff(coordinate_system[k%],ct_coords[j]),k%,1,dim),
+        if i#j then lg[j,i]:lg[i,j]
+      )
+    )
+  )
+  else error("Unknown coordinate system type!"),
+  if member('cylindrical,extra_args) then
+  (
+    if member('z, ct_coords) then
+      error("Cannot add Z coordinate to this metric, as it already exists")
+    else
+    (
+      dim:dim+1,
+      ct_coords:append(ct_coords,['z]),
+      if cframe_flag then
+      (
+        fri:addrow(addcol(fri,zeromatrix(dim-1,1)),ident(dim)[dim]),
+        lfg:addrow(addcol(lfg,zeromatrix(dim-1,1)),ident(dim)[dim])
+      )
+      else lg:addrow(addcol(lg,zeromatrix(dim-1,1)),ident(dim)[dim])
+    )
+  )
+  else if member('minkowski,extra_args) then
+  (
+    if member('ct, ct_coords) then
+      error("Cannot add CT coordinate to this metric, as it already exists")
+    else
+    (
+      dim:dim+1,
+/*    ct_coords:append(ct_coords,['ct]),*/
+      ct_coords:cons('ct,ct_coords),
+      if cframe_flag then
+      (
+/*      fri:addrow(addcol(fri,zeromatrix(dim-1,1)),ident(dim)[dim]),
+        lfg:addrow(addcol(lfg,zeromatrix(dim-1,1)),-ident(dim)[dim])*/
+        fri:apply(matrix,cons(-ident(dim)[1],
+            makelist(transpose(apply(matrix,cons(zeromatrix(dim-1,dim-1)[1],
+            makelist(transpose(fri)[i],i,1,dim-1))))[j],j,1,dim-1))),
+        lfg:apply(matrix,cons(-ident(dim)[1],
+            makelist(transpose(apply(matrix,cons(zeromatrix(dim-1,dim-1)[1],
+            makelist(transpose(lfg)[i],i,1,dim-1))))[j],j,1,dim-1)))
+      )
+/*    else lg:addrow(addcol(lg,zeromatrix(dim-1,1)),-ident(dim)[dim])*/
+      else lg:apply(matrix,cons(-ident(dim)[1],
+           makelist(transpose(apply(matrix,cons(zeromatrix(dim-1,dim-1)[1],
+           makelist(transpose(lg)[i],i,1,dim-1))))[j],j,1,dim-1)))
+    )
+  ),
+  if member('all,extra_args) then
+  (
+    cmetric(),
+    christof(false)
+  ),
+  if verbose then
+  (
+    ldisplay(dim),
+    ldisplay(ct_coords),
+    if cframe_flag then
+    (
+      ldisplay(lfg),
+      ldisplay(fri)
+    )
+    else ldisplay(lg)
+  ),
+  done
+)$
+
+/***********************************
+  THE TENSORS OF GENERAL RELATIVITY
+ ***********************************/
+
+/* Compute the Ricci rotation coefficients in a frame base */
+trrc(disp):=block
+(
+  [l,a,b,c,d],
+  if not symmetricp(_lg(),dim) then
+    error("Frame base calculations require a symmetric metric."),
+  for a thru dim do for b thru dim do for c from b thru dim do
+  if b=c then l[a,b,c]:0
+  else
+  (
+    /* Landau-Lifshitz II p98, pp379 (Hungarian edition) */
+    l[a,b,c]:sum(sum((diff(fri[a][i%],ct_coords[k%])-
+                      diff(fri[a][k%],ct_coords[i%]))*fr[b][i%]*fr[c][k%],
+                     k%,1,dim),i%,1,dim),
+    if ctrgsimp then l[a,b,c]:trigsimp(l[a,b,c])
+    else if ratchristof then l[a,b,c]:ratsimp(l[a,b,c]),
+    l[a,c,b]:-l[a,b,c],
+    if disp#false and debugmode then ldisplay(l[a,b,c])
+  ),
+  for c thru dim do for a thru dim do for b from a thru dim do
+  if a=b then lcs[c,a,b]:0
+  else
+  (
+    lcs[c,b,a]:(l[a,b,c]+l[b,c,a]-l[c,a,b])/2,
+    if ctrgsimp then lcs[c,b,a]:trigsimp(lcs[c,b,a])
+    else if ratchristof then lcs[c,b,a]:ratsimp(lcs[c,b,a]),
+    if ratfac then lcs[c,b,a]:factor(lcs[c,b,a]),
+    lcs[c,a,b]:-lcs[c,b,a]
+  ),
+  if disp=all or disp=lcs then
+    for a thru dim do for b thru dim-1 do for c from b+1 thru dim do
+      if lcs[a,b,c]#0 then ldisplay(lcs[a,b,c])
+);
+
+/* Compute the Christoffel-symbols, or, if a frame base is used, the Ricci
+   rotation coefficients and place them in the arrays lcs[] and mcs[] */
+christof(dis):=block
+(
+  [symmmetric:symmetricp(_lg(),dim)],
+  if cframe_flag then
+  (
+    if not symmmetric then
+      error("Frame base calculations require a symmetric metric."),
+    trrc(dis)
+  ),
+  if (not symmmetric and dis = lcs) then
+    error("Christoffel symbols of the first kind require a symmetric metric"),
+  if (not symmmetric and ctorsion_flag) then
+    error("Torsion requires a symmetric metric"),
+  if (not symmmetric and cnonmet_flag) then
+    error("Nonmetricity requires a symmetric metric"),
+  if ctorsion_flag and not member('kt,arrays) then contortion(tr),
+  if cnonmet_flag and not member('nmc,arrays) then nonmetricity(nm),
+  if symmmetric then
+  (
+    for i thru dim do
+    (
+      for j from i thru dim do
+      (
+        if not cframe_flag then for k thru dim do
+        (
+          lcs[i,j,k]:(diff(lg[j,k],ct_coords[i])
+            +diff(lg[k,i],ct_coords[j])-diff(lg[i,j],ct_coords[k]))/2,
+          lcs[j,i,k]:lcs[i,j,k]
+        ),
+        for k thru dim do
+        (
+          mcs[i,j,k]:ctaylor
+          (
+            if diagmetric then ratsimp(_ug()[k,k]*lcs[i,j,k])
+            else sum(_ug()[l%,k]*lcs[i,j,l%],l%,1,dim)
+          ),
+          if ratchristof then mcs[i,j,k]:ratsimp(mcs[i,j,k]),
+          mcs[j,i,k]:mcs[i,j,k],
+          if ctorsion_flag then
+          (
+            mcs[i,j,k]:mcs[i,j,k]-kt[i,j,k],
+            if j#i then mcs[j,i,k]:mcs[j,i,k]-kt[j,i,k]
+          ),
+          if cnonmet_flag then
+          (
+            mcs[i,j,k]:mcs[i,j,k]-nmc[i,j,k],
+            if j#i then mcs[j,i,k]:mcs[j,i,k]-nmc[j,i,k]
+          )
+        )
+      )
+    )
+  )
+  else block
+  (
+    /* This is a direct solution of the field equations,
+       g_{ab,c}-g_{bd}Gamma^d_{ac}-g_{dc}Gamma^d_{ba}=0.
+       See, e.g., Moffat & Boal, Phys Rev D V11 N6 p1375, Eq 2.5 */
+    [_mcs:zeromatrix(dim^3,dim^3),_ucs,_abc,_gam,a,b,c,d],
+    for a thru dim do
+      for b thru dim do
+        for c thru dim do
+          for d thru dim do
+    (
+      _mcs[(a-1)*dim^2+(b-1)*dim+c,(a-1)*dim^2+(c-1)*dim+d]:_mcs[(a-1)*dim^2+(b-1)*dim+c,(a-1)*dim^2+(c-1)*dim+d]+lg[b,d],
+      _mcs[(a-1)*dim^2+(b-1)*dim+c,(b-1)*dim^2+(a-1)*dim+d]:_mcs[(a-1)*dim^2+(b-1)*dim+c,(b-1)*dim^2+(a-1)*dim+d]+lg[d,c]
+    ),
+    _ucs:_mcs^^(-1),
+    if ratchristof then _ucs:ratsimp(_ucs),
+    _abc:zeromatrix(dim^3,1),
+    for a thru dim do
+      for b thru dim do
+        for c thru dim do
+    (
+      _abc[(a-1)*dim^2+(b-1)*dim+c,1]:diff(lg[b,c],ct_coords[a]),
+      if ratchristof then _abc[(a-1)*dim^2+(b-1)*dim+c,1]:ratsimp(_abc[(a-1)*dim^2+(b-1)*dim+c,1])
+    ),
+    _gam:_ucs._abc,
+    if ratchristof then _gam:ratsimp(_gam),
+    for a thru dim do
+      for b thru dim do
+        for c thru dim do
+      mcs[a,b,c]:_gam[(a-1)*dim^2+(b-1)*dim+c][1]
+  ),
+  if dis = all or dis = lcs then for i thru dim do
+    for j from i thru dim do
+      for k thru dim do
+        if lcs[i,j,k]#0 then ldisplay(lcs[i,j,k]),
+  if dis = mcs or dis = all then for i thru dim do
+    for j from (if symmmetric then i else 1) thru dim do
+      for k thru dim do
+        if mcs[i,j,k]#0 then ldisplay(mcs[i,j,k]),
+  done
+)$
+
+/* In a moving frame, the Ricci-tensor is computed from the covariant
+   curvature tensor */
+tricci(disp):=block
+(
+  [df],
+  if not symmetricp(_lg(),dim) then
+    error("Frame base calculations require a symmetric metric."),
+  if not member('lriem,arrays) then triemann(false),
+  kill(ric),
+  df:true,
+  for i thru dim do for j from i thru dim do
+  (
+    ric[i,j]:sum(sum(ufg[k%,l%]*lriem[l%,k%,i,j],k%,1,dim),l%,1,dim),
+    if ctrgsimp then ric[i,j]:trigsimp(ric[i,j])
+    else if ratfac then ric[i,j]:factor(ric[i,j])
+    else ric[i,j]:ctaylor(ratsimp(ric[i,j])),
+    if i#j then ric[j,i]:ric[i,j],
+    if disp and ric[i,j]#0 then
+    (
+      ldisplay(ric[i,j]),
+      df:false
+    )
+  ),
+  tracer:sum(sum(ric[i%,j%]*ufg[i%,j%],i%,1,dim),j%,1,dim),
+  if df and disp then print("THIS SPACETIME IS EMPTY AND/OR FLAT"),
+  done
+);
+
+/* In case of a holonomic metric, the Christoffel-symbols of the
+   second kind are used. */
+ricci(dis):=if cframe_flag then tricci(dis) else block
+(
+  [suma,sumb,flat:true,symmmetric:symmetricp(_lg(),dim)],
+  modedeclare(flat,boolean),
+  if not member('mcs,arrays) then christof(false),
+  if symmmetric then for i thru dim do
+  (
+    for j from i thru dim do
+    (
+      suma:0,sumb:0,
+      for k thru dim do
+      (
+        if k#i then suma:suma+(diff(mcs[j,i,k],ct_coords[k])
+                               -diff(mcs[j,k,k],ct_coords[i])),
+        sumb:sumb+sum(mcs[l%,k,k]*mcs[i,j,l%]-mcs[k,i,l%]*mcs[j,l%,k],l%,1,dim)
+      ),
+      ric[i,j]:ctaylor(suma+sumb),
+      if ratfac then ric[i,j]:factor(ctaylor(ratsimp(ric[i,j]))),
+      ric[j,i]:ric[i,j]
+    )
+  )
+  else
+  (
+    for m thru dim do for n thru dim do
+      ric[m,n]:ctaylor(sum(diff(mcs[m,n,a],ct_coords[a])-
+                               (diff(mcs[m,a,a]+mcs[a,m,a],ct_coords[n])+
+                                diff(mcs[n,a,a]+mcs[a,n,a],ct_coords[m]))/4+
+                       sum(-mcs[m,o,a]*mcs[a,n,o]+mcs[m,n,a]*mcs[a,o,o],o,1,dim)
+                      ,a,1,dim)),
+      if ratfac then ric[i,j]:factor(ctaylor(ratsimp(ric[i,j])))
+  ),
+  if dis#false then
+  (
+    for i thru dim do for j from (if symmmetric then i else 1) thru dim do if ric[i,j]#0 then
+    (
+      flat:false,
+      ldisplay(ric[i,j])
+    ),
+    if flat then print("THIS SPACETIME IS EMPTY AND/OR FLAT")
+  ),
+  tracer:if diagmetric 
+    then ctaylor(ratsimp(sum(ric[i%,i%]*ug[i%,i%],i%,1,dim)))
+    else ctaylor(sum(sum(ric[i%,j%]*ug[i%,j%],i%,1,dim),j%,1,dim)),
+  done
+)$
+
+/* Computing the mixed Ricci-tensor */
+uricci(dis):=block(
+  [flat:true],
+  modedeclare(flat,boolean),
+  if not (member('ric,arrays) or matrixp(ric)) then ricci(false),
+  for i thru dim do for j thru dim do uric[i,j]:0,
+  for i thru dim do
+  (
+    for j thru dim do
+    (
+      uric[i,j]:if diagmetric then ratsimp(ctaylor(ric[i,j]*_ug()[j,j]))
+                else ctaylor(sum(ric[i,k%]*_ug()[k%,j],k%,1,dim)),
+      if ratfac then uric[i,j]:factor(ctaylor(ratsimp(uric[i,j])))
+    )
+  ),
+  if dis#false then
+  (
+    for i thru dim do for j thru dim do if uric[i,j]#0 then
+    (
+      flat:false,
+      ldisplay(uric[i,j])
+    ),
+    if flat then print("THIS SPACETIME IS EMPTY AND/OR FLAT")
+  ),
+  done
+)$
+      
+/* The scalar curvature */
+
+scurvature():=
+(
+  if not (member('uric,arrays) or matrixp(uric)) then uricci(false),
+  if ratfac then factor(tracer) else tracer
+)$
+
+/* Computing the mixed Einstein-tensor */
+einstein(dis):=block
+(
+  [flat:true],
+  modedeclare(flat,boolean),
+  if not (member('uric,arrays) or matrixp(uric)) then uricci(false),
+  for i thru dim do for j thru dim do
+  (
+    if i=j then ein[i,j]:ctaylor(uric[i,j]-tracer/2)
+    else ein[i,j]:ctaylor(uric[i,j]),
+    if ratfac then ein[i,j]:factor(ratsimp(ein[i,j]))
+    else if rateinstein then ein[i,j]:ratsimp(ein[i,j]),
+    if dis#false and ein[i,j]#0 then
+    (
+      flat:false,
+      ldisplay(ein[i,j])
+    )
+  ),
+  if dis#false and flat then print("THIS SPACETIME IS EMPTY AND/OR FLAT"),
+  done
+)$
+
+/* Computing the covariant Einstein-tensor */
+leinstein(dis):=block
+(
+  if not (member('ein,arrays) or matrixp(ein)) then einstein(false),
+  for i thru dim do for j thru i do
+  (
+    lein[i,j]:if diagmetric then ein[i,j]*lg[j,j]
+              else sum(ein[i,k%]*lg[k%,j],k%,1,dim),
+    if i#j then lein[j,i]:lein[i,j],
+    if dis#false and lein[i,j]#0 then ldisplay(lein[i,j])
+  )
+)$
+
+/* The Riemann-tensor is computed so that its indices are compatible with the
+   index ordering in the itensor package:
+
+    l      _l       _l       _l   _m    _l   _m
+   R    = |      - |      + |    |   - |    |
+    ijk     ij,k     ik,j     mk   ij    mj   ik
+
+   This index ordering is somewhat unusual. In this form, the (3,1) Riemann
+   tensor is antisymmetric in its second and third indices.
+
+   The computation of the Weyl tensor follows the same index ordering.
+*/
+
+/* This function computes the (1,3) Riemann tensor */
+riemann(dis):=if cframe_flag then block
+(
+  if not member('lriem,arrays) then triemann(false),
+  for i thru dim do for j thru dim do for k thru dim do for l thru dim do
+    riem[i,j,k,l]:sum(lriem[i,j,k,m%]*ufg[l,m%],m%,1,dim),
+  done
+)
+else block
+(
+  [flat : true],
+  modedeclare(flat,boolean),
+  if not member('mcs,arrays) then christof(false),
+  for i thru dim do
+    for j thru dim do
+      for k thru dim do
+        for l thru dim do riem[i,j,k,l]:0,
+  for i thru dim do
+    for j thru dim do
+      for k thru j do
+        for l thru dim do
+  (
+    riem[i,j,k,l]:ctaylor(diff(mcs[i,j,l], ct_coords[k]) -
+                          diff(mcs[i,k,l], ct_coords[j]) +
+                          sum(mcs[m%,k,l]*mcs[i,j,m%] -
+                              mcs[m%,j,l]*mcs[i,k,m%], m%, 1, dim)),
+    if ratfac then riem[j,i,k,l] : factor(ctaylor(ratsimp(riem[j,i,k,l])))
+    else if ratriemann then riem[j,i,k,l] : ctaylor(ratsimp(riem[j,i,k,l])),
+    if k # j then riem[i,k,j,l] : -riem[i,j,k,l],
+    if dis#false and riem[i,j,k,l] # 0 then
+    (flat : false, ldisplay(riem[i,j,k,l]))
+  ),
+  if dis#false and flat then print("This spacetime is flat"),
+  done
+)$
+
+/* Computing the covariant Riemann-tensor in a moving frame */
+triemann(disp):=block
+(
+  [df],
+  if not symmetricp(_lg(),dim) then
+    error("Frame base calculations require a symmetric metric."),
+  if not member('lcs,arrays) then trrc(false),
+  kill(lriem),
+  df:true,
+  for i thru dim do
+    for j from i thru dim do
+      for k thru dim do
+        for l from k thru dim do
+  (
+    if i=j or k=l then lriem[l,j,i,k]:0
+    /* Wald (1984), p51, eq. 3.4.21 */
+    else lriem[l,j,i,k]:ctaylor(sum(fr[i][a%]*diff(lcs[j,k,l],ct_coords[a%])-
+      fr[j][a%]*diff(lcs[i,k,l],ct_coords[a%]),a%,1,dim)-sum(sum(ufg[a%,b%]*
+      (lcs[i,b%,k]*lcs[j,a%,l]-lcs[j,b%,k]*lcs[i,a%,l]+lcs[i,b%,j]*lcs[a%,k,l]-
+      lcs[j,b%,i]*lcs[a%,k,l]),b%,1,dim),a%,1,dim)),
+    if ctrgsimp then lriem[l,j,i,k]:trigsimp(ev(lriem[l,j,i,k]))
+    else if ratriemann then lriem[l,j,i,k]:ratsimp(ev(lriem[l,j,i,k]))
+    else lriem[l,j,i,k]:ev(lriem[l,j,i,k]),
+    if ratfac then lriem[l,j,i,k]:factor(lriem[l,j,i,k]),
+    lriem[l,i,j,k]:-lriem[l,j,i,k],
+    lriem[k,j,i,l]:-lriem[l,j,i,k],
+    lriem[k,i,j,l]:lriem[l,j,i,k],
+    if disp and lriem[l,j,i,k]#0 then
+    (
+      ldisplay(lriem[l,j,i,k]),
+      df:false
+    )
+  ),
+  if df and disp then print("THIS SPACETIME IS FLAT"),
+  done
+);
+/* This function computes the covariant Riemann tensor */
+lriemann(dis):=if cframe_flag then triemann(dis) else block
+(
+  [symmmetric:symmetricp(_lg(),dim)],
+  if not member('riem,arrays) then riemann(false),
+  for i thru dim do
+    for j thru dim do
+      for k thru dim do
+        for l thru dim do lriem[i,j,k,l]:0,
+  for i thru dim do
+    for j thru dim do
+      for k thru (if symmmetric then j else dim) do
+        for l thru (if symmmetric then i else dim) do
+  (
+    lriem[i,j,k,l] : if diagmetric then ratsimp(riem[i,j,k,l]*lg[l,l])
+                     else sum(riem[i,j,k,m%]*lg[m%,l], m%, 1, dim),
+    if ratriemann then lriem[i,j,k,l] : ratsimp(lriem[i,j,k,l]),
+    if symmmetric then
+    (
+      if j # k then lriem[i,k,j,l] : -lriem[i,j,k,l],
+      if l # i then
+      (
+        lriem[l,j,k,i] : -lriem[i,j,k,l],
+        if j # k then lriem[l,k,j,i] : lriem[i,j,k,l]
+      )
+    ),
+    if dis#false and lriem[i,j,k,l] # 0 then ldisplay(lriem[i,j,k,l])
+  ),
+  done
+)$
+
+/* This function computes the contravariant Riemann tensor */
+uriemann(dis):=block
+(
+  [symmmetric:symmetricp(_lg(),dim)],
+  if not member('riem,arrays) then riemann(false),
+  for i thru dim do
+    for j thru dim do
+      for k thru dim do
+        for l thru dim do uriem[i,j,k,l]:0,
+  for i thru dim do
+    for j thru dim do
+      for k thru (if symmmetric then j else dim) do
+        for l thru (if symmmetric then i else dim) do
+  (
+    uriem[i,j,k,l] : if diagmetric then
+                      ratsimp(riem[i,j,k,l]*_ug()[i,i]*_ug()[j,j]*_ug()[k,k])
+                      else sum(sum(sum(
+                           riem[m%,n%,o%,l]*_ug()[i,m%]*_ug()[j,n%]*_ug()[k,o%],
+                           m%, 1, dim), n%, 1, dim), o%, 1, dim),
+    if ratriemann then uriem[i,j,k,l] : ratsimp(uriem[i,j,k,l]),
+    if symmmetric then
+    (
+      if j # k then uriem[i,k,j,l] : -uriem[i,j,k,l],
+      if l # i then
+      (
+        uriem[l,j,k,i] : -uriem[i,j,k,l],
+        if j # k then uriem[l,k,j,i] : uriem[i,j,k,l]
+      )
+    ),
+    if dis#false and uriem[i,j,k,l] # 0 then ldisplay(uriem[i,j,k,l])
+  ),
+  done
+)$
+
+/* The Kretchmann invariant is R^2=lriem[i,j,k,l]*uriem[i,j,k,l] */
+rinvariant():=kinvariant:sum(sum(sum(sum(lriem[i%,j%,k%,l%]*uriem[i%,j%,k%,l%],
+                         i%,1,dim),j%,1,dim),k%,1,dim),l%,1,dim)$
+
+/* The covariant Weyl tensor. See the note on the Riemann tensor above
+   for index ordering. */
+weyl(dis):=block
+(
+  [flat:true,symmmetric:symmetricp(_lg(),dim)],
+  modedeclare(flat,boolean),
+  if dim=2 then
+  (
+    print("ALL 2 DIMENSIONAL SPACETIMES ARE CONFORMALLY FLAT"),
+    return(done)
+  ),
+  if not ((member('ric,arrays) or matrixp(ric)) and member('lriem,arrays)) then
+  (
+    ricci(false),
+    riemann(false),
+    lriemann(false)
+  ),
+  for i thru dim do
+    for j thru dim do
+      for k thru dim do
+        for l thru dim do weyl[i,j,k,l]:0,
+  for i thru dim do
+    for j from (if symmmetric then i+1 else 1) thru dim do
+      for k from (if symmmetric then i else 1) thru dim do
+        for l from (if symmmetric then k+1 else 1) thru (if (symmmetric and k=i) then j else dim) do
+  (
+    weyl[l,j,i,k]:ctaylor(lriem[l,j,i,k]+
+                          1/(dim-2)*(_lg()[i,l]*ric[j,k]-_lg()[i,k]*ric[l,j]
+                                    +_lg()[j,k]*ric[l,i]-_lg()[j,l]*ric[k,i])-
+                          tracer/((dim-1)*(dim-2))*
+                          (_lg()[i,l]*_lg()[k,j]-_lg()[i,k]*_lg()[l,j])
+                         ),
+    if ratfac then weyl[l,j,i,k]:factor(ratsimp(weyl[l,j,i,k]))
+    else if ratweyl then weyl[l,j,i,k]:ratsimp(weyl[l,j,i,k]),
+    if symmmetric then
+    (
+      weyl[k,i,j,l]:weyl[l,j,i,k],
+      weyl[k,j,i,l]:weyl[l,i,j,k]:-weyl[l,j,i,k],
+      if i#k or j>l then
+      (
+        weyl[j,l,k,i]:weyl[i,k,l,j]:weyl[l,j,i,k],
+        weyl[j,k,l,i]:weyl[i,l,k,j]:-weyl[l,j,i,k]
+      )
+    ),
+    if dis#false and weyl[l,j,i,k]#0 then
+    (
+      flat:false,
+      ldisplay(weyl[l,j,i,k])
+    )
+  ),
+  if dis#false and flat then print("THIS SPACETIME IS CONFORMALLY FLAT"),
+  done
+)$
+
+/***********************************
+  MISCELLANEOUS CALCULATIONS
+ ***********************************/
+
+/* The geodesic equation of motion */
+cgeodesic(dis):=block
+(
+  [s,lgeod],
+  map(lambda([u],apply('remove,[u,constant])),ct_coords),
+  depends(ct_coords,s),
+  for i thru dim do
+    lgeod[i]:if diagmetric then
+               ratsimp(lg[i,i]*diff(ct_coords[i],s,2)+
+                       sum(diff(lg[i,i],ct_coords[a%])*diff(ct_coords[i],s)*
+                           diff(ct_coords[a%],s),a%,1,dim)-
+                       1/2*sum(diff(lg[a%,a%],ct_coords[i])*
+                               diff(ct_coords[a%],s)^2,a%,1,dim))
+             else ratsimp(sum(lg[i,a%]*diff(ct_coords[a%],s,2),a%,1,dim)+
+                       sum(sum(diff(lg[i,b%],ct_coords[a%])*diff(ct_coords[b%],s)*
+                           diff(ct_coords[a%],s)-
+                       1/2*diff(lg[a%,b%],ct_coords[i])*diff(ct_coords[a%],s)*
+                           diff(ct_coords[b%],s),a%,1,dim),b%,1,dim)),
+  for i thru dim do
+  (
+    geod[i]:factor(ratexpand(sum(ratsimp(_ug()[i,a%]*lgeod[a%]),a%,1,dim))),
+    if dis#false then ldisplay(geod[i])
+  ),
+  done
+)$
+
+/* The 4-dimensional Brans-Dicke vacuum field equations are represented by the
+   array bd and the scalar equation is generated by setting the d'Alembertian
+   of the scalar field to zero. That is, one calls the function dscalar on the
+   scalar field. */
+bdvac(zz):=block
+(
+  [addd,boxq:0],
+  if dim#4 then error("This program is restricted to 4 dimensions"),
+  for i:1 thru 4 do for j:1 thru 4 do
+    addd[i,j]:w/zz^2*(diff(zz,ct_coords[i])*diff(zz,ct_coords[j])-lg[i,j]*
+      sum(diff(zz,ct_coords[k%])*diff(zz,ct_coords[k%])*_ug()[k%,k%],k%,1,4)/2)+
+      (diff(diff(zz,ct_coords[i]),ct_coords[j])-sum(mcs[i,j,k%]*
+      diff(zz,ct_coords[k%]),k%,1,4)-lg[i,j]*boxq)/zz,
+  for i:1 thru 4 do for j:1 thru 4 do
+    bd[i,j]:ratsimp(ric[i,j]-r*lg[i,j]/2-0*t[i,j]-addd[i,j]),
+  remarray(addd),
+  done
+)$
+
+/* Compute the Euler-Lagrange equations for the density of the invariant R^2.
+   The form is (D is the Kronecker-delta):
+
+        b  2        b      b        bc
+ (1/2)*D  R  - 2 R R  + 2 D []R -2 g   R
+        a         a        a            ;ac
+
+   The equations are sometimes less complex if tracer is given a parametric
+   name with dependencies corresponding to those of the scalar curvature. */
+invariant1():=block
+(
+  for aa thru dim do for bb thru dim do 
+  (
+    inv1[aa,bb]:0
+  ),
+  if diagmetric then for aa thru dim do for bb thru dim do 
+  (
+    inv1[aa,bb]:ratsimp(kdelt(aa,bb)*tracer^2/2-2*tracer*uric[aa,bb]-
+                2*kdelt(aa,bb)*dscalar(tracer)+2*_ug()[aa,aa]*
+                (diff(diff(tracer,ct_coords[bb]),ct_coords[aa])-
+                sum(mcs[bb,aa,k%]*diff(tracer,ct_coords[k%]),k%,1,dim)))
+  )
+  else for aa thru dim do for bb thru dim do 
+  (
+    inv1[aa,bb]:ratsimp(kdelt(aa,bb)*tracer^2/2-2*tracer*uric[aa,bb]-
+                2*kdelt(aa,bb)*dscalar(tracer)+2*sum(_ug()[bb,c%]*
+                (diff(diff(tracer,ct_coords[aa]),ct_coords[c%])-sum(
+                mcs[aa,c%,k%]*diff(tracer,ct_coords[k%]),k%,1,dim)),c%,1,dim))
+  )
+)$
+
+invariant2():="NOT YET IMPLEMENTED";
+bimetric():="NOT YET IMPLEMENTED";
+
+/* Compute a Newman-Penrose null tetrad */
+nptetrad(disp):=block(
+  [nu],
+  if cframe_flag#true then error("Frame base required"),
+  if dim#4 then error("This calculation requires dim=4"),
+  nu:ident(4),
+  nu[1,1]:-1,
+  if lfg#nu then error("Frame metric signature of (-,+,+,+) required"),
+  np:ident(4),
+  np[1]:(fri[1]+fri[2])/sqrt(2),
+  np[2]:(fri[1]-fri[2])/sqrt(2),
+  np[3]:(fri[3]+%i*fri[4])/sqrt(2),
+  np[4]:(fri[3]-%i*fri[4])/sqrt(2),
+  if ctrgsimp then np:trigsimp(np)
+  else np:ratsimp(np),
+  if ratfac then np:factor(np),
+  if disp then ldisplay(np),
+  npi:np.ug,
+  if ctrgsimp then npi:trigsimp(npi)
+  else npi:ratsimp(npi),
+  if ratfac then npi:factor(npi),
+  if disp then ldisplay(npi),
+  done
+);
+
+contract4(w,l1,l2,l3,l4)::=
+(
+  if dim#4 then error("This calculation requires dim=4"),
+  modedeclare([l1,l2,l3,l4],fixnum),
+  block
+  (
+    [ans:0,i,j,k,l],
+    for i thru 4 do for j thru 4 do for k thru 4 do for l thru 4 do
+    ans:ans+w[l,j,i,k]*npi[l1,i]*npi[l2,j]*npi[l3,k]*npi[l4,l],
+    if ctrgsimp then ans:trigsimp(ans)
+    else ratsimp(ans)
+  )
+);
+
+/* Compute the Newman-Penrose coefficients */
+psi(disp):=block
+(
+  /* To compute these values, we must transform the Weyl-tensor to
+     coordinate representation if we've been working in a frame field. */
+  [w],
+  if cframe_flag then
+  (
+    for i thru dim do for j thru dim do for k thru dim do for l thru dim do
+      w[i,j,k,l]:0,
+    for i thru dim do
+      for j from i+1 thru dim do
+        for k from i thru dim do
+          for l from k+1 thru (if k=i then j else dim) do
+    (
+      w[l,j,i,k]:sum(sum(sum(sum(weyl[l%,j%,i%,k%]*fri[i%,i]*fri[j%,j]*
+              fri[k%,k]*fri[l%,l],i%,1,dim),j%,1,dim),k%,1,dim),l%,1,dim),
+      if ratfac then w[l,j,i,k]:factor(ratsimp(w[l,j,i,k]))
+      else if ratweyl then w[l,j,i,k]:ratsimp(w[l,j,i,k]),
+      w[k,i,j,l]:w[l,j,i,k],
+      w[k,j,i,l]:w[l,i,j,k]:-w[l,j,i,k],
+      if i#k or j>l then
+      (
+        w[j,l,k,i]:w[i,k,l,j]:w[l,j,i,k],
+        w[j,k,l,i]:w[i,l,k,j]:-w[l,j,i,k]
+      )
+    )
+  )
+  else w:'weyl,
+  psi[0]:ratsimp(-contract4(w,1,3,1,3)),
+  if disp then ldisplay(psi[0]),
+  psi[1]:ratsimp(-contract4(w,1,2,1,3)),
+  if disp then ldisplay(psi[1]),
+  psi[2]:ratsimp(gfactor(-1/2*(contract4(w,1,2,1,2)+contract4(w,1,2,3,4)))),
+  if disp then ldisplay(psi[2]),
+  psi[3]:ratsimp(contract4(w,1,2,2,4)),
+  if disp then ldisplay(psi[3]),
+  psi[4]:ratsimp(-contract4(w,2,4,2,4)),
+  if disp then ldisplay(psi[4]),
+  done
+);
+
+/* Compute the Petrov-classification of the metric; algorithm based on
+   Classifying geometries in general relativity: III Classification in practice
+   by Pollney, Skea, d'Inverno, Class. Quant. Grav. 17 2885-2992 (2000)
+
+   The algoritm has been optimized to compute only quantities that are
+   required for a specific (sub)case. As of 12/19/2004, it is essentially
+   untested, may even contain typos in some expressions.
+*/
+petrov():=block
+(
+  [
+    T:[   0,'N,'II,'III, 'D,'II,'II, 7,
+        'II,'I, 'I,  11,'II, 13, 14,15,
+         'N,'I, 'I,  19,'II, 21, 13,23,
+       'III,19, 11,  27,  7, 23, 15,31],
+    P:1
+  ],
+
+  if psi[4]#0 then P:P+1,
+  if psi[3]#0 then P:P+2,
+  if psi[2]#0 then P:P+4,
+  if psi[1]#0 then P:P+8,
+  if psi[0]#0 then P:P+16,
+
+  if numberp(T[P]) and T[P]>0 then
+  (
+    if T[P]=7 then
+      if ratsimp(psi[3]^2-3*psi[2]*psi[4])=0 then 'D
+      else 'II
+    else if T[P]=11 then
+      if ratsimp(27*psi[4]^2*psi[1]+64*psi[3]^3)=0 then 'II
+      else 'I
+    else if T[P]=13 then
+      if ratsimp(psi[1]^2*psi[4]+2*psi[2]^3)=0 then 'II
+      else 'I
+    else if T[P]=14 then
+      if ratsimp(9*psi[2]^2-16*psi[1]*psi[3])=0 then 'II
+      else 'I
+    else if T[P]=15 then
+      if ratsimp(3*psi[2]^2-4*psi[1]*psi[3])=0 and
+         ratsimp(psi[2]*psi[3]-3*psi[1]*psi[4])=0 then 'II
+      else 'I
+    else if T[P]=19 then
+      if ratsimp(psi[0]*psi[4]^3-27*psi[3]^4)=0 then 'II
+      else 'I
+    else if T[P]=21 then
+      if ratsimp(9*psi[2]^2-psi[4]^2)=0 then 'D
+      else 'I
+    else if T[P]=23 then block
+    (
+      [I:ratsimp(psi[0]*psi[4]+3*psi[2]^2)],
+      if I=0 and ratsimp(4*psi[2]*psi[4]-3*psi[3]^2)=0 then 'III
+      else block
+      (
+        [J:ratsimp(4*psi[2]*psi[4]-3*psi[3]^2)],
+        if ratsimp(psi[4]*I^2-3*J*(psi[0]*J-2*psi[2]*I))=0 then 'II
+        else 'I
+      )
+    )
+    else if T[P]=27 then
+      if ratsimp(psi[0]*psi[3]^2-psi[1]^2*psi[4])=0 then
+        if ratsimp(psi[0]*psi[4]+2*psi[1]*psi[3])=0 then 'D
+        else if ratsimp(psi[0]*psi[4]-16*psi[1]*psi[3])=0 then 'II
+        else 'I
+      else block
+      (
+        [I:ratsimp(psi[0]*psi[4]+2*psi[1]*psi[3])],
+        if I=0 then block
+        (
+          [J:ratsimp(-psi[0]*psi[3]^2-psi[1]^2*psi[4])],
+          if J=0 then 'III
+          else if ratsimp(I^3-27*J^2)=0 then 'II
+          else 'I
+        )
+        else 'I
+      )
+    else block
+    (
+      [H:ratsimp(psi[0]*psi[2]-psi[1]^2)],
+      if H=0 then
+        if ratsimp(psi[0]*psi[3]-psi[1]*psi[2])=0 then
+          if ratsimp(psi[0]*psi[4]-psi[2]^2)=0 then 'N
+          else 'I
+        else block
+        (
+          [E:ratsimp(psi[0]*psi[4]-psi[2]^2)],
+          if E=0 then
+            if ratsimp(37*psi[2]^2+27*psi[1]*psi[3])=0 then 'II
+            else 'I
+          else block
+          (
+            [
+              A:ratsimp(psi[1]*psi[3]+psi[2]^2),
+              I:ratsimp(E-4*A)
+            ],
+            if I#0 and ratsimp(I^3-27*(psi[4]*H-psi[3]^2*psi[0]+
+                               psi[1]*psi[2]*psi[3]+psi[2]*A)^2)=0 then 'II
+            else 'I
+          )
+        )
+        else block
+        (
+          [I:ratsimp(psi[0]*psi[4]-psi[2]^2-4*(psi[1]*psi[3]+psi[2]^2))],
+          if I=0 then
+            if ratsimp(psi[4]*H-psi[3]^2*psi[0]+psi[1]*psi[2]*psi[3]+
+                       psi[2]*(psi[1]*psi[3]+psi[2]^2))=0 then 'III
+            else 'I
+          else
+            if ratsimp(psi[0]^2*psi[3]-psi[0]*psi[1]*psi[2]-2*psi[1]*H)=0 then
+              if ratsimp(psi[0]^2*I-12*H^2)=0 then 'D
+              else if ratsimp(psi[0]^2*I-3*H^2)=0 then 'II
+              else 'I
+            else block
+            (
+              [J:ratsimp(psi[4]*H-psi[3]^2*psi[0]+psi[1]*psi[2]*psi[3]+
+                         psi[2]*(psi[1]*psi[3]+psi[2]^2))],
+              if J#0 and ratsimp(I^3-27*J^2)=0 then 'II
+              else 'I
+            )
+        )
+    )
+  )
+  else T[P]
+);
+
+/* Old algorithm by anonymous, intended for diagonal metrics
+petrov():=block
+(
+  [ii,jj,gg,hh],
+  ii:ratsimp(psi[0]*psi[4]-4*psi[1]*psi[3]+3*psi[2]^2),
+  jj:ratsimp(determinant(matrix([psi[0],psi[1],psi[2]],
+                                [psi[1],psi[2],psi[3]],
+                                [psi[2],psi[3],psi[4]]))),
+  if ratsimp(ii^3-27*jj^2)#0 then "Type is I"
+  else
+  (
+    gg:ratsimp(psi[0]^2*psi[3]-3*psi[0]*psi[1]*psi[2]+2*psi[1]^3),
+    if ii=0 and jj=0 then
+    (
+      if gg=0 then
+      (
+        hh:ratsimp(psi[0]*psi[2]-psi[1]^2),
+        if hh=0 then
+        (
+          if psi[0] = 0 and psi[1] = 0 and psi[2] = 0 and psi[3] = 0 and
+             psi[4] = 0 then "Type is FLAT(0)"
+          else "Type is N"
+        )
+        else "Type is III"
+      )
+      else "Type is III"
+    )
+    else
+    (
+      hh:ratsimp(psi[0]*psi[2]-psi[1]^2),
+      if ratsimp(gg-(psi[0]^2*ii-12*hh^2))#0 then "Type is II"
+      else "Type is D"
+    )
+  )
+)$*/
+
+frame_bracket(fr,fri,diagframe):=block
+(
+  for a thru dim do for b thru dim do for c thru dim do
+    fb[a,b,c]:sum(sum(fr[a,e%]*(diff(fri[e%,c],ct_coords[f%])-
+              diff(fri[f%,c],ct_coords[e%]))*fr[b,c],e%,1,dim),f%,1,dim)
+);
+
+/* The findde function finds a list of unique differential equations in the
+   list or 2-dimensional array a. The variable deindex is a global list
+   of the indices corresponding to these unique differential equations. */
+findde(a,n):=
+(
+  modedeclare(n,fixnum),
+  if n=1 then findde1(a)
+  else if n=2 then findde2(a)
+  else if n=3 then findde3(a)
+  else error("Invalid dimension:",n)
+)$
+
+findde1(list):=block
+(
+  [inflag:true,deriv:nounify('derivative),l:[],l1,q],
+  deindex:[],
+  for i while list#[] do
+  (
+    l1:factor(num(first(list))),
+    list:rest(list),
+    if not freeof(deriv,l1) then
+    (
+      deindex:cons(i,deindex),
+      if inpart(l1,0)#"*" then l:cons(l1,l)
+      else
+      (
+        q:1,
+        for j thru length(l1) do
+          if not freeof(deriv,inpart(l1,j)) then q:q*inpart(l1,j),
+        l:cons(q,l)
+      )
+    )
+  ),
+  cleanup(l)
+)$
+
+findde2(a):=block
+(
+  [inflag:true,deriv:nounify('derivative),l:[],t,q],
+  deindex:[],
+  for i thru dim do for j thru dim do
+  (
+    t:factor(num(a[i,j])),
+    if not freeof(deriv,t) then
+    (
+      deindex:cons([i,j],deindex),
+      if inpart(t,0)#"*" then l:cons(t,l)
+      else
+      (
+        q:1,
+        for n thru length(t) do
+          if not freeof(deriv,inpart(t,n)) then q:q*inpart(t,n),
+        l:cons(q,l)
+      )
+    )
+  ),
+  cleanup(l)
+)$
+
+findde3(a):=block
+(
+  [inflag:true,deriv:nounify('derivative),l:[],t,q],
+  deindex:[],
+  for i thru dim do for j thru dim do for k thru dim do
+  (
+    t:factor(num(a[i,j,k])),
+    if not freeof(deriv,t) then
+    (
+      deindex:cons([i,j,k],deindex),
+      if inpart(t,0)#"*" then l:cons(t,l)
+      else
+      (
+        q:1,
+        for n thru length(t) do
+          if not freeof(deriv,inpart(t,n)) then q:q*inpart(t,n),
+        l:cons(q,l)
+      )
+    )
+  ),
+  cleanup(l)
+)$
+      
+cleanup(ll):=block
+(
+  [a,l:[],index:[]],
+  while ll#[] do
+  (
+    a:first(ll),
+    ll:rest(ll),
+    if not member(a,ll) then
+    (
+      l:cons(a,l),
+      index:cons(first(deindex),index)
+    ),
+    deindex:rest(deindex)
+  ),
+  deindex:index,
+  l
+)$
+
+/***********************************
+  AUXILIARY FUNCTIONS (not used in ctensor)
+ ***********************************/
+
+/* Covariant and contravariant gradients */
+cograd(f,xyz):=block
+(
+  [],
+  for mm thru dim do 
+  (
+    arraysetapply(xyz,[mm],ratsimp(diff(f,ct_coords[mm])))
+  )
+)$
+
+contragrad(f,xyz):=block
+(
+  if diagmetric then for mm thru dim do 
+    arraysetapply(xyz,[mm],ratsimp(ratsimp(_ug()[mm,mm]*diff(f,ct_coords[mm]))))
+  else for mm thru dim do 
+    arraysetapply(xyz,[mm],sum(_ug()[m,n]*diff(f,ct_coords[n%]),n%,1,dim))
+)$
+
+/* The d'Alembertian of a scalar */
+dscalar(phi):=block
+(
+  if diagmetric then ratsimp(1/sqrt(-gdet)*sum(diff(_ug()[i%,i%]*
+                  sqrt(-gdet)*diff(phi,ct_coords[i%]),ct_coords[i%]),i%,1,dim))
+                else ratsimp(1/sqrt(-gdet)*sum(sum(diff(_ug()[i%,j%]*sqrt(-gdet)*
+                  diff(phi,ct_coords[j%]),ct_coords[i%]),i%,1,dim),j%,1,dim))
+)$
+
+/* Covariant divergence. The object gxyz must be a mixed 2nd rank tensor
+   whose first index is covariant. */
+checkdiv(gxyz):=block
+(
+  modedeclare([i,j%],fixnum),
+  if diagmatrixp(gxyz,dim) then for i thru dim do
+    print(div[i]:ratsimp(ctaylor(1/sqrt(-gdet)*diff(sqrt(-gdet)*gxyz[i,i],
+      ct_coords[i])-sum(mcs[i,j%,j%]*gxyz[j%,j%],j%,1,dim))))
+  else for i thru dim do
+    print(div[i]:ratsimp(ctaylor(1/sqrt(-gdet)*sum(diff(sqrt(-gdet)*gxyz[i,j%],
+      ct_coords[j%]),j%,1,dim)-sum(sum(mcs[i,j%,a%]*gxyz[a%,j%],a%,1,dim),j%,1,dim))))
+)$
+
+/* Contortion. Mostly generated with ic_convert(). */
+contortion(tr):=block
+(
+  for i thru dim do
+    for j thru dim do
+      for k thru dim do kt[i,j,k]:sum(_ug()[k,l%]*
+         (-sum(tr[l%,i,m%]*lg[j,m%],m%,1,dim)-sum(lg[l%,m%]*tr[i,j,m%],m%,1,dim)-
+          sum(tr[l%,j,m%]*lg[i,m%],m%,1,dim)), l%,1,dim)/2
+)$
+
+/* Nonmetricity. Also generated mainly with ic_convert(). */
+nonmetricity(nm):=block
+(
+  for i thru dim do
+    for j thru dim do
+      for k thru dim do nmc[i,j,k]:-nm[i]*kdelt(j,k)-kdelt(i,k)*nm[j]+
+                                   sum(_ug()[k,l%]*nm[l%],l%,1,dim)*lg[i,j]
+)$
+
+
+/********************************************************************
+ * Untested code from miscellaneous files...
+
+/* The second covariant derivative of the covariant Ricci Tensor */
+
+riccicov(ii,jj,kk,ll):=block(
+  modedeclare([ii,jj,kk,ll,a%,b%],fixnum), 
+  if diagmetric then h[ii,jj,kk,ll]:h[jj,ii,kk,ll]:
+    ratsimp(sum(
+     mcs[a%,ii,jj]*ric[jj,jj]*mcs[kk,ll,a%]+
+      mcs[a%,jj,ii]*ric[ii,ii]*mcs[kk,ll,a%]+
+       ric[a%,a%]*mcs[ii,kk,a%]*mcs[jj,ll,a%]+
+        mcs[a%,kk,ii]*ric[ii,ii]*mcs[jj,ll,a%]+
+         ric[a%,a%]*mcs[ii,ll,a%]*mcs[jj,kk,a%]+
+          mcs[a%,kk,jj]*ric[jj,jj]*mcs[ii,ll,a%]-
+           diff(ric[ii,jj],ct_coords[a%],1)*mcs[kk,ll,a%],a%,1,dim)
+
+  -(diff(ric[ii,ii],ct_coords[kk],1)*mcs[jj,ll,ii]+
+     ric[ii,ii]*diff(mcs[jj,kk,ii],ct_coords[ll],1)+
+      diff(ric[ii,ii],ct_coords[ll],1)*mcs[jj,kk,ii]+
+       diff(ric[jj,jj],ct_coords[kk],1)*mcs[ii,ll,jj]+
+        ric[jj,jj]*diff(mcs[ii,kk,jj],ct_coords[ll],1)+
+         diff(ric[jj,jj],ct_coords[ll],1)*mcs[ii,kk,jj])
+
+  +diff(diff(ric[ii,jj],ct_coords[kk],1),ct_coords[ll],1)) 
+
+  else  h[ii,jj,kk,ll]:h[jj,ii,kk,ll]:
+  ratsimp(sum(sum(
+    mcs[a%,ii,b%]*ric[b%,jj]*mcs[kk,ll,a%]+
+     mcs[a%,jj,b%]*ric[b%,ii]*mcs[kk,ll,a%]+
+      ric[a%,b%]*mcs[ii,kk,a%]*mcs[jj,ll,b%]+
+       mcs[a%,kk,b%]*ric[b%,ii]*mcs[jj,ll,a%]+
+        ric[a%,b%]*mcs[ii,ll,a%]*mcs[jj,kk,b%]+
+          mcs[a%,kk,b%]*ric[b%,jj]*mcs[ii,ll,a%],a%,1,dim),b%,1,dim)
+
+  - sum(
+      diff(ric[ii,jj],ct_coords[a%],1)*mcs[kk,ll,a%]+
+       diff(ric[a%,ii],ct_coords[kk],1)*mcs[jj,ll,a%]+
+        ric[a%,ii]*diff(mcs[jj,kk,a%],ct_coords[ll],1)+
+         diff(ric[a%,ii],ct_coords[ll],1)*mcs[jj,kk,a%]+
+          diff(ric[a%,jj],ct_coords[kk],1)*mcs[ii,ll,a%]+
+           ric[a%,jj]*diff(mcs[ii,kk,a%],ct_coords[ll],1)+
+     	    diff(ric[a%,jj],ct_coords[ll],1)*mcs[ii,kk,a%],a%,1,dim)
+
++diff(diff(ric[ii,jj],ct_coords[kk],1),ct_coords[ll],1)))$
+
+*******************************************************************/
+
+
+
+put('ctensor,'v20041204,'version)$

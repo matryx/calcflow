@@ -1,0 +1,70 @@
+load('optmiz);
+/* This macsyma batch file illustrates how to use the function
+STAP for determining the stationary points of a function of 1 or more
+variables, either unconstrained or subject to equality &/or inequality
+constraints.  As a prerequisite, see the text file  OPTMIZ USAGE.  The
+examples here are chosen to be instructive, geometrically visualizable,
+and easy enough to be solved by hand.  For a more thorough discussion
+and results of some more demanding test cases, see the report 
+"Automatic analytical optimization using computer algebraic
+manipulation", by David R. Stoutemyer, (ALOHA project technical report,
+University of Hawaii, Honolulu, June 1974).
+
+Here is an example with a maximum: */
+stapoints(5*log(y) - 3*x**2*y - 4*y) ;
+/* Here is an example with a saddle, which also illustrates 
+that we may use subscripted variables: */
+/* this example is broken
+stapoints(atan(x[1]) + atanh(x[2]) + x[2]/x[1]) ; */
+/* Here is a famous example by Peano, for which the second-
+order test reveals only that the stationary point is not a maximum.
+It turns out that the stationary point is a saddle, unless A=B, in
+which case it is a minimum, along with all other points on the curve
+Y = C + (B*X)**2.  See "Theory of Maxima and Minima" by H. Hancock,
+(Dover Press) for a discussion of how to analytically determine the
+nature of a stationary point when the 2nd-order test is inconclusive. 
+This example also illustrates how we may explicitly indicate the
+decision variables. */
+peano:  (y - c - (a*x)**2)*(y - c - (b*x)**2) ;
+stapoints(peano, [], [], [x,y]) ;
+/* Note how the answer is independent of A and B, but not C.
+
+Now, note how when A=B, giving a non-isolated stationary point, an
+extra parameter is automatically introduced to describe the stationary
+curve: */
+stapoints(ev(peano,a=b), [], [], [x,y]) ;
+/* The limitations of STAP are primarily dependent upon the
+limitations of the macsyma SOLVE command for solving nonlinear
+equations.  SOLVE will attempt to find a closed-form solution to a
+single equation that is irrational or involves elementary
+transcendental functions; but as of June 1974, SOLVE is intended
+to solve simultaneous equations only if they are polynomial
+in the unknowns.  However, it generally converts rational equations
+to this form by multiplying each equation by the least common
+denominator of its terms; so it may solve simultaneous rational
+equations too.  Thus, as in our first two examples, the objective may
+contain any terms with rational gradients, such as ATAN(R), ATANH(R),
+or LOG(R), where R is rational in the decision variables.  The clearing
+of the denominator may result in a "solution" which is a pole for some
+gradient components while a zero for the others.  Although not a true
+solution to the equations, this is a bonus in our case, because we are 
+interested in all extrema, not just stationary points.  In fact, we
+are usually more interested in any poles of the proper sign than in
+stationary points of the proper type with finite objective values.
+Poles, if found, are usually revealed in an alarming way by one or
+more large-magnitude components in GRADSUB or OBJSUB, or by an error
+interrupt such as a zerodivide.
+
+A surprising number of optimization problems can be converted to the
+required form by a change of variable  For example, fractional powers
+of a decision variable, X, may be eliminated by letting X = Z**Q,
+where Q is the least common denominator of the fractional powers of x.
+For example: */
+frac: x**(2/3) - 2*x*y + y ;
+ev(frac, x=z**3);
+stapoints(%) ;
+/* A similar technique may be used to eliminate fractional powers
+of more complicated subexpressions, provided we include appropriate
+supplementary equality constraints.  For example: */
+sqrt(x+y)*y - x ;
+stapoints(ev(%,sqrt(x+y)=z), [], z**2-x-y) ;

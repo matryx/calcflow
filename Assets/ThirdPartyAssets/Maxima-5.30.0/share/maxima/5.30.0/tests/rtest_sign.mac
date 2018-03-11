@@ -1,0 +1,1028 @@
+(kill(all),0);
+0$
+
+/* numbers and constants */
+
+sign(minf);
+neg$
+
+sign(-1);
+neg$
+
+sign(-1.0);
+neg$
+
+sign(-1.0b0);
+neg$
+
+sign(0);
+zero$
+
+sign(0.0);
+zero$
+
+sign(0.0b0);
+zero$
+
+sign(1);
+pos$
+
+sign(1.0);
+pos$
+
+sign(1.0b0);
+pos$
+
+sign(inf);
+pos$
+
+sign(%pi);
+pos$
+
+sign(%e);
+pos$
+
+sign(%phi);
+pos$
+
+/* polynomials */
+
+sign(x);
+pnz$
+
+sign(x^2);
+pz$
+
+sign(x^3);
+pnz$
+
+sign(x^4);
+pz$
+
+sign(x^2 + x);
+pnz$
+
+sign(x^2 + x + 42);
+pos$
+
+sign(x^2 + sqrt(5) + 101);
+pos$
+
+sign(%pi * x^2 + sqrt(5) + 101);
+pos$
+
+sign((sqrt(97) - 1) * x^2 + sqrt(5) + 101);
+pos$
+
+sign(-x^2 + x - 42);
+neg$
+
+sign(x^2 - 2 * x + 1);
+pz$
+
+sign(-x^2 + 2 * x - 1);
+nz$
+
+sign(x+y);
+pnz$
+
+sign(x^2 + 2 * x * y + y^2);
+pz$
+
+sign(x^2 + 2 * x * y + y^2 + 1);
+pos$
+
+sign((x+y)^2 + (z-x)^2);
+pz$
+
+sign(sqrt(2) * (x+y)^2 + %e * (z-x)^2);
+pz$
+
+sign(-(x+y)^2 - (z-x)^2);
+nz$
+
+sign(-(x+y)^2 - (z-x)^2 - %pi);
+neg$
+
+sign(-sqrt(2) * (x+y)^2 - %phi * (z-x)^2 - %pi);
+neg$
+
+
+/* rational */
+
+sign(1/x);
+pn$
+
+sign(1/(x-1));
+pn$
+
+sign(1/x + 1);
+pnz$
+
+sign(x/(1+x^2));
+pnz$
+
+sign(1 + x/(1+x^2));
+pos$
+
+sign((1+x^2)/x);
+pn$
+
+/* assumptions */
+
+(assume(a < b, b < c, c < d),0);
+0$
+
+sign(b-a);
+pos$
+
+sign(a-b);
+neg$
+
+sign(c-a);
+pos$
+
+sign(a-c);
+neg$
+
+sign(d-b);
+pos$
+
+sign(b-d);
+neg$
+
+sign(7*(c-a) + %pi * (d-b));
+pos$
+
+sign(-7*(c-a) - %pi * (d-b));
+neg$
+
+sign((b-a) * (d-a));
+pos$
+
+sign((b-a)/(c-b));
+pos$
+
+(forget(a < b, b < c, c < d),0);
+0$
+
+/* algebraic */
+
+sign(sqrt(x));
+pz$
+
+sign(sqrt(x^2 + 1));
+pos$
+
+sign(sqrt(a) + sqrt(b));
+pz$
+
+sign(x^(1/3));
+pnz$
+
+sign(x^(1/4));
+pz$
+
+sign(x^(1/4) + 1);
+pos$
+
+sign(-(x^(1/4) + 1));
+neg$
+
+/* exp-like */
+
+sign(cos(x));
+pnz$
+
+sign(cos(x) + 42);
+pos$
+
+sign(sin(x) - 42);
+neg$
+
+sign(cosh(x));
+pos$
+
+sign(cosh(x)-1);
+pz$
+
+sign(sinh(x));
+pnz$
+
+sign(tanh(x));
+pnz$
+
+sign(exp(x));
+pos$
+
+sign(exp(-x^2));
+pos$
+
+sign(exp(-x) - 1);
+pnz$
+
+sign(exp(-x) + 1);
+pos$
+
+/* log-like */
+
+sign(acos(x));
+pz$
+
+sign(asin(x));
+pnz$
+
+sign(atan(x));
+pnz$
+
+sign(log(x));
+pnz$
+
+(assume(x >= 1),0);
+0$
+
+sign(log(x));
+pn$
+
+(forget(x >= 1),0);
+0$
+
+sign(acosh(x));
+pz$
+
+sign(asinh(x));
+pnz$
+
+sign(tanh(x));
+pnz$
+
+
+
+/* SF bug 798571 */
+
+sign(sqrt(2)/2 - 1/sqrt(2));
+zero$
+
+/* SF bug 1045920 
+ * This case is fixed in compar.lisp revision 1.76.
+ * Adding some more examples.
+ */
+
+(assume(a > 1, b > 1),0);
+0$
+
+sign(a+b-2);
+pos;
+sign(2*a+b-3);
+pos;
+sign(2*a+b-4);
+pnz;
+
+(forget(a > 1, b > 1),0);
+0$
+
+(assume(a < -1, b < -1),0);
+0$
+
+sign(a+b+2);
+neg;
+sign(2*a+b+3);
+neg;
+sign(2*a+b+4);
+pnz;
+
+(forget(x < -1, y < -1),0);
+0;
+
+/* SF bug 1724592  */
+
+(aaa : 'bbb, bbb : 'ccc, ccc : 23.5,0);
+0$
+
+sign(1.0*aaa);
+pnz$
+
+sign(1.0*bbb);
+pnz$
+
+(remvalue(aaa, bbb, ccc),0);
+0$
+
+assume(x32 > 3/2);
+[x32 > 3/2];
+
+kill(all);
+done;
+
+assume(x32 < 1);
+[x32 < 1];
+
+/* [ 1981623 ] wrong sign of sqrt() */
+(assume(xx >= 0, xx <= 1), 0);
+0$
+
+sqrt(a/(xx-1)^2);
+sqrt(a)/(1-xx);
+
+
+/*****************************************************************************
+
+ Add tests for the function $csign
+ 
+ First: We repeat all tests which give a correct result for $sign.
+        The tests which are expected to fail are commented out.
+
+******************************************************************************/
+
+(kill(all),0);
+0$
+
+/* numbers and constants */
+
+csign(minf);
+neg$
+
+csign(-1);
+neg$
+
+csign(-1.0);
+neg$
+
+csign(-1.0b0);
+neg$
+
+csign(0);
+zero$
+
+csign(0.0);
+zero$
+
+csign(0.0b0);
+zero$
+
+csign(1);
+pos$
+
+csign(1.0);
+pos$
+
+csign(1.0b0);
+pos$
+
+csign(inf);
+pos$
+
+csign(%pi);
+pos$
+
+csign(%e);
+pos$
+
+csign(%phi);
+pos$
+
+/* polynomials */
+
+csign(x);
+pnz$
+
+csign(x^2);
+pz$
+
+csign(x^3);
+pnz$
+
+csign(x^4);
+pz$
+
+csign(x^2 + x);
+pnz$
+
+/* This is expected to be wrong
+csign(x^2 + x + 42);
+pos$
+*/
+
+csign(x^2 + sqrt(5) + 101);
+pos$
+
+csign(%pi * x^2 + sqrt(5) + 101);
+pos$
+
+csign((sqrt(97) - 1) * x^2 + sqrt(5) + 101);
+pos$
+
+/* This is expected to be wrong
+csign(-x^2 + x - 42);
+neg$
+*/
+
+csign(x^2 - 2 * x + 1);
+pz$
+
+csign(-x^2 + 2 * x - 1);
+nz$
+
+csign(x+y);
+pnz$
+
+csign(x^2 + 2 * x * y + y^2);
+pz$
+
+/* This is expected to be wrong.
+csign(x^2 + 2 * x * y + y^2 + 1);
+pos$
+*/
+
+csign((x+y)^2 + (z-x)^2);
+pz$
+
+csign(sqrt(2) * (x+y)^2 + %e * (z-x)^2);
+pz$
+
+csign(-(x+y)^2 - (z-x)^2);
+nz$
+
+csign(-(x+y)^2 - (z-x)^2 - %pi);
+neg$
+
+csign(-sqrt(2) * (x+y)^2 - %phi * (z-x)^2 - %pi);
+neg$
+
+
+/* rational */
+
+csign(1/x);
+pn$
+
+csign(1/(x-1));
+pn$
+
+csign(1/x + 1);
+pnz$
+
+csign(x/(1+x^2));
+pnz$
+
+/* This is expected to be wrong.
+csign(1 + x/(1+x^2));
+pos$
+*/
+
+csign((1+x^2)/x);
+pn$
+
+/* assumptions */
+
+(assume(a < b, b < c, c < d),0);
+0$
+
+csign(b-a);
+pos$
+
+csign(a-b);
+neg$
+
+csign(c-a);
+pos$
+
+csign(a-c);
+neg$
+
+csign(d-b);
+pos$
+
+csign(b-d);
+neg$
+
+csign(7*(c-a) + %pi * (d-b));
+pos$
+
+csign(-7*(c-a) - %pi * (d-b));
+neg$
+
+csign((b-a) * (d-a));
+pos$
+
+csign((b-a)/(c-b));
+pos$
+
+(forget(a < b, b < c, c < d),0);
+0$
+
+/* algebraic */
+
+csign(sqrt(x));
+pz$
+
+csign(sqrt(x^2 + 1));
+pos$
+
+csign(sqrt(a) + sqrt(b));
+pz$
+
+csign(x^(1/3));
+pnz$
+
+csign(x^(1/4));
+pz$
+
+csign(x^(1/4) + 1);
+pos$
+
+csign(-(x^(1/4) + 1));
+neg$
+
+/* exp-like */
+
+csign(cos(x));
+pnz$
+
+/* This is expected to be wrong.
+csign(cos(x) + 42);
+pos$
+*/
+
+/* This is expected to be wrong.
+csign(sin(x) - 42);
+neg$
+*/
+
+csign(cosh(x));
+pos$
+
+/* This is exprected to be wrong.
+csign(cosh(x)-1);
+pz$
+*/
+
+csign(sinh(x));
+pnz$
+
+csign(tanh(x));
+pnz$
+
+csign(exp(x));
+pos$
+
+csign(exp(-x^2));
+pos$
+
+csign(exp(-x) - 1);
+pnz$
+
+csign(exp(-x) + 1);
+pos$
+
+/* log-like */
+
+/* This is expected to be wrong.
+csign(acos(x));
+pz$
+*/
+
+csign(asin(x));
+pnz$
+
+csign(atan(x));
+pnz$
+
+csign(log(x));
+complex$
+
+(assume(x > 0),0);
+0$
+
+csign(log(x));
+pnz$
+
+(forget(x > 0),0);
+0$
+
+(assume(x >= 1),0);
+0$
+
+csign(log(x));
+pz$
+
+(forget(x >= 1),0);
+0$
+
+/* This is expected to be wrong.
+csign(acosh(x));
+pz$
+*/
+
+csign(asinh(x));
+pnz$
+
+csign(tanh(x));
+pnz$
+
+/* SF bug 798571 */
+
+csign(sqrt(2)/2 - 1/sqrt(2));
+zero$
+
+/* SF bug 1045920 */
+
+/* 
+
+(assume(a > 1, b > 1),0);
+0$
+
+csign(a + b -2);
+pos$
+
+(forget(a > 1, b > 1),0);
+0$
+
+*/
+
+/* SF bug 1724592  */
+
+(aaa : 'bbb, bbb : 'ccc, ccc : 23.5,0);
+0$
+
+csign(1.0*aaa);
+pnz$
+
+csign(1.0*bbb);
+pnz$
+
+(remvalue(aaa, bbb, ccc),0);
+0$
+
+assume(x32 > 3/2);
+[x32 > 3/2];
+
+kill(all);
+done;
+
+assume(x32 < 1);
+[x32 < 1];
+
+/******************************************************************************
+  Second: $csign with complex expressions.
+******************************************************************************/
+
+declare(n,integer,x,real,j,imaginary,z,complex);
+done;
+
+/* We test the constants. UND and IND do not give a result, but an error. */
+map(csign, [%e,%gamma,%phi,%i, minf,inf,infinity]);
+[pos,pos,pos,imaginary,neg,pos,complex];
+
+/* Symbols declcared as integeger, real, imaginary or complex */
+map(csign, [n,x,j,z]);
+[pnz,pnz,imaginary,complex];
+
+/* Some arithmetic with pure imaginary numbers and symbols */
+
+map(csign,[%i,sqrt(-1),10*%i,x*%i,%i^2,%i^3,%i^4,%i^5]);
+[imaginary,imaginary,imaginary,imaginary,neg,imaginary,pos,imaginary];
+
+map(csign,[j,sqrt(-1),10*j,x*j,j^2,j^3,j^4,j^5]);
+[imaginary,imaginary,imaginary,imaginary,nz,imaginary,pz,imaginary];
+
+/* negative base and half integral exponent */
+map(csign,[(-1)^(1/2),(-1)^(3/2),(-1)^(5/2), (-1)^(7/2), (-1)^(9/2)]);
+[imaginary,imaginary,imaginary,imaginary,imaginary];
+
+/* the same with an negative expression */
+(assume(xneg < 0, xpos>0),done);
+done;
+map(csign,[(xneg)^(1/2),(xneg)^(3/2),(xneg)^(5/2),(xneg)^(7/2)]);
+[imaginary,imaginary,imaginary,imaginary];
+
+map(csign,[(-xpos)^(1/2),(-xpos)^(3/2),(-xpos)^(5/2),(-xpos)^(7/2)]);
+[imaginary,imaginary,imaginary,imaginary];
+
+map(csign,[(-1)^xpos, (-1)^xneg]);
+[complex,complex];
+
+map(sign,[(-1)^xpos, (-1)^xneg]);
+[pn,pn];
+
+/* Expressions with an addition */
+
+csign(x+%i*y);
+complex;
+csign((x+%i*y)^2);
+complex;
+csign((x+%i*y)^(1/2));
+complex;
+
+csign((a+x+%i*y)/(b-y*%i));
+complex;
+
+/* More expressions */
+
+csign(1/z);
+complex;
+csign(1/j);
+imaginary;
+csign(10*a+c/z);
+complex;
+csign(10*a+c/j);
+complex;
+csign((10*a+(c/j)^2)^n);
+pnz;
+csign((10*a+(c/j)^3)^n);
+complex;
+
+/* This does not work correctly. 
+   The answer complex is not really wrong, but could be better.
+   To achive this we have first to improve the function rectform. */
+
+csign((1+%i)*(1-%i));
+complex; /* shoule be pos */
+
+csign(expand((1+%i)*(1-%i)));
+pos; /* after expansion correct */
+
+/* Functions which are declared to be complex give the sign $complex */
+
+csign(conjugate(z));
+complex;
+csign(conjugate(x)); /* x is real */
+pnz;
+
+declare(f,complex);
+done;
+csign(f(x));
+complex;
+
+/* realpart and imagpart are real valued */
+
+csign(realpart(z));
+pnz;
+csign(imagpart(z));
+pnz;
+
+/*
+ * Examples for assumptions with abs(x)<a, a is positive
+ *
+ */
+
+kill(all);
+done;
+
+assume(abs(x)<1);
+[abs(x)<1];
+
+sign(1-x);
+pos;
+sign(2-x);
+pos;
+sign(x-1);
+neg;
+sign(x-2);
+neg;
+
+forget(abs(x)<1);
+[abs(x)<1];
+
+facts();
+[];
+
+assume(a>0,abs(x)<a);
+[a>0,a>abs(x)];
+
+sign(a-x);
+pos;
+sign(x-a);
+neg;
+
+forget(abs(x)<a);
+[a>abs(x)];
+
+facts();
+[a>0];
+
+assume(a*abs(x)<1);
+[a*abs(x)<1];
+
+sign(1/a-x);
+pos;
+sign(x-1/a);
+neg;
+
+forget(a*abs(x)<1);
+[a*abs(x)<1];
+
+assume(abs(x)<2*a+1);
+[2*a-abs(x)+1>0];
+
+sign(2*a+1-x);
+pos;
+sign(2*a+1+x);
+pos;
+sign(a*(2*a+1-x));
+pos;
+
+forget(abs(x)<2*a+1);
+[2*a-abs(x)+1>0];
+
+facts();
+[a>0];
+
+assume(b>0,b<1);
+[b>0,b<1];
+
+assume(abs(x)<b);
+[b>abs(x)];
+
+is(x<1);
+true;
+sign(1-x);
+pos;
+sign(x-1);
+neg;
+
+forget(abs(x)<b);
+[b>abs(x)];
+
+facts();
+[a>0,b>0,1>b];
+
+assume(sin(abs(x)) < 1);
+[sin(abs(x))<1];
+
+sign(1-sin(x));
+pos;
+sign(2-sin(x));
+pos;
+sign(sin(x)-1);
+neg;
+sign(sin(x)-2);
+neg;
+
+forget(sin(abs(x)) < 1);
+[sin(abs(x))<1];
+
+assume(cos(abs(x)) < 1);
+[cos(abs(x))<1];
+
+sign(1-cos(x));
+pos;
+sign(2-cos(x));
+pos;
+sign(cos(x)-1);
+neg;
+sign(cos(x)-2);
+neg;
+
+forget(cos(abs(x)) < 1);
+[cos(abs(x))<1];
+
+assume(abs(sin(x)) < 1);
+[abs(sin(x))<1];
+
+sign(1-sin(x));
+pos;
+sign(2-sin(x));
+pos;
+sign(sin(x)-1);
+neg;
+sign(sin(x)-2);
+neg;
+
+forget(abs(sin(x)) < 1);
+[abs(sin(x))<1];
+
+assume(abs(cos(x)) < 1);
+[abs(cos(x))<1];
+
+sign(1-cos(x));
+pos;
+sign(2-cos(x));
+pos;
+sign(cos(x)-1);
+neg;
+sign(cos(x)-2);
+neg;
+
+forget(abs(cos(x)) <1);
+[abs(cos(x))<1];
+
+csign(log((1 + %i)/sqrt(2)));
+imaginary$
+
+/* Examples to show that learn-numer works
+ * Related bug report:
+ * Bug ID: 2477795 - "assume":problems with fractions or multiples of %pi and %e
+ */
+kill(all);
+done;
+assume(a>0,a<%pi/2);
+[a>0,%pi/2>a];
+
+is(a>%pi/2);
+false;
+is(a>%pi);
+false;
+
+assume(b>0,b<2*%pi);
+[b>0, 2*%pi>b];
+is(b>3*%pi);
+false;
+
+/* An example involving a numerical constant, the value of a function
+ * and the abs function.
+ * This example no longer works because of revision 1.62 of compar.lisp
+ */
+assume(abs(x) < sin(1)+%e/2);
+[sin(1)+%e/2>abs(x)];
+is(x<2*%e);
+true;
+is(x>-2*%e);
+true;
+(forget(abs(x)<sin(1)+%e/2),done);
+done;
+
+/* Bug ID: 2876382 - sign(a+b+sin(1)) unknown */
+(assume(a>0,b>0),done);
+done;
+sign(a+b+sin(1));
+pos;
+(forget(a>0,b>0),done);
+done;
+
+/* Bug ID: 2184396 - Wrong factorization of sqrt()
+ * This is the example from the bug report which has triggered the bug in sign
+ *      sqrt(1-(2-sqrt(2))/x * ((2+sqrt(2))/x-1));
+ * The expression has factored wrongly. This example is now correct.
+ */
+sign(1-(1+sqrt(2))*x);
+'pnz;
+sign(1-(1+sqrt(2))/x);
+'pnz;
+
+/* Bug ID: 1038624 - askinteger ignores asksign database
+ * With revison 1.64 of compar.lisp code has been added, which looks for
+ * integer and noninteger facts into the database.
+ */
+(assume(equal(a,0), equal(b,2), equal(c,1/3), equal(d,1.5), equal(e,3.0b0)),
+ done);
+done;
+
+map(askinteger, [a, b, 2*b, 2+b, c, d, e]);
+[yes, yes, yes, yes, no, no, no];
+
+
+(forget(equal(a,0), equal(b,2), equal(c,1/3), equal(d,1.5), equal(e,3.0b0)), 
+ done);
+done;
+
+/* Bug ID: 3376603 - sign of declared imaginary */
+declare(f,imaginary, g,complex);
+done$
+csign(f(x));
+imaginary$
+csign(g(x));
+complex$
+kill(f,g);
+done$
+
+/* Check adding new equaltiy does not make old inequality disappear */
+kill(all);
+done;
+
+assume(notequal(a,b));
+[notequal(a, b)];
+
+is(equal(a,b));
+false;
+
+(assume(equal(a, x+y)), 0);
+0;
+
+is(equal(a,b));
+false;
+
+/* Check fix for bug 2547 (declare constant messes up sign calculations) */
+(declare (x, constant), declare (y, constant), assume (x > y), is (x>y));
+true$
+
+kill(all);
+done$
+
+/* facts in assume database not cleaned up by 'sign' */
+
+(kill (foo), foo : %e^(abs(uu)+uu)*(uu/abs(uu)+1)+%e^(abs(uu)-uu)*(uu/abs(uu)-1), 0);
+0;
+
+block ([bar, baz], bar : copy (facts (initial)), is (equal (foo, 0)), baz : facts (initial), is (bar = baz));
+true;
+
+/* tnx to Barton Willis for the next couple of tests */
+
+map('sign,[sqrt(x),x]);
+[pz, pnz];
+
+(kill(buddy),
+ buddy(p,q) := expand(if p >= 0 then q else q,0,0),
+ buddy(sqrt(x),abs(x)));
+abs(x);
+

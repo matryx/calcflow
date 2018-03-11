@@ -1,0 +1,58 @@
+/*-*-macsyma-*-*/
+
+/* macros to define functions which take their arguments
+   via keywords. */
+
+eval_when([translate,batch,demo],
+	  load_package(sharem,"autolo"))$
+
+herald_package(keyarg)$
+
+/* The idea is to be able to say:
+
+  FOO(X_ZONE=3.3, LOGLIN, FOOSWITCH, BAR=0)
+
+  Specify the arguments/options to a function in terms of
+  keywords.
+
+And have unspecified arguments default. */
+
+
+def_keyarg(header,body)::=
+ buildq([mname:part(header,0), body,
+         sname:concat(part(header,0),"-internal"),
+         sargs:maplist(lambda([u],if atom(u) then u else part(u,1)),
+	               args(header)),
+         dispatch:maplist(lambda([u],if atom(u) then ['key_atom,[u]]
+	                                else ['key_pair,[part(u,1),part(u,2)]]),
+			  args(header))],
+	(eval_when(loadfile,
+	           setup_autoload("keyarg",translate_keyarg)),
+         put('mname,'dispatch,'translate_keyarg),
+         mname([macro_argl])::=translate_keyarg(macro_argl,'mname,'sname),
+	 sname(splice(sargs)):=body))$
+
+/* This routine must be around during the macro-expansion */
+
+translate_keyarg(macro_argl,mname,sname):=
+ /* for now I am not going to do the order-of-evaluation guarantee */
+ block([sargl:[],temp,dispatch:get(mname,'translate_keyarg)],
+       for d in dispatch
+       do(temp:apply(d[1],cons(macro_argl,d[2])),
+          push(temp[1],sargl),
+	  macro_argl:temp[2]),
+       if not macro_argl=[] then error("unknown arguments to",mname,":",macro_argl),
+       funmake(sname,reverse(sargl)))$
+
+key_indicator(argl,atom,value):=
+ (for a in argl
+  do(if atom(a) then(if a=atom then(value:true,argl:delete(a,argl),return(done)))
+     else if part(a,1)=atom then(value:part(a,2),argl:delete(a,argl),return(done))),
+  [value,argl])$     
+
+/* I am thinking of having KEY_ATOM and KEY_PAIR do different things. */
+
+key_atom(argl,atom):=key_indicator(argl,atom,false)$
+
+key_pair(argl,atom,value):=key_indicator(argl,atom,value)$
+

@@ -1,0 +1,171 @@
+/*
+This subroutine computes a proper tree
+Copyright (C) 1999  Dan Stanger
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Dan Stanger dan.stanger@ieee.org
+
+*/
+/* this function will return the a matrix
+   due to no local arrays, this function will prefix all arrays used
+   with the prefix pt, to avoid name clashes.  it will delete them at the end
+   the reference node will be 0.
+*/
+nameNode(l):=first(l)$
+fromNode(l):=third(l)$
+toNode(l):=fourth(l)$
+typeNode(l):=second(l)$
+valueNode(l):=fifth(l)$
+
+countNodes(cl):=block([n:0],
+   map(lambda([x],n:max(n,fromNode(x),toNode(x))),cl),n)$
+
+printarray2(a,na,n,b):=block([ipw:integer_print_width],integer_print_width:4,
+   apply(print, makelist(na[j],j,1,b)),
+   for i:1 thru n do apply(print,makelist(a[i,j],j,1,b)),
+   integer_print_width:ipw)$
+
+swap(a,i,j)::=buildq([a,i,j],block([temp:a[i]],a[i]:a[j],a[j]:temp))$
+
+properTree(filename):=block([cl, MB, MN, retvals, dbg:true],
+/* MB number of branches */
+/* MN number of nodes */
+if dbg then print("entry"),
+    cl:readfile(filename),
+if dbg then print("before sort", cl),
+    cl:sort(cl,
+	lambda([x,y],
+	    getElementIndex(typeNode(x))<getElementIndex(typeNode(y)))),
+if dbg then print("after sort", cl),
+    MB:length(cl),
+    MN:countNodes(cl),
+if dbg then print("branches", MB, " nodes", MN),
+    array(pt_A,MN,MB), array(pt_D, MN, MB),
+    array([pt_NF,pt_NT,pt_V,pt_JT, pt_MT, pt_name, pt_aJT], MB),
+/*	DIMENSION A(10,10),D(10,10),NF(10),NT(10),V(10),JT(10),MT(10) */
+/*	READ 99, (NF(I),NT(I),V(I),JT(I),MT(I) I=1,MB)
+C	I IS BRANCH NUMBER, NF IS FROM NODE, NT IS TO NODE
+C	V IS ELEMENT VALUE, JT IS ELEMENT TYPE
+C	MT TELLS TREE OR LINK
+C	WHEN MT IS 0 BRANCH IS TREE, OTHER NUMBER BRANCH IS
+C	LINK
+C	MT(I) HAS ALL ZERO ELEMENTS INITIALLY */
+/* pt_name is the symbolic name of the circuit element, and if a element
+   is not given a value, then it's value is its name.  maybe there should
+   be a flag, to assign symbolic names even if there are numeric values,
+   to be more compatable with spice.
+   pt_aJT is the element type in the order of the pt_A array */
+    block([i:0],
+	for l in cl do (i:i+1,
+	    pt_NF[i]:fromNode(l), pt_NT[i]:toNode(l), pt_V[i]:valueNode(l), 
+	    pt_JT[i]:typeNode(l), pt_MT[i]:0, pt_name[i]:nameNode(l),
+	    if pt_V[i] = false then pt_V[i]:pt_name[i])),
+/*	CONSTRUCT INCIDENCE MATRIX D */
+if dbg then print("constructing incidence matrix d"),
+    fillarray(pt_D,[0]),
+    for i:1 thru MB do (
+	if pt_NF[i] > 0 then pt_d[pt_NF[i],i]:1,
+	if pt_NT[i] > 0 then pt_d[pt_NT[i],i]:-1),
+if dbg then print("number of nodes", MN, "number of branches", MB),
+    /* print the d matrix for debugging */
+if dbg then printarray2(pt_d,pt_name,MN,MB),
+/*	SELECT TREE BRANCHES AND LINKS
+C	KV IS TREE VOLTAGE SOURCE NUMBER
+C	KC IS TREE CAPACITOR NUMBER
+C	KR IS TREE RESISTOR NUMBER
+C	IR IS LINK RESISTOR NUMBER
+C	IL IS LINK INDUCTOR NUMBER
+C	IC IS LINK CURRENT SOURCE NUMBER
+C	IK IS TREE BRANCH NUMBER
+C	K IS LINK BRANCH NUMBER */
+    block([KV:0, KC:0, KR:0, IR:0, IL:0, IC:0, IK:0, K:0],
+	for i:1 thru MB do (
+	    if pt_MT[i] = 0 then (
+		if i < MB then block([continu,treebranch:false],
+		    for j:(i+1) thru MB while (treebranch = false) do (
+			continu:false,
+if dbg then print("52", j, pt_MT[j]),
+			if pt_MT[j] = 0 then (
+if dbg then print("pt_MT[j]=0,i,pt_NT[i],j,pt_NT[j]", i, pt_NT[i], j, pt_NT[j]),
+			    if pt_NT[i] = pt_NT[j] then ( /* 61 */
+				if pt_NF[i] # pt_NF[j] then (/* 5 */
+				    pt_NT[j]:pt_NF[i], /* 43 */
+if dbg then print("1 j-MB",j-MB,52,102,102),
+				    /* IF(J-MB)52,102,102 * 220 */
+				    continu:true
+				) else (if dbg then print("should do 6"))
+			    )
+			    else (
+if dbg then print("33 i,pt_NT[i],j,pt_NF[j]",i,pt_NT[i],j,pt_NF[j]),
+				if pt_NT[i] # pt_NF[j] then ( /* 33 */
+if dbg then print("2 j-MB",j-MB,52,102,102),
+				    /* IF(J-MB)52,102,102 * 220 */
+				    continu:true
+				)
+				else (
+				    if pt_NF[i] # pt_NT[j] then ( /* 63 */
+					pt_NF[j]:pt_NF[i], /* 83 */
+					/* IF(J-MB)52,102,102 * 220 */
+if dbg then print("3 j-MB",j-MB,52,102,102),
+					continu:true
+				    ) else (if dbg then print("should do 6"))
+				)
+			    ),
+			    if continu = true then (
+if dbg then print("goto 102"),
+				if j >= MB then treebranch:true /* goto 102 */
+			    )
+			    else ( /* 6 branch j is a link */
+				K:K+1,
+if dbg then print("k", k, " adding a link 6"),
+				pt_MT[j]:MN + K,
+				pt_aJT[pt_MT[j]]:pt_JT[j],
+				for L:1 thru MN do pt_A[L,pt_MT[j]]:pt_D[L,j],
+				if getElementIndex(pt_JT[j]) < 4 then IR:IR+1
+				else (
+				    if getElementIndex(pt_JT[j]) > 4 then IC:IC+1
+				    else IL:IL+1
+				),
+				/* IF(J-MB)52,102,103 */
+if dbg then print("4 j-MB",j-MB,52,102,103),
+				if j = MB then treebranch:true,
+				if j >= MB then return
+			    )
+			)
+		    ),
+if dbg then print("102 treebranch is ", treebranch),
+		    if treebranch = true then ( /* 102 branch i is a tree branch */
+			IK:IK+1,
+if dbg then print("ik", ik,"i",i, " in 102 row swap"),
+			for M:1 thru MN do pt_A[M,IK]:pt_D[M,i],
+			pt_aJT[IK]:pt_JT[i],
+			swap(pt_name,i,IK),
+			if getElementIndex(pt_JT[i]) < 2 then KV:KV+1
+			else (
+			    if getElementIndex(pt_JT[i]) > 2 then KR:KR+1
+			    else KC:KC+1
+			)
+		    )
+		)
+	    )
+	),
+	retvals:[KC, KR, KV, IL, IR, IC, MN, MB]
+    ),
+if dbg then print("103? MB MN",MB,MN),
+if dbg then printarray2(pt_a, pt_name, MN, MB),
+    retvals
+)
+$

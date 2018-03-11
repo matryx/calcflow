@@ -1,0 +1,37 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Classification of the anti-deSitter metric
+ *
+ */
+
+if get('ctensor,'version)=false then load(ctensor);
+("Computing the Petrov classification of the anti-deSitter metric")$
+("We use frames")$
+cframe_flag:true;
+("We set up the metric by hand")$
+ct_coords:[t,x,theta,phi];
+(lfg:ident(4),lfg[1,1]:-1,lfg)$
+fri:matrix([ 1/sqrt(2), -%i*a*cos(t/a)/sqrt(2),0,0],
+           [-%i*1/sqrt(2),a*cos(t/a)/sqrt(2),0,0],
+    [0,0,a*cos(t/a)*sinh(x)/sqrt(2), %i*a*cos(t/a)*sin(theta)*sinh(x)/sqrt(2)],
+    [0,0,a*cos(t/a)*sinh(x)/sqrt(2),-%i*a*cos(t/a)*sin(theta)*sinh(x)/sqrt(2)]);
+cmetric(false);
+ug:invert(lg);
+weyl(false);
+nptetrad(false);
+ctrgsimp:true;
+psi(true);
+("And obtain the Petrov class")$
+petrov();
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

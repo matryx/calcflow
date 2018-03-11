@@ -1,0 +1,66 @@
+File DIMEN > contains functions for automatic dimensional analysis,
+and file DIMEN DEMO contains a demonstration.  Usage is of the form
+
+      NONDIMENSIONALIZE(list of physical quantities);
+
+The returned value is a sufficient list of nondimensional products of
+powers of the physical quantities.  A physical relation between only
+the given physical quantities must be expressible as a relation between
+the nondimensional quantities.  There are usually fewer nondimensional
+than physical quantities, which reduces the number of experiments or
+numerical computations necessary to establish the physical relation to
+a specified resolution, in comparison with the number if all but one
+dependent physical variable were independently varied.  Also, the 
+absence of any given physical quantity in the output reveals that
+either the quantity is irrelevant or others are necessary to describe
+the relation.
+
+The program already knows an extensive number of relations between
+physical quantities, such as  VELOCITY=LENGTH/TIME.  (CPUTIME plays
+the role of the customary MACSYMA global variable TIME.)
+The user may over-ride or supplement the prespecified
+relations by typing
+
+      DIMENSION(equation or list of equations);
+
+where each equation is of the form  indeterminate=expression, where
+expression is a product or quotient of powers of none or more of the
+indeterminates   CHARGE, TEMPERATURE, LENGTH, TIME, or MASS.  To see
+if a relation is already established type
+
+      GET(indeterminate, 'DIMENSION);
+
+The result of NONDIMENSIONALIZE usually depends upon the value of the
+global variable %PURE, which is set to a list of none or more of the
+indeterminates  ELECTRICPERMITTIVITYOFAVACUUM, BOLTZMANNSCONSTANT,
+SPEEDOFLIGHT, PLANCKSCONSTANT, GRAVITYCONSTANT, corresponding to the
+relation between charge and force, temperature and energy, length and
+time, length and momentum, and the inverse-square law of gravitation
+respectively.  Each included relation is used to eliminate one of
+CHARGE, TEMPERATURE, LENGTH, TIME, or MASS from the dimensional basis.
+To avoid omission of a possibly relevant nondimensional grouping,
+either include the relevant constant in %PURE or in the argument
+of NONDIMENSIONALIZE if the corresponding physical effect is thought to
+be relevant to the problem.  However, the inclusion of unnecessary
+constants, especially the latter three, tends to produce irrelevant or
+misleading dimensionless groupings, defeating the purpose of
+dimensional analysis.  As an extreme example, if all five constants are
+included in %PURE, all physical quantities are already dimensionless.
+%PURE is initially set to '[ELECTRICPERMITTIVITYOFVACUUM,
+BOLTZMANNSCONSTANT], which is best for most engineering work.
+%PURE must not include any of the other 3 constants without also
+including these 2.
+
+Send problems and suggestions to STOUTE.
+
+REFERENCES:
+
+R. Kurth, "Dimensional Analysis and Group Theory in Astrophysics",
+    Perggamon Press.
+
+H.L. Langhaar, "Dimensional Analysis and Theory of Models",  John
+    Wiley and Sons.
+
+D.R. Stoutemyer, "Automatic Dimensional Analysis, Using Computer
+    Symbolic Mathematics", report, Electrical Engineering Department,
+    University of Hawaii, Honolulu, Hawaii 96822.

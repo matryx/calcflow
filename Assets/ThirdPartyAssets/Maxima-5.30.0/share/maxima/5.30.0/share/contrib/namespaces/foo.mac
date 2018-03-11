@@ -1,0 +1,6 @@
+    in_namespace (foo);
+    export (f, g);
+    my_constant : 1729;
+    f(x) := my_constant * sin(x);
+    g(n) := expand ((f(a) + n!)^n);
+    hh(z) := f(z) - g(2);

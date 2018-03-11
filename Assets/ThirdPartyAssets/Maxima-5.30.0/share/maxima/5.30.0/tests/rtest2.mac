@@ -1,0 +1,350 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+kill(functions,arrays,values);
+done$
+use_fast_arrays:false;
+false;
+a[n]:=n*a[n-1];
+a[n]:=n*a[n-1]$
+a[0]:1;
+1$
+a[5];
+120$
+a[n]:=n;
+a[n]:=n$
+a[6];
+6$
+a[4];
+24$
+(use_fast_arrays:true,kill(a));
+done;
+lambda([x,y,z],x^2+y^2+z^2);
+lambda([x,y,z],x^2+y^2+z^2)$
+%(1,2,a);
+a^2+5$
+1+2+a;
+a+3$
+exp:[x^2,y/3,-2];
+[x^2,y/3,-2]$
+%[1]*x;
+x^3$
+[a,exp,%];
+[a,[x^2,y/3,-2],x^3]$
+m:matrix([a,0],[b,1]);
+matrix([a,0],[b,1])$
+m^2;
+matrix([a^2,0],[b^2,1])$
+exp:m . m;
+matrix([a^2,0],[a*b+b,1])$
+m[1,1]*m;
+matrix([a^2,0],[a*b,a])$
+%-exp+1;
+matrix([1,1],[1-b,a])$
+m^^(-1);
+matrix([1/a,0],[-b/a,1])$
+[x,y] . m;
+matrix([b*y+a*x,y])$
+matrix([a,b,c],[d,e,f],[g,h,i]);
+matrix([a,b,c],[d,e,f],[g,h,i])$
+%^^2;
+matrix([c*g+b*d+a^2,c*h+b*e+a*b,c*i+b*f+a*c],
+       [f*g+d*e+a*d,f*h+e^2+b*d,f*i+e*f+c*d],
+       [g*i+d*h+a*g,h*i+e*h+b*g,i^2+f*h+c*g])$
+exp:x+1 = y^2;
+x+1 = y^2$
+x-1 = 2*y+1;
+x-1 = 2*y+1$
+exp+%;
+2*x = y^2+2*y+1$
+exp/y;
+(x+1)/y = y$
+1/%;
+y/(x+1) = 1/y$
+fib[n]:=if n = 1 or n = 2 then 1 else fib[n-1]+fib[n-2];
+fib[n]:=if n = 1 or n = 2 then 1 else fib[n-1]+fib[n-2]$
+fib[1]+fib[2];
+2$
+fib[3];
+2$
+fib[5];
+5$
+eta(mu,nu):=if mu = nu then mu else (if mu > nu then mu-nu else mu+nu);
+eta(mu,nu):=if mu = nu then mu else (if mu > nu then mu-nu else mu+nu)$
+eta(5,6);
+11$
+eta(eta(7,7),eta(1,2));
+4$
+if not 5 >= 2 and 6 <= 5 or 4+1 > 3 then a else b;
+a$
+kill(f);
+done$
+
+kill(x,y,z);
+done$
+determinant(hessian(x^3-3*a*x*y*z+y^3,[x,y,z]));
+-3*a*y*(9*a^2*x*z+18*a*y^2)-27*a^3*x*y*z-54*a^2*x^3$
+
+subst(1,z,quotient(%,-54*a^2));
+y^3+a*x*y+x^3$
+f(x):=block([a,y],local(a),y:4,a[y]:x,display(a[y]));
+f(x):=block([a,y],local(a),y:4,a[y]:x,display(a[y]))$
+y:2;
+2$
+a[y+2]:0;
+0$
+f(9);
+done$
+a[y+2];
+0$
+
+(use_fast_arrays : false, kill(a), 0);
+0$
+
+/* ensure that matrix construction works as advertised */
+(L : makelist ([i], i, 1, 100), apply (matrix, L), [op (%%), args (%%)]);
+[matrix, ''(makelist ([i], i, 1, 100))];
+
+(L : makelist ([i], i, 1, 100), apply (matrix, L), transpose (%%));
+''(matrix (tree_reduce (append, L)));   /* call tree_reduce instead of append because GCL barfs ... */
+
+(matrix (), [op (%%), args (%%)]);
+[matrix, []];
+
+/* construct a matrix of modest size */
+(apply (matrix, makelist ([i], i, 1, 1000)), 0);
+0;
+
+/* construct a matrix of modest size */
+(apply (matrix, makelist ([i], i, 1, 10000)), 0);
+0;
+
+/* verify that arguments are evaluated exactly once */
+block ([a : b, b : c, c: d, d : 1], matrix ([a, b], [c, d]), [op (%%), args (%%)]);
+[matrix, '[[b, c], [d, 1]]];
+
+/* verify that arguments are evaluated exactly once */
+block ([a : b, b : c, c: d, d : 1, L1 : '[a, b], L2 : '[c, d]], matrix (L1, L2), [op (%%), args (%%)]);
+[matrix, '[[a, b], [c, d]]];
+
+/* should trigger an error */
+errcatch (matrix ([1], [1, 2]));
+[];
+
+/* should trigger an error */
+errcatch (matrix ([1], '(a + b)));
+[];
+
+/* SF bug # 3014545 "submatrix does not work as expected"
+ * works for me, throw in these tests to make sure
+ */
+
+(submatrix (10, 20, zeromatrix (20, 20)), [length (%%), length (%%[1])]);
+[18, 20];
+
+(kill (F), F : 1 + zeromatrix (5, 5), submatrix (2, 5, F, 2, 5));
+matrix ([1, 1, 1], [1, 1, 1], [1, 1, 1]);
+
+submatrix (3, 5, F, 3, 5);
+matrix ([1, 1, 1], [1, 1, 1], [1, 1, 1]);
+
+F;
+matrix ([1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]);
+
+(F : matrix ([1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]),
+ submatrix (F, 2, 4));
+matrix ([1, 3], [5, 7], [9, 11]);
+
+submatrix (1, 3, F);
+matrix ([5, 6, 7, 8]);
+
+/* next one is mostly just to ensure it doesn't trigger an error */
+submatrix (1, 2, 3, F);
+matrix ();
+
+/* next one is mostly just to ensure it doesn't trigger an error */
+submatrix (F, 1, 2, 3, 4);
+matrix ([], [], []);
+
+F;
+matrix ([1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]);
+
+submatrix (F);
+matrix ([1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]);
+
+/* name collision with special variables in 1-d output
+ * see mailing list circa 2012-01-09, "invert_by_lu does not work as expected"
+ */
+
+invert_by_lu (matrix ([v [0]]));
+matrix ([1 / v [0]]);
+
+/* additional tests for invert */
+
+/* Attempting to verify the effect of the ratmx and detout ev flags
+ * is quite a mess. ratmx produces CRE but the parser produces 
+ * expressions which have a different operator (RAT, versus MRAT for CRE).
+ * detout produces an unsimplified "*" expression, which is quite
+ * readily simplified away; I am reminded of 19th century efforts to
+ * isolate halogens and alkali metals. Anyway, we'll do what we can.
+ */
+
+/* symbolic elements */
+
+(kill (M, M1), M : matrix ([a, b], [c, d]), 0);
+0;
+
+M1 : invert (M), ratsimp;
+matrix([d/(a*d-b*c),-b/(a*d-b*c)],[-c/(a*d-b*c),a/(a*d-b*c)]);
+
+ratsimp ([M1 . M, M . M1]);
+[matrix ([1, 0], [0, 1]), matrix ([1, 0], [0, 1])];
+
+is (invert (M) = M^^-1);
+true;
+
+(M1 : ev (invert (M), detout=true, doscmxops=false, doallmxops=false), [op (M1), ratsimp (args (M1))]);
+["/",[matrix([d,-b],[-c,a]),a*d-b*c]];
+
+is (invert (M) = M^^-1), detout=true, doscmxops=false, doallmxops=false;
+true;
+
+block ([foo : matrix([d/(d*a-c*b),-(b/(d*a-c*b))],[-(c/(d*a-c*b)),a/(d*a-c*b)])],
+ ev (invert (M), ratmx=true), if equal (%%, foo) then true else %%);
+true;
+
+is (invert (M) = M^^-1), ratmx=true;
+true;
+
+block ([foo : ev (invert (M), ratmx=true, detout=true, doscmxops=false, doallmxops=false)],
+  [op (foo), first (foo), second (foo)],
+  if equal (%%, ["/", matrix ([d, -b], [-c, a]), a*d - b*c]) then true else %%);
+true;
+
+is (invert (M) = M^^-1), ratmx=true, detout=true, doscmxops=false, doallmxops=false;
+true;
+
+/* bigfloat elements */
+
+(M : ev (M, a = 1b0, b = 2b0, c = 3b0, d = -4b0), 0);
+0;
+
+invert (M);
+matrix([4.0b-1,2.0b-1],[3.0b-1,-1.0b-1]);
+
+is (invert (M) = M^^-1);
+true;
+
+(M1 : ev (invert (M), detout=true, doscmxops=false, doallmxops=false), ev ([op (M1), args (M1)], simp=false));
+["*", [-0.1b0, matrix([-4.0b0, -2.0b0], [-3.0b0, 1.0b0])]];
+
+is (invert (M) = M^^-1), detout=true, doscmxops=false, doallmxops=false;
+true;
+
+(M1 : ev (invert (M), ratmx=true),
+ if every (ratp, M1) and equal (M1, matrix ([2/5, 1/5], [3/10, -(1/10)])) then true else M1);
+true;
+
+is (invert (M) = M^^-1), ratmx=true;
+true;
+
+(M1 : ev (invert (M), ratmx=true, detout=true, doscmxops=false, doallmxops=false),
+ [o, a] : ev ([op (M1), args (M1)], simp=false),
+ if ?caar (a [1]) = ?rat and every (ratp (a [2])) and equal (%%, ["*", [-1/10, matrix ([-4, -2], [-3, 1])]]) then true else %%);
+true;
+
+is (invert (M) = M^^-1), ratmx=true, detout=true, doscmxops=false, doallmxops=false;
+true;
+
+/* float elements */
+
+(M : float (M), 0);
+0;
+
+invert (M);
+matrix([4.0e-1,2.0e-1],[3.0e-1,-1.0e-1]);
+
+is (invert (M) = M^^-1);
+true;
+
+(M1 : ev (invert (M), detout=true, doscmxops=false, doallmxops=false), ev ([op (M1), args (M1)], simp=false));
+["*", [-0.1e0, matrix([-4.0e0, -2.0e0], [-3.0e0, 1.0e0])]];
+
+is (invert (M) = M^^-1), detout=true, doscmxops=false, doallmxops=false;
+true;
+
+(M1 : ev (invert (M), ratmx=true),
+ if every (ratp, M1) and equal (M1, matrix ([2/5, 1/5], [3/10, -(1/10)])) then true else M1);
+true;
+
+is (invert (M) = M^^-1), ratmx=true;
+true;
+
+(M1 : ev (invert (M), ratmx=true, detout=true, doscmxops=false, doallmxops=false),
+ [o, a] : ev ([op (M1), args (M1)], simp=false),
+ if ?caar (a [1]) = ?rat and every (ratp (a [2])) and equal (%%, ["*", [-1/10, matrix ([-4, -2], [-3, 1])]]) then true else %%);
+true;
+
+is (invert (M) = M^^-1), ratmx=true, detout=true, doscmxops=false, doallmxops=false;
+true;
+
+/* a matrix of modest size, the subject of bug report #2362 */
+
+(M:matrix([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+ [0,1,0,-1,0,1,-1,-1,1,3,0,-3,0,3,1,-1,-3,-3,-1,1,3,3,-3,-3,3],
+ [0,0,1,0,-1,1,1,-1,-1,0,3,0,-3,1,3,3,1,-1,-3,-3,-1,3,3,-3,-3],
+ [0,1,0,1,0,1,1,1,1,9,0,9,0,9,1,1,9,9,1,1,9,9,9,9,9],
+ [0,0,1,0,1,1,1,1,1,0,9,0,9,1,9,9,1,1,9,9,1,9,9,9,9],
+ [0,0,0,0,0,1,-1,1,-1,0,0,0,0,3,3,-3,-3,3,3,-3,-3,9,-9,9,-9],
+ [0,1,0,-1,0,1,-1,-1,1,27,0,-27,0,27,1,-1,-27,-27,-1,1,27,27,-27,-27,27],
+ [0,0,0,0,0,1,1,-1,-1,0,0,0,0,9,3,3,9,-9,-3,-3,-9,27,27,-27,-27],
+ [0,0,0,0,0,1,-1,-1,1,0,0,0,0,3,9,-9,-3,-3,-9,9,3,27,-27,-27,27],
+ [0,0,1,0,-1,1,1,-1,-1,0,27,0,-27,1,27,27,1,-1,-27,-27,-1,27,27,-27,-27],
+ [0,1,0,1,0,1,1,1,1,81,0,81,0,81,1,1,81,81,1,1,81,81,81,81,81],
+ [0,0,0,0,0,1,-1,1,-1,0,0,0,0,27,3,-3,-27,27,3,-3,-27,81,-81,81,-81],
+ [0,0,0,0,0,1,1,1,1,0,0,0,0,9,9,9,9,9,9,9,9,81,81,81,81],
+ [0,0,0,0,0,1,-1,1,-1,0,0,0,0,3,27,-27,-3,3,27,-27,-3,81,-81,81,-81],
+ [0,0,1,0,1,1,1,1,1,0,81,0,81,1,81,81,1,1,81,81,1,81,81,81,81],
+ [0,0,0,0,0,1,1,-1,-1,0,0,0,0,81,3,3,81,-81,-3,-3,-81,243,243,-243,-243],
+ [0,0,0,0,0,1,-1,-1,1,0,0,0,0,27,9,-9,-27,-27,-9,9,27,243,-243,-243,243],
+ [0,0,0,0,0,1,1,-1,-1,0,0,0,0,9,27,27,9,-9,-27,-27,-9,243,243,-243,-243],
+ [0,0,0,0,0,1,-1,-1,1,0,0,0,0,3,81,-81,-3,-3,-81,81,3,243,-243,-243,243],
+ [0,0,0,0,0,1,1,1,1,0,0,0,0,81,9,9,81,81,9,9,81,729,729,729,729],
+ [0,0,0,0,0,1,-1,1,-1,0,0,0,0,27,27,-27,-27,27,27,-27,-27,729,-729,729,-729],
+ [0,0,0,0,0,1,1,1,1,0,0,0,0,9,81,81,9,9,81,81,9,729,729,729,729],
+ [0,0,0,0,0,1,1,-1,-1,0,0,0,0,81,27,27,81,-81,-27,-27,-81,2187,2187,-2187,-2187],
+ [0,0,0,0,0,1,-1,-1,1,0,0,0,0,27,81,-81,-27,-27,-81,81,27,2187,-2187,-2187,2187],
+ [0,0,0,0,0,1,1,1,1,0,0,0,0,81,81,81,81,81,81,81,81,6561,6561,6561,6561]),
+ invert (M));
+matrix([1,0,0,-10/9,-10/9,0,0,0,0,0,1/9,0,100/81,0,1/9,0,0,0,0,-10/81,0,-10/81,0,0,1/81],
+       [0,9/16,0,9/16,0,0,-1/16,0,-5/8,0,-1/16,0,-5/8,0,0,0,5/72,0,1/16,5/72,0,1/16,0,-1/144,-1/144],
+       [0,0,9/16,0,9/16,0,0,-5/8,0,-1/16,0,0,-5/8,0,-1/16,1/16,0,5/72,0,1/16,0,5/72,-1/144,0,-1/144],
+       [0,-9/16,0,9/16,0,0,1/16,0,5/8,0,-1/16,0,-5/8,0,0,0,-5/72,0,-1/16,5/72,0,1/16,0,1/144,-1/144],
+       [0,0,-9/16,0,9/16,0,0,5/8,0,1/16,0,0,-5/8,0,-1/16,-1/16,0,-5/72,0,1/16,0,5/72,1/144,0,-1/144],
+       [0,0,0,0,0,81/256,0,81/256,81/256,0,0,-9/256,81/256,-9/256,0,-9/256,-9/256,-9/256,-9/256,-9/256,1/256,-9/256,1/256,1/256,1/256],
+       [0,0,0,0,0,-81/256,0,81/256,-81/256,0,0,9/256,81/256,9/256,0,-9/256,9/256,-9/256,9/256,-9/256,-1/256,-9/256,1/256,-1/256,1/256],
+       [0,0,0,0,0,81/256,0,-81/256,-81/256,0,0,-9/256,81/256,-9/256,0,9/256,9/256,9/256,9/256,-9/256,1/256,-9/256,-1/256,-1/256,1/256],
+       [0,0,0,0,0,-81/256,0,-81/256,81/256,0,0,9/256,81/256,9/256,0,9/256,-9/256,9/256,-9/256,-9/256,-1/256,-9/256,-1/256,1/256,1/256],
+       [0,-1/48,0,-1/144,0,0,1/48,0,5/216,0,1/144,0,5/648,0,0,0,-5/216,0,-1/432,-5/648,0,-1/1296,0,1/432,1/1296],
+       [0,0,-1/48,0,-1/144,0,0,5/216,0,1/48,0,0,5/648,0,1/144,-1/432,0,-5/216,0,-1/1296,0,-5/648,1/432,0,1/1296],
+       [0,1/48,0,-1/144,0,0,-1/48,0,-5/216,0,1/144,0,5/648,0,0,0,5/216,0,1/432,-5/648,0,-1/1296,0,-1/432,1/1296],
+       [0,0,1/48,0,-1/144,0,0,-5/216,0,-1/48,0,0,5/648,0,1/144,1/432,0,5/216,0,-1/1296,0,-5/648,-1/432,0,1/1296],
+       [0,0,0,0,0,-3/256,0,-1/256,-3/256,0,0,3/256,-1/256,1/768,0,1/256,3/256,1/2304,1/768,1/256,-1/768,1/2304,-1/2304,-1/768,-1/2304],
+       [0,0,0,0,0,-3/256,0,-3/256,-1/256,0,0,1/768,-1/256,3/256,0,1/768,1/2304,3/256,1/256,1/2304,-1/768,1/256,-1/768,-1/2304,-1/2304],
+       [0,0,0,0,0,3/256,0,-3/256,1/256,0,0,-1/768,-1/256,-3/256,0,1/768,-1/2304,3/256,-1/256,1/2304,1/768,1/256,-1/768,1/2304,-1/2304],
+       [0,0,0,0,0,3/256,0,-1/256,3/256,0,0,-3/256,-1/256,-1/768,0,1/256,-3/256,1/2304,-1/768,1/256,1/768,1/2304,-1/2304,1/768,-1/2304],
+       [0,0,0,0,0,-3/256,0,1/256,3/256,0,0,3/256,-1/256,1/768,0,-1/256,-3/256,-1/2304,-1/768,1/256,-1/768,1/2304,1/2304,1/768,-1/2304],
+       [0,0,0,0,0,-3/256,0,3/256,1/256,0,0,1/768,-1/256,3/256,0,-1/768,-1/2304,-3/256,-1/256,1/2304,-1/768,1/256,1/768,1/2304,-1/2304],
+       [0,0,0,0,0,3/256,0,3/256,-1/256,0,0,-1/768,-1/256,-3/256,0,-1/768,1/2304,-3/256,1/256,1/2304,1/768,1/256,1/768,-1/2304,-1/2304],
+       [0,0,0,0,0,3/256,0,1/256,-3/256,0,0,-3/256,-1/256,-1/768,0,-1/256,3/256,-1/2304,1/768,1/256,1/768,1/2304,1/2304,-1/768,-1/2304],
+       [0,0,0,0,0,1/2304,0,1/6912,1/6912,0,0,-1/2304,1/20736,-1/2304,0,-1/6912,-1/6912,-1/6912,-1/6912,-1/20736,1/2304,-1/20736,1/6912,1/6912,1/20736],
+       [0,0,0,0,0,-1/2304,0,1/6912,-1/6912,0,0,1/2304,1/20736,1/2304,0,-1/6912,1/6912,-1/6912,1/6912,-1/20736,-1/2304,-1/20736,1/6912,-1/6912,1/20736],
+       [0,0,0,0,0,1/2304,0,-1/6912,-1/6912,0,0,-1/2304,1/20736,-1/2304,0,1/6912,1/6912,1/6912,1/6912,-1/20736,1/2304,-1/20736,-1/6912,-1/6912,1/20736],
+       [0,0,0,0,0,-1/2304,0,-1/6912,1/6912,0,0,1/2304,1/20736,1/2304,0,1/6912,-1/6912,1/6912,-1/6912,-1/20736,-1/2304,-1/20736,-1/6912,1/6912,1/20736])$
+
+/* end additional tests for invert */

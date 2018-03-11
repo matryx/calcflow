@@ -1,0 +1,1929 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="dan stanger">
+   <meta name="GENERATOR" content="Mozilla/4.51 [en] (WinNT; I) [Netscape]">
+   <title>Solver1 (translated)</title>
+</head>
+<body>
+<em> Note: This file is a machine translation of solver1.pdf.</em>
+<br>
+<br>
+Acknowlegments:
+<br>Many persons and institutions contributed considerably to the success
+of this work.
+<p>I would like to express my thanks to:
+<br>&nbsp;- Richard Petti and Jeffrey P. Golden of Macsyma, Inc. (USA)
+for their interest in this work,
+<br>&nbsp;&nbsp; for supplying Macsyma licenses and the modifcation of
+the LINSOLVE function,
+<br>&nbsp;- The Center for Microelectronics of the University of Kaiserslautern,
+in particular
+<br>&nbsp;&nbsp; Dr. Peter Conradi and Uwe Wassenm&uuml;ller, for the support
+of the project,
+<br>&nbsp;- Clemens, Frank and Michael for the first-class WG life and
+particularly Michael for the
+<br>&nbsp;&nbsp; temporary hiring of its computer,
+<br>&nbsp;- My parents and grandparents for their constant support during
+my study,
+<br>&nbsp;- and quite particularly my friend Dr. Ralf Sommer for outstanding
+co-operation and the
+<br>&nbsp;&nbsp; common enterprises of the last three years.
+<p>&nbsp;Eckhard Hennig
+<br>&nbsp;Braunschweig, August 1994
+<br>&nbsp;
+<br>
+<br>
+Summary:
+<br>Technical sizing functions require frequently the solution of sets
+of equations, which describe an object mathematically, after the values
+of the function defining element parameters. For the analytic solution
+of smaller sizing problems the application of commercial computer algebra
+systems offers itself such as Macsyma [ MAC 94 ], which is able, to manipulate
+and resolve after their variables symbolically extensive equations algebraically.
+<br>Despite their high efficiency these systems are however usually already
+overtaxed, if linear or weakly nonlinear, parameterized sets of equations
+are to solve after only one subset of their variables or be before-processed
+at least symbolically. In order to be able to treat such typically with
+design functions developing set of equations, in the context of this work,
+a universal symbolic equation solver based on heuristic algorithms was
+developed and implemented in Macsyma. Program module SOLVER extends the
+functionality of the Macsyma instruction SOLVE and LINSOLVE for the symbolic
+solution of algebraic equations or linear sets of equations by the ability
+for the selective solution of nonlinear, parameterized systems with degrees
+of freedom.
+<br>The first section of the available work describes some ranges of application
+of symbolic sizing methods, the request following from them to a symbolic
+equation solver as well as the used heuristic algorithms for the extraction
+of linear equations and for the complexity evaluation of algebraic functions.
+The second section contains an overview of the structure the Solvers and
+a guidance to its use. In the appendix is the source text of the module
+implemented in the internal higher programming language of Macsyma SOLVER.mac.
+<br>
+<br>
+Table of contents
+<br>1 heuristic algorithms~1
+<br>1.1 introduction~1
+<br>1.1.1 numeric procedures in the comparison with symbolic methods~1
+<br>1.1.2 examples of areas of application of symbolic sizing methods~2
+<br>1.2 conventional equation solver~7
+<br>1.3 requirements of a symbolic equation solver~8.
+<br>1.4 extraction and solution of linear equations~10
+<br>1.4.1 intuitive methodologies for the search of linear equations~10
+<br>1.4.2 a heuristic algorithm for the search of linear equations~11
+<br>1.4.3 solution of the linear equations~13.
+<br>1.5 evaluation strategies for the solution of nonlinear equations~14
+<br>1.5.1 substitution systems for nonlinear sets of equations~14
+<br>1.5.2 heuristic procedures for the complexity evaluation of algebraic printouts~16
+<br>1.5.3 list of the solution sequence~19
+<br>2 the Solver~21
+<br>2.1 the structure of the Solvers~21
+<br>2.2 the modules of the Solvers~23
+<br>2.2.1 the Solver Preprocessor~23
+<br>2.2.2 the Immediate Assignment Solver~25
+<br>2.2.3 the linear Solver~26
+<br>2.2.4 the Valuation Solver~28
+<br>2.2.5 the Solver Postprocessor~31
+<br>2.3 application of the Solvers~32
+<br>2.3.1 command syntax~32
+<br>2.3.2 special features of the syntax of equations~33
+<br>2.3.3 example calls of the Solvers~33
+<br>2.4 the options of the Solvers~37
+<br>2.5 user specific transformation routines~40
+<br>2.6 modification of the operator evaluations~44
+<br>2.7 user specific evaluation strategies~45
+<br>i
+<br>
+<br>
+<br>
+<br>
+ii~TABLE OF CONTENTS
+<br>bibliography~47
+<br>A example calculations~49
+<br>A.1 sizing of the staff two-impact~49
+<br>A.2 sizing of the transistor amplifier~57
+<br>B program listing~65
+<br>B.1 SOLVER.mac~65
+<br>
+<br>
+Chapter 1
+<br>heuristic algorithms for the symbolic solution specifications given
+by sets of equations
+<br>1,1 introduction
+<br>1,1,1 numeric procedures in the comparison with symbolic methods the
+accurate sizing of technical designs for requires frequently the solution
+of nonlinear sets of equations after function defining element parameters.
+Usually for the determination of the looked up variables numeric optimizing
+procedures are used, which do not function reliably however already for
+small design problems with a comparatively small number of unknown quantities
+always. Problems prepare the complexity order of many usual optimizing
+algorithms (a problem, known as the curse OF dimensionality [MIC 94] is),
+exponentially dependent on the variable number, in first line, the selection
+of suitable initial values, which unwanted finding locally instead of global
+optima and the principle-conditioned behavior with the solution of sets
+of equations with degrees of freedom, with which a clarity of the solution
+vector missing in the reality can be pretended.
+<br>The optimum procedure for the accomplishment of a design function would
+basically be a complete analytic solution of the appropriate set of equations.
+Analytic functions, which describe explicitly the looked up item values
+as functions of the specification parameters, would have to be determined
+only once and would be available then to the arbitrarily frequent analysis
+with modified parameters, e.g. within design data bases of CAD systems.
+Besides analytic sizing formulas clarify qualitatively functional connections
+between the item values and the specifications and reveal in the cases
+concerned the existence of degrees of freedom. Since there are however
+no generally accepted procedures for the solution of any nonlinear sets
+of equations and in the special cases, in which symbolic solutions can
+be calculated, which complexity of the results exceeds by hand calculation
+to mastering frameworks far, the analytic handling of also only small sizing
+problems plays so far a subordinated role. With the help of modern, efficient
+computer algebra systems, which are able to manipulate and resolve after
+any variables symbolic sets of equations algebraically,
+<br>1
+<br>
+<br>
+2 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>with the help of modern, efficient computer algebra systems, which
+are able to manipulate and resolve after any variables symbolic sets of
+equations algebraically, become some the problem categories, in particular
+such, specified above, which require the solution of majority linear or
+multivariate polynomialen systems, nevertheless the analytic handling accessible.
+Examples of appropriate applications are within many fields of the engineering
+sciences, among other things this concerns the design of similar electronic
+circuits, regulation-technical problem definitions, the technical mechanics
+and the robotics [ PFA 94 ].
+<br>1,1,2 examples of areas of application of symbolic sizing methods on
+the basis the following two examples are to be demonstrated some areas
+of application of symbolic methods. At the same time exemplary the concrete
+request are to be worked out at them, to which with the development of
+a concept for a universal solution algorithm for symbolic sets of equations
+must be considered.
+<br>Example 1,1 with the first example concerns it a simple task out of
+the technical mechanics. The two staff truss represented in figure 1,1
+is given [ BRO 88, P. 112 ], at which under the angle opposite the horizontals
+the strength F in the point C attacks. The staffs include the angles with
+the horizontals and fi, the height of the triangle stretched by the staffs
+are defined with c. Cross section aechen A1 and a2 of the two staffs are
+squares with the side lengths h1 and h2. Modulus of elasticity of the used
+material is E. Figure 1.1: Loaded two staff truss
+<br>Due to the load by the strength F deforms the truss in such a way that
+itself the point of the triangle in relation to the unloaded status around
+the vector (u; w) T shifts, sees figure 1.2. On the assumption that the
+staff length variations are small due to the load in relation to the output
+lengths, it is to be determined now the cross section dimensions h1 and
+h2 of the staffs in such a way that itself for given F, fi, c and E exactly
+a prescribed shift (u; w) T adjusts, i.e. a1 a2 is looked up = f (F; fi;
+c; E; u; w): (1.1)
+<br>
+<br>
+1.1. INTRODUCTION 3
+<br>figure 1.2: Flexibly deformed two staff truss
+<br>solution: From the static balance conditions at the point C follows
+after figure 1.3
+<p>figure 1.3: Force equilibrium at the point C
+<br>the material equations for the staff length variations read 1.
+<br>Fxi = 0 =) follows F cos l1 = S1l1 EA1 after figure 1,3 X; (1.4)
+<br>&nbsp;Fxi = 0 =) follows F cos l2 = S2l2 EA2 after figure 1,3 X; (1.5)
+<br>whereby for the staff lengths l1 and l2 as well as for the cross-section
+areas A1 and a2 applies to l1 = c cos (1.6) l2 = c cos fi (1.7) A1 = h
+2 1; (1.8) A2 = h 2 2: (1.9)
+<br>
+<br>
+4 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>figure 1.4:
+<br>Because of the small geometry modifications the circular arcs, on which
+the staff ends can move, were replaced to shift plan in the shift plan
+drawn in figure 1,4 by for original staff direction the senkrechten tangents.
+To the side lengths dashed of the drawn in parallelogram applies
+<br>From it the shifts u and v result to the function exist now therein
+to resolve the symbolic set of equations from the equations (1.2) to (1.13)
+after the unknown quantities h1 and h2 explicitly whereby all unnecessary
+variables, i.e. S1, S2, A1, l1, l2, a and b, are to be eliminated.
+<br>Example 1,2
+<br>The second example originates from electro-technology and concerns
+the sizing of similar electronic circuits. For the two-stage transistor
+amplifier drawn in figure 1,5 [ N&Uuml;H 89 ] symbolic sizing formulas
+are to be intended, those the values of the seven resistances g 1: R7 as
+function of the operating voltage VCC, which Zi and the output resistance
+Zo of the circuit for numerically determined bias points of the transistors
+describe small signal reinforcement A, the input impedance:
+<br>0 B @ G 1. R7 1 C A = f (VCC;a; Zi; Zo): (1.14)
+<br>
+<br>
+1.1. INTRODUCTION 5
+<br>Figure 1.5: Two-stage transistor amplifier
+<br>Figure 1.6: Bias point alternate circuit diagram of the amplifier with
+determined transistor bias points
+<br>For this purpose with the help of symbolic network analysis procedures
+[ SOM 93a] are calculated as well as symbolic approximation methods [ HEN
+93 ] first (highly simplified) the transfer functions A, Zi and Zo in the
+pass band of the amplifier as functions of the item parameters and the
+bias point values.
+<br>A = 145303681853R2/145309663773R1 (1.15)
+<br>Zi = R7 (1.16)
+<br>Zo = 1675719398828125 R2 R7 + 394048139880824192 R1 R2/136552890630303121408
+R1 (1.17)
+<br>The values of the resistances R1..R7 do not only determine the small
+signal characteristics, but influence besides the bias point adjustment
+of the circuit. Therefore are resistances
+<br>
+<br>
+6 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>to dimension in such a way that the small signal and bias point specifications
+are fulfilled at the same time. The equations (1.15) - (1.17) for this
+reason the extensive Sparse tablet set of equations is added (1.18) - (1.51),
+which comes out from the bias point alternate circuit diagram of the amplifier
+represented in figure 1,6.
+<br>For the determination of the looked up sizing regulations in the form
+(1.14) 1.51 from the set of equations (1.15) - (1.51) all branch voltages
+are and flow V?? and I?? to eliminate
+<br>
+<br>
+1.2. CONVENTIONAL EQUATION SOLVER 7
+<br>for the determination of the looked up sizing regulations in the form
+(1.14) is from the set of equations (1.15) - (1.51) all branch voltages
+and flows V?? and I?? to eliminate and the remaining equations after the
+resistances g 1: To resolve R7. 2,1,2 boundaries of the application of
+conventional equation solver the attempt is undertaken to insert for the
+solution of the sets of equations from the two examples the standard routines
+of well-known commercial computer algebra systems as Macsyma [ MAC 94 ]
+or Mathematica [ WOL 91 ] then in the case the use of Macsyma in the example
+1,1, results of the following type result usually, like here:
+<p>(COM1) Solve(
+<br>[ F*cos(gamma) - S1*cos(alpha) - S2*cos(beta) = 0,
+<br>F*sin(gamma) - S1*sin(alpha) + S2*sin(beta) = 0,
+<br>Delta_l1 = l1*S1/(E*A1),
+<br>Delta_l2 = l2*S2/(E*A2),
+<br>l1 = c/cos(alpha),
+<br>l2 = c/cos(beta),
+<br>a = Delta_l2/sin(alpha+beta),
+<br>b = Delta_l1/sin(alpha+beta),
+<br>u = a*sin(alpha) + b*sin(beta),
+<br>w = a*cos(alpha) + b*cos(beta),
+<br>A1 = h1^2, a2 = h2^2
+<br>],
+<br>[ h1, h2 ]);
+<br>(D1) [ ]
+<p>This behavior of the computer algebra programs is to be explained with
+the fact that the sets of equations which can be solved are regarded concerning
+the interesting variables h1 and h2 as over-certainly, because the equation
+solving no additional information about (after possibility) which can be
+eliminated variables (S1, S2, A1, a2, l1, l2, a, b) cannot be transferred
+or variables, i.e. the parameters of the system (F, over under any circumstances
+which can be eliminated, + fi, c, E, u, w). A possible way out consists
+of arranging the equation solver intending also solutions for the not interesting
+variables. This is however not always feasible and usually very inefficient,
+because it in some cases much computing time necessarily for the regulation
+of variables, which have no uss on the looked up unknown quantities. Even
+at all no solution is found, if there is no analytic solution for a only
+one not interesting variable. The latter applies for example to the following
+set of equations, if only the solutions for x and y are looked up: x +
+y = 1 (1.52)
+<br>
+<br>
+8 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>from the two linear equations (1.52) and (1.53) leave themselves the
+solutions untouched x = 2 and y = -1 to determine directly, not in the
+contradiction with the remaining nonlinear equation (1.54). Macsyma detects
+this circumstance however not and gives only error messages back | in the
+first attempt (COM3) because of the apparent over certainty of the system,
+in the second attempt (COM4) due to the analytically not solvable third
+equation:
+<br>(COM2) Eq: [ x + y = 1, 2*x - y = 5, y*z + sin(z) = 1]$
+<br>(COM3) Solve(Eq, [ x, y ]);
+<br>Inconsistent equations: (3)
+<br>(COM4) Solve(Eq, [ x, y, z ]);
+<br>ALGSYS CAN NOT solve - system too complicated.
+<br>1.3 request of a universal symbolic equation solver
+<br>For the symbolic solution of the equation systems it is necessary that
+the Solve function in none of the two above cases aborts prematurely. In
+the first case the solutions should be output on x and y after a consistency
+check with equation (1.54). In latter case is to require that beside the
+analytically calculated solutions additionally the remaining equations,
+for which no such solutions could be found in implicit form are returned,
+so that these can be solve if necessary with numeric procedures. An adequate
+response to the command COM4 would be in this sense e.g. an output of the
+form
+<br>[ x = 2; y = ]
+<br>the functions for the solution of sets of equations, provided by Macsyma,
+are not modifiable without access to the system nucleus in the way that
+they show the behavior required above. The target of the available work
+is therefore conceiving and implementation of a universal symbolic equation
+solver, which is, which is based on the Macsyma standard routines, able,
+to resolve or not make at least by elimination as much as possible necessary
+variables a large symbolic preprocessing of the equations sets of equations
+of the type stated in the examples after any subset of all variables, so
+that numeric optimizing procedures do not have to be only applied to a
+small, analytically any longer solvable nonlinear core of the system. Apart
+from this general objective detailed request can be derived to the program
+which can be developed from some well-known facts and a series from observations,
+which are to be made 1,1 and 1,2 as well as the set of equations (1.52)
+by the examples { (1.54):
+<br>1. Usually only the solution for some few variables is in demand, all
+other unknown quantities is to be eliminated.
+<br>2. The sets of equations which can be solved can be simple or several
+times parameterized.
+<br>3. It is not by any means guaranteed that the parameters are from each
+other independent, i.e. it is possible that a set of equations has a solution
+only if certain arithmetic obligation conditions between some parameters
+are kept.
+<br>
+<br>
+1.3. REQUEST OF SYMBOLIC EQUATION SOLVER 9
+<br>4. the sets of equations contained often easy, direct allocations of
+the form xi = const., see equations (1.6) and (1.7) or (1.42) - (1.51).
+<br>5. A substantial proportion of the equations which can be solved is
+linear concerning a not directly evident subset of all variables, sees
+regarding all V?? and I?? linear equations (1.18) - (1.32).
+<br>6. The systems can contain degrees of freedom.
+<br>7. No generally accepted solution procedures for nonlinear equations
+and sets of equations exist.
+<br>8. Nonlinear equations can be unsolvable (contradictory), unique solutions
+have or multiple solutions with finite or infinite solution varieties possess.
+<br>9. Always all items of the solution quantity with the remaining equations
+are not consistent in the case of multiple solutions.
+<br>10. For many nonlinear equations no analytic solutions exist, see equation
+(1.54).
+<p>From these statements the following result, the appropriate points assigned
+demands:
+<br>1. The program is to solve sets of equations only so far, as it is
+absolutely necessary for the determination of individual variables. Calculated
+solutions are to be checked for possible contradictions with the remaining
+equations.
+<br>2. Looked up variables and parameter must be able to be processed separately
+from each other indicated and. Parameters may not be under any circumstances
+eliminated contrary to not interesting variables.
+<br>3. If dependencies between parameters are detected, then the user the
+program run under consideration and storage of the appropriate obligation
+conditions must to be continued when desired be able.
+<br>4. Direct allocations should be looked up and executed directly at
+the beginning of the program run, in order to reduce the range of the remaining
+set of equations as far as possible at small expenditure.
+<br>5. There there for linear equations efficient, closed solution procedures
+is to solve is appropriate it to search the set of equations repeated for
+linear section blocks these and to use the results into the remainder of
+the equations, until no equation linear equations are more available.
+<br>6.&nbsp; Degrees of freedom are to be expressed automatically in variables
+selected by the program.
+<br>7. The solution of nonlinear equations must be controlled with the
+help of heuristic evaluation strategies.
+<br>8. In the case of multiple solutions with finite varieties is each
+individual solution path separately recursively to be pursued.
+<br>
+<br>
+10 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>9. Sections of multiple solutions, inconsistent with the remaining
+equations, must be detected and the appropriate solution path be rejected.
+<br>10. As was already required for the start of the paragraph, analytically
+solvable equations are not to lead not to the abort of the program. Instead
+the set of equations is as far as possible on triangle form to be brought
+and the not solvable remaining equations as well as the partial solutions
+determined up to then to be output.
+<br>1,4 extraction and solution of linear equations
+<br>is mostly nonlinear with technical tasks the equations which can be
+solved, but contains the systems concerned frequently large linear section
+blocks. Since linear sets of equations can be solved very efficiently with
+the help of the Gauss-Elimination simultaneously, it is advisable to process
+before the solution of the nonlinear equations first the linear proportion
+of the system separately. Even if a complete analytic dissolution of the
+entire nonlinear system cannot be achieved after all looked up variables,
+it is nevertheless meaningful not to reduce by elimination of the linear
+variables and equations the system to an only small, any longer analytically
+solvable core whose numeric solution is substantially less complex, than
+an optimization executed on the complete system. Under point 5 required
+iterative solution linear subsystems entire set of equations is to that
+extent no trivial function, than that neither the equations concerned nor
+the subset of the variable, concerning which these equations are linear
+admits from the beginning is. Therefore a search strategy must be found,
+(for efficiency reasons as large ones as possible) the linear equations
+and variable blocks extracted from any nonlinear set of equations.
+<br>1,4,1 intuitive methodologies for the search of linear equations
+<br>For the elucidation of the task the following nonlinear set of equations
+is consulted, which is to be solved x, y and z after the variables. At
+first sight only the equation (1.55) is linear, regarding all three variables.
+In the case of use of a simple search algorithm, which finds excluding
+such completely linear equations, max. a variable can after appropriate
+dissolution of (1.55), e.g. after x in this case, from which both remaining
+equations are eliminated. A more exact view of the equations reveals however
+a better alternative. After the distance of equation (1.56) and shifting
+the terms dependent on z on the right pages of the equations (1.55) and
+(1.57) two in the variables x and y linear equations develop:
+<br>
+<br>
+1.4. EXTRACTION AND SOLUTION of LINEAR EQUATIONS 11
+<br>their simultaneous inversion leads to the solutions parameterized in
+z after their inserting into (1.56) only one nonlinear equation which can
+be solved remains:
+<br>In view of the fact that with the second version in only one iteration
+two unknown quantity could be determined at the same time, it is to be
+preferred latter methodology of the search for completely linear equations,
+applied first, despite the additional shaping expenditure. This applies
+in particular if a set of equations contains at all no equations, in which
+all variables involved in purely linear form occurs. The procedure used
+for the extraction of linear subsystems should interconnect therefore both
+demonstrated operations for the removal of nonlinear equation proportions:
+<br>1. Distance of individual nonlinear equations
+<br>2. Shifting variables occurring in nonlinear terms to the right side
+of the equations by a balanced combination of the two operations can be
+achieved that the resulting linear subsystems have max. size and often
+at least are approximately square.
+<br>1.4.2 a heuristic algorithm for the search of linear equations
+<br>For a computer implementation such a search for equation linear equations,
+executed intuitively by humans, must be systematized and formulated algorithmic.
+Since the term does not define linear section set of equations, how is
+evident on the basis the different solution types, the desired result in
+unique way, a heuristic strategy was developed for the imitation of the
+intuitive methodology. This strategy is demonstrated for the comparison
+of the results at the system,&nbsp; already regarded, (1.55)- (1.57).
+<br>For the set of equations first a table is set up, whose lines are assigned
+to the equations and their columns the variables. The entry at the position
+(i; j) of the table contains for the equation i the coefficient 1 concerning
+the linear member, i.e. the first power, of the variable xj. Is available
+as for z in equation (1.57) no term in first power or steps these functions
+not polynomial in argument on (e.g. sin x or sqrt x), then the appropriate
+position with a cross () is marked. x y z
+<br>Gl. 1)
+<br>1 Macsyma places the instruction to the determination of the coefficients
+of rational printouts RATCOEFF to the order.
+<br>
+<br>
+12 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>second, equal large evaluation matrix, is assigned to this table whose
+entries are equal to zero, if the corresponding is entry in the coefficient
+table a constant, and equal unity, if the linear coefficient concerned
+contains looked up variables or not existed (). additionally the line and
+column totals become noted at the edges of the matrix, as well as under
+the sigma signs on the top right and on the left of down respectively the
+line total of the column totals (P S) and the column total of the line
+totals (P Z). obvious correspond to
+<br>x y z P S 0 1 2 3 1) 0 0 0 0 2) 2 0 1 1 3) 1 0 0 1 P Z 3 (1.63)
+<br>A linear section set of equations and the appropriate variables are
+found if with a consequence of the operations specified at the end of paragraph
+1,4,1 all ones were eliminated. Transferred to manipulations thereby the
+1 corresponds to the evaluation matrix. Operation deleting the line belonging
+to to a certain equation. The 2. Operation is equivalent column assigned
+for the distance of some variable. The linear subsystem consists afterwards
+of those equations and variables, whose lines and columns were not removed
+from the matrix. The reduction of the evaluation matrix (1.63) to a zero-matrix
+can take place in exactly three different ways:
+<br>1. Capers of the lines 2) and 3),
+<br>2nd capers of the columns y and z,
+<br>3rd capers of the line 2) and the column z.
+<br>of the demand for max. size and as square a form of the linear equation
+blocks as possible is directly portable to the characteristics of the zero-matrix
+which can be obtained. In this sense the latter of the three options is
+optimal, because it supplies the system (1.58)-(1.59), already detected
+in the previous paragraph as optimum solution. The two other possibilities
+lead against it for the under-certain equation (1.55) or to a over-certain
+3 1-System in x.
+<br>The search for an optimal sequence of line and column cancellations
+is a complex combinatorial problem. In order to avoid the associated expenditure,
+a heuristic, local decision criterion becomes the determination of the
+line or column which can be removed in the respective step, i.e. a Greedy
+strategy
+<br>[FOU 92], uses: The line or column is deleted, which contains most
+ones, thus that with the largest line or column total. This criterion supplies
+with however still no unique predicate,
+<br>&nbsp; if two or more lines have the same (largest) line total,
+<br>&nbsp; or two or more columns the same (largest) column total has,
+<br>&nbsp; or if the totals of the maximumevaluated line and the maximumevaluated
+column are identical.
+<br>
+<br>
+In the first two cases any can be selected, usually is this for the sake
+of simplicity first in each case the found with max. evaluation from the
+concerned lines or columns.
+<br>The third case occurs in the available example. In the evaluation matrix
+(1.63) possess both the line 3) and the column z the max. total 2. At the
+beginning from both possibilities arbitrarily the cancellation of the line
+one select, so that in the next step the following evaluation matrix results:
+<br>x y z P S 0 0 1 1 1) 0 0 0 0 3) 1 0 0 1 P Z 1 (1.64)
+<br>again is now the max. line total equal to the max. column total. The
+decision could take place according to the coincidence principle, but thereby
+the demand after as square a form of the linear subsystems as possible
+was not sufficiently considered also here.&nbsp;&nbsp; Is recommended either
+to delete lines and columns with same evaluation alternately to meet or
+the selection in favor of the possibility which brings the dimension relation
+n/m to the n*m evaluation matrix with n =/= m more near at unity. According
+to both criteria deleting of the column z proves as more favorable than
+the distance of the line 3).
+<br>x y P S 0 0 0 1) 0 0 0 3) 0 0 0 P Z 0 (1.65)
+<br>the cancellation of column z causes the removal of the last unity in
+the evaluation matrix. This expresses itself in disappearing P S and P
+Z, by which the end of the algorithm is marked. From the result matrix
+(1.65) it is to be read off now that the equations (1.55) are linear and
+(1.57) the example set of equations concerning the variables x and y. Those
+finally necessary shapings of the linear equations for the creation of
+the simultaneous form (1.58) - (1.59) do not represent a problem for a
+computer algebra system, them by Macsyma from the instruction LINSOLVE
+for the simultaneous solution of linear equations are automatically executed.
+<br>1,4,3 solution of the linear equations is unique solvable or under
+the linear section sets of equations extracted using the described algorithm,
+then their subsequent treatment is unproblematic. In the case of over-certain
+systems obligatory inconsistencies occur which require a more detailed
+handling. E.g. from a larger set of equations in the variables, in x and
+y linear subsystem (1.66)-(1.68) were inferred from x, y, z and w the over-certain.
+x
+<br>
+<br>
+14 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>after the forward of elimination ensteht the following set of equations,
+which is inconsistent in the sense of linear algebra and thus no solution
+has:
+<br>In the regarded case are however z and w variable of the set of equations
+which can be solved. The above linear subsystem has exactly solutions if
+these two variables fulfill the equation (1.71). This condition is to be
+only regarded therefore as a further equation of the remainder system,
+from which x and y were eliminated.
+<br>As consequence it results that with the occurrence of apparent inconsistencies
+following the eliminations process generally the right sides of the consistency
+conditions thereupon must be checked, whether they contain looked up variables
+of the entire system. If this is the case, then the conditions concerned
+are again added after the solution of the linear equations the initial
+equation system. If this applies not, i.e. does not occur not fulfillable
+obligation conditions between numeric values or parameters, then the set
+of equations has indeed no solution, and the solution process must be aborted.
+<br>1,5 evaluation strategies for the solution of nonlinear equations
+<br>Apart from few special cases do not exist closed solution procedures
+for general nonlinear sets of equations. This does not exclude however
+that for many nonlinear systems analytic solutions or at least partial
+solutions can be calculated, only is usually their regulation not in as
+efficient way as by Gauss-Elimination in the case of linear equations possible.
+<br>1,5,1 substitution systems for nonlinear sets of equations an elementary
+solution procedure, which can be applied to any sets of equations, is the
+well-known substitution system:
+<br>1. Select (as simple ones as possible) an equation from the system
+and resolve it after a variable xj. Abort, if all equations are solve,
+or no further equation analytically to solve leaves itself.
+<br>2. Insert the result into the remaining equations, in order to eliminate
+xj from the system.
+<br>3. Check the system reduced by an equation and a variable for consistency
+and continue with step 1.
+<br>For the demonstration of the procedure the nonlinear set of equations
+(1.72) { (1.76) one regard, which is to be solved a, b, c and d after the
+variables.
+<br>ab + 2c = 0 (1.72)
+<br>c 2 + d
+<br>
+<br>
+1.5. EVALUATION STRATEGIES FOR THE SOLUTION OF NONLINEAR EQUATIONS 15
+<br>The question, which concrete characteristics distinguish " as simple
+" an equation as possible, arises already directly at the beginning of
+the application of the substitution system. From know-how the among other
+things following evaluation criteria can be derived, which must to apply
+and be able depending upon application to be differently weighted not necessarily
+at the same time: Simple equations
+<br>1. contained only few the looked up variable,
+<br>2. contain a looked up variable at exactly one position, so that the
+unknown quantity lets itself be isolated relatively easily,
+<br>3. indicate concerning one or several variables only small depths of
+the operation hierarchy, i.e. the formula complexity is small,
+<br>4. contains no transcendental or different one, functions which can
+be inverted with difficulty.
+<br>On the basis these criteria now the simplest equation of the example
+system is to be determined. Regarding the first two points this could be
+the equation (1.75), because it contains only the variable a, and this
+occurs at exactly one position. On the other hand the evaluation does not
+precipitate due to the criteria 3 and 4 very favorably. Regarding the points
+2, 3 and 4 the solution of the equation (1.73) appears after the variable
+d as the best selection, because all other equations contain either more
+variables or more with difficulty resolvable functions.
+<br>As relevant criterion here first the combination of the points 1 and
+2 may be considered, so that with the solution of the equation (1.75) after
+the variable a one begins. Only if the principal value of the arctan function
+is considered, then a = 2 follows: (1.77)
+<br>Begun into the remaining four equations the system results
+<br>2b+ 2c = 0; (1.78)
+<br>c 2 + d
+<br>developed there no inconsistencies, with the selection of the next
+simplest equation are continued. The valuation criteria speak now unique
+2 for the solution of the equation (1.79) after d:
+<br>the first equation would probably solve 2 humans simpler would consider,
+but the beforehand necessary sections of the equation is strict by the
+factor 2 an additionally considering expenditure.
+<br>
+<br>
+16 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>from it 2b follows
+<br>2b + 2c = 0; (1.83)
+<br>p b + 4
+<br>concerning all criteria is now the equation (1.83) the most favorable
+candidate, so that with the solution
+<br>b =-c
+<br>still two equations with the unknown quantities c remain.
+<br>Equation (1.88) is analytically not solvable, therefore independently
+equation (1.87) must supply the still which is missing solution for c of
+the evaluation. In this case a multiple solution results for the first
+time:
+<br>[c=0,c=-1].
+<br>In it the meaning so far of the not relevant consistency check shows
+up. From the two solutions only second, c = -1, fulfills the equation (1.88).
+The other solution leads to the contradictory predicate
+<br>-i pi = 0 (1.90)
+<br>and must be rejected therefore. After the back substitution the consistent
+solutions read
+<br>[a=2, b=1, c=-1, d=3]. (1.91)
+<br>1.5.2 heuristic procedures for the complexity evaluation of algebraic
+printouts
+<br>being supposed the evaluation of algebraic equations regarding their
+" simplicity " and the solution of a nonlinear set of equations which is
+based on it by a computer algebra system to be thus made automatically,
+then the criteria in algorithms, formulated linguistically in the paragraph
+1.5.1, must be illustrated, which supply numeric complexity evaluations
+for the controlling of the solution process. The height of an evaluation
+number of b should be a measure for it how difficult it is to resolve an
+equation i after a variable xj analytically. The larger b is, the more
+complex appears 3 the function.
+<br>If the evaluation for each equation is made regarding each variable,
+then a solution sequence for the equations can be generated by means of
+an assortment on the basis the yardsticks. The solution sequence is representable
+by an arranged list of the form [ (i1; j1; b1); (i2; j2; b2); ] whereby
+for the evaluation numbers UC applies bl to k &lt; to l. for the equations
+more loeser implies the list the following statements: Attempts first,
+which equation i1 after the variable xj1
+<p>3 it here the formulation appears conscious selected, because made the
+evaluation on the basis heuristic criteria, which cannot guarantee optimal
+decisions.
+<br>
+<br>
+1.5. EVALUATION STRATEGIES FOR the SOLUTION of NONLINEAR EQUATIONS 17
+<br>to resolve since this appears simplest. If this does not succeed, then
+tries instead the solution from equation i2 after xj2, etc.. If the solution
+attempt is successful against it, then insert the solution into the remaining
+equations and begin from the front with the list of a new solution sequence.
+<br>The conversion of the first criterion to an algorithm does not represent
+a serious challenge, because the number of variables contained in an equation
+is already a numeric value. The implementation by programming is in a computer
+algebra system just as little a problem. In Macsyma the short instruction
+<br>Length(ListOfVars(Equation[i]))
+<br>is sufficient for the statement of the number of the unknown quantities
+in the ith equation. This number is however only as secondary criterion
+in connection with other evaluations of use, because only one order of
+rank of the equations, not however by pairs of equation/variables, is supplied.
+<br>Out later evident reasons is here first the view of the criterion 2
+to be reset and with the points 3 and 4 be continued. These two criteria
+were separately listed, but them can be interconnected very easily only
+one procedure. The heuristic evaluation algorithm used in in the following
+section described the implementation symbolic equation loesers uses the
+internal representation of algebraic printouts in computer algebra systems
+for complexity calculation. Assembled ones algebraic functions are administered
+in hierarchically organized lists by operators and operands in prefix notation,
+can which be illustrated directly into a tree structure. The nodes of such
+a tree contain the operators, the operands are in the pages. For example
+the figure 1,7 shows the representation of the left sides of the equations
+(1.75) and (1.87) as operation trees.
+<br>Figure 1.7: Tree representation of algebraic printouts
+<br>An evaluation of the formula complexity regarding the depth of the
+operation hierarchy, thus the degree of the nesting of a printout, is now
+readable at the tree structures. E.g. the complexity can be intended, as
+the branches of tree are counted, which must be crossed by the root of
+the operation tree on, in order to arrive for the instances of the regarded
+variables.
+<br>
+<br>
+18 CHAPTERS 1. HEURISTIC ALGORITHMS
+<br>regarded variables to arrive. In the case of the printout in figure
+1.7a) the complexity value is b concerning the variable a equal to the
+length of the fat drawn in path, i.e. b = 4. In order to achieve from the
+tree root in figure 1.7b) all instances of the variable c, altogether seven
+branches must be crossed, therefore are the complexity b = 7.
+<br>This methodology for the calculation of the complexity is easy so expandable
+that also the criterion 4, which is considered evaluation of a printout
+regarding the operators contained in it, at the same time. Instead of the
+easy counting of the branches of tree only additionally a weighting must
+take place, as a typical " difficulty factor " is assigned to each operator,
+by which the evaluation of its operands to be multiplied is. The height
+of the difficulty factor is to reflect, like complex for the computer algebra
+system the formation of the inverse function, thus the dissolution of the
+function after the operands, is [TRI 91].
+<br>At the beginning each page of the tree receives the weighting 1, if
+it contains the variable, concerning which the evaluation to be calculated
+is. Otherwise the pages are provided with the weighting 0. During the evaluation
+of the operators the operator serves " + " as reference with the weighting
+1, since it is to be inverted most easily. Regarded in the comparison to
+it the reversal of the operators will become " * " and " tan " arbitrarily
+as four or ten times so with difficulty, accordingly therefore the weightings
+set. The following table shows a selection of some operators and them assigned
+weightings.
+<br>Figure 1.8: Evaluation of the operators
+<br>The calculation of the complexity value takes place bottom up via repeated
+addition of the branch weights at the operator node, multiplication of
+the total with the operator weight and transfer of the resulting value
+onto the superordinate branch, until the tree root is achieved. For the
+demonstration of the procedure the operation tree in figure 1.a) one regard.
+In the squares drawn in beside the nodes the operator weights are marked,
+the numbers at the branches mean the total weight part of the tree subordinated
+in each case. Since the complexity of the printout is to be evaluated concerning
+the variable a,
+<br>
+<br>
+1.5. EVALUATION STRATEGIES FOR THE SOLUTION OF NONLINEAR EQUATIONS 19
+<br>only the page with the symbol a the weight 1, all other pages obtains
+with 0 is evaluated. At the multiplication node over-half the variables
+add themselves the branch weights to the total 0 +1 = 1, those, in accordance
+with which evaluation of the operator is passed on "*", with the factor
+4 multiplied to right branch of operand of the "/" operator. There likewise
+a multiplication with 4 takes place, so that the intermediate result is
+now alike to 16. Subsequently, are added in the process of the calculation
+still the factors 10 and 1 for "tan " - and the "+" operator. The final
+result, b = 160, is over the root of the tree. For the operation tree in
+figure 1.8b) appropriate calculations result in a complexity value of b
+= 110 concerning the variables c.
+<br>Here can now the provisionally reset criterion 2 again be taken up.
+In order to determine those equations of a system, one or more variables
+at exactly in each case one position contained, it is sufficient, to set
+in the calculation regulation for the formula complexity, described above,
+all operator weights to unity and store all pairs of equation/variables,
+for which under these conditions the complexity evaluation b = 1 results.
+The method is to be justified thereby that the search applies exactly to
+those equations, in whose tree representation determined variable symbols
+in only one page occurs. That means, there is only one path of the tree
+root only in each case in these cases to the symbol concerned. With a weighting
+of unity for all operators the complexity evaluation even corresponds to
+the number of paths to the instances of a variable.
+<br>The procedure can be verified easily on the basis of examples. If all
+operator weights are set equal unity, then it results for the printouts
+in figure 1.8a) and b) complexities of b = 1 for the variable a and b =
+2 for the variable c. This corresponds with the fact that the variable
+a is contained in exactly one page of the tree, while the symbol c at two
+positions is to be found.
+<br>1.5.3 list of the solution sequence
+<br>By different combining and weights of the appraisal procedures discussed
+above develops different strategies for the list of solution orders. The
+strategy named MinVarPathsFirst, implemented in the program developed in
+this work, represents a combination of the criterion 2 and the complexity
+evaluation by means of operator weighting. The equations, which contain
+looked up variables at exactly in each case one position, receive highest
+priority in the solution order, whereby within this group according to
+smallest weight of the operator trees one sorts. All remaining pairs of
+equation/variables are likewise arranged, according to smallest tree weight,
+placed to the end of the solution sequence. Therefore in the case of the
+two printouts in figure 1,8 would be first tried to resolve the equation
+with the tan function after the variable a although for it a higher evaluation
+was calculated than for the accompanying printout concerning the variable
+c.
+<br>
+<br>
+Chapters 2 the Solver
+<br>2.1 the structure of the Solvers
+<br>The request, in particular the points 4, set up in the paragraph 1,3,
+5 and 7, put in figure 2,1 schematically represented the structuring equations
+solvers into five to a large extent independent main modules close [TRI
+91]. Constructing on this structure and the heuristic algorithms described
+in the preceding section in the context of the available work the Macsyma
+program complex SOLVER was developed for the functionality extension of
+the Macsyma functions SOLVE and LINSOLVE.
+<br>The function of the module Solver Preprocessor are general, preparing
+work like the check of the command syntax and semantics and the structure
+internal data structures, in addition, the execution of an introductory
+consistency check. With their it is to be determined whether the set of
+equations directly contains number = number or obligation conditions between
+parameters of the form as contradictory awarding predicates.
+<br>The Immediate Assignment Solver searches the set of equations before
+the call linear of the Solvers for direct assignments of the form var =
+const. or const. = var and executes these immediately, so that the cost
+of computation necessary for the following Programmodule is kept as small
+as possible.
+<br>The linear Solver is a Pre and a post processor for the Macsyma function
+LINSOLVE for the simultaneous solution of linear sets of equations. The
+module extracts linear section sets of equations according to the heuristic
+algorithm described in paragraph 1,4,2 and solves the equations by call
+of LINSOLVE. The determined solutions are inserted before leaving linear
+the Solvers into the remaining equations.
+<br>The Valuation Solver is the core module of the Solvers. Its functions
+are the use of evaluation strategies for the generation of the solution
+sequences and the solution of the nonlinear equations with the help of
+the Macsyma internal SOLVE function. In the case of multiple solutions
+the Valuation Solver checks each single solution for consistency with the
+remainder set of equations. Inconsistent solutions are rejected, while
+valid solutions are inserted into the remainder set of equations and the
+appropriate solution paths separately through recursive of calls of the
+Valuation Solvers are pursued.
+<br>All for the editing of the solutions to the output to the user necessary
+step by the Solver Postprocessor are taken over. By this fall the expansion,
+of the hierarchically organized solution list supplied by the Valuation
+Solver, the back substitution of the
+<br>21
+<br>
+<br>
+22 CHAPTERS 2. The SOLVER
+<br>symbolic solutions as well as picking out, analysing and outputting
+the variables and assembled printouts asked by the user.
+<br>Solver Preprocessor:
+<br>Check of the command syntax
+<br>preprocessing the equations
+<br>consistency check
+<br>Immediate Assignment Solver:
+<br>Direct allocations look up and execute
+<br>consistency check
+<br>Linear Solver: Linear equations look up and solve
+<br>consistency check
+<br>Valuation Solver: Evaluation strategy
+<br>nonlinear equation solve
+<br>consistency check
+<br>multiple solutions apply recursively pursue
+<br>Solver Postprocessor: Back substitution
+<br>editing and output of the results
+<br>Figure 2.1: Structure of the Solvers
+<br>
+<br>
+2.2. The MODULES OF THE SOLVERS 23
+<br>2,2 The Modules of the Solvers
+<br>2,2,1 the Solver Preprocessor
+<br>SOLVER PREPROCESSOR
+<br>Check of the command syntax and semantics
+<br>structure of the internal equations, variable and parameter lists
+<br>consistency check
+<br>SolverSubstPowers = TRUE?
+<br>Search system for multiples of basic powers and replace if necessary
+<br>set variables
+<br>END
+<br>figure 2.2: Flow chart of the Solver Preprocessors
+<br>Beside the examination of the command syntax and semantics as well
+as the structure of the internal equations -, variable and parameter lists
+executes the Solver Preprocessor a consistency check of the equations,
+whose flow diagram is represented in figure 2,3. Target of the consistency
+check is it to detect from the beginning whether the set of equations is
+unsolvable due to direct contradictions. Such contradictions can occur
+to e.g. 0 = 1 in form of pure number equations, in addition, in the form
+of obligation conditions between as parameters defined symbols.
+<br>In order to uncover direct contradictions, the routine searches the
+set of equations to the consistency check for equations, which consist
+exclusively of values of the number or values of the number and parameters,
+but contain no variables.&nbsp; If a contradictory number equation is found,
+then the Solver Preprocessor aborts immediately. If such an equation is
+against it consistently, as for example 0 = 0, it is removed from the set
+of equations, since it is not the solubility and solution of the system
+influenced and thus redundant.
+<br>The handling of parameter obligation conditions is somewhat more complex.
+Assumed, the symbols A and B were defined as parameters of a set of equations,
+which contains the equation A + B = 1 (2.1).
+<br>
+<br>
+24 CHAPTERS 2. THE SOLVER
+<br>CONSISTENCY CHECK
+<br>all equations checked?
+<br>get equation from list
+<br>does the equation contain variables?
+<br>Does the equation contain only and no parameters of numbers?
+<br>Does a contradiction occur?
+<br>Does the parameter obligation condition hurt before made acceptance?
+<br>Remove redundant equation
+<br>question user about validity of the obligation condition
+<br>obligation condition of ok? ABORT
+<br>stores condition in SolverAssumptions
+<br>figure 2.3: Flow chart of the routine to the consistency check
+<br>from this condition follows that A and B are not independent parameters
+and therefore the set of equations is not solvable for any combinations
+of their values. Since conditioned inconsistencies of this type cannot
+be excluded with many technical problem definitions, it is not meaningful
+to abort the solution process in such cases easily it is, the parameters
+equation contradicts for its part again different obligation conditions
+in the set of equations. The decision, whether a parameter obligation condition
+is to be regarded as admissible, is delegated therefore by the consistency
+check to the user. In the case of the equation (2.1) the system asks in
+the following way for the validity of the condition:
+<br>Is B + A - 1 positive, negative, or zero?
+<br>Becomes the question with p; or n; (positive or negative) answers,
+then the Solver aborts. The response reads against it z; (zero), then the
+consistency check stores the obligation condition in a global list named
+SolverAssumptions, those after the Solver run examined
+<br>
+<br>
+2.2. The MODULES OF THE SOLVERS 25
+<br>will can. Subsequently, the consistency check removes the redundant
+equation from the system. 2,2,2 the Immediate Assignment Solver
+<br>IMMEDIATE ASSIGNMENT SOLVER
+<br>all equations&nbsp; searched?
+<br>Equation out of list take
+<br>variable list update
+<br>has the equation the form var=const. or const.=var?
+<br>Solutions begin
+<br>are var already in the solution list?
+<br>Consistency check
+<br>adds var=const the solution list in addition removes equation from
+the list
+<br>figure 2.4: Flow chart of the Immediate Assignment Solvers
+<br>the function of the Immediate Assignment Solvers consists of it, the
+set of equations after direct allocations of the form var = const. to search
+and to use such equations directly for the elimination of the betrenden
+variables. With by machine set up sets of equations, as for instance in
+the example 1,2, necessary cost of computation can be often reduced considerably
+by such preprocessing the equations the linear equations in linear the
+Solver, for the extraction and solution.
+<br>The Immediate Assignment Solvers filters all direct allocations in
+a loop first var = const. and const. = var from the system off and stores
+it in the form var = const. in the solution list, if a solution for var
+there is entered not already. Subsequently, the set of equations with the
+solution list is analysed and checked again for consistency.
+<br>
+<br>
+26 CHAPTERS 2. THE SOLVER
+<br>2.2.3 The linear Solver
+<br>The flow linear of the Solvers begins, as in paragraph 1.4.2 described,
+with the list of the complete coefficient matrix of the symbolic set of
+equations. On the basis this coefficient matrix the evaluation matrix is
+created, which serves for the extraction linear section set of equations.
+As long as the evaluation matrix contains still one elements, i.e. P S
+6 = 0 and P Z 6 = 0, is applied the described heuristic evaluation strategy,
+which decides on it, which nonlinear equation is removed or which in nonlinear
+sense occurring variable on the right side of the equation is brought.
+<br>If the evaluation matrix was reduced to a zero-matrix, then a list
+of the remaining (linear) equations and a list of the linear variables
+are created, which can be transferred to the Macsyma instruction LINSOLVE
+serving for the solution of linear sets of equations as function parameters.
+For efficiency increase before the call of LINSOLVE however still another
+special feature is considered, which was not mentioned during the description
+of the extraction algorithm. Occasionally it can occur that with the deleting
+of a nonlinear equation the only instance of a linear variable is removed
+at the same time xj from the entire evaluation matrix, without this was
+noticed directly. Likewise equations can develop, which are no longer nonlinear
+concerning as linear detected variables, but this variables any longer
+do not contain, i.e. the appropriate coefficients are directly zero. Therefore
+again all linear variables become before the solution of the linear subsystem
+thereupon it checks whether they are contained in the linear equations
+still, and only the subset of the extracted equations is passed on to LINSOLVE,
+which contain actually at least one of the linear variable. That would
+be linear Solver also able to solve the set of equations without these
+additional measures but frequently unnecessary cost of computation can
+be saved by it.
+<br>In paragraph 14.3 it was demonstrated that with the solve of over-certain
+linear sets of equations inconsistencies can occur, which mean not necessarily
+the insolubility of the set of equations. If such contradiction equations
+become, e.g. the right side of equation (1.71), discovers 1, then they
+are submitted, as at the beginning of the entire set of equations, of the
+consistency checking. If the contradiction equations prove as true inconsistencies,
+then the total system does not have a solution, and that linear Solver
+aborts with an appropriate error message. If the contradiction equations
+contain against it still looked up variables, then they are removed for
+the remainder set of equations from the linear set of equations and added
+as new obligation conditions. Thereupon LINSOLVE with the linear independent
+part of the equations is again called (inconsistencies to be able with
+the second run any longer not to occur).
+<br>If the linear equations were successfully solved, then the solutions
+are inserted into the remainder set of equations and the list of the looked
+up variables updates. Latter meant that all variables, for which by linear
+the Solver a solution was found it are removed from the list, while new
+variables, which are contained in these solutions, are added the list.
+<br>1 That access to the contradiction equations is from the outside not
+possible on use of the standard design LINSOLVE commands.&nbsp; Therefore
+one was necessary on Lisp level particularly modified version of the instruction,
+those by Jeffrey P. Golden, Macsyma, Inc. (the USA), on request kindly
+was made available.
+<br>
+<br>
+2.2. The MODULES OF THE SOLVERS 27
+<br>LINEAR SOLVER
+<br>complete coefficient matrix set up
+<br>evaluation matrix set up
+<br>sigma S = sigma Z = 0?
+<br>Heuristic apply: Line or column of the evaluation matrix
+<br>deletes list of the remaining equations
+<br>and variables sets up
+<br>line and column totals sigma S and sigma Z
+<br>updates linear equations with LINSOLVE solves
+<br>set of equations inconsistently?
+<br>Consistency check to right side of the extended coefficient matrix
+apply
+<br>genuine contradiction found?
+<br>Solutions into remaining equations use
+<br>variable list update
+<br>" inconsistent one " equations remove
+<br>Abort
+<br>figure 2.5: Flow chart linear of the Solvers
+<br>
+<br>
+28 CHAPTERS 2. THE SOLVER
+<br>2.2.4 The Valuation Solver
+<br>The Valuation Solver checks first whether equations and variables still
+which can be solved are available. If this is the case, then for the remaining
+equations two evaluation stencils are set up, which serve the solution
+sequence as basis for the list. Both stencils have the dimensions n*m,
+whereby n is the number of the equations and m the number of variables
+at the moment looked up. The first matrix, the variable path matrix, enhaelt
+for each equation the number of variable paths (see paragraph 1.5.2) concerning
+each variable. The second matrix is the evaluation matrix. Their items
+are calculated by the heuristic operator tree evaluations of each equation
+concerning each variable.
+<p>To these two stencils afterwards one is applied - depending whether
+a internal or user-defined&nbsp; evaluation strategy is desired, which
+arranges the pairs of equation/variables in such a way that the first items
+are in this list as promising a candidates for a following solution attempt
+as possible by means of the SOLVE instruction.
+<p>As long as yet all proposals for solution in the list and no correct
+solution for one of the suggestions were not tried be calculated could,
+on the basis the determined solution order the next equation from the equation
+list is selected and tried to solve. This succeeds not, becomes, if available,
+one or more user-defined transformation functions for the shaping of the
+equation applied and renewed in each case solution attempts made. Even
+if these are without result, the next proposal for solution is tried.
+<p>At all none of the equations is solvable after any variable more, then
+the Valuation Solver returns the unresolved equations in implicit form
+additionally to all solutions found up to this point, so that this with
+a numeric procedure can be treated possibly later. With a successful solution
+attempt all single solutions (nonlinear equations to be able multiple solutions
+to have) are checked separately for consistency with the remaining equations.
+Those solutions, which lead to contradictory predicates, are rejected and
+with them the appropriate solution path.
+<p>If check a solution does not remain after the consistency, then the
+set of equations is inconsistent, and the Valuation Solver aborts. Exactly
+if one solution remains, then this is attached to the solution list and
+inserted into the remaining equations. Finally the list of the looked up
+variables is updated, as the variable just calculated is removed from it
+and in the solution contained, new variable is if necessary added. The
+latter variables can be, which not when parameters in addition, not when
+up were looked indicated. The main solution loop of the Valuation Solvers
+begins then again from the front.
+<p>With consistent multiple solutions all solution paths must be pursued
+separately. In addition the Valuation Solver with the remaining equations
+calls itself and variables for each single solution recursively and stores
+the gotten back results in a hierarchically structured solution list. Their
+expansion is function of the Solver Postprocessors described in the next
+paragraph.
+<br>
+<br>
+2.2. The MODULES OF THE SOLVERS 29
+<br>VALUATION SOLVER
+<br>Still equations remaining?
+<br>All variables solved?
+<br>evaluation stencils set up
+<br>evaluation strategy apply, to the solution sequence generate
+<br>still proposals for solution remaining?
+<br>Equation from list unresolved
+<br>equations at solution list get attach
+<br>attempts to solve equation
+<br>solution attempt successfully?
+<br>Shaping apply?
+<br>Consistency of all single solutions
+<br>check equation transform
+<br>inconsistent solutions
+<br>reject more than one solution?
+<br>Figure 2.6: Flow chart of the Valuation Solvers (part of 1)
+<br>
+<br>
+30 CHAPTERS 2. THE SOLVER
+<br>&nbsp;all solution paths pursues?
+<br>hierarchical solution list
+<br>single solution use
+<br>variable list update
+<br>Valuation Solver update recursively call
+<p>no solution remaining?
+<br>Solution list update solution
+<br>use variable list update
+<br>Figure 2.7: Flow chart of the Valuation Solvers (part of 2)
+<br>
+<br>
+2.2. THE MODULES OF THE SOLVERS 31
+<br>2.2.5 the Solver Postprocessor
+<br>SOLVER POSTPROCESSOR
+<br>hierarchical solution list expand
+<br>unresolved equations abfiltern
+<br>back substitution required?
+<br>Back substitution
+<br>back substitution partly execute
+<br>look-ups variables and printouts with the solutions execute analyse
+<br>unresolved equations add
+<br>Figure 2.8: Flow chart of the Solver Postprocessors
+<p>The Valuation Solver in the case of multiple solutions of nonlinear
+equations because of the recursive pursuit of the solution paths a hierarchically
+structured result list as function value supplies, must do the Solver Postprocessor
+at the beginning the list hierarchy outer eyes there, so that the back
+substitution can be executed.
+<p>If not all equations could be solved within a solution path symbolically,
+then the result list contains the list of the remaining, unresolved nonlinear
+equations additionally to the variables, for which a solution was found.
+This will provisionally removed from the equation list and buffered, in
+order to the final result to be added later.
+<p>Depending upon desire of the user takes place afterwards the back substitution
+of the set of equations, which is present up to this point in time still
+in upper triangle form. In addition the solution list is analysed so long
+iterative with itself, until no modification of the results is to be registered
+more. Even if the back substition by the user, it is not required to 2
+nevertheless executed, but only so far, as necessary is, in order to eliminate
+everything in the instruction line not indicated variables from the solutions.
+Is e.g. a set of equations
+<p>2 this requires the allocation of the option variable SolverBacksubst
+with FALSE (see paragraph 2.4)
+<br>
+<br>
+32 CHAPTERS 2. THE SOLVER
+<br>in the variables x, y, z and w only after the variables x and y to
+be solve and supplies the solution process the triangle form
+<br>x = f1(y; z; w) (2.2)
+<br>y = f2(z; w) (2.3)
+<br>w = f3(z) (2.4)
+<br>z = const.; (2.5)
+<br>in such a way the complete back substitution leads to the result
+<br>x = const. (2.6)
+<br>y = const. (2.7)
+<br>With switched off complete back substitution against it the two equations
+<br>x = g(y) (2.8)
+<br>y = const. (2.9)
+<br>are returned, the internal variables z and w any longer do not contain,
+but are coupled by the variable y further among themselves.
+<br>After termination of the back substitution and the analysis of the
+assembled printouts with the solutions, indicated in the variable list
+of the command line, at the beginning of abge filtered, again to the solution
+list attached unresolved equations. The finished solution list is then
+transferred as function value to the user.
+<br>2.3 Application of the Solvers
+<br>2.3.1 Command syntax
+<br>The call of the Solvers from the Macsyma echelon of command with the
+syntax
+<br>Solver(equation list, variable list, parameter list)
+<br>or, if the set of equations which can be solved does not contain parameters,
+also with Solver(equation list, variable list).
+<br>The equation list is a list of Macsyma objects, for which EquationP
+is equal to TRUE. The set of equations (1.55)-(1.57) is thus indicated
+in the following way:
+<br>(COM5) Equations:
+<br>[
+<br>x + 2*y - z = 6,
+<br>2*x + y*z - z^2 = -1,
+<br>3*x - y + 2*z^2 = 3
+<br>] $
+<p>the unknown variables the Solver likewise indicated in form of a list,
+e.g. as
+<br>
+<br>
+2.3. APPLICATION OF THE SOLVERS 33
+<br>[ x, y, z ]
+<br>for the above-mentioned set of equations. Beside purely atomic variable
+symbols (SymbolP) the variable list may contain printouts also assembled
+in the looked up unknown quantities. For the set of equations not explicitly
+if the variables x, y and z, are looked but rather x and the value up sin(ssyz),
+then the variable list reads
+<br>[ x, sin(%pi*y*z) ].
+<br>The parameter list may against it excluding atomic symbols contain,
+thus only objects, for the SymbolP equal TRUE is. Assembled printouts are
+here neither admissible nor meaningfully.
+<p>2.3.2 Special features of the syntax of equations
+<br>Here is referred to some differences of the command syntax in the comparison
+with the admissible call forms of the Macsyma internal SOLVE function.
+The latters may be transferred the equations also to in Expression form,
+i.e. as printouts with EquationP = FALSE, which are understood implicitly
+as equations of the form Expression = 0:
+<br>[
+<br>x + 2*y - z - 6, illegally
+<br>2*x + y*z - z^2 + 1,
+<br>3*x - y + 2*z^2 - 3
+<br>] $
+<p>This form of the equation representation one uses internally, e.g. by
+the Valuation Solver, but is not not permitted it with the call of the
+Solvers in the command line. Furthermore the SOLVE function permits an
+omitting of the list brackets around the arguments, if only one equation
+and/or only one variable are to be transferred. Also this is not admissible
+with the use of the Solvers.
+<p>2.3.3 Example calls of the Solvers
+<p>Example 2.1
+<p>Of in COM5 input the set of equations a correct call of the Solvers
+is the instruction in the command line COM7. The specification of the calculated
+solutions effected in form of a list from solution lists, see output line
+D7.
+<p>(COM6) to MsgLevel: to ' DETAIL$ / * see paragraph 2,4 * /
+<p>(COM7) Solver(Equations, [ x, y, z ]);
+<p>Outputs of the Solver Preprocessors:
+<p>The variables to solved for are [ X, Y, Z ]
+<br>Checking for inconsistencies...
+<br>
+<br>
+34 CHAPTERS 2. THE SOLVER
+<p>... none found.
+<p>Outputs of the Immediate Assignment Solvers:
+<br>Searching for immediate assignments.
+<br>No immediate assignments found.
+<p>Outputs of the Linear Solvers:
+<br>Searching for linear equations...
+<br>... with respect to: [ X, Y, Z ]
+<br>Found 2 linear equations in 2 variables.
+<br>The variables to solved for are [ X, Y ]
+<br>The equations are [ - Z + 2 Y + X - 6, 2 Z^2 - Y + 3 X - 3 ]
+<br>Solving linear equations.
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4 Z^2 - Z - 12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2 Z^2 + 3 Z + 15
+<br>The solutions are [ X = - ---------------, Y = - -------------------]
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7
+<br>Searching for linear equations...
+<br>... with respect to: [ Z ]
+<br>No linear equations found.
+<br>Outputs of the Valuation Solvers:
+<br>Checking for remaining equations.
+<br>1 equation(s) and 1 variable (s) left.
+<br>The variables to solved for are [ Z ]
+<br>Trying to solve equation 1 for Z
+<p>Is not needed here a complexity evaluation,
+<br>because there is only one equation and a variable remaining.
+<br>Valuation: (irrelevant)
+<br>The equation is 2 Z^3 - 12 Z^2 + 17 Z + 31 = 0
+<br>Checking if equation was solved correctly.
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+SQRT(13) %i - 7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SQRT(13) %i +
+7
+<br>The solutions are [ Z = - -------------------, Z = ---------------------,
+Z = - 1 ]
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2
+<br>Solution is correct.
+<p>Individual consistency check with multiple solutions:
+<br>The solution is NOT unique. Tracing paths separately.
+<br>Solution 1 for Z
+<br>Checking for inconsistencies...
+<br>... none found.
+<br>Solution 2 for Z
+<br>Checking for inconsistencies...
+<br>... none found.
+<br>Solution 3 for Z
+<br>
+<br>
+2.3. APPLICATION OF THE SOLVERS 35<tt></tt>
+<p><tt>Checking for inconsistencies...</tt>
+<br><tt>... none found.</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+SQRT(13)%i - 7&nbsp;&nbsp;&nbsp;&nbsp; SQRT(13)%i + 7</tt>
+<br><tt>Consistent solutions for Z: [ Z = - --------------, Z =-------------,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Z = - 1 ]</tt>
+<br>Recursive pursuit of all three solution paths:
+<br><tt>Checking for remaining equations.</tt>
+<br><tt>All variable solved for. No equations left.</tt>
+<br><tt>Checking for remaining equations.</tt>
+<br><tt>All variable solved for. No equations left.</tt>
+<br><tt>Checking for remaining equations.</tt>
+<br><tt>All variable solved for. No equations left.</tt><tt></tt>
+<p>Outputs of the Solver Postprocessors:
+<br><tt>Post processing results.</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 27SQRT(13)%i-41&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+17SQRT(13)%i-87</tt>
+<br><tt>(D7) [[X = ---------------, Y = - ---------------,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+14</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SQRT(13)%i-7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+27SQRT(13)%i+41&nbsp;&nbsp;&nbsp;&nbsp; 17SQRT(13)%i+87</tt>
+<br><tt>Z = - ------------], [ X = - ---------------, Y =---------------,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+14</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; SQRT(13)%i+7</tt>
+<br><tt>Z = ------------], [ X = 1, Y = 2, Z = - 1 ]]</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2</tt>
+<p>To the better outline follows the result again in the TEX-record:
+<p>Example 2.2
+<br>As the second example is the set of equations parameterized in a and
+b
+<br>&nbsp;&nbsp;&nbsp; ax + y^2 = 1&nbsp; (2.13)
+<br>&nbsp;&nbsp;&nbsp; bx - y&nbsp;&nbsp;&nbsp; =&nbsp; -1 (2.14)
+<br>
+<br>
+36 CHAPTERS 2. THE SOLVER
+<br>after the variables x and y as well as zusamm the set printout x/y
+to be solve. Since the set of equations does not contain direct allocations
+and a repeated search for linear equations in this case is not meaningful,
+the Immediate Assignment Solver and the repetition loop linear of the Solvers
+with the instruction COM8 are switched off:
+<br><tt><font size=+1>(COM8) SolverImmedAssign: SolverRepeatLinear: FALSE$</font></tt>
+<br><tt><font size=+1>(COM9) ParEq: [ 3*a*x + y^2 = 1, b*x - y = -1 ] $</font></tt>
+<br><tt><font size=+1>(COM10) Solver(ParEq, [ x, y, x/y ], [ a, b ]);</font></tt><tt><font size=+1></font></tt>
+<p><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+X</font></tt>
+<br><tt><font size=+1>The variable to solved for AR [ X, -, Y ]</font></tt>
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Y</font></tt>
+<br><tt><font size=+1>The parameters are [ A, B ]</font></tt>
+<br><tt><font size=+1>Checking for inconsistencies...</font></tt>
+<br><tt><font size=+1>... none found.</font></tt>
+<br><tt><font size=+1>Trying to solve for [ X, Y ]</font></tt>
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+X</font></tt>
+<br><tt><font size=+1>in order to solve for the expression -</font></tt>
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Y</font></tt>
+<br><tt><font size=+1>Searching for linear equations...</font></tt>
+<br><tt><font size=+1>... with respect to: [ X, Y ]</font></tt>
+<br><tt><font size=+1>Found 1 linear equations in 2 variables.</font></tt>
+<br><tt><font size=+1>The variables to solved for are [ X, Y ]</font></tt>
+<br><tt><font size=+1>The equations are [ - Y + B X + 1 ]</font></tt>
+<br><tt><font size=+1>Solving linear equations.</font></tt>
+<br><tt><font size=+1>The solutions are [ Y = B X + 1 ]</font></tt><tt><font size=+1></font></tt>
+<p><tt><font size=+1>Checking for remaining equations.</font></tt>
+<br><tt><font size=+1>1 equation(s) and 1 variable (s) left.</font></tt>
+<br><tt><font size=+1>The variable to solved for are [ X ]</font></tt>
+<br><tt><font size=+1>Trying to solve equation 1 for X Valuation: (irrelevant)</font></tt>
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2 2</font></tt>
+<br><tt><font size=+1>The equation is B X + (2 B + 3 A) X = 0</font></tt>
+<br><tt><font size=+1>Checking if equation which solved correctly.</font></tt>
+<br><tt><font size=+1>2 B + 3 A</font></tt>
+<br><tt><font size=+1>The solutions are [ X = -, X = 0 ]</font></tt>
+<br><tt><font size=+1>2 B</font></tt>
+<br><tt><font size=+1>Solution is correct.</font></tt>
+<br><tt><font size=+1>The solution is not unique.</font></tt>
+<br><tt><font size=+1>Tracing paths separately.</font></tt>
+<br><tt><font size=+1>Solution 1 for X</font></tt>
+<br><tt><font size=+1>Checking for inconsistencies...</font></tt>
+<br><tt><font size=+1>... none found.</font></tt>
+<br><tt><font size=+1>Solution 2 for X</font></tt>
+<br><tt><font size=+1>Checking for inconsistencies...</font></tt>
+<br>
+<br>
+2.4. The OPTIONS OF THE SOLVERS 37
+<br><tt>... none found.</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2 B + 3 A</tt>
+<br><tt>Consistent solutions for X: [ X = - ---------, X = 0 ]</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+B</tt>
+<br><tt>Checking for remaining equations.</tt>
+<br><tt>All variable solved for. No equations left.</tt>
+<br><tt>Checking for remaining equations.</tt>
+<br><tt>All variable solved for. No equations left.</tt>
+<br><tt>Post processing results.</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2B+3A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B + 3A&nbsp; X&nbsp;&nbsp;
+2B + 3A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+X</tt>
+<br><tt>(D10) [[ X = - ------, Y = - ------, - = --------], [X = 0, Y =
+1, - = 0]]</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B&nbsp;&nbsp;&nbsp;&nbsp;
+Y&nbsp;&nbsp;&nbsp; 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Y</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+B + 3AB</tt>
+<p>2.4 The options of the Solvers
+<br>Of the Macsyma echelon of command (Macsyma toplevel) or from program
+tapes the behavior of the Solvers can be usst by the non-standard allocation
+of a set of option variable in, which is listed and described in the following.
+The standard mappings designated in the program represent the values or
+symbols indicated behind the names of the option variables in pointed parentheses,
+which are set automatically accordingly on first of the module SOLVER.
+<p>MsgLevel &lt; SHORT > (message level) controls the range of the display
+messages output during the program run. The allocations OFF, SHORT and
+DETAIL are admissible. Becomes MsgLevel: OFF set, then all program outputs
+are completely suppressed. In the case of an allocation with SHORT status
+information is only output for the pursuit of the program run. The keyword
+DETAIL against it causes additionally the output of all of the Solver modules
+calculated intermediate results and as soon as of messages over the decisions
+made due to the heuristics.
+<p>SolverImmedAssign &lt; TRUE > switches the Immediate on Assignment Solver
+(TRUE) or out (FALSE). If the module is switched on, then before the call
+linear of the Solvers the set of equations is searched for direct allocations
+of the form var = const. or const. = var, which can be inserted immediately
+into the remaining equations.
+<p>SolverRepeatImmed &lt; TRUE > determines whether the Immediate Assignment
+Solver is called repeated (TRUE), until no more direct allocations are
+found, or whether only one call takes place (FALSE).
+<p>SolverSubstPowers &lt; FALSE > (substitute powers) controls the handling
+of variables, which occur to a basic power p0 2 IN n f 1 g in powers pk
+integral multiples pk = kp0, k 2 IN. The set of equations contains e.g.
+the variable x exclusively in the powers x 2, x 4, x 6,: i.e. p0 = 2, then
+becomes with SolverSubstPowers: TRUE x p0 = x 2 by
+<br>
+<br>
+38 CHAPTERS 2. THE SOLVER
+<br>new variable symbol X2 substitutes, that thus only in the powers X2,
+X2 2, X2 3,: occurs. In this way the degree of the equations which can
+be solved and the solution variety which can be expected reduce. Is however
+if necessary a rework of the solutions necessary.
+<p>SolverInconsParams &lt; ASK > (parameter handling inconsistent) beein
+usst the behavior of the routine to the consistency check. Admissible allocations
+are ASK, BREAK and IGNORE. During the consistency if check a dependency
+between parameters is discovered, then becomes with SolverInconsParams:
+ASK of the users in demand for the validity of the appropriate obligation
+condition. This is stored with positive response for later analysis in
+the list SolverAssumptions. If dependency is not admissible or if the option
+variable with BREAK is occupied, then the solution process is aborted.
+An allocation with IGNORE arranges the consistency check to recognize basically
+all obligation conditions between parameters as valid as long as these
+directly acceptance already made do not contradict.
+<p>SolverLinear &lt; TRUE > switches linear the Solver on (TRUE) or out
+(FALSE). Switching off is recommended if the set of equations which can
+be solved does not contain linear equations or their number in relation
+to the number of the nonlinear equations is very small. In these cases
+much computing time can be saved through going around linear the Solvers,
+since the algorithm is quite complex to the search for linear equations.
+<p>SolverRepeatLinear &lt; TRUE > arranges that repeated calls linear of
+the Solvers. If the variable is set on FALSE, then that is passed through
+linear Solver only once.
+<br>SolverFindAllLinearVars &lt; TRUE > decides whether that looks linear
+Solver up for max. large linear section set of equations regarding all
+available variables (TRUE), or whether only subsystems in the variables
+are to be extracted, which are presently/immediately looked up during the
+solution process (FALSE). The allocation of the variables plays particularly
+a role if under-certain sets of equations are to be solved. Here SolverFindAllLinearVars
+should: FALSE to be set, because otherwise no solutions for the originally
+interesting variables can possibly be found due to the too small number
+of equations. With the allocation FALSE it is guaranteed that first after
+these variables it is solve and the degrees of freedom in other unknown
+quantities are expressed.
+<p>SolverValuationStrategy &lt; MinVarPathsFirst > contains the name of
+the function, which from the variable path matrix and the evaluation matrix
+a solution sequence generated (see paragraph 2,7). The call of the function
+occurs within the Valuation Solvers with:
+<p><tt>SolveOrder: Apply(</tt>
+<br><tt>SolverValuationStrategy, [ VarPathMatrix, ValuationMatrix ]</tt>
+<br><tt>)</tt>
+<p>as function value is expected a list of the form
+<p><tt>[ [ i1, j1, b1 ], [ i2, j2, b2 ], ... ]</tt>
+<p>how it was described in paragraph 1.5.2. To consider here the option
+variable is SolverMaxLenValOrder.
+<br>
+<br>
+2.4. The OPTIONS OF THE SOLVERS 39
+<br>SolverDefaultValuation &lt; 10 > determines the quality factor for
+operators, to who explicitly such a factor with the set prop. instruction
+was not assigned (see paragraph 2.6).
+<p>SolverMaxLenValOrder &lt; 5 > (maximum length OF valuation order) determines
+the max. length of the solution sequence. Even if the last proposal for
+solution in the list does not lead to success, then the Valuation Solver
+aborts the solution process, even if yet all pairs of equation/variables
+were not tried one after the other.
+<p>SolverTransforms &lt; [ ] > contains a list of the names of functions,
+which can be applied after a unsuccessful solution attempt to the betrende
+equation, in order to increase the solution chances with a renewed attempt.
+The functions are executed thereby in the order of their occurring in the
+list. After each function call directly the next solution attempt takes
+place. Even if this fails, then the next transformation in the list is
+applied, as long as to the equation could be solve or no further transformation
+is more available. Since the manipulation possibilities with the transformations
+are quite extensive, is a specification of their definition and application
+in paragraph 2.5.
+<p>SolverPostprocess &lt; TRUE > switches the Solver on Postprocessor (TRUE)
+or out (FALSE). In switched off status the hierarchical result list of
+the Solvers without rework is returned, thus without expansion, back substitution
+and extraction of the variables inquired by the user. This control variable
+serves Debug purposes primarily.
+<p>SolverBacksubst &lt; TRUE > (back substitution) determines whether the
+Solver Postprocessor is to execute a back substitution of the set of equations
+brought on triangle form (TRUE) or not (FALSE). If the calculated symbolic
+solutions are very extensive, then it is often meaningful to execute no
+complete back substitution but some the looked up variables as functions
+of other calculated unknown quantities to output.
+<p>SolverDispAllSols &lt; FALSE > (display all solutions) points, if on
+TRUE set, the Solver on to output for the termination of the solution process
+all found solutions and not only on the variables indicated by the user.
+<p>SolverRatSimpSols &lt; TRUE > (by form rationally simplifications on
+solutions) instructs the Solver Postprocessor to simplify the results before
+the output again with the instruction FullRatSimp.
+<p>SolverDumpToFile &lt; FALSE > compelled when desired (TRUE) the Valuation
+Solver to write after each successful solution attempt all gefundenden
+solutions as well as the remaining equations and variables into a Macsyma
+batch file whose name is contained in the option variable SolverDumpFile.
+This option is intended for extensive problems, in which Macsyma is inclined
+with acute lack of main and Swap memory to system crashes. At least a part
+of the results can be saved by the storage of the intermediate results
+with a crash.
+<p>SolverDumpFile &lt; " SOLVER.dmp " > contains the name of the file,
+into which the intermediate results are to be written.
+<br>
+<br>
+40 CHAPTERS 2. THE SOLVER
+<br>2.5 definition and integration of user specific transformation routines
+<br>Encounters not rarely the Valuation Solver during the solution process
+equations, which it is not able to solve, although already some simple
+shapings or summaries could help, in order the desired result to receive.
+Like that the SOLVE function is e.g. not in a the position to resolve the
+equation
+<br>x + sin^2 x + cos^2 x = 1 (2.15)
+<br>correctly after x since it does not notice that the square sine and
+Cosine terms can be combined easy into 1.
+<p>In order to be able to execute depending upon application fitting shapings
+of the equations, the dynamic integration of user-defined transformation
+functions is intended in the Solver, which are applied if necessary to
+unresolved equations. The Valuation Solver transfers among other things
+the equation and the variable to these functions, after which the equation
+is to be solve. The transformation function has now the function to transform
+and return as its function value again to the Solver the equation, so that
+a renewed solution attempt can be begun.
+<p>The call of a transformation function from the Solver occurs in the
+following way:
+<p><tt>Transform: CopyList(SolverTransforms).</tt>
+<br><tt>:</tt>
+<br><tt>SOLVER LOOP</tt>
+<br><tt>:</tt>
+<br><tt>Trans: Pop(Transform),</tt>
+<br><tt>TransEq: Apply(of trans, [ Equation, variable, Solution ])</tt>
+<br><tt>:</tt>
+<br><tt>LOOP END</tt>
+<p>Thereby contains the additionally transferred parameter Solution the
+result of the failed solution attempt, on the basis whose possibly helpful
+conclusions can be drawn. The following instruction shows an example of
+the definition of a simple, user specific transformation routine, which
+tries, to make an equation solvable by summary of trigonometric functions:
+<p><tt>TransformTrig(Equation, variable, Solution): =</tt>
+<br><tt>TrigSimp(Equation) $</tt>
+<p>For the integration of the function must be entered their name into
+the global list SolverTransforms:<tt></tt>
+<p><tt>SolverTransforms: [ ' TransformTrig ] $</tt>
+<p>Also the application of a transformation routine there to be unsuccessful
+can, exists the possibility of displaying to the Solver the failure of
+the shaping attempt by the return of an empty list ([ ]) as function value.
+In this way it is prevented that a further call of the
+<br>
+<br>
+2.5. USER SPECIFIC TRANSFORMATION ROUTINES 41
+<br>SOLVE function with the same equation takes place. Instead the Solver
+tries directly, if available, to execute the next transformation in the
+list.
+<br>When alternative to the shaping of the equation and following solution
+by the internal Solver is it a transformation routine also permitted, to
+intend the solutions for the transferred equation and return them in the
+form
+<br>[ variable = Solution_1, variable = Solution_2... ].
+<br>Possible area of application for such functions would be the application
+of numeric procedures for the solution of nonlinear equations, which contain
+only one variable and no parameters. Or, as the transformation routine
+calls a Macsyma BREAK, the equation can be manipulated by hand.
+<br>The methodology for the definition and integration of transformation
+functions with success acknowledgement is to be demonstrated in the following
+by a completely calculated example. To solve the set of equations (2.16)-(2.18)
+after the variables x, y and z. the function is quite simple in principle,
+but it causes substantial difficulties nevertheless to the Solver.
+<br>(2.16)
+<br>(2.17)
+<br>(2.18)
+<p>First the set of equations as equation list as well as the variables
+are input:
+<p><tt><font size=+1>(COM11) TrigEq:</font></tt>
+<br><tt><font size=+1>[ z - sin(x) = 0,</font></tt>
+<br><tt><font size=+1>y + z^2 + cos(x)^2 = 5,</font></tt>
+<br><tt><font size=+1>y + x = 1</font></tt>
+<br><tt><font size=+1>] $</font></tt>
+<br><tt><font size=+1>(COM12) Var: [ x, y, z]$</font></tt>
+<p>The first solution attempt is to be executed without transformation
+functions:
+<p><tt><font size=+1>(COM13) SolverTransforms: [ ] $</font></tt>
+<br><tt><font size=+1>(COM14) Solver(TrigEq, Var);</font></tt>
+<br><tt><font size=+1>The variable to solved for are [ X, Y, Z ]</font></tt>
+<br><tt><font size=+1>Checking for inconsistencies...</font></tt>
+<br><tt><font size=+1>... none found.</font></tt>
+<br><tt><font size=+1>Searching for linear equations...</font></tt>
+<br><tt><font size=+1>... with respect to: [ X, Y, Z ]</font></tt>
+<br><tt><font size=+1>Found 2 linear equations in 2 variables.</font></tt>
+<br><tt><font size=+1>The variables to solved for are [ Y, Z ]</font></tt>
+<br><tt><font size=+1>The equations are [ Z - SIN(x), Y + X - 1 ]</font></tt>
+<br>
+<br>
+42 CHAPTERS 2. THE SOLVER
+<p><tt><font size=+1>Solving linear equations.</font></tt>
+<br><tt><font size=+1>The solutions are [ Y = 1 - X, Z = SIN(x) ]</font></tt><tt><font size=+1></font></tt>
+<p><tt><font size=+1>Checking for remaining equations.</font></tt>
+<br><tt><font size=+1>1 equation(s) and 1 variable (s) left.</font></tt>
+<br><tt><font size=+1>The variable to solved for are [ X ]</font></tt>
+<br><tt><font size=+1>Trying to solve equation 1 for X Valuation: (irrelevant)</font></tt>
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2</font></tt>
+<br><tt><font size=+1>The equation is SIN (x) + COS (x) - X - 4 = 0</font></tt>
+<br><tt><font size=+1>Checking if equation was solved correctly.</font></tt>
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2</font></tt>
+<br><tt><font size=+1>The solutions are [ X = SIN (x) + COS (x) - 4 ]</font></tt>
+<br><tt><font size=+1>Solution is not correct.</font></tt>
+<br><tt><font size=+1>Cannot solve equation. Giving up.</font></tt><tt><font size=+1></font></tt>
+<p><tt><font size=+1>Post processing results.</font></tt>
+<br><tt><font size=+1>Cannot determine explicit on solution for X</font></tt>
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2</font></tt>
+<br><tt><font size=+1>(D14) [[ Y = 1 - X, Z = SIN(x), [ SIN (x) + COS (x)
+- X - 4]]]</font></tt><tt><font size=+1></font></tt>
+<p>The Solver is able to resolve in the above-mentioned case the equation
+with the square sine and Cosine terms not after the variable x and returns
+therefore the unresolved equation in implicit form as last item of the
+solution list. For the simplification of the equations now two transformation
+functions are to be defined and merged. The first transformation serves
+the summary of logarithm terms, second for the simplification of printouts,
+which contain trigonometric functions. Both functions check whether their
+application was successful and returns an empty list, if the transformation
+did not cause modification of the equation.
+<p><tt><font size=+1>(COM15) TransformLog(Equation, variable, Solution):
+= BLOCK(</font></tt>
+<br><tt><font size=+1>[ Eq ], Eq: LogContract(Equation),</font></tt>
+<br><tt><font size=+1>IF Eq = Equation THEN RETURN([ ])</font></tt>
+<br><tt><font size=+1>ELSE RETURN(Eq)</font></tt>
+<br><tt><font size=+1>) $</font></tt><tt><font size=+1></font></tt>
+<p><tt><font size=+1>(COM16) TransformTrig(Equation, variable, Solution):
+= BLOCK(</font></tt>
+<br><tt><font size=+1>[ Eq ],</font></tt>
+<br><tt><font size=+1>Eq: TrigSimp(Equation),</font></tt>
+<br><tt><font size=+1>IF Eq = Equation THEN RETURN([ ])</font></tt>
+<br><tt><font size=+1>ELSE RETURN(Eq)</font></tt>
+<br><tt><font size=+1>) $</font></tt>
+<br>
+<br>
+2.5. USER SPECIFIC TRANSFORMATION ROUTINES 43
+<br>the transformation function TransformLog may be applied basically as
+first, therefore the integration of the routines takes place in the order:
+<br><tt><font size=+1>(COM17) SolverTransforms: [ ' TransformLog, ' TransformTrig
+] $</font></tt>
+<br>now can be begun a new Solver run:
+<br><tt><font size=+1>(COM18) Solver(TrigEq, Var);</font></tt>
+<br><tt><font size=+1>The variable to solved for are [ X, Y, Z ]</font></tt>
+<br><tt><font size=+1>Checking for inconsistencies...</font></tt>
+<br><tt><font size=+1>... none found.</font></tt>
+<br><tt><font size=+1>Searching for linear equations...</font></tt>
+<br><tt><font size=+1>... with respect to: [ X, Y, Z ]</font></tt>
+<br><tt><font size=+1>Found 2 linear equations in 2 variable.</font></tt>
+<br><tt><font size=+1>The variable to solved for are [ Y, Z ]</font></tt>
+<br><tt><font size=+1>The equations are [ Z - SIN(x), Y + X - 1 ]</font></tt>
+<br><tt><font size=+1>Solving linear equations.</font></tt>
+<br><tt><font size=+1>The solutions are [ Y = 1 - X, Z = SIN(x) ]</font></tt>
+<br><tt><font size=+1>Checking for remaining equations.</font></tt>
+<br><tt><font size=+1>1 equation(s) and 1 variable (s) left.</font></tt>
+<br><tt><font size=+1>The variable to solved for are [ X ]</font></tt>
+<br><tt><font size=+1>Trying to solve equation 1 for X Valuation: (irrelevant)</font></tt>
+<br><tt><font size=+1>The equation is SIN (x) + COS (x) - X - 4 = 0</font></tt>
+<br><tt><font size=+1>Checking if equation which solved correctly.</font></tt>
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2</font></tt>
+<br><tt><font size=+1>The solutions are [ X = SIN (x) + COS (x) - 4 ]</font></tt>
+<br><tt><font size=+1>Solution is not correct.</font></tt>
+<p>Here the Solver determines as in the preceded case the fact that it
+cannot solve the equation and applies the first transformation in the list
+to it.<tt><font size=+1></font></tt>
+<p><tt><font size=+1>Applying transformation TRANSFORMLOG</font></tt>
+<br><tt><font size=+1>transformation failed.</font></tt><tt><font size=+1></font></tt>
+<p>Since the equation does not contain logarithmic functions, the shaping
+attempt is not successful. Therefore the second transformation routine
+is tried.
+<p><tt><font size=+1>Applying transformation TRANSFORMTRIG</font></tt>
+<br><tt><font size=+1>The transformation yields - X - 3 = 0</font></tt>
+<br><tt><font size=+1>Retrying with transformed equation.</font></tt>
+<br><tt><font size=+1>Checking if equation which solved correctly.</font></tt>
+<br><tt><font size=+1>The solutions are [ X = - 3 ]</font></tt>
+<br><tt><font size=+1>Solution is correct.</font></tt>
+<br>
+<br>
+44 CHAPTERS 2. THE SOLVER
+<br><tt><font size=+1>Solution 1 for X</font></tt>
+<br><tt><font size=+1>Checking for inconsistencies...</font></tt>
+<br><tt><font size=+1>... none found. Consistent solutions for X: [ X =
+- 3 ]</font></tt>
+<br><tt><font size=+1>Checking for remaining equations.</font></tt>
+<br><tt><font size=+1>All variable solved for. No equations left. Post
+processing results.</font></tt>
+<br><tt><font size=+1>(D18) [ [ X = - 3, Y = 4, Z = - SIN(3)]]</font></tt>
+<p>the transformation function TransformTrig succeeds the summary to the
+equation, so that the Solver is following able, to intend the correct solution
+for the variable x.
+<br>2.6 Modification of the operator evaluations
+<br>Over the user of the Solvers the possibility for the non-standard influence
+of the heuristic complexity evaluation of algebraic printouts to give,
+is stored the evaluations of the arithmetic operators not as unchangeable
+constants, but as Macsyma of properties under the keyword Valuation. The
+definition of a quality factor takes place with the instruction<tt><font size=+1></font></tt>
+<p><tt><font size=+1>SetProp(operator, ' Valuation, quality factor) $.</font></tt>
+<p>The standard mappings of the quality factors pre-defined in the Solver
+became with the instruction<tt><font size=+1></font></tt>
+<p><tt><font size=+1>SetProp(' sin, ' Valuation, 10) $</font></tt>
+<br><tt><font size=+1>SetProp(' cos, ' Valuation, 10) $</font></tt>
+<br><tt><font size=+1>SetProp(' tan, ' Valuation, 10) $</font></tt>
+<br><tt><font size=+1>SetProp(' asin, ' Valuation, 12) $</font></tt>
+<br><tt><font size=+1>SetProp(' acos, ' Valuation, 12) $</font></tt>
+<br><tt><font size=+1>SetProp(' atan, ' Valuation, 12) $</font></tt>
+<br><tt><font size=+1>SetProp(' sinh, ' Valuation, 12) $</font></tt>
+<br><tt><font size=+1>SetProp(' cosh, ' Valuation, 12) $</font></tt>
+<br><tt><font size=+1>SetProp(' tanh, ' Valuation, 12) $</font></tt>
+<br><tt><font size=+1>SetProp(' asinh, ' Valuation, 12) $</font></tt>
+<br><tt><font size=+1>SetProp(' acosh, ' Valuation, 12) $ 10) $</font></tt>
+<br>
+<br>
+2.7. USER SPECIFIC EVALUATION STRATEGIES 45
+<br>determined. E.g. if the evaluation of the tanh operator on 20 is to
+be modified, then this can be achieved at any time by
+<br>SetProp(' tanh, ' Valuation, 20) $.
+<br>A quality factor with the GET command leaves itself queries:
+<br>Get(operator, ' Valuation);
+<br>Example: The evaluation " * " - operator determined through:
+<br>(COM19) Get("* ", ' Valuation);
+<br>(D19) 4
+<br>if the query as result the value FALSE it supplies then this means
+that no quality factor for the operator concerned was defined.
+<br>2,7 definition and integration of user specific evaluation strategies
+of means of a Umbelegung of the procedure variable SolverValuationStrategy
+the Valuation Solver is arranged to use in place of the internal function
+a user-defined evaluation strategy to the determination of the solution
+sequence. The function become by their call with
+<br>SolveOrder: Apply(SolverValuationStrategy, [ VarPathMatrix, ValuationMatrix
+])
+<br>two evaluation stencils, which transfer variable path matrix and the
+complexity evaluation matrix, their line dimension equal the number of
+the equations and their column dimension equal the number of variables
+which can be determined is.
+<br>The entry at the position (i; j) of the variable path matrix corresponds
+to the number of paths to the instances the variable xj in equation i (see
+paragraph 1,5,2). The complexity evaluation matrix contains at the position
+(i; j) the complexity evaluation of the equation i regarding the variables
+xj. For the set of equations (1.55) - (1.57) the path matrix reads thus
+<br>2 6 4 x y z (1:55) 1 1 1 (1:56) 1 1 2 (1:57) 1 1 1 3 7 5;
+<br>and the evaluation matrix on use of the standard operator quality factors
+calculated to
+<br>2 6 4 x y z (1:55) 1 4 1 (1:56) 4 4 14 (1:57) 4 1 40 3 7 5:
+<br>
+<br>
+46 CHAPTERS 2. The SOLVER
+<br>from these stencils must generate the evaluation strategy a solution
+sequence (see paragraph 1,5,2) in the form
+<br>[ [ i1, j1, b1 ], [ i2, j2, b2 ]... ].
+<br>The max. length of the list should not be larger thereby than the value
+of the option variables SolverMaxLenValOrder.
+<br>The basic structure of an evaluation strategy is shown by the following
+pseudocode:
+<br>MyValuationStrategy(PathMat, ValMat): = BLOCK(generates a solution
+order from the evaluation strategy.
+<br>limits the length of the list to SolverMaxLenValOrder of items RETURN(the
+solution sequence)) $
+<p>for the integration of the function is afterwards the procedure variable
+SolverValuationStrategy with the function name to be occupied:
+<br>SolverValuationStrategy: ' MyValuationStrategy$
+<br>
+<br>
+BIBLIOGRAPHY [ADA 79] D. Adams, The Hitchhiker's Guide to the Galaxy, London:
+Pan Books, 1979
+<br>[BRO 88] E. Brommundt, G. Sachs, Technische Mechanik | Eine Einf&uuml;hrung,
+Berlin: Springer Verlag, 1988
+<br>[FOU 92] L. R. Foulds, Graph Theory Applications, Berlin, New York,
+Tokyo: Springer Verlag, 1992
+<br>[HEN 93] E. Hennig, \Mathematische Grundlagen und Implementation eines
+symbolischen Matrixapproximationsalgorithmus mit quantitativer Fehlervorhersage",
+Diplomar- beit am Institut f&uuml;r Netzwerktheorie und Schaltungstechnik,
+Technische Universit&auml;t Braunschweig, August 1993
+<br>[MAC 94] Macsyma Inc., Macsyma Reference Manual V14, Arlington, 1994
+<br>[MIC 94] Z. Michalewicz, Genetic Algorithms + Data Structures = Evolution
+Programs, Berlin, New York, Tokyo: Springer Verlag, 1994
+<br>[N&Uuml;H 89] D. N&uuml;hrmann, Professionelle Schaltungstechnik, M&uuml;nchen:
+Franzis Verlag, 1989
+<br>[PFA 94] J. Pfalzgraf, \Some Robotics Benchmarks for Computer Algebra",
+Vortrag auf der GAMM-Jahrestagung 1994, Braunschweig, April 1994
+<br>[SOM 93a] R. Sommer, \Konzepte und Verfahren zum rechnergest&uuml;tzten
+Entwurf analoger Schaltungen", Dissertation am Institut f&uuml;r Netzwerktheorie
+und Schaltungstechnik, Technische Universit&auml;t Braunschweig, Juli 1993
+<br>[SOM 93b] R. Sommer, E. Hennig, G. Dr&ouml;ge, E.-H. Horneber, \Equation-based
+Symbolic Approximation by Matrix Reduction with Quantitative Error Prediction",
+Alta Frequenza | Rivista di Elettronica, Vol. 5, No. 6, Dez. 1993, S. 29
+{ 37 [TRI 91] H. Trispel, \Symbolische Schaltungsanalyse mit Macsyma",
+Studienarbeit am In- stitut f&uuml;r Netzwerktheorie und Schaltungstechnik,
+Technische Universit&auml;t Braun- schweig, Juli 1991 [WOL 91] S. Wolfram,
+Mathematica | A System for Doing Mathematics by Computer, Addi- son Wesley,
+1991 47
+<br>
+<br>
+48 BIBLIOGRAPHYAppendix A example calculations A.1 sizing of the staff two-impact solve for the demonstration of the efficiency of the Solvers finally the Beipiel stated in the introduction gave up 1,1 and 1,2.  In the following are the complete display outputs of the two program runs.  (COM1)  Two-impact:  [ F*cos(gamma) - S1*cos(alpha) - S2*cos(beta) = 0, F*sin(gamma) - S1*sin(alpha) + S2*sin(beta) = 0, Delta_l1 = l1*S1/(E*A1), Delta_l2 = l2*S2/(E*A2), l1 = c/cos(alpha), l2 = c/cos(beta), a = Delta_l2/sin(alpha+beta), b = Delta_l1/sin(alpha+beta), u = a*sin(alpha) + b*sin(beta), w = a*cos(alpha) + b*cos(beta), A1 = h1^2, a2 = h2^2 ] $ (COM2) staff dimensions:  [ h1, h2]$ (COM3) two-impact parameter:  [ alpha, beta, gamma, F, c, E, u, w]$ (COM4) SolverRepeatImmed:  SolverRepeatLinear:  FALSE$ (COM5) MsgLevel:  ' DETAIL$ (COM6) Solver(two-impact, staff dimensions, two-impact parameters);  The variable to solved for AR [ H1, H2 ] The of parameter of AR [ ALPHA, BETA, C, E, F, U, W, GAMMA ] 49
+50 APPENDIX A. EXAMPLE CALCULATIONS
+Checking for inconsistencies...
+... none found.
+Searching for immediate assignments.
+C
+Assigning L1 = ----------
+COS(ALPHA)
+C
+Assigning L2 = ---------
+COS(BETA)
+Checking for inconsistencies...
+... none found.
+Searching for linear equations...
+...with respect to: [H1, H2, A, A1, A2, B, DELTA_L1, DELTA_L2, S1, S2]
+Found 7 linear equations in 7 variables.
+The variables to be solved for are [A, A1, B, DELTA_L1, DELTA_L2, S1, S2]
+The equations are [F COS(GAMMA) - COS(BETA) S2 - COS(ALPHA) S1,
+F SIN(GAMMA) + SIN(BETA) S2 - SIN(ALPHA) S1,
+A SIN(BETA + ALPHA) - DELTA_L2, B SIN(BETA + ALPHA) - DELTA_L1,
+2
+U - B SIN(BETA) - A SIN(ALPHA), W - B COS(BETA) + A COS(ALPHA), A1 - H1 ]
+Solving linear equations.
+COS(BETA) U - SIN(BETA) W
+The solutions are [A = -------------------------------------------,
+COS(ALPHA) SIN(BETA) + SIN(ALPHA) COS(BETA)
+2 SIN(ALPHA) W + COS(ALPHA) U
+A1 = H1 , B = -------------------------------------------,
+COS(ALPHA) SIN(BETA) + SIN(ALPHA) COS(BETA)
+DELTA_L1 = (SIN(ALPHA) SIN(BETA + ALPHA) W
++ COS(ALPHA) SIN(BETA + ALPHA) U)/(COS(ALPHA) SIN(BETA)
++ SIN(ALPHA) COS(BETA)), DELTA_L2 =
+COS(BETA) SIN(BETA + ALPHA) U - SIN(BETA) SIN(BETA + ALPHA) W
+-------------------------------------------------------------,
+COS(ALPHA) SIN(BETA) + SIN(ALPHA) COS(BETA)
+COS(BETA) F SIN(GAMMA) + SIN(BETA) F COS(GAMMA)
+S1 = -----------------------------------------------,
+COS(ALPHA) SIN(BETA) + SIN(ALPHA) COS(BETA)
+SIN(ALPHA) F COS(GAMMA) - COS(ALPHA) F SIN(GAMMA)
+S2 = -------------------------------------------------]
+
+A.1.  SIZING of the STAFF TWO-IMPACT 51
+COS(ALPHA) SIN(BETA) + SIN(ALPHA) COS(BETA)
+Checking for inconsistencies...
+... none found.
+Checking for remaining equations.
+3 equation(s) and 2 variable(s) left.
+The variables to be solved for are [H1, H2]
+Applying valuation strategy.
+Trying to solve equation 3 for H2
+Valuation: 10
+2
+The equation is A2 - H2 = 0
+Checking if equation was solved correctly.
+The solutions are [H2 = - SQRT(A2), H2 = SQRT(A2)]
+Solution is correct.
+The solution is not unique. Tracing paths separately.
+Solution 1 for H2
+Checking for inconsistencies...
+... none found.
+Solution 2 for H2
+Checking for inconsistencies...
+... none found.
+Consistent solutions for H2 : [H2 = - SQRT(A2), H2 = SQRT(A2)]
+Checking for remaining equations.
+2 equation(s) and 2 variable(s) left.
+The variables to be solved for are [A2, H1]
+Applying valuation strategy.
+Trying to solve equation 2 for A2
+Valuation: 8
+The equation is COS(ALPHA) C F SIN(GAMMA) - SIN(ALPHA) C F COS(GAMMA)
+- A2 COS(BETA) SIN(BETA) SIN(BETA + ALPHA) E W
+2
++ A2 COS (BETA) SIN(BETA + ALPHA) E U = 0
+Checking if equation was solved correctly.
+The solutions are [A2 = (COS(ALPHA) C F SIN(GAMMA)
+- SIN(ALPHA) C F COS(GAMMA))/(COS(BETA) SIN(BETA) SIN(BETA + ALPHA) E W
+2
+- COS (BETA) SIN(BETA + ALPHA) E U)]
+Solution is correct.
+Solution 1 for A2
+Checking for inconsistencies...
+... none found.
+Consistent solutions for A2 : [A2 = (COS(ALPHA) C F SIN(GAMMA)
+- SIN(ALPHA) C F COS(GAMMA))/(COS(BETA) SIN(BETA) SIN(BETA + ALPHA) E W
+
+52 APPENDIX A. EXAMPLE CALCULATIONS 2 - COS (BETA) SIN(beta + ALPHA) E U) ] Checking for remaining equations.  1 equation(s) and 1 variable (s) left.  The variable to solved for AR [ H1 ] Trying to solve equation 1 for H1 Valuation:  (irrelevant) The equation is - COS(beta) C F SIN(gamma) - SIN(beta) C F COS(gamma) 2 + COS(alpha) SIN(alpha) SIN(beta + ALPHA) E H1 W 2 2 + COS (ALPHA) SIN(beta + ALPHA) E H1 U = 0 Checking if equation which solved correctly.  The solutions AR [ H1 = - SQRT(cos(beta) C F SIN(gamma) / (COS(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U) + SIN(beta) C F COS(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U)), H1 = SQRT(cos(beta) C F SIN(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) 2 E W + COS (ALPHA) SIN(beta + ALPHA) E U) + SIN(beta) C F COS(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U)) ] Solution is correct.  The solution is NOT unique.  Tracing paths separately.  Solution 1 for H1 Checking for inconsistencies...... none found.  Solution 2 for H1 Checking for inconsistencies...... none found.  Consistent solutions for H1:  [ H1 = - SQRT(cos(beta) C F SIN(gamma) / (COS(alpha) SIN(alpha) SIN(beta + ALPHA) E W
+A.1.  SIZING of the STAFF TWO-IMPACT 53 2 + COS (ALPHA) SIN(beta + ALPHA) E U) + SIN(beta) C F COS(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U)), H1 = SQRT(cos(beta) C F SIN(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) 2 E W + COS (ALPHA) SIN(beta + ALPHA) E U) + SIN(beta) C F COS(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U)) ] Checking for remaining equations.  All variable solved for.  NO equations left.  Checking for remaining equations.  All variable solved for.  NO equations left.  Checking for remaining equations.  2 equation(s) and 2 variable (s) left.  The variable to solved for AR [ a2, H1 ] Applying valuation strategy.  Trying to solve equation 2 for a2 Valuation:  8 The equation is COS(alpha) C F SIN(gamma) - SIN(alpha) C F COS(gamma) - a2 COS(beta) SIN(beta) SIN(beta + ALPHA) E W 2 + a2 COS (BETA) SIN(beta + ALPHA) E U = 0 Checking if equation which solved correctly.  The solutions AR [ a2 = (COS(alpha) C F SIN(gamma) - SIN(alpha) C F COS(gamma))/(cos(beta) SIN(beta) SIN(beta + ALPHA) E W 2 - COS (BETA) SIN(beta + ALPHA) E U) ] Solution is correct.  Solution 1 for a2 Checking for inconsistencies...... none found.  Consistent solutions for a2:  [ A2 = (COS(alpha) C F SIN(gamma) - SIN(alpha) C F COS(gamma))/(cos(beta) SIN(beta) SIN(beta + ALPHA) E W
+ 54 APPENDIX A. EXAMPLE CALCULATIONS 2 - COS (BETA) SIN(beta + ALPHA) E U) ] Checking for remaining equations.  1 equation(s) and 1 variable (s) left.  The variable to solved for AR [ H1 ] Trying to solve equation 1 for H1 Valuation:  (irrelevant) The equation is - COS(beta) C F SIN(gamma) - SIN(beta) C F COS(gamma) 2 + COS(alpha) SIN(alpha) SIN(beta + ALPHA) E H1 W 2 2 + COS (ALPHA) SIN(beta + ALPHA) E H1 U = 0 Checking if equation which solved correctly.  The solutions AR [ H1 = - SQRT(cos(beta) C F SIN(gamma) / (COS(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U) + SIN(beta) C F COS(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U)), H1 = SQRT(cos(beta) C F SIN(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) 2 E W + COS (ALPHA) SIN(beta + ALPHA) E U) + SIN(beta) C F COS(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U)) ] Solution is correct.  The solution is NOT unique.  Tracing paths separately.  Solution 1 for H1 Checking for inconsistencies...... none found.  Solution 2 for H1 Checking for inconsistencies...... none found.  Consistent solutions for H1:  [ H1 = - SQRT(cos(beta) C F SIN(gamma) / (COS(alpha) SIN(alpha) SIN(beta + ALPHA) E W
+<br>
+<br>
+A.1. SIZING of the STAFF TWO-IMPACT 55 2 + COS (ALPHA) SIN(beta + ALPHA)
+E U) + SIN(beta) C F COS(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA)
+E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U)), H1 = SQRT(cos(beta) C F SIN(gamma)/(cos(alpha)
+SIN(alpha) SIN(beta + ALPHA) 2 E W + COS (ALPHA) SIN(beta + ALPHA) E U)
++ SIN(beta) C F COS(gamma)/(cos(alpha) SIN(alpha) SIN(beta + ALPHA) E W
+2 + COS (ALPHA) SIN(beta + ALPHA) E U)) ] Checking for remaining equations.
+All variable solved for. NO equations left. Checking for remaining equations.
+All variable solved for. NO equations left. Post processing results. (D6)
+[ [ H1 = - SQRT((cos(beta) C F SIN(gamma) + SIN(beta) C F COS(gamma)) /
+(COS(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta +
+ALPHA) E U)), H2 = - SQRT((sin(alpha) C F COS(gamma) - COS(alpha) C F SIN(gamma))
+2 / (COS (BETA) SIN(beta + ALPHA) E U - COS(beta) SIN(beta) SIN(beta +
+ALPHA) E W)) ], [ H1 = SQRT((cos(beta) C F SIN(gamma) + SIN(beta) C F COS(gamma))
+/ (COS(alpha) SIN(alpha) SIN(beta + ALPHA) E W 2 + COS (ALPHA) SIN(beta
++ ALPHA) E U))
+<br>
+<br>
+56 APPENDIX A. EXAMPLE CALCULATIONS E W)) ], [ H1 = - SQRT((cos(beta) C
+F SIN(gamma) + SIN(beta) C F COS(gamma)) / (COS(alpha) SIN(alpha) SIN(beta
++ ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA) E U)), H2 = SQRT((sin(alpha)
+C F COS(gamma) - COS(alpha) C F SIN(gamma)) 2 / (COS (BETA) SIN(beta +
+ALPHA) E U - COS(beta) SIN(beta) SIN(beta + ALPHA) E W)) ], [ H1 = SQRT((cos(beta)
+C F SIN(gamma) + SIN(beta) C F COS(gamma)) / (COS(alpha) SIN(alpha) SIN(beta
++ ALPHA) E W 2 + COS (ALPHA) SIN(beta + ALPHA
+<br>only by the combination of their signs differentiate. Due to the physical
+boundary condition that the lengths
+<br>h1 and h2 cannot take negative values, it is only the last solution
+meaningful:
+<br>h1 = s cos fi F sin + sin fi F cos cos sin sin (fi + Ew+ cos 2 sin
+(fi + E u (A.1) h2 = sh2 = s sin F cos sin F cos
+<br>
+<br>
+A.2.  SIZING of the TRANSISTOR AMPLIFIER 57 A.2 sizing of the transistor amplifier (COM7) amplifier:  [ -v_v1+v_r1+v_oc_1+v_fix2_q1 = 0, -v_v1+v_r2+v_oc_1+v_i1+v_fix2_q1 = 0, -v_v1+v_oc_1+v_i1+v_fix2_q2+v_fix2_q1-v_fix1_q2-v_fix1_q1 = 0, V_v1-v_r6+v_r3-v_oc_1-v_i1-v_fix2_q1+v_fix1_q1 = 0, -v_v1+v_r7+v_r4+v_oc_1+v_i1-v_fix1_q2 = 0, -v_v1+v_r7+v_r5+v_oc_1 = 0, V_oc_2-v_i1+v_fix1_q2 = 0, v_v_cc-v_v1+v_r6+v_oc_1+v_fix2_q1-v_fix1_q1 = 0, I_v1+i_oc_1 = 0, i_r7-i_oc_1+i_fix2_q1 = 0, i_r2+i_r1-i_fix2_q1-i_fix1_q1 = 0, I_r6+i_fix2_q2+i_fix1_q1 = 0, -i_r7+i_r5+i_r4 = 0, -i_r4+i_oc_2-i_fix2_q2-i_fix1_q2 = 0, i_r3-i_r2+i_i1+i_fix1_q2 = 0, I_v_cc-i_r6-i_r3 = 0, v_v1 = 0, i_i1 = 0, i_oc_1 = 0, v_fix1_q1 = 2,72, V_fix2_q1 = 0,607, i_r1*r1-v_r1 = 0, i_r7*r7-v_r7 = 0, i_r2*r2-v_r2 = 0, I_r6*r6-v_r6 = 0, v_fix1_q2 = 6,42, v_fix2_q2 = 0,698, i_r3*r3-v_r3 = 0, I_r4*r4-v_r4 = 0, i_r5*r5-v_r5 = 0,  [ g 1, R2, R3, R4, R5, R6, R7]$ (COM9) Design parameter:  [ VCC, A, ZIN, ZOUT]$ (COM10) SolverRepeatImmed:  SolverRepeatLinear:  TRUE$ (COM11) Solver(amplifier, resistances, Design parameters);  The variable to solved for AR [ g 1, R2, R3, R4, R5, R6, R7 ] The of parameter of AR [ A, VCC, ZIN, ZOUT ] Checking for inconsistencies...... none found.  Searching for immediate assignments.  Assigning V_v1 = 0 Assigning I_i1 = 0 Assigning I_oc_1 = 0 68 Assigning V_fix1_q1 = -- 25,607 Assigning V_fix2_q1 = --- 1000 321 Assigning V_fix1_q2 = -- 50
+58 APPENDIX A. EXAMPLE CALCULATIONS 349 Assigning V_fix2_q2 = -- 500 Assigning I_oc_2 = 0 Assigning V_v_cc = VCC 111 Assigning I_fix1_q1 = ------ 1000000 5 Assigning I_fix2_q1 = ------ 8695637 401 Assigning I_fix1_q2 = ----- 100000 25 Assigning I_fix2_q2 = ------ 1984127 Assigning R7 = ZIN Checking for inconsistencies...... none found.  Searching for immediate assignments.  Assigning I_v1 = 0 Checking for inconsistencies...... none found.  Searching for immediate assignments.  NO immediate assignments found.  Searching for linear equations...... with respect to:  [ g 1, R2, R3, R4, R5, R6, I_r1, I_r2, I_r3, I_r4, I_r5, I_r6, I_r7, I_v_cc, V_i1, V_oc_1, V_oc_2, V_r1, V_r2, V_r3, V_r4, V_r5, V_r6, V_r7 ] Found 18 linear equations in 18 variable.  The variable to solved for AR [ I_r1, I_r2, I_r3, I_r4, I_r5, I_r6, I_r7, I_v_cc, V_i1, V_oc_1, V_oc_2, V_r1, V_r2, V_r3, V_r4, V_r5, V_r6, V_r7 ] The equations AR [ 1000 V_r1 + 1000 V_oc_1 + 607, 1000 V_r2 + 1000 V_oc_1 + 1000 V_i1 + 607, 200 V_oc_1 + 200 V_i1 - 1567, - 1000 V_r6 + 1000 V_r3 - 1000 V_oc_1 - 1000 V_i1 + 2113, 50 V_r7 + 50 V_r4 + 50 V_oc_1 + 50 V_i1 - 321, V_r7 + V_r5 + V_oc_1, 50 V_oc_2 - 50 V_i1 + 321, 1000 V_r6 +
+A.2.  SIZING of the TRANSISTOR AMPLIFIER 59 8695637 I_r7 + 5, 8695637000000 I_r2 + 8695637000000 I_r1 - 970215707, 1984127000000 I_r6 + 245238097, - I_r7 + I_r5 + I_r4, - 198412700000 I_r4 - 798134927, 100000 I_r3 - 100000 I_r2 + 401, I_v_cc - I_r6 - I_r3, I_r7 ZIN - V_r7 ] Solving linear equations.  8695637000000 I_r3 + 33899288663 The solutions AR [ I_r1 = -, 8695637000000 100000 I_r3 + 401 798134927 I_r2 =, I_r4 = -, 100000 198412700000 6939299538713499 245238097 5 I_r5 =, I_r6 = -, I_r7 = -, 1725324815389900000 1984127000000 8695637 1984127000000 I_r3 - 245238097 200 V_oc_1 - 1567 I_v_cc =, V_i1 = -, 1984127000000 200,200 V_oc_1 - 283 1000 V_oc_1 + 607 4221 V_oc_2 = -, V_r1 = -, V_r2 = -, 200 1000 500,200 V_oc_1 + 200 VCC - 1567 1000 ZIN - 2460865271 V_r3 = -, V_r4 =, 200 1739127400 8695637 V_oc_1 - 5 ZIN 1000 V_oc_1 + 1000 VCC - 2113 V_r5 = -,  Searching for linear equations...... with respect to:  [ I_r3, g 1, R2, R3, R4, R5, R6, V_oc_1 ] Found 6 linear equations in 5 variable.  The variable to solved for AR [ R2, R4, R5, R6, V_oc_1 ] The equations AR [ 8695637000000 V_oc_1 - 8695637000000 I_r3 g 1 - 33899288663 g 1 + 5278251659000, 1984127000000 V_oc_1 + 1984127000000 VCC
+60 APPENDIX A. EXAMPLE CALCULATIONS - 245238097 R6 - 4192460351000, 200 V_oc_1 + 200 VCC + 200 I_r3 R3 - 1567, - 992063500000 ZIN - 6940291602213499 R4 + 2441334613776708500, - 992063500000 ZIN + 1725324815389900000 V_oc_1 + 6939299538713499 R5, 145309663773 A g 1 - 145303681853 R2 ] Solving linear equations.  Checking for inconsistencies...... none found.  145309663773 A g 1 The solutions AR [ R2 =, 145303681853 992063500000 ZIN - 2441334613776708500 R4 = -, 6940291602213499 R5 = - (- 9920635000000 ZIN + (17253248153899000000 I_r3 + 67260493917052201) g 1 - 10472721629416693000)/69392995387134990, R6 = (17253248153899000000 VCC + (17253248153899000000 I_r3 + 67260493917052201) g 1 - 46928834978605280000)/2132501470082789, (8695637000000 I_r3 + 33899288663) g 1 - 5278251659000 V_oc_1 = ] 8695637000000 Checking for inconsistencies...... none found.  Searching for linear equations...... with respect to:  [ I_r3, g 1, R3 ] NO linear equations found.  Checking for remaining equations.  3 equation(s) and 3 variable (s) left.  The variable to solved for AR [ I_r3, g 1, R3 ] Applying valuation strategy.  Trying to solve equation 1 for I_r3 Valuation:  4 The equation is 14530966377300000 A I_r3 g 1 + 58269175172973 A g 1 + 122665368220302600 = 0 Checking if equation which solved correctly.  6474352796997 A g 1 + 13629485357811400 The solutions AR [ I_r3 = - ] 1614551819700000 A g 1
+A.2.  SIZING of the TRANSISTOR AMPLIFIER 61 Solution is correct.  Solution 1 for I_r3 Checking for inconsistencies...... none found.  Consistent solutions for I_r3:  [ I_r3 = 6474352796997 A g 1 + 13629485357811400 - ] 1614551819700000 A g 1 Checking for remaining equations.  2 equation(s) and 2 variable (s) left.  The variable to solved for AR [ g 1, R3 ] Applying valuation strategy.  Trying to solve equation 1 for R3 Valuation:  20 The equation is - g 1 (- 16062755182397110876073408478539448677201569671148 # 116383372395290156600000000 A VCC + 64411648281412414613054367998943189195 # 578294381303946697323305113527966000 A R3 + 135601779249796410015811714375 # 830025732935651163832398508429761039502017200000 A + 135596196971410595846 # 324806740533400875556129557784494104259093864172929200000) - 1355961969714 # 10595846324806740533400875556129557784494104259093864172929200000 R3 - 179 # 2201925592952751292050414582157181324535016813917972727234536207382600 A 2 g 1 = 0 Checking if equation which solved correctly.  The solutions AR [ R3 = (140395565418006489000000 A g 1 VCC 2 - 15664635352383720279 A g 1 + (- 1185219363258810780138000 A - 1185170571683430488618000) R1)/(562986217326206020890 A g 1 + 1185170571683430488618000) ] Solution is correct.  Solution 1 for R3 Checking for inconsistencies...... none found.  Consistent solutions for R3:  [ R3 = (140395565418006489000000 A G 1 VCC 2 - 15664635352383720279 A G 1 + (- 1185219363258810780138000 A
+62 APPENDIX A. EXAMPLE CALCULATIONS - 1185170571683430488618000) R1)/(562986217326206020890 A g 1 + 1185170571683430488618000) ] Checking for remaining equations.  1 equation(s) and 1 variable (s) left.  The variable to solved for AR [ g 1 ] Trying to solve equation 1 for g 1 Valuation:  (irrelevant) The equation is g 1 (19841637776253069394020865409024 ZOUT - 243498222421608533966015625 A ZIN) 2 - 57259002716458635629644396416 A g 1 = 0 Checking if equation which solved correctly.  The solutions AR [ g 1 = 19841637776253069394020865409024 ZOUT - 243498222421608533966015625 A ZIN, 57259002716458635629644396416 A g 1 = 0 ] Solution is correct.  The solution is NOT unique.  Tracing paths separately.  Solution 1 for g 1 Checking for inconsistencies...... none found.  Solution 2 for g 1 Checking for inconsistencies...... none found.  Consistent solutions for g 1:  [ g 1 = 19841637776253069394020865409024 ZOUT - 243498222421608533966015625 A ZIN, 57259002716458635629644396416 A g 1 = 0 ] Checking for remaining equations.  All variable solved for.  NO equations left.  Checking for remaining equations.  All variable solved for.  NO equations left.  Post office processing results.  (D11) [ [ G 1 = - (243498222421608533966015625 A ZIN - 19841637776253069394020865409024 ZOUT)
+A.2.  SIZING OF THE TRANSISTOR AMPLIFIER 63 / (57259002716458635629644396416 A), R2 = 1493854125285941926171875 A ZIN - 121727839118116990147367272448 ZOUT -, 351267764122759016747201152 R3 = (334763184724568105702258732451550460395708593115792893559436793085952 2 ZOUT + VCC 2 (106256457337115768692100530787195899963103895496024350000000000000 A ZIN - 8658388208766832396126274743883820688291739892383476917089599488000000 A ZOUT) + A (73094113258409599088098011387867214250558868171501312134070398877696000 ZOUT + ZIN (- 8216483067762383568115091483320660991714242249851965644800000000 ZOUT - 896980085605567678321894471091892803815897329518698154700000000000)) + 73091104214643137701992515955008538217110816411520639295650692857856000 2 ZOUT + A (50416680420198682402077210492446131565566605185394287109375 2 ZIN - 897017012839931319298712680905507787488523085777437562700000000000 ZIN))/(a (- 34720136717154997908466361722974120960049876968457742437529293946880 ZOUT - 210926324831111746833250971831897544037167089192987941918299029504000) 2 + 426088393921834232455323128456655558852046620939057643500000000 A 992063500000 ZIN - 2441334613776708500 ZIN), R4 = -, 6940291602213499
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<br>
+<br>
+64 APPENDIX A. EXAMPLE CALCULATIONS R5 = (38195771383195691504052086845016246794667687936
+ZOUT + A (99303995957664108704965549227744192421875 ZIN + 599657596227485533261336202180916694139772288000)
++ 8339540409811836894068029655629814665587863808000) / (3973373711375163964000922192169533030064195840
+A), R6 = (- 38195771383195691504052086845016246794667687936 ZOUT + A (468741670456330507974731687410699967578125
+ZIN - 2687098289520198765190831087202789799110676480000) + 987903782911837781320158487942202132025984000000
+A VCC - 8339540409811836894068029655629814665587863808000) / (122104907468322449250303944919525361454884224
+A), R7 = ZIN ], 992063500000 ZIN - 2441334613776708500 [ g 1 = 0, R2 =
+0, R3 = 0, R4 = -, 6940291602213499 992063500000 ZIN + 1047272162941669300
+R5 =, 6939299538713499 1984127000000 VCC - 5396825440000 R6 =, R7 = ZIN
+] ] 245238097
+<br>more than one solution of the system are calculated also here, but
+place only first a physically meaningful result
+</body>
+</html>
