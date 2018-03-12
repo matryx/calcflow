@@ -186,6 +186,9 @@ public class AxisCoord : CalcOutput
         this.tokens = tokens;
     }
 
+    public AxisCoord(float numVal) {
+        this.val = numVal;
+    }
     public AxisCoord()
     {
         rawText = "";
