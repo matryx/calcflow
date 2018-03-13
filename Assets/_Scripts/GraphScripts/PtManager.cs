@@ -40,6 +40,9 @@ public class PtManager : MonoBehaviour
     [SerializeField]
     Inputs inputs;
 
+    [SerializeField]
+    PresentPlane presentPlane;
+
     [System.Serializable]
     internal class ConnectedMenus
     {
@@ -178,6 +181,9 @@ public class PtManager : MonoBehaviour
             updateOverlay = true;
             bool isValid = ptSet.CompileAll();
             ManageFeedback();
+            if (isValid)
+                presentPlane.CalculatePlane();
+			    presentPlane.ApplyGraphAdjustment();
             //if (isValid)
                 //paramSurface.GenerateParticles();
         }

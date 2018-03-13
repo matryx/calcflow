@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class PtSet : MonoBehaviour {
+public class PtSet {
 	public enum PtOptions
     {
         pt1, pt2, pt3
