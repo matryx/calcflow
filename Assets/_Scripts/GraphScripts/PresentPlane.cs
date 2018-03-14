@@ -19,21 +19,27 @@ public class PresentPlane : MonoBehaviour {
 	public Vector3 vector13;
 	public Vector3 vector23;
 	public Vector3 normalVector;
-
+	public List<Vector3> vertices; 
 	public string rawEquation;
 
 	AK.ExpressionSolver solver;
+
+	AK.Expression expr;
 
     public AxisLabelManager xLabelManager;
     public AxisLabelManager yLabelManager;
 	public AxisLabelManager zLabelManager;
 
 	public float steps = 3;
+
+	public float d;
 	
 
 	void Awake()
 	{
 		solver = new AK.ExpressionSolver();
+		expr = new AK.Expression();
+		vertices = new List<Vector3>();
 		if (pointReady())
 		{
 			rawPt1 = ptManager.ptSet.ptCoords["pt1"];
@@ -65,6 +71,9 @@ public class PresentPlane : MonoBehaviour {
 		xLabelManager.Max = centerPt.X.Value + stepSize * steps;
 		yLabelManager.Max = centerPt.Y.Value + stepSize * steps;
 		zLabelManager.Max = centerPt.Z.Value + stepSize * steps;
+		//Get the interaction points between the box edges and the plane
+		expr = solver.SymbolicateExpression(rawEquation);
+		getVerticesList();
 	}
 
 	public Vector3 GenerateVector(PtCoord pt1, PtCoord pt2)
@@ -77,14 +86,17 @@ public class PresentPlane : MonoBehaviour {
 	}
 
 	// Return the raw string of the equation
-	public string CalculatePlane() {
+	public string CalculatePlane() 
+	{
 		vector12 = GenerateVector(rawPt1, rawPt2);
 		vector13 = GenerateVector(rawPt1, rawPt3);
 		normalVector = Vector3.Cross(vector12, vector13);
 		// Basic formula of the equation
-		rawEquation = rawPt1.X.Value + "*(x-" + normalVector.x + ")+" +  
-			rawPt1.Y.Value + "*(y-" + normalVector.y + ")+" +  rawPt1.Z.Value + "*(z-" + normalVector.z + ")=0";
 
+		d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
+		rawEquation = normalVector.x + "x+" + normalVector.y + "y+" + normalVector.z + "z=" + d;
+
+		print(rawEquation);
 		return rawEquation;
 	}
 
@@ -101,5 +113,12 @@ public class PresentPlane : MonoBehaviour {
 		}
 
 		return result;
+	}
+
+	//public 
+
+	public void getVerticesList() 
+	{
+
 	}
 }
