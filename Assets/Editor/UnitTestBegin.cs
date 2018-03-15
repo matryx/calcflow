@@ -12,7 +12,7 @@ public  class UnitTestBegin : MonoBehaviour
     static void BeginTests()
     {
         //String[] arguments = Environment.GetCommandLineArgs();
-        instance = this;
+       // instance = this;
         //-------------------Build Scenes----------------------
         var sceneArray = new EditorBuildSettingsScene[12];
         sceneArray[0] = new EditorBuildSettingsScene("Assets/_Scenes/0 - Matryx Advertising.unity", true);
@@ -44,9 +44,10 @@ public  class UnitTestBegin : MonoBehaviour
 
 
         //curve.GetComponent<TouchRayButton>().PressButton(curve);
-        GameObject g = GameObject.Find("unitTester");
 
         //begin();
+        GameObject unitTester = new GameObject("UnitTester");
+        unitTester.AddComponent<loadonplay>();
 
     }
 
@@ -62,5 +63,5 @@ public  class UnitTestBegin : MonoBehaviour
         }
         return null;
     }
-   
+
 }   
