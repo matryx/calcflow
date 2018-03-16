@@ -49,6 +49,22 @@ public class ParametricExpression : MonoBehaviour
         return scroll;
     }
 
+    public void setButtonInputMaterial(Material mat)
+    {
+        foreach (Transform t in expressionsList)
+        {
+            t.Find("Button_Input").GetComponent<Renderer>().material = mat;
+        }
+    }
+
+    public void setElementQuadtex(Texture tex)
+    {
+        foreach (Transform t in variables)
+        {
+            t.GetChild(0).Find("Quad").GetComponent<Renderer>().material.SetTexture("_MainTex", tex);
+        }
+    }
+
     public void setTextColor(Color c)
     {
         foreach(Transform t in expressionsList)

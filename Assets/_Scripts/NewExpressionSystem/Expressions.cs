@@ -23,11 +23,11 @@ public class Expressions : MonoBehaviour
     // 3 - delete variable implementation
     // 4 - hide should change the text color of entire expression components to gray    
     //      - should deselect expression
-    //      - gray out feedback too
-    //      - gray out element symbol quad (material)
-    //      - hide action buttons
-    //      - gray out action button
-        
+    //      - gray out feedback too                         IMPLEMENTED/NEED TO TEST
+    //      - gray out element symbol quad (material)       MOSTLY DONE, JUST NEED TO PROPERLY GREY ELEMENT TEXTURE
+    //      - hide action buttons                           IMPLEMENTED/NEED TO TEST
+    //      - gray out action button                        IMPLEMENTED/NEED TO TEST
+
     //VAR DELETE UI IDEA:
     //talk to Kyle
     //for now just make it so that if user deletes variable from all expression components, hide the variable in UI 
@@ -36,7 +36,7 @@ public class Expressions : MonoBehaviour
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
     // 2 - creating empty game object everytime a letter is pressed
-    
+
     void Awake()
     {
         _instance = this;

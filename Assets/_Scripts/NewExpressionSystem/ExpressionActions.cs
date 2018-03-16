@@ -11,6 +11,16 @@ public class ExpressionActions : QuickButton
     private bool menuActive = false;
     private IEnumerator scaleButtonsUp, scaleButtonsDown;
 
+    public void disableButtons()
+    {
+        if (scaleButtonsUp != null) StopCoroutine(scaleButtonsUp);
+
+        scaleButtonsDown = ScaleButtonsDown();
+        StartCoroutine(scaleButtonsDown);
+
+        menuActive = false;
+    }
+
     //TODO:
     // 1 - implement button functionality
     //      - deleting variables        NEED HELP WITH UI 

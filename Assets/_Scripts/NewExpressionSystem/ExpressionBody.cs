@@ -75,7 +75,7 @@ public class ExpressionBody : QuickButton
         return variable;
     }
 
-    private void deselectPrevBody()
+    public void deselectPrevBody()
     {
         ExpressionBody selectedBody = expression.getSelectedBody();
         if (selectedBody && selectedBody.transform != transform)
