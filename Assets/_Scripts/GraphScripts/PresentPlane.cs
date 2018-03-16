@@ -8,10 +8,19 @@ public class PresentPlane : MonoBehaviour {
 	public Transform point2;
 	public Transform point3;
 
+	public Transform plane;
+	public Transform forwardPlane;
+	public Transform backwardPlane;
+	public Transform lookAtTarget;
+	public List<GameObject> walls;
+
 	public PtManager ptManager;
-	public PtCoord rawPt1;
-	public PtCoord rawPt2;
-	public PtCoord rawPt3;
+	private PtCoord rawPt1;
+	private PtCoord rawPt2;
+	private PtCoord rawPt3;
+
+	Vector3 center;
+	
 
 	public PtSet ptSet;
 
@@ -33,7 +42,6 @@ public class PresentPlane : MonoBehaviour {
 	public float steps = 3;
 
 	public float d;
-	
 
 	void Awake()
 	{
@@ -53,6 +61,28 @@ public class PresentPlane : MonoBehaviour {
 		return ptManager != null && ptManager.ptSet != null;
 	}
 
+	void Update() {
+		plane.LookAt(lookAtTarget);
+
+		var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+		sharedMaterial.SetInt("_planeClippingEnabled", 1);
+
+		for (int i = 0; i < 6; i++) {
+			sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
+			//plane normal vector is the rotated 'up' vector.
+			sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+		}
+
+		sharedMaterial = backwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+		sharedMaterial.SetInt("_planeClippingEnabled", 1);
+
+		for (int i = 0; i < 6; i++) {
+			sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
+			//plane normal vector is the rotated 'up' vector.
+			sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+		}
+	}
+
 	public void ApplyGraphAdjustment()
 	{
 		vector23 = GenerateVector(rawPt2, rawPt3);
@@ -63,6 +93,7 @@ public class PresentPlane : MonoBehaviour {
 		float centerX = pt1Coef * rawPt1.X.Value + pt2Coef * rawPt2.X.Value + pt3Coef * rawPt3.X.Value;
 		float centerY = pt1Coef * rawPt1.Y.Value + pt2Coef * rawPt2.Y.Value + pt3Coef * rawPt3.Y.Value;
 		float centerZ = pt1Coef * rawPt1.Z.Value + pt2Coef * rawPt2.Z.Value + pt3Coef * rawPt3.Z.Value;
+		center = new Vector3(centerX, centerY, centerZ);
 		PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
 		//Get the range of the box
 		xLabelManager.Min = centerPt.X.Value - stepSize * steps;
@@ -90,13 +121,23 @@ public class PresentPlane : MonoBehaviour {
 	{
 		vector12 = GenerateVector(rawPt1, rawPt2);
 		vector13 = GenerateVector(rawPt1, rawPt3);
-		normalVector = Vector3.Cross(vector12, vector13);
-		// Basic formula of the equation
+		if (PlaneValid()) {
+			normalVector = Vector3.Cross(vector12, vector13);
 
-		d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
-		rawEquation = normalVector.x + "x+" + normalVector.y + "y+" + normalVector.z + "z=" + d;
+			
+			//plane.rotation = Quaternion.Euler(normalVector);
+			
+			//plane.rotation = Quaternion.FromToRotation(Vector3.zero, normalVector-center);
+			plane.LookAt(lookAtTarget);
+			print(Quaternion.FromToRotation(Vector3.zero, normalVector-center));
+			
+			// Basic formula of the equation
 
-		print(rawEquation);
+			d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
+			rawEquation = normalVector.x + "x+" + normalVector.y + "y+" + normalVector.z + "z=" + d;
+		}
+
+
 		return rawEquation;
 	}
 
@@ -115,10 +156,46 @@ public class PresentPlane : MonoBehaviour {
 		return result;
 	}
 
-	//public 
+	public Vector3 CalculateX(float y, float z)
+	{
+		return new Vector3((- normalVector.y * y - normalVector.z * z + d) / normalVector.x, y, z);
+	}
+
+	public Vector3 CalculateY(float x, float z)
+	{
+		return new Vector3(x, (- normalVector.x * x - normalVector.z * z + d) / normalVector.y, z);
+	}
+
+	public Vector3 CalculateZ(float x, float y)
+	{
+		return new Vector3(x, y, (- normalVector.y * y - normalVector.x * x + d) / normalVector.z);
+	}
+
+	public bool PointWithinBox(float val, float min, float max)
+	{
+		return (val >= min) && (val <= max);
+	}
 
 	public void getVerticesList() 
 	{
-
+		List<Vector3> xVertices = new List<Vector3>();
+		xVertices.Add(CalculateX(yLabelManager.Min, zLabelManager.Min));
+		xVertices.Add(CalculateX(yLabelManager.Min, zLabelManager.Max));
+		xVertices.Add(CalculateX(yLabelManager.Max, zLabelManager.Max));
+		xVertices.Add(CalculateX(yLabelManager.Max, zLabelManager.Min));
+		xVertices.RemoveAll(point => !PointWithinBox(point.x, xLabelManager.Min, xLabelManager.Max));
+		List<Vector3> yVertices = new List<Vector3>();
+		yVertices.Add(CalculateY(xLabelManager.Min, zLabelManager.Min));
+		yVertices.Add(CalculateY(xLabelManager.Min, zLabelManager.Max));
+		yVertices.Add(CalculateY(xLabelManager.Max, zLabelManager.Max));
+		yVertices.Add(CalculateY(xLabelManager.Max, zLabelManager.Min));
+		yVertices.RemoveAll(point => !PointWithinBox(point.y, yLabelManager.Min, yLabelManager.Max));
+		List<Vector3> zVertices = new List<Vector3>();
+		zVertices.Add(CalculateZ(xLabelManager.Min, yLabelManager.Min));
+		zVertices.Add(CalculateZ(xLabelManager.Min, yLabelManager.Max));
+		zVertices.Add(CalculateZ(xLabelManager.Max, yLabelManager.Max));
+		zVertices.Add(CalculateZ(xLabelManager.Max, yLabelManager.Min));
+		zVertices.RemoveAll(point => !PointWithinBox(point.z, zLabelManager.Min, zLabelManager.Max));
+		
 	}
 }
