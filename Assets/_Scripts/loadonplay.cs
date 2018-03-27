@@ -11,8 +11,18 @@ using UnityEditor;
 public class loadonplay : MonoBehaviour {
 
     public int started = 0;
-    float cd = 5.0f;
+    float cd = 5.0f; //starts the unit tests after a small delay
     private static loadonplay instanceRef;
+
+    public int scenes; // how many times we change scenes in the test
+    public GameObject sceneChanger;
+    public GameObject nullTester;
+    public string[][] names; // names [name of gameobject to change scene][name of gameobjects to find in that scene to make sure they are or are not null]
+    public int[] changeScene;
+    public string[][] assertionType; //type of assertion for each comparison: isnull,isnotnull,equals, or notequals
+    public string[] sceneName; //contains the scene names after each switch
+
+
     // Use this for initialization
     private void Awake()
     {
@@ -44,8 +54,8 @@ public class loadonplay : MonoBehaviour {
     IEnumerator UnitTest()
     {
         started = 1;
-        bool done = false;
 
+        /*
         //LOAD SCENE 8
         GameObject doubleIntegral = GameObject.Find("DoubleIntegralScene");
         doubleIntegral.GetComponent<RayCastButton>().PressButton(doubleIntegral);
@@ -92,9 +102,56 @@ public class loadonplay : MonoBehaviour {
         yield return null; yield return null;
         //ExitApplication();
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
             EditorApplication.Exit(0);
+#endif
+*/
+
+
+        for (int i = 0; i < scenes; i++)
+        {
+            //if changeScene == 2, instantly switch to scene without pressing a button
+            if (changeScene[i] == 2)
+            {
+                UnityEngine.SceneManagement.SceneManager.LoadScene(int.Parse(names[i][0]));
+                yield return null; yield return null; //wait two update frames to finish loading scenes
+            }
+            //if changeScene ==1, press a button on a gameobject to switch the scene
+            else if (changeScene[i] == 1)
+            {
+                sceneChanger = GameObject.Find(names[i][0]);
+                sceneChanger.GetComponent<RayCastButton>().PressButton(sceneChanger);
+                yield return null; yield return null; //wait two update frames to finish loading scenes
+                Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, sceneName[i]);
+            }
+            else
+            {
+                yield return null; yield return null; //wait two frames to ensure accuracy between tests
+            }
+            //for each object in the scene that we want to check, makes sure they are null or non-null when they are supposed to be
+            for (int j = 1; j < names[i].Length; j++)
+            {
+                switch (assertionType[i][j])
+                {
+                    case "IsNull":
+                        Assert.IsNull(GameObject.Find(names[i][j]), "AssertMsg: " + names[i][j] + " was not null in scene " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + ", test #" + i);
+                        break;
+                    case "IsNotNull":
+                        Assert.IsNotNull(GameObject.Find(names[i][j]), "AssertMsg: " + names[i][j] + " was null in scene " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + ", test #" + i);
+                        break;
+                }
+            }
+        }
+
+        started = 2;
+
+        yield return null; yield return null;
+        //ExitApplication();
+
+        #if UNITY_EDITOR
+        EditorApplication.Exit(0);
         #endif
+        
     }
 
     void ExitApplication()
@@ -103,3 +160,5 @@ public class loadonplay : MonoBehaviour {
     }
 
 }
+
+

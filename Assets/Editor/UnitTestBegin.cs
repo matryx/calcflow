@@ -3,6 +3,7 @@ using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 public  class UnitTestBegin : MonoBehaviour
 {
@@ -49,19 +50,34 @@ public  class UnitTestBegin : MonoBehaviour
         GameObject unitTester = new GameObject("UnitTester");
         unitTester.AddComponent<loadonplay>();
 
+       // var ser = new System.Web.Script.Serialization.JavaScriptSerializer();
+        //ser.DeserializeObject(GetArg(1));
+        //var x = JsonUtility.FromJson<var>(json);
+
+        StreamReader reader = new StreamReader(GetArg(1));
+        string json = reader.ReadToEnd();
+        loadonplay player = JsonUtility.FromJson<loadonplay>(json);
+        unitTester.GetComponent<loadonplay>().scenes = player.scenes;
+        unitTester.GetComponent<loadonplay>().sceneChanger = player.sceneChanger;
+        unitTester.GetComponent<loadonplay>().nullTester = player.nullTester;
+        unitTester.GetComponent<loadonplay>().names = player.names;
+        unitTester.GetComponent<loadonplay>().assertionType = player.assertionType;
+        unitTester.GetComponent<loadonplay>().sceneName = player.sceneName;
+
+        //        public int scenes; // how many times we change scenes in the test
+        //public GameObject sceneChanger;
+        //public GameObject nullTester;
+        //public string[][] names; // names [name of gameobject to change scene][name of gameobjects to find in that scene to make sure they are or are not null]
+        //public int[] changeScene;
+        //public string[][] assertionType; //type of assertion for each comparison: isnull,isnotnull,equals, or notequals
+        //public string[] sceneName; //contains the scene names after each switch
+
     }
 
-    static string GetArg(string name)
+    static string GetArg(int x)
     {
         var args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i] == name && args.Length > i + 1)
-            {
-                return args[i + 1];
-            }
-        }
-        return null;
+        return args[x];
     }
 
 }   
