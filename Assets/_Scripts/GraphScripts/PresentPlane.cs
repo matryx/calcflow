@@ -40,6 +40,15 @@ public class PresentPlane : MonoBehaviour {
 	public AxisLabelManager zLabelManager;
 
 	public float steps = 3;
+	public float dummySteps = 10;
+	public float stepSize;
+	public float defaultStepSize = 5;
+
+	public float temp1;
+	public float temp2;
+	public float temp3;
+	public float temp;
+	public float temp0;
 
 	public float d;
 
@@ -85,28 +94,36 @@ public class PresentPlane : MonoBehaviour {
 
 	public void ApplyGraphAdjustment()
 	{
-		if (PlaneValid()) {
-			print("lfhzlskjdhflkjs");
-			vector23 = GenerateVector(rawPt2, rawPt3);
-			float stepSize = (vector12.magnitude * vector23.magnitude * vector13.magnitude) / (2 * Vector3.Cross(vector12, vector23).magnitude);
-			float pt1Coef = (Mathf.Pow(vector23.magnitude,2) * Vector3.Dot(vector12, vector13)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
-			float pt2Coef = (Mathf.Pow(vector13.magnitude,2) * Vector3.Dot((-1) * vector12, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
-			float pt3Coef = (Mathf.Pow(vector12.magnitude,2) * Vector3.Dot((-1) * vector13, (-1) * vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
+
+		vector23 = GenerateVector(rawPt2, rawPt3);
+		float pt1Coef = (Mathf.Pow(vector23.magnitude,2) * Vector3.Dot(vector12, vector13)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
+		float pt2Coef = (Mathf.Pow(vector13.magnitude,2) * Vector3.Dot((-1) * vector12, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
+		float pt3Coef = (Mathf.Pow(vector12.magnitude,2) * Vector3.Dot((-1) * vector13, (-1) * vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
+
+
+		if (pt1Coef != pt1Coef || pt2Coef != pt2Coef || pt3Coef != pt3Coef) {
+			center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+			stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+			if (stepSize == 0) {
+				stepSize = defaultStepSize;
+			}
+		} else {
+			stepSize = (vector12.magnitude * vector23.magnitude * vector13.magnitude) / (2 * Vector3.Cross(vector12, vector23).magnitude);
 			float centerX = pt1Coef * rawPt1.X.Value + pt2Coef * rawPt2.X.Value + pt3Coef * rawPt3.X.Value;
 			float centerY = pt1Coef * rawPt1.Y.Value + pt2Coef * rawPt2.Y.Value + pt3Coef * rawPt3.Y.Value;
 			float centerZ = pt1Coef * rawPt1.Z.Value + pt2Coef * rawPt2.Z.Value + pt3Coef * rawPt3.Z.Value;
 			center = new Vector3(centerX, centerY, centerZ);
-			//PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
-			//Get the range of the box
-			xLabelManager.Min = centerX - stepSize * steps;
-			yLabelManager.Min = centerY - stepSize * steps;
-			zLabelManager.Min = centerZ - stepSize * steps;
-			xLabelManager.Max = centerX + stepSize * steps;
-			yLabelManager.Max = centerY + stepSize * steps;
-			zLabelManager.Max = centerZ + stepSize * steps;
-			//Get the interaction points between the box edges and the plane
-			expr = solver.SymbolicateExpression(rawEquation);
 		}
+		//PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
+		//Get the range of the box
+		xLabelManager.Min = center.x - stepSize * steps;
+		yLabelManager.Min = center.y - stepSize * steps;
+		zLabelManager.Min = center.z - stepSize * steps;
+		xLabelManager.Max = center.x + stepSize * steps;
+		yLabelManager.Max = center.y + stepSize * steps;
+		zLabelManager.Max = center.z + stepSize * steps;
+		//Get the interaction points between the box edges and the plane
+		//expr = solver.SymbolicateExpression(rawEquation);
 	}
 
 	public Vector3 GenerateVector(PtCoord pt1, PtCoord pt2)
@@ -123,15 +140,9 @@ public class PresentPlane : MonoBehaviour {
 	{
 		vector12 = GenerateVector(rawPt1, rawPt2);
 		vector13 = GenerateVector(rawPt1, rawPt3);
+		normalVector = Vector3.Cross(vector12, vector13);
 		if (PlaneValid()) {
-			normalVector = Vector3.Cross(vector12, vector13);
-
-			
-			//plane.rotation = Quaternion.Euler(normalVector);
-			
-			//plane.rotation = Quaternion.FromToRotation(Vector3.zero, normalVector-center);
 			plane.LookAt(lookAtTarget);
-			print(Quaternion.FromToRotation(Vector3.zero, normalVector-center));
 			
 			// Basic formula of the equation
 
@@ -139,10 +150,22 @@ public class PresentPlane : MonoBehaviour {
 			rawEquation = normalVector.x + "x+" + normalVector.y + "y+" + normalVector.z + "z=" + d;
 		}
 
-		point1.localPosition = ScaledPoint(PtCoordToVector(rawPt1));
-		print("PT1 location: " + point1.localPosition);
-
 		return rawEquation;
+	}
+
+	public void GetLocalPoint() {
+		point1.localPosition = ScaledPoint(PtCoordToVector(rawPt1));
+		point2.localPosition = ScaledPoint(PtCoordToVector(rawPt2));
+		point3.localPosition = ScaledPoint(PtCoordToVector(rawPt3));
+	}
+
+	public void GetPlaneDirection() {
+		if (PlaneValid()) {
+			float scale = dummySteps * stepSize / normalVector.magnitude;
+			Vector3 dummyPos = normalVector * scale;
+			lookAtTarget.localPosition = ScaledPoint(dummyPos);
+			plane.localPosition = ScaledPoint(center);
+		}
 	}
 
 	public bool PlaneValid() {		

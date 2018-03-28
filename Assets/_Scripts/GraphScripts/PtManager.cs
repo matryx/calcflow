@@ -184,6 +184,8 @@ public class PtManager : MonoBehaviour
             if (isValid)
                 presentPlane.CalculatePlane();
 			    presentPlane.ApplyGraphAdjustment();
+                presentPlane.GetLocalPoint();
+                presentPlane.GetPlaneDirection();
             //if (isValid)
                 //paramSurface.GenerateParticles();
         }
