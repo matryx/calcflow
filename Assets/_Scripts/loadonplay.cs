@@ -6,26 +6,24 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+public class loadonplay : MonoBehaviour
+{
 
-
-public class loadonplay : MonoBehaviour {
-
-    public int started = 0;
+    #region Global Variables
+    private int started = 0;
     float cd = 5.0f; //starts the unit tests after a small delay
-    private static loadonplay instanceRef;
+    private static loadonplay instanceRef; //used to make sure we don't create this object in every scene and that it persists through scene changes
 
-    public int scenes; // how many times we change scenes in the test
+    //Used for each unit test
     public GameObject sceneChanger;
     public GameObject nullTester;
-    public string[][] names; // names [name of gameobject to change scene][name of gameobjects to find in that scene to make sure they are or are not null]
-    public int[] changeScene;
-    public string[][] assertionType; //type of assertion for each comparison: isnull,isnotnull,equals, or notequals
-    public string[] sceneName; //contains the scene names after each switch
+    public data testData;
+    #endregion
 
-
-    // Use this for initialization
+    #region Instance Management
     private void Awake()
     {
+        //Makes sure only once instance is created, and makes sure it get destroyed when new scenes are loaded
         if (instanceRef == null)
         {
             instanceRef = this;
@@ -36,129 +34,98 @@ public class loadonplay : MonoBehaviour {
             DestroyImmediate(gameObject);
         }
     }
-    void Start () {
+    #endregion
 
-    }
-	
-	// Update is called once per frame
-	void Update () {
+    #region Unit Testing
+    void Update()
+    {
+        //Begin testing after cd seconds to make sure everything loads correctly first
         if (started > 0)
             return;
         cd -= Time.deltaTime;
         if (cd > 0)
             return;
-        
         StartCoroutine("UnitTest");
     }
 
+    //Main coroutine for unit testing
     IEnumerator UnitTest()
     {
         started = 1;
 
-        /*
-        //LOAD SCENE 8
-        GameObject doubleIntegral = GameObject.Find("DoubleIntegralScene");
-        doubleIntegral.GetComponent<RayCastButton>().PressButton(doubleIntegral);
-        yield return null; yield return null;
-
-        //TEST 1 ------ SCENE 8 LOADED CORRECTLY
-        Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "8 - DoubleIntegral");
-
-        UnityEngine.SceneManagement.SceneManager.LoadScene(1);
-        yield return null; yield return null;
-
-        //TEST 2 ------- SCENE 1 LOADED CORRECTLY
-        Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "7 - DoubleIntegral");
-
-        GameObject parametrizedCurve = GameObject.Find("Parametrized Curve");
-
-        //TESTS FOR CORRECT LOADING OF GAMEOBJECTS
-        Assert.IsNotNull(parametrizedCurve);
-        Assert.IsNull(GameObject.Find("SceneSelectMenu"),"AssertMsg: SceneSelectMenu was not null");
-        Assert.IsNull(GameObject.Find("RecenterInstruction"), "AssertMsg: RecenterInstruction was not null");
-        Assert.IsNull(GameObject.Find("SoundFXManager"), "AssertMsg: SoundFXManager was not null");
-        Assert.IsNull(GameObject.Find("VoiceoverSwitch"), "AssertMsg: VoiceoverSwitch was not null");
-        Assert.IsNull(GameObject.Find("SoundFXSwitch"), "AssertMsg: SoundFXSwitch was not null");
-        Assert.IsNull(GameObject.Find("DescriptionSwitch"), "AssertMsg: DescriptionSwitch was not null");
-        Assert.IsNotNull(GameObject.Find("_STATIC"), "AssertMsg: _STATIC was null");
-        Assert.IsNull(GameObject.Find("pointhand_right (1)"), "AssertMsg: pointhand_right was not null");
-        Assert.IsNotNull(GameObject.Find("FloorPrefab"), "AssertMsg: FloorPrefab was null");
-        Assert.IsNotNull(GameObject.Find("New Env"), "AssertMsg: New Env was null");
-        Assert.IsNotNull(GameObject.Find("CombinedAvatar"), "AssertMsg: CombinedAvatar was null");
-        Assert.IsNotNull(GameObject.Find("Graph"), "AssertMsg: Graph was null");
-        Assert.IsNotNull(GameObject.Find("GameOptions"), "AssertMsg: GameOptions was null");
-        Assert.IsNotNull(GameObject.Find("Timer"), "AssertMsg: Timer was null");
-        Assert.IsNotNull(GameObject.Find("[SteamVR]"), "AssertMsg: [SteamVR] was null");
-
-        //Press parametrized curve button, switching scenes
-        parametrizedCurve.GetComponent<RayCastButton>().PressButton(parametrizedCurve);
-        yield return null; yield return null;
-
-        //TEST 3 ------- SCENE 2 LOADED CORRECTLY
-        Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, "2 - R1-R3");
-
-        started = 2;
-
-        yield return null; yield return null;
-        //ExitApplication();
-
-#if UNITY_EDITOR
-            EditorApplication.Exit(0);
-#endif
-*/
-
-
-        for (int i = 0; i < scenes; i++)
+        for (int i = 0; i < testData.sceneInfo.changeScene.Count; i++)
         {
+            print("AssertMsg: -------------Starting Test-------------");
+           
             //if changeScene == 2, instantly switch to scene without pressing a button
-            if (changeScene[i] == 2)
+            if (testData.sceneInfo.changeScene[i] == 2)
             {
-                UnityEngine.SceneManagement.SceneManager.LoadScene(int.Parse(names[i][0]));
+                print("AssertMsg: Beginning Direct Scene change to scene " + int.Parse(testData.names[i].toCheck[0]));
+                UnityEngine.SceneManagement.SceneManager.LoadScene(int.Parse(testData.names[i].toCheck[0]));
                 yield return null; yield return null; //wait two update frames to finish loading scenes
+                Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, testData.sceneInfo.sceneName[i], "AssertMsg: Scene name was not correct. Expected: " + testData.sceneInfo.sceneName[i] + " Given: " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
             }
             //if changeScene ==1, press a button on a gameobject to switch the scene
-            else if (changeScene[i] == 1)
+            else if (testData.sceneInfo.changeScene[i] == 1)
             {
-                sceneChanger = GameObject.Find(names[i][0]);
+                print("AssertMsg: Beginning Scene change via button press to scene " + testData.names[i].toCheck[0]);
+                sceneChanger = GameObject.Find(testData.names[i].toCheck[0]);
                 sceneChanger.GetComponent<RayCastButton>().PressButton(sceneChanger);
                 yield return null; yield return null; //wait two update frames to finish loading scenes
-                Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, sceneName[i]);
+                Assert.AreEqual(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, testData.sceneInfo.sceneName[i], "AssertMsg: Scene name was not correct. Expected: " + testData.sceneInfo.sceneName[i] + " Given: " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
             }
             else
             {
                 yield return null; yield return null; //wait two frames to ensure accuracy between tests
             }
+
+            // ------------------- After Scene is loaded correctly -------------------
             //for each object in the scene that we want to check, makes sure they are null or non-null when they are supposed to be
-            for (int j = 1; j < names[i].Length; j++)
+            if (testData.names[i].assertType.Count > 1)
             {
-                switch (assertionType[i][j])
+                for (int j = 1; j < testData.names[i].assertType.Count; j++)
                 {
-                    case "IsNull":
-                        Assert.IsNull(GameObject.Find(names[i][j]), "AssertMsg: " + names[i][j] + " was not null in scene " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + ", test #" + i);
-                        break;
-                    case "IsNotNull":
-                        Assert.IsNotNull(GameObject.Find(names[i][j]), "AssertMsg: " + names[i][j] + " was null in scene " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + ", test #" + i);
-                        break;
+                    switch (testData.names[i].assertType[j])
+                    {
+                        case "IsNull":
+                            Assert.IsNull(GameObject.Find(testData.names[i].toCheck[j]), "AssertMsg: " + testData.names[i].toCheck[j] + " was not null in scene " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + ", test #" + j);
+                            break;
+                        case "IsNotNull":
+                            Assert.IsNotNull(GameObject.Find(testData.names[i].toCheck[j]), "AssertMsg: " + testData.names[i].toCheck[j] + " was null in scene " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + ", test #" + j);
+                            break;
+                    }
                 }
             }
         }
-
-        started = 2;
-
-        yield return null; yield return null;
-        //ExitApplication();
-
+        print("AssertMsg: Completed all tests");
+        //Checks for the editor script and exits unity completely from it, not just stopping the game.
+        //This allows for testing without graphics since normally Unity would continue running in the background.
         #if UNITY_EDITOR
         EditorApplication.Exit(0);
         #endif
-        
     }
+    #endregion
 
-    void ExitApplication()
+    #region Data Types
+    [System.Serializable]
+    public class namesData
     {
-        Application.Quit();
+        public List<string> toCheck;
+        public List<string> assertType;
     }
 
+    [System.Serializable]
+    public class info
+    {
+        public List<int> changeScene;
+        public List<string> sceneName; //contains the scene names after each switch
+    }
+
+    [System.Serializable]
+    public class data
+    {
+        public info sceneInfo;
+        public List<namesData> names;
+    }
+    #endregion
 }
-
-

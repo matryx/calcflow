@@ -1,24 +1,30 @@
-{
-			"changeScene":"1",
-			"sceneName":"7 - DoubleIntegral",
-			"names":
-			[{
-				"scene":"1 - IntroScene",
-				"DoubleIntegralScene":"IsNull",
-				"SceneSelectMenu":"IsNull",
-				"RecenterInstruction":"IsNull",
-				"SoundFXManager":"IsNull",
-				"VoiceoverSwitch":"IsNull",
-				"SoundFXSwitch":"IsNull",
-				"DescriptionSwitch":"IsNull",
-				"_STATIC":"IsNotNull",
-				"pointhand_right (1)":"IsNull",
-				"FloorPrefab":"IsNotNull",
-				"New Env":"IsNotNull",
-				"CombinedAvatar":"IsNotNull",
-				"Graph":"IsNotNull",
-				"GameOptions":"IsNotNull",
-				"Timer":"IsNotNull",
-				"[SteamVR]":"IsNotNull"
-			}]
+{	
+	"sceneInfo":{
+            "changeScene":[2,1,2],
+            "sceneName":["1 - IntroScene", "7 - DoubleIntegral", "WrongNameFor8SceneTest"]
+	},
+            "names":[
+		{
+                    "toCheck":["1","SceneSelectMenu",
+                    "RecenterInstruction","SoundFXManager","VoiceoverSwitch","SoundFXSwitch",
+                    "DescriptionSwitch","_STATIC","pointhand_right (1)","FloorPrefab","New Env",
+                    "CombinedAvatar","Graph","GameOptions","Timer","[SteamVR]"],
+                    "assertType":["IsNull","IsNull","IsNull","IsNull","IsNull","IsNull",
+                    "IsNull","IsNotNull","IsNull","IsNotNull","IsNotNull","IsNotNull",
+                    "IsNotNull","IsNotNull","IsNotNull","IsNotNull"]
+		},
+                {
+                    "toCheck":["DoubleIntegralScene","SceneSelectMenu",
+                    "RecenterInstruction","SoundFXManager","VoiceoverSwitch","SoundFXSwitch",
+                    "DescriptionSwitch","_STATIC","pointhand_right (1)","FloorPrefab","New Env",
+                    "CombinedAvatar","Graph","GameOptions","Timer","[SteamVR]"],
+                    "assertType":["IsNull","IsNull","IsNull","IsNull","IsNull","IsNull",
+                    "IsNull","IsNotNull","IsNull","IsNotNull","IsNotNull","IsNotNull",
+                    "IsNotNull","IsNotNull","IsNotNull","IsNotNull"]
+		},
+		{
+                    "toCheck":["6"],
+                    "assertType":["IsNull"]
+		}
+		]
 }
