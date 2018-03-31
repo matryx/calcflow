@@ -6,6 +6,10 @@ using UnityEngine.SceneManagement;
 public class AdvertisingScreen : MonoBehaviour {
 
     public int nextSceneIndex;
+
+    void Awake() {
+        Calcflow.UserStatistics.StatisticsTracking.Init();
+    }
 	// Use this for initialization
 	void Start () {
         Invoke("LoadScene", 5.0f);
