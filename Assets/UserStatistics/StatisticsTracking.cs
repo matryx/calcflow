@@ -64,6 +64,14 @@ namespace Calcflow.UserStatistics
 
                     // Ready to track
                     tracking = true;
+
+                    // Machine details
+                    var machine = new Value();
+                    machine["Mac"] = mac;
+                    machine["Host"] = host;
+                    machine["Unique"] = user;
+                    // User infos
+                    StatsIdentify(user, host, machine);
                 }
             }
             catch (Exception e)

@@ -19,6 +19,7 @@
 using UnityEngine;
 using System.Collections;
 using System;
+using Calcflow.UserStatistics;
 
 public class FlexButtonComponent : FlexActionableComponent
 {
@@ -126,6 +127,13 @@ public class FlexButtonComponent : FlexActionableComponent
         if (State >= 0)
         {
             enterCallback(this, gameObject);
+
+            string eventName = "Unknown";
+            if (gameObject != null)
+            {
+                eventName = gameObject.name;
+            }
+            StatisticsTracking.StartEvent("ButtonPress", eventName);
         }
     }
 
@@ -134,6 +142,13 @@ public class FlexButtonComponent : FlexActionableComponent
         if (State >= 0)
         {
             exitCallback(this, gameObject);
+
+            string eventName = "Unknown";
+            if (gameObject != null)
+            {
+                eventName = gameObject.name;
+            }
+            StatisticsTracking.EndEvent("ButtonPress", eventName);
         }
     }
 }
