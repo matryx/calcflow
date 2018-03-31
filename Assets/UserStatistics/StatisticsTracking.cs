@@ -260,7 +260,6 @@ namespace Calcflow.UserStatistics
         {
             try
             {
-                Debug.Log("Starting Stats");
                 Init();
                 if (!tracking)
                 {
