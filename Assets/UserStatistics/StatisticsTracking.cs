@@ -190,6 +190,68 @@ namespace Calcflow.UserStatistics
             props["User"] = user;
             props["Host"] = host;
             props["Session"] = session;
+            props["Hardware"] = UnityEngine.VR.VRDevice.model;
+            foreach (var extra in extras)
+            {
+                var key = extra.Key;
+                var value = extra.Value;
+                if (value != null)
+                {
+                    if (value is double)
+                    {
+                        props[key] = (double)value;
+                    }
+                    if (value is long)
+                    {
+                        props[key] = (long)value;
+                    }
+                    if (value is int)
+                    {
+                        props[key] = (int)value;
+                    }
+                    if (value is short)
+                    {
+                        props[key] = (short)value;
+                    }
+                    if (value is float)
+                    {
+                        props[key] = (float)value;
+                    }
+                    if (value is byte)
+                    {
+                        props[key] = (byte)value;
+                    }
+                    if (value is char)
+                    {
+                        props[key] = (char)value;
+                    }
+                    if (value is string)
+                    {
+                        props[key] = (string)value;
+                    }
+                    if (value is Vector3)
+                    {
+                        var vec = (Vector3)value;
+                        props[key + ".x"] = vec.x;
+                        props[key + ".y"] = vec.y;
+                        props[key + ".z"] = vec.z;
+                    }
+                    /*
+                    if (value is int)
+                    {
+                        props[key] = (int)value;
+                    }
+                    if (value is int)
+                    {
+                        props[key] = (int)value;
+                    }
+                    if (value is int)
+                    {
+                        props[key] = (int)value;
+                    }
+                    */
+                }
+            }
             return props;
         }
 
