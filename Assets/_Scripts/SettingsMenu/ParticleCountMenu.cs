@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ParticleCountMenu : MonoBehaviour {
+public class ParticleCountMenu : MonoBehaviour
+{
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         ParticleCountMenu particleCountMenu;
@@ -46,6 +47,14 @@ public class ParticleCountMenu : MonoBehaviour {
                 break;
         }
         #endregion
+
+        // @stats
+        // particle setting
+        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Particle Setting",
+        new Dictionary<string, object>()
+        {
+            {"buttonName", buttonID}
+        });
     }
 
     CustomParametrizedSurface paramSurface;
@@ -57,6 +66,6 @@ public class ParticleCountMenu : MonoBehaviour {
         keyboard.RegisterResponder(responder);
 
         paramSurface = FindObjectOfType<CustomParametrizedSurface>();
-        
+
     }
 }
