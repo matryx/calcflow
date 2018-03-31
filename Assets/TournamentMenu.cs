@@ -161,7 +161,7 @@ public class TournamentMenu : MonoBehaviour
 
     private void removeLoadButton()
     {
-        if(loadButton != null)
+        if (loadButton != null)
         {
             List<Transform> loadButtonTransform = new List<Transform>();
             loadButtonTransform.Add(loadButton.transform);
@@ -187,17 +187,17 @@ public class TournamentMenu : MonoBehaviour
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
-    
+
         return button;
     }
 
     private void HandleInput(GameObject source)
     {
-        if(source.name == "Load_Button")
+        if (source.name == "Load_Button")
         {
             LoadMoreTournaments();
         }
-        else if(source.GetComponent<TournamentContainer>() != null)
+        else if (source.GetComponent<TournamentContainer>() != null)
         {
             string name = source.name;
 
@@ -206,5 +206,13 @@ public class TournamentMenu : MonoBehaviour
             submitMenu.SetTournament(tournament);
             submissionsMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
         }
+
+        // @stats
+        // matryx tournament menu
+        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Tournament Menu",
+        new Dictionary<string, object>()
+        {
+            {"buttonName", source.name}
+        });
     }
 }
