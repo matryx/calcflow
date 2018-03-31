@@ -34,6 +34,9 @@ namespace Calcflow.UserStatistics
                 {
                     inited = true;
 
+                    // Log
+                    Debug.Log("Starting user statistics");
+
                     // Generate unique session id
                     session = Guid.NewGuid().ToString();
 
@@ -195,11 +198,12 @@ namespace Calcflow.UserStatistics
         {
             try
             {
+                Debug.Log("Starting Stats");
+                Init();
                 if (!tracking)
                 {
                     return;
                 }
-                Init();
                 callback();
             }
             catch (Exception e)
