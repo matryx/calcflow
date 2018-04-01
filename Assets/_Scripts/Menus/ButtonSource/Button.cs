@@ -27,13 +27,13 @@ namespace CalcFlowUI
             if (OnButtonEnter != null)
                 OnButtonEnter.Invoke(other);
 
-
-            string eventName = "Unknown";
-            if (gameObject != null)
+            string eventName = gameObject.name;
+            var extra = new Dictionary<string, object>();
+            extra["parent"] = gameObject.transform.parent.name;
+            if (!eventName.Equals("Body"))
             {
-                eventName = gameObject.name;
+                StatisticsTracking.StartEvent("Button Press", eventName, extra);
             }
-            StatisticsTracking.StartEvent("ButtonPress", eventName);
         }
 
         public virtual void UnpressButton(GameObject other)
@@ -47,12 +47,11 @@ namespace CalcFlowUI
             if (OnButtonExit != null)
                 OnButtonExit.Invoke(other);
 
-            string eventName = "Unknown";
-            if (gameObject != null)
+            string eventName = gameObject.name;
+            if (!eventName.Equals("Body"))
             {
-                eventName = gameObject.name;
+                StatisticsTracking.EndEvent("Button Press", eventName);
             }
-            StatisticsTracking.EndEvent("ButtonPress", eventName);
         }
 
 #if UNITY_EDITOR

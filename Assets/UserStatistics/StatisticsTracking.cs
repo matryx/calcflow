@@ -15,6 +15,7 @@ namespace Calcflow.UserStatistics
     public class StatisticsTracking
     {
 
+        static Dictionary<string, double> startTimesSaved = new Dictionary<string, double>();
         static Dictionary<string, double> startTimes = new Dictionary<string, double>();
 
         static bool inited = false;
@@ -110,7 +111,7 @@ namespace Calcflow.UserStatistics
             });
         }
 
-        public static void StartEvent(string eventType, string eventName, Dictionary<string, object> extras = null)
+        public static void StartEvent(string eventType, string eventName, Dictionary<string, object> extras = null, bool clearable = false)
         {
             SafeStatsCall(delegate ()
             {
@@ -121,9 +122,19 @@ namespace Calcflow.UserStatistics
                 // Event key
                 var key = eventType + ":" + eventName;
                 // Save start time
-                lock (startTimes)
+                if (clearable)
                 {
-                    startTimes[key] = Now();
+                    lock (startTimes)
+                    {
+                        startTimes[key] = Now();
+                    }
+                }
+                else
+                {
+                    lock (startTimesSaved)
+                    {
+                        startTimesSaved[key] = Now();
+                    }
                 }
                 // Send stats
                 StatsTrack(eventType + " Start", props);
@@ -141,16 +152,27 @@ namespace Calcflow.UserStatistics
                 // Event key
                 var key = eventType + ":" + eventName;
                 // Get duration
-                double startTime;
+                double duration = 0;
                 lock (startTimes)
                 {
+                    double startTime;
                     if (startTimes.TryGetValue(key, out startTime))
                     {
-                        Debug.Log("Duration of stuff: " + key + " -> " + (Now() - startTime));
-                        props["Duration"] = Now() - startTime;
+                        duration = (Now() - startTime);
                         startTimes.Remove(key);
                     }
                 }
+                lock (startTimesSaved)
+                {
+                    double startTime;
+                    if (startTimesSaved.TryGetValue(key, out startTime))
+                    {
+                        duration = (Now() - startTime);
+                        startTimesSaved.Remove(key);
+                    }
+                }
+                // Save duration
+                props["Duration"] = duration;
                 // Send stats
                 StatsTrack(eventType + " End", props);
             });
@@ -200,9 +222,7 @@ namespace Calcflow.UserStatistics
             props["Name"] = eventName;
             props["Stage"] = eventStage;
             props["Scene"] = SceneManager.GetActiveScene().name;
-            props["Mac"] = mac;
             props["User"] = user;
-            props["Host"] = host;
             props["Session"] = session;
             props["Hardware"] = UnityEngine.VR.VRDevice.model;
             if (extras != null)
@@ -213,6 +233,10 @@ namespace Calcflow.UserStatistics
                     var value = extra.Value;
                     if (value != null)
                     {
+                        if (value is bool)
+                        {
+                            props[key] = (bool)value;
+                        }
                         if (value is double)
                         {
                             props[key] = (double)value;

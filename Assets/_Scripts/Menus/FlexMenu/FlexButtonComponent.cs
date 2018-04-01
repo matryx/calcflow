@@ -111,6 +111,15 @@ public class FlexButtonComponent : FlexActionableComponent
         } else if (_new == 1)
         {
             transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
+            string eventName = "Unknown";
+            if (gameObject != null)
+            {
+                eventName = gameObject.name;
+            }
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.StartEvent("Button Hover", eventName);
+            }
         }
         else if (_new == 2)
         {
@@ -119,6 +128,15 @@ public class FlexButtonComponent : FlexActionableComponent
         else
         {
             transform.Find("Body").GetComponent<Renderer>().material.color = passiveColor;
+            string eventName = "Unknown";
+            if (gameObject != null)
+            {
+                eventName = gameObject.name;
+            }
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.EndEvent("Button Hover", eventName);
+            }
         }
     }
 
@@ -127,13 +145,6 @@ public class FlexButtonComponent : FlexActionableComponent
         if (State >= 0)
         {
             enterCallback(this, gameObject);
-
-            string eventName = "Unknown";
-            if (gameObject != null)
-            {
-                eventName = gameObject.name;
-            }
-            StatisticsTracking.StartEvent("ButtonPress", eventName);
         }
     }
 
@@ -142,13 +153,6 @@ public class FlexButtonComponent : FlexActionableComponent
         if (State >= 0)
         {
             exitCallback(this, gameObject);
-
-            string eventName = "Unknown";
-            if (gameObject != null)
-            {
-                eventName = gameObject.name;
-            }
-            StatisticsTracking.EndEvent("ButtonPress", eventName);
         }
     }
 }
