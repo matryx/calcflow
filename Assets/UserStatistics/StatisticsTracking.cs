@@ -26,6 +26,9 @@ namespace Calcflow.UserStatistics
         static string host = "??";
         static string user = "??-??";
 
+        static string tokenProduction = "5005f6e51ee4fcf77d39f8fc8699e225";
+        static string tokenDebug = "a4f806d995f496739c5ad34b8097bf6b";
+
         public static void Init()
         {
             try
@@ -48,8 +51,8 @@ namespace Calcflow.UserStatistics
 
                     // Setup tokens
                     var mixpanel = trackingObject.GetComponent<Mixpanel>();
-                    mixpanel.token = "5005f6e51ee4fcf77d39f8fc8699e225";
-                    mixpanel.debugToken = "a4f806d995f496739c5ad34b8097bf6b";
+                    mixpanel.token = tokenProduction;
+                    mixpanel.debugToken = tokenDebug;
                     mixpanel.trackInEditor = true;
 
                     // Mac addresses
@@ -73,6 +76,8 @@ namespace Calcflow.UserStatistics
                     machine["Mac"] = mac;
                     machine["Host"] = host;
                     machine["Unique"] = user;
+                    machine["Machine"] = Environment.MachineName;
+                    machine["Processors"] = Environment.ProcessorCount;
                     // User infos
                     StatsIdentify(user, host, machine);
                 }
@@ -190,6 +195,85 @@ namespace Calcflow.UserStatistics
             props["User"] = user;
             props["Host"] = host;
             props["Session"] = session;
+            props["Hardware"] = UnityEngine.VR.VRDevice.model;
+            foreach (var extra in extras)
+            {
+                var key = extra.Key;
+                var value = extra.Value;
+                if (value != null)
+                {
+                    if (value is double)
+                    {
+                        props[key] = (double)value;
+                    }
+                    if (value is long)
+                    {
+                        props[key] = (long)value;
+                    }
+                    if (value is int)
+                    {
+                        props[key] = (int)value;
+                    }
+                    if (value is short)
+                    {
+                        props[key] = (short)value;
+                    }
+                    if (value is float)
+                    {
+                        props[key] = (float)value;
+                    }
+                    if (value is byte)
+                    {
+                        props[key] = (byte)value;
+                    }
+                    if (value is char)
+                    {
+                        props[key] = (char)value;
+                    }
+                    if (value is string)
+                    {
+                        props[key] = (string)value;
+                    }
+                    if (value is Quaternion)
+                    {
+                        var vec = ((Quaternion)value).eulerAngles;
+                        props[key + ".x"] = vec.x;
+                        props[key + ".y"] = vec.y;
+                        props[key + ".z"] = vec.z;
+                    }
+                    if (value is Vector3)
+                    {
+                        var vec = (Vector3)value;
+                        props[key + ".x"] = vec.x;
+                        props[key + ".y"] = vec.y;
+                        props[key + ".z"] = vec.z;
+                    }
+                    if (value is Vector2)
+                    {
+                        var vec = (Vector2)value;
+                        props[key + ".x"] = vec.x;
+                        props[key + ".y"] = vec.y;
+                    }
+                    if (value is Bounds)
+                    {
+                        var rect = (Bounds)value;
+                        props[key + ".center.x"] = rect.center.x;
+                        props[key + ".center.y"] = rect.center.y;
+                        props[key + ".center.z"] = rect.center.z;
+                        props[key + ".size.x"] = rect.size.x;
+                        props[key + ".size.y"] = rect.size.y;
+                        props[key + ".size.z"] = rect.size.z;
+                    }
+                    if (value is Rect)
+                    {
+                        var rect = (Rect)value;
+                        props[key + ".center.x"] = rect.center.x;
+                        props[key + ".center.y"] = rect.center.y;
+                        props[key + ".size.x"] = rect.size.x;
+                        props[key + ".size.y"] = rect.size.y;
+                    }
+                }
+            }
             return props;
         }
 
@@ -198,7 +282,6 @@ namespace Calcflow.UserStatistics
         {
             try
             {
-                Debug.Log("Starting Stats");
                 Init();
                 if (!tracking)
                 {
