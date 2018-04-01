@@ -33,7 +33,10 @@ namespace CalcFlowUI
             {
                 eventName = gameObject.name;
             }
-            StatisticsTracking.StartEvent("ButtonPress", eventName);
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.StartEvent("ButtonPress", eventName);
+            }
         }
 
         public virtual void UnpressButton(GameObject other)
@@ -52,7 +55,10 @@ namespace CalcFlowUI
             {
                 eventName = gameObject.name;
             }
-            StatisticsTracking.EndEvent("ButtonPress", eventName);
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.EndEvent("ButtonPress", eventName);
+            }
         }
 
 #if UNITY_EDITOR
