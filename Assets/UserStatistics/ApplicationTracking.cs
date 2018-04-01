@@ -20,15 +20,12 @@ namespace Calcflow.UserStatistics
         void SceneChanged(Scene previousScene, Scene nextScene)
         {
             StatisticsTracking.EndAllStartedEvents();
-            if (previousScene.IsValid())
-            {
-                StatisticsTracking.EndEvent("Scene", previousScene.name);
-            }
             StatisticsTracking.StartEvent("Scene", nextScene.name);
         }
 
         void OnApplicationQuit()
         {
+            StatisticsTracking.EndAllStartedEvents();
             StatisticsTracking.EndEvent("Application", "Calcflow");
             StatisticsTracking.Flush();
             StatisticsTracking.StopTracking();

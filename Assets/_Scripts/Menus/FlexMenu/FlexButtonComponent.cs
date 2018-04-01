@@ -133,7 +133,7 @@ public class FlexButtonComponent : FlexActionableComponent
             {
                 eventName = gameObject.name;
             }
-            if (!eventName.Equals("Body"))
+            if (!eventName.Equals("Body") && _old == 1)
             {
                 StatisticsTracking.EndEvent("Button Hover", eventName);
             }
