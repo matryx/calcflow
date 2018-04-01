@@ -38,9 +38,6 @@ namespace Calcflow.UserStatistics
                 {
                     inited = true;
 
-                    // Ready to track
-                    tracking = true;
-
                     // Log
                     Debug.Log("Starting user statistics");
 
@@ -52,11 +49,20 @@ namespace Calcflow.UserStatistics
                     trackingObject.AddComponent<Mixpanel>();
                     GameObject.DontDestroyOnLoad(trackingObject);
 
+                    // Log
+                    Debug.Log("Created tracking objects");
+
                     // Setup tokens
                     var mixpanel = trackingObject.GetComponent<Mixpanel>();
                     mixpanel.token = tokenProduction;
                     mixpanel.debugToken = tokenDebug;
                     mixpanel.trackInEditor = true;
+
+                    // Ready to track
+                    tracking = true;
+
+                    // Log
+                    Debug.Log("Initialized tracking objects");
 
                     // Mac addresses
                     var macAddresses =
@@ -71,6 +77,9 @@ namespace Calcflow.UserStatistics
                     host = System.Net.Dns.GetHostName();
                     user = host + ":" + mac;
 
+                    // Log
+                    Debug.Log("Read user infos");
+
                     // Machine details
                     var machine = new Value();
                     machine["Mac"] = mac;
@@ -80,6 +89,9 @@ namespace Calcflow.UserStatistics
                     machine["Processors"] = Environment.ProcessorCount;
                     // User infos
                     StatsIdentify(user, host, machine);
+
+                    // Log
+                    Debug.Log("Start the tracking");
 
                     // Start the app tracking
                     trackingObject.AddComponent<ApplicationTracking>();

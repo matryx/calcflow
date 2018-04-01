@@ -10,11 +10,11 @@ public class AdvertisingScreen : MonoBehaviour
 
     void Awake()
     {
-        Calcflow.UserStatistics.StatisticsTracking.Init();
     }
     // Use this for initialization
     void Start()
     {
+        Calcflow.UserStatistics.StatisticsTracking.Init();
         Invoke("LoadScene", 5.0f);
     }
 
