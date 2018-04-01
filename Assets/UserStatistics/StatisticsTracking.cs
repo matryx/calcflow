@@ -2,12 +2,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 using System;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Linq;
-
-using mixpanel;
 
 namespace Calcflow.UserStatistics
 {
@@ -28,7 +27,8 @@ namespace Calcflow.UserStatistics
         static string user = "??-??";
 
         static string tokenProduction = "5005f6e51ee4fcf77d39f8fc8699e225";
-        static string tokenDebug = "a4f806d995f496739c5ad34b8097bf6b";
+        static string tokenDebug = "c6bd5ad95175ef01b440a5baaf8b49d2";
+        static string token = "";
 
         public static void Init()
         {
@@ -44,19 +44,12 @@ namespace Calcflow.UserStatistics
                     // Generate unique session id
                     session = Guid.NewGuid().ToString();
 
-                    // Create tracking components
-                    var trackingObject = new GameObject("Calcflow.UserStatistics.StatisticsTracking");
-                    trackingObject.AddComponent<Mixpanel>();
-                    GameObject.DontDestroyOnLoad(trackingObject);
-
-                    // Log
-                    Debug.Log("Created tracking objects");
-
-                    // Setup tokens
-                    var mixpanel = trackingObject.GetComponent<Mixpanel>();
-                    mixpanel.token = tokenProduction;
-                    mixpanel.debugToken = tokenDebug;
-                    mixpanel.trackInEditor = true;
+                    // Choose a token
+                    #if UNITY_EDITOR
+                    token = tokenDebug;
+                    #else
+                    token = tokenProduction;
+                    #endif
 
                     // Ready to track
                     tracking = true;
@@ -81,7 +74,7 @@ namespace Calcflow.UserStatistics
                     Debug.Log("Read user infos");
 
                     // Machine details
-                    var machine = new Value();
+                    var machine = new Dictionary<string, object>();
                     machine["Mac"] = mac;
                     machine["Host"] = host;
                     machine["Unique"] = user;
@@ -93,8 +86,10 @@ namespace Calcflow.UserStatistics
                     // Log
                     Debug.Log("Start the tracking");
 
-                    // Start the app tracking
+                    // Create tracking components
+                    var trackingObject = new GameObject("Calcflow.UserStatistics.StatisticsTracking");
                     trackingObject.AddComponent<ApplicationTracking>();
+                    GameObject.DontDestroyOnLoad(trackingObject);
                 }
             }
             catch (Exception e)
@@ -226,9 +221,9 @@ namespace Calcflow.UserStatistics
             });
         }
 
-        static Value EventProperties(string eventName, string eventStage, Dictionary<string, object> extras = null)
+        static Dictionary<string, object> EventProperties(string eventName, string eventStage, Dictionary<string, object> extras = null)
         {
-            var props = new Value();
+            var props = new Dictionary<string, object>();
             props["Name"] = eventName;
             props["Stage"] = eventStage;
             props["Scene"] = SceneManager.GetActiveScene().name;
@@ -341,11 +336,18 @@ namespace Calcflow.UserStatistics
             }
         }
 
-        static void StatsTrack(string name, Value props)
+        static void StatsTrack(string name, Dictionary<string, object> props)
         {
             if (tracking)
             {
-                Mixpanel.Track(name, props);
+                var jsonObject = new Dictionary<string, object>();
+                jsonObject["event"] = name;
+                var jsonProperties = props;
+                jsonProperties["token"] = token;
+                jsonProperties["distinct_id"] = user;
+                jsonObject["properties"] = jsonProperties;
+                var dataString = MakeDataString(jsonObject);
+                //Mixpanel.Track(name, props);
             }
         }
 
@@ -353,17 +355,23 @@ namespace Calcflow.UserStatistics
         {
             if (tracking)
             {
-                Mixpanel.FlushQueue();
+                //Mixpanel.FlushQueue();
             }
         }
 
-        static void StatsIdentify(string id, string name, Value props)
+        static void StatsIdentify(string id, string name, Dictionary<string, object> props)
         {
             if (tracking)
             {
-                Mixpanel.Identify(id.ToString());
-                Mixpanel.people.Name = name.ToString();
-                Mixpanel.people.Set(props);
+                var jsonObject = new Dictionary<string, object>();
+                jsonObject["$token"] = token;
+                jsonObject["$distinct_id"] = id;
+                jsonObject["$set"] = props;
+                props["User Name"] = name;
+                var dataString = MakeDataString(jsonObject);
+                //Mixpanel.Identify(id.ToString());
+                //Mixpanel.people.Name = name.ToString();
+                //Mixpanel.people.Set(props);
             }
         }
 
@@ -374,6 +382,25 @@ namespace Calcflow.UserStatistics
             var relativeTime = utcTime.Subtract(epochTime);
             return relativeTime.TotalSeconds;
         }
+
+        static string MakeDataString(Dictionary<string, object> json)
+        {
+            var jsonString = jsonWriter.SerializeString(jsonObject);
+            Debug.Log("Json Object: " + jsonString);
+            var bytesToEncode = Encoding.UTF8.GetBytes(jsonString);
+            var encodedText = Convert.ToBase64String(bytesToEncode);
+            Debug.Log("Json Base64: " + encodedText);
+            return encodedText;
+        }
+
+        /*
+        static string DoApiCall(string url, string data)
+        {
+            UnityWebRequest www = UnityWebRequest.Get("http://www.my-server.com");
+        }
+        */
+
+        static Nanome.Maths.Serializers.JsonSerializer.Serializer jsonWriter = new Nanome.Maths.Serializers.JsonSerializer.Serializer();
 
     }
 
