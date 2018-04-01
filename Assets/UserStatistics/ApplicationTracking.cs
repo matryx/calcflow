@@ -27,8 +27,21 @@ namespace Calcflow.UserStatistics
         {
             StatisticsTracking.EndAllStartedEvents();
             StatisticsTracking.EndEvent("Application", "Calcflow");
-            StatisticsTracking.Flush();
             StatisticsTracking.StopTracking();
+        }
+
+        public void DoRequest(string url, string data)
+        {
+            StartCoroutine(RequestCoroutine(url, data));
+        }
+
+        IEnumerator RequestCoroutine(string url, string data)
+        {
+            using (WWW www = new WWW(url + data))
+            {
+                yield return www;
+            }
+            yield return null;
         }
 
     }

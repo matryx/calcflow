@@ -30,6 +30,8 @@ namespace Calcflow.UserStatistics
         static string tokenDebug = "c6bd5ad95175ef01b440a5baaf8b49d2";
         static string token = "";
 
+        static ApplicationTracking tracker = null;
+
         public static void Init()
         {
             try
@@ -50,6 +52,13 @@ namespace Calcflow.UserStatistics
                     #else
                     token = tokenProduction;
                     #endif
+
+                    // Create tracking components
+                    var trackingObject = new GameObject("Calcflow.UserStatistics.StatisticsTracking");
+                    trackingObject.AddComponent<ApplicationTracking>();
+                    GameObject.DontDestroyOnLoad(trackingObject);
+
+                    tracker = trackingObject.GetComponent<ApplicationTracking>();
 
                     // Ready to track
                     tracking = true;
@@ -85,11 +94,6 @@ namespace Calcflow.UserStatistics
 
                     // Log
                     Debug.Log("Start the tracking");
-
-                    // Create tracking components
-                    var trackingObject = new GameObject("Calcflow.UserStatistics.StatisticsTracking");
-                    trackingObject.AddComponent<ApplicationTracking>();
-                    GameObject.DontDestroyOnLoad(trackingObject);
                 }
             }
             catch (Exception e)
@@ -180,17 +184,6 @@ namespace Calcflow.UserStatistics
                 props["Duration"] = duration;
                 // Send stats
                 StatsTrack(eventType + " End", props);
-            });
-        }
-
-        public static void Flush()
-        {
-            SafeStatsCall(delegate()
-            {
-                // Log
-                Debug.Log("EventTracking, Flushing");
-                // Flush
-                StatsFlush();
             });
         }
 
@@ -347,15 +340,7 @@ namespace Calcflow.UserStatistics
                 jsonProperties["distinct_id"] = user;
                 jsonObject["properties"] = jsonProperties;
                 var dataString = MakeDataString(jsonObject);
-                //Mixpanel.Track(name, props);
-            }
-        }
-
-        static void StatsFlush()
-        {
-            if (tracking)
-            {
-                //Mixpanel.FlushQueue();
+                SendDataString("http://api.mixpanel.com/track/?data=", dataString);
             }
         }
 
@@ -367,11 +352,9 @@ namespace Calcflow.UserStatistics
                 jsonObject["$token"] = token;
                 jsonObject["$distinct_id"] = id;
                 jsonObject["$set"] = props;
-                props["User Name"] = name;
+                props["$name"] = name;
                 var dataString = MakeDataString(jsonObject);
-                //Mixpanel.Identify(id.ToString());
-                //Mixpanel.people.Name = name.ToString();
-                //Mixpanel.people.Set(props);
+                SendDataString("http://api.mixpanel.com/engage/?data=", dataString);
             }
         }
 
@@ -383,22 +366,18 @@ namespace Calcflow.UserStatistics
             return relativeTime.TotalSeconds;
         }
 
-        static string MakeDataString(Dictionary<string, object> json)
+        static string MakeDataString(Dictionary<string, object> jsonObject)
         {
             var jsonString = jsonWriter.SerializeString(jsonObject);
-            Debug.Log("Json Object: " + jsonString);
             var bytesToEncode = Encoding.UTF8.GetBytes(jsonString);
             var encodedText = Convert.ToBase64String(bytesToEncode);
-            Debug.Log("Json Base64: " + encodedText);
             return encodedText;
         }
 
-        /*
-        static string DoApiCall(string url, string data)
+        static void SendDataString(string url, string data)
         {
-            UnityWebRequest www = UnityWebRequest.Get("http://www.my-server.com");
+            tracker.DoRequest(url, data);
         }
-        */
 
         static Nanome.Maths.Serializers.JsonSerializer.Serializer jsonWriter = new Nanome.Maths.Serializers.JsonSerializer.Serializer();
 
