@@ -46,6 +46,7 @@ public class ScalableObject : GrabbableObject
 
     protected override void OnDestroy()
     {
+        base.OnDestroy();
         StatisticsTracking.InstantEvent("Average Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
     }
 
