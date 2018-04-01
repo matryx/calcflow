@@ -140,7 +140,7 @@ public class CalcManager : MonoBehaviour
             }
         }
         //expression["expression"] = expressionString;
-        StatisticsTracking.InstantEvent("LoadExpression", expressionString);
+        StatisticsTracking.InstantEvent("Load Expression", expressionString);
 
         paramSurface.expressionSets = ess;
         pieceWiseControl.ForceNumberOfTabs(ess.Count);

@@ -118,7 +118,7 @@ public class FlexButtonComponent : FlexActionableComponent
             }
             if (!eventName.Equals("Body"))
             {
-                StatisticsTracking.StartEvent("ButtonHover", eventName);
+                StatisticsTracking.StartEvent("Button Hover", eventName);
             }
         }
         else if (_new == 2)
@@ -135,7 +135,7 @@ public class FlexButtonComponent : FlexActionableComponent
             }
             if (!eventName.Equals("Body"))
             {
-                StatisticsTracking.EndEvent("ButtonHover", eventName);
+                StatisticsTracking.EndEvent("Button Hover", eventName);
             }
         }
     }

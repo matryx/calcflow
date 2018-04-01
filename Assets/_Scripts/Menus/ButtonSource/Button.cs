@@ -27,15 +27,12 @@ namespace CalcFlowUI
             if (OnButtonEnter != null)
                 OnButtonEnter.Invoke(other);
 
-
-            string eventName = "Unknown";
-            if (gameObject != null)
-            {
-                eventName = gameObject.name;
-            }
+            string eventName = gameObject.name;
+            var extra = new Dictionary<string, object>();
+            extra["parent"] = gameObject.transform.parent.name;
             if (!eventName.Equals("Body"))
             {
-                StatisticsTracking.StartEvent("ButtonPress", eventName);
+                StatisticsTracking.StartEvent("Button Press", eventName, extra);
             }
         }
 
@@ -50,14 +47,10 @@ namespace CalcFlowUI
             if (OnButtonExit != null)
                 OnButtonExit.Invoke(other);
 
-            string eventName = "Unknown";
-            if (gameObject != null)
-            {
-                eventName = gameObject.name;
-            }
+            string eventName = gameObject.name;
             if (!eventName.Equals("Body"))
             {
-                StatisticsTracking.EndEvent("ButtonPress", eventName);
+                StatisticsTracking.EndEvent("Button Press", eventName);
             }
         }
 
