@@ -10,11 +10,10 @@ public class ScalableObject : GrabbableObject
 {
     float distance;
 
-    uint count = 0;
+    uint count = 1;
     uint skipCount = 0;
-    const uint skip = 0;
+    const uint skip = 60;
     Vector3 average;
-
 
     protected override void Start()
     {
@@ -32,13 +31,13 @@ public class ScalableObject : GrabbableObject
     {
         if(count == uint.MaxValue)
         {
-            count = 0;
+            count = 1;
             StatisticsTracking.InstantEvent("Averge Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
         }
         if(skipCount++ >= skip)
         {
             skipCount = 0;
-            float weight = 1 / count;
+            float weight = 1f / count;
             average = (average + transform.localScale * weight) / (1 + weight);
             count++;
         }
