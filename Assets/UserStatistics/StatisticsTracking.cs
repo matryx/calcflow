@@ -190,7 +190,7 @@ namespace Calcflow.UserStatistics
 
         public static void Flush()
         {
-            SafeStatsCall(delegate()
+            SafeStatsCall(delegate ()
             {
                 // Log
                 Debug.Log("EventTracking, Flushing");
@@ -373,6 +373,18 @@ namespace Calcflow.UserStatistics
             var epochTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var relativeTime = utcTime.Subtract(epochTime);
             return relativeTime.TotalSeconds;
+        }
+
+        static IEnumerator SendJsonObj(string json)
+        {
+            const string endpoint = "http://api.mixpanel.com/track/";
+
+            using (WWW www = new WWW(endpoint + json))
+            {
+                yield return www;
+                // Log 
+                Debug.Log("success" + www.text);
+            }
         }
 
     }
