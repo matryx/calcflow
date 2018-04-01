@@ -111,7 +111,7 @@ namespace Calcflow.UserStatistics
             });
         }
 
-        public static void StartEvent(string eventType, string eventName, Dictionary<string, object> extras = null, bool clearable = false)
+        public static void StartEvent(string eventType, string eventName, Dictionary<string, object> extras = null, bool clearable = true)
         {
             SafeStatsCall(delegate ()
             {
@@ -335,7 +335,6 @@ namespace Calcflow.UserStatistics
         {
             if (tracking)
             {
-                Debug.LogWarning("Track: " + name);
                 Mixpanel.Track(name, props);
             }
         }
@@ -344,7 +343,6 @@ namespace Calcflow.UserStatistics
         {
             if (tracking)
             {
-                Debug.LogWarning("FlushStats");
                 Mixpanel.FlushQueue();
             }
         }

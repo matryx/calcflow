@@ -13,8 +13,7 @@ namespace Calcflow.UserStatistics
 
         void Awake()
         {
-            Debug.LogWarning("OnAwake");
-            StatisticsTracking.StartEvent("Application", "Calcflow");
+            StatisticsTracking.StartEvent("Application", "Calcflow", null, false);
             SceneManager.activeSceneChanged += SceneChanged;
         }
 
