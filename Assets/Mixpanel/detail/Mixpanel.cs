@@ -149,6 +149,15 @@ public class Mixpanel : global::System.IDisposable {
     if (MixpanelSDKPINVOKE.SWIGPendingException.Pending) throw MixpanelSDKPINVOKE.SWIGPendingException.Retrieve();
   }
 
+  public bool has_tracked_integration() {
+    bool ret = MixpanelSDKPINVOKE.Mixpanel_has_tracked_integration(swigCPtr);
+    return ret;
+  }
+
+  public void set_tracked_integration() {
+    MixpanelSDKPINVOKE.Mixpanel_set_tracked_integration(swigCPtr);
+  }
+
   public class People : global::System.IDisposable {
     private global::System.Runtime.InteropServices.HandleRef swigCPtr;
     protected bool swigCMemOwn;

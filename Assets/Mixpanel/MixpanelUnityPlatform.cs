@@ -15,12 +15,15 @@ namespace mixpanel.platform
                 AndroidJavaObject currentActivity = up.GetStatic<AndroidJavaObject>("currentActivity");
                 AndroidJavaClass client = new AndroidJavaClass("com.google.android.gms.ads.identifier.AdvertisingIdClient");
                 AndroidJavaObject adInfo = client.CallStatic<AndroidJavaObject>("getAdvertisingIdInfo",currentActivity);
-                return adInfo.Call<string>("getId"); // note: we're not using the id for advertising
+                if (adInfo != null)
+                {
+                    return adInfo.Call<string>("getId"); // note: we're not using the id for advertising
+                }
             }
             catch (AndroidJavaException e)
             {
-                return null;
             }
+            return null;
         }
 
         public static string get_android_id()

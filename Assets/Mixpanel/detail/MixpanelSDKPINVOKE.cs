@@ -650,6 +650,20 @@ class MixpanelSDKPINVOKE {
   public static extern void Mixpanel_track__SWIG_1(global::System.Runtime.InteropServices.HandleRef jarg1, string jarg2);
 
   #if (UNITY_IPHONE || UNITY_XBOX360) && !UNITY_EDITOR
+    [global::System.Runtime.InteropServices.DllImport("__Internal", EntryPoint="CSharp_mixpanelfdetail_Mixpanel_has_tracked_integration___")]
+  #else
+    [global::System.Runtime.InteropServices.DllImport("MixpanelSDK", EntryPoint="CSharp_mixpanelfdetail_Mixpanel_has_tracked_integration___")]
+  #endif
+  public static extern bool Mixpanel_has_tracked_integration(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  #if (UNITY_IPHONE || UNITY_XBOX360) && !UNITY_EDITOR
+    [global::System.Runtime.InteropServices.DllImport("__Internal", EntryPoint="CSharp_mixpanelfdetail_Mixpanel_set_tracked_integration___")]
+  #else
+    [global::System.Runtime.InteropServices.DllImport("MixpanelSDK", EntryPoint="CSharp_mixpanelfdetail_Mixpanel_set_tracked_integration___")]
+  #endif
+  public static extern void Mixpanel_set_tracked_integration(global::System.Runtime.InteropServices.HandleRef jarg1);
+
+  #if (UNITY_IPHONE || UNITY_XBOX360) && !UNITY_EDITOR
     [global::System.Runtime.InteropServices.DllImport("__Internal", EntryPoint="CSharp_mixpanelfdetail_Mixpanel_People_set___")]
   #else
     [global::System.Runtime.InteropServices.DllImport("MixpanelSDK", EntryPoint="CSharp_mixpanelfdetail_Mixpanel_People_set___")]
