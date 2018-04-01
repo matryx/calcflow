@@ -2,21 +2,51 @@
 using System.Collections;
 //using OvrTouch.Hands;
 using NanoVRController;
+using Calcflow.UserStatistics;
+using System.Collections.Generic;
 
 
 public class ScalableObject : GrabbableObject
 {
     float distance;
 
+    uint count = 0;
+    uint skipCount = 0;
+    const uint skip = 0;
+    Vector3 average;
+
+
     protected override void Start()
     {
         base.Start();
+        average = transform.localScale;
     }
 
     protected override void Update()
     {
         if(activeGrabbers.Count > 0)
             UpdatePivot();
+    }
+
+    protected override void FixedUpdate()
+    {
+        if(count == uint.MaxValue)
+        {
+            count = 0;
+            StatisticsTracking.InstantEvent("Averge Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
+        }
+        if(skipCount++ >= skip)
+        {
+            skipCount = 0;
+            float weight = 1 / count;
+            average = (average + transform.localScale * weight) / (1 + weight);
+            count++;
+        }
+    }
+
+    protected override void OnDestroy()
+    {
+        StatisticsTracking.InstantEvent("Averge Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
     }
 
     protected override void OnRegisterController(Grabber g)
