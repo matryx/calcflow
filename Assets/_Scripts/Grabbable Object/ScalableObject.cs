@@ -29,6 +29,7 @@ public class ScalableObject : GrabbableObject
 
     protected override void FixedUpdate()
     {
+        base.FixedUpdate();
         if(count == uint.MaxValue)
         {
             count = 1;
