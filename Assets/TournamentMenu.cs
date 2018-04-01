@@ -212,7 +212,7 @@ public class TournamentMenu : MonoBehaviour
         Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Tournament Menu",
         new Dictionary<string, object>()
         {
-            {"buttonName", source.name}
+            {"Button Name", source.name}
         });
     }
 }
