@@ -98,14 +98,6 @@ public class CalcInput : MonoBehaviour
         }
         #endregion
         calcManager.updateText = true;
-
-        // @stats
-        // calculator button
-        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Calculator",
-        new Dictionary<string, object>()
-        {
-            {"buttonName", buttonID}
-        });
     }
 
     public void Initialize(CalcManager cm)

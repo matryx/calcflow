@@ -121,12 +121,6 @@ public class OutputMenu : MonoBehaviour
                 break;
         }
         calcManager.manageText();
-
-        // @stats
-        // calcmanager - core ui
-        var extras = new Dictionary<string, object>();
-        extras["buttonName"] = source;
-        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Caculator Utility", extras);
     }
 
     private void Update()
