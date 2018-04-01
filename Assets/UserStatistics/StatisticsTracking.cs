@@ -48,16 +48,19 @@ namespace Calcflow.UserStatistics
 
                     // Create tracking components
                     var trackingObject = new GameObject("Calcflow.UserStatistics.StatisticsTracking");
+                    trackingObject.SetActive(false);
                     trackingObject.AddComponent<Mixpanel>();
                     trackingObject.AddComponent<ApplicationTracking>();
-                    trackingObject.SetActive(true);
-                    GameObject.DontDestroyOnLoad(trackingObject);
 
                     // Setup tokens
                     var mixpanel = trackingObject.GetComponent<Mixpanel>();
                     mixpanel.token = tokenProduction;
                     mixpanel.debugToken = tokenDebug;
                     mixpanel.trackInEditor = true;
+
+                    // Boom start
+                    trackingObject.SetActive(true);
+                    GameObject.DontDestroyOnLoad(trackingObject);
 
                     // Mac addresses
                     var macAddresses =
@@ -87,6 +90,11 @@ namespace Calcflow.UserStatistics
             {
                 Debug.LogError("Could not initialize user tracking: " + e);
             }
+        }
+
+        public static void StopTracking()
+        {
+            tracking = false;
         }
 
         public static void InstantEvent(string eventType, string eventName, Dictionary<string, object> extras = null)
@@ -138,7 +146,8 @@ namespace Calcflow.UserStatistics
                 {
                     if (startTimes.TryGetValue(key, out startTime))
                     {
-                        props["Duration"] = startTime;
+                        Debug.Log("Duration of stuff: " + key + " -> " + (Now() - startTime));
+                        props["Duration"] = Now() - startTime;
                         startTimes.Remove(key);
                     }
                 }
@@ -172,7 +181,6 @@ namespace Calcflow.UserStatistics
                     {
                         keys.Add(key);
                     }
-                    startTimes.Clear();
                 }
                 // Loop over non-finished events
                 foreach (var key in keys)

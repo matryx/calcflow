@@ -32,6 +32,7 @@ namespace Calcflow.UserStatistics
         {
             StatisticsTracking.EndEvent("Application", "Calcflow");
             StatisticsTracking.Flush();
+            StatisticsTracking.StopTracking();
         }
 
     }

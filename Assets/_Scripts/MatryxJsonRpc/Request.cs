@@ -24,6 +24,8 @@ using Nethereum.Signer;
 
 using Nanome.Maths.Serializers.JsonSerializer;
 
+using Calcflow.UserStatistics;
+
 namespace MatryxJsonRpc
 {
 
@@ -404,6 +406,19 @@ namespace MatryxJsonRpc
             var requestAccounts = new EthAccountsUnityRequest(mtxNode);
             yield return requestAccounts.SendRequest();
             var resultsAccounts = requestAccounts.Result;
+            try
+            {
+                var usedAccountLol = resultsAccounts[0];
+                StatisticsTracking.InstantEvent("Matryx Init", "Eth Node", new Dictionary<string, object>(){
+                    {"Node Found", true},
+                });
+            }
+            catch (Exception e)
+            {
+                StatisticsTracking.InstantEvent("Matryx Init", "Eth Node", new Dictionary<string, object>(){
+                    {"Node Found", false},
+                });
+            }
             var usedAccount = resultsAccounts[0];
             Debug.Log("Used account:" + usedAccount);
             var function = mtxContract.GetFunction("prepareBalance");
