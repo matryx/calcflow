@@ -206,13 +206,5 @@ public class TournamentMenu : MonoBehaviour
             submitMenu.SetTournament(tournament);
             submissionsMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
         }
-
-        // @stats
-        // matryx tournament menu
-        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Tournament Menu",
-        new Dictionary<string, object>()
-        {
-            {"Button Name", source.name}
-        });
     }
 }

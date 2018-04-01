@@ -338,13 +338,5 @@ public class PresetMenu : MonoBehaviour
         expressionSet.AddRange("v", vmin, vmax);
         expressionSet.AddRange("w", wmin, wmax);
         calcManager.PresetPressed();
-
-        // @stats
-        // preset
-        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Preset",
-        new Dictionary<string, object>()
-        {
-            {"buttonName", source}
-        });
     }
 }

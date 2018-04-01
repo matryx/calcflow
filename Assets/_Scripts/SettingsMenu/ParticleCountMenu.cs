@@ -47,14 +47,6 @@ public class ParticleCountMenu : MonoBehaviour
                 break;
         }
         #endregion
-
-        // @stats
-        // particle setting
-        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Particle Setting",
-        new Dictionary<string, object>()
-        {
-            {"buttonName", buttonID}
-        });
     }
 
     CustomParametrizedSurface paramSurface;

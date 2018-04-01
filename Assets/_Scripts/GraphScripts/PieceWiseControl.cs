@@ -80,15 +80,6 @@ public class PieceWiseControl : MonoBehaviour
                 SwitchToTab(sender.gameObject);
                 break;
         }
-
-        // @stats
-        // tab/piecewise
-        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "Tab",
-        new Dictionary<string, object>()
-        {
-            {"buttonName", sender.name},
-            {"tabCount", tabList.Count}
-        });
     }
 
     void AddTab()
