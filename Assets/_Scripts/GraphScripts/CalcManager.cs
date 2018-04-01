@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Calcflow.UserStatistics;
 
 public class CalcManager : MonoBehaviour
 {
@@ -121,12 +122,26 @@ public class CalcManager : MonoBehaviour
 
     public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
     {
+
         List<ExpressionSet> ess = new List<ExpressionSet>();
         for (int i = 0; i < expressionSets.Count; i++)
         {
             ess.Add(expressionSets[i].DeepCopy());
             ess[ess.Count - 1].CompileAll();
         }
+
+        //var expression = new Dictionary<string, object>();
+        var expressionString = "";
+        foreach(var es in ess)
+        {
+            foreach (var e in es.expressions)
+            {
+                expressionString += e.Value.AKExpression.ToString() + "\n";
+            }
+        }
+        //expression["expression"] = expressionString;
+        StatisticsTracking.InstantEvent("LoadExpression", expressionString);
+
         paramSurface.expressionSets = ess;
         pieceWiseControl.ForceNumberOfTabs(ess.Count);
         expressionSet = paramSurface.expressionSets[0];
