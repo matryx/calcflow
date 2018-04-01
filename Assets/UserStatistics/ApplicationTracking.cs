@@ -11,9 +11,9 @@ namespace Calcflow.UserStatistics
     public class ApplicationTracking : MonoBehaviour
     {
 
-        void OnAwake()
+        void Awake()
         {
-            StatisticsTracking.StartEvent("Application", "Calcflow");
+            StatisticsTracking.StartEvent("Application", "Calcflow", null, false);
             SceneManager.activeSceneChanged += SceneChanged;
         }
 
@@ -31,6 +31,7 @@ namespace Calcflow.UserStatistics
         {
             StatisticsTracking.EndEvent("Application", "Calcflow");
             StatisticsTracking.Flush();
+            StatisticsTracking.StopTracking();
         }
 
     }

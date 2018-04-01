@@ -1,6 +1,6 @@
 ﻿/*
     *** do not modify the line below, it is updated by the build scripts ***
-    Mixpanel SDK for Unity version v1.1.1
+    Mixpanel SDK for Unity version v1.0.1
 */
 
 #if !UNITY_PRO_LICENSE && (UNITY_2_6||UNITY_2_6_1||UNITY_3_0||UNITY_3_0_0||UNITY_3_1||UNITY_3_2||UNITY_3_3||UNITY_3_4||UNITY_3_5||UNITY_4_0||UNITY_4_0_1||UNITY_4_1||UNITY_4_2||UNITY_4_3||UNITY_4_5||UNITY_4_6)
@@ -555,30 +555,12 @@ namespace mixpanel
 
         static bool tracking_enabled = true;
 
-        private string BuildTrackIntegrationRequestURL() {
-            string body = "{\"event\":\"Integration\",\"properties\":{\"token\":\"85053bf24bba75239b16a601d9387e17\",\"mp_lib\":\"unity\",\"distinct_id\":\"" + this.token +"\"}}";
-            byte[] bytes = Encoding.UTF8.GetBytes(body);
-            string encoded = Convert.ToBase64String(bytes);
-            return "https://api.mixpanel.com/track/?data=" + encoded;
-        }
-
-        private IEnumerator<WWW> WaitForRequest(WWW request) {
-            yield return request;
-            instance.set_tracked_integration();
-        }
-
-        private void TrackIntegrationEvent() {
-            if (instance.has_tracked_integration()) {
-                return;
-            }
-            string url = BuildTrackIntegrationRequestURL();
-            var request = new WWW(url);
-            StartCoroutine(WaitForRequest(request));
-        }
-
         void Awake()
         {
             DontDestroyOnLoad(this);
+
+            var reporter = gameObject.AddComponent<IntegrationReporter>();
+            reporter.token = token;
 
             #if UNITY_EDITOR
             tracking_enabled = trackInEditor;
@@ -609,8 +591,8 @@ namespace mixpanel
                 Register("$screen_dpi", Screen.dpi);
 
                 #if UNITY_ANDROID && !UNITY_EDITOR
-                Register("$app_build_number", platform.MixpanelUnityPlatform.get_android_version_code());
-                Register("$app_version_string", platform.MixpanelUnityPlatform.get_android_version_name());
+                Register("$app_build_number", platform.MixpanelUnityPlatform.get_android_version_name());
+                Register("$app_version_string", platform.MixpanelUnityPlatform.get_android_version_code());
 
                 people.Set("$android_app_version_string", platform.MixpanelUnityPlatform.get_android_version_name());
                 people.Set("$android_app_build_number", platform.MixpanelUnityPlatform.get_android_version_code());
@@ -646,8 +628,6 @@ namespace mixpanel
                 }
 
                 mp_interface.set_flush_interval((uint)flushInterval);
-
-                TrackIntegrationEvent();
             }
         }
 
@@ -692,5 +672,33 @@ namespace mixpanel
 
         static People people_;
         #endregion
+    }
+
+    class IntegrationReporter : MonoBehaviour {
+        public string token = null;
+
+        void Update() {
+            if (token == null || token.Length == 0) return;
+
+            enabled = false;
+            string url = BuildRequestURL();
+            var request = new WWW(url);
+            StartCoroutine(WaitForRequest(request));
+        }
+
+        string BuildRequestURL() {
+            string body = "{\"event\":\"Integration\",\"properties\":{\"token\":\"85053bf24bba75239b16a601d9387e17\",\"mp_lib\":\"unity\",\"distinct_id\":\"" + this.token +"\"}}";
+            byte[] bytes = Encoding.UTF8.GetBytes(body);
+            string encoded = Convert.ToBase64String(bytes);
+            return "https://api.mixpanel.com/track/?data=" + encoded;
+        }
+
+        IEnumerator<WWW> WaitForRequest(WWW request) {
+            yield return request;
+
+            if (request.error != null) {
+                enabled = true;
+            }
+        }
     }
 }

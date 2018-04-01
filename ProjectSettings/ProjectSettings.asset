@@ -141,6 +141,7 @@ PlayerSettings:
   protectGraphicsMemory: 0
   useHDRDisplay: 0
   applicationIdentifier:
+    '': com.oculus.UnitySample
     Android: com.oculus.UnitySample
     Standalone: unity.nanome.Calcflow
     Tizen: com.oculus.UnitySample
@@ -308,6 +309,9 @@ PlayerSettings:
     m_Devices: []
   - m_BuildTarget: tvOS
     m_Enabled: 0
+    m_Devices: []
+  - m_BuildTarget: 
+    m_Enabled: 1
     m_Devices: []
   openGLRequireES31: 0
   openGLRequireES31AEP: 0
@@ -583,7 +587,8 @@ PlayerSettings:
     WebPlayer: 0
   incrementalIl2cppBuild: {}
   additionalIl2CppArgs: 
-  apiCompatibilityLevelPerPlatform: {}
+  apiCompatibilityLevelPerPlatform:
+    Standalone: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: NGonVive
