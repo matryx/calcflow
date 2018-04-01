@@ -49,6 +49,11 @@ public class ScalableObject : GrabbableObject
         StatisticsTracking.InstantEvent("Averge Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
     }
 
+    protected void OnApplicationQuit()
+    {
+        StatisticsTracking.InstantEvent("Averge Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
+    }
+
     protected override void OnRegisterController(Grabber g)
     {
         KillMomentum();
