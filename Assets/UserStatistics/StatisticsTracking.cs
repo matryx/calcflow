@@ -37,6 +37,9 @@ namespace Calcflow.UserStatistics
                 {
                     inited = true;
 
+                    // Ready to track
+                    tracking = true;
+
                     // Log
                     Debug.Log("Starting user statistics");
 
@@ -47,6 +50,7 @@ namespace Calcflow.UserStatistics
                     var trackingObject = new GameObject("Calcflow.UserStatistics.StatisticsTracking");
                     trackingObject.AddComponent<Mixpanel>();
                     trackingObject.AddComponent<ApplicationTracking>();
+                    trackingObject.SetActive(true);
                     GameObject.DontDestroyOnLoad(trackingObject);
 
                     // Setup tokens
@@ -67,9 +71,6 @@ namespace Calcflow.UserStatistics
                     mac = macAddresses.FirstOrDefault();
                     host = System.Net.Dns.GetHostName();
                     user = host + ":" + mac;
-
-                    // Ready to track
-                    tracking = true;
 
                     // Machine details
                     var machine = new Value();
@@ -196,81 +197,84 @@ namespace Calcflow.UserStatistics
             props["Host"] = host;
             props["Session"] = session;
             props["Hardware"] = UnityEngine.VR.VRDevice.model;
-            foreach (var extra in extras)
+            if (extras != null)
             {
-                var key = extra.Key;
-                var value = extra.Value;
-                if (value != null)
+                foreach (var extra in extras)
                 {
-                    if (value is double)
+                    var key = extra.Key;
+                    var value = extra.Value;
+                    if (value != null)
                     {
-                        props[key] = (double)value;
-                    }
-                    if (value is long)
-                    {
-                        props[key] = (long)value;
-                    }
-                    if (value is int)
-                    {
-                        props[key] = (int)value;
-                    }
-                    if (value is short)
-                    {
-                        props[key] = (short)value;
-                    }
-                    if (value is float)
-                    {
-                        props[key] = (float)value;
-                    }
-                    if (value is byte)
-                    {
-                        props[key] = (byte)value;
-                    }
-                    if (value is char)
-                    {
-                        props[key] = (char)value;
-                    }
-                    if (value is string)
-                    {
-                        props[key] = (string)value;
-                    }
-                    if (value is Quaternion)
-                    {
-                        var vec = ((Quaternion)value).eulerAngles;
-                        props[key + ".x"] = vec.x;
-                        props[key + ".y"] = vec.y;
-                        props[key + ".z"] = vec.z;
-                    }
-                    if (value is Vector3)
-                    {
-                        var vec = (Vector3)value;
-                        props[key + ".x"] = vec.x;
-                        props[key + ".y"] = vec.y;
-                        props[key + ".z"] = vec.z;
-                    }
-                    if (value is Vector2)
-                    {
-                        var vec = (Vector2)value;
-                        props[key + ".x"] = vec.x;
-                        props[key + ".y"] = vec.y;
-                    }
-                    if (value is Bounds)
-                    {
-                        var rect = (Bounds)value;
-                        props[key + ".center.x"] = rect.center.x;
-                        props[key + ".center.y"] = rect.center.y;
-                        props[key + ".center.z"] = rect.center.z;
-                        props[key + ".size.x"] = rect.size.x;
-                        props[key + ".size.y"] = rect.size.y;
-                        props[key + ".size.z"] = rect.size.z;
-                    }
-                    if (value is Rect)
-                    {
-                        var rect = (Rect)value;
-                        props[key + ".center.x"] = rect.center.x;
-                        props[key + ".center.y"] = rect.center.y;
-                        props[key + ".size.x"] = rect.size.x;
-                        props[key + ".size.y"] = rect.size.y;
+                        if (value is double)
+                        {
+                            props[key] = (double)value;
+                        }
+                        if (value is long)
+                        {
+                            props[key] = (long)value;
+                        }
+                        if (value is int)
+                        {
+                            props[key] = (int)value;
+                        }
+                        if (value is short)
+                        {
+                            props[key] = (short)value;
+                        }
+                        if (value is float)
+                        {
+                            props[key] = (float)value;
+                        }
+                        if (value is byte)
+                        {
+                            props[key] = (byte)value;
+                        }
+                        if (value is char)
+                        {
+                            props[key] = (char)value;
+                        }
+                        if (value is string)
+                        {
+                            props[key] = (string)value;
+                        }
+                        if (value is Quaternion)
+                        {
+                            var vec = ((Quaternion)value).eulerAngles;
+                            props[key + ".x"] = vec.x;
+                            props[key + ".y"] = vec.y;
+                            props[key + ".z"] = vec.z;
+                        }
+                        if (value is Vector3)
+                        {
+                            var vec = (Vector3)value;
+                            props[key + ".x"] = vec.x;
+                            props[key + ".y"] = vec.y;
+                            props[key + ".z"] = vec.z;
+                        }
+                        if (value is Vector2)
+                        {
+                            var vec = (Vector2)value;
+                            props[key + ".x"] = vec.x;
+                            props[key + ".y"] = vec.y;
+                        }
+                        if (value is Bounds)
+                        {
+                            var rect = (Bounds)value;
+                            props[key + ".center.x"] = rect.center.x;
+                            props[key + ".center.y"] = rect.center.y;
+                            props[key + ".center.z"] = rect.center.z;
+                            props[key + ".size.x"] = rect.size.x;
+                            props[key + ".size.y"] = rect.size.y;
+                            props[key + ".size.z"] = rect.size.z;
+                        }
+                        if (value is Rect)
+                        {
+                            var rect = (Rect)value;
+                            props[key + ".center.x"] = rect.center.x;
+                            props[key + ".center.y"] = rect.center.y;
+                            props[key + ".size.x"] = rect.size.x;
+                            props[key + ".size.y"] = rect.size.y;
+                        }
                     }
                 }
             }
@@ -299,6 +303,7 @@ namespace Calcflow.UserStatistics
         {
             if (tracking)
             {
+                Debug.LogWarning("Track: " + name);
                 Mixpanel.Track(name, props);
             }
         }
@@ -307,6 +312,7 @@ namespace Calcflow.UserStatistics
         {
             if (tracking)
             {
+                Debug.LogWarning("FlushStats");
                 Mixpanel.FlushQueue();
             }
         }

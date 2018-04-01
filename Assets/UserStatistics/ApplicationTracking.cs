@@ -11,8 +11,9 @@ namespace Calcflow.UserStatistics
     public class ApplicationTracking : MonoBehaviour
     {
 
-        void OnAwake()
+        void Awake()
         {
+            Debug.LogWarning("OnAwake");
             StatisticsTracking.StartEvent("Application", "Calcflow");
             SceneManager.activeSceneChanged += SceneChanged;
         }

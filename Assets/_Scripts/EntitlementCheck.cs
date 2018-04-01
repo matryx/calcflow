@@ -10,6 +10,7 @@ public class EntitlementCheck
         //Core.Initialize("1143046855744783"); // CalcFlow app ID
         Core.Initialize(); // CalcFlow app ID
         Debug.Log("Checking of user has valid entitlement..");
+        return;
         Entitlements.IsUserEntitledToApplication().OnComplete(
             (Message msg) =>
             {
