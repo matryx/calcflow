@@ -32,7 +32,7 @@ public class ScalableObject : GrabbableObject
         if(count == uint.MaxValue)
         {
             count = 1;
-            StatisticsTracking.InstantEvent("Averge Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
+            StatisticsTracking.InstantEvent("Average Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
         }
         if(skipCount++ >= skip)
         {
@@ -45,12 +45,12 @@ public class ScalableObject : GrabbableObject
 
     protected override void OnDestroy()
     {
-        StatisticsTracking.InstantEvent("Averge Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
+        StatisticsTracking.InstantEvent("Average Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
     }
 
     protected void OnApplicationQuit()
     {
-        StatisticsTracking.InstantEvent("Averge Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
+        StatisticsTracking.InstantEvent("Average Size", gameObject.name, new Dictionary<string, object>() { {"Size", average } });
     }
 
     protected override void OnRegisterController(Grabber g)
