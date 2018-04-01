@@ -122,11 +122,10 @@ public class SaveLoadMenu : MonoBehaviour
 
         // @stats
         // save load panel
-        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Button Click", "SaveLoad Menu",
+        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Save Load", source.name,
         new Dictionary<string, object>()
         {
-            {"buttonName", source.name},
-            {"deletion", delete}
+            {"Deletion", delete}
         });
     }
 
