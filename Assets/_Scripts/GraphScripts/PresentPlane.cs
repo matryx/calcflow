@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class PresentPlane : MonoBehaviour {
 
-	public Transform point1;
-	public Transform point2;
-	public Transform point3;
+	public Transform point1, point2, point3;
 	public Transform centerPt;
+	public TextMesh pt1Label, pt2Label, pt3Label;
 
 	public Transform plane;
 	public Transform forwardPlane;
@@ -16,24 +15,20 @@ public class PresentPlane : MonoBehaviour {
 	public List<GameObject> walls;
 
 	public PtManager ptManager;
-	private PtCoord rawPt1;
-	private PtCoord rawPt2;
-	private PtCoord rawPt3;
+	private PtCoord rawPt1, rawPt2, rawPt3;
 
 	public Vector3 center;
-	
-
 	public PtSet ptSet;
-
-	public Vector3 vector12;
-	public Vector3 vector13;
-	public Vector3 vector23;
+	public Vector3 vector12, vector13, vector23;
+	public Vector3 scaledPt1, scaledPt2, scaledPt3;
+ 	public Vector3 scaledVector12, scaledVector13; 
 	public Vector3 normalVector;
+	public Vector3 scaledNormal;
+
 	public List<Vector3> vertices; 
 	public string rawEquation;
 
 	AK.ExpressionSolver solver;
-
 	AK.Expression expr;
 
     public AxisLabelManager xLabelManager;
@@ -44,12 +39,6 @@ public class PresentPlane : MonoBehaviour {
 	public float dummySteps = 10;
 	public float stepSize;
 	public float defaultStepSize = 5;
-
-	public float temp1;
-	public float temp2;
-	public float temp3;
-	public float temp;
-	public float temp0;
 
 	public float d;
 
@@ -73,6 +62,11 @@ public class PresentPlane : MonoBehaviour {
 
 	void Update() {
 		plane.LookAt(lookAtTarget);
+
+		pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
+		pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
+		pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
+		//pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
 		var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
 		sharedMaterial.SetInt("_planeClippingEnabled", 1);
@@ -113,9 +107,6 @@ public class PresentPlane : MonoBehaviour {
 			float centerX = pt1Coef * rawPt1.X.Value + pt2Coef * rawPt2.X.Value + pt3Coef * rawPt3.X.Value;
 			float centerY = pt1Coef * rawPt1.Y.Value + pt2Coef * rawPt2.Y.Value + pt3Coef * rawPt3.Y.Value;
 			float centerZ = pt1Coef * rawPt1.Z.Value + pt2Coef * rawPt2.Z.Value + pt3Coef * rawPt3.Z.Value;
-			temp1 = centerX;
-			temp2 = centerY;
-			temp3 = centerZ;
 			center = new Vector3(centerX, centerY, centerZ);
 		}
 		//PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
@@ -144,37 +135,56 @@ public class PresentPlane : MonoBehaviour {
 	{
 		vector12 = GenerateVector(rawPt1, rawPt2);
 		vector13 = GenerateVector(rawPt1, rawPt3);
+		//Debug.Log("Vector 12 is: " + vector12 +". Vector13 is: " + vector13);
 		normalVector = Vector3.Cross(vector12, vector13);
 		if (PlaneValid()) {
-			plane.LookAt(lookAtTarget);
+			forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+			backwardPlane.GetComponent<MeshRenderer>().enabled = true;
 			
 			// Basic formula of the equation
-
 			d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
-			rawEquation = normalVector.x + "x+" + normalVector.y + "y+" + normalVector.z + "z=" + d;
+
+			// Formatting equation
+			string temp1 = normalVector.y.ToString();
+			string temp2 = normalVector.z.ToString();
+			if (temp1[0] != '-') temp1 = '+' + temp1;
+			if (temp2[0] != '-') temp2 = '+' + temp2;
+			rawEquation = normalVector.x + "x" + temp1 + "y" + temp2 + "z=" + d;
+		} else {
+			forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+			backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+			rawEquation = "Invalid Plane";
 		}
+
+		//Debug.Log("Normal vector is: " + normalVector);
 
 		return rawEquation;
 	}
 
 	public void GetLocalPoint() {
-		point1.localPosition = ScaledPoint(PtCoordToVector(rawPt1));
-		point2.localPosition = ScaledPoint(PtCoordToVector(rawPt2));
-		point3.localPosition = ScaledPoint(PtCoordToVector(rawPt3));
+		scaledPt1 = ScaledPoint(PtCoordToVector(rawPt1));
+		point1.localPosition = scaledPt1;
+		scaledPt2 = ScaledPoint(PtCoordToVector(rawPt2));
+		point2.localPosition = scaledPt2;
+		scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
+		point3.localPosition = scaledPt3;
 		centerPt.localPosition = ScaledPoint(center);
 	}
 
 	public void GetPlaneDirection() {
 		if (PlaneValid()) {
-			float scale = dummySteps * stepSize / normalVector.magnitude;
-			//Debug.Log("The scale is: " + scale + ". The Normal vectoer before scale is " + normalVector);
-			Vector3 dummyPos = normalVector * scale;
+			scaledVector12 = scaledPt2 - scaledPt1;
+			scaledVector13 = scaledPt3 - scaledPt1;
+			scaledNormal = Vector3.Cross(scaledVector12, scaledVector13);
+			float scale = dummySteps * stepSize / scaledNormal.magnitude;
+			Vector3 dummyPos = scaledNormal * scale;
 			//Debug.Log("The Normal vector after scale is: " + dummyPos);
-			lookAtTarget.localPosition = ScaledPoint(dummyPos);
+			lookAtTarget.localPosition = dummyPos;
 			plane.localPosition = ScaledPoint(center);
 		}
 	}
 
+	
 	public bool PlaneValid() {		
 		if (PtCoordToVector(rawPt1) == PtCoordToVector(rawPt2) || PtCoordToVector(rawPt1) == PtCoordToVector(rawPt3) || PtCoordToVector(rawPt2) == PtCoordToVector(rawPt3)) {
 			return false; 

@@ -40,6 +40,8 @@ public class PtManager : MonoBehaviour
     [SerializeField]
     Inputs inputs;
 
+    public TextMesh equation;
+
     [SerializeField]
     PresentPlane presentPlane;
 
@@ -162,6 +164,7 @@ public class PtManager : MonoBehaviour
     void Awake()
     {
         Initialize();
+        inputReceived = true;
     }
 
     public bool updateOverlay = false;
@@ -181,13 +184,14 @@ public class PtManager : MonoBehaviour
             updateOverlay = true;
             bool isValid = ptSet.CompileAll();
             ManageFeedback();
-            if (isValid)
-                presentPlane.CalculatePlane();
+            if (isValid) {
+                equation.text = presentPlane.CalculatePlane();
 			    presentPlane.ApplyGraphAdjustment();
                 presentPlane.GetLocalPoint();
                 presentPlane.GetPlaneDirection();
-            //if (isValid)
-                //paramSurface.GenerateParticles();
+            } else {
+                equation.text = "Invalid Plane";
+            }
         }
         if (toExport)
         {
