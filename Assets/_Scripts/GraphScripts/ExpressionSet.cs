@@ -44,7 +44,7 @@ public class ExpressionSet
         }
         else
         {
-            expressions.Add(variable, new Expression(tokens));
+            expressions.Add(variable, new Expression(tokens, this));
         }
     }
 
@@ -89,9 +89,9 @@ public class ExpressionSet
     public ExpressionSet()
     {
         expressions = new Dictionary<ExpOptions, Expression>();
-        expressions.Add(ExpOptions.X, new Expression());
-        expressions.Add(ExpOptions.Y, new Expression());
-        expressions.Add(ExpOptions.Z, new Expression());
+        expressions.Add(ExpOptions.X, new Expression(this));
+        expressions.Add(ExpOptions.Y, new Expression(this));
+        expressions.Add(ExpOptions.Z, new Expression(this));
 
         //need to change later
         ranges = new Dictionary<string, RangePair>();
@@ -104,10 +104,10 @@ public class ExpressionSet
 
         expressions = new Dictionary<ExpOptions, Expression>();
         emptyTokens.Add("x");
-        expressions.Add(ExpOptions.X, new Expression(emptyTokens));
+        expressions.Add(ExpOptions.X, new Expression(emptyTokens, this));
         emptyTokens.Remove("x");
-        expressions.Add(ExpOptions.Y, new Expression(emptyTokens));
-        expressions.Add(ExpOptions.Z, new Expression(emptyTokens));
+        expressions.Add(ExpOptions.Y, new Expression(emptyTokens, this));
+        expressions.Add(ExpOptions.Z, new Expression(emptyTokens, this));
 
         ranges = new Dictionary<string, RangePair>();
         ranges.Add("x", new RangePair(new Range(emptyTokens), new Range(emptyTokens)));
@@ -120,7 +120,7 @@ public class ExpressionSet
         newEs.expressions = new Dictionary<ExpOptions, Expression>();
         foreach (ExpOptions key in expressions.Keys)
         {
-            newEs.expressions.Add(key, new Expression(expressions[key]));
+            newEs.expressions.Add(key, new Expression(expressions[key], this));
         }
 
         newEs.ranges = new Dictionary<string, RangePair>();
@@ -205,11 +205,14 @@ public abstract class CalcOutput
     public List<string> tokens;
     public string rawText;
     public AK.Expression AKExpression;
+    public ExpressionSet expSet;
 
     public void PrintOut()
     {
         Debug.Log("CalcOutput tokens: " + string.Join("", tokens.ToArray()));
     }
+
+
 
     public virtual void compileTokens()
     {
@@ -339,20 +342,23 @@ public class Expression : CalcOutput
         }
     }
 
-    public Expression()
+    public Expression(ExpressionSet es)
     {
+        expSet = es;
         rawText = "";
         tokens = new List<string>();
     }
 
-    public Expression(List<string> tokens)
+    public Expression(List<string> tokens, ExpressionSet es)
     {
+        expSet = es;
         rawText = "";
         this.tokens = tokens;
     }
 
-    public Expression(Expression toCopy)
+    public Expression(Expression toCopy, ExpressionSet es)
     {
+        expSet = es;
         rawText = toCopy.rawText;
         tokens = new List<string>(toCopy.tokens);
     }
@@ -461,16 +467,28 @@ public class SerializableExpressionSet
 
     public ExpressionSet ConvertToExpressionSet()
     {
-        return new ExpressionSet(rangeKeys, DeserializeRangePairs(), ExpressionKeys, DeserializeExpression());
+        ExpressionSet es = new ExpressionSet();
+        List<RangePair> rps = DeserializeRangePairs(es);
+        for (int i=0; i < rps.Count(); i++)
+        {
+            es.AddRange(rangeKeys[i], rps[i]);
+        }
+        List<Expression> expl = DeserializeExpression(es);
+        for (int i = 0; i < rps.Count(); i++)
+        {
+            es.AddExpression(ExpressionKeys[i], expl[i]);
+        }
+
+        return es;
     }
 
-    private List<RangePair> DeserializeRangePairs()
+    private List<RangePair> DeserializeRangePairs(ExpressionSet es)
     {
         return rangePairs.Select(x => x.Deserialize()).ToList();
     }
-    private List<Expression> DeserializeExpression()
+    private List<Expression> DeserializeExpression(ExpressionSet es)
     {
-        return ExpressionValues.Select(exp => new Expression(ExpressionParser.Parse(exp))).ToList();
+        return ExpressionValues.Select(exp => new Expression(ExpressionParser.Parse(exp), es)).ToList();
     }
 }
 

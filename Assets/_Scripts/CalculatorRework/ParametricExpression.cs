@@ -9,7 +9,7 @@ public class ParametricExpression : MonoBehaviour
     ExpressionSet expSet;
     List<Transform> expressionsList;
     List<Transform> variableClumps;
-    List<Transform> variables;
+    Dictionary<string, Transform> variables;
     List<Transform> emptyList;
     Transform separator;
     Scroll scroll;
@@ -24,11 +24,10 @@ public class ParametricExpression : MonoBehaviour
         expSet = new ExpressionSet();
         expressionsList = new List<Transform>();
         variableClumps = new List<Transform>();
-        variables = new List<Transform>();
+        variables = new Dictionary<string, Transform>();
         emptyList = new List<Transform>();
 
         scroll = expressionsClass.getScroll("param");
-        //action = transform.Find("ExpressionSet").Find("Button_Xinput").Find("ActionMenu");
         initialized = true;
 
     }
@@ -59,9 +58,9 @@ public class ParametricExpression : MonoBehaviour
 
     public void setElementQuadtex(Texture tex)
     {
-        foreach (Transform t in variables)
+        foreach (KeyValuePair<string, Transform> t in variables)
         {
-            t.GetChild(0).Find("Quad").GetComponent<Renderer>().material.SetTexture("_MainTex", tex);
+            t.Value.GetChild(0).Find("Quad").GetComponent<Renderer>().material.SetTexture("_MainTex", tex);
         }
     }
 
@@ -78,9 +77,9 @@ public class ParametricExpression : MonoBehaviour
             }
         }
 
-        foreach (Transform t in variables)
+        foreach (KeyValuePair<string, Transform> t in variables)
         {
-            foreach (Transform child in t)
+            foreach (Transform child in t.Value)
             {
                 foreach(Transform gchild in child)
                 {
@@ -93,32 +92,20 @@ public class ParametricExpression : MonoBehaviour
         }
     }
 
-    //public void enableActions()
+    //public string getVarTitle(Transform var)
     //{
-    //    action.gameObject.SetActive(true);
+    //    if (variables.ContainsValue(var))
+    //    {
+    //        foreach (KeyValuePair<string, Transform> v in variables)
+    //        {
+    //            if (v.Value.Equals(var))
+    //            {
+    //                return v.Value.Find("VariableTitle").GetComponentInChildren<TMPro.TextMeshPro>().text;
+    //            }
+    //        }
+    //    }
+    //    return "";
     //}
-
-    //public void disableActions()
-    //{
-    //    action.gameObject.SetActive(false);
-    //}
-
-    public string getVarTitle(Transform var)
-    {
-        if (variables.Contains(var))
-        {
-            int i = 0;
-            foreach(Transform v in variables)
-            {
-                if (v.Equals(var))
-                {
-                    return variables[i].Find("VariableTitle").GetComponentInChildren<TMPro.TextMeshPro>().text;
-                }
-                i++;
-            }
-        }
-        return "";
-    }
 
     public void setSeparator(Transform sep)
     {
@@ -135,18 +122,18 @@ public class ParametricExpression : MonoBehaviour
         expressionsList.Add(expr);
     }
 
-    public void addVariable(Transform newVar)
+    public void addVariable(string varName, Transform varValue)
     {
         if (variables.Count % 2 == 0)
         {
-            addNewVariableClump(newVar);
+            addNewVariableClump(varValue);
         }
         else
         {
-            addToVarClump(newVar);
+            addToVarClump(varValue);
         }
 
-        variables.Add(newVar);
+        variables.Add(varName, varValue);
     }
 
     public Expressions.ExpressionType getType()
@@ -164,10 +151,10 @@ public class ParametricExpression : MonoBehaviour
     }
 
     //NOTE: only handles one by one deletion, still needs to be tested
-    private void deleteVariable(Transform varToDelete)
+    public void deleteVariable(string varToDelete)
     {
+        Destroy(variables[varToDelete]);
         variables.Remove(varToDelete);
-        Destroy(varToDelete);
 
         for (int i = 0; i < variableClumps.Count; i++)
         {

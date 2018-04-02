@@ -47,6 +47,9 @@ public class CalcInput : MonoBehaviour
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
 
+    //TODO: change this to apply to individual expressions 
+    private Dictionary<string, int> variable;
+
     private void Awake()
     {
         _instance = this;
@@ -68,6 +71,7 @@ public class CalcInput : MonoBehaviour
         ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
         errorPopup = Instantiate(Resources.Load("Popups/VariableError")) as GameObject;
         errorPopup.SetActive(false);
+        variable = new Dictionary<string, int>();
     }
 
     private void addForwarders(Transform obj)
@@ -120,7 +124,7 @@ public class CalcInput : MonoBehaviour
                 variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(selectedColor);
 
                 //if typing a single letter
-                if (buttonID.Length == 1 && buttonID[0] >= 97 && buttonID[0] <= 122)
+                if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
                 {
                     //prevents typing of letters when a variable body is selected
                     if (expressions.getSelectedBody().isVariable())
@@ -139,13 +143,22 @@ public class CalcInput : MonoBehaviour
                     //creates new variable button when new letter pressed
                     if (param != null && !calcManager.expressionSet.ranges.ContainsKey(buttonID))
                     {
-                        GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-                        var.GetComponent<ExpressionComponent>().setExpressionParent(param);
-                        var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
-                        param.GetComponent<ParametricExpression>().addVariable(var.transform);
-                        var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
-                        calcManager.expressionSet.AddRange(buttonID);
-                        addForwarders(var.transform);
+                        if (calcManager.expressionSet.ranges.ContainsKey(buttonID))
+                        {
+                            variable[buttonID] = variable[buttonID]++;
+                        }
+                        else
+                        {
+                            GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                            var.GetComponent<ExpressionComponent>().setExpressionParent(param);
+                            var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
+                            param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
+                            var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
+                            calcManager.expressionSet.AddRange(buttonID);
+                            addForwarders(var.transform);
+
+                            variable.Add(buttonID, 1);
+                        }
                     }
                 }
 
@@ -164,8 +177,24 @@ public class CalcInput : MonoBehaviour
                 {
                     currExpression.tokens.RemoveAt(index - 1);
                     index--;
+
+                    if(variable.ContainsKey(buttonID))
+                    {
+                        if (variable[buttonID] > 0)
+                        {
+                            variable[buttonID] = variable[buttonID]--;
+
+                            if (variable[buttonID] == 0)
+                            {
+                                expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(buttonID);
+                                variable.Remove(buttonID);
+                                //TODO: save variable here instead of just deleting it completely
+                            }
+                        }
+                    }
                 }
                 break;
+            //TODO: consider how to update count of variables when expression is cleared
             case "Button_Clear":
                 index = 0;
                 currExpression.tokens.Clear();

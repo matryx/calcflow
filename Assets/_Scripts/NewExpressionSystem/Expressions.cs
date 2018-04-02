@@ -21,8 +21,10 @@ public class Expressions : MonoBehaviour
     // 1 - slide variable shortcuts in and out 
     // 2 - enable underscore movement by raycast hit
     // 3 - delete variable implementation
+    //      - need to keep track of indices of variables in the expression string
+    //        and check if it matches current letter at the indices
     // 4 - hide should change the text color of entire expression components to gray    
-    //      - should deselect expression
+    //      - should deselect expression                    IMPLEMENTED/NEED TO TEST
     //      - gray out feedback too                         IMPLEMENTED/NEED TO TEST
     //      - gray out element symbol quad (material)       MOSTLY DONE, JUST NEED TO PROPERLY GREY ELEMENT TEXTURE
     //      - hide action buttons                           IMPLEMENTED/NEED TO TEST
