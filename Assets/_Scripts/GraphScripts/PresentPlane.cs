@@ -7,6 +7,7 @@ public class PresentPlane : MonoBehaviour {
 	public Transform point1;
 	public Transform point2;
 	public Transform point3;
+	public Transform centerPt;
 
 	public Transform plane;
 	public Transform forwardPlane;
@@ -97,8 +98,8 @@ public class PresentPlane : MonoBehaviour {
 
 		vector23 = GenerateVector(rawPt2, rawPt3);
 		float pt1Coef = (Mathf.Pow(vector23.magnitude,2) * Vector3.Dot(vector12, vector13)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
-		float pt2Coef = (Mathf.Pow(vector13.magnitude,2) * Vector3.Dot((-1) * vector12, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
-		float pt3Coef = (Mathf.Pow(vector12.magnitude,2) * Vector3.Dot((-1) * vector13, (-1) * vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
+		float pt2Coef = (Mathf.Pow(vector13.magnitude,2) * Vector3.Dot( (-1) * vector12, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
+		float pt3Coef = (Mathf.Pow(vector12.magnitude,2) * Vector3.Dot(vector13, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
 
 
 		if (pt1Coef != pt1Coef || pt2Coef != pt2Coef || pt3Coef != pt3Coef) {
@@ -112,6 +113,9 @@ public class PresentPlane : MonoBehaviour {
 			float centerX = pt1Coef * rawPt1.X.Value + pt2Coef * rawPt2.X.Value + pt3Coef * rawPt3.X.Value;
 			float centerY = pt1Coef * rawPt1.Y.Value + pt2Coef * rawPt2.Y.Value + pt3Coef * rawPt3.Y.Value;
 			float centerZ = pt1Coef * rawPt1.Z.Value + pt2Coef * rawPt2.Z.Value + pt3Coef * rawPt3.Z.Value;
+			temp1 = centerX;
+			temp2 = centerY;
+			temp3 = centerZ;
 			center = new Vector3(centerX, centerY, centerZ);
 		}
 		//PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
@@ -129,9 +133,9 @@ public class PresentPlane : MonoBehaviour {
 	public Vector3 GenerateVector(PtCoord pt1, PtCoord pt2)
 	{
 		Vector3 result = Vector3.zero;
-		result.x = pt1.X.Value - pt2.X.Value;
-		result.y = pt1.Y.Value - pt2.Y.Value;
-		result.z = pt1.Z.Value - pt2.Z.Value;
+		result.x = pt2.X.Value - pt1.X.Value;
+		result.y = pt2.Y.Value - pt1.Y.Value;
+		result.z = pt2.Z.Value - pt1.Z.Value;
 		return result;
 	}
 
@@ -157,12 +161,15 @@ public class PresentPlane : MonoBehaviour {
 		point1.localPosition = ScaledPoint(PtCoordToVector(rawPt1));
 		point2.localPosition = ScaledPoint(PtCoordToVector(rawPt2));
 		point3.localPosition = ScaledPoint(PtCoordToVector(rawPt3));
+		centerPt.localPosition = ScaledPoint(center);
 	}
 
 	public void GetPlaneDirection() {
 		if (PlaneValid()) {
 			float scale = dummySteps * stepSize / normalVector.magnitude;
+			//Debug.Log("The scale is: " + scale + ". The Normal vectoer before scale is " + normalVector);
 			Vector3 dummyPos = normalVector * scale;
+			//Debug.Log("The Normal vector after scale is: " + dummyPos);
 			lookAtTarget.localPosition = ScaledPoint(dummyPos);
 			plane.localPosition = ScaledPoint(center);
 		}
