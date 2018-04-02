@@ -17,7 +17,7 @@ public abstract class ManualSerializeBehavior : Nanome.Core.Behaviour, IRuntimeS
     /// <summary>
     /// Event triggered after <see cref="RuntimeSerializableAttribute"/> object is serialized.
     /// </summary>
-    public void OnAfterRuntimeSerialize() { }
+    public virtual void OnAfterRuntimeSerialize() { }
 
     /// <summary>
     /// Event triggered after <see cref="RuntimeSerializableAttribute"/> object is deserialized.

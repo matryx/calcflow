@@ -13,11 +13,21 @@ using VoxelBusters.RuntimeSerialization;
 public class CustomParametrizedSurface : ManualSerializeBehavior
 {
 
+    public bool changeTestVals;
+
+    public void LateUpdate()
+    {
+        if (changeTestVals) {
+            particleCount = 100;
+            changeTestVals = false;
+        }
+    }
+
     #region Serializable Fields
     [RuntimeSerializeField]
     public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
     [RuntimeSerializeField]
-    public int particleCount;
+    public int particleCount = 12;
     //Fields that are serializable on their own.
     [RuntimeSerializeField]
     [Range(0.1f, 2.0f)]
@@ -52,8 +62,11 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
 
     #region non-serializable fields
     //Fields that are not serializable and require a surrogate for loading.
+    [NonRuntimeSerializedField]
     public Texture2D particleSprite;
+    [NonRuntimeSerializedField]
     public Shader particleShader;
+    [NonRuntimeSerializedField]
     public ComputeShader particleAnimation;
     #endregion
 
@@ -80,9 +93,11 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
     // size of a particle struct in bytes
+    [RuntimeSerializeField]
     public const int PARTICLE_SIZE = 2 * 12 + 16;
     // number of threads for a group
-    private const int GROUP_SIZE = 256;
+    [RuntimeSerializeField]
+    public const int GROUP_SIZE = 256;
     #endregion
 
 
@@ -96,6 +111,9 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
         restoreGradient();
         InitializeVariables();
         InitializeParticleSystem();
+    }
+    public override void OnAfterRuntimeSerialize() {
+        print ("particleCount: " + particleCount);
     }
 
     private void restoreGradient()

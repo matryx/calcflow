@@ -265,6 +265,7 @@ public class PlaybackLogAction2
         catch (Exception e)
         {
             Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name"));
+            Debug.LogError(e.Message);
             throw e;
         }
         //yield return null;
