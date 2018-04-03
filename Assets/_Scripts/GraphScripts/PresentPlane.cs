@@ -143,13 +143,11 @@ public class PresentPlane : MonoBehaviour {
 			
 			// Basic formula of the equation
 			d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
-
+			string[] formattedValue = roundString(new float[] {normalVector.x, normalVector.y, normalVector.z});
 			// Formatting equation
-			string temp1 = normalVector.y.ToString();
-			string temp2 = normalVector.z.ToString();
-			if (temp1[0] != '-') temp1 = '+' + temp1;
-			if (temp2[0] != '-') temp2 = '+' + temp2;
-			rawEquation = normalVector.x + "x" + temp1 + "y" + temp2 + "z=" + d;
+			if (formattedValue[1][0] != '-') formattedValue[1] = '+' + formattedValue[1];
+			if (formattedValue[2][0] != '-') formattedValue[2] = '+' + formattedValue[2];
+			rawEquation = formattedValue[0] + "x" + formattedValue[1] + "y" + formattedValue[2] + "z=" + d;
 		} else {
 			forwardPlane.GetComponent<MeshRenderer>().enabled = false;
 			backwardPlane.GetComponent<MeshRenderer>().enabled = false;
@@ -159,6 +157,21 @@ public class PresentPlane : MonoBehaviour {
 		//Debug.Log("Normal vector is: " + normalVector);
 
 		return rawEquation;
+	}
+
+	public string[] roundString(float[] input) {
+		string[] result = new string[input.Length];
+		for (int i = 0; i < input.Length; i++)  {
+			string a = input[i].ToString();
+			string b = string.Format("{0:0.000}", input[i]);
+			print("comparing: " + a + "  " + b);
+			if (a.Length <= b.Length) {
+				result[i] = a;
+			} else {
+				result[i] = b;
+			}
+		}
+		return result;
 	}
 
 	public void GetLocalPoint() {
