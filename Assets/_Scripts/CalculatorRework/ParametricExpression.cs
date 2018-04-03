@@ -66,9 +66,9 @@ public class ParametricExpression : MonoBehaviour
 
     public void setTextColor(Color c)
     {
-        foreach(Transform t in expressionsList)
+        foreach (Transform t in expressionsList)
         {
-            foreach(Transform child in t)
+            foreach (Transform child in t)
             {
                 if (child.GetComponent<TMPro.TextMeshPro>())
                 {
@@ -81,7 +81,7 @@ public class ParametricExpression : MonoBehaviour
         {
             foreach (Transform child in t.Value)
             {
-                foreach(Transform gchild in child)
+                foreach (Transform gchild in child)
                 {
                     if (gchild.GetComponent<TMPro.TextMeshPro>())
                     {
@@ -150,11 +150,12 @@ public class ParametricExpression : MonoBehaviour
         scroll.deleteObjects(expressionsList);
     }
 
-    //NOTE: only handles one by one deletion, still needs to be tested
+    //BUG: doesn't rearrange properly or remove clumps when it should
     public void deleteVariable(string varToDelete)
     {
-        Destroy(variables[varToDelete]);
+        Destroy(variables[varToDelete].gameObject);
         variables.Remove(varToDelete);
+        Transform del = null;
 
         for (int i = 0; i < variableClumps.Count; i++)
         {
@@ -168,7 +169,17 @@ public class ParametricExpression : MonoBehaviour
                     variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
                     variableClumps[i + 1].GetChild(0).localPosition = new Vector3(xPos, 0, 0);
                 }
+
+                if (variableClumps[i].childCount == 0) del = variableClumps[i];
             }
+        }
+
+        if (del != null)
+        {
+            variableClumps.Remove(del);
+            List<Transform> temp = new List<Transform>();
+            temp.Add(del);
+            scroll.deleteObjects(temp);
         }
     }
 

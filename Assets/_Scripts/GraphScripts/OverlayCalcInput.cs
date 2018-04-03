@@ -84,14 +84,12 @@ public class OverlayCalcInput : MonoBehaviour {
 
     void ToExpressionSet(ExpressionSet es)
     {
-        //ExpressionSet es = new ExpressionSet();
-
         List<string> tokens = ExpressionParser.Parse(xInput.text);
-        es.AddExpression(ExpressionSet.ExpOptions.X, new Expression(tokens));
+        es.AddExpression(ExpressionSet.ExpOptions.X, new Expression(tokens, es));
         tokens = ExpressionParser.Parse(yInput.text);
-        es.AddExpression(ExpressionSet.ExpOptions.Y, new Expression(tokens));
+        es.AddExpression(ExpressionSet.ExpOptions.Y, new Expression(tokens, es));
         tokens = ExpressionParser.Parse(zInput.text);
-        es.AddExpression(ExpressionSet.ExpOptions.Z, new Expression(tokens));
+        es.AddExpression(ExpressionSet.ExpOptions.Z, new Expression(tokens, es));
 
         if (uInput != null)
         {

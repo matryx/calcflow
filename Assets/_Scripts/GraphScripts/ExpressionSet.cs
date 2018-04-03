@@ -21,6 +21,18 @@ public class ExpressionSet
         return expressions[(ExpOptions)i].expression;
     }
 
+    public int GetTotalOccurence(string target)
+    {
+        int totalCount = 0;
+
+        foreach(KeyValuePair<ExpOptions, Expression> entry in expressions)
+        {
+            totalCount += entry.Value.GetOccurences(target);
+        }
+
+        return totalCount;
+    }
+
     public void AddExpression(ExpOptions variable, Expression expression)
     {
         if (expression != null)
@@ -207,12 +219,15 @@ public abstract class CalcOutput
     public AK.Expression AKExpression;
     public ExpressionSet expSet;
 
+    public void setExpressionSet(ExpressionSet es)
+    {
+        expSet = es;
+    }
+
     public void PrintOut()
     {
         Debug.Log("CalcOutput tokens: " + string.Join("", tokens.ToArray()));
     }
-
-
 
     public virtual void compileTokens()
     {
@@ -342,6 +357,18 @@ public class Expression : CalcOutput
         }
     }
 
+    public int GetOccurences(string x)
+    {
+        int count = 0;
+
+        foreach(string s in tokens)
+        {
+            if (x == s) count++; 
+        }
+
+        return count;
+    }
+
     public Expression(ExpressionSet es)
     {
         expSet = es;
@@ -441,7 +468,7 @@ public class Range : CalcOutput
 }
 
 [System.Serializable]
-public class SerializableExpressionSet
+public class SerializableExpressionSet 
 {
     public string[] rangeKeys;
     public List<SerializableRangePair> rangePairs = new List<SerializableRangePair>();
@@ -476,6 +503,7 @@ public class SerializableExpressionSet
         List<Expression> expl = DeserializeExpression(es);
         for (int i = 0; i < rps.Count(); i++)
         {
+            expl[i].setExpressionSet(es);
             es.AddExpression(ExpressionKeys[i], expl[i]);
         }
 

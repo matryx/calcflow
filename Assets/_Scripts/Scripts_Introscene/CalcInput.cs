@@ -47,9 +47,6 @@ public class CalcInput : MonoBehaviour
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
 
-    //TODO: change this to apply to individual expressions 
-    private Dictionary<string, int> variable;
-
     private void Awake()
     {
         _instance = this;
@@ -71,7 +68,6 @@ public class CalcInput : MonoBehaviour
         ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
         errorPopup = Instantiate(Resources.Load("Popups/VariableError")) as GameObject;
         errorPopup.SetActive(false);
-        variable = new Dictionary<string, int>();
     }
 
     private void addForwarders(Transform obj)
@@ -143,26 +139,20 @@ public class CalcInput : MonoBehaviour
                     //creates new variable button when new letter pressed
                     if (param != null && !calcManager.expressionSet.ranges.ContainsKey(buttonID))
                     {
-                        if (calcManager.expressionSet.ranges.ContainsKey(buttonID))
-                        {
-                            variable[buttonID] = variable[buttonID]++;
-                        }
-                        else
-                        {
-                            GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-                            var.GetComponent<ExpressionComponent>().setExpressionParent(param);
-                            var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
-                            param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
-                            var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
-                            calcManager.expressionSet.AddRange(buttonID);
-                            addForwarders(var.transform);
-
-                            variable.Add(buttonID, 1);
-                        }
+                        GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                        var.GetComponent<ExpressionComponent>().setExpressionParent(param);
+                        var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
+                        param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
+                        var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
+                        calcManager.expressionSet.AddRange(buttonID);
+                        addForwarders(var.transform);
                     }
                 }
 
                 currExpression.tokens.Insert(index, buttonID);
+
+                //print("COUNT OF " + buttonID + ": " + currExpression.expSet.GetTotalOccurence(buttonID));
+
                 index++;
                 break;
             case "Paste":
@@ -175,29 +165,29 @@ public class CalcInput : MonoBehaviour
             case "Button_del":
                 if (index > 0)
                 {
+                    string toDelete = currExpression.tokens[index - 1];
                     currExpression.tokens.RemoveAt(index - 1);
                     index--;
 
-                    if(variable.ContainsKey(buttonID))
-                    {
-                        if (variable[buttonID] > 0)
-                        {
-                            variable[buttonID] = variable[buttonID]--;
+                    //print("COUNT OF " + toDelete + ": " + currExpression.expSet.GetTotalOccurence(toDelete));
 
-                            if (variable[buttonID] == 0)
-                            {
-                                expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(buttonID);
-                                variable.Remove(buttonID);
-                                //TODO: save variable here instead of just deleting it completely
-                            }
-                        }
+                    if (currExpression.expSet.GetTotalOccurence(toDelete) == 0)
+                    {
+                        calcManager.expressionSet.ranges.Remove(toDelete);
+                        expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDelete);
                     }
                 }
+
                 break;
-            //TODO: consider how to update count of variables when expression is cleared
             case "Button_Clear":
+                //TODO: 
+                //consider how to check if any variable counts have turned to 0
+                //need to go through each variable in tokens
+                //IDEA:     create a public function in expression set that handles the clearing,
+                //          including the parsing through tokens for variable counts
                 index = 0;
                 currExpression.tokens.Clear();
+
                 break;
             case "Button_Enter":
                 calcManager.inputReceived = true;
