@@ -131,7 +131,7 @@ public class Recorder : MonoBehaviour
 
     public static void LogSpawn(GameObject subject)
     {
-        long time = PlaybackClock.GetTime() - (long)(PlaybackLog2.Period * 1001);
+        long time = PlaybackClock.GetTime() - ((long)PlaybackLog2.Period * 1001);
         recordLog.log.Add(PlaybackLogAction2.CreateSpawn(time,
                                                             subject,
                                                             subject.transform.position,
@@ -141,7 +141,7 @@ public class Recorder : MonoBehaviour
 
     public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
     {
-        long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1000);
+        long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period * 1000);
         recordLog.log.Add(PlaybackLogAction2.CreateMovement(time,
                           subject, destination, rotation, scale, parent));
     }

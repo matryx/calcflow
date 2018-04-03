@@ -77,7 +77,7 @@ public class PlaybackLog2
 [Serializable]
 public class PlaybackLogAction2
 {
-    internal static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>();
+    public static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>();
 
     public enum ActionType
     {
@@ -255,6 +255,8 @@ public class PlaybackLogAction2
         return newAction;
     }
 
+    HashSet<int> brokenparents = new HashSet<int>();
+
     void Spawn()
     {
         GameObject subject;
@@ -264,7 +266,7 @@ public class PlaybackLogAction2
         }
         catch (Exception e)
         {
-            Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name"));
+            Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name") + " with subject key " + subjectKey);
             Debug.LogError(e.Message);
             throw e;
         }
@@ -317,11 +319,15 @@ public class PlaybackLogAction2
 
                     if (objectMap.ContainsKey(parentKey))
                     {
+                        if (brokenparents.Contains(subjectKey)) {
+                            Debug.Log("successful parent");
+                        }
                         subject.transform.SetParent((parentKey == 0) ? null : objectMap[parentKey].transform, false);
                     }
                     else
                     {
-                        Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent does not exist.");
+                        brokenparents.Add(subjectKey);
+                        Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent does not exist." );
                     }
 
                     subject.LocalMoveTo(position, PlaybackLog.Period);
@@ -340,7 +346,7 @@ public class PlaybackLogAction2
                 }
                 else
                 {
-                    Debug.Log(timeStamp + " " + subjectKey);
+                    Debug.Log(timeStamp + " subject " + subjectKey + " could not be moved because subject does not exist.");
                 }
                 break;
             case ActionType.Enable:
