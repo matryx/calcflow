@@ -4,7 +4,7 @@ using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
 
 [RuntimeSerializable(typeof(MonoBehaviour), false, false)]
-public class SerializationTestFF : MonoBehaviour
+public class SerializationTestFF : ManualSerializeBehavior
 {
     [RuntimeSerializeField]
     public int RT_testVal = 12;
@@ -21,4 +21,13 @@ public class SerializationTestFF : MonoBehaviour
             changeTestVals = false;
         }
     }
+
+
+	protected override void manualSerialize(){}
+
+    /// <summary>
+    /// Override this to manually deserialize the class. 
+	/// Use the serialized variables to reconstruct the class.
+    /// </summary>
+	protected override void manualDeserialize(){}
 }
