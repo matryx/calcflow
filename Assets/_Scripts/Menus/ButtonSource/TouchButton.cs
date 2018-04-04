@@ -6,7 +6,7 @@ using System;
 
 public class TouchButton : Button {
 
-    public bool verbose = false;
+    //public bool verbose = false;
 
     void OnTriggerEnter(Collider other)
     {

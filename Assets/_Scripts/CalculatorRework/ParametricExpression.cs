@@ -151,36 +151,48 @@ public class ParametricExpression : MonoBehaviour
     }
 
     //BUG: doesn't rearrange properly or remove clumps when it should
+    //  -   not deleting variable count child
     public void deleteVariable(string varToDelete)
     {
+        //print("CHILD COUNT: " + variableClumps[0].childCount);
+
+        //BUG: probably shouldn't destroy variable here, need to re-consider this algorithm
         Destroy(variables[varToDelete].gameObject);
         variables.Remove(varToDelete);
-        Transform del = null;
 
         for (int i = 0; i < variableClumps.Count; i++)
         {
             if (variableClumps[i].childCount != 2)
             {
                 //TODO: move to coroutine
-                variableClumps[i].GetChild(0).localPosition = new Vector3(-xPos, 0, 0);
+                //print("CHILD COUNT != 2");
+                //print("CHILD COUNT: " + variableClumps[i].childCount);
+                //print("CHILD NAME: " + variableClumps[i].GetChild(0).name);
+                if (variableClumps[i].GetChild(0)) variableClumps[i].GetChild(0).localPosition = new Vector3(-xPos, 0, 0);
 
                 if (i + 1 < variableClumps.Count)
                 {
                     variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
                     variableClumps[i + 1].GetChild(0).localPosition = new Vector3(xPos, 0, 0);
                 }
-
-                if (variableClumps[i].childCount == 0) del = variableClumps[i];
             }
         }
 
-        if (del != null)
+        Transform last = variableClumps[variableClumps.Count - 1];
+
+        print("LAST: " + last);
+        print("CHILD COUNT: " + last.childCount);
+        print("PARENT: " + last.parent.name);
+
+        if (last.childCount == 0)
         {
-            variableClumps.Remove(del);
+            print("last var clump empty");
+            Destroy(last);
+            variableClumps.Remove(last);
             List<Transform> temp = new List<Transform>();
-            temp.Add(del);
+            temp.Add(last);
             scroll.deleteObjects(temp);
-        }
+        } 
     }
 
     IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)
