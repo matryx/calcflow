@@ -218,6 +218,7 @@ public abstract class CalcOutput
     public string rawText;
     public AK.Expression AKExpression;
     public ExpressionSet expSet;
+    List<string> toDelete = new List<string>();
 
     public void setExpressionSet(ExpressionSet es)
     {
@@ -271,6 +272,23 @@ public abstract class CalcOutput
             paren--;
         }
         rawText = string.Join("", equation.ToArray());
+    }
+
+    public List<string> ClearTokens()
+    {
+        List<string> temp = tokens;
+        toDelete.Clear();
+        tokens.Clear();
+
+        foreach (string s in temp)
+        {
+            if (expSet.GetTotalOccurence(s) == 0)
+            {
+                toDelete.Add(s);
+            }
+        }
+
+        return toDelete;
     }
 
     public virtual bool GenerateAKSolver(AK.ExpressionSolver solver)

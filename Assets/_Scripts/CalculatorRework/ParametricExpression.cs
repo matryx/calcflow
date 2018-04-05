@@ -15,6 +15,9 @@ public class ParametricExpression : MonoBehaviour
     Scroll scroll;
     bool initialized = false;
     float xPos = 1.2f;
+    bool deleteVar = false;
+    bool destroyCalled = false;
+    string varName;
 
     void Awake()
     {
@@ -29,7 +32,6 @@ public class ParametricExpression : MonoBehaviour
 
         scroll = expressionsClass.getScroll("param");
         initialized = true;
-
     }
 
     public void Initialize()
@@ -150,49 +152,10 @@ public class ParametricExpression : MonoBehaviour
         scroll.deleteObjects(expressionsList);
     }
 
-    //BUG: doesn't rearrange properly or remove clumps when it should
-    //  -   not deleting variable count child
     public void deleteVariable(string varToDelete)
     {
-        //print("CHILD COUNT: " + variableClumps[0].childCount);
-
-        //BUG: probably shouldn't destroy variable here, need to re-consider this algorithm
-        Destroy(variables[varToDelete].gameObject);
-        variables.Remove(varToDelete);
-
-        for (int i = 0; i < variableClumps.Count; i++)
-        {
-            if (variableClumps[i].childCount != 2)
-            {
-                //TODO: move to coroutine
-                //print("CHILD COUNT != 2");
-                //print("CHILD COUNT: " + variableClumps[i].childCount);
-                //print("CHILD NAME: " + variableClumps[i].GetChild(0).name);
-                if (variableClumps[i].GetChild(0)) variableClumps[i].GetChild(0).localPosition = new Vector3(-xPos, 0, 0);
-
-                if (i + 1 < variableClumps.Count)
-                {
-                    variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
-                    variableClumps[i + 1].GetChild(0).localPosition = new Vector3(xPos, 0, 0);
-                }
-            }
-        }
-
-        Transform last = variableClumps[variableClumps.Count - 1];
-
-        print("LAST: " + last);
-        print("CHILD COUNT: " + last.childCount);
-        print("PARENT: " + last.parent.name);
-
-        if (last.childCount == 0)
-        {
-            print("last var clump empty");
-            Destroy(last);
-            variableClumps.Remove(last);
-            List<Transform> temp = new List<Transform>();
-            temp.Add(last);
-            scroll.deleteObjects(temp);
-        } 
+        varName = varToDelete;
+        deleteVar = true;
     }
 
     IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)
@@ -235,6 +198,50 @@ public class ParametricExpression : MonoBehaviour
 
     void Update()
     {
+        if (deleteVar)
+        {
+            if (variables.ContainsKey(varName))
+            {
+                Destroy(variables[varName].gameObject);
+                variables.Remove(varName);
 
+                destroyCalled = true;
+                deleteVar = false;
+                return;
+            }
+
+        }
+
+        if (destroyCalled)
+        {
+            for (int i = 0; i < variableClumps.Count; i++)
+            {
+                if (variableClumps[i].childCount == 1)
+                {
+                    print("ONE CHILD");
+                    variableClumps[i].GetChild(0).localPosition = new Vector3(-xPos, 0, 0);
+
+                    if (i + 1 < variableClumps.Count)
+                    {
+                        print("next var available");
+                        variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
+                        variableClumps[i].GetChild(1).localPosition = new Vector3(xPos, 0, 0);
+                    }
+                }
+
+            }
+
+            Transform last = variableClumps[variableClumps.Count - 1];
+
+            if (last.childCount == 0)
+            {
+                variableClumps.Remove(last);
+                List<Transform> temp = new List<Transform>();
+                temp.Add(last);
+                scroll.deleteObjects(temp);
+            }
+
+            destroyCalled = false;
+        }
     }
 }

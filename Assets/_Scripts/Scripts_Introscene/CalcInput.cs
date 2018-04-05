@@ -42,6 +42,7 @@ public class CalcInput : MonoBehaviour
     Color errorColor;
     Color selectedColor;
     GameObject errorPopup;
+    List<string> varsToDelete = new List<string>();
 
     ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
@@ -150,9 +151,6 @@ public class CalcInput : MonoBehaviour
                 }
 
                 currExpression.tokens.Insert(index, buttonID);
-
-                //print("COUNT OF " + buttonID + ": " + currExpression.expSet.GetTotalOccurence(buttonID));
-
                 index++;
                 break;
             case "Paste":
@@ -169,8 +167,6 @@ public class CalcInput : MonoBehaviour
                     currExpression.tokens.RemoveAt(index - 1);
                     index--;
 
-                    //print("COUNT OF " + toDelete + ": " + currExpression.expSet.GetTotalOccurence(toDelete));
-
                     if (currExpression.expSet.GetTotalOccurence(toDelete) == 0)
                     {
                         calcManager.expressionSet.ranges.Remove(toDelete);
@@ -180,13 +176,15 @@ public class CalcInput : MonoBehaviour
 
                 break;
             case "Button_Clear":
-                //TODO: 
-                //consider how to check if any variable counts have turned to 0
-                //need to go through each variable in tokens
-                //IDEA:     create a public function in expression set that handles the clearing,
-                //          including the parsing through tokens for variable counts
+                //BUG: clear tokens not working properly, not detecting 0 occurrence
+                foreach (string del in currExpression.ClearTokens())
+                {
+                    //NOTE: can probably move this to expresion set
+                    calcManager.expressionSet.ranges.Remove(del);
+                    expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(del);
+                }
+
                 index = 0;
-                currExpression.tokens.Clear();
 
                 break;
             case "Button_Enter":
