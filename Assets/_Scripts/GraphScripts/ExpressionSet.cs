@@ -13,6 +13,7 @@ public class ExpressionSet
 
     public Dictionary<ExpOptions, Expression> expressions;
     public Dictionary<string, RangePair> ranges;
+    public Dictionary<string, RangePair> hiddenRanges;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
 
@@ -47,6 +48,8 @@ public class ExpressionSet
             }
         }
     }
+
+    //TODO: create function thta moves range from ranges to hiddenRanges and vice veersa
 
     public void AddExpression(ExpOptions variable, List<string> tokens)
     {
@@ -218,7 +221,8 @@ public abstract class CalcOutput
     public string rawText;
     public AK.Expression AKExpression;
     public ExpressionSet expSet;
-    List<string> toDelete = new List<string>();
+
+    public abstract List<string> ClearTokens();
 
     public void setExpressionSet(ExpressionSet es)
     {
@@ -272,23 +276,6 @@ public abstract class CalcOutput
             paren--;
         }
         rawText = string.Join("", equation.ToArray());
-    }
-
-    public List<string> ClearTokens()
-    {
-        List<string> temp = tokens;
-        toDelete.Clear();
-        tokens.Clear();
-
-        foreach (string s in temp)
-        {
-            if (expSet.GetTotalOccurence(s) == 0)
-            {
-                toDelete.Add(s);
-            }
-        }
-
-        return toDelete;
     }
 
     public virtual bool GenerateAKSolver(AK.ExpressionSolver solver)
@@ -375,6 +362,24 @@ public class Expression : CalcOutput
         }
     }
 
+    public override List<string> ClearTokens()
+    {
+        List<string> toDelete = new List<string>();
+        List<string> temp = new List<string>(tokens);
+
+        tokens.Clear();
+
+        foreach (string s in temp)
+        {
+            if (expSet.GetTotalOccurence(s) == 0)
+            {
+                toDelete.Add(s);
+            }
+        }
+
+        return toDelete;
+    }
+
     public int GetOccurences(string x)
     {
         int count = 0;
@@ -433,6 +438,12 @@ public class Range : CalcOutput
 {
     float val;
     public bool Exclusive = false;
+
+    public override List<string> ClearTokens()
+    {
+        tokens.Clear();
+        return null;
+    }
 
     public float Value
     {

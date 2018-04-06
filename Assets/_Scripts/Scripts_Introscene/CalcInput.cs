@@ -176,10 +176,10 @@ public class CalcInput : MonoBehaviour
 
                 break;
             case "Button_Clear":
-                //BUG: clear tokens not working properly, not detecting 0 occurrence
-                foreach (string del in currExpression.ClearTokens())
+                List<string> toDel = currExpression.ClearTokens();
+
+                foreach (string del in toDel)
                 {
-                    //NOTE: can probably move this to expresion set
                     calcManager.expressionSet.ranges.Remove(del);
                     expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(del);
                 }

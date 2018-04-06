@@ -218,12 +218,10 @@ public class ParametricExpression : MonoBehaviour
             {
                 if (variableClumps[i].childCount == 1)
                 {
-                    print("ONE CHILD");
                     variableClumps[i].GetChild(0).localPosition = new Vector3(-xPos, 0, 0);
 
                     if (i + 1 < variableClumps.Count)
                     {
-                        print("next var available");
                         variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
                         variableClumps[i].GetChild(1).localPosition = new Vector3(xPos, 0, 0);
                     }
