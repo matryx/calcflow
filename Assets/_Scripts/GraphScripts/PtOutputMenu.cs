@@ -50,6 +50,8 @@ public class PtOutputMenu : MonoBehaviour {
     PtManager ptManager;
 
     PresentPlane presentPlane;
+    public PlaneSolverPointGrab grabber;
+    public TextMesh grabbed;
 
     public void Initialize(PtManager pm)
     {
@@ -94,16 +96,20 @@ public class PtOutputMenu : MonoBehaviour {
             case "Button_pt3Zinput":
                 ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
                 break;
-            case "":
-                 
-			case "GenerateMesh":
-                ptManager.toExport = true;
-                break;
-            case "Save":
-                if (Saveable)
-                {
-                    ptManager.saveLoadMenu.Save();
+            case "FixPlane":
+                if (grabber.FixedPlane) {
+                    grabber.FixedPlane = false;
+                    grabbed.text = "false";
+                } else {
+                    grabber.FixedPlane = true;
+                    grabbed.text = "true";
                 }
+                
+                break;
+            case "eqn":
+                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                break;
+            case "":
                 break;
         }
         ptManager.manageText();

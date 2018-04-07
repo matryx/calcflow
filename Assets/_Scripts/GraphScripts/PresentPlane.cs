@@ -87,7 +87,7 @@ public class PresentPlane : MonoBehaviour {
 		}
 	}
 
-	public void ApplyGraphAdjustment()
+	public void ApplyGraphAdjustment(bool changeScale)
 	{
 
 		vector23 = GenerateVector(rawPt2, rawPt3);
@@ -111,14 +111,22 @@ public class PresentPlane : MonoBehaviour {
 		}
 		//PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
 		//Get the range of the box
-		xLabelManager.Min = center.x - stepSize * steps;
-		yLabelManager.Min = center.y - stepSize * steps;
-		zLabelManager.Min = center.z - stepSize * steps;
-		xLabelManager.Max = center.x + stepSize * steps;
-		yLabelManager.Max = center.y + stepSize * steps;
-		zLabelManager.Max = center.z + stepSize * steps;
+		if (changeScale) {
+			xLabelManager.Min = center.x - stepSize * steps;
+			yLabelManager.Min = center.y - stepSize * steps;
+			zLabelManager.Min = center.z - stepSize * steps;
+			xLabelManager.Max = center.x + stepSize * steps;
+			yLabelManager.Max = center.y + stepSize * steps;
+			zLabelManager.Max = center.z + stepSize * steps;
+		}
 		//Get the interaction points between the box edges and the plane
 		//expr = solver.SymbolicateExpression(rawEquation);
+	}
+
+	public void ApplyUnroundCenter(string ptName, Vector3 newLoc) {
+		if (ptName.Equals("pt1")) center = (newLoc + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+		else if (ptName.Equals("pt2")) center = (PtCoordToVector(rawPt1) + newLoc + PtCoordToVector(rawPt3)) / 3;
+		else if (ptName.Equals("pt3")) center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + newLoc) / 3;
 	}
 
 	public Vector3 GenerateVector(PtCoord pt1, PtCoord pt2)
@@ -186,23 +194,26 @@ public class PresentPlane : MonoBehaviour {
 
 	public void GetPlaneDirection() {
 		if (PlaneValid()) {
-			scaledVector12 = scaledPt2 - scaledPt1;
-			scaledVector13 = scaledPt3 - scaledPt1;
+			scaledVector12 = point2.localPosition - point1.localPosition;
+			scaledVector13 = point3.localPosition - point1.localPosition;
 			scaledNormal = Vector3.Cross(scaledVector12, scaledVector13);
 			float scale = dummySteps * stepSize / scaledNormal.magnitude;
 			Vector3 dummyPos = scaledNormal * scale;
 			//Debug.Log("The Normal vector after scale is: " + dummyPos);
-			lookAtTarget.localPosition = dummyPos;
+			lookAtTarget.localPosition = dummyPos + ScaledPoint(center);
+			centerPt.localPosition = ScaledPoint(center);
 			plane.localPosition = ScaledPoint(center);
 		}
 	}
 
 	
-	public bool PlaneValid() {		
+	public bool PlaneValid() {
+		// no points are the same
 		if (PtCoordToVector(rawPt1) == PtCoordToVector(rawPt2) || PtCoordToVector(rawPt1) == PtCoordToVector(rawPt3) || PtCoordToVector(rawPt2) == PtCoordToVector(rawPt3)) {
 			return false; 
 		}
 		
+		// points are not in same line
 		float scale;
 		if (vector13.x != 0) {
 			scale = vector12.x / vector13.x;
@@ -225,10 +236,19 @@ public class PresentPlane : MonoBehaviour {
 
 	public Vector3 ScaledPoint(Vector3 pt) {
 		Vector3 result = Vector3.zero;
-		print("raw pt1 position: " + pt);
+		//print("raw pt1 position: " + pt);
 		result.z = (pt.x - xLabelManager.Min) / (xLabelManager.Max - xLabelManager.Min) * 20 - 10;
 		result.x = (pt.y - yLabelManager.Min) / (yLabelManager.Max - yLabelManager.Min) * 20 - 10;
 		result.y = (pt.z - zLabelManager.Min) / (zLabelManager.Max - zLabelManager.Min) * 20 - 10;
+		return result;
+	}
+
+	public Vector3 UnscaledPoint(Vector3 pt) {
+		Vector3 result = Vector3.zero;
+		print("raw pt1 position: " + pt);
+		result.x = (pt.z + 10) / 20 * (xLabelManager.Max - xLabelManager.Min) + xLabelManager.Min;
+		result.y = (pt.x + 10) / 20 * (yLabelManager.Max - yLabelManager.Min) + yLabelManager.Min;
+		result.z = (pt.y + 10) / 20 * (zLabelManager.Max - zLabelManager.Min) + zLabelManager.Min;
 		return result;
 	}
 }

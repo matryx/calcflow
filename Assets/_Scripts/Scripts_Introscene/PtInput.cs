@@ -104,4 +104,15 @@ public class PtInput : MonoBehaviour {
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);
     }
+
+    public void RewriteInput(float newValue) {
+        index = 0;
+        currExpression.tokens.Clear();
+        string s = string.Format("{0:0.00}", newValue);
+        foreach (char c in s) {
+            currExpression.tokens.Insert(index, c.ToString());
+            index++;
+        }
+        ptManager.inputReceived = true;
+    }
 }

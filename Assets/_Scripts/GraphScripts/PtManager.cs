@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class PtManager : MonoBehaviour
 {
-    PtSet currPtSet;
-    CalcOutput currOutput;
-
     [HideInInspector]
     public bool inputReceived;
 
@@ -17,15 +14,11 @@ public class PtManager : MonoBehaviour
     public SaveLoadMenu saveLoadMenu;
 
     private PtInput ptInput;
-    private PieceWiseControl pieceWiseControl;
-    private BoundsManager boundsManager;
 
     private Color positiveFeedback = new Color(0, 204, 54);
     private Color negativeFeedback = Color.red;
 
     int maxDisplayLength = 6;
-
-    internal bool toExport = false;
 
     [SerializeField]
     public FlexActionableComponent defaultSpeed;
@@ -51,27 +44,8 @@ public class PtManager : MonoBehaviour
         [SerializeField]
         internal PtInput ptInput;
 
-        //[SerializeField]
-        // this is for tabs
-        //internal PieceWiseControl pieceWiseControl;
-
-        //[SerializeField]
-        // this is for handling preset (e.g. circle, cone)
-        //internal PresetMenu presetMenu;
         [SerializeField]
         internal PtOutputMenu ptOutputMenu;
-
-        //[SerializeField]
-        // this is for boundary variables
-        //internal BoundsManager boundsManager;
-
-        //[SerializeField]
-        // this is for save and load
-        //internal SaveLoadMenu saveLoadMenu;
-
-        //[SerializeField]
-        // this is for controlling effect of particle animation
-        //internal ParticleAnimationSettings particleAnimationSettings;
     }
 
     [System.Serializable]
@@ -94,33 +68,6 @@ public class PtManager : MonoBehaviour
                 pt3XInput, pt3YInput, pt3ZInput;
     }
 
-    public void ChangePtSet(PtSet PS)
-    {
-        ptSet = PS;
-        ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
-        manageText();
-        if (boundsManager != null) boundsManager.UpdateButtonText();
-    }
-
-    //TODO: how to save and load
-    /*
-    public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
-    {
-        List<ExpressionSet> ess = new List<ExpressionSet>();
-        for (int i = 0; i < expressionSets.Count; i++)
-        {
-            ess.Add(expressionSets[i].DeepCopy());
-            ess[ess.Count - 1].CompileAll();
-        }
-        paramSurface.expressionSets = ess;
-        pieceWiseControl.ForceNumberOfTabs(ess.Count);
-        expressionSet = paramSurface.expressionSets[0];
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
-        if(boundsManager != null) boundsManager.UpdateButtonText();
-        inputReceived = true;
-    }
-    */
-
     public void SetOutput(CalcOutput output)
     {
         ptInput.ChangeOutput(output);
@@ -129,47 +76,20 @@ public class PtManager : MonoBehaviour
     private void Initialize()
     {
         ptInput = connectedMenus.ptInput;
-        //boundsManager = connectedMenus.boundsManager;
-        //pieceWiseControl = connectedMenus.pieceWiseControl;
-        //saveLoadMenu = connectedMenus.saveLoadMenu;
-
-        //if (connectedMenus.boundsManager != null) connectedMenus.boundsManager.Initialize(this);
         connectedMenus.ptInput.Initialize(this);
-        //tier 3
         connectedMenus.ptOutputMenu.Initialize(this);
-
-        //Req: calcInput
-        //connectedMenus.pieceWiseControl.Initialize(this);
-        //Req: calcInput
-        // Initialize ptSet (not necessary if implemented tabs)
         ptSet = new PtSet();
         ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
-        //Req: calcInput
-        //connectedMenus.presetMenu.Initialize(this);
-
-        //connectedMenus.saveLoadMenu.Initialize(this);
-
-        //if (connectedMenus.particleAnimationSettings != null)
-        //    connectedMenus.particleAnimationSettings.Initialize(this);
     }
 
-    public void PresetPressed()
-    {
-        ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
-        if (boundsManager != null) boundsManager.UpdateButtonText();
-        inputReceived = true;
-    }
 
-    // Use this for initialization
     void Awake()
     {
         Initialize();
         inputReceived = true;
     }
-
-    public bool updateOverlay = false;
     public bool updateText = false;
-    // Update is called once per frame
+
     void Update()
     {
         if (updateText || inputReceived)
@@ -181,22 +101,16 @@ public class PtManager : MonoBehaviour
         if (inputReceived)
         {
             inputReceived = false;
-            updateOverlay = true;
             bool isValid = ptSet.CompileAll();
             ManageFeedback();
             if (isValid) {
                 equation.text = presentPlane.CalculatePlane();
-			    presentPlane.ApplyGraphAdjustment();
+			    presentPlane.ApplyGraphAdjustment(true);
                 presentPlane.GetLocalPoint();
                 presentPlane.GetPlaneDirection();
             } else {
                 equation.text = "Invalid Plane";
             }
-        }
-        if (toExport)
-        {
-            toExport = false;
-            //paramSurface.GenerateMesh();
         }
     }
 
@@ -205,6 +119,34 @@ public class PtManager : MonoBehaviour
         if (feedbacks.pt1Feedback != null) feedbacks.pt1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
         if (feedbacks.pt2Feedback != null) feedbacks.pt2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
         if (feedbacks.pt3Feedback != null) feedbacks.pt3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
+    }
+
+    public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane) {
+        CalcOutput originalExpression = ptInput.currExpression;
+        SetOutput(ptSet.ptCoords[ptName].X);
+        ptInput.RewriteInput(newLoc.x);
+        SetOutput(ptSet.ptCoords[ptName].Y);
+        ptInput.RewriteInput(newLoc.y);
+        SetOutput(ptSet.ptCoords[ptName].Z);
+        ptInput.RewriteInput(newLoc.z);
+        SetOutput(originalExpression);
+        if (fixedPlane) {
+            manageText();
+            ptSet.CompileAll();
+            inputReceived = false;
+        } else {
+            manageText();
+            inputReceived = false;
+            bool isValid = ptSet.CompileAll();
+            ManageFeedback();
+            if (isValid) {
+                equation.text = presentPlane.CalculatePlane();
+                presentPlane.ApplyUnroundCenter(ptName, newLoc);
+                presentPlane.GetPlaneDirection();
+            } else {
+                equation.text = "Invalid Plane";
+            }
+        }
     }
 
     public void manageText()
