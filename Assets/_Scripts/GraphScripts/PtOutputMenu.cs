@@ -104,7 +104,6 @@ public class PtOutputMenu : MonoBehaviour {
                     grabber.FixedPlane = true;
                     grabbed.text = "true";
                 }
-                
                 break;
             case "eqn":
                 ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);

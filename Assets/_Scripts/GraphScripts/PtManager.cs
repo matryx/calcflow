@@ -65,7 +65,7 @@ public class PtManager : MonoBehaviour
         [SerializeField]
         internal TextMesh pt1XInput, pt1YInput, pt1ZInput,
                 pt2XInput, pt2YInput, pt2ZInput,
-                pt3XInput, pt3YInput, pt3ZInput;
+                pt3XInput, pt3YInput, pt3ZInput, aInput, bInput, cInput, dInput;
     }
 
     public void SetOutput(CalcOutput output)
