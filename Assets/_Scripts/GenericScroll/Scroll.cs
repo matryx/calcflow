@@ -299,37 +299,37 @@ public class Scroll : MonoBehaviour
     }
 
     //old add implementation
-    public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
-    {
-        if (objects == null) objects = new List<Transform>();
+    //public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
+    //{
+    //    if (objects == null) objects = new List<Transform>();
 
-        if (secondToLast) atIndex = objects.Count - 1;
-        if (atIndex < 0 || atIndex > objects.Count)
-        {
-            return;
-        }
+    //    if (secondToLast) atIndex = objects.Count - 1;
+    //    if (atIndex < 0 || atIndex > objects.Count)
+    //    {
+    //        return;
+    //    }
 
-        if (objs.Count > 0)
-        {
-            int temp = atIndex;
-            foreach (Transform o in objs)
-            {
-                objects.Insert(temp, o);
-                temp++;
-            }
-        }
-        else
-        {
-            objects.Insert(atIndex, obj);
-        }
+    //    if (objs.Count > 0)
+    //    {
+    //        int temp = atIndex;
+    //        foreach (Transform o in objs)
+    //        {
+    //            objects.Insert(temp, o);
+    //            temp++;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        objects.Insert(atIndex, obj);
+    //    }
 
-        setNumPagesAndHighestVisIndex();
+    //    setNumPagesAndHighestVisIndex();
 
-        for (int i = atIndex; i < objects.Count; i++)
-        {
-            placeObject(objects[i], i, false);
-        }
-    }
+    //    for (int i = atIndex; i < objects.Count; i++)
+    //    {
+    //        placeObject(objects[i], i, false);
+    //    }
+    //}
 
     public int getIndex(Transform obj)
     {

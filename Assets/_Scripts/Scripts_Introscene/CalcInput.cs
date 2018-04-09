@@ -138,15 +138,24 @@ public class CalcInput : MonoBehaviour
                     variableShortcut.recordVarPress(buttonID);
 
                     //creates new variable button when new letter pressed
-                    if (param != null && !calcManager.expressionSet.ranges.ContainsKey(buttonID))
+                    if (param != null) 
                     {
-                        GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-                        var.GetComponent<ExpressionComponent>().setExpressionParent(param);
-                        var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
-                        param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
-                        var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
-                        calcManager.expressionSet.AddRange(buttonID);
-                        addForwarders(var.transform);
+                        if (calcManager.expressionSet.hiddenRanges.ContainsKey(buttonID))
+                        {
+                            currExpression.expSet.ReAddVariable(buttonID);
+                            param.GetComponent<ParametricExpression>().addVariable(buttonID, null);
+                        }
+                        else if (!calcManager.expressionSet.ranges.ContainsKey(buttonID))
+                        {
+                            GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                            var.GetComponent<ExpressionComponent>().setExpressionParent(param);
+                            var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
+                            param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
+                            var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
+                            calcManager.expressionSet.AddRange(buttonID);
+                            addForwarders(var.transform);
+                        }
+
                     }
                 }
 
@@ -169,7 +178,7 @@ public class CalcInput : MonoBehaviour
 
                     if (currExpression.expSet.GetTotalOccurence(toDelete) == 0)
                     {
-                        calcManager.expressionSet.ranges.Remove(toDelete);
+                        calcManager.expressionSet.RemoveVariable(toDelete);
                         expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDelete);
                     }
                 }
@@ -180,7 +189,7 @@ public class CalcInput : MonoBehaviour
 
                 foreach (string del in toDel)
                 {
-                    calcManager.expressionSet.ranges.Remove(del);
+                    calcManager.expressionSet.RemoveVariable(del);
                     expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(del);
                 }
 

@@ -22,8 +22,7 @@ public class ExpressionActions : QuickButton
     }
 
     //TODO:
-    // 1 - implement button functionality
-    //      - deleting variables        NEED HELP WITH UI 
+    //
 
     //BUGS:
     //

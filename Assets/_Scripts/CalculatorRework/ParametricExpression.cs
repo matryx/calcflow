@@ -10,6 +10,7 @@ public class ParametricExpression : MonoBehaviour
     List<Transform> expressionsList;
     List<Transform> variableClumps;
     Dictionary<string, Transform> variables;
+    Dictionary<string, Transform> hiddenVariables;
     List<Transform> emptyList;
     Transform separator;
     Scroll scroll;
@@ -28,6 +29,7 @@ public class ParametricExpression : MonoBehaviour
         expressionsList = new List<Transform>();
         variableClumps = new List<Transform>();
         variables = new Dictionary<string, Transform>();
+        hiddenVariables = new Dictionary<string, Transform>();
         emptyList = new List<Transform>();
 
         scroll = expressionsClass.getScroll("param");
@@ -126,6 +128,14 @@ public class ParametricExpression : MonoBehaviour
 
     public void addVariable(string varName, Transform varValue)
     {
+        if(hiddenVariables.ContainsKey(varName))
+        {
+            Transform temp = hiddenVariables[varName];
+            temp.gameObject.SetActive(true);
+            varValue = temp;
+            hiddenVariables.Remove(varName);
+        }
+
         if (variables.Count % 2 == 0)
         {
             addNewVariableClump(varValue);
@@ -136,6 +146,12 @@ public class ParametricExpression : MonoBehaviour
         }
 
         variables.Add(varName, varValue);
+    }
+
+    public void ReAddVariable(string varName)
+    {
+
+
     }
 
     public Expressions.ExpressionType getType()
@@ -156,20 +172,6 @@ public class ParametricExpression : MonoBehaviour
     {
         varName = varToDelete;
         deleteVar = true;
-    }
-
-    IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)
-    {
-        float startTime = Time.time;
-
-        while (Time.time < startTime + overTime)
-        {
-            if (obj == null) break;
-            obj.localPosition = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
-            yield return null;
-        }
-
-        if (obj != null) obj.localPosition = end;
     }
 
     private void addToVarClump(Transform var)
@@ -196,20 +198,36 @@ public class ParametricExpression : MonoBehaviour
         var.localPosition = new Vector3(-xPos, 0, 0);
     }
 
+    IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)
+    {
+        float startTime = Time.time;
+
+        while (Time.time < startTime + overTime)
+        {
+            if (obj == null) break;
+            obj.localPosition = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
+            yield return null;
+        }
+
+        if (obj != null) obj.localPosition = end;
+    }
+
     void Update()
     {
         if (deleteVar)
         {
             if (variables.ContainsKey(varName))
             {
-                Destroy(variables[varName].gameObject);
+                Transform temp = variables[varName];
+                temp.gameObject.SetActive(false);
+                temp.SetParent(null);
+                hiddenVariables.Add(varName, temp);
                 variables.Remove(varName);
 
                 destroyCalled = true;
                 deleteVar = false;
                 return;
             }
-
         }
 
         if (destroyCalled)
@@ -218,12 +236,12 @@ public class ParametricExpression : MonoBehaviour
             {
                 if (variableClumps[i].childCount == 1)
                 {
-                    variableClumps[i].GetChild(0).localPosition = new Vector3(-xPos, 0, 0);
+                    StartCoroutine(MoveTo(variableClumps[i].GetChild(0), variableClumps[i].GetChild(0).localPosition, new Vector3(-xPos, 0, 0), 0.3f));
 
                     if (i + 1 < variableClumps.Count)
                     {
                         variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
-                        variableClumps[i].GetChild(1).localPosition = new Vector3(xPos, 0, 0);
+                        StartCoroutine(MoveTo(variableClumps[i].GetChild(1), variableClumps[i].GetChild(1).localPosition, new Vector3(xPos, 0, 0), 0.3f));
                     }
                 }
 

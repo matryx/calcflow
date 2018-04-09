@@ -49,7 +49,21 @@ public class ExpressionSet
         }
     }
 
-    //TODO: create function thta moves range from ranges to hiddenRanges and vice veersa
+    public void ReAddVariable(string v)
+    {
+        RangePair temp = hiddenRanges[v];
+        hiddenRanges.Remove(v);
+
+        ranges.Add(v, temp);
+    }
+
+    public void RemoveVariable(string v)
+    {
+        RangePair temp = ranges[v];
+        ranges.Remove(v);
+
+        hiddenRanges.Add(v, temp);
+    }
 
     public void AddExpression(ExpOptions variable, List<string> tokens)
     {
@@ -110,6 +124,7 @@ public class ExpressionSet
 
         //need to change later
         ranges = new Dictionary<string, RangePair>();
+        hiddenRanges = new Dictionary<string, RangePair>();
     }
 
     //CREATES EMPTY EXPRESSION SET
@@ -126,6 +141,7 @@ public class ExpressionSet
 
         ranges = new Dictionary<string, RangePair>();
         ranges.Add("x", new RangePair(new Range(emptyTokens), new Range(emptyTokens)));
+        hiddenRanges = new Dictionary<string, RangePair>();
         this.CompileAll();
     }
 
@@ -163,6 +179,8 @@ public class ExpressionSet
     internal ExpressionSet (string[] rangeKeys, List<RangePair> rangePairs, ExpOptions[] ExpressionKeys, List<Expression> ExpressionValues)
     {
         ranges = new Dictionary<string, RangePair>();
+        hiddenRanges = new Dictionary<string, RangePair>();
+
         for (int i =0; i < rangePairs.Count; i++)
         {
             ranges.Add(rangeKeys[i], rangePairs[i]);
