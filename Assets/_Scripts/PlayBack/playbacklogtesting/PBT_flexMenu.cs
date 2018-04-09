@@ -17,6 +17,7 @@ public class PBT_flexMenu : MonoBehaviour
         {
             this.tester = tester;
         }
+        public KeyboardInputResponder(){}
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {

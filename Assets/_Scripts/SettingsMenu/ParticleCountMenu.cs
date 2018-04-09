@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ParticleCountMenu : MonoBehaviour {
+public class ParticleCountMenu : MonoBehaviour
+{
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         ParticleCountMenu particleCountMenu;
@@ -10,6 +11,7 @@ public class ParticleCountMenu : MonoBehaviour {
         {
             this.particleCountMenu = particleCountMenu;
         }
+        public KeyboardInputResponder() { }
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {
@@ -57,6 +59,6 @@ public class ParticleCountMenu : MonoBehaviour {
         keyboard.RegisterResponder(responder);
 
         paramSurface = FindObjectOfType<CustomParametrizedSurface>();
-        
+
     }
 }

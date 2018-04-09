@@ -21,7 +21,7 @@ using System.Collections;
 using System;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), false)]
+[RuntimeSerializable(typeof(MonoBehaviour), false, false)]
 abstract public class FlexActionableComponent : MonoBehaviour {
 
     protected Action<FlexActionableComponent, GameObject> exitCallback;

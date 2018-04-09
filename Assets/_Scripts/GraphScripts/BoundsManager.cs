@@ -13,7 +13,7 @@ public class BoundsManager : MonoBehaviour
     public TMPro.TextMeshPro vParam1, vParam2;
     public TMPro.TextMeshPro wParam1, wParam2;
 
-    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+    [RuntimeSerializable(null, true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         BoundsManager boundsManager;
@@ -21,6 +21,7 @@ public class BoundsManager : MonoBehaviour
         {
             this.boundsManager = boundsManager;
         }
+        public KeyboardInputResponder(){}
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {

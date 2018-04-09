@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(null, true, true)]
 internal class ParticleSettingsResponder : FlexMenu.FlexMenuResponder
 {
     internal bool isReady = false;
@@ -16,6 +16,7 @@ internal class ParticleSettingsResponder : FlexMenu.FlexMenuResponder
     {
         paramSurface = psurf;
     }
+    public ParticleSettingsResponder() { }
 
     public void initialize(FlexActionableComponent defaultEffect, FlexActionableComponent defaultSpeed)
     {

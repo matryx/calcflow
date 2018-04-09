@@ -7,7 +7,7 @@ using UnityEngine;
  */
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(typeof(MonoBehaviour), false, false)]
 public class KeyboardFlexPanel : FlexPanelComponent {
 
     protected override void OnActionEnd(FlexActionableComponent sender, GameObject collider)

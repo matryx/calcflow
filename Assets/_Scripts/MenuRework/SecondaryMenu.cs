@@ -6,9 +6,11 @@ using VoxelBusters.RuntimeSerialization;
 [RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class SecondaryMenu : MonoBehaviour
 {
+    [RuntimeSerializable(null, true, true)]
     internal class SecondaryMenuResponder : FlexMenu.FlexMenuResponder
     {
         SecondaryMenu secMenu;
+        public SecondaryMenuResponder(){}
 
         internal void initialize(SecondaryMenu sec)
         {

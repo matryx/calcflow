@@ -7,7 +7,7 @@ internal class SettingsInputResponder : FlexMenu.FlexMenuResponder
     internal bool isReady = false;
 
 
-    internal SettingsInputResponder()
+    public SettingsInputResponder()
     {
         
     }

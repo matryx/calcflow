@@ -44,14 +44,16 @@ public class PieceWiseControl : MonoBehaviour
 
     Vector3 distanceBetween;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+    [RuntimeSerializable(null, true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
-        PieceWiseControl pwControl;
+        internal PieceWiseControl pwControl;
         internal KeyboardInputResponder(PieceWiseControl pwControl)
         {
             this.pwControl = pwControl;
         }
+
+        public KeyboardInputResponder(){}
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {

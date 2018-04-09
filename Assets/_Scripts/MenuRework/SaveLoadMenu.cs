@@ -28,6 +28,7 @@ public class SaveLoadMenu : MonoBehaviour
     private MultiSelectFlexPanel selectPanel;
     Dictionary<string, SavePackage> saves;
 
+    [RuntimeSerializable(null, true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         SaveLoadMenu saveLoadMenu;
@@ -35,6 +36,7 @@ public class SaveLoadMenu : MonoBehaviour
         {
             this.saveLoadMenu = saveLoadMenu;
         }
+        public KeyboardInputResponder(){}
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {

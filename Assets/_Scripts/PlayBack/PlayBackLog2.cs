@@ -255,21 +255,19 @@ public class PlaybackLogAction2
         return newAction;
     }
 
-    HashSet<int> brokenparents = new HashSet<int>();
-
     void Spawn()
     {
         GameObject subject;
-        try
-        {
+         try
+         {
             subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
-        }
-        catch (Exception e)
-        {
-            Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name") + " with subject key " + subjectKey);
-            Debug.LogError(e.Message);
-            throw e;
-        }
+         }
+         catch (Exception e)
+         {
+             Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name") + " with subject key " + subjectKey);
+             Debug.LogError(e.Message);
+             throw e;
+         }
         //yield return null;
         if (objectMap.ContainsKey(subjectKey))
         {
@@ -303,6 +301,10 @@ public class PlaybackLogAction2
                 scale = _info.GetValue<Vector3>("scale");
                 rotation = _info.GetValue<Quaternion>("rotation");
 
+                if (subject.name == "PieceWiseTabs"){
+                    Debug.Log ("delete parent is being made. key: " + subjectKey);
+                }
+
                 subject.MoveTo(position, 0);
                 subject.RotateTo(rotation, 0);
                 subject.GlobalScaleTo(scale, 0);
@@ -319,15 +321,18 @@ public class PlaybackLogAction2
 
                     if (objectMap.ContainsKey(parentKey))
                     {
-                        if (brokenparents.Contains(subjectKey)) {
-                            Debug.Log("successful parent");
+                        if (subject.name == "delete") {
+                            Debug.Log("DELETE: ABLE TO REPARENT: " + timeStamp);  
+                            //
                         }
                         subject.transform.SetParent((parentKey == 0) ? null : objectMap[parentKey].transform, false);
                     }
                     else
                     {
-                        brokenparents.Add(subjectKey);
-                        Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent does not exist." );
+                        if (subject.name == "delete") {
+                            Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist." );
+                        }
+                        //Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist." );
                     }
 
                     subject.LocalMoveTo(position, PlaybackLog.Period);
@@ -346,7 +351,7 @@ public class PlaybackLogAction2
                 }
                 else
                 {
-                    Debug.Log(timeStamp + " subject " + subjectKey + " could not be moved because subject does not exist.");
+                    //Debug.Log(timeStamp + " subject " + subjectKey + " could not be moved because subject does not exist.");
                 }
                 break;
             case ActionType.Enable:

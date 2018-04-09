@@ -35,6 +35,7 @@ public class FlexMenu : MonoBehaviour
     {
         void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider);
         void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider);
+
     }
     [SerializeField]
     private FlexMenuResponder responder;

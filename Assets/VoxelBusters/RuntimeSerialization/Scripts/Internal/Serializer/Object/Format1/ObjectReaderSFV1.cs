@@ -678,6 +678,8 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 				}
 			}
 
+			Debug.Log("dessing object of type: " + _objectType);
+
 			// Fallback condition
 			return Activator.CreateInstance(_objectType);
 		}

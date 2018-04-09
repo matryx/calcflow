@@ -18,19 +18,22 @@ public class ComponentRSExtension : ObjectRSExtension
 	public override object CreateInstance (RuntimeSerializationInfo _info)
 	{
 		string		_hierarchyMetadata	= _info.GetValue<string>(kHierarchyMetadataKey, true);
+		if (_hierarchyMetadata == "Null" || _hierarchyMetadata == null || _hierarchyMetadata == "") {
+			Debug.Log ("Object Type " + _info.ObjectType);
+		}
 		string		_componentUID		= _info.GetValue<string>(kComponentUIDKey, 		true);
 		bool		_isPrefab			= _info.GetValue<bool>(kIsPrefabKey, 			true);
 		System.Type	_componentType		= _info.ObjectType;
 		Component	_component			= UnityObjectSerializationUtil.GetComponent(_hierarchyMetadata, _componentUID, _componentType, _isPrefab);
 
-#if RS_DEBUG_MODE
+#if RS_DEBUG_MODE  
 		Debug.Log(string.Format("[RS] Finished creating component of type:{0} having UID: {1} and metadata: {2}.", _componentType, _componentUID, _hierarchyMetadata), _component);
 #endif
 
 		return _component;
 	}
 
-	#endregion
+	#endregion 
 
 	#region Serialization Methods
 
@@ -38,7 +41,7 @@ public class ComponentRSExtension : ObjectRSExtension
 	{
 		Component		_component		= _object as Component;
 
-		if (_component == null)
+		if (_component == null)  
 			return;
 
 		GameObject		_gameObject		= _component.gameObject;
@@ -56,7 +59,9 @@ public class ComponentRSExtension : ObjectRSExtension
 		// Serialize properties
 		string		_hierarchyMetadata	= UnityObjectSerializationUtil.GetHierarchyMetadata(_gameObject);
 		string		_componentUID		= _UIDSystem.GetComponentUID(_component);
-
+		if (_hierarchyMetadata == "Null") {
+			Debug.Log (_hierarchyMetadata);
+		}
 		_info.AddValue<string>(kHierarchyMetadataKey, 	_hierarchyMetadata, 	true);
 		_info.AddValue<string>(kComponentUIDKey, 		_componentUID,			true);
 		_info.AddValue<bool>(kIsPrefabKey, 				_UIDSystem.IsPrefab,	true);

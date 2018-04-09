@@ -7,7 +7,7 @@ using VoxelBusters.RuntimeSerialization;
 public class OutputMenu : MonoBehaviour
 {
 
-    [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+    [RuntimeSerializable(null, true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         OutputMenu outputMenu;
@@ -15,6 +15,7 @@ public class OutputMenu : MonoBehaviour
         {
             this.outputMenu = outputMenu;
         }
+        public KeyboardInputResponder(){}
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {

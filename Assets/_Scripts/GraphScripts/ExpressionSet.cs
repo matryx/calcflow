@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class ExpressionSet
 {
@@ -192,7 +192,7 @@ public class ExpressionSet
     }
 }
 
-[RuntimeSerializable(typeof(MonoBehaviour), false, false)]
+[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public abstract class CalcOutput //: ManualSerialize
 {
@@ -325,7 +325,7 @@ public abstract class CalcOutput //: ManualSerialize
     #endregion
 }
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class Expression : CalcOutput
 {
@@ -356,12 +356,17 @@ public class Expression : CalcOutput
     }
 }
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class RangePair
 {
     public Range Min;
     public Range Max;
+
+    public RangePair (){
+        Min = new Range();
+        Max = new Range();
+    }
 
     public RangePair(Range min, Range max)
     {
@@ -376,7 +381,7 @@ public class RangePair
     }
 }
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class Range : CalcOutput
 {
@@ -435,7 +440,7 @@ public class Range : CalcOutput
 
 }
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class SerializableExpressionSet
 {
@@ -476,7 +481,7 @@ public class SerializableExpressionSet
     }
 }
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class SerializableRangePair
 {
@@ -495,7 +500,7 @@ public class SerializableRangePair
     }
 }
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class SerializableRange
 {
