@@ -75,6 +75,17 @@ public class ExpressionBody : QuickButton
         return variable;
     }
 
+    public void deselectCurrBody()
+    {
+        ExpressionBody selectedBody = expression.getSelectedBody();
+        if (selectedBody)
+        {
+            TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+            oldTextInput.text = oldTextInput.text.Replace("_", "");
+            unSelect();
+        }
+    }
+
     public void deselectPrevBody()
     {
         ExpressionBody selectedBody = expression.getSelectedBody();
@@ -82,7 +93,6 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
-
             selectedBody.unSelect();
         }
     }

@@ -43,6 +43,11 @@ public class HighlightOnRaycast : MonoBehaviour {
         color = rend.material.color;
     }
 
+    public void setDefaultColor(Color col)
+    {
+        color = col;
+    }
+
     // Update is called once per frame
     void Update () {
         if (numPressers < 1)

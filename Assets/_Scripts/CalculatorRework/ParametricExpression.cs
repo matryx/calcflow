@@ -52,11 +52,12 @@ public class ParametricExpression : MonoBehaviour
         return scroll;
     }
 
-    public void setButtonInputMaterial(Material mat)
+    public void setButtonInputColor(Color col)
     {
+        print("SET BUTTON INPUT MAT");
         foreach (Transform t in expressionsList)
         {
-            t.Find("Button_Input").GetComponent<Renderer>().material = mat;
+            t.Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
         }
     }
 

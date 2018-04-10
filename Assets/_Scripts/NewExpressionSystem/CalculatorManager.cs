@@ -34,7 +34,7 @@ public class CalculatorManager : MonoBehaviour
     const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
     #endregion
 
-    private Color positiveFeedback;
+    private Color positiveFeedback;  //GREEN
     private Color negativeFeedback = Color.red;
 
     int expressionDisplayLength = 20;
@@ -74,7 +74,7 @@ public class CalculatorManager : MonoBehaviour
         //presetMenu.Initialize(this);
         //saveLoadMenu.Initialize(this);
 
-        ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback);
+        ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback); 
 
         //if (connectedMenus.particleAnimationSettings != null)
         //    connectedMenus.particleAnimationSettings.Initialize(this);
