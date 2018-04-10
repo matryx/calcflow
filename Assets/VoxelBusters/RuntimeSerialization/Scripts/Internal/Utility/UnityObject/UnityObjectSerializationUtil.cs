@@ -201,10 +201,21 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 			// As component with given UID doesnt exist, please create a new one
 			Component	_newComponent	= null;
 			
-			if (_componentType == typeof(Transform))
+			// if (_componentType == typeof(RectTransform)){
+			// 	Debug.Log ("attempting to add rectTransform to gameobject: " + _uidSystem.CachedGameObject.name);
+			// 	_newComponent = _uidSystem.CachedGameObject.GetComponent<RectTransform>();
+			// 	if (_newComponent == null) {
+			// 		Debug.Log("Adding rect");
+			// 		_newComponent		= _uidSystem.CachedGameObject.AddComponent(_componentType);
+			// 	} else {
+			// 		Debug.Log("Rect already added");
+			// 	}
+			// }
+			if (_componentType == typeof(Transform) || _componentType == typeof(RectTransform))
 				_newComponent		= _uidSystem.CachedTransform;
-			else
+			else {
 				_newComponent		= _uidSystem.CachedGameObject.AddComponent(_componentType);
+			}
 			
 			// Update UIDSystem with type and UID information
 			_uidSystem.SetComponentUID(_newComponent, _componentUID);

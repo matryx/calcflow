@@ -647,7 +647,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 			Type							_objectType				= _serilizationInfo.ObjectType;
 			RuntimeSerializableAttribute	_serializableAttr		= SerializationTypeUtil.GetRuntimeSerializableAttribute(_objectType);
 			Type							_extensionObjectType	= null;
-			
+
 			// Type uses Extension for serialization
 			if (_serializableAttr == null)
 			{
@@ -677,8 +677,6 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 					return ((IRuntimeSerializableExtension)_extension.Instance).CreateInstance(_serilizationInfo);
 				}
 			}
-
-			Debug.Log("dessing object of type: " + _objectType);
 
 			// Fallback condition
 			return Activator.CreateInstance(_objectType);
