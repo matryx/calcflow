@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class PtSet {
-	public enum PtOptions
-    {
-        pt1, pt2, pt3
-    }
-
+public class PtSet 
+{
 	public Dictionary<string, PtCoord> ptCoords;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
@@ -240,5 +236,169 @@ public class SerializableAxisCoord
     {
         AxisCoord ac = new AxisCoord(ExpressionParser.Parse(rawText));
         return ac;
+    }
+}
+
+public class EqnSet 
+{
+    public Dictionary<string, EqnCoef> eqnCoefs;
+    public Dictionary<string, bool> coefValidity = new Dictionary<string, bool>();
+    public AK.ExpressionSolver solver = new AK.ExpressionSolver();
+    public void AddEqnCoef(string variable, EqnCoef eqnCoef)
+    {
+        if (eqnCoefs != null)
+        {
+            if (eqnCoefs.ContainsKey(variable))
+            {
+                eqnCoefs[variable] = eqnCoef;
+            }
+            else
+            {
+                eqnCoefs.Add(variable, eqnCoef);
+            }
+        }
+    }
+
+    public void AddEqnCoef(string variable, List<string> tokens)
+    {
+        EqnCoef x = new EqnCoef(tokens);
+        AddEqnCoef(variable, x);
+    }
+    public void AddEqnCoef(string variable)
+    {
+        AddEqnCoef(variable, new List<string>());
+    }
+
+    public void RemoveEqnCoef(string variable)
+    {
+        if (eqnCoefs.ContainsKey(variable))
+        {
+            eqnCoefs.Remove(variable);
+        }
+    }
+
+	public EqnSet()
+	{
+		eqnCoefs = new Dictionary<string, EqnCoef>();
+        AddEqnCoef("pt1");
+        AddEqnCoef("pt2");
+        AddEqnCoef("pt3");
+	}
+
+	public EqnSet DeepCopy()
+	{
+		EqnSet newEs = new EqnSet();
+
+		newEs.eqnCoefs = new Dictionary<string, EqnCoef>();
+        foreach (string key in eqnCoefs.Keys)
+        {
+            newEs.eqnCoefs.Add(key, new EqnCoef(eqnCoefs[key]));
+        }
+
+        newEs.coefValidity = new Dictionary<string, bool>(coefValidity);
+
+        return newEs;
+	}
+
+	public EqnSet ShallowCopy()
+	{
+		EqnSet newEs = new EqnSet();
+        newEs.eqnCoefs = new Dictionary<string, EqnCoef>((Dictionary<string, EqnCoef>)eqnCoefs);
+        newEs.coefValidity = new Dictionary<string, bool>(coefValidity);
+
+        return newEs;
+	}
+
+	internal EqnSet(string[] eqKeys, List<EqnCoef> coefs)
+	{
+		eqnCoefs = new Dictionary<string, EqnCoef>();
+        for (int i = 0; i < coefs.Count; i++)
+        {
+            eqnCoefs.Add(eqKeys[i], coefs[i]);
+        }
+	}
+
+	public bool CompileAll()
+	{
+		bool isValid = true;
+		foreach (string PO in eqnCoefs.Keys)
+        {
+            solver.SetGlobalVariable(PO, -666);
+            eqnCoefs[PO].compileTokens();
+            coefValidity[PO] = eqnCoefs[PO].GenerateAKSolver(solver);
+            isValid &= coefValidity[PO];
+        }
+		return isValid;
+	}
+
+	public void PrintOut()
+	{
+		foreach (string po in eqnCoefs.Keys)
+        {
+            Debug.Log(po);
+            eqnCoefs[po].PrintOut();
+        }
+	}
+
+	void SaveToFile()
+    {
+
+    }
+}
+
+[System.Serializable]
+public class EqnCoef : CalcOutput
+{
+    float val;
+
+    public float Value
+    {
+        get
+        {
+            return val;
+        }
+    }
+
+    public string expression
+    {
+        get
+        {
+            return rawText;
+        }
+        set
+        {
+            rawText = value;
+        }
+    }
+
+    public EqnCoef(EqnCoef toCopy)
+    {
+        this.rawText = toCopy.rawText;
+        this.tokens = new List<string>(toCopy.tokens);
+    }
+
+    public EqnCoef(List<string> tokens)
+    {
+        rawText = "";
+        this.tokens = tokens;
+    }
+
+    public EqnCoef(float numVal) {
+        this.val = numVal;
+    }
+    public EqnCoef()
+    {
+        rawText = "";
+        tokens = new List<string>();
+    }
+
+    public override bool GenerateAKSolver(AK.ExpressionSolver solver)
+    {
+        bool success = base.GenerateAKSolver(solver);
+        if (success)
+        {
+            val = (float)AKExpression.Evaluate();
+        }
+        return success;
     }
 }

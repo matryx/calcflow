@@ -113,6 +113,5 @@ public class PtInput : MonoBehaviour {
             currExpression.tokens.Insert(index, c.ToString());
             index++;
         }
-        ptManager.inputReceived = true;
     }
 }

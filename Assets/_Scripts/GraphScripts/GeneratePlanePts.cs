@@ -5,24 +5,20 @@ using UnityEngine;
 public class GeneratePlanePts : MonoBehaviour {
 
 	public float a, b, c, d;
-	public Vector3 pt1;
-	public Vector3 pt2;
-	public Vector3 pt3;
-	public PresentPlane myPlane;
+	public Vector3 pt1, pt2, pt3;
+	public Vector3 center;
+	public Transform point1, point2, point3;
+	public Transform centerPt;
+	public PresentPlane presentPlane;
+	public PtManager ptManager;
 	public float steps = 3;
 	public float stepSize = 5;
 	public AxisLabelManager xLabelManager;
     public AxisLabelManager yLabelManager;
 	public AxisLabelManager zLabelManager;
-	public Vector3 center;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
+	public void eqnToPoints() 
+	{	
 		getCenter();
 		changeScale();
 		bool check = getSidePoints(null, center.y, center.z);
@@ -34,13 +30,14 @@ public class GeneratePlanePts : MonoBehaviour {
 		{
 			check = getSidePoints(center.x, center.y, null);
 		}
-
+		ptManager.eqnUpdatePoint(pt1, pt2, pt3);
 	}
 
 	public void getCenter() 
 	{
 		Vector3 normal = new Vector3(a,b,c); 
 		center = Vector3.ProjectOnPlane(Vector3.zero, normal);
+		presentPlane.center = center;
 	}
 
 	public void changeScale() 
@@ -61,7 +58,7 @@ public class GeneratePlanePts : MonoBehaviour {
 			{
 				return false;
 			}
-			return checkPtValid((float)y, (float)x, (float)z, xLabelManager); 
+			return checkPtValid((float)y, (float)x, (float)z, b, a, c, xLabelManager); 
 		}
 		else if (y == null)
 		{
@@ -69,7 +66,7 @@ public class GeneratePlanePts : MonoBehaviour {
 			{
 				return false;
 			}
-			return checkPtValid((float)x, (float)y, (float)z, yLabelManager);
+			return checkPtValid((float)x, (float)y, (float)z, a, b, c, yLabelManager);
 		}
 		else
 		{
@@ -77,32 +74,32 @@ public class GeneratePlanePts : MonoBehaviour {
 			{
 				return false;
 			}
-			return checkPtValid((float)x, (float)z, (float)y, zLabelManager);
+			return checkPtValid((float)x, (float)z, (float)y, a, c, b, zLabelManager);
 		}
 	}
 
-	public bool checkPtValid(float width, float depth, float height, AxisLabelManager myAxis)
+	public bool checkPtValid(float width, float depth, float height, float widthCoef, float depthCoef, float heightCoef, AxisLabelManager myAxis)
 	{
-			float newWidth = width-steps; 
-			float newHeight = height-steps;
-			float newDepth = (d - a*newWidth - c*newHeight)/b;
+			float newWidth = width-stepSize; 
+			float newHeight = height-stepSize;
+			float newDepth = (d - widthCoef*newWidth - heightCoef*newHeight)/depthCoef;
 			if(newDepth > myAxis.Max || newDepth < myAxis.Min)
 			{
 				return false;
 			}
 			Vector3 temp1 = new Vector3(newWidth, newHeight, newDepth);
 
-			newWidth = width-steps; 
-			newHeight = height+steps;
-			newDepth = (d - a*newWidth - c*newHeight)/b;
+			newWidth = width+stepSize; 
+			newHeight = height+stepSize;
+			newDepth = (d - widthCoef*newWidth - heightCoef*newHeight)/depthCoef;
 			if(newDepth > myAxis.Max || newDepth < myAxis.Min)
 			{
 				return false;
 			}
 			Vector3 temp2 = new Vector3(newWidth, newHeight, newDepth);
 
-			newWidth = width-steps;
-			newDepth = (d - a*newWidth - c*height)/b;
+			newHeight = height+stepSize;
+			newDepth = (d - widthCoef*newWidth - heightCoef*height)/depthCoef;
 			if(newDepth > myAxis.Max || newDepth < myAxis.Min)
 			{
 				return false;

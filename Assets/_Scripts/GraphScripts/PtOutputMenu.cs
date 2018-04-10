@@ -96,6 +96,18 @@ public class PtOutputMenu : MonoBehaviour {
             case "Button_pt3Zinput":
                 ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
                 break;
+            case "Button_a":
+                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                break;
+            case "Button_b":
+                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                break;
+            case "Button_c":
+                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                break;
+            case "Button_d":
+                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                break;
             case "FixPlane":
                 if (grabber.FixedPlane) {
                     grabber.FixedPlane = false;

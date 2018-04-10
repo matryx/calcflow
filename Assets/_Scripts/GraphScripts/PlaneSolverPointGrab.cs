@@ -11,7 +11,6 @@ public class PlaneSolverPointGrab : MonoBehaviour {
 
 	public ConstraintGrabbable pt1Grabber, pt2Grabber, pt3Grabber;
 	public bool FixedPlane = true;
-	public Vector3 pt1NewLoc;
 
 	void Update() {
 		if (!pt1Grabber.IsGrabbed) pt1Grabber.lastLocalPos = point1.localPosition;
@@ -25,10 +24,10 @@ public class PlaneSolverPointGrab : MonoBehaviour {
 	private void grabbingPoint(Transform point, ConstraintGrabbable grabber) {
 		Vector3 newLoc = Vector3.zero;
 		if (FixedPlane) {
-			newLoc = Vector3.ProjectOnPlane(grabber.lastLocalPos, presentPlane.lookAtTarget.localPosition - presentPlane.plane.localPosition);
+			newLoc = Vector3.ProjectOnPlane(grabber.lastLocalPos - presentPlane.centerPt.localPosition, presentPlane.lookAtTarget.localPosition - presentPlane.plane.localPosition);
 			newLoc = newLoc + presentPlane.centerPt.localPosition;
 			if (newLoc.x > 10 || newLoc.x < -10 || newLoc.y > 10 || newLoc.y < -10 || newLoc.z > 10 || newLoc.z < -10) {
-				grabber.transform.position = point.position - presentPlane.centerPt.localPosition;
+				grabber.transform.position = point.position;
 			}
 			point.localPosition = newLoc;
 		} else {

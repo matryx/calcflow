@@ -121,7 +121,8 @@ public class PtManager : MonoBehaviour
         if (feedbacks.pt3Feedback != null) feedbacks.pt3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
     }
 
-    public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane) {
+    public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane) 
+    {
         CalcOutput originalExpression = ptInput.currExpression;
         SetOutput(ptSet.ptCoords[ptName].X);
         ptInput.RewriteInput(newLoc.x);
@@ -130,23 +131,53 @@ public class PtManager : MonoBehaviour
         SetOutput(ptSet.ptCoords[ptName].Z);
         ptInput.RewriteInput(newLoc.z);
         SetOutput(originalExpression);
-        if (fixedPlane) {
+        if (fixedPlane) 
+        {
             manageText();
             ptSet.CompileAll();
-            inputReceived = false;
-        } else {
+        } else 
+        {
             manageText();
-            inputReceived = false;
             bool isValid = ptSet.CompileAll();
             ManageFeedback();
-            if (isValid) {
+            if (isValid) 
+            {
                 equation.text = presentPlane.CalculatePlane();
                 presentPlane.ApplyUnroundCenter(ptName, newLoc);
                 presentPlane.GetPlaneDirection();
-            } else {
+            } else 
+            {
                 equation.text = "Invalid Plane";
             }
         }
+    }
+
+    public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
+    {
+        CalcOutput originalExpression = ptInput.currExpression;
+        SetOutput(ptSet.ptCoords["pt1"].X);
+        ptInput.RewriteInput(pt1NewLoc.x);
+        SetOutput(ptSet.ptCoords["pt1"].Y);
+        ptInput.RewriteInput(pt1NewLoc.y);
+        SetOutput(ptSet.ptCoords["pt1"].Z);
+        ptInput.RewriteInput(pt1NewLoc.z);
+        SetOutput(ptSet.ptCoords["pt2"].X);
+        ptInput.RewriteInput(pt2NewLoc.x);
+        SetOutput(ptSet.ptCoords["pt2"].Y);
+        ptInput.RewriteInput(pt2NewLoc.y);
+        SetOutput(ptSet.ptCoords["pt2"].Z);
+        ptInput.RewriteInput(pt2NewLoc.z);
+        SetOutput(ptSet.ptCoords["pt3"].X);
+        ptInput.RewriteInput(pt3NewLoc.x);
+        SetOutput(ptSet.ptCoords["pt3"].Y);
+        ptInput.RewriteInput(pt3NewLoc.y);
+        SetOutput(ptSet.ptCoords["pt3"].Z);
+        ptInput.RewriteInput(pt3NewLoc.z);
+        SetOutput(originalExpression);
+        manageText();
+        ptSet.CompileAll();
+        presentPlane.GetLocalPoint();
+        presentPlane.GetPlaneDirection();
     }
 
     public void manageText()
