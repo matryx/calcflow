@@ -21,12 +21,6 @@ public class ExpressionActions : QuickButton
         menuActive = false;
     }
 
-    //TODO:
-    //
-
-    //BUGS:
-    //
-
     private void Initialize()
     {
         delete = transform.parent.Find("Delete");

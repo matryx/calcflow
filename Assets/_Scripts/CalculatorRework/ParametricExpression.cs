@@ -107,21 +107,6 @@ public class ParametricExpression : MonoBehaviour
         }
     }
 
-    //public string getVarTitle(Transform var)
-    //{
-    //    if (variables.ContainsValue(var))
-    //    {
-    //        foreach (KeyValuePair<string, Transform> v in variables)
-    //        {
-    //            if (v.Value.Equals(var))
-    //            {
-    //                return v.Value.Find("VariableTitle").GetComponentInChildren<TMPro.TextMeshPro>().text;
-    //            }
-    //        }
-    //    }
-    //    return "";
-    //}
-
     public void setSeparator(Transform sep)
     {
         separator = sep;
@@ -201,7 +186,6 @@ public class ParametricExpression : MonoBehaviour
         newVarClump.localScale = Vector3.one;
         newVarClump.localPosition = Vector3.zero;
         newVarClump.localEulerAngles = Vector3.zero;
-        //scroll.addToIndex(lastComponentInd + 1, emptyList, newVarClump, false);
         scroll.addToScroll(null, newVarClump, lastComponentInd + 1);
         variableClumps.Add(newVarClump);
 

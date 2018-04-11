@@ -18,7 +18,7 @@ public class Expressions : MonoBehaviour
     //Color expressionActiveColor, expressionInactiveColor;
 
     //TODO:
-    // main functionalities - DONE / NEED TO TEST HEAVILY
+    // main functionalities for parametric - DONE / NEED TO TEST HEAVILY
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit

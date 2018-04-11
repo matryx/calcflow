@@ -6,7 +6,7 @@ public class ExpressionComponent : MonoBehaviour {
     Transform expressionParent;
     Transform panel;
 
-    //NOTE: this script might be unnecessary, might just need ExpressionBody
+    //TODO: need to move everything in here into ExpressionBody (this script is unnecessary)
 	void Start () {
 		
 	}
