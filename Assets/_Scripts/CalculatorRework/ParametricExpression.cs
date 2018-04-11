@@ -18,6 +18,7 @@ public class ParametricExpression : MonoBehaviour
     float xPos = 1.2f;
     bool deleteVar = false;
     bool destroyCalled = false;
+    bool isActive = true;
     string varName;
 
     void Awake()
@@ -47,6 +48,16 @@ public class ParametricExpression : MonoBehaviour
         }
     }
 
+    public void setActiveStatus(bool status)
+    {
+        isActive = status;
+    }
+
+    public bool getActiveStatus()
+    {
+        return isActive;
+    }
+
     public Scroll getScroll()
     {
         return scroll;
@@ -54,7 +65,6 @@ public class ParametricExpression : MonoBehaviour
 
     public void setButtonInputColor(Color col)
     {
-        print("SET BUTTON INPUT MAT");
         foreach (Transform t in expressionsList)
         {
             t.Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
@@ -129,7 +139,7 @@ public class ParametricExpression : MonoBehaviour
 
     public void addVariable(string varName, Transform varValue)
     {
-        if(hiddenVariables.ContainsKey(varName))
+        if (hiddenVariables.ContainsKey(varName))
         {
             Transform temp = hiddenVariables[varName];
             temp.gameObject.SetActive(true);

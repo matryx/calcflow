@@ -18,10 +18,10 @@ public class Expressions : MonoBehaviour
     //Color expressionActiveColor, expressionInactiveColor;
 
     //TODO:
-    // 1 - slide variable shortcuts in and out 
-    // 2 - enable underscore movement by raycast hit
-    // 3 - hide should change the text color of entire expression components to gray    
-    //      hiding works but need to work on logistics of showing
+    // main functionalities - DONE / NEED TO TEST HEAVILY
+    // nice to haves - 
+    //  1 - slide variable shortcuts in and out 
+    //  2 - enable underscore movement by raycast hit
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
@@ -106,10 +106,6 @@ public class Expressions : MonoBehaviour
     {
         if (expr == null)
         {
-            //if (selectedExpression.GetComponent<ParametricExpression>())
-            //{
-            //    //selectedExpression.GetComponent<ParametricExpression>().disableActions();
-            //}
             selectedExpression = expr;
             selectedBody = null;
             selectedExpSet = null;
@@ -126,7 +122,6 @@ public class Expressions : MonoBehaviour
             selectedExpSet = expr.GetComponent<ParametricExpression>().getExpSet();
             calcManager.ChangeExpressionSet(selectedExpSet);
 
-            //expr.GetComponent<ParametricExpression>().enableActions();
         }
         else if (expr.GetComponent<VectorFieldExpression>())
         {

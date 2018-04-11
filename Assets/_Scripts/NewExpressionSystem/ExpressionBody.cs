@@ -11,6 +11,7 @@ public class ExpressionBody : QuickButton
     string title;
     OutputManager outputManager;
     CalcInput calcInput;
+    ParametricExpression param;
 
     private bool thisBodyActive = false;
     private bool finishedScaling = false;
@@ -47,6 +48,7 @@ public class ExpressionBody : QuickButton
     protected override void Start()
     {
         base.Start();
+        param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
     }
 
     public Transform getFeedBack()
@@ -136,7 +138,7 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            selectBody();
+            if (param.getActiveStatus()) selectBody();
         }
 
         if (expComp == null)

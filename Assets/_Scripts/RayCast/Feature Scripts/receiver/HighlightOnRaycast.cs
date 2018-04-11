@@ -43,6 +43,7 @@ public class HighlightOnRaycast : MonoBehaviour {
         color = rend.material.color;
     }
 
+    //TODO: change the implementation of this class
     public void setDefaultColor(Color col)
     {
         color = col;

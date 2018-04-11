@@ -10,7 +10,11 @@ public class ToggleExpression : QuickButton
     ExpressionSet expressionSet;
     Transform selectedExpression;
     Transform expressionActions;
-    
+    Transform thisExpr;
+    ExpressionComponent expComp;
+    ExpressionBody thisBody;
+    ParametricExpression param;
+
     Material showMat, hideMat;
     Color grayHide, grayShow;
 
@@ -22,7 +26,9 @@ public class ToggleExpression : QuickButton
         expressions = Expressions._instance;
         calcManager = CalculatorManager._instance;
         expressionSet = expressions.getSelectedExprSet();
-
+        expComp = transform.parent.parent.parent.GetComponent<ExpressionComponent>();
+        thisExpr = expComp.getExpressionParent();
+        thisBody = transform.parent.parent.parent.Find("Button_Input").GetComponent<ExpressionBody>();
         expressionActions = transform.parent.parent.Find("Body");
 
         showMat = transform.GetComponent<Renderer>().material;
@@ -33,29 +39,29 @@ public class ToggleExpression : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        expressionSet = expressions.getSelectedExprSet();
         selectedExpression = expressions.getSelectedExpr();
         selectedBody = expressions.getSelectedBody();
 
         if (active)     //HIDE
         {
-            print("HIDING");
+            expressionSet = expressions.getSelectedExprSet();
             calcManager.RemoveExpressionSet(expressionSet);
-            selectedExpression.GetComponent<ParametricExpression>().setTextColor(grayHide);
-            //expressionActions.GetComponent<Renderer>().material.SetTexture("_MainTex", Resources.Load("Icons/finalEllipses_gray", typeof(Texture)) as Texture);
+            param = selectedExpression.GetComponent<ParametricExpression>();
+            param.setTextColor(grayHide);
             expressionActions.GetComponent<ExpressionActions>().disableButtons();
-            selectedExpression.GetComponent<ParametricExpression>().setButtonInputColor(grayHide);
-            selectedBody.deselectCurrBody();  
+            param.setButtonInputColor(grayHide);
+            param.setActiveStatus(false);
+            selectedBody.deselectCurrBody();
         }
         else            //SHOW
         {
-            print("SHOWING");
             calcManager.AddExpressionSet(expressionSet);
-            //BUG: not the selected expression so this is null
+            param.setActiveStatus(true);
+            expressions.setSelectedExpr(thisExpr, thisBody);
+            thisBody.selectBody();
+            selectedExpression = expressions.getSelectedExpr();
             selectedExpression.GetComponent<ParametricExpression>().setTextColor(Color.black);
-            //expressionActions.GetComponent<Renderer>().material.SetTexture("_MainTex", Resources.Load("Icons/finalEllipses", typeof(Texture)) as Texture);
             selectedExpression.GetComponent<ParametricExpression>().setButtonInputColor(grayShow);
-            //TODO: select expression, component X
         }
 
         transform.GetComponent<Renderer>().material = (active) ? hideMat : showMat;
