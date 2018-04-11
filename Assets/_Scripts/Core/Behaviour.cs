@@ -302,7 +302,7 @@ namespace Nanome.Core
         //    rect.pivot = pivot;
         //}
 
-        public void OnDestroy()
+        public virtual void OnDestroy()
         {
             unsubscribe();
         }

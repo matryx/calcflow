@@ -17,7 +17,8 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
 
     public void LateUpdate()
     {
-        if (changeTestVals) {
+        if (changeTestVals)
+        {
             particleCount = 100;
             changeTestVals = false;
         }
@@ -107,13 +108,14 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
     }
     protected override void manualDeserialize()
     {
-        print("this works!");
-        restoreGradient();
-        InitializeVariables();
-        InitializeParticleSystem();
+        // print("this works!");
+        // InitializeVariables();
+        // InitializeParticleSystem();
+        // restoreGradient();
     }
-    public override void OnAfterRuntimeSerialize() {
-        print ("particleCount: " + particleCount);
+    public override void OnAfterRuntimeSerialize()
+    {
+        print("particleCount: " + particleCount);
     }
 
     private void restoreGradient()
@@ -168,8 +170,8 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
     // Use this for initialization
     protected virtual void Start()
     {
-        InitializeVariables();
         solver = new AK.ExpressionSolver();
+        InitializeVariables();
         InitializeParticleSystem();
         restoreGradient();
     }
@@ -234,8 +236,7 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
             dest[i].position = pos;
         }
 
-        Debug.Log(PARTICLE_SIZE);
-        Debug.Log(l);
+        Debug.Log("Creating compute buffers");
         pBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
         sBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
         dBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
@@ -296,6 +297,7 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
     public void ChangeParticleCount(int count)
     {
         particleCount = count;
+        releaseBuffers();
         InitializeParticleSystem();
         GenerateParticles();
     }
@@ -549,5 +551,19 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
     public bool isGraphing()
     {
         return !(animProgress == 1 || calculating);
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        releaseBuffers();
+        Debug.Log("Destroying Compute Buffers");
+
+    }
+    private void releaseBuffers()
+    {
+        pBuffer.Release();
+        sBuffer.Release();
+        dBuffer.Release();
     }
 }

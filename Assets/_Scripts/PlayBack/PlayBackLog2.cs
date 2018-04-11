@@ -258,16 +258,18 @@ public class PlaybackLogAction2
     void Spawn()
     {
         GameObject subject;
-         try
-         {
-            subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
-         }
-         catch (Exception e)
-         {
-             Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name") + " with subject key " + subjectKey);
-             Debug.LogError(e.Message);
-             throw e;
-         }
+        subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
+
+        // try
+        // {
+        //     subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
+        // }
+        // catch (Exception e)
+        // {
+        //     Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name") + " with subject key " + subjectKey);
+        //     Debug.LogError(e.Message);
+        //     throw e;
+        // }
         //yield return null;
         if (objectMap.ContainsKey(subjectKey))
         {
@@ -301,8 +303,9 @@ public class PlaybackLogAction2
                 scale = _info.GetValue<Vector3>("scale");
                 rotation = _info.GetValue<Quaternion>("rotation");
 
-                if (subject.name == "PieceWiseTabs"){
-                    Debug.Log ("delete parent is being made. key: " + subjectKey);
+                if (subject.name == "PieceWiseTabs")
+                {
+                    Debug.Log("delete parent is being made. key: " + subjectKey);
                 }
 
                 subject.MoveTo(position, 0);
@@ -321,16 +324,18 @@ public class PlaybackLogAction2
 
                     if (objectMap.ContainsKey(parentKey))
                     {
-                        if (subject.name == "delete") {
-                            Debug.Log("DELETE: ABLE TO REPARENT: " + timeStamp);  
+                        if (subject.name == "delete")
+                        {
+                            Debug.Log("DELETE: ABLE TO REPARENT: " + timeStamp);
                             //
                         }
                         subject.transform.SetParent((parentKey == 0) ? null : objectMap[parentKey].transform, false);
                     }
                     else
                     {
-                        if (subject.name == "delete") {
-                            Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist." );
+                        if (subject.name == "delete")
+                        {
+                            Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist.");
                         }
                         //Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist." );
                     }

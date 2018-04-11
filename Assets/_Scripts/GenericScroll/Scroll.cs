@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NanoVRController;
-
 using VoxelBusters.RuntimeSerialization;
 
 [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
@@ -59,25 +58,26 @@ public class Scroll : MonoBehaviour
 
     private void Awake()
     {
-        setUpMenu();
     }
 
     void Start()
     {
+        setUpMenu();
+
         if (transform.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local rotation of object with Scroll script needs to be zero");
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-            #endif
+#endif
         }
 
         if (objectParent.localScale != Vector3.one || objectParent.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local scale and local rotation of Object Parent needs to be one and zero");
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-            #endif
+#endif
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
@@ -131,6 +131,7 @@ public class Scroll : MonoBehaviour
             scrollBar.localPosition = Vector3.zero;
             scrollBar.localEulerAngles = Vector3.zero;
             scrollBar.gameObject.AddComponent<ScrollBar>();
+
             scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation);
             scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
             scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
@@ -288,10 +289,10 @@ public class Scroll : MonoBehaviour
 
             if (highestVisIndex - lowestVisIndex + 1 <= numberOfVisibleThings - fixedRowOrCol)
             {
-                int offsetBy = (numberOfVisibleThings / fixedRowOrCol) - 
+                int offsetBy = (numberOfVisibleThings / fixedRowOrCol) -
                                (int)Mathf.Ceil(((float)(highestVisIndex - lowestVisIndex + 1) / (float)fixedRowOrCol));
                 lowestVisIndex = lowestVisIndex - (fixedRowOrCol * offsetBy);
-            } 
+            }
 
             if (numPages == 1) lowestVisIndex = 0;
         }
