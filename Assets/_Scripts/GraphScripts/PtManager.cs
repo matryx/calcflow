@@ -11,6 +11,9 @@ public class PtManager : MonoBehaviour
     public PtSet ptSet;
 
     [HideInInspector]
+    public EqnSet eqnSet;    
+
+    [HideInInspector]
     public SaveLoadMenu saveLoadMenu;
 
     private PtInput ptInput;
@@ -18,7 +21,9 @@ public class PtManager : MonoBehaviour
     private Color positiveFeedback = new Color(0, 204, 54);
     private Color negativeFeedback = Color.red;
 
-    int maxDisplayLength = 6;
+    int maxDisplayLength = 7;
+    
+    int maxEqnLength = 6;
 
     [SerializeField]
     public FlexActionableComponent defaultSpeed;
@@ -57,6 +62,8 @@ public class PtManager : MonoBehaviour
         internal Renderer pt2Feedback;
         [SerializeField]
         internal Renderer pt3Feedback;
+        [SerializeField]
+        internal Renderer eqnFeedback;
     }
 
     [System.Serializable]
@@ -65,12 +72,21 @@ public class PtManager : MonoBehaviour
         [SerializeField]
         internal TextMesh pt1XInput, pt1YInput, pt1ZInput,
                 pt2XInput, pt2YInput, pt2ZInput,
-                pt3XInput, pt3YInput, pt3ZInput, aInput, bInput, cInput, dInput;
+                pt3XInput, pt3YInput, pt3ZInput,
+                aInput, bInput, cInput, dInput;
     }
+
+    public bool eqnInput = false;
+    public GeneratePlanePts generatePlanePts;
 
     public void SetOutput(CalcOutput output)
     {
         ptInput.ChangeOutput(output);
+        if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"]) {
+            eqnInput = false;
+        } else {
+            eqnInput = true;
+        }
     }
 
     private void Initialize()
@@ -79,6 +95,7 @@ public class PtManager : MonoBehaviour
         connectedMenus.ptInput.Initialize(this);
         connectedMenus.ptOutputMenu.Initialize(this);
         ptSet = new PtSet();
+        eqnSet = new EqnSet();
         ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
     }
 
@@ -98,10 +115,11 @@ public class PtManager : MonoBehaviour
             updateText = false;
         }
 
-        if (inputReceived)
+        if (inputReceived && !eqnInput)
         {
             inputReceived = false;
             bool isValid = ptSet.CompileAll();
+            
             ManageFeedback();
             if (isValid) {
                 equation.text = presentPlane.CalculatePlane();
@@ -112,6 +130,23 @@ public class PtManager : MonoBehaviour
                 equation.text = "Invalid Plane";
             }
         }
+
+        if (inputReceived && eqnInput)
+        {
+            inputReceived = false;
+            bool isValid = eqnSet.CompileAll();
+
+            ManageFeedback();
+            if (isValid) {
+                generatePlanePts.a = eqnSet.eqnCoefs["a"].Value;
+                generatePlanePts.b = eqnSet.eqnCoefs["b"].Value;
+                generatePlanePts.c = eqnSet.eqnCoefs["c"].Value;
+                generatePlanePts.d = eqnSet.eqnCoefs["d"].Value;
+                generatePlanePts.eqnToPoints();
+            } else {
+
+            }
+        }
     }
 
     public void ManageFeedback()
@@ -119,11 +154,13 @@ public class PtManager : MonoBehaviour
         if (feedbacks.pt1Feedback != null) feedbacks.pt1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
         if (feedbacks.pt2Feedback != null) feedbacks.pt2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
         if (feedbacks.pt3Feedback != null) feedbacks.pt3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
+        if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback;
     }
 
     public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane) 
     {
         CalcOutput originalExpression = ptInput.currExpression;
+        eqnInput = false;
         SetOutput(ptSet.ptCoords[ptName].X);
         ptInput.RewriteInput(newLoc.x);
         SetOutput(ptSet.ptCoords[ptName].Y);
@@ -178,6 +215,46 @@ public class PtManager : MonoBehaviour
         ptSet.CompileAll();
         presentPlane.GetLocalPoint();
         presentPlane.GetPlaneDirection();
+        presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+		presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+    }
+
+    public void updateEqn(float newA, float newB, float newC, float newD) 
+    {
+        CalcOutput originalExpression = ptInput.currExpression;
+        SetOutput(eqnSet.eqnCoefs["a"]);
+        ptInput.RewriteInput(newA);
+        SetOutput(eqnSet.eqnCoefs["b"]);
+        ptInput.RewriteInput(newB);
+        SetOutput(eqnSet.eqnCoefs["c"]);
+        ptInput.RewriteInput(newC);
+        SetOutput(eqnSet.eqnCoefs["d"]);
+        ptInput.RewriteInput(newD);
+        SetOutput(originalExpression);
+        manageText();
+        eqnSet.CompileAll();
+        ManageFeedback();        
+    }
+
+    public void updateEqn()
+    {
+        CalcOutput originalExpression = ptInput.currExpression;
+        SetOutput(eqnSet.eqnCoefs["a"]);
+        ptInput.RewriteInput();
+        SetOutput(eqnSet.eqnCoefs["b"]);
+        ptInput.RewriteInput();
+        SetOutput(eqnSet.eqnCoefs["c"]);
+        ptInput.RewriteInput();
+        SetOutput(eqnSet.eqnCoefs["d"]);
+        ptInput.RewriteInput();
+        SetOutput(originalExpression);
+        manageText();
+        eqnSet.CompileAll();
+        inputs.aInput.text = "NaN";
+        inputs.bInput.text = "NaN";
+        inputs.cInput.text = "NaN";
+        inputs.dInput.text = "NaN";
+        feedbacks.eqnFeedback.material.color = negativeFeedback;
     }
 
     public void manageText()
@@ -201,6 +278,15 @@ public class PtManager : MonoBehaviour
             inputs.pt3YInput.text = displayText(ptSet.ptCoords["pt3"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Y, maxDisplayLength);
             inputs.pt3ZInput.text = displayText(ptSet.ptCoords["pt3"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Z, maxDisplayLength);
         }
+        if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
+        if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
+        if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
+        if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
+        
+        if (inputs.aInput != null && inputs.aInput.text.Length == 0) inputs.aInput.text = "0";
+        if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
+        if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";
+        if (inputs.dInput != null && inputs.dInput.text.Length == 0) inputs.dInput.text = "0";
         #endregion
     }
 

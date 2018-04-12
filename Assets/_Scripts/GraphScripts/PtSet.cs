@@ -242,7 +242,7 @@ public class SerializableAxisCoord
 public class EqnSet 
 {
     public Dictionary<string, EqnCoef> eqnCoefs;
-    public Dictionary<string, bool> coefValidity = new Dictionary<string, bool>();
+    public bool coefValidity = true;
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
     public void AddEqnCoef(string variable, EqnCoef eqnCoef)
     {
@@ -280,9 +280,10 @@ public class EqnSet
 	public EqnSet()
 	{
 		eqnCoefs = new Dictionary<string, EqnCoef>();
-        AddEqnCoef("pt1");
-        AddEqnCoef("pt2");
-        AddEqnCoef("pt3");
+        AddEqnCoef("a");
+        AddEqnCoef("b");
+        AddEqnCoef("c");
+        AddEqnCoef("d");
 	}
 
 	public EqnSet DeepCopy()
@@ -295,7 +296,7 @@ public class EqnSet
             newEs.eqnCoefs.Add(key, new EqnCoef(eqnCoefs[key]));
         }
 
-        newEs.coefValidity = new Dictionary<string, bool>(coefValidity);
+        newEs.coefValidity = coefValidity;
 
         return newEs;
 	}
@@ -304,7 +305,7 @@ public class EqnSet
 	{
 		EqnSet newEs = new EqnSet();
         newEs.eqnCoefs = new Dictionary<string, EqnCoef>((Dictionary<string, EqnCoef>)eqnCoefs);
-        newEs.coefValidity = new Dictionary<string, bool>(coefValidity);
+        newEs.coefValidity = coefValidity;
 
         return newEs;
 	}
@@ -320,15 +321,14 @@ public class EqnSet
 
 	public bool CompileAll()
 	{
-		bool isValid = true;
+		coefValidity = true;
 		foreach (string PO in eqnCoefs.Keys)
         {
             solver.SetGlobalVariable(PO, -666);
             eqnCoefs[PO].compileTokens();
-            coefValidity[PO] = eqnCoefs[PO].GenerateAKSolver(solver);
-            isValid &= coefValidity[PO];
+            coefValidity &= eqnCoefs[PO].GenerateAKSolver(solver);
         }
-		return isValid;
+		return coefValidity;
 	}
 
 	public void PrintOut()

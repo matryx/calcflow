@@ -22,13 +22,16 @@ public class GeneratePlanePts : MonoBehaviour {
 		getCenter();
 		changeScale();
 		bool check = getSidePoints(null, center.y, center.z);
+		Debug.Log("checking x axis " + check);
 		if (check == false)
 		{
 			check = getSidePoints(center.x, null, center.z);
+			Debug.Log("checking y " + check);
 		}
 		if (check == false)
 		{
 			check = getSidePoints(center.x, center.y, null);
+			Debug.Log("checking z " + check);
 		}
 		ptManager.eqnUpdatePoint(pt1, pt2, pt3);
 	}
@@ -36,7 +39,11 @@ public class GeneratePlanePts : MonoBehaviour {
 	public void getCenter() 
 	{
 		Vector3 normal = new Vector3(a,b,c); 
-		center = Vector3.ProjectOnPlane(Vector3.zero, normal);
+		float sqrtNormal = normal.sqrMagnitude;
+		float x0 = (a*d)/(sqrtNormal);
+		float y0 = (b*d)/(sqrtNormal);
+		float z0 = (c*d)/(sqrtNormal);
+		center = new Vector3(x0, y0, z0);
 		presentPlane.center = center;
 	}
 
@@ -58,7 +65,7 @@ public class GeneratePlanePts : MonoBehaviour {
 			{
 				return false;
 			}
-			return checkPtValid((float)y, (float)x, (float)z, b, a, c, xLabelManager); 
+			return checkPtValid((float)y, (float)z, b, a, c, xLabelManager); 
 		}
 		else if (y == null)
 		{
@@ -66,7 +73,7 @@ public class GeneratePlanePts : MonoBehaviour {
 			{
 				return false;
 			}
-			return checkPtValid((float)x, (float)y, (float)z, a, b, c, yLabelManager);
+			return checkPtValid((float)x, (float)z, a, b, c, yLabelManager);
 		}
 		else
 		{
@@ -74,11 +81,11 @@ public class GeneratePlanePts : MonoBehaviour {
 			{
 				return false;
 			}
-			return checkPtValid((float)x, (float)z, (float)y, a, c, b, zLabelManager);
+			return checkPtValid((float)x, (float)y, a, c, b, zLabelManager);
 		}
 	}
 
-	public bool checkPtValid(float width, float depth, float height, float widthCoef, float depthCoef, float heightCoef, AxisLabelManager myAxis)
+	public bool checkPtValid(float width, float height, float widthCoef, float depthCoef, float heightCoef, AxisLabelManager myAxis)
 	{
 			float newWidth = width-stepSize; 
 			float newHeight = height-stepSize;
@@ -90,7 +97,7 @@ public class GeneratePlanePts : MonoBehaviour {
 			Vector3 temp1 = new Vector3(newWidth, newHeight, newDepth);
 
 			newWidth = width+stepSize; 
-			newHeight = height+stepSize;
+			newHeight = height-stepSize;
 			newDepth = (d - widthCoef*newWidth - heightCoef*newHeight)/depthCoef;
 			if(newDepth > myAxis.Max || newDepth < myAxis.Min)
 			{
@@ -99,12 +106,12 @@ public class GeneratePlanePts : MonoBehaviour {
 			Vector3 temp2 = new Vector3(newWidth, newHeight, newDepth);
 
 			newHeight = height+stepSize;
-			newDepth = (d - widthCoef*newWidth - heightCoef*height)/depthCoef;
+			newDepth = (d - widthCoef*width - heightCoef*newHeight)/depthCoef;
 			if(newDepth > myAxis.Max || newDepth < myAxis.Min)
 			{
 				return false;
 			}
-			Vector3 temp3 = new Vector3(newWidth, newHeight, newDepth);
+			Vector3 temp3 = new Vector3(width, newHeight, newDepth);
 
 			pt1 = temp1;
 			pt2 = temp2;

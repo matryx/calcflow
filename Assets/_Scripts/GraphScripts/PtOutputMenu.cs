@@ -97,16 +97,16 @@ public class PtOutputMenu : MonoBehaviour {
                 ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
                 break;
             case "Button_a":
-                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                ptManager.SetOutput(ptManager.eqnSet.eqnCoefs["a"]);
                 break;
             case "Button_b":
-                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                ptManager.SetOutput(ptManager.eqnSet.eqnCoefs["b"]);
                 break;
             case "Button_c":
-                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                ptManager.SetOutput(ptManager.eqnSet.eqnCoefs["c"]);
                 break;
             case "Button_d":
-                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
+                ptManager.SetOutput(ptManager.eqnSet.eqnCoefs["d"]);
                 break;
             case "FixPlane":
                 if (grabber.FixedPlane) {
@@ -116,9 +116,6 @@ public class PtOutputMenu : MonoBehaviour {
                     grabber.FixedPlane = true;
                     grabbed.text = "true";
                 }
-                break;
-            case "eqn":
-                ptManager.SetOutput(ptManager.ptSet.ptCoords["pt3"].Z);
                 break;
             case "":
                 break;

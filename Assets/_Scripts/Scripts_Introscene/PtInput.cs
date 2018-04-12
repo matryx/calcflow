@@ -51,7 +51,6 @@ public class PtInput : MonoBehaviour {
                 ptManager.inputReceived = true;
                 break;
             case "Paste":
-                //TODO: how to paste
                 /*
                 string temp = GUIUtility.systemCopyBuffer;
                 List<string> tempList = ExpressionParser.Parse(temp);
@@ -109,9 +108,15 @@ public class PtInput : MonoBehaviour {
         index = 0;
         currExpression.tokens.Clear();
         string s = string.Format("{0:0.00}", newValue);
+        if (ptManager.eqnInput) s = string.Format("{0:0.0}", newValue);
         foreach (char c in s) {
             currExpression.tokens.Insert(index, c.ToString());
             index++;
         }
+    }
+
+    public void RewriteInput() {
+        index = 0;
+        currExpression.tokens.Clear();
     }
 }
