@@ -32,13 +32,14 @@ namespace MatryxJsonRpc
     public class Request : MonoBehaviour
     {
         private static Serializer serializer = new Serializer();
-        private static string sharedUrl = "http://54.183.167.220/tempAPI";
+        private static string explorerEndpt = "http://13.57.163.24";
+        private static string sharedUrl = explorerEndpt + "/tempAPI";
         private static string allTournamentsEndpt = "/tournaments";
         private static string tournamentDetailByAddressEndpt = "/tournaments/address/";
         private static string tournamentDetailByIdEndpt = "/tournaments/id/";
         private static string submissionDetailByAddressEndpt = "/submissions/address/";
 
-        private static string roundDetailEndpt = "http://54.183.167.220/tempAPI/rounds/id/";
+        private static string roundDetailEndpt = sharedUrl + "/rounds/id/";
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
@@ -117,14 +118,12 @@ namespace MatryxJsonRpc
             var param = (object[])context.param;
             var page = (long)param[0];
             var offset = page * 10;
-            using (WWW www = new WWW(sharedUrl + allTournamentsEndpt))
+            using (WWW www = new WWW(explorerEndpt + allTournamentsEndpt))
             {
                 yield return www;
                 // Debug.Log(www.text);
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
-                Debug.Log(allTournamentsEndpt + " - " + jsonObj["message"] as string);
-                var dataObj = jsonObj["data"] as Dictionary<string, object>;
-                var tournamentList = dataObj["tournaments"] as List<object>;
+                var tournamentList = jsonObj["data"] as List<object>;
                 for (int i = 0; i < 10; i++)
                 {
                     try
@@ -135,8 +134,7 @@ namespace MatryxJsonRpc
                         tournament.description = tourna["tournamentDescription"] as string;
                         tournament.bounty = (long)Convert.ToDouble(tourna["mtx"]);
                         tournament.address = tourna["address"] as string;
-                        tournament.id = Convert.ToInt64(tourna["tournamentID"]);
-                        // tournament.address = tournament.id.ToString();
+                        tournament.id = i;
                         tournaments.Add(tournament);
                     }
                     catch (System.ArgumentOutOfRangeException e) { break; }
@@ -226,7 +224,7 @@ namespace MatryxJsonRpc
             var uniqueId = (string)param[0];
             var page = (long)param[1];
             var offset = page * 10;
-            var url = sharedUrl + tournamentDetailByIdEndpt + uniqueId;
+            var url = explorerEndpt + tournamentDetailByIdEndpt + uniqueId;
             using (WWW www = new WWW(url))
             {
                 yield return www;
@@ -309,7 +307,7 @@ namespace MatryxJsonRpc
             var param = context.param as object[];
             var tournamentAddress = param[0] as string;
             var submissionAddress = param[1] as string;
-            var url = sharedUrl + submissionDetailByAddressEndpt + submissionAddress;
+            var url = explorerEndpt + submissionDetailByAddressEndpt + submissionAddress;
             using (var www = new WWW(url))
             {
                 yield return www;
@@ -420,14 +418,17 @@ namespace MatryxJsonRpc
                 });
             }
             var usedAccount = resultsAccounts[0];
-            Debug.Log("Used account:" + usedAccount);
-            var function = mtxContract.GetFunction("prepareBalance");
-            var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
-            transactionInput.Gas = new HexBigInteger(3000000);
-            // Do request
-            var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
-            yield return requestTransaction.SendRequest(transactionInput);
-            var resultsTransaction = requestTransaction.Result;
+            if(usedAccount != null)
+            {
+                Debug.Log("Used account:" + usedAccount);
+                var function = mtxContract.GetFunction("prepareBalance");
+                var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
+                transactionInput.Gas = new HexBigInteger(3000000);
+                // Do request
+                var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
+                yield return requestTransaction.SendRequest(transactionInput);
+                var resultsTransaction = requestTransaction.Result;
+            }
         }
 
         void Start()
