@@ -91,11 +91,12 @@ public class ExpressionBody : QuickButton
     public void deselectPrevBody()
     {
         ExpressionBody selectedBody = expression.getSelectedBody();
-        if (selectedBody && selectedBody.transform != transform)
+        if (selectedBody)
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
-            selectedBody.unSelect();
+
+            if (selectedBody.transform != transform) selectedBody.unSelect();
         }
     }
 

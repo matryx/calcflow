@@ -26,6 +26,7 @@ public class Expressions : MonoBehaviour
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
     // 2 - creating empty game object everytime a letter is pressed
+    // 3 - 
 
     void Awake()
     {
@@ -88,17 +89,31 @@ public class Expressions : MonoBehaviour
         return (selectedExpression != null);
     }
 
-    public void deleteExpression()
+    public void deleteExpression(Transform del)
     {
-        expressions.Remove(selectedExpression);
+        //expressions.Remove(selectedExpression);
 
-        if (selectedExpression.GetComponent<ParametricExpression>())
+        if (del)
         {
-            //deletes expression from graph
-            //have to do this first because deleting UI sets expression set to null
-            calcManager.RemoveExpressionSet(selectedExpSet);
-            //deletes expression from UI
-            selectedExpression.GetComponent<ParametricExpression>().deleteExpressionFromScroll();
+            ParametricExpression param = del.GetComponent<ParametricExpression>();
+            if (param)
+            {
+                calcManager.RemoveExpressionSet(param.getExpSet());
+                param.deleteExpressionFromScroll();
+                expressions.Remove(del);
+            }
+        }
+        else
+        {
+            if (selectedExpression.GetComponent<ParametricExpression>())
+            {
+                //deletes expression from graph
+                //have to do this first because deleting UI sets expression set to null
+                calcManager.RemoveExpressionSet(selectedExpSet);
+                //deletes expression from UI
+                selectedExpression.GetComponent<ParametricExpression>().deleteExpressionFromScroll();
+                expressions.Remove(selectedExpression);
+            }
         }
     }
 

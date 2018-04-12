@@ -5,10 +5,8 @@ using UnityEngine;
 public class ToggleExpression : QuickButton
 {
     Expressions expressions;
-    ExpressionBody selectedBody;
     CalculatorManager calcManager;
     ExpressionSet expressionSet;
-    Transform selectedExpression;
     Transform expressionActions;
     Transform thisExpr;
     ExpressionComponent expComp;
@@ -39,19 +37,20 @@ public class ToggleExpression : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        selectedExpression = expressions.getSelectedExpr();
-        selectedBody = expressions.getSelectedBody();
-
         if (active)     //HIDE
         {
-            expressionSet = expressions.getSelectedExprSet();
-            calcManager.RemoveExpressionSet(expressionSet);
-            param = selectedExpression.GetComponent<ParametricExpression>();
-            param.setTextColor(grayHide);
-            expressionActions.GetComponent<ExpressionActions>().disableButtons();
-            param.setButtonInputColor(grayHide);
-            param.setActiveStatus(false);
-            selectedBody.deselectCurrBody();
+            if (thisExpr.GetComponent<ParametricExpression>())
+            {
+                param = thisExpr.GetComponent<ParametricExpression>();
+                expressionSet = param.getExpSet();
+                calcManager.RemoveExpressionSet(expressionSet);
+                param.setTextColor(grayHide);
+                expressionActions.GetComponent<ExpressionActions>().disableButtons();
+                param.setButtonInputColor(grayHide);
+                param.setActiveStatus(false);
+            }
+
+            if (expressions.getSelectedBody()) expressions.getSelectedBody().deselectCurrBody();
         }
         else            //SHOW
         {
@@ -59,9 +58,8 @@ public class ToggleExpression : QuickButton
             param.setActiveStatus(true);
             expressions.setSelectedExpr(thisExpr, thisBody);
             thisBody.selectBody();
-            selectedExpression = expressions.getSelectedExpr();
-            selectedExpression.GetComponent<ParametricExpression>().setTextColor(Color.black);
-            selectedExpression.GetComponent<ParametricExpression>().setButtonInputColor(grayShow);
+            param.setTextColor(Color.black);
+            param.setButtonInputColor(grayShow);
         }
 
         transform.GetComponent<Renderer>().material = (active) ? hideMat : showMat;
