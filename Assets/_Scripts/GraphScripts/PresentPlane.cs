@@ -139,7 +139,7 @@ public class PresentPlane : MonoBehaviour {
 	}
 
 	// Return the raw string of the equation
-	public string CalculatePlane() 
+	public bool CalculatePlane() 
 	{
 		vector12 = GenerateVector(rawPt1, rawPt2);
 		vector13 = GenerateVector(rawPt1, rawPt3);
@@ -157,16 +157,16 @@ public class PresentPlane : MonoBehaviour {
 			if (formattedValue[2][0] != '-') formattedValue[2] = '+' + formattedValue[2];
 			rawEquation = formattedValue[0] + "x" + formattedValue[1] + "y" + formattedValue[2] + "z=" + d;
 			ptManager.updateEqn(normalVector.x, normalVector.y, normalVector.z, d);
+			return true;
 		} else {
 			forwardPlane.GetComponent<MeshRenderer>().enabled = false;
 			backwardPlane.GetComponent<MeshRenderer>().enabled = false;
 			rawEquation = "Invalid Plane";
 			ptManager.updateEqn();
+			return false;
 		}
 
 		//Debug.Log("Normal vector is: " + normalVector);
-
-		return rawEquation;
 	}
 
 	public string[] roundString(float[] input) {

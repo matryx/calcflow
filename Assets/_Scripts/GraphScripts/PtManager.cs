@@ -26,10 +26,6 @@ public class PtManager : MonoBehaviour
     int maxEqnLength = 6;
 
     [SerializeField]
-    public FlexActionableComponent defaultSpeed;
-    public FlexActionableComponent defaultEffect;
-
-    [SerializeField]
     ConnectedMenus connectedMenus;
 
     [SerializeField]
@@ -122,12 +118,13 @@ public class PtManager : MonoBehaviour
             
             ManageFeedback();
             if (isValid) {
-                equation.text = presentPlane.CalculatePlane();
-			    presentPlane.ApplyGraphAdjustment(true);
-                presentPlane.GetLocalPoint();
-                presentPlane.GetPlaneDirection();
-            } else {
-                equation.text = "Invalid Plane";
+                if (presentPlane.CalculatePlane()) {
+                    presentPlane.ApplyGraphAdjustment(true);
+                    presentPlane.GetLocalPoint();
+                    presentPlane.GetPlaneDirection();
+                } else {
+                    presentPlane.GetLocalPoint();
+                }
             }
         }
 
@@ -135,16 +132,22 @@ public class PtManager : MonoBehaviour
         {
             inputReceived = false;
             bool isValid = eqnSet.CompileAll();
-
             ManageFeedback();
             if (isValid) {
-                generatePlanePts.a = eqnSet.eqnCoefs["a"].Value;
-                generatePlanePts.b = eqnSet.eqnCoefs["b"].Value;
-                generatePlanePts.c = eqnSet.eqnCoefs["c"].Value;
-                generatePlanePts.d = eqnSet.eqnCoefs["d"].Value;
-                generatePlanePts.eqnToPoints();
-            } else {
-
+                if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
+                {
+                    feedbacks.eqnFeedback.material.color = negativeFeedback;
+                    presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                    presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                }
+                else
+                {
+                    generatePlanePts.a = eqnSet.eqnCoefs["a"].Value;
+                    generatePlanePts.b = eqnSet.eqnCoefs["b"].Value;
+                    generatePlanePts.c = eqnSet.eqnCoefs["c"].Value;
+                    generatePlanePts.d = eqnSet.eqnCoefs["d"].Value;
+                    generatePlanePts.eqnToPoints();
+                }
             }
         }
     }
@@ -179,12 +182,10 @@ public class PtManager : MonoBehaviour
             ManageFeedback();
             if (isValid) 
             {
-                equation.text = presentPlane.CalculatePlane();
-                presentPlane.ApplyUnroundCenter(ptName, newLoc);
-                presentPlane.GetPlaneDirection();
-            } else 
-            {
-                equation.text = "Invalid Plane";
+                if (presentPlane.CalculatePlane()) {
+                    presentPlane.ApplyUnroundCenter(ptName, newLoc);
+                    presentPlane.GetPlaneDirection();
+                }
             }
         }
     }
@@ -265,18 +266,30 @@ public class PtManager : MonoBehaviour
             inputs.pt1XInput.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength);
             inputs.pt1YInput.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
             inputs.pt1ZInput.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength);
+
+            if (inputs.pt1XInput.text.Length == 0) inputs.pt1XInput.text = "0";
+            if (inputs.pt1YInput.text.Length == 0) inputs.pt1YInput.text = "0";
+            if (inputs.pt1ZInput.text.Length == 0) inputs.pt1ZInput.text = "0";
         }
         if (ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2XInput != null)
         {
             inputs.pt2XInput.text = displayText(ptSet.ptCoords["pt2"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].X, maxDisplayLength);
             inputs.pt2YInput.text = displayText(ptSet.ptCoords["pt2"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Y, maxDisplayLength);
             inputs.pt2ZInput.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength);
+
+            if (inputs.pt2XInput.text.Length == 0) inputs.pt2XInput.text = "0";
+            if (inputs.pt2YInput.text.Length == 0) inputs.pt2YInput.text = "0";
+            if (inputs.pt2ZInput.text.Length == 0) inputs.pt2ZInput.text = "0";
         }
         if (ptSet.ptCoords.ContainsKey("pt3") && inputs.pt3XInput != null)
         {
             inputs.pt3XInput.text = displayText(ptSet.ptCoords["pt3"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].X, maxDisplayLength);
             inputs.pt3YInput.text = displayText(ptSet.ptCoords["pt3"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Y, maxDisplayLength);
             inputs.pt3ZInput.text = displayText(ptSet.ptCoords["pt3"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Z, maxDisplayLength);
+
+            if (inputs.pt3XInput.text.Length == 0) inputs.pt3XInput.text = "0";
+            if (inputs.pt3YInput.text.Length == 0) inputs.pt3YInput.text = "0";
+            if (inputs.pt3ZInput.text.Length == 0) inputs.pt3ZInput.text = "0";
         }
         if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
         if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);

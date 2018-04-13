@@ -51,7 +51,7 @@ public class PtOutputMenu : MonoBehaviour {
 
     PresentPlane presentPlane;
     public PlaneSolverPointGrab grabber;
-    public TextMesh grabbed;
+    public MeshRenderer grabbed;
 
     public void Initialize(PtManager pm)
     {
@@ -111,10 +111,10 @@ public class PtOutputMenu : MonoBehaviour {
             case "FixPlane":
                 if (grabber.FixedPlane) {
                     grabber.FixedPlane = false;
-                    grabbed.text = "false";
+                    grabbed.enabled = false;
                 } else {
                     grabber.FixedPlane = true;
-                    grabbed.text = "true";
+                    grabbed.enabled = true;
                 }
                 break;
             case "":
