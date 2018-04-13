@@ -1,0 +1,115 @@
+load('optvar)$
+/* We may also treat problems with more than one
+dependent variable.  For example, the charge, Q, and
+displacement from equilibrium, Y, of a simple
+electromagnetic loudspeaker, with M, K, L, S, E(T), and T
+denoting mass, spring constant, inductance, electro-
+magnetic work coefficient, voltage, and time, respectively,
+are given by the stationary value of the integral of the
+function in the first argument of EL below.  (ref. S.H.
+Crandall, D.C. Karnop, E.F. Kurtz Jr., & D.C. Pridmore-
+Brown, "Dynamics of Mechanical and Electromechanical
+Systems", McGraw-Hill). */
+el((m*'d(y,t)**2 - k*y**2 + l*'d(q,t)**2)/2 + s*'d(q,t)*y +
+e(t)*q,
+   [y, q], t);
+/* We may simplify these equations, replacing 'D(Q,T)
+with the current, I; and we may introduce linear mechanical
+resistance B and linear electrical resistance R as follows:
+*/
+%, eval, 'd(q,t)=i, s*i=s*i-b*'d(y,t), e(t)=e(t)-r*i;
+/* DESOLVE  also works for some systems of arbitrary-
+order constant-coefficient equations; so let's try it with
+the following parameter values, excitation E(T), and initial
+conditions: */
+subst([m=2,k=1,b=1,s=1,l=1,e(t)=sin(t),r=1], %)$
+convert(%,
+[y,i], t)$
+(atvalue(y(t),t=0,0), atvalue(i(t),t=0,0),
+atvalue('d(y(t),t),t=0,0))$
+desolve(%th(2), [y(t),i(t)]);
+/* The functional may also have more than 1 independ-
+ent variable.  For example, the general 2-dimensional linear
+elliptic partial differential equation is equivalent to the
+variational problem:*/
+el(a*'d(u,x)**2 + b*'d(u,y)**2 + c*u**2 + e*'d(u,x) +
+f*'d(u,y) + g*u,  u, [x,y]);
+/* Analytic solutions to even the simplest cases of
+this equation are rare, but computer algebraic
+manipulation has been used to construct series solutions to
+such equations.
+
+Many variational optimization problems are easier to treat
+using Pontryagin's Maximum-Principle than by the calculus of
+varia- tions.  This is particularly true of optimal control
+problems.
+
+As an elementary example, suppose that we have a unit mass
+at an arbitrary position X[0] with arbitrary velocity V[0]
+at time T=0, and we wish to vary the force  F, subject to
+the constraint -1 <= F <= 1, such that the mass arrives at
+position X=0 with velocity V=0, in minimum time.  The force
+equals the rate of change of momentum; so the motion is
+governed by the pair of first-order differential equations:
+*/
+['d(v,t)=f, 'd(x,t)=v]$
+/* Using this list as the argument to the function HAM
+results in output of the Hamiltonian followed by
+differential equations for the so-called Auxiliary
+variables, together with their solution when- ever the
+differential equation is of the trivial form: 'D(aux[i],t) =
+0, as is often the case: */
+cc:ham(%);
+/* We may substitute the given solution to the last
+differential equation into the one before it, then use
+either DESOLVE or ODE2: */
+part(%,4),eval$
+ode2(ev(part(cc,2),%,eval), aux[1], t);
+/* Now we may substitute the values of the auxiliary
+variables into the Hamiltonian: */
+first(cc), %, eval$
+subst(%th(3), %);
+/* According to the maximum principle, we should vary
+F to maximize this expression for all values of T in the
+time-interval of interest.  Considering the constraints on
+F, clearly F should be SIGN(C-C[2]*T).  (We could use the
+function  STAP in the SHARE file OPTMIZ >  or OPTMIZ LISP
+to determine this.)
+
+We have found that every optimal control is  F=1  and/or
+F=-1, with at most one switch between them, when T=C/C[2].
+Since  F  is piecewise constant, we may combine the two
+first-order equations of motion and solve them as follows:
+*/
+ode2('d(x,t,2)=f, x, t);
+/* Now we may choose the constants of integration
+to sat- isfy any given boundary conditions.  For example,
+suppose that we start with  V=0  and  X=1  at  T=0.  Assume
+we start with  F=-1: */
+ic2(subst(f=-1,%), t=0, x=1, 'd(x,t)=0);
+/* Assuming that we terminate with  F=+1: */
+ic2(subst(f=1,%th(2)), t=tfinal, x=0, 'd(x,t)=0);
+/* To determine  TFINAL  and the time  T  at which  F
+switches sign, we may impose the condition that the two
+solutions must agree in position and velocity at that time:
+*/
+%,%th(2);
+solve([%, d(%,t)]);
+/* For the first of these solutions,  0 < T < TFINAL;
+so the assumption that  F  switches from  -1  to  1  is
+justified.  F is now completely determined as a function of
+time, but to represent it with our expression
+SIGN(C-C[2]*T): */
+solve(subst(first(%), c-c[2]*t), c);
+/* As is always the case, one of the integration
+constants for the auxiliary equations is redundant; so we
+may set C[2] and C to the same arbitrary negative constant,
+such as -1.
+
+It is important to remember that so far, we have only
+determined an EXTREMAL control.  To prove that it is an
+OPTIMAL control, we must prove that an optimal control
+exists and that no more-optimal extremal control exists.
+However, such considerations are beyond the scope of this
+demonstration.  */
+"end of demo"$

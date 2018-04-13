@@ -1,0 +1,46 @@
+/* Filename <name>.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/* An interactive demonstration of MACSYMA */
+
+      LOADPRINT:FALSE$
+/* Enter a FUNCTION of X to be differentiated */
+      F0:READ();
+      DIFF(F0,X);
+/* Enter a FUNCTION of X to be integrated */
+      F1:READ();
+      INTEGRATE(F1,X);
+/* Enter an ALGEBRAIC EQUATION to be solved for X */
+      F2:READ();
+      SOLVE(F2,X);
+/* Enter a TRIG EXPRESSION to be simplified */
+      F3:READ();
+      EXPAND(TRIGREDUCE(EXPAND(F3)));
+/* Enter a COMPLEX FUNCTION of Z
+      whose real part is to be found */
+      Z:X+%I*Y;
+      F4:READ();
+      REALPART(F4);
+/* Enter a 3 X 3 MATRIX to be inverted */
+      F5:ENTERMATRIX(3,3);
+      INVERT(F5),DETOUT;
+/* Enter a FUNCTION of X to be Taylor-expanded
+      about X=0 */
+      F6:READ();
+      TAYLOR(F6,X,0,8);
+/* Enter a FUNCTION of X to be plotted
+      from X=0 to 10 */
+      F7:READ();
+      XAXIS:YAXIS:TRUE$
+      PLOT(F7,X,0,10);

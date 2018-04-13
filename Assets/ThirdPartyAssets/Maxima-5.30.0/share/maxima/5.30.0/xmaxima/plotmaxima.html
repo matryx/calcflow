@@ -1,0 +1,55 @@
+<html>
+
+<title>Maxima Plotting</title>
+<body  BGCOLOR=#ffffff TEXT=#000000 LINK=#244C21>
+
+<br>
+<h4>Maxima 3d Plotting</h4>
+<br>
+
+
+<pre>
+ - Function:<b> plot3d (expr, xrange, yrange,..., options,...)</b>
+ - Function:<b> plot3d ([expr1,expr2,expr3], xrange, yrange,..., options,...)</b>
+</pre>
+When viewed with the netmath plotting routines, you can rotate the object
+by dragging with the right mouse button depressed.  
+<ul>
+<li>  <eval program=maxima> plot3d(2^(-u^2+v^2),[u,-2,2],[v,-2,2]);</eval>
+     would plot z = 2^(-u^2+v^2) with u and v varying in [-2,2] and
+     [-2,2] respectively, and with u on the x axis, and v on the y axis.
+
+<li> a <b>moebius band uses the second pattern of arguments</b>
+
+<eval program=maxima>
+plot3d([cos(x)*(3+y*cos(x/2)), sin(x)*(3+y*cos(x/2)), y*sin(x/2)],
+       [x,-%pi,%pi],[y,-1,1],['grid,40,15]);</eval>
+     <br>
+parametrized by the 3 expressions given as the first
+argument to plot3d.  An additional optional argument [grid,50,15]
+gives the grid number of rectangles in the x direction and y
+direction.
+
+<li>A <b>Riemann surface</b>: Real part of z^1/3 
+<eval program=maxima>
+plot3d(r^.33*cos(th/3),[r,0,1],[th,0,6*%pi],
+     ['grid,12,80],
+     ['transform_xy,polar_to_xy]);</eval>
+
+<li> a <b>Klein bottle</b>:
+<eval program=maxima>
+plot3d([5*cos(x)*(cos(x/2)*cos(y)+sin(x/2)*sin(2*y)+3.0) - 10.0,
+        -5*sin(x)*(cos(x/2)*cos(y)+sin(x/2)*sin(2*y)+3.0),
+       5*(-sin(x/2)*cos(y)+cos(x/2)*sin(2*y))],
+     [x,-%pi,%pi],[y,-%pi,%pi],['grid,40,40]);</eval>
+
+<li>a <b>torus</b>
+<eval program=maxima>
+plot3d([cos(y)*(10.0+6*cos(x)),
+        sin(y)*(10.0+6*cos(x)),
+       -6*sin(x)],
+      [x,0,2*%pi],[y,0,2*%pi], ['grid,20,20]);</eval>
+
+
+
+

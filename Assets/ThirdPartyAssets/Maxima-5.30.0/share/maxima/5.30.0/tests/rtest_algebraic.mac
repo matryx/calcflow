@@ -1,0 +1,151 @@
+(kill(all), algebraic : true, 0);
+0$
+
+ratsimp([2 / sqrt(2), -2/sqrt(2), 1 / (1 + sqrt(2)), -1/(1 + sqrt(2)), 1/(sqrt(2) - 1), -1/(sqrt(2) -1)]);
+[sqrt(2),  -sqrt(2), sqrt(2) - 1, 1 - sqrt(2), sqrt(2) + 1,  -1 - sqrt(2)]$
+
+ratsimp([1/(sqrt(5) - sqrt(2)), 1/(sqrt(5) + sqrt(2))]);
+[((sqrt(5) + sqrt(2))/3), ((sqrt(5) - sqrt(2))/3)]$
+
+ratsimp(1/(5^(1/3) - 2^(1/3)));
+((5^(2/3) + 2^(1/3) * 5^(1/3) + 2^(2/3))/3)$
+
+ratsimp(-1/(5^(2/3) + 2^(2/3)));
+((2^(2/3) * 5^(2/3) - 5 * 5^(1/3) - 2 * 2^(1/3))/29)$
+
+(eq : 4*z^2-2*z-1,0);
+0$
+
+(sol : solve(eq,z),0);
+0$
+
+map(lambda([s], ratsimp(subst(s,eq))), sol);
+[0,0]$
+
+(eq : 4*z^4-2*z^2-1,0);
+0$
+
+(sol : solve(eq,z),0);
+0$
+
+map(lambda([s], ratsimp(subst(s,eq))), sol);
+[0,0,0,0]$
+
+(eq : 4*z^3-2*z^2-1,0);
+0$
+
+(sol : solve(eq,z),0);
+0$
+
+map(lambda([s], ratsimp(subst(s,eq))), sol);
+[0,0,0]$
+
+(eq : 4*z^3-2*z^2-sqrt(42),0);
+0$
+
+(sol : solve(eq,z),0);
+0$
+
+map(lambda([s], ratsimp(subst(s,eq))), sol);
+[0,0,0]$
+
+(eq : 4*z^3 + (12 + %pi * %i) *z^2-sqrt(42),0);
+0$
+
+(sol : solve(eq,z),0);
+0$
+
+map(lambda([s], ratsimp(subst(s,eq))), sol);
+[0,0,0]$
+
+(eq : 4*z^4 + z - 1,0);
+0$
+
+(sol : solve(eq,z),0);
+0$
+
+/* This needs some extra help -- I don't consider this to be a bug. */
+
+map(lambda([s], ratsimp(radcan(subst(s,eq)))), sol);
+[0,0,0,0]$
+
+/* By the way, cos(%pi/32) is a root of this polynomial.*/
+
+(eq : 32768*x^16-131072*x^14+212992*x^12-180224*x^10+84480*x^8-21504*x^6+2688*x^4-128*x^2+1,0);
+0$
+
+(sol : solve(eq,x),0);
+0$
+
+map(lambda([s], rectform(ratsimp(subst(s,eq)))), sol);
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]$
+
+/* By the way, cos(%pi/60) is a root of this polynomial. 
+Also, cos(%pi/60) = sqrt(sqrt(15)+sqrt(2)*sqrt(5-sqrt(5))+sqrt(3)+8)/4 */
+
+(eq : 65536*z^16-262144*z^14+430080*z^12-372736*z^10+182784*z^8-50176*z^6+7040*z^4-384*z^2+1,0);
+0$
+
+(sol : solve(eq,z),0);
+0$
+
+map(lambda([s], rectform(ratsimp(subst(s,eq)))), sol);
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]$
+ 
+ratsimp((1 + %i)/(1 - %i));
+%i$
+
+ratsimp(1/(7 + %i * 7));
+ - ((%i - 1)/14)$
+
+(tellrat(x,x^2+5*x+1),0);
+0$
+
+ratsimp([0,1,x,x^2,x^3]);
+[0,1,x,-5*x-1,24*x+5]$
+
+ratsimp([0,1,1/x,1/x^2,1/x^3]);
+[0, 1,  - x - 5, 5 * x + 24,  - 24 * x - 115]$
+
+ratsimp(a + b * x + c * x^2 + d * x^3);
+(24*d-5*c+b)*x+5*d-c+a$
+
+ratsimp((a + b * x + c * x^2 + d * x^3) * ratsimp(1/(a + b * x + c * x^2 + d * x^3)));
+1$
+
+ratsimp([%i, minf, inf, infinity]);
+[%i, minf, inf, infinity]$
+
+ratsimp(makelist(%i^k,k,-8,8));
+[1,%i,-1,-%i,1,%i,-1,-%i,1,%i,-1,-%i,1,%i,-1,-%i,1]$
+
+ratsimp([1/(x+1), 1/(x -1), 1/(x - 1)^2]);
+[((x + 4)/3),  -((x + 6)/7), ((x + 5)/7)]$
+
+ratsimp(cos(x^2));
+cos(5*x+1)$
+
+ratsimp(matrix([1,x],[x^2,x^3]));
+matrix([1,x],[-5*x-1, 24 * x + 5])$
+
+(untellrat(x),0);
+0$
+
+ratsimp([1,x,x^2,x^3]);
+[1,x,x^2,x^3]$
+
+ratsimp([1,1/x,1/x^2,1/x^3]);
+[1,1/x,1/x^2,1/x^3]$
+
+(reset(algebraic), remvalue(eq, sol),0);
+0$
+
+
+
+
+
+
+
+
+
+

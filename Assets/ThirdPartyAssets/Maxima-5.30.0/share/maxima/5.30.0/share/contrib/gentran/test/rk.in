@@ -1,0 +1,27 @@
+/*  Runge-Kutta Method  */                                      
+                                                                
+rungekutta(p1, p2, p, q, tt) :=                                 
+  block( [k11, k12, k21, k22, k31, k32, k41, k42],              
+         k11 : hh*p1,                                           
+	  k12 : hh*p2,                                           
+	  k21 : hh*ratsubst(q+k12/2, q,                          
+			    ratsubst(p+k11/2, p,                 
+				     ratsubst(tt+hh/2, tt, p1))),
+	  k22 : hh*ratsubst(q+k12/2, q,                          
+			    ratsubst(p+k11/2, p,                 
+			 	     ratsubst(tt+hh/2, tt, p2))),
+	  k31 : hh*ratsubst(q+k22/2, q,                          
+			    ratsubst(p+k21/2, p,                 
+				     ratsubst(tt+hh/2, tt, p1))),
+	  k32 : hh*ratsubst(q+k22/2, q,                          
+			    ratsubst(p+k21/2, p,                 
+				     ratsubst(tt+hh/2, tt, p2))),
+	  k41 : hh*ratsubst(q+k32, q,                            
+			    ratsubst(p+k31, p,                   
+				     ratsubst(tt+hh, tt, p1))),  
+	  k42 : hh*ratsubst(q+k32, q,                        
+			    ratsubst(p+k31, p,                   
+				     ratsubst(tt+hh, tt, p2))),  
+	  pn : ratsimp(p + (k11 + 2*k21 + 2*k31 + k41)/6),       
+	  qn : ratsimp(q + (k12 + 2*k22 + 2*k32 + k42)/6)        
+       )$                                                       

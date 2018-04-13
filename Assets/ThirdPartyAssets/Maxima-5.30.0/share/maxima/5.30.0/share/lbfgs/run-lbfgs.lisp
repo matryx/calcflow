@@ -1,0 +1,6 @@
+(load "/home/robert/lisp/f2cl0.l")
+(load "/home/robert/lisp/macros.l")
+(load "lbfgs")
+(load "sdrive")
+(/blockdata-lb2/)
+(time (sdrive))

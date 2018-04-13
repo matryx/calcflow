@@ -1,0 +1,140 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Algebra/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Algebra ---------- */
+/* One would think that the simplification 2 2^n => 2^(n + 1) would happen
+   automatically or at least easily ... */
+2*2^n;
+subst(a = 2, subst(2 = a, %));
+/* And how about 4 2^n => 2^(n + 2)?   [Richard Fateman] */
+4*2^n;
+map(factor, %);
+/* (-1)^[n (n + 1)] => 1 for integer n */
+declare(n, integer)$
+(-1)^(n*(n + 1));
+remove(n, integer)$
+/* Also easy => 2 (3 x - 5) */
+factor(6*x - 10);
+/* Univariate gcd: gcd(p1, p2) => 1, gcd(p1 q, p2 q) => q   [Richard Liska] */
+p1: 64*x^34 - 21*x^47 - 126*x^8 - 46*x^5 - 16*x^60 - 81$
+p2: 72*x^60 - 25*x^25 - 19*x^23 - 22*x^39 - 83*x^52 + 54*x^10 + 81$
+q: 34*x^19 - 25*x^16 + 70*x^7 + 20*x^3 - 91*x - 86$
+gcd(p1, p2);
+gcd(expand(p1*q), expand(p2*q)) - q;
+/* resultant(p1 q, p2 q) => 0 */
+resultant(expand(p1*q), expand(p2*q), x);
+/* How about factorization? => p1 * p2 */
+factor(expand(p1 * p2));
+remvalue(p1, p2, q)$
+/* Multivariate gcd: gcd(p1, p2) => 1, gcd(p1 q, p2 q) => q */
+p1: 24*x*y^19*z^8 - 47*x^17*y^5*z^8 + 6*x^15*y^9*z^2 - 3*x^22 + 5$
+p2: 34*x^5*y^8*z^13 + 20*x^7*y^7*z^7 + 12*x^9*y^16*z^4 + 80*y^14*z$
+q: 11*x^12*y^7*z^13 - 23*x^2*y^8*z^10 + 47*x^17*y^5*z^8$
+gcd(p1, p2);
+gcd(expand(p1*q), expand(p2*q)) - q;
+/* How about factorization? => p1 * p2 */
+factor(expand(p1 * p2));
+remvalue(p1, p2, q)$
+/* => x^n for n > 0   [Chris Hurlburt] */
+gcd(2*x^(n + 4) - x^(n + 2), 4*x^(n + 1) + 3*x^n);
+/* Resultants.  If the resultant of two polynomials is zero, this implies they
+   have a common factor.  See Keith O. Geddes, Stephen R. Czapor and George
+   Labahn, _Algorithms for Computer Algebra_, Kluwer Academic Publishers, 1992,
+   p. 286 => 0 */
+resultant(3*x^4 + 3*x^3 + x^2 - x - 2, x^3 - 3*x^2 + x + 5, x);
+/* Numbers are nice, but symbols allow for variability---try some high school
+   algebra: rational simplification => (x - 2)/(x + 2) */
+(x^2 - 4)/(x^2 + 4*x + 4);
+ratsimp(%);
+/* This example requires more sophistication => e^(x/2) - 1 */
+[(%e^x - 1)/(%e^(x/2) + 1), (exp(x) - 1)/(exp(x/2) + 1)];
+radcan(%);
+/* Expand and factor polynomials */
+(x + 1)^20;
+expand(%);
+diff(%, x);
+factor(%);
+/* Completely factor this polynomial, then try to multiply it back together! */
+solve(x^3 + x^2 - 7 = 0, x);
+apply("*", map(lambda([e], lhs(e) - rhs(e)), %));
+ratsimp(expand(%));
+x^100 - 1;
+factor(%);
+/* Factorization over the complex rationals
+   => (2 x + 3 i) (2 x - 3 i) (x + 1 + 4 i) (x + 1 - 4 i) */
+gfactor(4*x^4 + 8*x^3 + 77*x^2 + 18*x + 153);
+/* Algebraic extensions */
+algebraic: true$
+tellrat(sqrt2^2 - 2);
+/* => sqrt2 + 1 */
+rat(1/(sqrt2 - 1));
+/* => (x^2 - 2 x - 3)/(x - sqrt2) = (x + 1) (x - 3)/(x - sqrt2)
+      [Richard Liska] */
+(x^3 + (sqrt2 - 2)*x^2 - (2*sqrt2 + 3)*x - 3*sqrt2)/(x^2 - 2);
+rat(%);
+factor(%);
+factor(%, sqrt2^2 - 2);
+untellrat(sqrt2)$
+/* Multiple algebraic extensions */
+tellrat(sqrt3^2 - 3, cbrt2^3 - 2);
+/* => 2 cbrt2 + 8 sqrt3 + 18 cbrt2^2 + 12 cbrt2 sqrt3 + 9 */
+rat((cbrt2 + sqrt3)^4);
+untellrat(sqrt3, cbrt2)$
+algebraic: false$
+/* Factor polynomials over finite fields and field extensions */
+p: x^4 - 3*x^2 + 1;
+factor(p);
+/* => (x - 2)^2 (x + 2)^2  mod  5 */
+ev(factor(p), modulus:5);
+expand(%);
+/* => (x^2 + x + 1) (x^9 - x^8 + x^6 - x^5 + x^3 - x^2 + 1)  mod  65537
+      [Paul Zimmermann] */
+ev(factor(x^11 + x + 1), modulus:65537);
+/* => (x - phi) (x + phi) (x - phi + 1) (x + phi - 1)
+   where phi^2 - phi - 1 = 0 or phi = (1 +- sqrt(5))/2 */
+factor(p, phi^2 - phi - 1);
+remvalue(p)$
+expand((x - 2*y^2 + 3*z^3)^20)$
+factor(%);
+expand((sin(x) - 2*cos(y)^2 + 3*tan(z)^3)^20)$
+factor(%);
+/* expand[(1 - c^2)^5 (1 - s^2)^5 (c^2 + s^2)^10] => c^10 s^10 when
+   c^2 + s^2 = 1   [modification of a problem due to Richard Liska] */
+expand((1 - c^2)^5 * (1 - s^2)^5 * (c^2 + s^2)^10)$
+grobner([%, c^2 + s^2 - 1]);
+factor(%);
+/* => (x + y) (x - y)  mod  3 */
+ev(factor(4*x^2 - 21*x*y + 20*y^2), modulus:3);
+/* => 1/4 (x + y) (2 x +  y [-1 + i sqrt(3)]) (2 x + y [-1 - i sqrt(3)]) */
+factor(x^3 + y^3, isqrt3^2 + 3);
+/* Partial fraction decomposition => 3/(x + 2) - 2/(x + 1) + 2/(x + 1)^2 */
+(x^2 + 2*x + 3)/(x^3 + 4*x^2 + 5*x + 2);
+partfrac(%, x);
+/* Noncommutative algebra: note that (A B C)^(-1) = C^(-1) B^(-1) A^(-1)
+   => A B C A C B - C^(-1) B^(-1) C B */
+(A.B.C - (A.B.C)^^(-1)) . A.C.B;
+expand(%);
+/* Jacobi's identity: [A, B, C] + [B, C, A] + [C, A, B] = 0 where [A, B, C] =
+   [A, [B, C]] and [A, B] = A B - B A is the commutator of A and B */
+comm2(A, B):= A . B - B . A$
+comm3(A, B, C):= comm2(A, comm2(B, C))$
+comm2(A, B);
+comm3(A, B, C) + comm3(B, C, A) + comm3(C, A, B);
+expand(%);
+remfunction(comm2, comm3)$
+/* ---------- Quit ---------- */
+quit();

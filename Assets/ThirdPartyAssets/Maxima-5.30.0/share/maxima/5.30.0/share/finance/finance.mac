@@ -1,0 +1,250 @@
+/*               COPYRIGHT NOTICE
+
+Copyright (C) 2008 Nicolas Guarin Zapata
+
+This program is free software; you can redistribute
+it and/or modify it under the terms of the
+GNU General Public License as published by
+the Free Software Foundation.
+
+This program is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details at
+http://www.gnu.org/copyleft/gpl.html
+*/
+
+
+/*
+****************************************************
+*             FINANCE PACKAGE V.0.1                *
+****************************************************
+*This is the Finance Package.                      *
+*Actually, there are only basic functions, we hope *
+*you could improve the package with brand new lines*
+****************************************************
+*In all the functions rate is the compound interest*
+*rate, num is the number of periods and must be    *
+*postivive & "flow" refers to cash flow so if you  *
+*have and Output the flow is negative & positive   *
+*for Inputs.                                       *
+****************************************************
+*/
+load(draw)$
+
+/*
+Returns the amortization table determinated by rate, Ammount,
+and number of periods.
+*/
+amortization(rate,Ammount,num):=
+block([result,A,payment,k,a],
+	if num<0 then error("num must be a positive value")
+	else A:genmatrix(a, num+2, 5),
+	payment:Ammount*rate*((1+rate)^(num)/((1+rate)^num-1)),
+	A[1]:["n", "Balance", "Interest", "Amortization","Payment"],
+	A[2]:[0,0,0,0,0],
+	A[2,2]:Ammount,
+	for k:3 thru num+2 step 1 do (
+		A[k,5]:payment,
+		A[k,1]:k-2,
+		A[k,3]:A[k-1,2]*rate,
+		A[k,4]:A[k,5]-A[k,3],
+		A[k,2]:A[k-1,2]-A[k,4]
+		),
+	printf(true,"           "),
+	printf(true,"~7s~14s~13s~16s~14s ~% ~{ ~{ ~12,3f ~} ~% ~}",
+	A[1,1],A[1,2],A[1,3],A[1,4],A[1,5],
+	args(submatrix(1,A)))
+)$
+
+/*
+Returns the annuity knowing the desired value (future value),
+it is a constant and periodic payment.
+*/
+annuity_fv(rate,FV,num):=FV*rate/((1+rate)^num-1)$
+
+/*
+Returns the annuity knowing the present value (like an ammount),
+it is a constant and periodic payment.
+*/
+annuity_pv(rate,PV,num):=PV*rate*((1+rate)^(num)/((1+rate)^num-1))$
+
+/*
+Returns the amortization table determinated by rate, Ammount,
+and number of periods. The payment is not constant, it presents
+an arithmetic growing, increment is then the difference between two
+consecutive rows in the "Payment" column.
+*/
+arit_amortization(rate,increment,Ammount,num):=
+block([result,A,payment,k,a],
+	if num<0 then error("num must be a positive value")
+	else A:genmatrix(a, num+2, 5),
+	payment:(rate^2*(rate+1)^num*Ammount+(rate*num-(1+rate)^num+1)*increment)/(rate*(rate+1)^num-rate),
+	A[1]:["n", "Balance", "Interest", "Amortization","Payment"],
+	A[2]:[0,0,0,0,0],
+	A[2,2]:Ammount,
+	A[3,5]:payment,
+	for k:4 thru num+2 step 1 do (A[k,5]:A[k-1,5]+increment),
+	for k:3 thru num+2 step 1 do (
+		A[k,1]:k-2,
+		A[k,3]:A[k-1,2]*rate,
+		A[k,4]:A[k,5]-A[k,3],
+		A[k,2]:A[k-1,2]-A[k,4]
+	),
+	printf(true,"           "),
+	printf(true,"~7s~14s~13s~16s~14s ~% ~{ ~{ ~12,3f ~} ~% ~}",
+	A[1,1],A[1,2],A[1,3],A[1,4],A[1,5],
+	args(submatrix(1,A)))
+)$
+
+/*
+Calculate the ratio Benefit/Cost, Benefit is the Net Present Value (NPV)
+of the inputs, and Cost is the Net Present Value (NPV) of the outputs.
+*/
+benefit_cost(rate,Input,Output):=
+block([result,NVIn,NVOut],
+	NVIn:0,NVOut:0,
+	if length(Input)#length(Output)
+	then error("Input & Output must have the same length")
+	else
+		(NVIn:npv(rate,Input),
+		NVOut:npv(rate,Output)),
+	result:NVIn/NVOut
+)$
+
+
+/*
+Calculate the distance between 2 dates, assuming 360 days years,
+30 days months.
+*/
+days360(year1,month1,day1,year2,month2,day2):=block([years,months,days],
+if month2>month1 then (years:year2-year1,
+	if day2>day1 then (months:month2-month1,days:day2-day1)
+	else (months:month2-month1-1,days:day2+30-day1)
+)
+else (years:year2-year1-1,
+	if day2>day1 then (months:month2+12-month1,days:day2-day1)
+	else (months:month2+11-month1, days:day2+30-day1)
+),	days:days+years*360+months*30
+)$
+
+/*
+Returns the Future Value of a Present one, the diference in the
+values is the Interest given by the interest rate.
+*/
+fv(rate,PV,num):=PV*(1+rate)^num$
+
+/*
+Plot the money flow in a time line, the positive values in blue
+and upside; the negative ones in red and downside.
+The direction of the flow is given by the sign of the value.
+*/
+graph_flow(flowValues):=
+block([vectors, options], 
+	vectors: flatten(makelist([color = if flowValues[k]<0 then 'red else
+	'blue,vector([k-1,0],[0,flowValues[k]])],
+	k,1,length(flowValues))),
+	options: [head_length=0.05,
+			xaxis=true,
+			yaxis=false,
+			xrange=[-1,length(flowValues)+1]],
+	apply(draw2d,append(options,vectors))
+)$
+
+/*
+Returns the amortization table determinated by rate, Ammount,
+and number of periods. The payment is not constant, it presents
+ah geometric growing, growinRate is then the cocient between two
+consecutive rows in the "Payment" column.
+*/
+geo_amortization(rate,growing_rate,Ammount,num):=
+block([result,A,payment,k,a],
+	if num<0 then error("num must be a positive value")
+	else
+	A:genmatrix(a,num+2, 5),
+	payment:Ammount*(rate-growing_rate)/(1-(1+growing_rate)^(num)/((1+rate)^num)),
+	A[1]:["n", "Balance", "Interest", "Amortization","Payment"],
+	A[2]:[0,0,0,0,0],
+	A[2,2]:Ammount,
+	A[3,5]:payment,
+	for k:4 thru num+2 step 1 do (A[k,5]:A[k-1,5]*(1+growing_rate)),
+	for k:3 thru num+2 step 1 do (
+		A[k,1]:k-2,
+		A[k,3]:A[k-1,2]*rate,
+		A[k,4]:A[k,5]-A[k,3],
+		A[k,2]:A[k-1,2]-A[k,4]
+	),
+	printf(true,"           "),
+	printf(true,"~7s~14s~13s~16s~14s ~% ~{ ~{ ~12,3f ~} ~% ~}",
+	A[1,1],A[1,2],A[1,3],A[1,4],A[1,5],
+	args(submatrix(1,A)))
+)$
+
+/*
+Returns the growing annuity knowing the desired value (future value),
+it is a growing payment.
+*/
+geo_annuity_fv(rate,growing_rate,FV,num):=FV*(rate-growing_rate)/((1+rate)^num-(1+growing_rate)^(num))$
+
+/*
+Returns the growing annuity knowing the desired value (like an ammount),
+it is a growing payment.
+*/
+geo_annuity_pv(rate,growing_rate,PV,num):=PV*(rate-growing_rate)/(1-(1+growing_rate)^(num)/((1+rate)^num))$
+
+/*
+IRR (Internal Rate of Return), is the value of rate wich makes Net Present Value
+zero.
+*/
+irr(flowValues,I0):=
+block([r,sum],
+	sum:npv(r,flowValues)-I0,
+	realonly:true,
+	result:float(algsys([sum=0],[r])),
+	realonly:false,
+	result
+)$
+
+/*
+Calculate de present value of a value series to evaluate the viability in a
+project.
+*/
+npv(rate,flowValues):=
+block([sum,k],
+   sum:0,
+   for k:1 thru length(flowValues) step 1 do
+   (sum:sum+pv(rate,flowValues[k],k-1)),
+   sum
+)$
+
+/*
+Returns the Present Value of a Future one, the diference in the
+values is the Interest given by the interest rate.
+*/
+pv(rate,FV,num):=FV/(1+rate)^num$
+
+/*
+Returns a table that represent the values in a constant an periodic
+saving. Ammount represent the desired quantity and num the number
+of periods to save.
+*/
+saving(rate,Ammount,num):=
+block([result,A,payment,k,a],
+	if num<0 then error("num must be a positive value")
+	else A:genmatrix(a,num+2, 4),
+	payment:Ammount*rate/((1+rate)^num-1),
+	A[1]:["n", "Balance", "Interest","Payment"],
+	A[2]:[0,0,0,0],
+	A[2,2]:0,
+	for k:3 thru num+2 step 1 do(
+		A[k,4]:payment,
+		A[k,1]:k-2,
+		A[k,3]:A[k-1,2]*rate,
+		A[k,2]:A[k-1,2]+A[k,3]+A[k,4]
+	),
+	printf(true,"           "),
+	printf(true,"~7s~14s~13s~14s ~% ~{ ~{ ~12,3f ~} ~% ~}",
+	A[1,1],A[1,2],A[1,3],A[1,4],
+	args(submatrix(1,A)))
+)$

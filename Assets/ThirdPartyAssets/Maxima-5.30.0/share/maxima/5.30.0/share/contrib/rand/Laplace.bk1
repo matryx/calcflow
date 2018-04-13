@@ -1,0 +1,49 @@
+/* Filename <name>.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /*   
+(d4) This program solves a system of N first order
+
+
+linear nonhomogeneous constant coefficient O.D.E's
+
+
+of the form         X[I]' = F(X[1],...,X[N],T)
+
+
+by using Laplace transforms.  To call it, type:
+
+
+                    LAPTR()
+
+*/  
+laptr():=(input1(),setup1(),input2(),setup2(),step1(),step2(),step3(),step4(),
+      step5(),output())$
+input1():=n:read("ENTER NUMBER OF 1ST ORDER ODE'S")$
+setup1():=(remarray(x),for i thru n do x[i]:x[i](t))$
+input2():=(
+       print("ENTER RHS'S OF ODE'S\
+USE X[I] FOR ITH DEPENDENT VARIABLE\
+AND T FOR INDEPENDENT VARIABLE"),
+       for i thru n do (f[i]:read("RHS OF EQ",i,":"),print(f[i])),
+       print("ENTER INITIAL CONDITIONS"),
+       for i thru n do z[i]:read("VALUE OF X[",i,"] AT T=0:"))$
+setup2():=for i thru n do eq[i]:diff(x[i],t) = f[i]$
+step1():=for i thru n do transf[i]:laplace(eq[i],t,s)$
+step2():=for i thru n do
+       transf[i]:subst(-z[i],part(lhs(transf[i]),2),transf[i])$
+step3():=for i thru n do
+       (for j thru n do transf[j]:subst(l[i],laplace(x[i],t,s),transf[j]))$
+step4():=lt:solve(makelist(transf[i],i,1,n),makelist(l[i],i,1,n))$
+step5():=(remarray(x),for i thru n do x[i]:ilt(rhs(part(lt,1,i)),s,t))$
+output():=for i thru n do (print("x[",i,"] =",x[i]),print(" "))$

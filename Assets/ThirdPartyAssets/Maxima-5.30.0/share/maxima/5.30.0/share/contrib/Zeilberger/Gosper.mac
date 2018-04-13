@@ -1,0 +1,288 @@
+/* Gosper's algorithm        */
+
+/* RISC Institute, Linz, Austria */
+/* by Fabrizio Caruso            */
+
+
+/* Dependencies:             */
+/* makeGosperForm2.macsyma   */
+/*      poly2quint.macsyma   */
+/* GosperEq2.macsyma         */
+/*      AlgUtil2.macsyma     */
+
+
+
+/* PREPROCESSING ROUTINES */
+
+
+/* Preprocessing function "fRat" */
+simpleFRatSlow(f,k) :=
+  minfactorial(
+  factor((subst(k+1,k,f)/f)));
+
+simpleFRatFast(f,k) :=
+  subst(k+1,k,f)/f;
+
+simpleFRat(f,k) := simpleFRatFast(f,k);
+
+
+fRatSlow(f,k) :=
+  minfactorial(
+  factor(expand(num(xthru(minfactorial(makefact(simpleFratSlow(f,k))))))/
+         expand(denom(xthru(minfactorial(makefact(simpleFratSlow(f,k))))))));
+
+
+fratFast(f,k) :=
+  factor(expand(num(xthru(minfactorial(makefact(simpleFratFast(f,k))))))/
+         expand(denom(xthru(minfactorial(makefact(simpleFratFast(f,k)))))));
+
+fratVeryFast(f,k) :=
+  factor(expand(num(xthru(minfactorial(makefact(simpleFratFast(f,k))))))/
+         expand(denom(xthru(minfactorial(makefact(simpleFratFast(f,k)))))));
+
+
+
+fRat(f,k) := fRatFast(f,k);
+
+
+/* Postprocessing function that computes the rational function "certificate" */
+telescope(Gsol,p,r,k) :=
+   r*Gsol/p;
+
+/* Postprocessing function that computes the rational function "certificate" */
+telescopeSimplified(Gsol,p,r,k) :=
+   r*Gsol/factor(p);
+
+
+/* Postprocessing function that computes the rational function "certificate"   */
+/* This is correct because we are telescoping w.r.t. a linear operator applied */
+/* to the original function f , i.e. lin.op.(f) = (numNF/denNF)*f              */
+/* We telescoping solution is (r/p)*Gsol*(numNF/denNF)*f =                     */
+/* = (r/gfP*numNF)*Gsol*(numNF/denNF) = (r*GSol)/(gfP*denNF)                   */
+zTelescope(GSol,gfP,r,denNF) :=
+   r*GSol/(gfP*denNF);
+
+/* Postprocessing function that computes the rational function "certificate" */
+zTelescopeSimplified(GSol,gfP,r,denNF) :=
+   r*Gsol/(gfP*denNF); /* BOGUS */
+
+
+printGosperSummary(fRat,GosperForm,AnsatzDegree,Gpoly,GosperSol,mode) := 
+  block([],
+     print("--------------------------------"),
+     print("Gosper-related summary"),
+     print("(1) fRat : " , fRat),
+     print("(2) Gosper form : ", GosperForm),
+     print("(3) AnsatzDegree : ", AnsatzDegree),
+     print("(4) Gosper polynomial : " , Gpoly),
+     if mode>= verbose then
+       print("(5) Gosper solution : ", GosperSol)
+     );
+
+
+
+/* GOSPER'S ALGORITHM - Main routine - verbose */
+GosperVerboseOpt(f,k,mode) :=
+  block(
+  [fRat,
+   signFlag,
+   GosperForm,
+   p,q,r,
+   AnsatzDegree,
+   Gpoly,
+   sysSol,
+   GosperSol,
+   tlscope,
+   c,
+   constantPart],
+  
+ 
+
+  /* Computation of the shift quotient */
+  fRat : shiftQuoOnlyHyp(factor(f),k), /* factor might not be necessary */
+  if fRat = [] then
+    (
+      if warnings then
+        print(f, " is not hypergeometric in ", k),
+    return(NON_HYPERGEOMETRIC)
+    ),
+
+  if mode>=verbose then
+     print("Shift quotient computed! : " , fRat),
+
+
+  /* Computation of the Gosper form */
+  GosperForm: makeGosperFormVerboseOpt(factor(fRat),k,mode-1), /* factor ? */
+
+  if GosperForm = NON_HYPERGEOMETRIC then
+    (
+    print(f, " is not proper hypergeometric in ", k),
+    return(NON_HYPERGEOMETRIC)
+    ),
+
+  p: takeP(GosperForm),
+  q: takeQ(GosperForm),
+  r: takeR(GosperForm),
+  if mode>=verbose then
+     print("p,q,r have been extracted! p: ", p, ", q: ", q, ", r: ", r),
+
+  /* Solution of the Gosper equation */
+  AnsatzDegree: AnsatzDegreeVerboseOpt(p,q,r,k,mode-1),
+
+  if mode>=verbose then
+     print("Ansatz degree computed ! : " , AnsatzDegree),
+
+  Gpoly : 0,
+
+  if AnsatzDegree >= 0 then
+    Gpoly: expand(GosperPoly(p,q,r,k,c,AnsatzDegree)),
+  if mode>=verbose then 
+     print("Gosper polynomial created! : " , Gpoly),
+  if Gpoly = 0 then
+     return(NO_HYP_SOL),
+  
+  sysSol: SolveSysVerboseOpt(Gpoly,c,AnsatzDegree+1,k,mode-1),
+  
+  if mode>=very_verbose then
+     print("System of equations solved! :  " , sysSol),
+  GosperSol: Gsol2Poly(first(sysSol),k),  
+  if mode>=verbose then
+     print("Gosper solution created! : " , GosperSol),
+
+  if mode>=summary then 
+     printGosperSummary(fRat,GosperForm,AnsatzDegree,Gpoly,GosperSol,mode-1),
+
+
+  /* Postprocessing : building the sol. to the telesc. probl. */    
+  if GosperSol = 0 then 
+    tlscope: NO_HYP_SOL
+  else
+    tlscope: telescope(GosperSol,p,r,k),
+
+
+ if simplified_output then
+    return(ratsimp(tlscope))
+ else
+    return(tlscope)
+  );
+
+
+/* Macro for the normal verbose Gosper algorithm */
+GosperVerbose(f,k) ::=
+  buildq([f,k],
+         GosperVerboseOpt(f,k,verbose));
+
+/* Macro for the very verbose Gosper algorithm */
+GosperVeryVerbose(f,k) ::=
+  buildq([f,k],
+         GosperVerboseOpt(f,k,very_verbose));
+
+
+GosperExtra(f,k) ::=
+  buildq([f,k],
+         GosperVerboseOpt(f,k,extra));
+
+/* Macro for the summary version of the Gosper algorithm */
+GosperSummary(f,k) ::=
+  buildq([f,k],
+         GosperVerboseOpt(f,k,summary));
+
+
+/* Short name for the non verbose mode */
+Gosper(f,k) ::=
+   buildq([f,k],
+          GosperVerboseOpt(f,k,nonverbose));
+
+/* ----------------------------------------------------------------------- */
+/* Anti-difference : It finds the anti-difference of a hypergeometric term */
+
+AntiDifferenceVerboseOpt(f,k,mode) :=
+  block([gSol],
+  gSol : GosperVerboseOpt(f,k,mode),
+  if gSol=NO_HYP_SOL then
+    return(NO_HYP_ANTIDIFFERENCE)
+  else
+    if gSol=NON_HYPERGEOMETRIC then
+      return(NON_HYPERGEOMETRIC)
+    else
+      if simplified_output then
+         return(factor(f*gSol))
+      else
+         return(f*gSol)
+  );
+       
+
+AntiDifference(f,k) :=
+  AntiDifferenceVerboseOpt(f,k,nonverbose);
+
+AntiDifferenceSummary(f,k) :=
+  AntiDifferenceVerboseOpt(f,k,summary);
+
+AntiDifferenceVerbose(f,k) :=
+  AntiDifferenceVerboseOpt(f,k,verbose);
+
+AntiDifferenceVeryVerbose(f,k) :=
+  AntiDifferenceVerboseOpt(f,k,very_verbose);
+
+AntiDifferenceExtra(f,k) :=
+  AntiDifferenceVerboseOpt(f,k,extra);
+
+
+/* ------------------------------------------------------------------ */
+/* Gosper Sum : It sums Gosper-summable hypergeometric terms          */
+
+/* Gosper summation function - Summary mode */
+GosperSumVerboseOpt(f,k,a,b,mode) :=
+  block(
+        [antiDiff],
+        
+        antiDiff:AntiDifferenceVerboseOpt(f,k,mode),
+        if antiDiff=NO_HYP_ANTIDIFFERENCE then
+           return(NON_GOSPER_SUMMABLE)
+        else
+          if antiDiff=NON_HYPERGEOMETRIC then
+             return(NON_HYPERGEOMETRIC)
+          else
+            (
+            if mode>= verbose then              
+              print("Anti-difference : ", antiDiff),
+            return(subst(b+1,k,antiDiff)-subst(a,k,antiDiff))
+            )
+       );
+
+/* Gosper summation function */
+GosperSum(f,k,a,b) :=
+  GosperSumVerboseOpt(f,k,a,b,nonverbose);
+
+
+/* Gosper summation function - Summary mode */
+GosperSumSummary(f,k,a,b) :=
+  GosperSumVerboseOpt(f,k,a,b,summary);
+
+GosperSumVerbose(f,k,a,b) :=
+  GosperSumVerboseOpt(f,k,a,b,verbose);
+
+GosperSumVeryVerbose(f,k,a,b) :=
+  GosperSumVerboseOpt(f,k,a,b,very_verbose);
+
+GosperSumExtra(f,k,a,b) :=
+  GosperSumVerboseOpt(f,k,a,b,extra);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

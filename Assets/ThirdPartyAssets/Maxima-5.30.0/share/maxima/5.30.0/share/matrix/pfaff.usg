@@ -1,0 +1,38 @@
+	PFAFF > and PFAFF LISP contain a function called PFAFFIAN(N,LIST)
+which returns the Pfaffian of its list argument.  PFAFFIAN
+takes two arguments.  The first is an integer which denotes the order
+of the Pfaffian to be expanded.  The second is a list of the elements
+of the Pfaffian.  As an illustration, one would evaluate the Pfaffian
+
+			|  A  B  C  |
+			|     D  E  |
+			         F  |
+
+as :		PFAFFIAN(3,[A,B,C,D,E,F]);
+
+Another example:
+
+	|  A  B  C  D  E  |
+	      F  G  H  I  |
+		 J  K  L  |	is PFAFFIAN(5,[A,B,C,D,E,F,G,H,I,J,K,L]);
+		    M  N  |
+		       O  |
+
+
+In order to speed the evaluation, a hashed array called PFAFFM is
+created and added to from time to time, whenever a PFAFFIAN of
+a new and higher order is  evaluated.   This array contains infor-
+mation used by the function PFAFFIAN and is of no interest to the
+user.  KILLing it will slow the evaluations, but will not other-
+wise affect the results.  Modifying the array PFAFFM will lead to
+errors.
+
+Some error-checking is done by PFAFFIAN.  If the length of the
+list argument is not equal to (N+1)*N/2, or if the integer argument
+is not a positive integer, or if the second argument is not a 
+list, an error is detected and both arguments are put into a list,
+to which ERREXP is then bound.
+
+The demo file is PFAFF DEMO.
+
+					Written by ASB

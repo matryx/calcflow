@@ -1,0 +1,12 @@
+/* solution of simultaneous differential equations */
+
+eq1:3*'diff(f(x),x,2)-2*'diff(g(x),x)=sin(x);
+eq2:a*'diff(g(x),x,2)+'diff(f(x),x)=a*cos(x);
+atvalue(g(x),x=0,1)$
+atvalue('diff(f(x),x),x=0,0)$
+atvalue('diff(g(x),x),x=0,1)$
+laplace_eq1:laplace(eq1,x,s);
+laplace_eq2:laplace(eq2,x,s);
+solve([laplace_eq1,laplace_eq2],
+         ['laplace(f(x),x,s),'laplace(g(x),x,s)]);
+ilt(%,s,x);

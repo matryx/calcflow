@@ -1,0 +1,585 @@
+(C13) BATCH (OPTMIZ, DEMO, DSK, SHARE);
+
+(C14) /* This macsyma batch file illustrates how to use the function
+STAP for determining the stationary points of a function of 1 or more
+variables, either unconstrained or subject to equality &/or inequality
+constraints.  As a prerequisite, see the text file  OPTMIZ USAGE.  The
+examples here are chosen to be instructive, geometrically visualizable,
+and easy enough to be solved by hand.  For a more thorough discussion
+and results of some more demanding test cases, see the report 
+"Automatic analytical optimization using computer algebraic
+manipulation", by David R. Stoutemyer, (ALOHA project technical report,
+University of Hawaii, Honolulu, June 1974).
+
+Here is an example with a maximum: */
+
+STAP(5*LOG(Y) - 3*X**2*Y - 4*Y) $
+
+ALGSYS FASL DSK MACSYM BEING LOADED 
+LOADING DONE
+
+					5
+(E14)                    STAPTS  = [Y = -, X = 0.0]
+			       1        4
+
+					 5
+(E15)                     OBJSUB = 5 LOG(-) - 5.0
+					 4
+
+(E16)                       GRADSUB = [0.0, 0.0]
+
+POLYRZ FASL DSK MACSYM BEING LOADED 
+LOADING DONE
+
+(E17)                          EIGEN = - 7.5
+
+(E18)                          EIGEN = - 3.2
+TIME= 4469 MSEC.
+
+(C19) /* Here is an example with a saddle, which also illustrates 
+that we may use subscripted variables: */
+
+STAP(ATAN(X[1]) + ATANH(X[2]) + X[2]/X[1]) $
+
+(E19)         STAPTS  = [X  = 0.409324944, X  = - 0.83245319]
+		    1     2                 1
+
+(E20)                      OBJSUB = - 0.75112805
+
+(E21)              GRADSUB = [5.2154064E-8, 1.3411045E-7]
+
+(E22)                       EIGEN = - 1.5897126
+
+(E23)                        EIGEN = 1.93282488
+TIME= 7350 MSEC.
+
+(C24) /* Here is a famous example by Peano, for which the second-
+order test reveals only that the stationary point is not a maximum.
+It turns out that the stationary point is a saddle, unless A=B, in
+which case it is a minimum, along with all other points on the curve
+Y = C + (B*X)**2.  See "Theory of Maxima and Minima" by H. Hancock,
+(Dover Press) for a discussion of how to analytically determine the
+nature of a stationary point when the 2nd-order test is inconclusive. 
+This example also illustrates how we may explicitly indicate the
+decision variables. */
+
+PEANO:  (Y - C - (A*X)**2)*(Y - C - (B*X)**2) $
+TIME= 125 MSEC.
+
+(C25) STAP(PEANO, [], [], [X,Y]) $
+
+(E25)                    STAPTS  = [X = 0.0, Y = C]
+			       1
+
+(E26)                           OBJSUB = 0.0
+
+(E27)                       GRADSUB = [0.0, 0.0]
+
+(E28)                            EIGEN = 0
+
+(E29)                            EIGEN = 2
+TIME= 6177 MSEC.
+
+(C30) /* Note how the answer is independent of A and B, but not C.
+
+Now, note how when A=B, giving a non-isolated stationary point, an
+extra parameter is automatically introduced to describe the stationary
+curve: */
+
+STAP(EV(PEANO,A=B), [], [], [X,Y]) $
+
+				       2   2
+				  - 2 B  R1  - 2 C
+(E30)           STAPTS  = [Y = - -----------------, X = R1]
+		      1                  2
+
+				  2   2
+			     - 2 B  R1  - 2 C    2   2     2
+(E31)          OBJSUB = ( - ----------------- - B  R1  - C)
+				    2
+
+				     2   2
+		      2         - 2 B  R1  - 2 C    2   2
+(E32) GRADSUB = [- 4 B  R1 ( - ----------------- - B  R1  - C),
+				       2
+
+					     2   2
+					- 2 B  R1  - 2 C    2   2
+				 2 ( - ----------------- - B  R1  - C)]
+					       2
+SOLUTION
+
+(E33)                            EIGEN = 0
+
+				       4   2
+(E34)                       EIGEN = 8 B  R1  + 2
+TIME= 5647 MSEC.
+
+(C35) /* Let's make certain that the GRADSUB expressions simplify to
+zero: */
+
+RADCAN(GRADSUB);
+TIME= 323 MSEC.
+(D35)                              [0, 0]
+
+(C36) /* The limitations of STAP are primarily dependent upon the
+limitations of the macsyma SOLVE command for solving nonlinear
+equations.  SOLVE will attempt to find a closed-form solution to a
+single equation that is irrational or involves elementary
+transcendental functions; but as of June 1974, SOLVE is intended
+to solve simultaneous equations only if they are polynomial
+in the unknowns.  However, it generally converts rational equations
+to this form by multiplying each equation by the least common
+denominator of its terms; so it may solve simultaneous rational
+equations too.  Thus, as in our first two examples, the objective may
+contain any terms with rational gradients, such as ATAN(R), ATANH(R),
+or LOG(R), where R is rational in the decision variables.  The clearing
+of the denominator may result in a "solution" which is a pole for some
+gradient components while a zero for the others.  Although not a true
+solution to the equations, this is a bonus in our case, because we are 
+interested in all extrema, not just stationary points.  In fact, we
+are usually more interested in any poles of the proper sign than in
+stationary points of the proper type with finite objective values.
+Poles, if found, are usually revealed in an alarming way by one or
+more large-magnitude components in GRADSUB or OBJSUB, or by an error
+interrupt such as a zerodivide.
+
+A surprising number of optimization problems can be converted to the
+required form by a change of variable  For example, fractional powers
+of a decision variable, X, may be eliminated by letting X = Z**Q,
+where Q is the least common denominator of the fractional powers of x.
+For example: */
+
+FRAC: X**(2/3) - 2*X*Y + Y $
+TIME= 55 MSEC.
+
+(C37) EV(FRAC, X=Z**3);
+TIME= 56 MSEC.
+				     3    2
+(D37)                         - 2 Y Z  + Z  + Y
+
+(C38) STAP(%) $
+
+(E38)            STAPTS  = [Z = 0.7937005, Y = 0.41997372]
+		       1
+
+(E39)                       OBJSUB = 0.62996052
+
+(E40)             GRADSUB = [1.1920929E-7, - 8.9406967E-8]
+
+(E41)                       EIGEN = - 4.9098093
+
+(E42)                        EIGEN = 2.9098091
+TIME= 6703 MSEC.
+
+(C43) /* A similar technique may be used to eliminate fractional powers
+of more complicated subexpressions, provided we include appropriate
+supplementary equality constraints.  For example: */
+
+SQRT(X+Y)*Y - X $
+TIME= 31 MSEC.
+
+(C44) STAP(EV(%,SQRT(X+Y)=Z), [], Z**2-X-Y) $
+
+(E44)    STAPTS  = [X = 3.0, Y = - 2.0, Z = - 1.0, EQMULT  = - 1.0]
+	       1                                         1
+
+(E45)                          OBJSUB = - 1.0
+
+(E46)                  GRADSUB = [0.0, 0.0, 0.0, 0.0]
+
+(E47)                       EIGEN = - 1.4484026
+
+(E48)                        EIGEN = 0.1150693
+TIME= 9172 MSEC.
+
+(C49) /* exponentials, hyperbolic functions, and trig functions may
+often be converted to the required form by using the multiple-argument
+formulas together with equality constraints such as the sum of the
+squares of the sine and cosine equals 1.  For example: */
+
+TRIGEXPAND: EXPTSUBST: TRUE $
+TIME= 7 MSEC.
+
+(C50) COS(2*X) + SIN(X)*EXP(2*Y) - EXP(Y);
+TIME= 209 MSEC.
+			    2 Y     Y      2         2
+(D50)              SIN(X) %E    - %E  - SIN (X) + COS (X)
+
+(C51) SUBST([SIN(X)=S, COS(X)=C, %E**Y=E], %);
+TIME= 267 MSEC.
+			       2    2          2
+(D51)                       - S  + E  S - E + C
+
+(C52) STAP(%, [], S**2+C**2-1) $
+
+(E52) STAPTS  = [E = 1.25992104, C = - 0.91788341, S = 0.39685026,
+	    1
+
+						       EQMULT  = - 1.0]
+							     1
+
+(E53)                       OBJSUB = 0.055059291
+
+(E54)        GRADSUB = [0, - 1.49011612E-8, 0.0, 8.19563865E-8]
+
+(E55)                       EIGEN = - 4.4000479
+
+(E56)                        EIGEN = 1.82370886
+
+(E57) STAPTS  = [E = 1.25992104, C = 0.91788339, S = 0.39685026,
+	    2
+
+						       EQMULT  = - 1.0]
+							     1
+
+(E58)                       OBJSUB = 0.055059254
+
+(E59)        GRADSUB = [0, - 1.49011612E-8, 0.0, 4.4703483E-8]
+
+(E60)                       EIGEN = - 4.4000479
+
+(E61)                        EIGEN = 1.82370886
+
+				 9        1
+(E62)       STAPTS  = [EQMULT  = -, E = - -, S = - 1.0, C = 0.0]
+		  3          1   8        2
+
+(E63)                         OBJSUB = - 0.75
+
+(E64)                  GRADSUB = [0.0, 0.0, 0.0, 0.0]
+
+(E65)                           EIGEN = - 2
+
+(E66)                           EIGEN = 4.25
+
+				   7      1
+(E67)         STAPTS  = [EQMULT  = -, E = -, S = 1.0, C = 0.0]
+		    4          1   8      2
+
+(E68)                         OBJSUB = - 1.25
+
+(E69)                  GRADSUB = [0.0, 0.0, 0.0, 0.0]
+
+(E70)                            EIGEN = 2
+
+(E71)                           EIGEN = 3.75
+TIME= 30639 MSEC.
+
+(C72) /* For any of the above answers, we may use LOG(E) or ?ATAN(S,C)
+to compute the corresponding values of the original decision
+variables, where E, S, or C are the right-hand-sides of the
+appropriate components of the chosen component of STAPTS.
+
+Now let's try the famous post-office parcel problem:  maximize the
+volume of a rectangular parallelopiped parcel, subject to the
+constraints that the length plus the girth can't exceed 72,
+and that the length, width, and depth cannot be negative or 
+exceed 42.  With three decision variables and 7 inequality constraints,
+a direct approach using STAP would involve 17 simultaneous nonlinear
+equations, which is beyond its present capabilities.  However, since we
+are only interested in stationary points that are maxima, it is clear
+that none of the non-negativity constraints will be active, and the
+length-plus-girth constraint will be active.  Knowing this, we may
+treat the length-plus-girth constraint as an equality, thus avoiding 
+one slack variable; and we may ignore the non-negativity constraints,
+rejecting any negative solutions, avoiding three multipliers and three
+more slacks.  Moreover, neither the width nor depth can be 42, because
+then the girth alone would exceed 72; so we may ignore these
+constraints to avoid two more slacks and two more multipliers.  These
+simplifications result in a simple enough system of 6 simultaneous
+nonlinear equations to be solved by SOLVE in a reasonable amount
+of time: */
+
+VOL: L*W*D $
+TIME= 14 MSEC.
+
+(C73) EQCON: L + 2*W + 2*D - 72 $
+TIME= 31 MSEC.
+
+(C74) STAP(VOL, L-42, EQCON) $
+
+(E74) STAPTS  = [RTSLACK  = 4.2426405, W = 12.0, D = 12.0, L = 24.0,
+	    1           1
+
+				      LEMULT  = 0.0, EQMULT  = - 144.0]
+					    1              1
+
+(E75)                         OBJSUB = 3456.0
+
+(E76)       GRADSUB = [0.0, 0.0, 0.0, 0.0, - 1.66893005E-6, 0.0]
+
+(E77)                           EIGEN = - 24
+
+(E78)                        EIGEN = - 7.902439
+
+				     15      15
+(E79) STAPTS  = [RTSLACK  = 0.0, W = --, D = --, L = 42.0,
+	    2           1            2       2
+
+						  405              315
+					LEMULT  = ---, EQMULT  = - ---]
+					      1    4         1      2
+
+(E80)                         OBJSUB = 2362.5
+
+(E81)              GRADSUB = [0.0, 0, 0.0, 0.0, 0.0, 0.0]
+
+(E82)                           EIGEN = - 42
+
+(E83)                          EIGEN = 202.5
+TIME= 47070 MSEC.
+
+(C84) /* However, we may simplify the problem further, saving
+additional time, by making the change of variable L=42-S**2, which
+automatically satisfies  the upper bound on L; and we may solve the
+equality constraint for either W or D, then eliminate it from the
+objective These changes reduce the problem to two simultaneous
+nonlinear equations: */
+
+SOLVE(EQCON,W);
+SOLUTION
+
+				   L + 2 D - 72
+(E84)                        W = - ------------
+					2
+TIME= 69 MSEC.
+(D84)                              [E84]
+
+(C85) VOLSUB: EV(VOL,%);
+TIME= 66 MSEC.
+			      D L (L + 2 D - 72)
+(D85)                       - ------------------
+				      2
+
+(C86) EV(%, L=42-S**2);
+TIME= 78 MSEC.
+				 2       2
+			D (42 - S ) ( - S  + 2 D - 30)
+(D86)                 - ------------------------------
+				      2
+
+(C87) STAP(%) $
+
+(E87)               STAPTS  = [S = 4.2426405, D = 12.0]
+			  1
+
+(E88)                         OBJSUB = 3456.0
+
+(E89)            GRADSUB = [- 1.90734863E-5, 1.8310547E-4]
+
+(E90)                       EIGEN = - 876.51387
+
+(E91)                       EIGEN = - 35.486028
+
+						15
+(E92)                   STAPTS  = [S = 0.0, D = --]
+			      2                 2
+
+(E93)                         OBJSUB = 2362.5
+
+(E94)                       GRADSUB = [0.0, 0.0]
+
+(E95)                           EIGEN = - 84
+
+(E96)                          EIGEN = 202.5
+TIME= 18140 MSEC.
+
+(C97) /* It is almost always worth solving the largest possible subset
+of the equality constraints for variables that enter them linearly,
+then using this solution to eliminate these variables from the
+remaining constraints and from the objective.  This is also worth
+doing for variables that enter nonlinearly, provided it introduces no
+fractional powers in the objective or remaining constraints.
+For example, to find the stationary points of  X + 3*Y - 6*Z**2,
+subject to  X**2 + Y**2 + Z**2 = 1, it is well worth eliminating Z.
+
+The change of variable for eliminating the inequality constraint
+L <= 42, is equivalent to converting the inequality to an equality by
+introducing a squared slack variable, solving for L, then eliminating
+L from VOLSUB.  From this viewpoint, the "change of variable"
+technique is seen to be applicable to a great variety of inequality
+constraints, not merely upper and lower bounds as is implied in most
+textbooks.  Together with applicable equality constraints, it is
+generally worth including in the elimination the largest possible
+subset of inequality constraints for which the eliminated variables
+enter linearly, up to the number of decision variables minus the number
+of equality constraints.
+
+Another technique for treating an inequality constraint is to
+solve the problem with the constraint assumed active, and also with
+the constraint ignored, checking any stationary points for violation
+of the constraint in the latter case: */
+
+STAP(EV(VOLSUB,L=42)) $
+
+				       15
+(E98)                              D = --
+				       2
+
+					4725
+(E99)                          OBJSUB = ----
+					 2
+
+(E100)                          GRADSUB = [0]
+
+(E101)                          EIGEN = - 84
+TIME= 1071 MSEC.
+
+(C102) STAP(VOLSUB) $
+
+(E102)                 STAPTS  = [L = 24.0, D = 12.0]
+			     1
+
+(E103)                         OBJSUB = 3456.0
+
+(E104)                      GRADSUB = [0.0, 0.0]
+
+(E105)                       EIGEN = - 51.633308
+
+(E106)                      EIGEN = - 8.36669242
+
+(E107)                  STAPTS  = [D = 36.0, L = 0.0]
+			      2
+
+(E108)                          OBJSUB = 0.0
+
+(E109)                      GRADSUB = [0.0, 0.0]
+
+(E110)                       EIGEN = - 58.249224
+
+(E111)                       EIGEN = 22.2492234
+
+(E112)                  STAPTS  = [L = 72.0, D = 0.0]
+			      3
+
+(E113)                          OBJSUB = 0.0
+
+(E114)                      GRADSUB = [0.0, 0.0]
+
+(E115)                      EIGEN = - 152.498447
+
+(E116)                       EIGEN = 8.49844718
+
+(E117)                  STAPTS  = [D = 0.0, L = 0.0]
+			      4
+
+(E118)                          OBJSUB = 0.0
+
+(E119)                      GRADSUB = [0.0, 0.0]
+
+(E120)                          EIGEN = - 36
+
+(E121)                           EIGEN = 36
+TIME= 11506 MSEC.
+
+(C122) /* The second-order test is inadequate when
+constraints have been artifically activated.  For example, the one
+eigenvalue for the case  D = 15/2 above is negative, but this
+stationary point is actually a saddle.  To see this, we must check the 
+unactivated gradient at this point to see if it points into or out of
+the feasible region: */
+
+EV(GRAD, D=15/2, L=42);
+TIME= 142 MSEC.
+				       405
+(D122)                           [0, - ---]
+					4
+
+(C123) DECSLKMULTS;
+TIME= 1 MSEC.
+(D123)                             [D, L]
+
+(C124) /*  GRAD is a global varible bound by STAP to the
+symbolic expression for the gradient, and DECSLKMULTS is bound to the
+variables that the gradient is taken with respect to, in the order
+of their components in GRAD.  Thus, -405/4 points in, making the
+point a saddle.
+
+The report referenced at the beginning of this demonstration
+explains how to generalize this test to more than one constraint.
+
+When there is more than one inequality constraint, each feasible
+combination must be activated, unless some additional convexity
+requirements are satisfied.  Nevertheless, this combinatorial
+activation technique is probably capable of treating
+larger problems than either the change-of-variable or the squared-
+slack-variable-with-multiplier techniques of treating inequality 
+constraints. 
+
+We have already seen how STAP finds poles of the objective or gradient
+only by accident.  The following examples are included as reminders
+about other limitations of using calculus to find extrema:*/
+
+STAP(X, [], X**3-Y**2) $
+
+(E124)                   NO STATIONARY POINTS FOUND
+TIME= 4727 MSEC.
+
+(C125) /* Lagrange multipliers require the constraints to have con-
+tinuous tangents, and this is violated for the above example at X=0,
+Y=0, where the objective is a minimum.  A direct use of elimination
+would fail too, because it results in an undefined derivative at the
+minimum.  In such cases, each piece between discontinuities must be
+considered a separate constraint.
+
+The next example has a minimum at X=0, Y=0, where the two
+active constraints are parallel, making them linearly dependent.
+Such cusps or "wiskers" on the feasible region violate the so-called
+"constraint-qualification" requirement; so the extremum is not found:*/
+
+STAP(X, [-Y, Y-X**3]) $
+
+(E125)                   NO STATIONARY POINTS FOUND
+TIME= 17706 MSEC.
+
+(C126) /* The following example doesn't have a strictly feasible point;
+so it violates Slater's condition; and the extremum at X=0 is not
+found: */
+
+STAP(X, X**2) $
+
+(E126)                   NO STATIONARY POINTS FOUND
+TIME= 4668 MSEC.
+
+(C127) /* Finally, it is important to remember that unbounded regions
+may have nonstationary or asymptotically stationary points
+at infinity, which STAP will not find.  Such situations are usually
+obvious from qualitative considerations, provided the objective and
+constraints are not too complicated and numerous, but the macsyma LIMIT
+function can be of help.  However, it is important to remember that a
+multivariate limit depends upon the way it is taken.  This is
+illustrated by the following example, where you will have to type
+NONZERO; in response to two interrupts: */
+
+LIMIT(PEANO, Y, INF);
+
+LIMIT FASL DSK MACSYM BEING LOADED 
+LOADING DONE
+TIME= 280 MSEC.
+(D127)                               INF
+
+(C128) LIMIT(PEANO, X, INF);
+IS  A B  ZERO OR NONZERO?
+
+NONZERO;
+TIME= 402 MSEC.
+(D128)                               INF
+
+(C129) RADCAN(EV(PEANO, Y=C+(A**2+B**2)*X**2/2));
+TIME= 818 MSEC.
+			      4      2  2    4   4
+			    (B  - 2 A  B  + A ) X
+(D129)                    - ----------------------
+				      4
+
+(C130) LIMIT(%, X, INF);
+IS  (B + A) (B - A)  ZERO OR NONZERO?
+
+NONZERO;
+TIME= 1085 MSEC.
+(D130)                              MINF
+
+TIME= 223257 MSEC.
+(D131)                           BATCH DONE
+

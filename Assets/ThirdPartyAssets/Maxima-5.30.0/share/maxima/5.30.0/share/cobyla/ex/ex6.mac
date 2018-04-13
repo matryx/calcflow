@@ -1,0 +1,35 @@
+/*
+ * Equation 9.1.15 in Fletcher's book Practical Methods of
+ * Optimization
+ *
+ * f = -x1-x2
+ * x2-x1^2 >= 0
+ * 1-x1^2-x2^2 >= 0
+ *
+ * True solution: x1=1/sqrt(2), x2=1/sqrt(2)
+ */
+
+fmin_cobyla(-x1-x2, [x1, x2], [1, 1], constraints = [x2-x1^2 >= 0, 1-x1^2-x2^2 >= 0], iprint=1);
+
+/* Output
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   63   F =-1.414214E+00    MAXCV = 2.000067E-12
+   X = 7.071064E-01   7.071072E-01
+[[x1 = .7071063653426506,x2 = .7071071970316142],-1.414213562374265,
+         63, 0]
+*/
+
+/* True output
+
+       Output from test problem 6 (Equation (9.1.15) in Fletcher)
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =   63   F =-1.414214E+00    MAXCV = 2.000067E-12
+   X = 7.071064E-01   7.071072E-01
+
+*/
+
+

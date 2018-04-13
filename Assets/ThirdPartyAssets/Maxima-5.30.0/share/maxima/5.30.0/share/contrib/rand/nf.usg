@@ -1,0 +1,640 @@
+nf.mac is from the book "Perturbation Methods, Bifurcation Theory and
+Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+This maxima run applies normal forms to a system of equations.  The
+functions NF, GEN, DECOMPOSE, HOPF2, HOPF3 and TRANSFORM are
+used. 
+
+The example is from p55-62.  It is presented without discussion.
+maxima-5.9.0 cvs reproduces the results from the book.
+
+(C1) load("./nf.mac");
+(D1)                               ./nf.mac
+(C2) load("./transfor.mac");
+(D2)                            ./transfor.mac
+(C3) nf();
+DO YOU WANT TO ENTER NEW VARIABLE NAMES (Y/N)?
+y;
+HOW MANY EQS
+2;
+SYMBOL FOR OLD X[ 1 ]
+x;
+SYMBOL FOR OLD X[ 2 ]
+y;
+SYMBOL FOR NEW X[ 1 ]
+u;
+SYMBOL FOR NEW X[ 2 ]
+v;
+DO YOU WANT TO ENTER NEW D.E.'S (Y/N)?
+y;
+ENTER RHS OF EQ. NO. 1 ,D x /DT =
+-y+fxx/2*x^2+fxy*x*y+fyy/2*y^2+fxxx/6*x^3+fxxy/2*x^2*y+fxyy/2*x*y^2+fyyy/6*y^3;
+                3           2        2         2                         3
+          fyyy y    fxyy x y    fyy y    fxxy x  y                 fxxx x
+D x /DT = ------- + --------- + ------ + --------- + fxy x y - y + -------
+             6          2         2          2                        6
+
+                                                                             2
+                                                                        fxx x
+                                                                      + ------
+                                                                          2
+ENTER RHS OF EQ. NO. 2 ,D y /DT =
+x+gxx/2*x^2+gxy*x*y+gyy/2*y^2+gxxx/6*x^3+gxxy/2*x^2*y+gxyy/2*x*y^2+gyyy/6*y^3;
+                3           2        2         2                     3        2
+          gyyy y    gxyy x y    gyy y    gxxy x  y             gxxx x    gxx x
+D y /DT = ------- + --------- + ------ + --------- + gxy x y + ------- + ------
+             6          2         2          2                    6        2
+
+                                                                           + x
+INPUT NEAR-IDENTITY TRANSFORMATION
+
+(USE PREV FOR PREVIOUS TRANSFORMATION)
+x = u + ?
+gen(2);
+                2                                2
+x = A          v  + A          u v + A          u  + u
+     1, [0, 2]       1, [1, 1]        1, [2, 0]
+y = v + ?
+gen(2);
+                2                                    2
+y = A          v  + A          u v + v + A          u
+     2, [0, 2]       2, [1, 1]            2, [2, 0]
+ENTER TRUNCATION ORDER (HIGHEST ORDER TERMS TO BE KEPT)
+2;
+du                                               2
+-- = - v - ((2 A          + 2 A          - fxx) u
+dT              2, [2, 0]      1, [1, 1]
+
+ + (2 A          - 4 A          + 4 A          - 2 fxy) v u
+       2, [1, 1]      1, [2, 0]      1, [0, 2]
+
+                                        2
+ + (2 A          - 2 A          - fyy) v )/2 + . . .
+       2, [0, 2]      1, [1, 1]
+dv                                             2
+-- = u - ((2 A          - 2 A          - gxx) u
+dT            2, [1, 1]      1, [2, 0]
+
+ + (- 4 A          + 4 A          - 2 A          - 2 gxy) v u
+         2, [2, 0]      2, [0, 2]      1, [1, 1]
+
+                                          2
+ + (- 2 A          - 2 A          - gyy) v )/2 + . . .
+         2, [1, 1]      1, [0, 2]
+DO YOU WANT TO ENTER ANOTHER TRANSFORMATION (Y/N)
+n;
+         du                                               2
+(D3)/T/ [-- = - v - ((2 A          + 2 A          - fxx) u
+         dT              2, [2, 0]      1, [1, 1]
+
+ + (2 A          - 4 A          + 4 A          - 2 fxy) v u
+       2, [1, 1]      1, [2, 0]      1, [0, 2]
+
+                                        2
+ + (2 A          - 2 A          - fyy) v )/2 + . . .,
+       2, [0, 2]      1, [1, 1]
+
+dv                                             2
+-- = u - ((2 A          - 2 A          - gxx) u
+dT            2, [1, 1]      1, [2, 0]
+
+ + (- 4 A          + 4 A          - 2 A          - 2 gxy) v u
+         2, [2, 0]      2, [0, 2]      1, [1, 1]
+
+                                          2
+ + (- 2 A          - 2 A          - gyy) v )/2 + . . .]
+         2, [1, 1]      1, [0, 2]
+
+
+(C4) hopf2();
+                      2 gyy + gxx + 2 fxy               - 2 gxy + 2 fyy + fxx
+(D4) [[A          = - -------------------, A          = ---------------------,
+        1, [2, 0]              6            2, [2, 0]             6
+
+             gxy - fyy + fxx                 gyy - gxx + fxy
+A          = ---------------, A          = - ---------------,
+ 1, [1, 1]          3          2, [1, 1]            3
+
+             - gyy - 2 gxx + 2 fxy               2 gxy + fyy + 2 fxx
+A          = ---------------------, A          = -------------------]]
+ 1, [0, 2]             6             2, [0, 2]            6
+
+
+
+(C5) nf();
+DO YOU WANT TO ENTER NEW VARIABLE NAMES (Y/N)?
+N;
+DO YOU WANT TO ENTER NEW D.E.'S (Y/N)?
+N;
+INPUT NEAR-IDENTITY TRANSFORMATION
+
+(USE PREV FOR PREVIOUS TRANSFORMATION)
+x = u + ?
+ev(prev,%);
+                             2
+    (- gyy - 2 gxx + 2 fxy) v    (gxy - fyy + fxx) u v
+x = -------------------------- + ---------------------
+                6                          3
+
+                                                                         2
+                                                  (2 gyy + gxx + 2 fxy) u
+                                                - ------------------------ + u
+                                                             6
+y = v + ?
+ev(prev,%);
+                           2
+    (2 gxy + fyy + 2 fxx) v    (gyy - gxx + fxy) u v
+y = ------------------------ - --------------------- + v
+               6                         3
+
+                                                                             2
+                                                    (- 2 gxy + 2 fyy + fxx) u
+                                                  + --------------------------
+                                                                6
+ENTER TRUNCATION ORDER (HIGHEST ORDER TERMS TO BE KEPT)
+2;
+du
+-- = - v + . . .
+dT
+dv
+-- = u + . . .
+dT
+DO YOU WANT TO ENTER ANOTHER TRANSFORMATION (Y/N)
+Y;
+INPUT NEAR-IDENTITY TRANSFORMATION
+
+(USE PREV FOR PREVIOUS TRANSFORMATION)
+x = u + ?
+prev+gen(3);
+                                                               2
+                3                 2   (- gyy - 2 gxx + 2 fxy) v
+x = A          v  + A          u v  + --------------------------
+     1, [0, 3]       1, [1, 2]                    6
+
+               2     (gxy - fyy + fxx) u v               3
+ + A          u  v + --------------------- + A          u
+    1, [2, 1]                  3              1, [3, 0]
+
+                          2
+   (2 gyy + gxx + 2 fxy) u
+ - ------------------------ + u
+              6
+y = v + ?
+prev+gen(3);
+                                                             2
+                3                 2   (2 gxy + fyy + 2 fxx) v
+y = A          v  + A          u v  + ------------------------
+     2, [0, 3]       2, [1, 2]                   6
+
+               2     (gyy - gxx + fxy) u v                   3
+ + A          u  v - --------------------- + v + A          u
+    2, [2, 1]                  3                  2, [3, 0]
+
+                            2
+   (- 2 gxy + 2 fyy + fxx) u
+ + --------------------------
+               6
+ENTER TRUNCATION ORDER (HIGHEST ORDER TERMS TO BE KEPT)
+3;
+du
+-- = - v - (((fxy + gxx + 2 gyy) fxx - 2 fxy fyy + 2 fxy gxy + 6 A
+dT                                                                2, [3, 0]
+
+                         3           2                            2
+ + 6 A          - fxxx) u  + (- 2 fxx  + (fyy - 2 gxy) fxx - 2 fyy  + 2 gxy fyy
+      1, [2, 1]
+
+        2
+ + 4 fxy  + (- gxx + 4 gyy) fxy + 6 A          - 18 A          + 12 A
+                                     2, [2, 1]       1, [3, 0]       1, [1, 2]
+
+              2
+ - 3 fxxy) v u  + ((- 6 fxy + 2 gxx + gyy) fxx + (3 fxy - 2 gxx + 2 gyy) fyy
+
+                                                                       2
+ - 4 fxy gxy + 6 A          - 12 A          + 18 A          - 3 fxyy) v  u
+                  2, [1, 2]       1, [2, 1]       1, [0, 3]
+
+                     2                    2
+ + (- 2 fyy fxx - fyy  - 2 gxy fyy - 2 fxy  + (2 gxx + gyy) fxy + 6 A
+                                                                     2, [0, 3]
+
+                         3
+ - 6 A          - fyyy) v )/6 + . . .
+      1, [1, 2]
+dv                                    2                  2
+-- = u + ((gxy fxx + 2 gxy fyy - 2 gxy  - 2 gxx fxy - gxx  - 2 gyy gxx
+dT
+
+                                        3
+ - 6 A          + 6 A          + gxxx) u
+      2, [2, 1]      1, [3, 0]
+
+ + ((2 gxx + gyy) fxx + (- 2 gxx + 2 gyy) fyy + (- 4 fxy + 3 gxx - 6 gyy) gxy
+
+                                                             2
+ + 18 A          - 12 A          + 6 A          + 3 gxxy) v u
+       2, [3, 0]       2, [1, 2]      1, [2, 1]
+
+                               2                              2
+ + (4 gxy fxx - gxy fyy + 4 gxy  + (2 gxx - 2 gyy) fxy - 2 gxx  + gyy gxx
+
+        2                                                           2
+ - 2 gyy  + 12 A          - 18 A          + 6 A          + 3 gxyy) v  u
+                2, [2, 1]       2, [0, 3]      1, [1, 2]
+
+ + (2 gyy fxx + gyy fyy + (2 fxy - 2 gxx + gyy) gxy + 6 A
+                                                         2, [1, 2]
+
+                         3
+ + 6 A          + gyyy) v )/6 + . . .
+      1, [0, 3]
+DO YOU WANT TO ENTER ANOTHER TRANSFORMATION (Y/N)
+N;
+         du
+(D5)/T/ [-- = - v - (((fxy + gxx + 2 gyy) fxx - 2 fxy fyy + 2 fxy gxy
+         dT
+
+                                        3
+ + 6 A          + 6 A          - fxxx) u
+      2, [3, 0]      1, [2, 1]
+
+           2                            2                    2
+ + (- 2 fxx  + (fyy - 2 gxy) fxx - 2 fyy  + 2 gxy fyy + 4 fxy
+
+ + (- gxx + 4 gyy) fxy + 6 A          - 18 A          + 12 A          - 3 fxxy)
+                            2, [2, 1]       1, [3, 0]       1, [1, 2]
+
+    2
+ v u  + ((- 6 fxy + 2 gxx + gyy) fxx + (3 fxy - 2 gxx + 2 gyy) fyy - 4 fxy gxy
+
+                                                           2
+ + 6 A          - 12 A          + 18 A          - 3 fxyy) v  u
+      2, [1, 2]       1, [2, 1]       1, [0, 3]
+
+                     2                    2
+ + (- 2 fyy fxx - fyy  - 2 gxy fyy - 2 fxy  + (2 gxx + gyy) fxy + 6 A
+                                                                     2, [0, 3]
+
+                         3
+ - 6 A          - fyyy) v )/6 + . . .,
+      1, [1, 2]
+
+dv                                    2                  2
+-- = u + ((gxy fxx + 2 gxy fyy - 2 gxy  - 2 gxx fxy - gxx  - 2 gyy gxx
+dT
+
+                                        3
+ - 6 A          + 6 A          + gxxx) u
+      2, [2, 1]      1, [3, 0]
+
+ + ((2 gxx + gyy) fxx + (- 2 gxx + 2 gyy) fyy + (- 4 fxy + 3 gxx - 6 gyy) gxy
+
+                                                             2
+ + 18 A          - 12 A          + 6 A          + 3 gxxy) v u
+       2, [3, 0]       2, [1, 2]      1, [2, 1]
+
+                               2                              2
+ + (4 gxy fxx - gxy fyy + 4 gxy  + (2 gxx - 2 gyy) fxy - 2 gxx  + gyy gxx
+
+        2                                                           2
+ - 2 gyy  + 12 A          - 18 A          + 6 A          + 3 gxyy) v  u
+                2, [2, 1]       2, [0, 3]      1, [1, 2]
+
+ + (2 gyy fxx + gyy fyy + (2 fxy - 2 gxx + gyy) gxy + 6 A
+                                                         2, [1, 2]
+
+                         3
+ + 6 A          + gyyy) v )/6 + . . .]
+      1, [0, 3]
+
+
+(C6) hopf3();
+                          2                                     2
+(D6) [[A          = (2 gyy  + (gxx + 7 fxy) gyy - 3 gxyy - 2 gxy
+        1, [3, 0]
+
+                                     2                         2
+ + (- fyy - 7 fxx) gxy - gxxx + 3 gxx  + fxy gxx - fyyy - 3 fyy  - fxx fyy
+
+        2                 2
+ + 2 fxy  - 3 fxxy - 2 fxx  + 24 %R1)/24, A          = %R2,
+                                           2, [3, 0]
+
+A          = (- 3 gyyy + (3 gxy - 3 fyy - 16 fxx) gyy + (3 gxx - 16 fxy) gxy
+ 1, [2, 1]
+
+ - 3 gxxy - 5 fxx gxx + 13 fxy fyy - 3 fxyy - 11 fxx fxy + 5 fxxx - 48 %R2)
+
+                        2                                        2
+/48, A          = (6 gyy  + (9 fxy - 9 gxx) gyy - 9 gxyy - 18 gxy
+      2, [2, 1]
+
+                                         2                          2
+ + (13 fyy - 11 fxx) gxy + 3 gxxx + 3 gxx  - 15 fxy gxx + fyyy - fyy
+
+                    2                 2
+ + 3 fxx fyy + 6 fxy  - 3 fxxy - 2 fxx  + 48 %R1)/48,
+
+                   2                                       2
+A          = (2 gyy  + (5 gxx + 3 fxy) gyy - 3 gxyy + 2 gxy
+ 1, [1, 2]
+
+                                          2                              2
+ + (- 17 fyy - 5 fxx) gxy - 3 gxxx + 5 gxx  + 15 fxy gxx - 5 fyyy - 3 fyy
+
+                      2                 2
+ - 11 fxx fyy - 14 fxy  + 3 fxxy + 2 fxx  + 48 %R1)/48,
+
+A          = - (3 gyyy + (21 gxy - 5 fyy + 4 fxx) gyy + (24 fxy - 15 gxx) gxy
+ 2, [1, 2]
+
+ - 9 gxxy + (8 fyy - 7 fxx) gxx - 5 fxy fyy + 3 fxyy + 7 fxx fxy - fxxx
+
+ - 48 %R2)/48, A          = (- gyyy + (5 gxy - 5 fyy - 6 fxx) gyy
+                1, [0, 3]
+
+ + (4 fxy - gxx) gxy - 3 gxxy + (4 fyy - 5 fxx) gxx - fxy fyy + 3 fxyy
+
+ + 5 fxx fxy + fxxx - 24 %R2)/24, A          = %R1]]
+                                   2, [0, 3]
+
+
+(C7) expand(ev(newdes,%));
+              2  3              3              3         3      2  3
+      du   gyy  v    5 gxx gyy v    5 fxy gyy v    gxyy v    gxy  v
+(D7) [-- = ------- + ------------ - ------------ - ------- + -------
+      dT     24           48             48          16        24
+
+            3              3         3        2  3            3         3
+   fyy gxy v    5 fxx gxy v    gxxx v    5 gxx  v    fxy gxx v    fyyy v
+ - ---------- - ------------ - ------- + --------- - ---------- + -------
+       48            48          16         48           48         16
+
+        2  3              3      2  3         3      2  3           2
+   5 fyy  v    5 fxx fyy v    fxy  v    fxxy v    fxx  v    gyyy u v
+ + --------- + ------------ + ------- + ------- + ------- + ---------
+      48            48          24        16        24         16
+
+              2              2              2           2              2
+   gxy gyy u v    fyy gyy u v    gxx gxy u v    gxxy u v    fxx gxx u v
+ - ------------ + ------------ - ------------ + --------- - ------------
+        16             16             16           16            16
+
+              2           2              2           2      2  2
+   fxy fyy u v    fxyy u v    fxx fxy u v    fxxx u v    gyy  u  v
+ + ------------ + --------- + ------------ + --------- + ---------
+        16           16            16           16          24
+
+              2                2           2        2  2              2
+   5 gxx gyy u  v   5 fxy gyy u  v   gxyy u  v   gxy  u  v   fyy gxy u  v
+ + -------------- - -------------- - --------- + --------- - ------------
+         48               48            16          24            48
+
+              2           2          2  2              2           2
+   5 fxx gxy u  v   gxxx u  v   5 gxx  u  v   fxy gxx u  v   fyyy u  v
+ - -------------- - --------- + ----------- - ------------ + ---------
+         48            16           48             48           16
+
+        2  2                2        2  2           2        2  2
+   5 fyy  u  v   5 fxx fyy u  v   fxy  u  v   fxxy u  v   fxx  u  v
+ + ----------- + -------------- + --------- + --------- + --------- - v
+       48              48            24          16          24
+
+         3            3            3            3         3            3
+   gyyy u    gxy gyy u    fyy gyy u    gxx gxy u    gxxy u    fxx gxx u
+ + ------- - ---------- + ---------- - ---------- + ------- - ----------
+     16          16           16           16         16          16
+
+            3         3            3         3
+   fxy fyy u    fxyy u    fxx fxy u    fxxx u
+ + ---------- + ------- + ---------- + -------,
+       16         16          16         16
+
+           3            3            3            3         3            3
+dv   gyyy v    gxy gyy v    fyy gyy v    gxx gxy v    gxxy v    fxx gxx v
+-- = ------- - ---------- + ---------- - ---------- + ------- - ----------
+dT     16          16           16           16         16          16
+
+            3         3            3         3      2    2                2
+   fxy fyy v    fxyy v    fxx fxy v    fxxx v    gyy  u v    5 gxx gyy u v
+ + ---------- + ------- + ---------- + ------- - --------- - --------------
+       16         16          16         16         24             48
+
+                2           2      2    2              2                2
+   5 fxy gyy u v    gxyy u v    gxy  u v    fyy gxy u v    5 fxx gxy u v
+ + -------------- + --------- - --------- + ------------ + --------------
+         48            16          24            48              48
+
+           2        2    2              2           2        2    2
+   gxxx u v    5 gxx  u v    fxy gxx u v    fyyy u v    5 fyy  u v
+ + --------- - ----------- + ------------ - --------- - -----------
+      16           48             48           16           48
+
+                2      2    2           2      2    2         2
+   5 fxx fyy u v    fxy  u v    fxxy u v    fxx  u v    gyyy u  v
+ - -------------- - --------- - --------- - --------- + ---------
+         48            24          16          24          16
+
+            2              2              2           2              2
+   gxy gyy u  v   fyy gyy u  v   gxx gxy u  v   gxxy u  v   fxx gxx u  v
+ - ------------ + ------------ - ------------ + --------- - ------------
+        16             16             16           16            16
+
+            2           2              2           2        2  3              3
+   fxy fyy u  v   fxyy u  v   fxx fxy u  v   fxxx u  v   gyy  u    5 gxx gyy u
+ + ------------ + --------- + ------------ + --------- - ------- - ------------
+        16           16            16           16         24           48
+
+              3         3      2  3            3              3         3
+   5 fxy gyy u    gxyy u    gxy  u    fyy gxy u    5 fxx gxy u    gxxx u
+ + ------------ + ------- - ------- + ---------- + ------------ + -------
+        48          16        24          48            48          16
+
+        2  3            3         3        2  3              3      2  3
+   5 gxx  u    fxy gxx u    fyyy u    5 fyy  u    5 fxx fyy u    fxy  u
+ - --------- + ---------- - ------- - --------- - ------------ - -------
+      48           48         16         48            48          24
+
+         3      2  3
+   fxxy u    fxx  u
+ - ------- - ------- + u]
+     16        24
+
+(C8) transform();
+ENTER NUMBER OF EQUATIONS
+2;
+ENTER SYMBOL FOR ORIGINAL VARIABLE 1
+u;
+ENTER SYMBOL FOR ORIGINAL VARIABLE 2
+v;
+ENTER SYMBOL FOR TRANSFORMED VARIABLE 1
+r;
+ENTER SYMBOL FOR TRANSFORMED VARIABLE 2
+theta;
+THE RHS'S OF THE D.E.'S ARE FUNCTIONS OF THE ORIGINAL VARIABLES:
+ENTER RHS OF u D.E.
+D u /DT =
+rhs(part(%,1));
+             2  3              3              3         3      2  3
+          gyy  v    5 gxx gyy v    5 fxy gyy v    gxyy v    gxy  v
+D u /DT = ------- + ------------ - ------------ - ------- + -------
+            24           48             48          16        24
+
+            3              3         3        2  3            3         3
+   fyy gxy v    5 fxx gxy v    gxxx v    5 gxx  v    fxy gxx v    fyyy v
+ - ---------- - ------------ - ------- + --------- - ---------- + -------
+       48            48          16         48           48         16
+
+        2  3              3      2  3         3      2  3           2
+   5 fyy  v    5 fxx fyy v    fxy  v    fxxy v    fxx  v    gyyy u v
+ + --------- + ------------ + ------- + ------- + ------- + ---------
+      48            48          24        16        24         16
+
+              2              2              2           2              2
+   gxy gyy u v    fyy gyy u v    gxx gxy u v    gxxy u v    fxx gxx u v
+ - ------------ + ------------ - ------------ + --------- - ------------
+        16             16             16           16            16
+
+              2           2              2           2      2  2
+   fxy fyy u v    fxyy u v    fxx fxy u v    fxxx u v    gyy  u  v
+ + ------------ + --------- + ------------ + --------- + ---------
+        16           16            16           16          24
+
+              2                2           2        2  2              2
+   5 gxx gyy u  v   5 fxy gyy u  v   gxyy u  v   gxy  u  v   fyy gxy u  v
+ + -------------- - -------------- - --------- + --------- - ------------
+         48               48            16          24            48
+
+              2           2          2  2              2           2
+   5 fxx gxy u  v   gxxx u  v   5 gxx  u  v   fxy gxx u  v   fyyy u  v
+ - -------------- - --------- + ----------- - ------------ + ---------
+         48            16           48             48           16
+
+        2  2                2        2  2           2        2  2
+   5 fyy  u  v   5 fxx fyy u  v   fxy  u  v   fxxy u  v   fxx  u  v
+ + ----------- + -------------- + --------- + --------- + --------- - v
+       48              48            24          16          24
+
+         3            3            3            3         3            3
+   gyyy u    gxy gyy u    fyy gyy u    gxx gxy u    gxxy u    fxx gxx u
+ + ------- - ---------- + ---------- - ---------- + ------- - ----------
+     16          16           16           16         16          16
+
+            3         3            3         3
+   fxy fyy u    fxyy u    fxx fxy u    fxxx u
+ + ---------- + ------- + ---------- + -------
+       16         16          16         16
+ENTER RHS OF v D.E.
+D v /DT =
+rhs(part(%,2));
+                3            3            3            3         3            3
+          gyyy v    gxy gyy v    fyy gyy v    gxx gxy v    gxxy v    fxx gxx v
+D v /DT = ------- - ---------- + ---------- - ---------- + ------- - ----------
+            16          16           16           16         16          16
+
+            3         3            3         3      2    2                2
+   fxy fyy v    fxyy v    fxx fxy v    fxxx v    gyy  u v    5 gxx gyy u v
+ + ---------- + ------- + ---------- + ------- - --------- - --------------
+       16         16          16         16         24             48
+
+                2           2      2    2              2                2
+   5 fxy gyy u v    gxyy u v    gxy  u v    fyy gxy u v    5 fxx gxy u v
+ + -------------- + --------- - --------- + ------------ + --------------
+         48            16          24            48              48
+
+           2        2    2              2           2        2    2
+   gxxx u v    5 gxx  u v    fxy gxx u v    fyyy u v    5 fyy  u v
+ + --------- - ----------- + ------------ - --------- - -----------
+      16           48             48           16           48
+
+                2      2    2           2      2    2         2
+   5 fxx fyy u v    fxy  u v    fxxy u v    fxx  u v    gyyy u  v
+ - -------------- - --------- - --------- - --------- + ---------
+         48            24          16          24          16
+
+            2              2              2           2              2
+   gxy gyy u  v   fyy gyy u  v   gxx gxy u  v   gxxy u  v   fxx gxx u  v
+ - ------------ + ------------ - ------------ + --------- - ------------
+        16             16             16           16            16
+
+            2           2              2           2        2  3              3
+   fxy fyy u  v   fxyy u  v   fxx fxy u  v   fxxx u  v   gyy  u    5 gxx gyy u
+ + ------------ + --------- + ------------ + --------- - ------- - ------------
+        16           16            16           16         24           48
+
+              3         3      2  3            3              3         3
+   5 fxy gyy u    gxyy u    gxy  u    fyy gxy u    5 fxx gxy u    gxxx u
+ + ------------ + ------- - ------- + ---------- + ------------ + -------
+        48          16        24          48            48          16
+
+        2  3            3         3        2  3              3      2  3
+   5 gxx  u    fxy gxx u    fyyy u    5 fyy  u    5 fxx fyy u    fxy  u
+ - --------- + ---------- - ------- - --------- - ------------ - -------
+      48           48         16         48            48          24
+
+         3      2  3
+   fxxy u    fxx  u
+ - ------- - ------- + u
+     16        24
+THE TRANSFORMATION IS ENTERED NEXT:
+ENTER u AS A FUNCTION OF THE NEW VARIABLES
+u =
+r*cos(theta);
+u = r COS(THETA)
+ENTER v AS A FUNCTION OF THE NEW VARIABLES
+v =
+r*sin(theta);
+v = r SIN(THETA)
+       dr
+(D8) [[-- = ((gyyy + (fyy - gxy) gyy - gxx gxy + gxxy - fxx gxx + fxy fyy
+       dT
+
+                           3    2
+ + fxyy + fxx fxy + fxxx) r  SIN (THETA)
+
+ + (gyyy + (fyy - gxy) gyy - gxx gxy + gxxy - fxx gxx + fxy fyy + fxyy
+
+                    3    2
+ + fxx fxy + fxxx) r  COS (THETA))/16,
+
+dTHETA            2                                       2
+------ = - ((2 gyy  + (5 gxx - 5 fxy) gyy - 3 gxyy + 2 gxy
+  dT
+
+                                       2                           2
+ + (- fyy - 5 fxx) gxy - 3 gxxx + 5 gxx  - fxy gxx + 3 fyyy + 5 fyy
+
+                    2                 2   2    2
+ + 5 fxx fyy + 2 fxy  + 3 fxxy + 2 fxx ) r  SIN (THETA)
+
+         2                                       2
+ + (2 gyy  + (5 gxx - 5 fxy) gyy - 3 gxyy + 2 gxy  + (- fyy - 5 fxx) gxy
+
+                 2                           2                    2
+ - 3 gxxx + 5 gxx  - fxy gxx + 3 fyyy + 5 fyy  + 5 fxx fyy + 2 fxy  + 3 fxxy
+
+        2   2    2
+ + 2 fxx ) r  COS (THETA) - 48)/48]]
+
+
+(C9) trigsimp(%);
+       dr
+(D9) [[-- = (gyyy + (fyy - gxy) gyy - gxx gxy + gxxy - fxx gxx + fxy fyy + fxyy
+       dT
+
+                    3     dTHETA            2
+ + fxx fxy + fxxx) r /16, ------ = - ((2 gyy  + (5 gxx - 5 fxy) gyy - 3 gxyy
+                            dT
+
+        2                                       2                           2
+ + 2 gxy  + (- fyy - 5 fxx) gxy - 3 gxxx + 5 gxx  - fxy gxx + 3 fyyy + 5 fyy
+
+                    2                 2   2
+ + 5 fxx fyy + 2 fxy  + 3 fxxy + 2 fxx ) r  - 48)/48]]
+
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

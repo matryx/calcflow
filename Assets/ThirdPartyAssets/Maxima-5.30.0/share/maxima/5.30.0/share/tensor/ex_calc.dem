@@ -1,0 +1,60 @@
+/* Copyright (C) 2003 Valerij Pipin <pip@iszf.irk.ru>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Demonstrating exterior algebra operations
+ *
+*/
+if get('itensor,'version)=false then load(itensor);
+("Exterior algebra for fully antisymmetric covariant tensors")$
+
+("The exterior product is denoted by ~. Apply it to two 1-forms")$
+ishow(a([i])~b([j]))$
+
+("The exterior product of the three  1-forms")$
+ishow(a([i])~b([j])~c([k]))$
+
+("Take a sum of two 3 forms")$
+ishow( factor(a([i])~(bk*b([j]))~c([k]) +(ak*a([i]))~c([j])~b([k])))$
+
+("declare a 2-form and compute its exterior product with a 1-form")$
+decsym(p,2,0,[anti(all)],[]);
+ishow(q([i])~p([j,k]))$
+
+("the exterior derivative by index k is denoted by extdiff(x,k)")$
+ishow(extdiff(p([j,k]),i))$
+("In other words, instead of 'd_k~f' we write extdiff(f,k)")$
+ishow(extdiff((a([j])~b([k])),i))$
+ishow(extdiff((a([j])~b([k])),k))$
+
+("Contraction (interior product) with a vector v is denoted by f|v")$
+ishow(a([i])|a)$
+
+ishow((a([i])~b([j]))|a)$
+
+("This operator always uses the first index in literal order")$
+ishow(factor((a([i2])~b([i1]))|a+(a([i1])~b([i2]))|a))$
+
+("The Lie derivative is liediff(v,x); v is a vector name, x a tensor")$
+ishow(liediff(v,a([i1])))$
+
+("The Lie-derivative works on all tensors (but not on functions)")$
+ishow(liediff(v,a([i,j],[k,l],m)))$
+
+("To see all these at work, we verify the Cartan identity for 1-forms")$
+ishow(canform(liediff(v,extdiff(a([i1]),i2))-extdiff(liediff(v,a([i1])),i2)))$
+
+("Where liediff(v,extdiff(a([i1]),i2)) evaluates to:")$
+ishow(liediff(v,extdiff(a([i1]),i2)))$
+
+("Cartan identities for higher-order forms are shown in car_iden.dem")$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

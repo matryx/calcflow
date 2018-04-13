@@ -1,0 +1,200 @@
+/*
+plsquares.mac v1.1 for Maxima (tested with Maxima 5.9.0).
+
+Multivariable polynomial adjustment of a data table by the "least squares"
+method.
+
+Usage:
+  plsquares(Mat, VarList, depvars, maxexpon, maxdegree);
+    Mat       - a matrix containing the data.
+    VarList   - list of variable names (one for each Mat column).
+                Use "-" instead of varnames to ignore Mat columns.
+    depvars   - the name of a dependent variable or a list with one or more
+                names of dependent variables. The names must be in VarList.
+    maxexpon  - optional maximum exponent for each independent variable.
+                Default: 1.
+    maxdegree - optional maximum polynomial degree (the sum of exponents of
+                each term will be equal or smaller than maxdegree).
+                If maxdgree = 0 then no limit is applied.
+                Default: maxexpon.
+
+Examples:
+  The file "plsquares.dem" shows some usage examples.
+
+Results:
+  - If depvars is the name of a dependent variable (not in a list),
+  plsquares returns the adjusted polynomial.
+    If depvars is a list of one or more dependent variables, plsquares
+  returns a list with the adjusted polynomial(s).
+  - The Determination Coefficients are displayed in order to inform about
+  the adjustment goodness (from 0:no correlation to 1:exact correlation).
+  These values are also stored in the global variable DETCOEF (a list if
+  depvars is a list).
+
+Dependences:
+  makeOrders.mac
+
+History:
+  2003-11 Salvador Bosch Pérez - version 1.1. Multiple dependent variables
+    (to return a list of polynomials). maxexpon and maxdegree are now 
+    optional. Code more readable.
+  2003-10 Salvador Bosch Pérez - version 1.0 (not released)
+
+Possible future improvements:
+  - Option to read the data from a file instead of from a matrix.
+  - Option to include a column with rows weights.
+
+--
+
+Copyright (C) 2003  Salvador Bosch Pérez
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+load("makeOrders")$   /* to obtain all the combinations of polynomial powers */
+
+plsquares([ArgList]):=
+  block([nargs, Mat, VarList, depvars, maxexpon, maxdegree,
+         ndat, nvar, DepVarList, depvarncol, DepCols, PowersList, ncoef,
+         TransformedData, LinearSystem, DepSums, PolyCoef, PolyList,
+         idat, ivar, jvar, irow, icol, icoef, degreelimit],
+
+    /* Elaboration and depuration of the function arguments */
+    narg:length(ArgList),
+    if narg < 3 or narg > 5 then (
+      print("plsquares: bad number of function arguments (it's required 3, 4 or 5 arguments)."),
+      return(false)
+    ),
+    Mat:ArgList[1],
+    VarList:ArgList[2],
+    depvars:ArgList[3],
+    if narg > 3 then maxexpon:ArgList[4]
+                else maxexpon:1,
+    if narg = 5 then maxdegree:ArgList[5]
+                else maxdegree:maxexpon,
+    ndat:length(Mat),
+    nvar:length(Mat[1]),
+    if atom(depvars) then DepVarList:[depvars]
+                     else DepVarList:depvars,
+    ndepvar:length(DepVarList),
+    if length(VarList) # nvar then (
+      print("plsquares: incorrect number of variable names (", nvar,
+            "matrix columns but", length(VarList), "variable names)."),
+      return(false)
+    ),
+    for ivar:ndepvar thru 1 step -1 do
+      if member(DepVarList[ivar], VarList) = false then (
+        print("plsquares: dependent variable", DepVarList[ivar], "isn't in",
+              VarList, "."),
+        DepVarList:delete(DepVarList[ivar], DepVarList),
+        ndepvar = ndepvar - 1
+      ),
+    if ndepvar < 1 then (
+      print("plsquares: no dependent variables."),
+      return(false)
+    ),
+    if maxexpon < 1 then (
+      print("plsquares: the maximum variable exponent must be greater than 0."),
+      return(false)
+    ),
+    if maxdegree # 0 and maxdegree < maxexpon then (
+      print("plsquares: the maximum degree of the polynomial must not be smaller than",
+            maxexpon),
+      return(false)
+    ),
+    for ivar:nvar thru 1 step -1 do
+      if VarList[ivar] = "-" then (
+        Mat:submatrix(Mat, ivar),
+        nvar:nvar - 1
+      ),
+    VarList:delete("-", VarList),
+    for ivar:1 thru ndepvar do (
+      depvarncol:ev(for jvar:1 thru nvar do
+                      if VarList[jvar] = DepVarList[ivar] then return(jvar)),
+      DepCols[ivar]:col(Mat, depvarncol),
+      VarList:delete(DepVarList[ivar], VarList),
+      Mat:submatrix(Mat, depvarncol),
+      nvar:nvar - 1
+    ),
+    PowersList:makeOrders(VarList, makelist(maxexpon, i, 1, nvar)),
+    if maxdegree > 0 then (
+      degreelimit(l):=lsum(i,i,l)<=maxdegree,
+      PowersList:sublist(PowersList, degreelimit)
+    ),
+    ncoef:length(PowersList),
+    if ndat < ncoef then (
+      print("plsquares: insufficient number of data rows (at least", ncoef,
+            "are required)."),
+      return(false)
+    ),
+    apply(kill, VarList),
+
+    /* Preparation of the linear system */
+    LinearSystem:zeromatrix(ncoef, ncoef + ndepvar),
+    for idat:1 thru ndat do (
+      TransformedData:makelist(product(if PowersList[icoef][ivar] = 0 then 1
+                                       else Mat[idat,ivar]^PowersList[icoef][ivar],
+                                       ivar, 1, nvar),
+                               icoef, 1, ncoef),
+      for irow:1 thru ncoef do (
+        for icol:1 thru ncoef do
+          LinearSystem[irow,icol]:LinearSystem[irow,icol] +
+                            TransformedData[irow] * TransformedData[icol],
+        for ivar:1 thru ndepvar do
+          LinearSystem[irow, ncoef + ivar]:LinearSystem[irow, ncoef + ivar] +
+                                     DepCols[ivar][idat][1] * TransformedData[irow]
+      )
+    ),
+    for ivar:1 thru ndepvar do
+      DepSums[ivar]:col(LinearSystem, ncoef+ivar), /* save this info before modifying it */
+
+    /* Calculation of polynomial coefficients by solving the linear system with
+       the Gauss method */
+    PolyCoef:zeromatrix(ndepvar, ncoef),
+    LinearSystem:ev(triangularize(LinearSystem), keepfloat:true),
+    if product(LinearSystem[icoef,icoef], icoef, 1, ncoef) = 0 then (
+      print("plsquares: insufficient number of independent data rows."),
+      return(false)
+    ),
+    for ivar:1 thru ndepvar do (
+      for irow:ncoef thru 1 step -1 do (
+        PolyCoef[ivar,irow]:LinearSystem[irow,ncoef+ivar],
+        for icol:irow+1 thru ncoef do
+          PolyCoef[ivar,irow]:PolyCoef[ivar,irow] -
+                               LinearSystem[irow,icol] * PolyCoef[ivar,icol],
+        PolyCoef[ivar,irow]:PolyCoef[ivar,irow] / LinearSystem[irow,irow]
+      )
+    ),
+
+    /* Calculation and display of the determination coefficient(s) */
+    DETCOEF:makelist(1 -
+                     (sum(DepCols[ivar][idat][1]^2, idat, 1, ndat) -
+                      sum(PolyCoef[ivar,icoef] * DepSums[ivar][icoef][1],icoef,1,ncoef)) /
+                     (sum(DepCols[ivar][idat][1]^2, idat, 1, ndat) -
+                      sum(DepCols[ivar][idat][1],idat,1,ndat)^2 / ndat),
+                 ivar, 1, ndepvar),
+    if atom(depvars) then DETCOEF:DETCOEF[1],
+    print("      Determination Coefficient for", depvars, "=", float(DETCOEF)),
+
+    /* Construction and return of the polynomial(s) */
+    PolyList:makelist(DepVarList[ivar]=
+                      xthru(sum(PolyCoef[ivar,icoef] * 
+                                product(VarList[jvar]^PowersList[icoef][jvar],
+                                         jvar, 1 ,nvar),
+                                icoef, 1, ncoef)),
+                      ivar, 1, ndepvar),
+    if atom(depvars) then return(PolyList[1])
+                     else return(PolyList)
+  )$

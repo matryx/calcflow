@@ -1,0 +1,156 @@
+;;; -*- Mode: lisp -*-
+;;;
+;;; This is a simple defsystem for converting some BLAS Fortran
+;;; routines to Lisp and compiling the result.  These came with
+;;; HOMPACK and are used in HOMPACK, among others.
+;;;
+;;; $Id: blas-lisp.system,v 1.2 2007-04-07 19:08:50 dtc Exp $
+;;; $Log: blas-lisp.system,v $
+;;; Revision 1.2  2007-04-07 19:08:50  dtc
+;;; o Fix some symbol case issues.  This enables the Lapack code to run in a
+;;;   lowercase Common Lisp variant.
+;;;
+;;; Revision 1.1  2007/01/05 18:17:38  rtoy
+;;; This large checkin imports large parts of BLAS and LAPACK for use with
+;;; Maxima.  The Fortran parts are in good shape.  The interface to maxima
+;;; works but still needs lots of work.
+;;;
+;;; Revision 1.3  2006/11/21 21:36:34  rtoy
+;;; Oops.  Array declarations should be relaxed.
+;;;
+;;; Revision 1.2  2006/11/21 18:27:25  rtoy
+;;; o Add BLAS-HOMPACK system for supporting HOMPACK with the minial BLAS
+;;;   routines it needs.
+;;; o Add BLAS system to load all of BLAS.
+;;;
+;;; Revision 1.1  2003/11/14 19:08:42  rtoy
+;;; Initial revision.
+;;;
+
+(mk:define-language :f2cl-lisp
+    :compiler #'f2cl:f2cl
+    :loader #'identity
+    :source-extension "f"
+    :binary-extension "lisp")
+
+(mk:defsystem blas-package
+  :source-pathname (directory-namestring *load-pathname*)
+  :components
+  ((:file "blas-package")))
+
+(mk:defsystem blas-lisp
+  :source-pathname (directory-namestring *load-pathname*)
+  :source-extension "f"
+  :language :f2cl-lisp
+  :depends-on ("blas-package")
+  :components
+  ((:module fortran
+	    :binary-pathname "."
+	    :compiler-options (:package :blas
+			       :float-format double-float)
+	    :compile-only t
+	    :components
+	    (
+	     (:file "daxpy")
+	     (:file "dcopy")
+	     (:file "ddot")
+	     (:file "dnrm2")
+	     (:file "dscal")
+	     (:file "idamax")
+
+	     (:file "dasum")
+	     (:file "dcabs1")
+	     (:file "dgbmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dgemm"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dgemv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dger"
+		    :depends-on ("xerbla"))
+	     (:file "drot")
+	     (:file "drotg")
+	     (:file "dsbmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dspmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dspr"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dspr2"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dswap")
+	     (:file "dsymm"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsymv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsyr"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsyr2"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsyr2k"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dsyrk"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtbmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtbsv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtpmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtpsv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtrmm"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtrmv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtrsm"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dtrsv"
+		    :depends-on ("lsame" "xerbla"))
+	     (:file "dzasum"
+		    :depends-on ("dcabs1"))
+	     (:file "dznrm2")
+	     (:file "icamax")
+	     (:file "isamax")
+	     (:file "izamax"
+		    :depends-on ("dcabs1"))
+	     (:file "lsame")
+	     (:file "xerbla")
+
+	     ;; Complex versions.
+	     (:file "zaxpy"
+		    :depends-on ("dcabs1"))
+	     (:file "zcopy")
+	     (:file "zdotc")
+	     (:file "zdotu")
+	     (:file "zdscal")
+	     (:file "zgbmv")
+	     (:file "zgemm")
+	     (:file "zgemv")
+	     (:file "zgerc")
+	     (:file "zgeru")
+	     (:file "zhbmv")
+	     (:file "zhemm")
+	     (:file "zhemv")
+	     (:file "zher")
+	     (:file "zher2")
+	     (:file "zher2k")
+	     (:file "zherk")
+	     (:file "zhpmv")
+	     (:file "zhpr")
+	     (:file "zhpr2")
+	     (:file "zrotg")
+	     (:file "zscal")
+	     (:file "zswap")
+	     (:file "zsymm")
+	     (:file "zsyr2k")
+	     (:file "zsyrk")
+	     (:file "ztbmv")
+	     (:file "ztbsv")
+	     (:file "ztpmv")
+	     (:file "ztpsv")
+	     (:file "ztrmm")
+	     (:file "ztrmv")
+	     (:file "ztrsm")
+	     (:file "ztrsv")
+	     ))))

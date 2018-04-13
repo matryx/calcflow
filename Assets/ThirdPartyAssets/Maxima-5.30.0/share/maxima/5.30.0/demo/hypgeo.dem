@@ -1,0 +1,119 @@
+/* This is a sample of answers from the under construction program, 
+which deals with "Bateman's Manuscript Project". */
+
+assume(p > 0, a > 0, b > 0);
+
+/* laplace transforms */
+
+/* some elementary functions. */
+
+t^(1/2)*%e^(-a*t/4)*%e^(-p*t);
+specint(%,t);
+
+t^(3/4)*%e^(-t^2/2/b)*%e^(-p*t);
+specint(%,t);
+
+t^(-1/2)*%e^(-2*a^(1/2)*t^(1/2))*%e^(-p*t);
+specint(%,t);
+
+/* Next example triggers a bug:
+ * "Is  psey  positive, negative, or zero?"
+ * psey is an internal variable
+ * bug report # 1635365
+ *
+t^(1/2)*%e^(-p*t-a/t);
+specint(%,t);
+ */
+
+/* Next example triggers a bug:
+ * internal variable fail-on-f24p146test appears
+ * bug report # 1635372
+ *
+sin(a*t)*cosh(b*t^2)*%e^(-p*t);
+radcan(specint(%,t));
+ */
+
+
+/* some "confluents". notice that "%m[k,m](z)" is a whittaker function. */
+
+%e^(-a*t)*t^2*erf(t^(1/2))*%e^(-p*t);
+specint(%,t);
+factor(radcan(%));
+
+t^(3/2)*%m[1/2,1](t)*%e^(-p*t);
+specint(%,t);
+factor(radcan(%));
+
+
+/* some bessel functs (bf's). */
+
+/* %j[v](z), 1st kind of bf's. */
+	/* %y[v](z), 2nd kind of bf's.*/
+/* %h[v,1](z), 1st kind of the 3rd kind of bf's (1st hankel). */
+	/* %h[v,2](z), 2nd kind of the 3rd kind of bf's (2nd hankel).*/
+
+t^(1/2)*bessel_j(1, 2*a^(1/2)*t^(1/2))*%e^(-p*t);
+specint(%,t);
+
+t^2*bessel_j(1, a*t)*%e^(-p*t);
+specint(%,t);
+factor(radcan(%));
+
+t^(3/2)*bessel_y(1, a*t)*%e^(-t);
+specint(%,t);
+
+t^(3/2)*%h[1/2,1](t)*%e^(-p*t);
+specint(%,t);
+factor(radcan(%));
+
+t^(1/2)*%h[3/4,2](t)*%e^(-p*t);
+specint(%,t);
+ratsimp(%);
+
+t*%h[2/3,1](t^(1/2))*%e^(-p*t);
+specint(%,t);
+ratsimp(%);
+
+
+/* bessel_i(v,z), %k[v](z), modified bf's. */
+
+t^(1/2)*bessel_i(1,t)*%e^(-p*t);
+specint(%,t);
+ratsimp(%);
+
+bessel_j(1, t)^2*%e^(-p*t+r);
+specint(%,t);
+
+t^(1/2)*bessel_j(1/2, t^(1/2))^2*%e^(-p*t);
+specint(%,t);
+
+t^(5/2)*bessel_y(1/2, t^(1/2))^2*%e^(-p*t);
+specint(%,t);
+ratsimp(%);
+
+/*some combinations of products of bessel functions*/
+t^(3/4)*bessel_j(1/2, t)*bessel_j(1/4, t)*%e^(-p*t);
+specint(%,t);
+ratsimp(%);
+
+/* Next example triggers asksign of (psey - a)*(psey + a)
+ * bug report # 1635365
+ *
+t*bessel_i(0,a*t/2)*bessel_i(1,a*t/2)*%e^(-p*t);
+specint(%,t);
+ */
+
+
+/* related to bf's functions. */
+
+/* struve functions. */
+
+t^(3/2)*hstruve[1](t^(1/2))*%e^(-p*t);
+specint(%,t);
+radcan(%);
+
+t*hstruve[1](t)*%e^(-p*t);
+specint(%,t);
+radcan(%);
+
+forget(p > 0, a > 0, b > 0);

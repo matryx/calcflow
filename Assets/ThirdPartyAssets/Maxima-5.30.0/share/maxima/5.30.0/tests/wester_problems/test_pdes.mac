@@ -1,0 +1,55 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/PDEs/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Partial Differential Equations ---------- */
+pde_solns(ll):=
+   map(lambda([l],
+              if apply("+", map(lambda([e], if e # 0 then 1 else 0), l)) >= 2
+                 then
+                 pl_solve(l)
+              else
+                 l),
+       ll)$
+/* A very simple PDE => g(x) + h(y) for arbitrary functions g and h */
+'diff(f, x, 1, y, 1) = 0;
+errcatch(pl_symmetry([lhs(%) - rhs(%)], [f], [x, y], [], ['diff(f, x)]));
+/* Heat equation: the fundamental solution is 1/sqrt(4 pi t) exp(-x^2/[4 t]).
+   If f(x, t) and a(x, t) are solutions, the most general solution obtainable
+   from f(x, t) by group transformations is of the form u(x, t) = a(x, t)
+   + 1/sqrt(1 + 4 e6 t) exp(e3 - [e5 x + e6 x^2 -  e5^2 t]/[1 + 4 e6 t])
+   f([e^(-e4) (x - 2 e5 t)]/[1 + 4 e6 t] - e1, [e^(-2 e4) t]/[1 + 4 e6 t] - e2)
+   See Peter J. Olver, _Applications of Lie Groups to Differential Equations_,
+   Second Edition, Springer Verlag, 1993, p. 120 (an excellent book).  See also
+   Heat.macsyma */
+'diff(u, t) = 'diff(u, x, 2);
+q: pl_symmetry([lhs(%) - rhs(%)], [u], [x, t], [], ['diff(u, t)]);
+assume(u > 0, %x1 > 0, %x2 > 0, 4*%n2 > 1)$
+pde_solns(q);
+pl_sksol;
+forget(u > 0, %x1 > 0, %x2 > 0, 4*%n2 > 1)$
+remvalue(q)$
+/* Potential equation on a circular disk---a separable PDE
+   => v(r, theta) = a[0] + sum(a[n] r^n cos(n theta), n = 1..infinity)
+                         + sum(b[n] r^n sin(n theta), n = 1..infinity) */
+1/r * diff(r * diff(v(r, theta), r), r)
+        + 1/r^2 * diff(v(r, theta), theta, 2) = 0;
+subst(v, v(r, theta), %);
+pl_symmetry([lhs(%) - rhs(%)], [v], [r, theta], [], ['diff(v, theta, 2)]);
+pl_sksol;
+remfunction(pde_solns)$
+/* ---------- Quit ---------- */
+quit();

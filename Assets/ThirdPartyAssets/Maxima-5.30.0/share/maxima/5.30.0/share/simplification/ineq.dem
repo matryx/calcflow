@@ -1,0 +1,34 @@
+/* load the file with the rules */
+load('ineq);
+/* a sample inequality */
+a>=4;
+/* add a second, strict inequality, and note that the result is strict */
+(b>c)+%;
+/* multiply an inequality by a positive number */
+7*(x<y);
+/* multiply an inequality by a negative number, and note change of > to < */
+-2*(x>=3*z);
+/* MACSYMA knows that 1+a^2 is a positive number */
+(1+a^2)*(1/(1+a^2)<=1);
+/* you can tell it p or n, though with z it errs on the conservative side and
+   does not simply return 0... */
+x*(2<3);
+/* another inequality */
+a>=b;
+/* add something */
+3+%;
+/* subtract it out */
+%-3;
+/* yet another inequality */
+a>=c-b;
+/* add b to both sides */
+b+%;
+/* subtract c from both sides */
+%-c;
+/* multiply by -1 */
+-%;
+/* use inequality manipulation to determine truth of assertion */
+(z-1)^2>-2*z;
+/* expand this and add 2*z to both sides */
+expand(%)+2*z;
+%,pred;

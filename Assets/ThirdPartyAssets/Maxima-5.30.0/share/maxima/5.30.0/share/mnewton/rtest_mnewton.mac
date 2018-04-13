@@ -1,0 +1,114 @@
+(kill(all),
+  %start : absolute_real_time(),
+  algexact : true,
+  current_fpprec : fpprec,
+  fpprec : 16,
+  approx_equal(x,y,epsilon) := block(
+    [vx:setify(listofvars(x)),vy:setify(listofvars(y)),prederror:true],
+    if vx#vy then return(false),
+    x : sort(flatten(listify(x))), y : sort(flatten(listify(y))),
+    every(map(lambda([u,v],is(abs(rectform(rhs(u)-rhs(v))) < epsilon)),x,y))),
+  load("mnewton"),
+  0);
+0$
+
+approx_equal(
+  mnewton(x-1.0,x,0),
+  [[x = 1.0]],
+  newtonepsilon
+  )$
+true $
+
+approx_equal(
+  mnewton(sin(x),x,1.0),
+  [[x = 0.0]],
+  newtonepsilon
+  )$
+true $
+
+
+/* from manual */
+approx_equal(
+  mnewton([x1+3*log(x1)-x2^2, 2*x1^2-x1*x2-5*x1+1], [x1, x2], [5, 5]),
+  [[x1 = 3.756834008012769, x2 = 2.779849592817897]],
+  newtonepsilon
+  )$
+true $
+
+/* from manual */
+approx_equal(
+  mnewton([2*a^a-5],[a],[1]),
+  [[a = 1.70927556786144]],
+  newtonepsilon
+  )$
+true $
+
+/* from manual */
+approx_equal(
+  mnewton([2*3^u-v/u-5, u+2^v-4], [u, v], [2, 2]),
+  [[u = 1.066618389595407, v = 1.552564766841786]],
+  newtonepsilon
+  )$
+true $
+
+/* see https://sourceforge.net/tracker/index.php?func=detail&aid=1725549&group_id=4933&atid=104933 */
+approx_equal(
+  mnewton([2*(x1-1.1234),3*(x2-2.2345)], [x1, x2], [1,2]),
+  [[x1=1.1234,x2=2.2345]],
+  newtonepsilon
+  )$
+true $
+
+
+block([newtonepsilon:bfloat(newtonepsilon)],
+  approx_equal(
+    mnewton(cos(x)-%i,x,1b0),
+    [[x = 1.570796326794897b0 - 8.81373587019543b-1*%i]],
+    newtonepsilon
+    ))$
+true $
+
+/* see http://www.math.utexas.edu/pipermail/maxima/2010/021238.html and
+https://sourceforge.net/tracker/?func=detail&atid=104933&aid=2994196&group_id=4933 */
+block([f:diff(acos(x^2+8.363+267)/(sqrt(x^2-4.29*x+1042)*(x^2+12.8102*x+1177)),x)],
+  approx_equal(
+    mnewton(f,x,-5.0),
+    [[x = 5.69311809542034e-9*%i - 5.626466372932345]],
+    newtonepsilon
+    ))$
+true $
+
+block([newtonepsilon:bfloat(newtonepsilon)*1b-8,f:diff(acos(x^2+8.363+267)/(sqrt(x^2-4.29*x+1042)*(x^2+12.8102*x+1177)),x)],
+  approx_equal(
+    mnewton(f,x,-5.0),
+    [[x = - 5.626466372928149b0]],
+    newtonepsilon
+    ))$
+true $
+
+block([fpprec:100,newtonepsilon:bfloat(10^(-fpprec/2)),f:diff(acos(x^2+8.363+267)/(sqrt(x^2-4.29*x+1042)*(x^2+12.8102*x+1177)),x)],
+  approx_equal(
+    mnewton(f,x,-5.0),
+    [[x = - 5.62646637292814898636208310765236683228303380080106742342217423415231803837099458924175436056796413b0]],
+    newtonepsilon
+    ))$
+true $
+
+/* see https://sourceforge.net/tracker/index.php?func=detail&aid=1666011&group_id=4933&atid=104933 */
+approx_equal(
+  mnewton([x^y - %i,x+y-2],[x,y],[1,1.5]),
+  [[x=0.563519172421*%i+0.451201761049,y=1.5487982389505-0.563519172421*%i]],
+  newtonepsilon
+  )$
+true $
+
+/* see https://sourceforge.net/tracker/index.php?func=detail&aid=1662070&group_id=4933&atid=104933 */
+approx_equal(
+  mnewton([x[1] + x[2]-1, x[1] - x[2] - 10],[x[1],x[2]],[1,2]),
+  [[x[1] = 5.5,x[2] = -4.5]],
+  newtonepsilon
+  )$
+true $
+
+kill(all)$
+done $

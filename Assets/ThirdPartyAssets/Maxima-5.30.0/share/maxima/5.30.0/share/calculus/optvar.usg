@@ -1,0 +1,105 @@
+
+This file describes how to use a MACSYMA variational optimization
+package to analytically solve problems from the calculus of variations
+and the maximum principle, including optimal control.
+
+Programmed by David R. Stoutemyer, (login name:STOUTE), Electrical
+Engineering Department, University of Hawaii, August 1974.
+Suggestions, questions, and interesting successful
+or unsuccessful examples are welcome.
+
+                        OTHER RELEVANT FILES:
+OPTVAR >  is a MACSYMA batch file containing the functions and
+   option settings for variational optimization.
+OPTVAR LISP  is a LISP translation of OPTVAR >.
+OPTVAR DEMO  is a MACSYMA batch file demonstrating various ways of
+   using the optimization functions.
+OPTVAR OUTPUT  is a text file containing  OPTVAR DEMO together with
+   the output that it produces when executed.
+
+                           USAGE:
+In MACSYMA,  first type
+             BATCH(OPTVAR, >, DSK, SHARE2);
+or
+             LOADFILE(OPTVAR, LISP, DSK, SHARE2);
+
+
+Next, if interested in executing the demonstration, type
+
+             LOADFILE(ODE2, FASL, DSK, SHARE);
+             LOADFILE(DESOLN, LISP, DSK, SHARE);
+then either
+             BATCH(OPTVAR, DEMO, DSK, SHARE2);
+or
+             DEMO(OPTVAR, DEMO, DSK, SHARE2);
+
+The latter alternative permits opportunities for interaction.
+
+To derive the Euler-Lagrange equations for a calculus-of-variations
+problem, type
+
+             EL(F, YLIST, TLIST);
+
+F  is an expression or the label of an expression for the integrand
+   of the stationary functional, augmented by Lagrange multipliers
+   times the integrands of any isoperimetric constraints and/or
+   differential expressions constrained to equal zero.  The multipliers
+   should be written as functions of the independent variables in the
+   latter case.
+YLIST  is a list of the dependent variables, or the label thereof.
+TLIST  is a list of the independent variables, or the label thereof.
+
+For convenience, square brackets may be omitted from 1-element lists.
+
+EL displays one or more E-labeled equations, then returns a list
+of the E-labels.  These equations are the Euler-Lagrange equations,
+perhaps together with first integrals corresponding to conservation
+of energy and/or conservation of momentum.  The former will contain a
+constant of integration K[0], whereas the latter will contain constants
+of integration K[I], with positive I.  The latter will immediately
+follow the corresponding Euler-Lagrange equation.
+
+OPTVAR DEMO or OPTVAR OUTPUT illustrates some ways that the
+resulting differential equations may be solved analytically.
+
+
+To derive the Hamiltonian and auxiliary differential equations for
+an optimal control problem, type
+
+             HAM(ODES);
+
+ODES  is a list of the first-order differential equations that
+   govern the state variables.  Each differential equation must be
+   of the form
+             'D(Y,T) = EXPRESSION
+where  Y  is one of the dependent variables,  T is the independent
+variable, and EXPRESSION  depends upon the independent, dependent, and
+control variables.
+
+HAM displays two or more E-labeled expressions, then returns a list
+of the E-labels.  The first expression is the Hamiltonian, and the
+other expressiona are the auxiliary diferential equations,
+together with their general solutions,  AUX[I] = K[I], whenever the
+Ith differential equation is of the trivial form  'D(AUX[I],T) = 0.
+The K[I] are undetermined constants of integration.
+
+HAM is directly suitable for the autonomous time-optimal problem.
+Other problems may be converted to this form by introducing extra state
+variables, as described in most optimal-control texts or in the report
+referenced in  OPTVAR OUTPUT  and OPTVAR DEMO.
+
+In simple enough cases, the routines in the SHARE files ODE2 FASL
+and/or DESOLN LISP  may be used to determine an analytical
+closed-form or series solution to the differential equations.  The
+latter requires the dependencies to be explicitly exhibited, for
+example:  'D(Y(T),T),; so  OPTVAR >  and  OPTVAR LISP  include a
+function to perform this conversion.  To use it type*
+
+             CONVERT(ODES, YLIST, T);
+
+ODES  is a list of ordinary differential equations to be converted,
+   or a list of labels thereof.
+YLIST  is a list of the dependent variables.
+T  is the independent variable.
+
+For convenience, square brackets may be omitted from one-element lists.

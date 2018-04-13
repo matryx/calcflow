@@ -1,0 +1,156 @@
+/* Simplification rules and other functions to implement log10 (base-10 logarithm)
+ *
+ * Copyright 2006 by Robert Dodier
+ *
+ * Released under the terms of the GNU General Public License
+ *
+ * Summary:
+ *
+ * log10 (<float>) => log (<float>) / log (10.0)
+ * log10 (<bigfloat>) => log (<bigfloat>) / log (10b0)
+ * log10 (a / b) => log10 (a) - log10 (b)
+ * log10 (a * b) => log10 (a) + log10 (b)
+ * log10 (a ^ b) => b log10 (a)
+ * log10 (<integer divisible by 10>) => <power of 10 in integer> + log10 (<remainder>)
+ * log10 (10) => 1
+ * log10 (1) => 0
+ * d/dx log10(x) => 1/log(10) 1/x
+ *
+ * log10 is an increasing function (Maxima can't do much with that, but anyway ...)
+ *
+ * log10 (x) => log (x) / log (10) (if you ask for it explicitly)
+ *
+ * Could also try to simplify is (log10 (x) < y) => is (x < 10^y),
+ * likewise with other relational operators, but I didn't do that yet.
+ *
+ * Examples:
+
+log10 (1);
+log10 (10);
+log10 (12/13);
+log10 (12/13), numer;
+log10 (2.3 * 234/2423);
+log10 (2.3 * 234/2423 + 1b0);
+log10 (1230000);
+log10 (9293923000000000 * w^23);
+log10 (w * (3 + b)^-8);
+log10 (123 * qwwqwe/235 * q^e);
+plot2d (log10 (x), [x, 1/100, 10]);
+quad_qags (log10 (x), x, 1, 10);
+integrate (log10 (x), x, 1, 10);
+expand_log10 (%);
+''%, nouns;
+%, numer;
+assume (x > y);
+is (log10 (x) > log10 (y));
+diff (log10 (x), x);
+expand_log10 (sin (log10 (x) + log10 (y)) / log10 (z));
+contract_log10 (%);
+
+ * which yield these outputs:
+
+(%i1) load ("./log10.mac");
+(%o1)                      ./log10.mac
+(%i2) log10 (1);
+(%o2)                           0
+(%i3) log10 (10);
+(%o3)                           1
+(%i4) log10 (12/13);
+(%o4)                 log10(12) - log10(13)
+(%i5) log10 (12/13), numer;
+(%o5)                 - .03476210625921192
+(%i6) log10 (2.3 * 234/2423);
+(%o6)                  - .6534097207097704
+(%i7) log10 (2.3 * 234/2423 + 1b0);
+Warning:  Float to bigfloat conversion of 0.22212133718530744
+(%o7)                 8.711432657265806b-2
+(%i8) log10 (1230000);
+(%o8)                    log10(123) + 4
+(%i9) log10 (9293923000000000 * w^23);
+(%o9)           23 log10(w) + log10(9293923) + 9
+(%i10) log10 (w * (3 + b)^-8);
+(%o10)              log10(w) - 8 log10(b + 3)
+(%i11) log10 (123 * qwwqwe/235 * q^e);
+(%o11) log10(qwwqwe) + e log10(q) - log10(235) + log10(123)
+(%i12) plot2d (log10 (x), [x, 1/100, 10]);
+(%o12) 
+(%i13) quad_qags (log10 (x), x, 1, 10);
+(%o13)  [6.091349662870734, 1.985877489938315E-10, 63, 0]
+(%i14) integrate (log10 (x), x, 1, 10);
+                          10
+                         /
+                         [
+(%o14)                   I   log10(x) dx
+                         ]
+                         /
+                          1
+(%i15) expand_log10 (%);
+                           10
+                          /
+                          [
+                          I   log(x) dx
+                          ]
+                          /
+                           1
+(%o15)                    -------------
+                             log(10)
+(%i16) ''%, nouns;
+(%o16)         .4342944819032518 (10 log(10) - 9)
+(%i17) %, numer;
+(%o17)                  6.091349662870734
+(%i18) assume (x > y);
+(%o18)                       [x > y]
+(%i19) is (log10 (x) > log10 (y));
+(%o19)                        true
+(%i20) diff (log10 (x), x);
+                                1
+(%o20)                      ---------
+                            log(10) x
+(%i21) expand_log10 (sin (log10 (x) + log10 (y)) / log10 (z));
+                             log(y)    log(x)
+                 log(10) sin(------- + -------)
+                             log(10)   log(10)
+(%o21)           ------------------------------
+                             log(z)
+(%i22) contract_log10 (%);
+                    sin(log10(y) + log10(x))
+(%o22)              ------------------------
+                            log10(z)
+
+ */
+
+multp (e) := not atom(e) and op(e) = "*";
+
+divp (e) := not atom(e) and op(e) = "/";
+
+exponp (e) := not atom(e) and op(e) = "^";
+
+divisible_by10 (e) := integerp(e) and e # 0 and mod (e, 10) = 0;
+
+not10 (e) := e # 10;
+
+power_of (m, n) := if n = 0 then 0 else block ([p : 0], while mod (n, m) = 0 do (p : p + 1, n : n/m), p);
+
+block ([simp : false],
+    local (aa, bb, cc, dd, ee, ff, gg, hh),
+    matchdeclare (aa, multp, bb, exponp, cc, floatnump, dd, bfloatp, ee, divisible_by10, ff, all, gg, divp, hh, not10),
+    tellsimp (log10(cc), log(cc)/log(10.0)),
+    tellsimp (log10(dd), log(dd)/log(10b0)),
+    tellsimp (log10(gg), log10 (first (args (gg))) - log10 (second (args (gg)))),
+    tellsimp (log10(aa), apply ("+", map (log10, args (aa)))),
+    tellsimp (log10(bb), second (args (bb)) * log10 (first (args (bb)))),
+    tellsimp (log10(ee), block ([p : power_of (10, ee)], p + log10 (ee / 10^p))),
+    tellsimp (log10(10), 1),
+    tellsimp (log10(1), 0),
+
+    gradef (log10(x), (1/log(10))*(1/x)),
+
+    declare (log10, increasing),
+
+    defrule (expand_log10_rule, log10 (ff), log(ff)/log(10)),
+    expand_log10 (expr) := apply1 (expr, expand_log10_rule),
+
+    defrule (contract_log10_rule, log (hh), log10(hh) * log(10)),
+    contract_log10 (expr) := apply1 (expr, contract_log10_rule));
+
+

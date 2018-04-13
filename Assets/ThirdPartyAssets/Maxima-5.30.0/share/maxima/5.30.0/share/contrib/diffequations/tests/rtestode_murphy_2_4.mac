@@ -1,0 +1,126 @@
+/* ODE tests - Murphy equations 2.301 - 2.300
+
+  Reference: 
+    G M Murphy, Ordinary Differential Equations and Their 
+    Solutions, Van Nostrand, 1960, pp 15-23
+
+    First Order and Second or Higher Degree, p278 ff
+*/
+
+/* Don't kill(all); It messes up trigsimp */
+
+/* Eliminate parameter t from singular solution */
+(elim_(ans,x,y,t):=block([s],s:first(solve(ans[2],t)),s:solve(ev(ans[1],s),y),s[1]),done);
+done;
+
+/* Print ode number*/
+(pn_(n_):=print("Murphy ODE 2.",n_),true);
+true;
+
+/* 313 */
+(pn_(313),ans:contrib_ode(eqn:x*'diff(y,x)^3-y*'diff(y,x)^2+a=0,y,x));
+[y=(%c^3*x+a)/%c^2,y =(3*sqrt(3)*%i-3)*a^(1/3)*x^(2/3)/(2*4^(1/3)),y=-((3*sqrt(3)*%i+3)*a^(1/3)*x^(2/3)/(2*4^(1/3))),y=3*a^(1/3)*x^(2/3)/4^(1/3)];
+[method,ode_check(eqn,ans[1]),ode_check(eqn,ans[2]),ode_check(eqn,ans[3]),ode_check(eqn,ans[4])];
+[clairault,0,0,0,0];
+
+/* 314 */
+(pn_(314),ans:contrib_ode(eqn:x*'diff(y,x)^3+(2*x-y)*'diff(y,x)^2+(x-2*y)*'diff(y,x)+1-y=0,y,x));
+[y=((%c^3+2*%c^2+%c)*x+1)/(%c^2+2*%c+1),y=3*(-sqrt(3)*%i/2-1/2)*x^(2/3)/4^(1/3)-x,y=3*(sqrt(3)*%i/2-1/2)*x^(2/3)/4^(1/3)-x,y=(9*x^(2/3)/4^(1/3)-3*x)/3];
+[method,ode_check(eqn,ans[1]),ode_check(eqn,ans[2]),ode_check(eqn,ans[3]),ode_check(eqn,ans[4])];
+[clairault,0,0,0,0];
+
+/* 320 */
+(pn_(320),ans:contrib_ode(eqn:x^2*'diff(y,x)^3-2*x*y*'diff(y,x)^2+y^2*'diff(y,x)+1=0,y,x));
+[y=(sqrt(-%c)*%c*x+1)/sqrt(-%c),y=-((3*sqrt(3)*%i-3)*x^(1/3)/(2*4^(1/3))),y=(3*sqrt(3)*%i+3)*x^(1/3)/(2*4^(1/3)),y=-(3*x^(1/3)/4^(1/3))];
+[method,ode_check(eqn,ans[1]),ode_check(eqn,ans[2]),ode_check(eqn,ans[3]),ode_check(eqn,ans[4])];
+[clairault,0,0,0,0];
+
+/* 367 FIXME - check second solution */
+(pn_(367),ans:contrib_ode(eqn:'diff(y,x)^n+x*'diff(y,x)-y=0,y,x));
+[y=%c*x+%c^n,[-y+%t*x+%t^n=0,(%t*x+n*%t^n)/%t=0]];
+[method,ode_check(eqn,ans[1])];
+[clairault,0];
+
+/* 373 */
+(pn_(373),ans:contrib_ode(eqn:2*sqrt(a*'diff(y,x))+x*'diff(y,x)-y=0,y,x));
+[y=%c*x+2*sqrt(%c*a),[-y+%t*x+2*sqrt(a*%t)=0,(sqrt(a*%t)*x+a)/sqrt(a*%t)=0]];
+assume(a>0,x<0);
+[a>0,x<0];
+first(solve(ans[2][2],%t));
+%t=a/x^2;
+ans[2][1],%;
+-y-a/x=0;
+s:first(solve(%,y));
+y=-a/x;
+[method,ode_check(eqn,ans[1]),ode_check(eqn,s)];
+[clairault,0,0];
+forget(a>0,x<0);
+[a>0,x<0];
+
+/* 375 */
+(pn_(375),ans:contrib_ode(eqn:2*(1+'diff(y,x))^(3/2)+3*x*'diff(y,x)-3*y=0,y,x));
+[y=(3*%c*x+sqrt(%c+1)*(2*%c+2))/3,[-3*y+3*%t*x+2*(%t+1)^(3/2)=0,3*x+3*sqrt(%t+1)=0]];
+assume(u>0);
+[u>0];
+s:subst(u^2-1,%t,ans[2]);
+[-3*y+3*(u^2-1)*x+2*u^3=0,3*x+3*u=0];
+solve(s[2],u);
+[u=-x]; /* so x<0 for singular solution */
+s[1],%[1];
+-3*y-2*x^3+3*x*(x^2-1)=0;
+ans[2]:first(solve(%,y));
+y=(x^3-3*x)/3;
+[method,ode_check(eqn,ans[1]),(assume(x<0),ode_check(eqn,ans[2]))];
+[clairault,0,0];
+forget(u>0,x<0);
+[u>0,x<0];
+
+/* 381 FIXME - check second solution */
+(pn_(381),ans:contrib_ode(eqn:sqrt(a^2+b^2*'diff(y,x)^2)+x*'diff(y,x)-y=0,y,x));
+[y=%c*x+sqrt(%c^2*b^2+a^2),[-y+%t*x+sqrt(b^2*%t^2+a^2)=0,(sqrt(b^2*%t^2+a^2)*x+b^2*%t)/sqrt(b^2*%t^2+a^2)=0]];
+[method,ode_check(eqn,ans[1])];
+[clairault,0];
+
+/* 382 FIXME - check second solution */
+(pn_(382),ans:contrib_ode(eqn:sqrt(a+2*b*'diff(y,x)+c*'diff(y,x)^2)+(x*'diff(y,x)-y)*sqrt(a*c-b^2)=0,y,x));
+[y=(%c*sqrt(a*c-b^2)*x+sqrt(%c^2*c+2*%c*b+a))/sqrt(a*c-b^2),
+  [sqrt(a*c-b^2)*(%t*x-y)+sqrt(%t^2*c+2*%t*b+a)=0,
+   (sqrt(a*c-b^2)*sqrt(c*%t^2+2*b*%t+a)*x+c*%t+b)/sqrt(c*%t^2+2*b*%t+a)=0]];
+[method,ode_check(eqn,ans[1])];
+[clairault,0];
+
+/* 388 FIXME - check second solution */
+(pn_(388),ans:contrib_ode(eqn:a*(1+'diff(y,x))^(1/3)+x*'diff(y,x)-y=0,y,x));
+[y=%c*x+(%c+1)^(1/3)*a,[-y+%t*x+a*(%t+1)^(1/3)=0,(3*(%t+1)^(2/3)*x+a)/(3*(%t+1)^(2/3))=0]];
+[method,ode_check(eqn,ans[1])];
+[clairault,0];
+
+/* 389 FIXME - check second solution */
+(pn_(389),ans:contrib_ode(eqn:(y-x*'diff(y,x))*sqrt(1+'diff(y,x)^2)+a*'diff(y,x)=0,y,x));
+[y=(%c*sqrt(%c^2+1)*x-%c*a)/sqrt(%c^2+1),[sqrt(%t^2+1)*(y-%t*x)+%t*a=0,(%t*y-2*%t^2*x-x+sqrt(%t^2+1)*a)/sqrt(%t^2+1) = 0]];
+[method,ode_check(eqn,ans[1])];
+[clairault,0];
+
+/* 390 */
+(pn_(390),ans:contrib_ode(eqn:y=x*'diff(y,x)+cos('diff(y,x)),y,x));
+[y=cos(%c)+%c*x, [y-%t*x-cos(%t)=0,sin(%t)-x=0]];
+first(solve(ans[2][2],%t));
+%t=asin(x);
+s:first(solve(ev(ans[2][1],%),y));
+y=x*asin(x)+sqrt(1-x^2);
+[method,ode_check(eqn,ans[1]),ode_check(eqn,s)];
+[clairault,0,0];
+
+/* 396  FIXME - check second solution */
+(pn_(396),ans:contrib_ode(eqn:(1+'diff(y,x)^2)*sin(y-x*'diff(y,x))^2=1,y,x));
+[y=%c*x+asin(1/sqrt(%c^2+1)),[(%t^2+1)*sin(y-%t*x)^2-1=0,2*%t*sin(y-%t*x)^2-(2*%t^2*x+2*x)*cos(y-%t*x)*sin(y-%t*x)=0]];
+[method,ode_check(eqn,ans[1])];
+[clairault,0];
+
+/* 397 FIXME - check second solution */
+(pn_(397),ans:contrib_ode(eqn:'diff(y,x)*(acos('diff(y,x))-x)+sqrt(1-'diff(y,x)^2)+y=0,y,x));
+[y=%c*x-%c*acos(%c)-sqrt(1-%c^2),
+  [y+%t*(acos(%t)-x)+sqrt(1-%t^2)=0,
+  (sqrt(1-%t^2)*(acos(%t)-x)-2*%t)/sqrt(1-%t^2)=0]];
+[method,ode_check(eqn,ans[1])];
+[clairault,0];

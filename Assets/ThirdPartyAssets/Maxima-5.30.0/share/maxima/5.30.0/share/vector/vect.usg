@@ -1,0 +1,133 @@
+NOTE:  The current version of VECT is the one due to Stoutemyer from
+the summer of 1977.  It will be replaced soon by a package which 
+handles vectors and dyadics (as soon as I clean up a few remaining
+details and write a new version of this usage file).
+	Michael C. Wirth (MCW), 12/18/78
+
+BATCH file VECT > DSK SHARE contains a vector analysis package,
+DEMO file VECT DEMO DSK SHARE contains a corresponding demonstration, and
+BATCH file VECT ORTH DSK SHARE contains definitions of various orthogonal 
+curvilinear coordinate systems.
+
+Send questions or comments to David R. Stoutemyer, Electrical
+Engineering Department, University of Hawaii, Honolulu, Hawaii 96822,
+(login name: STOUTE).
+
+The vector analysis package can combine and simplify symbolic 
+expressions including dot products and cross products, together with
+the gradient, divergence, curl, and Laplacian operators.  The
+distribution of these operators over sums or products is under
+user control, as are various other expansions, including expansion
+into components in any specific orthogonal coordinate systems.
+There is also a capability for deriving the scalar or vector potential
+of a field.
+
+To establish indeterminate1, indeterminate2, ... as vector entities,
+type
+
+        DECLARE([indeterminate1, indeterminate2, ...], NONSCALAR) $
+Vectors can also be represented as lists of components.
+
+"." is the dot-product operator, "~" is the cross-product operator,
+GRAD is the gradient operator, DIV is the divergence operator, CURL
+is the curl or rotation operator, and LAPLACIAN is DIV GRAD.
+
+Most non-controversial simplifications are automatic.  For additional
+simplification, there is a function which can be used in the form
+
+        VECTORSIMP(vectorexpression)
+
+This function employs additional non-controversial simplifications,
+together with various optional expansions according to the settings
+of the following global flags:
+
+EXPANDALL,
+    EXPANDDOT,
+        EXPANDDOTPLUS,
+    EXPANDCROSS,
+        EXPANDCROSSPLUS,
+        EXPANDCROSSCROSS,
+    EXPANDGRAD,
+        EXPANDGRADPLUS,
+        EXPANDGRADPROD,
+    EXPANDDIV,
+        EXPANDDIVPLUS,
+        EXPANDDIVPROD,
+    EXPANDCURL,
+        EXPANDCURLPLUS,
+        EXPANDCURLCURL,
+    EXPANDLAPLACIAN,
+        EXPANDLAPLACIANPLUS,
+        EXPANDLAPLACIANPROD.
+
+The PLUS suffix refers to employing additivity or distributivity.
+The PROD suffix refers to the expansion for an operand that is any
+kind of product.  EXPANDCROSSCROSS refers to replacing p~(q~r)
+with (p.r)*q-(p.q)*r,  and EXPANDCURLCURL refers to replacing
+CURL CURL p with  GRAD DIV p + DIV GRAD p.  EXPANDCROSS=TRUE has the 
+same effect as EXPANDCROSSPLUS=EXPANDCROSSCROSS=TRUE, etc.  Two other
+flags, EXPANDPLUS and EXPANDPROD, have the same effect as setting all
+similarly suffixed flags true.  When TRUE, another flag named
+EXPANDLAPLACIANTODIVGRAD, replaces the LAPLACIAN operator with the
+composition DIV GRAD.  All of these flags are initially FALSE.
+For convenience, all of these flags have been declared EVFLAG.
+
+For orthogonal curvilinear coordinates, the global variables
+COORDINATES, DIMENSION, SF, and SFPROD are set by the function
+invocation
+
+        SCALEFACTORS(coordinatetransform) $
+
+Here coordinatetransform evaluates to the form
+[[expression1, expression2, ...], indeterminate1, indeterminat2, ...],
+where indeterminate1, indeterminate2, etc. are the curvilinear
+coordinate variables and where a set of rectangular Cartesian
+components is given in terms of
+the curvilinear coordinates by [expression1, expression2, ...].  COORDINATES
+is set to the vector [indeterminate1, indeterminate2, ...], and
+DIMENSION is set to the length of this vector.  SF[1], SF[2], ...,
+SF[DIMENSION] are set to the coordinate scale factors, and SFPROD is
+set to the product of these scale factors.  Initially, COORDINATES is
+[X, Y, Z], DIMENSION is 3, and SF[1]=SF[2]=SF[3]=SFPROD=1,
+corresponding to 3-dimensional rectangular Cartesian coordinates.
+
+To expand an expression into physical components in the current
+coordinate system, there is a function with usage of the form
+
+        EXPRESS(expression).
+
+The result uses the noun form of any derivatives arising from
+expansion of the vector differential operators.
+To force evaluation of these derivatives,
+the built-in EV function can be used together with the DIFF evflag,
+after using the built-in DEPENDS function to establish any new
+implicit dependencies.
+
+The scalar potential of a given gradient vector, in the current
+coordinate system, is returned as the result of
+ 
+        POTENTIAL(givengradient).
+
+The calculation makes use of the global variable POTENTIALZEROLOC,
+which must be NONLIST or of the form [indeterminatej=expressionj,
+indeterminatek=expressionk, ...], the former being equivalent to
+the nonlist expression
+for all right-hand sides in the latter.  The indicated right-hand
+sides are used as the lower limit of integration.  The success of
+the integrations may depend upon their values and order.
+POTENTIALZEROLOC is initially set to 0.
+
+The vector potential of a given curl vector, in the current
+coordinate system, is returned as the result of
+
+        VECTORPOTENTIAL(givencurl).
+
+POTENTIALZEROLOC has a similar role as for POTENTIAL, but the order
+of the left-hand sides of the equations must be a cyclic permutation
+of the coordinate variables.
+
+EXPRESS, POTENTIAL, and VECTORPOTENTIAL can have a second argument
+like the argument of SCALEFACTORS, causeing an corresponding
+invocation of SCALEFACTORS before the other computations.
+
+Warning: The VECT package DECLAREs "." to be a commutative operator.

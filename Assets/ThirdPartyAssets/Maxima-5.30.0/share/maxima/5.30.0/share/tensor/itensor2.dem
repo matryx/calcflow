@@ -1,0 +1,43 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Tensor index contraction
+ */
+
+if get('itensor,'version)=false then load(itensor);
+
+("defcon() assigns contraction properties to tensors")$
+defcon(e,f,g)$
+ishow(e([a],[b])*f([b],[c]))$
+ishow(contract(%))$
+
+("kdelta is the Kronecker delta with special contraction properties")$
+
+dim:3;
+ishow(contract(kdelta([a],[b])*kdelta([b],[a])))$
+ishow(ev(%,kdelta))$
+
+("The imetric() function sets up contraction properties for the metric")$
+remcomps(g);
+imetric(g)$
+ishow(g([i,j],[]))$
+ishow(g([],[j,k]))$
+ishow(%th(1)*%th(2))$
+ishow(contract(rename(expand(%))))$
+
+("The contract() function can also raise and lower indices")$
+defcon(Ti);
+ishow(Te([i,j],[k,l])*Ti([k,m])*Ti([l,n]))$
+ishow(contract(%))$
+ishow(Te([i,j],[k,l])*Ti([],[i,n])*Ti([],[j,m]))$
+ishow(contract(%))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

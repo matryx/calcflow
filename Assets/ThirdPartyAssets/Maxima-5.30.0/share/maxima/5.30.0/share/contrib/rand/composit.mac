@@ -1,0 +1,81 @@
+/* Filename composit.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: "The Use of Symbolic Computation             *
+   *                 in Perturbation Analysis"                   *
+   *		     by Rand in Symbolic Computation             *
+   *		     in Fluid Mechanics and Heat Transfer        *
+   *                 ed H.H.Bau (ASME 1988)                      *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+
+/* method of composite expansions */
+composite():=(
+/* input problem from keyboard */
+print("The d.e. is: ey''+a(x)y'+b(x)y=0"),
+print("with b.c. y(0)=y0 and y(1)=y1"),
+a:read("enter a(x) > 0 on [0,1]"),
+b:read("enter b(x)"),
+y0:read("enter y0"),
+y1:read("enter y1"),
+print("The d.e. is: ey''+(",a,")y'+(",b,")y=0"),
+print("with b.c. y(0)=",y0,"and y(1)=",y1),
+trunc:read("enter truncation order"),
+/* set up basic form of solution */
+y:sum(f[n](x)*e^n,n,0,trunc)+
+  %e^(-g(x)/e)*sum(h[n](x)*e^n,n,0,trunc),
+/* substitute into d.e. */
+de1:e*diff(y,x,2)+a*diff(y,x)+b*y,
+/* expand and collect terms */
+de2:expand(e*de1),
+gstuff:coeff(de2,%e^(-g(x)/e)),
+other:expand(de2-gstuff*%e^(-g(x)/e)),
+gstuff2:taylor(gstuff,e,0,trunc+1),
+other2:taylor(other,e,0,trunc+1),
+for i:0 thru trunc+1 do
+   geq[i]:coeff(gstuff2,e,i),
+for i:1 thru trunc+1 do
+   otheq[i]:coeff(other2,e,i),
+/* find g(x) */
+/* assume a(x) coeff of y' is >0 st bl occurs at x=0 */
+geq:geq[0]/h[0](x)/diff(g(x),x),
+gsol:ode2(geq,g(x),x),
+resultlist:[g(x)=ev(rhs(gsol),%c=0)],
+/* find h[i](x)'s */
+for i:0 thru trunc do(
+   heq[i]:ev(geq[i+1],resultlist,diff),
+   hsol[i]:ode2(heq[i],h[i](x),x),
+   hsol[i]:ev(hsol[i],%c=hh[i]),
+   resultlist:append(resultlist,[hsol[i]])),
+/* find f[i](x)'s */
+/* ff[i] = constant of integration */
+for i:0 thru trunc do(
+   feq[i]:ev(otheq[i+1],resultlist,diff),
+   fsol[i]:ode2(feq[i],f[i](x),x),
+   fsol[i]:ev(fsol[i],%c=ff[i]),
+   resultlist:append(resultlist,[fsol[i]])),
+/* boundary conditions */
+/* y(0)=y0 and y(1)=y1 */
+bc1:ev(y=y0,resultlist,x=0),
+bc2:ev(y=y1,resultlist,x=1),
+/* kill exponentially small %e terms since taylor won't */
+bc2:subst(0,%e,bc2),
+for i:0 thru trunc do
+   (bc1[i]:ratcoef(bc1,e,i),
+    bc2[i]:ratcoef(bc2,e,i)),
+/* solve for unknown consts */
+bceqs:makelist(bc1[i],i,0,trunc),
+bceqs:append(bceqs,makelist(bc2[i],i,0,trunc)),
+bcunk:makelist(hh[i],i,0,trunc),
+bcunk:append(bcunk,makelist(ff[i],i,0,trunc)),
+const:solve(bceqs,bcunk),
+resultlist:ratsimp(ev(resultlist,const)),
+ysol:ev(y,resultlist))$
+

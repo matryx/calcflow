@@ -1,0 +1,1742 @@
+kill (all)$
+done$
+
+/* Test ability of parser to recognize curly braces notation on input.
+ */
+
+{};
+set ();
+
+{a, b, c};
+set (a, b, c);
+
+[{b, c}, {a}];
+[set (b, c), set (a)];
+
+[{a, b, c}, {}];
+[set (a, b, c), set ()];
+
+{{{{a, b, c}}}};
+set (set (set (set (a, b, c))));
+
+{a, b, 2^{c, d, e}, mogrify ({x, y, [{}]}, {[]})};
+set (a, b, 2^set (c, d, e), mogrify (set (x, y, [set ()]), set ([])));
+
+/* 1-d output should contain curly braces.
+ */
+
+string (set ());
+"{}";
+
+string (set (a, b, set (c, d, set (e))));
+"{a,b,{c,d,{e}}}";
+
+/* General tests.
+ */
+
+emptyp(set());
+true$
+
+emptyp([]);
+true$
+
+emptyp(set(false));
+false$
+
+emptyp([false]);
+false$
+
+emptyp(set(true));
+false$
+
+emptyp(set(set()));
+false$
+
+emptyp(set([]));
+false$
+
+emptyp(set(u,n,k));
+false$
+
+adjoin(set(),set());
+set(set())$
+
+adjoin(set(),set(a));
+set(set(),a)$
+
+adjoin(a,set());
+set(a)$
+
+adjoin(false,set());
+set(false)$
+
+adjoin(false,set(false));
+set(false)$
+
+adjoin(false,set(true));
+set(true,false)$
+
+adjoin(a, set(set()));
+set(set(),a)$
+
+adjoin(a,set(a));
+set(a)$
+
+adjoin(set(a),set(a));
+set(a,set(a))$
+
+adjoin(a,set(a,b));
+set(a,b)$
+
+adjoin(a,set(b,a));
+set(a,b)$
+
+adjoin(z,set(a,b));
+set(a,b,z)$
+
+errcatch(adjoin(a,b));
+[]$
+
+disjoin(x,set());
+set()$
+
+disjoin(x,set(x));
+set()$
+
+disjoin(x,set(y));
+set(y)$
+
+disjoin(0,set(0,1,2));
+set(1,2)$
+
+disjoin(1,set(0,1,2));
+set(0,2)$
+
+disjoin(2,set(0,1,2));
+set(0,1)$
+
+set(a,a,c);
+set(a,c)$
+
+set(a,c,a);
+set(a,c)$
+
+set(a,a,a);
+set(a)$
+
+set(set(a,b),set(a,b),z);
+set(set(a,b),z)$
+
+union();
+set()$
+
+union(set());
+set()$
+
+union(set(),set());
+set()$
+
+union(set(false),set());
+set(false)$
+
+union(set(6));
+set(6)$
+
+union(set(8,8,1932));
+set(8,1932)$
+
+union(set(a),set(a,b),set(a,b,c));
+set(a,b,c)$
+
+union(set(),set(a));
+set(a)$
+
+union(set(a),set(b),set(c));
+set(a,b,c)$
+
+union(set(set(a)),set(a))$
+set(a,set(a))$
+
+errcatch(union(set(a),set(b),x));
+[]$
+
+union(set(a),set());
+set(a)$
+
+union(set(),set(set()));
+set(set())$
+
+setdifference(set(a,b),set());
+set(a,b)$
+
+setdifference(set(a,b),set(a));
+set(b)$
+
+setdifference(set(a,b),set(b));
+set(a)$
+
+setdifference(set(a,b),set(x));
+set(a,b)$
+
+setdifference(set(a,b),set());
+set(a,b)$
+
+setdifference(set(),set(x));
+set()$
+
+setdifference(set(a),set(x));
+set(a)$
+
+setdifference(set(a,b),set(x));
+set(a,b)$
+
+errcatch(setdifference(a,b));
+[]$
+
+errcatch(setdifference(set(a),b));
+[]$
+
+errcatch(setdifference(a,set(b)));
+[]$
+
+errcatch(intersection());
+[]$
+
+intersection(set(x));
+set(x)$
+
+intersection(set(),set());
+set()$
+
+intersection(set(set()),set());
+set()$
+
+intersection(set(set()),set(set(),set(set())));
+set(set())$
+
+intersection(set(a,b),set(a,b,c));
+set(a,b)$
+
+intersection(set(a,b),set(x,y,z));
+set()$
+
+intersection(set(a,b,c),set(a,y,x),set(z,a),set(p,q,a));
+set(a)$
+
+errcatch(intersect());
+[]$
+
+intersect(set(x));
+set(x)$
+
+intersect(set(),set());
+set()$
+
+intersect(set(set()),set());
+set()$
+
+intersect(set(set()),set(set(),set(set())));
+set(set())$
+
+intersect(set(a,b),set(a,b,c));
+set(a,b)$
+
+intersect(set(a,b),set(x,y,z));
+set()$
+
+intersect(set(a,b,c),set(a,y,x),set(z,a),set(p,q,a));
+set(a)$
+
+
+subsetp(set(),set());
+true$
+
+subsetp(set(),set(a));
+true$
+
+subsetp(set(a),set())$
+false$
+
+subsetp(set(),set(set()));
+true$
+
+subsetp(set(set()),set(set()));
+true$
+
+subsetp(set(a,b),set(a,b,c));
+true$
+
+subsetp(set(a,b,c),set(a,b));
+false$
+
+errcatch(subsetp(a,b));
+[]$
+
+errcatch(subsetp(a,set(b)));
+[]$
+
+errcatch(subsetp(set(a),b));
+[]$
+
+disjointp(set(),set());
+true$
+
+disjointp(set(set()),set());
+true$
+
+errcatch(disjointp(a,a+b));
+[]$
+
+errcatch(disjointp(set(a),a+b));
+[]$
+
+errcatch(disjointp(a,set(a+b)));
+[]$
+
+disjointp(set(a),set(b));
+true$
+
+disjointp(set(b,a),set(a));
+false$
+
+subset(set(),evenp);
+set()$
+
+subset(set(3,5,8),evenp);
+set(8)$
+
+errcatch(subset(a,oddp));
+[]$
+
+subset(set(a,b,4,sin(x)), evenp);
+set(4)$
+
+symmdifference();
+set()$
+
+symmdifference(set());
+set()$
+
+symmdifference(set(1));
+set(1)$
+
+symmdifference(set(1,2,3));
+set(1,2,3)$
+
+symmdifference(set(a),set(b),set(c));
+set(a,b,c)$
+
+symmdifference(set(a),set(a,b),set(a,b,c));
+set(a,c)$
+
+symmdifference(set(a,b,c),set(a,b),set(a));
+set(a,c)$
+
+symmdifference(set(a,b,c),set(),set(1,2,3));
+set(a,b,c,1,2,3)$
+
+symmdifference(set(), set(1,2,3),set(a,b,c));
+set(a,b,c,1,2,3)$
+
+symmdifference(set(1,2,3),set(a,b,c),set());
+set(a,b,c,1,2,3)$
+
+symmdifference(set(), set(1,2,3),set(a,b,c),set(),set());
+set(a,b,c,1,2,3)$
+
+symmdifference(set(),set());
+set()$
+
+symmdifference(set(set()),set());
+set(set())$
+
+symmdifference(set(i,s,t,j), set(i,n,t,p));
+set(s,n,j,p)$
+
+errcatch(symmdifference(a,set(b)));
+[]$
+
+errcatch(symmdifference(set(a),b));
+[]$
+
+errcatch(symmdifference(a,set(b)));
+[]$
+
+symmdifference(set(a,b),set(a));
+set(b)$
+
+
+subsetp(set(),set());
+true$
+
+subsetp(set(set()),set());
+false$
+
+subsetp(set(),set(set()));
+true$
+
+subsetp(set(x),set(set(x)));
+false$
+
+subsetp(set(a,b),set(a,y));
+false$
+
+subsetp(set(a,b),set(a,b));
+true$
+
+subsetp(set(set(a)),set(x,y,set(a)));
+true$
+
+subsetp(set(rat(x)),set(x));
+true$
+
+subsetp(set(a,a,a,x),set(a,x));
+true$
+
+adjoin(x,set());
+set(x)$
+
+
+set(x,rat(x),x,x,x);
+set(x)$
+
+union(set(),set());
+set()$
+
+union(set(),set(8));
+set(8)$
+
+union(set(1932),set());
+set(1932)$
+
+union(set(set(8)),set(8));
+set(set(8),8)$
+
+is(union(set(a),set(b),set(c))= set(a,b,c));
+true$
+
+is(union(set(set()),set(b),set()) = set(b,set()));
+true$
+
+is(union(set(x=6),set(y=3),set(z=-8)) = set(z=-8,y=3,x=6));
+true$
+
+setify([]);
+set()$
+
+setify([a,b]);
+set(a,b)$
+
+setify([[a]]);
+set([a])$
+
+setify([set(a)]);
+set(set(a))$
+
+setify([false]);
+set(false)$
+
+setify([false,false]);
+set(false)$
+
+setify([false,false,true]);
+set(true,false)$
+
+listify(set());
+[]$
+
+listify(set(a));
+[a]$
+
+listify(set(set(a)));
+[set(a)]$
+
+listify(set(set()));
+[set()]$
+
+full_listify(set());
+[]$
+
+full_listify(set(false));
+[false]$
+
+full_listify(set(set));
+[set]$
+
+full_listify(set(x));
+[x]$
+
+full_listify(set(set()));
+[[]]$
+
+full_listify(set(set(false)));
+[[false]]$
+
+full_listify(set(a,set(b),set(set(c))));
+[a,[b],[[c]]]$
+
+full_listify(a+b=c);
+a+b=c$
+
+full_listify(matrix([1,2],[3,4]));
+matrix([1,2],[3,4])$
+
+full_listify(f(set(a)));
+f([a])$
+
+full_listify(f(set(set(a))));
+f([[a]])$
+
+full_listify(f(a,set(a), [a+b]));
+f(a,[a],[a+b])$
+
+full_listify(5);
+5$
+
+full_listify(a);
+a$
+
+full_listify(a[5]);
+a[5]$
+
+full_listify(sin(x+7));
+sin(x+7)$
+
+full_listify(7.8e-4);
+7.8e-4$
+
+full_listify(5.6b2);
+5.6b2$
+
+full_listify(set + 7);
+set + 7$
+
+full_listify(a^b + 1/set + set^z);
+a^b + 1/set + set^z$
+
+(simp : false,0);
+0$
+
+listify(set());
+[]$
+
+listify(set(a,a,b));
+[a,a,b]$
+
+full_listify(set(a,a,b));
+[a,a,b]$
+
+full_listify(set(a,a,b,set()));
+[a,a,b,[]]$
+
+(simp : true,0);
+0$
+
+subst(b=a,set(a,b));
+set(a)$
+
+subst(b=a,set());
+set()$
+
+subst([a=x,b=x,c=x],set(a,b,c));
+set(x)$
+
+union(set(x),set(y));
+set(x,y)$
+
+union(set(),set());
+set();
+
+errcatch(intersect());
+[]$
+
+intersect(set(a));
+set(a)$
+
+intersect(set(a),set(a,b));
+set(a)$
+
+elementp(x,set());
+false$
+
+elementp(false, set());
+false$
+
+elementp(false, set(false));
+true$
+
+elementp(set(),set());
+false$
+
+elementp(set(),set(set()));
+true$
+
+elementp(x,set(x));
+true$
+
+elementp(rat(x),set(x));
+true$
+
+elementp(x,set([x]));
+false$
+
+union(set(false),set(true));
+set(false,true)$
+
+union(setify([true,false]), set(x));
+set(x,true,false)$
+
+fullsetify([]);
+set()$
+
+fullsetify([false]);
+set(false)$
+
+fullsetify([[]]);
+set(set())$
+
+fullsetify([a,b,c]);
+set(a,b,c)$
+
+fullsetify([a,[b]]);
+set(a,set(b))$
+
+fullsetify(f[0,1]);
+f[0,1]$
+
+fullsetify(f[5](x));
+f[5](x)$
+
+fullsetify(matrix([1,2],[3,4]));
+matrix([1,2],[3,4])$
+
+(remfunction(f,g),0);
+0$
+
+flatten(3);
+3$
+
+flatten(-3);
+-3$
+
+flatten(2/3);
+2/3$
+
+flatten(-2/3);
+-2/3$
+
+flatten(1.4d2);
+1.4d2$
+
+flatten(-3.4d0);
+-3.4d0$
+
+flatten(x);
+x$
+
+flatten(abc);
+abc$
+
+flatten(%pi);
+%pi$
+
+flatten(rat(x));
+''(rat(x))$
+
+flatten(rat(-x));
+''(rat(-x))$
+
+
+flatten(x[5]);
+x[5]$
+
+flatten(x[8,32]);
+x[8,32]$
+
+flatten(-x);
+-x$
+
+flatten(rat(-x));
+''(rat(-x))$
+
+flatten(a+b);
+a+b$
+
+flatten(rat(a+b));
+''(rat(a+b))$
+
+
+flatten(a*b);
+a*b$
+
+flatten([]);
+[]$
+
+flatten([[]]);
+[]$
+
+flatten([x]);
+[x]$
+
+flatten([[x]]);
+[x]$
+
+flatten(f(g(f(f(x)))));
+f(g(f(f(x))))$
+
+flatten(f(f(g(f(x)))));
+f(g(f(x)))$
+
+/* Examples from Macsyma 422 */
+
+flatten([a,b,[c,[d]],e,[[f],g,h]]);
+[a,b,c,d,e,f,g,h]$
+
+flatten([a,b([c]),[d]]);
+[a,b([c]),d]$
+
+flatten(f(f(a,b), f(c,d)));
+f(a,b,c,d)$
+
+flatten(f[1](f[1](a,b), f[1](c,d)));
+f[1](a,b,c,d)$
+
+elementp(false,set());
+false$
+
+elementp(false,set(1));
+false$
+
+elementp(false,set(false));
+true$
+
+elementp(0,set());
+false$
+
+elementp(1,set(1));
+true$
+
+elementp(0,set(1));
+false$
+
+elementp(2,set(1));
+false$
+
+elementp(1,set(0,2));
+false$
+
+adjoin(false,set());
+set(false)$
+
+adjoin(false,set(1));
+set(false,1)$
+
+adjoin(false,set(false));
+set(false)$
+
+adjoin(0,set());
+set(0)$
+
+adjoin(1,set(1));
+set(1)$
+
+adjoin(0,set(1));
+set(1,0)$
+
+adjoin(2,set(1));
+set(2,1)$
+
+adjoin(1,set(0,2));
+set(0,1,2)$
+
+cardinality(set());
+0$
+
+cardinality(set([]));
+1$
+
+cardinality(set(8,8,1932));
+2$
+
+errcatch(cardinality(x+y));
+[]$
+
+setp([]);
+false$
+
+setp(false);
+false$
+
+setp(true);
+false$
+
+setp(a+b);
+false$
+
+setp([x]);
+false$
+
+setp(set());
+true$
+
+setp(set(set(a+b=c)));
+true$
+
+setp(rat(x));
+false$
+
+setp(1.5b34);
+false$
+
+errcatch(setp());
+[]$
+
+listify(adjoin(-1,set(2,4,6)));
+[-1,2,4,6]$
+
+listify(adjoin(2,set(2,4,6)));
+[2,4,6]$
+
+listify(adjoin(3,set(2,4,6)));
+[2,3,4,6]$
+
+listify(adjoin(6,set(2,4,6)));
+[2,4,6]$
+
+listify(adjoin(7,set(2,4,6)));
+[2,4,6,7]$
+
+permutations(set());
+set([])$
+
+permutations([]);
+set([])$
+
+permutations([a]);
+set([a])$
+
+permutations([a,a]);
+set([a,a])$
+
+(s : listify(permutations([0,1,2,3,4])),0);
+0$
+
+is(s = sort(s));
+true$
+
+(s : listify(permutations([a,b,b,a])),0);
+0$
+
+is(s = sort(s));
+true$
+
+(q : [1,2,3,4,5],0);
+0$
+
+(s : permutations(q),0);
+0$
+
+is(cardinality(s) = length(q)!);
+true$
+
+elementp([5,3,2,1,4],s);
+true$
+
+elementp([5,3,2,1,0],s);
+false$
+
+(p : map(setify,s),0);
+0$
+
+is(p = set(setify(q)));
+true$
+
+(remvalue(s,p),0);
+0$
+
+powerset(set());
+set(set())$
+
+powerset(set(x));
+set(set(),set(x))$
+
+powerset(set(x,y));
+set(set(),set(x),set(y),set(x,y))$
+
+errcatch(powerset(a+b=c));
+[]$
+
+errcatch(powerset(rat(a)));
+[]$
+
+powerset(set(),0);
+set(set())$
+
+powerset(set(),1);
+set()$
+
+powerset(set(1),2);
+set()$
+
+powerset(set(false));
+set(set(),set(false))$
+
+powerset(set(a+b=c),1);
+set(set(a+b=c))$
+
+powerset(set(1,2,3),2);
+set(set(1,2),set(1,3),set(2,3))$
+
+errcatch(powerset(a+b=c));
+[]$
+
+is(subset(powerset(set(a,b,c,d,e)),lambda([x],is(cardinality(x)=3))) = powerset(set(a,b,c,d,e),3));
+true$
+
+is(subset(powerset(set(a,b,c,d,e)),lambda([x],is(cardinality(x)=5))) =  
+	powerset(set(a,b,c,d,e),5));
+true$
+
+is(subset(powerset(set(a,b,c,d,e)),lambda([x],is(cardinality(x)=7))) = 
+powerset(set(a,b,c,d,e),7));
+true$
+
+extremal_subset(set(),lambda([x],x^2), max);
+set()$
+
+extremal_subset(set(-1,0,1),lambda([x],x^2), max);
+set(-1,1)$
+
+extremal_subset(set(1,sqrt(2),3,%pi),log, max);
+set(%pi)$
+
+/* quote exp because some other tests assign a value to exp,
+   and kill refuses to kill the assigned value ... (sigh)
+ */
+extremal_subset(set(sqrt(2),sqrt(3),sqrt(5)), 'exp, max);
+set(sqrt(5))$
+
+extremal_subset(set(1+%i,sqrt(2),1-%i),abs, max);
+set(1+%i,sqrt(2),1-%i)$
+
+extremal_subset(set(a,a+b,1.4b0,sqrt(28)),lambda([x],if atom(x) then 0 else 1), max);
+
+set(a+b,sqrt(28))$
+
+cartesian_product();
+set([])$
+
+cartesian_product(set());
+set()$
+
+cartesian_product(set(a));
+set([a])$
+
+cartesian_product(set(),set(),set());
+set()$
+
+cartesian_product(set(a),set(b));
+set([a,b])$
+
+cartesian_product(set(u,n,k),set());
+set()$
+
+cartesian_product(set(), set(u,n,k));
+set()$
+
+cartesian_product(set(u,n,k),set(1));
+set([u,1],[n,1],[k,1])$
+
+cartesian_product(set(a,b),set(1,2));
+set([a,1],[a,2],[b,1],[b,2])$
+
+equiv_classes(set(),"=");
+set()$
+
+equiv_classes(set(),"#");
+set()$
+
+equiv_classes(set(a,b,c),"=");
+set(set(a),set(b),set(c))$
+
+equiv_classes(set(a,b,c),"#");
+set(set(a,b,c))$
+
+equiv_classes(set(1,2,3,4,5),lambda([x,y],remainder(x-y,2)=0));
+set(set(1,3,5),set(2,4))$
+
+partition_set(set(),evenp);
+[set(),set()]$
+
+partition_set(set(9),evenp);
+[set(9), set()]$
+
+partition_set(set(2,4),evenp);
+[set(), set(2,4)]$
+
+partition_set(set(a,b,c),lambda([x],false));
+[set(a,b,c), set()]$
+
+partition_set(set(a,b,c),lambda([x],true));
+[set(),set(a,b,c)]$
+
+partition_set(set(a,b,c),lambda([x],orderlessp(x,b)));
+[set(b,c), set(a)]$
+
+set_partitions(set());
+set(set())$
+
+set_partitions(set(),1);
+set()$
+
+set_partitions(set(),2);
+set()$
+
+set_partitions(set(u,n,k),1);
+set(set(set(u,n,k)))$
+
+set_partitions(set(u,n,k),2);
+set(set(set(u),set(n,k)),set(set(n),set(u,k)), set(set(k),set(u,n)))$
+
+makelist(stirling1(i,0),i,0,5);
+[1,0,0,0,0,0]$
+
+makelist(stirling1(i,i),i,0,5);
+[1,1,1,1,1,1]$
+
+factor(sum(stirling1(3,i)*x^i,i,0,3));
+x*(x-1)*(x-2)$
+
+makelist(stirling1(i,1) - (-1)^(i-1)*(i-1)!,i,1,5);
+[0,0,0,0,0]$
+
+sum(stirling1(8,k),k,1,8);  /* A & S 24.1.3 */
+0$
+
+sum(stirling1(3,k),k,1,3); 
+0$
+
+sum(stirling1(5,k)*(-1)^(5-k),k,0,5);
+5!$
+
+sum(stirling1(2,k)*(-1)^(2-k),k,0,2);
+2!$
+
+(declare([a,b],integer),0);
+0$
+
+(assume(a>0,b>0),0);
+0$
+
+stirling1(b,a);
+stirling1(b,a)$
+
+stirling2(b,a);
+stirling2(b,a)$
+
+(forget(a>0,b>0),0);
+0$
+
+(remove(a,integer), remove(b,integer),0);
+0$
+
+stirling2(0,0);
+1$
+
+stirling2(1,0);
+0$
+
+stirling2(0,1);
+0$
+
+stirling2(10,10);
+1$
+
+stirling2(10,11);
+0$
+
+stirling2(10,5) - 5 * stirling2(9,5) - stirling2(9,4);
+0$
+
+sum((-1)^(12-m) * m! * stirling2(12,m),m,0,12);
+1$
+
+/* test stirling2 simplification rules */
+
+(remvalue(n),0);
+0$
+
+(e : stirling2(n,0),0);
+0$
+
+makelist(subst(n=i,e) - stirling2(i,0),i,-5,5);
+''(makelist(0,i,-5,5))$
+
+(e : stirling2(n,1),0);
+0$
+
+makelist(subst(n=i,e) - stirling2(i,1),i,-5,5);
+''(makelist(0,i,-5,5))$
+
+(e : stirling2(n,2),0);
+0$
+
+makelist(subst(n=i,e) - stirling2(i,2),i,-5,5);
+''(makelist(0,i,-5,5))$
+
+(e : stirling2(n,n),0);
+0$
+
+makelist(subst(n=i,e) - stirling2(i,i),i,-5,5);
+''(makelist(0,i,-5,5))$
+
+(remvalue(e),0);
+0$
+
+is(cardinality(set_partitions(set())) = belln(0));
+true$
+
+is(cardinality(set_partitions(set(1))) = belln(1));
+true$
+
+is(cardinality(set_partitions(set(1,2))) = belln(2));
+true$
+
+is(cardinality(set_partitions(set(1,2,3))) = belln(3));
+true$
+
+belln([5,6]);
+[belln(5),belln(6)]$
+
+integer_partitions(0);
+set([])$
+
+integer_partitions(1);
+set([1])$
+
+integer_partitions(2);
+set([1,1],[2])$
+
+is(cardinality(integer_partitions(25)) = 1958)$
+true;
+
+map(lambda([x], apply("+",x)), integer_partitions(25));
+set(25)$
+
+integer_partitions(2,1);
+set([2])$
+
+integer_partitions(2,2);
+set([1,1],[2,0])$
+
+integer_partitions(5,3);
+set([5,0,0],[4,1,0],[3,1,1],[3,2,0],[2,2,1])$
+
+multinomial_coeff(0);
+1$
+
+multinomial_coeff(1);
+1$
+
+multinomial_coeff(5);
+1$
+
+multinomial_coeff(2,3,4);
+(2+3+4)! / (2! * 3! * 4!)$
+
+factor(sum(multinomial_coeff(i,5-i) * x^(5-i) * y^i,i,0,5));
+(x+y)^5$
+
+diff((x+y+z)^9,x,3,y,6);
+''(multinomial_coeff(3,6,0) * 3! * 6!)$
+
+kron_delta(false,false);
+1$
+
+/* need to have true and false sysconsts (not standard) for this to work
+kron_delta(false,true);
+0$
+*/
+
+kron_delta(true,true);
+1$
+
+kron_delta(0,0);
+1$
+
+kron_delta(a+b,a+b);
+1$
+
+kron_delta(rat(x), x);
+1$
+
+kron_delta(x,y) - kron_delta(y,x);
+0$
+
+kron_delta(x,y) / 42 - kron_delta(y,x) / 42;
+0$
+
+kron_delta(%i*x,%i*y) - kron_delta(%i*y,%i*x);
+0$
+
+kron_delta(0.42,0.42);
+1$
+
+kron_delta(0.42, 42/100);
+kron_delta(0.42, 42/100)$
+
+kron_delta(2,3);
+0$
+
+kron_delta(x,x);
+1$
+
+kron_delta(x,x-1);
+0$
+
+kron_delta(%i*x,%i*y);
+kron_delta(%i*x,%i*y)$
+
+kron_delta(%i*x,%i*x);
+1$
+
+ratsimp(kron_delta(%i*(x+1)^2,%i*(x^2+2*x+1)));
+1$
+
+(assume(a > b),0);
+0$
+
+kron_delta(a,b);
+0$
+
+kron_delta(%i*a,%i*b);
+0$
+
+(forget(a > b),0);
+0$
+
+(assume(a < 1, b >= 3/2),0);
+0$
+
+kron_delta(a,b);
+0$
+
+kron_delta(%i,%i);
+1$
+
+kron_delta(5+%i,5+%i);
+1$
+
+kron_delta(5-%i,5+%i);
+0$
+
+kron_delta(3 + %i/7,1 + %i/7);
+0$
+
+kron_delta(1 + %i/5,1 + %i/7);
+0$
+
+/* new kronecker delta tests for multivariable version */
+
+(map('forget, facts()),0);
+0$
+
+errcatch(kron_delta(x));
+[]$
+
+kron_delta();
+1$
+
+kron_delta(sqrt(2), 1/sqrt(2), %pi);
+0$
+
+kron_delta(a,b,a);
+kron_delta(a,b)$
+
+subst(a=c, kron_delta(a,b,rat(c)));
+kron_delta(c,b)$
+
+kron_delta(a,b)-kron_delta(-a,-b);
+0$
+
+kron_delta(a,-b)-kron_delta(-a,b);
+0$
+
+kron_delta(a,b,-c)-kron_delta(-a,-b,c);
+0$
+
+kron_delta(-a,b,-c)-kron_delta(a,-b,c);
+0$
+
+conjugate(kron_delta(a+%i,b,c));
+kron_delta(a+%i,b,c)$
+
+cabs(kron_delta(a,b,23 +%i));
+kron_delta(a,b,23 + %i)$
+
+abs(kron_delta(l,s,s));
+kron_delta(l,s)$
+
+sign(kron_delta(u,n,k,1));
+pz$
+
+featurep(kron_delta(a+%i, cos(x - %i), 42/19),'integer);
+true$
+
+/* end new kronecker delta tests */
+
+every(f,[]);
+true$
+
+every(f,set());
+true$
+
+every(evenp,set());
+true$
+
+every(evenp,set(2));
+true$
+
+every(evenp,set(%pi));
+false$
+
+every(evenp,set(2,4,6,%pi));
+false$
+
+every(evenp,set(1,2,4,6));
+false$
+
+every("=",[],[]);
+true$
+
+every("=",[1,2],[2,1]);
+false$
+
+every("#",[a,b],[b,a]);
+true$
+
+some(f,[]);
+false$
+
+some(f,set());
+false$
+
+some(oddp,set());
+false$
+
+some(oddp,set(%i));
+false$
+
+some(oddp,set(%i,1));
+true$
+
+some(oddp,[1,%i]);
+true$
+
+some("<",[a,1],[4,2]);
+true$
+
+some("=",[a,4],[a,5]);
+true$
+
+some("<=",[5,a],[6,a]);
+true$
+
+rreduce("+",[],0);
+0$
+
+rreduce("+",[a],0);
+a$
+
+rreduce("+",[a,b]);
+a+b$
+
+rreduce(adjoin, [1,2,3,4], set());
+set(1,2,3,4)$
+
+rreduce(lambda([x,y],x),[a,b,c,d]);
+a$
+
+rreduce(lambda([x,y],y),[a,b,c,d]);
+d$
+
+rreduce(concat,["a","m","h"],"");
+"amh"$
+
+flatten(rreduce(f,[1,2,3,4]));
+f(1,2,3,4)$
+
+lreduce("+",[],0);
+0$
+
+lreduce("+",[a],0);
+a$
+
+lreduce("+",[a,b]);
+a+b$
+
+lreduce(lambda([x,y],x),[a,b,c,d]);
+a$
+
+lreduce(lambda([x,y],y),[a,b,c,d]);
+d$
+
+lreduce(concat,["a","m","h"],"");
+"amh"$
+
+flatten(lreduce(f,[1,2,3,4]));
+f(1,2,3,4)$
+
+xreduce('max,[]);
+minf$
+
+xreduce('min,[]);
+inf$
+
+xreduce('max,[0,1]);
+1$
+
+xreduce('min,[0,1]);
+0$
+
+xreduce('max,[],x);
+x$
+
+xreduce('min,[],x);
+x$
+
+xreduce("and",[]);
+true$
+
+xreduce("or",[]);
+false$
+
+xreduce("and",[true]);
+true$
+
+xreduce("and",[false]);
+false$
+
+xreduce("and",[true,true],false)$
+false$
+
+xreduce("or",[true]);
+true$
+
+xreduce("or",[false]);
+false$
+
+xreduce("or",[true,true],false)$
+true$
+
+xreduce("and",[]);
+true$
+
+xreduce("or",[]);
+false$
+
+xreduce("and",[true]);
+true$
+
+xreduce("and",[false]);
+false$
+
+xreduce("and",[true,true],false)$
+false$
+
+xreduce("or",[true]);
+true$
+
+xreduce("or",[false]);
+false$
+
+xreduce("or",[true,true],false)$
+true$
+
+(nary ("@@@"), declare ("@@@", nary), "@@@" ([L]) := apply (FOO, L), kill (FOO));
+done;
+
+xreduce ("@@@", [a, e, c, b, d]);
+FOO (a, e, c, b, d);
+
+xreduce ("@@@", {a, e, c, b, d});
+FOO (a, b, c, d, e);
+
+(infix ("%%%"), "%%%" (aa, bb) := BAR (aa, bb), kill (BAR));
+done;
+
+xreduce ("%%%", [a, e, c, b, d]);
+BAR (BAR (BAR (BAR (a, e), c), b), d);
+
+xreduce ("%%%", {a, e, c, b, d});
+BAR (BAR (BAR (BAR (a, b), c), d), e);
+
+makeset(i,[i],set());
+set()$
+
+makeset(i,[i],[[1]]);
+set(1)$
+
+makeset(i,[i],[[true],[false]]);
+set(true,false)$
+
+makeset(i/j,[i,j],[[2,6],[6,28]]);
+set(2/6,6/28)$
+
+num_partitions(0);
+1$
+
+every(is, makelist(num_partitions(i)=cardinality(integer_partitions(i)),i,1,15));
+true$
+
+(distinctp(l) := is(cardinality(setify(l)) = length(l)),0);
+0$
+
+(chk(n) := cardinality(subset(integer_partitions(n),distinctp)), 0);
+0$
+
+every(is, makelist(num_distinct_partitions(i)=chk(i),i,0,10));
+true$
+
+(remfunction(chk,distinctp),0);
+0$
+
+divisors(1);
+set(1)$
+
+divisors(2);
+set(1,2)$
+
+divisors(28);
+set(1,2,4,7,14,28)$
+
+divisors([28]);
+[set(1,2,4,7,14,28)]$
+
+divisors(a=b);
+divisors(a) = divisors(b)$
+
+every(is, makelist(divsum(i) = xreduce("+",divisors(i)),i,1,100));
+true$
+
+moebius(1);
+1$
+
+moebius(2);
+-1$
+
+moebius(3);
+-1$
+
+moebius([3,4]);
+[moebius(3),moebius(4)]$
+
+/* See A & S 24.3.1 */
+
+every(is, makelist(xreduce("+", map(moebius, divisors(i))) = 0,i,2,100));
+true$
+
+(rprimep(i,j) := block([ ],
+  if integerp(i) and integerp(j) then if gcd(i,j) > 1 then 0 else 1
+  else funmake(rprimep,[i,j])),0);
+0$
+
+every(is, makeset(moebius(i*j) = moebius(i) * moebius(j) * rprimep(i,j),[i,j],
+cartesian_product(setify(makelist(i,i,1,15)),setify(makelist(j,j,1,15)))));
+true$
+
+/* Tests for random_permutation */
+
+(set_random_state (make_random_state (1234)), 0);
+0;
+
+(L : '[a + 1, b - 2, c * d, %pi, %e], S : setify (L), 0);
+0;
+
+[random_permutation (L), random_permutation (L), random_permutation (L)];
+'[[a + 1, %e, c*d, b - 2, %pi], [b - 2, a + 1, c*d, %e, %pi], [a + 1, c*d, b - 2, %e, %pi]];
+
+[random_permutation (S), random_permutation (S), random_permutation (S)];
+'[[c*d, b - 2, a + 1, %pi, %e], [%pi, %e, a + 1, b - 2, c*d], [b - 2, %pi, a + 1, %e, c*d]];
+
+apply ("+", makelist (if random_permutation ([1, 2, 3, 4]) = [4,2,1,3] then 1 else 0, i, 1, 1000));
+41;
+
+/* Tests for sublist_indices */
+
+sublist_indices ([], lambda([x], x='b));
+[];
+
+errcatch (sublist_indices (1, lambda([x], x='b)));
+[];
+
+sublist_indices ('[a, b, b, c, 1, 2, b, 3, b], lambda ([x], x='b));
+[2, 3, 7, 9];
+
+sublist_indices ('[a, b, b, c, 1, 2, b, 3, b], lambda ([x], integerp (x)));
+[5, 6, 8];
+
+sublist_indices ('[a, b, b, c, 1, 2, b, 3, b], symbolp);
+[1, 2, 3, 4, 7, 9];
+
+sublist_indices ([true, false, false, true, true], identity);
+[1, 4, 5];
+
+sublist_indices ([1 > 0, 1 < 0, 2 < 1, 2 > 1, 2 > 0], identity);
+[1, 4, 5];
+
+(kill (P), P(x) := ordergreatp (x, 'm), sublist_indices ('[a, %pi, x, z, h, y, %e, 1, s], P));
+[3, 4, 6, 9];
+
+sublist_indices ('[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], lambda ([x], evenp(x) and primep(x)));
+[3];
+
+/* Tests for sublist (not part of nset but related functionality) */
+
+sublist ([], lambda([x], x='b));
+[];
+
+errcatch (sublist (1, lambda([x], x='b)));
+[];
+
+sublist ('[a, b, b, c, 1, 2, b, 3, b], lambda ([x], x='b));
+[b, b, b, b];
+
+sublist ('[a, b, b, c, 1, 2, b, 3, b], lambda ([x], integerp (x)));
+[1, 2, 3];
+
+sublist ('[a, b, b, c, 1, 2, b, 3, b], symbolp);
+[a, b, b, c, b, b];
+
+sublist ([true, false, false, true, true], identity);
+[true, true, true];
+
+sublist ([1 > 0, 1 < 0, 2 < 1, 2 > 1, 2 > 0], identity);
+[1 > 0, 2 > 1, 2 > 0];
+
+(kill (P), P(x) := ordergreatp (x, 'm), sublist ('[a, %pi, x, z, h, y, %e, 1, s], P));
+[x, z, y, s];
+
+sublist ('[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], lambda ([x], evenp(x) and primep(x)));
+[2];
+
+/* from mailing list 2009-08-27 "what happened to 'ev' ?" */
+
+block ([l1: [[2,3], [3,4], [4,5]]], local(s_list),
+  s_list(list, option) := sublist(list, lambda([x], ev(option))),
+  s_list(l1, x[2]<4));
+[[2, 3]];
+
+block ([l1: [[2,3], [3,4], [4,5]]], local(s_list_indices),
+  s_list_indices(list, option) := sublist_indices(list, lambda([x], ev(option))),
+  s_list_indices(l1, x[2]<4));
+[1];
+
+/* SF bug 2698078  set_partitions does not produce simplified sets */
+(l : set_partitions({1,2,3,4},3),0);
+0$
+
+is(l = expand(l));
+true$
+
+map(lambda([s], xreduce('union,s)), l);
+set(set(1,2,3,4))$
+
+map(lambda([s], xreduce('intersection,s)), l);
+set(set())$
+
+(l : set_partitions({1,2,3,4}),0);
+0$
+
+is(l = expand(l));
+true$
+
+map(lambda([s], xreduce('union,s)), l);
+set(set(1,2,3,4))$
+
+map(lambda([s], xreduce('intersection,s)), l);
+set(set(), set(1,2,3,4))$
+
+(l : set_partitions(set(a,b, set(c)),2),0);
+0$
+
+is(l = expand(l));
+true$
+
+map(lambda([s], xreduce('union,s)), l);
+set(set(a,b,set(c)))$
+
+map(lambda([s], xreduce('intersection,s)), l);
+set(set())$
+
+(l : set_partitions(set(a,b, set(c))),0);
+0$
+
+is(l = expand(l));
+true$
+
+map(lambda([s], xreduce('union,s)), l);
+set(set(a,b,set(c)))$
+
+map(lambda([s], xreduce('intersection,s)), l);
+set(set(),set(a,b,set(c)))$
+
+(remvalue(l),0);
+0$
+
+in_exactly_one(set());
+set()$
+
+in_exactly_one(set(l), set(s), set(s));
+set(l)$
+
+in_exactly_one(set(r), set(e), set(n), set(e), set(e));
+set(r,n)$
+
+in_exactly_one(set(m), set(a), set(x), set(i,m,a));
+set(i,x)$
+
+in_exactly_one(set(x),set(x), set(a,b));
+set(a,b)$
+
+/* bug reported to mailing list, is(f("x") > 0) => Lisp error
+ * following example from Matthew Gwynne 2010-04-29, thanks Matthew!
+ */
+
+(
+ /* F as specified in original example
+ F : {{gv("CSup"),-gv("DiagF"),-gv("DisT"),-gv("ProgF"),-gv("SymA"),-gv("Via")},
+    {-gv("CSup"),-gv("DiagF"),-gv("DisT"),-gv("ProgF"),-gv("SymA"),-gv("Via")},
+    {gv("CSup"),-gv("DiagF"),-gv("DisT"),-gv("ProgF"),-gv("SymA"),-gv("Via")},
+    {-gv("CSup"),-gv("DiagF"),gv("DisT"),-gv("ProgF"),gv("SymA"),-gv("Via")},
+    {-gv("CSup"),gv("DiagF"),-gv("DisT"),-gv("ProgF"),gv("SymA"),gv("Via")},
+    {gv("CSup"),gv("DiagF"),-gv("DisT"),-gv("ProgF"),gv("SymA"),gv("Via")},
+    {gv("CSup"),gv("DiagF"),gv("DisT"),-gv("ProgF"),gv("SymA"),gv("Via")},
+    {gv("CSup"),gv("DiagF"),gv("DisT"),-gv("ProgF"),gv("SymA"),gv("Via")},
+    {-gv("CSup"),gv("DiagF"),-gv("DisT"),gv("ProgF"),gv("SymA"),gv("Via")},
+    {gv("CSup"),gv("DiagF"),gv("DisT"),gv("ProgF"),gv("SymA"),gv("Via")},
+    {gv("CSup"),gv("DiagF"),gv("DisT"),gv("ProgF"),gv("SymA"),gv("Via")}}, */
+ /* here is a smaller (fewer variables) example */
+ F : {{gv("CSup"),-gv("DiagF"),-gv("DisT")},
+      {gv("CSup"),gv("DiagF"),gv("DisT")},
+      {gv("CSup"),gv("DiagF"),gv("DisT")}},
+ var_cs(F) := map(abs,apply(union,listify(F))),
+ all_tass(V) :=
+  map(setify,
+   apply(cartesian_product,
+     map(lambda([v],{-v,v}),listify(V)))),
+ fullcnf2fulldnf(F) := setdifference(all_tass(var_cs(F)),F),
+ fullcnf2fulldnf(F));
+
+{{-abs(gv("CSup")),-abs(gv("DiagF")),-abs(gv("DisT"))},{-abs(gv("CSup")),-abs(gv("DiagF")),abs(gv("DisT"))},
+ {-abs(gv("CSup")),abs(gv("DiagF")),-abs(gv("DisT"))},{-abs(gv("CSup")),abs(gv("DiagF")),abs(gv("DisT"))},
+ {abs(gv("CSup")),-abs(gv("DiagF")),-abs(gv("DisT"))},{abs(gv("CSup")),-abs(gv("DiagF")),abs(gv("DisT"))},
+ {abs(gv("CSup")),abs(gv("DiagF")),-abs(gv("DisT"))},{abs(gv("CSup")),abs(gv("DiagF")),abs(gv("DisT"))}}$
+
+/* full_listify - ID: 3005820 */
+full_listify(rat(3/4));
+3/4$
+
+/* is union nary? */
+xreduce('union,[]);
+set()$

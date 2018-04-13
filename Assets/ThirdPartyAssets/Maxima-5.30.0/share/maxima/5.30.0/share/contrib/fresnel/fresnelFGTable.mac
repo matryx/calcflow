@@ -1,0 +1,7 @@
+fresnelFG1(i,d):=block([l],
+   l:fresnelFG(i/d),
+   [dfloat(first(l)),dfloat(second(l)),dfloat(third(l))])$
+fresnelFGTable(n,d):=block([l0,l],
+   l0:[0.0d0, 0.5d0, 0.5d0],
+   cons(l0,makelist(fresnelFG1(i,d),i,1,n))
+)$

@@ -1,0 +1,71 @@
+/*
+  Some utilities for working with vectors.
+  
+  Copyright (C)  Nov. 2008  Volker van Nek
+
+  For examples see vector_rebuild.usg .
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301, USA.
+*/
+
+eval_when([translate,batch,demo,load], load("vector_rebuild.lisp"))$
+
+eval_when([batch,demo,load], ttyoff:true)$
+
+listarith: false$
+doallmxops: false$
+domxmxops: false$
+
+dotexptsimp: false$
+/* dotexptsimp: false avoids the following (same for matrices): 
+(%i1) (listarith: false, x: [1,2].[1,2], listarith: true, ev(x));
+(%o1)                                [ 5 ]
+*/
+
+domxplus: false$ /* default */
+scalarmatrixp: true$ /* default */
+mx0simp: true$ /* default, if false then 0*matrix([1,2]); --> 0 */
+
+/* 1. define mtimesq (vector_rebuild.lisp)
+   2. set listarith & friends
+   3. then we are ready for tellsimpafter 
+*/
+ttyoff: true$
+lsmx_or_abs1_p(x):= 
+  is( listp(x) or matrixp(x) or is(equal(abs(x),1))=true )$
+matchdeclare(
+  nlsmx, lambda([x], not lsmx_or_abs1_p(x)),
+  tmsq, ?mtimesqp,
+  lsmx, lambda([x],listp(x) or matrixp(x)) )$
+simp:false$
+tellsimpafter(
+  nlsmx*tmsq, 
+    buildq([nlm:nlsmx, tq1:args(tmsq)[1], tq2:args(tmsq)[2]], 
+      nlm*tq1 ?mtimesq tq2) )$
+tellsimpafter(
+  nlsmx*lsmx, buildq([nlm:nlsmx, lm:lsmx], nlm ?mtimesq lm) )$
+tellsimpafter(
+  (-1)*nlsmx*lsmx, buildq([nlm:nlsmx, lm:lsmx], - nlm ?mtimesq lm) )$   
+tellsimpafter(
+  (-1)*lsmx, buildq([lm:lsmx], - lm) )$   
+simp:true$
+ttyoff: false$
+
+/* 2 lines copied from share/matrix/eigen.mac: */
+columnvector(x):=transpose(matrix(x))$
+covect(x):=columnvector(x)$
+
+eval_when([batch,demo,load], ttyoff:false)$

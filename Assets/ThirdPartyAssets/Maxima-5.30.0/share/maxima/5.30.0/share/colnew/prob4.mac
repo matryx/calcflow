@@ -1,0 +1,191 @@
+/* Problem 4 for colnew, example of continuation,
+   written by Michel Talon
+
+   If everything is working correctly with Maxima's interface to
+   colnew, then this should match the Fortran result in the ex4 
+   directory, which is a translation of this to Fortran.
+*/
+
+/******************************************************************/
+/* Quantum Neumann equation, with 2 "eigenvalues" c_1 and c_2     */
+/* (c_1=v-c_2-c_3, v is a parameter, used in continuation)        */
+/*                                                                */
+/* diff(f,x,2) + (1/2)*(1/x + 1/(x-1) + 1/(x-y))*diff(f,x)        */
+/*      - (c_1/x + c_2/(x-1) + c_3/(x-y))* f(x) = 0               */
+/*                                                                */
+/* and 4 "boundary" conditions: diff(f,x)(a_k)=2*c_k*f(a_k) for   */
+/* k=1,2,3, a_k=(0, 1 , y)  and normalization f(1) = 1            */ 
+/*                                                                */
+/* The z-vector is z_1=f, z_2=diff(f,x), z_3=c_2 and z_4=c_3      */
+/* The guess is chosen to have one node in [0,1],  f(x)=2*x-1     */
+/* such that f(1)=1, c_2 and c_3 are chosen to cancel poles in    */
+/* the differential equation at 1.0 and y, z_3=1, z_4=1/(2*y-1)   */
+/* Ref: http://arxiv.org/pdf/hep-th/0407005                       */
+/******************************************************************/
+
+
+
+
+/* Number of differential equations */
+ncomp : 3;
+/* Orders */
+m : [2, 1, 1];
+
+
+/* Set up parameter array.  */
+ipar : makelist(0,k,1,11);
+
+/* Non-linear prob */
+ipar[1] : 1;
+
+/* Number of collocation points */
+ipar[2] : 3;
+
+
+/* Initial uniform mesh of 4 subintervals */
+ipar[3] : 4;
+ipar[8] : 0;
+
+/* Size of fspace, ispace */
+ipar[5] : 30000;
+ipar[6] : 3000;
+
+/* Medium output */
+ipar[7] : 0;
+/* Initial approx is provided */
+ipar[9] : 1;
+
+/* fixpnt is an array containing all fixed points in the mesh, in
+particular "boundary" points, except aleft and aright, ipar[11] its size */
+ipar[11] : 1;
+
+/* Tolerances on all components z_1, z_2, z_3, z_4 */
+ipar[4] : 4;
+
+/* Tolerance on f and diff(f,x) and on c_2 and c_3 */
+ltol : [1, 2, 3, 4];
+tol : [1d-5, 1d-5, 1d-5, 1d-5];
+
+fspace : makelist(0d0, k, 1, 30000)$
+ispace : makelist(0, k, 1, 3000)$
+
+/* the only one interior "boundary point" */
+fixpnt : [1.0d0];
+
+
+/* Define the differential equations */
+
+
+/* v is the parameter. To solve the eigenvalues problem one adds the
+equations c'_2 = 0, c'_3 = 0, so 4 unknowns constants, and 4 boundary conditions
+f -> z[1], f' -> z[2], c_2 -> z[3], c_3 -> z[4], c_1 -> v - z[3] - z[4] */
+
+
+f(x,z1,z2,z3,z4) :=
+  [- (1/2.0d0)*(1/x + 1/(x-1.0d0) + 1/(x-y))*z2 +
+      ((vv - z3 - z4)/x + z3/(x-1.0d0) + z4/(x-y))*z1,
+  0.0d0, 0.0d0];
+df : jacobian(f(x,z1,z2,z3,z4),[z1,z2,z3,z4]);
+
+
+/* Define the boundary conditions, in order, one at 0, two at 1, one at y */
+
+g(z1,z2,z3,z4) := [z2 - 2.0d0*z1*(vv-z3-z4), z2 - 2.0d0*z1*z3,
+                z1 - 1.0d0, z2 - 2.0d0*z1*z4];
+dg : jacobian(g(z1,z2,z3,z4), [z1,z2,z3,z4]);
+
+
+/* Define constant, y is defined here to have clean formulas above */
+
+y: 1.9d0;  /* Can be changed, but effect is not big */
+v: 0.00001d0; /* Take v small at first */
+
+
+/* Locations of side conditions, sorted, depends on y! */
+zeta : float([0.0d0, 1.0d0, 1.0d0, y]);
+/* Interval ends */
+aleft : 0.0d0;
+aright : y;
+
+
+fsub(x,z1,z2,z3,z4) := subst(['x=x,'y=y,'vv=v,'z1=z1,'z2=z2,'z3=z3,'z4=z4],
+                              f(x,z1,z2,z3,z4))$
+dfsub(x,z1,z2,z3,z4) := subst(['x=x,'y=y,'vv=v,'z1=z1,'z2=z2,'z3=z3,'z4=z4], df)$
+gsub(i,z1,z2,z3,z4) := subst(['x=x,'y=y,'vv=v,'z1=z1,'z2=z2,'z3=z3,'z4=z4],
+                              g(z1,z2,z3,z4)[i])$
+dgsub(i,z1,z2,z3,z4) := subst(['y=y,'vv=v,'z1=z1,'z2=z2,'z3=z3,'z4=z4], row(dg,i)[1])$
+
+
+
+/* eigenstates are characterized by number of nodes in [0,1] and in
+[1,y], here guess selects one node (zero) in [0,1] with linear
+f(x)=2*x-1 and constant c_2, c_3, so dmval=0. Notice that the z-vector
+has mstar = 4 components, while dmval has ncomp = 3 components. */
+
+init_guess(x) := [[2.0d0*x -1.0d0, 2.0d0, 1.0d0, 1/(2.0d0*y-1.0d0)],[0.0d0, 0.0d0, 0.0d0]];
+
+
+
+[iflag, fspace, ispace] :
+  colnew_expert(ncomp, m, aleft, aright, zeta, ipar, ltol, tol, fixpnt, ispace, fspace,
+ 		0, fsub, dfsub, gsub, dgsub, init_guess)$
+
+/* Plot values of solution at x = 0.1 0.2 ... 1.0 ...y */
+
+
+len: floor(1+y/0.1)$
+
+xx: makelist(0.1*k, k, 0, len)$
+
+zvals: colnew_appsln(xx, 4, fspace, ispace)$
+
+/* Values of the wave function f */
+
+fvals: makelist(zvals[k][1],k, 1, 1+len)$
+
+plot2d([discrete,xx,fvals])$
+
+
+/* Show eigenvalues, it suffices to use the first value of x. Energy
+is 2*(c_2+y*c_3). Show it */
+
+printf(true, "c_2 = ~5,2f    c_3 = ~5,2f   E/2 = ~5,2f ~%", 
+zvals[1][3], zvals[1][4], zvals[1][3]+y*zvals[1][4])$
+
+
+/* Now do the continuation by setting ipar[9]=3 and slowly varying v in 40
+steps. We store c_2 and c_3 in the array eigenval. */
+
+nsteps:100;
+eigenval: makelist([0.0,0.0,0.0],k,0,nsteps)$
+eigenval[1][1]: zvals[1][3]$
+eigenval[1][2]: zvals[1][4]$
+eigenval[1][3]: zvals[1][3]+y*zvals[1][4]$
+
+ipar[9] : 3;
+ipar[3] : 1;
+for i from 1 thru nsteps do
+  (v: v + 0.2,
+   print("v = ", v),
+   fsub(x,z1,z2,z3,z4) := subst(['x=x,'y=y,'vv=v,'z1=z1,'z2=z2,'z3=z3,'z4=z4],
+                              f(x,z1,z2,z3,z4)),
+   dfsub(x,z1,z2,z3,z4) := subst(['x=x,'y=y,'vv=v,'z1=z1,'z2=z2,'z3=z3,'z4=z4], df),
+   gsub(i,z1,z2,z3,z4) := subst(['x=x,'y=y,'vv=v,'z1=z1,'z2=z2,'z3=z3,'z4=z4],
+                              g(z1,z2,z3,z4)[i]),
+   dgsub(i,z1,z2,z3,z4) := subst(['y=y,'vv=v,'z1=z1,'z2=z2,'z3=z3,'z4=z4], row(dg,i)[1]),
+   ipar[3] : ispace[1],
+   [iflag, fspace, ispace] :
+   colnew_expert(ncomp, m, aleft, aright, zeta, ipar, ltol, tol, fixpnt, ispace, fspace,
+ 		0, fsub, dfsub, gsub, dgsub, init_guess),
+   zval: colnew_appsln([0.1d0], 4, fspace, ispace)[1],
+   eigenval[i+1][1]: zval[3],
+   eigenval[i+1][2]: zval[4],
+   eigenval[i+1][3]: zval[3]+y*zval[4])$
+
+
+/* Plot evolution of eigenvalues with v */
+
+vv: makelist(0.2*k,k,0,nsteps)$
+plot2d([[discrete,vv, makelist(eigenval[k][1],k,1,nsteps+1)],
+  [discrete,vv, makelist(eigenval[k][2],k,1,nsteps+1)],
+  [discrete,vv, makelist(eigenval[k][3],k,1,nsteps+1)]])$

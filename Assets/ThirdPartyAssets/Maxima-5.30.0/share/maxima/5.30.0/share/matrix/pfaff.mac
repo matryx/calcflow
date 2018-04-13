@@ -1,0 +1,29 @@
+ttyoff:true$
+pfaffian(integ,list):=block([sgn:-1,ans:0,pdum,ldum],
+  if not (listp(list)
+	  and integerp(integ)
+	  and integ>0
+	  and length(list)=integ*(integ+1)/2)
+  then error((errexp:[integ,list],"invalid arg to pfaffian.merrexp holds the offending expression.")),
+  if integ =1 then return(first(list)),
+  if evenp(integ)
+  then return(0),
+  if integ = 3
+  then return(list[1]*list[6]-list[2]*list[5]+list[3]*list[4])
+  else for kzero thru integ do
+	ans:ans+
+	    inpart(list,kzero)*(sgn:-sgn)*
+		pfaffian(integ-2,
+			 rest(inpart(list,
+				     apply('allbut,
+					   if listp(pdum:pfaffm[integ,kzero])
+					   then pdum
+					   else pfaffm[integ,kzero]:(ldum:(kzero+1)*(2*integ-kzero)/2,
+								     pdum:[],
+								     if kzero#1 then for mdum:2 thru kzero do
+								       pdum:endcons(kzero+(mdum-1)*(2*integ-mdum)/2,pdum),
+								     for mdum:kzero*(2*integ-kzero+1)/2+1 thru ldum do
+								       pdum:endcons(mdum,pdum),
+								     pdum))),integ)),
+  ans)$
+ttyoff:false$

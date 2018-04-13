@@ -1,0 +1,24 @@
+/*  written by Gosei Furuya <go.maxima@gmail.com> 
+#  This program is free software; you can redistribute it and/or modify        
+#  it under the terms of the GNU General Public License as published by        
+#  the Free Software Foundation; either version 2 of the License, or           
+#  (at your option) any later version.                
+*/
+
+/*to find integral factor for a diff form,if posiible */
+trans_toexact(_w):= block([anorm_table,a,b,c],
+    if d(_w)@ _w # 0 then return("no answer")
+    else (
+	   anorm_table:norm_table,
+	   a:makelist(concat('u,i),i,1,dim),
+	   norm_table:map("*",a,norm_table),
+	   for i:1 thru dim do
+             ( extsubb2[i]:cons(basis[i]=norm_table[i]/basis[i],extsub[i])),
+           b:_w & _w,
+           c:( d(_w) & _w) /b,
+           norm_table:anorm_table,
+	   for i:1 thru dim do
+             ( extsubb2[i]:cons(basis[i]=norm_table[i]/basis[i],extsub[i]))
+           ),
+	c
+	);

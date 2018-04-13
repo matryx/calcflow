@@ -1,0 +1,1054 @@
+/* This file contains tests added since April 2002 */
+
+kill(all);
+done$
+
+/* This file assumes fpprec has its default value of 16 */
+fpprec:16;
+16;
+
+/* apropos function added 7 april 2002 
+   changed to accept only a string as an argument 06/2009
+*/
+apropos("tr_optimize_max_loop");
+[tr_optimize_max_loop]$
+
+/* test introduced 7 april 2002. bug fix incorporated 9 june 2002 */
+integrate(3^log(x),x);
+3^((1/log(3)+1)*log(x))/((1/log(3)+1)*log(3))$
+
+/* wester[1995] problem 84 
+   Bug 541030 fixed 2006-02-27, rev 1.14 of src/sin.lisp */
+integrate(sqrt(x+1/x-2),x,0,1);
+4/3$
+
+/* bug reported by kevin ellwood.  fixed mar 11 2004 */
+integrate(exp(-k*t)/sqrt(k*t),t);
+sqrt(%pi)*erf(sqrt(k*t))/k$
+
+/* a bug in chebyf.  fixed 20 apr 2004. */
+
+kill(t,k);
+done$
+integrate(sqrt(k*t)*t,t);
+2*t^2*sqrt(k*t)/5$
+integrate(sqrt(k*t)*t^(1/3),t);
+6*t^(4/3)*sqrt(k*t)/11$
+integrate(sqrt(k*t)/t^(3/2),t);
+sqrt(k*t)*log(t)/sqrt(t)$
+integrate(sqrt(k*t)/sqrt(t),t);
+sqrt(t)*sqrt(k*t)$
+kill(t,k);
+done$
+
+/* lisp error observed by stavros macrakis (#956730).  fixed 2004-05-20. */
+
+block([context:'foobar],
+  assume(n+1<0),
+  declare(n,integer),
+  errcatch(integrate(x^n,x,0,inf)));
+[]$
+
+error;
+["defint: integral is divergent."];
+
+killcontext('foobar);
+done$
+
+/* second thru tenth code added 9 june 2002 */
+l : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]$
+first(l);
+1$ 
+second(l);
+2$
+third(l);
+3$
+fourth(l);
+4$
+fifth(l);
+5$
+sixth(l);
+6$
+seventh(l);
+7$
+eighth(l);
+8$
+ninth(l);
+9$
+tenth(l);
+10$
+
+/* assoc tests */
+assoc(1,[x=2]);
+false$
+assoc(x,[x=2]);
+2$
+assoc(1,[x=2],foobar);
+foobar$
+
+/* some older versions of gcl had a bug that resulted in a failure of the */
+/* following. */
+primep(80630964769);
+true$
+
+
+/* maxima has a bug causing an incorrect answer for the second integral. */
+integrate(diff(f(x,y),x,1,y,1),x);
+'diff(f(x,y),y,1)$
+integrate(diff(f(x,y),x,1,y,1),y);
+'diff(f(x,y),x,1)$
+/* the same bug causes a bug with the second integral in this set. */
+h(x,y):=x*y*diff(f(x,y),x,1,y,1);
+h(x,y):=x*y*diff(f(x,y),x,1,y,1)$
+integrate(h(x,y),x);
+'integrate(x*'diff(f(x,y),x,1,y,1)*y,x)$
+integrate(h(x,y),y);
+'integrate(x*'diff(f(x,y),x,1,y,1)*y,y)$
+
+/* trigrat example from manual - fixed june 2002 */
+trigrat(sin(3*a)/sin(a+%pi/3));
+sqrt(3)*sin(2*a)+cos(2*a)-1;
+
+/* another trigrat from manual
+ * call ratsimp because result is not simplified same as expected result ... strange
+ */
+
+(sin(a)^2*sin(3*b+3*a)^2/sin(b+a)^2
+    -2*sin(a)*sin(3*a)*cos(b)*sin(b+a-%pi/3)*sin(3*b+3*a)
+    /(sin(a-%pi/3)*sin(b+a))
+    +sin(3*a)^2*sin(b+a-%pi/3)^2/sin(a-%pi/3)^2,
+ result : trigrat (%%),
+ expected :
+     (- (sqrt(3)*sin(4*b + 4*a) - cos(4*b + 4*a)
+      - 2*sqrt(3)*sin(4*b + 2*a) + 2*cos(4*b + 2*a)
+      - 2*sqrt(3)*sin(2*b + 4*a) + 2*cos(2*b + 4*a)
+      + 4*sqrt(3)*sin(2*b + 2*a) - 8*cos(2*b + 2*a) - 4*cos(2*b - 2*a)
+      + sqrt(3)*sin(4*b) - cos(4*b) - 2*sqrt(3)*sin(2*b) + 10*cos(2*b)
+      + sqrt(3)*sin(4*a) - cos(4*a) - 2*sqrt(3)*sin(2*a) + 10*cos(2*a)
+      - 9)/4),
+ ratsimp (result - expected));
+0;
+
+/* verify that trigrat distributes over composite objects
+ * resolves SF bug reports # 1732315 and 1562340.
+ */
+
+trigrat (matrix ([1, 2], [3, 4]));
+''(matrix ([trigrat(1), trigrat(2)], [trigrat(3), trigrat(4)]));
+
+trigrat ({1, 2, 3});
+''({trigrat(1), trigrat(2), trigrat(3)});
+
+trigrat ([1, 2, 3]);
+''([trigrat(1), trigrat(2), trigrat(3)]);
+
+(kill (a, b), trigrat ([a < b, a <= b, a = b, a # b, a >= b, a > b]));
+''([trigrat(a) < trigrat(b),
+    trigrat(a) <= trigrat(b),
+    trigrat(a) = trigrat(b),
+    trigrat(a) # trigrat(b),
+    trigrat(a) >= trigrat(b),
+    trigrat(a) > trigrat(b)]);
+
+/* Bug ID: 742909 - trigrat(sin(x/2)) makes a mess
+ * Bug ID: 2999635 - trigrat(sin(1)) makes mess
+ */
+trigrat(sin(x/2));
+sin(x/2);
+trigrat(sin(1));
+sin(1);
+
+/* -----------------------------------------------------------------------------
+ * Bug ID: 3398047 - trigrat() causes an error
+ * -------------------------------------------------------------------------- */
+
+trigrat((cos(x)+(sqrt(3)+2)*sin(x)-4*sin(5*%pi/12)*cos(x-(7*%pi)/12))/cos(x));
+2;
+
+/* compile() will fail with gcl if gcc not installed */
+f(x):=x+2;
+f(x):=x+2;
+f(2);
+4;
+compile(f);
+[f];
+f(2);
+4;
+/* some tests for lambda expressions.
+  we test for both translate and compile because there are some compiler
+  macros for translated code */
+define_variable(qwerty,1,fixnum);
+1;
+/* m-tlambda */
+f():=apply(lambda([u],u+qwerty),[1]);
+f():=apply(lambda([u],u+qwerty),[1]);
+f();
+2;
+translate(f);
+[f];
+f();
+2;
+compile(f);
+[f];
+f();
+2;
+/* m-tlambda&env */
+f(x):=apply(lambda([u],u+x),[1]);
+f(x):=apply(lambda([u],u+x),[1]);
+f(1);
+2;
+translate(f);
+[f];
+f(1);
+2;
+compile(f);
+[f];
+f(1);
+2;
+/* m-tlambda&env */
+f(x,qwerty):=apply(lambda([u],u+x+qwerty),[1]);
+f(x,qwerty):=apply(lambda([u],u+x+qwerty),[1]);
+f(1,0);
+2;
+translate(f);
+[f];
+f(1,0);
+2;
+compile(f);
+[f];
+f(1,0);
+2;
+/* m-tlambda&env (outer) and m-tlambda (inner) */
+f(x):=apply(lambda([u],x+apply(lambda([v],v+qwerty),[u])),[-1]);
+f(x):=apply(lambda([u],x+apply(lambda([v],v+qwerty),[u])),[-1]);
+f(2);
+2;
+translate(f);
+[f];
+f(2);
+2;
+compile(f);
+[f];
+f(2);
+2;
+/* m-tlambda& */
+f():=apply(lambda([u,[v]],[u+qwerty,v]),[0,2,3]);
+f():=apply(lambda([u,[v]],[u+qwerty,v]),[0,2,3]);
+f();
+[1,[2,3]];
+translate(f);
+[f];
+f();
+[1,[2,3]];
+compile(f);
+[f];
+f();
+[1,[2,3]];
+/* m-tlambda&env& */
+f(x):=apply(lambda([u,[v]],[u+x,v]),[0,2,3]);
+f(x):=apply(lambda([u,[v]],[u+x,v]),[0,2,3]);
+f(1);
+[1,[2,3]];
+translate(f);
+[f];
+f(1);
+[1,[2,3]];
+compile(f);
+[f];
+f(1);
+[1,[2,3]];
+/* m-tlambda&env (from the sum), the inner lambda currently remains
+  untranslated.  this is really a test for fungen&env-for-mevalsumarg. */
+f(n):=sum(apply(lambda([x],i+x),[i]),i,1,n);
+f(n):=sum(apply(lambda([x],i+x),[i]),i,1,n);
+f(3);
+12;
+translate(f);
+[f];
+f(3);
+12;
+compile(f);
+[f];
+f(3);
+12;
+kill(qwerty,f);
+done;
+/* this should kill f, but doesn't which upsets subsequent tests
+   redefining it then killing it does the right thing */
+f(x):=x+3;
+f(x):=x+3;
+kill(f);
+done;
+
+/* trignometric and hyperbolic functions of complex arguments */
+sin(%i*z);
+%i*sinh(z);
+cos(%i*z);
+cosh(z);
+tan(%i*z);
+%i*tanh(z);
+csc(%i*z);
+-%i*csch(z);
+sec(%i*z);
+sech(z);
+cot(%i*z);
+-%i*coth(z);
+sinh(%i*z);
+%i*sin(z);
+cosh(%i*z);
+cos(z);
+tanh(%i*z);
+%i*tan(z);
+csch(%i*z);
+-%i*csc(z);
+sech(%i*z);
+sec(z);
+coth(%i*z);
+-%i*cot(z);
+
+/* trigreduce(sinh(x)^n)) wrong for some cases.  fixed 4 oct 2003 */
+trigreduce(sin(x)^2);
+(1-cos(2*x))/2;
+trigreduce(sin(x)^3);
+(3*sin(x)-sin(3*x))/4;
+trigreduce(sin(x)^4);
+(cos(4*x)-4*cos(2*x)+3)/8;
+trigreduce(sin(x)^5);
+(sin(5*x)-5*sin(3*x)+10*sin(x))/16;
+trigreduce(cos(x)^2);
+(cos(2*x)+1)/2;
+trigreduce(cos(x)^3);
+(cos(3*x)+3*cos(x))/4;
+trigreduce(cos(x)^4);
+(cos(4*x)+4*cos(2*x)+3)/8;
+trigreduce(cos(x)^5);
+(cos(5*x)+5*cos(3*x)+10*cos(x))/16;
+trigreduce(sinh(x)^2);
+(cosh(2*x)-1)/2;
+trigreduce(sinh(x)^3);
+(sinh(3*x)-3*sinh(x))/4;
+trigreduce(sinh(x)^4);
+(cosh(4*x)-4*cosh(2*x)+3)/8;
+trigreduce(sinh(x)^5);
+(sinh(5*x)-5*sinh(3*x)+10*sinh(x))/16;
+trigreduce(cosh(x)^2);
+(cosh(2*x)+1)/2;
+trigreduce(cosh(x)^3);
+(cosh(3*x)+3*cosh(x))/4;
+trigreduce(cosh(x)^4);
+(cosh(4*x)+4*cosh(2*x)+3)/8;
+trigreduce(cosh(x)^5);
+(cosh(5*x)+5*cosh(3*x)+10*cosh(x))/16;
+
+/* de moivre's theorem - abramowitz & stegun 4.3.48, 4.5.53 */
+expand(trigreduce(expand((cos(x)+%i*sin(x))^2)));
+%i*sin(2*x)+cos(2*x);
+expand(trigreduce(expand((cos(x)+%i*sin(x))^3)));
+%i*sin(3*x)+cos(3*x);
+expand(trigreduce(expand((cos(x)+%i*sin(x))^4)));
+%i*sin(4*x)+cos(4*x);
+expand(trigreduce(expand((cos(x)+%i*sin(x))^5)));
+%i*sin(5*x)+cos(5*x);
+expand(trigreduce(expand((cos(x)+%i*sin(x))^6)));
+%i*sin(6*x)+cos(6*x);
+expand(trigreduce(expand((cos(x)+%i*sin(x))^7)));
+%i*sin(7*x)+cos(7*x);
+expand(trigreduce(expand((cos(x)+%i*sin(x))^8)));
+%i*sin(8*x)+cos(8*x);
+expand(trigreduce(expand((cos(x)+%i*sin(x))^9)));
+%i*sin(9*x)+cos(9*x);
+expand(trigreduce(expand((cosh(x)+sinh(x))^2)));
+sinh(2*x)+cosh(2*x);
+expand(trigreduce(expand((cosh(x)+sinh(x))^3)));
+sinh(3*x)+cosh(3*x);
+expand(trigreduce(expand((cosh(x)+sinh(x))^4)));
+sinh(4*x)+cosh(4*x);
+expand(trigreduce(expand((cosh(x)+sinh(x))^5)));
+sinh(5*x)+cosh(5*x);
+expand(trigreduce(expand((cosh(x)+sinh(x))^6)));
+sinh(6*x)+cosh(6*x);
+expand(trigreduce(expand((cosh(x)+sinh(x))^7)));
+sinh(7*x)+cosh(7*x);
+expand(trigreduce(expand((cosh(x)+sinh(x))^8)));
+sinh(8*x)+cosh(8*x);
+expand(trigreduce(expand((cosh(x)+sinh(x))^9)));
+sinh(9*x)+cosh(9*x);
+
+/* bug 835287 */
+solve('diff(y,x),'diff(y,x));
+['diff(y,x,1)=0];
+
+/* multiplicity bug in solve.lisp 1.3 - 13 may 2004 */
+eigenvalues(matrix([3,1,0,0],[-4,-1,0,0],[7,1,2,1],[-17,-6,-1,0]));
+[[1],[4]];
+
+/* Bug 1369669 */
+trigexpand(csc(3*x));
+csc(x)^3*sec(x)^3/(3*csc(x)^2*sec(x)-sec(x)^3);
+
+/* Bug 1369451 */
+trigexpand(sec(x+y));
+csc(x)*sec(x)*csc(y)*sec(y)/(csc(x)*csc(y)-sec(x)*sec(y));
+
+/* Bug 1309377 */
+(fpred(x) := (prederror:'false, is(x <= -1)),0);
+0$
+
+fpred(xyzzy);
+unknown$
+translate(fpred);
+[fpred]$
+fpred(xyzzy);
+unknown$
+
+/* Bug 1281737 */
+limit(atan(x)/(1/exp(1)-exp(-(1+x)^2)),x,inf);
+%e*%pi/2;
+
+/* Bug 1363411 */
+'sum(1+f(k),k,1,2),simpsum;
+f(2) + f(1) + 2;
+
+/* Bug 1403415, fixed in clmacs.lisp rev 1.20 */
+float(0.0b0);
+0.0;
+
+/* Bug 1404754, fixed in float.lisp rev 1.23 */
+1.0b0*x;
+1.0b0*x;
+
+/* Bug 1374704.  See also 1418010 because result isn't simplified. */
+(assume(cos(x)>0),0);
+0;
+integrate(sin(x)/cos(x)^2,x,0,%pi/3);
+1$
+
+/*
+ * Test compiled array access
+ */
+use_fast_arrays:false;
+false;
+
+(ar:make_array('fixnum,3,2),0);
+0;
+(aref(array,row,col):=array[row,col],0);
+0;
+ar[2,1]:1;
+1;
+aref(ar,2,1);
+1;
+compile(aref);
+[aref];
+aref(ar,2,1);
+1;
+/* A old-style maxima hashed array */
+har[2,1]:1;
+1;
+aref(har,2,1);
+1;
+
+use_fast_arrays:true;
+true;
+har2[3,4]:12;
+12;
+aref(har2,3,4);
+12;
+
+/*
+ * This test from Fabrizio Caruso, maxima list, 2006/02/14 
+ *
+ * We're basically trying to test that the compiled version of foo
+ * returns a fixnum array, just like the interpreted one.
+ */
+(foo(x) := block([r], r : make_array('fixnum,2), r[0]:x,r[1]:x+1, return(r)),0);
+0$
+
+(expr : foo(7), arrayinfo(expr));
+[declared,1,[1]]$
+
+compile(foo);
+[foo];
+
+(expr : foo(7), arrayinfo(expr));
+[declared,1,[1]]$
+
+use_fast_arrays:false;
+false;
+
+/* Bug 1405931: integrate(log(x)/(x^2+1)^2,x,0,inf)
+ */
+integrate(log(x)/(x^2+1)^2,x,0,inf);
+-%pi/4;
+
+/*
+ * Bug 941457: integrate(1/x^5,x,1,2^(1/78))
+ * Fixed 2006/03/13.  Solution needs work, though.
+ */
+integrate(1/x^5,x,1,2^(1/78));
+1/4-(1/8)*2^(37/39);
+
+integrate(1/x^3, x, 1, inf);
+1/2;
+
+/*
+ * Bug 938235: integrate((1/2)*u^2-1/u^5,u,1,sqrt(2))
+ * Fixed 2006/03/13.  Solution needs work, though.
+ */
+integrate((1/2)*u^2-1/u^5,u,1,sqrt(2));
+sqrt(2)/3-17/48;
+
+/*
+ * These next two cases are regression tests.  Rev 1.11 of sin.lisp
+ * caused different (much messier) results to be returned.
+ */
+integrate(sin(2*x)/sec(x),x);
+-2*cos(x)^3/3;
+
+integrate(-a*sin(2*x)/(a*sin(x)^2+b),x);
+-log(a*sin(x)^2+b);
+
+/*
+ * Bug 1471861: limit(abs(sin(x)/x),x,0);
+ * Fixed 2006/05/05, limit.lisp, rev 1.20.
+ */
+limit(abs(sin(x)/x),x,0);
+1;
+
+/* 
+ * Bug 1482843: subscripted variable causes trouble in integrate
+ *
+ * Fixed in defint.lisp, rev 1.25, 2006/05/06.
+ */
+integrate(exp(-(x-mu[1])^2),x,0,inf);
+sqrt(%pi)*erf(mu[1])/2+sqrt(%pi)/2;
+
+/*
+ * Bug 1487703: integrate((sqrt(x^4-6*x^2+1)-x^2+1)/(2*x),x) fails
+ *
+ * Fixed in sin.lisp, 2006/05/14.  We don't loop forever anymore.
+ */
+integrate((sqrt(x^4-6*x^2+1)-x^2+1)/(2*x),x);
+('integrate((sqrt(x^2+2*x-1)*sqrt(x^2-2*x-1))/x,x)+log(x)-x^2/2)/2;
+
+/*
+ * Bug mentioned in mailing-list, 2006-05-31, "problem with bigfloats"
+ */
+exp(1.0b-1);
+1.105170918075648b0;
+
+/* sqrt(0b0) loops endlessly (bug report # 1515703)
+ * asin(1b0) triggers same bug (it eventually calls sqrt(0b0))
+ * Problem was in FPROOT.
+ */
+
+sqrt(0b0);
+0b0;
+
+/* 0b0^(1/n) is not routed through FPROOT. Test it anyway. */
+[0b0^(1/2), 0b0^(1/3), 0b0^(1/17)];
+[0b0, 0b0, 0b0];
+
+asin(1b0);
+''(bfloat(%pi/2));
+
+asin(-1b0);
+''(-bfloat(%pi/2));
+
+/* li[2](1.0) stack overflow (bug report # 1514861)
+ */
+
+li[2](1.0);
+''(ev (%pi^2/6, numer));
+
+/* bug report [ 782046 ] limit(abs(x),x,0) fails
+ * appears to be fixed in 5.9.3cvs -- verify
+ */
+
+limit (abs(x), x, 0);
+0;
+
+/* Related to Bug [1044318] defint(1/(sin(x)^2+1),x,0,3*%pi)
+ *
+ * integrate(1/(sin(x)^2+1),x,0,n*2*%pi) should be
+ * n*integrate(1/(sin(x)^2+1),x,0,2*%pi), for positive integer n.  We
+ * were just returning the same value.  
+ */
+factor(integrate(1/(sin(x)^2+1),x,0,2*%pi));
+sqrt(2)*%pi;
+
+integrate(1/(sin(x)^2+1),x,0,4*%pi);
+2*sqrt(2)*%pi;
+
+integrate(1/(sin(x)^2+1),x,0,20*%pi);
+10*sqrt(2)*%pi;
+
+/*
+ * Bug  1547769:  integrate(sqrt(x^3/(2*a-x)),x,0,2*a);
+ *
+ * We don't get an internal error, and we should be able to evaluate
+ * this.  defint.lisp, rev 1.27
+ */
+(assume(a > 0), 0);
+0;
+
+integrate(sqrt(x^3/(2*a-x)),x,0,2*a);
+3*%pi*a^2/2;
+
+/*
+ * Bug [1044318] defint(1/(sin(x)^2+1),x,0,3*%pi)
+ *
+ * But there are other bugs related to this one.
+ */
+factor(integrate(1/(sin(x)^2+1),x,0,3*%pi));
+(3 / 2) * sqrt(2)*%pi;
+
+/*
+ * Bug [1504505] integrate( 1/(x^8-1),x,0,1/2) => internal error
+ *
+ * Fixed in residu.lisp, 1.5.
+ *
+ * The call to factor is to get rid of some numerical factors.
+ */
+ratsimp(ev(logcontract((integrate(1/(x^8-1),x,0,1/2))),algebraic) + 
+(sqrt(2)*log((2^(3/2)+5)/(2^(3/2)-5)/-1)
+      +2*sqrt(2)*atan((sqrt(2)+2)/2)
+      +2*sqrt(2)*atan((sqrt(2)-2)/2)+log(9)
+      +4*atan(1/2))
+ /16);
+0;
+
+/*
+ * Bug [ 1582625 ] integrate(t^2*log(t)/((t^2-1)*(t^4+1)), t, 0, 1) wrong?
+ *
+ * Fixed in defint.lisp
+ *
+ */
+integrate(t^2*log(t)/((t^2-1)*(t^4+1)), t, 0, 1);
+/* The following result has changed to an equivalent result,
+ * because of a change in simp.lisp revision 14.11.2011.
+ * -((sqrt(2)-2)*%pi^2/32);
+ */
+(sqrt(2)-1)*%pi^2/2^(9/2)$
+
+/*
+ * Bug [ 1073338 ] integrate yields incorrect result on rational function
+ *
+ * Here's one of the tests listed in that bug report.
+ */
+logcontract(ratsimp(factor(integrate (1/((x-3)^4+1), x,0,1)))),algebraic;
+(sqrt(2)*log((5*sqrt(2)-38)/(5*sqrt(2)+38)/-1)
+ +2^(3/2)*atan((7*sqrt(2)+5)/73)+2^(3/2)*atan((7*sqrt(2)-5)/73))
+
+ /8$
+/*
+ * Work around in residu.lisp, rev 1.9
+ *
+ * To make the answer shorter and easier to read, we need sqrtdenest,
+ * so load it up.
+ *
+ */
+(load(sqdnst), true);
+true;
+factor(expand(sqrtdenest(integrate (1/((x-3)^4+1/2), x,0,1))))
+/* we factor the result and subtract it */
+-factor(-(2*atan((2^(13/4)+2^(5/2)+2^(3/4))/(-2^(13/4)+2^(3/4)-98))
+ +2*atan((-2^(13/4)+2^(5/2)-2^(3/4))/(-2^(13/4)+2^(3/4)+98))
+ +log((3*2^(9/4)-2^(3/4)+sqrt(2)+73)/33)
+ -log((-3*2^(9/4)+2^(3/4)+sqrt(2)+73)/33))
+ /2^(7/4));
+0;
+
+/*
+(2*atan((sqrt(2)-4*2^(1/4)+8)/(49*2^(3/4)+sqrt(2)-8))
+ -log((2^(3/4)+12*sqrt(2)+73*2^(1/4)-2)/(33*2^(1/4)))
+ +log((2^(3/4)-12*sqrt(2)+73*2^(1/4)+2)/(33*2^(1/4)))
+ -2*atan((sqrt(2)+4*2^(1/4)+8)/(-49*2^(3/4)+sqrt(2)-8)))
+ /(2*2^(3/4))$
+ */
+
+/*
+ * Bug [ 1607567 ] trigreduce([atan(sin(a)/cos(a))]) => [ atan(tan(a)) ] (FIX)
+ */
+(assume(a>-%pi/2, a<%pi/2),0);
+0;
+
+trigreduce(atan(sin(a)/cos(a)));
+a;
+trigreduce([atan(sin(a)/cos(a))]);
+[a];
+
+(forget(a>-%pi/2, a<%pi/2),0);
+0;
+
+trigreduce([sin(x)^2]);
+[(1-cos(2*x))/2];
+
+/*
+ * Bug [ 1620977 ] limit(5^n/(2^n*3^n),n,inf) is wrong
+ */
+limit(5^n/(2^n*3^n),n,inf);
+0;
+
+/*
+ * Bug [ 1370433 ] trigsimp(sqrt(%i2)) != sqrt(trigsimp(%i2))
+ */
+trigsimp(sqrt(2*(cos(x)^2-sin(x)^2)+2));
+''(sqrt(trigsimp(2*(cos(x)^2-sin(x)^2)+2)));
+
+/* Tests for COERCE-FLOAT-FUN via QUADPACK functions.
+ * COERCE-FLOAT-FUN is also an important element in plotting.
+ *
+ * Following cases are tested here:
+ *  EXPR is a symbol
+ *    name of a Lisp function
+ *    name of a Maxima function
+ *    name of a Maxima macro
+ *    a string which is the name of a Maxima operator (e.g., "!")
+ *    name of a simplifying function
+ *  EXPR is a Maxima lambda expression
+ *  EXPR is a general Maxima expression with atomic variable
+ *  EXPR is a general Maxima expression with subscripted variable
+ *
+ * The one case not tested: EXPR is the name of a DEFMSPEC function
+ */
+
+(kill(F1, F2, F3),
+ F1(foo) := sin(foo),
+ F2(bar) ::= sin(bar),
+ F3 : lambda([baz], sin(baz)),
+ postfix ("F4"),
+ "F4"(zorg) := sin(zorg),
+ 0);
+0;
+
+(tol : 1e-8,
+ expected : quad_qags (sin(quux), quux, 0, %pi, 'epsrel=tol),
+ [first (expected),
+  is (second (expected) < tol * first (expected)),
+  is (abs (first (expected) - 2.0) < tol * 2.0),
+  last (expected)]);
+[2.0, true, true, 0];
+
+quad_qags (F1, blurf, 0, %pi, 'epsrel=tol);
+''(expected);
+
+quad_qags (F2, mumble, 0, %pi, 'epsrel=tol);
+''(expected);
+
+quad_qags (F3, gronk, 0, %pi, 'epsrel=tol);
+''(expected);
+
+quad_qags ("F4", flopt, 0, %pi, 'epsrel=tol);
+''(expected);
+
+quad_qags (sin, foobar, 0, %pi, 'epsrel=tol);
+''(expected);
+
+(translate (F1), ?not(?null(?fboundp (F1))));
+true;
+
+quad_qags (F1, glump, 0, %pi, 'epsrel=tol);
+''(expected);
+
+quad_qags (sin(y[1]), y[1], 0, %pi, 'epsrel=tol);
+''(expected);
+
+/*
+ * [ 1654183 ] integrate(x^2 / (1+x^6)^(3/2),x);
+ */
+integrate(x^2/(1+x^6)^(3/2),x);
+x^3/(3*sqrt(x^6+1));
+
+integrate(x^2/(1+x^6)^(3/2),x,-1,1);
+sqrt(2)/3;
+
+/*
+ * A few more tests of CHEBYF that handles integrals of the form
+ *
+ * x^r1*(c1+c2*x^q)^r2
+ */
+/* (r1-q+1)/q a positive integer */
+integrate(x^7/(1+x^4)^(3/2),x);
+sqrt(x^4+1)/2+1/(2*sqrt(x^4+1));
+
+/* r2 an integer */
+integrate(sqrt(x)/(1+x^(3/2))^2,x);
+-2/(3*(x^(3/2)+1));
+
+/* (r1-q+1)/q a negative integer */
+integrate(x^(-1)/(1+x^4)^(3/2),x);
+-log(sqrt(x^4+1)+1)/4+log(sqrt(x^4+1)-1)/4+1/(2*sqrt(x^4+1));
+
+/* (r1-q+1)/q + r2 an integer */
+integrate(sqrt(x)*(1+x^2)^(1/4),x);
+log((x^2+1)^(1/4)/sqrt(x)+1)/8-log((x^2+1)^(1/4)/sqrt(x)-1)/8
+			      +atan((x^2+1)^(1/4)/sqrt(x))/4
+			      +(x^2+1)^(1/4)/(sqrt(x)*(2*(x^2+1)/x^2-2))$
+
+/*
+ * Bug [ 1552789 ] integrate(1/(sin(x)^2+1),x,1,1+%pi)
+ *
+ * This bug said it was slow.  That's no longer true, but the result
+ * was wrong.
+ * 
+ * This has been fixed for this particular case.
+ */
+integrate(1/(sin(x)^2+1),x,1,1+%pi);
+%pi/sqrt(2);
+
+/* A few more related tests.  I think these are right */
+integrate(1/(sin(x)^2+1),x,1,1+4*%pi);
+2*sqrt(2)*%pi;
+
+/*
+ * Bug [ 1690374 ] asin(1 / sqrt(2))
+ *
+ * We return %pi/4 now.
+ */
+asin(1/sqrt(2)),%piargs;
+%pi/4;
+asin(-1/sqrt(2)),%piargs;
+-%pi/4;
+acos(1/sqrt(2)),%piargs;
+%pi/4;
+acos(-1/sqrt(2)),%piargs;
+3*%pi/4;
+
+/* Bug [ 1045287 ] */
+floatnump(float(exp(exp(2))));
+true$
+
+/*
+ * Bug [ 1778796 ] integrate( (x^3+1)/(x^4 + 4*x + 1), 0, 1) 
+ *
+ * Not really a bug, but maxima takes way to long to compute the 
+ * integral, and the result is extremely long.  The fix is it try 
+ * the antiderivative first before trying the keyhole contour.
+ */
+integrate( (x^3+1)/(x^4 + 4*x + 1), x, 0, 1);
+log(6)/4;
+
+/* [ 1884711 ] bug when adding fractions involving square roots */
+factor(sqrt(2)/6-2*sqrt(2)/6);
+-sqrt(2)/6;
+
+sqrt(3)/12 - 5*sqrt(3)/12;
+-1/sqrt(3);
+
+/* Bug reported to mailing list 2008-03-23
+ * Bug causes a Lisp error in FREEL (eventually called by $DEFINT).
+ */
+
+block ([foo],
+    apply (forget, facts ()),
+    assume (equal (a, 0)),
+    foo : integrate (cos(a*x)/(1 + x^2), x, 0, inf),
+    forget (equal (a, 0)),
+    foo);
+%e^-a * (%pi*%e^(2*a) + %pi)/4;
+
+/* verify that verbified math functions are not evaluated to numbers
+ * bug reported to mailing list 2007-11-19
+ */
+
+(kill (x, t),
+ 'integrate (sqrt (9*x^2 + 37), x, 0, 2),
+ changevar (%%, 3*x = sqrt(37)*sinh(t), t, x),
+ ev (%%, nouns));
+37*%e^-(2*asinh(6/sqrt(37)))
+  *(%e^(4*asinh(6/sqrt(37)))+4*asinh(6/sqrt(37))
+                              *%e^(2*asinh(6/sqrt(37)))-1) /24;
+
+/* considering the verbification stuff in more detail:
+ * (1) verify that foo(non-float), nouns => non-numeric
+ * (2) verify that foo(non-float), numer => float
+ * (3) verify that foo(float) => float
+ */
+
+/* ignore last few digits; not important in this context */
+
+(kill (all), float_approx_equal_tolerance : 1e-12, 0);
+0;
+
+/* LIST OF MATH FUNCTIONS FOR WHICH THERE ARE FLOAT FUNCTIONS
+ * (1) FUNCTIONS OF 1 ARGUMENT
+ */
+(F1 :
+ [erf, airy_ai, airy_bi, airy_dai, airy_dbi, elliptic_ec,
+  elliptic_kc, exp, log, factorial, gamma, acosh, acoth, acsch,
+  asech, asinh, atanh, cosh, coth, csch, sech, sinh, tanh, sqrt,
+  acos, acot, acsc, asec, asin, atan, cos, cot, csc, sec, sin, tan,
+  li[1], li[2], li[3], psi[0], psi[1], psi[2]],
+ Y1 : makelist (foo(1/7), foo, F1),
+ ev (Y1, nouns));
+[erf(1/7), 'airy_ai(1/7), 'airy_bi(1/7), 'airy_dai(1/7),
+ 'airy_dbi(1/7), 'elliptic_ec(1/7), 'elliptic_kc(1/7), %e^(1/7),
+ -log(7), (1/7)!, gamma(1/7), acosh(1/7), acoth(1/7), acsch(1/7),
+ asech(1/7), asinh(1/7), atanh(1/7), cosh(1/7), coth(1/7), csch(1/7),
+ sech(1/7), sinh(1/7), tanh(1/7), 1/sqrt(7), acos(1/7), acot(1/7),
+ acsc(1/7), asec(1/7), asin(1/7), atan(1/7), cos(1/7), cot(1/7),
+ csc(1/7), sec(1/7), sin(1/7), tan(1/7), -log(6/7), li[2](1/7),
+ li[3](1/7), psi[0](1/7), psi[1](1/7), psi[2](1/7)];
+
+ev (Y1, numer);
+[0.16010712672873, 0.31821739764818, 0.67928220872456, 
+- 0.25544752010866, 0.45500004582164, 1.513096652187913, 
+1.631906796078438, 1.153564994895108, - 1.945910149055313, 
+0.93543756289255, 6.548062940247834, 1.427448757889531*%i, 
+0.14384103622589 - 1.570796326794897*%i, 2.644120761058629, 
+2.633915793849633, 0.1423756431678, 0.14384103622589, 
+1.010221447322645, 7.047554385466551, 6.976247043798608, 
+0.98988197355171, 0.14334354757246, 0.14189319376693, 
+0.37796447300923, 1.427448757889531, 1.428899272190733, 
+1.570796326794897 - 2.633915793849634*%i, 2.633915793849634*%i, 
+0.14334756890537, 0.14189705460416, 0.98981326044662, 
+6.952316038379697, 7.023866335396166, 1.010291577169605, 
+0.14237172979226, 0.14383695943619, 0.15415067982726, 
+0.14831179749879, 0.14552316969849, - 7.363980242224349, 
+50.3574714369117, - 687.6815220686585];
+
+makelist (foo(float(1/7)), foo, F1);
+[0.16010712672873, 0.31821739764818, 0.67928220872456, 
+- 0.25544752010866, 0.45500004582164, 1.513096652187913, 
+1.631906796078438, 1.153564994895108, - 1.945910149055313, 
+0.93543756289255, 6.548062940247834, 1.427448757889531*%i, 
+0.14384103622589 - 1.570796326794897*%i, 2.644120761058629, 
+2.633915793849633, 0.1423756431678, 0.14384103622589, 
+1.010221447322645, 7.047554385466551, 6.976247043798608, 
+0.98988197355171, 0.14334354757246, 0.14189319376693, 
+0.37796447300923, 1.427448757889531, 1.428899272190733, 
+1.570796326794897 - 2.633915793849634*%i, 2.633915793849634*%i, 
+0.14334756890537, 0.14189705460416, 0.98981326044662, 
+6.952316038379697, 7.023866335396166, 1.010291577169605, 
+0.14237172979226, 0.14383695943619, 0.15415067982726, 
+0.14831179749879, 0.14552316969849, - 7.363980242224349, 
+50.3574714369117, - 687.6815220686585];
+
+/* (2) FUNCTIONS OF 2 ARGUMENTS
+ */
+(F2 : 
+ [atan2, bessel_i, bessel_j, bessel_k, bessel_y,
+jacobi_cd, jacobi_cn,
+  jacobi_cs, jacobi_dc, jacobi_dn, jacobi_ds, jacobi_nc, jacobi_nd,
+  jacobi_ns, jacobi_sc, jacobi_sd, jacobi_sn, elliptic_e,
+  elliptic_eu, elliptic_f, beta],
+ Y2 : makelist (foo(1/7, 2/7), foo, F2),
+ ev (Y2, nouns));
+[atan(1/2), 'bessel_i(1/7, 2/7), 'bessel_j(1/7, 2/7),
+ 'bessel_k(1/7, 2/7), 'bessel_y(1/7, 2/7),
+ 'jacobi_cd(1/7, 2/7), 'jacobi_cn(1/7, 2/7), 'jacobi_cs(1/7, 2/7),
+ 'jacobi_dc(1/7, 2/7), 'jacobi_dn(1/7, 2/7), 'jacobi_ds(1/7, 2/7),
+ 'jacobi_nc(1/7, 2/7), 'jacobi_nd(1/7, 2/7), 'jacobi_ns(1/7, 2/7),
+ 'jacobi_sc(1/7, 2/7), 'jacobi_sd(1/7, 2/7), 'jacobi_sn(1/7, 2/7),
+ elliptic_e(1/7, 2/7), elliptic_eu(1/7, 2/7), elliptic_f(1/7, 2/7),
+ beta(1/7, 2/7)];
+
+ev (Y2, numer);
+[0.46364760900081, 0.82410033570153, 0.79518665715578, 
+1.44325571710677, - 1.035878262667884, 0.99270611823031, 
+0.98983293044762, 6.959141929885592, 1.007347473371774, 
+0.99710570154659, 7.010274039905824, 1.010271500613521, 
+1.002902699732754, 7.030622760487995, 0.14369587660018, 
+0.14264777586547, 0.1422349106284, 0.14271875687, 
+0.14258093144727, 0.1429957703483, 9.973633393356877];
+
+makelist (foo (float (1/7), float (2/7)), foo, F2);
+[0.46364760900081, 0.82410033570153, 0.79518665715578, 
+1.44325571710677, - 1.035878262667884, 0.99270611823031, 
+0.98983293044762, 6.959141929885592, 1.007347473371774, 
+0.99710570154659, 7.010274039905824, 1.010271500613521, 
+1.002902699732754, 7.030622760487995, 0.14369587660018, 
+0.14264777586547, 0.1422349106284, 0.14271875687, 
+0.14258093144727, 0.1429957703483, 9.973633393356877];
+
+(F2 :
+ [inverse_jacobi_cd, inverse_jacobi_cn, inverse_jacobi_cs,
+  inverse_jacobi_sc, inverse_jacobi_sd, inverse_jacobi_sn],
+ Y2 : makelist (foo(1/7, 2/7), foo, F2),
+ ev (Y2, nouns));
+['inverse_jacobi_cd(1/7,2/7),'inverse_jacobi_cn(1/7,2/7),
+ 'inverse_jacobi_cs(1/7,2/7),'inverse_jacobi_sc(1/7,2/7),
+ 'inverse_jacobi_sd(1/7,2/7),'inverse_jacobi_sn(1/7,2/7)];
+
+ev (Y2, numer);
+[1.562139916774403, 1.536246964132837, 1.537956342530595, 
+  .1420329085375161, .1430674391291362, 0.143487627597992];
+
+makelist (foo (float (1/7), float (2/7)), foo, F2);
+[1.562139916774403, 1.536246964132837, 1.537956342530595, 
+  .1420329085375161, .1430674391291362, 0.143487627597992];
+
+(kill (F2),
+ Y2 : [inverse_jacobi_dc (8/7, 1/7),
+  inverse_jacobi_dn (1/7, 8/7),
+  inverse_jacobi_ds (1/7, 8/7),
+  inverse_jacobi_nc (8/7, 9/7),
+  inverse_jacobi_nd (8/7, 9/7),
+  inverse_jacobi_ns (8/7, 9/7)],
+ ev (%%, nouns));
+['inverse_jacobi_dc(8/7,1/7),'inverse_jacobi_dn(1/7,8/7),
+ 'inverse_jacobi_ds(1/7,8/7),'inverse_jacobi_nc(8/7,9/7),
+ 'inverse_jacobi_nd(8/7,9/7),'inverse_jacobi_ns(8/7,9/7)];
+
+ev (Y2, numer);
+[.5422366033071744, 1.9430926302695156045465694, 
+1.969205044088928940255018036, 0.53608536161539688257016016, 
+0.461019342719434980049828553, 1.7162052237576627569674777881];
+
+[inverse_jacobi_dc (float (8/7), float (1/7)),
+ inverse_jacobi_dn (float (1/7), float (8/7)),
+ inverse_jacobi_ds (float (1/7), float (8/7)),
+ inverse_jacobi_nc (float (8/7), float (9/7)),
+ inverse_jacobi_nd (float (8/7), float (9/7)),
+ inverse_jacobi_ns (float (8/7), float (9/7))];
+[.5422366033071744, 1.9430926302695156045465694, 
+1.969205044088928940255018036, 0.53608536161539688257016016, 
+0.461019342719434980049828553, 1.7162052237576627569674777881];
+
+/* (3) FUNCTIONS OF 3 ARGUMENTS */
+(Y3 : elliptic_pi (1/2, 1/3, 1/4),
+ ev (Y3, nouns));
+elliptic_pi (1/2, 1/3, 1/4);
+
+ev (Y3, numer);
+.3411527670552568;
+
+elliptic_pi (float (1/2), float (1/3), float (1/4));
+.3411527670552568;
+
+/* (4) FUNCTIONS WHICH ARE DON'T SEEM TO
+ * GENERALLY YIELD NOUNS WHICH CAN BE EVALUATED TO NUMBERS
+ * AND WHICH ARE THEREFORE EXCLUDED FROM THESE TESTS
+ *  hermite chebyshev_t chebyshev_u scaled_bessel_i scaled_bessel_i0
+ *  stirling jacobi_p laguerre legendre_p legendre_q assoc_legendre_p
+ *  assoc_legendre_q spherical_bessel_j spherical_bessel_y
+ *  spherical_hankel1 spherical_hankel2 spherical_harmonic
+ *  ultraspherical pochhammer zeta genfact gen_laguerre
+ */
+ 
+(reset (float_approx_equal_tolerance), 0);
+0;
+
+/* disallow bigfloat conversion for floating point infinity and not-a-number.
+ * SF bug [ 2013654 ] bfloat(NaN) => finite number
+ */
+
+(foo : ?most\-positive\-double\-float,
+ bar : ?most\-negative\-double\-float,
+ block ([ratepsilon : 0], [bfloat (foo), bfloat (bar)]));
+/* might need to replace the expected result w/ a rat-ified value to ensure equality ... */
+[1.797693134862316b308, - 1.797693134862316b308];
+
+errcatch (bfloat (2*foo));
+[];
+
+errcatch (bfloat (2*bar));
+[];
+
+errcatch (bfloat (2*foo + 3*bar));
+[];
+
+/* Test that sinh(-x) for large x doesn't crash */
+sinh(-100b0)+sinh(100b0);
+0b0;

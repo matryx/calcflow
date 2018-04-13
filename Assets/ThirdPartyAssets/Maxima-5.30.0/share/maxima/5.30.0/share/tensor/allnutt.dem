@@ -1,0 +1,44 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Classification of Allnutt's type III perfect fluid metric
+ *
+ */
+
+if get('ctensor,'version)=false then load(ctensor);
+("Computing the Petrov classification of Allnutt's perfect fluid metric")$
+("We use frames")$
+cframe_flag:true;
+("We set up the metric by hand")$
+ct_coords:[t,x,y,z];
+(lfg:ident(4),lfg[1,1]:-1,lfg);
+g:4/9*exp(-3*x-4*y);
+f:n^2*exp(-x)-g/3;
+h:n^2*exp(-x+2*z)-n^2*exp(-x);
+q:3/4*sqrt(6)*g^(-3/4)*exp(-x/4-z);
+fri:matrix(
+[-q/sqrt(2)*(f*exp(2*x)-exp(-2*x)),exp(2*x)/sqrt(2),          0,          0],
+[-q/sqrt(2)*(f*exp(2*x)+exp(-2*x)),exp(2*x)/sqrt(2),          0,          0],
+[                     -sqrt(2*g)*q,               0,3/sqrt(2*g),          0],
+[                     -sqrt(2*h)*q,               0,          0,1/sqrt(2*h)])$
+cmetric(false);
+ug:invert(lg)$
+nptetrad(false);
+("We return to a coordinate base to compute the Weyl tensor")$
+cframe_flag:false;
+("The metric was computed for us by cmetric() already")$
+weyl(false);
+psi(true);
+("And obtain the Petrov class")$
+petrov();
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

@@ -1,0 +1,265 @@
+/* devine.usg 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *									 *
+ * Copyright (C) 2002 Martin Rubey <Martin.Rubey@LaBRI.fr>               *
+ *									 *
+ * This file is part of GNU Maxima.					 *
+ *									 *
+ * This program is free software; you can redistribute it and/or	 *
+ * modify it under the terms of the GNU General Public License as	 *
+ * published by the Free Software Foundation; either version 2 of	 *
+ * the License, or (at your option) any later version.			 *
+ *									 *
+ * This program is distributed in the hope that it will be		 *
+ * useful, but WITHOUT ANY WARRANTY; without even the implied		 *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR		 *
+ * PURPOSE. See the GNU General Public License for more details.	 *
+ *									 *
+ * History:								 *
+ * This is a translation of the Mathematica package Rate.m		 *
+ * by Christian Krattenthaler <Kratt@pap.univie.ac.at>.			 *
+ * The translation to Maple was done by Jean-Francois Beraud		 *
+ * <Jean-Francois.Beraud@sic.sp2mi.univ-poitiers.fr> and Bruno Gauthier	 *
+ * <Bruno.Gauthier@univ-mlv.fr>						 *
+ *									 *
+ * All features of this package are due to C. Krattenthaler      	 *
+ * The help text is due to Jean-Francois Beraud and Bruno Gauthier	 *
+ *									 *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+A package to guess closed form for a sequence of numbers.
+
+CALLING SEQUENCE:
+
+guess(l, optional_args);
+
+SYNOPSIS:
+- This  package  provides  functions  to find a closed form for a sequence,
+  of  numbers   within  the  hierarchy  of   expressions   of   the   form,
+  <rational function>, <product of rational function>, <product of product,
+  of rational function>, etc.
+
+EXAMPLES:
+guess([1,2,3]);
+                                [i0]
+
+guess([1,4,9,16]);
+
+                                   2
+                                [i0 ]
+
+guess([1,2,6,24,120]);
+
+                           i0 - 1
+                           /===\
+                            ! !
+                          [ ! !   (i1 + 1)]
+                            ! !
+                           i1 = 1
+
+guess(makelist(product(product(gamma(i)*i^2,i,1,j),j,1,k),k,1,8));
+
+                      i0 - 1   i1 - 1    i2 - 1
+                      /===\    /===\     /===\          2
+                       ! !      ! !       ! !   (i3 + 3)
+                     [ ! !   4  ! !   18  ! !   ---------]
+                       ! !      ! !       ! !    i3 + 2
+                      i1 = 1   i2 = 1    i3 = 1
+
+guess([1,2,7,42,429,7436,218348,10850216]);
+
+                    i0 - 1   i1 - 1
+                    /===\    /===\
+                     ! !      ! !   3 (3 i2 + 2) (3 i2 + 4)
+                   [ ! !   2  ! !   -----------------------]
+                     ! !      ! !   4 (2 i2 + 1) (2 i2 + 3)
+                    i1 = 1   i2 = 1
+
+
+
+guess(makelist(k^3+k^2,k,1,7));
+
+
+Dependent equations eliminated:  (6)
+                       i0 - 1
+                       /===\
+         2              ! !                       5040
+      [i0  (i0 + 1), 2  ! !   (- --------------------------------------),
+                        ! !        4        3         2
+                       i1 = 1    i1  - 24 i1  + 245 i1  - 1422 i1 + 360
+
+                                                      i0 - 1
+                                                      /===\
+                                                       ! !   (i1 + 1) (i1 + 2)
+                                                    2  ! !   -----------------]
+                                                       ! !            2
+                                                      i1 = 1        i1
+
+Note that the last example produces three solutions. The first and the last are
+equivalent, but the second is different! In this case,
+
+guess(makelist(k^3+k^2,k,1,7),1); 
+
+or
+
+guess(makelist(k^3+k^2,k,1,7),"one");
+ 
+                          2
+find only the solution i0  (i0 + 1), which is a rational function, and is also
+the first function guess finds.
+
+PARAMETERS:
+  l               - a list of numbers,
+  level           - an integer (optional),
+  "one"           - the string "one" (optional),
+  "nogamma"       - the string "nogamma" (optional),
+
+SYNOPSIS:,
+- guess(l) tries to find a closed form for a sequence within the hierarchy,
+  of expressions  of  the  form  <rational function>, <product of rational,
+  function>, <product of product of rational function>, etc.
+
+- guess(l,level) does the same thing as guess(l) but it searches only
+  within the first 'level' levels
+
+- guess(l,"one") does the same thing as guess(l) but it returns the first
+  solution it finds.
+
+- guess(l,"nogamma") does the same thing as guess(l) but it returns
+  expressions without gamma functions. In fact, there is not much difference
+  just at the moment, because Maxima doesn't simplify products yet...  
+*/
+
+
+/* devine.mac -*- mode: Maxima; -*- 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *									 *
+ * Copyright (C) 2002 Martin Rubey <Martin.Rubey@LaBRI.fr>               *
+ *									 *
+ * This file is part of GNU Maxima.					 *
+ *									 *
+ * This program is free software; you can redistribute it and/or	 *
+ * modify it under the terms of the GNU General Public License as	 *
+ * published by the Free Software Foundation; either version 2 of	 *
+ * the License, or (at your option) any later version.			 *
+ *									 *
+ * This program is distributed in the hope that it will be		 *
+ * useful, but WITHOUT ANY WARRANTY; without even the implied		 *
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR		 *
+ * PURPOSE. See the GNU General Public License for more details.	 *
+ *									 *
+ * History:								 *
+ * This is a translation of the Mathematica package Rate.m		 *
+ * by Christian Krattenthaler <Kratt@pap.univie.ac.at>.			 *
+ * The translation to Maple was done by Jean-Francois Beraud		 *
+ * <Jean-Francois.Beraud@sic.sp2mi.univ-poitiers.fr> and Bruno Gauthier	 *
+ * <Bruno.Gauthier@univ-mlv.fr>						 *
+ *									 *
+ * All features of this package are due to C. Krattenthaler      	 *
+ * The help text is due to Jean-Francois Beraud and Bruno Gauthier	 *
+ *									 *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ */
+
+/*
+ * Rational Interpolation
+ * Gives the rational interpolant to the set of points defined by xlist and
+ * ylist, where m and k are respectively the degrees of the numerator and
+ * denominator, and xlist is a list of m+k+1 abscissas of the interpolation
+ * points, x is the variable the result is supposed to be a function of.
+ */
+rationalinterpolation(xlist, ylist, x, m, k) := 
+block([tempvec : makelist(1, i, 1, m+k+1), /* contains the new row of mat */
+       rowlist,                               /* first set of rows of mat */
+       mat,            /* matrix that describes the interpolation problem */
+       varlist : makelist('x[i], i, 1, m+k+2)], 
+  mode_declare([tempvec,rowlist,varlist,mat],list,[m,k],fixnum), 
+
+  if max(m, k) > 0
+  then rowlist : cons(tempvec, 
+                      makelist(tempvec : tempvec * xlist, i, 1, max(m, k)))
+  else rowlist : [tempvec],
+
+  mat : transpose(apply(matrix, 
+                        append(rest(rowlist, -(max(m, k) - m) ), 
+                               -1 * makelist(rowlist[i] * ylist, 
+                                             i, 1, k + 1)))),
+  mat : ev(mat . varlist, scalarmatrixp : false), 
+
+/* not sure whether it is save to modify xlist... */
+  xlist : linsolve(makelist(mat[i, 1], i, 1, (m+k)+1), varlist), 
+  if length(xlist) = 0 
+/* something went wrong */
+  then 'null
+/* use the solution to define the interpolating rational function */ 
+  else factor(subst(xlist, sum('x[i+1]*x^i, i, 0, m)
+                           /sum('x[(i+m)+2]*x^i, i, 0, k))));
+
+
+/* Intermediate function */
+guesscons(l, t) := 
+block([lsize : length(l), res : [], x, ri], 
+  mode_declare(lsize, fixnum, res, list, ri, any),
+  
+  for i : 0 thru lsize-2 do 
+     (ri : rationalinterpolation(makelist(k, k, 1, lsize-1), rest(l,-1),
+                                 x, (lsize-2)-i, i),
+      if ri # 'null
+      then if (subst(x=lsize, denom(ri)) # 0)
+              and
+              (subst(x=lsize, ri)-last(l) = 0)
+              and 
+              not member(subst(x=t, ri), res)
+           then res : cons(subst(x=t, ri), res)), 
+  res);
+
+/*
+ * Main function of the package
+ * it tries to find a closed form  for a sequence 
+ * within the hierarchy of expressions of the 
+ * form <rational function>, <product of rational functions>, 
+ * <product of product of rational functions>, etc. It may 
+ * give several answers
+ */
+guess(l, [optargs]) := 
+block([lsize : length(l), 
+       tempres, maxlevel, 
+       maxlevellist : sublist(optargs, numberp), 
+       res : [], 
+       onep : member("one", optargs), 
+       unevp : member("nogamma", optargs), g], 
+      mode_declare([lsize, maxlevel], fixnum, 
+                   [tempres, maxlevellist, res], list, 
+		   [onep, unevp], boolean, g, any), 
+
+      optargs : delete("nogamma", delete("one", optargs, 1), 1),
+      if length(maxlevellist) > 1 or length(optargs)-length(maxlevellist) > 0
+      then error("Wrong number of optional arguments: ", optargs)
+      else maxlevel : mode_identity(fixnum, apply(min, cons(lsize-1, maxlevellist)) - 1), 
+       
+      g : make_array('any, maxlevel + 1), 
+
+      for k : 0 thru maxlevel do
+         (g[k] : l, 
+          l : makelist(l[i+1]/l[i], i, 1, (lsize-k)-1),
+
+          tempres : guesscons(g[k], concat('i, k)),
+          if tempres # []
+          then (if k > 0 
+                then for i : 1 thru k do
+                         if unevp
+                         then tempres : 
+                                  block ([j : concat('i, (k-i)+1)],
+                                        map(lambda([expr], 
+                                                   g[k-i][1] *
+                                                   apply (nounify (product), [expr, j, 1, concat('i, k-i)-1])),
+                                            tempres))
+                         else tempres : 
+                                  block ([j : concat('i, (k-i)+1)],
+                                        map(lambda([expr],
+                                                   g[k-i][1] *
+                                                   apply (verbify (product), [expr, j, 1, concat('i, k-i)-1])),
+                                            tempres)),
+                res : append(res, tempres), 
+                if onep then return(res))),
+      res);

@@ -1,0 +1,72 @@
+recursiv.mac is from the book "Computer Algebra in Applied
+Mathematics: An introduction to MACSYMA", by Richard H Rand, Pitman
+(1984).
+
+Mathieu's equation is x''+(delta+e*cos(t))*x=0 
+
+For given values of the parameters delta and e, either all the
+solutions are bounded (the equation is stable) or there exist
+unbounded solutions (the equation is unstable).  The regions of
+stability are separated from thos of instability by "transition
+curves".
+
+This program computes the transition curves of Mathieu's equation
+using a method due to Levy and Keller (1963) which uses Fourier series
+to solve the perturbation equations.  An improved version of this
+routine is given in newimprv.mac.
+
+The run below, using maxima-5.9.0cvs, reproduces the result on pages
+115-116 of the book.  
+
+(C1) load("./recursiv.mac");
+(D1)                            ./recursiv.mac
+(C2) tc();
+ENTER TRANSITION CURVE NUMBER N
+0;
+ENTER DEGREE OF TRUNCATION
+6;
+             6      4    2
+         29 e    7 e    e
+delta= - ----- + ---- - --
+          144     32    2
+
+(D2)                                 FALSE
+(C3) tc();
+ENTER TRANSITION CURVE NUMBER N
+1;
+ENTER DEGREE OF TRUNCATION
+6;
+           6       5    4     3    2
+       49 e    11 e    e     e    e    e   1
+delta= ----- - ----- - --- + -- - -- - - + -
+       36864   4608    384   32   8    2   4
+
+           6       5    4     3    2
+       49 e    11 e    e     e    e    e   1
+delta= ----- + ----- - --- - -- - -- + - + -
+       36864   4608    384   32   8    2   4
+
+(D3)
+(C4) tc();
+ENTER TRANSITION CURVE NUMBER N
+2;
+ENTER DEGREE OF TRUNCATION
+4;
+              4      2
+         763 e    5 e
+delta= - ------ + ---- + 1
+          3456     12
+
+          4    2
+       5 e    e
+delta= ---- - -- + 1
+       3456   12
+
+Reference:
+
+Levy, D.M. and Keller, J.B. "Instability Intervals of Hill's
+Equation", Comm. Pure Appl. Math. 16:469-476 (1963)
+
+Local Variables: ***
+mode: Text ***
+End: ***

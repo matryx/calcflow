@@ -1,0 +1,15 @@
+\newcommand{\mlabel}[1]
+   {\textcolor{red}{(#1)} \quad}
+
+\newenvironment{mcline}[1]
+   {\mlabel{#1} \color{blue} \begin{verb}}  
+   {\end{verb} \color{black}}
+
+\newenvironment{mdline}[1]
+   {\mlabel{#1} \color{blue} \[}
+   {\]}
+
+\newenvironment{maxima}
+   {\begin{verb}}
+   {\end{verb}}  
+

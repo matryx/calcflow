@@ -1,0 +1,89 @@
+/*
+This subroutine implicit derivatives of multivariable expressions
+Copyright (C) 1999  Dan Stanger
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Dan Stanger dan.stanger@internut.com
+please contact me for updates to this code or
+look on my web page (currently www.diac.com/~dxs)
+this code was tested using Macsyma 2.4 from Macsyma, Inc.
+*/
+/* f is an array, the indexes are the derivative degree
+     in the indvarlist order.
+   indvarlist independent variable list
+   depvar the dependent variable
+   orderlist the order desired
+*/
+
+/* If makeOrders is not already defined, then load it.
+ * Following test looks for a Maxima function named makeOrders.
+ * Probably should also look for a Lisp function,
+ * in case makeOrders is reimplemented as a Lisp function.
+ */
+if ?mget ('makeOrders, '?mexpr) = false then load (makeOrders);
+
+/* Display an array, either a hashed array or a declared array,
+ * as a list of equations a[<subscripts>] = <value>.
+ * Seems generally useful -- might want to move this into core at some point.
+ */
+display_array ('a) := block ([stuff, ainfo],
+  stuff : errcatch (apply (arrayinfo, [a])),
+  if stuff # []
+    then
+     (ainfo : first (stuff),
+      if first (ainfo) = declared
+        then display_array_declared (a, ainfo[3])
+        else display_array_hashed (a, rest (rest (ainfo)))));
+
+display_array_declared (a, dimensions) :=
+ (map (lambda ([n], apply (set, makelist (i, i, 1, n))), dimensions),
+  apply (cartesian_product, %%),
+  makelist (arraymake (a, i), i, args (%%)),
+  apply (display, %%));
+
+display_array_hashed (a, indices) :=
+ (makelist (arraymake (a, i), i, indices),
+  apply (display, %%));
+
+implicit_derivative(f,indvarlist,orderlist,depvar):=
+   block([
+	l:makeOrders(indvarlist,orderlist),
+	orders,orderslength,diffargs],local(orders,diffargs),
+	orderslength:length(l)-1,
+	array([orders,diffargs],orderslength),
+	fillarray(orders,l),
+	depends(depvar,indvarlist),
+	for i:1 thru orderslength do block([d,s],
+	   diffargs[i]:apply('append,maplist(lambda([x,y],[x,y]),
+			      indvarlist,orders[i])),
+	   d:apply('diff, cons(arrayapply(f,orders[0]), diffargs[i])),
+	   for j:(i-1) step -1 thru 1 do block(
+		d:subst(
+		   arrayapply(f,orders[j]),
+		   apply('diff,cons(depvar,diffargs[j])), d)),
+	   s:solve(d,apply('diff,cons(depvar,diffargs[i]))),
+	   arraysetapply(f,orders[i],rhs(first(s)))),
+       f)$
+
+/* the following example will fill the array f with derivatives
+
+    load (impdiff);
+    f [0, 0] : x^2 + y^3 - z^4 = 0;
+    implicit_derivative (f, [x, y], [2, 3], z);
+    display_array (f);
+
+ */
+

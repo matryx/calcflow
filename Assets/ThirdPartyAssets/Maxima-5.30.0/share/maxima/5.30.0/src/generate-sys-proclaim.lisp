@@ -1,0 +1,5 @@
+(load "../lisp-utils/defsystem.lisp")
+(compiler::emit-fn t)
+(load "../lisp-utils/make-proclaim.lisp")
+(mk::oos "maxima" :compile :verbose t)
+(compiler::make-all-proclaims "*/*.fn" "*/*/*/*.fn")

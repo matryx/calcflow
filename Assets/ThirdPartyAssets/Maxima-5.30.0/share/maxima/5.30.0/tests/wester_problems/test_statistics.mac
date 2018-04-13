@@ -1,0 +1,127 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Statistics/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Statistics ---------- */
+/* Compute the mean of a list of numbers => 9 */
+sample_mean([3, 7, 11, 5, 19]);
+/* Compute the median of a list of numbers => 7 */
+sample_median([3, 7, 11, 5, 19]);
+/* Compute the first quartile (25% quantile) of a list of numbers => 2 or 5/2 */
+xx: [1, 2, 3, 4, 5, 6, 7, 8]$
+remvalue(xx)$
+/* Compute the mode (the most frequent item) of  a list of numbers => 7 */
+[3, 7, 11, 7, 3, 5, 7];
+/* Compute the unbiased sample standard deviation of a list of numbers
+   => sqrt(5/2) */
+sample_standard_deviation([1, 2, 3, 4, 5]);
+/* Discrete distributions---what is the probability of finding exactly 12
+   switches that work from a group of 15 where the probability of a single one
+   working is 75%?  (Need to use the probability density function [PDF] of the
+   binomial distribution.) => 0.22520 */
+binomial_density(12, 15, .75);
+/* Replace `exactly' by `up through' in the above.  (Need to use the cumulative
+   probability density function [CDF] of the binomial distribution.) => 0.76391
+   */
+binomial_distrib(12, 15, .75);
+/* Continuous distributions---if a radiation emission can be modeled by a
+   normal distribution with a mean of 4.35 mrem and a standard deviation of
+   0.59 mrem, what is the probability of being exposed to anywhere from 4 to 5
+   mrem? => .5867 */
+normal_distrib(5, 4.35, 0.59^2) - normal_distrib(4, 4.35, 0.59^2);
+/* Hypothesis testing---how good of a guess is 5 for the mean of xx? */
+xx: [1, -2, 3, -4, 5, -6, 7, -8, 9, 10]$
+/* Using Student's T distribution (preferred) => 0.057567 */
+students_t_distrib((sample_mean(xx) - 5)/(sample_standard_deviation(xx) /
+                                          sqrt(length(xx))), length(xx) - 1);
+sfloat(%);
+/* Using the normal distribution (as an alternative) => 0.040583 */
+standard_normal_distrib((sample_mean(xx) - 5)/(sample_standard_deviation(xx) /
+                                               sqrt(length(xx))));
+sfloat(%);
+remvalue(xx)$
+/* Chi-square test---what is the expectation that row characteristics are
+   independent of column characteristics for a two dimensional array of data?
+   => 0.469859   (chi2 = 1153/252) */
+x: matrix([41, 27, 22], [79, 53, 78])$
+m: mat_nrows(x)$
+n: mat_ncols(x)$
+rowSum: makelist(sum(x[i, j], j, 1, n), i, 1, m)$
+colSum: makelist(sum(x[i, j], i, 1, m), j, 1, n)$
+matSum: sum(rowSum[i], i, 1, m)$
+e: genmatrix(lambda([i, j], rowSum[i]*colSum[j]/matSum), m, n)$
+chi2: sum(sum((x[i, j] - e[i, j])^2/e[i, j], i, 1, m), j, 1, n);
+1 - chi_square_distrib(chi2, m*n - 1);
+sfloat(%);
+remvalue(chi2, colSum, matSum, rowSum, e, m, n, x)$
+/* Linear regression (age as a function of developmental score).  See Lambert
+   H. Koopmans, _Introduction to Contemporary Statistical Methods_, Second
+   Edition, Duxbury Press, 1987, p. 459 => y' = 0.7365 x + 6.964 */
+t: [[3.33, 3.25, 3.92, 3.50,  4.33,  4.92,  6.08,  7.42,  8.33,  8.00,  9.25,
+        10.75],
+    [8.61, 9.40, 9.86, 9.91, 10.53, 10.61, 10.59, 13.28, 12.76, 13.44, 14.27,
+        14.13]]$
+lsq1(t[1], t[2], 1, x);
+lsq_linear(t[1], t[2], [1, x], [x]);
+remvalue(t)$
+/* Multiple linear regression (income as a function of age and years of
+   college) => y = -16278.7 + 960.925 x1 + 2975.66 x2 */
+[[37, 45, 38, 42, 31], [4, 0, 5, 2, 4], [31200, 26800, 35000, 30300, 25400]]$
+lsq_linear(makelist([%[1][i], %[2][i]], i, 1, length(%[1])), %[3],
+           [1, x1, x2], [x1, x2]);
+/* Multiple linear regression using the L1 or Least Absolute Deviations
+   technique rather than the Least Squares technique (minimizing the sum of the
+   absolute values of the residuals rather than the sum of the squares of the
+   residuals).  Here, the Stack-loss Data is used (percentage of ammonia lost
+   times 10 from the operation of a plant over 21 days as a function of air
+   flow to the plant, cooling water inlet temperature and acid concentration).
+   See W. N. Venables and B. D. Ripley, _Modern Applied Statistics with
+   S-plus_, Springer, 1994, p. 218.
+   => y = 0.83188 x1 + 0.57391 x2 - 0.06086 x3 - 39.68984 */
+[[80, 80, 75, 62, 62, 62, 62, 62, 58, 58, 58, 58, 58, 58, 50, 50, 50, 50, 50,
+  56, 70],
+ [27, 27, 25, 24, 22, 23, 24, 24, 23, 18, 18, 17, 18, 19, 18, 18, 19, 19, 20,
+  20, 20],
+ [89, 88, 90, 87, 87, 87, 93, 93, 87, 80, 89, 88, 82, 93, 89, 86, 72, 79, 80,
+  82, 91],
+ [42, 37, 37, 28, 18, 18, 19, 20, 15, 14, 14, 13, 11, 12,  8,  7,  8,  8,  9,
+  15, 15]]$
+lsq_linear(makelist([%[1][i], %[2][i], %[3][i]], i, 1, length(%[1])), %[4],
+           [1, x1, x2, x3], [x1, x2, x3]);
+/* Nonlinear regression (Weight Loss Data from an Obese Patient consisting of
+   the time in days and the weight in kilograms of a patient undergoing a
+   weight rehabilitation program).  Fit this using least squares to weight =
+   b0 + b1 2^(- days/th), starting at (b0, b1, th) = (90, 95, 120)   [Venables
+   and Ripley, p. 225] => weight = 81.37375 + 102.6842 2^(- days/141.9105) */
+q:
+[[  0,   4,   7,   7,  11,  18,  24,  30,  32,  43,  46,  60,  64,  70,  71,
+   71,  73,  74,  84,  88,  95, 102, 106, 109, 115, 122, 133, 137, 140, 143,
+  147, 148, 149, 150, 153, 156, 161, 164, 165, 165, 170, 176, 179, 198, 214,
+  218, 221, 225, 233, 238, 241, 246],
+ [184.35, 182.51, 180.45, 179.91, 177.91, 175.81, 173.11, 170.06, 169.31,
+  165.10, 163.11, 158.30, 155.80, 154.31, 153.86, 154.20, 152.20, 152.80,
+  150.30, 147.80, 146.10, 145.60, 142.50, 142.30, 139.40, 137.90, 133.70,
+  133.70, 133.30, 131.20, 133.00, 132.20, 130.80, 131.30, 129.00, 127.90,
+  126.90, 127.70, 129.50, 128.40, 125.40, 124.90, 124.90, 118.20, 118.20,
+  115.30, 115.70, 116.00, 115.50, 112.60, 114.00, 112.60]]$
+errcatch(lsq_nonlinear(q[1], q[2], b0 + b1*2^(- days/th), [days], [b0, b1, th],
+                       [90, 95, 120]))$
+lsq_nonlinear(q[1], q[2], b0 + b1*2.0^(- days/th), [days], [b0, b1, th],
+              [90, 95, 120]);
+sfloat(1/141.9105);
+remvalue(q)$
+/* ---------- Quit ---------- */
+quit();

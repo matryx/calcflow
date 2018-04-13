@@ -1,0 +1,1197 @@
+\documentclass[11pt]{article}
+\usepackage[letterpaper]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{makeidx}
+\usepackage{supertabular}
+\usepackage[hypertex,colorlinks=true,linkcolor=blue,filecolor=webgreen,%
+hyperindex=true,extension=dvi]{hyperref}
+
+
+\title{The SYM Package for Maxima \\ User's Manual}
+\author{Annick Valibouze\\
+LITP (tour 45-55)\\
+4, Place Jussieu\\
+75252 Paris Cedex 05\\
+Unit\'e associ\'ee au CNRS No 248\\
+et\\
+GDR DE CALCUL FORMEL MEDICIS\\
+\small{e-mail: avb@sysal.ibp.fr}}
+\date{July 19 1993}
+
+\makeindex
+
+\begin{document}
+\maketitle
+
+\tableofcontents 
+\newpage
+\noindent
+
+\section{Introduction}
+
+This documentation concerns a module for manipulating symmetric functions,
+implemented in Common Lisp. This module, named \texttt{SYM}, is actually
+presented as an extension of the symbolic calculation system \texttt{Maxima}.
+
+Among its applications we note the calculation of resolvents.
+
+
+\section{Definitions and notation}
+
+We will consider a ring $\mathcal{A}$.
+
+\subsection{Symmetric polynomials}
+
+We are given an integer $n>0$.
+
+\subsubsection{Group actions}
+
+Let $S_n$ be the symmetric group of degree $n$ (each element is a permutation of
+$\{1,\dots,n\}$).
+
+Let $E$ be an arbitrary set. Denote by $E^n$ the set of $n$-tuples of elements
+of $E$.  The \emph{action} of $S_n$ on any $n$-tuple $\underline
+a=(a_1,\ldots,a_n)$ of $E^n$ is defined as
+\begin{eqnarray*}
+  S_n   \times E^n & \longrightarrow &  E^n\\
+  \sigma \times {\underline a} & \longrightarrow &
+  \sigma{\underline a}=(a_{\sigma (1)},\ldots,a_{\sigma (n)}).
+\end{eqnarray*}
+Let $\mathcal{A}[\underline x]$ be the ring of polynomials in the $n$ variables
+$\underline x=(x_1,\ldots ,x_n)$, with coefficients in $\mathcal{A}$.  The
+action of $S_n$ on $\mathcal{A}(\underline x)$ is defined as follows:
+\begin{eqnarray*}
+  S_n \times \mathcal{A}[\underline x] & \longrightarrow &
+  \mathcal{A}[\underline x] \\
+  \sigma \times f  & \longrightarrow &  \sigma f \;\; :\;
+  \sigma f({\underline x}) = f(\sigma{\underline x}).
+\end{eqnarray*}
+
+\textbf{Remark.} The action of $S_n$ extends to the sets $E^c$ or
+$\mathcal{A}[x_1,\ldots ,x_c]$ with $c \leq n$ simply by embedding these sets in
+$E^n$ and $\mathcal{A}[\underline x]$ respectively.
+
+Let $f$ be a function from $\mathcal{A}[\underline x]$ (resp. $\underline a$, a
+$n$-tuple).  We will denote $S_nf$ (resp. $S_n \underline a$) the set $\{\sigma
+f \;|\; \sigma \in S_n \}$ (resp. $\{\sigma\underline a \;|\; \sigma \in S_n
+\}$), called the \textit{orbit} of $f$ (resp. $\underline a$) under the action
+of $S_n$.
+
+
+\subsubsection{Partitions, symmetric polynomials}
+
+Let $m$ be a natural number.  A \textit{partition} of $m$ is a decreasing
+sequence of natural numbers $i_1\geq i_2 \geq \ldots$ called \textit{parts}
+whose sum is $m$. This sum is the \textit{weight} of the partition and its
+\textit{length} is the number of its non-zero parts.
+
+Let $p$ be a polynomial in $n$ variables.  This polynomial is \textit{symmetric}
+if it remains invariant under the action of $S_n$, i.e. if $S_n p =\{p\}$.
+
+A symmetric polynomial may be represented by partitions.  Let $I=(i_1,\ldots,
+i_n)$ (i.e. $i_1\geq i_2\geq \ldots \geq i_n$) be a partition of length $\le n$
+and let ${\underline x}^I$ be the monomial
+\begin{equation*}
+  {\underline x}^I = x_1^{i_1}x_2^{i_2}\ldots x_n^{i_n}.
+\end{equation*}
+A \textit{monomial form} $M_I({\underline x})$ on ${\underline x}$ indexed by
+$I$ is the sum of the monomials of the orbit of ${\underline x}^I$ under the
+action of $S_n$:
+\begin{equation*}
+  M_I({\underline x}) =\sum_{J \in S_nI}{\underline x}^J.
+\end{equation*}
+The monomial forms constitute naturally a basis of the vector space on the ring
+of symmetric polynomials: any symmetric polynomial can be represented by a
+finite linear combination of monomial forms.
+
+
+\subsubsection{Contracted and partitioned representations}
+
+Let $p$ be a symmetric polynomial on a ring $\mathcal{A}$, and suppose that it
+is expressed in the basis of monomial forms.
+
+In the \emph{contracted} representation of $p$ we replace every monomial form
+$M_I(x)$ by $x^I$, or by every monomial of $S_nx^I$, its orbit.
+
+In the \emph{partitioned} representation, we replace every monomial term
+$cM_I(x)$ where $c$ is a coefficient in $\mathcal{A}$, by the list
+$[c,i_1,\ldots ,i_n]$ and join the whole into one list.
+
+\textbf{Example.} The contracted polynomial associated to $3x^4 + 3y^4 - 2xy^5 -
+2x^5y$ is $3x^4 -2xy^5$, and the partitioned polynomial is [[3,4],[-2,5,1]].
+
+
+
+\subsection{Multi-symmetric polynomials}
+
+Here we generalize the symmetric case. We are given an integer $r>0$ and an
+$r$-tuple of integers $D=(d_1, \ldots ,d_r)$.
+
+\subsubsection{Group actions}
+
+Let $E_1, E_2, \ldots ,E_r$ be $r$ arbitrary sets.  Denote by $D(E)$ the product
+$E_1^{d_1}\times E_2^{d_2}\times \ldots \times E_r^{d_r}$.
+
+The action of the product of the symmetric groups $S_D=S_{d_1}\times S_{d_2}
+\times \ldots \times S_{d_r}$ on $D(E)$ is naturally defined as
+\begin{eqnarray*}
+  S_D \times D(E)  & \longrightarrow & D(E) \\
+  \sigma \times A  & \longrightarrow &
+  \sigma A=(\sigma_1{\underline a}_1,\ldots ,\sigma_r{\underline a}_r),
+\end{eqnarray*}
+where $\sigma = (\sigma_1,\ldots ,\sigma_r)$ with $\sigma_i \in S_{d_i}$.  The
+orbit of $A$ under the action of $S_D$ will be denoted $S_DA$.
+
+Similarly, if $X=({\underline x}_1, \ldots,{\underline x}_r)$ is an $r$-tuple
+such that the $i$th element ${\underline x}_i$ is a $d_i$-tuple of variables, we
+wil denote by $\mathcal{A}[X]$ the set of polynomials in the variables of $X$
+and with coefficients in $\mathcal{A}$.  The action of $S_D$ on $\mathcal{A}[X]$
+is defined as follows:
+\begin{eqnarray*}
+  S_D \times \mathcal{A}[X] & \longrightarrow & \mathcal{A}[X]\\
+  \sigma \times f  & \longrightarrow & \sigma f \;\; :\;
+  \sigma f(X)= f(\sigma X).
+\end{eqnarray*}
+The orbit of $f$ under the action of $S_D$ will be denoted $S_Df$.
+
+
+\subsubsection{Multi-partitions, multi-symmetric polynomials}
+
+A \textit{multi-partition}, $I$, of order $r$ is an $r$-tuple of partitions.  We
+will call the \textit{multi-length} of $I$ the list of lengths of the partitions
+that constitute $I$.
+
+Let $p$ be a polynomial in $d_1+\cdots + d_r$ variables. This polynomial is
+called \textit{multi-symmetric} if it is invariant by $S_D$, that is if $S_D p =
+\{p\}$.
+
+A multi-symmetric polynomial may be represented by multi-partitions.  Let $X$ be
+as above and $I=(I_1,\ldots,I_r)$ be an $r$-tuple of $\mathbf{N}^{d_1}\times
+\ldots \times \mathbf{N}^{d_r}$.  We will naturally denote by $X^I$ the monomial
+\begin{equation*}
+  X^I = {\underline x}_1^{I_1}\ldots{\underline x}_r^{I_r}.
+\end{equation*}
+If $I$ is a multi-partition of multi-length less than $D$, we will define the
+\textit{monomial multi-form} $M_I(X)$ on $X$ indexed by $I$ as the sum of the
+monomials of the orbit of $X^I$ under the action of $S_D$:
+\begin{equation*}
+  M_I(X) \;=\; \sum_{J \in S_DI} X^J.
+\end{equation*}
+It is natural to represent a multi-symmetric polynomial by a linear combination
+of monomial multi-forms over the ring of coefficients of the polynomial.
+
+
+\subsubsection{Contracted form}
+
+Let us now consider a multi-symmetric polynomial with coefficients in a ring
+$\mathcal{A}$ in the variables of $X$.  This polynomial is naturally expressed
+as a finite sum of $cM_I(X)$ where $c \in \mathcal{A}$ and $M_I(X)$ is a
+monomial multi-forme on $X$. A \textit{contracted form} associated to a
+multi-symmetric polynomial consists in replacing in this polynomial each
+$M_I(X)$ by the monomial $X^I$ or by an other monomial of its orbit $S_DX^I$.
+
+
+
+\section{Initialization and usage}
+
+The file \texttt{sym.mac} includes all the commands for auto-loading.  It is
+ultimately in this file where one must change the path names if \texttt{SYM}
+must be used from another directory than the one where it is installed.
+
+The file \texttt{compile.lisp} includes the list of files to compile.  To execute
+it one may load it under Lisp or under Maxima by the command
+\texttt{load("sym/compile")}.  Once the the files of \texttt{SYM} are compiled
+the module can be loaded under Maxima via the file \texttt{sym.mac}:
+\begin{verbatim}
+  load("sym.mac");
+\end{verbatim}
+
+If a function's argument is a list, the function will fill in missing values by
+formal arguments: for the $i$th elementary symmetric function these will be
+\texttt{ei}, for the $i$th power function they will be \texttt{pi}, and for the
+$i$th complete (homogeneous) symmetric function they will be \texttt{hi}.
+
+There are many evaluation modes for polynomials in Maxima: \texttt{meval},
+\texttt{expand}, \texttt{rat}, \texttt{ratsimp}.  \texttt{SYM} allows a choice
+of operation mode.  On every function call, \texttt{SYM} tests if the flag
+\texttt{oper} has been changed.  If so, the operating mode is modified as
+follows:
+\begin{description}
+  \item If \texttt{oper = meval} (default), the operations are carried out with
+  \texttt{meval}.
+  \item If \texttt{oper = expand}, they are done with \texttt{expand}.
+  \item If \texttt{oper = rat}, they are done with \texttt{rat}.
+  \item If \texttt{oper = ratsimp}, they are done with \texttt{ratsimp}.
+\end{description}
+The \texttt{meval} mode is advantageous in numerical calculations.  With formal
+arguments, \texttt{rat} mode is often preferable.
+
+To set the flag \texttt{oper} to \texttt{expand}, for example, it suffices to
+write \texttt{oper\ :\ expand;}.
+
+
+
+\section{Description of the available functions}
+
+Take $q$ as the minimum of the degree of the polynomial \texttt{sym} and the
+cardinal \texttt{card}.  \texttt{lvar} contains the variables of the polynomial
+under consideration, thus distinguishing them from any eventual parameters.
+
+
+\subsection{Combinatorics}
+
+\begin{itemize}
+  \item \texttt{arite(degree,arity,powers)} \index{arite(degree, arity, powers)}
+    applies the ``arity theorem'' (A. Valibouze \textit{Sur l'arit\'e
+    des fonctions}, European Journal of Combinatorics, 1992?).  This function
+    allows to go from a power function of a resolvent in \texttt{arity} variables
+    to a power function in \texttt{degree} variables.  It adds a binomial
+    coefficient to each partition.  It is assumed that the power functions are
+    given in the basis of monomial forms, in partitioned representation, in the
+    list \texttt{powers}.
+  \item \texttt{card\_orbit(part,n)} \index{card\_orbit(part, n)}
+    $\longrightarrow$ \texttt{integer} \\
+    \texttt{part} is a partition in the form $[a_1,m_1,...,a_q,m_q]$ where
+    $m_i$ is the multiplicity of $a_i$ in the partition.  The function computes
+    the cardinal of the orbit of the partition under the action of the symmetric
+    group of degree \texttt{n}. 
+  \item \texttt{multinomial(r,part)} \index{multinomial(r, part)}
+    $\longrightarrow$ \texttt{integer} \\
+    where \texttt{r} is the weight of the partition \texttt{part}. This function
+    returns the associated multinomial coefficient: if the parts of partition
+    \texttt{part} are $i_1, i_2, \dots, i_k$, the result is
+    $r!/(i_1!i_2! \cdots i_k!)$.
+  \item \texttt{card\_stab(L,eq)} \index{card\_stab(L, eq)}
+    $\longrightarrow$ \texttt{integer} \\
+    \texttt{L} is a list of ordered objects and \texttt{eq} is the equality test
+    for them.  If the list \texttt{L} has length $n$, this function computes the
+    cardinal of the stabilizer of \texttt{L} under the action of the symmetric
+    group of order $n$.  (The \emph{stabilizer} of $L$ is the subgroup of
+    permutations that maps $L$ to $L$, i.e. leaves it invariant.)
+ \item \texttt{permut(L)} \index{permut(L)}
+   $\longrightarrow$ \texttt{list} \\
+   returns the list of permutations of the list \texttt{L}.
+\end{itemize}
+Examples:
+\small
+\begin{verbatim}
+  card_orbit([5,2,1,3], 6);
+                                 60
+  card_stab([a, a, c, b, b], eq);
+                                  4
+  card_stab([1,1,2,3,3], "=");
+                                  4
+\end{verbatim}
+Here the list of power functions is $[x^2y^4,x^5y^5 + x^2,x^2y^2+x^3]$, the
+arity is 2, and the degree is 4. (This function is useful in the calculation of
+resolvents.)
+\begin{verbatim}
+  arite(4,2,[[[1,2,4]],[[1,5,5],[1,2]],[[1,2,2],[1,3]]]);
+
+       [[[1, 2, 4]], [[1, 5, 5], [3, 2]], [[1, 2, 2], [3, 3]]]
+\end{verbatim}
+\normalsize
+
+
+\subsection{On polynomials in one variable}
+
+\begin{itemize}
+  \item \texttt{ele2polynome(cele,z)} \index{ele2polynome(cele,z)}
+    $\longrightarrow$ \texttt{polynomial} \\
+    returns the polynomial in \texttt{z} s.t. the elementary symmetric functions of
+    its roots are in the list \texttt{cele}.  \texttt{cele}=$[n,e_1,\dots,e_n]$
+    where $n$ is the degree of the polynomial and $e_i$ the $i$th elementary
+    symmetric function.
+  \item \texttt{polynome2ele(poly,z)} \index{polynome2ele(poly,z)}
+    $\longrightarrow$ \texttt{cele} \\
+    produces the list \texttt{cele}=$[n,e_1,\dots,e_n]$ where $n$ is the degree
+    of the polynomial in the variable \texttt{z} and $e_i$ the $i$th elementary
+    symmetric function of its roots.
+\end{itemize}
+Examples:
+\small
+\begin{verbatim}
+ ele2polynome([2,e1,e2],z);
+                                  2
+                                 z  - e1 z + e2
+
+ polynome2ele(x^7-14*x^5  + 56*x^3  - 56*x + 22, x);
+ 
+                      [7, 0, - 14, 0, 56, 0, - 56, - 22]
+
+ ele2polynome( [7, 0, - 14, 0, 56, 0, - 56, - 22], x);
+
+                          7       5       3
+                         x  - 14 x  + 56 x  - 56 x + 22
+\end{verbatim}
+\normalsize
+
+
+\subsection{Changing representations}
+
+A symmetric polynomial may be given in many forms: extended, contracted, or
+partitioned. The functions described below-dessous allow passing from one form
+to another. Some of them additionaly test for symmetry.
+
+In all cases the variables of the polynomial are contained in the list
+\texttt{lvar}.
+\begin{itemize}
+   \item \texttt{tpartpol(poly,lvar)} \index{tpartpol(polynomial, lvar)}
+   $\longrightarrow$ \texttt{ppart} \\ 
+   \texttt{partpol(poly, lvar)} \index{partpol(poly,lvar)}
+   $\longrightarrow$ \texttt{ppart} \\ 
+   return, in increasing (resp. decreasing) lexicographic order, the partitioned
+   polynomial associated to the polynomial given in extended form.  If the
+   polynomial is not symmetric, the function \texttt{tpartpol} returns an error.
+  \item \texttt{tcontract(poly,lvar)} \index{tcontract(poly, lvar)}
+    $\longrightarrow$ \texttt{pc} \\ \texttt{contract(poly,lvar)}
+    \index{contract(poly, lvar)} $\longrightarrow$ \texttt{pc} \\ act respectively
+    like \texttt{tpartpol} and \texttt{partpol} in recreating the contracted
+    represention.
+  \item \texttt{cont2part(pc,lvar)} \index{cont2part(pc, lvar)}
+    $\longrightarrow$ \texttt{ppart} \\ returns the partitioned form
+    \texttt{ppart} of a symmetric polynomial given in its contracted form
+    \texttt{pc}.
+  \item \texttt{part2cont(ppart,lvar)} \index{part2cont(ppart, lvar)}
+    $\longrightarrow$ \texttt{pc} \\ returns the contracted form \texttt{pc} of a
+    symmetric polynomial given in its partitioned form \texttt{ppart}.
+  \item \texttt{explose(pc,lvar)} \index{explose(pc, lvar)} $\longrightarrow$
+    \texttt{psym} \\ returns the extended form \texttt{psym} of a symmetric
+    polynomial given in its contracted form \texttt{pc}.
+\end{itemize}
+Examples:
+\small
+\begin{verbatim}
+  tpartpol(x^3-y, [x,y]);
+
+                         manque des monomes (no monomials)
+\end{verbatim}
+Consider the symmetric polynomial in $\mathbb{Z}[x,y,z]$ (the ring of
+polynomials in $x,y,z$ with coefficients in $\mathbb{Z}$) of which one
+contracted form is $2a^3bx^4y$. We will perform various changes of
+representations on it:
+\small
+\begin{verbatim}
+ lvar : [x,y,z]$
+ pc : 2*a^3*b*x^4*y;  
+                                3    4
+                             2 a  b x  y
+ psym : explose(pc, lvar);
+                         3      4      3      4      3    4   
+                      2 a  b y z  + 2 a  b x z  + 2 a  b y  z 
+             3    4        3      4      3    4
+        + 2 a  b x  z + 2 a  b x y  + 2 a  b x  y
+\end{verbatim}
+\normalsize And if we apply to it the function \texttt{contract} we recover a
+contracted form:
+\small
+\begin{verbatim}
+ contract(psym, lvar);
+                                 3    4
+                              2 a  b x  y
+ tcontract(psym, lvar);
+                                 3    4
+                              2 a  b x  y
+ tpartpol(psym, lvar);
+                                  3
+                             [[2 a  b, 4, 1]]
+ partpol(psym, lvar);
+                                  3
+                             [[2 a  b, 4, 1]]
+ ppart : cont2part(pc, lvar);
+                                  3
+                             [[2 a  b, 4, 1]]
+ part2cont(ppart, lvar);
+                                 3    4
+                              2 a  b x  y
+\end{verbatim}
+\normalsize
+
+
+
+\subsection{Functions related to partitions}
+
+\begin{itemize}
+  \item \texttt{kostka(part1,part2)} \index{kostka(part1,part2)}
+    $\longrightarrow$ integer \\
+    (written by P.Esperet) returns the Kostka number associated to the
+    partitions \texttt{part1} and \texttt{part2}.
+  \item \texttt{treinat(part)} \index{treinat(part)} 
+    $\longrightarrow$ list of partitions 
+    inferior in the natural order to the partition \texttt{part} and of the same
+    weight.
+  \item\texttt{treillis(n)} \index{treillis(n)} 
+    $\longrightarrow$ list of partitions of weight $n$.
+  \item \texttt{lgtreillis(n,m)} \index{lgtreillis(n,m)} 
+    $\longrightarrow$ list of partitions of weight $n$ and length $m$.
+  \item \texttt{ltreillis(n,m)} \index{ltreillis(n,m)}
+    $\longrightarrow$ list of partitions of weight $n$ and length $\le m$.
+\end{itemize}
+\small
+\begin{verbatim}
+ kostka([3,3,3],[2,2,2,1,1,1]);
+                                  6
+ lgtreillis(4,2);
+                           [[3, 1], [2, 2]]
+ ltreillis(4,2);
+                         [[4, 0], [3, 1], [2, 2]]
+ treillis(4);
+                [[4], [3, 1], [2, 2], [2, 1, 1], [1, 1, 1, 1]]
+ treinat([5]);
+                               [[5]]
+ treinat([1,1,1,1,1]);
+                        [[5], [4, 1], [3, 2], [3, 1, 1],
+                    [2, 2, 1], [2, 1, 1, 1], [1, 1, 1, 1, 1]]
+ treinat([3,2]);
+                        [[5], [4, 1], [3, 2]]
+\end{verbatim}
+\normalsize
+
+
+
+\subsection{Orbit calculations}
+
+\begin{itemize}
+  \item \texttt{orbit(poly,lvar)} \index{orbit(poly, lvar)}
+    $\longrightarrow$ $S_n$(poly) \\
+    produces the list of polynomials in the orbit of \texttt{poly}
+    under the action of the symmetric group $S_n$. The $n$ variables of
+    \texttt{poly} are in the list \texttt{lvar}.
+  \item \texttt{multi\_orbit(polyl,[lvar$_{1}$,lvar$_{2}$,\ldots ,lvar$_{r}$])
+      \index{multi\_orbit(poly,[lvar$_{1}$,lvar$_{2}$,\ldots ,lvar$_{r}$])}
+      $\longrightarrow$ ${S_D}$(poly) }\\
+    the variables of \texttt{poly} are in the lists
+    \texttt{lvar$_1$,lvar$_{2}$,\ldots ,lvar$_{r}$} on which act, respectively,
+    the symmetric groups $S_{d_1},S_{d_2},\ldots ,S_{d_r}$.  This function
+    returns the orbit of \texttt{poly} under the action of the product $S_D$ of
+    these symmetric groups.
+\end{itemize}
+\textbf{Examples:}
+\small
+\begin{verbatim}
+ orbit(a*x+b*y,[x,y]);
+                            [a y + b x, b y + a x]
+ orbit(2*x+x**2,[x,y,z]);
+                                       2         2         2
+                                     [z  + 2 z, y  + 2 y, x  + 2 x]
+ multi_orbit(a*x+b*y,[[x,y],[a,b]]);
+                                        [b y + a x, a y + b x]
+ multi_orbit(x+y+2*a,[[x,y],[a,b,c]]);
+ 
+                  [y + x + 2 c, y + x + 2 b, y + x + 2 a]
+\end{verbatim}
+\normalsize
+
+
+\subsection{The contracted product of two symmetric polynomials}
+
+\begin{itemize}
+\item\texttt{multsym(ppart1,ppart2,n)}\index{multsym(ppart1,ppart2,n)}
+  $\longrightarrow$ \texttt{pc} \\
+  calculates the product of two symmetric polynomials in \texttt{n} variables
+  given in the partitioned forms \texttt{part1} and \texttt{part2}.
+\end{itemize}
+Given two symmetric polynomials \texttt{p1} and \texttt{p2}. We will
+calculate their product by a classical method for the product of two
+arbitrary polynomials, and then obtain this product by \texttt{multsym}. We will
+work in $\mathbb{Z}[x,y]$.
+\small
+\begin{verbatim}
+ p1 : x*y^2  + x^2*y$
+ p2 : y+x$
+ prod : expand(p1*p2);
+                              3      2  2    3
+                           x y  + 2 x  y  + x  y
+\end{verbatim}
+\normalsize
+We verify that this is the extended form of the product obtained with
+\texttt{multsym}:
+\small
+\begin{verbatim}
+ partpol(prod,[x,y]);
+                                [[1, 3, 1], [2, 2, 2]]
+ ppart1 : partpol(p1,[x,y]);
+                                   [[1, 2, 1]]
+ ppart2 : partpol(p2,[x,y]);
+                                   [[1, 1, 0]]
+ multsym(ppart1, ppart2, 2);
+                                [[1, 3, 1], [2, 2, 2]]
+\end{verbatim}
+\normalsize
+
+
+\subsection{Basis changes}
+
+In general, the list \texttt{lvar} will represent the list of variables of
+polynomials.
+\begin{itemize}
+  \item \texttt{elem(cel,sym,lvar)} \index{elem(cel,sym,lvar)}
+    $\longrightarrow$  $P(e_1,\dots,e_q)$ \\
+    decomposes the symmetric polynomial \texttt{sym} into the elementary symmetric
+    functions contained in the list \texttt{cel} (3 possible flags).
+  \item \texttt{multi\_elem([cel$_{1}$,\dots,cel$_{r}$],multi\_pc,[lvar$_{1}$,
+     \dots,lvar$_{r}$])}
+     \index{multi\_elem([cel$_{1}$,\dots,cel$_{p}$],multi\_pc,[lvar$_{1}$,
+        \dots,lvar$_{r}$])}
+      $\longrightarrow$ P(cel$_{1}$,\dots,cel$_{r}$) \\
+    gives a polynomial \texttt{multi\_pc} multi-symmetric under the action
+    of $S_D$, in multi-contracted form.  It is decomposed successively into each
+    of the groups \texttt{cel$_{j}$} of elementary symmetric functions of the set 
+    ${\underline x}_j$.  The list of variables \texttt{lvar}$_j$ allows reading
+    the polynomial.  The variables of ${\underline x}_j$ are found in the
+    expression of the multi-contracted polynomial.
+  \item \texttt{pui(cpui,sym,lvar)} \index{pui(cpui, sym, lvar)}
+    $\longrightarrow$ $P(p_1,\dots,p_q)$ \\ decomposes a symmetric polynomial into
+    power functions (3 flags possible).
+  \item \texttt{multi\_pui([cpui$_{1}$,\ldots, cpui$_{p}$],multi\_pc, [lvar$_{1}$, \ldots,var$_{p}$])}
+    \index{multi\_pui([cpui$_{1}$,\ldots,cpui$_{p}$], multi\_pc, [lvar$_{1}$,\ldots,lvar$_{p}$])} 
+    $\longrightarrow$ P(cpui$_{1}$,\ldots,cpui$_{p}$) \\ 
+    acts like \texttt{multi\_elem} in decomposing the multi-symmetric polynomial
+    into power functions.
+\end{itemize}
+If the symmetric polynomial is in a contracted form, the flag \texttt{elem}
+should be 1 (its default value).
+
+Let us consider the symmetric polynomial $x^4+y^4+z^4+t^4 - 2(x(y+z+t) + y(z+t)
++ z t)$ of which a contracted form is $x^4 -2 y z$.
+\small
+\begin{verbatim}
+  elem:1$
+
+  elem([],x**4 - 2*y*z, [x,y,z]); 
+
+                   4          2                 2
+                 e1  - 4 e2 e1  + 4 e3 e1 + 2 e2  - 2 e2 - 4 e4
+\end{verbatim}
+\normalsize
+Let us now suppose that the number of variables of the symmetric polynomial is 3
+(i.e. $t=0$). This value 3 must be noted at the head of the list \texttt{cel} as
+follows:
+\small
+\begin{verbatim}
+elem([3],x^4 - 2*y*z,[x,y,z]);
+
+                      4          2                 2
+                    e1  - 4 e2 e1  + 4 e3 e1 + 2 e2  - 2 e2
+\end{verbatim}
+\normalsize
+If, in addition, the first elementary symmetric function has a particular value,
+say $e_1=7$, it should be in the second position of the list \texttt{cel}:
+\small
+\begin{verbatim}
+  elem([3,7],x^4-2*x*y,[x,y]);
+
+                               2
+                   28 e3 + 2 e2  - 198 e2 + 2401
+\end{verbatim}
+\normalsize
+The $(i+1)$th element of the list \texttt{cel} should be the $i$th elementary
+symmetric function.  If the symmetric polynomial is in an extended form the flag
+\texttt{elem} should be 2, and if it is in a partitioned form it should be 3:
+\small
+\begin{verbatim}
+ elem :2$
+ elem([3,f1,f2,f3],x^4+y^4+z^4 - 2*(x*y + x*z + y*z),[x,y,z]);
+
+                      4          2                 2
+                    f1  - 4 f2 f1  + 4 f3 f1 + 2 f2  - 2 f2
+
+ elem:3$
+ elem(([],[[1, 2, 1]],[]);
+                             e1 e2 - 3 e3
+\end{verbatim}
+\normalsize
+It is the same for the flag \texttt{pui} associated to the function \texttt{pui}.
+
+For the function \texttt{pui}, if formal arguments need to be added to
+\texttt{cpui} we remember the cardinal of the alphabet, if it is supplied, to
+calculate the power functions as a function of the first.  We then use the
+function \texttt{puireduc} (see later).
+\small
+\begin{verbatim}
+  multi_elem([[2,e1,e2],[2,f1,f2]],a*x+a^2+x^3,[[x,y],[a,b]]);
+
+                                2                       3
+                     - 2 f2 + f1  + e1 f1 - 3 e1 e2 + e1
+
+  multi_pui([[2,p1,p2],[2,t1,t2]],a*x+a^2+x^3,[[x,y],[a,b]]);
+    
+                                              3
+                                       3 p1 p2   p1
+                          t2 + p1 t1 + ------- - ---
+                                          2       2
+\end{verbatim}
+\normalsize
+\begin{itemize}
+  \item \texttt{ele2pui(m,cel)} \index{ele2pui(m,cel)}
+    $\longrightarrow$ \texttt{cpui} \\
+    performs the passage from the elementary symmetric functions to the power
+    functions $p_1,\ldots,p_m$.
+  \item \texttt{pui2ele(n,cpui)} \index{pui2ele(n,cpui)}
+      $\longrightarrow$ \texttt{cel} \\
+      performs the passage from the power functions to the elementary symmetric
+      functions.  If the flag \texttt{pui2ele} is set to \texttt{girard}, one gets
+      the list of the first \texttt{n} elementary symmetric functions
+      $e_1,\dots,e_n$, and if it is set to \texttt{close}, one gets the $n$th
+      elementary symmetric function.
+\end{itemize}
+Below, we are looking for the first 3 elementary symmetric functions.  We are
+not supplying values for the first 3 power functions, so \texttt{pui2ele} adds
+formal parameters \texttt{p1}, \texttt{p2}, \texttt{p3}.
+\small
+\begin{verbatim}
+  pui2ele(3,[]);
+                           2                      3
+                         p1    p2  p3   p1 p2   p1
+                 [3, p1, --- - --, -- - ----- + ---]
+                          2    2   3      2      6
+\end{verbatim}
+\normalsize
+Below we are looking for the first 4 elementary symmetric functions in terms of
+the power functions such that $p_1=2$.  The cardinal of the alphabet being 3,
+the fourth elementary symmetric function is thus null.  Subsequently the
+function \texttt{ele2pui} calculates the first 3 power functions in terms of the
+first 3 elementary symmetric functions.
+\small
+\begin{verbatim}
+ pui2ele(4,[3,2]);
+                         4 - p2  p3 - 3 p2 + 4
+                 [3, 2 , ------, -------------, 0]
+                           2        3   
+ ele2pui(3,[]);
+                             2                            3
+                   [3, e1, e1  - 2 e2, 3 e3 - 3 e1 e2 + e1 ]
+\end{verbatim}
+\normalsize
+Here, as the cardinal is 2, the 3d elementary symmetric function is null:
+\small
+\begin{verbatim}
+ ele2pui(3,[2]);
+                                2           3
+                      [2, e1, e1  - 2 e2, e1  - 3 e1 e2]
+\end{verbatim}
+\normalsize
+\begin{itemize}
+  \item \texttt{puireduc(n,cpui)} \index{puireduc(n,cpui)}
+      $\longrightarrow$ [\texttt{card}, $p_1,p_2,p_3,\dots,p_n$] \\ 
+    allows finding the power functions up to order \texttt{n} by knowing those
+    of order up to \texttt{m}.  The cardinal (number of variables) is specified
+    in \texttt{cpui}.
+\end{itemize}
+If the cardinal $n$ of the alphabet is given, one may express all the power
+functions in terms of the first $n$.  We take, for example, 2 as the cardinal
+and ask for the first 3 power functions:
+\small
+\begin{verbatim}
+  puireduc(3,[2]);
+                                       3
+                           3 p1 p2   p1
+               [2, p1, p2, ------- - ---]
+                             2        2
+\end{verbatim}
+\normalsize
+\begin{itemize}
+  \item \texttt{ele2comp(m,cel)} \index{ele2comp(m,cel)}
+    $\longrightarrow$ \texttt{ccomp} \\
+    effects the passage from the elementary symmetric functions to the complete
+    (homogeneous) symmetric functions $h_1,\ldots,h_m$.
+  \item \texttt{pui2comp(n,cpui)} \index{pui2comp(n,cpui)}
+    $\longrightarrow$ \texttt{ccomp} \\
+    effects the passage from the power functions to the complete symmetric
+    functions $h_1,\ldots,h_n$.
+  \item \texttt{comp2ele(n,ccomp)} \index{comp2ele(n,ccomp)}
+    $\longrightarrow$ \texttt{cel} \\
+    effects the passage from the complete symmetric functions to the elementary
+    symmetric functions $e_1,\ldots,e_n$.
+  \item \texttt{comp2pui(n,ccomp)} \index{comp2pui(n,ccomp)}
+    $\longrightarrow$ \texttt{cpui} \\
+    effects the passage from the complete symmetric functions to the power
+    functions $p_1,\ldots,p_n$.
+  \item \texttt{mon2schur(part)} \index{mon2schur(part)}
+    $\longrightarrow$ \texttt{pc} \\
+    effects the passage from the monomial forms to the Schur functions.  The
+    result \texttt{pc} is thus a symmetric polynomial in a contracted form.
+  \item \texttt{schur2comp(P,[$h_{i_1}$,\dots,$h_{i_q}$])}
+    \index{schur2comp(P,L)}
+    $\longrightarrow$ \texttt{list of lists} \\
+    effects the passage from the Schur functions, denoted $S_I$, to the complete
+    functions.  The polynomial \texttt{P} is a polynomial in the complete
+    functions $h_{i_k}$.  \emph{It is necessary} to denote these complete
+    functions by an \texttt{h} concatenated with an integer.
+\end{itemize}
+
+The function \texttt{mon2schur} allows writing a Schur function in the basis of
+monomial forms represented in their contracted form.  The Schur function is
+given by a partition\footnote{A \emph{Schur function} is a certain kind of
+  symmetric polynomial.  Schur polynomials are connected with Vandermonde
+  determinants, and with Young tableaux, among other things. For some
+  background, see, e.g. D.E. Knuth, Vol. 3, 2nd Ed., \S5.1.4, and Exercise 33
+  there.}.
+We will first verify that the Schur function associated with the partition
+$(1^3)$ is equal to the 3d elementary symmetric function and that the one
+associated with the partition $(3)$ is equal to the 3d complete symmetric
+function (this follows from a general result).
+\small
+\begin{verbatim}
+ mon2schur([1,1,1]);
+                       x1 x2 x3
+ mon2schur([3]);
+                            2        3
+               x1 x2 x3 + x1  x2 + x1
+
+ mon2schur([1,2]);
+                                   2
+                    2 x1 x2 x3 + x1  x2
+\end{verbatim}
+\normalsize
+Let us see with an example how, by a circular sequence of changes of basis, we
+indeed recover what is given initially:
+\small
+\begin{verbatim}
+  a1 :  pui2comp(3,[3]);
+                                2                 3
+                         p2   p1   p3   p1 p2   p1
+                 [3, p1, -- + ---, -- + ----- + ---]
+                          2    2   3      2      6
+  a2 : comp2ele(3, a1);
+                      2                      3
+                    p1    p2  p3   p1 p2   p1
+            [3, p1, --- - --, -- - ----- + ---]
+                     2    2   3      2      6
+  a3 : ele2pui(3,a2);
+                       [3, p1, p2, p3]
+
+  a4 : comp2pui(3,[]);
+                          2                     3
+         [3, h1, 2 h2 - h1 , 3 h3 - 3 h1 h2 + h1 ]
+
+  a5 : pui2ele(3,a4);
+                     2                        3
+           [3, h1, h1  - h2, h3 - 2 h1 h2 + h1 ]
+
+  a6 : ele2comp(3,a5);
+                       [3, h1, h2, h3]
+\end{verbatim}
+\normalsize
+Below we show how to express a Schur function in the basis of monomial forms (in
+\texttt{c48}), of complete functions (in \texttt{c50}), elementary symmetric
+functions (in \texttt{c51}), and power functions (in \texttt{c52}).
+\small
+\begin{verbatim}
+(c48) mon2schur([1,2]);
+
+                           2
+(d48)       2 x1 x2 x3 + x1  x2
+
+(c49) comp2ele(3, []);
+
+                     2                        3
+(d49)      [3, h1, h1  - h2, h3 - 2 h1 h2 + h1 ]
+
+(c50) elem(d49, d48, [x1,x2,x3]);
+
+(d50)             h1 h2 - h3
+
+(c51) elem([], d48, [x1,x2,x3]);
+
+(d51)             e1 e2 - e3
+
+(c52) pui([], d48, [x1,x2,x3]);
+
+                3
+              p1    p3
+(d52)         --- - --
+              3    3
+
+(c53) schur2comp(h1*h2-h3, [h1,h2,h3]);
+
+
+(d53) 				    s	  
+				     1, 2
+
+(c54) schur2comp(a*h3,[h3]);
+
+(d54)                                 s  a
+                                       3
+
+\end{verbatim}
+\normalsize
+With the last commands we decomposed $h_1 h_2 - h_3$ and $h_3$ in the basis of
+Schur functions.
+
+
+
+\subsection{Resolvents}
+
+Let $p$ be a polynomial of one variable $x$ and of degree $n$ on a ring $A$.
+Let $f \in A[x_1,x_2,\ldots,x_n]$ be a transformation function and $S_nf$ its
+orbit under the action of the symmetric group $S_n$.  Then the \emph{resolvent}
+of $p$ by $f$, denoted $f_*(p)$, is the unitary polynomial:
+\begin{equation*}
+  f_*(p)(y) = \prod_{h\in S_nf} (y - h(\alpha_1,\ldots ,\alpha_n)),
+\end{equation*}
+where $\alpha_1,\ldots,\alpha_n$ are the roots of $p$.
+
+If the transformation function is
+\begin{enumerate}
+  \item a polynomial in a single variable ,
+  \item a linear polynomial,
+  \item a linear polynomial whose non-zero coefficients alternate in sign,
+  \item a linear polynomial with coefficients equal to 1,
+  \item a polynomial symmetric in its variables,
+  \item a monomial whose coefficient is 1,
+  \item the function of the Cayley resolvent,
+  \item of the Lagrange resolvent,
+  \item an arbitrary polynomial,
+\end{enumerate}
+then each assocaited resolvent is respectively called
+\begin{enumerate}
+  \item \textit{unitary},
+  \item \textit{linear},
+  \item \textit{alternating},
+  \item \textit{sum},
+  \item \textit{symmetric},
+  \item \textit{product},
+  \item \textit{Cayley},
+  \item \textit{Lagrange},
+  \item \textit{general}.
+\end{enumerate}
+As we will see later, there are also other resolvents (dihedral, Klein, \dots).
+
+We define the \textit{arity} of a function as the number of variables that
+appear in its expression.  In general if a function is of arity $k$ we use
+$f(x_1,\ldots,x_k)$ in place of $f(x_1,\ldots ,x_k ,\ldots ,x_n)$. Let us give
+examples for each of these cases:
+\begin{enumerate}
+  \item $f(x)=x^7-x+1$ of arity 1,
+  \item $f(x_1,x_2) = x_1+3x_2$ of arity 2,
+  \item $f(x_1,x_2,x_3,x_4) = x_1 -x_2 + 3x_3-3x_4$ of arity 4,
+  \item $f(x_1,x_2,x_3) = x_1+x_2+x_3$ of arity 3,
+  \item $f(x_1,x_2,x_3) = 3x_1x_2 + 3x_2x_3 +3x_1x_3$ of arity 3,
+  \item $f(x_1,x_2) =x_1x_2$ of arity 2,
+  \item $f(x_1,x_2,x_3,x_4,x_5)=(x_1x2+x_2x_3+x_3x_4+x_4x_5+x_5x_1 -
+  (x_1x_3+x_3x_5+x_5x_2+x_2x_4+x_4x_1))^2$
+  \item $f(x_1,x_2,x_3) = \epsilon x_1 + \epsilon^2 x_2 + \epsilon^3 x_3$, where
+  $\epsilon$ is a third root of unity,
+  \item $f(x_1,x_2,x_3) = x_1 +2x_2x_3$ of arity 3.
+\end{enumerate}
+It is clear that a sum or product resolvant is also symmetric, and that a sum or
+alternating resolvent is also linear.
+
+The calculations of these resolvents are done in two ways.  Either by the
+function \texttt{resolvante} or by a specific name preceded by
+\texttt{resolvante}.  The list of possible functions is thus:
+\begin{itemize}
+  \item \texttt{resolvante\_produit\_sym(p, x)}
+    \index{resolvante\_produit\_sym(p, x)} which calculates the list of all the
+    product resolvents of the polynomial \texttt{p(x)}.
+  \item \texttt{resolvante\_unitaire(p,q,x)} \index{resolvante\_unitaire(p, q, x)}
+    which calculates the resolvant of the polynomial $p(x)$ by the polynomial
+    $q(x)$.  That is, $\prod_{p(\alpha)=0}(y-q(\alpha))$.
+  \item \texttt{resolvante\_alternee1(p,x)} \index{resolvante\_alternee1(p, x)}
+    which calculates the transformation of $p(x)$ of degree $n$ by the function
+    $\prod_{1\leq i<j\leq n-1} (x_i-x_j)$.
+  \item \texttt{resolvante\_klein(p,x)} \index{resolvante\_klein(p, x)} which
+    calculates the transformation of $p(x)$ by the function $x_1x_2+x_3$, and is
+    so named because it is associated to the Klein group.
+  \item \texttt{resolvante\_klein3(p,x)} \index{resolvante\_klein3(p, x)} which
+    calculates the transformation of $p(x)$ by the function $x_1x_2x_4+x_4$.
+  \item \texttt{resolvante\_vierer(p,x)} \index{resolvante\_vierer(p, x)} which
+    calculates the transformation of $p(x)$ by the function $x_1x_2-x_3x_4$.
+  \item \texttt{resolvante\_diedrale(p,x)} \index{resolvante\_diedrale(p, x)}
+    which calculates the transformation of $p(x)$ by the function $x_1x_2+x_3x_4$.
+  \item \texttt{resolvante\_bipartite(p,x)} \index{resolvante\_bipartite(p, x)}
+    which calculates the transformation of $p(x)$ by the function $x_1x_2\ldots
+    x_{n/2}+x_{n/2+1}\ldots x_n$.  The degree of $p$ must necessarily be even.
+  \item \texttt{resolvante(p, x, f,[x1,x2,\ldots,xk])}
+    \index{resolvante(p,x,f,[x1,x2,\ldots,xk])} which calculates the transformation
+    of $p(x)$ by the function $f$ of arity $k$ in the variables
+    $x_1,x_2,\ldots,x_k$.
+\end{itemize}
+
+It is essential for the efficiency of the computations to include in the list of
+variables of $f$ only those which appear effectively in its expression.  Before
+calling the function \texttt{resolvante}, according to the type of resolvent
+calculated, one may set the flag \texttt{resolvante} so as to use the most
+suitable algorithm.  According to the kinds of resolvent cited above, the flag
+\texttt{resolvante} should be set respectively to
+\begin{enumerate}
+  \item unitaire,
+  \item lineaire,
+  \item alternee,
+  \item somme,
+  \item symetrique,
+  \item produit,
+  \item Cayley
+  \item Lagrange,
+  \item generale.
+\end{enumerate}
+The notion of resolvent can be gneralized by the transformation of $r$
+polynomials by a function depending on $r$ blocks of variables:
+\begin{itemize}
+\item \texttt{direct} \index{direct}
+  ([$P_1,P_2,\ldots,P_r$],y,f,[$lvar_1,lvar_2,\ldots ,lvar_r$])
+  $\longrightarrow$ $f_*(P_1,P_2, \ldots, P_r)(y)$  \\
+  which, given the $r$ polynomials $P_1,\ldots,P_r$ in the variable $y$, of
+  degrees $d_1,\ldots ,d_r$, returns the product polynomial of $(y - h(a^{(1)},
+  \ldots, a^{(p)}))$ where $a^{(i)}$ is the $d_i$-tuple of roots of $P_i$ for
+  $i=1,\dots,r$ and where $h$ runs through the whole orbit of the function $f$
+  under the action of the product of the symmetric groups $S_{d_1}\times \cdots
+  \times S_{d_r}$.  We put in $lvar_i$ the variables of $f$ which appear
+  effectively in its expression.  That is, $lvar_i$ may include fewer than $d_i$
+  variables.  The function \texttt{direct} will deduce the action of the
+  symmetric group $S_{d_i}$.
+\end{itemize}
+\textbf{Examples}.
+\small
+\begin{verbatim}
+  resolvante:unitaire;
+  resolvante(x^7-14*x^5+56*x^3-56*x+22, x, x^3-1, [x]);
+
+        7      6        5         4          3   
+      y  + 7 y  - 539 y  - 1841 y  + 51443 y  
+
+				  2
+                        + 315133 y  + 376999 y + 125253  
+
+ resolvante : lineaire$
+ resolvante(x^4-1, x, x1+2*x2+3*x3, [x1,x2,x3]);
+    24       20         16            12       
+   y   + 80 y   + 7520 y   + 1107200 y   
+                               8	      4
+                   + 49475840 y  + 344489984 y + 655360000
+                                                      
+ resolvante : generale$
+ resolvante(x^4-1, x, x1+2*x2+3*x3, [x1,x2,x3]);
+    24       20         16            12       
+   y   + 80 y   + 7520 y   + 1107200 y   
+                               8	      4
+                   + 49475840 y  + 344489984 y + 655360000
+
+ resolvante(x^4-1, x, x1+2*x2+3*x3, [x1,x2,x3,x4]);
+    24       20         16            12       
+   y   + 80 y   + 7520 y   + 1107200 y   
+                               8	      4
+                   + 49475840 y  + 344489984 y + 655360000
+
+ direct([x^4-1], x, x1+2*x2+3*x3, [[x1,x2,x3]]);
+
+    24       20         16            12       
+   y   + 80 y   + 7520 y   + 1107200 y   
+                               8	      4
+                   + 49475840 y  + 344489984 y + 655360000
+
+ resolvante_diedrale(x^5-3*x^4+1, x);
+   15       12       11       10        9         8         7        6
+  x   - 21 x   - 81 x   - 21 x   + 207 x  + 1134 x  + 2331 x  - 945 x
+
+                     5          4          3          2
+             - 4970 x  - 18333 x  - 29079 x  - 20745 x  - 25326 x - 697
+\end{verbatim}
+\normalsize
+We verify that the function \texttt{direct} is a generalisation of the function
+\texttt{resolvante}:
+\small
+\begin{verbatim} 
+ resolvante : lineaire$
+ resolvante(x^4-1, x, x1+2*x2, [x1,x2]);
+                           12       8        4
+                          y   + 13 y  + 611 y  - 625
+ direct([x^4-1], x, x1+2*x2, [[x1,x2,x3]]);
+                           12       8        4
+                          y   + 13 y  + 611 y  - 625
+\end{verbatim}
+\normalsize
+The result of this last calculation was the same as
+\begin{verbatim} 
+  direct([x^4-1], x, x1+2*x2, [[x1,x2]]);
+\end{verbatim}
+As it is more efficient, it is advisable not to include variables that do not
+appear in the expression of the transformation function.
+\small
+\begin{verbatim} 
+ resolvante:lineaire$
+ resolvante(x^4-1, x, x1+x2+x3, [x1,x2,x3]);
+                                 4
+                                y  - 1
+ resolvante:symetrique$
+
+ resolvante(x^4-1, x, x1+x2+x3, [x1,x2,x3]);
+                                 4
+                                y  - 1
+ resolvante:lineaire$
+ resolvante(x^4+x+1, x, x1-x2, [x1,x2]);
+               12      8       6        4        2
+              y   + 8 y  + 26 y  - 112 y  + 216 y  + 229
+ resolvante:alternee$
+ resolvante(x^4+x+1, x, x1-x2, [x1,x2]);
+                12      8       6        4        2
+              y   + 8 y  + 26 y  - 112 y  + 216 y  + 229
+ resolvante:generale$
+ resolvante(x^4+x+1, x, x1-x2, [x1,x2]);
+               12      8       6        4        2
+              y   + 8 y  + 26 y  - 112 y  + 216 y  + 229 
+\end{verbatim}
+\normalsize
+We calculate below a direct image in two different ways.  The first displays the
+intermediate calculations done by the function \texttt{direct}.  One may change
+the flag \texttt{direct}.  The default is \texttt{puissances}, which means that
+the function \texttt{multi\_pui} is used.  If we set \texttt{direct :
+elementaire}, the function \texttt{direct} uses the function
+\texttt{multi\_elem}, generally of lower performance.
+\small
+\begin{verbatim}
+ l : pui_direct(multi_orbit(a*x+b*y, [[x,y],[a,b]]), [[x,y],[a,b]], [2,2]);
+
+                                    2  2
+                 [a x, 4 a b x y + a  x ]
+
+ m: multi_elem([[2,e1,e2],[2,f1,f2]], l[1], [[x,y],[a,b]]);
+
+                           e1 f1
+
+ n: multi_elem([[2,e1,e2],[2,f1,f2]], l[2], [[x,y],[a,b]]);
+
+                            2             2     2   2
+              8 e2 f2 - 2 e1  f2 - 2 e2 f1  + e1  f1
+
+ pui2ele(2, [2,m,n]);
+
+                                       2           2
+              [2, e1 f1, - 4 e2 f2 + e1  f2 + e2 f1 ]
+ 
+ ele2polynome(%, y);
+
+                    2                         2           2
+                   y  - e1 f1 y - 4 e2 f2 + e1  f2 + e2 f1
+
+ direct([z^2-e1*z+e2, z^2-f1*z+f2], z, b*v+a*u, [[u, v],[a, b]]);
+
+                    2                         2           2
+                   y  - e1 f1 y - 4 e2 f2 + e1  f2 + e2 f1
+\end{verbatim}
+\normalsize
+\begin{itemize}
+  \item\texttt{pui\_direct($[f_1,\ldots,f_q]$, [$lvar_1,\ldots,lvar_p$],
+    [$d_1,d_2,\ldots,d_p$])} \\ 
+    \index{pui\_direct} 
+    Let $f$ be a polynomial in $r$ blocks of variables $lvar_1,\ldots,lvar_r$.
+    Let $c_i$ be the number of variables in $lvar_i$ and let $S_C$ be the product
+    of the $r$ symmetric groups $S_{c_i}$ of degrees $c_1,\dots,c_r$.  This group
+    acts naturally on $f$.  The list \texttt{orbite} is the orbit, denoted $S_Cf$,
+    of the function $f$ under the action of $S_C$.  (This list may be obtained via
+    the function \texttt{multi\_orbit}).  The $d_i$ are integers such that
+    $c_1\leq d_1, c_2 \leq d_2,\ldots, c_p\leq d_p$.  We denote by $S_D$ the
+    product of the symmetric groups $S_{d_1} \times S_{d_2} \times \ldots \times
+    S_{d_p}$.
+
+    The function \texttt{pui\_direct} returns the first $N$ power functions of
+    the orbit $S_Df$ pf the function $f$ deduced from the power functions of the
+    orbit $S_Cf$ where $N$ is the cardinal of $S_Df$.
+
+    The result is returned in multi-contracted form relative to $S_D$ (i.e. only
+    one element is kept per orbit under the action of $S_D$).
+\end{itemize}
+\small
+\begin{verbatim}
+  L : [[x,y],[a,b]]$
+
+  pui_direct([b*y + a*x, a*y + b*x], L, [2,2]);
+
+                                2  2
+             [a x, 4 a b x y + a  x ]
+
+  pui_direct([b*y + a*x, a*y + b*x], L, [3,2]);
+
+                         2  2     2    2        3  3
+  [2 a x, 4 a b x y + 2 a  x , 3 a  b x  y + 2 a  x ,
+
+        2  2  2  2      3    3        4  4
+    12 a  b  x  y  + 4 a  b x  y + 2 a  x ,
+
+        3  2  3  2      4    4        5  5
+    10 a  b  x  y  + 5 a  b x  y + 2 a  x ,
+
+        3  3  3  3       4  2  4  2      5    5        6  6
+    40 a  b  x  y  + 15 a  b  x  y  + 6 a  b x  y + 2 a  x ]
+
+ pui_direct ([y+x+2*c, y+x+2*b, y+x+2*a],[[x,y],[a,b,c]],[2,3]);
+
+                             2              2
+      [3 x + 2 a, 6 x y + 3 x  + 4 a x + 4 a , 
+
+              2                   3        2       2        3
+           9 x  y + 12 a x y + 3 x  + 6 a x  + 12 a  x + 8 a ]
+\end{verbatim}
+\normalsize 
+Evidently, we find the same result by
+\small
+\begin{verbatim}
+  pui_direct([y+x+2*a], [[x,y],[a]], [2,3]);
+
+                             2              2
+      [3 x + 2 a, 6 x y + 3 x  + 4 a x + 4 a , 
+
+              2                   3        2       2        3
+           9 x  y + 12 a x y + 3 x  + 6 a x  + 12 a  x + 8 a ]
+\end{verbatim}
+\normalsize
+
+
+\newpage
+\section{Meaning of objects}
+
+\begin{flushleft}
+\texttt{card} : the cardinal of the set of variables with which we are working.
+
+\texttt{$e_k$} : $k$-th elementary symmetric function $\sum_{i_1<i_2<\cdots<
+i_k} x_{i_1} x_{i_2} \cdots x_{i_k}$.
+
+\texttt{$p_k$} : $k$-th power function $\sum_i x_i^k$.
+
+\texttt{$h_k$} : $k$-th complete (homogeneous) symmetric function $\sum_{i_1\le
+i_2\le \cdots\le i_k} x_{i_1} x_{i_2} \cdots x_{i_k}$.
+
+\texttt{ele} = [$e_1,e_2,\ldots,e_n$], $n$ given in the function call.
+
+\texttt{cele} = [card, $e_1,e_2,\ldots,e_n$]
+
+\texttt{pui} = [$p_1,p_2,p_3,\ldots,p_m$], $m$ given in the function call.
+
+\texttt{cpui} = [card, $p_{1},p_{2},p_{3},\ldots,p_{m}$].
+
+\texttt{ccomp} = [card, $h_{1},h_{2},h_{3},\ldots,h_{m}$].
+
+\texttt{sym} : symmetric polynomial of unspecified representation.
+
+\texttt{fmc} : contracted monomial form.
+
+\texttt{part} : partition.
+
+\texttt{tc} : contracted term.
+
+\texttt{tpart} : partitioned term.
+
+\texttt{psym} : symmetric polynomial in extended form.
+
+\texttt{pc} : symmetric polynomial in contracted form.
+
+\texttt{multi\_pc} : multi-symmetric polynomial in multi-contracted form under
+$S_D$.
+
+\texttt{ppart} : symmetric polynomial in partitioned form.
+
+\texttt{P($x_1,\ldots,x_q$)} : polynomial in $x_1,\ldots,x_q$.
+
+\texttt{lvar} : list of variables.
+
+$[lvar_1, \ldots,lvar_r]$ : list of lists of variables.
+\end{flushleft}
+
+
+\addcontentsline{toc}{section}{Index}
+% makeindex docsym
+\printindex
+
+
+\end{document}

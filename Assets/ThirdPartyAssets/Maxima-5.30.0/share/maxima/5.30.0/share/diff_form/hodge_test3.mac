@@ -1,0 +1,38 @@
+/* written by Gosei Furuya <go.maxima@gmail.com> 
+#  This program is free software; you can redistribute it and/or modify        
+#  it under the terms of the GNU General Public License as published by        
+#  the Free Software Foundation; either version 2 of the License, or           
+#  (at your option) any later version.                
+*/
+
+inargs(q):=block([inflag:true],args(q));
+inop(q):=block([inflag:true],op(q));
+
+/* hodge star operator*/
+h_st(_f):=block([_f1:expand(_f),_l1:[],_l2:[],_l3:[],_l4,_l5,_l6,_l7,abasis],
+	match_declare(abasis,any),
+	abasis:[],
+	if _f=0 then return(0) 
+	else (
+	    if atom(_f1) then _l1:[_f1] 
+	       else (
+		      if is(inop(_f1)="+") then _l1:inargs(_f1) 
+	                 else (
+	_l1:[_f1]))),
+	for i:1 thru dim do (
+	abasis:endcons(basis[i],abasis)
+	),abasis,
+/*	_l2:sublis(ev(map("=",abasis,makelist(1,i,1,dim))),_l1),*/
+	_l2:sublis(map("=",abasis,makelist(1,i,1,dim)),_l1),	
+	_l3:map(lambda([x,y],y/x),_l2,_l1),
+	_l6:sublis(map("=",abasis,norm_table),_l3),
+	_l4:map(lambda([x],(apply("*",abasis))/x),_l3),
+	_l5:map(lambda([x,y],(x@y)/(apply("*",abasis))),_l3,_l4),
+	_l4:map(lambda([x,y,z],x*y*z),_l6,_l5,_l4),
+	_l7:apply("+",map(lambda([x,y],x*y*volume),_l2,_l4)),
+	_l7);
+
+ nest2(_f,_x):=block([_a:[_x],i],if listp(_f) then (
+	 _f:reverse(_f),for i:1 thru length(_f) do(_a:map(_f[i],_a))) 
+	else (_a:map(_f,_a)),_a[1]);
+ nest3(_f,_x,_n):=block([_a,i],_a:[_x],for i:1 thru _n do (_a:map(_f,_a)),_a);

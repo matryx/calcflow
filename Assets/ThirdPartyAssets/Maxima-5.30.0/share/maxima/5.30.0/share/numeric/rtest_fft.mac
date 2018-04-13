@@ -1,0 +1,232 @@
+(kill (all),
+ if not ?fboundp ('fft) then load ('fft),
+ float_approx_equal_tolerance : 1e-13,
+ 0);
+0;
+
+(naive_ft (x) := block ([y, n],
+    n : length (x),
+    y : makelist (0, i, 1, n),
+    for k : 0 thru n - 1
+        do y[1 + k] : (1/n) * sum (x[1 + j] * exp (+2 * %i * %pi * j * k / n), j, 0, n - 1),
+    expand (y)),
+ naive_ft_inverse (y) := block ([x, n],
+    n : length (y),
+    x : makelist (0, i, 1, n),
+    for j : 0 thru n - 1
+        do x[1 + j]: sum (y[1 + k] * exp (-2 * %i * %pi * j * k / n), k, 0, n - 1),
+    expand (x)),
+ 0);
+0;
+
+(compare_ft (x) := block ([y1, y2],
+    y1 : fft (x),
+    y2 : naive_ft (x),
+    y1 - float (y2),
+    map (lambda ([u], is (u < float_approx_equal_tolerance)), map (abs, %%)),
+    apply ("and", %%)),
+ compare_ft_inverse (y) := block ([x1, x2],
+    x1 : inverse_fft (y),
+    x2 : naive_ft_inverse (y),
+    x1 - float (x2),
+    map (lambda ([u], is (u < float_approx_equal_tolerance)), map (abs, %%)),
+    apply ("and", %%)),
+ 0);
+0;
+
+/* TESTS FOR FFT */
+
+/* verify that fft does not modify its argument */
+
+(foo0 : [1, 1 + %i, 1 - %i, 2], 0);
+0;
+
+(kill (foo), foo : foo0, fft (foo), foo);
+''foo0;
+
+(foo : make_array (any, 4), fillarray (foo, foo0), fft (foo), listarray (foo));
+''foo0;
+
+(kill (foo), array (foo, 3), fillarray (foo, foo0), fft (foo), listarray (foo));
+''foo0;
+
+/* verify fft computation */
+
+fft ([]);
+[];
+
+fft ([1729]);
+[1729.0];
+
+compare_ft ([2, -3, 5, -7, 11, -13, 17, -19]);
+true;
+
+compare_ft ([1/2, 1/3, 1/5, 1/7, -1/11, -1/13, -1/17, -1/19]);
+true;
+
+compare_ft ([-2.5, -3.5, -5.5, -7.5, 11.5, 13.5, 17.5, 19.5]);
+true;
+
+compare_ft ([2*%pi, %pi, -%pi, -2*%pi, %e, %gamma, %phi, 1]);
+true;
+
+set_random_state (make_random_state (1729));
+done;
+
+compare_ft (makelist (2 * random (1.0) - 1, i, 1, n)), n=1;
+true;
+
+compare_ft (makelist (2 * random (1.0) - 1, i, 1, n)), n=2;
+true;
+
+compare_ft (makelist (2 * random (1.0) - 1, i, 1, n)), n=4;
+true;
+
+compare_ft (makelist (2 * random (1.0) - 1, i, 1, n)), n=8;
+true;
+
+compare_ft (makelist (2 * random (1.0) - 1, i, 1, n)), n=16;
+true;
+
+compare_ft (makelist (random (256), i, 1, 8)); /* integers */
+true;
+
+compare_ft (makelist (bfloat (2 * random (1.0) - 1), i, 1, 8)); /* bigfloats */
+true;
+
+compare_ft (makelist (random (256) / 4, i, 1, 8)); /* rationals */
+true;
+
+(aa : makelist (2 * random (1.0) - 1, i, 1, 8),
+ bb : makelist (2 * random (1.0) - 1, i, 1, 8),
+ kill (aabb),
+ array (aabb, 7),
+ fillarray (aabb, aa + %i*bb),
+ xx : fft (aa + %i*bb),
+ yy : fft (aabb),
+ apply (max, abs (xx - listarray (yy))),
+ is (%% < float_approx_equal_tolerance));
+true;
+
+(aa : makelist (2 * random (1.0) - 1, i, 1, 8),
+ bb : makelist (2 * random (1.0) - 1, i, 1, 8),
+ kill (aabb),
+ aabb : make_array ('float, 8),
+ fillarray (aabb, aa + %i*bb),
+ xx : fft (aa + %i*bb),
+ yy : fft (aabb),
+ apply (max, abs (xx - listarray (yy))),
+ is (%% < float_approx_equal_tolerance));
+true;
+
+/* TESTS FOR IFT */
+
+/* verify that inverse_fft does not modify its argument */
+
+(foo0 : [1, 1 + %i, 1 - %i, 2], 0);
+0;
+
+(kill (foo), foo : foo0, inverse_fft (foo), foo);
+''foo0;
+
+(foo : make_array (any, 4), fillarray (foo, foo0), inverse_fft (foo), listarray (foo));
+''foo0;
+
+(kill (foo), array (foo, 3), fillarray (foo, foo0), inverse_fft (foo), listarray (foo));
+''foo0;
+
+/* verify inverse_fft computation */
+
+inverse_fft ([]);
+[];
+
+inverse_fft ([1729]);
+[1729.0];
+
+compare_ft_inverse ([2, -3, 5, -7, 11, -13, 17, -19]);
+true;
+
+compare_ft_inverse ([1/2, 1/3, 1/5, 1/7, -1/11, -1/13, -1/17, -1/19]);
+true;
+
+compare_ft_inverse ([-2.5, -3.5, -5.5, -7.5, 11.5, 13.5, 17.5, 19.5]);
+true;
+
+compare_ft_inverse ([2*%pi, %pi, -%pi, -2*%pi, %e, %gamma, %phi, 1]);
+true;
+
+set_random_state (make_random_state (1729));
+done;
+
+compare_ft_inverse (makelist (2 * random (1.0) - 1, i, 1, n)), n=1;
+true;
+
+compare_ft_inverse (makelist (2 * random (1.0) - 1, i, 1, n)), n=2;
+true;
+
+compare_ft_inverse (makelist (2 * random (1.0) - 1, i, 1, n)), n=4;
+true;
+
+compare_ft_inverse (makelist (2 * random (1.0) - 1, i, 1, n)), n=8;
+true;
+
+compare_ft_inverse (makelist (2 * random (1.0) - 1, i, 1, n)), n=16;
+true;
+
+compare_ft_inverse (makelist (random (256), i, 1, 8)); /* integers */
+true;
+
+compare_ft_inverse (makelist (bfloat (2 * random (1.0) - 1), i, 1, 8)); /* bigfloats */
+true;
+
+compare_ft_inverse (makelist (random (256) / 4, i, 1, 8)); /* rationals */
+true;
+
+(aa : makelist (2 * random (1.0) - 1, i, 1, 8),
+ bb : makelist (2 * random (1.0) - 1, i, 1, 8),
+ kill (aabb),
+ array (aabb, 7),
+ fillarray (aabb, aa + %i*bb),
+ xx : inverse_fft (aa + %i*bb),
+ yy : inverse_fft (aabb),
+ apply (max, abs (xx - listarray (yy))),
+ is (%% < float_approx_equal_tolerance));
+true;
+
+(aa : makelist (2 * random (1.0) - 1, i, 1, 8),
+ bb : makelist (2 * random (1.0) - 1, i, 1, 8),
+ kill (aabb),
+ aabb : make_array ('float, 8),
+ fillarray (aabb, aa + %i*bb),
+ xx : inverse_fft (aa + %i*bb),
+ yy : inverse_fft (aabb),
+ apply (max, abs (xx - listarray (yy))),
+ is (%% < float_approx_equal_tolerance));
+true;
+
+/* FFT + FFT_INVERSE */
+
+(L : [1, 2, 3, 4, -1, -2, -3, -4], 0);
+0;
+
+is (apply (max, abs (L - fft (inverse_fft (L)))) < float_approx_equal_tolerance);
+true;
+
+is (apply (max, abs (L - inverse_fft (fft (L)))) < float_approx_equal_tolerance);
+true;
+
+(L : [1, 1 - %i, 1 + %i, -1, -1/2, 1/2 + %i, 1/2 - %i, 1/2], 0);
+0;
+
+is (apply (max, abs (L - fft (inverse_fft (L)))) < float_approx_equal_tolerance);
+true;
+
+is (apply (max, abs (L - inverse_fft (fft (L)))) < float_approx_equal_tolerance);
+true;
+
+/* Bug 3581619 - Incorrect FFT for input of size 2 */
+is (apply (max, abs([0.5, 0.5] - fft([1, 0]))) < float_approx_equal_tolerance);
+true;
+
+reset (float_approx_equal_tolerance);
+[float_approx_equal_tolerance];

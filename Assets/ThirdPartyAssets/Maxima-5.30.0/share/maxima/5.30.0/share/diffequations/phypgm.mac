@@ -1,0 +1,248 @@
+setup_autoload("lodsav",lodesave)$
+
+svhypr(wb,wc):=block([p],swsv:t,print("the type is hypergeometric"),
+   for i:1 thru 3 do (sl[i]:ssolve(cheq[i],l), la[i,0]:spt[i],
+          la[i,1]:part(sl[i],1,2), la[i,2]:part(sl[i],2,2)),
+   print("the solution may be written by Riemann's P-functions as follows"),
+   pfuncthg(n,dum), replcompform(dum), infosum(dum),
+   lmin:min(l[1],l[2],l[3],l[4]), lmax:max(l[1],l[2],l[3],l[4]),
+   if lmin=0 then (j:seekodd(dum),
+      if j>0 then (ldf3(1),ys:nopmt(j),return(ys))),
+   ldf3(2),ys:haspmts(dum),return(ys))$
+
+pfuncthg(selv,v):=block([p], p:matrix([la[1,0],la[2,0],la[3,0]],
+   [la[1,1],la[2,1],la[3,1]],[la[1,2],la[2,2],la[3,2]]),
+   if selv=y then print("y=",v,"P",p,"(x)") else print("y=P",p,"(x)"))$
+
+infosum(dum):=block([ws],
+   for i:1 thru 3 do dla[i]:la[i,1]-la[i,2],
+   ws:dla[1]+dla[2]+dla[3], sum[1]:ratsimp(ws),
+   ws:dla[1]+dla[2]-dla[3], sum[2]:ratsimp(ws),
+   ws:dla[1]-dla[2]+dla[3], sum[3]:ratsimp(ws),
+   ws:dla[1]-dla[2]-dla[3], sum[4]:ratsimp(ws),
+   for i:1 thru 4 do (var[i]:listofvars(sum[i]),l[i]:length(var[i])))$
+
+excrow(dum):=block([wla], for i:1 thru 3 do exc1c(i))$
+
+ssolve(e,x):=block([l,ws,fws],ws:solve(e,x),l:length(ws),
+   if l=1 then (fws:first(ws),ws:[fws,fws]),return(ws))$
+
+oddintp(pol,v):=block([c,wtst,wd],c:coeff(pol,v,0),wtst:ratsimp((pol-c)/2),
+   wd:denom(wtst),if wd=1 and oddp(c) then return(t) else return(f))$
+
+exc1c(i):=block([wla], wla:la[i,1],la[i,1]:la[i,2],
+                        la[i,2]:wla,     dla[i]:-dla[i])$
+
+seekodd(dum):=block([i,j],i:1,j:0,
+ loop, if l[i]=0 and oddp(sum[i]) then (j:j+1,jodd[j]:i),
+       if l[i]=1 then (ans:read("is",sum[i],"an odd integer?"),
+                       if ans=y then (j:j+1,jodd[j]:i)),
+   if i<4 then (i:i+1,go(loop)), return(j))$
+
+replcompform(dum):=block([],for i:1 thru 3 do
+   (nv:listofvars(la[i,1]), if length(nv)>1 then
+   (ans:read("do you replace in",la[i,1],"?",str4),
+   if ans=y then (ob:read("replace"),oa:read("by"),
+   for j:1 thru 2 do la[i,j]:subst(oa,ob,la[i,j])))))$
+
+ldf3(i):=block([], if ldsw[3,i]#y then (ldsw[3,i]:y,
+   if i=1 then load(pnopm) else
+   if i=2 then load(phghp) else
+   if i=3 then load(psleg) else
+   if i=4 then load(phyp25) else
+   if i=5 then load(psolh) ))$
+
+lodesave([phypgm,fasl],svhypr,infosum,excrow,ssolve,pfuncthg,
+        oddintp,exc1c,seekodd,replcompform,ldf3);
+
+/* the sum has no parameter */
+nopmt(j):=block([], iodd:minabssum(j),excroots(iodd),
+   if integerp(sum[iodd]) then (if sum[iodd]>0 then 
+      (excrow(dum),sum[iodd]:-sum[iodd])) 
+   else (ans:read("is",sum[iodd],"positive?",str4), if ans=y then 
+      (excrow(dum),sum[iodd]:-sum[iodd])),
+   wsum:sum[iodd],xa:x-spt[1],xb:x-spt[2],
+   print(str1), pfuncthg(n,v), wd:xa*xb,
+   if sum[iodd]=-1 then ys:elmrephg1(iodd) 
+                   else ys:elmrephg2((1-wsum)/2), return(ys))$
+
+minabssum(j):=block([i,j1,j2,minj],i:1,j1:jodd[i], minj:j1,
+   loop,if i<j then (i:i+1,j2:jodd[i],
+   if abs(sum[j1]) > abs(sum[j2]) then minj:j2, go(loop)),
+   return(minj))$
+
+excroots(iodd):=block([],
+    if iodd=2 or iodd=4 then exc1c(3),
+    if iodd=3 or iodd=4 then exc1c(2))$
+
+elmrephg1(iodd):=block([w1,w2,w3,w4],
+   sdla1:ratsimp(-dla[1]-1), sdmu1:ratsimp(-dla[2]-1),
+   if la[1,1]=la[2,1] then w1:wd^la[1,1] 
+                      else w1:xa^la[1,1]*xb^la[2,1],
+   if dla[1]=dla[2] then w2:wd^sdla1 else w2:xa^sdla1*xb^sdmu1,
+   w3:k1+k2*'integrate(w2,x), w4:w1*w3, print("y=",w4), ys:w4,
+   reqans1(dum), if ans=y then 
+    (w5:k1+k2*integrate(w2,x), ys:expand(w1*w5),
+     y1:coeff(ys,k1,1), y2:coeff(ys,k2,1)), return(ys))$
+
+elmrephg2(m):=block([w1,w2,w3,w4,w5],
+  sdlam :ratsimp(dla[1]+m),  sdmum :ratsimp(dla[2]+m),
+  sdlam1:ratsimp(sdlam-1),sdmum1:ratsimp(sdmum-1),
+  if la[1,2]=la[2,2] then w1:wd^la[1,2] 
+                     else w1:xa^la[1,2]*xb^la[2,2],
+  if dla[1]=dla[2]   then (w2:wd^sdlam1, w3:wd^(-sdlam)) else
+   (w2:xa^sdlam1*xb^sdmum1,w3:xa^(-sdlam)*xb^(-sdmum)),
+  w4:k1+k2*'integrate(w3,x), w5:w1*'diff(w2*w4,x,m-1), print("y=",w5),
+  ys:w5, reqans1(dum), if ans=y then
+   (w6:k1+k2*'integrate(w3,x), w7:w1* diff(w2*w6,x,m-1), ys:expand(w7),
+    y1:coeff(ys,k1,1), y2:coeff(ys,k2,1)), return(ys)  )$
+
+lodesave([pnopm,fasl],nopmt,minabssum,excroots,elmrephg1,elmrephg2);
+  
+/* the sum has parameters */
+haspmts(dum):=block([], y0:1, plist:listofpars(eq),
+  for i:1 thru 3 do checkcontratn(i),
+  sortratn(dum), exccolumns(dum), pfuncthg(n,dum),
+  if not(cdla[1]=cdla[2]) then hgstdd(dum),
+  make01p(1), make01p(2), pfuncthg(y,y0), xa:x-spt[1],xb:x-spt[2],
+  if la[1,2]=0 and la[2,2]=0 then (excrow(dum), pfuncthg(y,y0)),
+  if la[1,1]=0 and la[2,1]=0 and dla[1]=dla[2] then (ans:n,
+      if not integerp(dla[1]) then 
+         ans:read("Is",dla[1],"an integer?",str4),
+      if integerp(dla[1]) or ans=y then 
+         (v:-la[3,1],ldf3(3),gsvlgdre(v),return(ys))),
+  if dla[1]=dla[2] and la[1,3]=2 and la[2,3]=2 then 
+      (ldf3(4),ys:caseof22(dum)),
+  if ys#f then return(ys) else (hgstdd(dum),
+       ldf3(5),gsvhg(dum),return(ys)))$
+
+pfdivide(y0,i,lamu):=block([],    wy:ratsimp(y0*(x-la[i,0])^lamu), 
+   la[i,1]:ratsimp(la[i,1]-lamu), la[i,2]:ratsimp(la[i,2]-lamu),
+   la[3,1]:ratsimp(la[3,1]+lamu), la[3,2]:ratsimp(la[3,2]+lamu), 
+   v:-la[3,1], return(wy))$
+
+listofpars(exp):=block([pl],pl:listofvars(exp), pl:delete(x,pl), 
+   pl:delete(y,pl), lplist:length(pl), return(pl))$
+
+contratn(i):=block([], dexp:dla[i], j:1,
+   wexp:ratsimp(dexp), if wexp=-1/2 then return(f),
+   dnop:ratsimp(dexp), if integerp(dnop) then return(dnop),
+ loop, dnop:ratsimp(dexp-1/j), if psdmint(dnop) then return(1/j),
+   j:j+1, if j<6 then go(loop),
+   dnop:ratsimp(dexp-2/5), if psdmint(dnop) then return(2/5), 
+   return(f))$
+
+psdmint(dnop):=block([],wdno:ratsimp(dnop),
+   if integerp(wdno) then (if wdno<=0 then return(t) else return(f)),
+   if lplist=0 then return(f),
+   if lplist=1 then 
+    (if denom(wdno)#1 then return(f),
+     ans:read("Is",wdno,"a minus integer?",str4),
+     if ans=y then return(t) else return(f)))$
+
+sortratn(dum):=block([], nrat:0, 
+  for i:1 thru 3 do (if cdla[i]#f then 
+   (nrat:nrat+1, la[i,3]:denom(cdla[i]), if la[i,3]=1 then 
+   (if cdla[i]=0 then la[i,3]:0 else (minla[i]:min(abs(la[i,1]),abs(la[i,2])),
+                                      la[i,3]:la[i,3]+minla[i])))
+    else (if la[i,1]*la[i,2]=0 then la[i,3]:8 else la[i,3]:9)),  
+  clsort(dum))$
+
+exccolumns(dum):=block([],
+  if la[1,4]#1 then (if la[2,4]=1 then exc2c(1,2) else exc2c(1,3)),
+  if la[2,4]=3 then exc2c(2,3),
+  for i:1 thru 3 do dla[i]:ratsimp(la[i,1]-la[i,2]))$
+
+exc2c(l,m):=block([],for i:0 thru 4 do exchla(i,l,m))$
+
+exchla(i,l,m):=block([],ws:la[l,i],la[l,i]:la[m,i],la[m,i]:ws)$
+
+wlength(exp):=block([], p1:first(plist),
+  if not freeof(p1,exp) then (wdeg:hipow(exp,p1),return(wdeg))
+  else return(0))$
+
+mklntr(x1,x2,x3):=block([a,b,c,d],
+ if x3=inf then (a:1/(x2-x1),b:-a*x1, c:0,d:1  ) else 
+ if x2=inf then (a:1,        b:-a*x1, c:1,d:-x3) else
+ if x1=inf then (a:0,        b:x2-x3 ,c:1,d:-x3),
+ vtr:t=ratsimp((a*x+b)/(c*x+d)) )$
+
+checkcontratn(i):=block([wla],
+   cdla[i]:contratn(i), if cdla[i]#f then return(t),
+   exc1c(i), cdla[i]:contratn(i))$
+
+hgstdd(dum):=block([], 
+   if la[1,0]=0 and la[2,0]=1 and la[3,0]=inf then return(f),
+   mklntr(la[1,0],la[2,0],la[3,0]), 
+   print(str2,vtr), la[1,0]:0,la[2,0]:1,la[3,0]:inf,
+   print(str1),pfuncthg(n,dum))$
+
+make01p(i):=block([],
+  if la[i,1]=la[i,2] and la[i,2]#0 then y0:pfdivide(y0,i,la[i,2]) else
+     (l1:wlength(la[i,1]),l2:wlength(la[i,2]), 
+      if l1>l2 then excrow(dum),
+      if la[i,1]#0 then y0:pfdivide(y0,i,la[i,2]), 
+      if la[i,2]=0 then exc1c(1)))$
+
+clsort(dum):=block([], for i:1 thru 3 do la[i,4]:3,
+   for i:1 thru 3 do (i1:nmod(i+1,3),i2:nmod(i+2,3), 
+    if la[i ,3]<=la[i1,3] and la[i,3]<=la[i2,3] then (la[i,4]:1,
+    if la[i1,3]<=la[i2,3] then la[i1,4]:2 else la[i2,4]:2)))$
+ 
+nmod(n,k):=block([],if n>k then return(n-k) else return(n))$
+
+lodesave([phghp,fasl],haspmts,pfdivide,listofpars,contratn,
+   checkcontratn,mklntr,psdmint,sortratn,exccolumns,
+   exc2c,exchla,wlength,hgstdd,make01p,clsort,nmod);
+
+gsvlgdre(v):=block([],remvalue(L),
+print("The solution is representable by the solution of Legendre's eq:
+       (x^2-1)*y''+2*x*y'-v*(v+1)*y=0"), 
+  if la[1,2]=0 and la[2,2]=0 then svlgdre(v) else 
+ (if la[1,2]=la[2,2] then 
+     (if integerp(la[1,2]) then
+        (if la[1,2]>0 then (y0:y0*expand(xa*xb),   
+         la[3,1]:la[3,1]+la[1,2], la[3,2]:la[3,2]+la[1,2], v:-la[3,2],
+         yw:y[L](v,x), ys:y0^la[1,2]*'diff(yw,x,la[1,2]),
+         print("y=",ys), return(ys))) 
+      else
+        (ans:read("Is",la[1,2],str5),
+         if ans=p then (w0:expand(xa*xb),y0:y0*w0^la[1,2] ,
+            la[3,1]:la[3,1]+la[1,2], la[3,2]:la[3,2]+la[1,2],v:-la[3,2]) else
+         if ans=m then (la[1,2]:-la[1,2], la[3,1]:la[3,1]-la[1,2], 
+                          la[3,2]:la[3,2]-la[1,2], v:-la[3,2]),
+         remvalue(L), yw:y[L](v,x), ys:y0*'diff(yw,x,la[1,2]),
+         print("y=",ys,",where y[L](v,x) is the solution of Legendre's eq."),
+         return(ys)) ) ))$
+
+svlgdre(v):=block([],
+   if spt[1]*spt[2]=-1 and (spt[1]=1 or spt[1]=-1) then 
+      (ys:y0*y[L](v,x), print("y=",ys), return(ys)) 
+ else (lfrtr:(-2*x+spt[1]+spt[2])/(spt[1]-spt[2]),lfrtr:ratsimp(lfrtr),
+       vtr:t=lfrtr, ys:y0*y[L](v,t), 
+       print("y=",ys,"where t=",lfrtr),return(ys)))$
+
+lodesave([psleg,fasl],svlgdre,gsvlgdre);
+
+caseof22(dum):=block([], ans:no,
+  mcdla:ratsimp(-dal[1]+1/2), 
+  if not integerp(mcdla) then 
+     ans:read("Is",mcdla,"a positive integer?",str4),
+  if (integerp(mcdla) and mcdla>=0) or ans=y then ( 
+    w1:sqrt(xa), w2:sqrt(xb),
+    wy1:(w1+w2)^dla[3], wy2:(w1-w2)^dla[3],  
+    ys:y0*'diff(k1*wy1+k2*wy2,x,mcdla),print("y=",ys),return(ys))
+  else return(f))$
+
+lodesave([phyp25,fasl],caseof22);
+
+gsvhg(dum):=block([E,K], ys:f, remvalue(E,K),
+  if la[1,0]=0 and la[2,0]=1 and la[1,1]=0 and la[2,1]=0 then 
+   (print("The solution is representable by Hypergeometric function."),
+    ha:la[3,1],hb:la[3,2],hg:-la[1,2]+1, remvalue(G), ys:y0*y[G](ha,hb,hg,x),
+    if ha=-1/2 and hb=1/2 and hg=1 then 
+   (y1:E(sqrt(x)),y2:E(sqrt(1-x))-K(sqrt(1-x)),ys:k1*y1+k2*y2,print("y=",ys),
+    print("where E and K are elliptic functions of 1st and 2nd kind."))
+    else print("y=",ys), return(ys)))$
+
+lodesave([psolh,fasl],gsvhg);

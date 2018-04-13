@@ -1,0 +1,52 @@
+/*-*-macsyma-*-*/
+
+/* Macros for organizing packages. */
+
+eval_when(translate,transcompile:true)$
+
+/* HERALD_PACKAGE(MYJUNK)$ will tell the macsyma user and the system
+           which VERSION of your MYJUNK package is being loaded. */
+
+eval_when([translate,demo,batch,loadfile],
+
+ herald_package(name)::=
+    buildq([name,
+	    version_no:if tr_true_name_of_file_being_translated#false then
+			  ?pathname\-version(tr_true_name_of_file_being_translated)
+		       else "version unknown"],
+	 (if loadprint then print('name,"source",'version_no),
+          put('name,'version_no,'version)))
+)$
+
+/* next, a macro that is convenient for making sure a HERALDed package
+   is loaded. It saves a bit of typing. e.g.
+   LOAD_PACKAGE(FOO_STUFF,FOO,FASL,DSK,SHARE) */
+
+herald_package(packg)$
+
+load_package(name,file_name)::=
+ buildq([name,file_name],
+        if get('name,'version)=false then load(file_name))$
+
+
+/* For address space reasons on MC things which have an autoload
+   property are loaded during translation time only if they
+   have a TRANSLOAD property. This isn't all bad because the
+   the presence of the property can tell you that the form has
+   special handling during translation. Which is not a bad thing to
+   know. */
+
+setup_autoload_macro(filename,[l])::=
+ buildq([propsets:maplist(lambda([u],buildq([u],put('u,true,'transload))),l),
+         filename,l],
+        (setup_autoload(filename,splice(l)),splice(propsets)) )$
+
+/* Now, here are the big ones */
+
+/* Should have a DEFINE_PACKAGE which sets up 
+   (1) Entry points & autoloads.
+   (2) Bulk Translate & compile aids.
+   (3) Tags aids.
+
+*/
+

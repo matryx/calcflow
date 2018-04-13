@@ -1,0 +1,32 @@
+/* Copyright (C) 2003 Valerij Pipin <pip@iszf.irk.ru>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Examine magnetic field lines embedded in moving plasma
+ *
+*/
+
+if get('itensor,'version)=false then load(itensor);
+("Examine magnetic field lines embedded in moving plasma")$
+("introduce the 2-form describing the magnetic field")$
+decsym(B,2,0,[anti(all)],[]);
+("Due to infinite conductivity the electric field is expressed as")$
+E1:ishow(B([i1,i2])|v)$
+("But we can also express it through the vector potential")$
+E2:ishow(expand(2*extdiff(A([i1]),i2)|v))$
+("and put this result in the following equation:")$
+EQ1:ishow(dt*B([i1,i2])=extdiff(E2,i1))$
+("Now compute the Lie-derivative of B")$
+EQ2:ishow('liediff(v,B([i2,i1]))=liediff(v,extdiff(A([i1]),i2)))$
+("and sum up the LHS and RHS")$
+ishow(lhs(EQ1)+lhs(EQ2)=rename(expand(rhs(EQ1)+rhs(EQ2))))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

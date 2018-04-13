@@ -1,0 +1,55 @@
+/*-*-MACSYMA-*-*/
+if properties(reduce_consts) = [] then load(rducon)$
+/* We begin by illustrating REDUCE_CONSTS on a very simple example, EXP1.
+   But first, we need to establish a database of constants:              */
+declare([b,con,a,mu,tau,alpha,beta],constant);
+exp1:p*q+a/b*r;
+reduce_consts(exp1);
+/* Remember that the definitions of all generated constants are kept in
+   CONST_EQNS .                                                          */
+const_eqns;
+/* For the next examples, lets reinitialize CONST_EQNS for convenience,
+   and change the prefix for generated constants to "ZZZ" :             */
+const_eqns:[]$
+const_prefix:'zzz;
+const_counter:1$
+exp2:5/4*b*(c*t+u*v)/(r-s)/mu^(1/3);
+reduce_consts(exp2);
+const_eqns;
+/* Observe that the constant ZZZ1 was not found as mu^(1/3) because of the
+   internal form in which MACSYMA stores quotients.
+
+   Next, we have an expression which contains a power easily expressed in
+   terms of ZZZ1.  Lets see what REDUCE_CONSTS does to it.                */
+exp3:alpha*mu^(2/3)*(u+v*t);
+reduce_consts(exp3);
+const_eqns;
+/* Since mu^(2/3) = mu*mu^(-1/3), REDUCE_CONSTS took advantage of that fact
+   and generated a more optimal means of computing ZZZ3.  For other types of
+   constant expressions, REDUCE_CONSTS attempts to find ways of computing
+   them in terms of the existing database of constant definitions.
+
+   While REDUCE_CONSTS generally reduces the size of the expression it
+   operates on, it will not do this if there are no constant subexpressions
+   to remove:                                                              */
+exp4:mu^(-t/3)*u*kappa;
+reduce_consts(exp4);
+/* For another example, note that because MACSYMA has already declared %PI
+   to be a constant, REDUCE_CONSTS also knows about this fact:            */
+exp5:(s-v)/(alpha-%pi);
+reduce_consts(exp5);
+const_eqns;
+/* REDUCE_CONSTS also knows how to collapse out portions of a sum which
+   are constant:                                                        */
+exp6:r*t-alpha+beta;
+reduce_consts(exp6);
+const_eqns;
+/* And it knows that scalar functions of constant expressions are
+   constants:                                                     */
+const_eqns:[]$
+const_prefix:'q$
+const_counter:1$
+exp7:f*cos(alpha+beta);
+reduce_consts(exp7);
+const_eqns;
+remove([b,con,a,mu,tau,alpha,beta],constant);

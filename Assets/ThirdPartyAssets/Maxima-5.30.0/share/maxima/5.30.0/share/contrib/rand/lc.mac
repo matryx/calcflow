@@ -1,0 +1,104 @@
+/* Filename lc.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/*program number 1: lc(), lindstedt's method to calculate limit cycles,
+  see page 7 in "perturbation methods, bifurcation theory  and computer
+  algebra".*/
+
+/* this program applies lindstedt's method to
+the equation:
+               x'' + x + e f(x,x') = 0,
+assuming a limit cycle exists.
+call it with:
+                   lc();
+*/
+
+lc():=(
+
+/* input the differential equation */
+kill(x,xlist,paramlist),
+print("the d.e. is of the form:  x'' + x + e * f(x,x') = 0"),
+f:read("enter f(x,y), representing x' as y"),
+print("the d.e. is: x'' + x + e (",f,") = 0"),
+f:subst('diff(x,z,1)*w,y,f),
+
+/* set up the series expansions */
+n:read("enter truncation order"),
+w:1,
+for i thru n do w:w+k[i]*e^i,
+x:b[0]*cos(z),
+xlist:[xx[0] = x],
+for i thru n do x:x+xx[i]*e^i,
+
+/* plug into the d.e. and collect terms */
+depends(xx,z),
+temp1:diff(x,z,2)+x/w^2+e*ev(f,diff)/w^2,
+temp1:taylor(temp1,e,0,n),
+for i thru n do eq[i]:coeff(temp1,e,i),
+
+/* set up pattern matching rules for use in solving d.e. */
+matchdeclare(n1,true),
+defrule(c,cos(n1*z),cos(n1*z)/(n1*n1-1)),
+defrule(s,sin(n1*z),sin(n1*z)/(n1*n1-1)),
+
+/* load poisson series package and set parameter */
+outofpois(dummy),
+poislim:100,
+
+/* main loop */
+for i:1 thru n do block(
+
+/* trigonometric simplification */
+temp1:outofpois(ev(eq[i],xlist,paramlist,diff)),
+
+/* eliminate secular terms */
+if i = 1
+     then (paramlist:solve(coeff(temp1,sin(z)),b[0]),
+           print("choices for limit cycle amplitude:"),
+	   for j:1 thru length(paramlist) do 
+                print(j,")  ",part(paramlist,j,2)),
+           r1:read("enter choice number"),
+	   paramlist:append(solve(coeff(temp1,cos(z)),k[1]),
+		[part(paramlist,r1)]))
+     else  paramlist:append(paramlist,solve([coeff(temp1,cos(z)),
+		coeff(temp1,sin(z))],[k[i],b[i-1]])),
+temp1:expand(ev(temp1,paramlist)),
+xlist:expand(ev(xlist,paramlist)),
+
+/* output progress */
+print("done with step",i,"of",n),
+
+/* exit here if last iteration */
+if i=n then go(end),
+
+/* solve the d.e. */
+temp1:factor(ev(temp1,xx[i] = 0)),
+temp1:applyb1(temp1,c,s),
+temp1:xx[i] = temp1+a[i]*sin(z)+b[i]*cos(z),
+
+/* fit the initial condition */
+temp2:rhs(temp1),
+temp2:diff(temp2,z),
+temp2:solve(ev(temp2,z:0),a[i]),
+xlist:append(xlist,[ev(temp1,temp2)]),
+
+/* end of main loop */
+end),
+
+/* output results */
+w:ev(w,paramlist),
+x:taylor(ev(x,xlist,paramlist),e,0,n-1),
+print("x =",x),
+print("w =",w))$

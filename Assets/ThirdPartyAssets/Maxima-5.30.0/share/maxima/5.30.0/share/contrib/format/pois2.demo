@@ -1,0 +1,72 @@
+/* -*- Mode: macsyma -*- */
+
+/*************************************************************************************
+ Demo of enhanced Poisson package.
+
+ With the default settings, this package should behave exactly as the original Pois2
+ package, with 2 exceptions:
+   1) the guard bit (see below) reduces the field size for the multiplier for each angle.
+      Eg. 30 bits for 6 variables gives a range of +/- 7 instead of +/- 15.
+     [in fact, this makes one of the demo examples fail]
+   2) The algorithm for the `5 argument poissubst' has been changed to resemble a taylor
+     expansion.
+
+ The follwing demonstrates the new or changed capabilities.
+*************************************************************************************/
+
+/* Default settings */
+(poisvars:[u,v,w,x,y,z],poislim:30)$
+
+/* An option POIS_ENCODE_LIBERALIZE, if True, tells the poisson system to accept trig
+  arguments that are not linear in the poisvars; the remainder is taken into the coefficients.
+  Compare these results:
+ */
+errcatch(intopois(cos(u+q)));
+block([pois_encode_liberalize:true], intopois(cos(u+q)));
+
+/* A Guard bit (per angular variable) has been allocated to the encoded multiples to
+  detect overlows during multiplication.  Previously, the overflow went undetected with the
+  result that
+
+  intopois(2*cos(4*u)^2);  -> 
+  /P/           cos(8 z + 8 y + 8 x + 8 w + 8 v) + 1 
+
+Now: */
+errcatch(intopois(2*cos(4*u)^2));
+
+/* There is more flexibility in setting the parameters for encoding the trig arguments.
+   For example, if you need more range for one multiplier than another, consider this:
+ */
+expr:cos(5*u)*cos(2*v);
+errcatch(intopois(expr^2));
+pois_setup(u,15,v,7,w,7,x,7,y,7,z,7);
+intopois(expr^2);
+poislim:30$
+
+/* Trigonometric arguments can also be represented by lists of multipliers in 
+general representation.  This is less efficient than packing integers multipliers, but
+still more efficient than many alternatives. 
+To use this feature, you set POISLIM:FALSE, as if "No Poisson limit". */
+errcatch(intopois(cos(u+x*v)^2));
+poislim:false$
+intopois(cos(u+x*v)^2);
+poislim:30$
+
+
+/* The following gives the same result as before */
+poissubst(v,u,sin(u),w,3);
+/* But this result is different: */
+poissubst(v,u,sin(2*u),w,3);
+/* Previously you would get:
+      2 cos(2 v) (w - w^3/6) + 2 sin(2 v) (1 - w^2/2)
+  Does that make sense? (consider w->0)  */
+
+/* Minor extensions:  POISPLUS & POISTIMES take any number of arguments. 
+   There is now also a POISMINUS. */
+poisplus(sin(u),cos(u),cos(u)^2+sin(u));
+poisminus(sin(u),cos(u),cos(u)^2+sin(u));
+poistimes(sin(u),cos(u),cos(u)^2+sin(u));
+
+/* Clean up */
+(remvalue(expr,expr1,expr2),remfunction(cosfun,sinfun,poistrim),
+ reset(poisvars,poislim,poistrim))$

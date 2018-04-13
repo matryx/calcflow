@@ -1,0 +1,138 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/ComplexDomain/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- The Complex Domain ---------- */
+/* Complex functions---separate into their real and imaginary parts.
+   Here, variables default to REAL.
+   [Re(x + i y), Im(x + i y)] => [Re(x) - Im(y), Im(x) + Re(y)]
+   for x and y complex */
+[realpart(x + %i*y), imagpart(x + %i*y)];
+declare([x, y], complex)$
+[realpart(x + %i*y), imagpart(x + %i*y)];
+remove([x, y], complex)$
+/* => 1   [W. Kahan] */
+abs(3 - sqrt(7) + %i*sqrt(6*sqrt(7) - 15));
+ratsimp(%);
+/* => 1/sqrt(a^2 + (1/a + b)^2) for real a, b */
+abs(1/(a + %i/a + %i*b));
+/* => log 5 + i arctan(4/3) */
+rectform(log(3 + 4*%i));
+/* => [sin(x) cos(x) + i sinh(y) cosh(y)] / [cos(x)^2 + sinh(y)^2] */
+rectform(tan(x + %i*y));
+/* Check for branch abuse.  See David R. Stoutemyer, ``Crimes and Misdemeanors
+   in the Computer Algebra Trade'', _Notices of the American Mathematical
+   Society_, Volume 38, Number 7, September 1991, 778--785.  This first
+   expression can simplify to sqrt(x y)/sqrt(x), but no further in general
+   (consider what happens when x, y = -1).  sqrt(x y) = sqrt(x) sqrt(y) if
+   either x >= 0 or y >= 0 or both x and y lie in the right-half plane
+   (Re x, Re y > 0) [considering principal values]. */
+expr: sqrt(x*y*abs(z)^2) / (sqrt(x)*abs(z));
+ratsimp(%);
+declare([x, y, z], complex)$
+ratsimp(expr);
+remove(y, complex)$
+/* Special case: sqrt(x y |z|^2)/(sqrt(x) |z|) => sqrt(y) [PV] for y >= 0 */
+assume(y >= 0)$
+sqrt(x*y*abs(z)^2) / (sqrt(x)*abs(z));
+forget(y >= 0)$
+remove([x, z], complex)$
+/* sqrt(1/z) = 1/sqrt(z) except when z is real and negative, in which case
+   sqrt(1/z) = - 1/sqrt(z) [considering principal values] */
+expr: sqrt(1/z) - 1/sqrt(z);
+ratsimp(%);
+declare(z, complex)$
+ratsimp(expr);
+remove(z, complex)$
+/* Special case: sqrt(1/z) - 1/sqrt(z) => 0 [PV] for z > 0 */
+assume(z > 0)$
+ratsimp(expr);
+forget(z > 0)$
+/* Special case: sqrt(1/z) + 1/sqrt(z) => 0 [PV] for z < 0 */
+assume(z < 0)$
+sqrt(1/z) + 1/sqrt(z);
+forget(z < 0)$
+/* sqrt(e^z) = e^(z/2) if and only if Im z is contained in the interval
+   ((4 n - 1) pi, (4 n + 1) pi] for n an integer: ..., (-5 pi, -3 pi],
+   (-pi, pi], (3 pi, 5 pi], ...; otherwise, sqrt(e^z) = - e^(z/2) [considering
+   principal values] */
+declare(z, complex)$
+sqrt(%e^z) - %e^(z/2);
+ratsimp(%);
+remove(z, complex)$
+/* Special case: sqrt(e^z) - e^(z/2) => 0 [PV] for z real */
+sqrt(%e^z) - %e^(z/2);
+/* The principal value of this expression is - e^(3 i) = - cos 3 - i sin 3 */
+sqrt(%e^(6*%i));
+bfloat(%);
+/* log(e^z) = z if and only if Im z is contained in the interval (-pi, pi]
+   [considering principal values] */
+declare(z, complex)$
+log(%e^z);
+remove(z, complex)$
+/* Special case: log(e^z) => z [PV] for z real */
+log(%e^z);
+/* The principal value of this expression is (10 - 4 pi) i */
+log(%e^(10*%i));
+/* (x y)^n = x^n y^n if either x > 0 or y > 0 or both x and y lie in the
+   right-half plane (Re x, Re y > 0) or n is an integer [considering principal
+   values] */
+expr: (x*y)^(1/n) - x^(1/n)*y^(1/n);
+ratsimp(%);
+declare([x, y], complex)$
+ratsimp(expr);
+remove(y, complex)$
+/* Special case: (x y)^(1/n) - x^(1/n) y^(1/n) => 0 [PV] for y > 0 */
+assume(y > 0)$
+ratsimp(expr);
+forget(y > 0)$
+/* Special case: (x y)^n - x^n y^n => 0 [PV] for integer n */
+declare(y, complex, n, integer)$
+(x*y)^n - x^n*y^n;
+remove([x, y], complex, n, integer)$
+/* arctan(tan(z)) = z for z real if and only if z is contained in the interval
+   (-pi/2, pi/2] [considering principal values] */
+expr: atan(tan(z));
+ratsimp(%);
+declare(z, complex)$
+ratsimp(expr);
+remove(z, complex)$
+/* Special case: arctan(tan(z)) => z [PV] for -pi/2 < z < pi/2 */
+assume(-%pi/2 < z, z < %pi/2)$
+ratsimp(expr);
+forget(-%pi/2 < z, z < %pi/2)$
+ev(expr, triginverses: all);
+remvalue(expr)$
+/* The principal value of this expression is 10 - 3 pi */
+atan(tan(10));
+/* The principal value of this expression is 11 - 4 pi + 30 i = -1.56637 + 30 i
+   */
+atan(tan(11 + 30*%i));
+atan(tan(11.0 + 30.0*%i));
+sfloat(%);
+/* This is a challenge problem proposed by W. Kahan: simplify the following
+   expression for complex z.  Expanding out the expression produces
+   (z^2 + 1)/(2 z) +- (z + 1)*(z - 1)/(2 z) => z or 1/z in each of its branches
+   */
+declare(z, complex)$
+w: (z + 1/z)/2;
+expr: w + sqrt(w + 1)*sqrt(w - 1);
+ratsimp(expr);
+radcan(expr);
+remvalue(w, expr)$
+remove(z, complex)$
+/* ---------- Quit ---------- */
+quit();

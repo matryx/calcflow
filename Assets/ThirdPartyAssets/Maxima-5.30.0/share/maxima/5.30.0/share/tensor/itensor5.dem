@@ -1,0 +1,40 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * ITENSOR frames, torsion, and nonmetricity demo
+ */
+
+if get('itensor,'version)=false then load(itensor);
+
+("Partial differentiation with respect to a coordinate")$
+ishow(idiff(f([],[]),k))$
+ishow(idiff(v([i],[]),k))$
+ishow(idiff(a([i],[j]),k))$
+("Partial differentiation is a commutative operation")$
+ishow(idiff(idiff(v([i],[]),k),l)-idiff(idiff(v([i],[]),l),k))$
+("Unless a frame base is used")$
+iframe_flag:true;
+ishow(idiff(idiff(v([i],[]),k),l)-idiff(idiff(v([i],[]),l),k))$
+iframe_flag:false;
+("To undo a partial differentation, use the undiff function")$
+ishow(v([i],[],k))$
+exp:ishow(undiff(%))$
+("Use rediff to evaluate all occurrences of idiff() again")$
+ishow(rediff(exp))$
+("These are useful for tensors that cannot be evaluated in derivative form")$
+exp:ishow('icurvature([i,j,k],[m],n))$
+("Evaluation of this expression causes an error")$
+errcatch(ev(exp,nouns));
+("Here is when undiff, ev, rediff helps, which is what evundiff does")$
+ishow(evundiff(exp))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

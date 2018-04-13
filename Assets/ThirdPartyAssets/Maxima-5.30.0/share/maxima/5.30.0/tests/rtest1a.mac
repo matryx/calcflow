@@ -1,0 +1,53 @@
+(use_fast_arrays:true,array(bil,3),0);
+0$
+bil[1];
+false;
+bil[1]:3;
+3;
+bil[1];
+3;
+listarray(bil);
+[false, 3, false,false];
+arrayinfo(bil);
+[declared, 1, [3]];
+ha[1]:2;
+2;
+ha[3];
+false;
+arrayinfo(ha);
+[hash_table, 1, 1];
+use_fast_arrays:false;
+false;
+array(bil1,3);
+bil1;
+bil1[2];
+bil1[2];
+bil1[2]:3;
+3;
+bil1[2];
+3;
+listarray(bil1);
+[''?munbound,''?munbound,3,''?munbound];
+arrayinfo(bil1);
+[declared, 1, [3]];
+oldha[1]:8;
+8;
+oldha[2];
+oldha[2];
+arrayinfo(oldha);
+[hashed, 1, [1]];
+use_fast_arrays:true;
+true;
+bilx[n]:=n*bilx[n-1];
+bilx[n]:=n*bilx[n-1];
+bilx[0]:1;
+1;
+bilx[3];
+6;
+
+use_fast_arrays: false;
+false;
+
+block ([use_fast_arrays : true], kill (foo), foo [2] : 'x, foo [3] : 'y, foo [5] : 'z, foo [7] : 'a, sort (listarray (foo)));
+[a, x, y, z];
+

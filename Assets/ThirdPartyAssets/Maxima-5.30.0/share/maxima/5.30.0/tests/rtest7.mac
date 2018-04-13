@@ -1,0 +1,109 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+kill(all);
+done$
+linechar:%t;
+%t$
+atvalue(f(x,y),[x = 0,y = 1],a^2);
+a^2$
+atvalue('diff(f(x,y),x),x = 0,y+1);
+\@2+1$
+printprops(all,atvalue);
+done$
+diff(4*f(x,y)^2-u(x,y)^2,x);
+8*f(x,y)*'diff(f(x,y),x,1)-2*u(x,y)*'diff(u(x,y),x,1)$
+at(%,[x = 0,y = 1]);
+16*a^2-2*u(0,1)*(''(at('diff(u(x,y),x,1),[x = 0,y = 1])))$
+atvalue(f(x,y),[x = 0,y = 1],a^2);
+a^2$
+atvalue('diff(f(x,y),x),x = 0,y+1);
+\@2+1$
+printprops(all,atvalue);
+done$
+diff(4*f(x,y)^2-u(x,y)^2,x);
+8*f(x,y)*'diff(f(x,y),x,1)-2*u(x,y)*'diff(u(x,y),x,1)$
+at(%,[x = 0,y = 1]);
+16*a^2-2*u(0,1)*(''(at('diff(u(x,y),x,1),[x = 0,y = 1])))$
+listofvars(f(x[1]+y)/g^(2+a));
+[g,a,x[1],y]$
+coeff(2*a*tan(x)+tan(x)+b = 5*tan(x)+3,tan(x));
+2*a+1 = 5$
+coeff(y+x*%e^x+1,x,0);
+y+1$
+a*x+b*x+5;
+b*x+a*x+5$
+ratcoef(%,a+b);
+x$
+islinear(exp,var):=block([c],c:bothcoef(rat(exp,var),var),
+	 is(freeof(var,c) and c[1] # 0));
+islinear(exp,var):=block([c],c:bothcoef(rat(exp,var),var),
+	 is(freeof(var,c) and c[1] # 0))$
+islinear((r^2-(x-r)^2)/x,x);
+true$
+(a+b)^4*(1+x*(2*x+(c+d)^2));
+(b+a)^4*(x*(2*x+(d+c)^2)+1)$
+(linenum:0,isolate(%,x));
+%t2*(x*(2*x+%t1)+1)$
+ratexpand(%);
+2*%t2*x^2+%t1*%t2*x+%t2$
+ev(%);
+2*(b+a)^4*x^2+(b+a)^4*(d+c)^2*x+(b+a)^4$
+(a+b)*(x+a+b)^2*%e^(x^2+a*x+b);
+(b+a)*(x+b+a)^2*%e^(x^2+a*x+b)$
+block([linenum:2],ev(isolate(%,x),exptisolate:true));
+%t3*%t4*(x+%t3)^2*%e^(x^2+a*x)$
+exp1:integrate(1/(x^3+2),x);
+  -log(x^2-2^(1/3)*x+2^(2/3))/(6*2^(2/3))+atan((2*x-2^(1/3))/(2^(1/3)*sqrt(3)))
+					/(2^(2/3)*sqrt(3))
+				       +log(x+2^(1/3))/(3*2^(2/3))$
+/* got this at one point but it differentiates ok
+  -2^(1/3)*log(2^(2/3)*x^2-2*x+2*2^(1/3))/12+2^(1/3)*atan((2*2^(2/3)*x-2)/(2*sqrt(3)))/(2*sqrt(3))+2^(1/3)*log(x+2^(1/3))/6; */
+radcan(diff(%,x));
+1/(x^3+2);
+block([linenum:4],pickapart(exp1,1));
+%t7+%t6+%t5$
+gamma(7/2);
+15*sqrt(%pi)/8$
+numfactor(%);
+15/8$
+'diff(y,x,2)+'diff(y,z,3)*2+'diff(y,x,1)*x^2;
+2*'diff(y,z,3)+'diff(y,x,2)+x^2*'diff(y,x,1)$
+derivdegree(%,y,x);
+2$
+(%i*v+u)/(f+%i*e)+%e^(%i*alpha);
+(%i*v+u)/(f+%i*e)+%e^(%i*alpha)$
+realpart(%);
+(e*v+f*u)/(f^2+e^2)+cos(alpha)$
+rectform(sin(2*%i+x));
+cosh(2)*sin(x)+%i*sinh(2)*cos(x)$
+polarform(%);
+sqrt(cosh(2)^2*sin(x)^2+sinh(2)^2*cos(x)^2)
+ *%e^(%i*atan2(sinh(2)*cos(x),cosh(2)*sin(x)))$
+rectform(log(3+4*%i));
+log(5)+%i*atan(4/3)$
+polarform(%);
+sqrt(log(5)^2+atan(4/3)^2)*%e^(%i*atan(atan(4/3)/log(5)))$
+
+%emode:false;
+false;
+ev(rectform((2+3.5*%i)^0.25),numer);
+0.3682587918166914*%i+1.368266274774369;
+polarform(%);
+1.416956998795383*%e^(0.2629125531370934*%i);
+/* %emode:false is needed to keep above answer from being converted out of polar form 
+   before being compared to result of polarform() */
+%emode:true;
+true;
+
+delete(sin(x),x+sin(x)+y);
+y+x$
+
+/* SF bug 2014436 */
+at(f(x),[]);
+f(x)$

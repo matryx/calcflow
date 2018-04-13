@@ -1,0 +1,25 @@
+/*-*-Macsyma-*-*/
+
+
+/*
+CASEQ(<var>,'[<keys1>],<stmt1>,
+            '[<keys2>],<stmt2>,
+            ....,
+            '[<keysn>],<stmtn>
+            {,'otherwise,<code for no match>})
+
+where the first <stmt> that has <var> as a member of the associated
+<keys> is the one chosen to execute.  */
+
+
+sstatus(feature,"gcook caseq")$
+
+caseq(var,[pairs])::=
+   if length(pairs)<=2 then
+      block([keys:first(pairs),statement:last(pairs)],
+         if keys=otherwise then buildq([var,statement],statement)
+         else buildq([var,keys,statement],if member(var,'keys) then statement))
+   else buildq([var,keys:first(pairs),statement:first(rest(pairs)),
+                pairs:rest(rest(pairs))],
+          if member(var,'keys) then statement else caseq(var,splice(pairs)))$
+

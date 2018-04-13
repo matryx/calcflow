@@ -1,0 +1,234 @@
+/******************************************************************************
+  rtest_lambert_w.mac
+  Test for Lambert W function
+******************************************************************************/
+
+kill(all);
+done;
+
+(closeto(value,compare,tol):=
+  block(
+    [abse],
+    abse:abs(value-compare),if(abse<tol) then true else abse),
+    done);
+done;
+
+
+/* Exact values */
+lambert_w(-%pi/2)$
+%i*%pi/2;
+lambert_w(-log(2)/2)$
+-log(2);
+lambert_w(-1/%e)$
+-1;
+lambert_w(0)$
+0;
+lambert_w(%e)$
+1;
+
+/* Numerical values.  Results from Mathematica 6 */  
+
+/* This point -47/128 is slightly greater than the branch cut at x=-1/%e.  
+   Known difficult region. */
+closeto(lambert_w(-0.3671875),-0.93988639805243454196,5.0e-15);
+true;
+
+closeto(lambert_w(-0.25),-0.35740295618138890306,1.0e-16);
+true;
+
+closeto(lambert_w(0.0),0.0,1.0e-16);
+true;
+
+closeto(lambert_w(0.5),0.3517337112491958260,1.0e-16);
+true;
+
+closeto(lambert_w(2.0),0.85260550201372549134,2.0e-16);
+true;
+
+closeto(lambert_w(16.0),2.05319271746264858727,1.0e-16);
+true;
+
+closeto(lambert_w(128.0),3.57739529855165334288,1.0e-16);
+true;
+
+closeto(lambert_w(2048.0),5.85698416299949388816,1.0e-15);
+true;
+
+closeto(float(lambert_w(-%pi/2)),%i*%pi/2,1.0e-16);
+true;
+
+closeto(lambert_w(3.0+2*%i),
+  1.12605402258467335157 + 0.31512993765865848403*%i,1.0e-16);
+true;
+
+/* bfloat evaluation.  Results from Mathematica 6 to 82 sf */
+(oldfpprec:fpprec,fpprec:80,done);
+done;
+
+closeto(lambert_w(-0.3671875b0),
+ -0.9398863980524345419695464132107234809629689590715558376016258594821501408118726902b0,5.0b-79);
+true;
+
+closeto(lambert_w(-0.25b0),
+  -0.3574029561813889030688111040559047533165905550760120436276204485896714025961457963b0,5.0b-80);
+true;
+
+closeto(lambert_w(0.0b0),0.0b0,1.0e-80);
+true;
+
+closeto(lambert_w(0.5b0),
+  0.3517337112491958260249093009299510651714642155171118040466438461099606107203387109b0,1.0b-80);
+true;
+
+closeto(lambert_w(2.0b0),
+  0.8526055020137254913464724146953174668984533001514035087721073946525150656742630449b0,1.0b-80);
+true;
+
+closeto(lambert_w(16.0b0),
+  2.053192717462648587277573057065703715549879054683959196524461288893671477132320243b0,5.0b-80);
+true;
+
+closeto(lambert_w(128.0b0),
+  3.577395298551653342882928583858277466679549941663670990487212206804013161129017297b0,1.0b-80);
+true;
+
+closeto(lambert_w(2048.0b0),
+  5.856984162999493888162560618072936017287078565867036752738725003619707275074129900b0,5.0b-80);
+true;
+
+closeto(lambert_w(3.0b0+2.0b0*%i),
+1.1260540225846733515720001139613054043549635214873248102633125218051215201783683422b0
++
+0.3151299376586584840326916101687325819105911412081543422333577478256866198890713045b0
+*%i ,1.0b-80);
+true;
+
+/* Check an argument > most-positive-double-float ~ 1.0e308 */
+closeto(lambert_w(1.0b1000),
+2294.846671683506869652792785993616789973426699478802684415757740164730983851156757b0,
+1.0b-77);
+true;
+
+/* Arguments that are exact numbers are not evaluated numerically */
+lambert_w(2);
+lambert_w(2);
+
+lambert_w(3+2*%i);
+lambert_w(3+2*%i);
+
+/* ... unless we set numer evflag*/
+closeto(lambert_w(2),0.85260550201372549134,2.0e-16), numer;
+true;
+
+diff(lambert_w(x),x);
+%e^-lambert_w(x)/(lambert_w(x)+1);
+
+integrate(lambert_w(x),x);
+x*(lambert_w(x)^2-lambert_w(x)+1)/lambert_w(x);
+
+/* SF bug report 2468610 the integrator loops endlessly 
+   errcatch() doesn't catch the error for clisp-2.46 on cygwin */
+integrate(lambert_w(1/x),x);
+'integrate(lambert_w(1/x),x);
+
+taylor(lambert_w(x),x,0,6);
+x-x^2+3*x^3/2-(8*x^4/3)+125*x^5/24-(54*x^6/5);
+
+/******************************************************************************
+  Tests for Generalized Lambert W function
+******************************************************************************/
+
+closeto(generalized_lambert_w(0,-0.25),-0.35740295618138890306,1.0e-16);
+true;
+
+closeto(generalized_lambert_w(0,3.0+2*%i),
+  1.12605402258467335157 + 0.31512993765865848403*%i,1.0e-16);
+true;
+
+closeto(generalized_lambert_w(0,-0.25),-0.35740295618138890306,1.0e-16);
+true;
+
+/* This point -753/2048 is slightly greater than the branch cut at x=-1/%e.  
+   Known difficult region. */
+closeto(generalized_lambert_w(-1,-753.0/2048),-1.033649565301979,5.0e-15);
+true;
+
+closeto(generalized_lambert_w(-1,-754.0/2048),
+   -0.9994844032397146 - 0.0393272270347577*%i,5.32e-15);
+true;
+
+closeto(generalized_lambert_w(1,-753.0/2048),
+  -3.089416043057986+7.461420464927938*%i,5.0e-15);
+true;
+
+closeto(generalized_lambert_w(1,-754.0/2048),
+  -3.088042730569348+7.461585404728464*%i,5.0e-15);
+true;
+
+/* Reduced precision when very near branch point z = -1/%e */
+closeto(generalized_lambert_w(-1,z:float(-1/%e)-1.0e-12),
+ -0.999999999998187812 - 2.3316439815951875e-6*%i,1e-9);
+true;
+
+/* The branch test was wrong for this point due to roundoff */
+closeto(generalized_lambert_w(-1,-1/float(%e)),-1.0,1e-15);
+true;
+
+/* bigfloat evaluation near the branch point failed to obtain a starting guess 
+   There is significant (~ 14 decimal digits) loss of precision due to ill-conditioning 
+   The expected answer below checked with 200 and 300 digit bfloats */
+closeto(generalized_lambert_w(-1,bfloat(-1/%e)+1b-30),
+- 1.000000000000002331643981597126015551421701533827747686376229738168073845444881159b0,
+ 1.0b-64);
+true;
+
+closeto(generalized_lambert_w(1,-754.0b0/2048),
+ -3.088042730569348561456014556706168490039090862315553536854637271843252771228714625b0
+ +7.461585404728464111653134458076750679263104524925586270112477441975032123188737473b0*%i,
+ 1.0b-77);
+true;
+
+/* Check an argument > most-positive-double-float ~ 1.0e308 */
+closeto(generalized_lambert_w(0,1.0b1000),
+2294.846671683506869652792785993616789973426699478802684415757740164730983851156757b0,
+1.0b-77);
+true;
+
+closeto(generalized_lambert_w(0,1.0b1000*%i),
+  2.294846671449550599071991520727747213463470638397366444770394873636319358115746758b3
+ +1.570112136469240112764525899485121673623387222840770033671975542758566442609326195b0*%i 
+ ,1.0b-77);
+true;
+
+
+/* Arguments that are not evaluated numerically */
+generalized_lambert_w(3,1/2);
+generalized_lambert_w(3,1/2);
+
+generalized_lambert_w(1/2,3.0);
+generalized_lambert_w(1/2,3.0);
+
+generalized_lambert_w(0.5,3.0);
+generalized_lambert_w(0.5,3.0);
+
+generalized_lambert_w(1.0,3.0);
+generalized_lambert_w(1.0,3.0);
+
+generalized_lambert_w(%pi,3.0);
+generalized_lambert_w(%pi,3.0);
+
+/* ... unless we set numer evflag */
+closeto(generalized_lambert_w(0,2),0.85260550201372549134,2.0e-16), numer;
+true;
+
+
+diff(generalized_lambert_w(n,x),x);
+%e^-generalized_lambert_w(n,x)/(generalized_lambert_w(n,x)+1);
+
+integrate(generalized_lambert_w(n,x),x);
+(generalized_lambert_w(n,x)^2-generalized_lambert_w(n,x)+1)*x
+ /generalized_lambert_w(n,x);
+
+(fpprec:oldfpprec, kill(oldfpprec), done);
+done;
+

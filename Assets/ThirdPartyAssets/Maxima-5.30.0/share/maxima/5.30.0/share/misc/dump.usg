@@ -1,0 +1,31 @@
+To efficiently save and load number arrays do:
+
+LOAD(DUMP);
+DUMPARRAYS([<filespec>],<arrays>); to save them
+and 
+LOADARRAYS(<filespec>); to load them back in.
+
+the arrays must be number arrays. i.e. as produced by 
+ARRAY(<arrayname>,INTEGER, .. ); or ARRAY(<arrayname>,FLOAT, .. );
+
+the defaulting of <filepsec> is identical to the SAVE and LOADFILE
+commands.  e.g. DUMPARRAYS(<arrays>); dumps them in the default file.
+
+example:
+LOAD(DUMP);
+ARRAY(FOO,FLOAT,2,3,4);
+FOO[1,2,3]:EV(%PI,NUMER);
+ARRAY(BAR,INTEGER,20);
+FOR I FROM 1 THRU 20 DO BAR[I]:I;
+DUMPARRAYS([ARRAYS],FOO,BAR); saves FOO and BAR into the file ARRAYS.
+
+In a fresh MACSYMA,
+LOAD(DUMP);
+LOADARRAYS(ARRAYS);
+BAR[5]; ==> 5
+FOO[1,2,3]; ==> 3.14159..
+
+The amount of room occupied by these files is roughly 1/2 of what
+is needed when saving the arrays using the SAVE command.  More
+importantly it doesn't require chunks of FLONUM or FIXNUM space as
+the SAVE command sometimes does.

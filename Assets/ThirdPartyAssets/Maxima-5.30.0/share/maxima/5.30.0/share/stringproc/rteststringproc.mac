@@ -1,0 +1,167 @@
+(kill (all), 0);
+0;
+
+m : "text";
+"text"$
+stringp(m);
+true;
+l : sconcat("\"", "text", "\"");
+''(string("text"))$
+stringp(l);
+true;
+c : "e";
+"e"$
+[charp(c), lcharp(c)];
+[true, false]$
+c: supcase(c);
+"E"$
+charp(c);
+true$
+control : "~2tAn atom: ~20t~a~%~2tand a list: ~20t~{~r ~}~%~2tand an integer: ~20t~d~%";
+"~2tAn atom: ~20t~a~%~2tand a list: ~20t~{~r ~}~%~2tand an integer: ~20t~d~%"$
+printf(false, control, 'true, [1, 2, 3], 42)$
+"  An atom:          true
+  and a list:       one two three 
+  and an integer:   42
+"$
+printf(false, "~a ~a ~4f ~a ~@r", "String", sym, bound, sqrt(12), 144), bound = 1.234;
+"String sym 1.23 2*sqrt(3) CXLIV"$
+printf(false, "~{~a ~}", ["one", 2, "THREE"]);
+"one 2 THREE "$
+printf(false, "~{~{~9,1f ~}~%~}", mat), mat = args(matrix([1.1, 2, 3.33], [4, 5, 6], [7, 8.88, 9]))$
+"      1.1       2.0       3.3 
+      4.0       5.0       6.0 
+      7.0       8.9       9.0 
+"$
+control : "~:(~r~) bird~p ~[is~;are~] singing.";
+"~:(~r~) bird~p ~[is~;are~] singing."$
+printf(false, control, n, n, if n = 1 then 0 else 1), n = 2;
+"Two birds are singing."$
+
+block([res:{},tmp],for n from 0 thru 255 do (tmp : ascii(n), if alphacharp(tmp) then res : adjoin (tmp, res)), subsetp ({"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"}, res));
+true;
+
+block([res:{},tmp],for n from 0 thru 255 do (tmp : ascii(n), if constituent(tmp) then res : adjoin (tmp, res)), subsetp ({"!","\"","#","$","%","&","'","(",")","*","+",",","-",".","/","0","1","2","3","4","5","6","7","8","9",":",";","<","=",">","?","@","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","[","\\","]","^","_","`","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","{","|","}","~"}, res));
+true;
+
+charat("Lisp", 1);
+"L"$
+l: charlist("Lisp");
+["L","i","s","p"]$
+l[1];
+"L"$
+cint("$");
+36$
+[cequal("e","E"),cequalignore("e","E")];
+[false, true]$
+[alphacharp("2"),alphanumericp("2")];
+[false, true]$
+[clessp("E","e"),clesspignore("E","e")];
+[true, false]$
+[lowercasep("e"),lowercasep("E")];
+[true, false]$
+
+2*parse_string ("1.234; 5.678");
+2.468$
+
+3*parse_string ("1/2");
+3/2$
+
+parse_string ("2.3e10");
+2.3e10$
+
+parse_string (".25e-1");
+0.025$
+
+2*parse_string ("2.3b1");
+4.6b1$
+
+parse_string (".25b-1");
+2.5b-2$
+
+parse_string ("foo");
+foo$
+
+parse_string ("[2]");
+[2];
+
+parse_string ("(foo : 1234, expand ((foo + bar)^2))");
+(foo : 1234, expand ((foo + bar)^2));
+
+eval_string ("(foo : 1234, expand ((foo + bar)^2))");
+bar^2 + 2468*bar + 1522756;
+
+(kill (bar), parse_string ("bar (x) := x^2"), bar (7));
+bar (7);
+
+(eval_string ("bar (x) := x^2"), bar (7));
+49;
+
+s: sconcat ("xx[", 3, "]:", expand((y + x)^3));
+"xx[3]:y^3+3*x*y^2+3*x^2*y+x^3"$
+scopy("Original");
+"Original"$
+[sequal("gnuplot","Gnuplot"),sequalignore("gnuplot","Gnuplot")];
+[false, true]$
+stringp(s);
+true$
+simplode(["xx[", 3, "]:", expand((y + x)^3 )]);
+"xx[3]:y^3+3*x*y^2+3*x^2*y+x^3"$
+simplode(charlist("stars"), " * ");
+"s * t * a * r * s"$
+simplode(["One", "more", "coffee."], " ");
+"One more coffee."$
+s: "A submarine.";
+"A submarine."$
+sconcat (substring(s, 1, 3), "yellow ", substring(s, 3));
+"A yellow submarine."$
+sinsert("hollow ", s, 3);
+"A hollow submarine."$
+sinvertcase("sInvertCase");
+"SiNVERTcASE"$
+smake(3, "w");
+"www"$
+smismatch("seven","seventh");
+6$
+split("1.2   2.3   3.4   4.5");
+["1.2","2.3","3.4","4.5"]$
+split("first;;third;fourth", ";", false);
+["first","","third","fourth"]$
+sposition("e","seventh");
+2$
+sremove("n't", "I don't like coffee.");
+"I do like coffee."$
+sremove("DO ", %, 'sequalignore);
+"I like coffee."$
+sreverse("einnegermitgazellezagtimregennie");
+"einnegermitgazellezagtimregennie"$
+ssearch("~s", "~{~S ~}~%", 'sequalignore);
+3$
+ssearch ("foo", "bar");
+false;
+ssort("I don't like Mondays.");
+"   '.IMaddeiklnnoosty"$
+ssort("I don't like Mondays.", 'cgreaterpignore);
+"ytsoonnMlkIiedda.'   "$   
+ssubst("like", "hate", "I hate Thai food. I hate green tea.");
+"I like Thai food. I like green tea."$
+ssubst("Black", "Green", "Green light. Green tea. Greenwich.", 'sequal, 10, 20);
+"Green light. Black tea. Greenwich."$
+"  /* comment */  ";
+"  /* comment */  "$
+strim(" /*", %);
+"comment"$
+slength(%);
+7$
+substring("substring", 4);
+"string"$
+substring(%, 4, 6);
+"in"$
+supcase("english", 1, 2);
+"English"$
+tokens("24 October 2005");
+["24","October","2005"]$
+tokens("05-10-24", 'digitcharp);
+["05","10","24"]$
+map(parse_string, %);
+[5,10,24]$

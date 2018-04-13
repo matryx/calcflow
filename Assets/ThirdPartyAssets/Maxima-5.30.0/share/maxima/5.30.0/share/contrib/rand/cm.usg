@@ -1,0 +1,128 @@
+cm.mac is from the book "Perturbation Methods, Bifurcation Theory and
+Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+It performs center manifold reduction for ordinary differential
+equations.  
+
+The first example is from p31.  maxima-5.9.0 cvs reproduces the
+results from the book.
+
+(C1) load("./cm.mac");
+(D1)                               ./cm.mac
+(C2) cm();
+ENTER NO. OF EQS.
+3;
+ENTER DIMENSION OF CENTER MANIFOLD
+2;
+THE D.E.'S MUST BE ARRANGED SO THAT THE FIRST 2 EQS.
+REPRESENT THE CENTER MANIFOLD.  I.E. ALL ASSOCIATED
+EIGENVALUES ARE ZERO OR HAVE ZERO REAL PARTS.
+ENTER SYMBOL FOR VARIABLE NO. 1
+x;
+ENTER SYMBOL FOR VARIABLE NO. 2
+y;
+ENTER SYMBOL FOR VARIABLE NO. 3
+z;
+ENTER ORDER OF TRUNCATION
+2;
+ENTER RHS OF EQ. 1
+D x /DT =
+y;
+ENTER RHS OF EQ. 2
+D y /DT =
+-x-x*z;
+ENTER RHS OF EQ. 3
+D z /DT =
+-z+alpha*x^2;
+dx
+-- = y
+dT
+dy
+-- = - x z - x
+dT
+dz          2
+-- = ALPHA x  - z
+dT
+CENTER MANIFOLD:
+              2                          2
+     2 ALPHA y    2 ALPHA x y   3 ALPHA x
+[z = ---------- - ----------- + ----------]
+         5             5            5
+FLOW ON THE C.M.:
+                            2                          2
+ dx      dy        2 ALPHA y    2 ALPHA x y   3 ALPHA x
+[-- = y, -- = - x (---------- - ----------- + ----------) - x]
+ dT      dT            5             5            5
+
+
+
+The second example is from page 35, and again the results in the book
+are reproduced by maxima-5.9.0-cvs.
+
+(C3) cm();
+ENTER NO. OF EQS.
+4;
+ENTER DIMENSION OF CENTER MANIFOLD
+3;
+THE D.E.'S MUST BE ARRANGED SO THAT THE FIRST 3 EQS.
+REPRESENT THE CENTER MANIFOLD.  I.E. ALL ASSOCIATED
+EIGENVALUES ARE ZERO OR HAVE ZERO REAL PARTS.
+ENTER SYMBOL FOR VARIABLE NO. 1
+mu;
+ENTER SYMBOL FOR VARIABLE NO. 2
+x;
+ENTER SYMBOL FOR VARIABLE NO. 3
+y;
+ENTER SYMBOL FOR VARIABLE NO. 4
+z;
+ENTER ORDER OF TRUNCATION
+3;
+ENTER RHS OF EQ. 1
+D MU /DT =
+0;
+ENTER RHS OF EQ. 2
+D x /DT =
+mu*x+y;
+ENTER RHS OF EQ. 3
+D y /DT =
+mu*y-x-x*z;
+ENTER RHS OF EQ. 4
+D z /DT =
+-z+alpha*x^2;
+dMU
+--- = 0
+dT
+dx
+-- = y + MU x
+dT
+dy
+-- = - x z + MU y - x
+dT
+dz          2
+-- = ALPHA x  - z
+dT
+CENTER MANIFOLD:
+                    2            2
+       28 ALPHA MU y    2 ALPHA y    8 ALPHA MU x y   2 ALPHA x y
+[z = - -------------- + ---------- + -------------- - -----------
+             25             5              25              5
+
+                                                               2            2
+                                                  22 ALPHA MU x    3 ALPHA x
+                                                - -------------- + ----------]
+                                                        25             5
+FLOW ON THE C.M.:
+                                                  2            2
+ dMU      dx             dy          28 ALPHA MU y    2 ALPHA y
+[--- = 0, -- = y + MU x, -- = - x (- -------------- + ----------
+ dT       dT             dT                25             5
+
+                                                   2            2
+       8 ALPHA MU x y   2 ALPHA x y   22 ALPHA MU x    3 ALPHA x
+     + -------------- - ----------- - -------------- + ----------) + MU y - x]
+             25              5              25             5
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

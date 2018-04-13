@@ -1,0 +1,76 @@
+	The functions LINSIMP and DECLARE_LINEAR_OPERATOR provide
+the user with the capability of simplifying expressions that contain
+operators that are linear in one or more arguments.  It is possible
+to accomplish something quite similar using the standard MACSYMA
+function DECLARE, but there is no simple way to extend this to operators
+that have more than one argument.  The example below illustrates the
+capabilities that are built into MACSYMA:
+
+(C1) DECLARE(F,LINEAR);
+(D1) 				     DONE
+
+(C2) F(2*A);
+(D2) 				    2 F(A)
+
+(C3) F(2);
+(D3) 				    2 F(1)
+
+(C4) F(A*B);
+(D4) 				    F(A B)
+
+(C5) DECLARE(B,CONSTANT);
+(D5) 				     DONE
+
+(C6) F(A*B);
+(D6) 				    B F(A)
+
+
+Notice that constant factors are extracted from the argument of F.  This
+will often be what is needed, but not always.  Operators that have more
+than one argument are treated differently.  A complete description is given
+in MACDOC;UPDATE >, in a note describing new features of MACSYMA #261.
+
+	LINSIMP and DECLARE_LINEAR_OPERATOR fill these minor gaps in
+MACSYMA's understanding of linear operators.  DECLARE_LINEAR_OPERATOR is
+used to set up the information necessary for appropriate simplifications
+to be carried out, and LINSIMP is used to execute those simplifications.
+The desired simplification rules are not applied automatically, which is
+a disadvantage of this method relative to MACSYMA's built in capability.
+To obtain automatic simplification, one might use DECLIN in conjunction
+with TELLSIMP or TELLSIMPAFTER.
+
+LINSIMP(exp, operator1, operator2, ... ) simplifies exp with respect to
+    the linearity properties of operator1, then operator2, and so on.
+    Any terms belonging to the same sum that can be combined together
+    under the same operator are combined, and any factors that can be
+    extracted from any of these operators are extracted.  If any of the
+    operators in the argument list of LINSIMP have not been declared
+    linear using the function DECLARE_LINEAR_OPERATOR, an error will re-
+    sult.
+
+DECLARE_LINEAR_OPERATOR(operator, linear-arguments, separation-predicate)
+    sets up the linearity property of "operator", which must be an atomic
+    symbol.  The second argument of DECLARE_LINEAR_OPERATOR, linear-arguments,
+    is a list of one or more elements the entries of which denote the spe-
+    cific arguments of "operator" that participate in the linearity property.  
+    "operator" is considered to be a linear function of these specific argu-
+    ments, taken together.  For example, let F be linear in its first three
+    arguments.  Then:
+
+		F(2*A, 2*B, 2*C, D, E)  =  2*F(A, B, C, D, E)
+
+    The third argument of DECLARE_LINEAR_OPERATOR is the separation predicate.
+    It must be a function of one argument which returns TRUE if its argument
+    is not meant to be extracted from "operator", and FALSE if its argument
+    is meant to be extracted.  Thus, for example, the built in separation
+    predicate used by MACSYMA for this purpose could be defined as
+
+		NOT_CONSTANTP(EXP):=NOT CONSTANTP(EXP)$
+
+    With such a definition, the declaration necessary to mimic MACSYMA's
+    built-in capability would be, for the function H of one argument,
+
+		DECLARE_LINEAR_OPERATOR(H, [1], NOT_CONSTANTP)$
+
+    Subsequent use of LINSIMP would then produce forms similar to those pro-
+    duced by MACSYMA if H had been DECLAREd LINEAR.

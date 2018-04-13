@@ -1,0 +1,87 @@
+/* Problem 2 for colnew */
+
+/* Define constants */
+
+gamma : 1.1;
+eps : 0.01;
+dmu : eps;
+eps4mu : eps^4/dmu;
+xt : sqrt(2*(gamma-1)/gamma);
+
+/* Number of differential equations */
+ncomp : 2;
+/* Orders */
+m : [2, 2];
+
+/* Interval ends */
+aleft : 0.0;
+aright : 1.0;
+
+/* Locations of side conditions */
+zeta : float([0, 0, 1, 1]);
+
+/* Set up parameter array.  */
+ipar : makelist(0,k,1,11);
+/* Non-linear prob */
+ipar[1] : 1;
+/* 4 collocation points per subinterval */
+ipar[2] : 4;
+/* Initial uniform mesh of 10 subintervals */
+ipar[3] : 10;
+ipar[8] : 0;
+/* Size of fspace, ispace */
+ipar[5] : 40000;
+ipar[6] : 2500;
+/* Full output */
+ipar[7] : -1;
+/* Initial approx is provided */
+ipar[9] : 1;
+/* Regular problem */
+ipar[10] : 0;
+/* No fixed points in mesh */
+ipar[11] : 0;
+/* Tolerances on all components */
+ipar[4] : 4;
+
+/* Two error tolerances (on u and its second derivative */
+ltol : [1, 2, 3, 4];
+tol : [1d-5, 1d-5, 1d-5, 1d-5];
+
+fspace : makelist(0d0, k, 1, 40000)$
+ispace : makelist(0, k, 1, 2500)$
+fixpnt : [];
+
+/* Define the equations */
+fsub(x, z1, z2, z3, z4) := [z1/x/x - z2/x + (z1-z3*(1-z1/x) - gamma*x*(1-x*x/2))/eps4mu,
+               z3/x/x - z4/x + z1*(1-z1/2/x)/dmu];
+df : jacobian(fsub(x,z1, z2, z3, z4),[z1,z2,z3,z4]);
+dfsub(x, z1, z2, z3, z4) := 
+  subst(['x=x,'z1=z1,'z2=z2,'z3=z3,'z4=z4], df);
+g(z1, z2, z3, z4) := [z1, z3, z1, z4 - 0.3*z3 + .7];
+gsub(i, z1, z2, z3, z4) :=
+    subst(['z1=z1,'z2=z2,'z3=z3,'z4=z4], g(z1, z2, z3, z4)[i]);
+dg:jacobian(g(z1, z2, z3, z4), [z1,z2,z3,z4]);
+dgsub(i, z1, z2, z3, z4) := subst(['z1=z1,'z2=z2,'z3=z3,'z4=z4], row(dg, i)[1]);
+
+solutn(x) :=
+  block([cons : gamma*x*(1-0.5*x*x),
+         dcons : gamma*(1-1.5*x*x),
+         d2cons : -3*gamma*x],
+    if is(x > xt) then
+      [[0, 0, -cons, -dcons],
+       [0, -d2cons]]
+    else
+      [[2*x, 2, -2*x + cons, -2 + dcons],
+       [0, d2cons]]);
+
+[iflag, fspace, ispace] :
+  colnew_expert(ncomp, m, aleft, aright, zeta, ipar, ltol, tol, fixpnt, ispace, fspace,
+ 		0, fsub, dfsub, gsub, dgsub, solutn);
+
+/* Print values of solution at x = 0,.05,...,1 */
+x : 0;
+for j : 1 thru 21 do
+  block([],
+    zval : colnew_appsln([x], 4, fspace, ispace)[1],
+    printf(true, "~5,2f  ~{~15,5e~}~%", x, zval),
+    x : x + 0.05);

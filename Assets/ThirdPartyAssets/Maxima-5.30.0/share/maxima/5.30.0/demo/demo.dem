@@ -1,0 +1,101 @@
+
+title(exp):=disp(dpart(exp))$
+(title("a classical textbook example of differentiation"))$
+x^x^x;
+diff(%,x);
+(title("differentiation of a nested function"))$
+erf(tan(acos(log(x))));
+diff(%,x);
+title("expanding and factorizing a univariate polynomial")$
+(x-1)*(2*x-1)*(3*x-1)^7;
+expand(%);
+factor(%);
+title("factorization of cyclotomic polynomials - which form of an expression is more simple?")$
+x^600-1;
+factor(%);
+title("factorization of a multivariate polynomial")$
+(y^3-x^2)^4*(x+y+z)^2;
+expand(%);
+factor(%);
+title(" algebraic simplification example")$
+(sqrt(r^2+a^2)+a)*(sqrt(r^2+b^2)+b)/r^2
+ -(sqrt(r^2+b^2)+sqrt(r^2+a^2)+b+a)/(sqrt(r^2+b^2)+sqrt(r^2+a^2)-b-a);
+ratsimp(%);
+title(" algebraic simplification example")$
+(z^5-y*z^4+x*z^4-2*y*z^3-6*x*z^3+2*y^2*z^2+4*x*y*z^2-6*x^2*z^2+y^2*z+
+6*x*y*z+9*x^2*z-y^3-5*x*y^2-3*x^2*y+9*x^3)/(-z^2+y+3*x)^2;
+ratsimp(%);
+title("integration of a non-tabulated function")$
+1/(x^3+a*x^2+x);
+integrate(%,x);
+diff(%,x),ratsimp;
+title("logarithmic subcase of risch's integration algorithm")$
+(log(x)-1)/(log(x)^2-x^2);
+integrate(%,x);  
+title("taylor series example")$
+sin(x+a*x^3);   
+taylor(%,x,0,19);
+title("taylor series example - puiseux")$
+sqrt(log(1+x)+sin(x));
+taylor(%,x,0,17); 
+title("macsyma to fortran conversion - optimized routine not yet available")$
+exp:-gamma^5+delta*gamma^4+2*delta^2*gamma^3-alpha^3*gamma^3-3*alpha^2*gamma^3
+-3*alpha*gamma^3-gamma^3-2*delta^3*gamma^2+3*alpha^3*delta*gamma^2
++9*alpha^2*delta*gamma^2+9*alpha*delta*gamma^2+3*delta*gamma^2
++alpha^2*gamma^2-2*alpha*gamma^2+gamma^2-delta^4*gamma-3*alpha^3*delta^2*gamma
+-9*alpha^2*delta^2*gamma-9*alpha*delta^2*gamma-3*delta^2*gamma
++2*alpha^2*delta*gamma-4*alpha*delta*gamma+2*delta*gamma+delta^5
++alpha^3*delta^3+3*alpha^2*delta^3+3*alpha*delta^3+delta^3+alpha^2*delta^2
+-2*alpha*delta^2+delta^2+alpha^5+alpha^4-2*alpha^3-2*alpha^2+alpha+1;
+fortran(%);
+factorsum(exp);
+fortran(%);
+title("bignum arithmetic and arbitrary precision floating point arithmetic")$
+6427752177035961102167848369364650410088811975131171341205503;
+%^5;
+2535301200456458802993406410751;
+%th(3)/%;
+sqrt(%pi),numer;
+fpprec:50;
+bfloat(sqrt(%pi));
+/* at the moment this runs pretty slowly but would be a nice example of bignums
+title("large numbers - the largest known prime number")$
+2^(44497)-1; */
+title("vandermond's matrix")$
+mat1:matrix([1,x,x^2,x^3],[1,y,y^2,y^3],[1,z,z^2,z^3],[1,w,w^2,w^3]);
+factor(determinant(mat1));
+minor(mat1,4,4);
+%^^-1,factor;
+title("solving algebraic equations")$
+q^2*x^2+p^2*q*x-p*q*x-p^3=0;
+solve(%,x);
+title("application of cubic formula")$
+(breakup:false,eq:4*x^3+a*x+10*b= 0);
+h:solve(eq,x)$
+first_root:first(h);
+second_root:part(h,2);
+third_root:last(h);
+title("solution of set of simultaneous linear equations")$
+[3*a+5*b+7*c+11*d+13*e=17*r,19*a+23*b+29*c+31*d+37*e=41*s,43*a+47*b+53*c+59*d+61*e=67*t,
+71*a+73*b+79*c+83*d+89*e=97*x,101*a+103*b+107*c+109*d+113*e=127*y];
+solve(%,[a,b,c,d,e]);
+title("solution of set of simultaneous non-linear equations")$
+[x*y*z = 42,-z+y+x = -2,-3*z+2*y+3*x = -9];
+solve(%);
+title("finding eigenvalues")$
+matrix([0,6,-10,-8],[6,0,8,10],[-10,8,15*a,6],[-8,10,6,15*a]);
+solve(charpoly(%,l),l);
+title("two dimensional plot")$ 
+plotnum:100$
+plot(x*sin(x^2),x,0,4,plot(x*sin(x^2),x,0,4));
+title("two dimensional parametric plot")$
+plotnum:400;
+paramplot(s*sin(s),s*cos(s),s,0,80,paramplot(s*sin(s),s*cos(s),s,0,80));
+title("three dimensional cartesian plot of a bessel function")$
+plotnum:20$
+plot3d(j0(sqrt(x^2+y^2)),x,-12,12,y,-12,12,plot3d(j0(sqrt(x^2+y^2)),x,-12,12,y,-12,12));
+title("three dimensional polar plot of the same bessel function")$
+plot3d(j0(r),th,0,2*%pi,r,0,12,polar,plot3d(j0(r),th,0,2*%pi,r,0,12,polar));
+title("three dimensional plot of x*exp(-x^2-y^2)")$
+plot3d(x*exp(-x^2-y^2),x,-2,2,y,-2,2,plot3d(x*exp(-x^2-y^2),x,-2,2,y,-2,2));
+

@@ -1,0 +1,52 @@
+/* Example of use of double integrator (dblint) */
+
+/* F must be a function of two variables, R and S must be functions of
+one variable, and A and B must be floating point numbers (all of the 
+functions must be translated or compiled prior to using dblint) */
+
+/* Get the fasl file containing dblint(F,R,S,A,B) */ 
+
+batchload("dblint"); 
+
+/* To get the double integral of exp(x-y^2) over the region bounded by
+y=1 and y=2+x and x=0 to x=1 */
+
+/* Define the integrand as a function of two variables */
+
+F(X,Y):=(mode_declare([X,Y],float),exp(X-Y^2)); 
+
+/* Define the lower and upper limits on the inner (y in this case)
+integral as a function of the outer variable (x in this case) */
+
+R(X):=(mode_declare(X,float),1.0); 
+S(X):=(mode_declare(X,float),2.0+X);
+
+/* Now translate these functions for the sake of efficiency */
+
+translate(F,R,S); 
+
+/* Call the dblint function with quoted arguments for function names, and
+floating point values for the endpoints of the outer (x) integration
+*/ 
+
+dblint_ans:dblint('F,'R,'S,0.0,1.0); 
+
+/* Compare with the exact answer */
+
+inty:risch(exp(X-Y^2),Y); 
+xint:ev(inty,Y:2+X)-ev(inty,Y:1);
+dint:risch(xint,X); 
+ans:ev(dint,X:1.0)-ev(dint,X:0.0),numer; 
+
+/* Relative error check here */
+(ans-dblint_ans)/ans;
+/* Quite reasonable */
+/* Of course, the dblint routine will still work even when we choose an
+area over which the closed-form integral fails to be expressible in
+terms of standard transcendental functions */ 
+
+S1(X):=(mode_declare(X,float),2.0+X^(3/2));
+translate(S1);
+dblint('F,'R,'S1,0.0,1.0); 
+
+"end of dblint.dem"$

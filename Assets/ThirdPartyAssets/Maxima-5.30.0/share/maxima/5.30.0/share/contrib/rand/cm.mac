@@ -1,0 +1,92 @@
+/* Filename cm.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /* program number 3: cm(), center manifold reduction for ordinary
+   differential equations. see page 32 in "perturbation methods,
+   bifurcation theory and computer algebra". */
+
+
+
+cm():=(
+
+/* input problem */
+n:read("enter no. of eqs."),
+m:read("enter dimension of center manifold"),
+print("the d.e.'s must be arranged so that the first",m,"eqs."),
+print("represent the center manifold.  i.e. all associated"),
+print("eigenvalues are zero or have zero real parts."),
+for i:1 thru n do
+   x[i]:read("enter symbol for variable no.",i),
+l:read("enter order of truncation"),
+for i:1 thru n do (
+   print("enter rhs of eq.",i),
+   print("d",x[i],"/dt ="),
+   g[i]:read()),
+/* set up d.e.'s */
+for i:1 thru n do
+   depends(x[i],t),
+for i:1 thru n do
+   (eq[i]:diff(x[i],t)=g[i],
+    print(eq[i])),
+
+/* form power series */
+sub:makelist(k[i],i,1,m),
+var:product(x[i]^k[i],i,1,m),
+unk:[],
+for p:m+1 thru n do(
+   temp:a[p,sub]*var,
+   for i:1 thru m do
+      temp:sum(ev(temp,k[i]=j),j,0,l),
+   temp2:taylor(temp,makelist(x[i],i,1,m),0,l),
+   /* remove constant and linear terms */
+   temp3:temp2-part(temp2,1)-part(temp2,2),
+   soln[p]:expand(temp3),
+   /* prepare list of unknowns */
+   setxto1:makelist(x[i]=1,i,1,m),
+   /* turn sum into a list */
+   unkn[p]:subst("[","+",ev(temp3,setxto1)),
+   unk:append(unk,unkn[p])),
+sol:makelist(x[p]=soln[p],p,m+1,n),
+
+/* substitute into d.e.'s */
+cmde:makelist(eq[i],i,1,m),
+rest:makelist(lhs(eq[i])-rhs(eq[i]),i,m+1,n),
+temp4:ev(rest,sol,diff),
+temp5:ev(temp4,cmde,diff),
+temp6:ev(temp5,sol),
+temp7:taylor(temp6,makelist(x[i],i,1,m),0,l),
+
+/* collect terms */
+counter:1,
+/* make list of terms */
+terms:subst("[","+",soln[n]),
+terms:ev(terms,a[dummy,sub]:=1),
+for i:1 thru n-m do (
+   exp[i]:expand(part(temp7,i)),
+   for j:1 thru length(terms) do(
+      cond[counter]:ratcoef(exp[i],part(terms,j)),
+      counter:counter+1)),
+conds:makelist(cond[i],i,1,counter-1),
+conds:ev(conds,makelist(x[i]=0,i,1,m)),
+
+/* solve for center manifold */
+acoeffs:solve(conds,unk),
+centermanifold:ev(sol,acoeffs),
+print("center manifold:"),
+print(centermanifold),
+
+/* get flow on cm */
+cmde2:ev(cmde,centermanifold),
+print("flow on the c.m.:"),
+print(cmde2))$

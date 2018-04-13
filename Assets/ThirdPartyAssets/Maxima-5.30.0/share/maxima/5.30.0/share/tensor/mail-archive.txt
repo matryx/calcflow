@@ -1,0 +1,937 @@
+From TENSOR@MIT-MC  Mon Apr 30 20:08:00 1979
+Date: 30 APR 1979 2008-EDT
+From: TENSOR at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+This is RP.  Sorry about the last message which was inadvertently sent.
+INFO-TENSOR is now back up and each of you who receives this is on the
+mailing list.  If you wish to communicate with everyone on the mailing
+list simply send mail to INFO-TENSOR.  If you wish your name removed or
+wish another name added let me know.  The following is the list at the
+moment.
+
+(ASB) (DAVEK) (RP) (AMENT) (STAN) (TENSOR) (ADK) (ZIM) (YEKTA)
+(SWOLF) (CMA) (JPLHDW) (JPLFBE) (BIRREL) (FORWRD) (SHAP) (STOUTE) (JLK)
+
+In closing, this is the final time you will see the system message which
+was sent twice.  Somehow, a number of people do not like to look at msgs.
+
+
+                Attention TENSOR users
+
+There are plans to rewrite the tensor code this summer.  There are a number
+of known difficulties with the ETENSR and ITENSR (or original CTMS and ITMS)
+packs.  However, we would like to know who uses them and more important we
+would appreciate any comments, criticisms, suggestions etc on improving
+the ETENSR AND ITENSR code. If you have developed any special purpose routines
+utilizing the code let us know this as well.  Further, please criticise the
+description of these packages in the manual.  Send mail to TENSOR or
+INFO-TENSOR if you wish to share your ideas.  Work on the tensor packs
+will begin in early June.
+
+
+From RP@MIT-MC  Mon Apr 30 20:29:20 1979
+DISTRIB:  *CMU, *DM, *MC, *ML, *AI
+EXPIRES: 04/30/79 20:29:20
+From: RP@MIT-MC
+Date: 04/15/79 20:29:20
+Subject: Re: Attention TENSOR users
+
+There are plans to rewrite the tensor code this summer.  There are a number
+of known difficulties with the ETENSR and ITENSR (or original CTMS and ITMS)
+packs.  However, we would like to know who uses them and more important we
+would appreciate any comments, criticisms, suggestions etc on improving
+the ETENSR AND ITENSR code. If you have developed any special purpose routines
+utilizing the code let us know this as well.  Further, please criticise the
+description of these packages in the manual.  Send mail to TENSOR.
+
+
+From TENSOR@MIT-MC  Sat May  5 08:15:00 1979
+Date: 5 MAY 1979 0815-EDT
+From: TENSOR at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+Has anyone ever found an example where the CANTEN function was
+useful. There is a bug in it now but we will have to decide whether
+it should be kept.
+
+
+From RP@MIT-MC  Mon Jun  4 13:45:00 1979
+Date: 4 JUN 1979 1345-EDT
+From: RP at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+ETENSR is being modified at this time.  I will let you know the changes
+which are being made at a later date.  It is now a good time to send
+suggestions for changes to me.
+
+
+From MIKE@MIT-MC  Thu Jun  7 13:44:00 1979
+Date: 7 JUN 1979 1344-EDT
+From: MIKE at MIT-MC (Michael Wester)
+To: INFO-TENSOR at MIT-MC
+
+Does anyone use the so-called "special metric file" (TENSOR;METRIC FILE)
+in ETENSR?
+
+
+From RP@MIT-MC  Fri Jun 15 16:36:00 1979
+Date: 15 JUN 1979 1636-EDT
+From: RP at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+        ATTENTION TENSOR USERS
+
+It is important that I know the kind of problems which users have for
+which they hope ITENSR can help.  In particular I wish to know about
+problems which involve symmetries.  As you know ITENSR does not yet
+manipulate indexed objects which are skew- symmetric.  If you can tell
+me what you would like perhaps it will happen this summer. Be specific!
+Send mail to me or TENSOR.
+
+
+From RP@MIT-MC  Sun Aug  5 13:45:00 1979
+Date: 5 AUG 1979 1345-EDT
+From: RP at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+During the next months, before a new manual appears, there will appear
+on the tensor directory a sequence of batch files. These will give
+some problems which have been solved using the new tensor packges and
+should give the user some understanding of the new features which have
+been implemented by MIKE and me. The names of the files will be
+ITENSR DEMO1, ITENSR DEMO2,....    and
+ETENSR DEMO1, ETENSR DEMO2,....
+Send comments or bugs to RP@MIT-MC.
+
+
+From TENSOR@MIT-MC  Sun Dec 16 08:22:00 1979
+Date: 16 DEC 1979 0822-EST
+From: TENSOR at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+The new  tensor code will  be released shortly.  There has been  a great
+deal of revision to ITENSR and ETENSR. During the next few weeks, before
+the programs are released, it would be helpful if some of you  would try
+the code and examine an early  draft of the manual which is on  the file
+TENSOR;MANUAL  DOCUME.  If  anyone does  not  have  a  hardcopy terminal
+available I  can send a  copy. Recall there  are also demo  files called
+TENSOR;ETENSR DEMO(1,2,...) and  ITENSR DEMO(1,2,...). Send  comments to
+RP or TENSOR.
+
+
+From TENSOR@MIT-MC  Sat Feb 16 16:31:00 1980
+Date: 16 FEB 1980 1631-EST
+From: TENSOR at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+The new tensor packages are operational. The ETENSR pack is now called
+CTENSR and is available by doing
+
+LOADFILE(CTENSR,FASL,SHARE); for component tensor manipulation.
+
+The ITENSR pack, as before, is loaded by doing
+
+LOADFILE(ITENSR,FASL,SHARE); for indicial tensor manipulation.
+
+Both packages have many new  functions as well  as old ones which have
+been modified. A full description is available by printing
+
+SHARE;TENSOR DESCR.
+
+In addition,  demos  exist  on the TENSOR  directory  under  the first
+filenames CTENSR and ITENSR. Send bugs or comments to RP or TENSOR.
+
+
+From RP@MIT-MC  Thu Jul 10 07:46:00 1980
+Date: 10 JUL 1980 0746-EDT
+From: RP at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+John Fitch, Michael Rothstein and I are writing an article on Computer
+Algebra for Scientific American.  I am soliciting ideas about specific
+items of interest we might include.
+
+The proposal to Scientific American suggested the following topics:
+1) a historical introduction to algebraic manipulation
+2) a description of algorithm implementation and capabilities
+3) the various programming languages and their advantages to specific
+   systems
+4) a description of some specific problems which have been solved. This
+   would include some of the big problems which had been done by hand
+   and have now been checked by computer with comments on the accuracy of
+   scientists of that day.
+5) the future of the field and comments on problems which may be solved
+   (in the physical sciences for example).
+
+The article must, of course, be directed to the educated layman. In addition,
+no equations may appear in the text but we can put them in separate boxes.
+
+Bearing in mind that the 5 topics above are not cast in stone, but there
+are the two constraints, I would appreciate any suggestions and/or
+comments.  Please reply to RP@MC. Thanks.
+
+P.S. Please excuse the multiple copies some of you may receive because
+of my choice of mailing lists.
+
+
+From TENSOR@MIT-MC  Thu Aug  7 13:51:00 1980
+Date:  7 AUG 1980 1351-EDT
+From: TENSOR at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+The new tensor manual has been reproduced as an LCS document. If you
+wish to have a copy for your very own then send me a note. If your
+inquir listing does not give your address then send that as well.
+Send requests to TENSOR@MC
+
+
+From RP@MIT-MC  Sun Sep 21 11:15:00 1980
+Date: 21 SEP 1980 1115-EDT
+From: RP at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+Plans are being made to extend CTENSR to include interaction with LSH's
+STENSR package. This will mean that a user in CTENSR may decide that
+a 5dimensional array such as the covariant derivative of the Riemann
+tensor is needed or perhaps a scalar constructed from the Riemann
+tensor and its dual- whatever.  A new function in CTENSR will interact
+with STENSR to allow construction of a large number of geometrical
+objects.
+
+We need some input and hence this note. We must have some idea
+of the kinds of objects you may be interested in so we can build
+a decent input function in CTENSR. Therefore, if you have some ideas
+of the kinds of objects you may want to construct send mail to TENSOR@MC.
+
+
+From TENSOR@MIT-MC  Sun Sep 28 14:46:00 1980
+Date: 28 SEP 1980 1446-EDT
+From: TENSOR at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+CC: GJC at MIT-MC
+
+There is now a new version of CTENSR called TENSOR;CTENSR NFASL.
+It runs about twice as fast as the old version, CTENSR FASL,
+but may leave less work space for the user. This may not, however,
+be apparant for standard problems.
+
+I am asking users to test the new version and let me know how it
+runs. If there are no core problems I will let this become the working
+version with the fassave as the backup version. However, for the
+present the old version will still be loaded by calling TSETUP()
+in MACYSMA.
+
+Thanks go to GJC for creating CTENSR NFASL.
+
+
+From RP@MIT-MC  Sat Oct  4 16:49:41 1980
+RP@MIT-MC 10/04/80 16:49:41
+To: JPG at MIT-MC, GJC at MIT-MC, JM at MIT-MC, RZ at MIT-MC
+To: LSH at MIT-MC, TENSOR at MIT-MC
+
+I ran some tests on GJC'c newly translated and compiled version of CTENSR
+comparing it to the FASLOAD which has been the standard. Both are about
+the same size. GJC's looks very good for the 4 tests below. LHS's version
+bombed out for the 4th demo but was equivalent to GJC's wrt time
+and size for the other three. In view of these results I think
+this version should replace the FASSAVE. I will wait a few days
+and run some more tests. Any comments?
+
+CTENSR DEMO1    TOTALTIME   GCTIME      FREECORE AT FINISH
+FASLOAD     12402 msec.     4151 msec.      40 BLOCKS
+GJC     10209 msec. 3770 msec.  41 BLOCKS
+
+CTENSR DEMO2    TOTALTIME   GCTIME      FREECORE AT FINISH
+FASLOAD     79252 msec.     23022 msec.     32 BLOCKS
+GJC     26251 msec. 9326 msec.  37 BLOCKS
+
+CTENSR DEMO3    TOTALTIME   GCTIME      FREECORE AT FINISH
+FASLOAD     54072 msec.     15815 msec. 34 BLOCKS
+GJC     24662 msec. 9378 msec.  37 BLOCKS
+
+CTENSR DEMO4    TOTALTIME   GCTIME      FREECORE AT FINISH
+FASLOAD     54010 msec.     19832 msec.     6 BLOCKS
+GJC     38671 msec. 15216 msec. 9 BLOCKS
+
+
+From RP@MIT-MC  Sun Oct  5 22:26:00 1980
+Date:  5 OCT 1980 2226-EDT
+From: RP at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+CC: GJC at MIT-MC
+
+There is now a new version of CTENSR called TENSOR;CTENSR FASL.
+It is translated and compiled and it runs several times as fast
+as the old version while providing more work space for the user.
+
+I would like users to test it and let me know if there are any
+problems. CTENSR FASL may be loaded by calling TSETUP() in MACYSMA
+or loading the file directly.
+
+Thanks go to GJC for creating the new version.
+
+
+From LSH@MIT-MC  Wed Nov  5 08:33:00 1980
+Date:  5 NOV 1980 0833-EST
+From: LSH at MIT-MC (Lars S. Hornfeldt)
+Subject: STENSR's humanoid trig simplifier
+To: MACSYMA-I at MIT-MC, ELL at MIT-MC, STOUTE at MIT-MC
+CC: INFO-TENSOR at MIT-MC, MRM at MIT-MC, JPFF at MIT-MC
+
+TRIGSUM(exp);   is a new function that exploits the trig sum-relation:
+                 2         2
+                          sin (x) + cos (x) -1  => 0
+
+simultaneously in all formulations: sin+cos->1,  1-sin->cos,  1-cos->sin.
+Each direction is selectively used only where it is BENEFICIAL, and
+the program returns THAT mixture of sin and cos that constitutes the
+least number of terms.      For instance:
+
+TRIGSUM of: (ONE - C     )*SIN(X)^2   Returns     (      S)*SIN(X)^2
+          + (ONE      - S)*COS(X)^2     ===>    + (    C  )*COS(X)^2
+          + (    + C  + S)                      + (ONE    )
+
+This works equally well and fast if multiplied with any sin-cos power.
+The workspace consumption =0, in contrast to explicit subst. sin=>cos.
+See the output file  LSH;TRGSUM DEMOUT   -which is a writefile
+of  the batch        TRGSUM,DEMO
+
+TRIGSUM calls the arbitrary-sum-substitutor (=1yr work) in STENSR (6y).
+An attempt to explain it's main lines is in TRGSUM MAIL
+(complementing Springer Verlag.. see lsh;STENSR INFO)
+
+I've the last two months [besides beating RP's Sci. Am-problem on 4
+machines] made long planned improvements of the sumsubstitutor as to:
+
+1) Substitute COLLAPSABLE sums, ie sums for which the number of, and
+   sequence of, the terms may change in certain malign environments.
+   Eg. the cyclic sum of 3 Riemann tensors (=identically zero) can
+   collapse to 2 or less terms if contracted with symmetric tensors.
+
+2) allow a user-provided, optional ELECTION-function, that determines
+   what terms to get rid of when that choice is extra tricky. A such
+   one is built into TRIGSUM, doing the choice between the terms
+   associated with  "sin", "cos" and "-1".
+
+Let me know if you can repeat any demo example with trigsimp,ratsubst
+,exponentialize..
+            -lsh
+
+
+From LSH@MIT-MC  Tue Dec 16 20:10:00 1980
+Date: 16 DEC 1980 2010-EST
+From: LSH at MIT-MC (Lars S. Hornfeldt)
+Subject: Human-like new TRIG-SIMPLIFIER and SUMSUBSTITUTOR
+To: INFO-MACSYM at MIT-MC, INFO-TENSOR at MIT-MC, HEP at MIT-MC
+
+TRIGSUM(exp);  is a new function (autoloading) that exploits the
+TRIG-onometric SUM-relation:     2         2
+                              sin (x) + cos (x) - 1  ==> 0
+
+in an optimal fashion; ie it uses DIFFERENT formulations:
+   2      2                   2        2             2        2
+sin  + cos  ==> 1,     1 - sin  ==> cos ,     1 - cos  ==> sin
+
+selectively only where they are BENEFICIAL, and the program returns
+THAT mixture of sin and cos that constitutes the least number of terms.
+For instance, TRIGSUM on the 6-term-expression:
+
+  (ONE - C     )*SIN(X)^2 \  Returns 3 terms: /    (      S)*SIN(X)^2
++ (ONE      - S)*COS(X)^2  >      ===>       <   + (    C  )*COS(X)^2
++ (    + C  + S)          /                   \  + (ONE    )
+
+This works equally well and fast if multiplied with any sin-cos power.
+
+TRIGSUM uses the sum-substitutor (=1yr work) in STENSR. For references
+and pointers see SHARE;STENSR USAGE.  Any arb.-length-sum of arb.-length-
+products of tensors can be substituted, and in PRINCIPLE also of scalars.
+Send bugs, and such sum-relations that you want to exploit, to me.
+
+Being a complicated program, it's not small, but you can ALWAYS type
+TRIGSUM(..);  since it tests space to fit the program before it autoloads.
+Also the workspace consumption =0, in contrast to explicit subst. sin=>cos.
+
+Do   :PRINT LSH;TRGSUM DEMOUT    to see a demo writefile, or run the demo
+itself by  DEMO(TRGSUM,DEMO,DSK,LSH)$   which takes 5 cpu-min to end
+[but (a curiosum): substituting sin=>cos would give results requiring
+an Earthsized machine to store, and would take 10^7 Universe-lifetimes].
+
+-lsh
+
+From RP@MIT-MC  Sun Jan 25 10:17:00 1981
+Date: 25 JAN 1981 1017-EST
+From: RP at MIT-MC (Richard Pavelle)
+To: INFO-TENSOR at MIT-MC
+
+I wish to remind users of the tensor packages that if you have written
+any code which you feel should/could be added to the existing code then
+please let me know. This is the best way to expand the capabilities!
+
+From LSH0@MIT-MC  Sat May 30 12:35:00 1981
+Date: 30 May 1981 12:35-EDT
+From: Lars S. Hornfeldt <LSH at MIT-MC>
+Sender: LSH0 at MIT-MC
+Subject: TRIGSUM accepts all trigfunctions
+To: INFO-MACSYM at MIT-MC, INFO-TENSOR at MIT-MC
+
+-at input, i.e. also tan, cot, sec and csc, and converts them
+to sin and cos, so that all equivalent formulations of the
+relation   sin^2 + cos^2 = 1    are exploited fully
+     (decreasing the number of terms).
+Then it also COMBINES BACK the sin- and cos-es into the most
+advantageous combination of the other functions (not offered
+by earlier methods as I know).  If nothing better, at least
+neg. powers of sin or cos are replaced with csc and sec.
+   Both conversions are integrated in an excisting one, costing
+negligible extra time.  Please send +/-  -experiences and bugs to me.
+-lsh
+
+From ADK@MIT-MC  Thu Jan 14 16:03:00 1982
+Date: 14 January 1982 16:03-EST
+From: Anthony D. Kennedy <ADK at MIT-MC>
+Subject: Dirac Algebra.
+To: HEP at MIT-MC, INFO-TENSOR at MIT-MC, WEC at MIT-MC,
+    MACSYM at MIT-MC
+
+    I am considering implementing a new Dirac gamma-matrix
+algorithm in Macsyma.  The algorithm is much faster than the
+previously used brute-force methods for arbitrary n-dimensional
+calculations, and is quite possibly faster than tricks like the
+Kahane algorithm in four dimensions.  I would like to know all
+your comments, suggestions, and uses (past, present, or future)
+for such a program, as well as your preferences for input/output
+formats and syntax.  Now is the chance to make your prejudices known!
+        - Tony Kennedy (ADK@MIT-MC)
+[Apologies for multiple copies due to overlapping mailing-lists]
+
+From TENSOR@MIT-MC  Fri Feb 19 07:26:00 1982
+Date: 19 February 1982 07:26-EST
+From: Richard Pavelle <TENSOR at MIT-MC>
+To: INFO-TENSOR at MIT-MC
+
+Do not use ITENSR until further notice. It is broken!
+
+From TENSOR@MIT-MC  Mon Mar  1 08:38:00 1982
+Date: 1 March 1982 08:38-EST
+From: Richard Pavelle <TENSOR at MIT-MC>
+To: INFO-TENSOR at MIT-MC
+
+ITENSR is now fixed.  Thanks JPG.
+
+From TENSOR@MIT-MC  Tue Mar  9 14:38:00 1982
+Date: 9 March 1982 14:38-EST
+From: Richard Pavelle <TENSOR at MIT-MC>
+Subject: TRANSFORM in CTENSR
+To: INFO-TENSOR at MIT-MC
+cc: JPG at MIT-MC, ELLEN at MIT-MC, RJF at MIT-MC, RP at MIT-MC,
+    ELL at MIT-MC
+
+The TRANSFORM function in CTENSR has been renamed to TTRANSFORM.
+
+From TENSOR@MIT-MC  Tue Mar  9 15:25:00 1982
+Date: 9 March 1982 15:25-EST
+From: Richard Pavelle <TENSOR at MIT-MC>
+To: Kim.fateman at UCB-C70
+cc: RP at MIT-MC
+
+    Date: 4 Mar 1982 12:37:41-PST
+    From: Kim.fateman at Berkeley
+
+    I mentioned to you that "transform" as a name of a command was
+    used elsewhere (than in ctensor).  It is used in "ode".  We noticed
+    it on the vax because we have installed auto-load properties on
+    entries into ode in our default system.
+Thanks. It has been changed to TTRANSFORM in CTENSR.
+
+From ELLEN@MIT-MC  Wed Mar 10 02:42:59 1982
+From: ELLEN@MIT-MC 03/10/82 02:42:59
+Subject: Re: TRANSFORM in CTENSR
+
+I have changed TRANSFORM in TENSOR;MANUAL > to be TTRANSFORM, and
+made the proper change in DESCRIBE.
+
+From ELLEN@MIT-MC  Wed Mar 10 10:56:00 1982
+Date: 10 March 1982 10:56-EST
+From: V. Ellen Golden <ELLEN at MIT-MC>
+To: GJC at MIT-MC
+cc: BUG-MULMAX at MIT-MC
+
+I moved TENSOR;ITENSR > over to Multics as
+>udd>Mathlab>macsyma>share>itensr.lisp and when I attempt to loadfile
+it it gets
+
+"Call to an undefined function '?macsyma\-module' at Lisp level."
+
+Any ideas what that is about?
+
+From RP@MIT-MC  Thu Mar 11 08:25:00 1982
+Date: 11 March 1982 08:25-EST
+From: Richard Pavelle <RP at MIT-MC>
+Subject: conflicting functions in ITENSR and CTENSR
+To: JPG at MIT-MC
+cc: RP at MIT-MC, ELLEN at MIT-MC
+
+    Date: 22 September 1981 04:10-EDT
+    From: Jeffrey P. Golden <JPG at MIT-MC>
+
+       ELLEN@MIT-MC 09/22/81 03:57:36 Re: BUG - ITENSR
+       I tried the ITENSO DEMO1 and it got a "too many arguments supplied
+       to RIEMANN(DIS) at the first line.  You better check this, since POURNE
+       may want to use these demos (and the error could be indicative of more
+       serious trouble in MACSYMA).
+
+    It appears that RIEMANN is two different functions, the one in CTENSR takes
+    one arg and the one in ITENSR takes two args!  So you get into trouble
+    if you try CTENSR and ITENSR in the same MACSYMA.  What lossage!  This
+    should be fixed.
+I have changed the RIEMANN function in ITENSR to CURVATURE. If this name
+causes no conflicts please recompile TENSOR;ITENSR > and I will send a
+note out.
+
+From RP@MIT-MC  Thu Mar 11 16:37:00 1982
+Date: 11 March 1982 16:37-EST
+From: Richard Pavelle <RP at MIT-MC>
+Subject: change to ITENSR
+To: INFO-TENSOR at MIT-MC
+
+The RIEMANN function in ITENSR, which represents the standard Riemann
+4 index curvature tensor, has been renamed to CURVATURE to stop the
+conflict with the RIEMANN function in CTENSR.
+
+From RP@MIT-MC  Fri Mar 12 09:46:00 1982
+Date: 12 March 1982 09:46-EST
+From: Richard Pavelle <RP at MIT-MC>
+Subject: TENSOR;MANUAL >
+To: ELLEN at MIT-MC
+cc: RP at MIT-MC
+
+    ELLEN@MIT-MC 03/11/82 18:19:42 Re: TENSOR;MANUAL >
+    I have put CURVATURE alphabetically, which places it between COVDIFF
+    and DIFF.  I myself wonder if (since there is an index) you might want
+    to consider reordering the functions more by "use", if there is any
+    sort of progression there... it is a very minor point, so if you don't
+    care we will leave things as they are, but to me for instance it would
+    seem natural to have DIFF and COVDIFF together, and have CURVATURE
+    (even if it were named RIEMANN and thus came later in the alphabet) just
+    before GEODESIC, since they appear (to my casual glance) to be related.
+    Anyone needing the page of a precise function probably isn't going to
+    be making use of the fact they are alphabetical, but rather using the
+    index.
+I do not think this would be useful here. Clearly, for a users manual it
+is a winning idea.
+
+From RP@MIT-MC  Sun Mar 14 17:11:00 1982
+Date: 14 March 1982 17:11-EST
+From: Richard Pavelle <RP at MIT-MC>
+To: ELLEN at MIT-MC
+cc: RP at MIT-MC
+
+I made a few more changes to the TENSOR manual. I assume you will be using
+this as the source for the new manual, right? Also, I want to remind you
+about checking that acknowledgements to not occur in the new manual.
+
+From ELLEN@MIT-MC  Sun Mar 14 17:11:55 1982
+ELLEN@MIT-MC 03/14/82 17:11:55
+Yes, the PUB for the manual pulls TENSOR;MANUAL > in as source file.
+I will check on the acknowledgements, thanks for reminding me.
+
+From ELLEN@MIT-MC  Mon Mar 15 16:31:30 1982
+ELLEN@MIT-MC 03/15/82 16:31:30
+    Date: 14 March 1982 17:11-EST
+    From: Richard Pavelle <RP at MIT-MC>
+
+    I made a few more changes to the TENSOR manual. I assume you will be using
+    this as the source for the new manual, right? Also, I want to remind you
+    about checking that acknowledgements to not occur in the new manual.
+-----------------------------------
+I have removed the acknowledgement from TENSOR;MANUAL > and placed it in
+DRAFT > so that if the TENSOR manual is run off again as a TM, it will appear
+in that copy, but the text itself as gets slurped into the "real manual"
+will not contain it.
+
+From RP@MIT-MC  Tue Mar 23 20:40:00 1982
+Date: 23 March 1982 20:40-EST
+From: Richard Pavelle <RP at MIT-MC>
+To: JPG at MIT-MC
+cc: RP at MIT-MC, ELLEN at MIT-MC, CWH at MIT-MC
+
+       Date: 23 March 1982 03:39-EST
+       From: Jeffrey P. Golden <JPG at MIT-MC>
+       CWH tells me that ITENSR has been compiled on Multics.  Load it up and
+       see if it works.
+   Date: 10 March 1982 10:56-EST
+   From: V. Ellen Golden <ELLEN at MIT-MC>
+   To: GJC at MIT-MC
+   cc: BUG-MULMAX at MIT-MC
+   I moved TENSOR;ITENSR > over to Multics as
+   >udd>Mathlab>macsyma>share>itensr.lisp and when I attempt to loadfile
+   it it gets
+   "Call to an undefined function '?macsyma\-module' at Lisp level."
+   Any ideas what that is about?
+This bug is still there so I cannot test ITENSR.
+
+From CWH@MIT-MC  Tue Mar 23 21:15:00 1982
+Date: 23 March 1982 21:15-EST
+From: Carl W. Hoffman <CWH at MIT-MC>
+To: RP at MIT-MC, JPG at MIT-MC, ELLEN at MIT-MC, GJC at MIT-MC
+
+    Date: 23 March 1982 20:40-EST
+    From: Richard Pavelle <RP at MIT-MC>
+
+       Date: 10 March 1982 10:56-EST
+       From: V. Ellen Golden <ELLEN at MIT-MC>
+
+       I moved TENSOR;ITENSR > over to Multics as
+       >udd>Mathlab>macsyma>share>itensr.lisp and when I attempt to loadfile
+       it it gets
+       "Call to an undefined function '?macsyma\-module' at Lisp level."
+       Any ideas what that is about?
+
+    This bug is still there so I cannot test ITENSR.
+
+No, that's a different bug.  The installed Macsyma doesn't know about
+macsyma-module, so running interpreted system code won't work.  Try loading
+the compiled file.
+
+From ELLEN@MIT-MC  Tue Mar 23 23:47:00 1982
+Date: 23 March 1982 23:47-EST
+From: V. Ellen Golden <ELLEN at MIT-MC>
+To: CWH at MIT-MC
+cc: RP at MIT-MC, JPG at MIT-MC, ELLEN at MIT-MC, GJC at MIT-MC
+
+RE ITENSR... what is the proper file spec for the compiled version of
+ITENSR?  My guess would be ">udd>Mathlab>macsyma>share>itensr.fasl"
+but Multics is not always that obvious... is this correct?
+
+From ELLEN@MIT-MC  Wed Mar 24 00:26:00 1982
+Date: 24 March 1982 00:26-EST
+From: V. Ellen Golden <ELLEN at MIT-MC>
+To: CWH at MIT-MC
+cc: ELLEN at MIT-MC, RP at MIT-MC, JPG at MIT-MC, GJC at MIT-MC
+
+    Date: 23 March 1982 23:47-EST
+    From: V. Ellen Golden <ELLEN at MIT-MC>
+
+    RE ITENSR... what is the proper file spec for the compiled version of
+    ITENSR?  My guess would be ">udd>Mathlab>macsyma>share>itensr.fasl"
+    but Multics is not always that obvious... is this correct?
+-------------------------------
+I just tried it and it is not correct.  NU?
+
+From CWH@MIT-MC  Wed Mar 24 11:13:00 1982
+Date: 24 March 1982 11:13-EST
+From: Carl W. Hoffman <CWH at MIT-MC>
+To: ELLEN at MIT-MC
+cc: GJC at MIT-MC, JPG at MIT-MC, RP at MIT-MC
+
+    Date: 23 March 1982 23:47-EST
+    From: V. Ellen Golden <ELLEN>
+    To:   CWH
+    cc:   RP, JPG, ELLEN, GJC
+
+    RE ITENSR... what is the proper file spec for the compiled version of
+    ITENSR?  My guess would be ">udd>Mathlab>macsyma>share>itensr.fasl"
+    but Multics is not always that obvious... is this correct?
+
+No, it is just called itensr.  If you do "cwd >udd>Mathlab>Macsyma>share"
+(or just "cwd >udd>mal>a>share"), then you can type "list" to list the
+contents of the directory.  (Of course this is less obvious than typing
+control-F, but what can you do with a loser like Multics.)
+
+From RP@MIT-MC  Wed Mar 24 11:38:00 1982
+Date: 24 March 1982 11:38-EST
+From: Richard Pavelle <RP at MIT-MC>
+To: ELLEN at MIT-MC
+cc: RP at MIT-MC, JPG at MIT-MC
+
+    Date: 24 March 1982 11:13-EST
+    From: Carl W. Hoffman <CWH at MIT-MC>
+        Date: 23 March 1982 23:47-EST
+        From: V. Ellen Golden <ELLEN>
+        To:   CWH
+        cc:   RP, JPG, ELLEN, GJC
+        RE ITENSR... what is the proper file spec for the compiled version of
+        ITENSR?  My guess would be ">udd>Mathlab>macsyma>share>itensr.fasl"
+        but Multics is not always that obvious... is this correct?
+    No, it is just called itensr.  If you do "cwd >udd>Mathlab>Macsyma>share"
+    (or just "cwd >udd>mal>a>share"), then you can type "list" to list the
+    contents of the directory.  (Of course this is less obvious than typing
+    control-F, but what can you do with a loser like Multics.)
+I tried LOADFILE(">udd>Mathlab>macsyma>share>itensr") and this is ok. Then
+BATCH(">udd>Mathlab>macsyma>share>itensr.demo1") etc bombs out because
+each ITENSR demo has a command to LOADFILE(ITENSR,FASL). Can you edit this
+line out of each demo or tell me how to do it?
+
+From ELLEN@MIT-MC  Wed Mar 24 17:33:00 1982
+Date: 24 March 1982 17:33-EST
+From: V. Ellen Golden <ELLEN at MIT-MC>
+To: RP at MIT-MC
+cc: ELLEN at MIT-MC, JPG at MIT-MC
+
+    Date: 24 March 1982 11:38-EST
+    From: Richard Pavelle <RP at MIT-MC>
+
+        Date: 24 March 1982 11:13-EST
+        From: Carl W. Hoffman <CWH at MIT-MC>
+        No, it is just called itensr.
+        If you do "cwd >udd>Mathlab>Macsyma>share"
+        (or just "cwd >udd>mal>a>share"), then you can type "list" to list the
+        contents of the directory.  (Of course this is less obvious than typing
+        control-F, but what can you do with a loser like Multics.)
+    I tried LOADFILE(">udd>Mathlab>macsyma>share>itensr") and this is ok. Then
+    BATCH(">udd>Mathlab>macsyma>share>itensr.demo1") etc bombs out because
+    each ITENSR demo has a command to LOADFILE(ITENSR,FASL). Can you edit this
+    line out of each demo or tell me how to do it?
+---------------------------------
+I edited a copy of each demo file here on MC and retransferred them to Multics.
+Now, when I attempt to demo these files, they appear to work until (for
+demo1, e.g.) up to the line
+
+CANFORM(EXP);
+
+at which point it gets an error:
+
+lisp:function allfiles rejected argument ((dsk tensor) symtry fasl)
+
+which I gather means we need to transfer (and compile) some more files.
+
+From ELLEN@MIT-MC  Wed Mar 24 17:55:00 1982
+Date: 24 March 1982 17:55-EST
+From: V. Ellen Golden <ELLEN at MIT-MC>
+Subject: More ITENSR stuff
+To: CWH at MIT-MC, GJC at MIT-MC, RP at MIT-MC
+cc: ELLEN at MIT-MC, JPG at MIT-MC
+
+It appears to get ITENSR working on Multics we need also to compile
+TENSOR; CANTEN 6
+    GENER 50
+    SYMTRY 100
+on Multics.  Since there are called from itensr.
+
+>udd>Mathlab>macsyma>share>itensr.demo1
+
+gets an error:
+
+lisp:function allfiles rejected argument ((dsk tensor) symtry fasl)
+
+From Unruh.QuantGR@MIT-MULTICS  Thu Mar 25 17:21:00 1982
+Date:  25 March 1982 17:21 est
+From:  Unruh.QuantGR at MIT-MULTICS
+Subject:  Bug in ctensr on Multics
+To:  RP at MIT-MC
+
+I've run into another bug in CTENSR on Multics.I ran tsetup(), dimension 4,
+coordinates [u,v,x,y], symmetric metric, with 1,2=a , 3,3=b , 4,4=b
+and depends(a,[x,y],b,[x,y]). I had the metric listed. After the metric
+was displayed,I got the message
+ "Call to an undefined function 'true' at Lisp level."
+              Unruh under QuantGR on Multics.
+
+From RP@MIT-MC  Thu Mar 25 19:25:27 1982
+From: RP@MIT-MC 03/25/82 19:25:27
+Subject: Re: Bug in ctensr on Multics
+To: JPG at MIT-MC
+CC: RP at MIT-MC, CWH at MIT-MC
+
+    Date:  25 March 1982 17:21 est
+    From:  Unruh.QuantGR at MIT-MULTICS
+
+    coordinates [u,v,x,y], symmetric metric, with 1,2=a , 3,3=b , 4,4=b
+    and depends(a,[x,y],b,[x,y]). I had the metric listed. After the metric
+    was displayed,I got the message
+     "Call to an undefined function 'true' at Lisp level."
+                  Unruh under QuantGR on Multics.
+I ran this on MC without difficulty but it does bomb out on MULTICS-
+see RP;AA BUG.
+Any suggestions?
+
+From JPG@MIT-MC  Thu Mar 25 19:39:35 1982
+RP@MIT-MC 03/25/82 19:39:35 Re: Bug in ctensr on Multics
+To: JPG at MIT-MC
+CC: RP at MIT-MC, CWH at MIT-MC
+I ran some more tests and the CTENSR demos run on MULTICS though
+this example of Unruh's bombs. The problem occurs when ANY metric
+is direct input (as opposed to the demos where the user does not
+type them). I have no idea where the problem lies.
+
+From RP@MIT-MC  Thu Mar 25 19:42:00 1982
+Date: 25 March 1982 19:42-EST
+From: Richard Pavelle <RP at MIT-MC>
+Subject: Bug in ctensr on Multics
+To: Unruh.QuantGR at MIT-MULTICS
+cc: RP at MIT-MC
+
+    Date:  25 March 1982 17:21 est
+    From:  Unruh.QuantGR at MIT-MULTICS
+
+    I've run into another bug in CTENSR on Multics.I ran tsetup(), dimension 4,
+    coordinates [u,v,x,y], symmetric metric, with 1,2=a , 3,3=b , 4,4=b
+    and depends(a,[x,y],b,[x,y]). I had the metric listed. After the metric
+    was displayed,I got the message
+     "Call to an undefined function 'true' at Lisp level."
+                  Unruh under QuantGR on Multics.
+It seems to happen with any metric. MC is working fine if that helps.
+We will try to do something but there is little support for MULTICS macsyma
+as you may know.
+
+From JPG@MIT-MC  Sat Mar 27 09:39:00 1982
+Date: 27 March 1982 09:39-EST
+From: Jeffrey P. Golden <JPG at MIT-MC>
+To: ELLEN at MIT-MC, RP at MIT-MC
+
+You people have any ideas for UNRUH:
+   Date:  26 March 1982 17:08 est
+   From:  Unruh.QuantGR at MIT-MULTICS
+   To:  JPG at MIT-MC
+   Yes, I am the William G Unruh who used to use MIT-MC, and I would love to
+   use MC to do my calculations. My problem is that here I do not have access
+   to ARPA NET and have been unable to find out how to get on to it from
+   British Columbia. We are now on Datapac and I can therefore get onto
+   Multics via TELENET. Its too expensive to phone MC (about $100/hr). If you
+   have any sugestion as to how I could use MC I would love to hear it.
+
+From ELLEN@MIT-MC  Sat Mar 27 13:27:00 1982
+Date: 27 March 1982 13:27-EST
+From: V. Ellen Golden <ELLEN at MIT-MC>
+Subject: Using MC
+To: Unruh.QuantGR at MIT-MULTICS
+cc: JPG at MIT-MC, ELLEN at MIT-MC, RP at MIT-MC
+
+One possibility is to request ARPAnet access (or Chaos net access...
+that is our local MIT net and I believe Multics is now connected to
+it) to MC to go along with your Multics account and use MC from a
+"supdup" connection from Multics.  The connection (being through
+Telenet to Multics then through ARPA or Chaos net to MC) will probably
+be somewhat "slow" and perhaps frustrating from the "user
+input/output" point of view, but of course the Tensor package would
+then work for you, and you could probably do any preparation of batch
+files or whatever on Multics and only make use of an interactive port
+to MC to do the actual calculation.  You would have to contact the
+Information Processing Services to arrange this.  If they have any
+questions about it, you can refer them to me.
+
+From JPG@MIT-MC  Sun Mar 28 13:26:00 1982
+Date: 28 March 1982 13:26-EST
+From: Jeffrey P. Golden <JPG at MIT-MC>
+To: RP at MIT-MC, Unruh.QuantGR at MIT-MULTICS
+cc: BUG-MULMAX at MIT-MC, CWH at MIT-MC
+
+   RP@MIT-MC 03/25/82 19:25:27 Re: Bug in ctensr on Multics
+   To: JPG at MIT-MC
+   CC: RP at MIT-MC, CWH at MIT-MC
+       Date:  25 March 1982 17:21 est
+       From:  Unruh.QuantGR at MIT-MULTICS
+       coordinates [u,v,x,y], symmetric metric, with 1,2=a , 3,3=b , 4,4=b
+       and depends(a,[x,y],b,[x,y]). I had the metric listed. After the metric
+       was displayed,I got the message
+        "Call to an undefined function 'true' at Lisp level."
+                     Unruh under QuantGR on Multics.
+   I ran this on MC without difficulty but it does bomb out on MULTICS:
+   See RP;AA BUG.  Any suggestions?
+has been fixed.
+
+From JPG@MIT-MC  Sun Mar 28 13:36:00 1982
+Date: 28 March 1982 13:36-EST
+From: Jeffrey P. Golden <JPG at MIT-MC>
+To: RP at MIT-MC, Unruh.QuantGR at MIT-MULTICS
+cc: BUG-MULMAX at MIT-MC
+
+    Date: 12 March 1982 10:15-EST
+    From: Richard Pavelle <RP at MIT-MC>
+        Date:  11 March 1982 18:55 est
+        From:  Unruh.QuantGR at MIT-MULTICS
+        In the CTENSR package on MULTICS MACSYMA , one cannot seem to
+        enter a new metric . If I try tsetup() I get a message saying
+        I must do a KILL(ALL). I KEEP GETTING THIS EVEN AFTER I DO A KILL(ALL)
+    For the moment you will have to start up a fresh MACSYMA to enter a new
+    metric.
+has been fixed so starting up a new macsyma is no longer necessary.
+(You have to do a KILL(ALL); and a TENSORKILL:TRUE$ as RP's comments
+dictate.)
+
+From JPG@MIT-MC  Mon Apr  5 01:02:00 1982
+Date: 5 April 1982 01:02-EST
+From: Jeffrey P. Golden <JPG at MIT-MC>
+To: LAParker.Gravity at MIT-MULTICS
+cc: MULTICS-MACSYMA-BUGS at MIT-MC
+
+   Date: 4 April 1982 18:45 est
+   From: LAParker.Gravity at MIT-MULTICS
+   To: Multics-Macsyma-Bugs at MIT-MC
+   [1] why did  loadfile(etensr,fasl,dsk,share)
+   not load as macsyma manual says it should? What do I do?
+The manual was written before the current Multics Macsyma even existed.
+On Multics you can get the package which is now called "ctensr" by doing:
+    loadfile(">udd>Mathlab>macsyma>share>ctensr.lisp");
+
+   [2] Following macsyma reference manual, p.191-192, I typed tsetup(),
+   but only got the reply   tsetup()
+   rather than what the manual shows.
+On Multics you have to do the loadfile listed in [1] above before typing
+tsetup();.
+
+From RP@MIT-MC  Fri Jul  2 13:58:00 1982
+Date: 2 July 1982 13:58-EDT
+From: Richard Pavelle <RP at MIT-MC>
+To: INFO-TENSOR at MIT-MC
+cc: RP at MIT-MC
+
+I have revised the tensor manual, TM-167 (June 1980), to reflect
+some changes and additions to the CTENSR and ITENSR packages. If
+you wish to receive a copy let me know.
+
+From RP@MIT-MC  Sat Nov 20 16:44:00 1982
+Date: 20 November 1982 16:44-EST
+From: Richard Pavelle <RP at MIT-MC>
+Subject: RATRIEMAN
+To: INFO-TENSOR at MIT-MC
+
+At ASB's suggestion, for consistency, I have changed RATRIEMAN to RATRIEMANN
+in CTENSR.
+
+From RP@MIT-MC  Fri Jan 14 06:05:00 1983
+Date: 14 January 1983 06:05-EST
+From: Richard Pavelle <RP @ MIT-MC>
+Subject:  GR10
+To: INFO-TENSOR @ MIT-MC
+
+Many of you on this list do not work in relativity but if
+some of your colleagues have used MACSYMA for relativity
+applications please forward the following to them:
+
+Lars Hornfeldt and his colleagues at Stockholm would like
+to get together a list of papers for the 10th International
+Conference on General Relativity and Gravitation this July
+in Padova. The papers are to be those which have used MACSYMA
+for General Relativity and I am trying to collect them for
+Hornfeldt. If you have published any, or if you have any in
+preprint form, send them or the references to me.
+
+Thanks.
+
+
+From vttoth@vttoth.com  Tue Nov 30 23:39:00 2004
+Date: Tue, 30 Nov 2004 23:39:00 -0500
+From: "Viktor T. Toth" <vttoth@vttoth.com>
+To: "MAXIMA users"
+Subject: Mail archive
+
+This mail archive contains old MIT MACSYMA mailing list messages that were
+found in two file fragments among the TENSOR package source code. It is
+mostly of historical interest, but I found some of it educational, i.e.,
+worth preserving. I sorted them chronologically, and modified message
+headers so that the archive can now be read by any mail program that
+understands UNIX format mail archives (i.e., mail -f mail-archive.txt
+should suffice on any UNIX/Linux box.)
+
+It is interesting to note that much of this code was written at a time when
+people were still concerned about loading an extra few kilobytes worth of
+code into system memory!
+
+Enjoy,
+
+
+Viktor Toth
+(http://www.vttoth.com/)
+

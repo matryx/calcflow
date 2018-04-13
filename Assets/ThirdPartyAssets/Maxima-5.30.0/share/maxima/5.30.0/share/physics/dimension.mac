@@ -1,0 +1,207 @@
+/*
+Copyright (C) 2002, 2008 Barton Willis
+Brief Description: Maxima code for dimensional analysis.
+I release this file under the terms of the GNU General Public License, version 2
+*/
+
+put('dimension,2,'version)$
+
+/* 
+If e is a list, return true if either e is empty or if e[i] = e[j]
+for all 1 <= i,j <= length(e). If e isn't a list, return false. 
+*/
+
+all_equalp (e) := listp(e) and cardinality(setify(e))< 2;
+
+/*
+fundamental_dimensions is a Maxima list that is used by the functions
+dimensionless, natural_unit, and dimension_as_list; the function
+dimension doesn't use this list.  A user may insert or remove elements
+from the list; for example, to use quantities that involve
+temperature, you could append temp onto fundamental_dimensions.
+
+You'll get into trouble if you call any one of the functions
+dimensionless, natural_unit, or  dimension_as_list with expressions
+that have dimensions not in the list fundamental_dimensions.
+Be careful.
+
+The default value of fundamental_dimensions is [mass, length, time].
+You can change this list to anything you like. 
+*/
+
+assume('mass > 0);
+assume('length > 0);
+assume('time > 0);
+fundamental_dimensions : ['mass, 'length, 'time];
+
+/* Notes
+
+0.  When e is a list, map dimension over the list.
+
+1.  Use logcontract so that log(a) - log(b) is okay when a and b have the
+    same dimensions.
+
+2.5  dimension(a[x]) = dimension(a) regardless of what x is.
+
+3.  In a sum, check that all terms have the same dimensions; if not,
+    signal the error "The expression is dimensionally inconsistent."
+
+4.  abs, sqrt, max, and min  are the only prefix functions that may
+    take an argument that isn't dimensionless.
+
+5.  Check that all function arguments are dimensionless; if not,
+    signal the error "The expression is dimensionally inconsistent."
+
+Return the dimensions of the expression e; if e is dimensionally
+inconsistent, signal an error "The expression is dimensionally inconsistent."
+
+The infix binary operators +, *, /, ^, ^^, ., = and ~ are supported.
+(Maxima's vector package defines ~ to be the cross product
+operator.)  For the = operator, the expression is dimensionally
+inconsistent if the dimension of the right and left sides differ.
+
+It supports the prefix unary negation and the abs function. The nary
+min and max functions are supported; for the min and max functions,
+all arguments must have the same dimension, otherwise, the
+expression is dimensionally inconsistent.
+*/
+
+
+dimension (e) := block([inflag : true, e_op, dim, var, i, n],
+
+  if listp(e) then (                     /* 0 */
+     map ('dimension, e))
+   else (
+     e : logcontract (e),                 /* 1 */
+     if not mapatom(e) then e_op : op(e),
+     if constantp (e) then (
+       1)
+     else if symbolp (e) then (          
+       if member(e, fundamental_dimensions) then (
+         e)
+       else (
+         dim : get (e, 'dimension),
+         if dim = false then (
+           funmake ('dimension, [e]))  
+         else (
+           dim)))
+     else if subvarp (e) then (          /* 2.5 */
+       dimension(inpart(e,0)))
+     else if e_op = "*" or e_op = "." or e_op = "~" then (
+       xreduce("*", map ('dimension, args (e))))
+     else if e_op = "/" then (
+       dimension(num(e)) / dimension(denom(e)))
+     /* apply (e_op, map ('dimension, args (e)))) */
+     else if (e_op = "^" or e_op = "^^") and dimension (inpart (e,2)) = 1 then (
+       dimension(inpart(e,1)) ^ inpart(e,2))
+     else if e_op = "-" then (
+       dimension(inpart(e,1)))
+     else if e_op = "+" or e_op = 'max or e_op =  'min then ( /*3*/ 
+       dim : map ('dimension, args (e)),
+       if all_equalp (dim) then (
+         first (dim))
+       else (
+         error ("The expression is dimensionally inconsistent.")))
+     else if e_op = 'matrix then (
+       dim : map ('dimension, args (e)),
+       dim : apply ('append, dim),
+       if all_equalp (dim) then (
+         first(dim))
+       else (
+         error ("The expression is dimensionally inconsistent.")))
+     else if (e_op = "="  or e_op = "#" or e_op = "<" or e_op = ">" or e_op = "<=" or e_op = ">=" ) then (
+       if inpart(e,1) = 0 then (
+         dimension (inpart(e,2)))
+       else if inpart (e,2) = 0 then (
+         dimension (inpart(e,1)))
+       else (
+         dim : dimension(inpart(e,1)),
+         if dim = dimension(inpart(e,2)) then (
+           dim )
+         else (
+           error ("The expression is dimensionally inconsistent."))))
+     else if e_op = 'abs then (     /*  4 */
+       dimension (inpart (e, 1)))
+     else if e_op = 'sqrt then (
+       dimension (inpart(e,1)) ^ (1/2))
+     else if e_op = nounify('diff) then (
+       var : args(e),
+       n : length(var) - 1,
+       dim : dimension (inpart(var,1)),
+       for i : 2 thru n step 2 do (
+         dim : dim / dimension (inpart(var,i)) ^ inpart(var,i+1)),
+       dim)
+     else if e_op = nounify('integrate) then (
+       var : args(e),
+       dim : dimension(inpart(var,1)) * dimension(inpart(var,2)),
+       if length (e) = 4 and not all_equalp([dimension(inpart(var,2)),
+         dimension(inpart(var,3)),dimension(inpart(var,4))]) then (
+         error ("The expression is dimensionally inconsistent."))
+       else (
+         dim))
+     else if e_op = nounify('sum) or e_op = nounify('product) then (
+       error("The function dimension doesn't handle sums or products."))    
+     else if e_op = "DIV" or  e_op = "div" or e_op = "GRAD" or e_op = "grad"  or
+     e_op = "CURL" or e_op = "curl" then (
+       if listp(inpart(e,1)) then (
+         dim : map ('dimension, inpart(e,1)),
+         if all_equalp(dim) then (
+           dim : first(dim))
+         else (
+           error ("The expression is dimensionally inconsistent.")))
+       else (
+         dim : dimension (inpart(e,1))),
+       dim / 'length)
+     else if e_op = "laplacian" then (
+       dimension(inpart(e,1) / 'length^2))
+     else (                                /*  5 */
+       dim : map ('dimension, args(e)),
+       if all_equalp (cons (1,dim)) then (
+         dim : dimension(inpart(e,0)),
+         if not atom(dim) and ?equal(inpart(dim,0),'dimension) then (
+           1)
+         else (
+           dim ))
+       else (
+         error ("The expression is dimensionally inconsistent.")))));
+
+/*
+For the expression e, return a list of the exponents of the
+fundamental_dimensions. Thus if  fundamental_dimensions =
+[mass, length, time] and c is a velocity, dimension_as_list(c)
+returns [0,1,-1].
+*/
+
+dimension_as_list(e) := (
+  if listp(e) then map('dimension_as_list, e)
+  else (
+    e : dimension(e), 
+    if polynomialp(e, fundamental_dimensions, lambda([x], numberp(x)), lambda([x], integerp(x))) then
+    makelist(hipow(e, dk), dk, fundamental_dimensions)
+    else error("Unable to determine the dimension of", e)));
+
+/*
+Return a basis for the dimensionless quantities that can be formed from a product of powers of elements
+of the list e. The basis excludes constants.
+*/
+
+dimensionless(e) := (
+  require_list(e,"first", "dimensionless"),	
+  args(map(lambda([s], xreduce("*", map("^", e, first(transpose(s))))),
+      nullspace(transpose(funmake('matrix, map('dimension_as_list, e)))))));
+  
+natural_unit(dim,e) := block([vars, s, linsolve_params : true,
+  back_subst : true, globalsolve : false],
+  require_list(e,"second", "natural_unit"),
+ 
+ dim : dimension_as_list(dim),
+ s : map ('dimension_as_list, e),
+ vars : makelist(?gensym(),k,1,length(e)),
+ s : linsolve(s . vars - dim, vars),
+ s : xreduce("*", map("^", e, map('rhs, s))),
+ s : subst(map("=", %rnum_list, makelist(0,i,1,length(%rnum_list))), s),
+ map(lambda([x], s * x), cons(1, dimensionless(e))));
+   
+
+   
+

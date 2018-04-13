@@ -1,0 +1,141 @@
+/*-*-macsyma-*-*/
+
+/* George Carrette, 2:35pm  Thursday, 21 August 1980 */
+
+/* A macro for defining substitution macros. */
+
+eval_when([translate,batch,demo],
+          if get('sharem,'version) = false
+             then load(autolo))$
+
+eval_when(batch,ttyoff:true)$ 
+
+/* e.g.  
+
+defm(rect_rule('exp,'x,a,b,dx),
+     block([%_sum:0.0],
+     for x:a thru b step dx 
+     do %_sum:%_sum+exp, %_sum))$
+
+defines a rectangle-rule numerical integration macro.
+The DEFM macro provides a more convenient interface to the
+usual tools of macro processing. 
+
+The first argument definition gives the name of the
+macro and the formal parameters. The second gives a body
+into which the substitutions are made. The substitutions are made
+with the built-in macro BUILDQ.
+[1] If a formal parameter appears as 'FOO then the actual parameter
+    is directly substituted for FOO. This is somewhat like the
+    call-by-name semantics some languages have.
+[2] If the first two characters in the name of a symbol on the right is
+    "%_" then when the macro defined expands, that symbol will be
+    a unique generated symbol (GENSYM). This is used to avoid name
+    conflicts with symbols in substituted expressions.
+    This is remincent of algol 60.
+[3] If a formal parameter appears as FOO then the macro defined will
+    assure that FOO will be the value of the actual parameter.
+    e.g.
+        DEFM(EXAMPLE(FOO),BAR(FOO,FOO)) is like
+        DEFM(EXAMPLE(FOO),BLOCK([%_FOO:FOO],BAR(%_FOO,%_FOO)))
+    note: that EXAMPLE(FOO):=BAR(FOO,FOO) a function call, has exactly the
+        same evaluation semantics as EXAMPLE(FOO)=>BAR(FOO,FOO),
+        however, in the macro case the code for EXAMPLE would be duplicated
+        wherever there was a call to it, which may be bad if the code is
+        large. This is sometimes know as "open compilations".
+    Generated symbols are introduced to avoid name conflicts.
+*/
+
+herald_package(defm)$
+
+eval_when([translate],transcompile:true,
+	  /* PACKAGEFILE:TRUE, bug in MEVAL makes this lose now. */
+          modedeclare(function(getcharn),fixnum,
+	  function(symbolp,gensym_conventionp),boolean))$
+
+gensym_conventionp(x):=
+ if (symbolp(x) and 
+     not(member(x,%_gensyms)) and
+     getchar(x,1)='% and
+     getchar(x,2)='_)
+   then push(x,%_gensyms)$
+
+
+%_check(exp):=
+ /* This give a syntactic coverage of the "variables" in the
+    code, not a semantic one. The BUILDQ macro which does
+    the substitution is similarly non-semantic */
+ if atom(exp) then gensym_conventionp(exp)
+    else (%_check(part(exp,0)),
+          for exp in args(exp) do(%_check(exp)))$
+
+%_gensyms(exp):=block([%_gensyms:[]],%_check(exp),%_gensyms)$
+
+
+defm(header,body)::=
+    block([build_subst:[], /* the subsitutions the buildq will make */
+           eval_once:[], /* from unquoted arguments. */
+	   formal_args:[] ], /* of the constructed macro. */
+
+	   for u in %_gensyms(body)
+	    do push(buildq([u],u:?gensym()),build_subst),
+
+	   for arg in args(header)
+            do(if atom(arg)
+	          /* f(x)=>bar(x) is
+	             f(g001)::=buildq([g001,x:?gensym()],block([x:g001],body)) */
+                  then block([g:?gensym()],
+		             push(g,formal_args),
+			     push(g,build_subst),
+			     push(buildq([arg],arg:?gensym()),build_subst),
+			     push(buildq([arg,g],arg:g),eval_once))
+               else if part(arg,0)="'"
+	          then (arg:part(arg,1),
+		        push(arg,build_subst),
+			push(arg,formal_args))
+               else error("bad formal arg to defm",arg)),
+
+	   formal_args:reverse(formal_args),
+	   eval_once:reverse(eval_once), /* preserve order of evaluation. */
+
+           buildq([formal_args,eval_once,build_subst,name:part(header,0),body],
+		  name(splice(formal_args))::=
+                       buildq(build_subst,
+                              block(eval_once,body))))$
+
+
+
+
+/* Define an optional syntax for DEFM. */
+
+/*    :=        180       ANY       20        ANY       ANY
+    INFIX(operator, lbp[180], rbp[180], lpos[ANY], rpos[ANY],pos[ANY])
+*/
+
+eval_when([translate,batch,demo],
+	  infix("=>",180,20),
+	  "=>"(x,y)::=buildq([x,y],defm(x,y)))$
+
+eval_when([translate],
+	  translate("=>"), /* Yes Virginia, good lisp is reentrant. */
+	  /* This hack deflects the syntax to another file */
+	  save("defm.syn","=>"))$
+
+/* By default, don't load syntax.
+This is evaluated once we are translated and then loaded. 
+EVAL_WHEN([LOADFILE],
+          LOAD("DEFM.SYN"))$
+*/
+
+
+eval_when(demo,
+rect_rule('exp,'x,a,b,dx)=>block([%_sum:0.0],
+                                 for x:a thru b step dx
+                                  do %_sum:%_sum+exp, %_sum));
+eval_when(demo,macroexpand(rect_rule(x^3*a,x,a^2,a*b^2,0.5)));
+
+eval_when(batch,ttyoff:false)$
+
+
+
+

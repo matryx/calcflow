@@ -1,0 +1,74 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * ATENSOR basics
+ */
+
+if get('atensor,'version)=false then load(atensor);
+
+("ATENSOR can simplify noncommutative products in various algebras.")$
+
+("Let us begin with a Clifford algebra")$
+init_atensor(clifford);
+atensimp(u.u);
+atensimp(u.v-v.u);
+
+("Here is the symplectic algebra")$
+init_atensor(symplectic);
+atensimp(u.v+v.u);
+("The function af is an antisymmetric scalar-valued function.")$
+atensimp(w.u.v);
+
+
+("A Clifford algebra of positive dimension 3 is defined as")$
+init_atensor(clifford,3);
+
+("The symbol used for base vectors is stored in asymbol")$
+asymbol;
+atensimp(v[1].v[1]);
+
+("ATENSOR knows about predefined algebras, such as quaternions")$
+init_atensor(quaternion);
+
+("Quaternions are defined as a Clifford algebra of 2 negative dimensions")$
+adim;
+
+("The antisymmetric function af() takes its values from the matrix aform")$
+aform;
+
+("Quaternionic units are v[1], v[2], and v[1].v[2]")$
+atensimp(v[1].v[1]);
+atensimp(v[2].v[2]);
+atensimp((v[1].v[2]).(v[1].v[2]));
+
+("We can even construct the quaternionic multiplication table:")$
+q:zeromatrix(4,4);
+q[1,1]:1;
+for i thru adim do q[1,i+1]:q[i+1,1]:v[i];
+q[1,4]:q[4,1]:v[1].v[2];
+for i from 2 thru 4 do for j from 2 thru 4 do q[i,j]:atensimp(q[i,1].q[1,j]);
+q;
+
+("Scalar variables are treated appropriately")$
+declare([a,b],scalar);
+atensimp((a+b*v[1].v[2]).(v[1].v[2]));
+
+("Verify the Jacobi-identity for Lie algebras")$
+init_atensor(lie_envelop);
+("Let's define the Lie-bracket")$
+lbr(u,v):=u.v-v.u;
+atensimp(lbr(u,lbr(v,w)));
+atensimp(lbr(v,lbr(w,u)));
+atensimp(lbr(w,lbr(u,v)));
+%th(3)+%th(2)+%th(1);
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

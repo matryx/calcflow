@@ -1,0 +1,135 @@
+/* copyright 2007 by Robert Dodier
+ * I release this file under the terms of the GNU General Public License.
+ */
+
+(kill (all),
+ file_search_maxima : cons ("./###.mac", file_search_maxima),
+ file_search_lisp : cons ("./###.lisp", file_search_lisp),
+ load (amatrix),
+ load (wilcoxon),
+ set_random_state (make_random_state (1234)), 0);
+0;
+
+/* first some tests of the ranks function */
+
+ranks ([]);
+[];
+
+ranks ([1]);
+[1];
+
+(foo : permutations ({1, 2, 3}),
+ is (equal (foo, map (ranks, foo))));
+true;
+
+(foo : permutations ({1, 2, 3, 4}),
+ is (equal (foo, map (ranks, foo))));
+true;
+
+(makelist (i, i, 1, 10),
+ foo : random_permutation (%%), is (equal (foo, ranks (foo))));
+true;
+
+(makelist (i, i, 1, 20),
+ foo : random_permutation (%%), is (equal (foo, ranks (foo / 20))));
+true;
+
+(makelist (i, i, 1, 50),
+ foo : random_permutation (%%), is (equal (foo, ranks (foo / 50.0))));
+true;
+
+(makelist (i, i, 1, 100),
+ foo : random_permutation (%%), is (equal (foo, ranks (foo / 100b0))));
+true;
+
+(makelist (i, i, 1, 32),
+ foo : random_permutation (%%),
+ makelist (i/32.0, i, 1, 32),
+ bar : permute (%%, foo),
+ is (equal (ranks (bar), inverse_permutation (foo))));
+true;
+
+ranks ([4, 3, 2, 1, 1, 2, 3, 4]);
+[15/2, 11/2, 7/2, 3/2, 3/2, 7/2, 11/2, 15/2];
+
+ranks ([4, 1, 2, 3, 4]);
+[9/2, 1, 2, 3, 9/2];
+
+ranks ([1, 4, 3, 2, 1]);
+[3/2, 5, 4, 3, 3/2];
+
+float (ranks ([0.343750, 0.1250, 0.531250, 0.56250, 0.031250, 0.968750, 0.750,
+ 0.218750, 0.68750, 0.1250]));
+[5.0, 2.50, 6.0, 7.0, 1.0, 10.0, 9.0, 4.0, 8.0, 2.50];
+
+float (ranks ([0.43750, 0.56250, 0.43750, 0.6250, 0.31250, 0.31250, 0.50,
+ 0.31250, 0.50, 0.8750, 0.43750, 0.250, 0.93750, 0.68750, 0.6250, 0.250,
+ 0.8750, 0.1250, 0.06250, 0.50]));
+[9.0, 14.0, 9.0, 15.50, 6.0, 6.0, 12.0, 6.0, 12.0, 18.50, 9.0, 3.50, 20.0,
+ 17.0, 15.50, 3.50, 18.50, 2.0, 1.0, 12.0];
+
+float (ranks ([0.0, 0.43750, 0.68750, 0.18750, 0.250, 0.56250, 0.6250, 0.18750,
+ 0.6250, 0.0, 0.8750, 0.18750, 0.0, 0.43750, 0.50, 0.6250, 0.250, 0.31250,
+ 0.31250, 0.93750]));
+[2.0, 11.50, 18.0, 5.0, 7.50, 14.0, 16.0, 5.0, 16.0, 2.0, 19.0, 5.0, 2.0,
+ 11.50, 13.0, 16.0, 7.50, 9.50, 9.50, 20.0];
+
+float (ranks ([0.1250, 0.8750, 0.31250, 0.6250, 0.8750, 0.81250, 0.31250,
+ 0.3750, 0.06250, 0.31250, 0.06250, 0.31250, 0.250, 0.750, 0.56250, 0.6250,
+ 0.750, 0.93750, 0.750, 0.81250]));
+[3.0, 18.50, 6.50, 11.50, 18.50, 16.50, 6.50, 9.0, 1.50, 6.50, 1.50, 6.50,
+ 4.0, 14.0, 10.0, 11.50, 14.0, 20.0, 14.0, 16.50];
+
+float (ranks ([0.250, 0.750, 0.93750, 0.250, 0.50, 0.56250, 0.8750, 0.1250,
+ 0.0, 0.1250, 0.93750, 0.6250, 0.750, 0.6250, 0.0, 0.31250, 0.750, 0.1250,
+ 0.1250, 0.750]));
+[7.50, 15.50, 19.50, 7.50, 10.0, 11.0, 18.0, 4.50, 1.50, 4.50, 19.50, 12.50,
+ 15.50, 12.50, 1.50, 9.0, 15.50, 4.50, 4.50, 15.50];
+
+/* ranks applied to nonnumeric data; dunno if this is practical
+ * but in any case it should work the same.
+ */
+
+(foo : random_permutation ([-1, 0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 5, 5]),
+ bar : subst ([-1=a, 0=b, 1=c, 2=d, 3=e, 4=f, 5=g], foo),
+ is (equal (ranks (foo), ranks (bar))),
+ 0);
+0;
+
+/* now for some tests of wilcoxon itself */
+
+(set_random_state (make_random_state (1234)),
+ foo : random_matrix (20, 6),
+ foo [all, 4] : amatrixmap (lambda ([x, y], if x + y > 1.0 then 1 else 0), foo [all, 1], foo [all, 2]),
+ foo [all, 5] : amatrixmap (lambda ([x], if x > 0.5 then 1 else 0), foo [all, 3]),
+ foo [all, 6] : amatrixmap (lambda ([x], if x > 0.5 then 1 else 0), foo [all, 6]),
+ 0);
+0;
+
+wilcoxon (foo [all, 1], foo [all, 4]);
+''(69/(6 * 14));
+ 
+wilcoxon (foo [all, 1], foo [all, 5]);
+''(111/2/(8 * 12));
+ 
+wilcoxon (foo [all, 1], foo [all, 6]);
+''(65/(8 * 12));
+ 
+wilcoxon (foo [all, 2], foo [all, 4]);
+''(80/(6 * 14));
+ 
+wilcoxon (foo [all, 2], foo [all, 5]);
+''(85/2/(8 * 12));
+ 
+wilcoxon (foo [all, 2], foo [all, 6]);
+''(61/2/(8 * 12));
+ 
+wilcoxon (foo [all, 3], foo [all, 4]);
+''(40/(6 * 14));
+ 
+wilcoxon (foo [all, 3], foo [all, 5]);
+''(96/(8 * 12));
+ 
+wilcoxon (foo [all, 3], foo [all, 6]);
+''(42/(8 * 12));
+ 
