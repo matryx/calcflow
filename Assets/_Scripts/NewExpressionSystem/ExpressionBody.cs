@@ -113,6 +113,7 @@ public class ExpressionBody : QuickButton
         scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
         StartCoroutine(scaleUp);
         finishedScaling = false;
+
         expression.setSelectedExpr(expComp.getExpressionParent(), this);
 
         thisBodyActive = true;
@@ -148,17 +149,23 @@ public class ExpressionBody : QuickButton
         //BUG: this code isn't running when you press t in a Vec Field expression
         if (variable)
         {
+            print("VAR");
             title = transform.parent.parent.Find("VariableTitle").Find("Title").GetComponent<TMPro.TextMeshPro>().text;
+            print("PARENT: " + transform.parent.name);
+            print("TITLE: " + title);
             outputManager.HandleInput(transform.parent.name, title);
         }
         else
         {
+            print("NOT VAR");
             if (thisBodyActive)
             {
+                print("BODY SET TO ACTIVE");
                 outputManager.HandleInput(expComp.name, title);
             }
             else
             {
+                print("BODY SET TO INACTIVE");
                 calcInput.ChangeOutput(null);
             }
         }

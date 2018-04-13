@@ -26,7 +26,7 @@ public class Expressions : MonoBehaviour
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
     // 2 - creating empty game object everytime a letter is pressed
-    // 3 - 
+    // 3 - when creating new expression and last selected body was a variable, causes issues with UI 
 
     void Awake()
     {

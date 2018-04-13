@@ -75,6 +75,7 @@ public class ExpressionSelector : QuickButton
 
             param.GetComponent<ParametricExpression>().setSeparator(sep.transform);
             expressions.addExpr(param.transform);
+            //expressions.setSelectedExpr(param.transform, xButton.GetComponentInChildren<ExpressionBody>());
         }
         else if (vecPanel.gameObject.activeSelf)
         {
