@@ -72,8 +72,8 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             RSExtensionManager.AddNewExtension(typeof(Quaternion), new QuaternionRSExtension());
 
             //CalcFlow Types
-            RSExtensionManager.AddNewExtension(typeof(TMP_Text), new TMProExtension());
-            RSExtensionManager.AddNewExtension(typeof(TextMeshPro), new TMProExtension());
+            RSExtensionManager.AddNewExtension(typeof(TMP_Text), new TMProExtension1());
+            RSExtensionManager.AddNewExtension(typeof(TextMeshPro), new TMProExtension1());
 
             RSExtensionManager.AddNewExtension(typeof(LineRenderer), new LineRendererExtension());
 
@@ -203,9 +203,6 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             // As component with given UID doesnt exist, please create a new one
             Component _newComponent = null;
 
-
-
-
             if (_componentType == typeof(Transform) || _componentType == typeof(RectTransform))
             {
                 _newComponent = _uidSystem.CachedTransform;
@@ -213,13 +210,19 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             }
             else
             {
-				var components = _uidSystem.CachedGameObject.GetComponents(_componentType);
-				foreach (var comp in components){
-					if (!deserializedComponents.Contains(comp)){
-						Debug.Log("misplaced component");
-					}
-				}
-                _newComponent = _uidSystem.CachedGameObject.AddComponent(_componentType);
+                var components = _uidSystem.CachedGameObject.GetComponents(_componentType);
+                foreach (var comp in components)
+                {
+                    if (!deserializedComponents.Contains(comp))
+                    {
+                        _newComponent = comp;
+                        break;
+                    }
+                }
+                if (_newComponent == null)
+                {
+                    _newComponent = _uidSystem.CachedGameObject.AddComponent(_componentType);
+                }
                 deserializedComponents.Add(_newComponent);
             }
 

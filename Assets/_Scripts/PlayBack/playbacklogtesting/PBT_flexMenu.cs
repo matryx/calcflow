@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true,true)]
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class PBT_flexMenu : MonoBehaviour
 {
     private FlexMenu keyboard;
 
     KeyboardInputResponder responder;
 
+    [RuntimeSerializable(null, true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         PBT_flexMenu tester;
@@ -17,7 +18,7 @@ public class PBT_flexMenu : MonoBehaviour
         {
             this.tester = tester;
         }
-        public KeyboardInputResponder(){}
+        public KeyboardInputResponder() { }
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {
@@ -37,7 +38,7 @@ public class PBT_flexMenu : MonoBehaviour
 
     void HandleInput(string name)
     {
-		print ("FlexMenu hit by " + name);
+        print("FlexMenu hit by " + name);
     }
 
     // Update is called once per frame

@@ -6,7 +6,7 @@ using VoxelBusters.RuntimeSerialization;
 
 [RuntimeSerializable(null, true, true)]
 [System.Serializable]
-public class ExpressionSet
+public class ExpressionSet : ManualSerialize
 {
     public enum ExpOptions
     {
@@ -190,6 +190,16 @@ public class ExpressionSet
     {
 
     }
+
+    protected override void manualSerialize()
+    {
+
+    }
+
+    protected override void manualDeserialize()
+    {
+        CompileAll();
+    }
 }
 
 [RuntimeSerializable(null, true, true)]
@@ -264,6 +274,8 @@ public abstract class CalcOutput //: ManualSerialize
         }
         return true;
     }
+
+
 
     #region helper Functions
     /// <summary>
@@ -363,7 +375,8 @@ public class RangePair
     public Range Min;
     public Range Max;
 
-    public RangePair (){
+    public RangePair()
+    {
         Min = new Range();
         Max = new Range();
     }

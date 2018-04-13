@@ -1,78 +1,75 @@
 ﻿using UnityEngine;
 using System.Collections;
+using VoxelBusters.RuntimeSerialization;
+using TMPro;
 
-public class TMProExtension : ComponentRSExtension
-{}
-
-
-// using UnityEngine;
-// using System.Collections;
-// using VoxelBusters.RuntimeSerialization;
-// using TMPro;
+public class TMProExtension1
+{ }
 
 // [RuntimeSerializable]
-// public class TMProExtension : ComponentRSExtension
+// public class TMProExtension2 : ComponentRSExtension
 // {
-//     private const string koverflowMode                   ="overflowMode";
-//     private const string kwordWrappingRatios             ="wordWrappingRatios";
-//     private const string khorizontalMapping              ="horizontalMapping";
-//     private const string kcharacterWidthAdjustment       ="characterWidthAdjustment";
-//     private const string kparagraphSpacing               ="paragraphSpacing";
-//     private const string klineSpacingAdjustment          ="lineSpacingAdjustment";
-//     private const string klineSpacing                    ="lineSpacing";
-//     private const string kenableWordWrapping             ="enableWordWrapping";
-//     private const string klinkedTextComponent            ="linkedTextComponent";
-//     private const string kignoreRectMaskCulling          ="ignoreRectMaskCulling";
-//     private const string kenableKerning                  ="enableKerning";
-//     private const string kextraPadding                   ="extraPadding";
-//     private const string krichText                       ="richText";
-//     private const string kparseCtrlCharacters            ="parseCtrlCharacters";
-//     private const string kisOverlay                      ="isOverlay";
-//     private const string kisOrthographic                 ="isOrthographic";
-//     private const string kenableCulling                  ="enableCulling";
-//     private const string kignoreVisibility               ="ignoreVisibility";
-//     private const  tring kisLinkedTextComponent          ="isLinkedTextComponent";
-//     private const string kcharacterSpacing               ="characterSpacing";
-//     private const string kspriteAsset                    ="spriteAsset";
-//     private const string kverticalMapping                ="verticalMapping";
-//     private const string kfaceColor                      ="faceColor";
-//     private const string koverrideColorTags              ="overrideColorTags";
-//     private const string ktintAllSprites                 ="tintAllSprites";
-//     private const string kcolorGradientPreset            ="colorGradientPreset";
-//     private const string kcolorGradient                  ="colorGradient";
-//     private const string kenableVertexGradient           ="enableVertexGradient";
-//     private const string kalpha                          ="alpha";
-//     private const string kcolor                          ="color";
-//     private const string kfontMaterials                  ="fontMaterials";
-//     private const string kfontMaterial                   ="fontMaterial";
-//     private const string kalignment                      ="alignment";
-//     private const string kfontSharedMaterials            ="fontSharedMaterials";
-//     private const string kfont                           ="font";
-//     private const string kisRightToLeftText              ="isRightToLeftText";
-//     private const string ktext                           ="text";
-//     private const string kfontSize                       ="fontSize";
-//     private const string kfontWeight                     ="fontWeight";
-//     private const string kenableAutoSizing               ="enableAutoSizing";
-//     private const string kfontSizeMin                    ="fontSizeMin";
-//     private const string kfontSizeMax                    ="fontSizeMax";
-//     private const string kfontStyle                      ="fontStyle";
-//     private const string kfontSharedMaterial             ="fontSharedMaterial";
-//     private const string kmappingUvLineOffset            ="mappingUvLineOffset";
-//     private const string koutlineWidth                   ="outlineWidth";
-//     private const string krenderMode                     ="renderMode";
-//     private const string kautoSizeTextContainer          ="autoSizeTextContainer";
-//     private const string kisVolumetricText               ="isVolumetricText";
-//     private const string kisUsingLegacyAnimationComponent="isUsingLegacyAnimationComponent";
-//     private const string khavePropertiesChanged          ="havePropertiesChanged";
-//     private const string koutlineColor                   ="outlineColor";
-//     private const string kpageToDisplay                  ="pageToDisplay";
-//     private const string kgeometrySortingOrder           ="geometrySortingOrder";
-//     private const string kfirstVisibleCharacter          ="firstVisibleCharacter";
-//     private const string kmaxVisibleCharacters           ="maxVisibleCharacters";
-//     private const string kmargin                         ="margin";
-//     private const string kmaxVisibleWords                ="maxVisibleWords";
-//     private const string kmaxVisibleLines                ="maxVisibleLines";
-//     private const string kuseMaxVisibleDescender         = "useMaxVisibleDescender";
+//     private const string koverflowMode = "overflowMode";
+//     private const string kwordWrappingRatios = "wordWrappingRatios";
+//     private const string khorizontalMapping = "horizontalMapping";
+//     private const string kcharacterWidthAdjustment = "characterWidthAdjustment";
+//     private const string kparagraphSpacing = "paragraphSpacing";
+//     private const string klineSpacingAdjustment = "lineSpacingAdjustment";
+//     private const string klineSpacing = "lineSpacing";
+//     private const string kenableWordWrapping = "enableWordWrapping";
+//     private const string klinkedTextComponent = "linkedTextComponent";
+//     private const string kignoreRectMaskCulling = "ignoreRectMaskCulling";
+//     private const string kenableKerning = "enableKerning";
+//     private const string kextraPadding = "extraPadding";
+//     private const string krichText = "richText";
+//     private const string kparseCtrlCharacters = "parseCtrlCharacters";
+//     private const string kisOverlay = "isOverlay";
+//     private const string kisOrthographic = "isOrthographic";
+//     private const string kenableCulling = "enableCulling";
+//     private const string kignoreVisibility = "ignoreVisibility";
+//     private const string kisLinkedTextComponent = "isLinkedTextComponent";
+//     private const string kcharacterSpacing = "characterSpacing";
+//     private const string kspriteAsset = "spriteAsset";
+//     private const string kverticalMapping = "verticalMapping";
+//     private const string kfaceColor = "faceColor";
+//     private const string koverrideColorTags = "overrideColorTags";
+//     private const string ktintAllSprites = "tintAllSprites";
+//     private const string kcolorGradientPreset = "colorGradientPreset";
+//     private const string kcolorGradient = "colorGradient";
+//     private const string kenableVertexGradient = "enableVertexGradient";
+//     private const string kalpha = "alpha";
+//     private const string kcolor = "color";
+//     private const string kfontMaterials = "fontMaterials";
+//     private const string kfontMaterial = "fontMaterial";
+//     private const string kwordSpacing = "wordSpacing";
+//     private const string kalignment = "alignment";
+//     private const string kfontSharedMaterials = "fontSharedMaterials";
+//     private const string kfont = "font";
+//     private const string kisRightToLeftText = "isRightToLeftText";
+//     private const string ktext = "text";
+//     private const string kfontSize = "fontSize";
+//     private const string kfontWeight = "fontWeight";
+//     private const string kenableAutoSizing = "enableAutoSizing";
+//     private const string kfontSizeMin = "fontSizeMin";
+//     private const string kfontSizeMax = "fontSizeMax";
+//     private const string kfontStyle = "fontStyle";
+//     private const string kfontSharedMaterial = "fontSharedMaterial";
+//     private const string kmappingUvLineOffset = "mappingUvLineOffset";
+//     private const string koutlineWidth = "outlineWidth";
+//     private const string krenderMode = "renderMode";
+//     private const string kautoSizeTextContainer = "autoSizeTextContainer";
+//     private const string kisVolumetricText = "isVolumetricText";
+//     private const string kisUsingLegacyAnimationComponent = "isUsingLegacyAnimationComponent";
+//     private const string khavePropertiesChanged = "havePropertiesChanged";
+//     private const string koutlineColor = "outlineColor";
+//     private const string kpageToDisplay = "pageToDisplay";
+//     private const string kgeometrySortingOrder = "geometrySortingOrder";
+//     private const string kfirstVisibleCharacter = "firstVisibleCharacter";
+//     private const string kmaxVisibleCharacters = "maxVisibleCharacters";
+//     private const string kmargin = "margin";
+//     private const string kmaxVisibleWords = "maxVisibleWords";
+//     private const string kmaxVisibleLines = "maxVisibleLines";
+//     private const string kuseMaxVisibleDescender = "useMaxVisibleDescender";
 
 //     public override void WriteSerializationData(object _object, RuntimeSerializationInfo _info)
 //     {

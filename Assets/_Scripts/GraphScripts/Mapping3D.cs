@@ -37,8 +37,8 @@ public class Mapping3D : MonoBehaviour
             CorrespondingPoint.transform.localPosition = swapYandZ(xyz);
             if (tmpro != null)
             {
-                tmpro.text = "(x,y,z) = (" + System.String.Format("{0:F2}", xyz.x) + "," 
-                                           + System.String.Format("{0:F2}", xyz.y) + "," 
+                tmpro.text = "(x,y,z) = (" + System.String.Format("{0:F2}", xyz.x) + ","
+                                           + System.String.Format("{0:F2}", xyz.y) + ","
                                            + System.String.Format("{0:F2}", xyz.z) + ")";
             }
             ManageText();
@@ -99,13 +99,31 @@ public class Mapping3D : MonoBehaviour
         ExpressionSet es = calcManager.expressionSet;
         float scale = calcManager.paramSurface.currentScale;
 
-        foreach (ExpressionSet.ExpOptions key in es.expressions.Keys)
+        if (es == null)
         {
-            AK.ExpressionSolver solver = es.solver;
-            if (es.ranges.ContainsKey("u")) solver.SetGlobalVariable("u", uvw.x);
-            if (es.ranges.ContainsKey("v")) solver.SetGlobalVariable("v", uvw.y);
-            if (es.ranges.ContainsKey("w")) solver.SetGlobalVariable("w", uvw.z);
+            Debug.Log("ES is null. Cannot Map");
+            return Vector3.zero;
         }
+        else if (es.expressions == null)
+        {
+            Debug.Log("ES.expressions is null. Cannot Map");
+            return Vector3.zero;
+        }
+        else if (es.expressions[X] == null)
+        {
+            Debug.Log("ES.expressions[x] is null. Cannot Map");
+            return Vector3.zero;
+        }
+        else if (es.expressions[X].AKExpression == null)
+        {
+            Debug.Log("ES.expressions[X].AKExpression is null. Cannot Map");
+            return Vector3.zero;
+        }
+
+        AK.ExpressionSolver solver = es.solver;
+        if (es.ranges.ContainsKey("u")) solver.SetGlobalVariable("u", uvw.x);
+        if (es.ranges.ContainsKey("v")) solver.SetGlobalVariable("v", uvw.y);
+        if (es.ranges.ContainsKey("w")) solver.SetGlobalVariable("w", uvw.z);
 
         output.x = (float)es.expressions[X].AKExpression.Evaluate();
         output.y = (float)es.expressions[Y].AKExpression.Evaluate();

@@ -25,7 +25,7 @@ public class ManageUIDSystem : MonoBehaviour
     {
         if (turnOffRecursive || turnOnRecursive)
         {
-            UIDSystem[] allObjects = UnityEngine.Object.FindObjectsOfType<UIDSystem>();
+            UIDSystem[] allObjects = Resources.FindObjectsOfTypeAll<UIDSystem>();
             foreach (UIDSystem UIDS in allObjects)
             {
                 UIDS.SerializeChildren = turnOnRecursive;

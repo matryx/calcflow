@@ -258,19 +258,19 @@ public class PlaybackLogAction2
     void Spawn()
     {
         GameObject subject;
-        subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
+        //subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
 
-        // try
-        // {
-        //     subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
-        // }
-        // catch (Exception e)
-        // {
-        //     Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name") + " with subject key " + subjectKey);
-        //     Debug.LogError(e.Message);
-        //     throw e;
-        // }
-        //yield return null;
+        try
+        {
+            subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name") + " with subject key " + subjectKey);
+            Debug.LogError(e.Message);
+            throw e;
+        }
+
         if (objectMap.ContainsKey(subjectKey))
         {
             objectMap[subjectKey] = subject;
