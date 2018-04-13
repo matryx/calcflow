@@ -16,22 +16,23 @@ public class GeneratePlanePts : MonoBehaviour {
 	public AxisLabelManager xLabelManager;
     public AxisLabelManager yLabelManager;
 	public AxisLabelManager zLabelManager;
+	public float sqrtNormal;
 
 	public void eqnToPoints() 
 	{	
 		getCenter();
 		changeScale();
 		bool check = getSidePoints(null, center.y, center.z);
-		Debug.Log("checking x axis " + check);
+		Debug.Log("fixing x axis " + check);
 		if (check == false)
 		{
 			check = getSidePoints(center.x, null, center.z);
-			Debug.Log("checking y " + check);
+			Debug.Log("fixing y " + check);
 		}
 		if (check == false)
 		{
 			check = getSidePoints(center.x, center.y, null);
-			Debug.Log("checking z " + check);
+			Debug.Log("fixing z " + check);
 		}
 		ptManager.eqnUpdatePoint(pt1, pt2, pt3);
 	}
@@ -39,7 +40,7 @@ public class GeneratePlanePts : MonoBehaviour {
 	public void getCenter() 
 	{
 		Vector3 normal = new Vector3(a,b,c); 
-		float sqrtNormal = normal.sqrMagnitude;
+		sqrtNormal = normal.sqrMagnitude;
 		float x0 = (a*d)/(sqrtNormal);
 		float y0 = (b*d)/(sqrtNormal);
 		float z0 = (c*d)/(sqrtNormal);
@@ -59,13 +60,50 @@ public class GeneratePlanePts : MonoBehaviour {
 
 	public bool getSidePoints(float? x, float? y, float? z) 
 	{
+		float newX;
+		float newY; 
+		float newZ;
 		if(x == null)
 		{
 			if (a == 0)
 			{
 				return false;
 			}
-			return checkPtValid((float)y, (float)z, b, a, c, xLabelManager); 
+			//Lower left point
+			newY = (float)y - stepSize; 
+			newZ = (float)z - stepSize;
+			newX = (d - newY*b - newZ * c)/a;
+			if(newX > xLabelManager.Max || newX < xLabelManager.Min)
+			{
+				return false;
+			}
+			Vector3 temp1 = new Vector3(newX, newY, newZ);
+
+			//Lower right point
+			newY = (float)y + stepSize; 
+			newZ = (float)z - stepSize;
+			newX = (d - newY*b - newZ * c)/a;
+			if(newX > xLabelManager.Max || newX < xLabelManager.Min)
+			{
+				return false;
+			}
+			Vector3 temp2 = new Vector3(newX, newY, newZ);
+
+			//Upper Point
+			newZ = (float)z+stepSize;
+			newX = (d - (float)y*b - newZ * c)/a;
+			if(newX > xLabelManager.Max || newX < xLabelManager.Min)
+			{
+				return false;
+			}
+			Vector3 temp3 = new Vector3(newX, (float)y, newZ);
+
+			pt1 = temp1;
+			pt2 = temp2;
+			pt3 = temp3;
+
+			return true;
+			
 		}
 		else if (y == null)
 		{
@@ -73,7 +111,43 @@ public class GeneratePlanePts : MonoBehaviour {
 			{
 				return false;
 			}
-			return checkPtValid((float)x, (float)z, a, b, c, yLabelManager);
+
+			//Lower left point
+			newX = (float)x - stepSize; 
+			newZ = (float)z - stepSize;
+			newY = (d - newX*a - newZ * c)/b;
+			if(newY > yLabelManager.Max || newY < yLabelManager.Min)
+			{
+				return false;
+			}
+			Vector3 temp1 = new Vector3(newX, newY, newZ);
+
+			//Lower right point
+			newX = (float)x + stepSize; 
+			newZ = (float)z - stepSize;
+			newY = (d - newX*a - newZ * c)/b;
+			if(newY > yLabelManager.Max || newY < yLabelManager.Min)
+			{
+				return false;
+			}
+			Vector3 temp2 = new Vector3(newX, newY, newZ);
+
+			//Upper Point
+			newZ = (float)z+stepSize;
+			newY = (d - (float)x*a - newZ * c)/b;
+			if(newY > yLabelManager.Max || newY < yLabelManager.Min)
+			{
+				return false;
+			}
+			Vector3 temp3 = new Vector3((float)x, newY, newZ);
+
+			pt1 = temp1;
+			pt2 = temp2;
+			pt3 = temp3;
+
+			return true;
+
+
 		}
 		else
 		{
@@ -81,42 +155,43 @@ public class GeneratePlanePts : MonoBehaviour {
 			{
 				return false;
 			}
-			return checkPtValid((float)x, (float)y, a, c, b, zLabelManager);
-		}
-	}
-
-	public bool checkPtValid(float width, float height, float widthCoef, float depthCoef, float heightCoef, AxisLabelManager myAxis)
-	{
-			float newWidth = width-stepSize; 
-			float newHeight = height-stepSize;
-			float newDepth = (d - widthCoef*newWidth - heightCoef*newHeight)/depthCoef;
-			if(newDepth > myAxis.Max || newDepth < myAxis.Min)
+			
+			//Lower left point
+			newX = (float)x - stepSize; 
+			newY = (float)y - stepSize;
+			newZ = (d - newX*a - newY * b)/c;
+			if(newZ > zLabelManager.Max || newZ < zLabelManager.Min)
 			{
 				return false;
 			}
-			Vector3 temp1 = new Vector3(newWidth, newHeight, newDepth);
+			Vector3 temp1 = new Vector3(newX, newY, newZ);
 
-			newWidth = width+stepSize; 
-			newHeight = height-stepSize;
-			newDepth = (d - widthCoef*newWidth - heightCoef*newHeight)/depthCoef;
-			if(newDepth > myAxis.Max || newDepth < myAxis.Min)
+			//Lower right point
+			newX = (float)x + stepSize; 
+			newY = (float)y - stepSize;
+			newZ = (d - newX*a - newY * b)/c;
+			if(newZ > zLabelManager.Max || newZ < zLabelManager.Min)
 			{
 				return false;
 			}
-			Vector3 temp2 = new Vector3(newWidth, newHeight, newDepth);
+			Vector3 temp2 = new Vector3(newX, newY, newZ);
 
-			newHeight = height+stepSize;
-			newDepth = (d - widthCoef*width - heightCoef*newHeight)/depthCoef;
-			if(newDepth > myAxis.Max || newDepth < myAxis.Min)
+			//Upper Point
+			newY = (float)y+stepSize;
+			newZ = (d - (float)x*a - newY * b)/c;
+			if(newZ > zLabelManager.Max || newZ < zLabelManager.Min)
 			{
 				return false;
 			}
-			Vector3 temp3 = new Vector3(width, newHeight, newDepth);
+			Vector3 temp3 = new Vector3((float)x, newY, newZ);
 
 			pt1 = temp1;
 			pt2 = temp2;
 			pt3 = temp3;
 
 			return true;
+			
+		}
 	}
+
 }
