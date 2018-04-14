@@ -107,8 +107,8 @@ public class PtInput : MonoBehaviour {
     public void RewriteInput(float newValue) {
         index = 0;
         currExpression.tokens.Clear();
-        string s = string.Format("{0:0.00}", newValue);
-        if (ptManager.eqnInput) s = string.Format("{0:0.0}", newValue);
+        string s = roundString(newValue, "{0:0.00}");
+        if (ptManager.eqnInput) s = roundString(newValue, "{0:0.0}");
         foreach (char c in s) {
             currExpression.tokens.Insert(index, c.ToString());
             index++;
@@ -119,4 +119,14 @@ public class PtInput : MonoBehaviour {
         index = 0;
         currExpression.tokens.Clear();
     }
+
+    public string roundString(float input, string format) {
+		string a = input.ToString();
+		string b = string.Format(format, input);
+		if (a.Length <= b.Length) {
+			return a;
+		} else {
+			return b;
+		}
+	}
 }

@@ -72,7 +72,7 @@ public class PtManager : MonoBehaviour
                 aInput, bInput, cInput, dInput;
     }
 
-    public bool eqnInput = false;
+    public bool eqnInput;
     public GeneratePlanePts generatePlanePts;
 
     public void SetOutput(CalcOutput output)
@@ -100,6 +100,7 @@ public class PtManager : MonoBehaviour
     {
         Initialize();
         inputReceived = true;
+        eqnInput = false;
     }
     public bool updateText = false;
 
@@ -119,10 +120,11 @@ public class PtManager : MonoBehaviour
             ManageFeedback();
             if (isValid) {
                 if (presentPlane.CalculatePlane()) {
-                    presentPlane.ApplyGraphAdjustment(true);
+                    presentPlane.ApplyGraphAdjustment();
                     presentPlane.GetLocalPoint();
                     presentPlane.GetPlaneDirection();
                 } else {
+                    presentPlane.ApplyGraphAdjustment();
                     presentPlane.GetLocalPoint();
                 }
             }
@@ -130,6 +132,7 @@ public class PtManager : MonoBehaviour
 
         if (inputReceived && eqnInput)
         {
+            print("4");
             inputReceived = false;
             bool isValid = eqnSet.CompileAll();
             ManageFeedback();
@@ -142,10 +145,6 @@ public class PtManager : MonoBehaviour
                 }
                 else
                 {
-                    generatePlanePts.a = eqnSet.eqnCoefs["a"].Value;
-                    generatePlanePts.b = eqnSet.eqnCoefs["b"].Value;
-                    generatePlanePts.c = eqnSet.eqnCoefs["c"].Value;
-                    generatePlanePts.d = eqnSet.eqnCoefs["d"].Value;
                     generatePlanePts.eqnToPoints();
                 }
             }
@@ -174,6 +173,7 @@ public class PtManager : MonoBehaviour
         if (fixedPlane) 
         {
             manageText();
+            ManageFeedback();
             ptSet.CompileAll();
         } else 
         {
@@ -213,6 +213,7 @@ public class PtManager : MonoBehaviour
         ptInput.RewriteInput(pt3NewLoc.z);
         SetOutput(originalExpression);
         manageText();
+        ManageFeedback();
         ptSet.CompileAll();
         presentPlane.GetLocalPoint();
         presentPlane.GetPlaneDirection();
@@ -251,10 +252,10 @@ public class PtManager : MonoBehaviour
         SetOutput(originalExpression);
         manageText();
         eqnSet.CompileAll();
-        inputs.aInput.text = "NaN";
-        inputs.bInput.text = "NaN";
-        inputs.cInput.text = "NaN";
-        inputs.dInput.text = "NaN";
+        // inputs.aInput.text = "NaN";
+        // inputs.bInput.text = "NaN";
+        // inputs.cInput.text = "NaN";
+        // inputs.dInput.text = "NaN";
         feedbacks.eqnFeedback.material.color = negativeFeedback;
     }
 

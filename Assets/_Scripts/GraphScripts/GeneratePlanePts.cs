@@ -5,6 +5,8 @@ using UnityEngine;
 public class GeneratePlanePts : MonoBehaviour {
 
 	public float a, b, c, d;
+
+	EqnSet eqnSet;
 	public Vector3 pt1, pt2, pt3;
 	public Vector3 center;
 	public Transform point1, point2, point3;
@@ -17,6 +19,18 @@ public class GeneratePlanePts : MonoBehaviour {
     public AxisLabelManager yLabelManager;
 	public AxisLabelManager zLabelManager;
 	public float sqrtNormal;
+
+	void Awake()
+	{
+		if (ptManager != null && ptManager.eqnSet != null)
+		{
+			eqnSet = ptManager.eqnSet;
+		}
+	}
+
+	void Update() {
+
+	}
 
 	public void eqnToPoints() 
 	{	
@@ -39,7 +53,11 @@ public class GeneratePlanePts : MonoBehaviour {
 
 	public void getCenter() 
 	{
-		Vector3 normal = new Vector3(a,b,c); 
+		a = eqnSet.eqnCoefs["a"].Value;
+        b = eqnSet.eqnCoefs["b"].Value;
+        c = eqnSet.eqnCoefs["c"].Value;
+        d = eqnSet.eqnCoefs["d"].Value;
+		Vector3 normal = new Vector3(a,b,c);
 		sqrtNormal = normal.sqrMagnitude;
 		float x0 = (a*d)/(sqrtNormal);
 		float y0 = (b*d)/(sqrtNormal);

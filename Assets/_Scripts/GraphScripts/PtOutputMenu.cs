@@ -51,7 +51,7 @@ public class PtOutputMenu : MonoBehaviour {
 
     PresentPlane presentPlane;
     public PlaneSolverPointGrab grabber;
-    public MeshRenderer grabbed;
+    public MeshRenderer radio;
 
     public void Initialize(PtManager pm)
     {
@@ -111,10 +111,10 @@ public class PtOutputMenu : MonoBehaviour {
             case "FixPlane":
                 if (grabber.FixedPlane) {
                     grabber.FixedPlane = false;
-                    grabbed.enabled = false;
+                    radio.enabled = false;
                 } else {
                     grabber.FixedPlane = true;
-                    grabbed.enabled = true;
+                    radio.enabled = true;
                 }
                 break;
             case "":

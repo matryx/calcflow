@@ -47,17 +47,13 @@ public class PresentPlane : MonoBehaviour {
 		solver = new AK.ExpressionSolver();
 		expr = new AK.Expression();
 		vertices = new List<Vector3>();
-		if (pointReady())
+		stepSize = defaultStepSize;
+		if (ptManager != null && ptManager.ptSet != null)
 		{
 			rawPt1 = ptManager.ptSet.ptCoords["pt1"];
 			rawPt2 = ptManager.ptSet.ptCoords["pt2"];
 			rawPt3 = ptManager.ptSet.ptCoords["pt3"];
 		}
-	}
-
-	public bool pointReady()
-	{
-		return ptManager != null && ptManager.ptSet != null;
 	}
 
 	void Update() {
@@ -87,7 +83,7 @@ public class PresentPlane : MonoBehaviour {
 		}
 	}
 
-	public void ApplyGraphAdjustment(bool changeScale)
+	public void ApplyGraphAdjustment()
 	{
 
 		vector23 = GenerateVector(rawPt2, rawPt3);
@@ -95,15 +91,17 @@ public class PresentPlane : MonoBehaviour {
 		float pt2Coef = (Mathf.Pow(vector13.magnitude,2) * Vector3.Dot( (-1) * vector12, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
 		float pt3Coef = (Mathf.Pow(vector12.magnitude,2) * Vector3.Dot(vector13, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
 
-
-		if (pt1Coef != pt1Coef || pt2Coef != pt2Coef || pt3Coef != pt3Coef) {
+		if (float.IsNaN(pt1Coef) || float.IsInfinity(pt1Coef) || float.IsNaN(pt2Coef) || float.IsInfinity(pt2Coef) || float.IsNaN(pt3Coef) || float.IsInfinity(pt3Coef)) {
+			print("succ");
 			center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
 			stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
-			if (stepSize == 0) {
-				stepSize = defaultStepSize;
-			}
 		} else {
+			print("fail");
 			stepSize = (vector12.magnitude * vector23.magnitude * vector13.magnitude) / (2 * Vector3.Cross(vector12, vector23).magnitude);
+			print("stepSize" + stepSize);
+			print("pt1Coef" + pt1Coef);
+			print("pt2Coef" + pt2Coef);
+			print("pt3Coef" + pt3Coef);
 			float centerX = pt1Coef * rawPt1.X.Value + pt2Coef * rawPt2.X.Value + pt3Coef * rawPt3.X.Value;
 			float centerY = pt1Coef * rawPt1.Y.Value + pt2Coef * rawPt2.Y.Value + pt3Coef * rawPt3.Y.Value;
 			float centerZ = pt1Coef * rawPt1.Z.Value + pt2Coef * rawPt2.Z.Value + pt3Coef * rawPt3.Z.Value;
@@ -111,14 +109,15 @@ public class PresentPlane : MonoBehaviour {
 		}
 		//PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
 		//Get the range of the box
-		if (changeScale) {
-			xLabelManager.Min = center.x - stepSize * steps;
-			yLabelManager.Min = center.y - stepSize * steps;
-			zLabelManager.Min = center.z - stepSize * steps;
-			xLabelManager.Max = center.x + stepSize * steps;
-			yLabelManager.Max = center.y + stepSize * steps;
-			zLabelManager.Max = center.z + stepSize * steps;
+		if (stepSize == 0) {
+			stepSize = defaultStepSize;
 		}
+		xLabelManager.Min = center.x - stepSize * steps;
+		yLabelManager.Min = center.y - stepSize * steps;
+		zLabelManager.Min = center.z - stepSize * steps;
+		xLabelManager.Max = center.x + stepSize * steps;
+		yLabelManager.Max = center.y + stepSize * steps;
+		zLabelManager.Max = center.z + stepSize * steps;
 		//Get the interaction points between the box edges and the plane
 		//expr = solver.SymbolicateExpression(rawEquation);
 	}
@@ -151,17 +150,17 @@ public class PresentPlane : MonoBehaviour {
 			
 			// Basic formula of the equation
 			d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
-			string[] formattedValue = roundString(new float[] {normalVector.x, normalVector.y, normalVector.z});
-			// Formatting equation
-			if (formattedValue[1][0] != '-') formattedValue[1] = '+' + formattedValue[1];
-			if (formattedValue[2][0] != '-') formattedValue[2] = '+' + formattedValue[2];
-			rawEquation = formattedValue[0] + "x" + formattedValue[1] + "y" + formattedValue[2] + "z=" + d;
+			// string[] formattedValue = roundString(new float[] {normalVector.x, normalVector.y, normalVector.z});
+			// // Formatting equation
+			// if (formattedValue[1][0] != '-') formattedValue[1] = '+' + formattedValue[1];
+			// if (formattedValue[2][0] != '-') formattedValue[2] = '+' + formattedValue[2];
+			// rawEquation = formattedValue[0] + "x" + formattedValue[1] + "y" + formattedValue[2] + "z=" + d;
 			ptManager.updateEqn(normalVector.x, normalVector.y, normalVector.z, d);
 			return true;
 		} else {
 			forwardPlane.GetComponent<MeshRenderer>().enabled = false;
 			backwardPlane.GetComponent<MeshRenderer>().enabled = false;
-			rawEquation = "Invalid Plane";
+			// rawEquation = "Invalid Plane";
 			ptManager.updateEqn();
 			return false;
 		}
@@ -191,7 +190,7 @@ public class PresentPlane : MonoBehaviour {
 		point2.localPosition = scaledPt2;
 		scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
 		point3.localPosition = scaledPt3;
-		centerPt.localPosition = ScaledPoint(center);
+		//centerPt.localPosition = ScaledPoint(center);
 	}
 
 	public void GetPlaneDirection() {
@@ -214,7 +213,8 @@ public class PresentPlane : MonoBehaviour {
 		if (PtCoordToVector(rawPt1) == PtCoordToVector(rawPt2) || PtCoordToVector(rawPt1) == PtCoordToVector(rawPt3) || PtCoordToVector(rawPt2) == PtCoordToVector(rawPt3)) {
 			return false; 
 		}
-		
+		vector12 = GenerateVector(rawPt1, rawPt2);
+		vector13 = GenerateVector(rawPt1, rawPt3);
 		// points are not in same line
 		float scale;
 		if (vector13.x != 0) {

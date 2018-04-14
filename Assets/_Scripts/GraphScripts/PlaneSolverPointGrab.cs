@@ -12,6 +12,8 @@ public class PlaneSolverPointGrab : MonoBehaviour {
 	public ConstraintGrabbable pt1Grabber, pt2Grabber, pt3Grabber;
 	public bool FixedPlane = true;
 
+	public MeshRenderer radio;
+
 	void Update() {
 		if (!pt1Grabber.IsGrabbed) pt1Grabber.lastLocalPos = point1.localPosition;
 		else grabbingPoint(point1, pt1Grabber);
@@ -23,7 +25,7 @@ public class PlaneSolverPointGrab : MonoBehaviour {
 
 	private void grabbingPoint(Transform point, ConstraintGrabbable grabber) {
 		Vector3 newLoc = Vector3.zero;
-		if (FixedPlane) {
+		if (FixedPlane && presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled) {
 			newLoc = Vector3.ProjectOnPlane(grabber.lastLocalPos - presentPlane.centerPt.localPosition, presentPlane.lookAtTarget.localPosition - presentPlane.plane.localPosition);
 			newLoc = newLoc + presentPlane.centerPt.localPosition;
 			if (newLoc.x > 10 || newLoc.x < -10 || newLoc.y > 10 || newLoc.y < -10 || newLoc.z > 10 || newLoc.z < -10) {
@@ -31,6 +33,8 @@ public class PlaneSolverPointGrab : MonoBehaviour {
 			}
 			point.localPosition = newLoc;
 		} else {
+			FixedPlane = false;
+            radio.enabled = false;
 			newLoc = grabber.lastLocalPos;
 			point.localPosition = newLoc;
 		}
