@@ -60,16 +60,16 @@ public class Replayer : MonoBehaviour
                     //print("popping next instruction");
                     PlaybackLogAction2 item = log[0];
                     log.RemoveAt(0);
-                    //item.Reenact();
+                    item.Reenact();
 
-                    try
-                    {
-                        item.Reenact();
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e.Message);
-                    }
+                    // try
+                    // {
+                    //     item.Reenact();
+                    // }
+                    // catch (Exception e)
+                    // {
+                    //     Debug.LogError(e.Message);
+                    // }
                 }
                 else
                 {

@@ -588,7 +588,14 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             UInt32 _objectReferenceID;
 
             RegisterObject(_object, out _objectReferenceID, out _firstTime);
-
+            if (_objectReferenceID == 11)
+            {
+                Debug.Log("object 11 has type " + _objectType);
+            }
+            if (_objectReferenceID == 30)
+            {
+                Debug.Log("object 30 has type " + _objectType);
+            }
             if (_firstTime)
             {
                 if (_typeTag == eTypeTag.ARRAY)
@@ -622,6 +629,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 
             // Cache this new object
             _referenceID = ObjectReferenceCounter++;
+
             _firstTime = true;
             ObjectReferenceCache.Add(_object, _referenceID);
         }
