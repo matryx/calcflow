@@ -52,8 +52,8 @@ public class SubmitMenu : MonoBehaviour {
         var bodyData = SerializeSurface();
 
         var rpcSubmission = new MatryxJsonRpc.Submission();
-        Debug.Log("Submission: " + tournament.uniqueId + " -> " + title);
-        rpcSubmission.tournamentAddress = tournament.uniqueId;
+        Debug.Log("Submission: " + tournament.address + " -> " + title);
+        rpcSubmission.tournamentAddress = tournament.address;
         rpcSubmission.title = title;
         rpcSubmission.body = bodyData;
         rpcSubmission.contributorsList(contributorsList);
