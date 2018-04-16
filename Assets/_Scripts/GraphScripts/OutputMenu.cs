@@ -48,10 +48,6 @@ public class OutputMenu : MonoBehaviour
 
     FlexActionableComponent saveButton;
 
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-
     public FlexMenu menu;
 
     CalcManager calcManager;
@@ -73,13 +69,13 @@ public class OutputMenu : MonoBehaviour
                 print("unknown input: " + source);
                 break;
             case "Button_Xinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[X]);
+                calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
                 break;
             case "Button_Yinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[Y]);
+                calcManager.SetOutput(calcManager.expressionSet.expressions["Y"]);
                 break;
             case "Button_Zinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[Z]);
+                calcManager.SetOutput(calcManager.expressionSet.expressions["Z"]);
                 break;
             case "umin":
                 calcManager.SetOutput(calcManager.expressionSet.ranges["u"].Min);

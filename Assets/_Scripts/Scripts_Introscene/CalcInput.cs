@@ -44,10 +44,6 @@ public class CalcInput : MonoBehaviour
     GameObject errorPopup;
     List<string> varsToDelete = new List<string>();
 
-    ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-
     private void Awake()
     {
         _instance = this;
@@ -187,15 +183,15 @@ public class CalcInput : MonoBehaviour
 
                 break;
             case "Button_Clear":
+                index = 0;
                 List<string> toDel = currExpression.ClearTokens();
+                if (toDel == null) break;
 
                 foreach (string del in toDel)
                 {
                     calcManager.expressionSet.RemoveVariable(del);
                     expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(del);
                 }
-
-                index = 0;
 
                 break;
             case "Button_Enter":

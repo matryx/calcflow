@@ -23,6 +23,7 @@ public class Expressions : MonoBehaviour
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
 
+
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
     // 2 - creating empty game object everytime a letter is pressed
@@ -121,7 +122,7 @@ public class Expressions : MonoBehaviour
     {
         if (expr == null)
         {
-            selectedExpression = expr;
+            selectedExpression = null;
             selectedBody = null;
             selectedExpSet = null;
             return;
@@ -132,21 +133,21 @@ public class Expressions : MonoBehaviour
 
         if (!calcManager) calcManager = CalculatorManager._instance;
 
-        if (expr.GetComponent<ParametricExpression>())
-        {
-            selectedExpSet = expr.GetComponent<ParametricExpression>().getExpSet();
-            calcManager.ChangeExpressionSet(selectedExpSet);
+        //if (expr.GetComponent<ParametricExpression>())
+        //{
+        //    selectedExpSet = expr.GetComponent<ParametricExpression>().getExpSet();
+        //    calcManager.ChangeExpressionSet(selectedExpSet);
 
-        }
-        else if (expr.GetComponent<VectorFieldExpression>())
-        {
-            selectedExpSet = expr.GetComponent<VectorFieldExpression>().getExpSet();
-            calcManager.ChangeExpressionSet(selectedExpSet);
-        }
-        else if (expr.GetComponent<Constant>())
-        {
-            //TODO: implement constants
-        }
+        //}
+        //else if (expr.GetComponent<VectorFieldExpression>())
+        //{
+        //    selectedExpSet = expr.GetComponent<VectorFieldExpression>().getExpSet();
+        //    calcManager.ChangeExpressionSet(selectedExpSet);
+        //}
+        //else if (expr.GetComponent<Constant>())
+        //{
+        //    //TODO: implement constants
+        //}
     }
 
     void Update() { }

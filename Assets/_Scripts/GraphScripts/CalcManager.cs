@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class CalcManager : MonoBehaviour
 {
-    #region constants
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-    #endregion
-
     ExpressionSet currExpressionSet;
     CalcOutput currOutput;
 
@@ -106,7 +100,7 @@ public class CalcManager : MonoBehaviour
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.expressions["X"]);
         manageText();
         if (boundsManager != null) boundsManager.UpdateButtonText();
     }
@@ -122,7 +116,7 @@ public class CalcManager : MonoBehaviour
         paramSurface.expressionSets = ess;
         pieceWiseControl.ForceNumberOfTabs(ess.Count);
         expressionSet = paramSurface.expressionSets[0];
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.expressions["X"]);
         if(boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
@@ -148,7 +142,7 @@ public class CalcManager : MonoBehaviour
         //Req: calcInput
         connectedMenus.pieceWiseControl.Initialize(this);
         //Req: calcInput
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.expressions["X"]);
         //Req: calcInput
         //connectedMenus.presetMenu.Initialize(this);
 
@@ -160,7 +154,7 @@ public class CalcManager : MonoBehaviour
 
     public void PresetPressed()
     {
-        calcInput.ChangeOutput(expressionSet.expressions[X]);
+        calcInput.ChangeOutput(expressionSet.expressions["X"]);
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
@@ -207,17 +201,17 @@ public class CalcManager : MonoBehaviour
     public void manageText()
     {
         #region expressions
-        if (expressionSet.expressions.ContainsKey(X) && inputs.xInputbox != null)
+        if (expressionSet.expressions.ContainsKey("X") && inputs.xInputbox != null)
         {
-            inputs.xInputbox.text = displayText(expressionSet.expressions[X].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[X], maxDisplayLength);
+            inputs.xInputbox.text = displayText(expressionSet.expressions["X"].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions["X"], maxDisplayLength);
         }
-        if (expressionSet.expressions.ContainsKey(Y) && inputs.yInputbox != null)
+        if (expressionSet.expressions.ContainsKey("Y") && inputs.yInputbox != null)
         {
-            inputs.yInputbox.text = displayText(expressionSet.expressions[Y].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[Y], maxDisplayLength);
+            inputs.yInputbox.text = displayText(expressionSet.expressions["Y"].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions["Y"], maxDisplayLength);
         }
-        if (expressionSet.expressions.ContainsKey(Z) && inputs.zInputbox != null)
+        if (expressionSet.expressions.ContainsKey("Z") && inputs.zInputbox != null)
         {
-            inputs.zInputbox.text = displayText(expressionSet.expressions[Z].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions[Z], maxDisplayLength);
+            inputs.zInputbox.text = displayText(expressionSet.expressions["Z"].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions["Z"], maxDisplayLength);
         }
         #endregion
         #region params

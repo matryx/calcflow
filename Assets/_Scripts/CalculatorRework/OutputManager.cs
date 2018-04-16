@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class OutputManager : MonoBehaviour {
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-
     CalculatorManager calcManager;
     public static OutputManager _instance;
 
@@ -29,13 +25,14 @@ public class OutputManager : MonoBehaviour {
                 print("unknown input: " + source);
                 break;
             case "Button_Xinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[X]);
+                print("X");
+                calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
                 break;
             case "Button_Yinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[Y]);
+                calcManager.SetOutput(calcManager.expressionSet.expressions["Y"]);
                 break;
             case "Button_Zinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[Z]);
+                calcManager.SetOutput(calcManager.expressionSet.expressions["Z"]);
                 break;
             case "Min":
                 calcManager.SetOutput(calcManager.expressionSet.ranges[rangeTitle].Min); 
@@ -53,7 +50,7 @@ public class OutputManager : MonoBehaviour {
                 //    }
                 //    break;
         }
-        calcManager.manageText();
+        //calcManager.manageText();
     }
 
     private void Update()

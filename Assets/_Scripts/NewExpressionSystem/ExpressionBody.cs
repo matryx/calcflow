@@ -8,7 +8,7 @@ public class ExpressionBody : QuickButton
     ExpressionComponent expComp;
     Transform feedBack;
     TMPro.TextMeshPro textInput;
-    string title;
+    string title = "X";
     OutputManager outputManager;
     CalcInput calcInput;
     ParametricExpression param;
@@ -103,6 +103,7 @@ public class ExpressionBody : QuickButton
     public void selectBody()
     {
         deselectPrevBody();
+        expression.setSelectedExpr(expComp.getExpressionParent(), this);
 
         if (retracting && backToIdle != null)
         {
@@ -113,8 +114,6 @@ public class ExpressionBody : QuickButton
         scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
         StartCoroutine(scaleUp);
         finishedScaling = false;
-
-        expression.setSelectedExpr(expComp.getExpressionParent(), this);
 
         thisBodyActive = true;
     }

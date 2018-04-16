@@ -338,9 +338,9 @@ public class PresetMenu : MonoBehaviour
                 break;
         }
 
-        expressionSet.AddExpression(ExpressionSet.ExpOptions.X, x);
-        expressionSet.AddExpression(ExpressionSet.ExpOptions.Y, y);
-        expressionSet.AddExpression(ExpressionSet.ExpOptions.Z, z);
+        expressionSet.AddExpression("X", x);
+        expressionSet.AddExpression("Y", y);
+        expressionSet.AddExpression("Z", z);
         expressionSet.AddRange("t", tmin, tmax);
         expressionSet.AddRange("u", umin, umax);
         expressionSet.AddRange("v", vmin, vmax);

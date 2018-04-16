@@ -211,9 +211,9 @@ public class CustomVectorField : MonoBehaviour
         //if (es.CompileAll())
         //{
         es.CompileAll();
-            expX = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
-            expY = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Y].expression);
-            expZ = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Z].expression);
+            expX = solver.SymbolicateExpression(es.expressions["X"].expression);
+            expY = solver.SymbolicateExpression(es.expressions["Y"].expression);
+            expZ = solver.SymbolicateExpression(es.expressions["Z"].expression);
         //}
         //else
         //{

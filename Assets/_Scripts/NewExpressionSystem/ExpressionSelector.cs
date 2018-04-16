@@ -40,6 +40,7 @@ public class ExpressionSelector : QuickButton
     protected override void ButtonEnterBehavior(GameObject other)
     {
         List<Transform> toAdd = new List<Transform>();
+        ExpressionSet expressionSet = null;
         string panelType = "";
 
         if (paramPanel.gameObject.activeSelf)
@@ -49,7 +50,9 @@ public class ExpressionSelector : QuickButton
 
             GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
             param.GetComponent<ParametricExpression>().Initialize();
-            calcManager.AddExpressionSet(param.GetComponent<ParametricExpression>().getExpSet());
+
+            expressionSet = param.GetComponent<ParametricExpression>().getExpSet();
+            calcManager.AddExpressionSet(expressionSet);
             addForwarders(param.transform);
 
             foreach (Transform child in param.transform)
@@ -74,7 +77,9 @@ public class ExpressionSelector : QuickButton
             toAdd.Add(sep.transform);
 
             param.GetComponent<ParametricExpression>().setSeparator(sep.transform);
+
             expressions.addExpr(param.transform);
+            //NOTE: COMMENTED OUT IN CURR IMPLEMENTATION 
             //expressions.setSelectedExpr(param.transform, xButton.GetComponentInChildren<ExpressionBody>());
         }
         else if (vecPanel.gameObject.activeSelf)
@@ -84,7 +89,8 @@ public class ExpressionSelector : QuickButton
 
             GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
             vec.GetComponent<VectorFieldExpression>().Initialize();
-            calcManager.SetVecFieldES(vec.GetComponent<VectorFieldExpression>().getExpSet());
+            expressionSet = vec.GetComponent<VectorFieldExpression>().getExpSet();
+            calcManager.SetVecFieldES(expressionSet);
             //expressions.setSelectedExpr(vec.transform, null);
             addForwarders(vec.transform);
 
@@ -113,30 +119,37 @@ public class ExpressionSelector : QuickButton
 
             expressions.addExpr(vec.transform);
         }
-        else if (constPanel.gameObject.activeSelf)
-        {
-            panelType = "cons";
-            currPanel = constPanel;
+        //else if (constPanel.gameObject.activeSelf)
+        //{
+        //    panelType = "cons";
+        //    currPanel = constPanel;
 
-            GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
-            cons.GetComponent<Constant>().Initialize();
-            cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
-            cons.GetComponentInChildren<ExpressionComponent>().setExpressionParent(cons.transform);
-            cons.GetComponentInChildren<ExpressionComponent>().setPanel(currPanel);
-            addForwarders(cons.transform);
+        //    GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
+        //    cons.GetComponent<Constant>().Initialize();
+        //    cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
+        //    cons.GetComponentInChildren<ExpressionComponent>().setExpressionParent(cons.transform);
+        //    cons.GetComponentInChildren<ExpressionComponent>().setPanel(currPanel);
+        //    addForwarders(cons.transform);
 
-            toAdd.Add(cons.transform.Find("Constant"));
+        //    toAdd.Add(cons.transform.Find("Constant"));
 
-            GameObject sepConst = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
-            addForwarders(sepConst.transform);
-            toAdd.Add(sepConst.transform);
+        //    GameObject sepConst = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+        //    addForwarders(sepConst.transform);
+        //    toAdd.Add(sepConst.transform);
 
-            expressions.addExpr(cons.transform);
-        }
+        //    expressions.addExpr(cons.transform);
+        //}
 
         thisScroll = expressions.getScroll(panelType);
         thisScroll.addToScroll(toAdd, null, 0);
-        if (xButton) xButton.GetComponentInChildren<ExpressionBody>().selectBody();
+        if (xButton)
+        {
+            calcManager.ChangeExpressionSet(expressionSet);
+            xButton.GetComponentInChildren<ExpressionBody>().selectBody();
+            calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
+        }
+
+
         xButton = null;
     }
 

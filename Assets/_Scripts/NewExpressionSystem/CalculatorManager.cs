@@ -28,12 +28,6 @@ public class CalculatorManager : MonoBehaviour
     TMPro.TextMeshPro textInput;
     string title;
 
-    #region constants
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-    #endregion
-
     private Color positiveFeedback;  //GREEN
     private Color negativeFeedback = Color.red;
 
@@ -65,7 +59,7 @@ public class CalculatorManager : MonoBehaviour
         if (boundsManager != null) boundsManager.Initialize(this);
         calcInput.Initialize(this);
 
-        calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
+        calcInput.ChangeOutput(expressionSet.expressions["X"]); //need to fix
         if (outputManager != null)
         {
             print("OUTPUT INIIALIZED");
@@ -74,7 +68,7 @@ public class CalculatorManager : MonoBehaviour
         //presetMenu.Initialize(this);
         //saveLoadMenu.Initialize(this);
 
-        ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback); 
+        ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback);
 
         //if (connectedMenus.particleAnimationSettings != null)
         //    connectedMenus.particleAnimationSettings.Initialize(this);
@@ -82,15 +76,16 @@ public class CalculatorManager : MonoBehaviour
 
     public void PresetPressed()
     {
-        calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
+        calcInput.ChangeOutput(expressionSet.expressions["X"]); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
 
     public void AddExpressionSet(ExpressionSet ES)
     {
+        //print("input received");
         expressionSetList.Add(ES);
-        inputReceived = true;
+        //inputReceived = true;
     }
 
     public void RemoveExpressionSet(ExpressionSet ES)
@@ -106,10 +101,11 @@ public class CalculatorManager : MonoBehaviour
 
     public void ChangeExpressionSet(ExpressionSet ES)
     {
+        print("change expression set");
         expressionSet = ES;
-        calcInput.ChangeOutput(expressionSet.expressions[getExpOption()]);
-        manageText();
-        if (boundsManager != null) boundsManager.UpdateButtonText();
+        //print("expression: " + expressionSet.expressions[getExpOption()]);
+        //manageText();
+        //if (boundsManager != null) boundsManager.UpdateButtonText();
     }
 
     public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
@@ -122,7 +118,7 @@ public class CalculatorManager : MonoBehaviour
         }
         paramSurface.expressionSets = ess;
         expressionSet = paramSurface.expressionSets[0];
-        calcInput.ChangeOutput(expressionSet.expressions[X]); //need to fix
+        calcInput.ChangeOutput(expressionSet.expressions["X"]); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
@@ -130,32 +126,20 @@ public class CalculatorManager : MonoBehaviour
     public void SetOutput(CalcOutput output)
     {
         calcInput.ChangeOutput(output);
+        manageText();
     }
 
-    private ExpressionSet.ExpOptions getExpOption()
+    private string getExpOption()
     {
-        ExpressionSet.ExpOptions op = X;
+        //print("TITLE: " + expressions.getSelectedBody().getTitle());
         title = (expressions.getSelectedBody()) ? expressions.getSelectedBody().getTitle() : "X";
-
-        switch (title)
-        {
-            case "X":
-                op = X;
-                break;
-            case "Y":
-                op = Y;
-                break;
-            case "Z":
-                op = Z;
-                break;
-        }
-
-        return op;
+        return title;
     }
 
     public void manageText()
     {
         selectedExpr = expressions.getSelectedExpr();
+        //print("SELECTED EXPR: " + selectedExpr);
         if (selectedExpr == null || expressions.getSelectedBody() == null) return;
 
         selectedBody = expressions.getSelectedBody().transform;

@@ -54,15 +54,15 @@ public class OverlayCalcInput : MonoBehaviour {
     {
         if (xInput != null)
         {
-            xInput.text = es.expressions[ExpressionSet.ExpOptions.X].expression;
+            xInput.text = es.expressions["X"].expression;
         }
         if (yInput != null)
         {
-            yInput.text = es.expressions[ExpressionSet.ExpOptions.Y].expression;
+            yInput.text = es.expressions["Y"].expression;
         }
         if (zInput != null)
         {
-            zInput.text = es.expressions[ExpressionSet.ExpOptions.Z].expression;
+            zInput.text = es.expressions["Z"].expression;
         }
         if (uInput != null)
         {
@@ -85,11 +85,11 @@ public class OverlayCalcInput : MonoBehaviour {
     void ToExpressionSet(ExpressionSet es)
     {
         List<string> tokens = ExpressionParser.Parse(xInput.text);
-        es.AddExpression(ExpressionSet.ExpOptions.X, new Expression(tokens, es));
+        es.AddExpression("X", new Expression(tokens, es));
         tokens = ExpressionParser.Parse(yInput.text);
-        es.AddExpression(ExpressionSet.ExpOptions.Y, new Expression(tokens, es));
+        es.AddExpression("Y", new Expression(tokens, es));
         tokens = ExpressionParser.Parse(zInput.text);
-        es.AddExpression(ExpressionSet.ExpOptions.Z, new Expression(tokens, es));
+        es.AddExpression("Z", new Expression(tokens, es));
 
         if (uInput != null)
         {
