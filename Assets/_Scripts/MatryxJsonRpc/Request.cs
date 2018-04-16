@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Networking;
 
 using System;
 using System.Collections;
@@ -36,8 +37,9 @@ namespace MatryxJsonRpc
         private static string sharedUrl = explorerEndpt + "/tempAPI";
         private static string allTournamentsEndpt = "/tournaments";
         private static string tournamentDetailByAddressEndpt = "/tournaments/address/";
-        private static string tournamentDetailByIdEndpt = "/tournaments/id/";
+        private static string tournamentDetailByIdEndpt = "/tournaments/";
         private static string submissionDetailByAddressEndpt = "/submissions/address/";
+		private static string submissionUploadEndpt = explorerEndpt + "/ipfs/upload/";
 
         private static string roundDetailEndpt = sharedUrl + "/rounds/id/";
 
@@ -134,7 +136,6 @@ namespace MatryxJsonRpc
                         tournament.description = tourna["tournamentDescription"] as string;
                         tournament.bounty = (long)Convert.ToDouble(tourna["mtx"]);
                         tournament.address = tourna["address"] as string;
-                        tournament.id = i;
                         tournaments.Add(tournament);
                     }
                     catch (System.ArgumentOutOfRangeException e) { break; }
@@ -221,39 +222,47 @@ namespace MatryxJsonRpc
         {
             var submissions = new List<Submission>();
             var param = (object[])context.param;
-            var uniqueId = (string)param[0];
+            var tournamentAddress = (string)param[0];
             var page = (long)param[1];
             var offset = page * 10;
-            var url = explorerEndpt + tournamentDetailByIdEndpt + uniqueId;
+            var url = explorerEndpt + tournamentDetailByIdEndpt + tournamentAddress;
             using (WWW www = new WWW(url))
             {
                 yield return www;
                 // Debug.Log(www.text);
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
-                Debug.Log(url + " - " + jsonObj["message"] as string);
-                var dataObj = jsonObj["data"] as Dictionary<string, object>;
-                var title = dataObj["tournamentTitle"] as string;
-                var bounty = Convert.ToDouble(dataObj["mtx"] as string);
-                var description = dataObj["tournamentDescription"] as string;
-                var submissionList = dataObj["recentSubmissions"] as List<object>;
-                for (int i = 0; i < 10; i++)
-                {
-                    try
-                    {
-                        var sub = submissionList[i + (int)offset] as Dictionary<string, object>;
-                        var submission = new Submission();
-                        submission.address = uniqueId + ":" + sub["submissionAddress"] as string;
-                        submission.title = sub["submissionTitle"] as string;
-                        submission.address += submission.title;
-                        submission.author = sub["authorName"] as string;
-                        submissions.Add(submission);
-                    }
-                    catch (System.ArgumentOutOfRangeException e) { break; }
-                    catch (Exception e) { Debug.Log(e); }
-                }
-            }
-            Debug.Log("Fetched submissions: " + submissions.Count);
-            context.done(submissions);
+				if (jsonObj["error"] != null)
+				{
+					context.done(submissions);
+				}
+				else
+				{
+					Debug.Log(url + " - " + jsonObj["message"] as string);
+					var dataObj = jsonObj["data"] as Dictionary<string, object>;
+					var title = dataObj["tournamentTitle"] as string;
+					var bounty = Convert.ToDouble(dataObj["mtx"] as string);
+					var description = dataObj["tournamentDescription"] as string;
+					var submissionList = dataObj["recentSubmissions"] as List<object>;
+					for (int i = 0; i < 10; i++)
+					{
+						try
+						{
+							var sub = submissionList[i + (int)offset] as Dictionary<string, object>;
+							var submission = new Submission();
+							submission.address = tournamentAddress + ":" + sub["submissionAddress"] as string;
+							submission.title = sub["submissionTitle"] as string;
+							submission.address += submission.title;
+							submission.author = sub["authorName"] as string;
+							submissions.Add(submission);
+						}
+						catch (System.ArgumentOutOfRangeException e) { break; }
+						catch (Exception e) { Debug.Log(e); }
+					}
+
+					Debug.Log("Fetched submissions: " + submissions.Count);
+					context.done(submissions);
+				}
+			}
         }
 
         // DETAIL SUBMISSION
@@ -359,11 +368,27 @@ namespace MatryxJsonRpc
             var submission = (Submission)param[0];
             var tournamentAddress = Convert.ToInt64(submission.tournamentAddress);
             var title = submission.title;
-            var body = submission.body;
+
+
+			List<IMultipartFormSection> submissionFormData = new List<IMultipartFormSection>();
+			submissionFormData.Add(new MultipartFormDataSection("jsonContent=" + submission.body));
+			UnityWebRequest www = UnityWebRequest.Post(submissionUploadEndpt, submissionFormData);
+			yield return www.Send();
+
+			if (www.isError)
+			{
+				Debug.Log(www.error);
+			}
+			else
+			{
+				Debug.Log("Form upload complete!");
+			}
+
+			var bodyHash = Encoding.UTF8.GetString(www.downloadHandler.data);
             var references = submission.references + "\n";
             var contributors = submission.contributors + "\n";
             // Make input
-            var transactionInput = function.CreateTransactionInput(usedAccount, tournamentAddress, title, body, references, contributors);
+            var transactionInput = function.CreateTransactionInput(usedAccount, tournamentAddress, title, bodyHash, references, contributors);
             transactionInput.Gas = new HexBigInteger(3000000);
             // Do request
             var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
@@ -417,10 +442,11 @@ namespace MatryxJsonRpc
                     {"Node Found", false},
                 });
             }
-            var usedAccount = resultsAccounts[0];
-            if(usedAccount != null)
-            {
-                Debug.Log("Used account:" + usedAccount);
+
+			if(resultsAccounts != null && resultsAccounts[0] != null)
+			{
+				var usedAccount = resultsAccounts[0];
+				Debug.Log("Used account:" + usedAccount);
                 var function = mtxContract.GetFunction("prepareBalance");
                 var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
                 transactionInput.Gas = new HexBigInteger(3000000);
