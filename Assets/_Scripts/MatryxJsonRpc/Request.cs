@@ -26,6 +26,7 @@ using Nethereum.Signer;
 using Nanome.Maths.Serializers.JsonSerializer;
 
 using Calcflow.UserStatistics;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace MatryxJsonRpc
 {
@@ -34,8 +35,11 @@ namespace MatryxJsonRpc
     {
         private static Serializer serializer = new Serializer();
         private static string explorerEndpt = "http://13.57.163.24";
-        private static string sharedUrl = explorerEndpt + "/tempAPI";
+        private static string latestPlatformInfoEndpt = explorerEndpt+"/platform/getLatestInfo";
+        private static string latestTokenInfoEndpt = explorerEndpt + "/token/getLatestInfo";
         private static string allTournamentsEndpt = "/tournaments";
+        private static string latestTournamentAbiEndpt = explorerEndpt + allTournamentsEndpt + "/getLatestAbi";
+        private static string sharedUrl = explorerEndpt + "/tempAPI";
         private static string tournamentDetailByAddressEndpt = "/tournaments/address/";
         private static string tournamentDetailByIdEndpt = "/tournaments/";
         private static string submissionDetailByAddressEndpt = "/submissions/address/";
@@ -47,6 +51,8 @@ namespace MatryxJsonRpc
         private static string mtxNode = "http://localhost:8545";
         private static string mtxContractAddr = "0x7c4970b887cfa95062ead0708267009dcd564017";
         private static Contract mtxContract;
+        private static Contract tokenContract;
+        private static Contract tournamentContract;
 
         // Public api
         public delegate void ResultDelegate(object obj);
@@ -171,6 +177,13 @@ namespace MatryxJsonRpc
             public string author { get; set; }
         }
 
+        [FunctionOutput]
+        private class EntryFeeDTO
+        {
+            [Parameter("uint256", 1)]
+            public long entryFee { get; set; }
+        }
+
         private static IEnumerator CoroutineListSumbissions(RoutineContext context)
         {
             // Prepare
@@ -277,7 +290,7 @@ namespace MatryxJsonRpc
         private static IEnumerator CoroutineDetailSubmission(RoutineContext context)
         {
             // Prepare
-            var function = mtxContract.GetFunction("submissionByAddress");
+            var function = tournamentContract.GetFunction("submissionByAddress");
             // Parse routine params
             var param = (object[])context.param;
             var tournamentAddress = (string)param[0];
@@ -356,39 +369,115 @@ namespace MatryxJsonRpc
 
         private static IEnumerator CoroutineUploadSubmission(RoutineContext context)
         {
-            // Prepare
-            var function = mtxContract.GetFunction("createSubmission");
             // Get accounts
             var requestAccounts = new EthAccountsUnityRequest(mtxNode);
             yield return requestAccounts.SendRequest();
             var resultsAccounts = requestAccounts.Result;
             var usedAccount = resultsAccounts[0];
+
+            // Try to create a peer.
+            var createPeerFunction = mtxContract.GetFunction("createPeer");
+            object[] createPeerParams = { };
+            var createPeerInput = createPeerFunction.CreateTransactionInput(usedAccount, createPeerParams);
+            createPeerInput.Gas = new HexBigInteger(3000000);
+            var createPeerCall = new EthSendTransactionUnityRequest(mtxNode);
+            yield return createPeerCall.SendRequest(createPeerInput);
+            try
+            {
+                var resultsTransaction = createPeerCall.Result;
+            }
+            catch (Exception e)
+            {
+                // Error
+                Debug.Log("Could not check peer status");
+                //Debug.Log(e);
+                context.done(null);
+            }
+
+            // tournament.entryFee();
+            var submission = (Submission)((object[])context.param)[0];
+            tournamentContract.Address = submission.tournamentAddress;
+            var entryFeeFunction = tournamentContract.GetFunction("entryFee");
+            var entryFeeInput = entryFeeFunction.CreateCallInput(new object[0]);
+            entryFeeInput.Gas = new HexBigInteger(300000);
+            var entryFeeCall = new EthCallUnityRequest(mtxNode);
+            yield return entryFeeCall.SendRequest(entryFeeInput, BlockParameter.CreateLatest());
+            EntryFeeDTO entryFee = new EntryFeeDTO();
+            try
+            {
+                entryFee = entryFeeFunction.DecodeDTOTypeOutput<EntryFeeDTO>(entryFeeCall.Result);
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Could not get tournament entry fee.");
+                context.done(null);
+            }
+
+            // token.approve(tournament.address, tournament.entryFee)
+            if (entryFee.entryFee > 0)
+            {
+                
+                var tokenApproveFunction = tokenContract.GetFunction("approve");
+                object[] tokenApproveParams = { submission.tournamentAddress, entryFee };
+                var tokenApproveInput = tokenApproveFunction.CreateTransactionInput(usedAccount, tokenApproveParams);
+                tokenApproveInput.Gas = new HexBigInteger(300000);
+                var tokenApproveTransaction = new EthSendTransactionUnityRequest(mtxNode);
+                yield return tokenApproveTransaction.SendRequest(tokenApproveInput);
+                try
+                {
+                    var tokenApprovalTransactionResult = tokenApproveTransaction.Result;
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("Could not approve tournament to withdraw entry fee.");
+                    context.done(null);
+                }
+            }
+
+            //platform.enterTournament(tournament.address)
+            var enterTournamentFunction = mtxContract.GetFunction("enterTournament");
+            object[] enterTournamentParams = { submission.tournamentAddress };
+            var enterTournamentInput = enterTournamentFunction.CreateTransactionInput(usedAccount, enterTournamentParams);
+            enterTournamentInput.Gas = new HexBigInteger(300000);
+            var enterTournamentTransaction = new EthSendTransactionUnityRequest(mtxNode);
+            yield return enterTournamentTransaction.SendRequest(enterTournamentInput);
+            try
+            {
+                var enterTournamentTransactionResult = enterTournamentTransaction.Result;
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Could not enter tournament.");
+                context.done(null);
+            }
+
+            // Fix the below code
+            // Prepare create submission
+            var createSubmissionFunction = tournamentContract.GetFunction("createSubmission");
             // Parse routine params
-            var param = (object[])context.param;
-            var submission = (Submission)param[0];
-            var tournamentAddress = Convert.ToInt64(submission.tournamentAddress);
+            var tournamentAddress = (submission.tournamentAddress);
             var title = submission.title;
+            tournamentContract.Address = submission.tournamentAddress;
 
+            List<IMultipartFormSection> submissionFormData = new List<IMultipartFormSection>();
+            submissionFormData.Add(new MultipartFormDataSection("description=helloWorld"));
+            UnityWebRequest www = UnityWebRequest.Post(submissionUploadEndpt, submissionFormData);
+            yield return www.Send();
 
-			List<IMultipartFormSection> submissionFormData = new List<IMultipartFormSection>();
-			submissionFormData.Add(new MultipartFormDataSection("jsonContent=" + submission.body));
-			UnityWebRequest www = UnityWebRequest.Post(submissionUploadEndpt, submissionFormData);
-			yield return www.Send();
+            if (www.isError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                Debug.Log("Form upload complete!");
+            }
 
-			if (www.isError)
-			{
-				Debug.Log(www.error);
-			}
-			else
-			{
-				Debug.Log("Form upload complete!");
-			}
-
-			var bodyHash = Encoding.UTF8.GetString(www.downloadHandler.data);
+            var bodyHash = Encoding.UTF8.GetString(www.downloadHandler.data);
             var references = submission.references + "\n";
             var contributors = submission.contributors + "\n";
             // Make input
-            var transactionInput = function.CreateTransactionInput(usedAccount, tournamentAddress, title, bodyHash, references, contributors);
+            var transactionInput = createSubmissionFunction.CreateTransactionInput(usedAccount, tournamentAddress, title, bodyHash, references, contributors);
             transactionInput.Gas = new HexBigInteger(3000000);
             // Do request
             var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
@@ -407,6 +496,15 @@ namespace MatryxJsonRpc
                 //Debug.Log(e);
                 context.done(null);
             }
+
+            // If we're not, create a peer.
+        }
+
+        private static ulong ParseHexString(string hexNumber)
+        {
+            hexNumber = hexNumber.Replace("0x", string.Empty);
+            ulong parsed = ulong.Parse(hexNumber, System.Globalization.NumberStyles.AllowHexSpecifier);
+            return parsed;
         }
 
         private static IEnumerator SimpleCall(EthCallUnityRequest request, CallInput input)
@@ -416,15 +514,40 @@ namespace MatryxJsonRpc
             return waiting;
         }
 
-        // Read basic infos about contracts
-        void Awake()
-        {
-            var abi = (Resources.Load("mtxAbi") as TextAsset).text;
-            mtxContract = new Contract(null, abi, mtxContractAddr);
-        }
-
         IEnumerator InitRoutine()
         {
+            // instantiate platform contract
+            using (WWW www = new WWW(latestPlatformInfoEndpt))
+            {
+                yield return www;
+                var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                var platformAddress = jsonObj["address"] as string;
+
+                var platformAbi = Encoding.UTF8.GetString(serializer.Serialize(jsonObj["abi"]));
+                mtxContract = new Contract(null, platformAbi, mtxContractAddr);
+            }
+
+            // instantiate token contract
+            using (WWW www2 = new WWW(latestTokenInfoEndpt))
+            {
+                yield return www2;
+                var tokenJsonObj = serializer.Deserialize<object>(www2.bytes) as Dictionary<string, object>;
+                var tokenAddress = tokenJsonObj["address"] as string;
+
+                var tokenAbi = Encoding.UTF8.GetString(serializer.Serialize(tokenJsonObj["abi"]));
+                tokenContract = new Contract(null, tokenAbi, tokenAddress);
+            }
+
+            // instantiate tournament contract (without address)
+            using (WWW www3 = new WWW(latestTournamentAbiEndpt))
+            {
+                yield return www3;
+                var tournyJsonObj = serializer.Deserialize<object>(www3.bytes) as Dictionary<string, object>;
+                var tournamentAbi = Encoding.UTF8.GetString(serializer.Serialize(tournyJsonObj["abi"]));
+                //var tournamentAbi = Encoding.UTF8.GetString(serializer.Serialize(tournyJsonObj["abi"]));
+                tournamentContract = new Contract(null, tournamentAbi, null);
+            }
+
             // Get accounts
             var requestAccounts = new EthAccountsUnityRequest(mtxNode);
             yield return requestAccounts.SendRequest();
