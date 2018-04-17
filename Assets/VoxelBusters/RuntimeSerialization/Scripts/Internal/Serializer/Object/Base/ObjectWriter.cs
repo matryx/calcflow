@@ -57,7 +57,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 		internal void Reset ()
 		{
 			// Resetting object reference cache
-			ObjectReferenceCounter		= 0;
+			//ObjectReferenceCounter		= 0;
 			ObjectReferenceCache.Clear();
 
 			// Resetting type metadata

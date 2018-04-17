@@ -14,9 +14,6 @@ public class CalcManager : Nanome.Core.Behaviour
 
     #endregion
 
-    ExpressionSet currExpressionSet;
-    CalcOutput currOutput;
-
     [HideInInspector]
     public bool inputReceived;
 
@@ -27,6 +24,7 @@ public class CalcManager : Nanome.Core.Behaviour
     public SaveLoadMenu saveLoadMenu;
 
     public CustomParametrizedSurface paramSurface;
+    [RuntimeSerializeField]
     private CalcInput calcInput;
     private PieceWiseControl pieceWiseControl;
     private BoundsManager boundsManager;
@@ -43,12 +41,15 @@ public class CalcManager : Nanome.Core.Behaviour
     public FlexActionableComponent defaultSpeed;
     public FlexActionableComponent defaultEffect;
 
+    [RuntimeSerializeField]
     [SerializeField]
     ConnectedMenus connectedMenus;
 
+    [RuntimeSerializeField]
     [SerializeField]
     FeedBacks feedbacks;
 
+    [RuntimeSerializeField]
     [SerializeField]
     Inputs inputs;
 

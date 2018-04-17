@@ -18,7 +18,7 @@ public class AvatarSelector : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-        Debug.Log(UnityEngine.VR.VRDevice.model);
+        //Debug.Log(UnityEngine.VR.VRDevice.model);
         Avatar = this;
         OculusAvatar = transform.Find("OculusAvatar").gameObject;
         SteamAvatar = transform.Find("SteamAvatar").gameObject;
