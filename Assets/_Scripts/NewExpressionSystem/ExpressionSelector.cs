@@ -37,6 +37,7 @@ public class ExpressionSelector : QuickButton
         }
     }
 
+    //TODO: refactor
     protected override void ButtonEnterBehavior(GameObject other)
     {
         List<Transform> toAdd = new List<Transform>();
@@ -144,11 +145,9 @@ public class ExpressionSelector : QuickButton
         thisScroll.addToScroll(toAdd, null, 0);
         if (xButton)
         {
-            calcManager.ChangeExpressionSet(expressionSet);
             xButton.GetComponentInChildren<ExpressionBody>().selectBody();
-            calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
+            //calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
         }
-
 
         xButton = null;
     }

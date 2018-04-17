@@ -172,8 +172,7 @@ public class CalcInput : MonoBehaviour
                     currExpression.tokens.RemoveAt(index - 1);
                     index--;
 
-                    //BUG: null reference
-                    print("CURR EXP: " + currExpression);
+                    if (currExpression.expSet == null) break;
                     if (currExpression.expSet.GetTotalOccurence(toDelete) == 0)
                     {
                         calcManager.expressionSet.RemoveVariable(toDelete);

@@ -12,6 +12,7 @@ public class ExpressionBody : QuickButton
     OutputManager outputManager;
     CalcInput calcInput;
     ParametricExpression param;
+    CalculatorManager calcManager;
 
     private bool thisBodyActive = false;
     private bool finishedScaling = false;
@@ -25,6 +26,7 @@ public class ExpressionBody : QuickButton
 
     private void Awake()
     {
+        calcManager = CalculatorManager._instance;
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
         if (transform.parent.parent.Find("VariableTitle")) variable = true;
@@ -48,7 +50,6 @@ public class ExpressionBody : QuickButton
     protected override void Start()
     {
         base.Start();
-        param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
     }
 
     public Transform getFeedBack()
@@ -105,6 +106,11 @@ public class ExpressionBody : QuickButton
         deselectPrevBody();
         expression.setSelectedExpr(expComp.getExpressionParent(), this);
 
+        if (!param) param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
+        calcManager.ChangeExpressionSet(param.getExpSet());
+
+        if (!variable) calcManager.SetOutput(calcManager.expressionSet.expressions[title]);
+
         if (retracting && backToIdle != null)
         {
             StopCoroutine(backToIdle);
@@ -114,7 +120,6 @@ public class ExpressionBody : QuickButton
         scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
         StartCoroutine(scaleUp);
         finishedScaling = false;
-
         thisBodyActive = true;
     }
 
@@ -139,6 +144,7 @@ public class ExpressionBody : QuickButton
         }
         else
         {
+            if (!param) param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
             if (param.getActiveStatus()) selectBody();
         }
 
@@ -148,23 +154,17 @@ public class ExpressionBody : QuickButton
         //BUG: this code isn't running when you press t in a Vec Field expression
         if (variable)
         {
-            print("VAR");
             title = transform.parent.parent.Find("VariableTitle").Find("Title").GetComponent<TMPro.TextMeshPro>().text;
-            print("PARENT: " + transform.parent.name);
-            print("TITLE: " + title);
             outputManager.HandleInput(transform.parent.name, title);
         }
         else
         {
-            print("NOT VAR");
             if (thisBodyActive)
             {
-                print("BODY SET TO ACTIVE");
                 outputManager.HandleInput(expComp.name, title);
             }
             else
             {
-                print("BODY SET TO INACTIVE");
                 calcInput.ChangeOutput(null);
             }
         }

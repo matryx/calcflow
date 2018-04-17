@@ -140,6 +140,7 @@ public class CalculatorManager : MonoBehaviour
     {
         selectedExpr = expressions.getSelectedExpr();
         //print("SELECTED EXPR: " + selectedExpr);
+        //print("SELECTED BODY: " + selectedBody);
         if (selectedExpr == null || expressions.getSelectedBody() == null) return;
 
         selectedBody = expressions.getSelectedBody().transform;
@@ -152,6 +153,7 @@ public class CalculatorManager : MonoBehaviour
         if (textInput != null)
         {
             int displayLength = (expressions.getSelectedBody().isVariable()) ? rangeDisplayLength : expressionDisplayLength;
+            print("CURR EXP: " + calcInput.currExpression);
             textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
         }
     }
