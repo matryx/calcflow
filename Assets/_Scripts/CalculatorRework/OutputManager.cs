@@ -25,7 +25,6 @@ public class OutputManager : MonoBehaviour {
                 print("unknown input: " + source);
                 break;
             case "Button_Xinput":
-                print("X");
                 calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
                 break;
             case "Button_Yinput":

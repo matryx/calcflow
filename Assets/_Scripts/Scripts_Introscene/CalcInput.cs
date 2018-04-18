@@ -120,7 +120,7 @@ public class CalcInput : MonoBehaviour
                 if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
                 {
                     //prevents typing of letters when a variable body is selected
-                    if (expressions.getSelectedBody().isVariable())
+                    if (expressions.getSelectedBody() && expressions.getSelectedBody().isVariable())
                     {
                         errorPopup.SetActive(true);
                         errorPopup.transform.position = transform.position + new Vector3(0, -1.5f, -1);

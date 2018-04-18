@@ -23,7 +23,6 @@ public class CalculatorManager : MonoBehaviour
 
     Expressions expressions;
     Transform selectedExpr;
-    Transform selectedBody;
     Transform feedBack;
     TMPro.TextMeshPro textInput;
     string title;
@@ -83,15 +82,12 @@ public class CalculatorManager : MonoBehaviour
 
     public void AddExpressionSet(ExpressionSet ES)
     {
-        //print("input received");
         expressionSetList.Add(ES);
-        //inputReceived = true;
     }
 
     public void RemoveExpressionSet(ExpressionSet ES)
     {
         expressionSetList.Remove(ES);
-        inputReceived = true;
     }
 
     public void SetVecFieldES(ExpressionSet ES)
@@ -101,11 +97,7 @@ public class CalculatorManager : MonoBehaviour
 
     public void ChangeExpressionSet(ExpressionSet ES)
     {
-        print("change expression set");
         expressionSet = ES;
-        //print("expression: " + expressionSet.expressions[getExpOption()]);
-        //manageText();
-        //if (boundsManager != null) boundsManager.UpdateButtonText();
     }
 
     public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
@@ -126,12 +118,11 @@ public class CalculatorManager : MonoBehaviour
     public void SetOutput(CalcOutput output)
     {
         calcInput.ChangeOutput(output);
-        manageText();
+        inputReceived = true;
     }
 
     private string getExpOption()
     {
-        //print("TITLE: " + expressions.getSelectedBody().getTitle());
         title = (expressions.getSelectedBody()) ? expressions.getSelectedBody().getTitle() : "X";
         return title;
     }
@@ -139,21 +130,18 @@ public class CalculatorManager : MonoBehaviour
     public void manageText()
     {
         selectedExpr = expressions.getSelectedExpr();
-        //print("SELECTED EXPR: " + selectedExpr);
-        //print("SELECTED BODY: " + selectedBody);
-        if (selectedExpr == null || expressions.getSelectedBody() == null) return;
+        ExpressionBody exprBody = expressions.getSelectedBody();
 
-        selectedBody = expressions.getSelectedBody().transform;
+        if (selectedExpr == null || exprBody == null) return;
 
         if (expressions.selectedNotNull())
         {
-            textInput = expressions.getSelectedBody().getTextInput();
+            textInput = exprBody.getTextInput();
         }
 
         if (textInput != null)
         {
-            int displayLength = (expressions.getSelectedBody().isVariable()) ? rangeDisplayLength : expressionDisplayLength;
-            print("CURR EXP: " + calcInput.currExpression);
+            int displayLength = (exprBody.isVariable()) ? rangeDisplayLength : expressionDisplayLength;
             textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
         }
     }
@@ -228,6 +216,7 @@ public class CalculatorManager : MonoBehaviour
             }
             else start = true;
         }
+
         return displayList;
     }
 

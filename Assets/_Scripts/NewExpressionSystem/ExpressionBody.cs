@@ -97,19 +97,32 @@ public class ExpressionBody : QuickButton
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
 
-            if (selectedBody.transform != transform) selectedBody.unSelect();
+            if (selectedBody.transform != transform)
+            {
+                selectedBody.unSelect();
+            }
         }
     }
 
     public void selectBody()
     {
         deselectPrevBody();
+
+        if (expComp == null) expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
         expression.setSelectedExpr(expComp.getExpressionParent(), this);
 
         if (!param) param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
         calcManager.ChangeExpressionSet(param.getExpSet());
 
-        if (!variable) calcManager.SetOutput(calcManager.expressionSet.expressions[title]);
+        if (variable)
+        {
+            title = transform.parent.parent.Find("VariableTitle").Find("Title").GetComponent<TMPro.TextMeshPro>().text;
+            outputManager.HandleInput(transform.parent.name, title);
+        }
+        else
+        {
+            calcManager.SetOutput(calcManager.expressionSet.expressions[title]);
+        }
 
         if (retracting && backToIdle != null)
         {
@@ -146,27 +159,6 @@ public class ExpressionBody : QuickButton
         {
             if (!param) param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
             if (param.getActiveStatus()) selectBody();
-        }
-
-        if (expComp == null)
-            expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
-
-        //BUG: this code isn't running when you press t in a Vec Field expression
-        if (variable)
-        {
-            title = transform.parent.parent.Find("VariableTitle").Find("Title").GetComponent<TMPro.TextMeshPro>().text;
-            outputManager.HandleInput(transform.parent.name, title);
-        }
-        else
-        {
-            if (thisBodyActive)
-            {
-                outputManager.HandleInput(expComp.name, title);
-            }
-            else
-            {
-                calcInput.ChangeOutput(null);
-            }
         }
     }
 
@@ -212,17 +204,15 @@ public class ExpressionBody : QuickButton
             feedBack.localScale = idleScale;
             feedBack.gameObject.SetActive(false);
 
-            ExpressionBody selectedBody = expression.getSelectedBody();
-
-            if (selectedBody)
+            if (thisBodyActive)
             {
+                ExpressionBody selectedBody = expression.getSelectedBody();
                 TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
                 oldTextInput.text = oldTextInput.text.Replace("_", "");
+                expression.setSelectedExpr(null, null);
+                thisBodyActive = false;
+                calcInput.ChangeOutput(null);
             }
-
-            expression.setSelectedExpr(null, null);
-            thisBodyActive = false;
-            calcInput.ChangeOutput(null);
         }
     }
 
