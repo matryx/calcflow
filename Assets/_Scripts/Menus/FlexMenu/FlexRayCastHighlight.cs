@@ -6,7 +6,9 @@ using VoxelBusters.RuntimeSerialization;
 [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class FlexRayCastHighlight : MonoBehaviour
 {
-    FlexActionableComponent flexActionableComponent;
+    [RuntimeSerializeField]
+    [SerializeField]
+    private FlexActionableComponent flexActionableComponent;
     int numhitters = 0;
 
     void Start()
@@ -51,5 +53,4 @@ public class FlexRayCastHighlight : MonoBehaviour
         }
 
     }
-
 }

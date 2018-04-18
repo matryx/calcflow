@@ -29,6 +29,7 @@ abstract public class FlexActionableComponent : MonoBehaviour {
     protected Action<FlexActionableComponent, GameObject> enterCallback;
      
     #region Properties
+    [RuntimeSerializeField]
     private int state;
     public int State
     {

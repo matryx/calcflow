@@ -588,9 +588,13 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             UInt32 _objectReferenceID;
 
             RegisterObject(_object, out _objectReferenceID, out _firstTime);
-            if (_objectReferenceID == 821)
+            if (_objectReferenceID == 4503)
             {
-                Debug.Log("object 821 has type " + _objectType);
+                Debug.Log("object 4503 has type " + _objectType);
+            }
+            if (_objectReferenceID == 4845)
+            {
+                Debug.Log("object 4845 has type " + _objectType);
             }
 
             if (_firstTime)

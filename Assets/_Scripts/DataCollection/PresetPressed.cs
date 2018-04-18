@@ -16,7 +16,7 @@ public class PresetPressed : QuickButton
     {
         base.Start();
         preset = transform.parent.gameObject.name;
-        analyticsManager = GameObject.Find("ParametricAnalytics").GetComponent<ParametricAnalyticsManager>();
+        //analyticsManager = GameObject.Find("ParametricAnalytics").GetComponent<ParametricAnalyticsManager>();
     }
 
     protected override void ButtonEnterBehavior(GameObject other)

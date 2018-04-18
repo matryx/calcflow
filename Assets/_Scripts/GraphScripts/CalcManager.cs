@@ -7,6 +7,10 @@ using VoxelBusters.RuntimeSerialization;
 [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class CalcManager : Nanome.Core.Behaviour
 {
+
+    [RuntimeSerializeField]
+    public int testint = 100;
+
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
@@ -28,7 +32,6 @@ public class CalcManager : Nanome.Core.Behaviour
     private CalcInput calcInput;
     private PieceWiseControl pieceWiseControl;
     private BoundsManager boundsManager;
-
     private Color positiveFeedback = new Color(0, 204, 54);
     private Color negativeFeedback = Color.red;
 
@@ -133,6 +136,7 @@ public class CalcManager : Nanome.Core.Behaviour
     {
         calcInput.ChangeOutput(output);
     }
+
 
     private void Initialize()
     {
