@@ -459,21 +459,39 @@ namespace MatryxJsonRpc
             var title = submission.title;
             tournamentContract.Address = submission.tournamentAddress;
 
-            List<IMultipartFormSection> submissionFormData = new List<IMultipartFormSection>();
-            submissionFormData.Add(new MultipartFormDataSection("description=helloWorld"));
-            UnityWebRequest www = UnityWebRequest.Post(submissionUploadEndpt, submissionFormData);
-            yield return www.Send();
+            //List<IMultipartFormSection> submissionFormData = new List<IMultipartFormSection>();
+            //MultipartFormDataSection formDataSection = new MultipartFormDataSection("description", "hello");
+            //submissionFormData.Add(formDataSection);
+            //UnityWebRequest ipfsRequest = UnityWebRequest.Post(submissionUploadEndpt, submissionFormData, Encoding.ASCII.GetBytes("----WebKitFormBoundary7MA4YWxkTrZu0gW"));
+            //ipfsRequest.SetRequestHeader("Content-Type", "multipart/form-data");
+            //ipfsRequest.chunkedTransfer = true;
+            ////www.uploadHandler.contentType = "multipart/form-data";
+            //yield return ipfsRequest.Send();
 
-            if (www.isError)
+            //if (ipfsRequest.isError)
+            //{
+            //    Debug.Log(ipfsRequest.error);
+            //}
+            //else
+            //{
+            //    Debug.Log("Form upload complete!");
+            //}
+
+            WWWForm form = new WWWForm();
+            form.AddBinaryData("description", Encoding.ASCII.GetBytes("hello world"));
+            UnityWebRequest ipfsRequest = UnityWebRequest.Post(submissionUploadEndpt, form);
+            yield return ipfsRequest.Send();
+            print("request completed with code: " + ipfsRequest.responseCode);
+            if (ipfsRequest.isError)
             {
-                Debug.Log(www.error);
+                print("Error: " + ipfsRequest.error);
             }
             else
             {
-                Debug.Log("Form upload complete!");
+                print("Request Response: " + ipfsRequest.downloadHandler.text);
             }
 
-            var bodyHash = Encoding.UTF8.GetString(www.downloadHandler.data);
+            var bodyHash = Encoding.UTF8.GetString(ipfsRequest.downloadHandler.data);
             var references = submission.references + "\n";
             var contributors = submission.contributors + "\n";
             // Make input
