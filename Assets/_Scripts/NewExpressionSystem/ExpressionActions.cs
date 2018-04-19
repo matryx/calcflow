@@ -93,8 +93,24 @@ public class ExpressionActions : QuickButton
 
     private void OnDisable()
     {
-        delete.localScale = Vector3.zero;
-        toggleHide.localScale = Vector3.zero;
+        if (delete == null) delete = transform.parent.Find("Delete");
+
+        if (!delete.gameObject.activeSelf)
+        {
+            delete.gameObject.SetActive(true);
+            delete.localScale = Vector3.zero;
+            delete.gameObject.SetActive(false);
+        }
+
+        if (toggleHide == null) toggleHide = transform.parent.Find("ToggleHide");
+
+        if (!toggleHide.gameObject.activeSelf)
+        {
+            toggleHide.gameObject.SetActive(true);
+            toggleHide.localScale = Vector3.zero;
+            toggleHide.gameObject.SetActive(false);
+        }
+
         menuActive = false;
     }
 
