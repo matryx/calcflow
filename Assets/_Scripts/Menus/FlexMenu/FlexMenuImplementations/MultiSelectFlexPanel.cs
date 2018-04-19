@@ -8,7 +8,7 @@ using VoxelBusters.RuntimeSerialization;
  * This is a basic FlexPanel that will highlight clicked buttons until another button is clicked.
  */
 
-[RuntimeSerializable(typeof(MonoBehaviour), false)]
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class MultiSelectFlexPanel : FlexPanelComponent
 {
 

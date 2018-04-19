@@ -140,6 +140,7 @@ public class CalcManager : Nanome.Core.Behaviour
 
     private void Initialize()
     {
+        if (null == connectedMenus) return;
         calcInput = connectedMenus.calcInput;
         boundsManager = connectedMenus.boundsManager;
         pieceWiseControl = connectedMenus.pieceWiseControl;
@@ -183,6 +184,8 @@ public class CalcManager : Nanome.Core.Behaviour
     // Update is called once per frame
     void Update()
     {
+        if (null == connectedMenus) return;
+
         if (updateText || inputReceived)
         {
             manageText();

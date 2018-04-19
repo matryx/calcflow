@@ -62,14 +62,14 @@ public class Replayer : MonoBehaviour
                     log.RemoveAt(0);
                     item.Reenact();
 
-                    // try
-                    // {
-                    //     item.Reenact();
-                    // }
-                    // catch (Exception e)
-                    // {
-                    //     Debug.LogError(e.Message);
-                    // }
+                    try
+                    {
+                        item.Reenact();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e.Message);
+                    }
                 }
                 else
                 {

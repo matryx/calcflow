@@ -22,12 +22,16 @@ using System;
 using VoxelBusters.RuntimeSerialization;
 
 [RuntimeSerializable(typeof(MonoBehaviour), false, false)]
-abstract public class FlexActionableComponent : MonoBehaviour {
+abstract public class FlexActionableComponent : MonoBehaviour
+{
 
+    [NonRuntimeSerializedField]
     protected Action<FlexActionableComponent, GameObject> exitCallback;
+    [NonRuntimeSerializedField]
     protected Action<FlexActionableComponent, GameObject> stayCallback;
+    [NonRuntimeSerializedField]
     protected Action<FlexActionableComponent, GameObject> enterCallback;
-     
+
     #region Properties
     [RuntimeSerializeField]
     private int state;
@@ -46,7 +50,8 @@ abstract public class FlexActionableComponent : MonoBehaviour {
             StateChanged(_old, value);
         }
     }
-
+    
+    [RuntimeSerializeField]
     private FlexPanelComponent panel;
 
     #endregion
@@ -55,7 +60,7 @@ abstract public class FlexActionableComponent : MonoBehaviour {
     // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 
     //will be called on setup
-	protected abstract void AssembleComponent();
+    protected abstract void AssembleComponent();
     //will be called whenever state changes
     protected abstract void StateChanged(int _old, int _new);
     //will be called whenever button is removed from panel
@@ -91,7 +96,7 @@ abstract public class FlexActionableComponent : MonoBehaviour {
 
     public void SetExitCallback(System.Action<FlexActionableComponent, GameObject> exitAction)
     {
-		this.exitCallback = exitAction;
+        this.exitCallback = exitAction;
     }
 
     public void SetStayCallback(System.Action<FlexActionableComponent, GameObject> OnCollisionEnter)
