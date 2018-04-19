@@ -20,16 +20,23 @@ public class GeneratePlanePts : MonoBehaviour {
 	public AxisLabelManager zLabelManager;
 	public float sqrtNormal;
 
+	bool ptSetExist = false;
+
 	void Awake()
 	{
 		if (ptManager != null && ptManager.eqnSet != null)
 		{
+			ptSetExist = true;
 			eqnSet = ptManager.eqnSet;
 		}
 	}
 
 	void Update() {
-
+		if (!ptSetExist && ptManager != null && ptManager.eqnSet != null)
+		{
+			ptSetExist = true;
+			eqnSet = ptManager.eqnSet;
+		}
 	}
 
 	public void eqnToPoints() 

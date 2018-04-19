@@ -8,6 +8,7 @@ public class FlexButtonLockPlane : MonoBehaviour {
 	public SpriteRenderer lockIcon;
 	public Renderer fixFeedback;
 	public TextMesh title;
+	public TextMesh description;
 
 	public Color passive;
 	Color active = new Color(0, 204, 54);
@@ -17,6 +18,7 @@ public class FlexButtonLockPlane : MonoBehaviour {
         lockIcon.enabled = true;
         fixFeedback.material.color = active;
 		title.text = "Unlock Plane";
+		description.text = "Click to unlock\nthe plane when\ndragging points.";
 	}
 
 	public void LockOff() {
@@ -24,5 +26,6 @@ public class FlexButtonLockPlane : MonoBehaviour {
 		lockIcon.enabled = false;
 		fixFeedback.material.color = passive;
 		title.text = "Lock Plane";
+		description.text = "Click to lock\nthe plane when\ndragging points.";
 	}
 }
