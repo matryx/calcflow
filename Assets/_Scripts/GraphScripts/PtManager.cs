@@ -21,9 +21,9 @@ public class PtManager : MonoBehaviour
     private Color positiveFeedback = new Color(0, 204, 54);
     private Color negativeFeedback = Color.red;
 
-    int maxDisplayLength = 7;
+    int maxDisplayLength = 9;
     
-    int maxEqnLength = 6;
+    int maxEqnLength = 7;
 
     [SerializeField]
     ConnectedMenus connectedMenus;

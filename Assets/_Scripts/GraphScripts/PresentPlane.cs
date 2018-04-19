@@ -40,6 +40,8 @@ public class PresentPlane : MonoBehaviour {
 	public float stepSize;
 	public float defaultStepSize = 5;
 
+	bool ptSetExist = false;
+
 	public float d;
 
 	void Awake()
@@ -50,6 +52,7 @@ public class PresentPlane : MonoBehaviour {
 		stepSize = defaultStepSize;
 		if (ptManager != null && ptManager.ptSet != null)
 		{
+			ptSetExist = true;
 			rawPt1 = ptManager.ptSet.ptCoords["pt1"];
 			rawPt2 = ptManager.ptSet.ptCoords["pt2"];
 			rawPt3 = ptManager.ptSet.ptCoords["pt3"];
@@ -57,6 +60,13 @@ public class PresentPlane : MonoBehaviour {
 	}
 
 	void Update() {
+		if (!ptSetExist && ptManager != null && ptManager.ptSet != null)
+		{
+			ptSetExist = true;
+			rawPt1 = ptManager.ptSet.ptCoords["pt1"];
+			rawPt2 = ptManager.ptSet.ptCoords["pt2"];
+			rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+		}
 		plane.LookAt(lookAtTarget);
 
 		pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
@@ -92,11 +102,9 @@ public class PresentPlane : MonoBehaviour {
 		float pt3Coef = (Mathf.Pow(vector12.magnitude,2) * Vector3.Dot(vector13, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
 
 		if (float.IsNaN(pt1Coef) || float.IsInfinity(pt1Coef) || float.IsNaN(pt2Coef) || float.IsInfinity(pt2Coef) || float.IsNaN(pt3Coef) || float.IsInfinity(pt3Coef)) {
-			print("succ");
 			center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
 			stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
 		} else {
-			print("fail");
 			stepSize = (vector12.magnitude * vector23.magnitude * vector13.magnitude) / (2 * Vector3.Cross(vector12, vector23).magnitude);
 			print("stepSize" + stepSize);
 			print("pt1Coef" + pt1Coef);

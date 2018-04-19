@@ -8,11 +8,12 @@ public class PlaneSolverPointGrab : MonoBehaviour {
 	
 	public PresentPlane presentPlane;
 	public PtManager ptManager;
+	public PtOutputMenu ptOutputMenu;
 
 	public ConstraintGrabbable pt1Grabber, pt2Grabber, pt3Grabber;
 	public bool FixedPlane = true;
 
-	public MeshRenderer radio;
+	public FlexButtonLockPlane lockButton;
 
 	void Update() {
 		if (!pt1Grabber.IsGrabbed) pt1Grabber.lastLocalPos = point1.localPosition;
@@ -34,7 +35,7 @@ public class PlaneSolverPointGrab : MonoBehaviour {
 			point.localPosition = newLoc;
 		} else {
 			FixedPlane = false;
-            radio.enabled = false;
+			lockButton.LockOff();
 			newLoc = grabber.lastLocalPos;
 			point.localPosition = newLoc;
 		}

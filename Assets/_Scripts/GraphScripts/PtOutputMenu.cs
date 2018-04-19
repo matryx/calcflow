@@ -51,7 +51,7 @@ public class PtOutputMenu : MonoBehaviour {
 
     PresentPlane presentPlane;
     public PlaneSolverPointGrab grabber;
-    public MeshRenderer radio;
+    public FlexButtonLockPlane lockButton;
 
     public void Initialize(PtManager pm)
     {
@@ -108,13 +108,13 @@ public class PtOutputMenu : MonoBehaviour {
             case "Button_d":
                 ptManager.SetOutput(ptManager.eqnSet.eqnCoefs["d"]);
                 break;
-            case "FixPlane":
+            case "LockPlane":
                 if (grabber.FixedPlane) {
                     grabber.FixedPlane = false;
-                    radio.enabled = false;
+                    lockButton.LockOff();
                 } else {
                     grabber.FixedPlane = true;
-                    radio.enabled = true;
+                    lockButton.LockOn();
                 }
                 break;
             case "":
