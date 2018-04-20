@@ -97,24 +97,9 @@ public class PresentPlane : MonoBehaviour {
 	{
 
 		vector23 = GenerateVector(rawPt2, rawPt3);
-		float pt1Coef = (Mathf.Pow(vector23.magnitude,2) * Vector3.Dot(vector12, vector13)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
-		float pt2Coef = (Mathf.Pow(vector13.magnitude,2) * Vector3.Dot( (-1) * vector12, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
-		float pt3Coef = (Mathf.Pow(vector12.magnitude,2) * Vector3.Dot(vector13, vector23)) / (2 * Vector3.Cross(vector12, vector23).sqrMagnitude);
 
-		if (float.IsNaN(pt1Coef) || float.IsInfinity(pt1Coef) || float.IsNaN(pt2Coef) || float.IsInfinity(pt2Coef) || float.IsNaN(pt3Coef) || float.IsInfinity(pt3Coef)) {
-			center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-			stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
-		} else {
-			stepSize = (vector12.magnitude * vector23.magnitude * vector13.magnitude) / (2 * Vector3.Cross(vector12, vector23).magnitude);
-			print("stepSize" + stepSize);
-			print("pt1Coef" + pt1Coef);
-			print("pt2Coef" + pt2Coef);
-			print("pt3Coef" + pt3Coef);
-			float centerX = pt1Coef * rawPt1.X.Value + pt2Coef * rawPt2.X.Value + pt3Coef * rawPt3.X.Value;
-			float centerY = pt1Coef * rawPt1.Y.Value + pt2Coef * rawPt2.Y.Value + pt3Coef * rawPt3.Y.Value;
-			float centerZ = pt1Coef * rawPt1.Z.Value + pt2Coef * rawPt2.Z.Value + pt3Coef * rawPt3.Z.Value;
-			center = new Vector3(centerX, centerY, centerZ);
-		}
+		center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+		stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
 		//PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
 		//Get the range of the box
 		if (stepSize == 0) {
