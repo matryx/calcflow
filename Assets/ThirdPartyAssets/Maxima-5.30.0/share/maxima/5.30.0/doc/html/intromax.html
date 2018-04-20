@@ -1,0 +1,979 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<meta name="GENERATOR" content="TtH 3.85">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+ <style type="text/css"> div.p { margin-top: 7pt;}</style>
+ <style type="text/css"><!--
+ td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+ td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+ td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+ td div.norm {line-height:normal;}
+ pre
+ {
+ border: 1px solid gray;
+ padding-top: 1em;
+ padding-bottom: 1em;
+ padding-left: 1em;
+ padding-right: 1em;
+ background-color: #F1F5F9; /* light blue-gray */
+ }
+ span.roman {font-family: serif; font-style: normal; font-weight: normal;} 
+ span.overacc2 {position: relative;  left: .8em; top: -1.2ex;}
+ span.overacc1 {position: relative;  left: .6em; top: -1.2ex;} --></style>
+ 
+
+
+<title> Introduction to Maxima</title>
+ 
+<h1 align="center">Introduction to Maxima </h1>
+
+<h3 align="center">Richard H. Rand<br />
+Dept. of Theoretical and Applied Mechanics, Cornell University
+<a href="#tthFtNtAAB" name="tthFrefAAB"><sup>1</sup></a> </h3>
+
+<h3 align="center">  </h3>
+
+<div class="p"><!----></div>
+ Copyright (c) 1988-2010 Richard H. Rand.
+
+<div class="p"><!----></div>
+This document is free; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation. See the GNU General Public License for more
+details at http://www.gnu.org/copyleft/gpl.html
+
+<div class="p"><!----></div>
+
+<h1>Contents </h1><a href="#tth_sEc1"
+>1&nbsp; Introduction </a><br />
+<a href="#tth_sEc2"
+>2&nbsp; Special keys and symbols </a><br />
+<a href="#tth_sEc3"
+>3&nbsp; Arithmetic </a><br />
+<a href="#tth_sEc4"
+>4&nbsp; Algebra </a><br />
+<a href="#tth_sEc5"
+>5&nbsp; Calculus </a><br />
+<a href="#tth_sEc6"
+>6&nbsp; Matrix calculations </a><br />
+<a href="#tth_sEc7"
+>7&nbsp; Programming in Maxima </a><br />
+<a href="#tth_sEc8"
+>8&nbsp; A partial list of Maxima functions</a><br />
+
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc1">
+1</a>&nbsp;&nbsp;Introduction <a name="sec:introduction">
+</a></h2>
+
+<div class="p"><!----></div>
+To invoke Maxima in a console, type
+
+<pre>
+maxima&nbsp;&lt;enter&#62;
+
+</pre>
+
+<div class="p"><!----></div>
+The computer will display a greeting of the sort:
+
+<pre>
+Distributed&nbsp;under&nbsp;the&nbsp;GNU&nbsp;Public&nbsp;License.&nbsp;See&nbsp;the&nbsp;file&nbsp;COPYING.
+Dedicated&nbsp;to&nbsp;the&nbsp;memory&nbsp;of&nbsp;William&nbsp;Schelter.
+This&nbsp;is&nbsp;a&nbsp;development&nbsp;version&nbsp;of&nbsp;Maxima.&nbsp;The&nbsp;function&nbsp;bug_report()
+provides&nbsp;bug&nbsp;reporting&nbsp;information.
+(%i1)
+
+</pre>
+
+<div class="p"><!----></div>
+The <tt>(%i1)</tt> is a "label".  Each input or output line is
+labelled and can be referred to by its own label for the rest of the
+session.  <tt>i</tt> labels denote your commands and <tt>o</tt> labels
+denote displays of the machine's response.  <em>Never use variable
+  names like <tt>%i1</tt> or <tt>%o5</tt>, as these will be confused with
+  the lines so labeled</em>.
+
+<div class="p"><!----></div>
+Maxima distinguishes lower and upper case.  All built-in functions
+have names which are lowercase only (<tt>sin</tt>, <tt>cos</tt>, <tt>save</tt>,
+<tt>load</tt>, etc).  Built-in constants have lowercase names (<tt>%e</tt>,
+<tt>%pi</tt>, <tt>inf</tt>, etc).  If you type <tt>SIN(x)</tt> or <tt>
+  Sin(x)</tt>, Maxima assumes you mean something other than the built-in
+<tt>sin</tt> function.  User-defined functions and variables can have
+names which are lower or upper case or both.  <tt>foo(XY)</tt>, <tt>
+  Foo(Xy)</tt>, <tt>FOO(xy)</tt> are all different.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc2">
+2</a>&nbsp;&nbsp;Special keys and symbols <a name="sec:keys">
+</a></h2>
+
+<div class="p"><!----></div>
+
+<ol type="1">
+<li> To end a Maxima session, type <tt>quit();</tt>.
+<div class="p"><!----></div>
+</li>
+
+<li> To abort a computation without leaving Maxima, type <tt>^C</tt>.
+(Here <tt>^</tt> stands for the control key, so
+that <tt>^C</tt> means first press the key marked control and hold it down while pressing the C key.)
+It is important for you to
+know how to do this in case, for example, you begin a computation which is taking too long.
+For example:
+
+<pre>
+(%i1)&nbsp;sum&nbsp;(1/x^2,&nbsp;x,&nbsp;1,&nbsp;100000)$
+^C
+Maxima&nbsp;encountered&nbsp;a&nbsp;Lisp&nbsp;error:
+
+&nbsp;Interactive&nbsp;interrupt&nbsp;at&nbsp;#x7FFFF74A43C3.
+
+Automatically&nbsp;continuing.
+To&nbsp;enable&nbsp;the&nbsp;Lisp&nbsp;debugger&nbsp;set&nbsp;*debugger-hook*&nbsp;to&nbsp;nil.
+(%i2)
+
+</pre>
+<div class="p"><!----></div>
+</li>
+
+<li> In order to tell Maxima that you have finished your command, use
+  the semicolon (<tt>;</tt>), followed by a return.  Note that the return
+  key alone does not signal that you are done with your input.
+<div class="p"><!----></div>
+</li>
+
+<li> An alternative input terminator to the semicolon (<tt>;</tt>) is
+  the dollar sign (<tt>$</tt>), which, however, supresses the display of
+  Maxima's computation.  This is useful if you are computing some long
+  intermediate result, and you don't want to waste time having it
+  displayed on the screen.
+<div class="p"><!----></div>
+</li>
+
+<li> If you wish to repeat a command which you have already given,
+  say on line <tt>(%i5)</tt>, you may do so without typing it over again
+  by preceding its label with two single quotes (<tt>"</tt>), i.e., <tt>
+    "%i5</tt>. (Note that simply inputing <tt>%i5</tt> will not do the job
+  - try it.)
+<div class="p"><!----></div>
+</li>
+
+<li> If you want to refer to the immediately preceding result
+  computed by Maxima, you can either use its <tt>o</tt> label, or you can
+  use the special symbol percent (<tt>%</tt>).
+<div class="p"><!----></div>
+</li>
+
+<li> The standard quantities e (natural log base), i (square root
+  of <font face="symbol">-</font
+>1) and <font face="symbol">p</font
+> (3.14159<font face="symbol">¼</font
+>) are respectively referred to as
+  <tt>%e</tt>, <tt>%i</tt>,
+  and <tt>%pi</tt>.  Note that the use of <tt>%</tt> here as a prefix
+  is completely unrelated to the use of <tt>%</tt> to refer to the
+  preceding result computed.
+<div class="p"><!----></div>
+</li>
+
+<li> In order to assign a value to a variable, Maxima uses the colon
+  (<tt>:</tt>), not the equal sign.  The equal sign is used for
+  representing equations.
+<div class="p"><!----></div>
+</li>
+</ol>
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc3">
+3</a>&nbsp;&nbsp;Arithmetic <a name="sec:arithmetic">
+</a></h2>
+
+<div class="p"><!----></div>
+The common arithmetic operations are
+
+<dl compact="compact">
+ <dt><b><tt>+</tt></b></dt>
+	<dd> addition</dd>
+ <dt><b><tt>-</tt></b></dt>
+	<dd> subtraction</dd>
+ <dt><b><tt>*</tt></b></dt>
+	<dd> scalar multiplication</dd>
+ <dt><b><tt>/</tt></b></dt>
+	<dd> division</dd>
+ <dt><b><tt>^</tt></b></dt>
+	<dd>  or <tt>**</tt> exponentiation</dd>
+ <dt><b><tt>.</tt></b></dt>
+	<dd> matrix multiplication</dd>
+ <dt><b><tt>sqrt(x)</tt></b></dt>
+	<dd> square root of <tt>x</tt>.</dd>
+</dl>
+Maxima's output is characterized by exact (rational) arithmetic. For example,
+
+<pre>
+(%i1)&nbsp;1/100&nbsp;+&nbsp;1/101;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;201
+(%o1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10100
+
+</pre>
+If irrational numbers are involved in a computation, they are kept in symbolic form:
+
+<pre>
+(%i2)&nbsp;(1&nbsp;+&nbsp;sqrt(2))^5;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5
+(%o2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sqrt(2)&nbsp;+&nbsp;1)
+(%i3)&nbsp;expand&nbsp;(%);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7/2
+(%o3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;5&nbsp;sqrt(2)&nbsp;+&nbsp;41
+
+</pre>
+However, it is often useful to express a result in decimal notation.
+This may be accomplished by following the expression you want expanded
+by "<tt>,numer</tt>":
+
+<pre>
+(%i4)&nbsp;%,&nbsp;numer;
+(%o4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;82.01219330881977
+
+</pre>
+Note the use here of <tt>%</tt>
+to refer to the previous result.  In this version of Maxima, <tt>
+  numer</tt> gives 16 significant figures, of which the last is often
+unreliable.  However, Maxima can offer <em>arbitrarily high
+  precision</em> by using the <tt>bfloat</tt> function:
+
+<pre>
+(%i5)&nbsp;bfloat&nbsp;(%o3);
+(%o5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.201219330881976b1
+
+</pre>
+The number of significant figures displayed is controlled by the
+Maxima variable <tt>fpprec</tt>, which has the default value of 16:
+
+<pre>
+(%i6)&nbsp;fpprec;
+(%o6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;16
+
+</pre>
+Here we reset <tt>fpprec</tt> to yield 100 digits:
+
+<pre>
+(%i7)&nbsp;fpprec:&nbsp;100;
+(%o7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100
+(%i8)&nbsp;''%i5;
+(%o8)&nbsp;8.20121933088197564152489730020812442785204843859314941221\
+2371240173124187540110412666123849550160561b1
+
+</pre>
+Note the use of two single quotes (<tt>"</tt>) in <tt>(%i8)</tt> to repeat
+command <tt>(%i5)</tt>.  Maxima can handle very large numbers without
+approximation:
+
+<pre>
+(%i9)&nbsp;100!;
+(%o9)&nbsp;9332621544394415268169923885626670049071596826438162146859\
+2963895217599993229915608941463976156518286253697920827223758251\
+185210916864000000000000000000000000
+
+</pre>
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc4">
+4</a>&nbsp;&nbsp;Algebra <a name="sec:algebra">
+</a></h2>
+
+<div class="p"><!----></div>
+Maxima's importance as a computer tool to facilitate analytical
+calculations becomes more evident when we see how easily it does
+algebra for us.  Here's an example in which a polynomial is expanded:
+
+<pre>
+(%i1)&nbsp;(x&nbsp;+&nbsp;3*y&nbsp;+&nbsp;x^2*y)^3;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+(%o1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(x&nbsp;&nbsp;y&nbsp;+&nbsp;3&nbsp;y&nbsp;+&nbsp;x)
+(%i2)&nbsp;expand&nbsp;(%);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;2
+(%o2)&nbsp;x&nbsp;&nbsp;y&nbsp;&nbsp;+&nbsp;9&nbsp;x&nbsp;&nbsp;y&nbsp;&nbsp;+&nbsp;27&nbsp;x&nbsp;&nbsp;y&nbsp;&nbsp;+&nbsp;27&nbsp;y&nbsp;&nbsp;+&nbsp;3&nbsp;x&nbsp;&nbsp;y&nbsp;&nbsp;+&nbsp;18&nbsp;x&nbsp;&nbsp;y
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;27&nbsp;x&nbsp;y&nbsp;&nbsp;+&nbsp;3&nbsp;x&nbsp;&nbsp;y&nbsp;+&nbsp;9&nbsp;x&nbsp;&nbsp;y&nbsp;+&nbsp;x
+
+</pre>
+Now suppose we wanted to substitute <tt>5/z</tt> for <tt>x</tt> in the above
+expression:
+
+<div class="p"><!----></div>
+<table border="0"><tr><td></td><td><table border="0"><tr><td></td><td width="1000">
+
+<pre>
+(%i3)&nbsp;%o2,&nbsp;x=5/z;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;135&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;675&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;225&nbsp;y&nbsp;&nbsp;&nbsp;2250&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;125&nbsp;&nbsp;&nbsp;5625&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;1875&nbsp;y
+(%o3)&nbsp;------&nbsp;+&nbsp;------&nbsp;+&nbsp;-----&nbsp;+&nbsp;-------&nbsp;+&nbsp;---&nbsp;+&nbsp;-------&nbsp;+&nbsp;------
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9375&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;15625&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;-------&nbsp;+&nbsp;--------&nbsp;+&nbsp;27&nbsp;y
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z
+
+</pre>
+
+</td></tr></table><!--vbox-->
+</td><td></td></tr></table><!--hboxt-->The Maxima function <tt>ratsimp</tt> will place this over a common denominator:
+
+<pre>
+(%i4)&nbsp;ratsimp&nbsp;(%);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4
+(%o4)&nbsp;(27&nbsp;y&nbsp;&nbsp;z&nbsp;&nbsp;+&nbsp;135&nbsp;y&nbsp;&nbsp;z&nbsp;&nbsp;+&nbsp;(675&nbsp;y&nbsp;&nbsp;+&nbsp;225&nbsp;y)&nbsp;z
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2
+&nbsp;+&nbsp;(2250&nbsp;y&nbsp;&nbsp;+&nbsp;125)&nbsp;z&nbsp;&nbsp;+&nbsp;(5625&nbsp;y&nbsp;&nbsp;+&nbsp;1875&nbsp;y)&nbsp;z&nbsp;&nbsp;+&nbsp;9375&nbsp;y&nbsp;&nbsp;z
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;6
+&nbsp;+&nbsp;15625&nbsp;y&nbsp;)/z
+
+</pre>
+Expressions may also be <tt>factor</tt>ed:
+
+<pre>
+(%i5)&nbsp;factor&nbsp;(%);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(3&nbsp;y&nbsp;z&nbsp;&nbsp;+&nbsp;5&nbsp;z&nbsp;+&nbsp;25&nbsp;y)
+(%o5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----------------------
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z
+
+</pre>
+Maxima can obtain exact solutions to systems of nonlinear algebraic
+equations.  In this example we <tt>solve</tt> three equations in the
+three unknowns <tt>a</tt>, <tt>b</tt>, <tt>c</tt>:
+
+<pre>
+(%i6)&nbsp;a&nbsp;+&nbsp;b*c&nbsp;=&nbsp;1;
+(%o6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b&nbsp;c&nbsp;+&nbsp;a&nbsp;=&nbsp;1
+(%i7)&nbsp;b&nbsp;-&nbsp;a*c&nbsp;=&nbsp;0;
+(%o7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b&nbsp;-&nbsp;a&nbsp;c&nbsp;=&nbsp;0
+(%i8)&nbsp;a&nbsp;+&nbsp;b&nbsp;=&nbsp;5;
+(%o8)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b&nbsp;+&nbsp;a&nbsp;=&nbsp;5
+(%i9)&nbsp;solve&nbsp;([%o6,&nbsp;%o7,&nbsp;%o8],&nbsp;[a,&nbsp;b,&nbsp;c]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25&nbsp;sqrt(79)&nbsp;%i&nbsp;+&nbsp;25&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;sqrt(79)&nbsp;%i&nbsp;+&nbsp;5
+(%o9)&nbsp;[[a&nbsp;=&nbsp;-------------------,&nbsp;b&nbsp;=&nbsp;-----------------,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;sqrt(79)&nbsp;%i&nbsp;-&nbsp;34&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sqrt(79)&nbsp;%i&nbsp;+&nbsp;11
+&nbsp;&nbsp;&nbsp;&nbsp;sqrt(79)&nbsp;%i&nbsp;+&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;25&nbsp;sqrt(79)&nbsp;%i&nbsp;-&nbsp;25
+c&nbsp;=&nbsp;---------------],&nbsp;[a&nbsp;=&nbsp;-------------------,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;sqrt(79)&nbsp;%i&nbsp;+&nbsp;34
+&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;sqrt(79)&nbsp;%i&nbsp;-&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sqrt(79)&nbsp;%i&nbsp;-&nbsp;1
+b&nbsp;=&nbsp;-----------------,&nbsp;c&nbsp;=&nbsp;-&nbsp;---------------]]
+&nbsp;&nbsp;&nbsp;&nbsp;sqrt(79)&nbsp;%i&nbsp;-&nbsp;11&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10
+
+</pre>
+Note that the display consists of a "list", i.e., some expression
+contained between two brackets <tt>[ ... ]</tt>, which itself contains
+two lists.  Each of the latter contain a distinct solution to the
+simultaneous equations.
+
+<div class="p"><!----></div>
+Trigonometric identities are easy to manipulate in Maxima.  The
+function <tt>trigexpand</tt> uses the sum-of-angles formulas to make the
+argument inside each trig function as simple as possible:
+
+<pre>
+(%i10)&nbsp;sin(u&nbsp;+&nbsp;v)&nbsp;*&nbsp;cos(u)^3;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+(%o10)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cos&nbsp;(u)&nbsp;sin(v&nbsp;+&nbsp;u)
+(%i11)&nbsp;trigexpand&nbsp;(%);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+(%o11)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cos&nbsp;(u)&nbsp;(cos(u)&nbsp;sin(v)&nbsp;+&nbsp;sin(u)&nbsp;cos(v))
+
+</pre>
+The function <tt>trigreduce</tt>, on the other hand, converts an
+expression into a form which is a sum of terms, each of which contains
+only a single <tt>sin</tt> or <tt>cos</tt>:
+
+<pre>
+(%i12)&nbsp;trigreduce&nbsp;(%o10);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sin(v&nbsp;+&nbsp;4&nbsp;u)&nbsp;+&nbsp;sin(v&nbsp;-&nbsp;2&nbsp;u)&nbsp;&nbsp;&nbsp;3&nbsp;sin(v&nbsp;+&nbsp;2&nbsp;u)&nbsp;+&nbsp;3&nbsp;sin(v)
+(%o12)&nbsp;---------------------------&nbsp;+&nbsp;-------------------------
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8
+
+</pre>
+The functions <tt>realpart</tt> and <tt>imagpart</tt> will return the real
+and imaginary parts of a complex expression:
+
+<pre>
+(%i13)&nbsp;w:&nbsp;3&nbsp;+&nbsp;k*%i;
+(%o13)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%i&nbsp;k&nbsp;+&nbsp;3
+(%i14)&nbsp;w^2&nbsp;*&nbsp;%e^w;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;%i&nbsp;k&nbsp;+&nbsp;3
+(%o14)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(%i&nbsp;k&nbsp;+&nbsp;3)&nbsp;&nbsp;%e
+(%i15)&nbsp;realpart&nbsp;(%);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+(%o15)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%e&nbsp;&nbsp;(9&nbsp;-&nbsp;k&nbsp;)&nbsp;cos(k)&nbsp;-&nbsp;6&nbsp;%e&nbsp;&nbsp;k&nbsp;sin(k)
+
+</pre>
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc5">
+5</a>&nbsp;&nbsp;Calculus <a name="sec:calculus">
+</a></h2>
+
+<div class="p"><!----></div>
+Maxima can compute derivatives and integrals, expand in Taylor series,
+take limits, and obtain exact solutions to ordinary differential
+equations.  We begin by defining the symbol <tt>f</tt> to be the
+following function of <tt>x</tt>:
+
+<pre>
+(%i1)&nbsp;f:&nbsp;x^3&nbsp;*&nbsp;%e^(k*x)&nbsp;*&nbsp;sin(w*x);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;k&nbsp;x
+(%o1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&nbsp;%e&nbsp;&nbsp;&nbsp;&nbsp;sin(w&nbsp;x)
+
+</pre>
+We compute the derivative of <tt>f</tt> with respect to <tt>x</tt>:
+
+<pre>
+(%i2)&nbsp;diff&nbsp;(f,&nbsp;x);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;k&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;k&nbsp;x
+(%o2)&nbsp;k&nbsp;x&nbsp;&nbsp;%e&nbsp;&nbsp;&nbsp;&nbsp;sin(w&nbsp;x)&nbsp;+&nbsp;3&nbsp;x&nbsp;&nbsp;%e&nbsp;&nbsp;&nbsp;&nbsp;sin(w&nbsp;x)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;k&nbsp;x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+&nbsp;w&nbsp;x&nbsp;&nbsp;%e&nbsp;&nbsp;&nbsp;&nbsp;cos(w&nbsp;x)
+
+</pre>
+Now we find the indefinite integral of <tt>f</tt> with respect to <tt>x</tt>:
+
+<pre>
+(%i3)&nbsp;integrate&nbsp;(f,&nbsp;x);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;3
+(%o3)&nbsp;(((k&nbsp;w&nbsp;&nbsp;+&nbsp;3&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;+&nbsp;3&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;+&nbsp;k&nbsp;)&nbsp;x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;2
+&nbsp;+&nbsp;(3&nbsp;w&nbsp;&nbsp;+&nbsp;3&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;-&nbsp;3&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;-&nbsp;3&nbsp;k&nbsp;)&nbsp;x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4
+&nbsp;+&nbsp;(-&nbsp;18&nbsp;k&nbsp;w&nbsp;&nbsp;-&nbsp;12&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;+&nbsp;6&nbsp;k&nbsp;)&nbsp;x&nbsp;-&nbsp;6&nbsp;w&nbsp;&nbsp;+&nbsp;36&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;-&nbsp;6&nbsp;k&nbsp;)
+&nbsp;&nbsp;&nbsp;k&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+&nbsp;%e&nbsp;&nbsp;&nbsp;&nbsp;sin(w&nbsp;x)&nbsp;+&nbsp;((-&nbsp;w&nbsp;&nbsp;-&nbsp;3&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;-&nbsp;3&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;-&nbsp;k&nbsp;&nbsp;w)&nbsp;x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2
+&nbsp;+&nbsp;(6&nbsp;k&nbsp;w&nbsp;&nbsp;+&nbsp;12&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;+&nbsp;6&nbsp;k&nbsp;&nbsp;w)&nbsp;x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;x
+&nbsp;+&nbsp;(6&nbsp;w&nbsp;&nbsp;-&nbsp;12&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;-&nbsp;18&nbsp;k&nbsp;&nbsp;w)&nbsp;x&nbsp;-&nbsp;24&nbsp;k&nbsp;w&nbsp;&nbsp;+&nbsp;24&nbsp;k&nbsp;&nbsp;w)&nbsp;%e
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;8
+&nbsp;cos(w&nbsp;x))/(w&nbsp;&nbsp;+&nbsp;4&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;+&nbsp;6&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;+&nbsp;4&nbsp;k&nbsp;&nbsp;w&nbsp;&nbsp;+&nbsp;k&nbsp;)
+
+</pre>
+A slight change in syntax gives definite integrals:
+
+<pre>
+(%i4)&nbsp;integrate&nbsp;(1/x^2,&nbsp;x,&nbsp;1,&nbsp;inf);
+(%o4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1
+(%i5)&nbsp;integrate&nbsp;(1/x,&nbsp;x,&nbsp;0,&nbsp;inf);
+
+defint:&nbsp;integral&nbsp;is&nbsp;divergent.
+&nbsp;--&nbsp;an&nbsp;error.&nbsp;To&nbsp;debug&nbsp;this&nbsp;try:&nbsp;debugmode(true);
+
+</pre>
+Next we define the simbol <tt>g</tt> in terms of <tt>f</tt> (previously
+defined in <tt>%i1</tt>) and the hyperbolic sine function, and find its
+Taylor series expansion (up to, say, order 3 terms) about the point
+<tt>x = 0</tt>:
+
+<div class="p"><!----></div>
+<table border="0"><tr><td></td><td><table border="0"><tr><td></td><td width="1000">
+
+<pre>
+(%i6)&nbsp;g:&nbsp;f&nbsp;/&nbsp;sinh(k*x)^4;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;k&nbsp;x
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&nbsp;%e&nbsp;&nbsp;&nbsp;&nbsp;sin(w&nbsp;x)
+(%o6)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------------
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sinh&nbsp;(k&nbsp;x)
+(%i7)&nbsp;taylor&nbsp;(g,&nbsp;x,&nbsp;0,&nbsp;3);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w&nbsp;&nbsp;&nbsp;&nbsp;w&nbsp;x&nbsp;&nbsp;&nbsp;(w&nbsp;k&nbsp;&nbsp;+&nbsp;w&nbsp;)&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;(3&nbsp;w&nbsp;k&nbsp;&nbsp;+&nbsp;w&nbsp;)&nbsp;x
+(%o7)/T/&nbsp;--&nbsp;+&nbsp;---&nbsp;-&nbsp;--------------&nbsp;-&nbsp;----------------&nbsp;+&nbsp;.&nbsp;.&nbsp;.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;k&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;k
+
+</pre>
+
+</td></tr></table><!--vbox-->
+</td><td></td></tr></table><!--hboxt-->The limit of <tt>g</tt> as <tt>x</tt> goes to 0 is computed as follows:
+
+<pre>
+(%i8)&nbsp;limit&nbsp;(g,&nbsp;x,&nbsp;0);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;w
+(%o8)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;k
+
+</pre>
+Maxima also permits derivatives to be represented in unevaluated form
+(note the quote):
+
+<pre>
+(%i9)&nbsp;'diff&nbsp;(y,&nbsp;x);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dy
+(%o9)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dx
+
+</pre>
+The quote operator in <tt>(%i9)</tt> means "do not evaluate".  Without
+it, Maxima would have obtained 0:
+
+<pre>
+(%i10)&nbsp;diff&nbsp;(y,&nbsp;x);
+(%o10)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0
+
+</pre>
+Using the quote operator we can write differential equations:
+
+<pre>
+(%i11)&nbsp;'diff&nbsp;(y,&nbsp;x,&nbsp;2)&nbsp;+&nbsp;'diff&nbsp;(y,&nbsp;x)&nbsp;+&nbsp;y;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;y&nbsp;&nbsp;&nbsp;dy
+(%o11)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---&nbsp;+&nbsp;--&nbsp;+&nbsp;y
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;dx
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dx
+
+</pre>
+Maxima's <tt>ode2</tt> function can solve first and second order ODE's:
+
+<pre>
+(%i12)&nbsp;ode2&nbsp;(%o11,&nbsp;y,&nbsp;x);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;x/2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sqrt(3)&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sqrt(3)&nbsp;x
+(%o12)&nbsp;y&nbsp;=&nbsp;%e&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(%k1&nbsp;sin(---------)&nbsp;+&nbsp;%k2&nbsp;cos(---------))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2
+
+</pre>
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc6">
+6</a>&nbsp;&nbsp;Matrix calculations <a name="sec:matrix">
+</a></h2>
+
+<div class="p"><!----></div>
+Maxima can compute the determinant, inverse and eigenvalues and
+eigenvectors of matrices which have symbolic elements (i.e., elements
+which involve algebraic variables.) We begin by entering a matrix <tt>
+  m</tt> element by element:
+
+<pre>
+(%i1)&nbsp;m:&nbsp;entermatrix&nbsp;(3,&nbsp;3);
+
+Is&nbsp;the&nbsp;matrix&nbsp;&nbsp;1.&nbsp;Diagonal&nbsp;&nbsp;2.&nbsp;Symmetric&nbsp;&nbsp;3.&nbsp;Antisymmetric&nbsp;&nbsp;4.&nbsp;General
+Answer&nbsp;1,&nbsp;2,&nbsp;3&nbsp;or&nbsp;4&nbsp;:&nbsp;
+4;
+Row&nbsp;1&nbsp;Column&nbsp;1:&nbsp;
+0;
+Row&nbsp;1&nbsp;Column&nbsp;2:&nbsp;
+1;
+Row&nbsp;1&nbsp;Column&nbsp;3:&nbsp;
+a;
+Row&nbsp;2&nbsp;Column&nbsp;1:&nbsp;
+1;
+Row&nbsp;2&nbsp;Column&nbsp;2:&nbsp;
+0;
+Row&nbsp;2&nbsp;Column&nbsp;3:&nbsp;
+1;
+Row&nbsp;3&nbsp;Column&nbsp;1:&nbsp;
+1;
+Row&nbsp;3&nbsp;Column&nbsp;2:&nbsp;
+1;
+Row&nbsp;3&nbsp;Column&nbsp;3:&nbsp;
+0;
+
+Matrix&nbsp;entered.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;a&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+(%o1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;]
+
+</pre>
+Next we find its transpose, determinant and inverse:
+
+<pre>
+(%i2)&nbsp;transpose&nbsp;(m);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;1&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+(%o2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;a&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;]
+(%i3)&nbsp;determinant&nbsp;(m);
+(%o3)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;1
+(%i4)&nbsp;invert&nbsp;(m),&nbsp;detout;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;-&nbsp;1&nbsp;&nbsp;&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;-&nbsp;a&nbsp;&nbsp;&nbsp;a&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;-&nbsp;1&nbsp;]
+(%o4)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------------
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;1
+
+</pre>
+In <tt>(%i4)</tt>, the modifier <tt>detout</tt> keeps the determinant
+outside the inverse.  As a check, we multiply <tt>m</tt> by its inverse
+(note the use of the period to represent matrix multiplication):
+
+<pre>
+(%i5)&nbsp;m&nbsp;.&nbsp;%o4;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;-&nbsp;1&nbsp;&nbsp;&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;-&nbsp;a&nbsp;&nbsp;&nbsp;a&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;a&nbsp;]&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;-&nbsp;1&nbsp;]
+(%o5)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;]&nbsp;.&nbsp;-----------------
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;1
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;1&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;]
+(%i6)&nbsp;expand&nbsp;(%);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;-----&nbsp;+&nbsp;-----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;a&nbsp;+&nbsp;1&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+(%o6)&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----&nbsp;+&nbsp;-----&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;1&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----&nbsp;+&nbsp;-----&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;1&nbsp;&nbsp;&nbsp;a&nbsp;+&nbsp;1&nbsp;]
+(%i7)&nbsp;factor&nbsp;(%);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;1&nbsp;&nbsp;0&nbsp;&nbsp;0&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+(%o7)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0&nbsp;&nbsp;1&nbsp;&nbsp;0&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;0&nbsp;&nbsp;0&nbsp;&nbsp;1&nbsp;]
+
+</pre>
+In order to find the eigenvalues and eigenvectors of <tt>m</tt>, we use the function <tt>
+eigenvectors</tt>:
+
+<div class="p"><!----></div>
+<table border="0"><tr><td></td><td><table border="0"><tr><td></td><td width="1000">
+
+<pre>
+(%i8)&nbsp;eigenvectors&nbsp;(m);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sqrt(4&nbsp;a&nbsp;+&nbsp;5)&nbsp;-&nbsp;1&nbsp;&nbsp;sqrt(4&nbsp;a&nbsp;+&nbsp;5)&nbsp;+&nbsp;1
+(%o8)&nbsp;[[[-&nbsp;-----------------,&nbsp;-----------------,&nbsp;-&nbsp;1],&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sqrt(4&nbsp;a&nbsp;+&nbsp;5)&nbsp;-&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;sqrt(4&nbsp;a&nbsp;+&nbsp;5)&nbsp;-&nbsp;1
+[1,&nbsp;1,&nbsp;1]],&nbsp;[[[1,&nbsp;-&nbsp;-----------------,&nbsp;-&nbsp;-----------------]],&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;a&nbsp;+&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;a&nbsp;+&nbsp;2
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sqrt(4&nbsp;a&nbsp;+&nbsp;5)&nbsp;+&nbsp;1&nbsp;&nbsp;sqrt(4&nbsp;a&nbsp;+&nbsp;5)&nbsp;+&nbsp;1
+[[1,&nbsp;-----------------,&nbsp;-----------------]],&nbsp;[[1,&nbsp;-&nbsp;1,&nbsp;0]]]]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;a&nbsp;+&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;a&nbsp;+&nbsp;2
+
+</pre>
+  In <tt>%o8</tt>, the first triple gives the eigenvalues of <tt>m</tt> and
+  the next gives their respective multiplicities (here each is
+  unrepeated).  The next three triples give the corresponding
+  eigenvectors of <tt>m</tt>.  In order to extract from this expression
+  one of these eigenvectors, we may use the <tt>part</tt> function:
+
+<pre>
+(%i9)&nbsp;part&nbsp;(%o23,&nbsp;2,&nbsp;1,&nbsp;1);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sqrt(4&nbsp;a&nbsp;+&nbsp;5)&nbsp;-&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;sqrt(4&nbsp;a&nbsp;+&nbsp;5)&nbsp;-&nbsp;1
+(%o9)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1,&nbsp;-&nbsp;-----------------,&nbsp;-&nbsp;-----------------]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;a&nbsp;+&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;a&nbsp;+&nbsp;2
+
+</pre>
+
+</td></tr></table><!--vbox-->
+</td><td></td></tr></table><!--hboxt--> <h2><a name="tth_sEc7">
+7</a>&nbsp;&nbsp;Programming in Maxima <a name="sec:programming">
+</a></h2>
+
+<div class="p"><!----></div>
+So far, we have used Maxima in the interactive mode, rather like a
+calculator.  However, for computations which involve a repetitive
+sequence of commands, it is better to execute a program.  Here we
+present a short sample program to calculate the critical points of a
+function <tt>f</tt> of two variables <tt>x</tt> and <tt>y</tt>.  The program
+cues the user to enter the function <tt>f</tt>, then it computes the
+partial derivatives <tt>f</tt><sub><tt>x</tt></sub> and <tt>f</tt><sub><tt>y</tt></sub>, and then it
+uses the Maxima command <tt>solve</tt> to obtain solutions to
+<tt>f</tt><sub><tt>x</tt></sub><tt> = </tt><tt>f</tt><sub><tt>y</tt></sub><tt> = </tt><tt>0</tt>.  The program is written outside of Maxima
+with a text editor, and then loaded into Maxima with the <tt>batch</tt>
+command.  Here is the program listing:
+
+<pre>
+/*&nbsp;--------------------------------------------------------------------------&nbsp;
+&nbsp;&nbsp;&nbsp;this&nbsp;is&nbsp;file&nbsp;critpts.max:&nbsp;
+&nbsp;&nbsp;&nbsp;as&nbsp;you&nbsp;can&nbsp;see,&nbsp;comments&nbsp;in&nbsp;maxima&nbsp;are&nbsp;like&nbsp;comments&nbsp;in&nbsp;C&nbsp;
+
+&nbsp;&nbsp;&nbsp;Nelson&nbsp;Luis&nbsp;Dias,&nbsp;nldias@simepar.br
+&nbsp;&nbsp;&nbsp;created&nbsp;20000707
+&nbsp;&nbsp;&nbsp;updated&nbsp;20000707
+&nbsp;&nbsp;&nbsp;---------------------------------------------------------------------------&nbsp;*/
+critpts():=(
+&nbsp;&nbsp;&nbsp;print("program&nbsp;to&nbsp;find&nbsp;critical&nbsp;points"),
+/*&nbsp;---------------------------------------------------------------------------
+&nbsp;&nbsp;&nbsp;asks&nbsp;for&nbsp;a&nbsp;function
+&nbsp;&nbsp;&nbsp;---------------------------------------------------------------------------&nbsp;*/
+&nbsp;&nbsp;&nbsp;f:read("enter&nbsp;f(x,y)"),
+/*&nbsp;---------------------------------------------------------------------------
+&nbsp;&nbsp;&nbsp;echoes&nbsp;it,&nbsp;to&nbsp;make&nbsp;sure
+&nbsp;&nbsp;&nbsp;---------------------------------------------------------------------------&nbsp;*/
+&nbsp;&nbsp;&nbsp;print("f&nbsp;=&nbsp;",f),
+/*&nbsp;---------------------------------------------------------------------------
+&nbsp;&nbsp;&nbsp;produces&nbsp;a&nbsp;list&nbsp;with&nbsp;the&nbsp;two&nbsp;partial&nbsp;derivatives&nbsp;of&nbsp;f
+&nbsp;&nbsp;&nbsp;---------------------------------------------------------------------------&nbsp;*/
+&nbsp;&nbsp;&nbsp;eqs:[diff(f,x),diff(f,y)],
+/*&nbsp;---------------------------------------------------------------------------
+&nbsp;&nbsp;&nbsp;produces&nbsp;a&nbsp;list&nbsp;of&nbsp;unknowns
+&nbsp;&nbsp;&nbsp;---------------------------------------------------------------------------&nbsp;*/
+&nbsp;&nbsp;&nbsp;unk:[x,y],
+/*&nbsp;---------------------------------------------------------------------------
+&nbsp;&nbsp;&nbsp;solves&nbsp;the&nbsp;system
+&nbsp;&nbsp;&nbsp;---------------------------------------------------------------------------&nbsp;*/
+&nbsp;&nbsp;&nbsp;solve(eqs,unk)&nbsp;&nbsp;&nbsp;
+)$
+
+</pre>
+The program (which is actually a function with no argument) is called
+<tt>critpts</tt>. Each line is a valid Maxima command which could be
+executed from the keyboard, and which is separated by the next command
+by a comma.  The partial derivatives are stored in a variable named
+<tt>eqs</tt>, and the unknowns are stored in <tt>unk</tt>.  Here is a sample
+run:
+
+<pre>&nbsp;
+(%i1)&nbsp;batch&nbsp;("critpts.max");
+
+batching&nbsp;#p/home/robert/tmp/maxima-clean/maxima/critpts.max
+(%i2)&nbsp;critpts()&nbsp;:=&nbsp;(print("program&nbsp;to&nbsp;find&nbsp;critical&nbsp;points"),&nbsp;
+f&nbsp;:&nbsp;read("enter&nbsp;f(x,y)"),&nbsp;print("f&nbsp;=&nbsp;",&nbsp;f),&nbsp;
+eqs&nbsp;:&nbsp;[diff(f,&nbsp;x),&nbsp;diff(f,&nbsp;y)],&nbsp;unk&nbsp;:&nbsp;[x,&nbsp;y],&nbsp;solve(eqs,&nbsp;unk))
+(%i3)&nbsp;critpts&nbsp;();
+program&nbsp;to&nbsp;find&nbsp;critical&nbsp;points&nbsp;
+enter&nbsp;f(x,y)&nbsp;
+%e^(x^3&nbsp;+&nbsp;y^2)*(x&nbsp;+&nbsp;y);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;3
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;&nbsp;+&nbsp;x
+f&nbsp;=&nbsp;&nbsp;(y&nbsp;+&nbsp;x)&nbsp;%e&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(%o3)&nbsp;[[x&nbsp;=&nbsp;.4588955685487001&nbsp;%i&nbsp;+&nbsp;.3589790871086935,&nbsp;
+y&nbsp;=&nbsp;.4942017368275118&nbsp;%i&nbsp;-&nbsp;.1225787367783657],&nbsp;
+[x&nbsp;=&nbsp;.3589790871086935&nbsp;-&nbsp;.4588955685487001&nbsp;%i,&nbsp;
+y&nbsp;=&nbsp;-&nbsp;.4942017368275118&nbsp;%i&nbsp;-&nbsp;.1225787367783657],&nbsp;
+[x&nbsp;=&nbsp;.4187542327234816&nbsp;%i&nbsp;-&nbsp;.6923124204420268,&nbsp;
+y&nbsp;=&nbsp;0.455912070111699&nbsp;-&nbsp;.8697262692814121&nbsp;%i],&nbsp;
+[x&nbsp;=&nbsp;-&nbsp;.4187542327234816&nbsp;%i&nbsp;-&nbsp;.6923124204420268,&nbsp;
+y&nbsp;=&nbsp;.8697262692814121&nbsp;%i&nbsp;+&nbsp;0.455912070111699]]
+
+</pre>
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc8">
+8</a>&nbsp;&nbsp;A partial list of Maxima functions</h2>
+
+<div class="p"><!----></div>
+See the Maxima reference manual <tt>doc/html/maxima_toc.html</tt> (under
+the main Maxima installation directory).  From Maxima itself, you can
+use <tt>describe(<i>function name</i>)</tt>.
+
+<div class="p"><!----></div>
+
+<dl compact="compact">
+ <dt><b><tt>allroots(a)</tt></b></dt>
+	<dd> Finds all the (generally complex) roots of
+  the polynomial equation <tt>A</tt>, and lists them in <tt>numer</tt>ical
+  format (i.e. to 16 significant figures).</dd>
+ <dt><b><tt>append(a,b)</tt></b></dt>
+	<dd> Appends the list <tt>b</tt> to the list <tt>a</tt>,
+  resulting in a single list.</dd>
+ <dt><b><tt>batch(a)</tt></b></dt>
+	<dd> Loads and runs a program with filename <tt>a</tt>.</dd>
+ <dt><b><tt>coeff(a,b,c)</tt></b></dt>
+	<dd> Gives the coefficient of <tt>b</tt> raised to
+  the power <tt>c</tt> in expression <tt>a</tt>.</dd>
+ <dt><b><tt>concat(a,b)</tt></b></dt>
+	<dd> Creates the symbol <tt>ab</tt>.</dd>
+ <dt><b><tt>cons(a,b)</tt></b></dt>
+	<dd> Adds <tt>a</tt> to the list <tt>b</tt> as its first element.</dd>
+ <dt><b><tt>demoivre(a)</tt></b></dt>
+	<dd> Transforms all complex exponentials in <tt>
+    a</tt> to their trigonometric equivalents.</dd>
+ <dt><b><tt>denom(a)</tt></b></dt>
+	<dd> Gives the denominator of <tt>a</tt>.</dd>
+ <dt><b><tt>depends(a,b)</tt></b></dt>
+	<dd> Declares <tt>a</tt> to be a function of <tt>
+    b</tt>.  This is useful for writing unevaluated derivatives, as in
+  specifying differential equations.</dd>
+ <dt><b><tt>desolve(a,b)</tt></b></dt>
+	<dd> Attempts to solve a linear system <tt>a</tt> of
+  ODE's for unknowns <tt>b</tt> using Laplace transforms.</dd>
+ <dt><b><tt>determinant(a)</tt></b></dt>
+	<dd> Returns the determinant of the square
+  matrix <tt>a</tt>.</dd>
+ <dt><b><tt>diff(a,b1,c1,b2,c2,...,bn,cn)</tt></b></dt>
+	<dd> Gives the mixed partial
+  derivative of <tt>a</tt> with respect to each <tt>bi</tt>, <tt>ci</tt> times.
+  For brevity, <tt>diff(a,b,1)</tt> may be represented by <tt>
+    diff(a,b)</tt>.  <tt>'diff(...)</tt> represents the unevaluated
+  derivative, useful in specifying a differential equation.</dd>
+ <dt><b><tt>eigenvalues(a)</tt></b></dt>
+	<dd> Returns two lists, the first being the
+  eigenvalues of the square matrix <tt>a</tt>, and the second being their
+  respective multiplicities.</dd>
+ <dt><b><tt>eigenvectors(a)</tt></b></dt>
+	<dd> Does everything that <tt>eigenvalues</tt>
+  does, and adds a list of the eigenvectors of <tt>a</tt>.</dd>
+ <dt><b><tt>entermatrix(a,b)</tt></b></dt>
+	<dd> Cues the user to enter an <tt>a</tt> &times;&nbsp;<tt>b</tt> matrix, element by element.</dd>
+ <dt><b><tt>ev(a,b1,b2,...,bn)</tt></b></dt>
+	<dd> Evaluates <tt>a</tt> subject to the
+  conditions <tt>bi</tt>.  In particular the <tt>bi</tt> may be equations,
+  lists of equations (such as that returned by <tt>solve</tt>), or
+  assignments, in which cases <tt>ev</tt> "plugs" the <tt>bi</tt> into
+  <tt>a</tt>.  The <tt>Bi</tt> may also be words such as <tt>numer</tt> (in
+  which case the result is returned in numerical format), <tt>detout</tt>
+  (in which case any matrix inverses in <tt>a</tt> are performed with the
+  determinant factored out), or <tt>diff</tt> (in which case all
+  differentiations in <tt>a</tt> are evaluated, i.e., <tt>'diff</tt> in <tt>
+    a</tt> is replaced by <tt>diff</tt>).  For brevity in a manual command
+  (i.e., not inside a user-defined function), the <tt>ev</tt> may be
+  dropped, shortening the syntax to <tt>a,b1,b2,...,bn</tt>.</dd>
+ <dt><b><tt>expand(a)</tt></b></dt>
+	<dd> Algebraically expands <tt>a</tt>.  In particular
+  multiplication is distributed over addition.</dd>
+ <dt><b><tt>exponentialize(a)</tt></b></dt>
+	<dd> Transforms all trigonometric functions
+  in <tt>a</tt> to their complex exponential equivalents.</dd>
+ <dt><b><tt>factor(a)</tt></b></dt>
+	<dd> Factors <tt>a</tt>.</dd>
+ <dt><b><tt>freeof(a,b)</tt></b></dt>
+	<dd> Is true if the variable <tt>a</tt> is not part
+  of the expression <tt>b</tt>.</dd>
+ <dt><b><tt>grind(a)</tt></b></dt>
+	<dd> Displays a variable or function <tt>a</tt> in a
+  compact format.  When used with <tt>writefile</tt> and an editor
+  outside of Maxima, it offers a scheme for producing <tt>batch</tt>
+  files which include Maxima-generated expressions.</dd>
+ <dt><b><tt>ident(a)</tt></b></dt>
+	<dd> Returns an <tt>a</tt> &times;&nbsp;<tt>a</tt>
+  identity matrix.</dd>
+ <dt><b><tt>imagpart(a)</tt></b></dt>
+	<dd> Returns the imaginary part of <tt>a</tt>.</dd>
+ <dt><b><tt>integrate(a,b)</tt></b></dt>
+	<dd> Attempts to find the indefinite integral
+  of <tt>a</tt> with respect to <tt>b</tt>.</dd>
+ <dt><b><tt>integrate(a,b,c,d)</tt></b></dt>
+	<dd> Attempts to find the indefinite
+  integral of <tt>a</tt> with respect to <tt>b</tt>. taken from
+  <tt>b</tt><tt>=</tt><tt>c</tt> to <tt>b</tt><tt>=</tt><tt>d</tt>.  The limits of integration <tt>c</tt>
+  and <tt>d</tt> may be taken is <tt>inf</tt> (positive infinity) of <tt>
+    minf</tt> (negative infinity).</dd>
+ <dt><b><tt>invert(a)</tt></b></dt>
+	<dd> Computes the inverse of the square matrix <tt>
+    a</tt>.</dd>
+ <dt><b><tt>kill(a)</tt></b></dt>
+	<dd> Removes the variable <tt>a</tt> with all its
+  assignments and properties from the current Maxima environment.</dd>
+ <dt><b><tt>limit(a,b,c)</tt></b></dt>
+	<dd> Gives the limit of expression <tt>a</tt> as
+  variable <tt>b</tt> approaches the value <tt>c</tt>.  The latter may be
+  taken as <tt>inf</tt> of <tt>minf</tt> as in <tt>integrate</tt>.</dd>
+ <dt><b><tt>lhs(a)</tt></b></dt>
+	<dd> Gives the left-hand side of the equation <tt>a</tt>.</dd>
+ <dt><b><tt>loadfile(a)</tt></b></dt>
+	<dd> Loads a disk file with filename <tt>a</tt> from
+  the current default directory.  The disk file must be in the proper
+  format (i.e. created by a <tt>save</tt> command).</dd>
+ <dt><b><tt>makelist(a,b,c,d)</tt></b></dt>
+	<dd> Creates a list of <tt>a</tt>'s (each of
+  which presumably depends on <tt>b</tt>), concatenated from
+  <tt>b</tt><tt>=</tt><tt>c</tt> to <tt>b</tt><tt>=</tt><tt>d</tt></dd>
+ <dt><b><tt>map(a,b)</tt></b></dt>
+	<dd> Maps the function <tt>a</tt> onto the
+  subexpressions of <tt>b</tt>.</dd>
+ <dt><b><tt>matrix(a1,a2,...,an)</tt></b></dt>
+	<dd> Creates a matrix consisting of the rows <tt>ai</tt>, where each
+  row <tt>ai</tt> is a list of <tt>m</tt> elements, <tt>[b1, b2, ..., bm]</tt>.</dd>
+ <dt><b><tt>num(a)</tt></b></dt>
+	<dd> Gives the numerator of <tt>a</tt>.</dd>
+ <dt><b><tt>ode2(a,b,c)</tt></b></dt>
+	<dd> Attempts to solve the first- or second-order
+  ordinary differential equation <tt>a</tt> for <tt>b</tt> as a function of
+  <tt>c</tt>.</dd>
+ <dt><b><tt>part(a,b1,b2,...,bn)</tt></b></dt>
+	<dd> First takes the <tt>b1</tt>th part
+  of <tt>a</tt>, then the <tt>b2</tt>th part of that, and so on.</dd>
+ <dt><b><tt>playback(a)</tt></b></dt>
+	<dd> Displays the last <tt>a</tt> (an integer)
+  labels and their associated expressions.  If <tt>a</tt> is omitted,
+  all lines are played back.  See the Manual for other options.</dd>
+ <dt><b><tt>ratsimp(a)</tt></b></dt>
+	<dd> Simplifies <tt>a</tt> and returns a quotient of
+  two polynomials.</dd>
+ <dt><b><tt>realpart(a)</tt></b></dt>
+	<dd> Returns the real part of <tt>a</tt>.</dd>
+ <dt><b><tt>rhs(a)</tt></b></dt>
+	<dd> Gives the right-hand side of the equation <tt>a</tt>.</dd>
+ <dt><b><tt>save(a,b1,b2,..., bn)</tt></b></dt>
+	<dd> Creates a disk file with
+  filename <tt>a</tt> in the current default directory, of variables,
+  functions, or arrays <tt>bi</tt>.  The format of the file permits it to
+  be reloaded into Maxima using the <tt>loadfile</tt> command.
+  Everything (including labels) may be <tt>save</tt>d by taking <tt>b1</tt>
+  equal to <tt>all</tt>.</dd>
+ <dt><b><tt>solve(a,b)</tt></b></dt>
+	<dd> Attempts to solve the algebraic equation <tt>
+    a</tt> for the unknown <tt>b</tt>.  A list of solution equations is
+  returned.  For brevity, if <tt>a</tt> is an equation of the form
+  <tt>c</tt><tt> = </tt><tt>0</tt>, it may be abbreviated simply by the expression
+  <tt>c</tt>.</dd>
+ <dt><b><tt>string(a)</tt></b></dt>
+	<dd> Converts <tt>a</tt> to Maxima's linear notation
+  (similar to Fortran's) just as if it had been typed in and puts <tt>
+    a</tt> into the buffer for possible editing.  The <tt>string</tt>'ed
+  expression should not be used in a computation.</dd>
+ <dt><b><tt>stringout(a,b1,b2,...,bn)</tt></b></dt>
+	<dd> Creates a disk file with
+  filename <tt>a</tt> in the current default directory, of variables
+  (e.g. labels) <tt>bi</tt>.  The file is in a text format and is not
+  reloadable into Maxima. However the strungout expressions can be
+  incorporated into a Fortran, Basic or C program with a minimum of
+  editing.</dd>
+ <dt><b><tt>subst(a,b,c)</tt></b></dt>
+	<dd> Substitutes <tt>a</tt> for <tt>b</tt> in <tt>c</tt>.</dd>
+ <dt><b><tt>taylor(a,b,c,d)</tt></b></dt>
+	<dd> Expands <tt>a</tt> in a Taylor series in
+  <tt>b</tt> about <tt>b</tt><tt>=</tt><tt>c</tt>, up to and including the term
+  <tt>(</tt><tt>b</tt><font face="symbol">-</font
+><tt>c</tt><tt>)</tt><sup><tt>d</tt></sup>.  Maxima also supports Taylor expansions in more
+  than one independent variable; see the Manual for details.</dd>
+ <dt><b><tt>transpose(a)</tt></b></dt>
+	<dd> Gives the transpose of the matrix <tt>a</tt>.</dd>
+ <dt><b><tt>trigexpand(a)</tt></b></dt>
+	<dd> Is a trig simplification function which
+  uses the sum-of-angles formulas to simplify the arguments of
+  individual <tt>sin</tt>'s or <tt>cos</tt>'s.  For example, <tt>
+    trigexpand(sin(x+y))</tt> gives <tt>cos(x) sin(y) + sin(x) cos(y)</tt>.</dd>
+ <dt><b><tt>trigreduce(a)</tt></b></dt>
+	<dd> Is a trig simplification function which
+  uses trig identities to convert products and powers of <tt>sin</tt> and
+  <tt>cos</tt> into a sum of terms, each of which contains only a single
+  <tt>sin</tt> or <tt>cos</tt>.  For example, <tt>trigreduce(sin(x)^2)</tt>
+  gives <tt>(1 - cos(2x))/2</tt>.</dd>
+ <dt><b><tt>trigsimp(a)</tt></b></dt>
+	<dd> Is a trig simplification function which
+  replaces <tt>tan</tt>, <tt>sec</tt>, etc., by their <tt>sin</tt> and <tt>
+    cos</tt> equivalents.  It also uses the identity <tt>sin</tt><tt>(</tt><tt>)</tt><sup><tt>2</tt></sup> <tt>+</tt> <tt>cos</tt><tt>(</tt><tt>)</tt><sup><tt>2</tt></sup><tt> = </tt><tt>1</tt>.</dd>
+</dl>
+
+<div class="p"><!----></div>
+<hr /><h3>Footnotes:</h3>
+
+<div class="p"><!----></div>
+<a name="tthFtNtAAB"></a><a href="#tthFrefAAB"><sup>1</sup></a>Adapted from "Perturbation Methods, Bifurcation Theory and Computer Algebra"
+by Rand and Armbruster, Springer, 1987.
+Adapted to <span class="roman">L</span><sup><span class="roman">A</span></sup><span class="roman">T</span><sub><span class="roman">E</span></sub><span class="roman">X</span>&nbsp;and HTML by Nelson L. Dias (nldias@simepar.br), 
+SIMEPAR Technological Institute and Federal University of Paraná, Brazil.
+Updated by Robert Dodier, August 2005.
+<br /><br /><hr /><small>File translated from
+T<sub><font size="-1">E</font></sub>X
+by <a href="http://hutchinson.belmont.ma.us/tth/">
+T<sub><font size="-1">T</font></sub>H</a>,
+version 3.85.<br />On 26 Apr 2010, 00:45.</small>
+</html>

@@ -1,0 +1,34 @@
+/*
+ * Intermediate Rosenbrock
+ *
+ * f = 10*(x1^2-x2)^2 + (1+x1)^2
+ *
+ * True solution: x1=-1, x2=1
+ */
+
+fmin_cobyla(10*(x1^2-x2)^2 + (1+x1)^2, [x1, x2], [1,1], iprint=1, maxfun=2000);
+
+/* Output
+
+
+   Normal return from subroutine COBYLA
+
+   NFVALS = 1668   F = 3.166871E-09    MAXCV = 0.000000E+00
+   X =-9.999462E-01   9.998872E-01
+Evaluation took 0.2000 seconds (0.2100 elapsed) using 4.686 MB.
+[[x1 = -0.999946173141946,x2 = 0.999887157451855],
+         3.1668711862328912e-9, 1668, 0]
+*/
+
+/* True output
+
+       Output from test problem 5 (Intermediate Rosenbrock)
+
+   Normal return from subroutine COBYLA
+
+   NFVALS = 1668   F = 3.166871E-09    MAXCV =  .000000E+00
+   X =-9.999462E-01   9.998872E-01
+
+*/
+
+

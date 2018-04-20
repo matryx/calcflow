@@ -1,0 +1,677 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+block([],kill(all),%rnum:0);
+0$
+x^10-2*x^4+1/2;
+x^10-2*x^4+1/2$
+nroots(%,-6,9.1);
+4$
+realroots(x^5-x-1,5.0e-6);
+[x = 612003/524288]$
+ev(%[1],float);
+x = 1.1673030853271484$
+ev(x^5-x-1,%);
+-7.396496210176906e-6;
+(2*x+1)^3 = 13.5*(x^5+1);
+(2*x+1)^3 = 13.5*(x^5+1)$
+sort(allroots(%));
+[x = -1.0157555438281209,x = 0.82967499021293611,x = 1.0,
+       x = -0.96596251521963683*%i-0.40695972319240747,
+       x = 0.96596251521963683*%i-0.40695972319240747];
+
+/* SF bug [ 1951128 ] curious warning from allroots(x=0) */
+
+allroots (x = 0);
+[x = 0.0];
+
+allroots (17*x = 0);
+[x = 0.0];
+
+allroots (19*x^4 = 0);
+[x = 0.0, x = 0.0, x = 0.0, x = 0.0];
+
+allroots (x^3 * (x^4 - 1) = 0);
+[x = 0.0, x = 0.0, x = 0.0,
+ x = 1.0, x = - 1.0, x = 1.0*%i, x = - 1.0*%i];
+
+allroots (%i*x^5 = 0); /* this one goes through CPOLY-SL */
+[x = 0.0, x = 0.0, x = 0.0, x = 0.0, x = 0.0];
+
+/* additional tests for allroots */
+
+allroots (x = 1);
+[x = 1.0];
+
+allroots (8*u = 1);
+[u = 0.125];
+
+allroots (u^2 - 2*u = 35);
+[u = -5.0, u = 7.0];
+
+(complex_float_approx_equal (a, b) :=
+    if listp (a) and listp (b)
+        then apply ("and", map (complex_float_approx_equal, a, b))
+        elseif equationp (a) and equationp (b)
+            then is (lhs (a) = lhs (b))
+                and complex_float_approx_equal (rhs (a), rhs (b))
+            else
+                my_float_approx_equal (realpart (a), realpart (b))
+                    and my_float_approx_equal (imagpart (a), imagpart (b)),
+
+ equationp (e) := not atom (e) and op (e) = "=",
+
+ my_float_approx_equal (x, y) :=
+    if equal (y, 0)
+        then is (abs (x) <= float_approx_equal_tolerance)
+        else float_approx_equal (x, y),
+
+ float_approx_equal_tolerance : 1e-12,
+
+ 0);
+0;
+
+/* (u - 5/4)*(u - 7/4)*(u + 1/4)*(u^2 - 2*u + 5/4) which has roots
+ * 5/4, 7/4, -1/4, and 1 + %i/2, 1 - %i/2.
+ */
+complex_float_approx_equal 
+   (allroots (u^5 + 131*u^3/16 + 45*u/64 + 175/256 = 19*u^4/4 + 369*u^2/64),
+    [u = -0.25, u = 0.5*%i + 1, u = 1 - 0.5*%i, u = 1.25, u = 1.75]);
+true;
+
+/* (v - 5/4)*(v - 7/4*%i)*(v + 1/4*%i)*(v^2 - 2*v + 5/4) which has roots
+ * 5/4, 7/4*%i, -1/4*%i, and 1 + %i/2, 1 - %i/2.
+ */
+complex_float_approx_equal
+   (allroots (expand ((v - 5/4)*(v - 7/4*%i)*(v + 1/4*%i)*(v^2 - 2*v + 5/4))),
+    [v = - 0.25*%i,
+     v = 1.25,
+     v = 1.0 - 0.5*%i,
+     v = 0.5*%i + 1.0,
+     v = 1.75*%i]);
+true;
+
+reset (float_approx_equal_tolerance);
+[float_approx_equal_tolerance];
+
+exp1:x+z = y;
+z+x = y$
+exp:2*a*x-y = 2*a^2;
+2*a*x-y = 2*a^2$
+y-2*z = 2;
+y-2*z = 2$
+ev(linsolve([exp,exp1,%],[x,y,z]),globalsolve);
+[x = a+1,y = 2*a,z = a-1]$
+
+/* see http://trac.sagemath.org/sage_trac/ticket/8731 and
+http://sourceforge.net/tracker/index.php?func=detail&aid=2990307&group_id=4933&atid=104933 */
+algsys([8*x=1],[x])$
+[[x = 1/8]]$
+block([realonly:true],algsys([8*x=1],[x]))$
+[[x = 1/8]]$
+algsys([x^2+1],[x])$
+[[x = %i], [x = - %i]]$
+block([realonly:true],algsys([x^2+1],[x]))$
+[]$
+/* see http://sourceforge.net/tracker/index.php?func=detail&aid=2786017&group_id=4933&atid=104933 */
+algsys([x^4+1],[x])$
+[[x = (-1)^(1/4)],[x = -(-1)^(1/4)*%i],[x = -(-1)^(1/4)],[x = (-1)^(1/4)*%i]]$
+block([realonly:true],algsys([x^4+1],[x]))$
+[]$
+algsys([x^4-1],[x])$
+[[x = 1],[x = -1],[x = %i],[x = -%i]]$
+algsys([x^4-1],[x]),realonly=true $
+[[x = 1],[x = -1]]$
+
+block(
+  [f1:2*x*(1-l1)-2*(x-1)*l2,
+  f2:l2-l1,
+  f3:l1*(1-x^2-y),
+  f4:l2*(y-(x-1)^2)],
+  algsys([f1,f2,f3,f4],[x,y,l1,l2]))$
+[[x = 0,y = %r1,l1 = 0,l2 = 0],[x = 1,y = 0,l1 = 1,l2 = 1]]$
+block(
+  [f1:x^2-y^2,
+  f2:x^2-x+2*y^2-y-1],
+  algsys([f1,f2],[x,y]))$
+[[x = -1/sqrt(3),y = 1/sqrt(3)],[x = 1/sqrt(3),y = -1/sqrt(3)],
+ [x = -1/3,y = -1/3],[x = 1,y = 1]]$
+solve(asin(cos(3*x))*(f(x)-1),x);
+[x = %pi/6,f(x) = 1]$
+ev(solve(5^f(x) = 125,f(x)),solveradcan:true);
+[f(x) = 3]$
+
+(float_approx_equal_tolerance : 1e-12, 0);
+0$
+
+solve([4*x^2-y^2 = 12,x*y-x = 2], [x,y]);
+[[x = 2,y = 2],
+ [x = 0.5202594388652008*%i-0.1331240357358706,
+  y = 0.07678378523787777-3.608003221870287*%i],
+ [x = -0.5202594388652008*%i-0.1331240357358706,
+  y = 3.608003221870287*%i+0.07678378523787777],
+ [x = -1.733751846381093,y = -0.1535675710019696]]$
+
+(reset (float_approx_equal_tolerance), 0);
+0$
+
+(eq :1+a*x+x^3, sol : solve(eq,x), makelist(ratsimp(subst(s,eq)),s, sol));
+[0,0,0]$
+
+(eq : x^3-1, sol : solve(eq,x), makelist(ratsimp(subst(s,eq)),s,sol));
+[0,0,0]$
+
+sol : solve(x^6-1);
+[x = (sqrt(3)*%i+1)/2,x = (sqrt(3)*%i-1)/2,x = -1,x = -((sqrt(3)*%i+1)/2), x = -((sqrt(3)*%i-1)/2),x = 1]$
+
+ratsimp(makelist(subst(s, x^6-1), s, sol));
+[0,0,0,0,0,0]$
+
+(remvalue(eq, sol),0);
+0$
+
+exp:x^2-1;
+x^2-1$
+solve(%,x);
+[x = -1,x = 1]$
+ev(exp,%[1]);
+0$
+h[i,j]:=1/(i+j-1);
+h[i,j]:=1/(i+j-1)$
+genmatrix(h,3,3);
+matrix([1,1/2,1/3],[1/2,1/3,1/4],[1/3,1/4,1/5])$
+[2*x-(a-1)*y = 5*b,a*x+b*y+c = 0];
+[2*x-(a-1)*y = 5*b,b*y+a*x+c = 0]$
+augcoefmatrix(%,[x,y]);
+matrix([2,1-a,-5*b],[a,b,c])$
+matrix([2,1-a,-5*b],[a,b,c]);
+matrix([2,1-a,-5*b],[a,b,c])$
+
+echelon(%);
+matrix([1,-((a-1)/2),-(5*b/2)],[0,1,(2*c+5*a*b)/(2*b+a^2-a)])$
+
+matrix([2,1-a,-5*b],[a,b,c]);
+matrix([2,1-a,-5*b],[a,b,c])$
+triangularize(%);
+matrix([2,1-a,-5*b],[0,2*b+a^2-a,2*c+5*a*b])$
+matrix([2,1-a,-5*b],[a,b,c]);
+matrix([2,1-a,-5*b],[a,b,c])$
+rank(%);
+2$
+a:matrix([3,1],[2,4]);
+matrix([3,1],[2,4])$
+expand(charpoly(a,lambda));
+lambda^2-7*lambda+10$
+exp:(programmode:true,solve(%));
+[lambda = 5,lambda = 2]$
+matrix([x1],[x2]);
+matrix([x1],[x2])$
+ev(a . %-lambda*%,exp[1]);
+matrix([x2-2*x1],[2*x1-x2])$
+exp:%[1,1] = 0;
+x2-2*x1 = 0$
+x1^2+x2^2 = 1;
+x2^2+x1^2 = 1$
+solve([exp,%],[x1,x2]);
+[[x1 = -1/sqrt(5),x2 = -2/sqrt(5)],[x1 = 1/sqrt(5),x2 = 2/sqrt(5)]]$
+
+/* verify that find_root is happy with %e
+ * (problem reported on mailing list 2007/01/25)
+ */
+
+find_root (2*x = -(log((4 + %e)/(2*%pi)))*(((4 + %e)/(2*%pi))^x), x, -1, 0);
+-0.03340289826874122;
+
+find_root (2*x = cos((%e + %pi)*x), x, 0, 1);
+0.1984210505656873;
+
+/* verify that find_root evaluates its first argument
+ * (problem reported to mailing list 2007/06/07)
+ */
+(expr : x^2 - 5, find_root (expr, x, 0, 10));
+sqrt (5.0);
+
+/* other tests for find_root:
+ * verify that find_root expression is returned for non-numeric expression or bounds
+ */
+(kill (a, b), find_root (x^a - 5, x, 0, 10));
+find_root (x^a - 5, x, 0.0, 10.0);
+
+find_root (x^3 - 5, x, a, b);
+find_root (x^3 - 5, x, a, b);
+
+quad_closeto(qest,qtru,qtol) :=
+  map(lambda([est, tru, tol],
+             block([numer:true, abse],
+                   abse:abs(est-tru),
+                   if (abse <= tol) then true else abse)),
+      qest, qtru, qtol);
+quad_closeto(qest,qtru,qtol) :=
+  map(lambda([est, tru, tol],
+             block([numer:true, abse],
+                   abse:abs(est-tru),
+                   if (abse <= tol) then true else abse)),
+      qest, qtru, qtol);
+
+/* verify that find_root nested inside another function call is OK */
+quad_closeto(quad_qags (find_root (x^a - 5, x, 0, 10), a, 1, 3),
+             quad_qags (5^(1/a), a, 1, 3),
+             [1d-15, 5d-15, 0, 0]);
+[true,true,true,true];
+
+find_root (find_root (a^2 = x, a, 0, x) = 7, x, 0, 100); /* inner find_root returns sqrt(x) */
+49.0;
+
+/* verify that symbolic function name is OK */
+(foo (a) := 3^a - 5, bar : foo, find_root (bar, 0, 10));
+log(5.0) / log(3.0);
+
+/* example from mailing list 2006/12/01 */
+(expr : t = (297 * exp ((1000000 * t) / 33) - 330) / 10000000, find_root (expr, t, 1e-9, 0.003));
+1.7549783076857198E-5;
+
+/* example from mailing list 2007/06/07 */
+(expr : 6096 * tan((2 * atan(c/(2 * fl))) / r) / (tan((1/60) * (%pi/180))),
+ ev (find_root (expr=6096, fl, 1, 10), c=7.176, r=3264));
+6.98149293282488;
+
+/* adapted from mailing list 2007/01/13 */
+
+(g (a) := find_root (f (x, a), x, 0, 200),
+ f (x, a) := x^a - 5,
+ 0);
+0;
+
+g (0.5);
+25.0;
+
+expr : g (z + z);
+find_root (x^(2 * z) - 5, x, 0.0, 200.0);
+
+''(at (expr, z=0.25));
+25.0;
+
+quad_closeto(quad_qags (g (z), z, 1, 3),
+             quad_qags (5^(1/z), z, 1, 3),
+             [1d-15, 5d-15, 0, 0]);
+[true,true,true,true];
+
+/* adapted from the reference manual */
+
+(f(x) := sin(x) - x/2, 0);
+0;
+
+[find_root (sin(x) - x/2, x, 0.1, %pi),
+ find_root (sin(x) = x/2, x, 0.1, %pi),
+ find_root (f(x), x, 0.1, %pi),
+ find_root (f, 0.1, %pi)];
+[1.895494267033981, 1.895494267033981, 1.895494267033981, 1.895494267033981];
+
+[find_root (f, 1/(%pi*%e), 2*%pi*sin(%e)),
+ find_root (f, log(%pi), %e^%pi),
+ find_root (f, exp(1/5), exp(cos(%e + %pi))),
+ find_root (f, cos(exp(2))/10, 10*cos(exp(2)))];
+[1.895494267033981, 1.895494267033981, 1.895494267033981, 1.895494267033981];
+
+/* adapted from the mailing list 2007/06/10
+ * charfun2 copied from the interpol share package
+ */
+
+block ([expr],
+ charfun2 (z, l1, l2) := charfun (l1 <= z and z < l2),
+ expr : (-.329*x^3+.494*x^2 +.559*x+.117) *charfun2(x,minf,1.0)
+    +(.215*x^3-1.94*x^2 +4.85*x-2.77) *charfun2(x,2.5,inf) +(.0933*x^3-1.02*x^2
+    +2.56*x-.866) *charfun2(x,2.0,2.5) +(.0195*x^3-.581*x^2
+    +1.67*x-.275) *charfun2(x,1.5,2.0) +(.00117*x^3-.498*x^2 +1.55*x -.213)
+    *charfun2(x,1.0,1.5),
+ block ([float_approx_equal_tolerance : 1e-12],
+    float_approx_equal (find_root (expr, x, 0, 4), 3.127271310605426)));
+true;
+
+/* SF bug report [ 607079 ] solve with repeated variable
+ */
+solve ('[x = 1], '[x, x]);
+[x = 1];
+
+solve ('[u = v], '[u, u, u, u]);
+[u = v];
+
+/* verify that quadpack functions return partially-evaluated expressions
+ * instead of barfing on non-numeric values in limits or integrand.
+ */
+
+(kill (foo, u, au, bu, cu, omega, trig, alfa, vita, wfn), 0);
+0;
+
+e1 : quad_qag (foo (u), u, au, bu, 3);
+quad_qag (foo (u), u, au, bu, 3, epsrel = 1.0E-8, epsabs = 0.0, limit = 200);
+
+e1 : ev (e1, foo(u)=u^3, au=1);
+quad_qag (u^3, u, 1, bu, 3, epsrel=1e-8, epsabs=0.0, limit=200);
+
+ev (e1, bu=4);
+[63.75, 7.077671781985375E-13, 31, 0];
+
+e2 : quad_qags (foo (u), u, au, bu, epsrel=1e-4, epsabs=1e-4);
+quad_qags (foo (u), u, au, bu, epsrel=1e-4, epsabs=1e-4, limit=200);
+
+e2 : ev (e2, au= -1, bu=1);
+quad_qags (foo (u), u, -1, 1, epsrel=1e-4, epsabs=1e-4, limit=200);
+
+ev (e2, foo(u)=u^4);
+[0.4, 4.440892098500628E-15, 21, 0];
+
+e3 : quad_qagi (foo (u), u, minf, au, epsabs=2e-3);
+quad_qagi (foo (u), u, minf, au, epsrel=1.0E-8, epsabs=2e-3, limit=200);
+
+e3 : ev (e3, foo(u)=1/u^3);
+quad_qagi (1/u^3, u, minf, au, epsrel=1.0E-8, epsabs=2e-3, limit=200);
+
+ev (e3, au= -1);
+[- 0.5, 5.551115123125784E-15, 15, 0];
+
+e4 : quad_qawc (foo (u), u, cu, au, bu, limit=16);
+quad_qawc (foo (u), u, cu, au, bu, epsrel=1.0E-8, epsabs=0.0, limit=16);
+
+e4 : ev (e4, cu=1, au=0, bu=2);
+quad_qawc (foo (u), u, 1, 0, 2, epsrel=1.0E-8, epsabs=0.0, limit=16);
+
+ev (e4, foo(u)=u);
+[1.999999999999999, 2.220446049250313E-16, 25, 0];
+
+e5 : quad_qawf (foo (u), u, au, omega, sin, limit=32);
+quad_qawf (foo (u), u, au, omega, sin, epsabs=1e-10, limit=32, maxp1=100, limlst=10);
+
+e5 : ev (e5, foo(u)=exp(-u));
+quad_qawf (exp (- u), u, au, omega, sin, epsabs=1e-10, limit=32, maxp1=100, limlst=10);
+
+ev (e5, au=0, omega=2);
+[.4000000000000001, 2.216570948815925E-11, 175, 0];
+
+e6 : quad_qawo (foo (u), u, au, bu, omega, cos, limit=64);
+quad_qawo (foo (u), u, au, bu, omega, cos, epsrel=1e-8, epsabs=0.0, limit=64, maxp1=100);
+
+e6 : ev (e6, au=0, bu=%pi/2);
+quad_qawo (foo (u), u, 0, %pi/2, omega, cos, epsrel=1e-8, epsabs=0.0, limit=64, maxp1=100);
+
+ev (e6, foo(u)=1, omega=1);
+[1.0, 1.110223024625157E-14, 15, 0];
+
+e7 : quad_qaws (foo (u), u, au, bu, alfa, vita, wfn, limit=48);
+quad_qaws (foo (u), u, au, bu, alfa, vita, wfn, epsrel=1e-8, epsabs=0.0, limit=48);
+
+e7 : ev (e7, foo(u)=1/u, au=1, bu=2, wfn=1);
+quad_qaws (1/u, u, 1, 2, alfa, vita, 1, epsrel=1e-8, epsabs=0.0, limit=48);
+
+ev (e7, alfa=2, vita=1);
+[.05296102778655729, 5.551115123125782E-17, 50, 0];
+
+/* Tests for bfallroots.  Same as the allroots tests above */
+bfallroots(x=0);
+[x = 0b0];
+
+bfallroots (17*x = 0);
+[x = 0b0];
+
+bfallroots (19*x^4 = 0);
+[x = 0b0, x = 0b0, x = 0b0, x = 0b0];
+
+bfallroots (x^3 * (x^4 - 1) = 0);
+[x = 0b0, x = 0b0, x = 0b0,
+ x = 1b0, x = - 1b0, x = 1b0*%i, x = - 1b0*%i];
+
+bfallroots (%i*x^5 = 0); /* this one goes through CPOLY-SL */
+[x = 0b0, x = 0b0, x = 0b0, x = 0b0, x = 0b0];
+
+/* additional tests for bfallroots */
+
+bfallroots (x = 1);
+[x = 1b0];
+
+bfallroots (8*u = 1);
+[u = 0.125b0];
+
+bfallroots (u^2 - 2*u = 35);
+[u = -5b0, u = 7b0];
+
+(float_approx_equal_tolerance : 1e-12, 0);
+0;
+
+/* (u - 5/4)*(u - 7/4)*(u + 1/4)*(u^2 - 2*u + 5/4) which has roots
+ * 5/4, 7/4, -1/4, and 1 + %i/2, 1 - %i/2.
+ */
+complex_float_approx_equal 
+   (bfallroots (u^5 + 131*u^3/16 + 45*u/64 + 175/256 = 19*u^4/4 + 369*u^2/64),
+    [u = -0.25, u = 0.5*%i + 1, u = 1 - 0.5*%i, u = 1.25, u = 1.75]);
+true;
+
+/* (v - 5/4)*(v - 7/4*%i)*(v + 1/4*%i)*(v^2 - 2*v + 5/4) which has roots
+ * 5/4, 7/4*%i, -1/4*%i, and 1 + %i/2, 1 - %i/2.
+ */
+complex_float_approx_equal
+   (bfallroots (expand ((v - 5/4)*(v - 7/4*%i)*(v + 1/4*%i)*(v^2 - 2*v + 5/4))),
+    [v = - 0.25*%i,
+     v = 1.25,
+     v = 1.0 - 0.5*%i,
+     v = 0.5*%i + 1.0,
+     v = 1.75*%i]);
+true;
+
+/* [ 940835 ] rectform fails with float/numer flags */
+rectform(log(-%i)),float;
+-0.5 * %i * %pi;
+
+/* verify that exp(foo) evaluates to a number
+ * probably should try several variations on this
+ * adapted from sage mailing list
+ */
+
+first (quad_qags (sin (%pi * exp (x / 2)), x, 0, 2));
+- 0.4373454748252497;
+
+/* verify that nested numerical integral is handled correctly
+ * adapted from sage mailing list
+ */
+
+quad_qags (w^2 * quad_qags (1/(s - w), s, 1, 5) [1], w, -5, -1) [1];
+25.83639378805382;
+
+/* find_root example from sage mailing list */
+
+find_root (.05^(x + 1) = (x + 1)*10^(-10), x, 5, 100);
+6.034992572983213;
+
+/* another nested example, collected from mma user forum */
+
+(f : diff (1/(1 + (1 + (a - b)^2)), a),
+ g : quad_qags (f*b*(1 - b)^2, b, 0, 1) [1],
+ find_root (g = 0, a, 0, 1));
+0.3978613590133817;
+
+/* a variation -- not sure what g:=... means in mma */
+
+(f : diff (1/(1 + (1 + (a - b)^2)), a),
+ g : 'quad_qags (f*b*(1 - b)^2, b, 0, 1) [1],
+ find_root (g = 0, a, 0, 1));
+0.3978613590133817;
+
+/* from mailing list 2009-02-18
+ * "Re: [Maxima] I want to tell maxima (-1)^0.33333333333333=-1, what should i do?"
+ * see also tests/rtest_plot
+ */
+
+(foo17(x):=(sqrt(-16*x^4-16*x^3+20*x^2+12*x+23)/(6*sqrt(3))+(16*x^3-12*x^2-6*x-25)/54)^(1/3),
+ float_approx_equal_tolerance : 1e-12,
+ 0);
+0;
+
+first (quad_qags (foo17 (u), u, -1, 0));
+- 0.359753467469551;
+
+first (quad_qags (foo17, u, -1, 0));
+- 0.359753467469551;
+
+find_root (foo17 (u) = -0.2, u, -1, 0);
+- 0.246809031968399;
+
+(bar17 (u) := foo17 (u) + 0.2, find_root (bar17, u, -1, 0));
+- 0.246809031968399;
+
+(compile (foo17), first (quad_qags (foo17, u, -1, 0)));
+- 0.359753467469551;
+
+find_root (bar17, u, -1, 0);
+- 0.246809031968399;
+
+/* SF bug # 2937837 "find_root_error documentation incorrect"
+ */
+ 
+(find_root_error : true,
+ errcatch (find_root (1 + x^2, x, 0, 1)));
+[];
+
+(find_root_error : "FOO",
+ errcatch (find_root (1 + x^2, x, 0, 1)));
+["FOO"];
+
+reset (float_approx_equal_tolerance, find_root_error);
+[float_approx_equal_tolerance, find_root_error];
+
+/* Here are some tests of bf_find_root, based on the find_root tests above.
+   Use larger precision to catch any strangeness.
+*/
+fpprec:32;
+32;
+   
+bf_find_root (2*x = -(log((4 + %e)/(2*%pi)))*(((4 + %e)/(2*%pi))^x), x, -1, 0);
+-3.3402898268741287760799570603459b-2;
+
+bf_find_root (2*x = cos((%e + %pi)*x), x, 0, 1);
+1.9842105056568722553872075784746b-1;
+
+/* verify that bf_find_root evaluates its first argument
+ * (problem reported to mailing list 2007/06/07)
+ */
+(expr : x^2 - 5, bf_find_root (expr, x, 0, 10));
+sqrt (5b0);
+
+/* other tests for bf_find_root:
+ * verify that bf_find_root expression is returned for non-numeric expression or bounds
+ */
+(kill (a, b), bf_find_root (x^a - 5, x, 0, 10));
+bf_find_root (x^a - 5, x, 0b0, 10b0);
+
+bf_find_root (x^3 - 5, x, a, b);
+bf_find_root (x^3 - 5, x, a, b);
+
+/* verify that bf_find_root nested inside another function call is OK */
+quad_closeto(quad_qags (bf_find_root (x^a - 5, x, 0, 10), a, 1, 3),
+             quad_qags (5^(1/a), a, 1, 3),
+             [1d-15, 5d-15, 0, 0]);
+[true,true,true,true];
+
+bf_find_root (bf_find_root (a^2 = x, a, 0, x) = 7, x, 0, 100); /* inner bf_find_root returns sqrt(x) */
+49b0;
+
+/* verify that symbolic function name is OK */
+(foo (a) := 3^a - 5, bar : foo, bf_find_root (bar, 0, 10));
+log(5b0) / log(3b0);
+
+/* example from mailing list 2006/12/01 */
+(expr : t = (297 * exp ((1000000 * t) / 33) - 330) / 10000000, bf_find_root (expr, t, 1e-9, 0.003));
+1.7549783076857196664805799825747b-5;
+
+/* example from mailing list 2007/06/07 */
+(expr : 6096 * tan((2 * atan(c/(2 * fl))) / r) / (tan((1/60) * (%pi/180))),
+ ev (bf_find_root (expr=6096, fl, 1, 10), c=7.176, r=3264));
+6.9814929328248795062474005396418b0;
+
+/* adapted from mailing list 2007/01/13 */
+
+(g (a) := bf_find_root (f (x, a), x, 0, 200),
+ f (x, a) := x^a - 5,
+ 0);
+0;
+
+g (0.5);
+25b0;
+
+expr : g (z + z);
+bf_find_root (x^(2 * z) - 5, x, 0b0, 200b0);
+
+''(at (expr, z=0.25));
+25b0;
+
+quad_closeto(quad_qags (g (z), z, 1, 3),
+             quad_qags (5^(1/z), z, 1, 3),
+             [1d-15, 5d-15, 0, 0]);
+[true,true,true,true];
+             
+
+/* adapted from the reference manual */
+
+(kill(f), f(x) := sin(x) - x/2, 0);
+0;
+
+[bf_find_root (sin(x) - x/2, x, 0.1, %pi),
+ bf_find_root (sin(x) = x/2, x, 0.1, %pi),
+ bf_find_root (f(x), x, 0.1, %pi),
+ bf_find_root (f, 0.1, %pi)];
+[1.8954942670339809471440357380936b0, 
+ 1.8954942670339809471440357380936b0,
+ 1.8954942670339809471440357380936b0, 
+ 1.8954942670339809471440357380936b0];
+
+[bf_find_root (f, 1/(%pi*%e), 2*%pi*sin(%e)),
+ bf_find_root (f, log(%pi), %e^%pi),
+ bf_find_root (f, exp(1/5), exp(cos(%e + %pi))),
+ bf_find_root (f, cos(exp(2))/10, 10*cos(exp(2)))];
+[1.8954942670339809471440357380936b0, 
+ 1.8954942670339809471440357380936b0,
+ 1.8954942670339809471440357380936b0, 
+ 1.8954942670339809471440357380936b0];
+/* adapted from the mailing list 2007/06/10
+ * charfun2 copied from the interpol share package
+ */
+
+block ([expr],
+ charfun2 (z, l1, l2) := charfun (l1 <= z and z < l2),
+ expr : (-.329*x^3+.494*x^2 +.559*x+.117) *charfun2(x,minf,1.0)
+    +(.215*x^3-1.94*x^2 +4.85*x-2.77) *charfun2(x,2.5,inf) +(.0933*x^3-1.02*x^2
+    +2.56*x-.866) *charfun2(x,2.0,2.5) +(.0195*x^3-.581*x^2
+    +1.67*x-.275) *charfun2(x,1.5,2.0) +(.00117*x^3-.498*x^2 +1.55*x -.213)
+    *charfun2(x,1.0,1.5),
+ block ([tru : 3.12727131060542283643481895355b0,
+         est : bf_find_root (expr, x, 0, 4),
+         err],
+   err : abs(est-tru),
+   if is(err < 2*10b0^(-fpprec)) then true else err));
+true;
+
+/* bf_find_root example from sage mailing list */
+
+bf_find_root (.05^(x + 1) = (x + 1)*10^(-10), x, 5, 100);
+6.0349925729832129297929340832397b0;
+
+(find_root_error : true,
+ errcatch (bf_find_root (1 + x^2, x, 0, 1)));
+[];
+
+(find_root_error : "FOO",
+ errcatch (bf_find_root (1 + x^2, x, 0, 1)));
+["FOO"];
+
+/* From bug 3010567.  Just checking that we don't get
+   overflows when using bf_find_root */
+block([],
+  F(x,y):=(log(x)/log(y))^x-x^(log(x)/log(y)),
+  bf_find_root(F(400,z),z,2,1000));
+3.6541530643502285043078342270912b2;
+
+reset (find_root_error);
+[find_root_error];

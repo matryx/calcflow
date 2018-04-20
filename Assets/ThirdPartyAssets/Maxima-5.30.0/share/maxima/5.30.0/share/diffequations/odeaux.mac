@@ -1,0 +1,192 @@
+/* -*- Mode: macsyma; Package: CL-MAXIMA -*- */
+/* A collection of all the best ODE routines, run in the*/
+/*  best (hopefully) order  */
+/*************************************************/
+
+/* This intitializes the environment when the package gets loaded
+   or batched */
+
+define_variable(allmethods2,
+		'[ode2,whittaker,solvehyper,solfac,diffsol,desol,series],
+		list)$
+define_variable(allmethods1,
+		'[ode2,diffsol,nonlin,nonlin1,riccati],
+		list)$
+
+define_variable(odetutor,false,boolean)$
+
+define_variable(method,'method,any)$
+
+define_variable(method2,'method2,any)$
+
+define_variable(sings,'sings,any)$
+
+define_variable(ode_routinelist,[],list)$
+
+eval_when([batch,loadfile,translate],block(
+/* for DOE MACSYMA, the autoload properties are in max$disk:[ode]ode.lsp */
+if not status(feature,nil) or status(feature,cl)  then (
+ ode_routinelist:'[[[abel,lisp,dsk,ode],nonlin,nonlin1],
+                   [[ricsol,lisp,dsk,ode],ricsol],
+		   [[diffac,lisp,dsk,ode],solfac],
+		   [[lapl,lisp,dsk,ode],diffsol],
+		   [[trans,lisp,dsk,ode],desol, deptran,indtran,
+		        invariant,normalform,schwartzian,bothvartran,dadjoint],
+		   [[ricati,lisp,dsk,ode],apollo,riccati],
+		   [[hyper,lisp,dsk,ode],solvehyper],
+		   [[manyt,lisp,dsk,ode],manrecur],
+		   [[series,lisp,dsk,ode],series],
+		   [[whit,lisp,dsk,ode],whittaker],
+		   [[schmid,lisp,dsk,ode],schmidt],
+		   [[intfac,lisp,dsk,ode],int_factor],
+		   [[sings,lisp,dsk,ode],getsings],
+		   [[tran,lisp,dsk,ode],transform],
+		   [[hyp,fasl,dsk,ode],hgfred],
+		   [[remote,lisp,dsk,ell],run_remote],
+		   [[kamke,lisp,dsk,ode],kamke]],
+ for i in ode_routinelist do apply('setup_autoload,i)),
+ sstatus(feature,"ode")))$
+
+
+eval_when([batch,loadfile,translate],block([],
+/*  for DOE MACSYMA, the autoload properties are in max$disk:[ode]ode.lsp */
+if   status(feature,cl)  then (
+ ode_routinelist:'[["maxima-source:maxima;abel",nonlin,nonlin1],
+                   ["maxima-source:maxima;ricsol",ricsol],
+		   ["maxima-source:maxima;diffac",solfac],
+		   ["maxima-source:maxima;lapl",diffsol],
+		   ["maxima-source:maxima;trans",desol, deptran,indtran,
+		        invariant,normalform,schwartzian,bothvartran,dadjoint],
+		   ["maxima-source:maxima;ricati",apollo,riccati],
+		   ["maxima-source:maxima;hyper",solvehyper],
+		   ["maxima-source:maxima;manyt",manrecur],
+		   ["maxima-source:maxima;series",series],
+		   ["maxima-source:maxima;whit",whittaker],
+		   ["maxima-source:maxima;schmid",schmidt],
+		   ["maxima-source:maxima;intfac",int_factor],
+		   ["maxima-source:maxima;sings",getsings],
+		   ["maxima-source:maxima;tran",transform],
+		   ["maxima-source:maxima;hyp",hgfred],
+		   ["maxima-source:maxima;remote",run_remote],
+		   ["maxima-source:maxima;kamke",kamke]],
+ for i in ode_routinelist do apply('setup_autoload,i)),
+ sstatus(feature,"ode")))$
+ 
+/* This intitializes the environment for TRANSLATION,
+   loads modedeclarations, for the whole package, macro packages, etc. */
+
+/* EVAL_WHEN([TRANSLATE],?PRINC('?"
+WE ARE TRANSLATING AWAY!
+",?TYO))$ */
+
+
+odeaux(eq,oldy,oldx,option):=block([dd,ans,solutionlist,x,y],
+        eq:subsf(eq,oldy,oldx),
+    return(subst(oldy,y,subst(oldx,x,solveode(eq,y,x,option)))))$
+    
+solveode(eq,y,x,option):=block([dd,ans,solutionlist],
+    eq:eqsimp(eq),
+    dd:derivdegree(eq,y,x),
+
+    if option=[] or option=['any] then (
+    if(dd=1) then (
+    if(ans:win('ode2,eq,y,x))#false then return(ans),
+    if(testli(rhs(eq)-lhs(eq),y,x))=true then 
+    (if(ans:win('diffsol,eq,y,x))#false then 
+          (method:"LAPLACE XFORM", return(ans))) else 
+    (if(ans:win('nonlin,eq,y,x))#false then 
+          (method:"NONLIN IN YPRIME", return (ans)),
+     if(ans:win('nonlin1,eq,y,x))#false then
+          (method:"NONLIN XFORM", return (ans)),
+    if riccati_test(lhs(eq)-rhs(eq),y,x)=true then
+    if(ans:win('riccati,eq,y,x))#false then 
+          (method:"RICCATI",return(ans)),
+    if(ans:win('int_factor,eq,y,x))#false then
+          (method:"FOUND EULER MULTIPLIER",return(ans))
+	  )) else
+	  ( /*These methods are tailored for order = 2  */
+    if dd=2 then(
+    if(ans:win('ode2,eq,y,x))#false then return(ans),
+    if(ans:win('desol,eq,y,x))#false then (method:'method1,return(ans)),
+    if(ans:win('diffsol,eq,y,x))#false then
+       (method:"LAPLACE XFORM",return(ans)),
+
+
+  if(length(sings:getsings(eq,y,x))=3) then 
+     
+    if(ans:win('solvehyper,eq,y,x))#false then(method:'HYPERGEOMETRIC,
+      return(ans)),
+  if(sings='[0,inf] ) then 
+    if(ans:win('whittaker,eq,y,x))#false then(method:"CONFLUENT HYPER",
+      return(ans)),
+    if(ans:win('solfac,eq,y,x))#false then 
+          (method:"FACTOR OPERATOR",return(ans)),
+    if(ans:win('series,eq,y,x))#false then (method:"SERIES",
+      return(ans))) else
+   if (ans:win('diffsol,eq,y,x))#false then (method:"LAPLACE XFORM",
+       return(ans)),
+  method:"NONE",return(false)))
+  else(
+    if option=['all] then
+      if dd=2 then option:allmethods2 else if dd=1 then option:allmethods1
+         else option:['diffsol],
+    solutionlist:map(lambda([u],win(u,eq,y,x)),option),
+    if (length(solutionlist)=1) then
+      if programmode#true then 
+      solutionlist:part(solutionlist,1),
+    return(solutionlist)))$
+
+win(fun,eq,y,x):= block([ans],
+    if odetutor=true then print( "TRYING    ",fun),
+    if((ans:errcatch(block(method2:fun,apply(method2,[eq,y,x])))=[]))then 'fun,
+/* commented out of DOE MACSYMA since the GC statistics are on by default
+       if ?cadr(status(freecore))=0 then error("out of core...sorry"), */
+    if  (ans=[false] or ans=[]) then return(false) 
+            else return(part(ans,1)))$
+
+homog(eq,y,x):=block([eq1,p1,q1,hom,h1],
+    eq1:lhs(eq)-rhs(eq),
+    p1:p(eq1,y,x),q1:q(eq1,y,x),
+    hom:diff(y,x,2)+p1*diff(y,x)+q1*y,
+    if((h1:radcan(eq1-hom))=0) then return(false) else 
+       return(hom=-h1))$
+
+purify(sol,y,x):=block([sol1,s1,s2,%k1,%k2],
+    sol1:rhs(sol),
+    s1:ratcoef(sol1,%k1),s2:ratcoef(sol1,%k2),
+    if(s1=0) then if(s2=0) then return(false) else s1:s2,
+    if(length(s1)>length(s2)) then s1:s2,
+    return(s1))$
+
+testli(de,y,x):=block([h],
+    de:expand(de),
+    h:hipow(de,diff(y,x)),
+    if(h#1)then return(false),h:[],
+    h:cons(ratcoef(de,diff(y,x)),h),
+    h:cons(ratcoef(de,y,1),h),
+    h:cons(ratcoef(de,y,0),h),
+if(hipow(de,y)#1) then return(false),
+    h:cons(ratcoef(de,diff(y,x,2)),h),
+      if not freeof(y,h) then return(false) else 
+      return(true))$
+
+
+
+/*Simplifies an ODE removes factors common to all terms*/
+
+eqsimp(de):=block([inflag:true],
+    de:factor(lhs(de)-rhs(de)),
+    if(atom(de) or not(inpart(de,0)="*")) then return(de=0),
+    de:map(lambda([v],if freeof(nounify('diff),v) then 1 else v),de),
+    return(de=0))$
+subsf(eq,oldy,oldx):=block([%%newy,y,x],
+    depends(y,x),
+    eq:subst(%%newy,oldy,eq),
+    eq:subst(x,oldx,eq),
+    eq:subst(y,%%newy,eq),
+    return(eq))$
+
+riccati_test(de,y,x):=block([q],de:expand(de),
+    if hipow(de,'diff(y,x))#1 then return(false),
+    if ((q:lopow(de,'diff(y,x)))#1 and  q#0) then return(false),
+    if hipow(de,y)=2 then return(true) else return(false))$

@@ -1,0 +1,294 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+
+\title{The Meijer G-function\footnote
+{Copyright 2007 by Edmond Orignac.
+This file is released under the terms of the GNU General Public License, version 2.}}
+
+\begin{document}
+
+\maketitle
+
+\section{Meijer G-function} 
+
+The maxima function \texttt{meijer\_gred(x,b,a,c,d)} where 
+\texttt{x} is an expression, and \texttt{b,a,c,d} are lists
+attempts to express the Meijer G-function in terms of simpler
+functions, namely generalized hypergeometric functions, bessel
+functions and elementary transcendental functions. When no 
+simplification can be performed, it 
+returns \texttt{meijer\_g(x,b,a,c,d)}.  
+
+
+\subsection{Some definitions}
+
+The Meijer G-function is defined as a Mellin-Barnes integral\cite{meijer1951,braaksma1962,braaksma1975}:
+
+\begin{equation}
+  \label{eq:g-function-def}
+  G^{mn}_{pq}\left(z,\begin{array}{c} a_1\ldots a_n;a_{n+1} \ldots a_p \\ b_1\ldots b_m;b_{m+1} \ldots b_q \end{array} \right) = \frac 1 {2i\pi} \int_C \frac{\prod_{k=1}^m \Gamma(b_k-s) \prod_{j=1}^n \Gamma(1-a_j+s)}{\prod_{k=m+1}^q \Gamma(1-b_k+s) \prod_{j=n+1}^p \Gamma(a_j-s)} z^s ds   
+\end{equation}
+
+Where the contour $C$ is closed in an appropriate way to ensure the convergence
+of the integral. It is also required that no $a_j-b_k$ is an integer. 
+
+Many integral transforms of special functions can be expressed in terms of Meijer G-functions.\cite{maloo1966,shah1972,bajpai1968,bajpai1974,dahiya1988}
+
+The Meijer G-function has the following properties\cite{roach1997}: 
+ 
+It is invariant under any permutation of the parameters $a_1,\dots,a_n$ among themselves, any permutation of the parameters $b_1,\ldots, b_m$ among themselves, any permutation of the parameters $a_{n+1},\ldots a_p$ among themselves, and 
+any permutation of the parameters $b_{m+1},\ldots, b_q$ among themselves as 
+a trivial consequence of its definition. Furthermore, one has:  
+
+\begin{equation}\label{contin}
+   G^{mn}_{pq}\left(z,\begin{array}{c} a_1\ldots a_n;a_{n+1} \ldots a_p \\ b_1\ldots b_m;b_{m+1} \ldots b_q \end{array} \right)= G^{nm}_{qp}\left(\frac 1 z,\begin{array}{c}1-b_1\ldots 1-b_m;1-b_{m+1} \ldots 1-b_q\\  1-a_1\ldots 1-a_n;1-a_{n+1} \ldots 1-a_p  \end{array} \right)
+\end{equation}
+
+\begin{equation} \label{shift}
+  G^{mn}_{pq}\left(z,\begin{array}{c} a_1+\alpha\ldots a_n+\alpha;a_{n+1}+\alpha \ldots a_p+\alpha \\ b_1+\alpha\ldots b_m+\alpha;b_{m+1}+\alpha \ldots b_q+\alpha \end{array} \right)=z^\alpha  G^{mn}_{pq}\left(z,\begin{array}{c} a_1\ldots a_n;a_{n+1} \ldots a_p \\ b_1\ldots b_m;b_{m+1} \ldots b_q \end{array} \right)
+\end{equation}
+
+When no $b_j-b_k$ is an integer, the theorem of L.J. Slater allows the Meijer 
+G-function to be transformed into a sum of ${}_pF_{q-1}$ 
+generalized hypergeometric functions.\cite{roach1997} 
+
+For $p<q$ or for $p=q$ and $|z|<1$ one has:
+
+\begin{eqnarray}\label{slater}
+&&G^{mn}_{pq}\left(z,\begin{array}{c} a_1\ldots a_n;a_{n+1} \ldots
+       a_p \\ b_1\ldots b_m;b_{m+1} \ldots b_q \end{array} \right)= \\[6pt]
+&&\sum_{k=1}^m  \frac{ z^{b_k} \prod_{j=1}^n \Gamma(1+b_k-a_j) \prod_{l=1\atop l\ne k}^m \Gamma(b_j-b_k)}{\prod_{j=n+1}^p \Gamma(a_j-b_k) \prod_{j=m+1}^q \Gamma(1+b_k-b_j)} {}_pF_{q-1} (\{1+b_k-a_j\};\{1+b_k-b_l\}_{l\ne k};(-1)^{m+n-p} z)\nonumber
+\end{eqnarray}
+
+The case of $q>p$ or $p=q$ and $|z|>1$ can be treated by applying first (\ref{contin}) and then (\ref{slater}). The condition is then that 
+there are no $a_j-a_k$ that are integer.
+  
+\subsection{What the maxima script does}
+
+When one enters \texttt{meijer\_gred(x,b,a,c,d)} with \texttt{a=[a$_1$,\ldots,a$_n$]}, \texttt{b=[b$_1$,...b$_m$]}, \texttt{c=[a$_{n+1}$,...,a$_p$]}, \texttt{d=[b$_{m+1}$,...,b$_q$]}, the maxima script attempts to find a simplified expression for:
+
+\begin{equation}
+  G^{mn}_{pq}\left(x,\begin{array}{c} a_1\ldots a_n;a_{n+1} \ldots a_p \\ b_1\ldots b_m;b_{m+1} \ldots b_q \end{array} \right)
+\end{equation}
+ 
+By applying first some simple identities,\cite{meijer1951,wille1988} and if that fails applying the Slater  formula (\ref{slater}) after checking that its condition of validity is met. 
+
+One can see that the order in which the parameters have to be entered is the following: bottom left, then top left, then top right, then bottom right, i. e. blocks of parameters are read in the anticlockwise sense.
+
+
+\subsection{Limitations} 
+
+No numerical calculation or asymptotic expansion can be 
+ performed by the script, although asymptotic expansions for Meijer G-functions are known.\cite{braaksma1962} 
+
+The differentiation formulas for the G-functions are not used 
+nor defined by the script.\cite{roach1997} This is (in principle) 
+easy to add with \texttt{gradef} for differentiation with respect to $z$ 
+but more difficult in case of differentiation with respect to the paramters. 
+ 
+
+Relations between contiguous functions are not used by the script, but 
+an algorithm exists to take advantage of these.\cite{roach1997}   
+The relation (\ref{shift}) is not used in simplifications that are not
+based on Slater's formula. 
+
+Some identities for the G-function have been left out.\cite{meijer1932,meijer1935,meijer1939,meijer1951} Many more could be found in the Bateman Manuscript
+project.
+ 
+
+
+\section{MacRobert's E-function}
+
+The MacRobert E-function\cite{macrobert1958,macrobert1959c,macrobert1959b,macrobert1959a,macrobert1959,macrobert1960,macrobert1960a,macrobert1961,macrobert1961a,macrobert1962,macrobert1962a,ragab1962,ragab1993,ragab1962a,ragab1954} is also defined by a Mellin-Barnes integral. 
+This integral is a particular case of the integral defining 
+Meijer's G-function, and one has:
+
+\begin{equation}
+  E(a_1\ldots a_p;b_1\ldots b_q;z)=G^{p1}{q+1,p}\left(z,\begin{array}{c} 1;b_1\ldots b_q\\ a_1\ldots a_p \end{array} \right)
+\end{equation}
+
+This identity is used by the function \texttt{macrobert\_ered(a,b,x)} to derive simpified forms of MacRobert's E-function.
+
+ 
+
+%\bibliographystyle{acm} 
+%\bibliography{maxima}
+
+\begin{thebibliography}{10}
+
+\bibitem{bajpai1968}
+{\sc Bajpai, S.~D.}
+\newblock A finite integrals involving a confluent hypergemoetric and a meijer
+  g-function.
+\newblock {\em Portugaliae Mathematica 28\/} (1968), 55.
+\newblock Available online from National Library of Portugal.
+
+\bibitem{bajpai1974}
+{\sc Bajpai, S.~D.}
+\newblock Expansion formula for the product of meijer g-function and bessel
+  functions.
+\newblock {\em Portugaliae Mathematica 33\/} (1974), 35.
+\newblock Available online from National Library of Portugal.
+
+\bibitem{braaksma1975}
+{\sc Braaksma, B.}
+\newblock In memoriam c. s. meijer.
+\newblock {\em Nieuw Archief voor Wiskunde 23\/} (1975), 95.
+
+\bibitem{braaksma1962}
+{\sc Braaksma, B. L.~J.}
+\newblock Asymptotic expansion and analytic continuation for a class of
+  mellin-barnes integrals.
+\newblock {\em Compositio Mathematicae 15\/} (1962--1964), 239.
+\newblock available from \texttt{http://www.numdam.org}.
+
+\bibitem{dahiya1988}
+{\sc Dahiya, R., and Jowhar, I.}
+\newblock Two dimensional laplace transforms of generalized hypergeometric
+  functions.
+\newblock {\em Internat. J. Math. \& Math. Sci. 2\/} (1988), 167.
+
+\bibitem{macrobert1958}
+{\sc MacRobert, T.}
+\newblock Integrals involving e-functions.
+\newblock {\em Mathematische Zeitschrift 69}, 234 (1958).
+\newblock Available from texttt{http://www.digizeitschriften.de}.
+
+\bibitem{macrobert1959c}
+{\sc MacRobert, T.}
+\newblock Infinite series of e-functions.
+\newblock {\em Mathematische Zeitschrift 71\/} (1959), 143.
+\newblock Available from \texttt{http://www.digizeitschriften.de}.
+
+\bibitem{macrobert1959a}
+{\sc MacRobert, T.}
+\newblock Integrals of products of e-functions.
+\newblock {\em Mathematische Annalen 137\/} (1959), 412.
+\newblock Available from texttt{http://www.digizeitschriften.de}.
+
+\bibitem{macrobert1959b}
+{\sc MacRobert, T.}
+\newblock The multiplication formula for the gamma function and e-function
+  series.
+\newblock {\em Mathematische Annalen 139\/} (1959--1960), 133.
+\newblock Available from texttt{http://www.digizeitschriften.de}.
+
+\bibitem{macrobert1960a}
+{\sc MacRobert, T.}
+\newblock Recurrence formulae for the e-functions.
+\newblock {\em Mathematische Zeitschrift 73\/} (1960), 254.
+
+\bibitem{macrobert1962a}
+{\sc MacRobert, T.}
+\newblock Barnes integrals as a sum of e-functions.
+\newblock {\em Mathematische Annalen 147\/} (1962), 240.
+\newblock Available from \texttt{http://www.digizeitschriften.de}.
+
+\bibitem{macrobert1962}
+{\sc MacRobert, T., and Ragab, F.}
+\newblock E-function series whose sums are constants.
+\newblock {\em Mathematische Zeitschrift 78\/} (1962), 231.
+
+\bibitem{macrobert1959}
+{\sc MacRobert, T.~M.}
+\newblock product of e-functions.
+\newblock {\em Pacific Journal of Mathematics ??\/} (1959), 759.
+\newblock available from \texttt{http://www.projecteuclid.org}.
+
+\bibitem{macrobert1960}
+{\sc MacRobert, T.~M.}
+\newblock product of e-functions.
+\newblock {\em Pacific Journal of Mathematics ??\/} (1960), 309.
+\newblock available from \texttt{http://www.projecteuclid.org}.
+
+\bibitem{macrobert1961}
+{\sc MacRobert, T.~M.}
+\newblock Evaluation of an e-function when three of its upper parameters differ
+  by integral values.
+\newblock {\em Pacific Journal of Mathematics ??\/} (1961), 999.
+\newblock available from \texttt{http://www.projecteuclid.org}.
+
+\bibitem{macrobert1961a}
+{\sc MacRobert, T.~M.}
+\newblock Evaluation of an e-function when three of its upper parameters differ
+  by integral values.
+\newblock {\em Pacific Journal of Mathematics ??\/} (1961), 999.
+\newblock available from \texttt{http://www.projecteuclid.org}.
+
+\bibitem{maloo1966}
+{\sc Maloo, H.}
+\newblock Integrals involving products of bessel function and meijer's
+  g-function.
+\newblock {\em Monatshefte f\"ur Mathematik 70\/} (1966), 127.
+\newblock available from \texttt{http://www.digizeitschriften.de}.
+
+\bibitem{meijer1932}
+{\sc Meijer, C.~S.}
+\newblock Asymptotische entwicklungen von besselschen und hankelschen
+  funktionen f\"ur grosse...
+\newblock {\em Math. Ann. 108\/} (1932), 21.
+\newblock available from \texttt{http://www.digizeitschriften.de}.
+
+\bibitem{meijer1939}
+{\sc Meijer, C.~S.}
+\newblock Integraldarstellung fur struvesche und besselche funktionen.
+\newblock {\em Compositio Mathematicae 6\/} (1939), 348.
+\newblock available from \texttt{http://www.numdam.org}.
+
+\bibitem{meijer1935}
+{\sc Meijer, C.~S.}
+\newblock Neue integraldarstellungen aus der theorie der whittakerschen und
+  hankelschen funktionen.
+\newblock {\em Mathematische Annalen 112\/} (1939), 469.
+\newblock available from \texttt{http://www.digizeitschriften.de}.
+
+\bibitem{meijer1951}
+{\sc Meijer, C.~S.}
+\newblock Neue integraldarstellung fur besselche funktionen.
+\newblock {\em Compositio Mathematicae 8\/} (1951), 49.
+\newblock available from \texttt{http://www.numdam.org}.
+
+\bibitem{ragab1954}
+{\sc Ragab, F.}
+\newblock New integrals involving bessel-functions.
+\newblock {\em Mathematische Zeitschrift 61\/} (1954), 386.
+\newblock Available from \texttt{http://www.digizeitschriften.de}.
+
+\bibitem{ragab1962}
+{\sc Ragab, F.~M.}
+\newblock Neue integraldarstellungen aus der theorie der macrobertschen und
+  besselschen funktionen.
+\newblock {\em Mathematische Zeitschrift 79\/} (1962), 147.
+
+\bibitem{ragab1962a}
+{\sc Ragab, F.~M.}
+\newblock Integrals involving products of bessel functions.
+\newblock {\em Mathematische Zeitschrift 80\/} (1962--1963), 177.
+
+\bibitem{ragab1993}
+{\sc Ragab, S.~F.}
+\newblock Finite and infinite series involving macrobert's e-function.
+\newblock {\em Portugaliae Mathematica 50\/} (1993), 507.
+\newblock Available online from National Library of Portugal.
+
+\bibitem{roach1997}
+{\sc Roach, K.}
+\newblock Meijer g-function representations.
+\newblock In {\em ISSAC'97 proceedings\/} (New York, 1997), ACM.
+\newblock Available from CITESEER.
+
+\bibitem{shah1972}
+{\sc Shah, M.}
+\newblock On generalized meijer's and associated generlaized legendre
+  functions.
+\newblock {\em Portugaliae Mathematica 31\/} (1972), 55.
+\newblock Available online from National Library of Portugal.
+
+\bibitem{wille1988}
+{\sc Wille, L.~T.}
+\newblock A novel class of g-function integrals.
+\newblock {\em Journal of Mathematical Physics 29\/} (1988), 599.
+
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,194 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+kill(all);
+done$
+partition(2*a*x*f(x),x);
+[2*a,x*f(x)]$
+partition(a+b,x);
+[b+a,0]$
+2*(a*log(x)+2*a*log(y));
+2*(2*a*log(y)+a*log(x))$
+logcontract(%);
+a*log(x^2*y^4)$
+ratsimp(logcontract(log(sqrt(x+1)+sqrt(x))+log(sqrt(x+1)-sqrt(x))));
+0$
+
+/* Two examples from Bug report ID: 947808 - logcontract and ratfac */
+logexpand:false; /* To prevent simplification of the expected result */
+false;
+logcontract(2*log(x+1)+1);
+log((x+1)^2)+1;
+logexpand:true;
+true;
+logcontract(1000*log(x+1)+log(x));
+log(x*(x+1)^1000)$
+
+rootsconmode:false;
+false$
+
+rootscontract(x^(1/2)*y^(3/2));
+sqrt(x*y^3)$
+
+rootscontract(x^(1/2)*y^(1/4));
+sqrt(x)*y^(1/4)$
+
+rootsconmode:true;
+true$
+
+expand(rootscontract(x^(1/2)*y^(1/4)) - sqrt(x*sqrt(y)),0,0);
+0$
+
+expand(rootscontract(x^(1/2)*y^(1/3)) - sqrt(x)*y^(1/3),0,0);
+0$
+
+rootsconmode:all;
+all$
+expand(rootscontract(x^(1/2)*y^(1/4)) - (x^2*y)^(1/4),0,0);
+0$
+
+expand(rootscontract(x^(1/2)*y^(1/3)) -(x^3*y^2)^(1/6),0,0);
+0$
+
+rootsconmode:false;
+false$
+rootscontract(sqrt(sqrt(x+1)+sqrt(x))*sqrt(sqrt(x+1)-sqrt(x)));
+1$
+rootsconmode:true;
+true$
+
+rootscontract(sqrt(sqrt(5)+5)-5^(1/4)*sqrt(sqrt(5)+1));
+0$
+
+kill(f,g,h,x,y);
+done$
+diff(sin(x)+x^3+2*x^2,x);
+cos(x)+3*x^2+4*x$
+diff(sin(x)*cos(x),x);
+cos(x)^2-sin(x)^2$
+diff(sin(x)*cos(x),x,2);
+-4*cos(x)*sin(x)$
+derivabbrev:true;
+true$
+diff(exp(f(x)),x,2);
+%e^f(x)*'diff(f(x),x,2)+%e^f(x)*('diff(f(x),x,1))^2$
+'integrate(f(x,y),y,g(x),h(x));
+'integrate(f(x,y),y,g(x),h(x))$
+diff(%,x);
+'integrate('diff(f(x,y),x,1),y,g(x),h(x))
+ +f(x,h(x))*'diff(h(x),x,1)-f(x,g(x))*'diff(g(x),x,1)$
+kill(a,x,f,y,t);
+done$
+
+/* -----------------------------------------------------------------------------
+ * Examples for dependencies
+ * -------------------------------------------------------------------------- */
+depends(a,x);
+[a(x)]$
+diff(a . a,x);
+'diff(a,x,1) . a+a . 'diff(a,x,1)$
+depends(f,[x,y],[x,y],t);
+[f(x,y),x(t),y(t)]$
+diff(f,t);
+'diff(f,y,1)*'diff(y,t,1)+'diff(f,x,1)*'diff(x,t,1)$
+depends(y,x);
+[y(x)]$
+kill(f,g,j);
+done$
+
+/* More examples with subscribted variables */
+
+depends(g,f,f,[x[1],x[2],x[3]],x,t);
+[g(f),f(x[1],x[2],x[3]),x(t)]$
+diff(g,f);
+'diff(g,f,1)$
+diff(f,x[1]);
+'diff(f,x[1],1)$
+diff(f,x[1],2);
+'diff(f,x[1],2)$
+diff(x[1],t);
+'diff(x[1],t,1)$
+diff(f,x[1],1,x[2],1,x[3],1);
+'diff(f,x[1],1,x[2],1,x[3],1)$
+diff(f,t);
+'diff(x[3],t,1)*'diff(f,x[3],1)+'diff(x[2],t,1)*'diff(f,x[2],1)
+                               +'diff(x[1],t,1)*'diff(f,x[1],1)$
+diff(g,t);
+('diff(x[3],t,1)*'diff(f,x[3],1)+'diff(x[2],t,1)*'diff(f,x[2],1)
+                                +'diff(x[1],t,1)*'diff(f,x[1],1))
+ *'diff(g,f,1)$
+kill(g,f,x);
+done;
+
+/* The subscript is not differentiated, it is a constant */
+
+depends(f,x[a],x,t,t,a);
+[f(x[a]),x(t),t(a)]$
+diff(f,x[a]);
+'diff(f,x[a],1)$
+diff(f,t);
+'diff(x[a],t,1)*'diff(f,x[a],1)$
+diff(f,a);
+'diff(x[a],t,1)*'diff(f,x[a],1)*'diff(t,a,1)$
+kill(f,x,t);
+done;
+
+/* Maxima has not a problem with circular defined dependencies */
+
+depends(f,x,x,t,t,f);
+[f(x),x(t),t(f)]$
+diff(f,x);
+'diff(f,x,1)$
+diff(f,t);
+'diff(f,x,1)*'diff(x,t,1)$
+diff(t,f);
+'diff(t,f,1)$
+diff(t,x);
+'diff(f,x,1)*'diff(t,f,1)$
+kill(f,x,t);
+done;
+/* -------------------------------------------------------------------------- */
+
+gradef(f(x,y),x^2,g(x,y));
+f(x,y)$
+diff(f(x,y),x);
+g(x,y)*'diff(y,x,1)+x^2$
+gradef(j(n,z),'diff(j(n,z),n),j(n-1,z)-n/z*j(n,z));
+j(n,z)$
+ratsimp(diff(j(2,x),x,2));
+(j(0,x)*x^2-3*j(1,x)*x+6*j(2,x))/x^2$
+test(f):=block([u],u:integrate(f,x),ratsimp(f-diff(u,x)));
+test(f):=block([u],u:integrate(f,x),ratsimp(f-diff(u,x)))$
+test(sin(x));
+0$
+test(1/(1+x));
+0$
+test(1/(1+x^2));
+0$
+integrate(sin(x)^3,x);
+cos(x)^3/3-cos(x)$
+kill(q);
+done$
+integrate(%e^x/(%e^x+2),x);
+log(%e^x+2)$
+integrate(1/(x*log(x)),x);
+log(log(x))$
+integrate(sin(2*x+3),x);
+-cos(2*x+3)/2$
+
+/* Correct simplification after change to risch.lisp revision 1.17 */
+
+integrate(%e^x*erf(x),x);
+%e^x*erf(x)-%e^(1/4)*erf(x-1/2)$
+
+integrate(x/(x^3+1),x);
+log(x^2-x+1)/6+atan((2*x-1)/sqrt(3))/sqrt(3)-log(x+1)/3$
+diff(%,x);
+2/(3*((2*x-1)^2/3+1))+(2*x-1)/(6*(x^2-x+1))-1/(3*(x+1))$
+ratsimp(%);
+x/(x^3+1)$

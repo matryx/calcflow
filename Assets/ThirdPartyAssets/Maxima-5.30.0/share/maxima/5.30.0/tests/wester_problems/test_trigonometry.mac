@@ -1,0 +1,69 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Trigonometry/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Trigonometry ---------- */
+/* => - [(sqrt(5) + 1) sqrt(2)]/[(sqrt(5) - 1) sqrt(sqrt(5) + 5)]
+      = - sqrt[1 + 2/sqrt(5)]
+   From B. F. Caviness, Robert P. Gilbert, Wolfram Koepf, Roman Shtokhamer and
+   David W. Wood, _An Introduction to Applied Symbolic Computation using
+   MACSYMA_, University of Delaware, draft of December 14, 1993, section 2.3.3.
+   */
+tan(7*%pi/10);
+ev(%, %piargs:all);
+factor(rootscontract(%));
+/* => - cos 3 */
+sqrt((1 + cos(6))/2);
+/* cos(n pi) + sin((4 n - 1)/2 pi) => (-1)^n - 1 for integer n */
+declare(n, integer)$
+cos(n*%pi) + sin((4*n - 1)/2 * %pi);
+/* cos(cos(n pi) pi) + sin(cos(n pi) pi/2) => -1 + (-1)^n for integer n */
+cos(cos(n*%pi)*%pi) + sin(cos(n*%pi)*%pi/2);
+/* sin([n^5/5 + n^4/2 + n^3/3 - n/30] pi) => 0 for integer n
+   [Paul Zimmermann] */
+sin((n^5/5 + n^4/2 + n^3/3 - n/30) * %pi);
+remove(n, integer)$
+/* | cos x |, | sin x | => - cos x, - sin x  for  - 3 pi < x < - 5/2 pi */
+assume(-3*%pi < x, x < -5/2*%pi)$
+[abs(cos(x)), abs(sin(x))];
+forget(-3*%pi < x, x < -5/2*%pi)$
+/* Trigonometric manipulations---these are typically difficult for students */
+r: cos(3*x)/cos(x);
+/*  => cos(x)^2 - 3 sin(x)^2 or similar */
+ratsimp(trigexpand(r));
+/* => 2 cos(2 x) - 1 */
+poissimp(ratsimp(trigexpand(r)));
+ratsimp(trigreduce(ratsimp(trigexpand(r))));
+/* Use rewrite rules => cos(x)^2 - 3 sin(x)^2 */
+matchdeclare(n, integerp, x, true)$
+defrule(cos_angles, cos(n*x),
+        cos((n - 1)*x) * cos(x) - sin((n - 1)*x) * sin(x));
+defrule(sin_angles, sin(n*x),
+        sin((n - 1)*x) * cos(x) + cos((n - 1)*x) * sin(x));
+apply2(r, cos_angles, sin_angles);
+ratsimp(%);
+remvalue(r)$
+/* Here is a tricky way of writing 0/0 */
+expr: (tan(x)^2 + 1 - sec(x)^2)/(sin(x)^2 + cos(x)^2 - 1);
+/* Let's try simplifying this expression! */
+trigsimp(expr);
+/* What is its limit at zero? */
+limit(expr, x, 0);
+/* What is the derivative? */
+diff(expr, x);
+remvalue(expr)$
+/* ---------- Quit ---------- */
+quit();

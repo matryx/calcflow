@@ -18,9 +18,6 @@ public class CustomParametrizedSurface : MonoBehaviour
 
     public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
 
-    private float uMin, uMax;
-    private float vMin, vMax;
-
     #region axis labels
     public AxisLabelManager xAxis;
     public AxisLabelManager yAxis;
@@ -89,7 +86,8 @@ public class CustomParametrizedSurface : MonoBehaviour
     {
         solver = new AK.ExpressionSolver();
         InitializeParticleSystem();
-        //InitializeCorrespondingPoint();
+
+        tessel.gameObject.SetActive(false);
     }
 
     public MeshFilter mesh;
@@ -117,7 +115,7 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
         foreach (ExpressionSet expressionSet in expressionSets)
         {
-            tessel.EnqueueEquation(expressionSet.expressions[X].expression, expressionSet.expressions[Y].expression, expressionSet.expressions[Z].expression, expressionSet.ranges["u"].Min.Value, expressionSet.ranges["u"].Max.Value, expressionSet.ranges["v"].Min.Value, expressionSet.ranges["v"].Max.Value);
+            tessel.EnqueueEquation(currentScale, expressionSet.expressions[X].expression, expressionSet.expressions[Y].expression, expressionSet.expressions[Z].expression, expressionSet.ranges["u"].Min.Value, expressionSet.ranges["u"].Max.Value, expressionSet.ranges["v"].Min.Value, expressionSet.ranges["v"].Max.Value);
         }
     }
 
@@ -297,7 +295,8 @@ public class CustomParametrizedSurface : MonoBehaviour
             temp.AddRange(array);
         }
         Particle lastParticle = temp[temp.Count - 1];
-        for (int i = 0; i < missingParticles; i++) {
+        for (int i = 0; i < missingParticles; i++)
+        {
             temp.Add(lastParticle);
         }
         dest = temp.ToArray();
@@ -351,7 +350,7 @@ public class CustomParametrizedSurface : MonoBehaviour
                 string name = indexedParam[j];
                 AK.Variable var = vars[name];
 
-                var.value = threadHelper.parameterMin[name] + (float)val / (width-1) * (threadHelper.parameterMax[name] - threadHelper.parameterMin[name]);
+                var.value = threadHelper.parameterMin[name] + (float)val / (width - 1) * (threadHelper.parameterMax[name] - threadHelper.parameterMin[name]);
             }
 
             float x = (float)threadHelper.expressionList[0].Evaluate();

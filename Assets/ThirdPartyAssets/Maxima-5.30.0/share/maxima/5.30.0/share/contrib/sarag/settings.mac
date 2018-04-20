@@ -1,0 +1,93 @@
+/* Code by Fabrizio Caruso */
+
+/* Prime for modular square-freeness test */
+MOD_TEST_PRIME : 2;
+
+/* Verbosity level */
+DEFAULT_VERBOSITY : 0; /* non-verbose */
+
+/* Linear solver (used in naive sign determination) */
+LINEAR_SOLVER : linsolve;
+
+/* Assume expanded polynomial input in main functions */
+ASSUME_EXPANDED : false;
+
+/* Coefficients normal form in sSubRes and similar algorithms */
+NORM_ALGORITHM : lambda([x],ratexpand(x));
+/*
+NORM_ALGORITHM : lambda([x],rat(x));
+*/
+
+/* Square-free algorithm */
+/* Standard possibilities: */
+/* squareFreeBuiltin       */
+/* squareFreeWithZ         */
+/* squareFreeWithQ         */
+SQUARE_FREE_ALGORITHM : lambda([x,y],squareFreeWithZ(x,y));
+
+/* Sign determination algorithm to be used in Thom encoding */
+/*
+THOM_SIGN_DET_ALG : naiveSignDetermination;
+*/
+THOM_SIGN_DET_ALG : smartSignDetermination; /* experimental! */
+
+
+
+/* Assume generic position for curves when studing the topology */
+ASSUME_GENERIC_POSITION : false;
+
+/* Warnings */
+WARNINGS : false;
+
+/* Plot style */
+
+/* To be used only with gnuplot 4.0.x or above */
+/* Once the 3.7.x becomes deprecated and unsupported it might */
+/* become necessary to switch to the 4.0.x style */
+/*
+PLOT_STYLE : "unset xtics; unset ytics; unset key;";
+*/
+
+/* This is the old 3.7.x gnuplot command, which works also in 4.0.x */
+PLOT_STYLE : "set noxtics; set noytics; set nokey;"; 
+
+/* It decides whether to connect points at infinitity */
+PLOT_AT_INFINITY : true;
+
+
+
+/* Space between points on a projection */
+PLOT_SPACING : 2;
+
+/* Height of the graph */
+PLOT_HEIGHT : 10;
+
+
+/* Postscript output */
+PS_OUTPUT : false;
+
+/* Postscript output file name */
+PS_OUTPUT_FILE_NAME : "test.eps";
+
+
+/* Color related settings */
+
+SARAG_LINE_COLOR : 1;
+SARAG_POINT_SIZE : 3;
+SARAG_POINT_STYLE_GENERIC : 3;
+SARAG_POINT_STYLE_CRITICAL : 2;
+SARAG_POINT_STYLE_NONCRITICAL : 1;
+
+
+/* unimplemented */
+SARAG_POINT_STYLE_AT_INFINITY : 1;
+
+
+/* default interval for the certificate of positivity */
+DEFAULT_LEFT_END : -1;
+DEFAULT_RIGHT_END : 1;
+
+/* compression of the certificate */
+COMPRESS_CERTIFICATE : true;
+
+

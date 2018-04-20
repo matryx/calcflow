@@ -1,0 +1,85 @@
+---------------------------------------------------
+---------------------------------------------------
+SARAG 1.1
+
+August 3rd 2009
+
+
+by Fabrizio Caruso (caruso@dm.unipi.it)
+with a contribution by Richard Leroy
+(multivariate certificate of positivity)
+
+---------------------------------------------------
+---------------------------------------------------
+
+SARAG 1.1
+
+(1) small fix in the univariate certificate
+
+(2) integration of Richard Leroy's code 
+for the multivariate certificate of positivity
+("multiCertificateOfPositivity.mac").
+
+
+---------------------------------------------------
+
+SARAG 1.0.1
+
+(1) certificate of positivity: 
+- "certificateOfPositivity.mac"
+This files contains routines for the certificate of
+positivity, which can be used to produce formal
+proof of positivity/negativity or existence of roots
+for univariate polynomials. Try for example
+"certificateProof((2*x-1)^2+x^4,x,[-1,1]);"
+for a proof of positivity in [-1,1]. 
+
+(2) updated "readme.txt" and "arag_test.mac". 
+
+---------------------------------------------------
+SARAG 1.0
+
+(Some bug fixes)
+
+(1) gcdFreePart should be now correct
+
+(2) sRem and sSubRes compute sequences that
+are now longer by one element
+
+---------------------------------------------------
+SARAG beta 0.4
+
+(1) newtonFromPoly(pol,var,len) now takes three arguments:
+it computes a sequence of Newton sums of length "len"
+
+(2) code clean up ("subRes"-> "sSubRes", "sSubResSignChanges"-> "genPermMVar")
+
+
+---------------------------------------------------
+SARAG beta 0.3
+
+(1) bug fixes
+- drawTopology: 
+it now computes
+the correct topology of points
+at infinity
+
+(2) new functions
+- echelonMod : 
+it computes
+the Echelon form of a matrix
+
+(3) test files:
+- "arag_test.mac"
+It tests the examples contained
+in the book "Algorithms in Real
+Algebraic Geometry" (which contains
+SARAG and uses Maxima in its electronic version)
+- "hard_test.mac"
+It tests some other commands involve
+more computation  (mostly topology computations)
+
+(4) updated "readme.txt"
+
+--------------------------------------------------
+

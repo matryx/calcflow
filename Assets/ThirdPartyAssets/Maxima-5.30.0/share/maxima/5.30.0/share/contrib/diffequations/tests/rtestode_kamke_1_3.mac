@@ -1,0 +1,590 @@
+/* ODE tests - Equations 201-300
+
+  Reference:
+    E Kamke, Differentialgleichungen Losungsmethoden und Losungen, 
+    Vol 1, Geest & Portig, Leipzig, 1961
+
+    E. S. Cheb-Terrab, T. Koloknikov,  First Order ODEs, 
+    Symmetries and Linear Transformations, European Journal of 
+    Applied Mathematics, Vol. 14, No. 2, pp. 231-246 (2003). 
+    (http://lie.uwaterloo.ca/papers/ode_iv.pdf)
+
+*/
+/* Don't kill(all); It messes up trigsimp */
+
+/* Print ode number*/
+(pn_(n_):=print("Kamke ODE 1.",n_),true);
+true;
+
+/*  201  */ 
+(pn_(201),ans:contrib_ode(eqn:2*f(x)*'diff(y,x,1)+2*f(x)*y^2-'diff(f(x),x,1)*y-2*f(x)^2,y,x));
+[y=sqrt(f(x))*(%c*sinh('integrate(sqrt(f(x)),x))+%i*cosh('integrate(sqrt(f(x)),x)))/(%i*sinh('integrate(sqrt(f(x)),x))+%c*cosh('integrate(sqrt(f(x)),x)))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/*  202  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 202 ),ans:contrib_ode(eqn: f(x)*'diff(y,x,1)+g(x)*tg(y)+h(x) ,y,x)); */ 
+
+/*  203  */ 
+(pn_(203),ans:contrib_ode(eqn:y*'diff(y,x,1)+y+x^3,y,x));
+false;
+
+/*  204  */ 
+assume(a^2>4);
+[a^2>4];
+(pn_(204),ans:contrib_ode(eqn:y*'diff(y,x,1)+a*y+x,y,x));
+[%c*x=%e^-(((sqrt(a^2-4)*log((y^2+a*x*y+x^2)/x^2)-a*log(-((-2*y+sqrt(a^2-4)*x-a*x)/(2*y+sqrt(a^2-4)*x+a*x))))/(2*sqrt(a^2-4))))];
+method;
+homogeneous;
+forget(a^2>4);
+[a^2>4];
+
+/*  205  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 205 ),ans:contrib_ode(eqn: y*'diff(y,x,1)+a*y+b*x^n+(a^2-1)*x/4 ,y,x)); */ 
+
+/*  206  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 206 ),ans:contrib_ode(eqn: y*'diff(y,x,1)+a*y+b*%e^x-2*a ,y,x)); */ 
+
+/*  207  */ 
+(pn_(207),ans:contrib_ode(eqn:y*'diff(y,x,1)+y^2+4*x*(x+1),y,x));
+[(%e^(2*x)*y^2+4*x^2*%e^(2*x))/2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  208  */ 
+(pn_(208),ans:contrib_ode(eqn:y*'diff(y,x,1)+a*y^2-b*cos(x+c),y,x));
+[((4*a^2+1)*%e^(2*a*x)*y^2-2*b*%e^(2*a*x)*sin(x+c)-4*a*b*%e^(2*a*x)*cos(x+c))/(8*a^2+2)=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  209  */ 
+(pn_(209),ans:contrib_ode(eqn:y*'diff(y,x,1)-sqrt(a*y^2+b),y,x));
+[sqrt(a*y^2+b)/a=x+%c];
+[method,ode_check(eqn,ans[1])];
+[separable,0];
+
+/*  210  */ 
+(pn_(210),ans:contrib_ode(eqn:y*'diff(y,x,1)+x*y^2-4*x,y,x));
+[-((log(y+2)+log(y-2))/2)=x^2/2+%c];
+[method,ode_check(eqn,ans[1])];
+[separable,0];
+
+/*  211  */ 
+(pn_(211),ans:contrib_ode(eqn:y*'diff(y,x,1)-x*%e^(x/y),y,x));
+[%c*x=%e^'integrate(x*y/(x^2*%e^(x/y)-y^2),y/x)];
+method;
+homogeneous;
+
+/*  212  */ 
+/* This equation presents a problem - crashes ode_contrib */ 
+/* (pn_( 212 ),ans:contrib_ode(eqn: g(x)*f(y^2+x^2)+y*'diff(y,x,1)+x ,y,x)); */ 
+
+/* Abel equations of second kind */
+(pn_(213),ans:contrib_ode(eqn:(y+1)*'diff(y,x)=y+x,y,x));
+[-((log((2*(x-1)/(y+1)-sqrt(5)+1)/(2*(x-1)/(y+1)+sqrt(5)+1))+sqrt(5)*log((x-1)/(y+1)+(x-1)^2/(y+1)^2-1)-2*sqrt(5)*log((x-1)/(y+1)))/(2*sqrt(5)))=log(x-1)+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+(pn_(214),ans:contrib_ode(eqn:(y+x-1)*'diff(y,x)-y+2*x+3=0,y,x));
+[-((2*atan((1-(3*x+2)/(y+x-1))/sqrt(2))+sqrt(2)*log(-(2*(3*x+2)/(y+x-1))+(3*x+2)^2/(y+x-1)^2+3)-(2*sqrt(2)*log(-((3*x+2)/(2*(y+x-1))))))/(6*sqrt(2)))=log(3*x+2)/3+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+(pn_(215),ans:contrib_ode(eqn:(y+2*x-2)*'diff(y,x)-y+x+1=0,y,x));
+[-((6*atan((3-2*(3*x-1)/(y+2*x-2))/sqrt(3))+sqrt(3)*log(-((3*x-1)/(y+2*x-2))+(3*x-1)^2/(3*(y+2*x-2)^2)+1)-2*sqrt(3)*log(-((3*x-1)/(3*(y+2*x-2)))))/(6*sqrt(3)))=log(3*x-1)/3+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+(pn_(216),ans:contrib_ode(eqn:(y-2*x+1)*'diff(y,x)+y+x=0,y,x));
+[-((6*atan((2*(3*x-1)/(y-2*x+1)+3)/sqrt(3))+sqrt(3)*log((3*x-1)/(y-2*x+1)+(3*x-1)^2/(3*(y-2*x+1)^2)+1)-(2*sqrt(3)*log((3*x-1)/(3*(y-2*x+1)))))/(6*sqrt(3)))=log(3*x-1)/3+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+(pn_(217),ans:contrib_ode(eqn:(y-x^2)*'diff(y,x)=x,y,x));
+[(2*y-2*x^2-1)*%e^(2*y)/4 = %c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+(pn_(218),ans:contrib_ode(eqn:(y-x^2)*'diff(y,x)+4*x*y=0,y,x));
+[(2*y+2*x^2)/sqrt(y) = %c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  219  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 219 ),ans:contrib_ode(eqn: (y+g(x))*'diff(y,x,1)-f2(x)*y^2-f1(x)*y-f0(x) ,y,x)); */ 
+
+(pn_(220),ans:contrib_ode(eqn:2*y*'diff(y,x)-x*y^2-x^3=0,y,x));
+[%e^-(x^2/2)*(y^2+x^2+2) = %c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+(pn_(221),ans:contrib_ode(eqn:(2*y+x+1)*'diff(y,x)-(2*y+x-1)=0,y,x));
+[-((2*y+x+1)*(
+ -(4*(2*(x+1)+2*(1-x))*log(1-(2*(x+1)+2*(1-x))/(3*(2*y+x+1))) /(3*(2*y+x+1)))
+ +(4*(2*(x+1)+2*(1-x))*log(-((2*(x+1)+2*(1-x))/(3*(2*y+x+1))))/(3*(2*y+x+1)))
+ -4 )
+ / (3*(2*(x+1)+2*(1-x)))) 
+ =x+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+/*  222  Why ask about ynew? */ 
+assume(ynew>-2);
+[ynew>-2];
+(pn_(222),ans:contrib_ode(eqn:(2*y+x+7)*'diff(y,x,1)-y+2*x+4,y,x));
+[-((atan((x+3)/(y+2))-log(y^2+4*y+x^2+6*x+13))/5)=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+forget(ynew>-2);
+[ynew>-2];
+
+/*  223  */ 
+(pn_(223),ans:contrib_ode(eqn:(2*y-x)*'diff(y,x,1)-y-2*x,y,x));
+[y^2-x*y-x^2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  224  */ 
+(pn_(224),ans:contrib_ode(eqn:(2*y-6*x)*'diff(y,x,1)-y+3*x+2,y,x));
+[(2*y-6*x)*(4*(2*(3*x+2)-6*x)*log((2*(3*x+2)-6*x)/(5*(2*y-6*x))+1)/(5*(2*y-6*x))-4*(2*(3*x+2)-6*x)*log((2*(3*x+2)-6*x)/(5*(2*y-6*x)))/(5*(2*y-6*x))-4)/(5*(2*(3*x+2)-6*x))=x+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+/*  225  */ 
+(pn_(225),ans:contrib_ode(eqn:(4*y+2*x+3)*'diff(y,x,1)-2*y-x-1,y,x));
+[-((4*y+2*x+3) * (
+   -( (2*(2*x+3)+4*(-x-1))*log(1-((2*(2*x+3)+4*(-x-1))/(4*(4*y+2*x+3))))  / (4*(4*y+2*x+3)) )
+   +( (2*(2*x+3)+4*(-x-1))*log( -((2*(2*x+3)+4*(-x-1)) /(4*(4*y+2*x+3)))) / (4*(4*y+2*x+3)) )
+   - 1 )
+  )
+  / (2*(2*(2*x+3)+4*(-x-1)))
+ = x+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+/*  226  */ 
+(pn_(226),ans:contrib_ode(eqn:(4*y-2*x-3)*'diff(y,x,1)+2*y-x-1,y,x));
+[(4*y-2*x-3)*((4*(-x-1)-2*(-2*x-3))*log((4*(-x-1)-2*(-2*x-3))/(4*(4*y-2*x-3))+1)/(4*(4*y-2*x-3))-(4*(-x-1)-2*(-2*x-3))*log((4*(-x-1)-2*(-2*x-3))/(4*(4*y-2*x-3)))/(4*(4*y-2*x-3))-1)/(2*(4*(-x-1)-2*(-2*x-3)))=x+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+/*  227  */ 
+(pn_(227),ans:contrib_ode(eqn:(4*y-3*x-5)*'diff(y,x,1)-3*y+7*x+2,y,x));
+[(4*y^2+(-6*x-10)*y+7*x^2+4*x)/2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  228  */ 
+(pn_(228),ans:contrib_ode(eqn:(4*y+11*x-11)*'diff(y,x,1)-25*y-8*x+62,y,x));
+[(log(3-((25*(11*x-11)+4*(62-8*x))/(9*(4*y+11*x-11))))-3*log(1-((25*(11*x-11)+4*(62-8*x))/(9*(4*y+11*x-11))))+2*log(-((25*(11*x-11)+4*(62-8*x))/(36*(4*y+11*x-11)))))/18=log(9*x-1)/9+%c];
+[method,ode_check(eqn,ans[1])];
+[abel2,0];
+
+/*  229  */ 
+(pn_(229),ans:contrib_ode(eqn:(12*y-5*x-8)*'diff(y,x,1)-5*y+2*x+3,y,x));
+[6*y^2+(-5*x-8)*y+x^2+3*x=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  230  */ 
+(pn_(230),ans:contrib_ode(eqn:a*y*'diff(y,x,1)+b*y^2+f(x),y,x));
+[(2*'integrate(b*%e^(2*b*x/a)*y^2+%e^(2*b*x/a)*f(x),x)+(a*%e^(2*b*x/a)-2*b*'integrate(%e^(2*b*x/a),x))*y^2)/2=%c];
+method;
+exact;
+
+/*  231  */ 
+/* This equation presents a problem - runs forever */ 
+/* (pn_( 231 ),ans:contrib_ode(eqn: gamma+(a*y+b*x+c)*'diff(y,x,1)+alpha*y+beta*x ,y,x)); */ 
+
+/*  232  */ 
+(pn_(232),ans:contrib_ode(eqn:x*y*'diff(y,x,1)+y^2+x^2,y,x));
+[(2*x^2*y^2+x^4)/4=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  233  */ 
+(pn_( 233 ),ans:contrib_ode(eqn: x*y*'diff(y,x,1)-y^2+a*x^3*cos(x) ,y,x));
+[(y^2+2*a*x^2*sin(x))/(2*x^2) = %c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  234  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 234 ),ans:contrib_ode(eqn: x*y*'diff(y,x,1)-y^2+x*y+x^3-2*x^2 ,y,x)); */ 
+
+/*  235  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 235 ),ans:contrib_ode(eqn: (x*y+a)*'diff(y,x,1)+b*y ,y,x)); */ 
+
+/*  236  */ 
+(pn_( 236 ),ans:contrib_ode(eqn: x*(y+4)*'diff(y,x,1)-y^2-2*y-2*x ,y,x));
+[-((2*log(x-y)-log(-2*y+x-4)-log(x))/4) = %c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  237  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 237 ),ans:contrib_ode(eqn: x*(y+a)*'diff(y,x,1)+b*y+c*x ,y,x)); */ 
+
+/*  238  */ 
+/* This equation presents a problem - runs forever */ 
+/* (pn_( 238 ),ans:contrib_ode(eqn: (x*(y+x)+a)*'diff(y,x,1)-y*(y+x)-b ,y,x)); */ 
+
+/*  239  */ 
+(pn_(239),ans:contrib_ode(eqn:(x*y-x^2)*'diff(y,x,1)+y^2-3*x*y-2*x^2,y,x));
+[(x^2*y^2-2*x^3*y-x^4)/2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  240  */ 
+(pn_(240),ans:contrib_ode(eqn:2*x*y*'diff(y,x,1)-y^2+a*x,y,x));
+[(y^2+a*x*log(x))/x=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  241  */ 
+(pn_(241),ans:contrib_ode(eqn:2*x*y*'diff(y,x,1)-y^2+a*x^2,y,x));
+[(y^2+a*x^2)/x=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  242  */ 
+(pn_(242),ans:contrib_ode(eqn:2*x*y*'diff(y,x,1)+2*y^2+1,y,x));
+[-log(2*y^2+1)/2=log(x)+%c];
+[method,ode_check(eqn,ans[1])];
+[separable,0];
+
+/*  243  */ 
+(pn_(243),ans:contrib_ode(eqn:x*(2*y+x-1)*'diff(y,x,1)-y*(y+2*x+1),y,x));
+[-log(y)+3*log(-y+x-1)-log(x)=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  244  */ 
+(pn_(244),ans:contrib_ode(eqn:x*(2*y-x-1)*'diff(y,x,1)+(-y+2*x-1)*y,y,x));
+[3*log(y+x+1)-log(y)-log(x)=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  245  */ 
+(pn_(245),ans:contrib_ode(eqn:(2*x*y+4*x^3)*'diff(y,x,1)+y^2+112*x^2*y,y,x));
+[x=%c*%e^-((11*log((y+24*x^2)/x^2)+log(y/x^2))/30)];
+method;
+genhom;
+
+/*  246  */ 
+(pn_(246),ans:contrib_ode(eqn:x*(3*y+2*x)*'diff(y,x,1)+3*(y+x)^2,y,x));
+[(6*x^2*y^2+8*x^3*y+3*x^4)/4=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  247  */ 
+(pn_(247),ans:contrib_ode(eqn:(3*x+2)*(y-2*x-1)*'diff(y,x,1)-y^2+x*y-7*x^2-9*x-3,y,x));
+[(2*log(y+x+1)+log(-2*y+7*x+4)-log(3*x+2))/6=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  248  */ 
+/* This equation presents a problem - runs forever */ 
+/* (pn_( 248 ),ans:contrib_ode(eqn: (6*x*y+x^2+3)*'diff(y,x,1)+3*y^2+2*x*y+2*x ,y,x)); */ 
+
+/*  249  */ 
+/* This equation presents a problem - runs forever */ 
+/* (pn_( 249 ),ans:contrib_ode(eqn: (a*x*y+b*x^n)*'diff(y,x,1)+alpha*y^3+beta*y^2 ,y,x)); */ 
+
+/*  250  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 250 ),ans:contrib_ode(eqn: gamma+(B*x*y+b*y+A*x^2+a*x+c)*'diff(y,x,1)+A*x*y+beta*y-B*g(x)^2+alpha*x ,y,x)); */ 
+
+/*  251  */ 
+(pn_(251),ans:contrib_ode(eqn:(x^2*y-1)*'diff(y,x,1)+x*y^2-1,y,x));
+[(x^2*y^2-2*y-2*x)/2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  252  */ 
+(pn_(252),ans:contrib_ode(eqn:(x^2*y-1)*'diff(y,x,1)-x*y^2+1,y,x));
+[-((log(-3*x^2*y+x^3+2)-3*log(x-y))/6)=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  253  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 253 ),ans:contrib_ode(eqn: (x^2*y-1)*'diff(y,x,1)+8*(x*y^2-1) ,y,x)); */ 
+
+/*  254  */ 
+(pn_(254),ans:contrib_ode(eqn:x*(x*y-2)*'diff(y,x,1)+x^2*y^3+x*y^2-2*y,y,x));
+[x=%c*%e^((x*y-1)/(x^2*y^2))];
+map(log,ans[1]/%c);
+log(x/%c)=(x*y-1)/(x^2*y^2);
+[method,ode_check(eqn,%)];                       
+[genhom,0];
+
+/*  255  */ 
+(pn_(255),ans:contrib_ode(eqn:x*(x*y-3)*'diff(y,x,1)+x*y^2-y,y,x));
+[x=%c*%e^((3*log(x*y)-x*y)/2)];
+method;
+genhom;
+
+/*  256  */ 
+(pn_(256),ans:contrib_ode(eqn:x^2*(y-1)*'diff(y,x,1)+(x-1)*y,y,x));
+[log(y)-y=(x*log(x)+1)/x+%c];
+[method,ode_check(eqn,ans[1])];
+[separable,0];
+
+/*  257  */ 
+(pn_(257),ans:contrib_ode(eqn:x*(x*y+x^4-1)*'diff(y,x,1)-y*(x*y-x^4-1),y,x));
+false;
+
+/*  258  */ 
+(pn_(258),ans:contrib_ode(eqn:2*x^2*y*'diff(y,x,1)+y^2-2*x^3-x^2,y,x));
+[%e^-(1/x)*(y^2+(-gamma_incomplete(-1,1/x)-2*gamma_incomplete(-2,1/x))*%e^(1/x))=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  259  */ 
+(pn_(259),ans:contrib_ode(eqn:2*x^2*y*'diff(y,x,1)-y^2-x^2*%e^(x-1/x),y,x));
+[%e^(1/x)*y^2-%e^x=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  260  */ 
+(pn_(260),ans:contrib_ode(eqn:(2*x^2*y+x)*'diff(y,x,1)-x^2*y^3+2*x*y^2+y,y,x));
+[x=%c*%e^-((4*x*y+1)/(2*x^2*y^2))];
+map(log,ans[1]/%c);
+log(x/%c)=-((4*x*y+1)/(2*x^2*y^2));
+[method,ode_check(eqn,%)];                                              
+[genhom,0];
+
+/*  261  */ 
+(pn_(261),ans:contrib_ode(eqn:(2*x^2*y-x)*'diff(y,x,1)-2*x*y^2-y,y,x));
+[x=%c*%e^((2*x*y*log(x*y)+1)/(4*x*y))];
+ map(log,ans[1]/%c);
+log(x/%c)=(2*x*y*log(x*y)+1)/(4*x*y);
+[method,ode_check(eqn,%)];
+[genhom,0];
+
+/*  262  */ 
+(pn_(262),ans:contrib_ode(eqn:(2*x^2*y-x^3)*'diff(y,x,1)+y^3-4*x*y^2+2*x^3,y,x));
+[%c*x=%e^((log((y+x)/x)+log((y-x)/x)-2*log((y-2*x)/x))/2)];
+method;
+homogeneous;
+
+/*  263  */ 
+(pn_(263),ans:contrib_ode(eqn:y*'diff(y,x,1)+3*x^2*y^2+2*x^3+7,y,x));
+[(3*2^(1/3)*%e^(2*x^3)*y^2-2*gamma_incomplete(4/3,-2*x^3)+14*gamma_incomplete(1/3,-2*x^3))
+   /(6*2^(1/3))=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  264  */ 
+(pn_(264),ans:contrib_ode(eqn:2*x*(x^3*y+1)*'diff(y,x,1)+y*(3*x^3*y-1),y,x));
+[x=%c*%e^((8*log(3*x^3*y+7)+6*log(x^3*y))/21)];
+method;
+genhom;
+
+/*  265  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 265 ),ans:contrib_ode(eqn: (x^(n*(n+1))*y-1)*'diff(y,x,1)+2*(n+1)^2*x^(n-1)*(x^n^2*y^2-1) ,y,x)); */ 
+
+/*  266  */ 
+(pn_( 266 ),ans:contrib_ode(eqn: sqrt(x^2+1)*(y-x)*'diff(y,x,1)-a*(y^2+1)^(3/2) ,y,x));
+false;
+
+/*  267  */ 
+(pn_(267),ans:contrib_ode(eqn:sin(x)^2*y*'diff(y,x,1)+cos(x)*sin(x)*y^2-1,y,x));
+[(sin(x)^2*y^2-2*x)/2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  268  */ 
+(pn_(268),ans:contrib_ode(eqn:f(x)*y*'diff(y,x,1)+g(x)*y^2+h(x),y,x));
+[%e^-('integrate(('diff(f(x),x,1)-2*g(x))/f(x),x))*(2*%e^('integrate(('diff(f(x),x,1)-2*g(x))/f(x),x))*'integrate(%e^-('integrate(('diff(f(x),x,1)-2*g(x))/f(x),x))*(g(x)*y^2+h(x)),x)+(f(x)-2*%e^('integrate(('diff(f(x),x,1)-2*g(x))/f(x),x))*'integrate(g(x)*%e^-'integrate(('diff(f(x),x,1)-2*g(x))/f(x),x),x))*y^2)/2=%c];
+method;
+exact;
+
+/*  269  */ 
+/* This equation too general - E S Cheb-Terrab and T Kolokolnikov */ 
+/* (pn_( 269 ),ans:contrib_ode(eqn: (bessel_i(1,x)*%e^-x*y+bessel_i(0,x)*%e^-x)*'diff(y,x,1)-f3(x)*y^3-f2(x)*y^2-f1(x)*y-f0(x) ,y,x)); */ 
+
+/*  270  */ 
+(pn_(270),ans:contrib_ode(eqn:(y^2-x)*'diff(y,x,1)-y+x^2,y,x));
+[(y^3-3*x*y+x^3)/3=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  271  */ 
+(pn_(271),ans:contrib_ode(eqn:(y^2+x^2)*'diff(y,x,1)+2*x*(y+2*x),y,x));
+[(y^3+3*x^2*y+4*x^3)/3=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  272  */ 
+(pn_(272),ans:contrib_ode(eqn:(y^2+x^2)*'diff(y,x,1)-y^2,y,x));
+[%c*x=%e^-((2*atan((2*y-x)/(sqrt(3)*x))+sqrt(3)*log(y/x))/sqrt(3))];
+map(log,ans[1]);
+log(%c*x)=-((2*atan((2*y-x)/(sqrt(3)*x))+sqrt(3)*log(y/x))/sqrt(3));
+[method,ode_check(eqn,%)];
+[homogeneous,0];
+
+/*  273  */ 
+(pn_(273),ans:contrib_ode(eqn:(y^2+x^2+a)*'diff(y,x,1)+2*x*y,y,x));
+[(y^3+(3*x^2+3*a)*y)/3=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  274  */ 
+(pn_(274),ans:contrib_ode(eqn:(y^2+x^2+a)*'diff(y,x,1)+2*x*y+x^2+b,y,x));
+[(y^3+(3*x^2+3*a)*y+x^3+3*b*x)/3=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  275  */ 
+(pn_(275),ans:contrib_ode(eqn:(y^2+x^2+x)*'diff(y,x,1)-y,y,x));
+false;
+
+/*  276  */ 
+(pn_(276),ans:contrib_ode(eqn:(y^2-x^2)*'diff(y,x,1)+2*x*y,y,x));
+[-y/(y^2+x^2)=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  277  */ 
+(pn_(277),ans:contrib_ode(eqn:(y^2+x^4)*'diff(y,x,1)-4*x^3*y,y,x));
+[(y^2-x^4)/y=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  278  */ 
+(pn_(278),ans:contrib_ode(eqn:(y^2+4*sin(x))*'diff(y,x,1)-cos(x),y,x));
+[-((8*y^2+4*y+32*sin(x)+1)*%e^-(4*y)/32)=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  279  */ 
+(pn_( 279 ),ans:contrib_ode(eqn: (y^2+2*y+x)*'diff(y,x,1)+y^2*(y+x)^2+y*(y+1) ,y,x));
+false;
+
+/*  280  */ 
+(pn_(280),ans:contrib_ode(eqn:(y+x)^2*'diff(y,x,1)-a^2,y,x));
+[a*atan((y+x)/a)-y=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  281  */ 
+(pn_(281),ans:contrib_ode(eqn:(y^2+2*x*y-x^2)*'diff(y,x,1)-y^2+2*x*y+x^2,y,x));
+[-((y+x)/(2*y^2+2*x^2))=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  282  */ 
+(pn_(282),ans:contrib_ode(eqn:(y+3*x-1)^2*'diff(y,x,1)-(2*y-1)*(4*y+6*x-3),y,x));
+[(log(3*y+3*x-2)-3*log(2*y-1)+3*log(3*x-y))/6=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  283  */ 
+(pn_(283),ans:contrib_ode(eqn:3*(y^2-x^2)*'diff(y,x,1)+2*y^3-6*x*(x+1)*y-3*%e^x,y,x));
+[%e^(2*x)*y^3-3*x^2*%e^(2*x)*y-%e^(3*x)=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  284  */ 
+(pn_(284),ans:contrib_ode(eqn:(4*y^2+x^2)*'diff(y,x,1)-x*y,y,x));
+[(8*y^2*log(y)-x^2)/(2*y^2)=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  285  */ 
+(pn_(285),ans:contrib_ode(eqn:(4*y^2+2*x*y+3*x^2)*'diff(y,x,1)+y^2+6*x*y+2*x^2,y,x));
+[(4*y^3+3*x*y^2+9*x^2*y+2*x^3)/3=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  286  */ 
+(pn_(286),ans:contrib_ode(eqn:(2*y-3*x+1)^2*'diff(y,x,1)-(3*y-2*x-4)^2,y,x));
+[(5*log(-y+4*x-6)+5*log(-4*y+x+9)-log(-5*y+5*x+3))/45=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  287  */ 
+(pn_(287),ans:contrib_ode(eqn:(2*y-4*x+1)^2*'diff(y,x,1)-(y-2*x)^2,y,x));
+[-((4*sqrt(2)*log(7*y^2+(8-28*x)*y+28*x^2-16*x+2)+9*log((7*y-14*x+sqrt(2)+4)/(7*y-14*x-sqrt(2)+4))-56*sqrt(2)*y+14*sqrt(2)*x)/(98*sqrt(2)))=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  288  */ 
+(pn_(288),ans:contrib_ode(eqn:(6*y^2-3*x^2*y+1)*'diff(y,x,1)-3*x*y^2+x,y,x));
+[(4*y^3-3*x^2*y^2+2*y+x^2)/2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  289  */ 
+(pn_(289),ans:contrib_ode(eqn:(6*y-x)^2*'diff(y,x,1)-6*y^2+2*x*y+a,y,x));
+[12*y^3-6*x*y^2+x^2*y+a*x=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  290  */ 
+(pn_(290),ans:contrib_ode(eqn:(a*y^2+2*b*x*y+c*x^2)*'diff(y,x,1)+b*y^2+2*c*x*y+d*x^2,y,x));
+[(a*y^3+3*b*x*y^2+3*c*x^2*y+d*x^3)/3=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  291  */ 
+(pn_( 291 ),ans:contrib_ode(eqn: (b*(beta*y+alpha*x)^2-beta*(b*y+a*x))*'diff(y,x,1)+a*(beta*y+alpha*x)^2-alpha*(b*y+a*x) ,y,x));
+false;
+
+/*  292  */ 
+/* This equation presents a problem - runs forever */ 
+/* (pn_( 292 ),ans:contrib_ode(eqn: (gamma+alpha*y+beta*x)^2+(a*y+b*x+c)^2*'diff(y,x,1) ,y,x)); */ 
+
+/*  293  */ 
+(pn_(293),ans:contrib_ode(eqn:x*(y^2-3*x)*'diff(y,x,1)+2*y^3-5*x*y,y,x));
+[x=%c*%e^((2*log((5*y^2-13*x)/x)-30*log(y/sqrt(x)))/65)];
+method;
+genhom;
+
+/*  294  */ 
+(pn_(294),ans:contrib_ode(eqn:x*(y^2+x^2-a)*'diff(y,x,1)-y*(y^2+x^2+a),y,x));
+[(log(-y^2+x^2-a)-log(y)-log(x))/a=%c];
+[method,ode_check(eqn,ans[1])];
+[lie,0];
+
+/*  295  */ 
+(pn_(295),ans:contrib_ode(eqn:x*(y^2+x*y-x^2)*'diff(y,x,1)-y^3+x*y^2+x^2*y,y,x));
+[%c*x=%e^-((x*y*log(y/x)+y^2+x^2)/(2*x*y))];
+method;
+homogeneous;
+
+/*  296  */ 
+/* This equation presents a problem - runs forever */ 
+/* (pn_( 296 ),ans:contrib_ode(eqn: x*(y^2+x^2*y+x^2)*'diff(y,x,1)-2*y^3-2*x^2*y^2+x^4 ,y,x)); */ 
+
+/*  297  */ 
+(pn_(297),ans:contrib_ode(eqn:2*x*(y^2+5*x^2)*'diff(y,x,1)+y^3-x^2*y,y,x));
+[%c*x=%e^((2*log((y^2+3*x^2)/x^2)-10*log(y/x))/9)];
+method;
+homogeneous;
+
+/*  298  */ 
+(pn_(298),ans:contrib_ode(eqn:3*x*y^2*'diff(y,x,1)+y^3-2*x,y,x));
+[x*y^3-x^2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  299  */ 
+(pn_(299),ans:contrib_ode(eqn:(3*x*y^2-x^2)*'diff(y,x,1)+y^3-2*x*y,y,x));
+[x*y^3-x^2*y=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];
+
+/*  300  */ 
+(pn_(300),ans:contrib_ode(eqn:6*x*y^2*'diff(y,x,1)+2*y^3+x,y,x));
+[(4*x*y^3+x^2)/2=%c];
+[method,ode_check(eqn,ans[1])];
+[exact,0];

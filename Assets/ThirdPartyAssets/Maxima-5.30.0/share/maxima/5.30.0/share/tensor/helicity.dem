@@ -1,0 +1,49 @@
+/* Copyright (C) 2003 Valerij Pipin <pip@iszf.irk.ru>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Proving the conservation of helicity in hydrodynamics
+ *
+*/
+(if get('itensor,'version)=false then load(itensor),
+ icounter:5,idummyx:j,derivabbrev:false)$
+
+("the conservation of helicity in hydrodynamics")$
+("the covariant formulation of the Euler equation is")$
+euler:d_t*v([i1])+'liediff(v,v([i0]))=
+      -extdiff(p([]),i1)/rho([])+extdiff((v([i0])|v/2-phi([])),i1)$
+ishow(euler)$
+
+("take the exterior derivative of both sides")$
+euler:d_t*omega([i1,i2])+'liediff(v,omega([i0,i1]))=
+      extdiff(-extdiff(p([]),i1)/rho([])+extdiff(v([i0])|v/2-phi([]),i1),i2)$
+ishow(euler)$
+ishow(omega([i1,i2])=extdiff(v([i1]),i2))$
+("declare the function's dependencies")$
+depends(p,[rho,s])$
+("define the chain rule for the derivatives' replacement")$
+matchdeclare(i,symbolp);
+defrule(p_r, p([],[],i),'diff(p,rho)*rho([],[],i));
+defrule(p_sr, p([],[],i),'diff(p,s)*s([],[],i)+'diff(p,rho)*rho([],[],i));
+("apply the rules")$
+ishow(ratsimp(apply1(euler,p_r)))$
+("this law was originally discovered by Lord Kelvin")$
+("for the more general case there is Ertel's theorem")$
+
+("apply another rule where pressure depends on both rho and the entropy")$
+euler:factor(expand(apply1(euler,p_sr)))$
+ishow(euler)$
+("The RHS vanishes after forming the exterior product with the
+ differential of the entropy")$
+rhs(euler)~extdiff(s([]),i3)$
+ishow(lhs(euler)=factor(expand(apply1(%,p_sr))))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

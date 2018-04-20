@@ -1,0 +1,694 @@
+/* ODE tests - Second order linear equations 301-400
+
+  Reference:
+    E Kamke, Differentialgleichungen Losungsmethoden und Losungen, 
+    Vol 1, Geest & Portig, Leipzig, 1961
+*/
+
+/* Print ode number*/
+(pn_(n_):=print("Kamke ODE 2.",n_),true);
+true;
+
+/* Kamke 2. 301  */ 
+(pn_(301),ans:contrib_ode(eqn:(a*x^2+b*x)*'diff(y,x,2)+2*b*'diff(y,x,1)-2*a*y,y,x));
+[y=%k2*(a*x+b)^3/x-%k1*(a*x+b)^3/(x*(3*a^4*x^3+9*a^3*b*x^2+9*a^2*b^2*x+3*a*b^3))];
+ode_check(eqn,ans[1]);
+0;
+method;
+exact;
+
+/* Kamke 2. 302  */ 
+(pn_(302),ans:contrib_ode(eqn:(a*x+b)^2*'diff(y,x,2)*A2+(a*x+b)*'diff(y,x,1)*A1+(a*x+b)*y*A0,y,x));
+[y = %k2*(a*x+b)^(1/2-(A1/(2*a*A2)))
+             *bessel_y(1-(A1/(a*A2)),2*sqrt(a*x+b)*sqrt(A0)/(a*sqrt(A2)))
+     +%k1*(a*x+b)^(1/2-(A1/(2*a*A2)))
+             *bessel_j(1-(A1/(a*A2)),2*sqrt(a*x+b)*sqrt(A0)/(a*sqrt(A2)))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 303  */ 
+/* Takes a long time ...
+assume(4*a*c-b^2>0);
+[4*a*c-b^2>0];
+(pn_(303),ans:contrib_ode(eqn:(a*x^2+b*x+c)*'diff(y,x,2)+(d*x+f)*'diff(y,x,1)+g*y,y,x));
+false;
+[4*a*c > b^2];
+done;
+*/
+
+/* Kamke 2. 304  */ 
+(pn_(304),ans:contrib_ode(eqn:x^3*'diff(y,x,2)+x*'diff(y,x,1)+(-2*x-3)*y,y,x));
+[y = gamma_incomplete(-3,1/x)*%k2*%e^(1/x)/x+%k1*%e^(1/x)/x];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 305  */ 
+(pn_(305),ans:contrib_ode(eqn:x^3*'diff(y,x,2)+2*x*'diff(y,x,1)-y,y,x));
+[y = kummer_u(1/2,0,-2/x)*%k2*x*%e^(2/x)
+    +kummer_m(1/2,0,-2/x)*%k1*x*%e^(2/x)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 306  */ 
+(pn_(306),ans:contrib_ode(eqn:x^3*'diff(y,x,2)+x^2*'diff(y,x,1)+(a*x^2+b*x+a)*y,y,x));
+false;
+
+/* Kamke 2. 307  */ 
+(pn_(307),ans:contrib_ode(eqn:x^3*'diff(y,x,2)+x*(x+1)*'diff(y,x,1)-2*y,y,x));
+[y = kummer_u(-1,1,-1/x)*%k2*%e^(1/x)+kummer_m(-1,1,-1/x)*%k1*%e^(1/x)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 308  */ 
+(pn_(308),ans:contrib_ode(eqn:x^3*'diff(y,x,2)-x^2*'diff(y,x,1)+x*y-log(x)^3,y,x));
+[y=(2*log(x)^3+6*log(x)^2+9*log(x)+6)/(8*x)+x*(%k2*log(x)+%k1)];
+ode_check(eqn,ans[1]);
+0;
+method;
+variationofparameters;
+
+/* Kamke 2. 309  */ 
+(pn_(309),ans:contrib_ode(eqn:x^3*'diff(y,x,2)-(x^2-1)*'diff(y,x,1)+x*y,y,x));
+[y = kummer_u(3/2,1,-1/(2*x^2))*%k2*x*%e^(1/(2*x^2))
+    +kummer_m(3/2,1,-1/(2*x^2))*%k1*x*%e^(1/(2*x^2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 310  */ 
+(pn_(310),ans:contrib_ode(eqn:x^3*'diff(y,x,2)+3*x^2*'diff(y,x,1)+x*y-1,y,x));
+[y=log(x)^2/(2*x)+(%k2*log(x)+%k1)/x];
+ode_check(eqn,ans[1]);
+0;
+method;
+variationofparameters;
+
+/* Kamke 2. 311  */ 
+(pn_(311),ans:contrib_ode(eqn:x*(x^2+1)*'diff(y,x,2)+(2*x^2+1)*'diff(y,x,1)-v*(v+1)*x*y,y,x));
+false;
+
+/* Kamke 2. 312  */ 
+(pn_(312),ans:contrib_ode(eqn:x*(x^2+1)*'diff(y,x,2)+2*(x^2-1)*'diff(y,x,1)-2*x*y,y,x));
+[y=%k2*x^3/(x^2+1)-%k1/(3*(x^2+1))];
+ode_check(eqn,ans[1]);
+0;
+method;
+exact;
+
+/* Kamke 2. 313  */ 
+(pn_(313),ans:contrib_ode(eqn:x*(x^2+1)*'diff(y,x,2)+(2*(n+1)*x^2+2*n+1)*'diff(y,x,1)+(n-v)*(v+n+1)*x*y,y,x));
+false;
+
+/* Kamke 2. 314  */ 
+(pn_(314),ans:contrib_ode(eqn:x*(x^2+1)*'diff(y,x,2)-(2*(n-1)*x^2+2*n-1)*'diff(y,x,1)+(-v+n-1)*(v+n)*x*y,y,x));
+false;
+
+/* Kamke 2. 315   CHECKME */ 
+(pn_(315),ans:contrib_ode(eqn:x*(x^2-1)*'diff(y,x,2)+'diff(y,x,1)+a*x^3*y,y,x));
+[y=%k1*sin(sqrt(a)*log(2*sqrt(x^2-1)+2*x))+%k2*cos(sqrt(a)*log(2*sqrt(x^2-1)+2*x))];
+method;
+xformtoconstcoeff;
+
+/* Kamke 2. 316  */ 
+(pn_(316),ans:contrib_ode(eqn:x*(x^2-1)*'diff(y,x,2)+(x^2-1)*'diff(y,x,1)-x*y,y,x));
+false;
+
+/* Kamke 2. 317  */ 
+(pn_(317),ans:contrib_ode(eqn:x*(x^2-1)*'diff(y,x,2)+(3*x^2-1)*'diff(y,x,1)+x*y,y,x));
+false;
+
+/* Kamke 2. 318  */
+/* FIXME: ERROR "Quotient by a polynomial of higher degree"
+(pn_(318),ans:contrib_ode(eqn:x*(x^2-1)*'diff(y,x,2)+(a*x^2+b)*'diff(y,x,1)+c*x*y,y,x));
+false;
+*/
+
+/* Kamke 2. 319 */ 
+(pn_(319),ans:contrib_ode(eqn:x*(x^2+2)*'diff(y,x,2)-'diff(y,x,1)-6*x*y,y,x));
+[y=%k1*%e^(3*log(x^2+2)/4+3*log(x)/2)*'integrate(%e^(-3*log(x^2+2)/4-3*log(x)/2)/(x^3+2*x),x)+%k2*%e^(3*log(x^2+2)/4+3*log(x)/2)];
+ode_check(eqn,ans[1]);
+0;
+method;
+exact;
+
+/* Kamke 2. 320  */ 
+(pn_(320),ans:contrib_ode(eqn:x*(x^2-2)*'diff(y,x,2)-(x^3+3*x^2-2*x-2)*'diff(y,x,1)+(x^2+4*x+2)*y,y,x));
+[y = %k2*x^2*%e^x+%k1*(x-1)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 321  */ 
+(pn_(321),ans:contrib_ode(eqn:x^2*(x+1)*'diff(y,x,2)-x*(2*x+1)*'diff(y,x,1)+(2*x+1)*y,y,x));
+[y = %k2*(x*log(x)+x^2)+%k1*x];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 322  */ 
+(pn_(322),ans:contrib_ode(eqn:x^2*(x+1)*'diff(y,x,2)+2*x*(3*x+2)*'diff(y,x,1),y,x));
+[y=%k1*(4*log(x+1)-4*log(x)-((12*x^3+6*x^2-2*x+1)/(3*x^4+3*x^3)))+%k2];
+ode_check(eqn,ans[1]);
+0;
+method;
+freeofy;
+
+/* Kamke 2. 323  */ 
+(pn_(323),ans:contrib_ode(eqn:'diff(y,x,2)=2*(x+1)*y/((x-1)*x)-2*(x-2)*'diff(y,x,1)/((x-1)*x),y,x));
+false;
+
+/* Kamke 2. 324  */ 
+(pn_(324),ans:contrib_ode(eqn:'diff(y,x,2)=(5*x-4)*'diff(y,x,1)/((x-1)*x)-(9*x-6)*y/((x-1)*x^2),y,x));
+[y = %k2*(x^3*log(x)+x^2)+%k1*x^3];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 325  */ 
+(pn_(325),ans:contrib_ode(eqn:'diff(y,x,2)=(-(b+a+1)*x-beta-alpha+1)*'diff(y,x,1)/((x-1)*x)-(a*b*x-alpha*beta)*y/((x-1)*x^2),y,x));
+[y = %k2*gauss_b(alpha+a,b+alpha,-beta+alpha+1,x)*x^alpha
+    +%k1*gauss_a(alpha+a,b+alpha,-beta+alpha+1,x)*x^alpha];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 326  */ 
+(pn_(326),ans:contrib_ode(eqn:'diff(y,x,2)=-'diff(y,x,1)/(x+1)-y/(x*(x+1)^2),y,x));
+[y = %k2*(x*log(x)/(x+1)-(1/(x+1)))+%k1*x/(x+1)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 327  */ 
+(pn_(327),ans:contrib_ode(eqn:'diff(y,x,2)=2*'diff(y,x,1)/((x-2)*x)-y/((x-2)*x^2),y,x));
+[y = gauss_b(1/sqrt(2)-1,sqrt(2)/2,sqrt(2)+1,x/2)*%k2*x^(1/sqrt(2))
+    +gauss_a(1/sqrt(2)-1,sqrt(2)/2,sqrt(2)+1,x/2)*%k1*x^(1/sqrt(2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 328  */ 
+(pn_(328),ans:contrib_ode(eqn:'diff(y,x,2)=2*y/((x-1)^2*x),y,x));
+[y = %k2*(2*x*log(x)/(x-1)-(x^2/(x-1))+1/(x-1))+%k1*x/(x-1)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 329  */ 
+/* This equation presents a problem - runs forever */
+/*(pn_(329),ans:contrib_ode(eqn:'diff(y,x,2)=(-(beta+alpha+1)*x^2+(a*(gamma1+delta)-delta+beta+alpha+1)*x-a*gamma1)*'diff(y,x,1)/((x-1)*x*(x-a))-(alpha*beta*x-q)*y/((x-1)*x*(x-a)),y,x));*/
+
+/* Kamke 2. 330  */ 
+/* CHECKME:  Takes a long time
+(pn_(330),ans:contrib_ode(eqn:'diff(y,x,2)='diff(y,x,1)*(-C-x*B-x^2*A)/((x-a)*(x-b)*(x-c))-y*(E+x*D)/((x-a)*(x-b)*(x-c)),y,x));
+false;
+*/
+
+/* Kamke 2. 331  */ 
+/* CHECKME:  Takes a long time
+(pn_(331),ans:contrib_ode(eqn:'diff(y,x,2)=(x-4)*'diff(y,x,1)/(2*(x-2)*x)-(x-3)*y/(2*(x-2)*x^2),y,x));
+false;
+*/
+
+/* Kamke 2. 332  */ 
+(pn_(332),ans:contrib_ode(eqn:'diff(y,x,2)='diff(y,x,1)/(x+1)-(3*x+1)*y/(4*x^2*(x+1)),y,x));
+[y = %k2*(sqrt(x)*log(x)+x^(3/2))+%k1*sqrt(x)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 333  */ 
+(pn_(333),ans:contrib_ode(eqn:'diff(y,x,2)=v*(v+1)*y/(4*x^2)-(3*x-1)*'diff(y,x,1)/(2*(x-1)*x),y,x));
+[y = %k2*gauss_b(-v,1/2,1/2-v,x)/x^(v/2)
+    +%k1*gauss_a(-v,1/2,1/2-v,x)/x^(v/2)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 334  */ 
+(pn_(334),ans:contrib_ode(eqn:'diff(y,x,2)=(1-(a+1)*x)*'diff(y,x,1)/((x-1)*x)-((a^2-b^2)*x+c^2)*y/(4*(x-1)*x^2),y,x));
+[y = %k2*gauss_b(c/2-(b/2)+a/2,c/2+b/2+a/2,c+1,x)*x^(c/2)
+    +%k1*gauss_a(c/2-(b/2)+a/2,c/2+b/2+a/2,c+1,x)*x^(c/2)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 335  */ 
+(pn_(335),ans:contrib_ode(eqn:'diff(y,x,2)=-(3*x-1)*'diff(y,x,1)/(2*(x-1)*x)-(a*x+b)*y/(4*(x-1)^2*x),y,x));
+[y = %k2*gauss_b(-(sqrt(-b-a)/2)+sqrt(1-4*a)/4+3/4,
+                       -(sqrt(-b-a)/2)-(sqrt(1-4*a)/4)+3/4,3/2,x)*sqrt(x)
+          /(x-1)^(sqrt(-b-a)/2)
+    +%k1*gauss_a(-(sqrt(-b-a)/2)+sqrt(1-4*a)/4+3/4,
+                       -(sqrt(-b-a)/2)-(sqrt(1-4*a)/4)+3/4,3/2,x)*sqrt(x)
+           /(x-1)^(sqrt(-b-a)/2)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 336  */ 
+(pn_(336),ans:contrib_ode(eqn:'diff(y,x,2)=(3*x-1)*y/((x-1)*(2*x-1)^2),y,x));
+[y = %k2*(2*x*sqrt(2*x-1)*log(2*x-1)-2*sqrt(2*x-1)*log(2*x-1)
+         -2*x*sqrt(2*x-1)*log(x-1)+2*sqrt(2*x-1)*log(x-1)-sqrt(2*x-1))
+    +%k1*(x*sqrt(2*x-1)-sqrt(2*x-1))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 337  */
+assume(a>b);
+[a>b]; 
+(pn_(337),ans:contrib_ode(eqn:'diff(y,x,2)=-(3*x+2*b+a)*'diff(y,x,1)/(2*(x+a)*(x+b))-(a-b)*y/(4*(x+a)^2*(x+b)),y,x));
+[y=%k1*sqrt(x+b)/(sqrt(a-b)*sqrt((x+b)/(a-b)+1))+%k2/sqrt((x+b)/(a-b)+1)];
+ode_check(eqn,ans[1]);
+0;
+method;
+xformtoconstcoeff;
+forget(a>b);
+[a>b];
+
+/* Kamke 2. 338  */ 
+(pn_(338),ans:contrib_ode(eqn:'diff(y,x,2)=(6*x-1)*'diff(y,x,1)/(3*(x-2)*x)+y/(3*(x-2)*x^2),y,x));
+[y = %k2*(18*x^3-102*x^2+187*x)+%k1*(x-2)^(17/6)*x^(1/6)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 339  */ 
+(pn_(339),ans:contrib_ode(eqn:'diff(y,x,2)=(-a*(b+2)*x^2-(-d+c+1)*x)*'diff(y,x,1)/(x^2*(a*x+1))-(a*b*x-c*d)*y/(x^2*(a*x+1)),y,x));
+[y = %k2*gauss_b(d+1,d+b,d+c+1,-a*x)*x^d
+    +%k1*gauss_a(d+1,d+b,d+c+1,-a*x)*x^d];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 340  */ 
+(pn_(340),ans:contrib_ode(eqn:'diff(y,x,2)=2*(a*x+2*b)*'diff(y,x,1)/(x*(a*x+b))-(2*a*x+6*b)*y/(x^2*(a*x+b)),y,x));
+[y = %k2*x^3/(a*x+b)+%k1*x^2/(a*x+b)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 341  */ 
+(pn_(341),ans:contrib_ode(eqn:'diff(y,x,2)=x*A-(2*a*x+b)*'diff(y,x,1)/(x*(a*x+b))-(a*v*x-b)*y/(x^2*(a*x+b)),y,x));
+false;
+
+/* Kamke 2. 342  */ 
+(pn_(342),ans:contrib_ode(eqn:'diff(y,x,2)=-a*y/x^4,y,x));
+[y = %k2*x*%e^(sqrt(-a)/x)+%k1*x*%e^-(sqrt(-a)/x)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 343  */ 
+(pn_(343),ans:contrib_ode(eqn:'diff(y,x,2)=(b*(x+b)-(1-a)*a*x^2)*y/x^4,y,x));
+[y = %k2*kummer_u(a-(1/2),2*a,-(2*b/x))*x*%e^(b/x)/(-x)^a
+    +%k1*kummer_m(a-(1/2),2*a,-(2*b/x))*x*%e^(b/x)/(-x)^a];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 344  */ 
+(pn_(344),ans:contrib_ode(eqn:'diff(y,x,2)=(v^2-%e^(2/x))*y/x^4,y,x));
+false;
+
+/* Kamke 2. 345  */ 
+(pn_(345),ans:contrib_ode(eqn:'diff(y,x,2)=2*y/x^4-'diff(y,x,1)/x^3,y,x));
+[y = gamma_incomplete(1/2,1/(2*x^2))*%k2*x*%e^(1/(2*x^2))
+          +%k1*x*%e^(1/(2*x^2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 346  */ 
+(pn_(346),ans:contrib_ode(eqn:'diff(y,x,2)=(b+a)*'diff(y,x,1)/x^2-((b+a)*x+a*b)*y/x^4,y,x));
+[y = %k2*x*%e^-(b/x)+%k1*x*%e^-(a/x)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 347  */ 
+(pn_(347),ans:contrib_ode(eqn:'diff(y,x,2)=-'diff(y,x,1)/x-y/x^4,y,x));
+[y = bessel_y(0,-1/x)*%k2+bessel_j(0,-1/x)*%k1];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 348  */ 
+/* CHECKME - Takes a long time
+(pn_(348),ans:contrib_ode(eqn:'diff(y,x,2)=-'diff(y,x,1)/x-(a*(x^4+1)+b*x^2)*y/x^4,y,x));
+false;
+*/
+
+/* Kamke 2. 349  */ 
+(pn_(349),ans:contrib_ode(eqn:'diff(y,x,2)=(-x^2-1)*'diff(y,x,1)/x^3-y/x^4,y,x));
+[y = kummer_u(3/2,1,-1/(2*x^2))*%k2*%e^(1/(2*x^2))
+    +kummer_m(3/2,1,-1/(2*x^2))*%k1*%e^(1/(2*x^2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 350  */ 
+(pn_(350),ans:contrib_ode(eqn:'diff(y,x,2)=-2*'diff(y,x,1)/x-a^2*y/x^4,y,x));
+[y=%k2*cos(a/x)-%k1*sin(a/x)];
+ode_check(eqn,ans[1]);
+0;
+method;
+xformtoconstcoeff;
+
+/* Kamke 2. 351  */ 
+(pn_(351),ans:contrib_ode(eqn:'diff(y,x,2)=(-2*x^2-1)*'diff(y,x,1)/x^3+y/x^4,y,x));
+[y = gamma_incomplete(1/2,1/(2*x^2))*%k2*%e^(1/(2*x^2))
+          +%k1*%e^(1/(2*x^2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 352  */ 
+assume(b>0,b>a^2);
+[b>0,b>a^2];
+(pn_(352),ans:contrib_ode(eqn:'diff(y,x,2)=-2*(x+a)*'diff(y,x,1)/x^2-b*y/x^4,y,x));
+[y=(%k2*cos(sqrt(4-4*a^2/b)*sqrt(b)/(2*x))-%k1*sin(sqrt(4-4*a^2/b)*sqrt(b)/(2*x)))*%e^(a/x)];
+ode_check(eqn,ans[1]);
+0;
+method;
+xformtoconstcoeff;
+forget(b>0,b>a^2);
+[b>0,b>a^2];
+
+/* Kamke 2. 353  */ 
+(pn_(353),ans:contrib_ode(eqn:'diff(y,x,2)=(2*x^2-1)*'diff(y,x,1)/x^3-y/x^4,y,x));
+[y = kummer_u(3,5/2,-1/(2*x^2))*%k2*%e^(1/(2*x^2))
+    +kummer_m(3,5/2,-1/(2*x^2))*%k1*%e^(1/(2*x^2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 354  */ 
+(pn_(354),ans:contrib_ode(eqn:'diff(y,x,2)=(2*x^2-1)*'diff(y,x,1)/x^3-2*y/x^4,y,x));
+[y = kummer_u(2,-1/2,-1/(2*x^2))*%k2*x^3*%e^(1/(2*x^2))
+    +kummer_m(2,-1/2,-1/(2*x^2))*%k1*x^3*%e^(1/(2*x^2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 355  */ 
+(pn_(355),ans:contrib_ode(eqn:'diff(y,x,2)=(1-x^3)*'diff(y,x,1)/(x*(x^3+1))+x*y/(x^3+1),y,x));
+[y = %k2*(x+1)^(1/3)*(x^2-x+1)^(1/3)
+               *'integrate(x/(x^3*(x+1)^(1/3)*(x^2-x+1)^(1/3)
+                             +(x+1)^(1/3)*(x^2-x+1)^(1/3)),x)
+    +%k1*(x+1)^(1/3)*(x^2-x+1)^(1/3)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 356  */ 
+(pn_(356),ans:contrib_ode(eqn:'diff(y,x,2)=(-2*x^2-1)*'diff(y,x,1)/(x*(x^2+1))-(-v*(v+1)*x^2-n^2)*y/(x^2*(x^2+1)),y,x));
+false;
+
+/* Kamke 2. 357  */ 
+/* CHECKME - Takes a long time
+(pn_(357),ans:contrib_ode(eqn:'diff(y,x,2)=-(a*x^2+a-1)*'diff(y,x,1)/(x*(x^2+1))-(b*x^2+c)*y/(x^2*(x^2+1)),y,x));
+false;
+*/
+
+/* Kamke 2. 358  */ 
+(pn_(358),ans:contrib_ode(eqn:'diff(y,x,2)=(x^2-2)*'diff(y,x,1)/(x*(x^2-1))-(x^2-2)*y/(x^2*(x^2-1)),y,x));
+[y = %k2*(x*log(sqrt(x-1)*sqrt(x+1)+x)+log(2)*x)+%k1*x];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 359  */ 
+(pn_(359),ans:contrib_ode(eqn:'diff(y,x,2)=-2*x*'diff(y,x,1)/(x^2-1)-v*(v+1)*y/(x^2*(x^2-1)),y,x));
+false;
+
+/* Kamke 2. 360  */ 
+(pn_(360),ans:contrib_ode(eqn:'diff(y,x,2)=v*(v+1)*y/x^2-2*x*'diff(y,x,1)/(x^2-1),y,x));
+false;
+
+/* Kamke 2. 361  */ 
+(assume(a>0),done);
+done;
+(pn_(361),ans:contrib_ode(eqn:'diff(y,x,2)=2*x*'diff(y,x,1)/(x^2-1)-(a*(a+1)-a*(a+3)*x^2)*y/(x^2*(x^2-1)),y,x));
+[y = %k2*(2*a*x^(a+3)+x^(a+3)-2*a*x^(a+1)-3*x^(a+1))+%k1/x^a];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+(forget(a>0),done);
+done;
+
+/* Kamke 2. 362  */ 
+(pn_(362),ans:contrib_ode(eqn:'diff(y,x,2)=2*x*'diff(y,x,1)/(x^2-1)-(2*a*x^2+(a-n)*(n+a+1)*x^2*(x^2-1)+n*(n+1)*(x^2-1))*y/(x^2*(x^2-1)),y,x));
+false;
+
+/* Kamke 2. 363  */ 
+/* CHECKME:  Error "Quotient by a polynomial of higher degree"
+(pn_(363),ans:contrib_ode(eqn:'diff(y,x,2)=-(a*x^2+a-2)*'diff(y,x,1)/(x*(x^2-1))-b*y/x^2,y,x));
+false;
+*/
+
+/* Kamke 2. 364  */ 
+(pn_(364),ans:contrib_ode(eqn:'diff(y,x,2)=(2*(a-1)*x^2+2*b*c*x^c*(x^2-1)-2*a)*'diff(y,x,1)/(x*(x^2-1))-(b*(-c+2*a-1)*c*x^(c+2)-b*(-c+2*a+1)*c*x^c+((a-1)*a-v*(v+1))*x^2+b^2*c^2*x^(2*c)*(x^2-1)-a*(a+1))*y/(x^2*(x^2-1)),y,x));
+false;
+
+/* Kamke 2. 365  */ 
+(pn_(365),ans:contrib_ode(eqn:'diff(y,x,2)=-a*y/(x^2+1)^2,y,x));
+[y = %k2*sqrt(x^2+1)*%e^(sqrt(-a-1)*atan(x))
+    +%k1*sqrt(x^2+1)*%e^-(sqrt(-a-1)*atan(x))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 366  */ 
+(pn_(366),ans:contrib_ode(eqn:'diff(y,x,2)=-2*x*'diff(y,x,1)/(x^2+1)-y/(x^2+1)^2,y,x));
+[y=%k1*x/sqrt(x^2+1)+%k2/sqrt(x^2+1)];
+ode_check(eqn,ans[1]);
+0;
+method;
+xformtoconstcoeff;
+
+/* Kamke 2. 367  */ 
+(pn_(367),ans:contrib_ode(eqn:'diff(y,x,2)=-2*x*'diff(y,x,1)/(x^2+1)-(a^2*(x^2+1)^2-n*(n+1)*(x^2+1)+m^2)*y/(x^2+1)^2,y,x));
+[y = %k2*spherodialwave_b(-m,n^2+n-m^2+m-a^2,-a^2/4,-%i*x)/(x^2+1)^(m/2)
+    +%k1*spherodialwave_a(-m,n^2+n-m^2+m-a^2,-a^2/4,-%i*x)/(x^2+1)^(m/2)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 368  */ 
+(pn_(368),ans:contrib_ode(eqn:'diff(y,x,2)=-a*x*'diff(y,x,1)/(x^2+1)-b*y/(x^2+1)^2,y,x));
+[y = %k2*gauss_b(1-(a/2),a/2,sqrt(4*b+a^2-4*a+4)/2+1,1/2-(%i*x/2))
+              *(-%i*x-1)^(1/2-(sqrt(4*b+a^2-4*a+4)/4))
+              *(1-%i*x)^(sqrt(4*b+a^2-4*a+4)/4+1/2)
+         /(x^2+1)^(a/4)
+         +%k1*gauss_a(1-(a/2),a/2,sqrt(4*b+a^2-4*a+4)/2+1,1/2-(%i*x/2))
+             *(-%i*x-1)^(1/2-(sqrt(4*b+a^2-4*a+4)/4))
+             *(1-%i*x)^(sqrt(4*b+a^2-4*a+4)/4+1/2)
+          /(x^2+1)^(a/4)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 369  */ 
+(pn_(369),ans:contrib_ode(eqn:'diff(y,x,2)=-a*y/(x^2-1)^2,y,x));
+[y = %k2*(x-1)^(1/2-(sqrt(1-a)/2))*(x+1)^(sqrt(1-a)/2+1/2)
+    +%k1*(x-1)^(sqrt(1-a)/2+1/2)*(x+1)^(1/2-(sqrt(1-a)/2))] ;
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 370  */ 
+(pn_(370),ans:contrib_ode(eqn:'diff(y,x,2)=a^2*y/(x^2-1)^2-2*x*'diff(y,x,1)/(x^2-1),y,x));
+[y=%i*%k1*sinh(a*(log(x-1)/2-log(x+1)/2))+%k2*cosh(a*(log(x-1)/2-log(x+1)/2))];
+ode_check(eqn,ans[1]);
+0;
+method;
+xformtoconstcoeff;
+
+/* Kamke 2. 371  */ 
+(pn_(371),ans:contrib_ode(eqn:'diff(y,x,2)=-y*(-(x^2-1)*lambda-a^2)/(x^2-1)^2-2*x*'diff(y,x,1)/(x^2-1),y,x));
+[y = %k2*(x-1)^(a/2)
+        *gauss_b(sqrt(4*lambda+1)/2+1/2,1/2-(sqrt(4*lambda+1)/2),a+1,1/2-(x/2))
+           /(x+1)^(a/2)
+     +%k1*(x-1)^(a/2)
+        *gauss_a(sqrt(4*lambda+1)/2+1/2,1/2-(sqrt(4*lambda+1)/2),a+1,1/2-(x/2))
+           /(x+1)^(a/2)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 372  */ 
+/* CHECKME - Takes a long time
+(pn_(372),ans:contrib_ode(eqn:'diff(y,x,2)=-2*x*'diff(y,x,1)/(x^2-1)-((x^2-1)*(a*x^2+b*x+c)-k^2)*y/(x^2-1)^2,y,x));
+*/
+
+/* Kamke 2. 373  */ 
+(pn_(373),ans:contrib_ode(eqn:'diff(y,x,2)=-2*x*'diff(y,x,1)/(x^2-1)-(-a^2*(x^2-1)^2-n*(n+1)*(x^2-1)-m^2)*y/(x^2-1)^2,y,x));
+[y = %k2*spherodialwave_b(-m,n^2+n-m^2+m-a^2,-a^2/4,-x)
+          /((x-1)^(m/2)*(x+1)^(m/2))
+    +%k1*spherodialwave_a(-m,n^2+n-m^2+m-a^2,-a^2/4,-x)
+           /((x-1)^(m/2)*(x+1)^(m/2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 374  */ 
+(pn_(374),ans:contrib_ode(eqn:'diff(y,x,2)=2*(2*a-1)*x*'diff(y,x,1)/(x^2-1)-((2*a*(2*a-1)-v*(v+1))*x^2+v*(v+1)+2*a)*y/(x^2-1)^2,y,x));
+[y = %k2*gauss_b(-v,v+1,1,1/2-(x/2))*(x-1)^a*(x+1)^a
+    +%k1*gauss_a(-v,v+1,1,1/2-(x/2))*(x-1)^a*(x+1)^a];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 375  */ 
+(pn_(375),ans:contrib_ode(eqn:'diff(y,x,2)=-2*(n-2*a+1)*x*'diff(y,x,1)/(x^2-1)-(4*a*(a-n)*x^2-((v-n)*(v+n+1)+2*a)*(x^2-1))*y/(x^2-1)^2,y,x));
+[y = %k2*gauss_b(-v,v+1,n+1,1/2-(x/2))*(x-1)^a*(x+1)^(a-n)
+    +%k1*gauss_a(-v,v+1,n+1,1/2-(x/2))*(x-1)^a*(x+1)^(a-n)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 376  */ 
+assume(a>0);
+[a>0];
+(pn_(376),ans:contrib_ode(eqn:'diff(y,x,2)=-(2*x^2+a)*'diff(y,x,1)/(x*(x^2+a))-b*y/(x^2*(x^2+a)),y,x));
+[y=%k2*cos(sqrt(b)*asinh(sqrt(a)/abs(x))/sqrt(a))-%k1*sin(sqrt(b)*asinh(sqrt(a)/abs(x))/sqrt(a))];
+ode_check(eqn,ans[1]);
+0;
+method;
+xformtoconstcoeff;
+forget(a>0);
+[a>0];
+
+/* Kamke 2. 377  */
+(pn_(377),ans:contrib_ode(eqn:'diff(y,x,2)=-b^2*y/(x^2+a^2)^2,y,x));
+[y = %k2*sqrt(x^2+a^2)*%e^(sqrt(-b^2-a^2)*atan(x/a)/a)
+              *'integrate(1/(x^2*%e^(2*sqrt(-b^2-a^2)*atan(x/a)/a)
+                            +a^2*%e^(2*sqrt(-b^2-a^2)*atan(x/a)/a)),x)
+    +%k1*sqrt(x^2+a^2)*%e^(sqrt(-b^2-a^2)*atan(x/a)/a)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 378  */ 
+(pn_(378),ans:contrib_ode(eqn:'diff(y,x,2)=-2*(x^2-1)*'diff(y,x,1)/((x-1)^2*x)-(-2*x^2+2*x+2)*y/((x-1)^2*x^2),y,x));
+[y =%k2*(2*x^3*log(x)/(x^2-2*x+1)-(2*x^2*log(x)/(x^2-2*x+1))
+                                         -(2*x^3*log(x-1)/(x^2-2*x+1))
+                                         +2*x^2*log(x-1)/(x^2-2*x+1)
+                                         -(2*x^2/(x^2-2*x+1))+x/(x^2-2*x+1))
+    +%k1*x^2/(x-1)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 379  */ 
+(pn_(379),ans:contrib_ode(eqn:'diff(y,x,2)=12*y/((x+1)^2*(x^2+2*x+3)),y,x));
+[y = %k2*(3*x^2*atan(x/sqrt(2)+1/sqrt(2))/(x^2+2*x+1)
+                +6*x*atan(x/sqrt(2)+1/sqrt(2))/(x^2+2*x+1)
+                +9*atan(x/sqrt(2)+1/sqrt(2))/(x^2+2*x+1)
+                -(sqrt(2)*x^3/(x^2+2*x+1))-(2*sqrt(2)*x^2/(x^2+2*x+1))
+                -(4*sqrt(2)*x/(x^2+2*x+1))-(sqrt(2)/(x^2+2*x+1)))
+    +%k1*(x^2/(x^2+2*x+1)+2*x/(x^2+2*x+1)+3/(x^2+2*x+1))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 380  */ 
+(pn_(380),ans:contrib_ode(eqn:'diff(y,x,2)=-b*y/(x^2*(x-a)^2),y,x));
+[y = %k2*x^(1/2-(sqrt(a^2-4*b)/(2*a)))*(x-a)^(sqrt(a^2-4*b)/(2*a)+1/2)
+    +%k1*x^(sqrt(a^2-4*b)/(2*a)+1/2)*(x-a)^(1/2-(sqrt(a^2-4*b)/(2*a)))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 381  */ 
+(pn_(381),ans:contrib_ode(eqn:'diff(y,x,2)=c-b*y/(x^2*(x-a)^2),y,x));
+false;
+
+/* Kamke 2. 382  */ 
+/* CHECKME - Takes a long time
+(pn_(382),ans:contrib_ode(eqn:'diff(y,x,2)=c*y/((x-a)^2*(x-b)^2),y,x));
+false;
+*/
+
+/* Kamke 2. 383  */ 
+/*(pn_(383),ans:contrib_ode(eqn:'diff(y,x,2)=(-(-beta-alpha+1)*(x-a)*(x-b)^2-(beta+alpha+1)*(x-a)^2*(x-b))*'diff(y,x,1)/((x-a)^2*(x-b)^2)-alpha*(a-b)^2*beta*y/((x-a)^2*(x-b)^2),y,x));
+[y = %k2*(x-a)^beta/(x-b)^beta+%k1*(x-a)^alpha/(x-b)^alpha];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+*/
+
+/* Kamke 2. 384  */ 
+/* This equation presents a problem - runs forever */ 
+/*(pn_(384),ans:contrib_ode(eqn:'diff(y,x,2)=-(-(a^2-1)*x^2+2*(a+3)*b*x-b^2)*y/(4*x^2),y,x));*/
+
+/* Kamke 2. 385  */ 
+(pn_(385),ans:contrib_ode(eqn:'diff(y,x,2)=-(a*x^2+a-3)*y/(4*(x^2+1)^2),y,x));
+[y = %k2*gauss_b(sqrt(1-a)/2,-(sqrt(1-a)/2),1/2,1/2-(%i*x/2))
+               *(-%i*x-1)^(1/4)*(1-%i*x)^(1/4)
+    +%k1*gauss_a(sqrt(1-a)/2,-(sqrt(1-a)/2),1/2,1/2-(%i*x/2))
+              *(-%i*x-1)^(1/4)*(1-%i*x)^(1/4)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 386  */ 
+(pn_(386),ans:contrib_ode(eqn:'diff(y,x,2)=18*y/((2*x+1)^2*(x^2+x+1)),y,x));
+[y = %k2*(36*x^2*atan(2*x/sqrt(3)+1/sqrt(3))/(4*x^2+4*x+1)
+                +36*x*atan(2*x/sqrt(3)+1/sqrt(3))/(4*x^2+4*x+1)
+                +36*atan(2*x/sqrt(3)+1/sqrt(3))/(4*x^2+4*x+1)
+                -(16*sqrt(3)*x^3/(4*x^2+4*x+1))-(16*sqrt(3)*x^2/(4*x^2+4*x+1))
+                -(22*sqrt(3)*x/(4*x^2+4*x+1))-(3*sqrt(3)/(4*x^2+4*x+1)))
+          +%k1*(x^2/(4*x^2+4*x+1)+x/(4*x^2+4*x+1)+1/(4*x^2+4*x+1))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 387  */ 
+(pn_(387),ans:contrib_ode(eqn:'diff(y,x,2)=3*y/(4*(x^2+x+1)^2),y,x));
+[y = %k2*sqrt(x^2+x+1)*atan(2*x/sqrt(3)+1/sqrt(3))+%k1*sqrt(x^2+x+1)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 388  */ 
+(pn_(388),ans:contrib_ode(eqn:'diff(y,x,2)=-(3*x-1)*'diff(y,x,1)/(2*(x-1)*x)-(v*(v+1)*(x-1)-a^2*x)*y/(4*(x-1)^2*x^2),y,x));
+[y=%k2*gauss_b(-(v/2)-(a/2),-(v/2)-(a/2)+1/2,1/2-v,x)/((x-1)^(a/2)*x^(v/2))
+  +%k1*gauss_a(-(v/2)-(a/2),-(v/2)-(a/2)+1/2,1/2-v,x)/((x-1)^(a/2)*x^(v/2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 389  */ 
+(pn_(389),ans:contrib_ode(eqn:'diff(y,x,2)=-(3*x-1)*'diff(y,x,1)/(2*(x-1)*x)-(-4*n^2*x-v*(v+1)*(x-1)^2)*y/(4*(x-1)^2*x^2),y,x));
+[y = %k2*gauss_b(n-v,n+1/2,1/2-v,x)*(x-1)^n/x^(v/2)
+    +%k1*gauss_a(n-v,n+1/2,1/2-v,x)*(x-1)^n/x^(v/2)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 390  */ 
+(pn_(390),ans:contrib_ode(eqn:'diff(y,x,2)=-3*y/(16*(x-1)^2*x^2),y,x));
+[y = %k2*(x-1)^(1/4)*x^(3/4)+%k1*(x-1)^(3/4)*x^(1/4)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 391  */ 
+(pn_(391),ans:contrib_ode(eqn:'diff(y,x,2)=(7*a*x^2+5)*'diff(y,x,1)/(x*(a*x^2+1))-(15*a*x^2+5)*y/(x^2*(a*x^2+1)),y,x));
+[y = %k1*(2*a*x^3+x)+%k2*x*(a*x^2+1)^2];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 392  */ 
+/* CHECKME - Takes a long time
+(pn_(392),ans:contrib_ode(eqn:'diff(y,x,2)=-b*x*'diff(y,x,1)/(a*(x^2-1))-(c*x^2+d*x+e)*y/(a*(x^2-1)^2),y,x));
+false;
+*/
+
+/* Kamke 2. 393  */ 
+/* Error "Polynomial quotient is not exact"
+(pn_(393),ans:contrib_ode(eqn:'diff(y,x,2)=(-b*x^2-c*x-d)*y/(a*(x-1)^2*x^2),y,x));
+false;
+*/
+
+/* Kamke 2. 394  */ 
+(pn_(394),ans:contrib_ode(eqn:'diff(y,x,2)=-2*'diff(y,x,1)/x-c*y/(x^2*(a*x+b)^2),y,x));
+[y=%k2*x^(-(sqrt(b^2-4*c)/(2*b))-(1/2))*(a*x+b)^(sqrt(b^2-4*c)/(2*b)+1/2)
+  +%k1*x^(sqrt(b^2-4*c)/(2*b)-(1/2))*(a*x+b)^(1/2-(sqrt(b^2-4*c)/(2*b)))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 395  */ 
+/* Error "Exponent out of range"
+(pn_(395),ans:contrib_ode(eqn:'diff(y,x,2)=-y/(a*x+b)^4,y,x));
+false;
+*/
+
+/* Kamke 2. 396  */ 
+/* Error "Quotient by a polynomial of higher degree"
+(assume(4*a*c-b^2>0),done);
+done;
+(pn_(396),ans:contrib_ode(eqn:'diff(y,x,2)=-y*A/(a*x^2+b*x+c)^2,y,x));
+false;
+(forget(4*a*c-b^2>0),done);
+done;
+*/
+
+/* Kamke 2. 397  */ 
+(pn_(397),ans:contrib_ode(eqn:'diff(y,x,2)=y/x^5-'diff(y,x,1)/x^4,y,x));
+[y = gamma_incomplete(1/3,-1/(3*x^3))*%k2*x+%k1*x];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 398  */ 
+(pn_(398),ans:contrib_ode(eqn:'diff(y,x,2)=-(3*x^2-1)*'diff(y,x,1)/(x*(x^2-1))-(x^2-(2*v+1)^2-1)*y/(x^2-1)^2,y,x));
+false;
+
+/* Kamke 2. 399  */ 
+(pn_(399),ans:contrib_ode(eqn:'diff(y,x,2)=(3*x+1)*'diff(y,x,1)/((x-1)*(x+1))-36*(x+1)^2*y/((x-1)^2*(3*x+5)^2),y,x));
+[y = %k2*((x-1)^(3/2)*sqrt(3*x+5)*log(3*x+5)
+               +3*(x-1)^(3/2)*sqrt(3*x+5)*log(x-1))
+    +%k1*(x-1)^(3/2)*sqrt(3*x+5)];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];
+
+/* Kamke 2. 400  */ 
+(pn_(400),ans:contrib_ode(eqn:'diff(y,x,2)='diff(y,x,1)/x-a*y/x^6,y,x));
+[y = %k2*x^2*%e^(sqrt(-a)/(2*x^2))+%k1*x^2*%e^-(sqrt(-a)/(2*x^2))];
+[method,ode_check(eqn,ans[1])];
+[odelin,0];

@@ -1,0 +1,114 @@
+(kill(all),load(orthopoly), 0);
+0$
+
+pochhammer(x,0);
+1$
+
+pochhammer(0,0);
+1$
+
+pochhammer(%i,0);
+1$
+
+is(pochhammer(1,10) = 10!);
+true$
+
+pochhammer(2/3, 10);
+72642169600/59049$
+
+pochhammer(2/3,-10);
+59049/17041024000$
+
+pochhammer(2/3+%i,6);
+32110*%i/81-415610/729$
+
+pochhammer(9/7 + %i,-8);
+-2161987431262848*%i/11917457996918446325 - 2103182442996551/47669831987673785300$
+
+(f : pochhammer(x,-n), f : subst(n=-10, f));
+pochhammer(x,10)$
+
+pochhammer(13/2, 1/2);
+1024/(231*sqrt(%pi))$
+
+pochhammer(13/2,-1/2);
+512/(693*sqrt(%pi))$
+
+expand(pochhammer(x,3));
+x^3+3*x^2+2*x$
+
+(f : pochhammer(123/10, 78), g : pochhammer(12.3, 78), is(abs(f-g)/abs(f) < 3.0e-15));
+true$
+
+(f : pochhammer(-123/10 + %i, 42), g : pochhammer(-12.3 + %i, 42), is(abs(f-g)/abs(f) < 3.0e-15));
+true$
+
+(fpprec : 35,0);
+0$
+
+(f : pochhammer(12, 78), g : pochhammer(12.0b0, 78), is(bfloat(abs(f-g)/abs(f)) < 3.0b-35));
+true$
+
+
+(f : pochhammer(12 + %i, 42), g : pochhammer(12.0b0 + %i, 42), is(bfloat(abs(f-g)/abs(f)) < 3.0e-35));
+true$
+
+(f : pochhammer(-12 + %i, -57), g : pochhammer(-12.0b0 + %i, -57), is(bfloat(abs(f-g)/abs(f)) < 3.0e-35));
+true$
+
+(f : pochhammer(-7 - %i, -57), g : pochhammer(-7.0b0 - %i, -57), is(bfloat(abs(f-g)/abs(f)) < 3.0e-35));
+true$
+
+(f : pochhammer(%i, -87), g : pochhammer(1.0b0 * %i, -87), is(bfloat(abs(f-g)/abs(f)) < 3.0e-35));
+true$
+
+pochhammer(x,0);
+1$
+
+pochhammer(x,1);
+x$
+
+pochhammer(x,2);
+x*(x+1)$
+
+(f : pochhammer(x,n),0);
+0$
+
+sublis([n=3],f);
+x*(x+1)*(x+2)$
+
+diff(pochhammer(x,n),x);
+pochhammer(x,n)*(psi[0](x+n)-psi[0](x))$
+
+diff(pochhammer(x,n),n);
+pochhammer(x,n)*psi[0](x+n)$
+
+ratdisrep(pochhammer(taylor(x,x,0,2),10));
+362880*x+1026576*x^2+1172700*x^3$
+
+is(minfactorial(makefact(sublis([n=-1], makegamma(pochhammer(x,n))))) = pochhammer(x,-1));
+true$
+
+is(minfactorial(makefact(sublis([n=-2], makegamma(pochhammer(x,n))))) = pochhammer(x,-2));
+true$
+
+is(minfactorial(makefact(sublis([n=-5], makegamma(pochhammer(x,n))))) = pochhammer(x,-5));
+true$
+
+is(pochhammer(11/2, 1/2) = sublis([x=11/2, n = 1/2], makegamma(pochhammer(x,n))));
+true$
+
+is(pochhammer(11/2, -1/2) = sublis([x=11/2, n = -1/2], makegamma(pochhammer(x,n))));
+true$
+
+is(pochhammer(11/2, -7/2) = sublis([x=11/2, n = -7/2], makegamma(pochhammer(x,n))));
+true$
+
+(remvalue(f,g), reset(fpprec),0);
+0$
+
+
+
+
+
+

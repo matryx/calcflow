@@ -1,0 +1,120 @@
+12 Sept 2002
+
+1.  Posted version 1.3 to my webpage and announced its availability
+to the Maxima community.
+
+10 Sept 2002
+
+1. When fun in sdiffgrad is lambda, do not differentiate using positional
+derivatives.  Without checking for a lambda form, derivatives of lambda 
+forms were incorrectly differentiated (commerical Macsyma has this bug). 
+Maxima doesn't support derivatives of lambda forms.
+
+2.  Similar to the support for %sqrt in %pderivop, I added support for 
+the exp function.  This change allows things like
+(C40) diff(f(x),x);
+
+(D40) 				    f   (x)
+				     (1)
+(C41) %,f=exp;
+
+					x
+(D41) 				      %E
+
+to fully evaluate.
+
+3. Fixed bug in %pderivop; before
+
+  (cond ((or (eq f '%sqrt) (eq f '$exp)) ;; any others?
+	 (let ((x (gensym)))
+	   (setq f `((lambda simp) ((mlist) x) ((,f) x))))))
+
+after bug fix
+
+  (cond ((or (eq f '%sqrt) (eq f '$exp)) ;; any others?
+	 (let ((x (gensym)))
+	   (setq f `((lambda simp) ((mlist) ,x) ((,f) ,x))))))
+
+4.  Restored support for things like
+
+(C71) diff(f(x),x);
+
+(D71) 				    f   (x)
+				     (1)
+(C72) %,f=sqrt(42);
+
+(D72) 				       0
+
+Support for this was removed when I added a check for non-atoms in %pderivop.
+
+19 August 2002
+
+1.  Added support for pderivop(lambda([ ....]), ...).
+
+2.  Added support to %pderivop for sqrt; this allows
+
+    (c1) e : diff(g(x),x);
+    (c2) e, g=sqrt;
+    
+18 August 2002
+
+1.  Fixed bug in nonnegative-intp and zero-intp.
+
+2.  Added meval to final clause of %pderivop; without it things like
+
+(c1) g(x) := x^3$
+(c2) pderivop(g,1);
+(c3) ev(%);
+
+need a user-supplied ev to get the lambda form.
+
+
+10 August 2002
+
+1. pdiff.lisp now modifies the tex-mexpt function; thus pdiff now
+loads mactex.
+
+9 August 2002
+
+1. Started an experimental version of pdiff; serveral option 
+variables control the way positional deriviates are
+converted to tex.  Now, tex-mexpt also needs to be
+modifed.  When finished, this will be version 1.3.
+
+2. Added a new user-level function pderivop; this makes
+it possible to do several useful things.  See the source
+file.
+
+3. The experimental version checks that the arity of a function
+matches its number of derivative subscripts; this happens in
+mapply1.
+
+7 August 2002
+
+1. Used $put to included version information and changed the wording of
+some comments; boosted version to 1.2.2.  We can now conditionally 
+load pdiff with
+
+(c1) if(get('pdiff,'version) = false) then load("pdiff.lisp");
+
+29 July 2002  
+
+Fixed four bugs in convert_to_diff.  
+
+1. setf in  (setf (nth i args) iarg))) requires that args be a 
+copy of (cddr e).  Fixed.  
+
+2. Conversion  of f_(1)(k), when k is a constant requires a 
+dummy.  I added an extra conditional that checks for constant arguments.  
+
+3. Elements of the at-list weren't being converted to Maxima derivatives.
+
+4. convert_to_diff failed on CRE expressions; fixed by converting to
+general form.
+
+
+Changed version to 1.2.1.
+
+28 July 2002  
+
+First announcement of pdiff of Maxima list, version 1.2.

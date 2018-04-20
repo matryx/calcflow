@@ -1,0 +1,27 @@
+/*-*-macsyma-*-*/
+
+/* Autoload definitions for the macsyma macro library.
+
+   Do   LOAD(AUTOLO)
+
+ */
+
+eval_when([translate,batch,demo],
+          if not(member('macro,properties(load_package))) then load(packg))$
+
+herald_package(sharem)$
+
+setup_autoload_macro("basic",
+		     prog1, push, pop, tr_ev, symbolcheck)$
+
+setup_autoload_macro("defm",defm)$
+
+setup_autoload_macro("keyarg",def_keyarg)$
+
+setup_autoload_macro("contrl", cond ,caseq)$
+
+setup_autoload_macro("defstm",
+		     def_structure, %aux_constructor%, %aux_alterant%,
+		     initialize_structure_list)$
+
+setup_autoload_macro("expr", def)$

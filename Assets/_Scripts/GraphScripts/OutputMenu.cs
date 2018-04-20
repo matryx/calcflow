@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class OutputMenu : MonoBehaviour
 {
+    [SerializeField]
+    SecondaryMenu secondaryMenu;
 
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
@@ -113,6 +115,9 @@ public class OutputMenu : MonoBehaviour
                 {
                     calcManager.saveLoadMenu.Save();
                 }
+                break;
+            case "Matryx":
+                secondaryMenu.gameObject.SetActive(true);
                 break;
         }
         calcManager.manageText();

@@ -1,0 +1,62 @@
+\input texinfo
+
+@c NOTE: This template-standalone.texi shows how to create a texinfo file
+@c that yields a stand-alone MYTOPIC.info file.
+@c See template.texi for a texinfo file which is to be part of maxima.info.
+
+@c NOTE: The content of this file was determined by tedious trial and error.
+@c My advice is to keep all elements of this template, from \input to @bye,
+@c otherwise you'll experience cryptic error messages, hair loss, etc.
+
+@c makeinfo MYTOPIC.texi         to make .info
+@c texi2html MYTOPIC.texi        to make .html
+@c texi2pdf MYTOPIC.texi         to make .pdf
+
+@setfilename MYTOPIC.info
+@settitle MYTOPIC
+
+@ifinfo 
+@macro var {expr}
+<\expr\>
+@end macro
+@end ifinfo
+
+@node Top, Introduction to MYTOPIC, (dir), (dir)
+@top
+@menu
+* Introduction to MYTOPIC::
+* Definitions for MYTOPIC::
+* Function and variable index::
+@end menu
+@chapter MYTOPIC
+
+@node Introduction to MYTOPIC, Definitions for MYTOPIC, Top, Top
+@section Introduction to MYTOPIC
+
+@code{MYTOPIC} is yadda yadda yadda, foo bar baz quux mumble blurf.
+
+@node Definitions for MYTOPIC, Function and variable index, Introduction to MYTOPIC, Top
+@section Definitions for MYTOPIC
+
+@deffn {Function} transmogrify (@var{foo}, @var{bar})
+
+Returns the generalized transmogrificatin of @var{foo} and @var{bar}.
+See also @code{frotz}.
+
+@end deffn
+
+@defvr {Variable} frotz
+Default value: @code{true}
+
+When @code{frotz} is @code{true},
+@code{transmogrify} computes the transmogrification by Smith's algorithm.
+Otherwise, the transmogrification is computed by Jones' algorithm.
+
+@end defvr
+
+@node Function and variable index,  , Definitions for MYTOPIC, Top
+@appendix Function and variable index
+@printindex fn
+@printindex vr
+
+@bye

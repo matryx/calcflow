@@ -1,0 +1,54 @@
+/* Copyright (C) 2005 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Demonstrating the Hodge star operation
+ *
+*/
+("Using the hodge() function")$
+if get('itensor,'version)=false then load(itensor);
+("We set up a standard metric")$
+imetric(g);
+dim:4;
+("To avoid index conflicts, choose a suitable counter value")$
+icounter:100;
+("Declare the antisymmetric properties of a 3-form")$
+decsym(A,3,0,[anti(all)],[])$
+("Now compute the dual of the 3-form")$
+ishow(A([i,j,k],[]))$
+ishow(canform(hodge(%)))$
+("And compute the dual again")$
+ishow(canform(hodge(%th(2))))$
+("After simplification, we should get back the original 3-form up to sign")$
+lc2kdt(%th(2))$
+%,kdelta$
+ishow(canform(contract(expand(%))))$
+("The sign is (-1)^(p*(n-p)), in this case -1^3, which is correct.")$
+
+("Let's try another example")$
+decsym(F,2,0,[anti(all)],[])$
+ishow(F([i,j],[]))$
+ishow(canform(hodge(%)))$
+ishow(canform(hodge(%)))$
+lc2kdt(%)$
+%,kdelta$
+ishow(canform(contract(expand(%))))$
+
+("And here's the Hodge star of the exterior product of two vectors")$
+ishow(v([i],[])*w([j],[])-v([j],[])*w([i],[]))$
+ishow(canform(hodge(%)))$
+ishow(canform(hodge(%)))$
+lc2kdt(%)$
+%,kdelta$
+ishow(canform(contract(expand(%))))$
+
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

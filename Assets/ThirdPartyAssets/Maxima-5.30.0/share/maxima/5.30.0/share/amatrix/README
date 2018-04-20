@@ -1,0 +1,38 @@
+Notes about amatrix
+Robert Dodier, 2007-12-15
+I release this file under the terms of the GNU General Public License.
+
+amatrix is a matrix object which is implemented via an underlying
+Lisp array (instead of a list of lists), and which supports row and/or
+column subsets. As it stands, this code is experimental; its behavior
+from the user's point of view could be modified, and it has bugs.
+
+At present the following are recognized for row/column subset selection:
+the literal symbol 'all, an integer, a list of integers, and a 1-row
+or 1-column amatrix which contains expressions to be evaluated via
+the Maxima function "is". Maybe the scheme for selecting elements via
+Boolean expressions could be improved.
+
+Relational operators do not distribute over amatrix. That would make
+some selection constructs more legible (e.g. A[A[all, 1] = foo, all] to
+select rows of A such that the element in column 1 is foo), but probably
+it should not be automatic. It would be straightforward to implement
+some rules via defrule and invoke them via explicitly, via a function
+named, say, distribute_over_amatrix. But that is its own kind of
+clumsiness ... In the absence of a clear direction, I'll just leave it
+alone for now.
+
+A copy-on-write scheme has been attempted, which shares storage
+between an amatrix and any subset objects until one or the other
+is modified. I'm pretty sure the copy-on-write scheme has bugs.
+
+The wilcoxon program is an illustration of amatrix which computes
+something of practical importance, the so-called Mann-Whitney-Wilcoxon
+statistic.
+
+Replacing the existing matrix object by amatrix would be tedious,
+although well within the realm of possibility. There are many bits
+of Maxima source code which imagine they know the internal organization
+of the matrix object; those would have to be replaced with calls to
+functions within the amatrix package to obtain an element, the number
+of rows, or whatever.

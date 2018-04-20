@@ -1,0 +1,52 @@
+/* Copyright (C) 2007 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Deriving the Friedmann-equations of cosmology
+ *
+ */
+("Deriving the Friedmann-equations of cosmology" )$
+if get('ctensor,'version)=false then load(ctensor);
+("We start with the Friedmann-Lemaitre-Robertson-Walker metric")$
+("This metric describes a homogeneous, isotropic universe.")$
+("Our coordinate system is spherical:")$
+dim:4;
+ct_coords:[t,r,u,v];
+lg:ident(4);
+lg[2,2]:-a^2/(1-k*r^2);
+lg[3,3]:-a^2*r^2;
+lg[4,4]:-a^2*r^2*sin(u)^2;
+dependencies(a(t));
+cmetric();
+("Let us review the contravariant and covariant metric tensor:")$
+ug;
+lg;
+("And let us calculate the Einstein tensor.")$
+derivabbrev:true;
+christof(mcs);
+ricci(true);
+einstein(true);
+("The Weyl tensor is null. No gravitational waves in this metric!")$
+weyl(true);
+("The energy-momentum tensor is that of an ideal fluid with")$
+("energy density e and pressure p:")$
+T:-p*ident(4);
+T[1,1]:e;
+T;
+("The Einstein field equations are reduced to two differential equations:")$
+expand(ein[1,1]/3=(8*%pi*G*T[1,1]+L)/3);
+expand(ein[2,2]-ein[1,1]/3)/2=factor(8*%pi*G*(T[2,2]-T[1,1]/3)/2)+(L-L/3)/2;
+("These two are known as the Friedmann equations of cosmology.")$
+("The size of the universe is proportional to the scale factor a;")$
+("L (Lambda) is the infamous cosmological constant; k (=0, +1, or -1)")$
+("determines the curvature (flat, closed, or open universe, respectively.)")$
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */
+

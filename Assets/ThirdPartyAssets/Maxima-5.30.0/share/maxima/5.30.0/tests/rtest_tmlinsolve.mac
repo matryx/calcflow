@@ -1,0 +1,59 @@
+/* tmlinsolve and friends are undocumented, so I don't know if it's
+ * really worth the trouble to test them ... oh well.
+ */
+
+kill (all);
+done;
+
+(e1 : [a*x = 1],
+ e2 : [x + 7*y = 1, a*x - y = 2],
+ e3 : [x + y + a*z = 1, 3*x - y + z = 2, x - 5*y - z = b],
+ e4 : [a*w + x + y + z = 1, w - b*x + y + z = 2, w + x - 7*y + z = c, w + 11*x + y - z = 4],
+ 0);
+0;
+
+kill (labels);
+done;
+
+/* tmlinsolve return value is a list of labels, so we go through some
+ * gyrations to evaluate to the actual solution,
+ * then we go through some more gyrations to compare to the
+ * expected result. Sigh.
+ */
+
+(foo : (tmlinsolve (e1, [x]), ev (%%), ev (%%), ratdisrep (%%)),
+ bar : [x = 1/a],
+ ratsimp (foo - bar));
+[0 = 0];
+
+every (map (is, ratsimp (subst (foo, e1))));
+true;
+
+(foo : (tmlinsolve (e2, [x, y]), ev (%%), ev (%%), ratdisrep (%%)),
+ bar : [x = 15/(7*a+1),y = (a-2)/(7*a+1)],
+ ratsimp (foo - bar));
+[0 = 0, 0 = 0];
+
+every (map (is, ratsimp (subst (foo, e2))));
+true;
+
+(foo : (tmlinsolve (e3, [x, y, z]), ev (%%), ev (%%)),
+ bar : rat([x = -((a+1)*b-10*a+8)/(14*a-10),
+ y = -((3*a-1)*b-2*a+2)/(14*a-10),
+ z = (2*b+1)/(7*a-5)]),
+ ratsimp (foo - bar));
+[0 = 0, 0 = 0, 0 = 0];
+
+every (map (is, ratsimp (subst (foo, e3))));
+true;
+
+(foo : (tmlinsolve (e4, [w, x, y, z]), ev (%%), ev (%%)),
+ bar : [w = ((b+1)*c+19*b+67)/((3*a+5)*b-45*a+53),
+ x = -((a-1)*c+22*a-14)/((3*a+5)*b-45*a+53),
+ y = -(((a+1)*b-11*a+13)*c+(4*a-6)*b+28*a-30)/((6*a+10)*b-90*a+106),
+ z = -(((a-1)*b+11*a-11)*c+(28*a-4)*b+152*a-48)/((6*a+10)*b-90*a+106)],
+ ratsimp (foo - bar));
+[0 = 0, 0 = 0, 0 = 0, 0 = 0];
+
+every (map (is, ratsimp (subst (foo, e4))));
+true;

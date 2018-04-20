@@ -1,0 +1,163 @@
+/*
+  
+  GRAPHS - graph theory package for Maxima
+  Copyright (C) 2007-2011 Andrej Vodopivec <andrej.vodopivec@gmail.com>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or	 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+*/
+
+
+/*********************
+ *
+ * Chromatic polynomial
+ *
+ *********************/
+
+chromatic_polynomial(gr, x) :=
+if graph_size(gr)=0 then x^graph_order(gr)
+else  block(
+  [comp],
+  comp : connected_components(gr),
+  if length(comp)>1 then (
+    comp : map(lambda([u], chromatic_polynomial(induced_subgraph(u, gr), x)), comp),
+    expand(apply("*", comp)))
+  else if graph_size(gr)=graph_order(gr)-1 then x*(x-1)^graph_size(gr)
+  else if graph_size(gr)=graph_order(gr)*(graph_order(gr)-1)/2 then c_poly_complete(graph_order(gr),x)
+  else if min_degree(gr)[1]=2 and max_degree(gr)[1]=2 then c_poly_cycle[graph_order(gr)](x)
+  else block(
+    [g1, g2, u, v, p1, p2, e],
+    u : max_degree(gr)[2],
+    v : first(neighbors(u, gr)),
+    e : [min(u,v), max(u,v)],
+    g1 : copy_graph(gr),
+    g2 : copy_graph(gr),
+    remove_edge(e, g1),
+    contract_edge(e, g2),
+    p1 : chromatic_polynomial(g1, x),
+    p2 : chromatic_polynomial(g2, x),
+    p1-p2))$
+
+c_poly_cycle[1](x) := x$
+c_poly_cycle[3](x) := x*(x-1)*(x-2)$
+c_poly_cycle[n](x) := x*(x-1)^(n-1)-c_poly_cycle[n-1](x)$
+c_poly_complete(n,x) := apply("*", makelist(x-i, i, 0, n-1))$
+
+/*******************
+ *
+ *  Matching polynomial
+ *
+ *******************/
+
+matching_polynomial(gr, x) := (
+  if max_degree(gr)[1]<3 then
+    matching_polynomial_simple(gr, x)
+  else block(
+    [g1 : copy_graph(gr), g2 : copy_graph(gr), md, mv],
+    md : max_degree(g1),
+    mv : md[2],
+    md : md[1],
+    u : first(neighbors(mv, g1)),
+    remove_vertex(mv, g1),
+    remove_vertex(u, g1),
+    remove_edge([u, mv], g2),
+    matching_polynomial(g2, x) - matching_polynomial(g1, x)))$
+
+matching_polynomial_simple(gr, x) := block(
+  [conn, pol : 1, c, deg, u],
+  conn : connected_components(gr),
+  for c in conn do (
+    deg : apply(min,
+      args(map(lambda([u], vertex_degree(u, gr)), c))),
+    if deg=2 then pol : pol * cycle_poly(length(c), x)
+    else pol : pol * path_poly[length(c)](x)),
+  expand(pol))$
+
+cycle_poly(n, x) := path_poly[n](x) - path_poly[n-2](x)$
+path_poly[1](x) := x$
+path_poly[2](x) := x^2-1$
+path_poly[n](x) := x*path_poly[n-1](x) - path_poly[n-2](x)$
+
+/*******************
+ *
+ *  Tutte polynomial
+ *
+ *******************/
+
+tutte_polynomial(g, x, y) := block(
+  [non_bridge:false, tpzero:1, components: biconnected_components(g)],
+  /* Reduce to biconnected components */
+  if length(components)>1 then block(
+    [n_loops:0],
+    for v in vertices(g) do n_loops: n_loops+get_vertex_label(v, g, 0),
+    components: map(lambda([comp], induced_subgraph(comp, g)), components),
+    map(
+      lambda([gr],
+        for e in edges(gr) do
+        set_edge_weight(e, get_edge_weight(e, g), gr)),
+      components),
+    xreduce("*", map(lambda([gr], tutte_polynomial(gr, x, y)), components))*y^n_loops)
+  /* check for ``small'' graphs: */
+  /*   - point with loops */
+  else if graph_order(g)=1 then
+    y^get_vertex_label(first(vertices(g)), g, 0)
+  /*   - a multiedge with loops */
+  else if graph_order(g)=2 then block(
+    [e: first(edges(g))],
+    (x+xreduce("+", makelist(y^i, i, 1, get_edge_weight(e, g) - 1)))*
+      y^(get_vertex_label(e[1], g, 0) + get_vertex_label(e[2], g, 0)))
+  /* a cycle on n vertices */
+  else if first(max_degree(g))=2 and lmax(makelist(get_edge_weight(e, g), e, edges(g)))=1 then (
+    (y + xreduce("+", makelist(x^i, i, 1, graph_order(g)-1)))*
+      y^lsum(get_vertex_label(v, g, 0), v, vertices(g)))
+  /* The graph is biconnected - no edge is a bridge */
+  else (
+    /* choose the edge with one endpoint of minimum degree in the graph */
+    non_bridge: [second(min_degree(g))],
+    non_bridge: cons(first(neighbors(non_bridge[1], g)), non_bridge),
+    if non_bridge[1]>non_bridge[2] then non_bridge: reverse(non_bridge),
+    if non_bridge=false then block(
+      [tp:1],
+      tp: tp*x^graph_size(g),
+      for v in vertices(g) do
+        tp: tp*y^get_vertex_label(v, g, 0),
+      tp)
+    else block(
+      [g1: copy_graph(g), g2: copy_graph(g), mfactor:1, tp],
+      contract_edge(non_bridge, g2),
+      if get_edge_weight(non_bridge, g)=1 then (
+        remove_edge(non_bridge, g1))
+      else (
+        set_edge_weight(non_bridge, 1, g1),
+        mfactor: xreduce("+", makelist(y^i, i, 1, get_edge_weight(non_bridge, g)-1))),
+      for u in neighbors(non_bridge[2], g) do
+        if u#non_bridge[1] then
+          set_edge_weight([non_bridge[1], u], 
+            get_edge_weight([non_bridge[1], u], g, 1, 0) +
+            get_edge_weight([non_bridge[2], u], g, 1, 0),
+            g2),
+      set_vertex_label(non_bridge[1],
+        get_vertex_label(non_bridge[1], g, 0) +
+        get_vertex_label(non_bridge[2], g, 0),
+        g2),
+      tp: tutte_polynomial(g1, x, y) + mfactor*tutte_polynomial(g2, x, y))))$
+
+flow_polynomial(g, x) := block(
+  [n: graph_order(g), m: graph_size(g)],
+  (-1)^(m-n+1)*ratexpand(psubst(['y=0, 'x=x], tutte_polynomial(g,'y,1-'x))))$
+
+rank_polynomial(g, x, y) := block(
+  [tp: tutte_polynomial(g, 'x, 'y), n:graph_order(g)],
+  ratexpand(x^(n-1)*psubst(['x=1+1/x, 'y=1+y], tp)))$

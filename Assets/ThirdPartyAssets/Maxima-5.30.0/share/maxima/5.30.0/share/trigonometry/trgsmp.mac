@@ -1,0 +1,176 @@
+/*-*-MACSYMA-*-*/
+/*Code added 7/5/80 by ELL for mapping all trig and hyper trig functions
+into sin and cos (in lower case)*/
+/* 4:00pm  Tuesday, 11 August 1981 -GJC
+   Added more eval_when conditionals to complement the improvement
+   in Defrule translation and to invoke TRANSCOMPILE.
+11/20/83 11:08:42
+  reformatting and some streamlining for translation. -asb
+*/
+
+eval_when([translate],
+	  transcompile:true,
+          tr_bound_function_applyp:false,
+          mode_declare(function(expnlength,argslength),fixnum))$
+
+/* Variable definitions */
+
+define_variable(bestlength,0,fixnum)$
+define_variable(trylength,0,fixnum)$
+
+/* Properties */
+
+/* The following properties are used to implement the four identities:
+
+     FOO^2=GET(FOO,'UNITCOF)
+           +GET(FOO,'COMPLEMENT_COF)*GET(FOO,'COMPLEMENT_FUNCTION)^2*/
+
+put('sin,'cos,'complement_function)$
+put('cos,'sin,'complement_function)$
+put('sinh,'cosh,'complement_function)$
+put('cosh,'sinh,'complement_function)$
+put('cos,1,'unitcof)$
+put('sin,1,'unitcof)$
+put('cosh,1,'unitcof)$
+put('sinh,-1,'unitcof)$
+put('cos,-1,'complement_cof)$
+put('sin,-1,'complement_cof)$
+put('cosh,1,'complement_cof)$
+put('sinh,1,'complement_cof)$
+
+put('sin,'trigonometric,'type)$
+put('cos,'trigonometric,'type)$
+put('sinh,'hyper_trigonometric,'type)$
+put('cosh,'hyper_trigonometric,'type)$
+
+/* Declarations */
+
+eval_when([translate,batch,demo],
+	  matchdeclare(a,true))$
+
+/* Predicates */
+
+trigonometricp(exp):=
+  is(get(inpart(exp,0),'type)='trigonometric
+     or get(piece,'type)='hyper_trigonometric)$
+
+/* Rules */
+
+defrule(trigrule1,tan(a),sin(a)/cos(a))$
+defrule(trigrule2,sec(a),1/cos(a))$
+defrule(trigrule3,csc(a),1/sin(a))$
+defrule(trigrule4,cot(a),cos(a)/sin(a))$
+defrule(htrigrule1,tanh(a),sinh(a)/cosh(a))$
+defrule(htrigrule2,sech(a),1/cosh(a))$
+defrule(htrigrule3,csch(a),1/sinh(a))$
+defrule(htrigrule4,coth(a),cosh(a)/sinh(a))$
+
+/* Functions */
+
+trigsimp(x):=
+  trigsimp3(ratsimp(apply1(x,
+                          trigrule1,trigrule2,trigrule3,trigrule4,
+			  htrigrule1,htrigrule2,htrigrule3,htrigrule4)))$
+
+/*
+ * Original version, left for posterity
+ */
+/*
+trigsimp3(expn):=
+   (expn:totaldisrep(expn),
+    ratsimp(trigsimp1(num(expn))/trigsimp1(denom(expn)))) $
+*/
+
+/*
+ * Like the original except that if expn is a list, we recurse over
+ * the list one at a time instead of doing it all at once.  This
+ * prevents quadratic (or exponential) behavior as the list gets
+ * longer.
+ *
+ * See bug 965926
+ */
+
+trigsimp3(expn):=
+   if listp(expn)
+   then
+     if expn = []
+     then 
+        []
+     else
+        cons(ratsimp(trigsimp1(num(expn[1]))/trigsimp1(denom(expn[1]))),
+             trigsimp3(rest(expn)))
+   else
+     ratsimp(trigsimp1(num(expn))/trigsimp1(denom(expn)))$
+          
+trigsimp1(expn):=block(
+   [listoftrigsq, bestlength, trylength],
+   listoftrigsq: listoftrigsq(expn),
+   bestlength: 999999,
+   if listoftrigsq#[]
+   then improve(expn,expn,listoftrigsq)
+   else expn)$
+
+improve(expn,subsofar,listoftrigsq):=
+  if listoftrigsq=[]
+  then (if (trylength:expnlength(subsofar))<bestlength
+        then (bestlength:trylength,subsofar)
+        else expn)
+  else (subsofar:improve(expn,subsofar,rest(listoftrigsq)),
+	for alt in first(listoftrigsq) do 
+            subsofar:
+	    improve(subsofar,
+		    ratsubst(get(inpart(alt,0),'unitcof)
+           		     +get(piece,'complement_cof)
+			      *get(piece,'complement_function)(first(alt))^2,
+                             alt^2,subsofar),
+		    rest(listoftrigsq)),
+	subsofar)$
+
+listoftrigsq(expn):=
+  if atom(expn)
+  then []
+  else block([inflag, ans:[]],
+             if inpart(expn,0)="^" and integerp(inpart(expn,2))
+                and piece>=2
+             then if atom(expn:inpart(expn,1))
+                  then return([])
+	          else if trigonometricp(expn)
+                       then return([[expn]]),
+             inflag:true,
+             for arg in expn do
+                 ans:specialunion(listoftrigsq(arg),ans),
+             ans)$
+
+specialunion(list1,list2):=
+  if list1=[]
+  then list2
+  else if list2=[]
+       then list1
+       else block([alternates:first(list1)],
+                  for alt in alternates do
+                      list2:update(alt,get(inpart(alt,0),'complement_function)),
+                  specialunion(rest(list1),list2))$
+
+update(form, complement):=block(
+   [ans],
+   complement: apply(complement,[inpart(form,1)]),
+   ans: for element in list2 do
+      if member(form, element) then return('found)
+      else if member(complement,element) then return(
+         cons([form,complement], delete(element,list2))),
+   if ans='found
+   then list2
+   else if ans='done
+        then cons([form],list2)
+        else ans)$
+
+expnlength(expr):=block(
+  [inflag:true],
+  if atom(expr)
+  then 1
+  else 1+argslength(args(expr)))$
+
+argslength(args):=
+  apply("+",map('expnlength,args))$
+
+

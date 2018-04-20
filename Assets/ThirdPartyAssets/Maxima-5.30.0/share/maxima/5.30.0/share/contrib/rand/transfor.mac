@@ -1,0 +1,49 @@
+/* Filename transfor.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/*PROGRAM NUMBER 4: TRANSFORM(), THIS PROGRAM ALLOWS TO PERFORM ARBITRARY
+  COORDINATE TRANSFORMATIONS. SEE PAGE 44 IN "PERTURBATION METHODS,
+  BIFURCATION THEORY AND COMPUTER ALGEBRA". */
+
+
+transform():=(
+
+/* INPUT DATA */
+n:read("enter number of equations"),
+for i:1 thru n do
+   x[i]:read("enter symbol for original variable",i),
+for i:1 thru n do
+   y[i]:read("enter symbol for transformed variable",i),
+print("the rhs's of the d.e.'s are functions of the original variables:"),
+for i:1 thru n do (
+   print("enter rhs of",x[i],"d.e."),
+   print("d",x[i],"/dt ="),
+   f[i]:read(),
+   print("d",x[i],"/dt =",f[i])),
+print("the transformation is entered next:"),
+for i:1 thru n do (
+   print("enter",x[i],"as a function of the new variables"),
+   print(x[i],"="),
+   g[i]:read(),
+   print(x[i],"=",g[i])),
+
+/* DO IT */
+for i:1 thru n do depends([x[i],y[i]],t),
+for i:1 thru n do eq[i]:diff(x[i],t)=f[i],
+trans:makelist(x[i]=g[i],i,1,n),
+for i:1 thru n do treq[i]:ev(eq[i],trans,diff),
+treqs:makelist(treq[i],i,1,n),
+derivs:makelist(diff(y[i],t),i,1,n),
+neweqs:solve(treqs,derivs))$

@@ -1,0 +1,87 @@
+
+	MACSYMA's ordinary differential equation (ODE) solver ODE2
+may be used for symbolically solving elementary ODEs of first and
+second order.
+
+	One calls the ODE2 routine as follows:
+
+(C1) X^2*'DIFF(Y,X) + 3*X*Y = SIN(X)/X;
+			 2 dY	        SIN(X)
+(D1) 		        X  -- + 3 X Y = ------
+			   dX		  X
+
+(C2) ODE2(%,Y,X);
+
+				%C - COS(X)
+(D2) 			    Y = -----------
+				     3
+				    X
+
+	We see from this example how ODE2 is used.  Namely, it takes
+three arguments:  an ODE of first or second order (only the left hand side
+need be given if the right hand side is 0), the dependent variable, and
+the independent variable.  When successful, it returns either an explicit
+or implicit solution for the dependent variable.  %C is used to represent
+the constant in the case of first order equations, and %K1 and %K2 the 
+constants for second order equations.  If ODE2 cannot obtain a solution 
+for whatever reason, it returns FALSE, after perhaps printing out an 
+error message.
+
+	The methods implemented for first order equations in the order in
+which they are tested are:  linear, separable, exact - perhaps requiring 
+an integrating factor, homogeneous, Bernoulli's equation, and a 
+generalized homogeneous method.
+
+	For second order:  constant coefficient, exact, linear homogeneous
+with non-constant coefficients which can be transformed to constant
+coefficient, the Euler or equidimensional equation, the method of
+variation of parameters, and equations which are free of either the
+independent or of the dependent variable so that they can be reduced to
+two first order linear equations to be solved sequentially.
+
+	In the course of solving ODEs, several variables are set purely 
+for informational purposes: METHOD denotes the method of solution used e.g. 
+LINEAR, INTFACTOR denotes any integrating factor used, ODEINDEX denotes the 
+index for Bernoulli's method or for the generalized homogeneous method, 
+and YP denotes the particular solution for the variation of parameters 
+technique.
+
+	In order to solve initial value problems (IVPs) and boundary
+value problems (BVPs), the routine IC1 is available for first
+order equations, and IC2 and BC2 for second order IVPs and BVPs, 
+respectively.  They are used as in the following examples:
+
+(C3) IC1(D2,X=%PI,Y=0);
+				 COS(X) + 1
+(D3) 			   Y = - ----------
+				      3
+				     X
+
+(C4) 'DIFF(Y,X,2) + Y*'DIFF(Y,X)^3 = 0;
+			   2
+			  d Y	   dY 3
+(D4) 			  --- + Y (--)  = 0
+			    2	   dX
+			  dX
+
+(C5) ODE2(%,Y,X);
+			 3
+			Y  - 6 %K1 Y - 6 X
+(D7) 		        ------------------ = %K2
+				3
+
+(C8) RATSIMP(IC2(D7,X=0,Y=0,'DIFF(Y,X)=2));
+			     3
+			  2 Y  - 3 Y + 6 X
+(D9) 		        - ---------------- = 0
+				 3
+
+(C10) BC2(D7,X=0,Y=1,X=1,Y=3);
+			 3
+			Y  - 10 Y - 6 X
+(D11) 		        --------------- = - 3
+			       3
+
+	In order to see more clearly which methods have been implemented,
+a demonstration file is available.  To run it, you may do 
+DEMO(ODE2,DEMO,DSK,SHARE); .

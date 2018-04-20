@@ -1,0 +1,83 @@
+g1:(-1)^k*k/(4*k^2-1);
+
+g2:1/(4*k^2-1);
+
+g3:x^k;
+
+g4:(-1)^k*a!/(k!*(a-k)!);
+
+g5:k*k!;
+
+g6:(k+1)*k!/(k+1)!;
+
+g7:1/((a-k)!*k!);
+
+load ("Zeilberger/LOADZeilberger.mac");
+
+g1_gosper: GosperSum (g1, k, 1, n);
+g2_gosper: GosperSum (g2, k, 1, n);
+g3_gosper: GosperSum (g3, k, 1, n);
+g4_gosper: GosperSum (g4, k, 1, n);
+g5_gosper: GosperSum (g5, k, 1, n);
+g6_gosper: GosperSum (g6, k, 1, n);
+g7_gosper: GosperSum (g7, k, 1, n);
+
+L : makelist (i, i, 1, 20);
+
+g1_list_brute : map (lambda ([i1], apply ("+", map (lambda ([k], ''g1), makelist (i, i, 1, i1)))), L);
+g2_list_brute : map (lambda ([i1], apply ("+", map (lambda ([k], ''g2), makelist (i, i, 1, i1)))), L);
+g3_list_brute : map (lambda ([i1], apply ("+", map (lambda ([k], ''g3), makelist (i, i, 1, i1)))), L);
+g4_list_brute : map (lambda ([i1], apply ("+", map (lambda ([k], ''g4), makelist (i, i, 1, i1)))), L);
+g5_list_brute : map (lambda ([i1], apply ("+", map (lambda ([k], ''g5), makelist (i, i, 1, i1)))), L);
+g6_list_brute : map (lambda ([i1], apply ("+", map (lambda ([k], ''g6), makelist (i, i, 1, i1)))), L);
+g7_list_brute : map (lambda ([i1], apply ("+", map (lambda ([k], ''g7), makelist (i, i, 1, i1)))), L);
+
+g1_list_gosper : map (lambda ([n], ''g1_gosper), L);
+g2_list_gosper : map (lambda ([n], ''g2_gosper), L);
+g3_list_gosper : map (lambda ([n], ''g3_gosper), L);
+g4_list_gosper : map (lambda ([n], ''g4_gosper), L);
+g5_list_gosper : map (lambda ([n], ''g5_gosper), L);
+g6_list_gosper : map (lambda ([n], ''g6_gosper), L);
+/* g7_list_gosper : map (lambda ([n], ''g7_gosper), L); */  /* GosperSum reports "not Gosper summable" */
+
+ratsimp (g1_list_brute - g1_list_gosper);
+ratsimp (g2_list_brute - g2_list_gosper);
+ratsimp (g3_list_brute - g3_list_gosper);
+ratsimp (g4_list_brute - g4_list_gosper), a=21;
+ratsimp (g5_list_brute - g5_list_gosper);
+ratsimp (g6_list_brute - g6_list_gosper);
+/* ratsimp (g7_list_brute - g7_list_gosper); */ /* GosperSum reports "not Gosper summable" */
+
+g1_nusum : nusum (g1, k, 1, n);
+g2_nusum : nusum (g2, k, 1, n);
+g3_nusum : nusum (g3, k, 1, n);
+g4_nusum : nusum (g4, k, 1, n);
+g5_nusum : nusum (g5, k, 1, n);
+g6_nusum : nusum (g6, k, 1, n);
+g7_nusum : nusum (g7, k, 1, n);
+
+g1_list_nusum : map (lambda ([n], ''g1_nusum), L);
+/* g2_list_nusum : map (lambda ([n], ''g2_nusum), L); */    /* nusum returns a sum noun */
+g3_list_nusum : map (lambda ([n], ''g3_nusum), L);
+g4_list_nusum : map (lambda ([n], ''g4_nusum), L);
+g5_list_nusum : map (lambda ([n], ''g5_nusum), L);
+/* g6_list_nusum : map (lambda ([n], ''g6_nusum), L); */    /* nusum returns a sum noun */
+/* g7_list_nusum : map (lambda ([n], ''g7_nusum), L); */    /* nusum returns a sum noun */
+
+ratsimp (g1_list_brute - g1_list_nusum);
+/* ratsimp (g2_list_brute - g2_list_nusum); */  /* nusum returns a sum noun */
+ratsimp (g3_list_brute - g3_list_nusum);
+ratsimp (g4_list_brute - g4_list_nusum), a=21;
+ratsimp (g5_list_brute - g5_list_nusum);
+/* ratsimp (g6_list_brute - g6_list_nusum); */  /* nusum returns a sum noun */
+/* ratsimp (g7_list_brute - g7_list_nusum); */  /* nusum returns a sum noun */
+
+/* From Stavros comments on 625278:
+summand: binomial(q,2-k)-binomial(q,1-k);
+sum0: nusum( minfactorial(makefact(summand)), k,1,n);
+factcomb(minfactorial(sum0)) =>
+q-q!/((1-n)!*(q+n-1)!)
+
+For more fun, try summand: binomial(q,7-k)-binomial(q,3-k);
+
+ */

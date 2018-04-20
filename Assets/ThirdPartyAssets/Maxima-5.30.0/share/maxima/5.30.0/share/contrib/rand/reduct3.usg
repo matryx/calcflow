@@ -1,0 +1,117 @@
+reduct2.mac is from the book "Perturbation Methods, Bifurcation Theory
+and Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+it performs a liapunov-schmidt reduction for steady state bifurcations
+in systems of partial differential equations depending on one
+independent space variable.
+
+The example is from p187.  maxima-5.9.0 cvs reproduces the
+results from the book.
+
+
+
+(C1) load("reduct3.mac");
+Warning - you are redefining the MACSYMA function SETIFY
+(D1)                              reduct3.mac
+(C2) reduction3();
+ENTER THE NUMBER OF DIFFERENTIAL EQUATIONS
+2;
+ENTER THE DEPENDENT VARIABLES AS A LIST
+[y1,y2];
+ENTER THE SPATIAL COORDINATE
+x;
+ENTER THE BIFURCATION PARAMETER
+alpha;
+ENTER THE CRITICAL BIFURCATION VALUE
+1;
+WE DEFINE LAM =  ALPHA - 1
+ENTER THE CRITICAL EIGENFUNCTION AS A LIST
+sin(x)*[1,0];
+ENTER THE ADJOINT CRITICAL EIGENFUNCTION AS A LIST
+2/%pi*sin(x)*[1,1];
+ENTER THE DIFFERENTIAL EQUATION NUMBER 1
+y2;
+ENTER THE DIFFERENTIAL EQUATION NUMBER 2
+'diff(y1,x,2)+alpha*y1-y2-y1^3-a*y1^5;
+             2
+            d Y1       5     3
+[Y2, - Y2 + ---- - a Y1  - Y1  + (LAM + 1) Y1]
+              2
+            dx
+WHAT IS THE LENGTH OF THE SPACE INTERVAL
+%pi;
+DO YOU KNOW APRIORI THAT SOME TAYLOR COEFFICIENTS ARE 0
+Y,N
+Y;
+TO WHICH ORDER DO YOU WANT TO CALCULATE
+5;
+IS DIFF(W(AMP, 2 ,LAM, 0 ) IDENTICALLY ZERO, Y/N
+Y;
+IS DIFF(W(AMP, 3 ,LAM, 0 ) IDENTICALLY ZERO, Y/N
+N;
+
+Dependent equations eliminated:  (1)
+  3                               3
+ d W1    3 SIN(3 x) + 72 SIN(x)  d W2      9 SIN(x)
+[----- = ----------------------, ----- = - --------]
+     3             16                3        2
+ dAMP                            dAMP
+IS DIFF(W(AMP, 4 ,LAM, 0 ) IDENTICALLY ZERO, Y/N
+Y;
+IS DIFF(W(AMP, 1 ,LAM, 1 ) IDENTICALLY ZERO, Y/N
+N;
+
+Dependent equations eliminated:  (2)
+    2                     2
+   d W1                  d W2
+[--------- = - SIN(x), --------- = SIN(x)]
+ dAMP dLAM             dAMP dLAM
+IS DIFF(W(AMP, 2 ,LAM, 1 ) IDENTICALLY ZERO, Y/N
+Y;
+IS DIFF(W(AMP, 3 ,LAM, 1 ) IDENTICALLY ZERO, Y/N
+N;
+
+Dependent equations eliminated:  (1)
+     4                                         4
+    d W1        69 SIN(3 x) + 2304 SIN(x)     d W2
+[---------- = - -------------------------, ---------- = 18 SIN(x)]
+     3                     128                 3
+ dAMP  dLAM                                dAMP  dLAM
+IS G_POLY( 1 , 0 )IDENTICALLY ZERO, Y/N
+Y;
+IS G_POLY( 2 , 0 )IDENTICALLY ZERO, Y/N
+Y;
+IS G_POLY( 3 , 0 )IDENTICALLY ZERO, Y/N
+N;
+IS G_POLY( 4 , 0 )IDENTICALLY ZERO, Y/N
+Y;
+IS G_POLY( 5 , 0 )IDENTICALLY ZERO, Y/N
+N;
+IS G_POLY( 1 , 1 )IDENTICALLY ZERO, Y/N
+N;
+IS G_POLY( 2 , 1 )IDENTICALLY ZERO, Y/N
+Y;
+IS G_POLY( 3 , 1 )IDENTICALLY ZERO, Y/N
+N;
+IS G_POLY( 4 , 1 )IDENTICALLY ZERO, Y/N
+Y;
+                                                            5        3
+             3                 (- 1200 %PI a - 3195 %PI) AMP    3 AMP
+(D2)    3 AMP  LAM + AMP LAM + ------------------------------ - ------
+                                          1920 %PI                4
+(C3)  solve(%,lam);
+                                             4         2
+                             (80 a + 213) AMP  + 96 AMP
+(D3)                  [LAM = ---------------------------]
+                                          2
+                                   384 AMP  + 128
+(C4) taylor(%,amp,0,4);
+                                   2                  4
+                              3 AMP    (80 a - 75) AMP
+(D4)/T/        [LAM + . . . = ------ + ---------------- + . . .]
+                                4            128
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

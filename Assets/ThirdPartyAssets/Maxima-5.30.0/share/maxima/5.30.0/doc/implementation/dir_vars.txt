@@ -1,0 +1,67 @@
+This document describes the various directories and environment
+variables relating to directories used by Maxima.
+
+As of version 5.9.1, Maxima supports two different installed
+directory layouts:
+	  1) "source"
+	  2) "autotools"
+
+The "source" layout is that of the Maxima tarball (and cvs module.)
+The "autotools" layout is the layout of the files installed by the
+GNU Autotools.
+
+Maxima needs to know the following locations:
+
+       1) The parent directory for Maxima compiled images/executables:
+       	  maxima-imagesdir
+
+       2) The parent directory for Maxima share files:
+	  maxima-sharedir
+
+       3) The parent directory for the sym package:
+       	  maxima-symdir
+
+       4) The parent directory for Maxima source files:
+          maxima-srcdir
+
+       5) The parent directory for Maxima demo files:
+          maxima-demodir
+
+       6) The parent directory for Maxima test files:
+          maxima-testsdir
+
+       7) The parent directory for general documentation
+          maxima-docdir
+
+       8) The parent directory for Maxima info documentation:
+          maxima-infodir
+
+       9) The parent directory for Maxima html documentation:
+          maxima-htmldir
+
+      10) The parent directory for the Maxima plotting tcl scripts:
+          maxima-plotdir
+
+In order to determine the layout for the locations, it needs to know
+which installed directory layout is being used:
+
+      11) Whether maxima should use the "autotools" layout:
+          maxima-layout-autotools
+
+Maxima also will read user files from a directory in the user's
+area. This directory is independent of the installed layout:
+
+      12) The parent directory for user's files:
+          maxima-userdir
+
+      13) The parent directory for temporary files:
+          maxima-tempdir
+	  
+Maxima needs to know location of locale specific data
+(translated documentation, localized messages etc):
+
+      14) The sub-directory for locale specific data:
+          maxima-lang-subdir
+	  Usually value of this variable is automatically derived 
+	  from current user's locale. 
+

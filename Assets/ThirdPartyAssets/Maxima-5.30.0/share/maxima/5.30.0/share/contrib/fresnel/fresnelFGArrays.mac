@@ -1,0 +1,8 @@
+fresnelFGTable(n,d):=block([l],
+   array([xa,fa,ga],n),
+   xa[0]:0.0d0, fa[0]:0.5d0, ga[0]:0.5d0,
+   for i:1 thru n do (
+      l:fresnelFG(i/d),
+      xa[i]:dfloat(first(l)),fa[i]:dfloat(second(l)),ga[i]:dfloat(third(l))
+   )
+)$

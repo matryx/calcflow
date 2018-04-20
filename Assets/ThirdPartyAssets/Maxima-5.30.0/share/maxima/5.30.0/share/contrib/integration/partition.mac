@@ -1,0 +1,128 @@
+/* Expression Partitioning tool.
+   Application includes implementing stage 1 of Moses' SIN
+   symbolic indefinite integration, intfudu.
+  
+   Author: Richard Fateman, January, 2009. Suggestions by B. Willis.
+   Revision June 19, 2009
+   Documentation http://www.cs.berkeley.edu/~fateman/papers/partition.pdf */
+
+  /*  Moving expression arg to end makes matchdeclare
+simpler */
+
+partition_expression(operator,pred,init,combiner,action,res,E):=
+    block([yes:init,no:init],
+   if not atom(E) and inpart(E,0)=operator then
+       (map(lambda([r], if apply(pred,[r])=false
+              then  no:apply(combiner,[r,no])
+              else yes:apply(combiner,[r,yes])),
+            inargs(E) ),
+       res :: apply(action, [yes,no]), /* result stored as requested */
+       true))$
+
+ inargs(z):=substinpart("[",z,0)$ /* utility like args, but avoids / or - */
+
+ (
+/* %voi = variable of integration, a global variable wrt these entries */
+
+intable[otherwise]:=false, /*backstop for undefined kernels */
+ intable[sin] : lambda([u],  [-cos(u),diff(u,%voi)]),
+ intable[cos] : lambda([u],  [sin(u),diff(u,%voi)]),
+ intable[tan] : lambda([u],  [log(sec(u)),diff(u,%voi)]),
+ intable[sec] : lambda([u],  [log(tan(u)+sec(u)),diff(u,%voi)]),
+ intable[csc] : lambda([u],  [log(tan(u/2)),diff(u,%voi)]),
+ intable[cot] : lambda([u],  [log(sin(u)),diff(u,%voi)]),
+ intable[atan]: lambda([u],  [-(log(u^2+1)-2*u*atan(u))/2,diff(u,%voi)]),
+ intable[acos]: lambda([u],  [-sqrt(1-u^2)+u*acos(u),diff(u,%voi)]),
+ intable[asin]: lambda([u],  [sqrt(1-u^2)+u*asin(u),diff(u,%voi)]),
+ intable[sinh]: lambda([u],  [cosh(u),diff(u,%voi)]),
+ intable[cosh]: lambda([u],  [sinh(u),diff(u,%voi)]),
+ intable[tanh]: lambda([u],  [log(cosh(u)),diff(u,%voi)]),
+ intable[asinh]: lambda([u],  [-sqrt(1-u^2)+u*asinh(u),diff(u,%voi)]),
+ intable[acosh]: lambda([u],  [-sqrt(u^2-1)+u*acosh(u),diff(u,%voi)]),
+ intable[atanh]: lambda([u],  [log(1-u^2)/2+u*atanh(u),diff(u,%voi)]),
+ intable["^"] : lambda([u,v], if freeof(%voi,u) then [u^v/log(u),diff(v,%voi)]
+                                else if freeof(%voi,v)
+                                then if (v#-1) then [u^(v+1)/(v+1), diff(u,%voi)]
+                                else [log(u),diff(u,%voi)]),
+ intable[polygamma] :lambda([u,v], if freeof(%voi,u) then [polygamma(u-1,v),diff(v,%voi)]),
+ intable[log] : lambda([u], [u * log(u) - u, diff(u, %voi)]),
+ intable[Ci]: lambda([u], [u*Ci(u)-sin(u),diff(u,%voi)]),
+ intable[Si]: lambda([u], [u*Si(u)-cos(u),diff(u,%voi)]),
+ gradef(Ci(w), cos(w)/w),
+ gradef(Si(w), sin(w)/w),
+ intable[nounify(bessel_j)] :lambda([u,v], if(u=1) then [-bessel_j(0,v),diff(v,%voi)]),
+ intable[nounify(bessel_i)] :lambda([u,v], if(u=1) then [ bessel_i(0,v),diff(v,%voi)]),
+ intable[nounify(bessel_k)] :lambda([u,v], if(u=1) then [-bessel_k(0,v),diff(v,%voi)]),
+
+/* Legendre polynomials P[n](x), presumably if n is an explicit
+   integer this symbolism would be removed, so we assume it is of unknown
+   order n. */
+
+intable[legendre_p] :
+  lambda([n,u], if freeof(n,u) then 
+          [(legendre_p(n+1,u)-legendre_(n-1,u))/(2*n+1),
+            diff(u,%voi)]),
+intable[abs] : lambda([u], [u * abs(u) / 2, diff(u, %voi)]),
+intable[signum] : lambda([u], [abs(u), diff(u, %voi)]),
+intable[unit_step] : lambda([u], [(u + abs(u))/2, diff(u, %voi)])
+)$
+
+/*etc etc add functions */
+
+( matchdeclare(ss, partition_expression("*",lambda([u],freeof(%voi,u)),[],cons,"[",'ANSss)),
+ defrule(ddr1,ss,ANSss))$
+
+/*intfudu stands for integrate f(u)*du. This is equivalent to Moses' SIN, stage 1 */
+
+intfudu(exp,%voi):= /*integrate exp=f(u)*du wrt %voi*/
+  block([lists,consts,factors, thefuns, therest, thelist, int, df,
+result:false],
+   if freeof(%voi,exp) then return (exp*%voi),
+   lists:ddr1(exp), /*partition expression into factors*/
+   if lists=false then lists:[[1],[exp]],
+   factors:second(lists),
+   for k in factors do
+    if not atom(k) and
+      (thefuns:intable[inpart(k,0)]) # false and
+      (thelist:apply(thefuns,inargs(k)))#false
+     then( [int,df]:thelist,
+           if notequal(df,0) and freeof(%voi,therest:ratsimp(exp/k/df))
+               then (result:(therest*int),
+                            return())),
+   /*if nothing of form f(u)du worked, then try matching u^1*u'-> u^2/2 */
+  if result=false then
+      for k in factors do (
+          if notequal(diff(k,%voi),0) and freeof(%voi,therest:ratsimp(exp/k/diff(k,%voi)))
+               then (result:(therest*k^2/2),
+                            return())),
+  return(result))$
+
+ intfugudu(exp,%voi):=
+  block([lists,consts,factors, thefun, therest, thelist, int, df,
+result:false],
+   if freeof(%voi,exp) then return (exp*%voi),
+
+   lists:ddr1(exp), /*partition expression into factors*/
+   if lists=false then lists:[[1],[exp]],
+   factors:second(lists),
+   for k in factors do
+    for j in delete(k,factors,1) do
+    if not atom(k) and not atom (j) and
+      (thefun:intable2[inpart(k,0), inpart(j,0)])#false and
+      (thelist:apply(thefun,[[inargs(k),inargs(j)]]))#false
+     then( [int,df]:thelist,
+           if freeof(%voi,therest:ratsimp(exp/k/j/df))
+               then (result:(therest*int),
+                            return())),
+  return(result))$
+
+
+matchdeclare(%u,true, %m,freeof(x))$
+
+defrule(jsn,[[%u,%m],[%u,%m]], [jacobi_sn(%u,%m),diff(%u,%voi)])$
+defrule(jcn,[[%u,%m],[%u,%m]], [jacobi_cn(%u,%m),-diff(%u,%voi)])$
+defrule(jdn,[[%u,%m],[%u,%m]], [jacobi_dn(%u,%m),-%m*diff(%u,%voi)])$
+
+intable2[nounify('jacobi_cn),nounify('jacobi_dn)]:jsn$
+intable2[nounify('jacobi_dn),nounify('jacobi_sn)]:jcn$
+intable2[nounify('jacobi_cn),nounify('jacobi_sn)]:jdn$

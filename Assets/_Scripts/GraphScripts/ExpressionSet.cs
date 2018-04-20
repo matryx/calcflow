@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Calcflow.UserStatistics;
 
 [System.Serializable]
 public class ExpressionSet
@@ -168,6 +169,7 @@ public class ExpressionSet
             expValidity[EX.ToString()] = expressions[EX].GenerateAKSolver(solver);
             isValid &= expValidity[EX.ToString()];
         }
+        StatisticsTracking.InstantEvent("Expression Value", "Value Updated", new Dictionary<string, object>() { { "valid", isValid } });
         return isValid;
     }
 

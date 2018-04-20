@@ -1,0 +1,147 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * The equation of motion of a free particle in a five dimensional
+ * Kaluza-Klein metric appears as the motion of a charged particle
+ * in four dimensional space in the presence of an EM field
+ */
+
+("
+
+Deriving the Kaluza-Klein equation of motion.
+For reference, see http://www.vttoth.com/KK/kk.htm")$
+
+("We first load ITENSOR and set up the 5-dimensional metric.
+We also set up contraction properties for both the 4-dimensional
+and the 5-dimensional metric tensors.")$
+
+if get('itensor,'version)=false then load(itensor);
+(derivabbrev:true, dim:5, imetric:g5, defcon(g4),defcon(g5),
+defcon(g4,g4,kdelta), defcon(g5,g5,kdelta))$
+
+("To set up the metric components, we need some helper functions.
+The function predval() determines if a predicate can be evaluated.
+It returns false if the predicate would return an error. The
+function difflist() applies the differential operator to elements
+in a list.")$
+
+predval(prd):=block([retval,saved_prederror:prederror],
+    prederror:false,
+    retval:ev(prd,pred)=true or ev(prd,pred)=false,
+    prederror:saved_prederror,
+    retval
+)$
+difflist(exp,lst):=if length(lst)=0 then exp
+                   else difflist(idiff(exp,lst[1]),rest(lst))$
+
+("Metric components are defined conditionally, allowing us to treat
+the fifth index in a unique way.")$
+
+a(l1,l2,[l3]):=if member(5,l3) then 0 else funmake('a,append([l1,l2],l3))$
+g4(l1,l2,[l3]):=if member(5,l3) then 0 else funmake('g4,append([l1,l2],l3))$
+g5(l1,l2,[l3]):=
+    if member(5,l3) then 0
+    else if l1#[] then
+    (
+        if not (predval(l1[1]<=4) and predval(l1[2]<=4)) then
+            funmake('g5,append([l1,l2],l3))
+        else if l1[1]<=4 and l1[2]<=4 then
+            apply('g4,append([l1,l2],l3))+
+                      g55*difflist(a([l1[1]],[])*a([l1[2]],[]),l3)
+        else if l1[1]<=4 then g55*apply('a,append([[l1[1]],[]],l3))
+        else if l1[2]<=4 then g55*apply('a,append([[l1[2]],[]],l3))
+        else if l3#[] then 0 else g55
+    )
+    else if l2#[] then
+    (
+        if not (predval(l2[1]<=4) and predval(l2[2]<=4)) then
+            funmake('g5,append([l1,l2],l3))
+        else if l2[1]<=4 and l2[2]<=4 then apply('g4,append([l1,l2],l3))
+        else if l2[1]<=4 then -apply('a,append([[],[l2[1]]],l3))
+        else if l2[2]<=4 then -apply('a,append([[],[l2[2]]],l3))
+        else if l3#[] then sum(difflist(a([i],[])*a([],[i]),l3),i,1,4)
+        else 1/g55+sum(a([i],[])*a([],[i]),i,1,4)
+    )
+    else funmake('g5,append([l1,l2],l3))$
+
+("Now we're ready to begin the analysis. First, we predeclare
+some 4-dimensional indices:")$
+assume(k<=4,l<=4,m<=4)$
+
+("The equation of motion in empty 5-space:")$
+depends(x,t);
+ishow('diff(x([],[a]),t,2)+
+      'ichr2([b,c],[a])*'diff(x([],[b]),t)*'diff(x([],[c]),t)=0)$
+ishow(part(first(%),1))$
+ishow(subst(m,c,%)+subst(5,c,%))$
+ishow(subst(l,b,%)+subst(5,b,%)+part(first(%th(3)),2)=last(%th(3)))$
+
+("We are only interested in the case where A is a 4D index:")$
+ishow(subst(k,a,%th(2)))$
+
+("We protect one of the Christoffel-symbols from expansion:")$
+ishow(subst(chr2klm,'ichr2([l,m],[k]),%th(2)))$
+%,ichr2$
+ishow(rename(%))$
+
+("Now we break this up into two parts depending on whether %1=5:")$
+map(lambda([u],block(if freeof(%1,u) then u else u+subst(5,%1,u))),
+                     first(%th(2)))=last(%th(2))$
+assume(%1<=4)$
+%th(2),g5$
+%,nouns$
+ishow(%)$
+
+("Now we're ready to isolate the electromagnetic field tensor:")$
+map(lambda([u],factorout(u,g55)),%th(2))$
+ishow(ratsubst(-f([%1,%2],[]),a([%1],[],%2)-a([%2],[],%1),%))$
+
+("Contracting and rearranging yields the equation in the usual form:")$
+contract(%th(2))$
+%,nouns$
+ishow(rename(%))$
+%-part(first(%),1)$
+EQ:subst('ichr2([l,m],[k]),chr2klm,%)$
+ishow(box(EQ))$
+
+("But what about the 5D Christoffel-symbol?")$
+/*ishow(ichr2([k,l],[m]))$*/
+ishow(ichr2([l,m],[k]))$
+rename(%)$
+forget(%1<=4)$
+subst(5,%1,%th(2))$
+%,g5,g4$
+ishow(%)$
+
+assume(%1<=4)$
+%th(6),g5$
+/*ratsubst(-f([%1,k],[]),a([%1],[],k)-a([k],[],%1),%)$*/
+ratsubst(-f([%1,l],[]),a([%1],[],l)-a([l],[],%1),%)$
+ratsubst(-f([%1,m],[]),a([%1],[],m)-a([m],[],%1),%)$
+ishow(factor(contract(expand(%))))$
+
+%+%th(6)$
+%,nouns$
+/*ratsubst(ichr42([k,l],[m]),
+         g4([],[m,%1])*(g4([l,%1],[],k)+g4([k,%1],[],l)-g4([k,l],[],%1))/2,%)$*/
+ratsubst(ichr42([l,m],[k]),
+         g4([],[k,%1])*(g4([m,%1],[],l)+g4([l,%1],[],m)-g4([l,m],[],%1))/2,%)$
+ishow(%)$
+
+contract(%)$
+("The extra term is presumably the curvature caused by the EM field.")$
+/*ishow('ichr2([k,l],[m])=map(factor,combine(distrib(%th(2)))))$*/
+ishow('ichr2([l,m],[k])=map(factor,combine(distrib(%th(2)))))$
+("Or, if you wish, you can apply this result to the equation of motion:")$
+ishow(subst(rhs(%th(2)),lhs(%th(2)),EQ))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

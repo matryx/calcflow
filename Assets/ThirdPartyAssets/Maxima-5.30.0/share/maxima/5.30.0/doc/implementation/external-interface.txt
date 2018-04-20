@@ -1,0 +1,56 @@
+This document describes the hooks I added to Maxima in September 2003
+to aid interfaces to external programs such as TeXmacs.
+-- James Amundson 
+
+Hooks for prompts
+-----------------
+
+*prompt-prefix* : string printed at the beginning of each prompt
+*prompt-suffix* : string printed at the end of each prompt
+
+TeXmacs example:
+(setf *prompt-prefix* "channel:promptlatex:\\red ")
+(setf *prompt-suffix* "\\black")
+
+(The preceding lines contain control characters.)
+
+Hooks for display
+-----------------
+
+*general-display-prefix* : string printed before each displayed output label
+                           Exactly what that means my need refinement.
+
+*maxima-prolog* : string printed at the beginning of a Maxima session
+*maxima-epilog* : string printed at the end of a Maxima session
+
+TeXmacs example:
+
+(setf *general-display-prefix* "verbatim:")
+(setf *maxima-prolog* "verbatim:")
+(setf *maxima-epilog* "latex:\\red The end\\black")
+
+(Again, the preceding lines contain control characters.)
+
+Alternate display functions
+---------------------------
+
+*alt-display2d* : function to be used to display maxima equations
+                  when display2d is true
+
+*alt-display1d* : function to be used to display maxima equations
+                  when display2d is false
+
+TeXmacs example:
+
+(setf *alt-display2d* 'latex)
+
+The function latex is defined as
+
+(defun latex (x)
+  (let ((ccol 1))
+    (mapc #'myprinc
+      (if (and (listp x) (cdr x) (equal (cadr x) "Is  "))
+        (tex x '("$\\displaystyle ") '("$ ") 'mparen 'mparen)
+        (tex x '("latex:$\\displaystyle ") '("$
+") 'mparen 'mparen)))))
+

@@ -1,0 +1,271 @@
+/* Proves and Test for "parGosper" and "Gosper"        */
+/* by Fabrizio Caruso                                  */
+
+
+
+/* It proves the result of Gosper's algorithm                  */
+/*                                                             */
+/* Remark: The level of verbosity depends on "gs_prove_detail" */
+
+gs_prove(expr,k,cert) :=
+  block([rhs],
+
+  if expr = NON_HYPERGEOMETRIC then
+     (
+     if gs_prove_detail>= PROOF_LOW then
+       (
+       print("The input is not hypergeometric in ", k),
+       print("There is no proof for this case.")
+       ),
+     return(false)
+     )
+  else
+    if expr = NO_HYP_SOL then
+       (
+       if gs_prove_detail>=PROOF_LOW then
+         (
+         print("Gosper's algorithn found that"),
+         print("there is no hypergemetric antidifference for ", expr),
+         print("There is no proof for this case.")
+         ),
+       return(false)
+       )
+    else
+       (
+       if gs_prove_detail>=PROOF_MEDIUM then
+         (
+         print("Gosper's algorithm found the antidifference: ", cert*expr),
+         print("This means we must have: "),
+         print(expr, " = ", subst(k+1,k,cert*expr)-cert*expr),
+         print("which can be proved by dividing both members by ", expr),
+         print("and checking the resulting equality between rational functions")
+         ),
+       rhs : shiftQuo(expr,k)*subst(k+1,k,cert)-cert,
+       if gs_prove_detail>=PROOF_HIGH then
+         (
+         print("Namely: "),
+         print("1 =",rhs)
+         ),
+       return(is(1=factor(xthru(rhs))))
+       )
+);
+
+
+/* Routines related to the proof writer for Zeilberger's algoritm */
+
+zb_meaning(zb_in,k,n,zb_cert,zb_rec) :=
+  block([j__],
+
+    print(sum(zb_rec[j__]*subst(n+j__-1,n,zb_in),j__,1,length(zb_rec))," = "),
+    print(subst(k+1,k,zb_cert*zb_in)-zb_cert*zb_in,";")
+    );
+
+zb_reduced_meaning(zb_in,k,n,zb_cert,zb_rec) :=
+  block([i__,j__],
+
+    return([sum(zb_rec[j__]*product(subst(n+i__-1,n,shiftQuo(zb_in,n)),i__,1,j__-1),j__,1,length(zb_rec)),
+            subst(k+1,k,zb_cert)*shiftQuo(zb_in,k)-zb_cert])
+    );
+
+zb_test_equalityAux(eq_pair) :=
+  block([lhs,rhs], 
+  
+  lhs : rat(eq_pair[1]),
+  rhs : rat(eq_pair[2]),
+  
+  if lhs=rhs then
+    return(true)
+  else
+    return([lhs,rhs])
+  );
+
+
+zb_test_equality(eq_pair) :=
+  block([test_res],
+
+  test_res : zb_test_equalityAux(eq_pair),
+  if test_res = true then
+    return(true)
+  else
+    (
+    if zb_prove_detail>=PROOF_LOW then
+      (
+      print("lhs : ", test_res[1]),
+      print("rhs : ", test_res[2])
+      ),
+    
+    return(false)
+    )
+  );
+
+
+/* It proves the result of Zeilbeger's algorithm       */
+/*                                                     */
+/* The level of verbosity depends on "zb_prove_detail" */
+
+/* zb_prove(zb_in,k,n,zb_out) := */
+zb_prove([args]):=
+  block([i,j,zb_red,zb_in,zb_out,proof,undecided,k,n],
+    zb_in:first(args),
+    k:second(args),
+    n:third(args),
+    if length(args)=3 then
+      (
+      zb_out:Zeilberger(zb_in,k,n)
+      )
+    else
+      (
+      zb_out:fourth(args)
+      ),
+    if length(zb_out) = 0 then
+      (
+      if zb_prove_detail>=PROOF_LOW then
+        (
+        print("Zeilberger's algorithm could not find a recurrence for the given order."),
+        print("This DOES NOT mean that such a recurrence with the given order does not exist."),
+        print("Zeilberger's algorithm DOES NOT always find the minimal order recurrence"),
+        print("but it will find a recurrence for a higher order if a recurrence exists."),
+        print("Suggestion: "),
+        print("Sometimes rewriting the summand can produce a lower order recurrence."),
+        print("There is no proof for this case.")
+        ),
+     
+      return(false)
+      )
+    else
+      if zb_out=[NON_PROPER_HYPERGEOMETRIC] then
+        (
+        if zb_prove_detail>= PROOF_LOW then
+           (
+           print(zb_in, " is not proper hypergeometric in ", n, " and ", k),
+           print("There is no proof for this case.")
+           ),
+        return(false)
+        )
+      else
+       if length(zb_out) = 1 then
+         (
+         if zb_prove_detail>=PROOF_MEDIUM then
+           (
+            print("The result contains one recurrence for ", zb_in, ": "), 
+            print(" "),
+            zb_meaning(zb_in,k,n,zb_out[1][1],zb_out[1][2]),
+            print(" "),
+            print("which we can prove by dividing both members of the equality by ", zb_in),
+            print("and checking the resulting equality between rational functions.")
+            ),
+         zb_red : zb_reduced_meaning(zb_in,k,n,zb_out[1][1],zb_out[1][2]),
+         if zb_prove_detail>= PROOF_HIGH then
+            (
+            print("Namely it is equivalent to test the equality between: "),
+            
+            print(zb_red[1], " and ", zb_red[2]),
+
+            print(" ")
+            ),
+         return(zb_test_equality(zb_red))
+         )
+       else
+         (
+         proof : true,
+         print("The result contains ", length(zb_out),
+               " recurrences for ", zb_in, ": "),
+         print(" "),
+         for i : 1 thru length(zb_out) do
+           (
+           if zb_prove_detail>=PROOF_MEDIUM then
+             (
+             print("(",i,")"),
+             zb_meaning(zb_in,k,n,zb_out[i][1],zb_out[i][2]),
+             print(" "),
+             print("which we can proved by dividing both members of the equality by ", zb_in),
+             print("and checking the resulting equality between rational functions.")
+             ),
+           
+             zb_red : zb_reduced_meaning(zb_in,k,n,zb_out[1][1],zb_out[1][2]),
+             
+
+           if zb_prove_detail >= PROOF_HIGH then
+              (
+              print("Namely it is equivalent to test the equality between: "),
+              print(zb_red[1], " and ", zb_red[2]),
+              print(" ")
+              ),
+           if(zb_test_equality(zb_red)) then
+             print("which has been tested to be true")
+           else
+             (
+             print("which has been tested to be FALSE!!!"),
+             proof: false
+             ),
+           print("------------------------------------------------------------------------")
+           ),
+         return(proof)
+        )
+    );
+
+  
+
+/* It tests the result of "parGosper"                                               */
+/* As input it takes a list of quadruples of the form :                             */
+/* [hypergeometric term, summation variable, recurrence variable, recurrence order] */
+/*                                                                                  */
+/* Remark: The level of verbosity is decided by the value of "zb_prove_detail"      */
+
+zb_test(test_set) :=
+  block([i,res,zb_prove_res,zb_res],
+    
+    res : [],
+    if zb_prove_detail >= PROOF_LOW then
+      print("This benchmark contains : ", length(test_set), " elements"),
+    for i : 1 thru length(test_set) do
+      (
+      if zb_prove_detail>= PROOF_LOW then
+        (
+        print("(", i,")"),
+        print("computing the solution...")
+        ),
+      zb_res : parGosper(test_set[i][1],
+                         test_set[i][2],test_set[i][3],
+                         test_set[i][4]),
+
+      if zb_prove_detail >= PROOF_LOW then
+        if zb_res = [] then
+           print("no solution")
+        else
+           if zb_res = [NON_PROPER_HYPERGEOMETRIC] then
+              print("the input is not hypergeometric")
+           else
+              print("non-empty solution found"),
+
+      if zb_prove_detail >= PROOF_LOW then
+        print("checking the solution..."),
+      zb_prove_res : zb_prove(test_set[i][1],test_set[i][2],test_set[i][3],zb_res),
+      res : endcons(zb_prove_res,res),
+      if zb_prove_res then
+        (
+        if zb_prove_detail >= PROOF_LOW then
+          print("test passed")
+        )
+      else
+        (
+        test_flag : false,
+        if zb_prove_detail >= PROOF_LOW then
+          print("test failed!")
+        ),
+      print("---------------------------------------------------------------")
+      ), /* end for */
+     if apply("and",res) then
+       (
+       if zb_prove_detail>= PROOF_LOW then
+         print("all tests passed"),
+       return(true)
+       )
+     else
+        (
+        if zb_prove_detail>= PROOF_LOW then
+          print("some test was not passed!"),
+         return(false)
+        )
+     );
+   

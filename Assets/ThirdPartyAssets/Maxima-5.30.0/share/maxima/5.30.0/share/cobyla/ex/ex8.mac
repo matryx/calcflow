@@ -1,0 +1,41 @@
+/*
+ * Test problem 8 (Rosen-Suzuki)
+ *
+ * f = x1^2 + x2^2 + 2*x3^2 + x4^2 - 5*x1 - 5*x2 - 21*x3 + 7*x4
+ * 8-x1^2-x2^2-x3^2-x4^2-x1+x2-x3+x4 >= 0
+ * 10-x1^2-2*x2^2-x3^2-2*x4^2+x1+x4 >= 0
+ * 5-2*x1^2-x2^2-x3^2-2*x1+x2+x4
+ *
+ * True solution: x1=0, x2 = 1, x3 = 2, x4 = -1
+ */
+
+fmin_cobyla(x1^2 + x2^2 + 2*x3^2 + x4^2 - 5*x1 - 5*x2 - 21*x3 + 7*x4, [x1, x2, x3, x4],
+            [1,1,1,1], 
+            constraints = [8-x1^2-x2^2-x3^2-x4^2-x1+x2-x3+x4 >= 0,
+             10-x1^2-2*x2^2-x3^2-2*x4^2+x1+x4 >= 0,
+             5-2*x1^2-x2^2-x3^2-2*x1+x2+x4 >= 0],
+            iprint = 1);
+
+/* Output
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =  116   F =-4.400000E+01    MAXCV = 3.319345E-12
+   X = 3.532758E-07   9.999990E-01   2.000000E+00  -1.000000E+00
+
+[[x1 = 3.53275766748882e-7,x2 = .9999989781691816,
+          x3 = 2.000000039612459,x4 = -1.000000156831474],-44.00000000000451,
+         116, 0]
+*/
+
+/* True output
+
+       Output from test problem 8 (Rosen-Suzuki)
+
+   Normal return from subroutine COBYLA
+
+   NFVALS =  116   F =-4.400000E+01    MAXCV = 3.321565E-12
+   X = 3.532420E-07   9.999990E-01   2.000000E+00  -1.000000E+00
+*/
+
+

@@ -1,0 +1,208 @@
+/* Code by Fabrizio Caruso */
+
+
+/* --------------------------------------------------- */
+/* High level aliases */
+/* --------------------------------------------------- */
+
+/* --------------------------------------------------- */
+/* Determinant */
+det(A) := gaussDet(A); /* Bareiss is experimental */
+
+elim(A) := gaussElim(A);
+
+/* --------------------------------------------------- */
+/* Characteristic polynomial */
+
+charPol(A,var) := babyGiantCharPol(A,var);
+
+/* --------------------------------------------------- */
+/* Cauchy Index */
+
+cauchyIndexBetween(q,p,var,a,b) :=
+  sSubResCauchyIndexBetween(q,p,var,a,b);
+
+cauchyIndex(q,p,var) :=
+  sSubResCauchyIndex(q,p,var);
+
+tarskiQueryBetween(q,p,var,a,b) :=
+  sSubResTarskiQueryBetween(q,p,var,a,b);
+
+tarskiQuery(q,p,var) :=
+  sSubResTarskiQuery(q,p,var);
+
+numberOfRootsBetween(p,var,a,b) :=
+  sSubResNumberOfRootsBetween(p,var,a,b);
+
+sSubResNumberOfRoots(p,var) :=
+  sSubResNumberOfRoots(p,var);
+  /* why have that */
+
+numberOfRoots(p,var) :=
+  sSubResNumberOfRoots(p,var);
+
+
+
+findRoots(pol,var,threshold) :=
+  deCasteljauFindRoots(pol,var,threshold);
+
+findRootsVerbose(pol,var,threshold,verbosity) :=
+  deCasteljauFindRootsVerbose(pol,var,threshold,verbosity);
+  /* should not we suppress it ? */
+
+
+isolateRoots(pol,var) :=
+  deCasteljauIsolateRoots(pol,var);
+
+
+isolateRootsVerbose(pol,var,verbosity) :=
+  deCasteljauIsolateRootsVerbose(pol,var,verbosity);
+    /* should not we suppress it ? */
+
+signsAtRoots(isolListForP,p,q,var) :=
+  deCasteljauSignsAtRoots(isolListForP,p,q,var);
+
+signsAtRootsVerbose(isolListForP,p,q,var,verbosity) :=
+  deCasteljauSignsAtRootsVerbose(isolListForP,p,q,var,verbosity);
+    /* should not we suppress it ? */
+
+rootsSign(isLst,isPol,sgnPol,var) :=
+  deCasteljauRootsSign(isLst,isPol,sgnPol,var);
+
+compareRoots(p,q,var) :=
+  deCasteljauCompareRoots(p,q,var);
+
+/* --------------------------------------------------- */
+/* Sign determination */
+
+signDetermination(polList,ptSet,sqAlg,var) :=
+  smartSignDetermination(polList,ptSet,sqAlg,var);
+
+signDeterminationVerbose(polList,ptSet,sqAlg,var,verbosity) :=
+  smartSignDeterminationVerbose(polList,ptSet,sqAlg,var,verbosity);
+    /* should not we suppress it ? */
+
+
+/* --------------------------------------------------- */
+/* Dummy variables                                     */
+
+/*what  is this needed for ?*/
+
+
+/* Extra x */
+charPolDummy(m) :=
+  charPol(m,x);
+
+sSubResDummy(p,q) :=
+  sSubRes(p,q,x);
+
+sRemCauchyIndexDummy(q,p) :=
+  sRemCauchyIndex(q,p,x);
+
+sRemTarskiQueryDummy(q,p) :=
+  sRemTarskiQuery(q,p,x);
+
+cauchyIndexDummy(q,p) :=
+  cauchyIndex(q,p,x);
+
+tarskiQueryDummy(q,p) :=
+  tarskiQuery(q,p,x);
+
+numberOfRootsDummy(p) :=
+  numberOfRoots(p,x);
+
+posNegDiffDummy(p) :=
+  posNegDiff(p,x);
+
+sSubResNumberOfRootsDummy(p) :=
+  sSubResNumberOfRoots(p,x);
+
+isolateRootsDummy(pol) :=
+  isolateRoots(pol,x);
+
+deCasteljauCompareRootsDummy(p,q) :=
+  deCasteljauCompareRoots(p,q,x);
+
+thomEncodingDummy(p) :=
+  thomEncoding(p,x);
+
+thomCompareDummy(p,q) :=
+  thomCompare(p,q,x);
+
+cauchyRootUpperBoundDummy(p) :=
+  cauchyRootUpperBound(p,x);
+
+cauchyRootLowerBoundDummy(p) :=
+  cauchyRootLowerBound(p,x);
+
+primeCauchyRootUpperBoundDummy(p) :=
+  primeCauchyRootUpperBound(p,x);
+
+primeCauchyRootLowerBoundDummy(p) :=
+  primeCauchyRootLowerBound(p,x);
+
+
+/* Extra x and first */
+sRemDummyFirst(p,q) :=
+  first(sRem(q,p,x));
+
+sSubResDummyFirst(p,q) :=
+  first(sSubRes(p,q));
+
+/* Extra array2singleList */
+getCoeffFromNewtonList(ns) :=
+  array2singleList(getCoeffFromNewton(ns));
+
+/* Maybe Temporary definitions */
+topology(pol,x,y) :=
+  archimedianTopology(pol,deCasteljauIsolateRoots,x,y);
+
+topologyVerbose(pol,x,y,verbosity) :=
+  archimedianTopologyVerbose(pol,deCasteljauIsolateRoots,x,y,verbosity);
+
+
+
+/* Certificate of positivity */
+
+
+
+
+sqFreeCertificateVerbose(pol,var,verbosity):=
+  deCasteljauSqFreeCertificateBetweenVerbose(pol,var,
+                               [DEFAULT_LEFT_END,DEFAULT_RIGHT_END],verbosity);
+
+  
+sqFreeCertificate(pol,var) :=
+  deCasteljauSqFreeCertificateBetween(pol,var,[DEFAULT_LEFT_END,DEFAULT_RIGHT_END]);
+
+noCheckCertificate(pol,var) :=
+  sqFreeCertificate(pol,var);
+
+
+sqFreeCertificateBetween(pol,var,search_interval) :=
+  deCasteljauSqFreeCertificateBetween(pol,var,search_interval);
+
+
+noCheckCertificateBetween(pol,var,search_interval) :=
+  sqFreeCertificateBetween(pol,var,search_interval);
+
+deCasteljauSqFreeCertificateBetween(pol,var,search_interval) :=
+  deCasteljauSqFreeCertificateBetweenVerbose(pol,var,search_interval,DEFAULT_VERBOSITY);
+ 
+deCasteljauSqFreeCertificateBetweenVerbose(pol,var,
+                                           search_interval,verbosity):=
+    deCasteljauNoCheckCertificateBetweenVerbose(pol,var,
+                                                search_interval,verbosity);
+
+
+certificate(pol,var) :=
+  deCasteljauCertificateBetween(pol,var,[DEFAULT_LEFT_END,DEFAULT_RIGHT_END]);
+
+certificateVerbose(pol,var,verbosity) :=
+ deCasteljauCertificateBetweenVerbose(pol,var,[DEFAULT_LEFT_END, DEFAULT_RIGHT_END],verbosity);
+
+certificateBetween(pol,var,search_interval):=
+  deCasteljauCertificateBetween(pol,var,search_interval);
+
+deCasteljauCertificateBetween(pol,var,search_interval) :=
+  deCasteljauCertificateBetweenVerbose(pol,var,search_interval,DEFAULT_VERBOSITY);

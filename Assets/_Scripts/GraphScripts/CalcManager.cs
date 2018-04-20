@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Calcflow.UserStatistics;
 
 public class CalcManager : MonoBehaviour
 {
@@ -23,6 +24,12 @@ public class CalcManager : MonoBehaviour
 
     [HideInInspector]
     public SaveLoadMenu saveLoadMenu;
+
+    [HideInInspector]
+    public TournamentMenu tournamentMenu;
+
+    [HideInInspector]
+    public SubmissionsMenu submissionsMenu;
 
     public CustomParametrizedSurface paramSurface;
     private CalcInput calcInput;
@@ -67,6 +74,12 @@ public class CalcManager : MonoBehaviour
         internal SaveLoadMenu saveLoadMenu;
         [SerializeField]
         internal ParticleAnimationSettings particleAnimationSettings;
+        [SerializeField]
+        internal TournamentMenu tournamentMenu;
+        [SerializeField]
+        internal SubmissionsMenu submissionsMenu;
+        [SerializeField]
+        internal SubmissionMenu submissionMenu;
     }
 
     [System.Serializable]
@@ -109,12 +122,26 @@ public class CalcManager : MonoBehaviour
 
     public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
     {
+
         List<ExpressionSet> ess = new List<ExpressionSet>();
         for (int i = 0; i < expressionSets.Count; i++)
         {
             ess.Add(expressionSets[i].DeepCopy());
             ess[ess.Count - 1].CompileAll();
         }
+
+        //var expression = new Dictionary<string, object>();
+        var expressionString = "";
+        foreach(var es in ess)
+        {
+            foreach (var e in es.expressions)
+            {
+                expressionString += e.Value.AKExpression.ToString() + "\n";
+            }
+        }
+        //expression["expression"] = expressionString;
+        StatisticsTracking.InstantEvent("Load Expression", expressionString);
+
         paramSurface.expressionSets = ess;
         pieceWiseControl.ForceNumberOfTabs(ess.Count);
         expressionSet = paramSurface.expressionSets[0];
@@ -135,6 +162,8 @@ public class CalcManager : MonoBehaviour
         pieceWiseControl = connectedMenus.pieceWiseControl;
         boundsManager = connectedMenus.boundsManager;
         saveLoadMenu = connectedMenus.saveLoadMenu;
+        tournamentMenu = connectedMenus.tournamentMenu;
+        submissionsMenu = connectedMenus.submissionsMenu;
 
         if (connectedMenus.boundsManager != null) connectedMenus.boundsManager.Initialize(this);
         connectedMenus.calcInput.Initialize(this);
@@ -149,6 +178,10 @@ public class CalcManager : MonoBehaviour
         connectedMenus.presetMenu.Initialize(this);
 
         connectedMenus.saveLoadMenu.Initialize(this);
+
+        connectedMenus.tournamentMenu.Initialize(this);
+
+        connectedMenus.submissionsMenu.Initialize(this);
 
         if (connectedMenus.particleAnimationSettings != null)
             connectedMenus.particleAnimationSettings.Initialize(this);

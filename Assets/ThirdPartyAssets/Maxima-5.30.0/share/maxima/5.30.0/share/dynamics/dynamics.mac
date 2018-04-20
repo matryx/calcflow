@@ -1,0 +1,368 @@
+/************************************************************************
+    Copyright (C) 2003, 2004, 2006, 2007 Jaime E. Villate <villate@fe.up.pt>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+    MA  02111-1307  USA
+
+$Id: dynamics.mac,v 1.6 2010-04-20 12:55:46 villate Exp $
+***********************************************************************/
+
+load("complex_dynamics.lisp")$
+load("plotdf.lisp")$
+
+/************************************************************************
+ Function evolution
+
+    Description: Maxima program to draw orbits of one-dimensional mappings
+    Usage:
+      evolution(fun, initial, n, ..., [options], ...);
+    "fun" must be an expression which depends only on one variable.
+    "initial" is the initial value for that variable, and n is the number
+    of steps. [options] can be any options accepted by plot2d.
+*/
+
+evolution(fun, initial, n, [options]) :=
+  block
+  ([z:initial, data: [[0, initial]], kwds: [], plot: numer: true, float: true],
+    if length(listofvars(fun)) # 1 then
+           error("fun should depend on one variable"),
+    for i thru n do
+      (z: ev(fun, listofvars(fun)[1]=z),
+       if not numberp(z) then
+                 error("The function gave a non-numerical value:", z),
+       data: cons([i, z], data)),
+    for i thru length(options) do
+      (if not listp(options[i]) then error("Wrong option", options[i]),
+       kwds: cons(options[i][1], kwds)),
+    if not member('x,kwds) then options: cons(['x, -0.5, n+0.5],options),
+    if not member('xlabel,kwds) then options: endcons(['xlabel, "n"],options),
+    if not member('ylabel,kwds) then
+          options: endcons(['ylabel,concat(listofvars(fun)[1],"(n)")],options),
+    if not member('style,kwds) then options: endcons(['style,'points],options),
+    options: cons(['discrete, data], options),
+    apply(plot2d, options))$
+
+/************************************************************************
+ Function staircase
+
+    Description: Maxima program to draw staircase diagrams of
+                 one-dimensional mappings
+    Usage:
+      staircase(fun, initial, n, [options]);
+    "fun" must be an expression which depends only on one variable.
+    "initial" is the initial value for that variable, and n is the number
+    of steps. [options] can be any options accepted by plot2d.
+*/
+
+staircase(fun, initial, n, [options]) :=
+  block
+  ([zf, z:initial, z1:initial, z2:initial, stair:[[initial, initial]],
+    kwds: [], numer: true, float: true],
+    if length(listofvars(fun)) # 1 then
+           error("fun should depend on one variable"),
+    for i thru n do
+      (zf: ev(fun, listofvars(fun)[1]=z),
+       if not numberp(zf) then
+                 error("The function gave a non-numerical value:", zf),
+       stair: append(stair, [[z, zf], [zf, zf]]),
+       z: zf,
+       if z < z1 then z1: z,
+       if z > z2 then z2: z),
+    for i thru length(options) do
+      (if not listp(options[i]) then error("Wrong option", options[i]),
+       kwds: cons(options[i][1], kwds)),
+    if not member(listofvars(fun)[1],kwds) then 
+       options: cons([listofvars(fun)[1],
+                        4*(1.1*z1-.1*z2)/3,4*(1.1*z2-.1*z1)/3],options),
+    if not member('y,kwds) then 
+       options: endcons(['y,1.1*z1-.1*z2,1.1*z2-.1*z1],options),
+    if not member('xlabel,kwds) then
+       options: endcons(['xlabel,concat(listofvars(fun)[1],"(n)")],options),
+    if not member('ylabel,kwds) then
+       options: endcons(['ylabel,concat(listofvars(fun)[1],"(n+1)")],options),
+    if not member('legend,kwds) then options: endcons(['legend,false],options),
+    options: cons([['discrete, stair], fun, listofvars(fun)[1]], options),
+    apply(plot2d, options))$
+
+/************************************************************************
+ Function evolution2d
+
+    Description: Maxima program to show the evolution of a two-dimensional
+                 discrete dynamical system in a 2-dimensional graph.
+    Usage:
+      evolution2d([fun1, fun2], [u, v], [u0, v0], n, ..., [options], ...);
+
+    fun1 and fun2 must be expressions which depend only on two variables
+    (u and v) named on the second list. The third list must give two
+    initial numerical values for the two variables. n is the number of
+    points to be shown. The options can be any accepted by plot2d.
+*/
+
+evolution2d(fun, state, initial, n, [options]) :=
+  block
+  ([x: initial[1], y: initial[2], xaux, data: [],
+    fx: false, fy: false, kwds: [], numer: true, float: true],
+    if length(listofvars(fun)) >2 then
+           error("fun should depend on two variables."),
+    for i thru length(options) do
+      (if not listp(options[i]) then error("Wrong option", options[i]),
+       if options[i][1]=state[1] then
+          (x1: options[i][2],
+           x2: options[i][3],
+           options[i][1]:'x,
+           fx: true),
+       if options[i][1]=state[2] then
+          (y1: options[i][2],
+           y2: options[i][3],
+           options[i][1]: 'y,
+           fy: true),
+       kwds: cons(options[i][1], kwds)),
+    for i thru n do
+      (if (fx and fy)
+        then
+          (if ((y >= y1) and (y <= y2) and (x >= x1) and (x <= y2)) then
+              data: cons([x, y], data))
+        else
+          (data: cons([x, y], data)),
+       xaux: ev(fun[1], state[1]=x, state[2]=y),
+       if not numberp(xaux) then
+                 error("Function",fun[1],"gave a non-numerical value:", xaux),
+       y: ev(fun[2], state[1]=x, state[2]=y),
+       if not numberp(y) then
+                 error("The function",fun[2],"gave a non-numerical value:", y),
+       x: xaux),
+    if not member('xlabel,kwds) then
+       options: endcons(['xlabel,state[1]],options),
+    if not member('ylabel,kwds) then
+       options: endcons(['ylabel,state[2]],options),
+    if not member('style,kwds) then options: endcons(['style,'points],options),
+    options: cons(['discrete, data], options),
+    print("Graph passed to plot2d..."),
+    apply(plot2d, options))$
+
+/************************************************************************
+ Function chaosgame
+
+    Description: Maxima program to play the "chaos game".
+    Usage:
+      chaosgame([[x1,y1]...[xm,ym]], [x0,y0], beta, n, [options]);
+
+    where [x0,y0] are the coordinates of the initial point, [x1,y1]
+    ... [xm,ym] are the attracting points, beta is the ratio of the
+    final to initial distance from the attracting point, and n the
+    number of points to show.
+*/
+
+chaosgame(point,p0,b,n,[options]) :=
+block
+  ([p:ev(p0,numer), j, m:length(point), data: [p0], kwds: [],
+    xlabel, ylabel, numer:true, float:true],
+    if length(p0) # 2 then
+        error("Initial point",p0,"should be a list with 2 components"),
+    if not (numberp(p[1]) and numberp(p[2])) then
+        error("The components of the initial point", p,"should be numbers"),
+    for i thru m do
+        if length(point[i]) # 2 then
+         error("Point",point[i],"should be a list with 2 components"),
+    for i thru n do
+       (j: random(m) + 1,
+        p: ev(point[j] + b*(p-point[j]), numer),
+        if not (numberp(p[1]) and numberp(p[2])) then
+              error("Non-numerical coordinates were obtained:", p),
+       data: cons(p, data)),
+    for i thru length(options) do
+      (if not listp(options[i]) then error("Wrong option", options[i]),
+       kwds: cons(options[i][1], kwds)),
+    if not member('xlabel,kwds) then
+       (xlabel: concat("The chaos game with ",m," points"),
+        options: endcons(['xlabel,xlabel],options)),
+    if not member('ylabel,kwds) then
+       (ylabel: concat("contraction factor: ",b),
+        options: endcons(['ylabel,ylabel],options)),
+    if not member('style,kwds) then options: endcons(['style,'points],options),
+    options: cons(['discrete, data], options),
+    apply(plot2d, options))$
+
+/************************************************************************
+ Function ifs
+
+    Description: Maxima program to create 2-d fractals using Barnley's
+                 IFS (Iterated Function Systems) method.
+    Usage:
+      ifs([r1,...,rm], [A1,...,Am], [p1,...,pm]], p0, n, [options]);
+
+    where r1,...,rm are cummulative weights for the attracting points.
+    For instance if there are 3 points with probabilities 0.2, 0.5 and
+    0.3, you can use [2,7,10].
+    A1,...,Am, are the matrices for the m attracting points and
+    p1,...,pm are the 2D coordinates of those points. p0 are the 2D
+    coordinates of the initial point and n the number of points to be
+    shown.
+*/
+
+ifs(prob, mat, point, p0, n, [options]) :=
+block 
+  ([p:ev(p0,numer), s, r, w:last(prob), data:[p0], xlabel, kwds: [],
+    m:length(prob), plist, numer:true, float:true],
+    if length(p0) # 2 then
+        error("Initial point",p0,"should be a list with 2 components"),
+    if not (numberp(p[1]) and numberp(p[2])) then
+        error("The components of the initial point", p,"should be numbers"),
+    if not ((length(mat)=m) and (length(point)=m)) then
+        error("There should be the same number of probabilities, matrices and points"),
+    for i thru m do
+       (if length(point[i]) # 2 then
+           error("Point",point[i],"should be a list with 2 components"),
+        if not numberp(prob[i]) then
+           error("Cummulative probability",prob[i],"should be a number"),
+        if not ((length(mat[i])=2) and (length(mat[i][1])=2)) then
+           error("Matrix",mat[i],"should be a 2x2 matrix")),
+    for i thru n do
+       (r: random(w) + 1,
+        s: 0,
+        for j while (r-prob[j]) > 0 do s:j,
+        p: ev(mat[s+1].p + point[s+1], numer),
+        plist: first(transpose(p)),
+        if not (numberp(plist[1]) and numberp(plist[2])) then
+           error("Non-numerical coordinates were obtained:", plist),
+        data: cons(plist, data)),
+    for i thru length(options) do
+       (if not listp(options[i]) then error("Wrong option", options[i]),
+        kwds: cons(options[i][1], kwds)),
+    if not member('xlabel,kwds) then
+       (xlabel: concat("Iterated Function System of ",m," transformations"),
+        options: endcons(['xlabel,xlabel],options)),
+    if not member('ylabel,kwds) then options: endcons(['ylabel,""],options),
+    if not member('style,kwds) then options: endcons(['style,'points],options),
+    options: cons(['discrete, data], options),
+    apply(plot2d, options))$
+
+/************************************************************************
+ Function orbits
+
+    Description: Maxima program to draw orbit diagrams (also dubbed as
+                 bifurcation diagrams) for first-order discrete
+                 dynamical systems
+    Usage:
+      orbits(f, initial, n1, n2, [u, u0, uf], ..., [options], ...)
+
+    It will plot the orbits diagram for a family of first order discrete
+    dynamical system, with a parameter.
+    f must be an expression which depends only on one variable and
+    the parameter. The parameter must be named in the first component of
+    the list [u, u0, uf] (in this example it would be u) that sets up
+    the range of the variation for the parameter, from u0, uf. The initial
+    value of the parameter can be smaller than the final value, in the
+    cases when the bifurcations appear as the parameter decreases.
+    "initial" is an initial value for the state variable.
+    The parameter will be represented in the horizontal axis; the range of
+    the parameter will be divided by the value given by the nticks option,
+    or by 200 if that option is not used. For each value of the parameter,
+    the system will be left to evolve during n1 steps, and then the next
+    n2 steps will be plotted in the vertical axis.
+    The program tuns faster if a range is given to the vertical axis.
+    By default, the vertical scale is divide in 600 pixels. That number
+    can be changed with the option pixels, for instance, [pixels, 700].
+*/
+
+orbits(f, y0, n1, n2, domain, [options]) :=
+block
+ ([x, y, data: [], y1, y2, yflag: false, kwds: [], var, points, plot: [],
+   x0: domain[2], s, n, pixels: 600, numer:true, float: true],
+   var: listofvars(f),
+   var: delete(domain[1],var),
+    if length(listofvars(fun)) >2 then
+           error("f should depend on two variables."),
+    for i thru length(options) do
+      (if not listp(options[i]) then error("Wrong option", options[i]),
+       if options[i][1]=var[1] then
+          (y1: options[i][2],
+           y2: options[i][3],
+           if not y1 < y2 then
+           error("The first number has to be smaller than the second in:",options[i]),
+           options[i][1]: 'y,
+           yflag: true),
+       if options[i][1]='nticks then
+          (if integerp(options[i][2]) then
+              n: options[i][2]
+           else
+              error("Option nticks should have an integer value")),
+       if options[i][1]='pixels then
+          (pixels: options[i][2],
+           delete(options[i],options))
+       else
+          plot: endcons(options[i], plot),
+       kwds: cons(options[i][1], kwds)),
+   if  not (member('nticks,kwds) and integerp(n)) then n: 200,
+   s: (domain[3] - domain[2])/n,
+   if yflag then
+     (for i:0 thru n do
+         (x: x0+i*s,
+          y: y0,
+          points: [],
+          for j thru n1 do
+             (y: ev(f, domain[1]=x, var[1]=y),
+              if not numberp(y) then
+                 error("The function gave a non-numerical value:", y)),
+          for j thru n2 do
+             (y: ev(f, domain[1]=x, var[1]=y),
+              if ((y >= y1) and (y <= y2)) then
+                 (k: entier(pixels*(y-y1)/(y2-y1))+1,
+                  if k>pixels then k: pixels,
+                  if not member(k, points) then points: cons(k, points))),
+          for j thru length(points) do
+              data: cons([x,(y2-y1)*(points[j]-0.5)/pixels+y1], data)))
+   else
+     (for i:0 thru n do
+         (x: x0+i*s,
+          y: y0,
+          for j thru (n1+n2)/2 do
+             (y: ev(f, domain[1]=x, var[1]=y),
+              if not numberp(y) then
+                 error("The function gave a non-numerical value:", y),
+              if not yflag then
+                 (y1:y, y2:y, yflag: true)
+              else
+                 (if y<y1 then y1: y,
+                  if y>y2 then y2: y))),
+      if not y1 < y2 then error("It was not possible to find any points"),
+      for i:0 thru n do
+         (x: x0+i*s,
+          y: y0,
+          points: [],
+          for j thru n1 do y: ev(f, domain[1]=x, var[1]=y),
+          for j thru n2 do
+             (y: ev(f, domain[1]=x, var[1]=y),
+              if ((y >= y1) and (y <= y2)) then
+                 (k: entier(pixels*(y-y1)/(y2-y1))+1,
+                  if k>pixels then k: pixels,
+                  if not member(k, points) then points: cons(k, points))),
+          for j thru length(points) do
+              data: cons([x,(y2-y1)*(points[j]-0.5)/pixels+y1], data))),
+   if (length(data) > 0) then
+      (if not member('x,kwds) then
+	  (if domain[3] > domain[2] then
+              plot: cons(['x,domain[2],domain[3]],plot)
+           else
+              plot: cons(['x,domain[3],domain[2]],plot)),
+       if not member('xlabel,kwds) then
+          plot: endcons(['xlabel,domain[1]],plot),
+       if not member('ylabel,kwds) then
+          plot: endcons(['ylabel,var[1]],plot),
+       if not member('style,kwds) then plot:endcons(['style,'points],plot),
+       plot: cons(['discrete, data], plot),
+       print("Graph passed to plot2d..."),
+       apply(plot2d, plot)))$
+

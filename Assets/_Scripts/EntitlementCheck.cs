@@ -7,6 +7,7 @@ public class EntitlementCheck
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void OnBeforeSceneLoadRuntimeMethod()
     {
+        return;
         //Core.Initialize("1143046855744783"); // CalcFlow app ID
         Core.Initialize(); // CalcFlow app ID
         Debug.Log("Checking of user has valid entitlement..");

@@ -1,0 +1,19 @@
+/* -*- Mode: MACSYMA; Package: CL-MAXIMA -*- */
+
+desolve(eqns,vars):=block([teqns,tvars,ovar,lvar,flag,dispflag],
+	modedeclare(flag,boolean),
+	flag:false,
+	if not listp(vars) then (eqns:[eqns], vars:[vars], flag:true),
+	if length(ovar:vars[1])#1 then
+		error(ovar,"contains more than one independent variable."),
+	ovar:inpart(ovar,1),dispflag:false,
+	teqns:map(lambda([z],laplace(z,ovar,lvar)),eqns),
+	tvars:map(lambda([z],'laplace(z,ovar,lvar)),vars),
+	/* if not freeof(nounify('diff),teqns) then return(false), */
+	teqns:errcatch(solve(teqns,tvars)),
+	if teqns=[] or teqns=[[]] 
+	  then error("desolve can't handle this case.")
+	  else teqns:first(teqns),
+	if flag#true then teqns:first(teqns),
+	teqns:map(lambda([z],ilt(z,lvar,ovar)),teqns),
+	if flag and length(tvars)=1 then teqns[1] else teqns)$

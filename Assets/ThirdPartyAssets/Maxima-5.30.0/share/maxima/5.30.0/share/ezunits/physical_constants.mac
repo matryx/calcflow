@@ -1,0 +1,356 @@
+/* Physical constants for ezunits
+ * CODATA 2006 values. See: http://physics.nist.gov/constants
+ * This program copyright 2008 by Robert Dodier.
+ * I release this program under the terms of
+ * the GNU General Public License.
+ */
+
+/* After loading this program, the following prints a LaTeX document
+ * in which all the physical constants appear.
+ *
+    with_stdout
+     ("/tmp/foo.tex",
+      print ("\\documentclass{article}"),
+      print ("\\begin{document}"),
+      for x in propvars (physical_constant)
+        do printf (true, "~a~%~a~%~%", get (x, description), tex (x = constvalue (x), false)),
+      print ("\\end{document}"));
+*/
+
+qput (physical_constants, "experimental, usable", version);
+
+if get ('ezunits, 'version) = false then load (ezunits) else 'already_loaded;
+
+declare (physical_constant, feature);
+
+/* UNIVERSAL */
+
+declare (%c, physical_constant);
+declare (%c, dimensional);
+declare (%c, constant);
+qput (%c, "speed of light in vacuum", description);
+declare_constvalue (%c, 299792458 ` m/s);
+qput (%c, 0, RSU);
+texput (%c, "c");
+
+declare (%mu_0, physical_constant);
+declare (%mu_0, dimensional);
+declare (%mu_0, constant);
+qput (%mu_0, "magnetic constant", description);
+declare_constvalue (%mu_0, 4*314159265358979323/10^17*10^-7 ` N/A^2);
+qput (%mu_0, 0, RSU);
+texput (%mu_0, "\\mu_0");
+
+declare (%e_0, physical_constant);
+declare (%e_0, dimensional);
+declare (%e_0, constant);
+qput (%e_0, "electric constant $1/(\\mu_0 c^2)$", description);
+declare_constvalue (%e_0, constvalue (1/(%mu_0*%c^2)));
+qput (%e_0, 0, RSU);
+texput (%e_0, "\\epsilon_0");
+
+declare (%Z_0, physical_constant);
+declare (%Z_0, dimensional);
+declare (%Z_0, constant);
+qput (%Z_0, "characteristic impedance of vacuum $\\sqrt{\\mu_0/\\epsilon_0} = \\mu_0 c$", description);
+declare_constvalue (%Z_0, constvalue (%mu_0*%c));
+qput (%Z_0, 0, RSU);
+texput (%Z_0, "Z_0");
+
+declare (%G, physical_constant);
+declare (%G, dimensional);
+declare (%G, constant);
+qput (%G, "Newtonian constant of gravitation", description);
+declare_constvalue (%G, 667428/100000*10^(-11) ` m^3/kg/s^2);
+qput (%G, 10^-4, RSU);
+texput (%G, "G");
+
+declare (%h, physical_constant);
+declare (%h, dimensional);
+declare (%h, constant);
+qput (%h, "Planck constant", description);
+declare_constvalue (%h, 662606896*10^-8*10^-34 ` J*s);
+qput (%h, 5*10^-8, RSU);
+texput (%h, "h");
+
+declare (%h_bar, physical_constant);
+declare (%h_bar, dimensional);
+declare (%h_bar, constant);
+qput (%h_bar, "Planck constant $h/2\\pi$", description);
+declare_constvalue (%h_bar, constvalue (%h/(2*%pi)));
+qput (%h_bar, 5*10^-8, RSU);
+texput (%h_bar, "\\hbar");
+
+declare (%m_P, physical_constant);
+declare (%m_P, dimensional);
+declare (%m_P, constant);
+qput (%m_P, "Planck mass $\\sqrt{\\hbar c/G}$", description);
+declare_constvalue (%m_P, constvalue (sqrt(%h_bar * %c / %G)));
+qput (%m_P, 5*10^-5, RSU);
+texput (%m_P, "m_P");
+
+/* Boltzmann constant out of order; need it for Planck temperature */
+
+declare (%%k, physical_constant);
+declare (%%k, dimensional);
+declare (%%k, constant);
+qput (%%k, "Boltzmann constant $R/N_A$", description);
+declare_constvalue (%%k, 1.3806504e-23 ` J/K);
+qput (%%k, 1.7e-6, RSU);
+texput (%%k, "k");
+
+declare (%T_P, physical_constant);
+declare (%T_P, dimensional);
+declare (%T_P, constant);
+qput (%T_P, "Planck temperature $\\sqrt{\\hbar c^5/G}/k$", description);
+declare_constvalue (%T_P, constvalue (sqrt (%h_bar * %c^5 / %G) / %%k));
+qput (%T_P, 5*10^-5, RSU);
+texput (%T_P, "T_P");
+
+declare (%l_P, physical_constant);
+declare (%l_P, dimensional);
+declare (%l_P, constant);
+qput (%l_P, "Planck length $\\hbar/(m_P c) = \\sqrt{\\hbar G/c^3}$", description);
+declare_constvalue (%l_P, constvalue (%h_bar / (%m_P * %c)));
+qput (%l_P, 5*10^-5, RSU);
+texput (%l_P, "l_P");
+
+declare (%t_P, physical_constant);
+declare (%t_P, dimensional);
+declare (%t_P, constant);
+qput (%t_P, "Planck time $l_P/c = \\sqrt{\\hbar G/c^5}$", description);
+declare_constvalue (%t_P, constvalue (%l_P / %c));
+qput (%t_P, 5*10^-5, RSU);
+texput (%t_P, "t_P");
+
+/* ELECTROMAGNETIC */
+
+declare (%%e, physical_constant);
+declare (%%e, dimensional);
+declare (%%e, constant);
+qput (%%e, "elementary charge", description);
+declare_constvalue (%%e, 1602176487*10^-9*10^-19 ` C);
+qput (%%e, 25*10^-1*10^-8, RSU);
+texput (%%e, "e");
+
+declare (%Phi_0, physical_constant);
+declare (%Phi_0, dimensional);
+declare (%Phi_0, constant);
+qput (%Phi_0, "magnetic flux quantum $h/(2 e)$", description);
+declare_constvalue (%Phi_0, 2.067833667e-15 ` Wb);
+qput (%Phi_0, 2.5e-8, RSU);
+texput (%Phi_0, "\\Phi_0");
+
+declare (%G_0, physical_constant);
+declare (%G_0, dimensional);
+declare (%G_0, constant);
+qput (%G_0, "conductance quantum $2 e^2 / h$", description);
+declare_constvalue (%G_0, 7.7480917004e-5 ` S);
+qput (%G_0, 6.8e-10, RSU);
+texput (%G_0, "G_0");
+
+declare (%K_J, physical_constant);
+declare (%K_J, dimensional);
+declare (%K_J, constant);
+qput (%K_J, "Josephson constant $2 e/h$", description);
+declare_constvalue (%K_J, 483597.891e9 ` Hz/V);
+qput (%K_J, 2.5e-8, RSU);
+texput (%K_J, "K_J");
+
+declare (%R_K, physical_constant);
+declare (%R_K, dimensional);
+declare (%R_K, constant);
+qput (%R_K, "von Klitzing constant $h/e^2 = \\mu_0 c/(2 \\alpha)$", description);
+declare_constvalue (%R_K, 25812.807557 ` ohm);
+qput (%R_K, 6.8-10, RSU);
+texput (%R_K, "R_K");
+
+declare (%mu_B, physical_constant);
+declare (%mu_B, dimensional);
+declare (%mu_B, constant);
+qput (%mu_B, "Bohr magneton $e \\hbar/(2 m_{\\mathrm{e}})$", description);
+declare_constvalue (%mu_B, 927.400915e-26 ` J/T);
+qput (%mu_B, 2.5e-8, RSU);
+texput (%mu_B, "\\mu_B");
+
+declare (%mu_N, physical_constant);
+declare (%mu_N, dimensional);
+declare (%mu_N, constant);
+qput (%mu_N, "nuclear magneton $e \\hbar/(2 m_P)$", description);
+declare_constvalue (%mu_N, 5.05078324e-27 ` J/T);
+qput (%mu_N, 2.5e-8, RSU);
+texput (%mu_N, "\\mu_N");
+
+/* ATOMIC AND NUCLEAR */
+/* General */
+
+declare (%alpha, physical_constant);
+declare (%alpha, dimensional);
+declare (%alpha, constant);
+qput (%alpha, "fine-structure constant $e^2/(4\\pi \\epsilon_0 \\hbar c)$", description);
+declare_constvalue (%alpha, 7.2973525376e-3);
+qput (%alpha, 6.8e-10, RSU);
+texput (%alpha, "\\alpha");
+
+declare (%R_inf, physical_constant);
+declare (%R_inf, dimensional);
+declare (%R_inf, constant);
+qput (%R_inf, "Rydberg constant $\\alpha^2 m_{\\mathrm{e}} c /(2 h)$", description);
+declare_constvalue (%R_inf, 10973731.568527 ` 1/m);
+qput (%R_inf, 6.6e-12, RSU);
+texput (%R_inf, "R_{\\infty}");
+
+declare (%a_0, physical_constant);
+declare (%a_0, dimensional);
+declare (%a_0, constant);
+qput (%a_0, "Bohr radius $\\alpha/(4\\pi R_{\\infty}) = 4\\pi \\epsilon_0 \\hbar^2 / (m_{\\mathrm{e}} e^2)$", description);
+declare_constvalue (%a_0, 0.52917720859e-10 ` m);
+qput (%a_0, 6.8e-10, RSU);
+texput (%a_0, "a_0");
+
+declare (%E_h, physical_constant);
+declare (%E_h, dimensional);
+declare (%E_h, constant);
+qput (%E_h, "Hartree energy $e^2/(4\\pi \\epsilon_0 \\alpha_0) = 2 R_{\\infty} hc = \\alpha^2 m_{\\mathrm{e}} c^2$", description);
+declare_constvalue (%E_h, 4.35974394e-18 ` J);
+qput (%E_h, 5e-8, RSU);
+texput (%E_h, "E_{\\mathrm{h}}");
+
+declare (%ratio_h_me, physical_constant);
+declare (%ratio_h_me, dimensional);
+declare (%ratio_h_me, constant);
+qput (%ratio_h_me, "quantum of circulation $h/m_{\\mathrm{e}}$", description);
+declare_constvalue (%ratio_h_me, 3.6369475199e-4 ` m^2/s);
+qput (%ratio_h_me, 1.4e-9, RSU);
+texput (%ratio_h_me, "(h/m_{\\mathrm{e}})");
+
+/* OMITTED: Electro-weak */
+
+/* Electron */
+
+declare (%m_e, physical_constant);
+declare (%m_e, dimensional);
+declare (%m_e, constant);
+qput (%m_e, "electron mass", description);
+declare_constvalue (%m_e, 9.10938215e-31 ` kg);
+qput (%m_e, 5e-8, RSU);
+texput (%m_e, "m_{\\mathrm{e}}");
+
+/* REMAINDER OF SECTION OMITTED */
+
+/* OMITTED: Muon */
+/* OMITTED: Tau */
+/* OMITTED: Proton */
+/* OMITTED: Neutron */
+/* OMITTED: Deuteron */
+/* OMITTED: Triton */
+/* OMITTED: Helion */
+/* OMITTED: Alpha particle */
+
+/* PHYSICOCHEMICAL */
+
+declare (%N_A, physical_constant);
+declare (%N_A, dimensional);
+declare (%N_A, constant);
+qput (%N_A, "Avogadro constant", description);
+declare_constvalue (%N_A, 602214179*10^-8*10^23 ` 1/mol);
+qput (%N_A, 5*10^-8, RSU);
+texput (%N_A, "N_A");
+
+declare (%m_u, physical_constant);
+declare (%m_u, dimensional);
+declare (%m_u, constant);
+qput (%m_u, "atomic mass constant", description);
+declare_constvalue (%m_u, 1.660538782e-27 ` kg);
+qput (%m_u, 5e-8, RSU);
+texput (%m_u, "\\mu_{\\mathrm{u}}");
+
+declare (%F, physical_constant);
+declare (%F, dimensional);
+declare (%F, constant);
+qput (%F, "Faraday constant $N_A e$", description);
+declare_constvalue (%F, 96485.3399 ` C/mol);
+qput (%F, 2.5e-8, RSU);
+texput (%F, "F");
+
+declare (%R, physical_constant);
+declare (%R, dimensional);
+declare (%R, constant);
+qput (%R, "molar gas constant", description);
+declare_constvalue (%R, 8314472*10^-6 ` J/mol/K);
+qput (%R, 1.7e-6, RSU);
+texput (%R, "R");
+
+/* Boltzmann constant moved -- put it before Planck temperature */
+
+declare (%V_m, physical_constant);
+declare (%V_m, dimensional);
+declare (%V_m, constant);
+qput (%V_m, "molar volume of ideal gas $R T/p$, $T = 273.15 \\; \\mathrm{K}, p = 101.325 \\; \\mathrm{kPa}$", description);
+declare_constvalue (%V_m, 22.413996e-3 ` m^3/mol);
+qput (%V_m, 1.7e-6, RSU);
+texput (%V_m, "V_m");
+
+declare (%n_0, physical_constant);
+declare (%n_0, dimensional);
+declare (%n_0, constant);
+qput (%n_0, "Loschmidt constant $N_A/V_m$", description);
+declare_constvalue (%n_0, 2.6867774e25 ` 1/m^3);
+qput (%n_0, 1.7e-6, RSU);
+texput (%n_0, "n_0");
+
+declare (%ratio_S0_R, physical_constant);
+declare (%ratio_S0_R, dimensional);
+declare (%ratio_S0_R, constant);
+qput (%ratio_S0_R, "Sackur-Tetrode constant (absolute entropy constant) $5/2 + \\log\\left((2\\pi m_{\\mathrm{u}} k T_1/h^2)^{3/2} k T_1/p_0\\right)$, $T_1 = 1 \\; \\mathrm{K}, p_0 = 101.325 \\; \\mathrm{kPa}$", description);
+declare_constvalue (%ratio_S0_R, -1.1648677);
+qput (%ratio_S0_R, 3.8e-6, RSU);
+texput (%ratio_S0_R, "(S_0/R)");
+
+declare (%sigma, physical_constant);
+declare (%sigma, dimensional);
+declare (%sigma, constant);
+qput (%sigma, "Stefan-Boltzmann constant $(\\pi^2/60) k^4/(\\hbar^3 c^2)$", description);
+declare_constvalue (%sigma, 5.670400e-8 ` W/m^2/K^4);
+qput (%sigma, 7e-6, RSU);
+texput (%sigma, "\\sigma");
+
+declare (%c_1, physical_constant);
+declare (%c_1, dimensional);
+declare (%c_1, constant);
+qput (%c_1, "first radiation constant $2\\pi h c^2$", description);
+declare_constvalue (%c_1, 3.74177118e-16 ` W*m^2);
+qput (%c_1, 5e-8, RSU);
+texput (%c_1, "c_1");
+
+declare (%c_1L, physical_constant);
+declare (%c_1L, dimensional);
+declare (%c_1L, constant);
+qput (%c_1L, "first radiation constant for spectral radiance $2 h c^2$", description);
+declare_constvalue (%c_1L, 1.191042759e-16 ` W*m^2/sr);
+qput (%c_1L, 5e-8, RSU);
+texput (%c_1L, "c_{\\mathrm{1L}}");
+
+declare (%c_2, physical_constant);
+declare (%c_2, dimensional);
+declare (%c_2, constant);
+qput (%c_2, "second radiation constant $h c/k$", description);
+declare_constvalue (%c_2, 1.4387752e-2 ` m*K);
+qput (%c_2, 1.7e-6, RSU);
+texput (%c_2, "c_2");
+
+declare (%b, physical_constant);
+declare (%b, dimensional);
+declare (%b, constant);
+qput (%b, "Wien displacement law constant $b = \\lambda_{\\mathrm{max}} T = c_2/4.965 114 231\\ldots$", description);
+declare_constvalue (%b, 2.8977685e-3 ` m*K);
+qput (%b, 1.7e-6, RSU);
+texput (%b, "b");
+
+declare (%b_prime, physical_constant);
+declare (%b_prime, dimensional);
+declare (%b_prime, constant);
+qput (%b_prime, "Wien displacement law constant $b' = \\nu_{\\mathrm{max}}/T = 2.821 439 372\\ldots c/c_2$", description);
+declare_constvalue (%b_prime, 5.878933e10 ` Hz/K);
+qput (%b_prime, 1.7e-6, RSU);
+texput (%b_prime, "b'");

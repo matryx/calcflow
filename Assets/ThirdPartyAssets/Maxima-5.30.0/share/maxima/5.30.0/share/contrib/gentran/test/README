@@ -1,0 +1,15 @@
+Files here can be used to test the gentran package.  It include some
+example programs described in section 6 of the the gentran manual.
+
+The name.v file can be batched into vaxima and a name.f file will be produced.
+This should match exactly the corresponding file name.output.
+
+To perform the test:
+
+invoke vaxima
+(C1) loadfile("../gtload.l")$
+(C2) batch("filename.v")$
+
+
+There are some .l files that can be loaded into the lisp level
+under Vaxima to test the lisp level calls to gentran.

@@ -1,0 +1,158 @@
+/* Filename nf.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Perturbation Methods, Bifurcation            *
+   *                Theory and Computer Algebra.                 *
+   *           by Rand & Armbruster (Springer 1987)              *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/*program number 5: nf(), normal form transformations. see page 62 in
+  "perturbation methods, bifurcation theory and computer algebra". */
+
+
+/* this file contains nf(), a normal form utility function. it also contains
+   these additional functions:
+   gen(n) will generate a homogeneous order n transformation.
+   decompose() isolates the coefficients of the new equations.
+   vars(n) generates a list of unknown coefficients of degree n.
+   hopfk(), for k=2,3,4,5,6,7 solves for the coefficients of a system of
+   2 de's so as to put the eqs in hopf normal form */
+
+nf():= block( 
+
+/* new variable names? */
+test : read ("do you want to enter new variable names (y/n)?"),
+if test = n then go(jump),
+n : read ("how many eqs"),
+for i thru n do (x[i] : read ("symbol for old x[",i,"]")),
+for i thru n do( y[i] : read ("symbol for new x[",i,"]")),
+for i thru n do depends([x[i],y[i]],t),
+kill(flag), /* flag used in gen */
+
+jump,
+
+/* new d.e.'s? */
+print ("do you want to enter new d.e.'s (y/n)?"),
+test:read(),
+if test = n then go(loop),
+for i thru n do 
+          (rhs[i]:read("enter rhs of eq. no.",i,",d",x[i],"/dt ="),
+           print("d",x[i],"/dt =",rhs[i])),
+kill(rhs2),
+rhs2[i,j] := rhs[i],
+rhs3:genmatrix(rhs2,n,1),
+
+loop,
+
+/* near-identity transformation */
+print("input near-identity transformation 
+(use prev for previous transformation)"),
+for i thru n do 
+          (row:i, 
+           prev :tr[i],
+           tr[i] :read (x[i],"=",y[i],"+ ?"),
+           print (x[i],"=",y[i]+tr[i])),
+
+/* input truncation order */
+trans : makelist (x[i]=y[i]+tr[i],i,1,n),
+m : read("enter truncation order (highest order terms to be kept)"),
+
+
+/* transform the d.e.'s */
+temp2 :ev(rhs3,trans),
+
+/* solve for the transformed derivatives */
+kill(jacob),
+jacob[i,j]:=diff(tr[i],y[j]),
+jacob2:genmatrix(jacob,n,n),
+temp3:sum((-1)^i*jacob2^^i,i,0,m-1).temp2,
+
+/* taylor expand the resulting eqs */
+newrhs : taylor(temp3,makelist(y[i],i,1,n),0,m),
+newdes:makelist(diff(y[i],t)=newrhs[i,1],i,1,n),
+for i:1 thru n do 
+          print(part(newdes,i)),
+
+/* enter another transformation? */
+branch:read("do you want to enter another transformation (y/n)"),
+if branch = y then go(loop),
+newdes)$ 
+
+
+gen(nn):=(
+if not numberp(flag[nn]) then (
+               sub:makelist(k[i],i,1,n),
+               var:product(y[i]^k[i],i,1,n),
+               tempgen:a[rowdummy,sub]*var,
+               for i:1 thru n do
+                       tempgen:sum(ev(tempgen,k[i]=j),j,0,nn),
+               tempgen2:last(taylor(tempgen,makelist(y[i],i,1,n),0,nn)),
+               tempgen3[nn]:expand(tempgen2),
+               flag[nn] : 1),
+ev(tempgen3[nn],rowdummy=row)) $ 
+
+decompose():=(
+kill(c),
+if not numberp(flag[m]) then gen(m),
+temp8:subst("[","+",tempgen3[m]),
+terms:ev(temp8,a[dummy,sub]:=1),
+coeffs:ev(temp8,a[dummy,sub]:=c[dummy,sub],makelist(y[i]=1,i,1,n)),
+for i:1 thru n do(
+     for j:1 thru length(terms) do(
+          ev(part(coeffs,j),rowdummy=i)::ratcoef(expand(newrhs[i,1]),part(terms,
+j)))))$
+
+vars(nn):=(
+temp5:sum(ev(tempgen3[nn]),rowdummy,1,n),
+temp6:subst("[","+",temp5),
+temp7:ev(temp6,makelist(y[i]=1,i,1,n)))$
+
+
+ hopf2():=(decompose(),
+           solve([c[1,[2,0]],c[1,[1,1]],c[1,[0,2]],c[2,[2,0]],
+                  c[2,[1,1]],c[2,[0,2]]],
+                 vars(2)))$
+
+ hopf3():=(decompose(),
+           solve([c[1,[3,0]]=c[1,[1,2]],c[1,[3,0]]=c[2,[2,1]],
+                  c[1,[3,0]]=c[2,[0,3]],c[1,[0,3]]=c[1,[2,1]],
+                  c[1,[0,3]]=-c[2,[3,0]],c[1,[0,3]]=-c[2,[1,2]]],
+                 vars(3)))$
+
+ hopf4():=(decompose(),
+           solve([c[1,[4,0]],c[1,[3,1]],c[1,[2,2]],c[1,[1,3]],
+                  c[1,[0,4]],c[2,[4,0]],c[2,[3,1]],c[2,[2,2]],
+                  c[2,[1,3]],c[2,[0,4]]],
+                 vars(4)))$
+
+ hopf5():=(decompose(),                                
+           solve([c[1,[5,0]]=c[1,[3,2]]/2,c[1,[5,0]]=c[1,[1,4]],
+                  c[1,[5,0]]=c[2,[4,1]],c[1,[5,0]]=c[2,[2,3]]/2,
+                  c[1,[5,0]]=c[2,[0,5]],c[2,[5,0]]=c[2,[3,2]]/2,
+                  c[2,[5,0]]=c[2,[1,4]],c[2,[5,0]]=-c[1,[4,1]],
+                  c[2,[5,0]]=-c[1,[2,3]]/2,c[2,[5,0]]=-c[1,[0,5]]],
+                 vars(5)))$
+
+ hopf6():=(decompose(),
+           solve([c[1,[6,0]],c[1,[5,1]],c[1,[4,2]],c[1,[3,3]],
+                  c[1,[2,4]],c[1,[1,5]],c[1,[0,6]],c[2,[6,0]],
+                  c[2,[5,1]],c[2,[4,2]],c[2,[3,3]],c[2,[2,4]],
+                  c[2,[1,5]],c[2,[0,6]]],
+                 vars(6)))$
+
+ hopf7():=(decompose(),        
+           solve([c[1,[7,0]]=c[1,[5,2]]/3,c[1,[7,0]]=c[1,[3,4]]/3,
+                  c[1,[7,0]]=c[1,[1,6]],c[1,[7,0]]=c[2,[6,1]],
+                  c[1,[7,0]]=c[2,[4,3]]/3,c[1,[7,0]]=c[2,[2,5]]/3,
+                  c[1,[7,0]]=c[2,[0,7]],c[2,[7,0]]=c[2,[5,2]]/3,
+                  c[2,[7,0]]=c[2,[3,4]]/3,c[2,[7,0]]=c[2,[1,6]],
+                  c[2,[7,0]]=-c[1,[6,1]],c[2,[7,0]]=-c[1,[4,3]]/3,
+                  c[2,[7,0]]=-c[1,[2,5]]/3,c[2,[7,0]]=-c[1,[0,7]]],
+                 vars(7)))$

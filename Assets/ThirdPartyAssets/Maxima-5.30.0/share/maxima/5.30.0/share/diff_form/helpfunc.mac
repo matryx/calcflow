@@ -1,0 +1,47 @@
+/*  written by Gosei Furuya <go.maxima@gmail.com> 
+#  This program is free software; you can redistribute it and/or modify        
+#  it under the terms of the GNU General Public License as published by        
+#  the Free Software Foundation; either version 2 of the License, or           
+#  (at your option) any later version.
+#  
+#                  
+*/
+
+
+
+triple_pmat(u_,v_,w_):= 
+    block([k,m,i],
+	mode_declare([m],any),
+	k:length(u_),
+	m:zeromatrix(k,k),
+	for i:1 thru k do (
+	  m[i,1]:u_[i],m[i,2]:v_[i],m[i,3]:w_[i]
+	),    m);
+
+matdmake(_list,_base):=block([_a:_list,_b:_base,_m],match_declare([_a,_b,_m],any),
+	_m:coefmatrix(d(_a),_b),_m);
+
+/* liebraket   we assumed that _pform1 is 1form,_pform2 either*/
+Liebkt(_pform1,_pform2):=block([_a:[],_b:[],_a1,_b1,_m,_n,_p],
+	match_declare([_list1,_list2,_m,_n,_p],any),
+	_a1:expand(_pform1),_b1:expand(_pform2),
+	for i:1 thru dim do (
+	   _a:endcons(ratcoef(_a1,basis[i]),_a),
+	   _b:endcons(ratcoef(_b1,basis[i]),_b)
+	),
+	_m:transpose(matdmake(_b,basis)),_n:transpose(matdmake(_a,basis)),
+	_p: ( _a . _m . basis - _b . _n . basis)
+	/*inner(apply("+",basis),_p)*/
+	);
+
+/*from vector to pform  vtof1 is work form and vtof2 is flux form by Darling book*/
+vtof1(_vector):=block(_vector.diag(scale_factor).basis);
+vtof2(_vector):=block([_a],_a:map(h_st,basis),_vector._a);
+/*from pform to vector but these two functions are rather experimentable*/
+inv_i1(_pform):=block([a_],a_:coefmatrix(_pform,basis),a_.invert(diag(scale_factor)));
+
+/*pseudo scalar */
+J(_f):= volume*apply("*",basis)& _f$
+
+/*antiderivative or kodira diff op */
+antid(_g):=nest2([J,d,J],_g)$

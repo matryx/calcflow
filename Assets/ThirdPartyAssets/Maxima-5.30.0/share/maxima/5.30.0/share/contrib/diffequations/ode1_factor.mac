@@ -1,0 +1,88 @@
+/* Solution of first order ODEs by factoring
+   
+  References: 
+ 
+  Daniel Zwillinger, Handbook of Differential Equations, 3rd ed
+  Academic Press, (1997), pp 265-266
+
+
+  Copyright (C) 2004 David Billinghurst		 
+  		       								 
+  This program is free software; you can redistribute it and/or modify	 
+  it under the terms of the GNU General Public License as published by	 
+  the Free Software Foundation; either version 2 of the License, or		 
+  (at your option) any later version.					 
+ 		       								 
+  This program is distributed in the hope that it will be useful,		 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of		 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 
+  GNU General Public License for more details.				 
+ 		       								 
+  You should have received a copy of the GNU General Public License	
+  along with this program; if not, write to the Free Software 		 
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/ 
+
+put('ode1_factor,001,'version)$
+
+ode1_factor(eq,y,x):= block( 
+  [de,%p,ans:[],s,inflag:true,powflag:true,u,factors:[]],
+
+  ode_disp("    in ode1_factor"),  
+
+  /* substitute %p=y' */
+  de: expand(lhs(eq)-rhs(eq)),
+  de: subst(%p,'diff(y,x),de),
+  
+  /* At present restricted to simple cases such as p^2+5p+6=0
+     What about repeated factors? */
+  
+  /* if ( not(freeof(x,y,de)) ) then return(false), */
+
+  de:factor(de),
+  /* fail if the ode wasn't simplified by factoring */
+  if ( not(inpart(de,0)="*") or is(length(de)<2) ) then (
+    ode_disp2("     cannot factor",de),
+    return(false)
+  ),
+
+  /* Count the factors that are DEs. There may be constant terms 
+     Some test cases failed when this was combined with the loop below */
+  for u in de do (
+    if not(freeof(%p,u)) then (
+      factors:endcons(u,factors)
+    )
+  ),
+  
+  if length(factors)<2 then (
+    ode_disp2("     cannot factor",de),
+    return(false)
+  ),
+  ode_disp2("    and after factoring is ",de),
+
+  for u in de do (
+    /* Do not continue for higher order terms (including repeated factors) */
+    if hipow(expand(u),%p)>1 then (
+      ode_disp2("      unsuitable term ",u),
+      powflag:false
+    )
+  ),
+  if powflag=false then return(false),
+
+  /* For each factor, try and solve ODE */
+  for u in factors do (
+    ode_disp2("      Factor ",u),
+    if not(freeof(%p,u)) then (
+      s:ode2(subst('diff(y,x),%p,u)=0,y,x),
+      ode_disp2("      has solution",s),
+      if s#false then ans:endcons(s,ans)
+    )
+  ),
+
+  if ans#[] then (
+    method:'factor,
+    ans
+  )
+  else
+    false
+)$

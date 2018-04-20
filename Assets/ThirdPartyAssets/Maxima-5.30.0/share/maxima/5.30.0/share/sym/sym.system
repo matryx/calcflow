@@ -1,0 +1,33 @@
+;;; -*- Mode:Lisp; Package:CL-MAXIMA; Syntax:COMMON-LISP; Base:10 -*-;;;
+
+(mk:defsystem "sym"
+    :source-extension "lisp"
+    :binary-pathname (maxima::maxima-objdir "share" "sym")
+    :components
+    ;; Reflects the order in sym1.mac.
+    ((:module macros 
+	      :source-pathname ""
+	      :components ((:file macros.lisp)))
+     (:module un-tas-de-fichiers-quoi 
+	      :source-pathname ""
+	      :depends-on (macros)
+	      :components ((:file util.lisp)
+			   (:file lecteur.lisp)
+			   (:file ecrivain.lisp)
+			   (:file operations.lisp)
+			   (:file arite.lisp)
+			   (:file elem.lisp)
+			   (:file pui.lisp)
+			   (:file chbase.lisp)
+			   (:file schur.lisp)
+			   (:file direct.lisp)
+			   (:file kak.lisp)
+			   (:file partpol.lisp)
+			   (:file multmon.lisp)
+			   (:file permut.lisp)
+			   (:file treillis.lisp)
+			   (:file resolv1.lisp)
+			   ;; (:file resolcayley.lisp)
+			   (:file tri.lisp)))))
+
+;;; sym.system ends here

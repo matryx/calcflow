@@ -1,0 +1,441 @@
+/*******************************************************************************
+ *
+ *          Log function
+ *
+ * The examples show what a Maxima user can expect from the log function.
+ * Examples are taken from functions.wolfram.com.
+ *
+ ******************************************************************************/
+
+/* ---------- Initialization ------------------------------------------------ */
+
+kill(all);
+done;
+
+declare(z,complex, n,integer);
+done;
+
+assume(xp>0, notequal(v,0));
+[xp>0, notequal(v,0)];
+
+(load(functs),done);
+done;
+
+(domain:complex, logexpand:false, done);
+done;
+
+/* ----- Specific values ---------------------------------------------------- */
+
+log([exp(1), exp(2), exp(-2), exp(n), exp(n+2)]);
+[1, 2, -2, n, n+2];
+
+limit(log(x),x,0,plus);
+minf;
+
+log([1, 1.0, 1.0b0]);
+[0, 0.0, 0.0b0];
+
+log(-1),lognegint;
+%i*%pi;
+log(-1.0)-float(%i*%pi);
+0.0;
+log(-1.0b0)-bfloat(%i*%pi);
+0.0b0;
+
+log(%e);
+1;
+
+/* For the following simplifications Maxima needs help */
+
+log(-%e),lognegint, logexpand:all;
+1+%i*%pi;
+log(-%e),rectform;
+1+%i*%pi;
+
+log(%i),rectform;
+%i*%pi/2;
+
+log(-%i),rectform;
+-%i*%pi/2;
+
+/* ----- Values at infinities ----------------------------------------------- */
+
+/* functions.wolfram.com gives the result infinity for limit(log(minf)) and
+   limit(log(infinity)).
+ */
+
+limit(log([inf,minf,infinity]));
+[inf, infinity, infinity];
+
+/* ----- Mirror symmetry ---------------------------------------------------- */
+
+conjugate(log(z));
+'(conjugate(log(z)));
+
+conjugate(log(x+%i*y));
+'(conjugate(log(x+%i*y)));
+
+conjugate(log(xp+%i*y));
+log(xp-%i*y);
+
+conjugate(log(10+%i*y));
+log(10-%i*y);
+
+conjugate(log(-10+%i*y));
+'(conjugate(log(-10+%i*y)));
+
+/* ---- Series representations ---------------------------------------------- */
+
+taylor(log(x),x,x0,2);
+log(x0)+(x-x0)/x0-(x-x0)^2/(2*x0^2);
+
+taylor(log(f(x)),x,x0,2);
+log(f(x0))+('at('diff(f(x),x,1),x = x0))*(x-x0)/f(x0)
+          +(f(x0)*('at('diff(f(x),x,2),x = x0))
+           -('at('diff(f(x),x,1),x = x0))^2)
+           *(x-x0)^2
+           /(2*f(x0)^2);
+
+taylor(log(x),x,1,3) - (x-1-(x-1)^2/2+(x-1)^3/3), ratsimp;
+0;
+
+taylor(log(1+x),x,0,3);
+x-x^2/2+x^3/3;
+
+taylor(log(1+x),x,inf,3);
++log(x)+1/x-1/(2*x^2)+1/(3*x^3);
+
+taylor(log(x),x,0,2);
++log(x);
+
+/* ----- Differential equations --------------------------------------------- */
+
+depends([w,g,h],z);
+[w(z), g(z), h(z)];
+
+ode2(z*'diff(w,z)-1,w,z);
+w=log(z)+%c;
+
+ic1(%,z=1,w=0);
+w=log(z);
+
+ode2(z*'diff(w,z,2)+'diff(w,z),w,z);
+w = %k1*log(z) + %k2;
+
+determinant(wronskian([1,log(z)],z));
+1/z;
+
+ode2('diff(w,z,2)
+     +('diff(g(z),z)/g(z)-'diff(g(z),z,2)/'diff(g(z),z))*'diff(w,z),w,z);
+w = %k1*log(g(z)) + %k2;
+
+determinant(wronskian([log(g(z)),1],z));
+-'diff(g(z),z,1)/g(z)$
+
+/* Maxima can not solve this ode
+ode2( 'diff(w,z,2)
+     + ('diff(g(z),z)/g(z) - 2*'diff(h(z),z)/h(z) 
+                           - 'diff(g(z),z,2)/'diff(g(z),z)) * 'diff(w,z)
+     +(2*'diff(h(z),z)^2/h(z)^2 + 'diff(g(z),z,2)*'diff(h(z),z)/h(z)/'diff(g(z),z)
+                                - 'diff(g(z),z)*'diff(h(z),z)/g(z)/h(z)
+                                - 'diff(h(z),z,2)/h(z)) * w,
+     w,z);
+w=%k1*h(z)*log(g(z))+%k2*h(z)$
+*/
+
+determinant(wronskian([h(z)*log(g(z)), h(z)],z)),ratsimp;
+-h(z)^2*'diff(g(z),z,1)/g(z)$
+
+ode2 ('diff(w,z,2)*z^2+(1-2*s)*'diff(w,z,1)*z+s^2*w, w,z)$
+w = z^s*(%k2*log(z)+%k1)$
+
+determinant(wronskian([z^s*log(z),z^s],z)), ratsimp;
+-z^(2*s-1)$
+
+ode2(diff(w,z,2)-2*log(s)*diff(w,z,1)+log(s)^2*w, w,z), radcan;
+w = %k2*s^z*z+%k1*s^z$
+
+determinant(wronskian([s^z*z, s^z], z)), ratsimp;
+-s^(2*z)$
+
+/* ----- Transformations and argument simplifications ----------------------- */
+
+(reset(domain, logexpand), done);
+done$
+
+domain;
+real$
+logexpand;
+true$
+
+/* Simplifications with the standard settings of domain and logexpand */
+
+(expr1: (x-1)^3, expr2: (2*y-3), done);
+done$
+
+log(a^b);
+b*log(a)$
+
+log(x^a^b);
+a^b*log(x)$
+
+log((x^a)^b);
+a*b*log(x)$
+
+log(1/x);
+-log(x)$
+
+log(1/2);
+-log(2)$
+
+log(1/(x-1)^3);
+-3*log(x-1)$
+
+log(((x-1)^3)^(2*y-3));
+3*(2*y-3)*log(x-1)$
+
+/* Simplification of products with logexpand:all */
+
+log(-z), logexpand:all;
+log(-1)+log(z);
+
+log(2/3*a*b), logexpand:all;
+log(a)+log(b)+log(2/3)$
+
+log(2/3*a/b), logexpand:all;
+log(a)-log(b)+log(2/3)$
+
+log(2/3*(x-1)^3*(2*y-3)), logexpand:all;
+3*log(x-1)+log(2*y-3)+log(2/3)$
+
+log(2/3*(x-1)^3/(2*y-3)), logexpand:all;
+3*log(x-1)-log(2*y-3)+log(2/3)$
+
+log(2/3*((x-1)^3)^(a/b)*(2*y-3)^(b/a)), logexpand:all;
+3*a*log(x-1)/b + b*log(2*y-3)/a+log(2/3)$
+
+/* Simplificaton of products with logexpand:super
+   In addition log(n/d) -> log(n)-log(d), where n/d is a rational number
+ */
+
+log(2/3*a*b), logexpand:super;
+log(a)+log(b)+log(2)-log(3)$
+
+log(2/3*a/b), logexpand:super;
+log(a)-log(b)+log(2)-log(3)$
+
+log(2/3*(x-1)^3*(2*y-3)), logexpand:super;
+3*log(x-1)+log(2*y-3)+log(2)-log(3)$
+
+log(2/3*(x-1)^3/(2*y-3)), logexpand:super;
+3*log(x-1)-log(2*y-3)+log(2)-log(3)$
+
+log(2/3*((x-1)^3)^(a/b)*(2*y-3)^(b/a)), logexpand:super;
+3*a*log(x-1)/b + b*log(2*y-3)/a+log(2)-log(3)$
+
+/* Simplifications with domain:complex */
+
+/* The following examples show that the expressions do not simplify
+   with domain:complex or logexand:false
+ */
+
+subst(a^b=1,log(a^b)),domain:complex;
+0$
+subst(a^b=1,log(a^b)),logexpand:false;
+0$
+
+subst(xp^z=1,log(xp^z)),domain:complex;
+0;
+subst(xp^z=1,log(xp^z)),logexpand:false;
+0;
+
+subst(exp(x+%i*y)=1,log(exp(x+%i*y))),domain:complex;
+0$
+subst(exp(x+%i*y)=1,log(exp(x+%i*y))),logexpand:false;
+0$
+
+/* These examples simplifies with domain:complex and logexpand:false */
+
+log(xp^a), domain:complex, logexpand:false;
+a*log(xp);
+
+log(exp(x)), domain:complex, logexpand:false;
+x;
+log(exp(%i*x)), domain:complex, logexpand:false;
+%i*x;
+
+log(1/2), domain:complex, logexpand:false;
+-log(2);
+
+log(sqrt(z)), domain:complex, logexpand:false;
+log(z)/2;
+
+log(z^(1/3)), domain:complex, logexpand:false;
+log(z)/3;
+
+log(z^(1/(n^2+1))), domain:complex, logexpand:false;
+log(z)/(n^2+1);
+
+/* logexpand:all and logexpand:true overwrites the setting domain:complex */
+
+log(2/3*((x-1)^3)^(a/b)*(2*y-3)^(b/a)), domain:complex, logexpand:all;
+3*a*log(x-1)/b + b*log(2*y-3)/a+log(2/3)$
+
+log(2/3*((x-1)^3)^(a/b)*(2*y-3)^(b/a)), domain:complex, logexpand:super;
+3*a*log(x-1)/b + b*log(2*y-3)/a+log(2)-log(3)$
+
+/* Bug ID: 3377347 - log(1/(1+%i)) gives error
+ * Check this case.
+ */
+log(1/(1+%i)),logexpand:false;
+-log(1+%i);
+
+/* ----- Complex characteristics -------------------------------------------- */
+
+realpart(log(x+%i*y));
+log(y^2+x^2)/2;
+
+realpart(log(z));
+log(abs(z));
+
+realpart(log(x));
+log(abs(x));
+
+imagpart(log(x+%i*y));
+atan2(y,x);
+
+imagpart(log(z));
+carg(z);
+
+imagpart(log(x));
+atan2(0,x);
+
+cabs(log(x+%i*y));
+sqrt(log(y^2+x^2)^2/4+atan2(y,x)^2);
+
+cabs(log(z));
+sqrt(log(abs(z))^2+carg(z)^2);
+
+carg(log(x+%i*y));
+atan2(atan2(y,x),log(y^2+x^2)/2);
+
+carg(log(z));
+atan2(carg(z),log(abs(z)));
+
+/* ----- Differentiation ---------------------------------------------------- */
+
+diff(log(z),z);
+1/z;
+
+diff(log(z),z,2);
+-1/z^2;
+
+/* ----- Indefinite integration --------------------------------------------- */
+
+integrate(log(z),z);
+z*log(z)-z;
+
+integrate(z^(v-1)*log(z),z);
+z^v*log(z)/v-z^v/v^2;
+
+integrate(1/z*log((b+a*z)/(d+c*z)),z);
+log(z)*log((a*z+b)/(c*z+d))-log(c*z+d)*log(1-(c*z+d)/d)
+                           +log(a*z+b)*log(1-(a*z+b)/b)-li[2]((c*z+d)/d)
+                           -log(z)*(log(a*z+b)-log(c*z+d))+li[2]((a*z+b)/b);
+
+assume(c>0,d>0);
+[c>0,d>0];
+integrate(log(z)/sqrt(c*z^2+d),z);
+'integrate(log(z)/sqrt(c*z^2+d),z);
+forget(c>0,d>0);
+[c>0,d>0];
+
+integrate(log(b+a*z)/(d+c*z),z);
+(log(a*z+b)*log((a*c*z+b*c)/(a*d-b*c)+1)+li[2]((a*c*z+b*c)/(a*d-b*c)/-1))/c;
+
+integrate(log(a*z^2+b*z+e)/(d+c*z),z);
+'integrate(log(a*z^2+b*z+e)/(d+c*z),z);
+
+integrate(log(z)^2/(1-z),z);
+2*(-log(1-z)*log(z)^2/2-li[2](z)*log(z)+li[3](z));
+
+integrate(log(1+z)^2/z,z);
+-2*(-log(-z)*log(z+1)^2/2-li[2](z+1)*log(z+1)+li[3](z+1));
+
+integrate(log(a+b*z)^2/(e+f*z),z);
+-2*(-log(b*z+a)^2*log(1-f*(b*z+a)/(a*f-b*e))/2
+   +li[3](f*(b*z+a)/(a*f-b*e))-log(b*z+a)*li[2](f*(b*z+a)/(a*f-b*e)))/f;
+
+integrate(1/z*log((a+b*z)/(c+d*z))^2,z);
+'integrate(1/z*log((a+b*z)/(c+d*z))^2,z);
+
+integrate(log(z)*log(1-z)/z,z);
+li[3](z)-li[2](z)*log(z);
+
+integrate(log(a+b*z)*log(c+d*z)/(e+f*z),z);
+'integrate(log(a+b*z)*log(c+d*z)/(e+f*z),z);
+
+integrate(log(z)*log(z-1)/z,z);
+log(z-1)*log(z)^2/2-log(1-z)*log(z)^2/2-li[2](z)*log(z)+li[3](z);
+
+integrate(log(z)^3/(1-z),z);
+-6*(log(1-z)*log(z)^3/6+li[2](z)*log(z)^2/2-li[3](z)*log(z)+li[4](z));
+
+integrate(log(z)^2*log(1-z)/z,z);
+log(1-z)*log(z)^3/3-2*(log(1-z)*log(z)^3/6+li[2](z)*log(z)^2/2-li[3](z)*log(z)
+                                          +li[4](z))$
+
+integrate(log(z)^2*log(1-z)/(1-z),z);
+'integrate(log(z)^2*log(1-z)/(1-z),z);
+/*  'integrate(log(1-z)^2*log(z)/z,z)-log(1-z)^2*log(z)^2/2;  */
+
+/* Hier fehlen noch Integrale */
+
+/* ----- Definite integration ----------------------------------------------- */
+
+integrate(log(t),t,0,1);
+-1;
+
+integrate(log(t^2-2*cos(z)*t+1)/t,t,0,1);
+'integrate(log(t^2-2*cos(z)*t+1)/t,t,0,1);
+
+/* Lisp error in Maxima 5.24
+integrate(log(t)*log(t+1),t,0,1),expand,lognegint;
+-2*log(2)-%pi^2/12+2;
+*/
+
+integrate(log(t+1)*log(1+1/t^2)/t,t,0,inf);
+'integrate(log(t+1)*log(1+1/t^2)/t,t,0,inf);
+
+integrate(log(t+1)*log(1+1/t^2),t,0,inf);
+'integrate(log(t+1)*log(1+1/t^2),t,0,inf);
+
+integrate(log(a*t+1)*log(z/t^2+1)/t,t,0,inf);
+'integrate(log(a*t+1)*log(z/t^2+1)/t,t,0,inf);
+
+integrate(log(t)*log(1-t)^2/t,t,0,1);
+'integrate(log(t)*log(1-t)^2/t,t,0,1);
+
+integrate(log(t*(1-t))^4/(1-t),t,0,1/2);
+'integrate(log(t*(1-t))^4/(1-t),t,0,1/2);
+
+integrate(log(t*(1-t))^5/(1-t),t,0,1/2);
+'integrate(log(t*(1-t))^5/(1-t),t,0,1/2);
+
+integrate(exp(-t)*log(t),t,0,1);
+'integrate(exp(-t)*log(t),t,0,1);
+
+/* Hier fehlen noch Integrale */
+
+/* ----- Integral transforms ------------------------------------------------ */
+
+laplace(log(t),t,s);
+(-log(s)-%gamma)/s$
+
+/* ----- Representations through more general functions --------------------- */
+
+(z-1)*hgfred([1,1],[2],1-z);
+log(z)$
+
+-li[1](1-z);
+log(z)$

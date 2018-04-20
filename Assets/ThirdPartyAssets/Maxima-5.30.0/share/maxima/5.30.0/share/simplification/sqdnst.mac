@@ -1,0 +1,12 @@
+/* -*- Mode: MACSYMA -*- */
+
+sqrtdenest(a):=
+  subst("^" = lambda([a,b],
+     block([discr,max,min],
+       if evenp(denom(b)) and not atom(a) and inpart(a,0) = "+"
+			  and (max:max(first(a),rest(a)),
+			       min:a-max,
+			       numberp(discr:sqrt(1-(min/max)^2)))
+	  then (sqrt(max*(1+discr)/2)+signum(min)*sqrt(max*(1-discr)/2))^(2*b)
+	  else a^b)),
+      a)$

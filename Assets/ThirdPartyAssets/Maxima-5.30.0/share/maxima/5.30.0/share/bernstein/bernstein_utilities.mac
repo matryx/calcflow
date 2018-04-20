@@ -1,0 +1,27 @@
+/*
+;;  Author Barton Willis
+;;  University of Nebraska at Kearney
+;;  Copyright (C) 2011 Barton Willis
+
+;;  This program is free software; you can redistribute it and/or modify 
+;;  it under the terms of the GNU General Public License as published by	 
+;;  the Free Software Foundation; either version 2 of the License, or		 
+;;  (at your option) any later version.					 
+ 		       								 
+;;  This program is distributed in the hope that it will be useful,		 
+;;  but WITHOUT ANY WARRANTY; without even the implied warranty of		 
+;;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 
+;;  GNU General Public License for more details.
+*/
+
+bernstein_expand(p,v) := block([d, dd, bbinomial,xcoeff, dm,q],
+  bbinomial : lambda([a,b], xreduce("*", map(lambda([s,w], binomial(s,w)), a, b))),   
+  xcoeff : lambda([p,x,d], (p : ratexpand(p), map(lambda([z,n], p : ratcoeff(p,z,n)), x, d), p)),
+  p : ratexpand(p),
+  dm : map(lambda([s], hipow(p, s)),v),  
+  if not polynomialp(p,v, lambda([s], lfreeof(v,s))) then error("Input to bernstein_factor must be a polynomial"),  
+  d : map(lambda([s], map(lambda([w], hipow(s,w)), v)), if ?mplusp(p) then args(p) else [p]),  
+  dd : map(lambda([s], setify(makelist(k,k,0,s))),dm),  
+  dd : listify(apply('cartesian_product,dd)),    
+  q :  map(lambda([I], multibernstein_poly(I,dm,v) * lsum(bbinomial(I,J) * xcoeff(p, v, J)/ bbinomial(dm,J),J, d)),dd),
+  xreduce("+",q))$

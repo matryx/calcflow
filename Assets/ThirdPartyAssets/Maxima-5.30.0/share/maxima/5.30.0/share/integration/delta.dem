@@ -1,0 +1,11 @@
+
+load('delta)$
+g:(x-1)*(x-2)*(x-3)*(x-4)*(x^2+1);
+delint(f(x)*delta(g),x);
+factor(102);
+delint(f(x)*delta(g),x,0,sqrt(3));
+delint(f(y)*delta(y-x),y,0,inf);
+delint(f(y)*delint(h(x)*delta(y-2*x)*delta(x-3),x,0,inf),y,0,inf);
+delint(f(y)*delint(h(x)*delta(x-2*y)*delta(x),x),y);
+delint(f(y)*delta(y-a)+delta(y-b)*o(2*y),y);
+delint(cos(k*x)-delta(x)*j(c*x-b),x,-%pi,%pi);

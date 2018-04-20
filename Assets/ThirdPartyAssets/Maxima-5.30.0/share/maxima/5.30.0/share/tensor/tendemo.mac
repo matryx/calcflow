@@ -1,0 +1,149 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * The main MAXIMA tensor demo
+ *
+ */
+
+done,
+block(
+[sel:false],
+print("This is the main demonstration program for MAXIMA tensors."),
+print("The following demos are available:"),
+while sel#x and sel#X do
+(
+/* This block of code restores trigonometric
+   simplification properties that are removed
+   when a kill(all) is executed. */
+  kill(all),
+  put('sin,'cos,'complement_function),
+  put('cos,'sin,'complement_function),
+  put('sinh,'cosh,'complement_function),
+  put('cosh,'sinh,'complement_function),
+  put('cos,1,'unitcof),
+  put('sin,1,'unitcof),
+  put('cosh,1,'unitcof),
+  put('sinh,-1,'unitcof),
+  put('cos,-1,'complement_cof),
+  put('sin,-1,'complement_cof),
+  put('cosh,1,'complement_cof),
+  put('sinh,1,'complement_cof),
+  put('sin,'trigonometric,'type),
+  put('cos,'trigonometric,'type),
+  put('sinh,'hyper_trigonometric,'type),
+  put('cosh,'hyper_trigonometric,'type),
+print(""),
+print("INDICIAL TENSOR MANIPULATION        COMPONENT TENSOR MANIPULATION"),
+print("1. Basics                           11. Initialization"),
+print("2. Index contraction                12. Differential geometry"),
+print("3. Simplification and symmetries    13. Gravitational theory"),
+print("4. Special tensors                  14. Frame fields"),
+print("5. Coordinate differentiation       15. Torsion and nonmetricity"),
+print("6. Covariant derivatives, curvature 16. Algebraic classification"),
+print("7. Exterior algebra                 17. Differential equations"),
+print("8. Generating CTENSOR programs      18. Using Taylor series"),
+print("9. Frames, torsion, nonmetricity"),
+print(""),
+print("A. Algebraic tensor manipulation"),
+print("E. Complete examples"),
+print("X. Exit this demo"),
+print(""),
+sel:read("Select an option by its number followed by a semicolon (;)"),
+    if sel=1 then demo(itensor1)
+   else if sel=2 then demo(itensor2)
+   else if sel=3 then demo(itensor3)
+   else if sel=4 then demo(itensor4)
+   else if sel=5 then demo(itensor5)
+   else if sel=6 then demo(itensor6)
+   else if sel=7 then demo(ex_calc)
+   else if sel=8 then demo(itensor8)
+   else if sel=9 then demo(itensor9)
+   else if sel=11 then demo(ctensor1)
+   else if sel=12 then demo(ctensor2)
+   else if sel=13 then demo(ctensor3)
+   else if sel=14 then demo(ctensor4)
+   else if sel=15 then demo(ctensor5)
+   else if sel=16 then demo(ctensor6)
+   else if sel=17 then demo(ctensor7)
+   else if sel=18 then demo(ctensor8)
+   else if sel=a then demo(atensor)
+   else if sel=E or sel=e then
+(
+print("The following specific examples demonstrate practical applications:"),
+print(""),
+print("INDICIAL TENSOR MANIPULATION        COMPONENT TENSOR MANIPULATION"),
+print("1. Proving the Bianchi-identities   11. Deriving Schwarzschild's metric"),
+print("2. Proving Cartan's identities      12. Verifying Reissner-Nordstrom"),
+print("3. The Kaluza-Klein metric          13. Petrov classification of metrics"),
+print("4. The double divergence of R       14. Using a tetrad base"),
+print("5. Helicity in hydrodynamics        15. The Friedmann equations"),
+print("6. Magnetic field in plasma         16. Papapetrou's nonsymmetric metric"),
+print("7. Spinor algebra                   17. The Kruskal extension"),
+print("8. The EM field tensor              18. Hydrostatic equilibrium"),
+print("9. The Hodge star operator"),
+print("A. The Riemann and Weyl tensors"),
+print("B. The Rainich conditions"),
+print("C. The Einstein-Hilbert action"),
+print("D. Brans-Dicke cosmology"),
+print(""),
+print("X. Return to main menu"),
+print(""),
+sel:read("Select an option by its number followed by a semicolon (;)"),
+    if sel=1 then demo(bianchi)
+   else if sel=2 then demo(car_iden)
+   else if sel=3 then demo(kaluza)
+   else if sel=4 then demo(ademo)
+   else if sel=5 then demo(helicity)
+   else if sel=6 then demo(plasma)
+   else if sel=7 then demo(spinor)
+   else if sel=8 then demo(maxwell)
+   else if sel=9 then demo(hodge)
+   else if sel=a or sel=A then demo(weyl)
+   else if sel=b or sel=B then demo(rainich)
+   else if sel=c or sel=C then demo(einhil)
+   else if sel=d or sel=D then demo(bradic)
+   else if sel=11 then demo(schwarz)
+   else if sel=12 then demo(reissner)
+   else if sel=13 then
+   (
+     print("Choose from the following metrics"),
+     print(""),
+     print("1. The Schwarschild metric (type D)"),
+     print("2. The Kerr metric (type D)"),
+     print("3. The anti-deSitter metric (type 0)"),
+     print("4. Godel's universe (type D)"),
+     print("5. Taub-Nut plane vacuum (type D)"),
+     print("6. Allnutt's perfect fluid metric (type III)"),
+     print(""),
+     print("X. Return to main menu"),
+     print(""),
+     sel:read("Select an option by its number followed by a semicolon (;)"),
+      if sel=1 then demo("ctensor6")
+     else if sel=2 then demo("petrov")
+     else if sel=3 then demo("adsitter")
+     else if sel=4 then demo("godel")
+     else if sel=5 then demo("taubnut")
+     else if sel=6 then demo("allnutt")
+     else if sel#X and sel#x then print("*** Invalid entry, please try again")
+     else sel:0
+   )
+   else if sel=14 then demo(tetrad)
+   else if sel=15 then demo(friedmann)
+   else if sel=16 then demo(papapetrou)
+   else if sel=17 then demo(kruskal)
+   else if sel=18 then demo(hydro)
+   else if sel#X and sel#x then print("*** Invalid entry, please try again")
+   else sel:0
+)
+   else if sel#X and sel#x then print("*** Invalid entry, please try again")
+))$
+

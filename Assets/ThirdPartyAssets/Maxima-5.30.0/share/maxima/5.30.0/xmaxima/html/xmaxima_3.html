@@ -1,0 +1,396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html401/loose.dtd">
+<html>
+<!-- Created on April, 2 2013 by texi2html 1.76 -->
+<!--
+Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
+            Karl Berry  <karl@freefriends.org>
+            Olaf Bachmann <obachman@mathematik.uni-kl.de>
+            and many others.
+Maintained by: Many creative people <dev@texi2html.cvshome.org>
+Send bugs and suggestions to <users@texi2html.cvshome.org>
+
+-->
+<head>
+<title>Xmaxima Manual: 3. Entering commands</title>
+
+<meta name="description" content="Xmaxima Manual: 3. Entering commands">
+<meta name="keywords" content="Xmaxima Manual: 3. Entering commands">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="texi2html 1.76">
+<meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+pre.display {font-family: serif}
+pre.format {font-family: serif}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: serif; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: serif; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.sansserif {font-family:sans-serif; font-weight:normal;}
+ul.toc {list-style: none}
+body
+{
+    color: black;
+    background: white; 
+    margin-left: 8%;
+    margin-right: 13%;
+}
+
+h1
+{
+    margin-left: +8%;
+    font-size: 150%;
+    font-family: sans-serif
+}
+
+h2
+{
+    font-size: 125%;
+    font-family: sans-serif
+}
+
+h3
+{
+    font-size: 100%;
+    font-family: sans-serif
+}
+
+h2,h3,h4,h5,h6 { margin-left: +4%; }
+
+div.textbox
+{
+    border: solid;
+    border-width: thin;
+    /* width: 100%; */
+    padding-top: 1em;
+    padding-bottom: 1em;
+    padding-left: 2em;
+    padding-right: 2em
+}
+
+div.titlebox
+{
+    border: none;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    padding-left: 2em;
+    padding-right: 2em;
+    background: rgb(200,255,255);
+    font-family: sans-serif
+}
+
+div.synopsisbox
+{
+    border: none;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    padding-left: 2em;
+    padding-right: 2em;
+     background: rgb(255,220,255);
+    /*background: rgb(200,255,255); */
+    /* font-family: fixed */
+}
+
+pre.example
+{
+    border: 1px solid gray;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    padding-left: 1em;
+    padding-right: 1em;
+    /* background: rgb(247,242,180); */ /* kind of sandy */
+    /* background: rgb(200,255,255); */ /* sky blue */
+    background-color: #F1F5F9; /* light blue-gray */
+    /* font-family: "Lucida Console", monospace */
+}
+
+div.spacerbox
+{
+    border: none;
+    padding-top: 2em;
+    padding-bottom: 2em
+}
+
+div.image
+{
+    margin: 0;
+    padding: 1em;
+    text-align: center;
+}
+
+div.categorybox
+{
+    border: 1px solid gray;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 1em;
+    padding-right: 1em;
+    background: rgb(247,242,220);
+}
+
+
+-->
+</style>
+
+<link rel="icon" href="http://maxima.sourceforge.net/favicon.ico"/>
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+
+<a name="Entering-commands"></a>
+<a name="SEC3"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="xmaxima_2.html#SEC2" title="Previous section in reading order"> &lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#SEC4" title="Next section in reading order"> &gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima_2.html#SEC2" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Up section"> Up </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_8.html#SEC11" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1 class="chapter"> 3. Entering commands </h1>
+
+<p>Most commonly, you will enter Maxima commands in the last input line
+that appears on the text Window. That text will be rendered in green.
+If you press enter, without having written a command-termination
+character (either <samp>`;'</samp> or <samp>`$'</samp>) at the end, the text will remain
+green and you can continue to write a multi-line command.  When you type
+a command-end character and press the enter key, the text will become
+blue and a response from Maxima should appear in black. You can also use
+the key combination <kbd>Ctrl-j</kbd> to move to a new line without sending
+the input for Maxima evaluation yet. If you want to clear all the
+current input (in green), even if it spans several lines, use the key
+combination <kbd>Ctrl-u</kbd>.
+<a name="IDX5"></a>
+<a name="IDX6"></a>
+<a name="IDX7"></a>
+<a name="IDX8"></a>
+</p>
+<p>If you move the cursor over the <code>(%i1)</code> input label, or any other
+label or output text (in black), you will not be able to type any text
+there; that feature will prevent you from trying to enter a command in
+the wrong place, by mistake. If you really want to insert some
+additional text to modify Maxima's output, and which will not be
+interpreted by Maxima, you can do that using cut and paste (we will
+cover that later).
+</p>
+<p>You can also write a new input command for Maxima on top of a previous
+input line (in blue), for instance, if you do not want to write down
+again everything but just want to make a slight change. Once you press
+the enter key, the text you modified will appear at the last input line,
+as if you had written it down there; the input line you modified will
+continue the same in Xmaxima's and Maxima's memory, in spite of having
+changed in the screen.
+</p>
+<p>For example, suppose you entered <samp>`a: 45;'</samp> in input line
+<code>(%i1)</code>, and something else in <code>(%i2)</code>. You then move up over
+the <code>(%i1) a: 45;</code> and change the 5 for an 8. Once you press enter,
+you will have in the screen <code>(%i1) a: 48;</code> and <code>(%i3) a: 48;</code>.
+But if you write, in the current input line, <code>(%i1)</code> the original
+input <samp>`a: 45;'</samp> will reappear. If you navigate through the input
+lines history (see next section), you will also see that the first input
+keeps its original value.
+</p>
+<hr size="6">
+<a name="SEC4"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC3" title="Previous section in reading order"> &lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#SEC5" title="Next section in reading order"> &gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#SEC3" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#SEC3" title="Up section"> Up </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_8.html#SEC11" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h2 class="section"> 3.1 Input lines history </h2>
+<p>When the cursor is at the end of the last <code>(%i)</code> label, you can use
+the key combinations <kbd>Alt-p</kbd> and <kbd>Alt-n</kbd> to recover the previous
+or next command that you entered. If you have just pressed <kbd>Alt-n</kbd>,
+the <samp>`next'</samp> command means the first one you entered; but if you
+press it again it will mean the second one and so on.
+<a name="IDX9"></a>
+<a name="IDX10"></a>
+</p>
+<p>In the same way, if you press <kbd>Alt-p</kbd> repeatedly, until you reached
+the first input, it will then continue to the last command you
+entered. Once you get on the screen the command that you were looking
+for, it will appear in green, as if you would have just type it, and you
+can modify it before you press enter.
+</p>
+<p>Those two key combinations can also be used to search for a previous
+input line with a particular string in it. You first write down the
+string to search, and then press <kbd>Alt-p</kbd>, to search backwards, or
+<kbd>Alt-n</kbd> to search forward. Pressing those key combinations
+repeatedly will allow you to cycle through all the lines that contain
+the string. If you want to try a different string in the middle of the
+search, you can delete the current input, type the new string, and start
+the search again.
+</p>
+<hr size="6">
+<a name="SEC5"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC4" title="Previous section in reading order"> &lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#SEC6" title="Next section in reading order"> &gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#SEC3" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#SEC3" title="Up section"> Up </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_8.html#SEC11" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h2 class="section"> 3.2 Cutting and pasting </h2>
+<p>You can cut or copy a piece of text that you select, from anywhere on
+text window; not just from the input lines but also from the output text
+in black.
+</p>
+<p>To select the text, you can drag the cursor with the mouse while you
+keep its left button depressed, or you can hold the <kbd>shift</kbd> key with
+one finger, while you move the cursor with the mouse or with the arrow
+keys.
+</p>
+<p>Once you have selected the text, you can either cut it, with
+<kbd>Ctrl-x</kbd>, or copy it to an internal buffer, with
+<kbd>Ctrl-c</kbd>. Instead of those key combinations, you can also use two
+options that appear inside the <code>Edit</code> menu.
+<a name="IDX11"></a>
+<a name="IDX12"></a>
+<a name="IDX13"></a>
+<a name="IDX14"></a>
+</p>
+<p>The text that has been cut or copied more recently can be pasted
+anywhere, even in the output fields, using <kbd>Ctrl-v</kbd> or an option in
+the <code>Edit</code> menu.
+<a name="IDX15"></a>
+<a name="IDX16"></a>
+<a name="IDX17"></a>
+</p>
+<p>There is a command similar to <samp>`cut'</samp>, called <samp>`kill'</samp>
+(<kbd>Ctrl-k</kbd>, with two major differences: it only works in input fields
+(blue or green) and instead of cutting a text that was selected, it will
+cut all the text from the cursor until the end of the input line where
+the cursor is.  The command <samp>`Clear input'</samp> (<kbd>Ctrl-u</kbd>) is similar
+to <samp>`kill'</samp>, but it will cut the whole input line.
+<a name="IDX18"></a>
+<a name="IDX19"></a>
+<a name="IDX20"></a>
+<a name="IDX21"></a>
+</p>
+<p>To paste the last text that you have cut with either <samp>`kill'</samp> or
+<samp>`clear input'</samp>, you should use the <samp>`yank'</samp> command,
+<kbd>Ctrl-y</kbd>. If you prefer, you can use entries in the <code>Edit</code>
+menu to kill, clear input and yank.
+<a name="IDX22"></a>
+<a name="IDX23"></a>
+</p>
+<hr size="6">
+<a name="SEC6"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC5" title="Previous section in reading order"> &lt; </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Next section in reading order"> &gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#SEC3" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#SEC3" title="Up section"> Up </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_8.html#SEC11" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h2 class="section"> 3.3 Other key combinations </h2>
+<p>There are other useful key combinations, which are not particular to
+Xmaxima, but are defined in most Tcl/Tk programs:
+</p>
+<dl compact="compact">
+<dt> <kbd>Ctrl-f</kbd></dt>
+<dd><p>The same as the right arrow key.
+<a name="IDX24"></a>
+</p></dd>
+<dt> <kbd>Ctrl-b</kbd></dt>
+<dd><p>The same as the left arrow key.
+<a name="IDX25"></a>
+</p></dd>
+<dt> <kbd>Ctrl-p</kbd></dt>
+<dd><p>The same as the up arrow key.
+<a name="IDX26"></a>
+</p></dd>
+<dt> <kbd>Ctrl-n</kbd></dt>
+<dd><p>The same as the down arrow key.
+<a name="IDX27"></a>
+</p></dd>
+<dt> <kbd>Ctrl-a</kbd></dt>
+<dd><p>Moves to the first character in a line (either input or output)
+<a name="IDX28"></a>
+</p></dd>
+<dt> <kbd>Ctrl-e</kbd></dt>
+<dd><p>Moves to the last character in a line (either input or output)
+<a name="IDX29"></a>
+</p></dd>
+<dt> <kbd>PageUp</kbd></dt>
+<dd><p>Moves one page up
+<a name="IDX30"></a>
+</p></dd>
+<dt> <kbd>PageDown</kbd></dt>
+<dd><p>Moves one page down
+<a name="IDX31"></a>
+</p></dd>
+<dt> <kbd>Home</kbd></dt>
+<dd><p>Moves the first character in the text window.
+<a name="IDX32"></a>
+</p></dd>
+<dt> <kbd>End</kbd></dt>
+<dd><p>Moves to the last character in the text window.
+<a name="IDX33"></a>
+</p></dd>
+</dl>
+
+<hr size="6">
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC3" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_8.html#SEC11" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<p>
+ <font size="-1">
+  This document was generated by <em>Robert</em> on <em>April, 2 2013</em> using <a href="http://texi2html.cvshome.org/"><em>texi2html 1.76</em></a>.
+ </font>
+ <br>
+
+</p>
+</body>
+</html>

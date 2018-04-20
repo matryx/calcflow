@@ -1,0 +1,697 @@
+/* Zeilberger's algorithm        */
+
+/* RISC Institute, Linz, Austria */ 
+/* by Fabrizio Caruso            */
+ 
+
+
+/* Routine that generates a parametrized function */
+parShiftAux(f,n,parName,degree,count) :=
+  if count = degree then 
+     parName[count] * subst(n+count,n,f)
+  else
+     parName[count]*subst(n+count,n,f) + 
+     parShiftAux(f,n,parName,degree,count+1);
+
+
+/* Short name macro for parShift */
+parShift(f,n,parName,degree) ::=
+  buildq([f,n,parName,degree],
+         parShiftAux(f,n,parName,degree,0));
+
+
+
+/* It normalizes a solution by clearing the denominators */
+normalizeGZ(Gsol,Zsol) :=
+  block([i,lcm,Gres,Zres,lcm],
+  lcm : 1,
+  for i : 1 thru length(Gsol) do
+    (
+    lcm : lcm(lcm,denom(Gsol[i]))
+    ),
+  for i : 1 thru length(Zsol) do
+    (
+    lcm : lcm(lcm,denom(Zsol[i]))
+
+    ),
+
+  Gres : [],
+  Zres : [],
+  
+  for i : 1 thru length(Gsol) do
+     Gres : endcons(factor(Gsol[i] * lcm), Gres),
+  for i : 1 thru length(Zsol) do
+     Zres : endcons(factor(Zsol[i] * lcm), Zres),
+
+  return([Gres,Zres])
+  );
+
+
+
+/* Constant Factor correction for the Zeilberger solutions */
+constFactCorr(sol,constFact,var) :=
+  block([num,den,res,i,j,numCorr,denCorr],
+     num : first(constFact),
+     den : second(constFact),
+     res : [],
+
+
+/* Remark: length(sol)-1 = ZAnsatzDegree */
+
+     for i : 1 thru length(sol) do
+        (
+        numCorr : 1,
+        for j : 1 thru i-1 do
+           numCorr : numCorr * subst(var+j-1,var,num),
+
+        denCorr : 1,
+        for j : 1 thru length(sol)-i do
+           denCorr : denCorr * subst(var+length(sol)-1-j,var,den),
+
+        res : endcons(factor(sol[i]/numCorr/denCorr),res)
+
+        ),
+
+     return(res)
+  );
+
+
+
+/* Separates the Gosper and Zeilberger Ansatz coefficients */
+separateGZVerboseOpt(Gres,GLength,ZLength,mode) := 
+  block(
+  [GList,ZList],
+
+  GList:[],
+  ZList:[],
+  if mode>= verbose then
+    (
+    print("Gres : " , Gres),
+    print("GLength : " , GLength),
+    print("ZLength : " , ZLength)
+    ),
+  for i : 1 thru GLength do
+    (
+    if mode>=verbose then
+       print("Inserting ", Gres[i], " in the Gosper-list"),
+    GList : endcons(rhs(Gres[i]),GList)
+    ),
+
+  for i : GLength+1 thru GLength+ZLength do
+    (
+    if mode>=verbose then
+       print("Inserting ", Gres[i], " in the Zeilberger-list"),
+    ZList : endcons(rhs(Gres[i]),ZList)
+    ),
+   
+
+  return([GList,ZList])
+  );     
+
+
+
+
+/* It creates the specific polynomial p */
+makeSpec(p) :=
+   block(
+   Spec : p,
+   for i : 0 thru length(ZAnsatzCoeff)-1 do
+     Spec : subst(factor(expand(ZAnsatzCoeff[i+1])),'_z[i],Spec),
+   return(Spec)
+   );
+
+printParGosperSummary(p,sysSol,mode) :=
+  block([],
+   print("--------------------------"),
+   print("Zeilberger-related summary"),
+   print("(1) reconstructed p : ", p),
+   print("(2) dimension of the solution : ", length(sysSol)),
+   if mode>= verbose then
+      print("(3) solution : ", sysSol)
+   );
+
+
+/* Zeilberger's algorithm ("Parametrized" Gosper's algorithm) */
+parGosperVerboseOpt(f,k,n,ZAnsatzDegree,mode) :=
+   block(
+   [
+   parF,           /* Parametrized function */
+   parFRat,        /* Parametrized quotient function */
+   nF,nFTrivial, numNF,denNF,constDenNF,
+   GosperForm,     /* Gosper form */
+   p,q,r,          /* Gosper form's polynomials */
+   GAnsatzDegree,  /* Gosper Ansatz' degree */
+   Gpoly,          /* Gosper polynomial */
+   sysSol,         /* Solution to the Gosper system */
+   normSysSol,     /* Normalized solution to the Gosper system */
+   SpSysSol,       /* Specific solution to the Gosper system */
+   GAnsatzCoeff,   /* Gosper Ansatz coefficients */
+   ZAnsatzCoeff,   /* Zeilberger Ansatz coeffiecients */
+   GZAnsatzCoeff,  /* Couple (GAnsatzCoeff,ZAnsatzCoeff) */
+   GosperSol,      /* Solution to the Gosper equation */
+   tlscope,        /* Solution to the telescoping problem */
+   _g,             /* Gosper Ansatz coefficients */
+   _z,              /* Zeilberger Ansatz coefficients */
+   allSols,
+   i,
+   GosperSol,
+   test_Gpoly,
+   constantPart
+   ],   
+
+
+
+if not(dependent(f,n)) and ZAnsatzDegree>0 and warnings then
+  (
+  print("---------------------------------------------"),
+  print("WARNING!"),
+  print("The input does not depend on ",n,"."),
+  print("Maybe you should first try Gosper's algorithm."),
+  print("---------------------------------------------")
+  ),
+
+
+if ZAnsatzDegree = 0 then
+  (
+  if mode>=verbose then
+    print("Invoking Gosper's algorithm"),
+  GosperSol : GosperVerboseOpt(f,k,mode),
+  if GosperSol=NO_HYP_SOL then
+    return([])
+  else
+    if GosperSol = NON_HYPERGEOMETRIC then
+      return([NON_PROPER_HYPERGEOMETRIC])
+    else
+      return([[GosperSol,[1]]])
+  ),
+
+nFTrivial : niceForm(f,n,'_z,ZAnsatzDegree,k),
+
+if nFTrivial = [] then
+  (
+  if warnings then print(f, " is not hypergeometric in ", n),
+  return([NON_PROPER_HYPERGEOMETRIC])
+  ),
+
+nF : nFTrivial[1],
+
+
+if mode >= verbose then
+  (
+  print("NICE FORM : ", nF),
+  print("constant parts :  [", nFTrivial[2], ",", nFTrivial[3],"]")
+  ),
+
+numNF : num(nF),
+denNF : factor(denom(nF)),
+
+if mode >= very_verbose then
+  print("denNF : ", factor(denNF)),
+
+if mode >= very_verbose then
+   print("Considering now : ", factor(f/denNF)),
+
+parFRat : shiftQuoOnlyHyp(factor(f/denNF),k), /* We temporarily forget about the factor numNF */
+
+if parFRat = [] then
+ (
+ if warnings then print(f, " is not hypergeometric in ", k),
+ return([NON_PROPER_HYPERGEOMETRIC])
+ ),
+
+
+if mode >= verbose then
+   print("--- Shift quotient computed! : " , parFRat),
+
+
+/* Computation of the Gosper form */
+
+   GosperForm: makeGosperFormVerboseOpt(parFRat,k,mode-1),
+
+
+gfP: takeP(GosperForm),
+
+if mode >= very_verbose then
+  print("gfP :", factor(gfP)), 
+
+
+p: gfP * numNF, /* Now we remember that we "forgot" the factor numNF and compute the real p */
+
+q: takeQ(GosperForm),
+
+r: takeR(GosperForm),
+
+if mode>= verbose then
+  (
+  print(" p : ", p),
+  print(" q : ", q),
+  print(" r : ", r)
+  ),
+
+
+/* Solution of the Gosper equation */
+GAnsatzDegree: AnsatzDegreeVerboseOpt(p,q,r,k,mode-1),
+
+
+  Gpoly : 0,
+
+  if integerp(GAnsatzDegree) and GAnsatzDegree >= 0 then
+    Gpoly: GosperPoly(p,q,r,k,'_g,GAnsatzDegree),
+
+
+if mode >= very_verbose then
+  print("Gosper's equation : ", Gpoly),
+
+
+if Gpoly = 0 then
+  return([]),
+
+
+
+/* --------------------------------------------------------------------- */
+/* Numerical test                                                        */
+if mod_test and (ZAnsatzDegree<=mod_threshold) then
+  (
+  modulus : mod_big_prime,
+  test_Gpoly : polymod(subst(ev_point,n,Gpoly),mod_big_prime),
+
+
+
+  if test_Gpoly = 0 then
+    return([]),
+
+  if mode>= very_verbose then 
+    print("modulus : ", modulus),
+  sysSol : SolveZSysVerboseOpt(test_Gpoly,
+                              '_g,GAnsatzDegree+1,'_z,ZAnsatzDegree+1,k,
+                              modular_linear_solver,mode-1),
+  
+  modulus : false,
+  if mode>= very_verbose then
+     print("numerical sysSol : ", sysSol),
+  if sysSol = [] then
+    (
+    if mode >= verbose then 
+      print("no solution in the numerical test!"),
+    return([])
+    )
+  else
+    if mode >= verbose then
+       (
+       print("solution found in the numerical test!"),
+       print("sysSol : ", sysSol)
+       )
+  ),
+/* End of numerical test                                                 */
+/* --------------------------------------------------------------------- */
+
+
+sysSol : SolveZSysVerboseOpt(Gpoly,'_g,GAnsatzDegree+1,'_z,ZAnsatzDegree+1,k,
+                             linear_solver,mode-1),
+
+if mode>= very_verbose then
+  (
+  print("sysSol: "),
+  print(sysSol),
+  print("%rnum_list : ", %rnum_list)
+  ),
+
+if warnings and length(sysSol)>1 then
+  (
+  print("------------------------------------------------------------"),
+  print("WARNING!"),
+  print("Multiple solutions have been found."),
+  print("A lower order might probably work and yield fewer solutions."),
+  print("------------------------------------------------------------")
+  ),
+
+SpSysSol : sysSol, /* non-sense? */
+
+allSols : [],
+for i: 1 thru length(sysSol) do
+  (
+  if mode>=very_verbose then 
+    (
+    print("Solution no. ", i),
+    print(sysSol[i])
+    ),
+  SpSysSol : sysSol[i], 
+ 
+
+  GZAnsatzCoeff:separateGZVerboseOpt(SpSysSol,GAnsatzDegree+1,ZAnsatzDegree+1,
+                                     mode-1),
+
+  GAnsatzCoeff: GZAnsatzCoeff[1],
+  ZAnsatzCoeff: GZAnsatzCoeff[2],
+  
+  if mode>=very_verbose then
+    (
+    print("GAnsatzCoeff : ", GAnsatzCoeff),
+    print("ZAnsatzCoeff : ", ZAnsatzCoeff)
+    ),
+
+
+  ZAnsatzCoeff : constFactCorr(ZAnsatzCoeff,[nFTrivial[2],nFTrivial[3]],n),
+
+if mode>=very_verbose then
+  print("correction : ",[nFTrivial[2],nFTrivial[3]]),
+
+
+
+  constDenNF : product(subst(n+i-1,n,nFTrivial[3]),i,1,ZAnsatzDegree),
+
+
+  if mode>=very_verbose then
+    (
+    print("constDenNF : ", constDenNF),  
+    print("CORRECTED ZAnsatzCoeff : ", ZAnsatzCoeff)
+    ),
+
+  GZAnsatzCoeff : normalizeGZ(GAnsatzCoeff,ZAnsatzCoeff),
+  GAnsatzCoeff : GZAnsatzCoeff[1],
+
+  ZAnsatzCoeff : GZAnsatzCoeff[2],
+
+
+  if mode>=extra then 
+    (
+    print(""),
+    SolDeg : getDegrees(SpSysSol,GAnsatzDegree+1,ZAnsatzDegree+1,n),
+    print("Degrees of the Gosper parameters"),
+    prettyPrint(SolDeg[1]), 
+    print(""),
+    print("Degrees of the Zeilberger parameters"),
+    prettyPrint(SolDeg[2]) 
+    ),
+
+
+
+/*  GSol: factor(expand(sol2Poly(GAnsatzCoeff,k))), */
+  GSol : sol2Poly(GAnsatzCoeff,k),
+  if mode>= verbose then
+    print("GSol : ", GSol),
+  if Gsol = 0 then
+     (
+     grat:0,
+     tlscope:0
+     )
+  else
+     tlscope : factor(GSol * r / gfP / denNF / constDenNF),  
+
+
+
+ if trivial_solutions or (not(tlscope=0) and 
+    not(apply("and",map(lambda([x],is(x=0)),ZAnsatzCoeff)))) then 
+    
+
+   if simplified_output then
+     allSols : endcons([ratsimp(tlscope),ZAnsatzCoeff],allSols)
+   else
+     allSols : endcons([tlscope,ZAnsatzCoeff],allSols)
+ else
+   if warnings then
+     if tlscope = 0 then
+       (
+       print("----------------------------------------"),
+       print("WARNING!"),
+       print("The algorithm has discarted a trivial solution"),
+       print("with zero certificate."),
+        
+       if mode>= very_verbose then
+        print("The coefficients of the recurrence are: ", ZAnsatzCoeff),
+       print("----------------------------------------")
+       )       
+     else 
+      (
+      print("-------------------------------------------"),
+      print("WARNING!"),
+      print("The algorithm has discarted a trivial solution"),
+      print("whose recurrence only has zero coefficients."),
+      
+      if mode>= very_verbose then
+         (
+         print("The certificate is: "),
+         print(tlscope)
+         ),
+      print("-------------------------------------------")
+      )
+ ),
+ 
+if mode>=summary then
+     (
+     printGosperSummary(parFRat,GosperForm,GAnsatzDegree,Gpoly,GSol,mode-1),
+     printParGosperSummary(p,sysSol,mode)   
+     ),
+
+  return(allSols)
+
+);
+
+
+
+/* It builds the l.h.s. of the recursion of the summmand */
+/* out of the solution of "parGosper" */
+makeRecursionAux(f,ZCoeff,n,count) :=
+  if count = 1 then 
+     f * ZCoeff[1]
+  else
+     f * ZCoeff[1] + 
+     makeRecursionAux(subst(n+1,n,f),Rest(ZCoeff),n,count-1) ; 
+                     
+
+/* Front-end macro of makeRecursionAux */
+makeRecursion(f,ZCoeff,n) ::=
+  buildq([f,ZCoeff,n],
+  makeRecursionAux(f,ZCoeff,n,length(ZCoeff)) 
+        );
+
+
+UnEvMakeRecursion(f,n,ord) :=
+  block(
+  rec : concat(concat("a[",0,"]"),"f(n,k)"), 
+  for i : 1 thru ord do
+     rec : concat(rec, "+", concat(concat("a[",i,"]"),concat("f(",string(n+i),",k)"))),
+  rec
+  ); 
+
+/* It builds the l.h.s. of the recursion of the summmand */
+/* out of the solution of "parGosper" */
+makeRecursionOpAux(f,ZCoeff,n,count,upperBound) :=
+  if count = upperBound then 
+     first(ZCoeff) * eta[n]^count ( f )  
+  else
+     first(ZCoeff) * eta[n]^count ( f ) + 
+     makeRecursionOpAux(f,Rest(ZCoeff),n,count+1,upperBound) ; 
+                     
+
+/* Front-end macro of makeRecursionAux */
+makeRecursionOp(f,ZCoeff,n) :=
+   block(
+   count : 1,
+   makeRecursionOpAux(f,ZCoeff,n,count,length(ZCoeff))
+   ) ;
+
+
+printZeilbergerSummary(f,parGRes) :=
+  block([i],
+
+     print("---------------------------"),
+     print("Iterated-Zeilberger summary"),
+     print(UnEvMakeRecursion(f,n,length(parGRes[1][2])-1)," = ",
+      Delta[k]("cert(n,k)"*"f(n,k)")),
+
+     print("where"),
+     print("f(n,k) = ", f),
+     print("and"),
+     print("cert(n,k) = ", parGRes[1][1]),
+     print("and"),
+
+
+     for i : 0 thru length(parGRes[1][2])-1 do
+      print("a[",i,"] = ", parGRes[1][2][i+1])
+     );
+
+
+/* Front-end of the Zeilberger's algorithm with verbosity option */
+ZeilbergerVerboseOpt(f,k,n,mode) :=
+   block(
+   [
+   start,
+   ord,
+   parGRes
+   ],
+   
+   if Gosper_in_Zeilberger then
+      start : 0
+   else
+      (
+      start : 1,
+      if warnings and not(dependent(f,n)) then
+        (
+        print("-------------------------------------------------"),
+        print("WARNING!                             "),
+        print(f, " does not depend on ", n,"."),
+        print("The flag Gosper_in_Zeilberger is set to false."),
+        print("You might find a solution with Gosper's algorithm"),
+        print("-------------------------------------------------")
+        )
+      ),
+
+  
+
+   parGRes : [],
+
+   if mode>= verbose then
+      print( "max_ord : " , max_ord ) ,
+ 
+   for ord : start step 1 while (parGRes = []) and ( ord <= max_ord ) do 
+      ( 
+      if mode>= verbose then
+        (
+        print("----------------------------------------"),
+        print("Searching a recurrence with order : " , ord )
+        ),
+
+      parGRes : parGosperVerboseOpt(f,k,n,ord,mode-1),
+      if mode >= verbose then
+        (
+        print("Gosper result with order : ", ord, " is : "),
+        print(parGRes)
+        )
+      ),
+
+   if mode >= summary then     
+     printZeilbergerSummary(f,parGRes),
+
+   return(parGRes)
+
+   ) ; 
+
+
+/* Non verbose version of Zeilberger's algorithm */
+ZeilbergerSummary([args]):=
+ block([f,k,n],
+ f:first(args),
+ k:second(args),
+ n:third(args),
+ if length(args)=3 then
+   ZeilbergerVerboseOpt(f,k,n,summary)
+ else
+   parGosperVerboseOpt(f,k,n,fourth(args),summary)
+ );
+
+
+/* Non verbose version of Zeilberger's algorithm */
+ZeilbergerVerbose([args]):=
+ block([f,k,n],
+ f:first(args),
+ k:second(args),
+ n:third(args),
+ if length(args)=3 then
+   ZeilbergerVerboseOpt(f,k,n,verbose)
+ else
+   parGosperVerboseOpt(f,k,n,fourth(args),verbose)
+ );
+
+
+/* Non verbose version of Zeilberger's algorithm */
+ZeilbergerVeryVerbose([args]):=
+ block([f,k,n],
+ f:first(args),
+ k:second(args),
+ n:third(args),
+ if length(args)=3 then
+   ZeilbergerVerboseOpt(f,k,n,very_verbose)
+ else
+   parGosperVerboseOpt(f,k,n,fourth(args),very_verbose)
+ );
+
+
+/* Non verbose version of Zeilberger's algorithm */
+ZeilbergerExtra([args]):=
+ block([f,k,n],
+ f:first(args),
+ k:second(args),
+ n:third(args),
+ if length(args)=3 then
+   ZeilbergerVerboseOpt(f,k,n,extra)
+ else
+   parGosperVerboseOpt(f,k,n,fourth(args),extra)
+ );
+
+
+/* Non verbose version of Zeilberger's algorithm */
+Zeilberger([args]):=
+ block([f,k,n],
+ f:first(args),
+ k:second(args),
+ n:third(args),
+ if length(args)=3 then
+   ZeilbergerVerboseOpt(f,k,n,nonverbose)
+ else
+   parGosperVerboseOpt(f,k,n,fourth(args),nonverbose)
+ );
+
+
+/* Short name macro for verbose parGosper */
+parGosperVerbose(f,k,n,degree)::=
+   buildq([f,k,n,degree],
+          parGosperVerboseOpt(f,k,n,degree,verbose));
+
+
+/* Short name macro for very verbose parGosper */
+parGosperVeryVerbose(f,k,n,degree)::=
+   buildq([f,k,n,degree],
+          parGosperVerboseOpt(f,k,n,degree,very_verbose));
+
+
+/* Short name macro for the linear system version of parGosper */
+parGosperExtra(f,k,n,degree) ::=
+   buildq([f,k,n,degree],
+          parGosperVerboseOpt(f,k,n,degree,extra));
+
+/* Short name macro for the summary version of parGosper */
+parGosperSummary(f,k,n,degree) ::=
+   buildq([f,k,n,degree],
+          parGosperVerboseOpt(f,k,n,degree,summary));
+
+
+/* Short name for the non-verbose version of parGosper */
+parGosperNonVerbose(f,k,n,degree) ::=
+   buildq([f,k,n,degree],
+          parGosperVerboseOpt(f,k,n,degree,nonverbose));
+
+parGosper(f,k,n,order) ::=
+   buildq([f,k,n,order],
+          parGosperVerboseOpt(f,k,n,order,nonverbose)); 
+
+/* Pretty print of a list */
+prettyPrint(list) :=
+   block(
+   len : length(list),
+   for i : 1 step 1 thru len do 
+      list[i]
+   );
+
+
+ 
+
+    
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,76 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Derive the Schwarzschild solution in a tetrad base
+ *
+ */
+if get('ctensor,'version)=false then load(ctensor);
+("
+
+Derive and verify Schwarzschild's solution in a tetrad base.")$
+init_ctensor();
+ct_coords:[t,r,d,c]$
+("We use dimension 4. The four base vectors arranged in matrix form:")$
+fri:matrix(
+  [sqrt(f(r)),  0,  0,       0],
+  [0,  sqrt(h(r)),  0,       0],
+  [0,           0,  r,       0],
+  [0,           0,  0,r*sin(d)]);
+("The problem is simple enough for automatic simplification:")$
+(ctrgsimp:true,ratwtlvl:false,ratfac:true,cframe_flag:true)$
+cmetric();
+("Compute the Ricci rotation coefficients")$
+christof(true);
+("And the Riemann tensor in tetrad base")$
+lriemann(true);
+("Now compute the Ricci tensor")$
+ricci(true);
+("For a vacuum metric, the components of the Ricci tensor must be 0")$
+("We begin by adding ric1,1 and ric2,2 which yields a simple equation:")$
+ric[2,2]+ric[1,1];
+("Some algebraic manipulation yields a solution for f(r) in terms of h(r):")$
+factor(%th(2));
+num(%);
+%/f(r)/h(r);
+distrib(%);
+first(%)=-last(%);
+integrate(%,r);
+solve(%,f(r));
+("We can choose the constant to be 1 by rescaling the metric:")$
+solf:subst(1,num(last(%th(2)[1])),last(%th(2)[1]));
+("We substitute the solution for f(r) into ric3,3:")$
+ric[3,3];
+("Further algebraic manipulation helps get a solution for h(r):")$
+ratsimp(%th(2));
+subst(solf,f(r),%);
+ratsimp(%);
+num(%);
+%,diff;
+ode2(%,h(r),r);
+exp(first(%))=exp(last(%));
+solve(%,h(r));
+("We rename the constant to get the result in the usual form:")$
+solh:ratsimp(subst(1/2/m,exp(%c),last(%th(2)[1])));
+("Now substitute the solutions back into our base vectors:")$
+subst(solf,f(r),fri);
+fri:subst(solh,h(r),%);
+("And compute the metric, which is the standard Schwarzschild metric:")$
+cmetric(true);
+("We're done... now let us verify our solution.")$
+("We begin with recomputing the Ricci rotation coefficients:")$
+christof(true);
+("And the Riemann tensor:")$
+lriemann(true);
+("And last, the Ricci tensor, which should indicate an empty spacetime:")$
+ricci(true);
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

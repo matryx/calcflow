@@ -1,0 +1,99 @@
+/*  
+  GRAPHS - graph theory package for Maxima
+  Copyright (C) 2008 Andrej Vodopivec <andrej.vodopivec@gmail.com>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or	 
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+*/
+
+
+edge_connectivity_graph(g) := block(
+  [edges : edges(g), vertices : vertices(g), dg, dedges],
+  dedges : append(edges, map(reverse, edges)),
+  dedges : map(lambda([u], [u, 1]), dedges),
+  create_graph(vertices, dedges, directed=true))$
+
+edge_connectivity(g) := block(
+  [vertices, dg],
+  if not is_graph(g) then error("Argument to `edge_connectivity' is not a graph."),
+  if not is_connected(g) then return(0),
+  vertices : vertices(g),
+  if length(vertices)<2 then return('inf),
+  dg : edge_connectivity_graph(g),
+  lmin(makelist(first(max_flow(dg, first(vertices), u)), u, rest(vertices))))$
+
+min_edge_cut(g) := block(
+  [vertices, dg, v, mf : [inf, false], mf1, g1, edges:[], s, t, tr],
+  if not is_graph(g) then error("Argument to `min_edge_cut' is not a graph."),
+  if not is_connected(g) then return([]),
+  vertices : vertices(g),
+  v : first(vertices),
+  s : v,
+  dg : edge_connectivity_graph(g),
+  for u in rest(vertices) do (
+    mf1 : max_flow(dg, v, u),
+    if mf1[1]<mf[1] then (
+      mf:mf1,
+      t : u)),
+  for e in edges(g) do
+    if assoc(e, mf[2])=0 and assoc(reverse(e), mf[2])=0 then edges : cons(e, edges),
+  g1 : create_graph(vertices, edges),
+  tr : reachable_vertices(t, g1),
+  sublist(edges(g), lambda([e], is(member(e[1], tr) and not member(e[2], tr)) or
+                                is(member(e[2], tr) and not member(e[1], tr)))))$
+
+vertex_connectivity_graph(g) := block(
+  [edges : edges(g), vertices : vertices(g), dg, dedges],
+  dedges : append(
+    makelist([2*e[1],2*e[2]+1], e, edges),
+    makelist([2*e[2],2*e[1]+1], e, edges),
+    makelist([2*v+1, 2*v], v, vertices)),
+  dedges : map(lambda([u], [u, 1]), dedges),
+  vertices : append(2*vertices, 2*vertices+1),
+  create_graph(vertices, dedges, directed=true))$
+
+vertex_connectivity(g) := block(
+  [vertices, mvc : inf, flw, dg],
+  if not is_graph(g) then error("Argument to `vertex_connectivity' is not a graph."),
+  if not is_connected(g) then return(0),
+  dg : vertex_connectivity_graph(g),
+  vertices : vertices(g),
+  for i:1 thru length(vertices)-1 while i<=mvc do (
+    for j:i+1 thru length(vertices) while i<=mvc do (
+      if not is_edge_in_graph([vertices[i], vertices[j]], g) then (
+        flw : max_flow(dg, 2*vertices[i], 2*vertices[j]+1),
+        if flw[1]<mvc then mvc : flw[1]))),
+  mvc)$
+
+min_vertex_cut(g) := block(
+  [vertices, dg, v, mf : [inf, false], mf1: [inf, []], g1, edges:[], s, t, tr],
+  if not is_graph(g) then error("Argument to `min_vertex_cut' is not a graph."),
+  if not is_connected(g) then return([]),
+  vertices : vertices(g),
+  dg : vertex_connectivity_graph(g),
+  for i:1 thru length(vertices)-1 while i<=mf1[1] do (
+    for j:i+1 thru length(vertices) while i<=mf1[1] do (
+      if not is_edge_in_graph([vertices[i], vertices[j]], g) then (
+        mf1 : max_flow(dg, 2*vertices[i], 2*vertices[j]+1),
+        if mf1[1]<mf[1] then (
+          mf:mf1,
+          t : vertices[i])))),
+  for e in edges(dg) do
+    if assoc(e, mf[2])=0 then edges : cons(e, edges)
+    else edges : cons(reverse(e), edges),
+  g1 : create_graph(append(2*vertices, 2*vertices+1), edges, directed=true),
+  tr : reachable_vertices(2*t, g1),
+  edges : sublist(edges(dg), lambda([e], is(member(e[1], tr) and not member(e[2], tr)))),
+  map(lambda([u], floor(second(u)/2)), edges))$

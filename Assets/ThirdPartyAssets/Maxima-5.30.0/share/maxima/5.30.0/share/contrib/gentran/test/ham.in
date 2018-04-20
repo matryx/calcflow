@@ -1,0 +1,5 @@
+/*  Hamiltonian Calculation  */                         
+                                                        
+difq : diff(h, p)$                                      
+difp : -diff(h, q) - ratsubst(p/m, qdot, diff(d, qdot))$
+rungekutta(difp, difq, p, q, tt)$                       

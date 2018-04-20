@@ -1,0 +1,191 @@
+(kill (all), 0);
+0;
+
+(x : 123, y : abc, 0);
+0;
+
+defstruct (f (x, y, z));
+'[f (x, y, z)];
+
+myrecord : new (f);
+'(f (x, y, z));
+
+myrecord@y : 45;
+45;
+
+myrecord;
+'(f (x, 45, z));
+
+[x, y, z, myrecord@x, myrecord@y, myrecord@z];
+'[123, abc, z, myrecord@x, 45, myrecord@z];
+
+('(myrecord@y), [op (%%), args (%%)]);
+'["@", [myrecord, y]];
+
+(kill (y), myrecord@y);
+45;
+
+[kill (f), errcatch (new (f)), errcatch (myrecord@x)];
+[done, [], [f(x, 45, z)@x]];
+
+defstruct (f (x, y=3.14159, z));
+'[f(x, 3.14159, z)];
+
+ff : new (f);
+'(f (x, 3.14159, z));
+
+(ff@y : 2.71828, ff);
+'(f (x, 2.71828, z));
+
+k : h (g (aa, bb), cc);
+'(h (g (aa, bb), cc));
+
+errcatch (k@1@2 : dd);
+[];
+
+defstruct (h (xx, yy), g (uu, vv));
+'[h (xx, yy), g (uu, vv)];
+
+(k@1@2 : dd, k);
+'(h (g (aa, dd), cc));
+
+x : new (h);
+'(h (xx, yy));
+
+x@yy : new (g);
+g (uu, vv);
+
+x;
+h (xx, g (uu, vv));
+
+x@yy@vv : 123;
+123;
+
+x;
+h (xx, g (uu, 123));
+
+(yy : %i, vv : 1/2, 0);
+0;
+
+[x@yy, x@yy@vv];
+'[g (uu, 123), 123];
+
+string ('(x@yy + x@yy@vv));
+"x@yy@vv+x@yy";
+
+(kill (x@yy@vv), [x, x@yy, x@yy@vv]);
+'[h (xx, g (uu, vv)), g (uu, vv), x@yy@vv];
+
+(kill (x@yy), [x, x@yy]);
+'[h (xx, yy), x@yy];
+
+(kill (x), x);
+'x;
+
+block ([uu0 : 123, vv0 : 456], x : new (h (new (g), new (g (uu0, vv0)))));
+'(h (g (uu, vv), g (123, 456)));
+
+([a00, a01, b00, b01] : [123, 456, 789, 987],
+ block ([a0 : '(a00 + a01), b0 : '(b00 + b01)], defstruct (foo (a = a0, b = b0))));
+'[foo (a00 + a01, b00 + b01)];
+
+y : new (foo);
+'(foo (a00 + a01, b00 + b01));
+
+ev (y);
+foo (123 + 456, 789 + 987);
+
+/* IN FOLLOWING EXAMPLES QUOTE SHOULD BE UNNECESSARY !!
+ * CHANGE $EV CODE TO MAKE IT WORK OK WITHOUT QUOTE !!
+ */
+
+ev (sin (x@xx + 1), '(x@xx)=%e);
+sin (%e + 1);
+
+ev (sin (x@yy@uu + 1), '(x@yy@uu)=%i);
+sin (%i + 1);
+
+x;
+'(h (g (uu, vv), g (123, 456)));
+
+(kill (all), 0);
+0;
+
+[a, b, c]: [x, y, z];
+[x, y, z];
+
+[x, y, z]: [11, 22, 33];
+[11, 22, 33];
+
+[''a, ''b, ''c];
+[11, 22, 33];
+
+[x, y, z]: x*y*z;
+[7986, 7986, 7986];
+
+[x, y, z];
+[7986, 7986, 7986];
+
+(kill (a, b), [a, b]: [b, 2*a]);
+'[b, 2*a];
+
+[a, b]: [b, 2*a];
+'[2*a, 2*b];
+
+[a, b]: [b, 2*a];
+'[2*b, 4*a];
+
+[a, b]: [b, 2*a];
+'[4*a, 4*b];
+
+[a, b]: [b, 2*a];
+'[4*b, 8*a];
+
+(kgcd(a, b) := (while b#0 do [a, b]: [b, remainder(a, b)], abs(a)), kgcd(11*7*5*3, 17*13*11*7));
+''(gcd (11*7*5*3, 17*13*11*7));
+
+(i:10, j:20, [i, j] : [j, i]);
+[20, 10];
+
+[i, j];
+[20, 10];
+
+/* QUESTIONABLE. MAYBE THIS ONE SHOULD CAUSE AN ERROR */
+[i, i] : [1, 2];
+[1, 2];
+
+/* QUESTIONABLE. MAYBE PRECEDING ASSIGNMENT SHOULD HAVE FAILED */
+i;
+2;
+
+a : [1, 2, 3, 4];
+[1, 2, 3, 4];
+
+(i : 2, [i, a[i]] : [4, 11]);
+[4, 11];
+
+a;
+[1, 11, 3, 4];
+
+[ a[1], a[2] ] : [ a[3], a[4] ];
+[3, 4];
+
+a;
+[3, 4, 3, 4];
+
+(a : [1, 2, 3, 4], i:0, [ a[i : i + 1], a[i : i + 1] ] : [ a[i : i + 1], a[i : i + 1] ]);
+[1, 2];
+
+a;
+[1, 2, 1, 2];
+
+[a, [b, c], [[d, e], f]] : [1, [2, 3], [[4, 5], 6]];
+[1, [2, 3], [[4, 5], 6]];
+
+[a, b, c, d, e, f];
+[1, 2, 3, 4, 5, 6];
+
+/* NEED TESTS FOR :: HERE */
+
+(L : '[a, b, c], L :: [11, 22, 33], [a, b, c]);
+[11, 22, 33];

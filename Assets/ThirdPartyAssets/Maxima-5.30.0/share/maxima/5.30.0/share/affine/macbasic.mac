@@ -1,0 +1,174 @@
+/*-*- Mode: MACSYMA; Package: MACSYMA -*-*/
+1$
+dotexptsimp:false$
+dotscrules:true$
+matrix_element_mult:"."$ 
+algebraic:true$
+fast_solve:true$
+aaaa:create_list (concat(aa,i),i,1,105)$
+bbbb:create_list (concat(bb,i),i,1,35)$
+cccc:create_list (concat(cc,i),i,1,35)$
+parr:create_list (concat(par,i),i,0,20)$
+dddd:create_list (concat(dd,i),i,1,35)$
+eeee:create_list (concat(ee,i),i,1,35)$	      
+declare_scalar_list(dddd)$
+declare_scalar_list(eeee)$ 
+tellrat(%zeta3^2=-1-%zeta3,%zeta8^4=-1,
+        %sqrt2^2=2,
+	%zeta4^2+1,
+	%zeta5^4=-(+%zeta5^3+%zeta5^2+%zeta5+1),
+	%zeta6^2-%zeta6+1,
+        %zeta7^6+%zeta7^5+%zeta7^4+%zeta7^3+%zeta7^2+%zeta7+1,
+	%zeta9^6+%zeta9^3+1,
+	%zeta24^8=%zeta24^4-1)$
+declare_scalar_list([a,%eps,%zeta3,%zeta4,
+	%sqrt2,%zeta6,%zeta7,
+	%zeta8,%zeta9,%zeta5,
+	%i,b,c,d,e,%alpha,%alpha4,%alpha2,%alpha3,%beta,%zeta24])$
+declare_scalar_list(parr)$
+declare_scalar_list(bbbb)$
+declare_scalar_list(cccc)$
+declare_scalar_list(aaaa)$
+declare_weights(s2,4,t,3,w,1,v,1,x2,2,s,1,q1,5,q2,5,r,4,z5,5,z3,1,z2,1,z4,4,x3,3,x5,2,x1,2,x0,3,x10,3,u,1,x13,3,x03,3,s4,4,x04,4,y,1,s6,6)$
+declare_order_weights(y,1)$
+deg2_mat:matrix([a00*x.x+a01*x.y+a10*y.x+a11*y.y,sc00*x.x+sc01*x.y+sc10*y.x+sc11*y.y],
+       [b00*x.x+b01*x.y+b10*y.x+b11*y.y,sd00*x.x+sd01*x.y+sd10*y.x+sd11*y.y])$
+
+deg2_mat:matrix(
+       [a0000*x.x+a0010*x.y+a0100*y.x+a0110*y.y,a0001*x.x+a0011*x.y+a0101*y.x+a0111*y.y],
+       [a1000*x.x+a1010*x.y+a1100*y.x+a1110*y.y,a1001*x.x+a1011*x.y+a1101*y.x+a1111*y.y])$
+declare_scalar_list(delete(x,(delete(y,listofvars(deg2_mat)))))$
+rtx:matrix([x],[y])$ 
+lftx:matrix([x,y])$
+declare_scalar_list(delete(x,(delete(y,list_of_variables(deg2_mat)))))$
+fast_solve:true$
+central_elements(variables,deg):=block([expop:100],
+	temp:[],
+	monoms:mono(variables,deg),
+	monoms_higher:mono(variables,1+deg),
+	number_of_monoms:length(monoms),
+	if not (listp(aaaa) or length(monoms) > length(aaaa)) then
+	  aaaa: create_list(concat(aa,i),i,1,number_of_monoms),
+	declare_scalar_list(aaaa),
+	f:0,i:0,
+	for u in monoms do (i:i+1,
+	  f: u*?nth(i,aaaa)+f),
+	for v in variables do (
+	  temp : append (temp,[com(f,v)])),
+	eqns:Extract_linear_equations (temp,monoms_higher),
+	if fast_solve then ans : fast_linsolve (eqns,firstn(length(monoms),aaaa)) else
+	ans:linsolve(eqns,firstn (length( monoms), aaaa)),
+	return(sublis(ans,f)))$
+
+
+skew_centralizer(variables,elements,zet,deg):=block([expop:100,monoms_higher:[]],
+	temp:[],
+	monoms:mono(variables,deg),
+	for j in map(nc_degree,elements)
+	do( monoms_higher:append(monoms_higher,mono(variables,j+deg))),
+	number_of_monoms:length(monoms),
+	if not( listp(aaaa) or length(monoms) > length(aaaa)) then
+	  aaaa: create_list(concat(aa,i),i,1,number_of_monoms),
+	declare_scalar_list(aaaa),
+	f:0,i:0,
+	for u in monoms do (i:i+1,
+	  f: u*?nth(i,aaaa)+f),
+	for v in elements do (
+           temp : append (temp,[com(f,v,zet)])),
+	  
+	print(temp,monoms_higher),
+	eqns:Extract_linear_equations (temp,monoms_higher),
+	equations:eqns,	
+	if fast_solve then ans : fast_linsolve (eqns,firstn(length(monoms),aaaa)) else
+	ans:linsolve(eqns,firstn (length( monoms), aaaa)),
+	return(sublis(ans,f)))$	      
+
+dot_simplifications:false$
+central_elements_and_check_dot_simplifications(variables,deg):=block([expop:100],
+	check_overlapping_dot_simplifications(1+deg,true),
+	central_elements(variables,deg))$
+
+free_ideal_generated_by(a_list,variables):=block([temp],temp:[],
+	for v in variables do
+	(temp:append(temp,create_list(v.u,u,a_list),
+	create_List(u.v,u,a_list))),temp)$
+	
+ /*  %beta^2=-%beta*%zeta8-%zeta8^2 ,%alpha2^2=-2*%alpha2-2,
+	%alpha3^3=-(-5*%alpha3^2+9*%alpha3-1),%alpha^3-23*%alpha^2+210*%alpha+539)*/
+rtx3:
+			  matrix([x],[y],[z])$
+ p3:
+	   matrix([p11,p12,p13],[p21,p22,p23],[p31,p32,p33])$   
+declare_scalar_list(list_matrix_entries(p3))$  
+new_fast_dotsimp:true$
+
+tchirn(f,x):=ratsimp(sublis([x = x-ratcoef(f,x,2)/(ratcoef(f,x,3)*3)],f))$
+
+			      /* algorithm for j of ternary cubic
+eliminate the y^3 term by z=z+eps*y where AA1*EPS^3+3*BB2*EPS^2+3*CC1*EPS+DD0
+If have y^2*L+y*L'*L''=h(x,z)
+then can make replacement like Z=L,X=x,Y=y to make it y^2*z+y*L'*l''
+ then have y^2*z* to deal with?*/ 
+      /* for a binary quartic put one of the roots at infinity to get cubic*/
+j(g2,g3):=ratsimp(g2^3/(g2^3-27*g3^2))$
+/* note that this should really be multiplied by 1728 */
+jcubic(g,x):=block([ fac,f],f:tchirn(g,x),fac:1/4*ratcoef(f,x,3),
+        if fac=0 then (print("not degree 3"),infinity)
+	else if poly_discriminant(ratsimp(numerator(g)),x)=0
+	 then (print("discriminant is zero", infinity))
+	 else
+          ratsimp(j(-ratcoef(f/fac,x),-sublis([x = 0],f/fac))))$
+
+/*j-invariant of  y^2=x^4+bb*x^2+cc (with 1728 factor) */
+
+ y^2=x^4+bb*x^2+cc;
+
+jinv(bb,cc):=16*(12*c^2+bb^2)^3/(c^2*(2*c-bb)^2*(2*c+bb)^2)$
+
+
+
+			      /* cases  April 20 1985*/
+
+%alpha-1$
+ m300:matrix([x,0,0],[0,0,0],[0,0,0])$
+
+%beta-1$
+ m030:matrix([0,0,0],[0,y,0],[0,0,0])$
+
+%gamma-1$
+ m003: matrix([0,0,0],[0,0,0],[0,0,z])$
+
+
+
+%alpha^2*%beta-1$
+m210:matrix([y,x/%alpha,0],[%alpha*x,0,0],[0,0,0])$
+
+(%alpha*%beta^2-1)$	      
+m120:
+matrix([0,%beta*y,0],[y/%beta,x,0],[0,0,0])$
+
+%alpha^2*%gamma-1$
+m201:
+matrix([z,0,x/%alpha],[0,0,0],[%alpha*x,0,0])$
+
+
+%alpha*%gamma^2-1$
+m102:matrix([0,0,%gamma*z],[0,0,0],[z/%gamma,0,x])$
+
+
+%gamma*%beta^2-1$
+m021:matrix([0,0,0],[0,z,y/%beta],[0,%beta*y,0])$
+hhh(x):= x^2+3$
+%beta*%gamma^2-1$
+m012:matrix([0,0,0],[0,0,%gamma*z],[0,z/%gamma,y])$
+
+
+
+%alpha*%beta*%gamma-1$	      /* agree with manuscript Mar 85*/
+m111p:matrix([0,%beta*z,0],[0,0,x],[%alpha*%beta*y,0,0])$
+m111: matrix([0,0,y],[%alpha*z,0,0],[0,%alpha*%beta*x,0])$
+type3a:sublis([%beta=1,%alpha=1],m300+m030+m003+a*m111+b*m111p);
+type3b:sublis([%beta=1,%alpha=1,%gamma=-1],m210+m120+m102+a*m012);
+
+
+

@@ -1,0 +1,145 @@
+load('optvar)$
+/* This macsyma batch file illustrates how to use the
+functions in OPTVAR > or OPTVAR LISP to help solve classical
+variational or optimal control problems.  These functions
+use the calculus of variations and Pontryagin's
+Maximum-Principle to derive the governing differential and
+algebraic equations; and this demonstration also shows how
+the governing equations may be solved using the built-in
+SOLVE function and/or the functions in the SHARE files  ODE2
+LISP, and DESOLN LISP.  For more details, see the
+corresponding SHARE text files OPTVAR USAGE, ODE2 USAGE, or
+DESOLN USAGE.
+
+The illustrative examples here are intentionally elementary.
+For a more thorough discussion of the mathematical
+principles demonstrated here, and for results with more
+difficult examples, see the the ALOHA project technical
+report by David Stoutemyer, "Computer algebraic manipulation
+for the calculus of variations, the maximum principle, and
+automatic control", University of Hawaii, 1974.
+
+Many classical variational problems are analagous to special
+cases of choosing a path which minimizes the transit time
+through a region for which the speed is a function of
+position.  There are applications in, optics, acoustics,
+hydrodynamics, and routing of aircraft or ships. In the
+two-dimensional case, assuming the path may be represented
+by a single-valued function, Y(X), the transit time between
+Y(A) and Y(B) is given by the integral of
+Q(X,Y)*SQRT(1+'D(y,x)**2), from X=A to X=B, where D is an
+alias for DIFF and Q(X,Y) is the reciprocal of the speed,
+and where we have used the fact that 'D(arclength,X) =
+SQRT(1+'D(Y,X)**2).  For simplicity, assume Q independent of
+X.  We may use the function EL, previously loaded by
+LOADFILE(OPTVAR,LISP,DSK, SHARE), to derive the associated
+Euler-Lagrange equation together with an associated energy
+and/or momentum integral if they exist: */
+aa:el(q(y)*sqrt(1+'d(y,x)**2), y, x);
+/* To expand the Euler-Lagrange equation: */
+dependencies(y(x))$
+part(aa,2), eval, d;
+assume(k[0]>0)$
+/* The routines in the SHARE file ODE2 LISP, previously
+loaded, may solve an expanded first or second order
+quasi-linear ordinary differential equations; so the
+equation must be linear in its highest- order derivative.
+The Euler-Lagrange equation is always of this form, but when
+given a second-order equation, the ODE2 solver often returns
+with a first-order equation which we must quasi-linearize
+before proceeding; so it is usually most efficient to take
+advantage of a first integral when one exists, even though
+it requires a certain amount of manipulation.  The SOLVE
+function is currently somewhat weak with fractional powers;
+so we must massage the above energy integral before solving
+for 'D(Y,X): */
+part(aa,1) * sqrt(1+'d(y,x)**2), expand, eval;
+solve(%/k[0], 'd(y,x));
+ode2(ev(part(%,2),eval), y, x);
+/* We must specify Q(Y) to proceed further.  Q(Y)=1 is
+associat- ed with the Euclidian shortest path (a straight
+line), Q(Y)=SQRT(Y) is associated with the stationary
+Jacobian-action path of a projectile (a parabola), Q(Y)=Y is
+associated with the minimum-surface body of revolution (a
+hyperbolic cosine), and Q(Y)=1/SQRT(Y) is associated with
+the minimum-time path of a falling body, starting at Y=0,
+measured down, (a cycloid).  Of these, the cycloid presents
+the most difficult integration.  In fact, I have never seen
+the the integration for this case performed directly except
+by macsyma: */
+ratsubst(1/sqrt(y),q(y),%);
+%,integrate;
+/* This equation may be simplified by combining the
+LOGs and clearing some fractions, but it is transcendental
+in Y; so there is no hope for a closed-form representation
+for Y(X).  For completeness we should try the other
+alternative for 'D(Y,X), but it turns out to lead to the
+same result.
+
+Most authors solve this problem by introducing the change of
+variable 'D(Y,X)=TAN(T), useful also for other Q(Y), which
+leads to the para- metric representation: Y=K[0]*COS(T)**2,
+X=C+K[0]*(T+SIN(T)*COS(T)). Solving the former for T and
+substituting into the latter gives the representation
+equivalent to that found directly by macsyma.
+
+Some straightforward investigation reveals that  C  is the
+initial value of  X,  but the equation is transcendental in
+K[0], so K[0] cannot be determined analytically.  However,
+it may be determined to arbitrary numerical accuracy by an
+iterative algorithm such as that described in the SHARE file
+ZEROIN USAGE.
+
+To prove that the above solution is a strong global minimum,
+we must prove that such a minimum exists and that no other
+answer gives a smaller value to the functional.  This may be
+done by the direct approach of Caratheodory,  or by checking
+the classical Weierstrass, Weierstrass-Erdman, Legendre, and
+and Jacobi necessary and sufficient conditions.  Computer
+algebraic manipulation can assist these investigations, but
+they are beyond the scope of this demonstration.  Instead,
+to keep the demonstration brief, we will now consider other
+kinds of problems.
+
+Stationary values of a functional may be subject to
+algebraic or differential constraints of the form
+F(X,Y(X),'D(Y,X))=0 and/or isoperimetric constraints of the
+form INTEGRATE(F(X,Y(X),'D(Y,X)),X,A,B) = J, where J is a
+given constant. Sometimes it is possible to eliminate one or
+more constraints, substituting them into the functional and
+any remaining constraints; but if not, we may use Lagrange
+multipliers.  For example, suppose we wish to determine the
+curve that a string of given length assumes to minimize its
+potential energy.  The potential energy is 
+INTEGRATE(Y*SQRT(1+'D(Y,X)**2), X, A, B), whereas the length
+is INTEGRATE(SQRT(1+'D(Y,X)**2), X, A, B); so letting MULT
+be the Lagrange multiplier, our augmented functional is of
+the form that we have been studying, with Q(Y)=Y+MULT.
+Consequently, we may simply substitute this in the general
+integral that we found before: */
+subst(q(y)=Y+mult, %th(3));
+/* Type  NONZERO;  in response to the question
+generated by the following statement: */
+%,integrate;
+/* to get Y as a function of X: */
+%/k[0];
+exp(lhs(%))=exp(rhs(%));
+solve((%-2*y-2*mult)**2, y);
+%,eval,expand,radexpand:true;
+/* We may rewrite the above expression as: */
+k[0]*cosh(x/k[0]+c) - mult $
+/* We may substitute this into the integral constraint
+to get 1 equation relating the constant K[0] and C to the
+given length L: */
+sqrt(1+d(%,x)**2);
+/* This is simply COSH(X/K[0]+C), so: */
+l = integrate(cosh(x/k[0]+c), x, a, b);
+/* Given A, B, Y(A), and Y(B), we may substitute into
+the general solution to get two more relations among K[0], C
+and MULT, but the three equations are transcendental; so a
+numerical solution is generally necessary.
+
+For completeness, we should also investigate the case of
+K[0]=0, which yields the solution  Y=0; but for brevity, we
+will omit that analysis. */
+"end of part 1"$

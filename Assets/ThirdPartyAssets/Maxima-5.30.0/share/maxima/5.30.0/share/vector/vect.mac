@@ -1,0 +1,457 @@
+/*-*-MACSYMA-*-*/
+eval_when(batch,ttyoff:true)$
+/* Or use the BATCHLOAD command to load this with TTYOFF:TRUE */
+/*  NOTE:  THE CURRENT VERSION OF VECT IS THE ONE DUE TO STOUTEMYER.
+IT WILL BE REPLACED SOON BY AN EXTENDED VERSION WHICH HANDLES BOTH
+VECTORS AND DYADICS.
+	MICHAEL C. WIRTH (MCW)
+	12/18/78
+Style changes made in order to TRANSLATE, 3/1/81 George Carrette (GJC)
+*/
+
+herald_package(vect)$
+put('vect,true,'version);
+
+eval_when([translate,batch,demo,load,loadfile],
+  /* trgsmp is in the standard Maxima image but check anyway */
+  if get('sin,'complement_function)=false then load("trgsmp"),
+  if not ?boundp('coords) then load("vect_transform"),
+  matchdeclare([etrue,ttrue,vtrue], true, lessp, before, scalarm, vscalarp),
+  tr_bound_function_applyp:false
+  /* we do not want FOO(F):=F(1) to mean APPLY(F,[1]) */
+  )$
+
+infix("~", 134, 133, expr, expr, expr) $
+prefix("grad", 142, expr, expr) $
+prefix("div", 142, expr, expr) $
+prefix("curl", 142, expr, expr) $
+prefix("laplacian", 142, expr, expr) $ 
+
+declare(order,commutative,
+        ordern,nary,
+        ["grad","div","curl","laplacian"],outative,
+        "curl",nonscalar)$
+
+tellsimpafter(0~etrue, 0) $
+tellsimpafter(etrue~0, 0) $
+tellsimpafter(etrue~etrue, 0)$
+tellsimpafter(etrue~ttrue.vtrue, etrue.(ttrue~vtrue))$
+tellsimp(etrue~lessp, -(lessp~etrue)) $
+tellsimpafter(div (curl( etrue)), 0) $
+tellsimpafter(curl (grad( etrue)), 0) $
+tellsimpafter(vectorpotential(etrue,ttrue),(scalefactors(ttrue), vpot(etrue)))$
+tellsimpafter(vectorpotential(etrue), vpot(etrue)) $
+tellsimpafter(express(etrue), express1(etrue)) $
+tellsimpafter(express(etrue,ttrue), (scalefactors(ttrue), express(etrue)))$
+tellsimpafter(potential(etrue, ttrue),(scalefactors(ttrue),potential1(etrue)))$
+tellsimpafter(potential(etrue), potential1(etrue)) $
+
+
+/* Variables and switches */
+
+define_variable(coordinates, '[x, y, z],any)$
+define_variable(dimension,3,fixnum)$
+define_variable(dimenimbed,1,fixnum)$
+define_variable(trylength,1,fixnum)$
+define_variable(bestlength,1,fixnum)$
+define_variable(sfprod,1,any)$
+define_variable(sf,[1,1,1],list)$
+
+define_variable(expandall,false,boolean)$
+define_variable(expanddot,false,boolean)$
+define_variable(expanddotplus,false,boolean)$
+define_variable(expandgrad,false,boolean)$
+define_variable(expandplus,false,boolean)$
+define_variable(expandgradplus,false,boolean)$
+define_variable(expanddiv,false,boolean)$
+define_variable(expanddivplus,false,boolean)$
+define_variable(expandcurl,false,boolean)$
+define_variable(expandcurlplus,false,boolean)$
+define_variable(expandlaplacian,false,boolean)$
+define_variable(expandlaplacianplus,false,boolean)$
+define_variable(expandprod,false,boolean)$
+define_variable(expandgradprod,false,boolean)$
+define_variable(expanddivprod,false,boolean)$
+define_variable(expandcurlcurl,false,boolean)$
+define_variable(expandlaplaciantodivgrad,false,boolean)$
+define_variable(expandlaplacianprod,false,boolean)$
+define_variable(expandcross,false,boolean)$
+define_variable(expandcrosscross,false,boolean)$
+define_variable(expandcrossplus,false,boolean)$
+define_variable(firstcrossscalar,false,boolean)$
+
+vect_cross: true$
+
+
+ev_diff(_expr_):=apply('ev,[_expr_,'diff])$
+
+
+scalefactors(transformation) := block(
+   if listp(first(transformation)) then (
+      coordinates: rest(transformation),
+      transformation: first(transformation))
+   else coordinates: listofvars(transformation),
+   dimension: length(coordinates),
+   dimenimbed: length(transformation),
+   for row:1 thru dimension do
+      for col:1 thru dimenimbed do jacobian[row,col]:
+         trigsimp(ratsimp(diff(transformation[col],
+            coordinates[row]))),
+   sfprod:1,
+   for row:1 thru dimension do (
+      for col:1 thru row-1 do (
+         sf[row]: gcov(row,col),
+         if sf[row]#0 then 
+            print("warning: coordinate system is nonorthogonal unless following simplifies to zero:", sf[row])),
+      sf[row]: radcan(sqrt(gcov(row,row))),
+      sfprod: sfprod*sf[row])) $
+
+gcov(ii,jj) := trigsimp(ratsimp(sum(
+   jacobian[ii,kk]*jacobian[jj,kk], kk, 1, dimenimbed))) $
+
+express1(expn) := block(
+   [ans],
+   if mapatom(expn) then
+      if nonscalarp(expn) then (ans:[],
+         for jj: dimension step -1 thru 1 do
+            ans: cons(expn[coordinates[jj]], ans),
+         return(ans))
+      else return(expn),
+   expn: map('express1, expn),
+   if mapatom(expn) or listp(expn) then return(expn),
+
+   if inpart(expn,0)="grad" then (ans:[],
+      expn: inpart(expn,1),
+      for jj: dimension step -1 thru 1 do ans:
+         cons('diff(expn,coordinates[jj])/sf[jj], ans),
+      return(ans)),
+
+   if piece="div" then (expn: inpart(expn,1),
+      if not listp(expn) then error("div called on scalar arg:",
+         expn),
+      return(sum('diff(sfprod*expn[jj]/sf[jj],
+         coordinates[jj]), jj, 1, dimension)/sfprod)),
+
+   if piece="laplacian" then return(sum('diff(sfprod*'diff(
+      inpart(expn,1),coordinates[jj])/sf[jj]**2,
+      coordinates[jj]), jj, 1, dimension) / sfprod),
+
+   if piece="curl" then (expn:inpart(expn,1),
+      if listp(expn) then (
+         if length(expn)=2 then return(('diff(sf[2]*expn[2],
+            coordinates[1])-'diff(sf[1]*expn[1],
+            coordinates[2]))/ sf[1]/sf[2]),
+         if dimension=3 then return([
+             ('diff(sf[3]*expn[3],coordinates[2])-
+             'diff(sf[2]*expn[2],coordinates[3]))/
+             sf[2]/sf[3],
+             ('diff(sf[1]*expn[1],coordinates[3])-
+              'diff(sf[3]*expn[3],coordinates[1]))/
+             sf[1]/sf[3],
+             ('diff(sf[2]*expn[2],coordinates[1]) -
+              'diff(sf[1]*expn[1],coordinates[2]))/
+             sf[1]/sf[2]])),
+      error("curl used in space of wrong dimension")),
+
+   if piece="~" then (
+      ans: inpart(expn,1),  expn:inpart(expn,2),
+      if listp(ans) and listp(expn) and length(ans)=length(expn)
+         then (if length(ans)=2 then return(ans[1]*expn[2]
+             -ans[2]*expn[1]),
+            if length(ans)=3 then return([ans[2]*expn[3]-
+               ans[3]*expn[2], ans[3]*expn[1]-ans[1]*expn[3],
+               ans[1]*expn[2]-ans[2]*expn[1]])),
+      error("~ used with improper arguments:",ans,expn)),
+
+   expn) $
+
+
+dotassoc: dotexptsimp: false$
+dotscrules: true $
+define_variable(expandflags, '[
+   expandall,
+      expanddot,
+         expanddotplus,
+      expandcross,
+         expandcrossplus,
+         expandcrosscross,
+      expandgrad,
+         expandgradplus,
+         expandgradprod,
+      expanddiv,
+         expanddivplus,
+         expanddivprod,
+      expandcurl,
+         expandcurlplus,
+         expandcurlcurl,
+      expandlaplacian,
+         expandlaplacianplus,
+         expandlaplacianprod,
+   expandlaplaciantodivgrad,
+   expandplus,
+   expandprod ],list) $
+
+
+apply('declare, [expandflags, 'evflag]) $
+
+vectorsimp(expn) := block(
+   [dotdistrib, dotscrules, inflag, firstcrossscalar],
+   inflag: firstcrossscalar: true,
+   dotdistrib: expandall or expanddot or expanddotplus
+      or expandplus,
+   if expandall or expandgrad or expandgradplus or expandplus
+      then declare("grad",additive),
+   if expandall or expanddiv or expanddivplus or expandplus
+      then declare("div",additive),
+   if expandall or expandcurl or expandcurlplus or expandplus
+      then declare("curl",additive),
+   if expandall or expandlaplacian or expandlaplacianplus or
+      expandplus then declare("laplacian",additive),
+   expn: vsimp(expn),
+   if expandall then expn: ratexpand(expn),
+   if expandall or expandgrad or expandgradplus or expandplus
+      then remove("grad",additive),
+   if expandall or expanddiv or expanddivplus or expandplus
+      then remove("div",additive),
+   if expandall or expandcurl or expandcurlplus or expandplus
+      then remove("curl",additive),
+   if expandall or expandlaplacian or expandlaplacianplus or
+      expandplus then remove("laplacian",additive),
+   expn) $
+
+
+before(arg) := inpart(order(etrue,arg),1)#etrue$
+
+vscalarp(arg) := not nonscalarp(arg)$
+
+vsimp(expn) :=
+   if mapatom(expn) then expn
+   else block([pv, qv, rv, sv],
+      expn: map('vsimp, expn),
+      if mapatom(expn) then return(expn),
+      if inpart(expn,0)="~" then expn:removecrosssc1(expn,pv,rv,sv)
+      else if piece="grad" then (
+         if (expandall or expandgrad or expandgradprod or
+            expandprod) and
+            not mapatom(pv:inpart(expn,1)) and inpart(pv,0)="*"
+            then expn:apply("+", maplist(lambda([u],\gradprod(u,pv)), pv)))
+      else if piece="div" then(
+         if (expandall or expanddiv or expanddivprod or
+            expandprod) and not
+            mapatom(pv:inpart(expn,1)) and inpart(pv,0)="*" then
+            expn: apply("+", maplist(lambda([u],\divprod(u,pv)), pv)))
+      else if piece="curl" then (
+         if (expandall or expandcurl or expandcurlcurl) and not
+            mapatom(pv:inpart(expn,1)) and inpart(pv,0)="curl"
+            then expn: grad( div(pv:inpart(pv,1))) - laplacian( pv))
+      else if piece="laplacian" then
+         if expandlaplaciantodivgrad then
+            expn: div (grad( inpart(expn,1)))
+         else if (expandall or expandlaplacian or
+            expandlaplacianprod or expandprod) and not mapatom
+            (pv:inpart(expn,1)) and inpart(pv,0)="*" then(
+            qv: inpart(pv,1),
+            rv: delete(qv,pv),
+            expn: rv*laplacian(qv) + 2*grad (rv) * grad( qv) + qv*
+               laplacian(rv)),
+      expn) $
+
+crosssimp(ex,pv,rv,sv) :=
+   if not mapatom(ex) and inpart(ex,0)="~" then (
+      if expandall or expandcross or expandcrosscross then
+         ex: trycrosscross(ex,pv,rv,sv),
+      if not mapatom(ex) and inpart(ex,0)="~" and(
+         expandall or expandcross or expandcrossplus or
+         expandplus) then ex: trycrossplus(ex,pv,rv,sv),
+      ex)
+   else ex $
+
+removecrosssc(expn,pv,rv,sv) :=
+   if not mapatom(expn) and inpart(expn,0)="~" then
+      removecrosssc1(expn,pv,rv,sv)
+   else expn $
+
+removecrosssc1(expn,pv,rv,sv) :=  block(
+      [left, right],
+      left: partitionsc(inpart(expn,1)),
+      right: partitionsc(inpart(expn,2)),
+      if firstcrossscalar and (left[2]=1 or right[2]=1)
+         then( print("warning: declare vector indeterminants 
+nonscalar to avoid errors & to get full simplification"),
+            firstcrossscalar:false,
+                return(expn)),
+      left[1]*right[1]*crosssimp(left[2]~right[2],pv,rv,sv))$
+
+partitionsc(ex) :=
+   if mapatom(ex) then
+      if nonscalarp(ex) then [1,ex]
+      else [ex,1]
+   else if inpart(ex,0)="*" then block([sc,nonsc],
+      sc: nonsc: 1,
+      for fact in ex do
+         if nonscalarp(fact) then nonsc:nonsc*fact
+         else sc:sc*fact,
+      [sc,nonsc])
+   else [1,ex] $
+
+/*
+trycrossplus(expn,pv,rv,sv) :=(
+   pv:inpart(expn,1), rv:inpart(expn,2),
+   if not mapatom(pv) and inpart(pv,0)="+" then
+      if not mapatom(rv) and inpart(rv,0)="+" then
+         map(lambda([u],trycrossplus(u,pv,rv,sv)), 
+         map(lambda([u],crossrv(u,rv,sv)), pv))
+      else map(lambda([u],crossrv(u,rv,sv)), pv)
+   else if not mapatom(rv) and inpart(rv,0)="+" then
+      map(lambda([u],pvcross(pv,u,sv)), rv)
+   else expn) $
+*/
+
+trycrossplus(expn,pv,rv,sv) :=
+  (
+    pv:inpart(expn,1), 
+    rv:inpart(expn,2),
+    if not mapatom(pv) and inpart(pv,0)="+" then
+       map(lambda([u],crossrv(u,rv,sv)), pv)
+    else 
+       if not mapatom(rv) and inpart(rv,0)="+" then
+          map(lambda([u],pvcross(pv,u,sv)), rv)
+       else 
+          expn)$
+
+trycrosscross(expn,pv,rv,sv) := (
+      pv:inpart(expn,1),  rv:inpart(expn,2),
+      if not mapatom(rv) and inpart(rv,0)="~" then (
+         sv: inpart(rv,2), rv:inpart(rv,1),
+         rv*pv.sv - sv*pv.rv)
+      else if not mapatom(pv) and inpart(pv,0)="~" then(
+         sv:inpart(pv,2), pv:inpart(pv,1),
+         sv*rv.pv - pv*rv.sv)
+      else expn) $
+
+pvcross(pv,rv,sv) := removecrosssc(pv~rv,pv,rv,sv) $
+
+crossrv(pv,rv,sv) := removecrosssc(pv~rv,pv,rv,sv) $
+
+\gradprod(uu,pv) := delete(uu,pv)*grad(uu) $
+
+\divprod(uu,pv) := block([dotscrules],
+   dotscrules: false,
+ 
+   if nonscalarp(uu) then delete(uu,pv)*div(uu)
+   else delete(uu,pv).grad(uu) )$
+
+
+potential1(gr) := block(
+   [origin, grperm, jj, result,%dum],
+   if not listp(gr) or length(gr)#dimension then error(
+      "1st arg of potential must be a list of length equal to",
+      "the dimensionality of the coordinate system"),
+   origin: zeroloc(),
+   result: [],
+   for jj:dimension step -1 thru 1 do
+      result: cons(sf[jj]*gr[jj], result),
+   grperm:[],
+   for eqn in origin do (
+      jj:1,
+      while lhs(eqn)#coordinates[jj] do jj:jj+1,
+      grperm: endcons(result[jj], grperm)),
+   result:sum(myint(subless(jj,origin,grperm), %dum, rhs(origin[jj]),
+      lhs(origin[jj])), jj, 1, dimension),
+   gr: gr-express1(grad( result)),
+   gr: ev_diff(gr),
+   gr: trigsimp(radcan(gr)),
+   origin:1,
+    /* variable name should not be re-used! */
+   while origin<=dimension and gr[origin]=0 do 
+         (mode_declare(origin,fixnum),origin:origin+1),
+   if origin<=dimension then print("unable to prove that the",
+      "following difference between the input and the gradient",
+      "of the returned result is zero", gr),
+   trigsimp(radcan(result))) $
+
+define_variable(potentialzeroloc, 0, any) $
+
+zeroloc() := 
+   if not listp(potentialzeroloc) then
+       map(lambda([uu],uu=potentialzeroloc), coordinates)
+   else if disjunct(coordinates,map('lhs,potentialzeroloc)) # []
+      then error("potentialzeroloc must be a list of length",
+      "equaling the dimensionality of the coordinate system",
+      "containing equations with each coordinate variable",
+      "on the lhs of exactly 1 equation,",
+      "or else potentialzeroloc must not be a list")
+   else potentialzeroloc$
+
+
+
+eval_when([translate,batch,demo,load,loadfile],
+
+cyc(ii) ::= buildq([ii], 1 + remainder(ii+shift,3)) )$
+
+vpot(kurl) := block(
+   [origin, shift],
+   mode_declare(shift,fixnum),
+   if not listp(kurl) or length(kurl)#3 then error(
+      "1st arg of vectorpotential must be a list of length 3"),
+   origin: zeroloc(),
+   shift: 1,
+   while shift<=3 and lhs(origin[1])#coordinates[shift] do 
+      shift:shift+1,
+   shift: shift+1,
+   if shift>4 or lhs(origin[2])#coordinates[cyc(2)] or
+      lhs(origin[3])#coordinates[cyc(3)] then error(
+      "left sides of potentialzeroloc must be a cyclic",
+      "permutation of coordinates"),
+   origin: [(myint(sf[cyc(1)]*sf[cyc(3)]*kurl[cyc(2)],
+      lhs(origin[3]),rhs(origin[3]),lhs(origin[3])) - myint(
+      sf[cyc(1)]*sf[cyc(2)]*subst(origin[3],kurl[cyc(3)]),
+      lhs(origin[2]),rhs(origin[2]),lhs(origin[2])))/sf[cyc(1)],
+      -myint(sf[cyc(2)]*sf[cyc(3)]*kurl[cyc(1)],
+      lhs(origin[3]),rhs(origin[3]),lhs(origin[3]))/sf[cyc(2)],
+      0],
+   origin: [origin[cyc(cyc(1))], origin[cyc(cyc(2))],
+      origin[cyc(cyc(3))]],
+   kurl: kurl-express1(curl (origin)),
+   kurl: ev_diff(kurl),
+   kurl: trigsimp(radcan(kurl)),
+   for jj:1 thru 3 do if kurl[jj]#0 then print(
+      "unable to prove that the following difference between a",
+      "component of the input and of the curl output is zero",
+      kurl[jj]),
+   origin) $
+
+
+
+disjunct(l1,l2) := append(setdiff(l1,l2), setdiff(l2,l1)) $
+
+setdiff(l1,l2) :=
+   if l1=[] then []
+   else if member(first(l1),l2) then setdiff(rest(l1),l2)
+   else cons(first(l1), setdiff(rest(l1),l2)) $
+
+subless(kk,origin,grperm) := (mode_declare(kk,fixnum),block([ans,%dum],
+   ans: ratsubst(%dum, lhs(origin[kk]), grperm[kk]),
+   for l1:1 thru kk-1 do
+      ans: ratsubst(rhs(origin[l1]), lhs(origin[l1]),ans),
+   ans)) $
+
+myint(fun,var,low,high):=block([result,atlow,athigh],
+  result:integrate(fun,var),
+  if freeof(nounify('integrate),result) then (
+	atlow:evlimit(result,var,low),
+	if atlow=false then go(nogood),
+	athigh:evlimit(result,var,high),
+	if athigh=false then go(nogood),
+	return(radcan(athigh-atlow))),
+  nogood, defint(fun,var,low,high))$
+
+evlimit(expr,var,lim):=block([temp],
+  if lim='minf or lim='inf then go(uselimit),
+  temp:errcatch(subst(lim,var,expr)),
+  if temp#[] then return(temp[1]),
+  uselimit, temp:limit(expr,var,lim),
+  if member(temp,'[inf,minf,und,ind,infinity]) then return(false),
+  if freeof(nounify('limit),temp) then temp)$
+
+eval_when(batch,ttyoff:false)$

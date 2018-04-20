@@ -1,0 +1,18 @@
+/* ODE tests - Murphy equations 1.501 - 1.600
+
+  Reference: 
+    G M Murphy, Ordinary Differential Equations and Their 
+    Solutions, Van Nostrand, 1960
+
+  First Order and of First Degree, p 224 ff
+
+*/
+/* Don't kill(all); It messes up trigsimp */
+
+/* Print ode number*/
+(pn_(n_):=print("Murphy ODE 1.",n_),true);
+true;
+
+/* 593 - Abel eqn of 2nd kind */
+(pn_(593),ans:contrib_ode(eqn:x^7*y*'diff(y,x)=2*(1+x^2)+5*x^3*y,y,x));
+false;

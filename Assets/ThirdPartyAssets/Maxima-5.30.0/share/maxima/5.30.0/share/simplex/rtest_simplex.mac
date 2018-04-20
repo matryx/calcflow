@@ -1,0 +1,49 @@
+(kill(all), load(simplex), 0);
+0;
+
+linear_program(matrix([1,1,-1,0],[2,-3,0,-1],[4,-5,0,0]), [1,1,6], [1,-2,0,0]);
+[[13/2, 4, 19/2, 0], -3/2];
+
+minimize_lp(x, [y>=x-1, y>=-x-1, y<=x+1, y<=1-x, y=x/2]);
+[-(2/3), [x=-(2/3), y=-(1/3)]];
+
+maximize_lp(x+y, [y<=-x/2+3, y<=-x+4], [x, y]);
+[4, [x = 2, y = 2]];
+
+maximize_lp(x+y, [y<=-x/2+3, y<=-x+4], all);
+[4, [x = 2, y = 2]];
+
+maximize_lp(x+y, [y<=-x/2+3, y<=-x+4]), nonegative_lp=true;
+[4, [x = 2, y = 2]];
+
+maximize_lp(10*x1 - 57*x2 - 9*x3 - 24*x4,
+  [1/2*x1 - 11/2*x2 - 5/2*x3 + 9*x4 < 0,
+   1/2*x1 - 3+2*x2  - 1/2*x3 + x4   < 0,
+   x1 < 1],
+  all)$
+[41/5,[x4=0,x3=1/5,x2=0,x1=1]];
+
+minimize_lp(x, [x<1, y>0]);
+"Problem not bounded!";
+
+minimize_lp(x, [x<1, y>0], all);
+[0,[y=0,x=0]];
+
+minimize_lp(x, [x<1, y<-1], all);
+"Problem not feasible!";
+
+(
+  A : read_matrix(file_search("Tests/afiro_A.csv"), 'csv),
+  b : read_list(file_search("Tests/afiro_b.csv"), 'csv),
+  c : read_list(file_search("Tests/afiro_c.csv"), 'csv),
+  is (abs(second(linear_program(A, b, c) + 464.7531428571429))<10^-4)
+);
+true;
+
+(
+  A : read_matrix(file_search("Tests/sc50a_A.csv"), 'csv),
+  b : read_list(file_search("Tests/sc50a_b.csv"), 'csv),
+  c : read_list(file_search("Tests/sc50a_c.csv"), 'csv),
+  is (abs(second(linear_program(A, b, c) + 64.5750770585645))<10^-4)
+);
+true;

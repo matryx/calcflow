@@ -1,0 +1,140 @@
+Suggestions and tips for writing test files
+Barton Willis
+
+(1) test file contains pairs of expressions. The first
+expression is the input, and the second is the expected output; for
+example, here are two tests:
+
+x + 0;
+x$
+
+x - x;
+0$
+
+You may terminate each line with either a semicolon or a dollar
+sign. To keep the file somewhat organized, terminate the input line
+with a semicolon and the expected output with a dollar sign. It's helpful to
+separate each input / expected output pair with a blank line.
+
+(2) Name your file "rtest_<a word that describes its contents>.mac".
+For example, "rtest_abs.mac" is a good name for tests for the absolute 
+value function.
+
+(3) If the input is something that doesn't need to be checked, make a
+compound statement with the last statement being 0. Thus
+
+(assume(x > 0), 0);
+0$
+
+abs(x);
+x$
+
+(4) If a test needs to use a non-default value for an option variable, try to
+make the change local instead of global. For example
+
+is (x < 1), prederror : false;
+unknown$
+
+Doing so keeps your test from modifying the global environment.
+
+(5) The first line of the test file should be 
+
+(kill(all),0);
+0$
+
+(6) From a Maxima input prompt, use the 'batch' function to run your test:
+
+     (%i1) batch("rtest_abs.mac", 'test);
+     Error log on #<output stream rtest_abs.ERR>
+
+You may need to give Maxima a full pathname to the file. After the
+test finishes, you can look at the .ERR file to see which tests
+failed.
+
+(7) If your test defines functions, makes assumptions, or assigns
+values to symbols, the last few lines of your test should clean up the
+global environment; thus if your test does assume(x > 0), assigns a
+value to 'a', and defines a function 'f', the last line of your test
+should be something like
+
+(forget(x > 0), remvalue(a), remfunction(f),0);
+0$
+
+(8) To append a test file to the main Maxima test suite,
+you'll need to append the file name to the list in the file
+/tests/testsuite.lisp. If your test has known errors, you'll need to
+include this data into testsuite.lisp. To illustrate, the tests
+42 and 42 in rtest_abs are known bugs. To tell Maxima that these
+are known bugs, append ((mlist) "rtest_abs" 42 43) to the file 
+list in testsuite.lisp.
+
+Also, you'll need to append the name of the test file to
+makefile.am. Finally, build Maxima and run the test suite. If all goes
+well, commit the new test file.
+
+(9) Other:
+
+(a) Check that your test runs multiple times without error. After
+appending a new test to Maxima's test suite, make sure that run_testsuite() 
+runs multiple times without error.
+
+(b) Always test the simple cases: abs(0), abs(0.0), abs(0.0b0), ... Also,
+check that functions work correctly for CRE expressions, arguments that
+contain '%i', empty lists, empty matrices, ... Thus always test
+the 'boundary' cases; these are things like max(), min(), apply("*",[]), ....
+
+(c) Check the sourceforge bug list for all reported bugs for the functions(s)
+you are testing. Include tests for these bugs; also put a comment in your
+test file that references the bug report:
+
+/*  See SF Bug #  771061 */
+
+expand((vt . a^^(-1) . u+1)^^(-2));
+((vt.a^^(-1).u)^^2+2*(vt.a^^(-1).u)+1)^^(-1)$
+
+If a bug causes a fatal error, you'll need to exclude it from your test
+(or better, include it, but comment it out).
+
+(d) It might be easier to place all known failures at the top of the
+file. With this policy, you can append new tests without updating the
+list of known failures in testsuite.lisp.
+
+(e) If a test checks a not so well known identity, include a reference to the
+identity:
+
+/* A&S 13.6.1 */
+hgfred([v+1/2],[2*v+1],2*%i*z);
+4^(v/2)*bessel_j(v,z)*gamma(v+1)*exp(%i*z)/z^v$
+
+(f) Maxima evaluates the input, but only simplifies the expected output. Thus
+a test such as
+
+  makelist(sin(k * %pi),k,1,5);
+  makelist(0,k,1,5)$
+
+will fail. You'll need to write the test as either 
+
+  makelist(sin(k * %pi),k,1,5);
+  ''(makelist(0,k,1,5))$
+
+or 
+
+  makelist(sin(k * %pi),k,1,5);
+  [0,0,0,0,0]$
+
+To get a test to pass,you may need to insert a few parenthesis in the 
+expected output; for example
+
+  -a/2;
+  -(a/2)$
+
+Another way to handle such things is to use explicit calls to ratsimp:
+
+  ratsimp(-a/2);
+  ''(ratsimp(-a/2))$
+
+To test a function such as factor, you do not want to apply ratsimp.
+
+
+
+

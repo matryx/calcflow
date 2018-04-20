@@ -1,0 +1,42 @@
+
+/* MATTRACE computes the trace [sum of the elements on the main diagonal] of
+a square matrix.  It is used by NCHARPOLY, an alternative to MACSYMA's
+CHARPOLY.  NCHARPOLY works by computing traces of powers the given matrix,
+which are known to be equal to sums of powers of the roots of the
+characteristic polynomial.  From these quantities the symmetric functions of
+the roots can be calculated, which are nothing more than the coefficients of
+the characteristic polynomial.  CHARPOLY works by forming the determinant of
+VAR * IDENT [N] - A.  Thus NCHARPOLY wins, for example, in the case of large
+dense matrices filled with integers, since it avoids polynomial arithmetic
+altogether.
+
+Programmed by DRB@MC. */
+
+mattrace(a) := block([acc : 0, i],
+  if matrixp(a) then (
+    i : lmin(matrix_size(a)),
+    while i > 0 do (
+      acc : acc + inpart(a,i,i),
+      i : i - 1),
+    acc)
+  else funmake('mattrace, [a]));
+
+ncharpoly(a,var):=
+  block
+    ([ak:a,trlist:[mattrace(a)],
+      symlist:[1],
+      k:0,p:0,
+      maperror:false,mapprint:false],
+     thru length(a)-1 do block([],ak:a.ak,trlist:cons(mattrace(ak),trlist)),
+     trlist:reverse(trlist), 
+      /*
+     MAP(LAMBDA([X],K:K+1,SYMLIST:
+     CONS(APPLY("+",MAPLIST("*",SYMLIST,TRLIST))/-K,SYMLIST)),TRLIST),
+    */
+     for i in trlist do (k:k+1,symlist:
+       cons(apply("+",maplist("*",symlist,trlist))/-k,symlist)),
+     for i:0 unless symlist=[] do
+       block([],p:p+first(symlist)*var^i,symlist:rest(symlist)),
+     ratsimp(p,var));
+
+

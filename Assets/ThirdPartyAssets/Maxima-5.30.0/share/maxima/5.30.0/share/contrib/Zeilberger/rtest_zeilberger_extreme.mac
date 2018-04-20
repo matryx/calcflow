@@ -1,0 +1,26 @@
+/* converted from testZeilberger.mac */
+kill(all);
+done$
+(load(zeilberger),done);
+done$
+
+
+/* EXTREME_TEST */
+f5 : binomial(n,k)^5;
+binomial(n,k)^5$
+zb_prove(f5,k,n,parGosper(f5,k,n,3));
+true$
+
+/* Wilson polynomials recurrence */
+h6: binomial(n,k) * (n+a+b+c+d-2+k)! * (a+x+k-1)! * (a-x+k-1)! /
+              (n+a+b+c+d-2)! / (a+b+k-1)! / (a+c+k-1)! / (a+d+k-1)! * (-1)^k;
+binomial(n,k) * (n+a+b+c+d-2+k)! * (a+x+k-1)! * (a-x+k-1)! /
+              (n+a+b+c+d-2)! / (a+b+k-1)! / (a+c+k-1)! / (a+d+k-1)! * (-1)^k$
+zb_prove(h6,k,n,parGosper(h6,k,n,2));
+true$
+
+/* Third special case of Strehl identity (MEMO, Feb 25, 1992) */
+h12: binomial(n, k)^2 * binomial( 2*k, k) * binomial(2*k,n-k);
+binomial(n, k)^2 * binomial( 2*k, k) * binomial(2*k,n-k)$
+zb_prove(h12,k,n,parGosper(h12,k,n,5));
+true$

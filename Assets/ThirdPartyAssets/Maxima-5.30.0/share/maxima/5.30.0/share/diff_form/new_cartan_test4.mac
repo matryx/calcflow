@@ -1,0 +1,43 @@
+coords: read("Input new coordinate")$             
+
+ dim:extdim:length(coords)$
+ basis:VR:extsub[1]:extsubb[1]:[]$
+for i thru dim do
+ (basis:endcons(concat(D,coords[i]),basis))$
+for i thru dim do
+ (
+  extsub[i+1]:cons(basis[i]=-basis[i],extsub[i]),
+  extsubb[i]:cons(basis[i]=0,extsub[i]),
+  ci:concat(v,i),VR:endcons(ci,VR))$
+ basis;
+cliffordtype:read("please input metric type,for example [1,1,1],if E3");
+/*cliffordtype:[1,1,1]$*/
+translist:read("represent the standard coordinates with new one");
+/*translist:[r*sin(phi)*cos(th),r*sin(phi)*sin(th),r*cos(phi)]$ */
+/*calculation norms */
+norm_table:[]$
+scale_factor:[]$
+_l:[]$
+for i:1 thru dim do (_l:map(lambda([x],diff(x,coords[i])),translist),
+    _l:map(lambda([x],x^2),_l),_p:ratsimp(trigsimp(apply("+",_l))),
+norm_table:endcons(cliffordtype[i]/_p,norm_table))$
+norm_table;
+for i:1 thru dim do
+ ( extsubb2[i]:cons(basis[i]=norm_table[i]/basis[i],extsub[i])
+)$
+for i:1 thru dim do 
+ ( a_:solve(x_^2-1/norm_table[i],[x_]),
+   scale_factor:cons(rhs(a_[2]),scale_factor)
+	)$
+scale_factor:reverse(scale_factor)$
+scale_factor;
+
+nest2(_f,_x):=block([_a:[_x],i],if listp(_f) then (
+         _f:reverse(_f),for i:1 thru length(_f) do(_a:map(_f[i],_a)))
+        else (_a:map(_f,_a)),_a[1])$
+nest3(_f,_x,_n):=block([_a,i],_a:[_x],for i:1 thru _n do(_a:map(_f,_a)),_a)$
+
+aa_:solve(x_^2-apply("*",norm_table),[x_])$
+volume:rhs(aa_[2])$
+volume:1/volume$
+matrix_element_mult:lambda([x,y],x@y)$

@@ -1,0 +1,58 @@
+@c NOTE: This template.texi shows how to create a texinfo file that is
+@c incorporated into maxima.info. See template-standalone.texi for a
+@c texinfo file which is accessed apart from maxima.info.
+
+@c NOTE: To bring MYTOPIC into maxima.info, you need to make references
+@c to MYTOPIC in 3 places. Search for "lbfgs" in maxima.texi for an example.
+@c
+@c 1. Under the heading "Additional packages" (line 139 at the moment)
+@c    Here you put "MYTOPIC:: Transmogrification a la Smith and Jones."
+@c
+@c 2. Under the heading "The Detailed Node Listing" (line 178 at the moment)
+@c    Here you copy the @menu which is defined in this file.
+@c
+@c 3. In the @node list (line 544 at the moment)
+@c    You MUST fix up the preceding and succeeding @nodes when you
+@c    create a new @node MYTOPIC.
+@c
+@c    @node PRECEDINGTOPIC, MYTOPIC, PRECEDINGPRECEDINGTOPIC, Top
+@c    @chapter PRECEDINGTOPIC
+@c    @include PRECEDINGTOPIC.texi
+@c
+@c    @node MYTOPIC, NEXTTOPIC, PRECEDINGTOPIC, Top
+@c    @chapter MYTOPIC
+@c    @include MYTOPIC.texi
+@c
+@c    @node NEXTTOPIC, NEXTNEXTTOPIC, MYTOPIC, Top
+@c    @chapter NEXTTOPIC
+@c    @include NEXTTOPIC.texi
+
+
+@menu
+* Introduction to MYTOPIC::
+* Definitions for MYTOPIC::
+@end menu
+
+@node Introduction to MYTOPIC, Definitions for MYTOPIC, Top, Top
+@section Introduction to MYTOPIC
+
+@code{MYTOPIC} is yadda yadda yadda, foo bar baz quux mumble blurf.
+
+@node Definitions for MYTOPIC, , Introduction to MYTOPIC, Top
+@section Definitions for MYTOPIC
+
+@deffn {Function} transmogrify (@var{foo}, @var{bar})
+
+Returns the generalized transmogrificatin of @var{foo} and @var{bar}.
+See also @code{frotz}.
+
+@end deffn
+
+@defvr {Variable} frotz
+Default value: @code{true}
+
+When @code{frotz} is @code{true},
+@code{transmogrify} computes the transmogrification by Smith's algorithm.
+Otherwise, the transmogrification is computed by Jones' algorithm.
+
+@end defvr

@@ -1,0 +1,308 @@
+(kill(all),0);
+0$
+
+/*--- numbers ----*/
+
+abs(-5);
+5$
+
+abs(0);
+0$
+
+abs(42);
+42$
+
+abs(-7/8);
+7/8$
+
+abs(27/5);
+27/5$
+
+abs(-2.4);
+2.4$
+
+abs(0.0);
+0.0$
+
+abs(6.022e23);
+6.022e23;
+
+abs(-6.022b23);
+6.022b23$
+
+abs(1066.0b3);
+1066.0b3$
+
+abs(inf);
+inf$
+
+abs(minf);
+inf$
+
+abs(infinity);
+inf$
+
+abs(und);
+und$
+
+abs(ind);
+ind$
+
+abs(%pi);
+%pi$
+
+abs(%phi);
+%phi$
+
+abs(%i);
+1$
+
+abs(1 + %i);
+sqrt(2)$
+
+abs(cos(1));
+cos(1)$
+
+abs((1 + %i) / (1-%i));
+1$
+
+abs((1 + %i) * (1-%i));
+2$
+
+/*--reflection simplification ----*/
+
+abs(x) - abs(-x);
+0$
+
+abs(x*y) - abs(-x*y);
+0$
+
+abs(sin(x)) - abs(sin(-x));
+0$
+
+expand(abs(14 * a*(b - c)) - abs(-14 * a * (c - b)));
+0$
+
+ratsubst(c,b,abs(x*(a+b)) - abs(x*(a+c)));
+0$
+
+/*--database facts -----*/
+
+(assume(equal(zip,0)),0);
+0$
+
+abs(zip * x);
+0$
+
+is(equal(abs(1 + zip),1));
+true$
+
+(forget(equal(zip,0)),0);
+0$
+
+
+/*--absolute value of products and quotients ---*/
+
+abs((1+%i) * x);
+sqrt(2) * abs(x)$
+
+abs((1+%i) * %pi);
+sqrt(2) * %pi$
+
+abs((1+%i) / x);
+sqrt(2) / abs(x)$
+
+/*-- absolute value of lists and other mbags---*/
+
+abs([a,b]), listarith : true;
+[abs(a),abs(b)]$
+
+abs([%i,-6]), listarith : true;
+[1,6]$
+
+abs(x = 1), listarith : true;
+abs(x) = 1$
+
+abs(-x = 1), listarith : true;
+abs(x) = 1$
+
+
+/*---- declared complex stuff ---*/
+
+(declare(z, complex),0);
+0$
+
+abs(conjugate(z));
+abs(z)$
+
+abs(exp(z));
+exp(realpart(z))$
+
+subst(z = %i, abs(z^2));
+1$
+
+(remove(z,complex),0);
+0$
+
+/*--- abs and tellsimp ---- */
+
+(tellsimp(abs(a), a+1), abs_rules : tellsimp(abs(b), b+1), 0);
+0$
+
+abs(a);
+a+1$
+
+abs(a * x);
+(a+1) * abs(x)$
+
+abs([a]), listarith : true;
+[a+1]$
+
+abs(a*b);
+(a+1)*(b+1)$
+
+abs(a^7);
+(a+1)^7$
+
+abs((a*b)^5);
+(a+1)^5 * (b + 1)^5$
+
+(remrule(abs, first(abs_rules)), remrule(abs, second(abs_rules)),0);
+0$
+
+(remvalue(abs_rules),0);
+0$
+
+/*--- abs flatten  ---*/
+
+abs(abs(x));
+abs(x)$
+
+abs(abs(-x));
+abs(x)$
+
+abs(abs(abs(x)));
+abs(x)$
+
+abs(abs(abs(x))+1);
+abs(abs(x) + 1)$
+
+/*--- simplify noun form ---*/
+
+'abs(1);
+1$
+
+'abs(1+x^2);
+1 + x^2$
+
+'abs(abs(x));
+abs(x)$
+
+
+/*-- subst into abs ---*/
+
+ratsubst(x,x^2,abs(1+x^3));
+1+x^2$
+
+ratsubst(0,a,abs(%pi + a));
+%pi$
+
+/*-- CRE tests ---*/
+
+abs(rat(x) + 1);
+abs(1+x)$
+
+abs(rat(1));
+1$
+
+/*-- misc -----*/
+
+abs(signum(1/x));
+1$
+
+is(equal(op(abs(a.b)), abs));
+true$
+
+is(equal(op(abs(a^^7)), abs));
+true$
+
+abs(taylor(exp(x),x,0,3)) - taylor(exp(x),x,0,3);
+''(taylor(0,x,0,3));
+
+/* bug SF[2631766] abs((1+%i)^%i) is wrong */
+
+abs((1+%i)^%i);
+%e^(-%pi/4);
+
+abs((sqrt(3)*%i/2-1/2)/(3*(%i/(6*sqrt(3))-1/6)^(1/3))
+            +(%i/(6*sqrt(3))-1/6)^(1/3)*(-sqrt(3)*%i/2-1/2));
+
+/*
+sqrt(3*sin(5*%pi/18)^2-2*sqrt(3)*cos(5*%pi/18)*sin(5*%pi/18)
+                            +cos(5*%pi/18)^2)
+       /sqrt(3);
+*/
+
+sin(5*%pi/18)-cos(5*%pi/18)/sqrt(3);
+
+/* Bug ID: 900860 - Simplifications involving abs
+ */
+
+/* Examples from the bug report */
+abs(x)/x^2;
+1/abs(x);
+
+x^2/abs(x);
+abs(x);
+
+abs(x)^3;
+x^2*abs(x);
+
+/* More examples */
+1/x^3*abs(x);
+1/(x*abs(x));
+
+1/abs(x)*x^3;
+x*abs(x);
+
+abs(x)^3/x^2;
+abs(x);
+
+abs(2*x+a)^3/(2*x+a)^2;
+abs(2*x+a);
+
+abs(log(x));
+abs(log(x))$
+
+subst(x=-1, abs(log(x))), lognegint : true;
+%pi$
+
+abs((-1)^x);
+1$
+
+(declare(z,complex), abs(log(-z)));
+abs(log(-z))$
+
+subst(z=-1, abs(log(-z)));
+0$
+
+(forget(z,complex),0);
+0$
+
+/* check sign before using multiplicative identity; from x*y > 0 */
+(assume(x*y > 0), abs(x*y));
+x*y$
+
+abs(-x*y);
+x*y$
+
+(forget(x*y > 0),0)$
+0$
+
+/* check sign before using abs(x^n) = abs(x)^n. */
+
+abs(x^2);
+x^2$
+
+abs(rat(a-b))-abs(rat(b-a));
+0$

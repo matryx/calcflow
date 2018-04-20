@@ -1,0 +1,189 @@
+-*- mode: Text;  -*-
+
+MAXIMA's ordinary differential equation (ODE) solver ODE2 solves
+elementary linear ODEs of first and second order.  The function
+contrib_ode extends ODE2 with additional methods.  The code may be
+integrated into MAXIMA at some stage.
+
+The calling convention for contrib_ode is identical to ODE2.  It takes
+three arguments: an ODE (only the left hand side need be given if the
+right hand side is 0), the dependent variable, and the independent
+variable.  When successful, it returns a list of solutions.
+
+A solution can have a number of forms:
+ o  an explicit solution for the dependent variable,
+ o  an implicit solution for the dependent variable,
+ o  a parametric solution in terms of variable %t, or
+ o  a tranformation into another ODE in variable %u.
+
+%c is used to represent the constant in the case of first order equations,
+and %k1 and %k2 the constants for second order equations.  If contrib_ode
+cannot obtain a solution for whatever reason, it returns false, after
+perhaps printing out an error message.
+
+(C1) eqn:x*'diff(y,x)^2-(1+x*y)*'diff(y,x)+y=0;
+
+                           dy 2             dy
+(D1)                    x (--)  - (x y + 1) -- + y = 0
+                           dx               dx
+
+(C2) contrib_ode(eqn,y,x);
+
+                                                    x
+(D2)                     [y = log(x) + %c, y = %c %e ]
+
+
+(C3) method;
+
+(D3)                                factor
+
+Nonlinear odes can have singular solutions without constants of
+integration.
+
+(C4) eqn:'diff(y,x)^2+x*'diff(y,x)-y=0;
+
+                              dy 2     dy
+(D4)                         (--)  + x -- - y = 0
+                              dx       dx
+
+(C5) contrib_ode(eqn,y,x);
+
+                                                  2
+                                        2        x
+(D5)                      [y = %C x + %C , y = - --]
+                                                 4
+(C6) method;
+
+(D6)                               clairault
+
+
+The following ode has two parametric solutions in terms of the dummy
+variable %t.  In this case the parametric solutions can be manipulated
+to give explicit solutions.
+
+(C7) eqn:'diff(y,x)=(x+y)^2;
+
+                                 dy          2
+(D7)                             -- = (y + x)
+                                 dx
+
+(C8) contrib_ode(eqn,y,x);
+
+(D8) [[x = %C - ATAN(SQRT(%T)), y = - x - SQRT(%T)],
+      [x = ATAN(SQRT(%T)) + %C, y = SQRT(%T) - x]]
+
+(C9) method;
+
+(D9)                              lagrange
+
+The following Riccati equation is transformed into a linear
+second order ODE in the variable %u.  maxima is unable to
+solve the new ODE.
+
+(%i7) eqn:'diff(y,x)+1-x=(x+y)*y;
+
+                            dy
+(%o7)                       -- - x + 1 = y (y + x)
+                            dx
+
+(%i8) contrib_ode(eqn,y,x);
+
+                        d%u
+                        ---                          2
+                        dx     d%u                  D %u
+(%o8)           [[y = - ---, - --- x + %u (x - 1) + ---- = 0]]
+                        %u     dx                     2
+                                                    dx
+
+(%i9) method;
+
+(%o9)                               riccati
+
+
+For first order ODEs contrib_ode calls ode2.  It then tries the
+following methods: factorization, Clairault, Lagrange, Riccati,
+Abel and Lie symmetry methods.  The Lie method is not attempted
+on Abel equations if the Abel method fails, but it is tried
+if the Riccati method returns an unsolved second order ODE.
+
+For second order ODEs contrib_ode calls ode2.  No other methods are
+implemented yet.
+
+Extensive debugging traces and messages are displayed if the command
+put('contrib_ode,true,'verbose) is executed.
+
+
+TO DO
+=====
+
+These routines are work in progress.  I still need to:
+
+* Extend the FACTOR method ode1_factor to work for multiple roots.
+
+* Extend the FACTOR method ode1_factor to attempt to solve higher
+  order factors.  At present it only attemps to solve linear factors.
+
+* Fix the LAGRANGE routine ode1_lagrange to prefer real roots over
+  complex roots.
+
+* Add additional methods for Riccati equations.
+
+* Improve the detection of Abel equations of second kind.  The exisiting
+  pattern matching is weak.
+
+* Work on the Lie symmetry group routine ode1_lie.  There are quite a
+  few problems with it: some parts are unimplemented; some test cases
+  seem to run forever; other test cases crash; yet others return very
+  complex "solutions".  I wonder if it really ready for release yet.
+
+* Add more test cases.
+
+TEST CASES
+==========
+
+The routines have been tested on a few hundred test cases from Murphy,
+Kamke and Zwillinger.  These are included in the tests subdirectory.
+
+* The Clairault routine ode1_clairault finds all known solutions,
+  including singular soultions.  (This statement is asking for
+  trouble).
+
+* The other routines often return a single solution when multiple
+  solutions exist.
+
+* Some of the "solutions" from ode1_lie are overly complex and
+  impossible to check.
+
+* There are some crashes.
+
+
+References
+==========
+
+[1] E Kamke, Differentialgleichungen Losungsmethoden und Losungen, Vol 1,
+    Geest & Portig, Leipzig, 1961
+
+[2] G M Murphy, Ordinary Differential Equations and Their Solutions,
+    Van Nostrand, New York, 1960
+
+[3] D Zwillinger, Handbook of Differential Equations, 3rd edition,
+    Academic Press, 1998
+
+[4] F Schwarz, Symmetry Analysis of Abel's Equation, Studies in
+    Applied Mathematics, 100:269-294 (1998)
+
+[5] F Schwarz, Algorithmic Solution of Abel's Equation,
+    Computing 61, 39-49 (1998)
+
+[6] E. S. Cheb-Terrab, A. D. Roche, Symmetries and First Order
+    ODE Patterns, Computer Physics Communications 113 (1998), p 239.
+    (http://lie.uwaterloo.ca/papers/ode_vii.pdf)
+
+[7] E. S. Cheb-Terrab, T. Koloknikov,  First Order ODEs,
+    Symmetries and Linear Transformations, European Journal of
+    Applied Mathematics, Vol. 14, No. 2, pp. 231-246 (2003).
+    (http://arxiv.org/abs/math-ph/0007023)
+    (http://lie.uwaterloo.ca/papers/ode_iv.pdf)
+
+[8] G W Bluman, S C Anco, Symmetry and Integration Methods for
+    Differential Equations, Springer, (2002)

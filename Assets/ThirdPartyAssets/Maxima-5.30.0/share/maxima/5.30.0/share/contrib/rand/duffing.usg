@@ -1,0 +1,268 @@
+duffing.mac is from the book "Computer Algebra in Applied Mathematics:
+An introduction to MACSYMA", by Richard H Rand, Pitman (1984).
+
+Duffing's equation is 
+
+  x''(T) + x + e*x^3 = e*f*cos(w*T)
+
+It is a model of a nonlinear oscillator driven by a sinusiodal forcing
+function.  When e is small and the forcing frequency is close to the
+natural frequency (of unity) the equation has one or more steady state
+periodic solutions. 
+
+This program determines the periodic solutions using Lindstedt's method.
+The code is very similar to vandpol.mac and mathieu.mac. 
+
+The original code produces an error.  A small patch (below) is required
+to get the code to run with maxima-5.9.0cvs.
+
+The run below, using maxima-5.9.0cvs, reproduce the result on pages
+127-134 of the book.  In the first part, the problem is solved step by
+step.  Then the whole procedure is automated.
+
+(C1) load("./duffing.mac");
+(D1)                             ./duffing.mac
+(C2) setup1(2);
+(D2)                                 DONE
+(C3) w;
+                                   2
+(D3)                           k  e  + k  e + 1
+                                2       1
+(C4) x;
+                                     2
+(D4)                     a COS(t) + e  y (t) + e y (t)
+                                        2         1
+(C5) setup2(2);
+(D5)                                 DONE
+(C6) eq[1];
+            2
+           d              3    3
+(D6)/R/    --- (y (t)) + a  COS (t) + (- f - 2 k  a) COS(t) + y (t)
+             2   1                              1              1
+           dt
+(C7) eq[2];
+         2
+        d                   3    3         2          2
+(D7)/R/ --- (y (t)) - 2 k  a  COS (t) + 3 a  y (t) COS (t)
+          2   2          1                    1
+        dt
+
+                                              2
+                     + (2 k  f + (- 2 k  + 3 k ) a) COS(t) + y (t) - 2 k  y (t)
+                           1           2      1               2         1  1
+(C8) step1(1);
+      2             3                          3
+     d             a  COS(3 t)              3 a  COS(t)
+(D8) --- (y (t)) + ----------- - f COS(t) + ----------- - 2 k  a COS(t) + y (t)
+       2   1            4                        4           1             1
+     dt
+(C9) step2(1);
+      2             3                      3                         3
+     d             a  COS(3 t)   (4 f - 3 a ) COS(t)              3 a  COS(t)
+(D9) --- (y (t)) + ----------- + ------------------- - f COS(t) + -----------
+       2   1            4                 4                            4
+     dt
+
+                                                                        + y (t)
+                                                                           1
+(C10) f[1];
+                                               3
+                                      4 f - 3 a
+(D10)                         [k  = - ----------]
+                                1        8 a
+(C11) step3(1);
+                          3
+                         a  COS(3 t)
+(D11)            y (t) = ----------- + %K1 SIN(t) + %K2 COS(t)
+                  1          32
+(C12) step4(1);
+Inconsistent equations:  (1 2)
+#0: step4(i=1)
+ -- an error.  Quitting.  To debug this try DEBUGMODE(TRUE);)
+(C13)
+
+
+After a small patch
+
+(C1) load("./duffing.mac");
+(D1)                             ./duffing.mac
+(C2) setup1(2);
+(D2)                                 DONE
+(C3) w;
+                                   2
+(D3)                           k  e  + k  e + 1
+                                2       1
+(C4) x;
+                                     2
+(D4)                     a COS(t) + e  y (t) + e y (t)
+                                        2         1
+(C5) setup2(2);
+(D5)                                 DONE
+(C6) eq[1];
+            2
+           d              3    3
+(D6)/R/    --- (y (t)) + a  COS (t) + (- f - 2 k  a) COS(t) + y (t)
+             2   1                              1              1
+           dt
+(C7) eq[2];
+         2
+        d                   3    3         2          2
+(D7)/R/ --- (y (t)) - 2 k  a  COS (t) + 3 a  y (t) COS (t)
+          2   2          1                    1
+        dt
+
+                                              2
+                     + (2 k  f + (- 2 k  + 3 k ) a) COS(t) + y (t) - 2 k  y (t)
+                           1           2      1               2         1  1
+(C8) step1(1);
+      2             3                          3
+     d             a  COS(3 t)              3 a  COS(t)
+(D8) --- (y (t)) + ----------- - f COS(t) + ----------- - 2 k  a COS(t) + y (t)
+       2   1            4                        4           1             1
+     dt
+(C9) step2(1);
+      2             3                      3                         3
+     d             a  COS(3 t)   (4 f - 3 a ) COS(t)              3 a  COS(t)
+(D9) --- (y (t)) + ----------- + ------------------- - f COS(t) + -----------
+       2   1            4                 4                            4
+     dt
+
+                                                                        + y (t)
+                                                                           1
+(C10) f[1];
+                                               3
+                                      4 f - 3 a
+(D10)                         [k  = - ----------]
+                                1        8 a
+(C11) step3(1);
+                           3
+                          a  COS(3 t)
+(D11)             y (t) = ----------- + a  SIN(t) + b  COS(t)
+                   1          32         1           1
+(C12) step4(1);
+                                               3
+                                              a
+(D12)                        [[a  = 0, b  = - --]]
+                                1       1     32
+(C13) step5(1);
+                                 3             3
+                                a  COS(3 t)   a  COS(t)
+(D13)                   y (t) = ----------- - ---------
+                         1          32           32
+(C14) step1(2);
+       2               5               2                 5             2
+      d             3 a  COS(5 t)   9 a  f COS(3 t)   3 a  COS(3 t)   f  COS(t)
+(D14) --- (y (t)) + ------------- + --------------- - ------------- - ---------
+        2   2            128              32               16            4 a
+      dt
+
+                              2                5
+                          11 a  f COS(t)   21 a  COS(t)
+                        + -------------- - ------------ - 2 k  a COS(t) + y (t)
+                                32             128           2             2
+(C15) step2(2);
+       2               5               2                 5
+      d             3 a  COS(5 t)   9 a  f COS(3 t)   3 a  COS(3 t)
+(D15) --- (y (t)) + ------------- + --------------- - -------------
+        2   2            128              32               16
+      dt
+
+        2       3         6            2              2                5
+   (32 f  - 44 a  f + 21 a ) COS(t)   f  COS(t)   11 a  f COS(t)   21 a  COS(t)
+ + -------------------------------- - --------- + -------------- - ------------
+                128 a                    4 a            32             128
+
+ + y (t)
+    2
+(C16) f[2];
+                                   2       3         6
+                               32 f  - 44 a  f + 21 a
+(D16)                  [k  = - -----------------------]
+                         2                  2
+                                       256 a
+(C17) step3(2);
+               5                 2         5
+              a  COS(5 t) + (36 a  f - 24 a ) COS(3 t)
+(D17) y (t) = ---------------------------------------- + a  SIN(t) + b  COS(t)
+       2                        1024                      2           2
+(C18) step4(2);
+                                           2         5
+                                       36 a  f - 23 a
+(D18)                 [[a  = 0, b  = - ---------------]]
+                         2       2          1024
+(C19) step5(2);
+               5                 2         5
+              a  COS(5 t) + (36 a  f - 24 a ) COS(3 t)
+(D19) y (t) = ----------------------------------------
+       2                        1024
+
+                                                            2         5
+                                                       (36 a  f - 23 a ) COS(t)
+                                                     - ------------------------
+                                                                 1024
+
+
+The process can be automated
+(C20) duffing(3);
+         3             3
+        a  COS(3 t)   a  COS(t)
+y (t) = ----------- - ---------
+ 1          32           32
+
+         5               2                 5               2
+        a  COS(5 t)   9 a  f COS(3 t)   3 a  COS(3 t)   9 a  f COS(t)
+y (t) = ----------- + --------------- - ------------- - -------------
+ 2         1024             256              128             256
+
+                                                                      5
+                                                                  23 a  COS(t)
+                                                                + ------------
+                                                                      1024
+
+         7                4                 7                  2
+        a  COS(7 t)   13 a  f COS(5 t)   3 a  COS(5 t)   81 a f  COS(3 t)
+y (t) = ----------- + ---------------- - ------------- + ----------------
+ 3         32768            6144             2048              2048
+
+        4                   7                  2                4
+   423 a  f COS(3 t)   297 a  COS(3 t)   81 a f  COS(t)   1217 a  f COS(t)
+ - ----------------- + --------------- - -------------- + ----------------
+         8192               16384             2048             24576
+
+        7
+   547 a  COS(t)
+ - -------------
+       32768
+
+      3       3        3  2        6         9     2      2       3         6
+     e  (128 f  - 236 a  f  + 221 a  f - 81 a )   e  (32 f  - 44 a  f + 21 a )
+w= - ------------------------------------------ - ----------------------------
+                            3                                     2
+                      2048 a                                 256 a
+
+                                                                        3
+                                                            e (4 f - 3 a )
+                                                          - -------------- + 1
+                                                                 8 a
+
+
+The patch applied is
+
+--- duffing.mac.orig	2004-02-14 11:42:26.389030400 +1100
++++ duffing.mac	2004-02-14 11:27:35.948640000 +1100
+@@ -40,7 +40,8 @@
+       :expand(trigreduce(expand(ev(eq[i],makelist([e[j],f[j]],j,1,i-1),
+ 				   diff))))$
+ step2(i):=(f[i]:solve(coeff(temp1,cos(t)),k[i]),temp1:ev(temp1,f[i]))$
+-step3(i):=temp1:ev(ode2(temp1,y[i](t),t),%k1:a[i],%k2:b[i])$
++step3(i):=(temp1:ode2(temp1,y[i](t),t),
++  temp1:subst(a[i],%k1,temp1),temp1:subst(b[i],%k2,temp1))$
+ step4(i):=(temp2:rhs(temp1),temp2:diff(temp2,t),
+       temp2:solve([ev(rhs(temp1),t:0),ev(temp2,t:0)],[a[i],b[i]]))$
+ step5(i):=e[i]:ev(temp1,temp2)$
+
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

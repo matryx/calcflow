@@ -1,0 +1,109 @@
+/* tests for solving dimensional equations */
+
+(load (physical_constants), 0);
+0;
+
+([a, c, d] : [1 ` m, 2 ` m, 3 ` m], 0);
+0;
+
+solve_dimensional ([A = a * b, b = c * d], [A, b]);
+[[A = 6 ` m^3,b = 6 ` m^2]];
+
+foo : solve_dimensional (x ` m = 5 ` ft, x);
+[x = 5 ` ft/m];
+
+dimensions (foo);
+['dimensions(x) = 1];
+
+foo `` 1;
+[x = 381/250];
+
+/* A quadratic equation. */
+
+foo : solve_dimensional (10^6 ` Btu = 1/2 * (10 ` lbm) * v^2, v);
+[v = (-8*5^(5/2)) ` sqrt(Btu)/sqrt(lbm),v = 8*5^(5/2) ` sqrt(Btu)/sqrt(lbm)];
+
+dimensions (foo);
+['dimensions(v) = length/time,'dimensions(v) = length/time];
+
+foo1 : foo `` m/s;
+[v `` m/s = (-128*5^(13/2)*sqrt(1055)/sqrt(45359237)) ` m/s,
+ v `` m/s = 128*5^(13/2)*sqrt(1055)/sqrt(45359237) ` m/s];
+
+float (foo1);
+[v `` m/s = (-21567.92463845543) ` m/s,v `` m/s = 21567.92463845543 ` m/s];
+
+/* An example involving symbolic constants (Planck's and speed of light). */
+
+(declare ([E, %lambda], dimensional),
+ eq : E * %lambda = %c * %h,
+ foo : ev (solve_dimensional (eq, %lambda), E = 10^-20 ` J));
+[%lambda = %c*%h*(100000000000000000000 ` 1/J)];
+
+dimensions (foo);
+['dimensions(%lambda) = length];
+
+foo1 : foo, constvalue;
+[%lambda = 6207642188737199/312500000000000000000 ` m];
+
+float (foo1);
+[%lambda = 1.986445500395904E-5 ` m];
+
+/* Stefan-Boltzmann law -- radiant heat transfer
+ * Try it 2 ways -- one late substitution with numerical values, one early,
+ * should turn out the same both ways
+ */
+
+declare ([E, %A, %T, sigma_sb], dimensional);
+done;
+
+foo : solve_dimensional (E = %A * %T^4 * sigma_sb, %T);
+[%T = %i*(E/(%A*sigma_sb))^(1/4),%T = -(E/(%A*sigma_sb))^(1/4),
+ %T = -%i*(E/(%A*sigma_sb))^(1/4),%T = (E/(%A*sigma_sb))^(1/4)];
+
+dimensions (foo);
+['dimensions(%T) = 'dimensions(%i)*('dimensions(E)/('dimensions(%A)*'dimensions(sigma_sb)))^(1/4),
+ 'dimensions(%T) = -('dimensions(E)/('dimensions(%A)*'dimensions(sigma_sb)))^(1/4),
+ 'dimensions(%T) = -'dimensions(%i)*('dimensions(E)/('dimensions(%A)*'dimensions(sigma_sb)))^(1/4),
+ 'dimensions(%T) = ('dimensions(E)/('dimensions(%A)*'dimensions(sigma_sb)))^(1/4)];
+
+foo_late : subst ([E = 7 ` kW, %A = 11 ` m^2, sigma_sb = 56697/10000/10^8 ` W/m^2/K^4], foo);
+[%T = 1000*7^(1/4)*%i/623667^(1/4) ` K*kW^(1/4)/W^(1/4),
+ %T = (-1000*7^(1/4)/623667^(1/4)) ` K*kW^(1/4)/W^(1/4),
+ %T = (-1000*7^(1/4)*%i/623667^(1/4)) ` K*kW^(1/4)/W^(1/4),
+ %T = 1000*7^(1/4)/623667^(1/4) ` K*kW^(1/4)/W^(1/4)];
+
+dimensions (foo_late);
+['dimensions(%T) = temperature,'dimensions(%T) = temperature,
+ 'dimensions(%T) = temperature,'dimensions(%T) = temperature];
+
+foo1_late : foo_late `` K;
+[%T `` K = 7^(1/4)*1000^(5/4)*%i/623667^(1/4) ` K,
+ %T `` K = (-7^(1/4)*1000^(5/4)/623667^(1/4)) ` K,
+ %T `` K = (-7^(1/4)*1000^(5/4)*%i/623667^(1/4)) ` K,
+ %T `` K = 7^(1/4)*1000^(5/4)/623667^(1/4) ` K];
+
+float (foo1_late);
+[%T `` K = 325.4890020542776*%i ` K,%T `` K = (-325.4890020542776) ` K,
+ %T `` K = (-325.4890020542776*%i) ` K,%T `` K = 325.4890020542776 ` K];
+
+foo_early : solve_dimensional (subst ([E = 7 ` kW, %A = 11 ` m^2, sigma_sb = 56697/10000/10^8 ` W/m^2/K^4], E = %A * %T^4 * sigma_sb), %T);
+[%T = 1000*7^(1/4)*%i/623667^(1/4) ` K*kW^(1/4)/W^(1/4),
+ %T = (-1000*7^(1/4)/623667^(1/4)) ` K*kW^(1/4)/W^(1/4),
+ %T = (-1000*7^(1/4)*%i/623667^(1/4)) ` K*kW^(1/4)/W^(1/4),
+ %T = 1000*7^(1/4)/623667^(1/4) ` K*kW^(1/4)/W^(1/4)];
+
+dimensions (foo_early);
+['dimensions(%T) = temperature,'dimensions(%T) = temperature,
+ 'dimensions(%T) = temperature,'dimensions(%T) = temperature];
+
+foo1_early : foo_early `` K;
+[%T `` K = 7^(1/4)*1000^(5/4)*%i/623667^(1/4) ` K,
+ %T `` K = (-7^(1/4)*1000^(5/4)/623667^(1/4)) ` K,
+ %T `` K = (-7^(1/4)*1000^(5/4)*%i/623667^(1/4)) ` K,
+ %T `` K = 7^(1/4)*1000^(5/4)/623667^(1/4) ` K];
+
+float (foo1_early);
+[%T `` K = 325.4890020542776*%i ` K,%T `` K = (-325.4890020542776) ` K,
+ %T `` K = (-325.4890020542776*%i) ` K,%T `` K = 325.4890020542776 ` K];
+

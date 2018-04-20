@@ -1,0 +1,43 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Products/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Products ---------- */
+/* => [640 pi^3]/[2187 sqrt(3)]   [Gradshteyn and Ryzhik 8.338(5)] */
+closedform(product(gamma(k/3), k, 1, 8));
+/* => n! = gamma(n + 1) */
+product(k, k, 1, n);
+/* => x^[n (n + 1)/2] */
+closedform(product(x^k, k, 1, n));
+/* => n */
+closedform(product((1 + 1/k), k, 1, n - 1));
+/* => 1/2^(2 n) binomial(2 n, n)   [Knopp, p. 385] */
+closedform(product((2*k - 1)/(2*k), k, 1, n));
+/* => [x^(2 n) - 1]/(x^2 - 1)   [Gradshteyn and Ryzhik 1.396(1)] */
+'product(x^2 - 2*x*cos(k*%pi/n) + 1, k, 1, n - 1);
+closedform(%);
+/* => 2/3   [Knopp, p. 228] */
+closedform(product((k^3 - 1)/(k^3 + 1), k, 2, inf));
+/* => 2/pi   [Gradshteyn and Ryzhik 0.262(2)] */
+closedform(product(1 - 1/(2*k)^2, k, 1, inf));
+/* => sqrt(2)   [Gradshteyn and Ryzhik 0.261] */
+'product(1 + (-1)^(k + 1)/(2*k - 1), k, 1, inf);
+closedform(%);
+/* => -1   [Knopp, p. 436] */
+'product((k*(k +  1) + 1 + %i)/(k*(k + 1) + 1 - %i), k, 0, inf);
+closedform(%);
+/* ---------- Quit ---------- */
+quit();

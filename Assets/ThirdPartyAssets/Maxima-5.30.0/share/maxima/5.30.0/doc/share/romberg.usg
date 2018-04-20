@@ -1,0 +1,174 @@
+
+ROMBERG is now MACSYM;ROMBRG FASL and is autoloading.  Just call 
+ROMBERG and it will be there. - JPG
+
+GJC@MIT-MC 01/12/81 13:50:27
+To: (FILE [SHARE;ROMBRG USAGE]) at MIT-MC
+The old conventions of what are efficient ways to call ROMBERG, 
+or what are ways which work in at all, are now repaired.
+
+Given F(N):=ROMBERG(expression,VAR,0,N)$
+
+If F is translated/compiled then the expression
+will also be translated/compiled! Also, the
+old "efficient" way, which could ONLY BE USED
+ON TRANSLATED FUNCTIONS, (what a pain in the neck
+right?), now works on all functions.
+
+This change is made possible due to the increased
+power of the macsyma->lisp translator, and some
+reworking of the numerical code.
+
+[Anonymous functions, i.e. LAMBDA expressions, are
+now translated into lisp functions.]
+
+The entry point to ROMBERG is now ROMBERG_SUBR,
+which only takes 3 arguments, the first being a function.
+[This is never seen by the user.]
+
+ROMBERG(F,A,B) => ROMBERG_SUBR(F,A,B)
+ROMBERG(X^2,X,A,B) => ROMBERG_SUBR(LAMBDA([X],X^2),A,B)
+
+The arrow "=>" signifies a transformation which takes
+place through the same mechanisms as the *new* macsyma
+"macro" feature. To see how this feature can be
+useful in numerical applications see SHARE;SIMPSN MACRO.
+
+Proper use of MODE_DECLARE is still important of course.
+
+p.s. These same extensions apply to the syntax of the
+INTERPOLATE command. However, the restrictions on the
+use of the PLOT2 command unfortunately still hold.
+This takes lots of work on PLOT2 to fix.
+
+GJC@MIT-MC 03/20/80 19:09:30
+To: (FILE [SHARE;ROMBRG USAGE]) at MIT-MC
+The source for ROMBERG is now MAXSRC;ROMBRG > and NUMER;ROMBRG MMACRO.
+The three argument version of ROMBERG now works for macsyma functions,
+not just translated functions. Problems with arguments not getting
+properly floated, e.g. ROMBERG(X,X,1/10,2/10) have been fixed, problems
+with the arguments to ROMBERG not getting evaluated in compiled code
+have been fixed.
+
+CFFK@MIT-MC 12 AUG 1979 1743-EDT
+To: (FILE [SHARE;ROMBRG USAGE]) at MIT-MC
+At SK's suggestion, ROMBERG (BROMBERG) will now exit if an absolute
+error condition is satisfied.  This is governed by the new variable
+ROMBERGABS (BROMBERABS) - default value 0.0 (0.0B0).
+
+Assuming that successive estimates produced by ROMBERG are Y[0], Y[1],
+Y[2] etc., then ROMBERG will return after N iterations if
+(roughly speaking)
+(ABS(Y[N]-Y[N-1]) <= ROMBERGABS OR
+ ABS(Y[N]-Y[N-1])/(IF Y[N]=0.0 THEN 1.0 ELSE Y[N]) <= ROMBERGTOL)
+is TRUE.  (The condition on the number of iterations given by ROMBERGMIN
+must also be satisfied.)  (The old exit condition, was on the relative
+error if ABS(Y[N]) > 1.0, and on the absolute error otherwise.  Pretty
+random!)
+
+Thus if ROMBERGABS is 0.0 (the default) you just get the relative error
+test.  The usefulness of the additional variable comes when
+you want to perform an integral, where the dominant contribution
+comes from a small region.  Then you can do the integral over
+the small dominant region first, using the relative accuracy
+check, followed by the integral over the rest of the region
+using the absolute accuracy check.
+
+Example:  Suppose you want to compute
+   Integral(exp(-x),x,0,50)
+(numerically) with a relative accuracy of  1 part in 10000000.
+
+  /* Define the function.  N is a counter, so we can see how many
+     function evaluations were needed. */
+F(X):=(MODEDECLARE(N,INTEGER,X,FLOAT),N:N+1,EXP(-X))$
+TRANSLATE(F)$
+  /* First of all try doing the whole integral at once */
+BLOCK([ROMBERGTOL:1.E-6,ROMBERABS:0.],N:0,ROMBERG(F,0,50)); ==> 1.00000003
+N; ==> 257  /* Number of function evaluations*/
+  /* Now do the integral intelligently, by first doing
+     Integral(exp(-x),x,0,10) and then setting ROMBERGABS to 1.E-6*(this
+     partial integral).  */
+BLOCK([ROMBERGTOL:1.E-6,ROMBERGABS:0.,SUM:0.],
+      N:0,SUM:ROMBERG(F,0,10),ROMBERGABS:SUM*ROMBERGTOL,ROMBERGTOL:0.,
+      SUM+ROMBERG(F,10,50));  ==> 1.00000001  /* Same as before */
+N;  ==> 130
+
+So if F(X) were a function that took a long time to compute, the
+second method would be about 2 times quicker.
+
+CFFK@MIT-MC 05/04/78 16:52:43
+To: (FILE [SHARE;ROMBRG USAGE]) at MIT-MC
+There is a new option ROMBERGMIN whose default value is 0, that
+govern the minimum number of function evaluations that ROMBERG will
+make.  ROMBERG will evaluate its first arg. at least 2^(ROMBERGMIN+2)+1
+times.  This is useful for integrating oscillatory functions, when
+the normal converge test might sometimes wrongly pass.
+
+There are 2 ways of using this function:
+
+1) An inefficient way that looks like the definite integral version of
+INTEGRATE:
+	ROMBERG(<integrand>,<variable of integration>,<lower limit>,
+		<upper limit>);
+Examples:
+	ROMBERG(SIN(Y),Y,1,%PI);
+		TIME= 39 MSEC.		1.5403023
+	F(X):=1/(X^5+X+1);
+	ROMBERG(F(X),X,1.5,0);
+		TIME= 162 MSEC.		- 0.75293843
+
+2) An efficient way that is more like RJF's ROMBERG function:
+	ROMBERG(<function name>,<lower limit>,<upper limit>);
+Example:
+	F(X):=(MODEDECLARE([FUNCTION(F),X],FLOAT),1/(X^5+X+1));
+	TRANSLATE(F);
+	ROMBERG(F,1.5,0);
+		TIME= 13 MSEC.		- 0.75293843
+The first argument must be a TRANSLATEd or compiled function, which
+returns a floating point number.  (If it is
+compiled it must be declared to return a FLONUM.)  If the first argument
+is not already TRANSLATEd, ROMBERG will not attempt to TRANSLATE it but
+will give an error.
+
+The accuracy of the integration is governed by the global variables
+ROMBERGTOL (default value 1.E-4) and ROMBERGIT (default value 11).
+ROMBERG will return a result if the relative difference in successive
+approximations is less than ROMBERGTOL.  It will try halving the
+stepsize ROMBERGIT times before it gives up.
+
+ROMBERG may be called recursively and thus can do double and triple
+integrals.
+Example:
+	INTEGRATE(INTEGRATE(X*Y/(X+Y),Y,0,X/2),X,1,3);
+				13/3 (2 LOG(2/3) + 1)
+	%,NUMER;
+				0.81930233
+
+	DEFINE_VARIABLE(X,0.0,FLOAT,"Global variable in function F")$
+	F(Y):=(MODE_DECLARE(Y,FLOAT), X*Y/(X+Y) )$
+	G(X):=ROMBERG('F,0,X/2)$  
+	ROMBERG(G,1,3);
+ 				0.8193023
+
+The advantage with this way is that the function F can be used for other 
+purposes, like plotting. The disadvantage is that you have to think up 
+a name for both the function F and its free variable X.
+
+Or, without the global:
+	G1(X):=(MODE_DECLARE(X,FLOAT), ROMBERG(X*Y/(X+Y),Y,0,X/2))$
+	ROMBERG(G1,1,3);
+ 				0.8193023
+The advantage here is shortness.
+
+	Q(A,B):=ROMBERG(ROMBERG(X*Y/(X+Y),Y,0,X/2),X,A,B)$
+	Q(1,3);
+ 				0.8193023
+It is even shorter this way, and the variables do not need to be declared 
+because they are in the context of ROMBERG.
+
+Use of ROMBERG for multiple integrals can have great disadvantages,
+though.  The amount of extra calculation needed because of the geometric
+information thrown away by expressing multiple integrals this way can
+be incredible.  The user should understand and use the ROMBERGTOL and
+ROMBERGIT switches.
+

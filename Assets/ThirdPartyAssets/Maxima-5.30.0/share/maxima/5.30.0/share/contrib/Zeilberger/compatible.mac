@@ -1,0 +1,24 @@
+/* Maxima-compatibility definitions */
+
+/* RISC Institute, Linz, Austria    */
+/* by Fabrizio Caruso               */
+
+
+zb_op(expr) := 
+  if atom(expr) then
+     expr
+  else 
+     part(expr,0);
+
+
+zb_operatorp(expr,operator) :=
+    if zb_op(expr)=operator then
+       true
+    else
+       false;
+
+
+
+
+
+

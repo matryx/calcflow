@@ -1,0 +1,50 @@
+averm.mac is from the book "Perturbation Methods, Bifurcation Theory
+and Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+The routine performs m-th order averaging on an n-dimensional system
+of nonautonomous odes.  Averaging is performed by converting trig
+terms to complex exponentials, then killing exponentials.  It is noted
+that for most practical problems the routine is proabaly too slow and
+creates intermediate expressions that are too large.  
+
+The example is from p 130.  maxima-5.9.0 cvs reproduces the
+results from the book.
+
+(C1) load("averm.mac");
+(D1)                               averm.mac
+(C2) averm();
+DO YOU WANT TO ENTER A NEW PROBLEM? (Y/N)
+Y;
+ARE YOU CONSIDERING A WEAKLY NONLINEAR OSCILLATOR OF THE FORM
+Z'' + OMEGA0^2 Z = EPS F(Z,ZDOT,T) ? (Y/N)
+N;
+ENTER NUMBER OF DIFFERENTIAL EQUATIONS
+1;
+THE ODE'S ARE OF THE FORM:
+DX/DT = EPS F(X,T)
+WHERE X = [X1]
+SCALE TIME T SUCH THAT AVERAGING OCCURS OVER 2 PI
+ENTER RHS( 1 )=EPS*...
+(X1-X1^2)*SIN(T)^2;
+                  2            2
+D X1 /DT = EPS SIN (T) (X1 - X1 )
+ENTER ORDER OF AVERAGING
+3;
+THE TRANSFORMATION:  [X1] =
+          2                 2             3
+[- ((2 EPS  COS(4 T) - 8 EPS  COS(2 T)) Y1
+
+           2                                    2             2
+ + (- 3 EPS  COS(4 T) - 16 EPS SIN(2 T) + 12 EPS  COS(2 T)) Y1
+
+       2                                   2
+ + (EPS  COS(4 T) + 16 EPS SIN(2 T) - 4 EPS  COS(2 T) - 64) Y1)/64]
+                   3   4      3   3      3   2         2
+                EPS  Y1    EPS  Y1    EPS  Y1    EPS Y1    EPS Y1
+(D2)         [- -------- + -------- - -------- - ------- + ------]
+                   64         32         64         2        2
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

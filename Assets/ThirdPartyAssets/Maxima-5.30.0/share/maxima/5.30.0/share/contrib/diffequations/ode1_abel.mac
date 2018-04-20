@@ -1,0 +1,416 @@
+/* ode1_abel.mac 
+
+  Attempt to solve Abel ode of first kind
+
+    y' = f3(x)*y^3+f2(x)*y^2+f1(x)*y+f0(x)
+
+  and Abel ode of second kind 
+
+    (g1(x)*y+g0(x))*y' = f3(x)*y^3+f2(x)*y^2+f1(x)*y+f0(x)
+
+  Form of equations is from Zwillinger[5].  Other conventions
+  are used.
+
+  References: 
+
+  [1] E Kamke, Differentialgleichungen Losungsmethoden und Losungen, 
+      Vol 1, Geest & Portig, Leipzig, 1961
+
+  [2] G M Murphy, Ordinary Differential Equations and Their Solutions,
+      Van Nostrand, New York, 1960, pp 23-25
+ 
+  [3] F Schwarz, Symmetry Analysis of Abel's Equation, Studies in
+      Applied Mathematics, 100:269-294 (1998)
+
+  [4] F Schwarz, Algorithmic Solution of Abel's Equation, 
+      Computing 61, 39-49 (1998)
+
+  [5] D Zwillinger, Handbook of Differential Equations, 3rd ed
+      Academic Press, (1997)
+
+
+
+  Copyright (C) 2004  David Billinghurst
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or 
+  (at your option) any later version. 
+ 		       								 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+ 		       								 
+  You should have received a copy of the GNU General Public License	
+  along with this program; if not, write to the Free Software 		 
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+put('ode1_abel,001,'version)$
+
+/* Driver routine. */
+ode1_abel(eq,y,x) := block(
+  [s],
+  s:ode1_abel1(eq,y,x),
+  if s#false then (
+    if s#[] then method:'abel,
+    return(s)
+  ),
+  s:ode1_abel2(eq,y,x),
+  if s#false then (
+    if s#[] then method:'abel2,
+    return(s)
+  ),
+  false
+)$
+
+/* Determine if eq is an Abel equation of first kind  
+     y' = f3(x)*y^3+f2(x)*y^2+f1(x)*y+f0(x)
+   If so, try and solve it
+ */
+ode1_abel1(eq,y,x) := block(
+  [de,%a,expr,i,f,ans],
+  ode_disp("-> ode1_abel1"),
+
+  /* See eq is an Abel equation of first kind */
+  de:expand(lhs(eq)-rhs(eq)),
+  ode_disp2("  de: ",de),
+  if (derivdegree(de,y,x)>1) then return(false),
+  %a:coeff(de,'diff(y,x),1),
+  ode_disp2("  %a: ",%a),
+  if (%a=0) then return(false),
+  expr:expand(de-%a*'diff(y,x)),
+  if not(freeof(expr,'diff(y,x))) then (
+    ode_disp("  Unexpected event in ode1_abel1 - expr contains dy/dx"),
+    ode_disp2("  expr: ",expr),
+    return(false)
+  ),
+  expr:expand(expr/%a),
+
+  /* Now require expr to have form f3(x)*y^3+f2(x)*y^2+f1(x)*y+f0(x) */
+  if (hipow(expr,y)#3) then return(false),  
+  for i:0 thru 3 do (
+    f[i]:-ratsimp(coeff(expr,y,i)),
+    if not(freeof(y,f[i])) then return(false)
+  ),
+
+  expr: expand(de-%a*('diff(y,x)-f[3]*y^3-f[2]*y^2-f[1]*y-f[0])),
+  expr: ratsimp(expr),
+  ode_disp2("   expr: ",expr),
+  if is(expr#0) then return(false),
+
+  ode_disp("  Equation is an Abel equation of first kind with"),
+  ode_disp2("     f[3]: ",f[3]),
+  ode_disp2("     f[2]: ",f[2]),
+  ode_disp2("     f[1]: ",f[1]),
+  ode_disp2("     f[0]: ",f[0]),
+
+  ans:ode1_abel1a(f[0],f[1],f[2],f[3],y,x),
+
+  /* If equation is an Abel equation and this method fails
+     then give up.  Cannot be solved by ode1_lie() */
+  if ans=false then ans:[],
+  ans
+)$
+
+
+ode1_abel1a(f0,f1,f2,f3,y,x) := block(
+  [ans],
+
+  ode_disp("  In ode1_abel1a"),
+
+  /* These two cases are special. */ 
+  if ( f0=0 and f1=0 and f2#0 ) then (
+    ans:ode1_abel_f0_0_f1_0(f0,f1,f2,f3,y,x),
+    if ans#false then return(ans)
+  ),
+  if ( f0=0 and f2=0 ) then (
+    ans:ode1_abel_f0_0_f2_0(f0,f1,f2,f3,y,x),
+    if ans#false then return(ans)
+  ),
+
+  /* Calculate third order relative invariant.  Using definition
+     from Schwarz, with signs of fi reversed */
+  s3: -3*f0*f3^2 - diff(f2,x)*f3 + f2*diff(f3,x)
+    + f1*f2*f3 - 2*f2^3/9,
+  s3: ratsimp(s3),
+
+  ode_disp2("Third order relative invariant s3: ",s3),
+  if s3=0 then (
+    ode_disp("  case s3 = 0 "),
+    ode1_abel_relative_invariant_zero(f0,f1,f2,f3,y,x)
+  ) 
+  else (
+    ode_disp("  case s3 # 0"),
+    ode1_abel_relative_invariant_nonzero(f0,f1,f2,f3,y,x)
+  )
+)$
+
+/* Attempt to solve Abel ode 
+
+     y' = f3(x)*y^3+f2(x)*y^2+f1(x)*y+f0(x)
+
+   when f0=0 and f1=0.  This is Murphy Case 4-1.g.i
+
+   If F(x)=f3/f2 and A=F'(x)/f2 is constant 
+   then let y*F(x)=u(x) and equation becomes F(x)*u'(x)=f2*u*(A+u+u^2)
+*/ 
+ode1_abel_f0_0_f1_0(f0,f1,f2,f3,y,x) := block(
+  [_F,A,newde,u,ans],
+  ode_disp("-> ode1_abel_f0_0_f1_0"),
+
+  _F:f3/f2,
+  ode_disp2("   _F: ",_F),
+  A:ratsimp(diff(_F,x)/f2),
+  ode_disp2("   A: ",A),
+
+  if not(freeof(x,A)) then (
+    ode_disp("   A is not constant, so this algorithm dosen't apply"),
+    return(false)
+  ),
+
+  ode_disp("   A is constant, so can attempt solution"),
+  newde:_F*'diff(u,x)=f2*u*(A+u+u^2),
+  ode_disp2("Try to solve ",newde),
+  ans:ode2(newde,u,x),
+  ode_disp2("Answer is ",ans),
+  if ans=false then return(false),
+  ans:subst(y*_F,u,ans),
+  [ans]
+)$
+
+/* Solve Abel ode of first kind y' = f3(x)*y^3+f2(x)*y^2+f1(x)*y+f0(x)
+   when f0=0 and f2=0. The equation is a Bernouli ode - just call ode2()
+   This routine useful when testing ode1_abel() in isolation.
+*/ 
+ode1_abel_f0_0_f2_0(f0,f1,f2,f3,y,x) := block(
+  [ans],
+  ode_disp("In ode1_abel_f0_0_f2_0"),
+  ans:ode2('diff(y,x)=f3*y^3+f1*y,y,x),
+  if ans=false then return(false),
+  [ans]
+)$
+
+/* Attempt to solve Abel ode when relative invariant s3=0
+
+     y' = f3*y^3+f2*y^2+f1*y+f0
+
+   Schwarz defines
+   s3: -3*f0*f3^2 - f2'*f3 + f2*f3'+ f1*f2*f3 - 2*f2^3/9,
+
+   Kamke 4.10(g), Murphy p24, case g.ii define
+   U(x) = -s3/3 = f0 f3^2 + (f2` f3 - f2 f3' -f1 f2 f3)/3 + 2 f2^3/27
+   
+*/
+
+ode1_abel_relative_invariant_zero(f0,f1,f2,f3,y,x) := block(
+  [u,newde],
+  ode_disp("  ode1_abel_relative_invariant_zero: "),
+  ode_disp("  Abel ode with relative invariant=0"),  
+
+  ode_disp2("Particular solution is ",y=f2/(3*f3)),
+
+  /* Using notation from Kamke - although sign of f2^2/(3*f3) term wrong */
+  neweq: 'diff(u,x)=f3*u^3+(f1-f2^2/(3*f3))*u,
+  ode_disp2("New equation is ",neweq),
+  ans:ode2(neweq,u,x),
+  ode_disp2("solution is ",ans),
+
+  if ans=false then (
+    return(false)
+  ) else if lhs(ans)=u then (
+   /* Check the solution of the transformed equation */
+    ode_disp2("  Checking solution of new eq: ",ode_check(neweq,ans)),
+    return([y=rhs(ans)-f2/(3*f3)])
+  ) else (
+    return([subst(y+f2/(3*f3),u,ans)])
+  )
+)$
+
+
+/* Attempt to solve Abel ode 
+
+     y' = f3(x)*y^3 + f2(x)*y^2 + f1(x)*y + f0(x)
+
+   when invariant s3 is constant (following Schwarz)
+
+   Note: Sign of coefficents has just changed from Schwarz
+
+ */
+ode1_abel_relative_invariant_nonzero(f0,f1,f2,f3,y,x) := block(
+  [_A,_B,b0,_K,s,s3,s5,t],
+  ode_disp("  ode1_abel_relative_invariant_nonzero"),
+
+  /* Recalculate relative invariant */
+  s3: f2*diff(f3,x)-diff(f2,x)*f3-3*f0*f3^2+f1*f2*f3-2*f2^3/9,
+  s3: ratsimp(s3),
+  ode_disp2("Third order relative invariant s3: ",s3),
+
+  /* Transform to rational normal form (RNF) y'+A*y^3+B*y+1=0 */
+  _A: -s3^2/(9*f3^3),
+  _A: ratsimp(_A),
+  ode_disp2("    A: ",_A),
+  _B: -f1 + f2^2/(3*f3) - 2*diff(f3,x)/f3 + diff(s3,x)/s3,
+  _B: ratsimp(_B),
+  ode_disp2("    B: ",_B),
+  
+  /* Calculate absolute invariant. There is some confusion 
+     between Schwarz papers.  Take the inverse of the definition 
+     in "Symmetry Analysis of Abel's Equation" as this seems
+     to work. */
+  _K: (_B-(1/3)*diff(_A,x)/_A)^3 / _A,
+  _K: ratsimp(_K),
+  ode_disp2("  absolute invariant K: ",_K),
+
+  /* Solution method depends on _K */
+  if _K=0 then (
+    ode_disp(" Absolute invariant K = 0: exceptional case"),
+    s:ode1_abel_absolute_invariant_zero(_A,y,x)
+  )
+  else if freeof(x,_K) then (
+    ode_disp(" Absolute invariant K is non-zero constant"),
+    s:ode1_abel_absolute_invariant_constant(_A,_B,_K,y,x)
+  )
+  else (
+    ode_disp(" Absolute invariant K not constant"),
+    s:ode1_abel_absolute_invariant_not_constant(_A,_B,y,x)
+  ),
+  if ( s=false ) then return(s),
+
+  /* Undo the transformation to RNF 
+       y = v - f2/(3*f3),  v = b0 * w 
+
+     therefore to undo 
+       w -> v/b0  and v -> y + f2/(3*f3)
+   */ 
+   b0: f2*diff(f3,x)/(3*f3^2)-diff(f2,x)/(3*f3)
+      +f1*f2/(3*f3)-2*f2^3/(27*f3^2)-f0,
+   b0: ratsimp(b0),
+   s:subst(y/b0,y,s),
+   s:subst(y+ratsimp(f2/(3*f3)),y,s),
+   s
+)$
+
+ode1_abel_absolute_invariant_zero(_A,y,x) := block(
+  [u,_u,v,s],
+  ode_disp("  ode1_abel_absolute_invariant_zero: "),
+
+  /* Canonical variables */
+  u: _A^(1/3)*y,
+  v: integrate(_A^(1/3),x),
+  ode_disp2("  u: ",u),
+  ode_disp2("  v: ",v),
+
+  s: v + log((u+1)/sqrt(u^2-u+1))/3 + atan((2*u-1)/sqrt(3))/sqrt(3)=%c,
+  ode_disp2("  s: ",s),
+  [s]
+)$
+
+ode1_abel_absolute_invariant_constant(_A,_B,_K,y,x) := block(
+  [display2d:false,u,_u,v,s,integral,du],
+  ode_disp("  ode1_abel_absolute_invariant_constant: "),
+  ode_disp2("  A: ",_A),
+  ode_disp2("  B: ",_B),
+  ode_disp2("  K: ",_K),
+
+  /* Canonical variables */
+  u: (_B-diff(_A,x)/(3*_A))*y,
+  v: log(_A)/3 - integrate(_B,x),
+  ode_disp2("  u: ",u),
+  ode_disp2("  v: ",v),
+  
+  /* Can only obtain integral in closed form for specific values of _K.
+     Schwarz claims that these are K = -j^3 / ((k+j)*k^2) for j,k integers.
+     Seems true.  Get terms sqrt((k + j)(3 k - j)) so want this to be a square
+     for "nice" solutions. 
+
+     Only values that occur in Abel equations in Kamke are said (Schwarz) to be
+     j    k       K            sqrt(abs((k + j)(3 k - j)))
+     3    1   -27/4            0
+    21    4   -9261/400        15
+              -3375/1444       ???   (typo? - can't integrate this)
+   111   10   -1367631/12100   99
+   */
+  integral:integrate(1/(_u^3/_K+_u+1),_u),
+  ode_disp2("  integral ",integral),
+  ode_disp2("  part(integral,0):", part(integral,0)),
+  if operatorp(integral,nounify('integrate)) then (
+    ode_disp("Unevaluated integral: Giving up for now"),
+    return(false)
+  ),
+  integral: subst(u,_u,integral),
+  ode_disp2("  integral ",integral),
+
+  s: v-integral=%c,
+  ode_disp2("  s: ",s),
+  [s]
+)$
+
+ode1_abel_absolute_invariant_not_constant(_A,_B,y,x) := block(
+  ode_disp("  ode1_abel_absolute_invariant_not_constant: "),
+  ode_disp("  Not implemented - giving up"),
+  /* Consider returning empty solution rather than trying ode1_lie */
+  false
+)$
+
+/* transform Abel equation of second kind 
+     (g1(x)*y+g0(x)) y' = f3(x)*y^3 + f2(x)*y^2 + f1(x)*y + f0(x)
+  to Abel equation of first kind
+     v' = a3(x)*v^3 + a2(x)*v^2 + a1(x)*v + a0(x)
+  using change of variable (g1(x)*y(x)+g0(x)) = 1/v(x)
+ */
+ode1_abel2(eq,y,x) := block(
+  [de,a0,a1,a2,a3,f0,f1,f2,f3,g1,g0,%a,expr,s,v],
+
+  ode_disp("  In ode1_abel2"),
+
+  /* FIXME: This detection code is not general enough.  */
+  de:expand(lhs(eq)-rhs(eq)),
+  if (derivdegree(de,y,x)>1) then return(false),
+  /* See if the coefficient of y' is of form (y+g(x)) */
+  %a: coeff(de,'diff(y,x),1),
+  ode_disp2("  %a: ",%a),
+  if (%a=0) then return(false),
+  g0:coeff(%a,y,0),
+  g1:coeff(%a,y,1),
+  ode_disp2("  g0: ",g0),
+  ode_disp2("  g1: ",g1),
+  if g1=0 then return(false),
+  if not(freeof(y,g0)) then return(false),
+  if not(freeof(y,g1)) then return(false),
+  expr:expand(de-(g1*y+g0)*'diff(y,x)),
+  if not(freeof('diff(y,x),expr)) then return(false),
+  /* Now require expr to have form f3(x)*y^3+f2(x)*y^2+f1(x)*y+f0(x) */
+  f0:-ratsimp(coeff(expr,y,0)),
+  if not(freeof(y,f0)) then return(false),
+  f1:-ratsimp(coeff(expr,y,1)),
+  if not(freeof(y,f1)) then return(false),
+  f2:-ratsimp(coeff(expr,y,2)),
+  if not(freeof(y,f2)) then return(false),
+  f3:-ratsimp(coeff(expr,y,3)),
+  if not(freeof(y,f3)) then return(false),
+
+  expr: expand(de-(g1*y+g0)*'diff(y,x)+f3*y^3+f2*y^2+f1*y+f0),
+  expr: ratsimp(expr),
+  ode_disp2("   expr: ",expr),
+  if is(expr#0) then return(false),
+
+  a3: -f0*g1+f3*g0^3/g1^2+2*f2*g0+f1*g0, 
+  a2: g0*diff(g1,x)/g1-3*f3*g0^2/g1^2-diff(g0,x)-2*f2-f1 , 
+  a1: 3*f3*g0/g1^2-diff(g1,x)/g1, 
+  a0: -f3/g1^2,
+  ode_disp2("  a3: ",a3),
+  ode_disp2("  a2: ",a2),
+  ode_disp2("  a1: ",a1),
+  ode_disp2("  a0: ",a0),
+
+  s:ode1_abel1a(a0,a1,a2,a3,v,x),
+  ode_disp("  Back in ode1_abel2"),
+  ode_disp2("  s: ",s),
+
+  /* Just substitute regardless.  Is s is false or [] then ok */
+  s:subst(1/(g1*y+g0),v,s),
+  ode_disp2("  s: ",s),
+  s
+)$

@@ -1,0 +1,245 @@
+13 December 2005
+
+1. For $bessel_y, the argument order was changed.  Corrected
+call to $bessel_y in  $spherical_bessel_y. Under GCL, all
+tests pass.
+
+2. Change to (in-package :maxima)
+
+3. Changed to version 1.0.  The version identifier is now a float.
+This allows easier testing.
+
+4. Removed the claim that this is a preliminary version--orthopoly is
+better tested and has fewer bugs than does specfun.
+ 
+29 August 2003
+
+1. Replaced kron_delta with the one from nset.
+
+2. Made kron_delta and unit_step functions autoload -- actually
+the simplifying routines for these functions autoload.
+
+3. Added test for (consp (car e)) in intervalp; new function is
+
+(defun $intervalp (a)
+  (and (consp a) (consp (car a)) (eq (caar a) '$interval)))
+
+4. Added tex support for unit_step; 
+(C1) unit_step(x);
+(D1) 				 UNIT_STEP(x)
+(C2) tex(%);
+$$\Theta\left(x\right)$$
+
+4. Made version 0.94 available.
+
+16 July 2003
+
+1. Changed version identifier from 0.93 to 0.94.
+
+2. Fixed bug in summation representation for hypergeo11 -- the
+arguments to pochhammer were backwards. This bug wasn't detected
+by anything in test_orthopoly.  Yikes. Added some tests for this case
+in test_orthopoly.mac.  All 146 tests pass.
+
+3. At least for now, I now allow hypergeo11 and hypergeo21 to 
+return summations regardless of the main variable.  Specifically,
+I changed use-hypergeo to
+
+(defun use-hypergeo (n x)
+  (declare (ignore x))
+  (or (and (integerp n) (> n -1))
+      ($featurep n '$integer)))
+;      (and ($featurep n '$integer) ($ratnump x))))
+
+
+-------------------------------------------------------------
+
+9 July 2003
+
+1. Announced version 0.93.
+
+-----------------------------------------------------------------
+7 July 2003
+
+1.  Added check in orthopoly_weight that checks that all parameters 
+(non-main variables) are free of the integration variable.
+
+2. Added an autoload for orthopoly_weight in orthopoly-init.lisp.
+
+3. Now allow the main variable in orthopoly_weight to be a subscripted
+variable.
+
+4. Fixed A & S references in documentation.  Fixed some spelling errors
+in documentation.
+
+--------------------------------------------------------------------
+6 July 2003
+
+1.  Added orthopoly_weight.  And that's it folks! No more new functions
+allowed in orthopoly.  Yeah.  Added documentation for orthopoly_weight
+and added checks in test_orthopoly.mac.
+
+2.  Changed a (= ...) to a (like ...)  in hypergeo21 and hypergeo11
+Specifically
+
+	((and (integerp n) (> n -1))
+	 (cond ((and (like a (- n)) (use-float b c x))
+
+Now a call such as hypergeo21(a,b,c,x,inf) works okay; however, orthopoly
+never calls hypergeo21 or hypergeo11 with a symbolic first argument.
+
+---------------------------------------------------------------------
+30 June 2003
+
+1. Added tests for kron_delta.
+
+2. Added orthopoly_recur function; added tests in test_orthopoly
+for the recursion relations; added user documentation for 
+orthopoly_recur; added autoload for orthopoly_recur.
+
+3. Added brief documentation about the algorithms used by orthopoly.
+
+4. Changed "laaguerre" to "laguerre" in gradef for laguerre.
+
+--------------------------------------------------------------
+
+27 June 2003
+
+1.  Added note in documentation about loading orthopoly before using
+any functions; otherwise, a user can be stuck with needing to use
+upper case function identifiers -- yech.  This doesn't apply if the 
+initialization file uses the appropriate setup_autoload statements.
+
+2. Added note in documentation about numerical evaluation of pochhammer
+for orders exceeding pochhammer_max_index.
+
+3. Added a new function pochhammer-quotient  -- it computes the quotient
+of two pochhammer functions with the same order but different arguments. 
+The new function is used in a few places to compute normalizations.
+This new scheme prevents some overflow and (I suppose) underflows that
+could happen for orthogonal polynomials with large order.  
+
+4. Added gradef for pochhammer. I expressed the derivatives in terms
+of the psi function  -- when n is a positive integer psi(x+n) - psi(x)
+is expressible as a finite sum.  I didn't use a sum representation
+because of the trouble of introducing a dummy summation index. The 
+downside of this is Maxima doesn't recognize that psi(x+1)-psi(x) = 1/x,
+psi(x+2)-psi(x) = ....
+
+5. Bug in pochhammer with negative order; correct relation is
+pochhammer(x,-n) = (-1)^n / pochhammer(1-x,n).  Added tests for
+pochhammer and its gradient.
+
+6. Extended makegamma1 (in asum.lisp) to be able to convert pochhammer
+symbols to gamma form; thus pochhammer(x,n) => gamma(x+n) / gamma(x).
+
+7. Re-did documentation on pochhammer.
+
+-------------------------------------------------------
+16 June 2003
+
+1. Changed version identifier from 0.92 to 0.93.
+
+2. Replaced hyphens in file names to underscores.
+
+3. Added note in documentation that orthopoly functions map over lists and
+matrices.
+
+4. Added note in documentation about the shifted functions.
+
+5. Fixed bug in pochhammer; the option variable pochhammer_max_index
+was being ignored. Added documentation on pochhammer_max_index.
+
+6. Added section in documentation on how to use plot together with
+orthopoly.
+
+-------------------------------------------------------------------
+7 June 2003
+
+1. Fixed a misplaced absolute value in interval-mult.
+
+------------------------------------------------------------------
+14 May 2003
+
+1. New algorithm for spherical bessel functions; they are based on A&S
+10.1.8 and 10.1.9.  Much faster than old code; spherical_bessel_j now
+traps for a zero argument and no longer gives a divide by zero for that
+case. Purloined code from specfun.mac
+
+2. csign doesn't accept CRE arguments; added $ratdisrep to csign in
+spherical_bessel_j.  Do I need $ratdisrep on other csign calls?
+
+3. New algorithm for the associated Legendre polynomials of the second
+kind. Uses forward degree  recursion plus it special-cases 
+asssoc_legendre_q(n,n,x).
+
+4. Changed my generic-autoload function to write the file name to
+*standard-output* as it loads; nice when you have multiple versions
+and you're not sure which version gets loaded.
+
+---------------------------------------------------------------
+11 May 2003
+
+1. Switched to use bessel.lisp to support the spherical bessel functions.
+The function $bessel_j has a bug in it; placed a fix in orthopoly-init.lisp.
+Before, floating point evaluation for spherical_bessel_j and 
+spherical_bessel_y were done via the spherical hankel functions; this 
+approach is floating point "hostile."  Now we use slatec code for floating
+point evaluation -- downside, we don't get an error estimate. 
+
+For now, I still use my hypergeo21-float function for the 
+spherical hankel functions.
+
+
+----------------------------------------------------------------
+9 May 2003
+
+1. Added note to user documentation about how apply float to something 
+like assoc_legendre_p(n,2,1/2) is hazardous.
+
+2. Restored the summation representation feature. Added tests for the 
+summation representation. Now I demand that the "main" variable be
+a constant in order to get a sum representation; this eliminates
+the problem with the bug / feature ev(sum(x^k,k,0,n),x=0) => 0.
+
+3. Now I define assoc_legendre_q(n,m,x) only for |m| <= n.  This solves
+a problem with the gradef for assoc_legendre_q that gave incorrect values
+for |m| > n.  Note the Wronskian of P^m_n and Q^m_n suggests that we
+shouldn't allow Q^m_n with  |m| > n.
+
+
+----------------------------------------------------------------
+
+6 May 2003
+
+1. Replaced code for assoc_legendre_q by a more efficient algorithm.
+Added more tests for the associated legendre q functions (A & S 8.5.3).
+
+2. Added gradef for legendre_q and a test for it in test_orthopoly.
+The gradef involves a kron_delta. Removed the claim in the documentation
+that orthopoly doesn't use kron_delta.
+
+3. Added gradef for assoc_legendre_q and a test for it in test_orthopoly.
+
+----------------------------------------------------------------
+
+1 May 2003
+
+1. Made a few changes to user documentation in (I hope) increase
+clarity of installation instructions.
+
+2. Changed file name maxima-init.lisp to orthopoly-init.lisp.
+
+30 April 2003
+
+1. Floating point values returned by assoc_legendre_p have errors
+that are too large. Fix: missing factor of machine epsilon 
+multiplying dx.
+
+------------------------------------------------------------------
+
+30 April 2003
+
+1. Fixed miscellaneous grammar problems in the user documentation.
+
+

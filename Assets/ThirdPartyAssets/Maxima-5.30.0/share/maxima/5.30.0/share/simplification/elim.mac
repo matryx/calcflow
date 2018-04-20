@@ -1,0 +1,16 @@
+eliminate(eqns,vars):=block([teqns,sv,se,l,flag,dispflag],
+	modedeclare([l,i],fixnum,flag,boolean),flag:dispflag:false,
+	if not (listp(eqns) and listp(vars)) then error("the arguments must both be lists"),
+	if length(vars)>l:length(eqns) then error("more variables then equations"),
+	if l=1 then error("can't eliminate from only one equation"),
+	if length(vars)=l then (vars:reverse(vars),sv:vars[1], vars:reverse(rest(vars)),flag:true),
+/* ?meqhk turns [a=b] into [a-b] */
+	eqns:map('?meqhk,eqns),
+	for v in vars do (
+		teqns:[],
+		for j:1 thru l while(freeof(v,first(eqns))) do(
+		  teqns:cons(first(eqns),teqns), eqns:rest(eqns)),
+		if eqns=[] then eqns:teqns else (teqns:append(teqns,rest(eqns)), eqns:first(eqns), l:l-1, se:[],
+		for j:1 thru l do se:cons(resultant(eqns,teqns[j],v),se),
+		eqns:se)),
+	if flag then [rhs(apply('ev,[last(solve(eqns[1],sv)),eval]))] else eqns)$

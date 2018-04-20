@@ -1,0 +1,374 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+/* PRODUCED USING TOPS 20 AS GUIDE AND CHECKED ON 3600 
+This and the rtest*.mac files can be run using the command
+Batch("cl-maxima-source:maxima;rtest1.mac",test);   and a
+log file will be written recording the items which the testing
+function does not find the same as those answers listed in this file.
+The test is based on manual.demo, with the answers obtained from
+tops 20 macsyma, and checked on the 3600 with cl-maxima.  
+Although we have tried to put sufficient kills in, to eliminate
+errors caused by previous definitions, you may get some additional
+errors if you rerun the tests, or run some out of order. */
+
+(?fmakunbound(f),kill(functions,values,arrays));
+done;
+f(x):=x^2+y;
+f(x):=x^2+y$
+f(2);
+y+4$
+ev(f(2),y:7);
+11$
+f(x):=sin(x)^2+1;
+f(x):=sin(x)^2+1$
+f(x+1);
+sin(x+1)^2+1$
+g(y,z):=f(z)+3*y;
+g(y,z):=f(z)+3*y$
+ev(g(2*y+z,-0.5),y:7);
+3*(z+14)+1.22984884706593$
+h(n):=sum(i*x^i,i,0,n);
+h(n):=sum(i*x^i,i,0,n)$
+functions;
+[f(x),g(y,z),h(n)]$
+t[n](x):=ratexpand(2*x*t[n-1](x)-t[n-2](x));
+t[n](x):=ratexpand(2*x*t[n-1](x)-t[n-2](x))$
+t[0](x):=1;
+t[0](x):=1$
+t[1](x):=x;
+t[1](x):=x$
+t[4](y);
+8*y^4-8*y^2+1$
+g[n](x):=sum(ev(x),i,n,n+2);
+g[n](x):=sum(ev(x),i,n,n+2)$
+h(n,x):=sum(ev(x),i,n,n+2);
+h(n,x):=sum(ev(x),i,n,n+2)$
+g[2](i^2);
+3*i^2$
+h(2,i^2);
+29$
+p[n](x):=ratsimp(1/(2^n*n!)*diff((x^2-1)^n,x,n));
+p[n](x):=ratsimp(1/(2^n*n!)*diff((x^2-1)^n,x,n))$
+q(n,x):=ratsimp(1/(2^n*n!)*diff((x^2-1)^n,x,n));
+q(n,x):=ratsimp(1/(2^n*n!)*diff((x^2-1)^n,x,n))$
+p[2];
+lambda([x],(3*x^2-1)/2)$
+p[2](y+1);
+(3*(y+1)^2-1)/2$
+q(2,y);
+(3*y^2-1)/2$
+p[2](5);
+37$
+f[i,j](x,y):=x^i+y^j;
+f[i,j](x,y):=x^i+y^j$
+g(fun,a,b):=print(fun," applied to ",a," and ",b," is ",fun(a,b));
+g(fun,a,b):=print(fun," applied to ",a," and ",b," is ",fun(a,b))$
+g(f[2,1],sin(%pi),2*c);
+2*c$
+
+/* tests for ibase and obase; a recent accretion. dunno where else to put this stuff. */
+
+[integerp (2.), floatnump (2.)];
+[true, false];
+
+ibase : 2.;
+''(1 + 1);
+
+10.;
+''(1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1);
+
+10;
+2.;
+
+11111111;
+255.;
+
+10000000;
+128.;
+
+00000001;
+1.;
+
+[symbolp (23401), numberp (23401)];
+[true, false];
+
+[symbolp (\10432), numberp (\10432)];
+[true, false];
+
+[10.25, 10.25d0, 10.25e0, 10.25f0, 10.25s0] - 1010 - 1/100;
+''(float ([0, 0, 0, 0, 0]));
+
+[99.25, 99.25d0, 99.25e0, 99.25f0, 99.25s0] - 1100011 - 1/100;
+''(float ([0, 0, 0, 0, 0]));
+
+ibase : 8.;
+8.;
+
+10.;
+''(1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1);
+
+10;
+8.;
+
+1111;
+''(8.^3 + 8.^2 + 8. + 1);
+
+7777;
+4095.;
+
+[symbolp (8765), numberp (8765)];
+[true, false];
+
+[symbolp (\5678), numberp (\5678)];
+[true, false];
+
+[10.25, 10.25d0, 10.25e0, 10.25f0, 10.25s0] - 12 - 1/4;
+''(float ([0, 0, 0, 0, 0]));
+
+[99.25, 99.25d0, 99.25e0, 99.25f0, 99.25s0] - 143 - 1/4;
+''(float ([0, 0, 0, 0, 0]));
+
+ibase : 16.;
+16.;
+
+10.;
+''(1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1);
+
+10;
+16.;
+
+111111;
+''(16.^5 + 16.^4 + 16.^3 + 16.^2 + 16. + 1);
+
+999;
+''(9*16.^2 + 9*16. + 9);
+
+1000;
+''(16.^3);
+
+[symbolp (a000), numberp (a000)];
+[true, false];
+
+[symbolp (0a000), numberp (0a000)];
+[false, true];
+
+0a000;
+''(10.*16.^3);
+
+[symbolp (\0a000), numberp (\0a000)];
+[true, false];
+
+[is (abc = 0abc), is (0abc = \0abc), is (\0abc = abc)];
+[false, false, false];
+
+a000 + a000 + 0a000 + 0a000 + \0a000 + \0a000;
+2*a000 + 2*\0a000 + 14000;
+
+[10.25, 10.25d0, 10.25e0, 10.25f0, 10.25s0] - 0a - 1/4;
+''(float ([0, 0, 0, 0, 0]));
+
+[99.25, 99.25d0, 99.25e0, 99.25f0, 99.25s0] - 63 - 1/4;
+''(float ([0, 0, 0, 0, 0]));
+
+aa . bb;
+"." (\aa, \bb);
+
+aa.bb;
+"." (\aa, \bb);
+
+ibase : 36.;
+36.;
+
+10.;
+''(1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1);
+
+10;
+36.;
+
+1111;
+''(36.^3 + 36.^2 + 36. + 1);
+
+9999;
+''(9*36.^3 + 9*36.^2 + 9*36. + 9);
+
+10000;
+''(36.^4);
+
+[symbolp (xyz), numberp (xyz)];
+[true, false];
+
+[symbolp (0xyz), numberp (0xyz)];
+[false, true];
+
+0xyz;
+''(33.*36.^2 + 34.*36. + 35.);
+
+0XYZ;
+0xyz;
+
+[symbolp (\0xyz), numberp (\0xyz)];
+[true, false];
+
+[is (xyz = 0xyz), is (0xyz = \0xyz), is (\0xyz = xyz)];
+[false, false, false];
+
+0xyz;
+''(33.*36.^2 + 34.*36. + 35.);
+
+1xyz;
+''(36.^3 + 0xyz);
+
+xyz + 0xyz + \0xyz + xyz + 0xyz + \0xyz + xyz + 0xyz + \0xyz;
+3*xyz + 3*\0xyz + ''(3*(33.*36.^2 + 34.*36. + 35.));
+
+[10.25, 10.25d0, 10.25e0, 10.25f0, 10.25s0] - 0a - 1/4;
+''(float ([0, 0, 0, 0, 0]));
+
+[99.25, 99.25d0, 99.25e0, 99.25f0, 99.25s0] - 02r - 1/4;
+''(float ([0, 0, 0, 0, 0]));
+
+aa . bb;
+"." (\aa, \bb);
+
+aa.bb;
+"." (\aa, \bb);
+
+ibase : 10.;
+''(1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1);
+
+obase : 2;
+2.;
+
+string (255);
+"11111111";
+
+string (-255);
+"-11111111";
+
+string (256);
+"100000000";
+
+obase : 8;
+8.;
+
+string (255);
+"377";
+
+string (-255);
+"-377";
+
+string (256);
+"400";
+
+obase : 16;
+16.;
+
+(string (255), is (%% = "0FF" or %% = "0ff"));
+true;
+
+(string (-255), is (%% = "-0FF" or %% = "-0ff"));
+true;
+
+string (256);
+"100";
+
+(string (10 * 16^3), is (%% = "0A000" or %% = "0a000"));
+true;
+
+(string (10*16^3 + 11*16^2 + 12*16 + 13), is (%% = "0ABCD" or %% = "0abcd"));
+true;
+
+obase : 36;
+36.;
+
+string (8*36^3 + 8*36^2 + 8*36 + 8);
+"8888";
+
+(string (8*36^3 + 9*36^2 + 10*36 + 11), is (%% = "89AB" or %% = "89ab"));
+true;
+
+(string (35*36^3 + 35*36^2 + 35*36 + 35), is (%% = "0ZZZZ" or %% = "0zzzz"));
+true;
+
+(string (-(35*36^3 + 35*36^2 + 35*36 + 35)), is (%% = "-0ZZZZ" or %% = "-0zzzz"));
+true;
+
+(string (34*36^3 + 35*36^2 + 8*36 + 7), is (%% = "0YZ87" or %% = "0yz87"));
+true;
+
+[ibase, obase] : [10., 10.];
+[10., 10.];
+
+10;
+''(1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1);
+
+string (10);
+"10";
+
+ibase : 2.;
+2.;
+
+[1, 11, 111, 1111];
+[1., 3., 7., 15.];
+
+(load (file_search (test_readbase_lisp, file_search_tests)),
+ test_readbase_lisp ());
+[1., 2., 3., 4., 10., 20., 30., 40.];
+
+[1, 11, 111, 1111];
+[1., 3., 7., 15.];
+
+(?autof (test_readbase_lisp_autoload, file_search (test_readbase_lisp_autoload, file_search_tests)),
+ test_readbase_lisp_autoload ());
+[2., 3., 5., 7., 11., 13., 17., 19.];
+
+[1, 11, 111, 1111];
+[1., 3., 7., 15.];
+
+(load (file_search (test_readbase_maxima, file_search_tests)),
+ test_readbase_maxima ());
+[4., 3., 2., 1., 40., 30., 20., 10.];
+
+[1, 11, 111, 1111];
+[1., 3., 7., 15.];
+
+(batch (file_search (test_readbase_maxima, file_search_tests)),
+ test_readbase_maxima ());
+[4., 3., 2., 1., 40., 30., 20., 10.];
+
+[1, 11, 111, 1111];
+[1., 3., 7., 15.];
+
+(auto_mexpr (test_readbase_maxima_autoload, file_search (test_readbase_maxima_autoload, file_search_tests)),
+ test_readbase_maxima_autoload ());
+[19., 17., 13., 11., 7., 5., 3., 2.];
+
+[1, 11, 111, 1111];
+[1., 3., 7., 15.];
+
+ibase : 10.;
+10.;
+
+/* SF bug report # 2992398 "sort doesn't give error for invalid comparison"
+ */
+
+errcatch (sort([c, a, b], "<"));
+[];
+
+errcatch (sort([1, 2, 3], lambda([a, b], 'sdf)));
+[];
+
+sort ([c, a, b]);
+[a, b, c];
+
+sort ([1, 2, 3], "<");
+[1, 2, 3];
+
+sort ([1, 2, 3], lambda ([a, b], sin(a) < sin(b)));
+[3, 1, 2];
+
