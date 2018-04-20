@@ -301,6 +301,9 @@ public class PtManager : MonoBehaviour
         if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
         if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";
         if (inputs.dInput != null && inputs.dInput.text.Length == 0) inputs.dInput.text = "0";
+
+        if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
+        if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
         #endregion
     }
 
