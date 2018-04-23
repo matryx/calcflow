@@ -112,6 +112,11 @@ public class ParametricExpression : MonoBehaviour
         separator = sep;
     }
 
+    public Transform getSeparator()
+    {
+        return separator;
+    }
+
     public ExpressionSet getExpSet()
     {
         return expSet;

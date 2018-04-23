@@ -83,11 +83,13 @@ public class CalculatorManager : MonoBehaviour
     public void AddExpressionSet(ExpressionSet ES)
     {
         expressionSetList.Add(ES);
+        inputReceived = true;
     }
 
     public void RemoveExpressionSet(ExpressionSet ES)
     {
         expressionSetList.Remove(ES);
+        inputReceived = true;
     }
 
     public void SetVecFieldES(ExpressionSet ES)

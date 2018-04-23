@@ -142,7 +142,19 @@ public class ExpressionSelector : QuickButton
         }
 
         thisScroll = expressions.getScroll(panelType);
-        thisScroll.addToScroll(toAdd, null, 0);
+
+        if (expressions.getSelectedExpr())
+        {
+            Transform prevSep = expressions.getSelectedExpr().GetComponent<ParametricExpression>().getSeparator();
+            thisScroll.addToScroll(toAdd, null, thisScroll.getIndex(prevSep) + 1);
+        }
+        else
+        {
+            //BUG: scoots scroll down when adding and not at top of page
+            // - put on hold for now since it's a very specific case and need to merge with master
+            thisScroll.addToScroll(toAdd, null, 0); 
+        }
+
         if (xButton) xButton.GetComponentInChildren<ExpressionBody>().selectBody();
 
         xButton = null;
