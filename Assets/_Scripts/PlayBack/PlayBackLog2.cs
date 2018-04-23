@@ -258,7 +258,7 @@ public class PlaybackLogAction2
     void Spawn()
     {
         GameObject subject;
-        subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
+        //subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
 
         try
         {
@@ -303,10 +303,10 @@ public class PlaybackLogAction2
                 scale = _info.GetValue<Vector3>("scale");
                 rotation = _info.GetValue<Quaternion>("rotation");
 
-                if (subject.name == "PieceWiseTabs")
-                {
-                    Debug.Log("delete parent is being made. key: " + subjectKey);
-                }
+                // if (subject.name == "PieceWiseTabs")
+                // {
+                //     Debug.Log("delete parent is being made. key: " + subjectKey);
+                // }
 
                 subject.MoveTo(position, 0);
                 subject.RotateTo(rotation, 0);

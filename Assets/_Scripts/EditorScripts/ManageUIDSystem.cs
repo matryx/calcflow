@@ -80,4 +80,39 @@ public class ManageUIDSystem : MonoBehaviour
             updateUIDs = false;
         }
     }
+
+    List<GameObject> GetAllObjectsInScene()
+    {
+        List<GameObject> objectsInScene = new List<GameObject>();
+
+        foreach (GameObject go in Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[])
+        {
+            if (go.hideFlags == HideFlags.NotEditable || go.hideFlags == HideFlags.HideAndDontSave)
+                continue;
+
+            if (go.scene.name == null)
+                continue;
+
+            objectsInScene.Add(go);
+        }
+
+        return objectsInScene;
+    }
+
+    List<UIDSystem> GetAllUIDSInScene()
+    {
+        List<UIDSystem> objectsInScene = new List<UIDSystem>();
+
+        foreach (UIDSystem go in Resources.FindObjectsOfTypeAll(typeof(UIDSystem)) as UIDSystem[])
+        {
+            if (go.gameObject.hideFlags == HideFlags.NotEditable || go.gameObject.hideFlags == HideFlags.HideAndDontSave)
+                continue;
+            if (go.gameObject.scene.name == null)
+                continue;
+
+            objectsInScene.Add(go);
+        }
+
+        return objectsInScene;
+    }
 }

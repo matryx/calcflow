@@ -588,37 +588,45 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             UInt32 _objectReferenceID;
 
             RegisterObject(_object, out _objectReferenceID, out _firstTime);
-            if (_objectReferenceID == 4502)
+            if (_objectReferenceID == 830)
             {
-                Debug.Log("object 4502 has type " + _objectType + " " + _object);
+                Debug.Log("object 830 has type " + _objectType + " " + _object);
             }
-            if (_objectReferenceID == 4503)
+            if (_objectReferenceID == 1205)
             {
-                Debug.Log("object 4503 has type " + _objectType + " " + _object);
+                Debug.Log("object 1205 has type " + _objectType + " " + _object);
             }
-            if (_objectReferenceID == 4504)
+            if (_objectReferenceID == 1599)
             {
-                Debug.Log("object 4504 has type " + _objectType + " " + _object);
+                Debug.Log("object 1599 has type " + _objectType + " " + _object);
             }
-            if (_objectReferenceID == 4505)
+            if (_objectReferenceID == 1673)
             {
-                Debug.Log("object 4505 has type " + _objectType + " " + _object);
+                Debug.Log("object 1673 has type " + _objectType + " " + _object);
             }
-            if (_objectReferenceID == 4506)
+            if (_objectReferenceID == 1747)
             {
-                Debug.Log("object 4506 has type " + _objectType + " " + _object);
+                Debug.Log("object 1747 has type " + _objectType + " " + _object);
             }
             if (_objectReferenceID == 4507)
             {
-                Debug.Log("object 4506 has type " + _objectType + " " + _object);
+                Debug.Log("object 1821 has type " + _objectType + " " + _object);
             }
-            if (_objectReferenceID == 4508)
+            if (_objectReferenceID == 1821)
             {
                 Debug.Log("object 4506 has type " + _objectType + " " + _object);
             }
-            if (_objectReferenceID == 4509)
+            if (_objectReferenceID == 1895)
             {
-                Debug.Log("object 4506 has type " + _objectType + " " + _object);
+                Debug.Log("object 1895 has type " + _objectType + " " + _object);
+            }
+            if (_objectReferenceID == 1969)
+            {
+                Debug.Log("object 1969 has type " + _objectType + " " + _object);
+            }
+            if (_objectReferenceID == 2043)
+            {
+                Debug.Log("object 2043 has type " + _objectType + " " + _object);
             }
 
             if (_firstTime)

@@ -60,7 +60,7 @@ public class Replayer : MonoBehaviour
                     //print("popping next instruction");
                     PlaybackLogAction2 item = log[0];
                     log.RemoveAt(0);
-                    item.Reenact();
+                    //item.Reenact();
 
                     try
                     {
