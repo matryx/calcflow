@@ -12,6 +12,10 @@ public class MappingNormals : MonoBehaviour
     public Transform vTangent;
     public Transform normal;
 
+	public Transform forwardPlane;
+	public Transform backwardPlane;
+	public List<GameObject> walls;
+
     // Use this for initialization
     void Start()
     {
@@ -92,7 +96,23 @@ public class MappingNormals : MonoBehaviour
             uTangent.LookAt(_1dMapper.CorrespondingPoint.TransformPoint(Scale(uTan)));
         }
 
+        var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+		sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
+		for (int i = 0; i < 6; i++) {
+			sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
+			//plane normal vector is the rotated 'up' vector.
+			sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+		}
+
+		sharedMaterial = backwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+		sharedMaterial.SetInt("_planeClippingEnabled", 1);
+
+		for (int i = 0; i < 6; i++) {
+			sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
+			//plane normal vector is the rotated 'up' vector.
+			sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+		}
     }
 
     float scale = 0.2f;

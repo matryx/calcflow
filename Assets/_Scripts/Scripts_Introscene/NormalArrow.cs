@@ -11,7 +11,7 @@ public class NormalArrow : MonoBehaviour {
 	void Update () {
 		GetComponentInChildren<MeshRenderer>().enabled = (forwardPlane.isVisible) ? true : false;
 		
-		transform.localPosition = dummyNormal.localPosition.normalized;
+		transform.localPosition = (dummyNormal.localPosition - origin.localPosition).normalized + origin.localPosition;
         Vector3 position = transform.position;
 
         if (origin.position - position != Vector3.zero)
