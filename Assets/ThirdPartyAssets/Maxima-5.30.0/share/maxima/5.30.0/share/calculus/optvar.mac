@@ -1,0 +1,92 @@
+ttyoff: true;
+/* This file contains functions and option settings for
+variational optimization using the calculus of variations and
+the maximum principle.  For a description of its usage see the text
+file  OPTVAR USAGE. */
+
+/* Set options to automatically print cpu time in milliseconds, force
+attempted equation solution even when there are more variables than
+unknowns, when an equation involves logs or exponentials, or when a
+coefficient matrix is singular: */
+time:grindswitch:solveradcan:singsolve:true$
+/* establish  D  as an alias for the differentiation function: */
+alias(d,diff)$
+/* The name of this function has changed */
+ic(soln,xa,ya,dya):=ic2(soln,xa,ya,dya)$
+
+eval_when([translate,batch,demo,load,loadfile],
+dv(a)::=buildq([a],define_variable(a,'a,any)))$
+
+dv(aux)$ dv(c)$ dv(dd)$ dv(dydt)$ dv(k)$
+
+ham(odes) := block(
+/* This function computes the Hamiltonian & the auxiliary equations */
+
+   [t,nsv,statevars,auxvars,answ,elist,auxde], /*declare local vars*/
+
+   if not listp(odes) then odes: [odes], /* ensure list argument */
+   t: part(odes,1,1,2),  /* get independent var from derivative */
+   nsv: length(odes),  /* determine number of state variables */
+   /* Form list of state and auxiliary variables: */
+   statevars: auxvars: elist: [],
+   for i thru nsv do (statevars: endcons(part(odes,i,1,1), statevars),
+      auxvars: endcons(aux[i], auxvars)),
+   answ: [sum(rhs(odes[i])*aux[i], i, 1, nsv)], /* form Hamiltonian */
+
+   /* Form list of auxiliary equations and any trivial solutions: */
+   for i thru nsv do (
+      auxde: 'diff(aux[i],t) = -diff(answ[1], statevars[i]),
+      answ: endcons(auxde, answ),
+      if rhs(auxde)=0 then answ:endcons(aux[i]=c[i],answ)),
+
+   /* Form list of E-labels while displaying computed results: */
+   for item in answ do elist: endcons(first(apply('ldisp,[item])), elist),
+   elist) $
+
+el(f, ylist, tlist) := block( /* This function computes the
+Euler-Lagrange equations and any trivial first integrals: */
+
+   [ly,lt,fsub,energycon,fy,answ,elist],  /* declare local variables */
+
+   if not listp(tlist) then tlist: [tlist],
+   if not listp(ylist) then ylist: [ylist],
+   /* compute number of independent & independent variables: */
+   ly: length(ylist), lt: length(tlist), fsub: f,
+
+   /* no conservation of energy if more than 1 independent var: */
+   energycon: is(lt=1),
+   for i thru ly do /* substitute for derivatives: */
+      for j thru lt do (dd[i,j]: derivdegree(fsub,ylist[i],tlist[j]),
+         if dd[i,j] > 1 then energycon: false,
+         for kk thru dd[i,j] do
+            fsub:subst('diff(ylist[i],tlist[j],kk)=dydt[i,j,kk], fsub)),
+   /* no conservation of energy if independent var. in integrand: */
+   if not freeof(tlist[1],fsub) then energycon: false,
+   answ: if energycon then [fsub] else [], /* form list of results: */
+   for i thru ly do (fy: diff(fsub,ylist[i]),
+      answ: endcons(
+         sum(sum((-1)^(kk-1)*'diff(diff(fsub,dydt[i,j,kk]),tlist[j],kk),
+         kk,1,dd[i,j]), j, 1, lt) = fy, answ),
+      if energycon then answ[1]: answ[1] -
+         diff(fsub,dydt[i,1,1])*'diff(ylist[i],tlist[1]),
+      if fy=0 and lt=1 and dd[i,1]=1 then /* momentum integral */
+         answ: endcons(diff(fsub,dydt[i,1,1])=k[i], answ)),
+   if energycon then answ[1]: answ[1]=k[0],
+
+   for i thru ly do  /* resubstitute original derivatives: */
+      for j thru lt do
+         for kk thru dd[i,j] do
+            answ:subst(dydt[i,j,kk]='diff(ylist[i],tlist[j],kk), answ),
+
+   elist:[],  /* form list of E-labels while displaying results: */
+   for eqn in answ do elist: endcons(first(apply('ldisp,[eqn])), elist),
+   elist) $
+
+convert(odes, ylist, t) := block([answ],
+/* This function converts output of EL or HAM to form required by
+DESOLVE  from the file  DESOLN. */
+   if not listp(ylist) then ylist: [ylist],
+   answ: apply('ev,[odes,'eval]),  /* if E-labels, replace with values */
+   for yy in ylist do answ: subst(yy=funmake(yy,[t]), answ),
+   return(answ)) $
+ttyoff: false $

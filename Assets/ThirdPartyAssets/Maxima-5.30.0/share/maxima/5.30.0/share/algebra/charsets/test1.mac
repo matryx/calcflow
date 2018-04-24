@@ -1,0 +1,421 @@
+/* Test File for CharSets Version 2.0 (with Maple V.3) */
+/* Copyright (C) 1990-1996 by Dongming Wang */
+/* the test function for CharSets */
+charsets_test : lambda ([], block(
+  [ aa,ps,ps1,ord,orda,ordb,as,f,test_in,test_out,rr,i,
+    x4, x1, x2, x3, x, y, b, c2, basset, wbasset, qbasset,
+    charsetn, wcharsetn, qcharsetn, triset, trisetc],
+   ps : [ x4 ^ 2 + x4 ^ 2 * x1 -x4 * x2 -x1 * x2 * x4 + x1 * x2 + 3 * x2,
+       x1 * x4 + x3 -x1 * x2, x4 * x3 -2 * x2 ^ 2 -x1 * x2 -1],
+   ps1 : [ x ^ 2 + y, x ^ 4 * y -x ^ 3],
+   ord : [ x1, x2, x3, x4],
+   orda : [ x, y],
+   ordb : [ b, c2],
+   as : [ -1 + b + 6 * b ^ 2 + 12 * b ^ 3],
+   f : -6156 + 29484 * b + 23328 * c2 + 11664 * c2 ^ 3 -17712 * c2 ^ 2 + 67392 * c2 ^ 2
+     * b ^ 2 + 58320 * c2 ^ 2 * b -58320 * b * c2 -50544 * b ^ 2 * c2 + 17496 * b ^ 2,
+   test_in : [ [ charsets_charset, [ ps, ord]], /* 1 */
+             [ charsets_charset, [ ps, ord, basset]], /* 2 */
+             [ charsets_charset, [ ps, ord, wbasset]], /* 3 */
+             [ charsets_charset, [ ps, ord, qbasset]], /* 4 */
+             [ charsets_charset, [ ps, ord, charsetn]], /* 5 */
+             [ charsets_charset, [ ps, ord, wcharsetn]], /* 6 */
+             [ charsets_charset, [ ps, ord, qcharsetn]], /* 7 */
+             [ charsets_charset, [ ps, ord, triset]], /* 8 */
+             [ charsets_charset, [ ps, ord, trisetc]], /* 9 */
+             [ charsets_mcharset, [ ps, ord]], /* 10 */
+             [ charsets_mcharset, [ ps, ord, basset]], /* 11 */
+             [ charsets_mcharset, [ ps, ord, wbasset]], /* 12 */
+             [ charsets_mcharset, [ ps, ord, qbasset]], /* 13 */
+             [ charsets_mcharset, [ ps, ord, charsetn]], /* 14 */
+             [ charsets_mcharset, [ ps, ord, wcharsetn]], /* 15 */
+             [ charsets_mcharset, [ ps, ord, qcharsetn]], /* 16 */
+             [ charsets_mcharset, [ ps, ord, triset]], /* 17 */
+             [ charsets_mcharset, [ ps, ord, trisetc]], /* 18 */
+             [ charsets_iniset,[[as[1],((4*b^2-1))*f-11],ordb]], /* 19 */
+             [ charsets_remset,[[as[1]-f,f^2,2*f-b^2],[as[1],f],ordb]], /* 20 */
+             [ charsets_charser, [ ps, ord]], /* 21 */
+             [ charsets_charser, [ ps, ord, basset]], /* 22 */
+             [ charsets_charser, [ ps, ord, wbasset]], /* 23 */
+             [ charsets_charser, [ ps, ord, charsetn]], /* 24 */
+             [ charsets_charser, [ ps, ord, wcharsetn]], /* 25 */
+             [ charsets_charser, [ ps, ord, trisetc]], /* 26 */
+             [ charsets_mcs, [ ps, ord]], /* 27 */
+             [ charsets_mcs, [ ps, ord, basset]], /* 28 */
+             [ charsets_mcs, [ ps, ord, wbasset]], /* 29 */
+             [ charsets_mcs, [ ps, ord, charsetn]], /* 30 */
+             [ charsets_mcs, [ ps, ord, wcharsetn]], /* 31 */
+             [ charsets_mcs, [ ps, ord, trisetc]], /* 32 */
+             [ charsets_ecs, [ ps, ord]], /* 33 */
+             [ charsets_ecs, [ ps, ord, basset]], /* 34 */
+             [ charsets_ecs, [ ps, ord, wbasset]], /* 35 */
+             [ charsets_ecs, [ [ ps, x2-x3], ord, charsetn]], /* 36 */
+             [ charsets_ecs, [ ps, ord, wcharsetn]], /* 37 */
+             [ charsets_ecs, [ ps, ord, trisetc]], /* 38 */
+             [ charsets_mecs, [ ps, ord]], /* 39 */
+             [ charsets_mecs, [ ps, ord, basset]], /* 40 */
+             [ charsets_mecs, [ ps, ord, wbasset]], /* 41 */
+             [ charsets_mecs, [ [ ps, x2], ord, charsetn]], /* 42 */
+             [ charsets_mecs, [ ps, ord, wcharsetn]], /* 43 */
+             [ charsets_mecs, [ ps, ord, trisetc]], /* 44 */
+             [ charsets_triser, [ ps, ord]], /* 45 */
+             [ charsets_csolve,[subst(x1=3,ps),setify([x4,x2,x3])]],/* 46 */
+             [ charsets_ics, [ ps, ord]], /* 47 */
+             [ charsets_ics, [ ps, ord, basset]], /* 48 */
+             [ charsets_ics, [ ps, ord, charsetn]], /* 49 */
+             [ charsets_ics, [ ps, ord, trisetc]], /* 50 */
+             [ charsets_cfactor, [ f, as, ordb]], /* 51 */
+             [ charsets_qics, [ ps, ord]], /* 52 */
+             [ charsets_qics, [ ps, ord, basset]], /* 53 */
+             [ charsets_qics, [ ps, ord, wbasset]], /* 54 */
+             [ charsets_qics, [ ps, ord, charsetn]], /* 55 */
+             [ charsets_qics, [ ps, ord, wcharsetn]], /* 56 */
+             [ charsets_qics, [ ps, ord, trisetc]], /* 57 */
+             [ charsets_eics, [ ps, ord]], /* 58 */
+             [ charsets_eics, [ ps, ord, basset]], /* 59 */
+             [ charsets_eics, [ [ ps, x3], ord, charsetn]], /* 60 */
+             [ charsets_eics, [ ps, ord, trisetc]], /* 61 */
+             [ charsets_ivd, [ ps, ord]], /* 62 */
+             [ charsets_ivd, [ ps, ord, basset]], /* 63 */
+             [ charsets_ivd, [ ps, ord, charsetn]], /* 64 */
+             [ charsets_ivd, [ ps, ord, trisetc]], /* 65 */
+             [ charsets_pid, [ ps1, orda]], /* 66 */
+             [ charsets_pid, [ ps1, orda, basset]], /* 67 */
+             [ charsets_pid, [ ps1, orda, charsetn]], /* 68 */
+             [ charsets_pid, [ ps1, orda, trisetc]]], /* 69 */
+   test_out : [
+/* 1 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2]]),
+/* 2 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2]]),
+/* 3 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]]),
+/* 4 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]]),
+/* 5 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2]]),
+/* 6 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]]),
+/* 7 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]]),
+/* 8 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]]),
+/* 9 */ setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2]]),
+/*10 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2]])]),
+/*11 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2]])]),
+/*12 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]])]),
+/*13 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]])]),
+/*14 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2]])]),
+/*15 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]])]),
+/*16 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]])]),
+/*17 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2]])]),
+/*18 */ setify([setify([setify([x1]),[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2]])]),
+/*19 */ setify([setify([2*b+1,2*b-1])]),
+/*20 */ setify([setify([b^2])]),
+/*21 */ setify([setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+         [1+x1,x2,-1+x3^2,-x3+x4],[x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2]])]),
+/*22 */ setify([setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+         [1+x1,x2,-1+x3^2,-x3+x4],[x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2]])]),
+/*23 */ setify([setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+         [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],[x1,4*x2^4+4*x2^2+1,
+         -2*x2^3*x3+4*x2^4+4*x2^2-x2*x3+1,x4^2-x4*x2+3*x2],
+         [1+x1,x2,-x3^2+2*x2^2+1-x2*x3-x2,x4*x3-2*x2^2-x1*x2-1]])]),
+/*24 */ setify([setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3 -x1*x2],
+         [1+x1,x2,-1+x3^2,-x3+x4],[x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2]])]),
+/*25 */ setify([setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+         [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+         [x1,4*x2^4+4*x2^2+1,-2*x2^3*x3+4*x2^4+4*x2^2-x2*x3+1,x4^2-x4*x2+3*x2],
+         [1+x1,x2,-1+x3^2,x4*x3-2*x2^2-x1*x2-1]])]),
+/* 26 */ setify([setify([[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+         [1+x1,x2,-1+x3^2,-x3+x4],[x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2]])]),
+/* 27 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+         [1+x1,x2,-1+x3^2,-x3+x4],[x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2]])]),
+/* 28 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+         x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+         [1+x1,x2,-1+x3^2,-x3+x4],[x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2]])]),
+/* 29 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [1+x1,x2,x3^2-2*x2^2-1+x2*x3+x2,x4*x3-2*x2^2-x1*x2-1]]),
+          setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+           2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+           [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+           [1+x1,x2,-1+x3^2,x4*x3-2*x2^2-x1*x2-1]])]),
+/* 30 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          [1+x1,x2,-1+x3^2,-x3+x4],[x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2]])]),
+/* 31 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [1+x1,x2,x3^2-2*x2^2-1+x2*x3+x2,x4*x3-2*x2^2-x1*x2-1]]),
+          setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+           2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+           [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+           [1+x1,x2,-1+x3^2,x4*x3-2*x2^2-x1*x2-1]])]),
+/* 32 */ setify([setify([[-2 *x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          [1 +x1,x2,-1+x3^2,-x3+x4],[x1,2*x2^2+1,x3,x4^2-x4*x2 +3*x2]])]),
+/* 33 */ setify([setify([[1+x1,x2,-1+x3^2,-x3+x4],
+          [x1,2 *x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [[x1*((-2*x1*x2+2 *x2^2+2*x1*x2^2+1+x1)),
+          x1^3*x2+3*x1^2*x2+x3^2+x3 ^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          x1*((1 +x1))]])]),
+/* 34 */ setify([setify([[1+x1,x2,-1+x3^2,-x3+x4],
+          [x1,2 *x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          x1*((1 +x1))]])]),
+/* 35 */ setify([setify([[x1,2*x2^2+1,x3,x4^2-x4*x2 +3*x2],
+          [[1+x1,x2,-x3^2+2*x2^2+1-x2*x3-x2,x4*x3 -2*x2^2-x1*x2-1],x3],
+          [[x1*((-2*x1*x2+2*x2^2 +2*x1*x2^2+1+x1)),
+          2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2 *x3,x1*x4+x3-x1*x2],x1*((1+x1))],
+          [[x1,4*x2^4+4 *x2^2+1,-2*x2^3*x3+4*x2^4+4*x2^2-x2*x3+1,
+          x4^2 -x4*x2+3*x2],2*x2^2+1]])]),
+/* 36 */ setify([setify([[1+x1,x2,-1+x3^2,-x3+x4],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [[x1*((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          x1*((x2-x3))*((1+x1))]])]),
+/* 37 */ setify([setify([[x1,2 *x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [1+x1,x2,-1+x3^2,x4 *x3-2*x2^2-x1*x2-1],
+          [[x1*((-2*x1*x2+2*x2^2+2 *x1*x2^2+1+x1)),
+          2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2 *x3,x1*x4+x3-x1*x2],x1*((1+x1))],
+          [[x1,4*x2^4+4 *x2^2+1,-2*x2^3*x3+4*x2^4+4*x2^2-x2*x3+1,
+          x4^2 -x4*x2+3*x2],2*x2^2+1]])]),
+/* 38 */ setify([setify([[1+x1,x2,-1 +x3^2,-x3+x4],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [[x1 *((-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1)),
+          x1^3*x2+3 *x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3 -x1*x2],
+          x1*((1+x1))]])]),
+/* 39 */ setify([setify([[1+x1,x2,-1 +x3^2,-x3+x4],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [[-2 *x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3 ^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          x1 *((1+x1))]])]),
+/* 40 */ setify([setify([[1+x1,x2,-1+x3^2,-x3 +x4],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [[-2*x1 *x2+2*x2^2+2*x1*x2^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3^2 +x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          x1*((1 +x1))]])]),
+/* 41 */ setify([setify([[x1,2*x2^2+1,x3,x4^2-x4*x2 +3*x2],
+          [[1+x1,x2,-x3^2+2*x2^2+1-x2*x3-x2,x4*x3 -2*x2^2-x1*x2-1],x3],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,
+          x1 *x4+x3-x1*x2],x1*((1+x1))],
+          [[x1,4*x2^4+4*x2^2 +1,2*x2^2+1-x2*x3,x4^2-x4*x2+3*x2],2*x2^2+1]])]),
+/* 42 */ setify([setify([[x1,2 *x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [[-2*x1*x2+2*x2^2 +2*x1*x2^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          x1*x2*((1+x1))]])]),
+/* 43 */ setify([setify([[x1,2 *x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [1+x1,x2,-1+x3^2,x4 *x3-2*x2^2-x1*x2-1],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,
+          x1*x4 +x3-x1*x2],x1*((1+x1))],
+          [[x1,4*x2^4+4*x2^2+1,2 *x2^2+1-x2*x3,x4^2-x4*x2+3*x2],2*x2^2+1]])]),
+/* 44 */ setify([setify([[1 +x1,x2,-1+x3^2,-x3+x4],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2 +3*x2],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          x1*((1+x1))]])]),
+/* 45 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4 ^2-x4*x2+3*x2],
+          [1+x1,x2,x3^2-2*x2^2-1+x2*x3+x2,x4*x3-2*x2^2-x1*x2-1]]),
+          setify([[-2*x1*x2+2*x2^2 +2*x1*x2^2+1+x1,
+           2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2 *x3,x1*x4+x3-x1*x2],
+           [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+           [1 +x1,x2,-1+x3^2,x4*x3-2*x2^2-x1*x2-1]])]),
+/* 46 */ setify([setify([setify([x3 =((-3))/4+3/4*%I*23^((1/2)),
+          x2=3/8+1/8*%I*23 ^((1/2)),
+          x4=3/16+1/16*%I*23^((1/2))+1/16*2^((1 /2))*
+             ((-79-21*%I*23^((1/2))))^((1/2))]),
+          setify([x4 =3/16-1/16*%I*23^((1/2))+1/16*2^((1/2))*
+             ((-79 +21*%I*23^((1/2))))^((1/2)),
+             x3=((-3))/4-3/4 *%I*23^((1/2)),x2=3/8-1/8*%I*23^((1/2))]),
+          setify([x2 =3/8-1/8*%I*23^((1/2)),
+             x4=3/16-1/16*%I*23^((1/2)) -1/16*2^((1/2))*
+                ((-79+21*%I*23^((1/2))))^((1 /2)),
+             x3=15/8+3/8*%I*23^((1/2))]),
+          setify([x2=3/8+1 /8*%I*23^((1/2)),
+             x3=15/8-3/8*%I*23^((1/2)),
+             x4=3 /16+1/16*%I*23^((1/2))-1/16*2^((1/2))*
+                ((-79-21 *%I*23^((1/2))))^((1/2))])]),
+          setify([setify([x3=15 /8+3/8*%I*23^((1/2)),
+             x4=-1/4-1/4*%I*23^((1/2)),
+             x2 =-1/2*((-11+%I*23^((1/2))))/((7+%I*23^((1/2))))]),
+          setify([x3 =-3/4+3/4*%I*23^((1/2)),x4=5/8-1/8*%I*23^((1 /2)),
+             x2=1/4*((-1+5*%I*23^((1/2))))/((7+%I*23 ^((1/2))))]),
+          setify([x3=15/8-3/8*%I*23^((1/2)),
+             x2 =-1/2*((11+%I*23^((1/2))))/((-7+%I*23^((1/2)))),
+             x4 =-1/4+1/4*%I*23^((1/2))]),
+          setify([x3=-3/4-3/4 *%I*23^((1/2)),x4=5/8+1/8*%I*23^((1/2)),
+             x2=1/4 *((1+5*%I*23^((1/2))))/((-7+%I*23^((1/2))))])]),
+          setify([setify([x2 =3/8+1/8*%I*23^((1/2)),
+             x4=3/16+1/16*%I*23^((1/2))+1/16*((-158-42*%I*23^((1/2))))^((1/2)),
+             x3=-3 /4+3/4*%I*23^((1/2))]),
+          setify([x2=3/8+1/8*%I*23^((1 /2)),
+             x4=3/16+1/16*%I*23^((1/2))-1/16*((-158-42*%I*23^((1/2))))^((1/2)),
+             x3=15/8-3/8*%I*23^((1 /2))]),
+          setify([x2=3/8-1/8*%I*23^((1/2)),
+             x4=3/16-1/16*%I*23^((1/2))+1/16*((-158+42*%I*23^((1/2))))^((1/2)),
+             x3=-3/4-3/4*%I*23^((1/2))]),
+          setify([x2 =3/8-1/8*%I*23^((1/2)),
+             x4=3/16-1/16*%I*23^((1/2))-1/16*((-158+42*%I*23^((1/2))))^((1/2)),
+             x3=15 /8+3/8*%I*23^((1/2))])])]),
+/* 47 */ setify([setify([[1+x1,x2,x3 -1,x4-1],[1+x1,x2,1+x3,1+x4],
+          [-2*x1*x2+2*x2^2 +2*x1*x2^2+1+x1,x3-x1+x1*x2,x4+1-2*x2],
+          [-2*x1*x2 +2*x2^2+2*x1*x2^2+1+x1,-x3-x1+2*x1*x2,x4+x2-1]])]),
+/* 48 */ setify([setify([[1 +x1,x2,x3-1,x4-1],[1+x1,x2,1+x3,1+x4],
+          [-2*x1*x2 +2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,x4+1-2*x2],
+          [-2 *x1*x2+2*x2^2+2*x1*x2^2+1+x1,-x3-x1+2*x1*x2,x4+x2 -1]])]),
+/* 49 */ setify([setify([[1+x1,x2,x3-1,x4-1],[1+x1,x2,1 +x3,1+x4],
+          [-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1 +x1*x2,x4+1-2*x2],
+          [-2*x1*x2+2*x2^2+2*x1*x2^2+1 +x1,-x3-x1+2*x1*x2,x4+x2-1]])]),
+/* 50 */ setify([setify([[1 +x1,x2,x3-1,x4-1],[1+x1,x2,1+x3,1+x4],
+          [-2*x1*x2 +2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,x4+1-2*x2],
+          [-2 *x1*x2+2*x2^2+2*x1*x2^2+1+x1,-x3-x1+2*x1*x2,x4+x2 -1]])]),
+/* 51 */ setify([setify([144*
+          ((-27*b-32*c2+48*b^2*c2+27*b^2+27*c2^2+72*b*c2+18))*
+          ((12*b^2+7*b+3*c2 -1))])]),
+/* 52 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2 ^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3 -x1^2*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4^2-x4 *x2+3*x2],[1+x1,x2,x3-1,x4-1],
+          [1+x1,x2,1+x3,1+x4]])]),
+/* 53 */ setify([setify([[-2 *x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3 ^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2 *x2^2+1,x3,x4^2-x4*x2+3*x2],[1+x1,x2,x3-1,x4-1],
+          [1 +x1,x2,1+x3,1+x4]])]),
+/* 54 */ setify([setify([[-2*x1*x2+2*x2 ^2+2*x1*x2^2+1+x1,
+          2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2 *x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [1 +x1,x2,x3^2-2*x2^2-1+x2*x3+x2,x4*x3-2*x2^2-x1*x2-1]]),
+          setify([[-2 *x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          2*x1*x2^2+x1^2*x2+x1 +x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4 ^2-x4*x2+3*x2],[1+x1,x2,x3-1,x4-1],
+          [1+x1,x2,1+x3,1 +x4]])]),
+/* 55 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2 ^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3 -x1^2*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4^2-x4 *x2+3*x2],[1+x1,x2,x3-1,x4-1],
+          [1+x1,x2,1+x3,1+x4]])]),
+/* 56 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],
+          [1+x1,x2,x3^2-2*x2^2-1+x2*x3+x2,x4 *x3-2*x2^2-x1*x2-1]]),
+          setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+           2*x1*x2^2+x1^2*x2+x1+x3^2-x1*x2*x3,x1*x4+x3-x1*x2],
+           [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],[1+x1,x2,x3-1,x4-1],
+           [1+x1,x2,1+x3,1+x4]])]),
+/* 57 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,
+          x1^3*x2+3*x1^2*x2+x3^2+x3^2*x1-x1*x2*x3-x1^2*x2*x3,x1*x4+x3-x1*x2],
+          [x1,2*x2^2+1,x3,x4^2-x4*x2+3*x2],[1+x1,x2,x3-1,x4-1],
+          [1+x1,x2,1+x3,1+x4]])]),
+/* 58 */ setify([setify([[1+x1,x2,x3-1,x4-1],[1+x1,x2,1+x3,1+x4],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,-x3-x1+2*x1*x2,x4+x2-1],
+          x1*((1+x1))],[x1,2*x2^2+1,x3,x4+x2-1],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,x4+1-2*x2],
+          x1*((1+x1))],[x1,2*x2^2+1,x3,x4+1-2*x2]])]),
+/* 58 */ setify([setify([[1+x1,x2,x3-1,x4-1],[1+x1,x2,1+x3,1+x4],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,-x3-x1+2*x1*x2,x4+x2-1],
+          x1*((1+x1))],[x1,2*x2^2+1,x3,x4+x2-1],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,x4+1-2*x2],
+          x1*((1+x1))],[x1,2*x2^2+1,x3,x4+1-2*x2]])]),
+/* 59 */ setify([setify([[1+x1,x2,x3-1,x4-1],[1+x1,x2,1+x3,1+x4],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,-x3-x1+2*x1*x2,x4+x2-1],
+          x1*x3*((1+x1))],[[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,
+          x4+1-2*x2],x1*x3*((1+x1))]])]),
+/* 60 */ setify([setify([[1+x1,x2,x3-1,x4-1],[1+x1,x2,1+x3,1+x4],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,-x3-x1+2*x1*x2,x4+x2-1],
+          x1*((1+x1))],[x1,2*x2^2+1,x3,x4+x2-1],
+          [[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,x4+1-2*x2],
+          x1*((1+x1))],[x1,2*x2^2+1,x3,x4+1-2*x2]])]),
+/* 61 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,
+          x4+1-2*x2],[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3+x1-2*x1*x2,x4+x2-1]])]),
+/* 62 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,
+          x4+1-2*x2],[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3+x1-2*x1*x2,x4+x2-1]])]),
+/* 63 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,
+          x4+1-2*x2],[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3+x1-2*x1*x2,x4+x2-1]])]),
+/* 64 */ setify([setify([[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3-x1+x1*x2,
+          x4+1-2*x2],[-2*x1*x2+2*x2^2+2*x1*x2^2+1+x1,x3+x1-2*x1*x2,x4+x2-1]])]),
+/* 65 */ setify([setify([[[x^2-x+1,y+x-1],[x^2-x+1,y+x-1]],[[x^3,x^2+y],[x,y]],
+          [[x+1,y+1],[x+1,y+1]]])]),
+/* 66 */ setify([setify([[[x^2-x+1,y+x-1],[x^2-x+1,y+x-1]],[[x^3,x^2+y],[x,y]],
+          [[x+1,y+1],[x+1,y+1]]])]),
+/* 67 */ setify([setify([[[x^2-x+1,y+x-1],[x^2-x+1,y+x-1]],[[x^3,x^2+y],[x,y]],
+          [[x+1,y+1],[x+1,y+1]]])]),
+/* 68 */ setify([setify([[[x^2-x+1,y+x-1],[x^2-x+1,y+x-1]],[[x^3,x^2+y],[x,y]],
+          [[x+1,y+1],[x+1,y+1]]])])],
+
+   for i : 1 thru length(test_in) do (
+     print("Executing test number ",i),
+     rr : setify1(apply(first(test_in[i]), second(test_in[i]))),
+     if charsets_testsub( rr, test_out[i]) 
+       then (
+        print("CharSets_Test:",aa,"Good"))
+      else (
+        print("CharSets_Test:",aa,"Bad",rr)))
+))$
+/* subroutine for test */
+
+charsets_testsub( rr,ss):=block( [ i,ii,ind],
+   rr:map(expand,rr),ss:map(expand,ss),
+   if member(rr, ss) then ( true)
+   else (
+      ind:false,
+      for i in ss do (
+        ii:if listp(i) then i else setify1(i),
+        if charsets_equal ( setdifference ( rr, ii), setdifference ( ii, rr)) 
+          then (
+           return ( ind:true))) ,
+      return(ind))
+)$
+/* subroutine for testsub */
+
+charsets_equal ( a,b):= block(
+   [ i,j,ind],
+   if listp(a) then (
+      if length ( a) # length ( b)  then (
+         print("charsets_equal: lists of different lengths",length ( a),a,length ( b),b),
+         return ( false)),
+      ind:true,
+      for i : 1 thru length ( a) do (
+        if not charsets_equal ( a[i], b[i]) then return ( ind:false)),
+      return( ind))
+     else if /* WARNING: listp should be setp */listp(a) then (
+      if length ( a) # length ( b) then (
+         print("charsets_equal: sets of different lengths",length ( a),a,length ( b),b),
+         return ( false)),
+      ind:true,
+      for i in a do (
+        for j in b do (
+          if not charsets_equal ( i, j) then return (ind : false)),
+        if not ind then return ( false)),
+      return (ind))
+     else if operatorp(b, [ "[", setp]) then ( false)
+     else if polynomialp(a,listofvars(a)) then (
+      if second(divide ( a, b)) = 0 and second(divide ( b, a)) = 0 then ( true)
+        else (
+         print("charsets_equal: polynomials dont divide",a,b), 
+         false))
+     else if a = b then ( true)
+     else (
+        if a = -b then true
+        else (
+         print("charsets_equal: a not equal b",a,b), 
+      false))
+)$ 

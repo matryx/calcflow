@@ -1,0 +1,122 @@
+/* (kill (all), load (romberg), float_approx_equal_tolerance : rombergtol, 0); */
+(load (romberg), float_approx_equal_tolerance : rombergtol, 0);
+0;
+
+(I : [2*x - -(log((4 + %e)/(2*%pi)))*(((4 + %e)/(2*%pi))^x), x, -1, 0],
+ apply (romberg, I));
+''(first (apply (quad_qags, I)));
+
+(I : [2*x - cos((%e + %pi)*x), x, 0, 1],
+ apply (romberg, I));
+''(apply (integrate, I),
+ ev (%%, numer, %enumer));
+
+(expr : x^2 - 5,
+ romberg (expr, x, 0, 10));
+''(integrate (x^2 - 5, x, 0, 10),
+ ev (%%, numer));
+
+/* verify that romberg expression is returned for non-numeric expression or bounds
+ */
+(kill (a, b), romberg (x^a - 5, x, 0, 10));
+romberg (x^a - 5, x, 0.0, 10.0);
+
+romberg (x^3 - 5, x, a, b);
+romberg (x^3 - 5, x, a, b);
+
+/* verify that romberg nested inside another function call is OK */
+(quad_qags (romberg (sin(a)*cos(x) - a*x, x, 0, 10), a, 1, 3),
+ first (%%));
+''(integrate (integrate (sin(a)*cos(x) - a*x, x, 0, 10), a, 1, 3),
+ ev (%%, numer));
+
+romberg (romberg (a^2 - x, a, 0, x) - 7, x, 0, 100);
+7999300.0;
+
+/* verify that symbolic function name is OK */
+(foo (a) := 3^a - 5,
+ bar : foo,
+ romberg (bar, 0, 10));
+''(integrate (bar (a), a, 0, 10),
+ ev (%%, numer));
+
+/* misc examples */
+
+(expr : t - (297 * exp ((1000000 * t) / 33) - 330) / 10000000,
+ romberg (expr, t, 1e-9, 0.003));
+''(float ((-9801*%e^(1000/11)+9801*%e^(1/33000)+9197999933999/200000) /10000000000000));
+
+(expr : 6096 * tan((2 * atan(c/(2 * fl))) / r) / (tan((1/60) * (%pi/180))),
+ ev (romberg (expr-6096, fl, 1, 10), c=7.176, r=3264));
+''(first (ev (quad_qags (expr-6096, fl, 1, 10), c=7.176, r=3264)));
+
+/* more fun with evaluation */
+
+(g (a) := romberg (f (x, a), x, 0, 200),
+ f (x, a) := x^a - 5,
+ 0);
+0;
+
+g (0.5);
+''(integrate (f (x, 1/2), x, 0, 200), ev (%%, numer));
+
+expr : g (z + z);
+romberg (x^(2 * z) - 5, x, 0.0, 200.0);
+
+''(at (expr, z=0.25));
+''(integrate (f (x, 1/2), x, 0, 200), ev (%%, numer));
+
+(quad_qags (g (z), z, 1, 3),
+ first (%%));
+''(assume (z > 0),
+ integrate (f (x, z), x, 0, 200),
+ quad_qags (%%, z, 1, 3),
+ first (%%));
+
+/* verify that symbolic constants (in integrand or limits of integration) evaluate to numbers */
+
+(f(x) := cos (sin (%e) + %e^%pi + %pi^%e) * sin(x) - x/2, 0);
+0;
+
+[romberg (cos (sin (%e) + %e^%pi + %pi^%e) * sin(x) - x/2, x, 0.1, %pi),
+ romberg (f(x), x, 0.1, %pi),
+ romberg (f, 0.1, %pi)];
+''(integrate (f (x), x, a, b),
+ ev (%%, a=0.1, b=%pi, numer, %enumer),
+ [%%, %%, %%]);
+
+[romberg (f, 1/(%pi*%e), 2*%pi*sin(%e)),
+ romberg (f, log(%pi), %e^%pi),
+ romberg (f, sin(%e), %pi^%e),
+ romberg (f, exp(1/5), exp(cos(%e + %pi))),
+ romberg (f, cos(exp(2))/10, 10*cos(exp(2)))];
+''([integrate (f (x), x, 1/(%pi*%e), 2*%pi*sin(%e)),
+ integrate (f (x), x, log(%pi), %e^%pi),
+ integrate (f (x), x, sin(%e), %pi^%e),
+ integrate (f (x), x, exp(1/5), exp(cos(%e + %pi))),
+ integrate (f (x), x, cos(exp(2))/10, 10*cos(exp(2)))],
+ ev (%%, numer, %enumer));
+
+/* adapted from the mailing list 2007/06/10
+ * charfun2 copied from the interpol share package
+ */
+
+/* KNOWN FAILURE: romberg computes a result but relative error is greater than rombergtol */
+
+(charfun2 (z, l1, l2) := charfun (l1 <= z and z < l2),
+ e1 : (-.329*x^3+.494*x^2 +.559*x+.117),
+ e2 : (.215*x^3-1.94*x^2 +4.85*x-2.77),
+ e3 : (.0933*x^3-1.02*x^2+2.56*x-.866),
+ e4 : (.0195*x^3-.581*x^2+1.67*x-.275),
+ e5 : (.00117*x^3-.498*x^2 +1.55*x -.213),
+ expr : e1 *charfun2(x,minf,1.0)
+    +e2 *charfun2(x,2.5,inf)
+    +e3 *charfun2(x,2.0,2.5)
+    +e4 *charfun2(x,1.5,2.0)
+    +e5 *charfun2(x,1.0,1.5),
+ romberg (expr, x, 0, 4));
+''(ev (integrate (e1, x,0,1)
+ + integrate (e2, x,5/2,4)
+ + integrate (e3, x,2,5/2)
+ + integrate (e4, x,3/2,2)
+ + integrate (e5, x,1,3/2), keepfloat));

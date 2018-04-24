@@ -1,0 +1,57 @@
+/* First load the necessary file: */
+load("declin");
+/* For example, define the linearity properties of F.
+	F is to be linear in its first, third and fifth arguments.
+	The predicate to be used for distinguishing the coefficients
+	of these arguments will be called FVARP.  */
+declare_linear_operator(f,[1,3,5],fvarp);
+fvarp(exp):=member(exp,[a,b,c]);
+/* An example of an expression with the necessary property is:  */
+ff(x,e,y,f,z,g,x):=(k1*x+k2*y+k3*z)/(e+f)^g;
+/* In this expression, FF is linear in [X, Y, Z], taken
+	as the components of a vector.  Note that this is distinguished
+	from being linear in X, Y, or Z taken one at a time.
+
+Here is an expression that is equivalent to 0. */
+exp1:(f(a,x,b,y,c,z)*2-f(2*a,x,2*b,y,2*c,z))*h(q)/(a+b)*(f+h);
+/* The function LINSIMP looks at sums contained in its
+	first argument and combines the F expressions whenever possible. */
+linsimp(exp1,f);
+/* The function LINSIMP extracts coefficients from the arguments
+	of F whenever it can. */
+exp2:f(6*a,x,2*b,y,4*c,z);
+linsimp(exp2,f);
+/* To remove the LINEAR_OPERATOR property from F, use REM. */
+rem(f,linear_operator);
+/* Now verify that it is gone: */
+errcatch(linsimp(exp,f));
+/* LINSIMP can simplify with respect to several operators.
+	 To illustrate this, we first make the
+	 necessary declarations. */
+declare_linear_operator(f,[1,2,3],fvarp);
+declare_linear_operator(h,[1,2],hvarp);
+hvarp(exp):=member(exp,[d,e,f])$
+exp3:(f(2*a,-a*x,b/3,w)-f(a,b*x,c,w)
+	+h(w*e,f*(a+b),3)+2*h(-w*e,f*a,3))/a;
+linsimp(exp3,f,h);
+/* Notice that in the above example, LINSIMP was NOT confused
+	 by the presence of F as both a variable and an undefined
+	 operator.
+		LINSIMP will not combine forms that differ in the
+	 arguments that are not specified in the linearity
+	 declaration: */
+exp4:f(a,b,c,d,e)-f(a,b,c,d,h);
+linsimp(exp4,f);
+/* But it will make combinations whenever possible, even
+	 when the operator appears with varying numbers of 
+	 arguments: */
+exp5:f(a,b,c,d,e)-f(a,b,2*c,d,e)+2*f(b,a,c)-h*f(c,2*b,a);
+linsimp(exp5,f);
+/* LINSIMP also recognizes the zero case: */
+exp6:f(0,0,0,a,b,c);
+linsimp(exp6,f);
+/* Here is an example with SUM: */
+declare_linear_operator(nounify(sum),[1],'sumvarp);
+sumvarp(exp):=not(freeof('n,exp));
+a*'sum(f(n)*x^n,n,0,inf)+b*x*'sum(g(n)*x^(n-1),n,0,inf);
+factor(linsimp(%,nounify('sum)));

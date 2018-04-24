@@ -1,0 +1,63 @@
+(kill (all), 0);
+0;
+
+(zeta%pi : true, 0);
+0$
+
+(chk(x) := zeta(1-x) - 2 * cos(x * %pi /2) * gamma(x) * zeta(x) / (2 * %pi)^x, 0);
+0$
+
+every(lambda([e], is(equal(e,0))), makelist(chk(k),k,2,21));
+true$
+
+every(lambda([e], is(equal(e,0))), makelist(zeta(-k) + bern(k+1)/(k+1),k,1,21));
+true$
+
+zeta(-1);
+-1/12$
+
+zeta(0);
+-1/2$
+
+zeta(0.0);
+-0.5$
+
+zeta(0.0b0);
+-0.5b0$
+
+errcatch(zeta(1)); /* zeta(1) is undefined */
+[];
+
+errcatch(zeta(1.0));
+[];
+
+errcatch(zeta(1.0b0));
+[];
+
+/* Check the limit */
+limit(zeta(x),x,1,plus);
+inf;
+
+limit(zeta(x),x,1,minus);
+minf;
+
+limit(zeta(x),x,1);
+infinity;
+
+zeta(2);
+%pi^2 /6$
+
+zeta(4);
+%pi^4 / 90$
+
+zeta(6);
+%pi^6 / 945$
+
+zeta(8);
+%pi^8/9450$
+
+zeta(10);
+%pi^10/93555$
+
+(remfunction(chk),0);
+0$

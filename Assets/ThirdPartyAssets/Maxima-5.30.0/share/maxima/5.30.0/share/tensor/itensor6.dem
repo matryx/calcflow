@@ -1,0 +1,71 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Covariant differentiation, curvature
+ */
+if get('itensor,'version)=false then load(itensor);
+
+("Covariant differentiation is carried out relative to a metric")$
+remcomps(g);
+imetric(g);
+
+("We declare the metric's symmetry properties")$
+decsym(g,2,0,[sym(all)],[]);
+decsym(g,0,2,[],[sym(all)]);
+
+("MAXIMA can express both kinds of Christoffel symbols")$
+ishow(ichr1([i,j,k]))$
+ishow(ichr2([i,j],[k]))$
+
+("The covariant derivative uses the Christoffel symbols")$
+ishow(covdiff(a([j,k],[i]),i))$
+exp:ishow(canform(contract(expand(ev(%,ichr2)))))$
+
+("To drop first derivatives of the metric, use igeodesic_coords")$
+ishow(igeodesic_coords(exp,g))$
+
+("Covariant derivatives of a vector do not commute")$
+covdiff(v([],[i]),k,l)-covdiff(v([],[i]),l,k)$
+comm:ishow(factor(canform(%)))$
+
+("The curvature tensor is the same as the commutator")$
+curv:ishow(v([],[j])*icurvature([j,k,l],[i]))$
+canform(comm-curv);
+
+("The function flush and relatives can drop derivative expressions")$
+exp:u([i],[j,r],k,r)+a([i],[j,r,s],k,r,s)+b([i,k],[j,r],r)+u([i,k,r],[j,r])$
+ishow(exp)$
+ishow(flush(exp,u))$
+ishow(flushd(exp,u,b))$
+ishow(flushnd(exp,a,1))$
+
+("The function lorentz() can be used to remove divergence free terms")$
+defcon(e,e,kdelta)$
+defcon(e,p,p)$
+defcon(p,e,p)$
+decsym(e,0,2,[],[sym(all)]);
+declare(e,constant);
+(ratfac:false,ratvars(l),ratweight(l,1),ratwtlvl:1);
+
+components(g([i,j],[]),e([i,j],[])+2*l*p([i,j],[]));
+components(g([],[i,j]),e([],[i,j])-2*l*p([],[i,j]));
+
+rinv:g([],[r,t])*icurvature([r,s,t],[s])$
+ricci:g([],[i,r])*g([],[j,t])*icurvature([r,s,t],[s])$
+-(ricci-1/2*rinv*g([],[i,j]))$
+ishow(canform(rename(contract(ratexpand(ev(%))))))$
+ishow(lorentz_gauge(%,p))$
+
+("The conmetderiv function relates derivatives of the metric tensor")$
+ishow(q([],[a,b],c))$
+ishow(conmetderiv(%,q))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

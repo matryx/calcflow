@@ -1,0 +1,85 @@
+/*
+These functions implement misc functions needed by Solver
+Copyright (C) 2000 Dan Stanger
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Dan Stanger dan.stanger@ieee.org
+please contact me for updates to this code
+*/
+
+/******************************************************************************/
+/* Powers creates a list of low powers in a variable                          */
+/******************************************************************************/
+
+Powers(e,v) :=
+  if atom(e) then [lopow(e,v)]
+  else if part(e,0)="+" or part(e, 0)="-" then
+    maplist(lambda([p],lopow(p,v)), e)
+  else
+    [lopow(e,v)]$
+
+/******************************************************************************/
+/* pop pops the first element off a list and returns it                       */
+/******************************************************************************/
+
+Pop(l) ::= buildq([l],block([t:first(l)],l:rest(l),t))$
+
+/******************************************************************************/
+/* Set_Element modifies lists or matrixes and returns the list or matrix      */
+/******************************************************************************/
+
+Set_Element(o,i,j, [l]):=
+  if matrixp(o) then (
+    if l # [] then (
+      o[i,j]:first(l),
+      o
+    )
+    else (
+      o[i]:j,
+      o
+    )
+  )
+  else (
+    o[i]:j,
+    o
+  )$
+
+EquationP(eq) := part(eq,0)="="$
+
+/******************************************************************************/
+/* Solver does not know maxima sets - workarounds for set functions.          */
+/******************************************************************************/
+
+Setify(lst) :=
+  if length(lst)=0 then []
+  else append([lst[1]], Setify(delete(lst[1], lst)))$
+
+DisjointP(l1, l2) := disjointp(setify(l1), setify(l2))$
+
+Intersection(l1, l2) :=
+  if length(l1)=0 then []
+  else if member(l1[1], l2) then append([l1[1]], Intersection(rest(l1), l2))
+  else Intersection(rest(l1), l2)$
+
+SetDifference(l1, l2) := listify(setdifference(setify(l1), setify(l2)))$
+
+Union([l]) := lreduce(Union2, l)$
+
+Union2(l1, l2) :=
+  if length(l2)=0 then l1
+  else if not(member(l2[1], l1)) then Union2(append(l1, [l2[1]]), rest(l2))
+  else Union2(l1, rest(l2))$
+

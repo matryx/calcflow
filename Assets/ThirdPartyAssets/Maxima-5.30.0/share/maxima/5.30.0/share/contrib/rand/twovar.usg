@@ -1,0 +1,181 @@
+twovar.mac is from the book "Perturbation Methods, Bifurcation Theory
+and Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+This maxima routine applies the two variable expansion method to a
+non-autonomous (forced) system of n differential equations.  This
+sample run from p 93 applies the method to the van der Pol equation.
+
+The routine is case sensitive.  When I enter the inputs in lower case
+I get different (wrong) answers.
+
+(C1) load("./twovar.mac");
+Warning - you are redefining the MACSYMA function SETIFY
+(D1)                             ./twovar.mac
+(C2) twovar();
+DO YOU WANT TO ENTER NEW DATA (Y/N)
+Y;
+NUMBER OF D.E.'S
+1;
+THE 1 D.E.'S WILL BE IN THE FORM:
+X[I]'' + W[I]^2 X[I] = E F[I](X[1],...,X[ 1 ],T)
+ENTER SYMBOL FOR X[ 1 ]
+X;
+ENTER W[ 1 ]
+1;
+ENTER F[ 1 ]
+(1-X^2)*'DIFF(X,T);
+THE D.E.'S ARE ENTERED AS:
+                   2  dX
+X '' + X = E (1 - X ) --
+                      dT
+THE METHOD ASSUMES A SOLUTION IN THE FORM:
+X[I] = X0[I] + E X1[I]
+WHERE X0[I] = A[I](ETA) COS W[I] XI + B[I](ETA) SIN W[I] XI
+WHERE XI = T AND ETA = E T
+REMOVAL OF SECULAR TERMS IN THE X1[I] EQS. GIVES:
+                    2    3
+                A  B    A
+    d            1  1    1
+2 (---- (A )) + ----- + -- - A  = 0
+   dETA   1       4     4     1
+                   3    2
+                  B    A  B
+      d            1    1  1
+- 2 (---- (B )) - -- - ----- + B  = 0
+     dETA   1     4      4      1
+DO YOU WANT TO TRANSFORM TO POLAR COORDINATES (Y/N)
+Y;
+                    3
+              R    R
+   d           1    1   d
+[[---- (R ) = -- - --, ---- (THETA ) = 0]]
+  dETA   1    2    8   dETA       1
+DO YOU WANT TO SEARCH FOR RESONANT PARAMETER VALUES (Y/N)
+N;
+
+
+The second example is from pp 100-103.  The system of equations is
+
+    x'' + (1+e*delx) x + e nu x^3 = e k y
+
+    y'' + (1+e*dely) y + e mu cos(w*t) = 0
+
+First we use the two variable method to find a list of resonant
+frequencies w, then we set W to one of the frequencies and determine
+the slow flow equations for W:2.
+
+(C3) twovar();
+DO YOU WANT TO ENTER NEW DATA (Y/N)
+Y;
+NUMBER OF D.E.'S
+2;
+THE 2 D.E.'S WILL BE IN THE FORM:
+X[I]'' + W[I]^2 X[I] = E F[I](X[1],...,X[ 2 ],T)
+ENTER SYMBOL FOR X[ 1 ]
+X;
+ENTER SYMBOL FOR X[ 2 ]
+Y;
+ENTER W[ 1 ]
+1;
+ENTER W[ 2 ]
+1;
+ENTER F[ 1 ]
+-DELX*X-NU*X^3+K*Y;
+ENTER F[ 2 ]
+-DELY*Y-MU*Y*COS(W*T);
+THE D.E.'S ARE ENTERED AS:
+                        3
+X '' + X = E (K Y - NU X  - DELX X)
+Y '' + Y = E (- MU COS(T W) Y - DELY Y)
+THE METHOD ASSUMES A SOLUTION IN THE FORM:
+X[I] = X0[I] + E X1[I]
+WHERE X0[I] = A[I](ETA) COS W[I] XI + B[I](ETA) SIN W[I] XI
+WHERE XI = T AND ETA = E T
+REMOVAL OF SECULAR TERMS IN THE X1[I] EQS. GIVES:
+     3         2
+  3 B  NU   3 A  B  NU
+     1         1  1                           d
+- ------- - ---------- + B  K - B  DELX + 2 (---- (A )) = 0
+     4          4         2      1           dETA   1
+        2         3
+  3 A  B  NU   3 A  NU
+     1  1         1                           d
+- ---------- - ------- + A  K - A  DELX - 2 (---- (B )) = 0
+      4           4       2      1           dETA   1
+    d
+2 (---- (A )) - B  DELY = 0
+   dETA   2      2
+                d
+- A  DELY - 2 (---- (B )) = 0
+   2           dETA   2
+DO YOU WANT TO TRANSFORM TO POLAR COORDINATES (Y/N)
+N;
+DO YOU WANT TO SEARCH FOR RESONANT PARAMETER VALUES (Y/N)
+Y;
+X EQ'S RESONANT FREQ = 1
+FREQS ON RHS = [1, 3]
+Y EQ'S RESONANT FREQ = 1
+FREQS ON RHS = [1, W - 1, W + 1]
+WHICH PARAMETER TO SEARCH FOR ?
+W;
+[W = - 2, W = 0, W = 2]
+DO YOU WANT TO SEARCH FOR ANOTHER PARAMETER (Y/N) ?
+N;
+(D3)
+(C4) W:2;
+(D4)                                   2
+(C5) twovar();
+DO YOU WANT TO ENTER NEW DATA (Y/N)
+N;
+THE D.E.'S ARE ENTERED AS:
+                        3
+X '' + X = E (K Y - NU X  - DELX X)
+Y '' + Y = E (- MU COS(2 T) Y - DELY Y)
+THE METHOD ASSUMES A SOLUTION IN THE FORM:
+X[I] = X0[I] + E X1[I]
+WHERE X0[I] = A[I](ETA) COS W[I] XI + B[I](ETA) SIN W[I] XI
+WHERE XI = T AND ETA = E T
+REMOVAL OF SECULAR TERMS IN THE X1[I] EQS. GIVES:
+     3         2
+  3 B  NU   3 A  B  NU
+     1         1  1                           d
+- ------- - ---------- + B  K - B  DELX + 2 (---- (A )) = 0
+     4          4         2      1           dETA   1
+        2         3
+  3 A  B  NU   3 A  NU
+     1  1         1                           d
+- ---------- - ------- + A  K - A  DELX - 2 (---- (B )) = 0
+      4           4       2      1           dETA   1
+B  MU
+ 2                    d
+----- - B  DELY + 2 (---- (A )) = 0
+  2      2           dETA   2
+  A  MU
+   2                    d
+- ----- - A  DELY - 2 (---- (B )) = 0
+    2      2           dETA   2
+DO YOU WANT TO TRANSFORM TO POLAR COORDINATES (Y/N)
+Y;
+                R  SIN(THETA  - THETA ) K                R  SIN(2 THETA ) MU
+   d             2          2        1      d             2            2
+[[---- (R ) = - -------------------------, ---- (R ) = - -------------------,
+  dETA   1                  2              dETA   2               4
+
+                     2
+                  3 R  NU   R  COS(THETA  - THETA ) K
+ d                   1       2          2        1      DELX
+---- (THETA ) = - ------- + ------------------------- - ----,
+dETA       1         8                2 R                2
+                                         1
+
+                  COS(2 THETA ) MU
+ d                           2       DELY
+---- (THETA ) = - ---------------- - ----]]
+dETA       2             4            2
+DO YOU WANT TO SEARCH FOR RESONANT PARAMETER VALUES (Y/N)
+N;
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

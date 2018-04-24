@@ -1,0 +1,286 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.52
+     from dimension.texi on 7 April 2002 -->
+
+<TITLE>Untitled Document</TITLE>
+
+</HEAD>
+<BODY>
+<H1>Untitled Document</H1>
+<P>
+<P><HR><P>
+
+
+<H2><A NAME="SEC1" HREF="dimension_toc.html#TOC1">Introduction to the Dimensional Analysis Package</A></H2>
+
+<P>
+This document describes a new dimensional analysis package for Maxima.
+There is an older Maxima package for dimensional analysis.  The
+software described in this document differs from the older package.
+</P>
+
+
+<P>
+To use the dimensional analysis package, you must first load the file 
+<B>dimension.mac</B>.  Provided this file has been installed in a directory 
+that Maxima can  find, load it with the command
+
+<PRE>
+(C1) load("dimension.mac")$
+</PRE>
+
+
+Use <B>qput</B> to define the dimension of a variable; thus
+to define <EM>x</EM> to be a length, <EM>t</EM> a time, and <EM>c</EM> a speed, use
+
+<PRE>
+(C1) qput(x,"length",dimension)$
+(C2) qput(t,"time",dimension)$
+(C3) qput(c,"length"/"time",dimension)$
+</PRE>
+
+<P>
+To find  the dimension of an expression, use the  <B>dimension</B> function. 
+For example,
+
+<PRE>
+(C4) dimension(c*t/5);
+(D4) 				    length
+(C5) dimension(c-x/t);
+				    length
+(D5) 				    ------
+				     time
+</PRE>
+
+<P>
+When an expression is dimensionally inconsistent, <B>dimension</B> 
+should signal an error
+
+<PRE>
+(C6) dimension(c-x);
+
+Expression is dimensionally inconsistent.
+</PRE>
+
+<P>
+Any symbol may be used to represent a dimension; if you like,
+you can use "L" instead of "length" for the length dimension.  It
+isn't necessary to use strings for the dimensions; however, doing
+so reduces the chance of conflicting with other variables. 
+Thus to use the dimensions "M","L", and "T", for mass, length, and time,
+respectively, use the commands
+
+<PRE>
+(C1) qput(x,"L",dimension)$
+(C2) qput(t,"T",dimension)$
+(C3) qput(c,"L"/"T",dimension)$
+(C4) qput(m,"M",dimension)$
+</PRE>
+
+<P>
+Then
+
+<PRE>
+(C4) dimension(m * 'diff(x,t));
+				      L M
+(D4) 				      ---
+				       T
+</PRE>
+
+<P>
+An <EM>equation</EM> is dimensionally consistent if either one side of
+the equality vanishes or if both sides have the same 
+dimensions. Thus
+
+<PRE>
+(C5) dimension(x=c*t);
+
+(D5) 				       L
+(C6) dimension(x=0);
+
+(D6) 				       L
+(C7) dimension(x=c);
+
+Expression is dimensionally inconsistent.
+</PRE>
+
+<P>
+The  dimension function supports most Maxima operators and it 
+automatically maps over lists.  For example,
+
+<PRE>
+(C1) dimension([x^3,x.t,x/t,x^^2]);
+				 3	 L   2
+(D1) 			       [L , L T, -, L ]
+					 T
+</PRE>
+
+<P>
+The dimension of a subscripted symbol is the dimension of the 
+non-subscripted variable.  For example,
+
+<PRE>
+(C1) dimension(x[3]);
+(D1) 				       L
+</PRE>
+
+<P>
+When the dimensions of a symbol are undefined, dimension returns
+an unevaluated expression
+
+<PRE>
+(C2) dimension(z);
+(D2) 				 dimension(z)
+</PRE>
+
+<P>
+The remaining functions in the package, <B>dimensionless</B>,
+<B>dimension_as_list</B>, and <B>natural_unit</B> require that
+all expressions have dimensions that are members of the
+list <B>fundamental_dimensions</B>. The default value of this
+list is
+
+<PRE>
+(C1) fundamental_dimensions;
+
+(D1) 			     [mass, length, time]
+</PRE>
+
+<P>
+A user may redefine this list; to use "M", "L", and "T" for
+the fundamental dimensions, make the assignment
+
+<PRE>
+(C2) fundamental_dimensions : ["M", "L", "T"]$
+</PRE>
+
+<P>
+The list <B>fundamental_dimensions</B> must be nonempty, but it
+can have any finite cardinality.
+
+</P>
+<P>
+To find the dimensions of an expression as a list of the exponents
+of the fundamental dimensions, use the <B>dimension_as_list</B> function
+
+<PRE>
+(C3) dimension_as_list('diff(x,t,3));
+
+(D3) 				  [0, 1, - 3]
+</PRE>
+
+<P>
+Thus the dimension of the third derivative of x
+with respect to t  is L / T^3.
+
+</P>
+<P>
+To find the dimensionless expressions that can be formed as a
+product of elements of a list of atoms, use the 
+<B>dimensionless</B> function. For example,
+
+<PRE>
+(C1) dimensionless([c,t,x]);
+
+Dependent equations eliminated:  (1)
+				     x
+(D1) 				   [---, 1]
+				    c t
+</PRE>
+
+<P>
+Finally, to find quantities that have a given dimension, use
+the <B>natural_unit</B> function.  To find an expression with
+dimension time, use the command
+
+<PRE>
+(C1) natural_unit("T",[x,c]);
+
+Dependent equations eliminated:  (1)
+				       x
+(D1) 				      [-]
+				       c
+</PRE>
+
+
+
+<H2><A NAME="SEC2" HREF="dimension_toc.html#TOC2">Definitions for Dimensional Analysis</A></H2>
+
+<a name="FUNDAMENTAL_DIMENSIONS"></a><P>
+<DL>
+<DT><U>Variable:</U> <B>FUNDAMENTAL_DIMENSIONS</B>
+<DD><A NAME="IDX1"></A>
+FUNDAMENTAL_DIMENSIONS is a list of the fundamental dimensions. The
+default value is ["mass", "length", "time"]; however, a user may
+redefine it to be any nonempty list of atoms. The function
+<B>dimension</B> doesn't use this list, but the other functions
+in the dimensional analysis package do use it.
+
+</P>
+</DL>
+
+<a name="DIMENSION"></a><P>
+<DL>
+<DT><U>Function:</U> <B>DIMENSION</B> <I>(e)</I>
+<DD><A NAME="IDX2"></A>
+Return the dimension of the expression e. If
+e is dimensionally inconsistent, signal an error.
+The dimensions of the symbols in the expression e
+should be first defined using <B>qput</B>.
+
+</P>
+</DL>
+
+<a name="DIMENSION_AS_LIST"></a><P>
+<DL>
+<DT><U>Function:</U> <B>DIMENSION_AS_LIST</B> <I>(e)</I>
+<DD><A NAME="IDX3"></A>
+Return the dimension of the expression e as a list of
+the exponents of the dimensions in the list
+<B>fundamental_dimensions</B>. If e is dimensionally 
+inconsistent, signal an error.
+
+</P>
+</DL>
+
+<a name="DIMENSIONLESS"></a><P>
+<DL>
+<DT><U>Function:</U> <B>DIMENSIONLESS</B> <I>([e1,e2,...,en])</I>
+<DD><A NAME="IDX4"></A>
+
+</P>
+<P>
+Return a basis for the dimensionless quantities that can be formed as
+a product of powers of the expressions e1, e2, ..., en.
+
+</P>
+</DL>
+
+<a name="NATURAL_UNIT"></a><P>
+<DL>
+<DT><U>Function:</U> <B>NATURAL_UNIT</B> <I>(q, [e1,e2,...,en])</I>
+<DD><A NAME="IDX5"></A>
+
+</P>
+<P>
+Return a basis for the quantities that can be formed as a product of
+powers of the expressions e1, e2, ..., en that have the
+same dimension as does q.
+
+</P>
+</DL>
+
+<P>
+ 
+
+</P>
+
+<P>
+  
+<P><HR><P>
+This document was generated on 7 April 2002 using the
+<A HREF="http://wwwcn.cern.ch/dci/texi2html/">texi2html</A>
+translator version 1.51a.</P>
+</BODY>
+</HTML>

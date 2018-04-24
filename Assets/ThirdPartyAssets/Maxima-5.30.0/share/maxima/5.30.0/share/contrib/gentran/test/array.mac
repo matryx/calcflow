@@ -1,0 +1,29 @@
+mat : genmatrix(mat, 3,3, 1,1)$
+
+mat[1,1] :
+     18*cos(q3)*cos(q2)*m30*p^2 - 9*sin(q3)^2*p^2*m30
+     - sin(q3)^2*j30y + sin(q3)^2*j30z + p^2*m10 + 18*p^2*m30
+     + j10y + j30y$
+
+mat[2,1] :
+     mat[1,2] :
+     9*cos(q3)*cos(q2)*m30*p^2 - sin(q3)^2*j30y + sin(q3)^2*j30z
+     - 9*sin(q3)^2*m30*p^2 + j30y + 9*m30*p^2$
+
+mat[3,1] :
+     mat[1,3] :
+     -9*sin(q3)*sin(q2)*m30*p^2$
+mat[2,2] :
+     -sin(q3)^2*j30y + sin(q3)^2*j30z - 9*sin(q3)^2 *m30*p^2
+     + j30y + 9*m30*p^2$
+
+mat[3,2] : mat[2,3] : 0$
+
+mat[3,3] : 9*m30*p^2 + j30x$
+
+gentranout("array.f")$
+for i:1 thru 3 do
+	  for j:i thru 3 do
+	      gentran( lrsetq(mat[i,j], mat[i,j]) )$
+	
+gentranshut("array.f")$

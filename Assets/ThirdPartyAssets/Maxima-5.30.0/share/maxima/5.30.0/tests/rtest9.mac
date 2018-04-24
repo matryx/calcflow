@@ -1,0 +1,231 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+
+(kill(all),
+declare(l,scalar,[m1,m2,m3],nonscalar));
+done$
+expand((1-l*m1) . (1-l*m2) . (1-l*m3));
+-(l*m3)+(l*m2) . (l*m3)-(l*m2)+(l*m1) . (l*m3)-(l*m1) . (l*m2) . (l*m3)+(l*m1) . (l*m2)-l*m1+1;
+ev(%,dotscrules);
+-l*m3+l^2*(m2 . m3)-l*m2+l^2*(m1 . m3)-l^3*(m1 . m2 . m3)+l^2*(m1 . m2)-l*m1+1$
+rat(%,l);
+''(rat(-(m1 . m2 . m3)*l^3+(m2 . m3+m1 . m3+m1 . m2)*l^2+(-m3-m2-m1)*l+1,l))$
+rat(x^2);
+''(rat(x^2))$
+diff(f(%),x);
+'diff(f(x^2),x,1)$
+((x-2*y)^4/(x^2-4*y^2)^2+1)*(y+a)*(2*y+x)/(4*y^2+x^2);
+(y+a)*(2*y+x)*((x-2*y)^4/(x^2-4*y^2)^2+1)/(4*y^2+x^2)$
+rat(%,y,a,x);
+''(rat(2*a+2*y)/(x+2*y))$
+(x+3)^20;
+(x+3)^20$
+rat(%);
+''(rat(x^20+60*x^19+1710*x^18+30780*x^17+392445*x^16+3767472*x^15+28256040*x^14
+    +169536240*x^13+826489170*x^12+3305956680*x^11+10909657044*x^10
+    +29753610120*x^9+66945622770*x^8+123591918960*x^7+185387878440*x^6
+    +222465454128*x^5+208561363245*x^4+147219785820*x^3+73609892910*x^2
+    +23245229340*x+3486784401))$
+diff(%,x);
+''(rat(20*x^19+1140*x^18+30780*x^17+523260*x^16+6279120*x^15+56512080*x^14
+       +395584560*x^13+2203971120*x^12+9917870040*x^11+36365523480*x^10
+       +109096570440*x^9+267782491080*x^8+535564982160*x^7+865143432720*x^6
+       +1112327270640*x^5+1112327270640*x^4+834245452980*x^3+441659357460*x^2
+       +147219785820*x+23245229340))$
+factor(%);
+20*(x+3)^19$
+ratweight(a,1,b,1);
+[a,1,b,1]$
+exp:rat(a+b+1);
+''(rat(b+a+1))$
+%^2;
+''(rat(b^2+(2*a+2)*b+a^2+2*a+1))$
+ev(exp^2,ratwtlvl:1);
+''(rat(2*b+2*a+1))$
+poly:1.0e-20*x^2-5.5*x+5.2e+20;
+1.0e-20*x^2-5.5*x+5.2e+20$
+errcatch(ev(%,x = 1.0e+20));
+[7.0e19];
+/*  []$ floating point on lispm or tops20 can't do this */
+ev(horner(poly,x),keepfloat);
+1.0*((9.9999999999999995*10^-21*x-5.5)*x+5.2*10^+20)$
+ev(%,x = 1.0e+20);
+7.0e19;
+divide(x+y,x-y,x);
+[1,2*y]$
+divide(x+y,x-y);
+[-1,2*x]$
+content(2*x*y+4*x^2*y^2,y);
+[2*x,2*x*y^2+y]$
+resultant(a*y+x^2+1,y^2+x*y+b,x);
+y^4+a*y^3+(2*b+1)*y^2+b^2$
+bezout(a*y+x^2+1,y^2+x*y+b,x);
+matrix([y^2+b,-a*y^2-y],[y,y^2+b])$
+expand(determinant(%));
+y^4+a*y^3+2*b*y^2+y^2+b^2$
+%-expand(resultant(a*y+x^2+1,y^2+x*y+b,x));
+0$
+factor(poly_discriminant((x-a)*(x-b)*(x-c),x));
+(b-a)^2*(c-a)^2*(c-b)^2$
+exp:(4*x^3+10*x-11)/(x^5+5);
+(4*x^3+10*x-11)/(x^5+5)$
+ev(polymod(%),modulus:3);
+(x^2+x-1)/(x^4+x^3+x^2+x+1)$
+ratdiff(exp,x);
+-((8*x^7+40*x^5-55*x^4-60*x^2-50)/(x^10+10*x^5+25))$
+10*(1+%i)/(3^(1/3)+%i);
+10*(%i+1)/(%i+3^(1/3))$
+ev(ratdisrep(rat(%)),algebraic);
+(4*3^(2/3)-2*3^(1/3)-4)*%i+2*3^(2/3)+4*3^(1/3)-2$
+tellrat(a^2+a+1);
+[a^2+a+1]$
+a/(sqrt(2)+sqrt(3))+1/(a*sqrt(2)-1);
+1/(sqrt(2)*a-1)+a/(sqrt(3)+sqrt(2))$
+ev(ratdisrep(rat(%)),algebraic);
+((7*sqrt(3)-10*sqrt(2)+2)*a-2*sqrt(2)-1)/7$
+tellrat(y^2 = x^2);
+[y^2-x^2,a^2+a+1]$
+taylor(1+x,[x,0,3]);
+1+x$
+1/%;
+1-x+x^2-x^3$
+taylor(1+x+y+z,[x,0,3],[y,1,2],[z,2,1]);
+4+(z-2)+(y-1)+x$
+1/%;
+1/4-(z-2)/16+(-1/16+(z-2)/32)*(y-1)+(1/64-3*(z-2)/256)*(y-1)^2
+ +(-1/16+(z-2)/32+(1/32-3*(z-2)/128)*(y-1)+(-3/256+3*(z-2)/256)*(y-1)^2)*x
+ +(1/64-3*(z-2)/256+(-3/256+3*(z-2)/256)*(y-1)+(3/512-15*(z-2)/2048)*(y-1)^2)
+  *x^2
+ +(-1/256+(z-2)/256+(1/256-5*(z-2)/1024)*(y-1)
+		   +(-5/2048+15*(z-2)/4096)*(y-1)^2)
+  *x^3$
+taylor(1+x+y+z,[x,0,3],[y,0,3],[z,0,3]);
+1+z+y+x$
+1/%;
+1-z+z^2-z^3+(-1+2*z-3*z^2+4*z^3)*y+(1-3*z+6*z^2-10*z^3)*y^2
+	   +(-1+4*z-10*z^2+20*z^3)*y^3
+ +(-1+2*z-3*z^2+4*z^3+(2-6*z+12*z^2-20*z^3)*y+(-3+12*z-30*z^2+60*z^3)*y^2
+		     +(4-20*z+60*z^2-140*z^3)*y^3)
+  *x
+ +(1-3*z+6*z^2-10*z^3+(-3+12*z-30*z^2+60*z^3)*y+(6-30*z+90*z^2-210*z^3)*y^2
+		     +(-10+60*z-210*z^2+560*z^3)*y^3)
+  *x^2
+ +(-1+4*z-10*z^2+20*z^3+(4-20*z+60*z^2-140*z^3)*y
+		       +(-10+60*z-210*z^2+560*z^3)*y^2
+		       +(20-140*z+560*z^2-1680*z^3)*y^3)
+  *x^3$
+ev(sum(i^2+2^i,i,0,n),simpsum);
+2^(n+1)+(2*n^3+3*n^2+n)/6-1$
+ev(sum(3^-i,i,1,inf),simpsum);
+1/2$
+ev(sum(i^2,i,1,4)*sum(1/i^2,i,1,inf),simpsum);
+5*%pi^2$
+sum(i^2,i,1,5);
+55$
+product(x+i*(i+1)/2,i,1,4);
+(x+1)*(x+3)*(x+6)*(x+10)$
+limit(x*log(x),x,0,plus);
+0$
+limit((1+x)^(1/x),x,0);
+%e$
+limit(%e^x/x,x,inf);
+inf$
+limit(sin(1/x),x,0);
+ind$
+nusum(n*n!,n,0,n);
+(n+1)!-1$
+map('ratsimp, nusum(n^4*4^n/binomial(2*n,n),n,0,n));
+((126*n^5+350*n^4+260*n^3-8*n^2-38*n+6)*4^n)/(693*binomial(2*n,n))-2/231$
+unsum(%,n);
+n^4*4^n/binomial(2*n,n)$
+unsum(product(i^2,i,1,n),n);
+('product(i^2,i,1,n-1))*(n-1)*(n+1)$
+nusum(%,n,1,n);
+'product(i^2,i,1,n)-1$
+funcsolve((n+1)*f(n)-(n+3)*f(n+1)/(n+1) = (n-1)/(n+2),f(n));
+f(n) = n/((n+1)*(n+2))$
+(untellrat(a),'done);
+done$
+residue(s/(s^2+a^2),s,a*%i);
+1/2$
+residue(sin(a*x)/x**4,x,0);
+-a^3/6$
+taylor(sqrt(1+a*x+sin(x)),x,0,3);
+1+(a+1)*x/2 - ((a^2+2*a+1)*x^2/8) + (3*a^3+9*a^2+9*a-1)*x^3/48$
+
+%^2;
+1+(a+1)*x-x^3/6$
+taylor(sqrt(1+x),x,0,5);
+1+x/2-x^2/8+x^3/16-5*x^4/128+7*x^5/256$
+%^2;
+1+x$
+
+/* The following test does not work as expected.
+ * The product does not preserve the floating point number.
+ * Therefore the following taylor expansion gives a result
+ * in terms of rational numbers. We change the expected
+ * result accordingly.
+ * After revision 1.36 of asum.lisp it works as expected (DK 02/2010).
+ */
+keepfloat:true;
+true;
+product((x^i+1)^2.5,i,1,inf)/(x^2+1);
+('product((x^i+1)^2.5,i,1,inf))/(x^2+1)$
+ratdisrep(taylor(%,x,0,3));
+1+2.5*x+3.375*x^2+6.5625*x^3;
+keepfloat:false;
+false;
+
+taylor(1/log(1+x),x,0,3);
+1/x+1/2-x/12+x^2/24-19*x^3/720$
+taylor(cos(x)-sec(x),x,0,5);
+-x^2-x^4/6$
+taylor((cos(x)-sec(x))^3,x,0,5);
+0$
+taylor((cos(x)-sec(x))^-3,x,0,5);
+-1/x^6+1/(2*x^4)+11/(120*x^2)-347/15120-6767*x^2/604800-15377*x^4/7983360$
+
+taylor(sqrt(1-k^2*sin(x)^2),x,0,6);
+1-(k^2*x^2/2)-((3*k^4-4*k^2)*x^4/24)-((45*k^6-60*k^4+16*k^2)*x^6/720)$
+taylor((1+x)^n,x,0,4);
+1+n*x+(n^2-n)*x^2/2+(n^3-3*n^2+2*n)*x^3/6+(n^4-6*n^3+11*n^2-6*n)*x^4/24$
+
+taylor(sin(x+y),x,0,3,y,0,3);
+-(y^3/6) + x^2*(y^3/12-(y/2))+x^3*(y^2/12-1/6)+x*(1-y^2/2)+y$
+
+taylor(sin(x+y),[x,y],0,3);
+-((y^3+3*x*y^2+3*x^2*y+x^3)/6) + y + x$
+
+taylor(1/sin(x+y),x,0,3,y,0,3);
+1/y+y/6+(-1/y^2+1/6)*x+(+1/y^3)*x^2+(+(-1/y^4))*x^3$
+
+/* additional tests for integer modulus, adapted from email 2008-01-27 */
+
+(modulus : false,
+ m : matrix ([15, 2, 7], [8, 10, 23], [0, 2, 8]),
+ determinant(m)); /* calculate over Z */
+494;
+
+(modulus : 23, rm : rat(m));
+''(rat (matrix ([-8, 2, 7], [8, 10, 0], [0, 2, 8])));
+
+determinant(rm); /* calculate over Z23 */
+''(rat(11));
+
+rm^^-1; /* inverse over Z23 */
+''(rat (matrix ([1, 4, 2], [-10, -10, 3], [-9, -9, 8])));
+
+rm . rm^^-1;
+''(rat (matrix ([1, 0, 0], [0, 1, 0], [0, 0, 1])));
+
+modulus : false;
+false;
+
+/* [ 2604950 ] rats with keepfloat */
+ratsimp ((a*b - 0.5*a*(b - c))/a), keepfloat;
+0.5*c + 0.5*b;

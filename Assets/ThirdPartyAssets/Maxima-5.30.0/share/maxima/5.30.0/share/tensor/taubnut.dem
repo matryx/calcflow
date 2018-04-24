@@ -1,0 +1,38 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Classification of the Taub-Nut plane vacuum space
+ *
+ */
+
+if get('ctensor,'version)=false then load(ctensor);
+("Computing the Petrov classification of the Taub-Nut plane vacuum")$
+("We use frames")$
+cframe_flag:true;
+("We set up the metric by hand")$
+ct_coords:[t,x,y,z];
+(lfg:ident(4),lfg[1,1]:-1,lfg);
+fri:matrix(
+[  -z^(-1/4)/sqrt(2),0,0,%i*z^(-1/4)/sqrt(2)],
+[%i*z^(-1/4)/sqrt(2),0,0,  -z^(-1/4)/sqrt(2)],
+[0,-sqrt(z)/sqrt(2), sqrt(z)/sqrt(2),0],
+[0,-sqrt(z)/sqrt(2),-sqrt(z)/sqrt(2),0]
+);
+cmetric(false);
+ug:invert(lg)$
+nptetrad(false);
+weyl(false);
+psi(false);
+("And obtain the Petrov class")$
+petrov();
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

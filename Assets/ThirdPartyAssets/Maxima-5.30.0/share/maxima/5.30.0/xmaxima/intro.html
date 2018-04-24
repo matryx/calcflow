@@ -1,0 +1,197 @@
+<html>
+<br>
+
+<img src=maxima-icon.gif align=center border=0>
+
+
+                 <h1 align=center>Maxima Primer</h1>
+
+<body  BGCOLOR=#ffffff TEXT=#000000 LINK=#244C21>
+
+
+
+<p>Maxima is a computer program for doing mathematics calculations,
+symbolic manipulations, numerical computations and graphics.
+Procedures can be programmed and then run by Maxima to
+do complex tasks.  Much of the syntax for other languages such as
+Maple was copied from Maxima.</p>
+
+<h2>Project and documentation links</h2>
+<p>The <em>Help</em> menu in Xmaxima gives you access to the following documents:</p>
+<ul>
+<li>Maxima reference manual</li>
+<li>Xmaxima reference manual</li>
+<li>Maxima home page, http://maxima.sourceforge.net</li>
+<li>Maxima project page, http://sourceforge.net/projects/maxima</li>
+</ul>
+
+<h2>Getting started</h2>
+
+<p>To do basic operations, a line is typed, followed by a
+semicolon, and then entered.  This can be done in the window above.
+Alternately you may edit the blue portions in this buffer, and click
+on them, to see the result evaluated above and/or inserted in
+this window, depending on what was specified in the html source for this
+file.  
+For example clicking below
+<br>
+<ul><li>
+<eval program=maxima doinsert=0
+>integrate(1/(1+x^3),x)</eval> 
+</ul>
+You may double click the above formula, and the integral will be substituted into the Maxima evaluation in the other window.
+
+There are <a href="examples.html">examples</a> which you may also look at
+<a href="plotmaxima.html">3d plotting </a>
+If you wish to have your plots appear in a separate window, go to the 
+preferences button under file, and select separate.
+You may also go to the <http://www.ma.utexas.edu/users/wfs/netmath/netmath.html>
+netmath page </a> to see some more capabilities.
+
+
+<p>Here are some examples from basic calculus.  To have Maxima
+evaluate the derivative of the function below, click on this line.
+<ul><li>
+<eval program=maxima doinsert=1> diff(cos(x),x);</eval> returns <result modified>result</result>.
+</ul>
+
+<p>Maxima can calculate <b>indefinite integrals</b>.
+<ul>
+<li><eval program=maxima doinsert=1> integrate( x/(1+x^3),x );</eval> returns <result modified>result</result>  
+
+<li>...and definite integrals with respect to x from 0 to 1.
+<br><eval program=maxima doinsert=1> integrate( 1/(1+x^2), x,  0, 1 ); </eval> returns <result modified>result</result>
+<li><eval program=maxima doinsert=0> plot2d(sin(x),[x,0,2*%pi])</eval>
+<li><eval program=maxima doinsert=0> plot3d(x^2-y^2,[x,-2,2],[y,-2,2],[grid,12,12])</eval>
+</ul>
+<ul>
+<li>Also, limits can be evaluated as x goes to infinity:
+<br><eval program=maxima doinsert=1> limit( (2*x+1)/(3*x+2),  x,inf );</eval> produces <result modified>result</result> 
+
+<li><eval program=maxima doinsert=1> limit( sin(3*x)/x,  x,0);</eval> evaluates to <result modified>result</result> 
+</ul>
+
+<p>Maxima can perform calculations to arbitrary precision.  The
+following example computes Pi to one hundred decimal places.
+<ul><li><eval program=maxima doinsert=1>block([fpprec:100],bfloat(%pi))</eval> yields <result modified>result</result> 
+if we took sin of this we would get 0 to to within 100 decimal places..
+<li><eval program=maxima doinsert=1>block([fpprec:100],sin(bfloat(%pi)))</eval> gives <result modified>result</result> 
+
+<p>Maxima can solve equations.  Click this line to solve the system.
+<li><eval program=maxima doinsert=1> solve([x+y+z=5,3*x-5*y=10,y+2*z=3],[x,y,z]);</eval> returns <result modified>result</result>  
+
+<li><eval program=maxima doinsert=1> solve(x^2-5*x+6 =0,x);</eval> produces <result modified>result</result> 
+</ul>
+<h5>Linear Algebra</h5>
+<p>
+For example, matrices can be
+entered and manipulated.  Click these two lines.
+<ul>
+<li><eval program=maxima doinsert=1> A:matrix([1,2],[3,4]);</eval> gives <result modified>result</result> 
+
+
+<li><eval program=maxima doinsert=1> B:matrix([1,1],[1,1]);</eval> gives <result modified>result</result> 
+
+<p>The matrices can then be added, for example:
+<li><eval program=maxima doinsert=1>  A + B ;</eval> returns the sum <result modified>result</result>   
+
+...and multiplied.
+<li><eval program=maxima doinsert=1>  A . B ;</eval> gives the product<result modified>result</result>   
+
+
+<li><eval program=maxima doinsert=1>  A^^-1</eval> evaluates to the inverse: <result modified>result</result>   
+
+<li><eval program=maxima doinsert=1>determinant(matrix([a,b],[c,d]))</eval> gives <result modified>result</result> 
+<li><eval program=maxima doinsert=0
+>      Fib[0] : 0;
+       Fib[1] : 1;
+       Fib[n] := Fib[n-1] + Fib[n-2];
+</eval>
+</ul>
+Then the procedure can be called. <eval program=maxima doinsert=1> Fib[8];</eval> gives <result>21</result> 
+
+
+<p>Maxima can solve ordinary differential equations analytically and numerically.  Click the
+following line for an example of an analytic solution.
+
+    
+<ul><li>
+<eval program=maxima doinsert=1>ode2('diff(y,x)+3*x*y = sin(x)/x,  y,x)</eval> returns <result modified>result</result>
+<li><eval program=maxima doinsert=1>ode2('diff(y,x) -y = 1, y,x)</eval> returns <result modified>result</result>
+<li>
+<eval program=maxima doinsert=1> ode2('diff(y,x,2) - y = 1, y,x)</eval> gives <result modified>result</result>  
+</ul>
+
+<h4 align=left>Defining a Function</h4>
+
+
+  <p>The standard form is 
+
+<ul>    
+<li>
+<eval program=maxima doinsert=1>f(3)</eval> gives <result>f(3)</result>
+
+<li>
+<eval program=maxima doinsert=0>f(x):=x+2</eval>
+<li>now     <eval program=maxima doinsert=1>f(3)</eval> gives <result>5</result> 
+</ul>
+<p>Local variables:
+
+<p>The <b>block</b>  construct lets us introduce local variables, and also lets
+us have a sequence of statements:
+
+    <pre>block([v1:val1,v2:val2,v3,v4:val4],stmt1,stmt2,... stmtn)</pre>
+the value is the value of the last statement.   During the execution the 
+variables v1,v2,... will have the values indicated.   If no value is given
+for v3 then it will just evaluate to itself:
+
+<p>Thus if we set v3 globally to be 7,
+<ul><li><eval program=maxima doinsert=1>v3:7</eval> produces <result>7</result>
+<li> , then <eval program=maxima doinsert=1>block([v3],v3)</eval> gives <result>v3</result>.
+ </ul>
+An example in a function:
+
+<ul>   
+<li><eval program=maxima doinsert=0>g(x):=block([u:x+3,w], u:u^2, w:(y+2)^2, u+w);</eval>
+
+  
+
+<li><eval program=maxima doinsert=1>g(2)</eval> yields <result><pre>
+                                        2
+                                 (y + 2)  + 25
+</pre></result> 
+Using <b>if</b>:
+
+   
+
+<li><eval program=maxima doinsert=0>h(x):=block([u:x+3,w], u:u^2, 
+              if (u&lt;3) then  w:(y+2)^2 else w:(y+2)^2+1,
+              u+w);
+</eval>
+
+   
+
+<li><eval program=maxima doinsert=1>[h(3),h(2)]</eval> gives <result><pre>
+                                2              2
+                        [(y + 2)  + 37, (y + 2)  + 26]
+</pre></result> 
+
+  </ul>
+Using for:
+
+   
+<ul>
+<li><eval program=maxima doinsert=1> block([w:0], for i:1 thru 10 do (w:w+i^2))</eval> gives <result>done</result> 
+</ul>
+<p>a for loop always returns 'done as its value.  To get the value you want
+add the w.
+
+   
+<ul>
+<li><eval program=maxima doinsert=1> block([w:0], for i:1 thru 10 do (w:w+i^2),w)</eval> gives <result>385</result> 
+</ul>
+
+The function <b>describe(</b><i>s</i><b>)</b>
+returns documentation on all functions whose names include the string <i>s</i>.
+For example, if the string is "log",
+<br><eval program=maxima doinsert=1>describe("log");all</eval> prints <result modified>this output</result>

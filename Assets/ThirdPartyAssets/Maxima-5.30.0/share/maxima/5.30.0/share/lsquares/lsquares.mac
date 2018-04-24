@@ -1,0 +1,323 @@
+/* lsquares.mac -- fit parameters to data by the method of least squares
+ *
+ * Copyright 2007 by Robert Dodier.
+ * I release this file under the terms of the GNU General Public License.
+ *
+ * Examples:
+
+    load (lsquares);
+
+    /* (1) Linear regression. Exact solution is computed by solve. */
+
+    M1 : matrix ([1, -3, 2, 1], [-2, 1, 3, -1], [4, 0, -2, 1],
+                 [1, 2, 0, -1], [0, 2, 1, -2]);
+
+    lsquares_mse (M1, [w, x, y, z], w = a*x + b*y + c*z + d);
+        => ('sum ((-c*'M1[i,4] - b*'M1[i,3] - a*'M1[i,2] + 'M1[i,1] - d)^2, i, 1, 5))/5
+
+    ''%, nouns;
+        => ((-d + 2*c - b - 2*a)^2 + (-d + c - 3*b - a - 2)^2
+          + (-d + c - 2*a + 1)^2 + (- d - c + 2*b + 4)^2
+          + (- d - c - 2*b + 3*a + 1)^2)/5
+
+    a1 : lsquares_estimates (M1, [w, x, y, z], w = a*x + b*y + c*z + d, [a, b, c, d]);
+        => [[a = -19/34, b = -499/425, c = -181/850, d = 798/425]]
+
+    lsquares_residuals (M1, [w, x, y, z], w = a*x + b*y + c*z + d, first (a1));
+        => [3/425, -4/425, -11/850, 23/850, -1/85]
+
+    lsquares_residual_mse (M1, [w, x, y, z], w = a*x + b*y + c*z + d, first (a1));
+        => 1/4250
+
+    /* (2a) Nonlinear regression. Exact solution (perfect fit) is computed by solve. */
+
+    M2a : matrix ([1, 1, 1], [3/2, 1, 2], [9/4, 2, 1], [3, 2, 2]);
+
+    lsquares_mse (M2a, [z, x, y], (z + D)^2 = A*x + B*y + C);
+        => ('sum (((D + 'M2a[i, 1])^2 - C - 'M2a[i, 3] * B - 'M2a[i, 2]*A)^2, i, 1, 4))/4
+
+    ''%, nouns;
+        => (((D + 3)^2 - C - 2*B - 2*A)^2 + ((D + 9/4)^2 - C - B - 2*A)^2
+          + ((D + 3/2)^2 - C - 2*B - A)^2 + ((D + 1)^2 - C - B - A)^2)/4
+                                                      
+    a2a : lsquares_estimates (M2a, [z, x, y], (z + D)^2 = A*x + B*y + C, [A, B, C, D]);
+        => [[A = -75/8, B = -33/8, C = 2089/64, D = -43/8]]
+
+    lsquares_residuals (M2a, [z, x, y], (z + D)^2 = A*x + B*y + C, first (a2a));
+        => [0, 0, 0, 0]
+
+    lsquares_residual_mse (M2a, [z, x, y], (z + D)^2 = A*x + B*y + C, first (a2a));
+        => 0
+
+    /* (2b) Nonlinear regression. Exact solution (imperfect fit) is computed by solve. */
+
+    M2b : matrix ([1, 1, 1], [3/2, 1, 2], [9/4, 2, 1], [3, 2, 2], [2, 2, 1]);
+
+    lsquares_mse (M2b, [z, x, y], (z + D)^2 = A*x + B*y + C);
+        => ('sum (((D + 'M2b[i, 1])^2 - C - 'M2b[i, 3]*B - 'M2b[i, 2]*A)^2, i, 1, 5))/5
+    
+    ''%, nouns;
+        => (((D + 3)^2 - C - 2*B - 2*A)^2 + ((D + 9/4)^2 - C - B - 2*A)^2
+          + ((D + 2)^2 - C - B - 2*A)^2 + ((D + 3/2)^2 - C - 2*B - A)^2
+          + ((D + 1)^2 - C - B - A)^2)/5
+
+    a2b : lsquares_estimates (M2b, [z, x, y], (z + D)^2 = A*x + B*y + C, [A, B, C, D]);
+        => [[A = -59/16, B = -27/16, C = 10921/1024, D = -107/32]]
+
+    float (%);
+        => [[A = - 3.6875, B = - 1.6875, C = 10.6650390625, D = - 3.34375]]
+
+    lsquares_residual_mse (M2b, [z, x, y], (z + D)^2 = A*x + B*y + C, first (a2b));
+        => 169/2560
+
+    float (%);
+        => 0.066015625
+
+    /* (2c) Nonlinear regression. Approximate solution is computed by lbfgs.
+     *      Same data as for problem 2b.
+     */
+
+    MSE : lsquares_mse (M2b, [z, x, y], (z + D)^2 = A*x + B*y + C);
+
+    a2c : lsquares_estimates_approximate (MSE, [A, B, C, D]);
+        => [[A = - 3.678504947401859, B = - 1.683070351177876,
+            C = 10.63469950148675, D = - 3.340357993175253]]
+
+    lsquares_residual_mse (M2b, [z, x, y], (z + D)^2 = A*x + B*y + C, first (a2c));
+        => 0.066016442308688
+
+    /* (3) Nonlinear regression. Approximate solution is computed by lbfgs. */
+
+    M3 : matrix ([1, 1], [2, 7/4], [3, 11/4], [4, 13/4]);
+
+    lsquares_mse (M3, [x, y], y = a*x^b + c);
+        => ('sum (('M3[i, 2] - a*'M3[i, 1]^b - c)^2, i, 1, 4))/4
+
+    ''%, nouns;
+        => ((- c - a*4^b + 13/4)^2 + (- c - a*3^b + 11/4)^2
+          + (- c - a*2^b + 7/4)^2 +(- c - a + 1)^2)/4
+        
+    a3 : lsquares_estimates (M3, [x, y], y = a*x^b + c, [a, b, c], initial = [3, 3, 3]);
+        => [[a = 1.387365874920709, b = .7110956639593544, c = - .4142705622439636]]
+
+    lsquares_residuals (M3, [x, y], y = a*x^b + c, first (a3));
+        => [.02690468732325513, -.1069124575272924,
+            0.134080543273408, -.05376258426981284]
+
+    lsquares_residual_mse (M3, [x, y], y = a*x^b + c, first (a3));
+        => .008255535831587049
+
+    /* (4) Presence of unused matrix columns has no effect on result. */
+
+    M1_padded :
+        transpose (apply (matrix, apply (append,
+            map (lambda ([r], [r, 2*r]), args (transpose (M1))))));
+
+    lsquares_estimates (M1_padded, [w, w2, x, x2, y, y2, z, z2],
+        w = a*x + b*y + c*z + d, [a, b, c, d]);
+        => [[a = -19/34, b = -499/425, c = -181/850, d = 798/425]]
+
+    /* (5) Permutation of matrix columns has no effect on result. */
+
+    p : [4, 2, 1, 3];
+    M1_permutation :
+        transpose (apply (matrix, block ([L : args (transpose (M1))],
+            makelist (L[i], i, p))));
+
+    lsquares_estimates (M1_permutation, [z, x, w, y],
+        w = a*x + b*y + c*z + d, [a, b, c, d]);
+        => [[a = -19/34, b = -499/425, c = -181/850, d = 798/425]]
+
+    /* (6a) From the reference manual. Exact solution. */
+
+    A : matrix ([1, 2, 0], [3, 5, 4], [4, 7, 9], [5, 8, 10]);
+    soln : lsquares_estimates (A, [x, y, z], z = a*x*y + b*x + c*y + d, [a, b, c, d]);
+
+        => [[a = 1/6, b = -29/6, c = 23/6, d = -19/6]]
+
+    ratsimp (ev (z = a*x*y + b*x + c*y + d, soln [1]));
+
+        => z = ((x + 23)*y - 29*x - 19)/6
+        
+    lsquares_residual_mse (A, [x, y, z], z = a*x*y + b*x + c*y + d, soln [1]);
+
+        => 0
+
+    /* (6b) From the reference manual. Exact solution. */
+
+    kill (values);
+    A : matrix ([0, 0], [1, 0], [2, 0], [3, 8], [4, 44]);
+    soln : lsquares_estimates (A, [n, p], p = a4*n^4 + a3*n^3 + a2*n^2 + a1*n + a0, [a0, a1, a2, a3, a4]);
+
+        => [[a0 = 0, a1 = -1/3, a2 = 3/2, a3 = -5/3, a4 = 1/2]]
+
+    ratsimp (ev (p = a4*n^4 + a3*n^3 + a2*n^2 + a1*n + a0, soln [1]));
+
+        => p = (3*n^4 - 10*n^3 + 9*n^2 - 2*n)/6
+
+    lsquares_residual_mse (A, [n, p], p = a4*n^4 + a3*n^3 + a2*n^2 + a1*n + a0, soln [1]);
+
+        => 0
+
+    /* (6c) From the reference manual. Exact solution. */
+
+    A : matrix ([1, 7], [2, 13], [3, 25]);
+    soln : lsquares_estimates (A, [x, y], (y + c)^2 = a*x + b, [a, b, c]);
+
+        => [[a = - 216, b = 657, c = - 28]]
+
+    ev ((y + c)^2 = a*x + b, soln [1]);
+
+        => (y - 28)^2 = 657 - 216*x
+
+    lsquares_residual_mse (A, [x, y], (y + c)^2 = a*x + b, soln [1]);
+
+        => 0
+
+    /* (6d) From the reference manual. Exact solution. */
+
+    A : matrix ([1, 7], [2, 13], [3, 25], [4, 49]);
+    soln : lsquares_estimates (A, [x, y], y = a*b^x + c, [a, b, c]);
+
+        => [[a = 3, b = 2, c = 1]]
+
+    ev (y = a*b^x + c, soln [1]);
+
+        => y = 3*2^x + 1
+
+    lsquares_residual_mse (A, [x, y], y = a*b^x + c, soln [1]);
+
+        => 0
+
+    /* (7a) From the reference manual. Approximate solution. */
+
+    B : matrix ([1.1, 7.1], [2.1, 13.1], [3.1, 25.1], [4.1, 49.1]);
+    soln : lsquares_estimates (B, [x, y], y = a*b^x + c, [a, b, c], initial = [5, 5, 5], tol = 1e-8);
+
+        => [[a = 2.799098974486688, b = 2.000000000018375, c = 1.100000000358122]]
+
+    lsquares_residual_mse (B, [x, y], y = a*b^x + c, soln [1]);
+
+        => 7.353419577383337E-21
+
+    /* (7b) From the reference manual. Approximate solution. */
+
+    B : matrix ([1.1, 4.1], [4.1, 7.1], [9.1, 10.1], [16.1, 13.1]);
+    soln : lsquares_estimates (B, [x, y], y = a*x^b + c, [a, b, c], initial = [4, 1, 2], tol = 1e-8);
+
+        => [[a = 3.17731589660838, b = .4878659751689245, c = .7723843418856658]]
+
+    lsquares_residual_mse (B, [x, y], y = a*x^b + c, soln [1]);
+
+        => 6.822196230278462E-6
+
+    /* (7c) From the reference manual. Approximate solution. */
+
+    kill (A, B);
+    data : matrix ([0, 2, 4], [3, 3, 5], [8, 6, 6]);
+    soln : lsquares_estimates (data, [m, n, y], y = (A*m + B*n)^(1/3) + C, [A, B, C], initial = [3, 3, 3], tol = 1e-8);
+
+        => [[A = 4.999999920039424, B = 3.999999308815936, C = 2.000000105365426]]
+
+    lsquares_residual_mse (data, [m, n, y], y = (A*m + B*n)^(1/3) + C, soln [1]);
+
+        => 1.71963942036564E-16
+
+ */
+
+/* BEGIN STUFF COPIED FROM AUGMENTED_LAGRANGIAN.MAC */
+/* fboundp detects various kinds of Maxima functions */
+fboundp (a) :=
+    ?fboundp (a) # false
+ or ?mget (a, ?mexpr) # false
+ or ?get (a, ?mfexpr\*) # false
+ or ?mget (a, ?mmacro) # false;
+
+with_parameters ([L]) ::= buildq ([a : subst (":", "=",  ev (L [1])), e : rest (L)], block (a, splice (e)));
+/* END STUFF COPIED FROM AUGMENTED_LAGRANGIAN.MAC */
+
+if not fboundp (lbfgs) then load (lbfgs);
+
+lsquares_estimates (data, variables, equation, parameters, [optional_args]) := block
+
+  ([MSE : lsquares_mse (data, variables, equation)],
+
+    lsquares_estimates_exact (MSE, parameters),
+
+    if %% # []
+        then %%
+        else apply (lsquares_estimates_approximate,
+                    append ([MSE, parameters], optional_args)));
+
+lsquares_mse ('data%, variables, equation) := block
+
+   (if not atom (data%)
+        then block ([temp : ?gentemp (sconcat ("$M"))], temp :: data%, data% : temp),
+
+    makelist ('data% ['i, j], j, 1, length (variables)),
+    map ("=", variables, %%),
+    sublis (%%, (lhs (equation) - rhs (equation))^2),
+    buildq
+        ([n : length (ev (data%)), summand : %%],
+        (1/n) * 'sum (summand, i, 1, n)),
+    subst (nounify (data%), nounify ('data%), %%));
+
+/* Some evaluation gyrations can be avoided by working with an array ...
+ *
+lsquares_mse_with_array (data%,variables,equation):=block
+   (makelist(data%['i,j],j,0,length(variables)-1),
+    map("=",variables,%%),
+    sublis(%%,(lhs(equation)-rhs(equation))^2),
+    buildq([n:array_nrows(data%),summand:%%],
+    ('sum(summand,i,0,n-1))/n));
+ *
+ */
+
+array_nrows (a) := 1 + first (last (apply (arrayinfo, [a])));
+
+lsquares_estimates_exact (MSE, parameters) := block
+
+  ([keepfloat : true,
+    ratprint : false,
+    realonly : true,
+    solveradcan : true,
+    %e_to_numlog : true,
+    logexpand : all,
+    solveexplicit : true,
+    equations],
+
+    MSE : ev (MSE, nouns),
+    equations : map (lambda ([x], diff (%%, x)), parameters),
+    solutions : errcatch (solve (equations, parameters)),
+
+    if solutions = []
+    then []
+    else
+        /* solve finds stationary points of the MSE.
+         * Of the points returned, find the one or ones with least MSE.
+         */
+       (solutions : solutions [1], /* errcatch puts on extra layer of []'s ... */
+        map (lambda ([x], ev (MSE, x)), solutions),
+        sublist_indices (%%, lambda ([x], x = lmin (%%))),
+        makelist (solutions [i], i, %%)));
+
+lsquares_estimates_approximate (MSE, parameters, [optional_args]) := block
+
+  ([initial : makelist (1, i, 1, length (parameters)),
+    iprint : [1, 0],
+    tol : 1e-3],
+
+    with_parameters (optional_args,
+        lbfgs (MSE, parameters, initial, tol, iprint),
+        [%%]));
+
+lsquares_residuals (data, variables, equation, parameters_estimates) :=
+
+   (equation : sublis (parameters_estimates, equation),
+    maplist (lambda ([row], (sublis (map ("=", variables, row), equation), lhs (%%) - rhs (%%))), data));
+
+lsquares_residual_mse (data, variables, equation, parameters_estimates) :=
+
+   (lsquares_residuals (data, variables, equation, parameters_estimates),
+    (1 / length (%%)) * apply ("+", map (lambda ([e], e^2), %%)));
+

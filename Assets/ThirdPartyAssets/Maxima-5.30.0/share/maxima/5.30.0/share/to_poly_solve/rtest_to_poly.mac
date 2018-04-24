@@ -1,0 +1,100 @@
+(load(to_poly),0);
+0$
+
+/* constants and symbols */
+
+to_poly(42);
+[[42],[],[]]$
+
+to_poly(42.01);
+[[4201],[],[]]$
+
+to_poly(42.01b0);
+[[4201],[],[]]$
+
+to_poly(8/3);
+[[8],[],[]]$
+
+to_poly(%pi);
+[[%pi],[],[]]$
+
+map('first, map('to_poly, [false, true, %i, %phi, minf, inf]));
+[[false],[true],[%i],[%phi],[minf],[inf]]$
+
+to_poly(x);
+[[x],[],[]]$
+
+to_poly(x,[x]);
+[[x],[],[]]$
+
+to_poly(x,[x,y,z]);
+[[x],[],[]]$
+
+to_poly(x,[a,b,c]);
+[[x],[],[]]$
+
+to_poly(sqrt(5),[]);
+[[sqrt(5)],[],[]]$
+
+/* powers */
+first(elim_allbut(first(to_poly(sqrt(a)= b)),[a,b]));
+[b^2-a]$
+
+first(elim_allbut(first(to_poly(sqrt(a)= sqrt(b))),[a,b]));
+[b-a]$
+
+first(elim_allbut(first(to_poly(a^(1/3)= b)),[a,b]));
+[b^3-a]$
+
+first(elim_allbut(first(to_poly(a^(1/42)=b)),[a,b]));
+[b^42-a]$
+
+first(elim_allbut(first(to_poly(a^(1/4)=b^(1/3))),[a,b]));
+[b^4-a^3]$
+
+/* abs */
+
+first(elim_allbut(first(to_poly(abs(a) = b)),[a,b]));
+[b^2 - a^2]$
+
+first(elim_allbut(first(to_poly(abs(a) = abs(b))),[a,b]));
+[b^2 - a^2]$
+
+first(elim_allbut(first(to_poly(abs(1-abs(1-abs(a))))),[a]));
+[a*(a^2-4)]$
+
+/* polynomials */
+
+to_poly(-x);
+[[-x],[],[]]$
+
+to_poly(4.3-x);
+[[43-10*x],[],[]]$
+
+to_poly((x-1)*(x-2)*(x-3));
+[[x^3-6*x^2+11*x-6],[],[]]$
+
+expand(to_poly((x-1)*(x-sqrt(2))*(x-sqrt(3)),[x]));
+[[x^3-sqrt(3)*x^2-sqrt(2)*x^2-x^2+sqrt(2)*sqrt(3)*x+sqrt(3)*x+sqrt(2)*x-sqrt(2)*sqrt(3)],[],[]]$
+
+first(first(elim_allbut(first(to_poly((x-1)*(x-sqrt(2))*(x-sqrt(3)),[x,1])),[x])));
+(x^2-3)*(x^3-x^2-2*x+2)$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

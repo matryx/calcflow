@@ -1,0 +1,229 @@
+/* Here are all examples (I hope) from the online documentation
+   in our usual regression test format.  Note that the `doconline'
+   file has descriptions for `arite', `card_orbit' and `card_stab',
+   which are missing in the info file (inadvertence?) */
+
+(load("sym/sym.mac"),'done);
+done$
+
+arite(4,2,[[[1,2,4]],[[1,5,5],[1,2]],[[1,2,2],[1,3]]]);
+[[[1,2,4]],[[1,5,5],[3,2]],[[1,2,2],[3,3]]]$
+
+card_orbit([5,2,1,3],6);
+60$
+
+/* TODO: Should be able to use `eq' instead of `?eq' */
+card_stab([a,a,c,b,b],?eq);
+4$
+card_stab([1,1,2,3,3],"=");
+4$
+
+expand(comp2ele(3,[4,g1]));
+[4,g1,g1^2-h2,h3-2*g1*h2+g1^3]$
+expand(comp2pui(3,[4,g]));
+[4,g,2*h2-g^2,3*h3-3*g*h2+g^3]$
+
+/* The examples omit trailing zeros, but according to the general
+  definition they are left in the list (cf. subsection
+  `Représentations en machine' of section 1.1 in docsym.tex. */
+cont2part(2*a^3*b*x^4*y+x^5,[x,y]);
+[[1,5,0],[2*a^3*b,4,1]]$
+
+explose(2*a^3*b*x^4*y,[x,y,z]);
+2*a^3*b*y*z^4+2*a^3*b*x*z^4+2*a^3*b*y^4*z+2*a^3*b*x^4*z+2*a^3*b*x*y^4
+	     +2*a^3*b*x^4*y$
+contract(%,[x,y,z]);
+2*a^3*b*x^4*y$
+
+expand(direct([z^2-e1*z+e2,z^2-f1*z+f2],z,b*v+a*u,[[u,v],[a,b]]));
+/* The docs have here z instead of y, but the code (in direct.lisp)
+   shows that y is alway used as dummy variable for the resulting
+   polynomial.  So this is a typo in the docs. */
+y^2-e1*f1*y-4*e2*f2+e1^2*f2+e2*f1^2$
+/* The other examples for `direct' are ok. */
+expand(direct([z^3-e1*z^2+e2*z-e3,z^2-f1*z+f2],z,b*v+a*u,[[u,v],[a,b]]));
+y^6-2*e1*f1*y^5-6*e2*f2*y^4+2*e1^2*f2*y^4+2*e2*f1^2*y^4+e1^2*f1^2*y^4
+   +9*e3*f1*f2*y^3+5*e1*e2*f1*f2*y^3-2*e1^3*f1*f2*y^3-2*e3*f1^3*y^3
+   -2*e1*e2*f1^3*y^3+9*e2^2*f2^2*y^2-6*e1^2*e2*f2^2*y^2+e1^4*f2^2*y^2
+   -9*e1*e3*f1^2*f2*y^2-6*e2^2*f1^2*f2*y^2+3*e1^2*e2*f1^2*f2*y^2
+   +2*e1*e3*f1^4*y^2+e2^2*f1^4*y^2-27*e2*e3*f1*f2^2*y+9*e1^2*e3*f1*f2^2*y
+   +3*e1*e2^2*f1*f2^2*y-e1^3*e2*f1*f2^2*y+15*e2*e3*f1^3*f2*y
+   -2*e1^2*e3*f1^3*f2*y-e1*e2^2*f1^3*f2*y-2*e2*e3*f1^5*y-27*e3^2*f2^3
+   +18*e1*e2*e3*f2^3-4*e1^3*e3*f2^3-4*e2^3*f2^3+e1^2*e2^2*f2^3
+   +27*e3^2*f1^2*f2^2-9*e1*e2*e3*f1^2*f2^2+e1^3*e3*f1^2*f2^2+e2^3*f1^2*f2^2
+   -9*e3^2*f1^4*f2+e1*e2*e3*f1^4*f2+e3^2*f1^6$
+expand(direct([z^2-e1*z+e2,z^2-f1*z+f2],z,a+u,[[u],[a]]));
+y^4-2*f1*y^3-2*e1*y^3+2*f2*y^2+f1^2*y^2+3*e1*f1*y^2+2*e2*y^2+e1^2*y^2
+   -2*f1*f2*y-2*e1*f2*y-e1*f1^2*y-2*e2*f1*y-e1^2*f1*y-2*e1*e2*y+f2^2+e1*f1*f2
+   -2*e2*f2+e1^2*f2+e2*f1^2+e1*e2*f1+e2^2$
+
+ele2polynome([2,e1,e2],z);
+z^2-e1*z+e2$
+polynome2ele(x^7-14*x^5+56*x^3-56*x+22,x);
+[7,0,-14,0,56,0,-56,-22]$
+ele2polynome([7,0,-14,0,56,0,-56,-22],x);
+x^7-14*x^5+56*x^3-56*x+22$
+
+expand(elem([3,7],x^4-2*x*y,[x,y]));
+28*e3+2*e2^2-198*e2+2401$
+
+explose(a*x +1,[x,y,z]);
+a*z+a*y+a*x+1$
+
+kostka([3,3,3],[2,2,2,1,1,1]);
+6$
+
+lgtreillis(4,2);
+[[3,1],[2,2]]$
+
+ltreillis(4,2);
+[[4,0],[3,1],[2,2]]$
+
+mon2schur([1,1,1]);
+x1*x2*x3$
+mon2schur([3]);
+x1*x2*x3+x1^2*x2+x1^3$
+mon2schur([1,2]);
+2*x1*x2*x3+x1^2*x2$
+
+expand(multi_elem([[2,e1,e2],[2,f1,f2]],a*x+a^2+x^3,[[x,y],[a,b]]));
+-2*f2+f1^2+e1*f1-3*e1*e2+e1^3$
+
+multi_orbit(a*x+b*y,[[x,y],[a,b]]);
+[b*y+a*x,a*y+b*x]$
+multi_orbit(x+y+2*a,[[x,y],[a,b,c]]);
+[y+x+2*c,y+x+2*b,y+x+2*a]$
+
+multi_pui([[2,p1,p2],[2,t1,t2]],a*x+a^2+x^3,[[x,y],[a,b]]);
+/* The documentation had the exponent 3 at the wrong place.
+   The full form of the polynomial is
+   (a+b)*(x+y)+a^2+b^2+x^3+y^3 and
+   x^3+y^3=(3*(x+y)*(x^2+y^2)-(x+y)^3)/2=(3*p1*p2-p1^3)/2 */
+t2+p1*t1+3*p1*p2/2-p1^3/2$
+
+multsym([[3,1],[2,1,1]],[[5,2]],2);
+/* doconline has [[10, 3, 1], [15, 2, 1], [15, 3, 0]], but the
+   different order of the monomials (or their orbits or their
+   corresponding sums) does not matter. */
+[[10,3,1],[15,3,0],[15,2,1]]$
+
+orbit(a*x+b*y,[x,y]);
+[a*y+b*x,b*y+a*x]$
+orbit(2*x+x^2,[x,y]);
+[y^2+2*y,x^2+2*x]$
+
+part2cont([[2*a^3*b,4,1]],[x,y]);
+2*a^3*b*x^4*y$
+
+partpol(-a*(x+y)+3*x*y,[x,y]);
+[[3,1,1],[-a,1,0]]$
+
+pui;
+1$
+
+factor(pui([3,a,b],u*x*y*z,[x,y,z]));
+(2*p3-3*a*b+a^3)*u/6$
+
+pui2comp(2,[]);
+[2,p1,(p2+p1^2)/2]$
+ratsimp(pui2comp(3,[2,a1]));
+[2,a1,(p2+a1^2)/2,(2*p3+3*a1*p2+a1^3)/6]$
+
+polynome2ele(x^3-4*x^2+5*x-1,x);
+[3,4,5,1]$
+ele2pui(3,%);
+[3,4,6,7]$
+pui2polynome(x,%);
+x^3-4*x^2+5*x-1$
+
+([[x,y],[a,b]],pui_direct(multi_orbit(a*x+b*y,%%),%%,[2,2]));
+[a*x,4*a*b*x*y+a^2*x^2]$
+([[x,y],[a,b]],pui_direct(multi_orbit(a*x+b*y,%%),%%,[3,2]));
+[2*a*x,4*a*b*x*y+2*a^2*x^2,3*a^2*b*x^2*y+2*a^3*x^3,
+ 12*a^2*b^2*x^2*y^2+4*a^3*b*x^3*y+2*a^4*x^4,
+ 10*a^3*b^2*x^3*y^2+5*a^4*b*x^4*y+2*a^5*x^5,
+ 40*a^3*b^3*x^3*y^3+15*a^4*b^2*x^4*y^2+6*a^5*b*x^5*y+2*a^6*x^6]$
+pui_direct([y+x+2*c,y+x+2*b,y+x+2*a],[[x,y],[a,b,c]],[2,3]);
+[3*x+2*a,6*x*y+3*x^2+4*a*x+4*a^2,
+ 9*x^2*y+12*a*x*y+3*x^3+6*a*x^2+12*a^2*x+8*a^3]$
+
+ratsimp(puireduc(3,[2]));
+[2,p1,p2,(3*p1*p2-p1^3)/2]$
+
+resolvante:unitaire;
+unitaire$
+resolvante(x^7-14*x^5+56*x^3-56*x+22,x,x^3-1,[x]);
+y^7+7*y^6-539*y^5-1841*y^4+51443*y^3+315133*y^2+376999*y+125253$
+resolvante:lineaire;
+lineaire$
+resolvante(x^4-1,x,x1+2*x2+3*x3,[x1,x2,x3]);
+y^24+80*y^20+7520*y^16+1107200*y^12+49475840*y^8+344489984*y^4+655360000$
+resolvante:general;
+general$
+resolvante(x^4-1,x,x1+2*x2+3*x3,[x1,x2,x3]);
+y^24+80*y^20+7520*y^16+1107200*y^12+49475840*y^8+344489984*y^4+655360000$
+resolvante(x^4-1,x,x1+2*x2+3*x3,[x1,x2,x3,x4]);
+y^24+80*y^20+7520*y^16+1107200*y^12+49475840*y^8+344489984*y^4+655360000$
+direct([x^4-1],x,x1+2*x2+3*x3,[[x1,x2,x3]]);
+y^24+80*y^20+7520*y^16+1107200*y^12+49475840*y^8+344489984*y^4+655360000$
+resolvante:lineaire;
+lineaire$
+resolvante(x^4-1,x,x1+x2+x3,[x1,x2,x3]);
+y^4-1$
+resolvante:symetrique;
+symetrique$
+resolvante(x^4-1,x,x1+x2+x3,[x1,x2,x3]);
+y^4-1$
+resolvante:alternee;
+alternee$
+resolvante(x^4+x+1,x,x1-x2,[x1,x2]);
+y^12+8*y^8+26*y^6-112*y^4+216*y^2+229$
+resolvante:produit;
+produit$
+resolvante(x^7-7*x+3,x,x1*x2*x3,[x1,x2,x3]);
+y^35-7*y^33-1029*y^29+135*y^28+7203*y^27-756*y^26+1323*y^24+352947*y^23
+    -46305*y^22-2463339*y^21+324135*y^20-30618*y^19-453789*y^18-40246444*y^17
+    +282225202*y^15-44274492*y^14+155098503*y^12+12252303*y^11+2893401*y^10
+    -171532242*y^9+6751269*y^8+2657205*y^7-94517766*y^6-3720087*y^5
+    +26040609*y^3+14348907$
+resolvante:symetrique;
+symetrique$
+resolvante(x^7-7*x+3,x,x1*x2*x3,[x1,x2,x3]);
+y^35-7*y^33-1029*y^29+135*y^28+7203*y^27-756*y^26+1323*y^24+352947*y^23
+    -46305*y^22-2463339*y^21+324135*y^20-30618*y^19-453789*y^18-40246444*y^17
+    +282225202*y^15-44274492*y^14+155098503*y^12+12252303*y^11+2893401*y^10
+    -171532242*y^9+6751269*y^8+2657205*y^7-94517766*y^6-3720087*y^5
+    +26040609*y^3+14348907$
+resolvante:cayley;
+cayley$
+resolvante(x^5-4*x^2+x+1,x,a,[]);
+x^6-40*x^5+4080*x^4-92928*x^3+3772160*x^2+37880832*x+93392896$
+resolvante_bipartite(x^6+108,x);
+y^10-972*y^8+314928*y^6-34012224*y^4$
+resolvante_diedrale(x^5-3*x^4+1,x);
+x^15-21*x^12-81*x^11-21*x^10+207*x^9+1134*x^8+2331*x^7-945*x^6-4970*x^5
+    -18333*x^4-29079*x^3-20745*x^2-25326*x-697$
+resolvante_produit_sym(x^5+3*x^4+2*x-1,x);
+[y^5+3*y^4+2*y-1,y^10-2*y^8-21*y^7-31*y^6-14*y^5-y^4+14*y^3+3*y^2+1,
+ y^10+3*y^8+14*y^7-y^6-14*y^5-31*y^4-21*y^3-2*y^2+1,y^5-2*y^4-3*y-1,y-1]$
+resolvante:produit;
+produit$
+resolvante(x^5+3*x^4+2*x-1,x,a*b*c,[a,b,c]);
+y^10+3*y^8+14*y^7-y^6-14*y^5-31*y^4-21*y^3-2*y^2+1$
+
+schur2comp(h1*h2-h3,[h1,h2,h3]);
+s[1,2]$
+schur2comp(a*h3,[h3]);
+s[3]*a$
+
+treillis(4);
+[[4],[3,1],[2,2],[2,1,1],[1,1,1,1]]$
+
+treinat([5]);
+[[5]]$
+treinat([1,1,1,1,1]);
+[[5],[4,1],[3,2],[3,1,1],[2,2,1],[2,1,1,1],[1,1,1,1,1]]$
+treinat([3,2]);
+[[5],[4,1],[3,2]]$
+
+/* symtest.mac ends here */

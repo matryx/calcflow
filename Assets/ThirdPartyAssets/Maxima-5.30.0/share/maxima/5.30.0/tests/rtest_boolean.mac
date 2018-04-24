@@ -1,0 +1,408 @@
+(kill (all), 0);
+0;
+
+/* Test simplification of boolean expressions.
+ * '(...) expressions are simplified but not evaluated.
+ */
+
+['("and" ()), '("or" ())];      /* analogous to * and + with no arguments */
+[true, false];
+
+/* These values are supposed to be ignored in quoted expressions '(...).
+ */
+(a : true, b : false, c : true, 0);
+0;
+
+('(a and b), [op (%%), args (%%)]);
+["and", '[a, b]];
+
+('(a or b), [op (%%), args (%%)]);
+["or", '[a, b]];
+
+('(not a), [op (%%), args (%%)]);
+["not", '[a]];
+
+('(a and b or c and d), [op (%%), args (%%)]);
+["or", ['(a and b), '(c and d)]];
+
+('((a or b) and (c or d)), [op (%%), args (%%)]);
+["and", ['(a or b), '(c or d)]];
+
+'(a and true);
+'a;
+
+'(a and false);
+false;
+
+'(a or true);
+true;
+
+'(a or false);
+'a;
+
+'[true and true, true and false, true or true, true or false, false and true, false and false, false or true, false or false];
+[true, false, true, true, false, false, true, false];
+
+'((a or true) and (b or true));
+true;
+
+'(a and true or b and true);
+'(a or b);
+
+'(a or b or c or false);
+'(a or b or c);
+
+'(a and b and c and true);
+'(a and b and c);
+
+'(not (a and b));
+'((not a) or (not b));
+
+'(not a and b);
+'((not a) and b);
+
+'(not (a or b));
+'((not a) and (not b));
+
+'(not (a or b or c or d or e));
+'((not a) and (not b) and (not c) and (not d) and (not e));
+
+'(not (a and b and c and d and e));
+'((not a) or (not b) or (not c) or (not d) or (not e));
+
+'(not (a or b and c or d and e));
+'((not a) and ((not b) or (not c)) and ((not d) or (not e)));
+
+'(not (a and not b or c and not d and not e));
+'(((not a) or b) and ((not c) or d or e));
+
+'(not a or b);
+'((not a) or b);
+
+'(not not a);
+'a;
+
+'(not not not a);
+'(not a);
+
+'(not not not not a);
+'a;
+
+/* Flattening nested expressions.
+ * Maxima "and" and "or" are not commutative, so order of arguments should be preserved.
+ * Flattening is a simplification => should happen in both simplification and evaluation.
+ */
+
+kill (all);
+done;
+
+('(x and b and ((h and d) and c) and y), [op (%%), args (%%)]);
+["and", [x, b, h, d, c, y]];
+
+('(x or b or ((h or d) or c) or y), [op (%%), args (%%)]);
+["or", [x, b, h, d, c, y]];
+
+'(x and b and ((h or d) or c) and (y and q and e));
+x and b and (h or d or c) and y and q and e;
+
+(x and b and ((h and d) and c) and y, [op (%%), args (%%)]);
+["and", [x, b, h, d, c, y]];
+
+(x or b or ((h or d) or c) or y, [op (%%), args (%%)]);
+["or", [x, b, h, d, c, y]];
+
+x and b and ((h or d) or c) and (y and q and e);
+x and b and (h or d or c) and y and q and e;
+
+/* Side-effects shouldn't happen in simplification (since arguments are not evaluated).
+ */
+
+(kill (a, b, c), 0);
+0;
+
+('((a : true) and (b : false) and (c : foo ())), [op (%%), args (%%), a, b, c]);
+["and", '[a : true, b : false, c : foo ()], 'a, 'b, 'c];
+
+('(not (a : true)), [op (%%), args (%%), a]);
+["not", '[a : true], 'a];
+
+/* Miscellaneous tests.
+ */
+expr: '(a > b and (equal (c, d) or e = 1) and not f <= g or notequal (h, %pi));
+'(a > b and (equal (c, d) or e = 1) and f > g or notequal (h, %pi));
+
+'(a > b and b > c and true or a < b and b < c and true or false or not true);
+'((a > b and b > c) or (a < b and b < c));
+
+'(not not not not a > b);
+'(a > b);
+
+'(not not not not not a > b);
+'(a <= b);
+
+'(not not not false and not not not not true);
+true;
+
+'(not foo (a));
+''(funmake ("not", '[foo (a)]));
+
+'[is (not a > b or false), is (not a > b or true), is (not a > b and false)];
+'[is (a <= b), true, false];
+
+'['is (not a > b or false), 'is (not a > b or true), 'is (not a > b and false)];
+'['is (a <= b), true, false];
+
+'[maybe (not a > b or false), maybe (not a > b or true), maybe (not a > b and false)];
+'[maybe (a <= b), true, false];
+
+'['maybe (not a > b or false), 'maybe (not a > b or true), 'maybe (not a > b and false)];
+'['maybe (a <= b), true, false];
+
+/* Test evaluation of boolean expressions.
+ * Evaluate the arguments and simplify.
+ */
+
+["and" (), "or" ()];      /* analogous to * and + with no arguments */
+[true, false];
+
+(a and b, [op (%%), args (%%)]);
+["and", '[a, b]];
+
+(a or b, [op (%%), args (%%)]);
+["or", '[a, b]];
+
+(not a, [op (%%), args (%%)]);
+["not", '[a]];
+
+(a and b or c and d, [op (%%), args (%%)]);
+["or", ['(a and b), '(c and d)]];
+
+((a or b) and (c or d), [op (%%), args (%%)]);
+["and", ['(a or b), '(c or d)]];
+
+a and true;
+'a;
+
+a and false;
+false;
+
+a or true;
+true;
+
+a or false;
+'a;
+
+(a or true) and (b or true);
+true;
+
+a and true or b and true;
+'(a or b);
+
+a or b or c or false;
+'(a or b or c);
+
+a and b and c and true;
+'(a and b and c);
+
+not (a and b);
+'((not a) or (not b));
+
+not a and b;
+'((not a) and b);
+
+not (a or b);
+'((not a) and (not b));
+
+not (a or b or c or d or e);
+'((not a) and (not b) and (not c) and (not d) and (not e));
+
+not (a and b and c and d and e);
+'((not a) or (not b) or (not c) or (not d) or (not e));
+
+not (a or b and c or d and e);
+'((not a) and ((not b) or (not c)) and ((not d) or (not e)));
+
+not (a and not b or c and not d and not e);
+'(((not a) or b) and ((not c) or d or e));
+
+not a or b;
+'((not a) or b);
+
+not not a;
+'a;
+
+not not not a;
+'(not a);
+
+not not not not a;
+'a;
+
+/* Side-effects should happen in evaluation.
+ */
+
+((a : true) and (b : true) and (c : foo ()), [%%, a, b, c]);
+[foo (), true, true, foo ()];
+
+(not (a : bar ()), [%%, a]);
+['(not bar ()), bar ()];
+
+(kill (a, b, c), 0);
+0;
+
+/* Miscellaneous tests.
+ */
+expr: a > b and (equal (c, d) or e = 1) and not f <= g or notequal (h, %pi);
+'(a > b and equal (c, d) and f > g or notequal (h, %pi));
+
+''expr, e=1;
+'(a > b and equal (c, d) and f > g or notequal (h, %pi));
+
+''expr, e=1, h=%e;
+true;
+
+''expr, e=1, h=%pi;
+'(a > b and equal (c, d) and f > g);
+
+''expr, e=89, f = g + 1;
+'(a > b and equal (c, d) or notequal (h, %pi));
+
+(assume (notequal (c, d), equal (f, 100), g < 0), 0);
+0;
+
+''expr, e = 1;
+'(notequal (h, %pi));
+
+a > b and b > c and true or a < b and b < c and true or false or not true;
+'((a > b and b > c) or (a < b and b < c));
+
+not not not not a > b;
+'(a > b);
+
+not not not not not a > b;
+'(a <= b);
+
+not not not false and not not not not true;
+true;
+
+/* is-evaluation of conditionals.
+ * is(foo) => true, false, and unknown or error (depending on prederror flag).
+ */
+
+ev (is (a > b or a > c), prederror=false);
+unknown;
+
+errcatch (ev (is (a > b or a > c), prederror=true));
+[];
+
+[is (not a > b or true), is (not a > b and false), 'is (not a > b or true), 'is (not a > b and false)];
+[true, false, true, false];
+
+[maybe (not a > b or false), maybe (not a > b or true), maybe (not a > b and false)];
+[unknown, true, false];
+
+['maybe (not a > b or false), 'maybe (not a > b or true), 'maybe (not a > b and false)];
+['maybe (a <= b), true, false];
+
+is (not a > b or true);
+true;
+
+is (not a > b and false);
+false;
+
+ev (maybe (not a > b or false), prederror=false);
+unknown;
+
+ev (maybe (not a > b or false), prederror=true);
+unknown;
+
+ev (maybe (not a > b), a = 100.0, b = 1000/3);
+true;
+
+ev (maybe (not a > b), b = 100.0, a = 1000/3);
+false;
+
+(kill (aa, bb, cc, dd),
+ implies (a%, b%) := (not a%) or b%,
+ equivalent (a%, b%) := implies (a%, b%) and implies (b%, a%),
+ translate (implies, equivalent));
+[implies, equivalent];
+
+/* output not fully simplified -- these next two tests show bugs */
+
+implies (aa and bb, cc or dd);
+not (aa) or not (bb) or cc or dd;
+
+implies (aa and bb, aa);
+not (aa) or not (bb) or aa;
+
+equivalent (aa, aa);
+(not aa or aa) and (not aa or aa);
+
+/* crime scene example from mailing list 2006/05/06 tnx Mario */
+
+(kill (all),
+ "=>" (r, s) := not r or s,
+ infix ("=>"),
+ implies (ante, conse, listvar) := block ([expr, npos, maxn, combis:[], bits, quot, div],
+    npos: length(listvar),
+    maxn: 2^npos - 1,
+    expr: not ante or conse,
+    for i:0 thru maxn do
+       (bits: [],
+        quot: i,
+        for j: 1 thru npos do
+           (div: divide (quot, 2),
+            quot: div[1],
+            bits: cons (listvar[j]=div[2], bits)),
+        combis: cons (subst ([1=true, 0=false], bits), combis)),
+    apply ("and", makelist (subst (k, expr), k, combis))), 0);
+0;
+
+implies ((p or q) and (q => r) and (p => s) and not r, s, [p, q, r, s]);
+true;
+
+/* charfun examples following email discussion circa 2007-03-23 */
+
+(kill (x, y, z), expr : charfun (-1 < x and x < 1));
+'(charfun (-1 < x and x < 1));
+
+[ev (expr, x = 1/2), ev (expr, x = -3/2)];
+[1, 0];
+
+expr : charfun (x > 0 or y > 0);
+'(charfun (x > 0 or y > 0));
+
+[ev (expr, x = 1/2), ev (expr, x = -3/2), ev (expr, x = -3/2, y = -3/4)];
+[1, '(charfun (y > 0)), 0];
+
+/* ensure that arguments to is and maybe are evaluated exactly once */
+
+(kill (aa, bb, cc),
+ aa : bb : cc,
+ cc : 1234,
+ is (aa = bb));
+true;
+
+is (aa = 'cc and bb = 'cc);
+true;
+
+is ('aa = 'bb);
+false;
+
+maybe (aa = bb);
+true;
+
+maybe (aa = 'cc and bb = 'cc);
+true;
+
+maybe ('aa = 'bb);
+false;
+
+/* SF bug [ 1726148 ] maybe with prederror : true */
+
+(kill (a), ev (maybe (a), prederror = true));
+unknown;
+
+ev (maybe (a or false), prederror = true);
+unknown;
+

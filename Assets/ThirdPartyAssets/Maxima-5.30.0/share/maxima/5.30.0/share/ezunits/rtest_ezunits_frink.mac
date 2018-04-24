@@ -1,0 +1,406 @@
+/* examples of units calculations from the Frink project
+ * see: http://futureboy.us/frinkdocs/index.html
+ * Many, but not all, of the examples there are included here.
+ */
+
+(kill (all), load (ezunits), load (physical_constants), fpprec : 12, 0);
+0;
+
+/* I can never remember which units have built-in definitions .... */
+map (lambda ([x], is (x # false)),
+  map (get_unit_definition, '[gallon, inch, foot, liter, lbm, fluid_ounce, mile, hour, mph]));
+[true, true, true, true, true, true, true, true, true];
+
+/* "Math Operators" */
+
+1 ` gallon^(1/3) `` inch;
+231^(1/3) ` inch;
+
+bfloat ((20000 ` gallon)^(1/3) `` foot);
+1.387925257499022b1 ` foot;
+
+(rho_water : 1 ` kg/liter,
+  (20000 ` gallon)*(rho_water) `` lbm);
+98322384000/589081 ` lbm;
+
+block ([rho_sugar : 1.25b0 ` kg/liter],
+  declare_unit_conversion (1 ` cup = 8 ` fluid_ounce),
+  (250 ` gram)/(rho_sugar) `` cup);
+8.453505675460749b-1 ` cup;
+
+(1/4 ` mile) / (4.23b0 ` s) `` mile/hour;
+2.127659574468085b2 ` mile/hour;
+
+(declare_unit_conversion (1 ` gee = 981 ` cm/s^2, mph = mile/hour),
+  (329 ` mph) / (4.23b0 ` s) `` gee);
+3.544319855023219b0 ` gee;
+
+is (dimensions (foot) = dimensions (meter));
+true;
+
+(declare_unit_conversion (square_foot = foot^2),
+  3 ` square_foot `` foot^2);
+3 ` foot^2;
+
+(declare_unit_conversion (cubic_foot = foot^3),
+  3 ` cubic_foot `` foot^3);
+3 ` foot^3;
+
+(3 ` foot)^2 `` square_foot;
+9 ` square_foot;
+
+(3 ` foot)^3 `` cubic_foot;
+27 ` cubic_foot;
+
+/* "Common Functions" */
+
+(declare_unit_conversion (arc_degree = %pi/180, arc_minute = arc_degree/60, arc_second = arc_minute/60),
+  declare_unit_conversion (radian = 1),
+  0);
+0;
+
+sin (90 ` arc_degree);
+1;
+
+cos (2 * %pi ` radian);
+1;
+
+tan (30 ` arc_second);
+tan (%pi/21600);
+
+sec (45 ` arc_degree);
+sqrt (2);
+
+csc (%pi/2 ` radian);
+1;
+
+cot (30 ` arc_second);
+cot (%pi/21600);
+
+/* Just leave out these hyperbolic functions.
+ * Arguments for such functions are not typically interpreted as radians,
+ * from what I've seen. I suppose I could be mistaken about that.
+ *
+sinh (90 ` arc_degree);
+sinh (%pi/2);
+
+cosh (2 * %pi ` radian);
+cosh (2 * %pi);
+
+tanh (30 ` arc_second);
+tanh (%pi/21600);
+ *
+ */
+
+asin (0.1) `` arc_degree;
+18.03013580908076/%pi ` arc_degree;
+
+acos (1/2) `` radian;
+%pi/3 ` radian;
+
+acsc (3/2) `` radian, numer;
+0.7297276562269662 ` radian;
+
+asec (3/2) `` radian, numer;
+0.8410686705679303 ` radian;
+
+acot (1/2) `` radian, numer;
+1.107148717794091 ` radian;
+
+atan ((3 ` inch) / (1 ` foot)) `` arc_minute, numer;
+842.1746080755889 ` arc_minute;
+
+atan2 (3 ` inch, 1 ` foot) `` arc_degree, numer;
+14.03624346792648 ` arc_degree;
+
+/* "Temperature Scales" */
+
+451 ` degF `` K;
+91067/180 ` K;
+
+30 ` K `` degF;
+(-40567/100) ` degF;
+
+0 ` degC `` K;
+5463/20 ` K;
+
+30 ` K `` degC;
+(-4863/20) ` degC;
+
+98.6 ` degF `` degC;
+37.0 ` degC;
+
+/* "Sample Calculations" */
+
+/* "Mass and Volume" */
+
+(A_room : (10 ` foot)*(12 ` foot), 
+  V_room : (10 ` foot) * (12 ` foot) * (8 ` foot) `` gallon);
+552960/77 ` gallon;
+
+V_room * rho_water `` lbm;
+2718417272832/45359237 ` lbm;
+
+(if get_unit_conversion ('ton) = false
+  then declare_unit_conversion (1 ` ton = 2000 ` lbm),
+ (2 ` ton)/(A_room * rho_water) `` foot);
+5669904625/10618817472 ` foot;
+
+/* "Liquor" */
+
+foo : 
+ (rho_alcohol : rho_water / rat (1.267),
+  declare_unit_conversion (percent = 1/100),
+  declare_units (volume_alcohol_beer, fluid_ounce),
+  volume_alcohol_beer * rho_alcohol = (rat (3.2) ` percent) * ((12 ` fluid_ounce - volume_alcohol_beer) * rho_water + volume_alcohol_beer * rho_alcohol),
+  expand_dimensional (%%),
+  map (expand, %%), /* HMM, EQUATION SIMPLIFIES DIFFERENTLY IN THE PRESENCE OF MRAT ... */
+  map (lambda ([x], x `` g), %%),
+  solve (map (first, expand (%%)), qty (volume_alcohol_beer)));
+['qty(volume_alcohol_beer) = 15204/31517];
+
+volume_alcohol_beer : rhs (first (foo)) ` units (volume_alcohol_beer);
+15204/31517 ` fluid_ounce;
+
+(declare_unit_conversion (1 ` magnum = 60 ` fluid_ounce), /* NEED CORRECT DEFN OF MAGNUM HERE */
+  declare_unit_conversion (1 ` beer_equivalent = volume_alcohol_beer),
+  (1 ` magnum) * ((13.5b0 ` percent) ` liter/liter) `` beer_equivalent);
+1.679082478295186b1 ` beer_equivalent;
+
+jungle_juice_percent :
+ (declare_unit_conversion (1 ` proof = (1/2 ` percent) ` liter/liter),
+  (1.75b0 ` liter) * (190 ` proof) / (5 ` gallon) `` percent);
+8.783720740908435b0 ` percent;
+
+5 * (12 ` fluid_ounce) * jungle_juice_percent `` beer_equivalent;
+1.092488265947952b1 ` beer_equivalent;
+
+/* "More Liquor" */
+
+(declare_unit_conversion (1 ` beer_barrel = 31 ` gallon),
+  declare_unit_conversion (1 ` keg = 1/2 ` beer_barrel),
+  declare_unit_conversion (1 ` pony_key = 1/2 ` keg),
+  beer_case : 24 * (12 ` fluid_ounce),
+  (1 ` keg)/beer_case `` 1);
+62/9;
+
+/* TODO: I'd like to have x `` percent => (100*x) ` percent when x is a scalar,
+ * but "``" can't handle that now. I'll have to work on that.
+ */
+(volume_alcohol_beer_fraction : volume_alcohol_beer / (12 ` fluid_ounce),
+  (60 ` dollar) / ((1 ` keg) * volume_alcohol_beer_fraction) `` dollar/fluid_ounce);
+472755/628432 ` dollar/fluid_ounce;
+
+(6.99b0 ` dollar) / ((750 ` ml) * (13 ` percent)) `` dollar/fluid_ounce;
+2.120194580942308b0 ` dollar/fluid_ounce;
+
+(13.99b0 ` dollar) / ((1750 ` ml) * (80 ` proof)) `` dollar/fluid_ounce;
+5.9104811225625b-1 ` dollar/fluid_ounce;
+
+/* "Movie Magic" */
+
+foo : (mass_moon : 7.36b22 ` kg,
+  ((1/4) * mass_moon) / ((4/3) * %pi * (500/2 ` km)^3) `` kg/m^3);
+8.832b5/%pi ` kg/m^3;
+
+foo / rho_water `` 1;
+8.832b2/%pi;
+
+ev (%G * (1/4) * mass_moon / (500/2 ` km)^2, constvalue) `` gee;
+2.002964354740061b0 ` gee;
+
+/* "Fiscal Calculations" -- skip it, ezunits lacks date parsing stuff */
+
+/* "Ouch!" */
+
+(declare_unit_conversion (1 ` TNT_gram_equivalent = 4184 ` J),
+  (51 ` TNT_gram_equivalent) / ((185 ` lbm) * (1 ` gee)) `` foot);
+177820000000000000/209093336624403 ` foot;
+
+(energy_density_gasoline : 35 ` MJ/liter,
+  declare_unit_conversion (1 ` gasoline_teaspoon_equivalent = energy_density_gasoline * (1 ` teaspoon) `` MJ),
+  51 ` TNT_gram_equivalent `` gasoline_teaspoon_equivalent);
+1365657600/1104078437 ` gasoline_teaspoon_equivalent;
+
+/* "Sniping Ebay Auctions" -- skip it, ezunits lacks date parsing stuff */
+
+/* "Junkyard Wars" */
+
+(declare_unit_conversion (1 ` barrel = 55 ` gallon),
+  ((1/2) ` short_ton) / ((1 ` barrel) * rho_water) `` 1);
+147270250/67596639;
+
+(declare_unit_conversion (1 ` fathom = 6 ` foot),
+  ((2 ` fathom) * rho_water * (1 ` barrel) * (1 ` gee)) / ((40 ` W) * (1 ` minute)) `` 1);
+1945404028974483/625000000000000;
+
+(declare_unit_conversion (1 ` calorie = 4.184 ` J, 1 ` Calorie = 1000 ` calorie),
+  ((2 ` fathom) * rho_water * (1 ` barrel) * (1 ` gee)) `` Calorie);
+5836212086923449/3268750000000000 ` Calorie;
+
+/* "Body Heat" */
+
+2000 ` Calorie/day `` W;
+2615/27 ` W;
+
+/* "Microwave Cookery" */
+
+(1100 ` W) * (30 ` s) / ((27 ` ounce) * (1 ` calorie/gram/K)) `` R;
+40000000000/2156625541 ` R;
+
+/* "Why is Superman so Lazy?" */
+
+(sun_earth_distance : 150b6 ` km,
+  sun_power : 4 * %pi * sun_earth_distance^2 * (1353 ` W/m^2) `` GW,
+  earth_power : sun_power / (4 * %pi * sun_earth_distance^2) `` W/m^2,
+  charge_rate : earth_power * (12 ` foot^2) `` W);
+1.50837375744b3 ` W;
+
+(2 ` ton) * (7 ` foot) * (1 ` gee) / charge_rate `` s;
+2.51766982027399b1 ` s;
+
+((225 ` lbm) + (135 ` lbm)) * (15000 ` foot) * (1 ` gee) / charge_rate `` minute;
+8.092510136594969b1 ` minute;
+
+/* "Fart Jokes" */
+
+(declare_unit_conversion (1 ` kiloton = 1000 * 1000 * 1000 ` TNT_gram_equivalent),
+  (12.5b0 ` kiloton) / (6 ` year + 9 ` month `` year) `` horsepower);
+3.292531060702169b2 ` horsepower;
+
+(12.5b0 ` kiloton) / (6 ` year + 9 ` month `` year) `` Calorie/day;
+5.070094050244632b6 ` Calorie/day;
+
+(12.5b0 ` kiloton) / (2000 ` Calorie/day) `` year;
+1.711156741957563b4 ` year;
+
+(declare_unit_conversion
+  (1 ` therm = 10^5 ` Btu,
+   1 ` ccf = 100 ` foot^3,
+   1 ` natural_gas_equivalent = (1 ` therm) / (1 ` ccf)),
+  (12.5b0 ` kiloton) / (1 ` natural_gas_equivalent) / ((6 ` year + 9 ` month) `` s) / (%pi * (0.5b0 ` inch)^2) * 10 `` mph,
+  bfloat (%%));
+2.909260954481533b2 ` mph;
+
+/* "Advanced Farting" */
+
+(molar_volume : 22.4b0 ` liter/mol,
+  h2_energy : (2000 ` ml) / molar_volume * (19 ` percent) * (285.8 ` kJ/mol) `` kJ);
+4.848392857142857b0 ` kJ;
+
+methane_energy: (2000 ` ml) / molar_volume * (3.2 ` percent) * (890.8 ` kJ/mol) `` kJ;
+2.545142857142857b0 ` kJ;
+
+(h2_energy + methane_energy) `` Calorie;
+1.767097446052991b0 ` Calorie;
+
+(12.5b0 ` kiloton) / ((h2_energy + methane_energy) / (1 ` day)) `` year;
+1.936686339261734b7 ` year;
+
+/* "More Incorrect Facts" */
+
+/* "QE2" */
+
+(declare_unit_conversion (1 ` knot = 6000 ` foot/hour), /* PROBABLY NEED A MORE ACCURATE CONVERSION HERE */
+  (18 ` ton/hour) / (28 ` knot) / (0.85b0 ` kg/liter) `` gallon/foot,
+  1/%%);
+3.310343765967668b1 ` foot/gallon;
+
+/* "Hamburgers and Cars" */
+
+(48055 ` dollar) / (3115 ` lbm);
+1373/89 ` dollar/lbm;
+
+/* "Get The Provisions" -- skip it, ezunits lacks currency conversions */
+
+/* "Typing" -- skip it, ezunits lacks dictionary stuff */
+
+/* "Biblical References" */
+
+(declare_unit_conversion (1 ` biblical_cubit = 10 ` inch), /* NEED A MORE ACCURATE CONVERSION HERE */
+  depth : (29030 ` foot + 15 ` biblical_cubit - (2.4b0 ` inch/year) * (4000 ` year)) `` foot);
+2.82425b4 ` foot;
+
+rainfall : depth / (40 ` day) `` foot/hour;
+2.941927083333333b1 ` foot/hour;
+
+/* "E = mc^2" */
+
+(declare_unit_conversion (1 ` gasoline_gallon_equivalent = energy_density_gasoline * (1 ` gallon) `` MJ),
+  ev ((1 ` teaspoon) * rho_water * %c^2, constvalue) `` gasoline_gallon_equivalent);
+3209839924060063/960000000 ` gasoline_gallon_equivalent;
+
+/* "Days Old" -- omit date calculations since ezunits lacks it */
+
+(declare_unit_conversion
+ (1 ` milli_arc_second = 1/1000 ` arc_second,
+  1 ` au = 93*10^6 ` mile), /* close enough ... ?? */
+ (1 ` au) / (96.74b0 ` milli_arc_second) / constvalue (%c) `` day);
+3.870493221188194b4/%pi ` day;
+
+(declare_unit_conversion (1 ` light_year = constvalue (%c) * 365.25b0 ` day),
+  (1 ` au) / (0.7723b0 ` arc_second) `` light_year);
+13.27382643963228b0/%pi ` light_year;
+
+/* "Finding Your Own Star" -- no equations here */
+
+/* "Model Solar System" */
+
+(earth_radius : (7980 ` mile) / 2, /* close enough ... ?? */
+  scale : earth_radius / (3.5b0 ` inch) `` 1);
+7.22304b7;
+
+(moon_radius : (2150 ` mile) / 2, /* close enough ... ?? */
+  moon_radius / scale `` inch);
+9.429824561403509b-1 ` inch;
+
+(moon_distance : 235b3 ` mile, /* close enough ... ?? */
+  moon_distance / scale `` feet);
+1.717836257309942b1 ` feet;
+
+earth_radius / moon_radius `` 1;
+798/215;
+
+(%pi * earth_radius^2) / (%pi * moon_radius^2) `` 1;
+636804/46225;
+
+(1.9b0 ` inch) / (17.5b0 ` foot) `` arc_minute;
+9.771428571428571b1/%pi ` arc_minute;
+
+2 * asin (moon_radius / (moon_radius + moon_distance) `` 1) `` arc_degree;
+1.639315206860877b0/%pi ` arc_degree;
+
+(jupiter_radius : 88b3 ` mile, /* close enough ... ?? */
+  jupiter_distance : 400b6 ` mile, /* close enough ... ?? */
+  [jupiter_radius / scale `` feet, jupiter_distance / scale `` mile]);
+[6.432748538011696b0 ` feet, 5.537834485202906b0 ` mile];
+
+/* altitude of the space shuttle in model */
+(300 ` km) / scale `` inch;
+1.635187347992984b-1 ` inch;
+
+/* altitude of geosynchronous satellite in model */
+(42164 ` km) / scale `` inch;
+2.298201311359206b1 ` inch;
+
+/* size of sun, other planets, and some moons in model */
+(sun_radius : 800b3 ` mile, /* close enough ... ?? */
+  mercury_radius : 2500 ` mile, /* close enough ... ?? */
+  venus_radius : 7900 ` mile, /* close enough ... ?? */
+  mars_radius : 4000 ` mile, /* close enough ... ?? */
+  saturn_radius : 69000 ` mile, /* close enough ... ?? */
+  uranus_radius : 30000 ` mile, /* close enough ... ?? */
+  neptune_radius : 30000 ` mile, /* close enough ... ?? */
+  pluto_radius : 3000 ` mile, /* close enough ... ?? */
+  titan_radius : 3000 ` km, /* close enough ... ?? */
+  phobos_radius : 20 ` mile, /* close enough ... ?? */
+  map (lambda ([x], x / scale `` m, if qty (%%) > 100 then %% `` km elseif qty (%%) < 1/10 then %% `` mm else %%),
+    [sun_radius, mercury_radius, venus_radius, mars_radius, saturn_radius, uranus_radius, neptune_radius, pluto_radius, titan_radius, phobos_radius]));
+[1.782456140350877b1 ` m, 5.570175438596491b1 ` mm, 1.760175438596491b-1 ` m, 
+8.912280701754386b1 ` mm, 1.537368421052632b0 ` m, 6.684210526315789b-1 ` m, 
+6.684210526315789b-1 ` m, 6.68421052631579b1 ` mm, 4.15337586390218b1 ` mm, 4.456140350877193b-1 ` mm];
+
+/* no further calculations in frink-index.html */
+
+(reset (fpprec), 0);
+0;

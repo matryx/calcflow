@@ -1,0 +1,335 @@
+Installation
+
+  To use linalg, you'll need to have nset version 1.203.  If you
+  are using Maxima 5.9.1cvs or better, you already have the required
+  version of nset. Otherwise you'll need to download and install nset.
+  You may download nset from http://www.unk.edu/facstaff/profiles/willisb/.
+  
+  You will need to append the path to linearalgebra to 
+  file_search_maxima and file_search_lisp. If the path to
+  the directory linearalgebra is "c:/maxima/linearalgebra", you will
+  use the Maxima commands
+
+    (%i1) file_search_maxima : cons("c:/maxima/linearalgebra/###.{mac}",file_search_maxima)$
+    (%i2) file_search_lisp : cons("c:/maxima/linearalgebra/###.{lisp}",file_search_lisp)$
+
+  Now you should be able to load and use linalg.
+
+  (%i3) load("linalg");
+        Warning - you are redefining the MACSYMA function EIGENVALUES
+        Warning - you are redefining the MACSYMA function EIGENVECTORS
+        Warning - you are redefining the MACSYMA function RANK
+  (%o3) c:/maxima/linearalgebra/linalg.mac
+  (%i4) m : matrix([1-z,2],[5,8-z]);
+  (%o4) matrix([1-z,2],[5,8-z])
+  (%i5) ptriangularize(m,z);
+  (%o5) matrix([5,8-z],[0,-z^2/5+(9*z)/5+2/5])
+
+
+columnop(m,i,j,theta)
+
+  If m is a matrix, return the matrix that results from doing the  
+  column operation Ci <- Ci - theta * Cj. If m doesn't have a row
+  i or j, signal an error.
+
+columnswap(m,i,j)
+
+  If m is a matrix, swap columns i and j.  If m doesn't have a column
+  i or j, signal an error.
+
+columnspace(m)
+ 
+   If m is a matrix, return span(v1,v2,...,vn), where the set
+   {v1,v2,...,vn} is a basis for the column space of m.  The span 
+   of the empty set is {0}. Thus, when the column space has only 
+   one member, return span().
+
+ctranspose(m)
+
+   Return the conjugate of the transpose of the matrix m. If m is
+   a block matrix, transpose and conjugate each block. 
+
+dotproduct(u,v)
+
+   Return the dotproduct of vectors u and v.  This is the same
+   as conj(transpose(u)) . v.  The arguments u and v must be
+   n x 1 matrices.
+   
+get_lu_factors(x) 
+
+  When x = lu_factor(A), then get_lu_factors returns a list of the 
+  form [P, L, U], where P is a permutation matrix, L is lower triangular with
+  ones on the digonal, and U is upper triangular. And A = P L U.
+ 
+hilbert_matrix(n)
+
+  Return the n by n Hilbert matrix. When n isn't a nonnegative
+  integer, signal an error.
+
+kronecker_product(a,b)
+
+   Return the Kronecker product of the matrices a and b.
+
+listp (e, {pred})
+
+  Given an optional argument pred, return true if e is 
+  a Maxima list and pred evaluates to true for every list element.
+  When listp is not given the optional argument, return true if e is 
+  a Maxima list.  In all other cases, return false.
+  
+locate_matrix_entry(m, r1, c1, r2, c2, fn, rel)
+   
+   The first argument must be a matrix; the arguments
+   r1 through c2 determine a sub-matrix of m that consists of
+   rows r1 through r2 and columns c1 through c2. 
+  
+   Find a entry in the sub-matrix m that satisfies some property. 
+   Three cases:
+
+     (1) rel = bool and fn a predicate: 
+
+         Scan the sub-matrix from left to right then top to bottom,
+         and return the index of the first entry that satisfies the 
+         predicate fn. If no matrix entry satisfies fn, return false.
+
+     (2) rel = 'max and fn real-valued:
+
+         Scan the sub-matrix looking for an entry that maximizes fn.
+         Return the index of a maximizing entry.
+
+     (3) rel = 'min and fn real-valued:
+
+         Scan the sub-matrix looking for an entry that minimizes fn. 
+         Return the index of a minimizing entry.
+
+lu_backsub(m, b fld)
+
+  When m = lu_factor(A), then lu_backsub(m,b, fld) solves the linear
+  systme A x = b.
+
+lu_factor(m, generalfield)
+
+  Return a list of the form [LU, perm, {cnd}], where
+
+  (1) The matrix LU contains the factorization of m in a packed form. Packed
+      form means three things: First, the rows of LU are permuted according to the 
+      list perm.  If, for example, perm is the list [3,2,1], the actual first row 
+      of the LU factorization is the third row of the matrix LU. Second,
+      the lower triangular factor of m is the lower triangular part of LU with the
+      diagonal entries replaced by all ones. Third, the upper triangular factor of 
+      m is the upper triangular part of LU.  
+
+  (2) When the field is either 'floatfield' or 'complexfloatfield,' 
+      the number 'cnd' is an upper bound for the infinity norm condition number of m.
+      For all other fields, the condition number isn't estimated. For these fields,
+      lu_factor returns a two item list.
+   
+  The argument m must be a square matrix.
+
+  The argument 'fld' must be a symbol that determines a field. The pre-defined 
+  fields are:
+
+    (a) generalfield -- the field of Maxima expressions,
+    (b) floatfield --  the field of floating point numbers of the type double,
+    (c) complexfloatfield --  the field of complex floating point numbers of the 
+        type double,
+    (d) crefield  -- the field of Maxima CRE expressions,
+    (e) rationalfiled -- the field of rational numbers.
+
+  When the field is floatfield or complexfloatfield, the algorithm uses partial
+  pivoting; when the field is generalfield, rows are switched only when needed to
+  avoid a zero pivot.
+
+  Floating point addition arithmetic isn't associative, so the meaning of 'field' 
+  differs from the mathematical definition.
+
+  There is no user-interface for defining a new field. A user that is familiar with
+  Common Lisp should be able to define a new field. 
+
+  To compute the factorization, the first task is to convert each matrix entry
+  to a member of the indicated field. When conversion isn't possible, the factorization
+  halts with an error message. Members of the field needn't be Maxima expressions.
+  Members of the complexfloatfield, for example, are Common Lisp complex numbers. Thus
+  after computing the factorization, the matrix entries must be converted to Maxima
+  expressions.
+ 
+  See also get_lu_factors.
+
+  Examples
+
+   (%i1) w[i,j] := ?random(1.0) + %i * ?random(1.0)$
+           Evaluation took 0.00 seconds (0.00 elapsed)
+   (%i2) m : genmatrix(w,100,100)$
+           Evaluation took 00.30 seconds (00.30 elapsed)
+   (%i3) lu_factor(m,complexfloatfield)$
+           Evaluation took 1.45 seconds (1.45 elapsed)
+   (%i4) lu_factor(m,generalfield)$
+           Evaluation took 12.10 seconds (12.10 elapsed)
+
+   (%i1) m : matrix([1-z,3],[3,8-z]); 
+   (%o1) matrix([1-z,3],[3,8-z])
+   (%i2) lu_factor(m,generalfield);
+   (%o2) [matrix([1-z,3],[3/(1-z),-z-9/(1-z)+8]),[1,2]]
+   (%i3) get_lu_factors(%);
+   (%o3) [matrix([1,0],[0,1]),matrix([1,0],[3/(1-z),1]),matrix([1-z,3],[0,-z-9/(1-z)+8])]
+   (%i4) %[1] . %[2] . %[3];
+   (%o4) matrix([1-z,3],[3,8-z])
+
+mat_norm(m, p) 
+
+  Return the matrix p-norm of the matrix m.  The allowed values for p are
+  1, inf, and frobenius (the Frobenius matrix norm). The matrix m should be
+  an unblocked matrix.
+
+matrixp (e, {pred})
+
+  Given an optional argument pred, return true if e is 
+  a matrix and pred evaluates to true for every matrix element.
+  When matrixp is not given an optional argument, return true 
+  if e is a matrix.  In all other cases, return false.
+
+nonnegintegerp (n)
+
+  Return true if and only if n >= 0 and n is an integer.
+
+nullspace(m)
+
+   If m is a matrix, return span(v1,v2,...,vn), where the set {v1,v2,...,vn}
+   is a basis for the nullspace of m.  The span of the empty set is {0}.  
+   Thus, when the nullspace has only one member, return span().
+
+nullity(m)
+
+   If m is a matrix, return the dimension of the nullspace of m.
+
+orthogonal_complement(v1,v2,...,vn)
+
+   Return span(u1,u2,...,um), where the set {u1,u2,...,um} is a 
+   basis for the orthogonal complement of the set(v1,v2,...,vn).
+
+   Each vector v1 through vn must be a n x 1 matrix.
+
+polynomialp(p, l,  {(coeffp 'constantp), (exponp 'nonnegintegerp)})
+
+  Return true if p is a polynomial in the variables in the Maxmia list l,
+  The predicate coeffp (default constantp) must evaluate to true for each
+  coefficient, and the predicate exponp must evaluate to true for all 
+  exponents of the variables in the list l. If you want to use a non-default
+  value for exponp, you must supply coeffp with a value even if you want
+  to use the default for coeffp.
+
+  The polynomial needn't be expanded:
+  
+    (%i1) polynomialp((x+1)*(x+2),[x]);
+    (%o1) true
+
+    (%i2) polynomialp((x+1)*(x+2)^a,[x]);
+    (%o2) false
+
+  An example using non-default values for coeffp and exponp:
+
+    (%i3) polynomialp((x+1)*(x+2)^(3/2),[x],numberp,numberp);
+    (%o3) true
+
+    (%i4) polynomialp((x^(1/2)+1)*(x+2)^(3/2),[x],numberp,numberp);
+    (%o4) true
+
+  Polynomials with two variables:
+
+    (%i5) polynomialp(x^2 + 5*x*y + y^2,[x]);
+    (%o5) false
+
+    (%i6) polynomialp(x^2 + 5*x*y + y^2,[x,y]);
+    (%o6) true
+
+polytocompanion(p,x)
+   
+  If p is a polynomial in x, return the companion matrix of p. For
+  a monic polynomial p of degree n, we have p = (-1)^n charpoly(polytocompanion(p, x)).
+
+  When p isn't a polynomial in x, signal an error.
+  
+ptriangularize(m,v)
+   
+   If m is a matrix with each entry a polynomial in v, return 
+   a matrix m' such that
+ 
+     (1) m' is upper triangular,
+     (2) m' = E_n ... E_1 m, where E1 through En are elementary matrices 
+         whose entries are polynomials in v,
+     (3) |det(m)| = |det(m')|,
+
+   Note: This function doesn't check that every entry is a polynomial in v.  
+
+rowop(m,i,j,theta)
+
+  If m is a matrix, return the matrix that results from doing the  
+  row operation Ri <- Ri - theta * Rj. If m doesn't have a row
+  i or j, signal an error.
+
+rowswap(m,i,j)
+
+  If m is a matrix, swap rows i and j. If m doesn't have a row
+  i or j, signal an error.
+
+mat_unblocker(m)
+
+  If m is a block matrix, return its unblocked form. If m is a matrix,
+  return m; otherwise, signal an error.  If you use block matrices,
+  most likely you'll want to set matrix_element_mult : "." and
+  matrix_element_transpose : 'transpose. 
+
+  Example
+
+    (%i1) a : matrix([1,2],[3,4])$
+    (%i2) b : matrix([7,8],[9,10])$
+    (%i3) matrix([a,b]);
+    (%o3) matrix([matrix([1,2],[3,4]),matrix([7,8],[9,10])])
+    (%i4) mat_unblocker(%);
+    (%o4) matrix([1,2,7,8],[3,4,9,10])
+
+vandermonde_matrix([x1,x2,...,xn])
+
+  Return a n by n matrix whose i-th row is 
+  [1, xi, xi^2, ... xi^(n-1)]. 
+
+zeromatrixp(m)
+
+  If is(equal(e,0)) is true for each entry of the matrix m, return true; otherwise,
+  return false.  When m is not a matrix, signal an error.
+
+
+Short demo:
+
+(%i1) batch("linalg.demo");
+batching #pc:/maxima/linearalgebra/linalg.demo
+(%i2) load(linalg)
+(%o2) c:/maxima/linearalgebra/linalg.mac
+(%i3) m:matrix([1,2],[1,2])
+(%o3) matrix([1,2],[1,2])
+(%i4) nullspace(m)
+(%o4) span(matrix([1],[-1/2]))
+(%i5) columnspace(m)
+(%o5) span(matrix([1],[1]))
+(%i6) ptriangularize(m-z*ident(2),z)
+(%o6) matrix([1,2-z],[0,3*z-z^2])
+(%i7) m:matrix([1,2,3],[4,5,6],[7,8,9])-z*ident(3)
+(%o7) matrix([1-z,2,3],[4,5-z,6],[7,8,9-z])
+(%i8) mm:ptriangularize(m,z)
+(%o8) matrix([4,5-z,6],[0,66/49,-z^2/7+(102*z)/49+132/49],[0,0,(49*z^3)/264-(245*z^2)/88-(147*z)/44])
+(%i9) algebraic:true
+(%o9) true
+(%i10) tellrat(mm[3,3])
+(%o10) [z^3-15*z^2-18*z]
+(%i11) mm:ratsimp(mm)
+(%o11) matrix([4,5-z,6],[0,66/49,-(7*z^2-102*z-132)/49],[0,0,0])
+(%i12) nullspace(mm)
+(%o12) span(matrix([1],[(z^2-14*z-16)/8],[-(z^2-18*z-12)/12]))
+(%i13) m:matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16])
+(%o13) matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16])
+(%i14) column_space(m)
+(%o14) column_space(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))
+(%i15) apply('orthogonal_complment,args(nullspace(transpose(m))))
+(%o15) orthogonal_complment(matrix([0],[1],[-2],[1]),matrix([1],[0],[-3],[2]))
+
+

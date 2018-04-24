@@ -1,0 +1,57 @@
+This is Andy Hefner's McCLIM formula display code, and an initial effort
+by Raymond Toy at getting a Maxima REPL display in an McCLIM window. 
+
+Licenses:  Public Domain for Andy Hefner's code (formula.lisp) 
+           Raymond Toy's code is GPL
+	   
+Committer's note concerning formula.lisp:  This is mainly being 
+uploaded to make sure I can find a copy sometime in the future.  It doesn't
+have any ties to Maxima right now.
+
+Below is preserved part of an IRC discussion on formula.lisp, mainly
+so I (CY) remember what some of the issues were.
+
+<starseeker> what license, by the way?
+<hefner> dunno, that's a standard disclaimer for me. I guess if you
+don't expect it to ever reach quite 'TeX' quality output it's pretty
+sound. Right now I haven't worked out how/when it should emit
+parenthesis according to operator precedence, that's the major issue.
+<hefner> license is whatever, public domain I guess
+<starseeker> Cool :-)
+<starseeker> I don't think tex quality is called for, at least not
+right away - Mathematica doesn't achieve it
+<starseeker> Neither does word, for that matter ;-)
+<hefner> true enough
+<starseeker> Can it handle stuff like integral signs and summations?
+* starseeker is busily emailing himself the links.
+<hefner> not yet. I need to work out an interface to symbol fonts
+across the two mcclim backends, then I'll look at that.
+<hefner> but there's no reason in theory why it couldn't
+<starseeker> I've wondered about that - should those be done with fonts
+or drawing?
+<hefner> I'm thinking fonts
+<starseeker> that's the harder way, right?
+<starseeker> granted it'll look better
+<hefner> I think that's the easier way, actually. The fonts should
+already exist. :)
+<starseeker> Well, almost - http://www.stixfonts.org
+<starseeker> yes - I was thinking about resizing them in response to
+the expression they relate to - drawings you can tie the dimensions in
+x and y to the size of the expression - how would that work for fonts?
+<hefner> something creeping up my todo list is a little glue code that
+lets me match text sizes with pixel sizes (which I intended to use for
+trying to match the sizes of divisors/dividends more closely, but you
+could use it here too)
+<starseeker> Hmm.  That's a possibility, but doesn't that break down
+when generating postscript/pdf?
+<hefner> well s/pixel/device unit/
+<starseeker> ok.
+<starseeker> My worry is if you have something like x^2/(x^3+y)^2 in 2D
+inside an integral, the font may or may not have an integral symbol to
+fit.  Or am I underestimating fonts?
+<hefner> ah.. yeah, that could be a problem. the x11 symbol font here
+is bitmapped and goes up to 34 pixels high. that's too small, actually
+<starseeker> I think that's why maple does it with drawing lines
+<starseeker> the original macsyma gui I think did too
+<starseeker> Mathematica I can't remember
+<hefner> you could just pester people to install a scalable symbol font.

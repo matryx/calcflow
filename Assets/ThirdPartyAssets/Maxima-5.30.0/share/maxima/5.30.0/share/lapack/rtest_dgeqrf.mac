@@ -1,0 +1,99 @@
+/* rtest_dgeqrf.mac -- test script for dgeqrf
+ * Copyright 2011 by Robert Dodier
+ * I release this work under terms of the GNU General Public License.
+ */
+
+(if not ?fboundp ('dgeqrf) then load (lapack), 0);
+0;
+
+(random_matrix () := block ([nr : 5 + random (10), nc : 5 + random (10)],
+  genmatrix (lambda ([i, j], random (100.0) - 50), nr, nc)), 0);
+0;
+
+set_random_state (make_random_state (12345));
+done;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+
+block ([a, q, r],
+  a : random_matrix (),
+  [q, r] : dgeqrf (a),
+  mat_norm (q . r - a, 1),
+  if %% < 1e-12 then true else [a, q, r, %%]);
+true;
+

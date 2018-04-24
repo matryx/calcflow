@@ -1,0 +1,539 @@
+/*
+ * Copyright (C) 2010 Mark H. Weaver <mhw@netris.org>
+ *
+ * drawdf: Direction field plotting package for Maxima
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+/*
+ * If you encounter stack overflows when drawing complex plots,
+ * try redefining draw-transform (from draw.lisp) as follows:
+ *
+ * (defun draw-transform (expr transform)
+ *   (reduce #'append
+ * 	     (mapcar #'(lambda (x) (draw-transform-one x transform))
+ * 		     expr)
+ * 	     :from-end t))
+ */
+
+if not get('draw,'version) then load("draw") $
+
+default_aspect_ratio: 4/3 $
+default_horiz_grid_steps: 30 $
+default_horiz_arrow_spots: 30 $
+
+vec_mag(v) := sqrt(v.v)$
+normalize_vec(v) := v/sqrt(v.v)$
+translate(normalize_vec);
+
+make_f_rk_4(dxdt_expr, dydt_expr, x_var, y_var, x_min, x_max, y_min, y_max, partition_expr) := (
+  define(funmake('f_rk_4,vars),
+    buildq(
+      [ dxdt_expr, dydt_expr, dxdt_var:?gensym(), dydt_var:?gensym(),
+        x_var, y_var, x_min, x_max, y_min, y_max, partition_expr ],
+      block([dxdt_var, dydt_var],
+        if x_var<x_min or x_var>x_max or y_var<y_min or y_var>y_max then error(),
+        if partition_expr#current_partition then (
+          if current_partition='init then current_partition:partition_expr
+          else error()),
+        dxdt_var:dxdt_expr,
+        dydt_var:dydt_expr,
+        if imagpart(dxdt_var)^2 > 0 or imagpart(dydt_var)^2 > 0 then error(),
+        [dxdt_var,dydt_var]))),
+  translate(f_rk_4)) $
+
+/* Derived from rk in dynamics.mac by Jaime E. Villate <villate@fe.up.pt> */
+calc_soln_curve(derivs, vars, init, mins, maxs, max_step, max_tstep, min_tstep, duration, max_nsteps, partition_expr) :=
+block (
+  [ xxx,ddd,k1,k2,k3,k4,t0,t1,r,dxxx,nxxx,nk1,tstep,
+    current_partition:'init,
+    numer:true,display2d:false ],
+
+  make_f_rk_4(first(derivs), second(derivs), first(vars), second(vars),
+    first(mins), first(maxs), second(mins), second(maxs), partition_expr),
+  t0:0,
+  xxx: init,
+  r: errcatch ( k1: apply('f_rk_4,xxx) ),
+  if length(r)=0 then return([]),
+  ddd: [xxx],
+  tstep: max_tstep,
+  while max_nsteps > 0 and t0 < duration do (
+    max_nsteps: max_nsteps-1,
+    r: errcatch (
+      t1: t0+tstep,
+      k2: apply('f_rk_4,xxx+k1*tstep/2),
+      k3: apply('f_rk_4,xxx+k2*tstep/2),
+      k4: apply('f_rk_4,xxx+k3*tstep),
+      dxxx: tstep*(k1+2*k2+2*k3+k4)/6,
+      nxxx: xxx+dxxx,
+      nk1: apply('f_rk_4,nxxx)),
+    if length(r)=0 then (
+      tstep: tstep/2,
+      if tstep < min_tstep then return())
+    else if (abs(first(dxxx)) > first(max_step) or
+             abs(second(dxxx)) > second(max_step)) and
+           tstep/2 >= min_tstep then (
+      tstep: tstep/2)
+    else (
+      /* print("t:", t1, "dt:", tstep, "x:", nxxx, "dx:", dxxx), */
+      tstep: max_tstep,
+      k1: nk1,
+      t0: t1,
+      xxx: nxxx,
+      ddd: cons(xxx, ddd))),
+  reverse(ddd))$
+translate(calc_soln_curve);
+
+/*
+ * Note: if dir='reverse, this will return the curve in
+ *   reverse time order (starting from the initial point),
+ *   in order to help solution_arrows() draw the arrows
+ *   around saddle points more nicely.  In general, you
+ *   should not rely on the direction of the returned curve.
+ */
+calc_dir_soln_curve(derivs, vars, init, mins, maxs, max_step, dir, max_tstep, min_tstep, duration, max_nsteps, partition_expr) := (
+  if elementp(dir, {'forward,'right}) then (
+    calc_soln_curve(derivs, vars, init, mins, maxs, max_step, max_tstep, min_tstep, duration, max_nsteps, partition_expr))
+  elseif elementp(dir, {'reverse,'left}) then (
+    calc_soln_curve(-derivs, vars, init, mins, maxs, max_step, max_tstep, min_tstep, duration, max_nsteps, partition_expr))
+  elseif dir = 'both then block(
+    [ rev:calc_soln_curve(-derivs, vars, init, mins, maxs, max_step, max_tstep, min_tstep, duration, max_nsteps, partition_expr),
+      fwd:calc_soln_curve(derivs, vars, init, mins, maxs, max_step, max_tstep, min_tstep, duration, max_nsteps, partition_expr) ],
+    if fwd = [] then reverse(rev)
+    else if rev = [] then fwd
+    else append(reverse(rev), rest(fwd)))
+  else error("Invalid direction:",dir))$
+
+disallow_arrows_in(x_lo, y_lo, x_hi, y_hi) := block(
+  [ x_step, y_step, a_spot_x, a_spot_y, b_spot_x, b_spot_y,
+    a_spot_x_hi, a_spot_y_hi, b_spot_x_hi, b_spot_y_hi ],
+
+  x_step: (x_max-x_min) / horiz_arrow_spots,
+  y_step: (y_max-y_min) / vert_arrow_spots,
+
+  calc_point_vars([x_hi,y_hi]),
+  a_spot_x_hi:a_spot_x, a_spot_y_hi:a_spot_y,
+  b_spot_x_hi:b_spot_x, b_spot_y_hi:b_spot_y,
+  calc_point_vars([x_lo,y_lo]),
+
+  for y:a_spot_y thru a_spot_y_hi do (
+    for x:a_spot_x thru a_spot_x_hi do (
+      soln_arrow_a_spots[x,y]:2 )),
+
+  for y:b_spot_y thru b_spot_y_hi do (
+    for x:b_spot_x thru b_spot_x_hi do (
+      soln_arrow_b_spots[x,y]:2 )))$
+
+solution_arrows(curve) := block(
+  [ arrows:[], margin:0.5,
+    spacing:12, start_space:6, end_space:4, edge_space:4,
+    possible_arrow_dist:0, possible_arrow_pt:false, 
+    last_arrow_dist:0, new_dist, last_pt:first(curve),
+    gr_x, gr_y, a_spot_x, a_spot_y, b_spot_x, b_spot_y,
+    x_step, y_step, grid_step_vec, dv,
+    numer:true ],
+
+  x_step: (x_max-x_min) / horiz_arrow_spots,
+  y_step: (y_max-y_min) / vert_arrow_spots,
+  grid_step_vec: [x_step,y_step] * 0.3,
+
+  define(funmake('f_calc_dv,[x_var,y_var]),
+    float(grid_step_vec * normalize_vec([dxdt,dydt] / grid_step_vec))),
+  translate(f_calc_dv),
+
+  last_arrow_dist:spacing - start_space,
+  for pt in curve do (
+    calc_point_vars(pt),
+    if (gr_x < margin or gr_x > horiz_arrow_spots - margin or
+        gr_y < margin or gr_y > vert_arrow_spots - margin or
+        soln_arrow_a_spots[a_spot_x,a_spot_y] = 2 or
+        soln_arrow_b_spots[b_spot_x,b_spot_y] = 2) then (
+      if (possible_arrow_pt # false and possible_arrow_dist >= edge_space) then (
+        confirm_solution_arrow(possible_arrow_pt) ),
+      last_pt:pt, possible_arrow_pt:false, last_arrow_dist:spacing - edge_space )
+    else (
+      new_dist:vec_mag((pt - last_pt) / grid_step_vec),
+      last_pt:pt,
+      possible_arrow_dist:possible_arrow_dist + new_dist,
+      last_arrow_dist:last_arrow_dist + new_dist,
+      if (soln_arrow_a_spots[a_spot_x,a_spot_y] = 1 or
+          soln_arrow_b_spots[b_spot_x,b_spot_y] = 1) then (
+        if (possible_arrow_pt # false and possible_arrow_dist < spacing) then (
+          possible_arrow_pt:false ),
+        last_arrow_dist:0 )
+      elseif (possible_arrow_pt = false and last_arrow_dist >= spacing) then (
+        possible_arrow_pt:pt, possible_arrow_dist:0 )
+      elseif (possible_arrow_pt # false and possible_arrow_dist >= spacing) then (
+        confirm_solution_arrow(possible_arrow_pt),
+        possible_arrow_pt:pt, possible_arrow_dist:0 ))),
+  if (possible_arrow_pt # false and possible_arrow_dist >= end_space) then (
+    confirm_solution_arrow(possible_arrow_pt) ),
+  arrows )$
+
+calc_point_vars(pt) := (
+  gr_x: (first(pt)-x_min)/x_step,
+  gr_y: (second(pt)-y_min)/y_step,
+  a_spot_x: fix(gr_x + 1),
+  a_spot_y: fix(gr_y + 1),
+  b_spot_x: fix(gr_x + 0.5),
+  b_spot_y: fix(gr_y + 0.5) )$
+
+confirm_solution_arrow(pt) := block (
+  [ gr_x, gr_y, a_spot_x, a_spot_y, b_spot_x, b_spot_y ],
+  calc_point_vars(pt),
+  last_arrow_dist:possible_arrow_dist,
+  soln_arrow_a_spots[a_spot_x,a_spot_y]:1,
+  soln_arrow_b_spots[b_spot_x,b_spot_y]:1,
+  dv:apply('f_calc_dv, pt),
+  arrows:cons(funmake('vector, [pt-dv/2, dv]), arrows) )$
+
+solution_plot(pt) := block( [ curve, duration, numer:true ],
+  duration: (
+    if soln_duration#false then soln_duration
+    else if soln_nsteps#false then soln_nsteps*soln_tstep
+    else 10.0),
+  curve: calc_dir_soln_curve(
+    [dxdt,dydt], [x_var,y_var], float(pt),
+    [x_min-(x_max-x_min), y_min-(y_max-y_min)],
+    [x_max+(x_max-x_min), y_max+(y_max-y_min)],
+    [x_max-x_min, y_max-y_min]/100,
+    soln_direction, soln_tstep, soln_tstep/300, duration, 100000, partition_expr),
+  if curve=[] then curve:[pt],
+  [ 'point_type='none, funmake('soln_curve, [curve, 'soln_arrows = soln_arrows]) ] )$
+
+/*
+ * Ideally, this should probably detect and remove overlaps in the curve.
+ */
+equipotential_plot(pt) := block(
+  [ dxdt:dydt, dydt:-dxdt, soln_arrows:false, soln_direction:'both ],
+  solution_plot(pt) )$
+
+linearize_at(pt, derivs, vars) := block(
+  [ subs: map("=", vars, pt) ],
+  subst(subs, apply('matrix, outermap('diff, derivs, vars))))$
+
+/*
+ * WARNING: this currently assumes you are running a new enough version
+ * of Maxima to have the new improved eigenvectors function!
+ */
+saddle_plot(pt) := block(
+  [ eigen_info, eigvals, eigval, eigvects, the_graphics:[], soln_direction ],
+
+  eigen_info: block( [numer:false, keepfloat:false],
+    float(eigenvectors(linearize_at(pt, [dxdt,dydt], [x_var,y_var])))),
+
+  eigvals: inpart(eigen_info,1,1),
+  for i:1 thru length(eigvals) do (
+    eigval: inpart(eigvals,i),
+    if (imagpart(eigval) = 0 and eigval # 0) then (
+      soln_direction: (if eigval > 0 then 'forward else 'reverse),
+      eigvects: inpart(eigen_info,2,i),
+      for eigvect in eigvects do (
+        the_graphics: append(
+          solution_plot(pt + 0.001 * normalize_vec(eigvect)),
+          solution_plot(pt - 0.001 * normalize_vec(eigvect)),
+          the_graphics)))),
+  the_graphics)$
+
+valid_var_lo_hi_spec(spec) := (
+  is(listp(spec) and length(spec)=3 and symbolp(first(spec)) and
+    numberp(float(second(spec))) and numberp(float(third(spec)))))$
+
+list_of_points_from(params) := block([],
+  params: args(params),
+  if length(params) # 1 then return(params),
+  params: first(params),
+  if (length(params) # 2) or listp(first(params)) then return(params),
+  return([params]))$
+
+df_graphics(derivs_spec, [params]) := block(
+  [ dxdt:1, dydt, x_var:'x, y_var:'y, x_min:-10, x_max:10, y_min:-10, y_max:10,
+    aspect_ratio:'auto, horiz_grid_steps:'auto, vert_grid_steps:'auto,
+    horiz_arrow_spots:'auto, vert_arrow_spots:'auto,
+    soln_tinitial:0, soln_tstep:0.1, soln_nsteps:false, soln_duration:false,
+    field_tstep:0.1, field_nsteps:false, field_duration:false,
+    soln_direction:'both, soln_arrows:false,
+    show_field:true, field_arrows:'auto, field_degree:1,
+    field_horiz_offset:0, field_vert_offset:0, partition_expr:false,
+    field_color:'auto, init_soln_color:'auto,
+    field_head_size:0.5, field_head_type:'filled_circle,
+    temp_params:[], param, pvar, pvar_table,
+    x_step, y_step, grid_step_vec, the_graphics:[], pre_graphics:[],
+    soln_arrow_a_spots, soln_arrow_b_spots,
+    numer:true, keepfloat:true ],
+  local(f_calc_dv),
+
+  if listp(derivs_spec) then (
+    if length(derivs_spec) = 1 then [dydt]: derivs_spec
+    elseif length(derivs_spec) = 2 then [dxdt,dydt]: derivs_spec
+    else error("Invalid derivs_spec", derivs_spec))
+  else dydt: derivs_spec,
+
+  if (length(params) >= 1 and listp(first(params)) and
+      length(first(params)) = 2 and every('symbolp, first(params))) then (
+    [x_var,y_var]: first(params),
+    params: rest(params))
+  elseif (length(params) >= 2 and valid_var_lo_hi_spec(first(params)) and
+          valid_var_lo_hi_spec(second(params))) then (
+    [x_var,x_min,x_max]: float(first(params)),
+    [y_var,y_min,y_max]: float(second(params)),
+    params: rest(params,2)),
+
+  while params#[] do (
+    param: first(params),
+    params: rest(params),
+    if (operatorp(param, "=") and elementp(lhs(param), {'aspect_ratio,
+        'horiz_grid_steps,'vert_grid_steps,'horiz_arrow_spots,'vert_arrow_spots}))
+    then lhs(param) :: float(rhs(param))
+    else if (operatorp(param, "=") and lhs(param)='field_grid and
+             listp(rhs(param)) and length(rhs(param))=2)
+    then [horiz_grid_steps,vert_grid_steps]: float(rhs(param))
+    else if (listp(param) and first(param) = x_var and length(param) = 3)
+    then [x_min,x_max]: float(rest(param))
+    else if (listp(param) and first(param) = y_var and length(param) = 3)
+    then [y_min,y_max]: float(rest(param))
+    else if (listp(param) and not atom(first(param)))
+    then params: append(param, params)
+    else temp_params: cons(param, temp_params) ),
+  params: reverse(temp_params),
+
+  if aspect_ratio = 'auto then aspect_ratio:(
+    if (horiz_grid_steps # 'auto and vert_grid_steps # 'auto)
+    then horiz_grid_steps / vert_grid_steps
+    elseif (horiz_arrow_spots # 'auto and vert_arrow_spots # 'auto)
+    then horiz_arrow_spots / vert_arrow_spots
+    else default_aspect_ratio ),
+
+  if horiz_grid_steps = 'auto then horiz_grid_steps:(
+    if vert_grid_steps # 'auto
+    then fix(vert_grid_steps * aspect_ratio)
+    else default_horiz_grid_steps ),
+  if vert_grid_steps = 'auto
+  then vert_grid_steps:fix(horiz_grid_steps / aspect_ratio),
+
+  if horiz_arrow_spots = 'auto then horiz_arrow_spots:(
+    if vert_arrow_spots # 'auto
+    then fix(vert_arrow_spots * aspect_ratio)
+    else default_horiz_arrow_spots ),
+  if vert_arrow_spots = 'auto
+  then vert_arrow_spots:fix(horiz_arrow_spots / aspect_ratio),
+
+  soln_arrow_a_spots: make_array(fixnum, horiz_arrow_spots+2, vert_arrow_spots+2),
+  soln_arrow_b_spots: make_array(fixnum, horiz_arrow_spots+2, vert_arrow_spots+2),
+
+  pvar_table: '[ direction        = soln_direction,
+                 dir              = soln_direction,
+                 tinitial         = soln_tinitial,
+                 tstep            = soln_tstep,
+                 nsteps           = soln_nsteps,
+                 duration         = soln_duration,
+                 field_tstep      = field_tstep,
+                 field_nsteps     = field_nsteps,
+                 field_duration   = field_duration,
+                 soln_arrows      = soln_arrows,
+                 show_field       = show_field,
+                 partition_expr   = partition_expr,
+                 field_horiz_offset = field_horiz_offset,
+                 field_vert_offset = field_vert_offset,
+                 field_color      = field_color,
+                 field_arrows     = field_arrows,
+                 field_head_size  = field_head_size,
+                 field_head_type  = field_head_type,
+                 field_degree     = field_degree ],
+                 
+  for param in params do (
+    if listp(param) then (
+      if (pvar:assoc(first(param),pvar_table)) # false then pvar :: second(param)
+      elseif (first(param) = 'trajectory_at and length(param) >= 3)
+      then pre_graphics: append(reverse(solution_plot(rest(param))), pre_graphics)
+      else error("Invalid parameter:", param))
+    else if operatorp(param, "=") then (
+      if (pvar:assoc(lhs(param),pvar_table)) # false then pvar :: rhs(param)
+      else pre_graphics: cons(param, pre_graphics))
+    else if operatorp(param, 'point_at)
+    then pre_graphics: append(reverse([ 'point_type = 'filled_circle, funmake('points, [[args(param)]]) ]), pre_graphics)
+    else if operatorp(param, 'points_at)
+    then for pt in list_of_points_from(param) do (
+      pre_graphics: append(reverse([ 'point_type = 'filled_circle, funmake('points, [[pt]]) ]), pre_graphics))
+    else if operatorp(param, 'soln_at)
+    then pre_graphics: append(reverse(solution_plot(args(param))), pre_graphics)
+    else if operatorp(param, 'solns_at)
+    then for pt in list_of_points_from(param) do pre_graphics: append(reverse(solution_plot(pt)), pre_graphics)
+    else if operatorp(param, 'equipot_at)
+    then pre_graphics: append(reverse(equipotential_plot(args(param))), pre_graphics)
+    else if operatorp(param, 'equipots_at)
+    then for pt in list_of_points_from(param) do pre_graphics: append(reverse(equipotential_plot(pt)), pre_graphics)
+    else if operatorp(param, 'saddle_at)
+    then pre_graphics: append(reverse(saddle_plot(args(param))), pre_graphics)
+    else if operatorp(param, 'saddles_at)
+    then for pt in list_of_points_from(param) do pre_graphics: append(reverse(saddle_plot(pt)), pre_graphics)
+    else if operatorp(param, 'no_arrows_in)
+    then apply('disallow_arrows_in, args(param))
+    else pre_graphics: cons(param, pre_graphics)),
+
+  for element in pre_graphics do (
+    if operatorp(element, 'soln_curve) then (
+      the_graphics: cons(funmake('points, [first(element)]), the_graphics),
+      if assoc('soln_arrows, rest(args(element)), false) then (
+        the_graphics: append(solution_arrows(first(element)), the_graphics)))
+    else the_graphics: cons(element, the_graphics)),
+
+  if soln_arrows or not show_field then (
+    if field_arrows = 'auto then field_arrows: false,
+    if field_color = 'auto then field_color: red,
+    if init_soln_color = 'auto then init_soln_color: black )
+  else (
+    if field_arrows = 'auto then field_arrows: true,
+    if field_color = 'auto then field_color: black,
+    if init_soln_color = 'auto then init_soln_color: red ),
+
+  x_step: (x_max-x_min) / horiz_grid_steps,
+  y_step: (y_max-y_min) / vert_grid_steps,
+  grid_step_vec: [x_step,y_step] * (if field_degree#1 then 0.7 else if field_arrows then 0.8 else 0.5),
+
+  the_graphics: append(
+    [ 'point_type   = 'none,
+      'point_size   = 1,
+      'color        = init_soln_color,
+      'head_length  = 0.6 * x_step,
+      'head_angle   = 30 ],
+    the_graphics ),
+
+  if show_field then block ( [numer:true],
+    if field_degree=1 then (
+      define(funmake('f_calc_dv,[x_var,y_var]),
+        float(grid_step_vec * normalize_vec([dxdt,dydt] / grid_step_vec))),
+      translate(f_calc_dv),
+      for x: (x_min + x_step/2 + field_horiz_offset) step x_step thru x_max do (
+        for y: (y_min + y_step/2 + field_vert_offset) step y_step thru y_max do (
+          the_graphics: append(
+            errcatch(
+              block([v:[x,y], dv:apply('f_calc_dv,[x,y]), rdv, idv],
+                rdv: realpart(dv), idv: imagpart(dv),
+                if idv.idv > ratepsilon then error()
+                else if field_arrows then funmake('vector, [v-rdv/2, rdv])
+                else funmake('points, [[v-rdv/2, v+rdv/2]]))),
+            the_graphics))))
+    else if field_degree=2 then block (
+      [ dxdt2: diff(dxdt,x_var)*dxdt + diff(dxdt,y_var)*dydt,
+        dydt2: diff(dydt,x_var)*dxdt + diff(dydt,y_var)*dydt,
+        t_var:?gensym() ],
+      define(funmake('f_calc_dv,[x_var,y_var]),
+        float([dxdt,dydt])),
+      define(funmake('f_calc_dv2,[x_var,y_var]),
+        float([dxdt2,dydt2])),
+      translate(f_calc_dv),
+      translate(f_calc_dv2),
+      for x: (x_min + x_step/2 + field_horiz_offset) step x_step thru x_max do (
+        for y: (y_min + y_step/2 + field_vert_offset) step y_step thru y_max do (
+          the_graphics: append(
+            apply('append,
+              errcatch(
+                block(
+                  [ v:[x,y], dv:apply('f_calc_dv,[x,y]), rdv, idv,
+                    dv2:apply('f_calc_dv2,[x,y]), rdv2, idv2,
+                    curve, t_min:false, t_max:false, programmode:true ],
+                  rdv: realpart(dv), idv: imagpart(dv),
+                  rdv2: realpart(dv2), idv2: imagpart(dv2),
+                  if idv.idv > ratepsilon or idv2.idv2 > ratepsilon then error(),
+                  curve: rdv2*t_var^2/2 + rdv*t_var,
+                  for unit_vec in [[1,0],[-1,0],[0,1],[0,-1]] do (
+                    for root in map('float,map('rhs,realroots(((unit_vec.(curve/grid_step_vec))-0.5)))) do (
+                      if root>0 then (
+                        if t_max=false or t_max>root then t_max:root
+                      ) else if root<0 then (
+                        if t_min=false or t_min<root then t_min:root
+                      ))),
+                  append(
+                    [ funmake('parametric, append(curve + v, [t_var,t_min,t_max])) ],
+                    if field_arrows then [ point_type = field_head_type, funmake('points, [[at(curve+v, [t_var=t_max])]]) ] else [])))),
+            the_graphics))))
+    else if field_degree='solns then block (
+      [ curve, duration ],
+      duration: (
+        if field_duration#false then field_duration
+        else if field_nsteps#false then field_nsteps*field_tstep
+        else 10.0),
+      for x: (x_min + x_step/2 + field_horiz_offset) step x_step thru x_max do (
+        for y: (y_min + y_step/2 + field_vert_offset) step y_step thru y_max do (
+          the_graphics: append(
+            apply('append,
+              errcatch(
+                for fudge in [[0,0],[1,1],[-1,1],[-1,-1],[1,-1],'done] do (
+                  if fudge='done then error(),
+                  curve:reverse(
+                    calc_dir_soln_curve([dxdt,dydt], [x_var,y_var], [x,y]+fudge*grid_step_vec*1e-8,
+                      [x,y]-grid_step_vec/2, [x,y]+grid_step_vec/2,
+                      grid_step_vec/5, 'both,
+                      field_tstep, field_tstep/300, duration, 100, partition_expr)),
+                  if curve#[] then return(curve)),
+                append(
+                  [ point_type = 'none, funmake('points, [curve]) ],
+                  if field_arrows then [ point_type = field_head_type, funmake('points, [[first(curve)]]) ] else []))),
+            the_graphics))))
+    else error("field_degree must be either 1, 2, or 'solns")),
+
+  the_graphics: append(
+    [ 'head_length   = 0.3 * x_step,
+      'head_angle    = 20,
+      'point_type    = 'none,
+      'point_size    = field_head_size,
+      'points_joined = true,
+      'xrange        = [x_min, x_max],
+      'yrange        = [y_min, y_max],
+      'color         = field_color ],
+    the_graphics),
+
+  apply('gr2d, the_graphics))$
+
+drawdf([params]) := (draw(apply('df_graphics, params)), 0)$
+wxdrawdf([params]) := (wxdraw(apply('df_graphics, params)), 0)$
+
+/*
+
+/* Examples */
+
+drawdf(x^2+y^2, [x,-5,5], [y,-5,5], solns_at([1,1], [2,1], [3,4]))$
+
+drawdf([y,-9*sin(x)-y/5], [x,1,5], [y,-2,2])$
+drawdf([y,-9*sin(x)-y/5], [x,1,5], [y,-2,2], field_degree=2)$
+drawdf([y,-9*sin(x)-y/5], [x,1,5], [y,-2,2], tstep=0.01, soln_at(3.14,0))$
+
+drawdf(y, [x,-2,2], [y,-10,10], tstep=0.05, duration=3, solns_at([0,1], [0,-1], [0,0]))$
+drawdf(y, [x,-2,2], [y,-10,10], tstep=0.05, duration=3, soln_arrows=true, solns_at([0,1], [0,-1], [0,0]))$
+
+drawdf([x-x*y/2, (x*y - 3*y)/4], [x,2.5,3.5], [y,1.5,2.5], solns_at([3,1.8],[3,1.85],[3,1.9],[3,1.95])) $
+
+drawdf(exp(-t)+y, [t,y], [t,-5,5], [y,-20,20], soln_at(0,-0.5))$
+
+drawdf(3*sin(t)+1+y, [t,y], solns_at([0,-2.6],[0,-2.4]), color=blue, soln_at(0,-2.5))$
+drawdf(3*sin(t)+1+y, [t,y], soln_arrows=true, solns_at([0,-2.6],[0,-2.4],[0,-2.5]))$
+
+/* competing species */
+drawdf([x*(1-x-y), y*(3/4-y-x/2)], [x,0,1.1], [y,0,1], duration=40, soln_arrows=true, point_at(1/2,1/2), solns_at([0.1,0.2], [0.2,0.1], [1,0.8], [0.8,1], [0.1,0.1], [0.6,0.05], [0.05,0.4], [1,0.01], [0.01,0.75])) $
+
+/* damped pendulum phase portraits */
+drawdf([y,-9*sin(x)-y/5], tstep=0.05, soln_arrows=true, saddles_at([%pi,0], [-%pi,0]))$
+drawdf([y,-9*sin(x)-y/5], tstep=0.05, show_field=false, soln_arrows=true, saddles_at([3*%pi,0], [-3*%pi,0], [%pi,0], [-%pi,0]))$
+
+/* direction fields sampled quadratically and numerically */
+drawdf([x*(1-x-y), y*(3/4-y-x/2)], [x,0,1.1], [y,0,1], duration=40, soln_arrows=true, field_degree=2, point_at(1/2,1/2), solns_at([0.1,0.2], [0.2,0.1], [1,0.8], [0.8,1], [0.1,0.1], [0.6,0.05], [0.05,0.4], [1,0.01], [0.01,0.75])) $
+drawdf([x*(1-x-y), y*(3/4-y-x/2)], [x,0,1.1], [y,0,1], duration=40, soln_arrows=true, field_degree='solns, point_at(1/2,1/2), solns_at([0.1,0.2], [0.2,0.1], [1,0.8], [0.8,1], [0.1,0.1], [0.6,0.05], [0.05,0.4], [1,0.01], [0.01,0.75])) $
+
+drawdf([y,-9*sin(x)-y/5], tstep=0.05, soln_arrows=true, field_degree=2, saddles_at([%pi,0], [-%pi,0]))$
+drawdf([y,-9*sin(x)-y/5], tstep=0.05, soln_arrows=true, field_degree='solns, saddles_at([%pi,0], [-%pi,0]))$
+
+*/

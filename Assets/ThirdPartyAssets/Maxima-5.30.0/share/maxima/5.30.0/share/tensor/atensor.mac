@@ -1,0 +1,211 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Algebraic tensor manipulation
+ *
+ */
+
+if get('atensor,'version)#false then error("ATENSOR already loaded!")$
+
+alg_type: 'universal;
+asymbol:v;
+adim:0;
+aform:diagmatrix(3,1);
+
+dotscrules:true;
+dotdistrib:true;
+dotexptsimp:false;
+
+abasep(v):=if not atom(v) and mapatom(v) and op(v)=asymbol and length(v)=1
+              and part(v,1)>0 and part(v,1)<=adim then true else false;
+
+/* declare(..,scalarp) doesn't work on function names, which is why
+   we need some special rules here. */
+scalarfunp(x):=if not atom(x) and (op(x)=nounify(sf) or op(x)=nounify(af))
+               then true else scalarp(x);
+nonscfunp(x):=if atom(x) or (op(x)#nounify(sf) and op(x)#nounify(af))
+              then not scalarp(x) else false;
+
+matchdeclare([nonsc1,nonsc2], nonscfunp());
+matchdeclare([scalarf],scalarfunp());
+matchdeclare([abasev1,abasev2],abasep());
+
+defrule(scalarfun1,nonsc1.scalarf,nonsc1*scalarf);
+defrule(scalarfun2,scalarf.nonsc2,nonsc2*scalarf);
+
+defrule(grassmann1,nonsc1.nonsc1,0);
+defrule(grassmann2,nonsc1.nonsc2,
+        if ordergreatp(nonsc1,nonsc2) then -nonsc2.nonsc1 else nonsc1.nonsc2);
+defrule(clifford1,nonsc1.nonsc1,sf(nonsc1,nonsc1));
+defrule(clifford2,nonsc1.nonsc2,
+        if ordergreatp(nonsc1,nonsc2) then -nonsc2.nonsc1+2*sf(nonsc2,nonsc1) else nonsc1.nonsc2);
+defrule(symmetric,nonsc1.nonsc2,
+        if ordergreatp(nonsc1,nonsc2) then nonsc2.nonsc1 else nonsc1.nonsc2);
+defrule(symplectic,nonsc1.nonsc2,
+        if ordergreatp(nonsc1,nonsc2) then nonsc2.nonsc1-2*af(nonsc2,nonsc1)
+        else nonsc1.nonsc2);
+defrule(lie_envelop,nonsc1.nonsc2,
+        if ordergreatp(nonsc1,nonsc2) then nonsc2.nonsc1-2*av(nonsc2,nonsc1)
+        else nonsc1.nonsc2);
+defrule(complex1,abasev1.abasev1,-1);
+
+atenrules:[
+ [grassmann,[grassmann1,grassmann2]],
+ [clifford,[clifford1,clifford2]],
+ [symmetric,[symmetric]],
+ [symplectic,[symplectic]],
+ [lie_envelop,[lie_envelop]]
+];
+
+/* Recursively simplify an atensor expression, with special attention
+   paid to the fact that mnctimes can have multiple arguments;
+   furthermore, we don't want dot products to end up as arguments
+   to av(), af(), or sf(). The counter j is to ensure that the function
+   always terminates. Admittedly, this is not a very efficient
+   implementation and can use improvements, but it does provide results
+   that are compatible with commercial MACSYMA. */
+atensimp(exp):=block
+(
+  [i,j,exp1,exp2,exp3,done],
+  if not mapatom(exp) then exp:map(atensimp,exp),
+
+  for j thru 10 do
+  (
+    done:false,
+    exp1:exp,
+    while not done do
+    (
+      done:true,
+      if not atom(exp1) and op(exp1)="." and length(args(exp1))>2 then block
+      (
+        [argv:args(exp1)],
+        for i thru length(argv)-1 do
+        (
+          exp2:"."(argv[i],argv[i+1]),
+          exp3:atensimp(exp2),
+          if exp2#exp3 then
+          (
+            exp1:apply(".",append(rest(argv,-length(argv)+i-1),[exp3],
+                                  rest(argv,i+1))),
+            exp1:ev(exp1,simp),
+            i:length(argv),
+            done:false
+          )
+        )
+      )
+    ),
+    if exp#exp1 then exp:atensimp(exp1) else
+      for i thru length(atenrules) do
+        if atenrules[i][1]=alg_type then
+    (
+      exp2:apply('applyb1,cons(exp,atenrules[i][2])),
+      exp2:ev(exp2,simp),
+      exp2:applyb1(exp2,scalarfun1,scalarfun2),
+      exp2:ev(exp2,simp),
+      if exp=exp2 then j:10
+      else exp:(if mapatom(exp2) then exp2 else map(atensimp,exp2))
+    )
+  ),
+  exp
+);
+
+init_atensor(algname, [optdims]):=
+(
+  if algname='universal or algname='grassmann or algname='clifford or
+     algname='symmetric or algname='symplectic or algname='lie_envelop then
+  (
+    alg_type:algname,
+    if alg_type='symplectic then
+    (
+      adim:0,
+      kill(aform),
+      if length(optdims)>0 then
+      (
+        adim:optdims[1],
+        aform:zeromatrix(optdims[1],optdims[1]),
+        for i thru adim do
+          for j thru i-1 do
+        (
+          aform[i,j]:if evenp(i+j) then 1 else -1,
+          aform[j,i]:-aform[i,j]
+        ),
+        if length(optdims)>1 then
+        (
+          for i thru optdims[2] do
+            aform:addrow(aform,makelist(0,j,1,adim)),
+          adim:adim+optdims[2],
+          for i thru optdims[2] do
+            aform:addcol(aform,makelist(0,j,1,adim))
+        ),
+        if length(optdims)>2 then error("Invalid optional dimensions"),
+        optdims:[]
+      )
+    )
+    else if alg_type='clifford then block
+    (
+      [p:0,z:0,n:0],
+      if length(optdims)>0 then p:optdims[1],
+      if length(optdims)>1 then z:optdims[2],
+      if length(optdims)>2 then n:optdims[3],
+      if length(optdims)>3 then error("Invalid optional dimensions"),
+      adim:p+z+n,
+      if adim>0 then
+      (
+        aform:ident(adim),
+        for i from p+1 thru p+z do aform[i,i]:0,
+        for i from p+z+1 thru adim do aform[i,i]:-1
+      )
+      else kill(aform),
+      optdims:[]
+    )
+    else if length(optdims)>0 then
+    (
+      if length(optdims)>1 then error("Invalid optional dimensions"),
+      adim:optdims[1],
+      aform:ident(adim),
+      if alg_type='lie_envelop then
+      (
+        for i thru adim do for j thru i do
+          if i=j then aform[i,j]:0
+          else aform[i,j]:-(aform[j,i]:(remainder(2*adim+2-i-j,adim)+1)*
+                              signum(i-j)*(if oddp(i+j) then 1 else -1))
+      ),
+      optdims:[]
+    )
+    else
+    (
+      kill(aform),
+      adim:0
+    )
+  )
+  else if algname='complex then init_atensor(clifford,0,0,1)
+  else if algname='quaternion then init_atensor(clifford,0,0,2)
+  else if algname='pauli then init_atensor(clifford,3)
+  else if algname='dirac then init_atensor(clifford,3,0,1)
+  else error("Unknown algebra name"),
+  if optdims#[] then error("No optional dimensions permitted for this algebra"),
+  done
+);
+
+af(u,v):=if abasep(u) and abasep(v) then aform[part(u,1),part(v,1)]
+         else 'af(u,v);
+sf(u,v):=if abasep(u) and abasep(v) then aform[part(u,1),part(v,1)]
+         else 'sf(u,v);
+av(%u,%v):=if abasep(%u) and abasep(%v) then block
+           (
+             [i:aform[part(%u,1),part(%v,1)]],
+             if abs(i)>0 and abs(i)<=adim then asymbol[abs(i)]*signum(i) else 0
+           )
+           else 'av(%u,%v);
+
+
+put('atensor,'v20081223,'version)$

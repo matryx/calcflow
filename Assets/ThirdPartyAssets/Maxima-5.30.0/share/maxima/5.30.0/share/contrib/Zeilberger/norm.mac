@@ -1,0 +1,188 @@
+
+/* Conversion routines */
+
+/* RISC Institute, Linz, Austria */
+/* by Fabrizio Caruso            */
+
+
+/* It computes the norm of a non-trivial integer linear expression */
+intLinConst(intLin,k,n) :=
+   intLin - coeff(intLin,n,1)*n - coeff(intLin,k,1)*k;
+
+/* It converts an intLinNorm into an integer linear */
+norm2intLin(norm,k) :=
+  first(norm);
+
+/* It converts an intLinNorm into a power of an integer linear */
+norm2polyPower(norm) :=
+  first(norm)^second(norm);
+
+
+/* Norm of a non-zero degree (in k) integer linear */
+intLinPolyNorm(expr,k) :=
+   if(freeof(k,expr)) then
+      [expr,1]
+   else
+      [expand(expr/coeff(expr,k,1)),coeff(expr,k,1)];
+
+polyNorm(expr,k) :=
+   if (freeof(k,expr)) then
+      [expr,1]
+   else
+      [expand(expr/coeff(expr,k,degree(expr,k))),
+       coeff(expr,k,degree(expr,k))];
+
+intLinNorm(expr,k) :=
+ block([polyNorm,res,constRes],
+  if zb_operatorp(expr,"^") then
+     (
+     polyNorm : intLinPolyNorm(first(expr),k),
+     res : [polyNorm[1],second(expr)],
+     constRes : polyNorm[2]^second(expr)
+     )
+  else
+     (
+     polyNorm : intLinPolyNorm(expr,k),
+     res : [polyNorm[1],1],
+     constRes : polyNorm[2]
+     ),
+  return([res,constRes])
+  );    
+
+
+powerNorm(expr,k) :=
+  block([base,res,constRes],
+  if zb_operatorp(expr,"^") then
+     (
+     base : polyNorm(first(expr),k),
+     res : [base[1],second(expr)],
+     constRes : base[2]^second(expr)
+     )
+  else
+     (
+     base : polyNorm(expr,k),
+     res : [base[1],1],
+     constRes : base[2]
+     ),
+  return([res,constRes])
+  );    
+
+ 
+/* It outputs the integer linear factor and non-integer linear factor of a given expression */
+intLinCreate(expr,k) :=
+  block(
+  [nonIntLinList,intLinList,length],
+
+  nonIntLinList:[],
+  intLinList:[],
+  if atom(expr) or not(zb_operatorp(expr,"*")) then
+     if(integerLinear(expr,k)) then
+       if (expr=1) then
+           return([])
+       else
+        return([expr])
+     else
+        return([expr])
+  else
+     (
+     length:length(expr),
+
+     for i:1 thru length-1 do
+       (
+       /*
+       if integerLinear(first(expr),k) then 
+         intLinList:cons(first(expr),intLinList)
+       else
+         nonIntLinList:cons(first(expr),nonIntLinList),
+       */
+       intLinList : cons(first(expr),intLinList),
+       expr:expr/first(expr)
+       ),
+     
+     intLinList:cons(expr,intLinList),
+
+     return(intLinList)
+     )
+  );
+
+/* It outputs the integer linear factor and non-integer linear factor of a given expression */
+intLinSep(expr,k) :=
+  block(
+  [nonIntLinList,intLinList,length],
+
+  nonIntLinList:[],
+  intLinList:[],
+  
+  if atom(expr) or not(zb_operatorp(expr,"*")) then
+     if(integerLinear(expr,k)) then
+       if (expr=1) then
+           return([[],[]])
+       else
+        return([[],[expr]])
+     else
+        return([[expr],[]])
+  else
+     (
+     length:length(expr),
+
+     for i:1 thru length-1 do
+       (
+       if integerLinear(first(expr),k) then 
+         intLinList:cons(first(expr),intLinList)
+       else
+         nonIntLinList:cons(first(expr),nonIntLinList),
+       expr:expr/first(expr)
+       ),
+     if integerLinear(expr,k) then
+      intLinList:cons(expr,intLinList)
+     else 
+      nonIntLinList:cons(expr,nonIntLinList),
+
+     return([nonIntLinList,intLinList])
+     )
+  );
+
+
+
+/* It creates a list of irreducible factors out of a factorized polynomial */
+factored2List(expr) :=
+  block(
+  [list,length,i],
+
+  list:[],
+  if atom(expr)or not(zb_operatorp(expr,"*")) then
+     return([expr])
+  else
+     (
+     length:length(expr),
+     for i:1 thru length-1 do
+       (
+       list:cons(first(expr),list),
+       expr:expr/first(expr)
+       ),
+     list:cons(expr,list),
+     return(list)
+     )
+  );
+
+
+/* It generates a list of normalized powers of integer linears */
+intLinNormList(exprList,k) :=
+  block([res,i],
+   res:[],
+   for i:1 thru length(exprList) do
+      res:cons(intLinNorm(part(exprList,i),k),res),
+          
+   return(res)
+   );
+
+normList(exprList,k) :=
+   block([res,i],
+   res:[],
+   for i:1 thru length(exprList) do
+      res:cons(powerNorm(part(exprList,i),k),res),
+   return(res)
+   );
+
+
+

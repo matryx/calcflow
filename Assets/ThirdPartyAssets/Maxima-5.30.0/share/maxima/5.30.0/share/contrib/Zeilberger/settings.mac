@@ -1,0 +1,52 @@
+/* --------------------------------------------------------------------- */ 
+/* Maxium order of the recurrence equation searched in Zeilberger's alg. */
+max_ord: 5;
+
+
+/* --------------------------------------------------------------------- */
+/* Simplification */
+/* Constant values used to set output_format */
+simplified_output : false;
+
+
+/* --------------------------------------------------------------------- */
+/* Linear Solver */
+/* We are assuming that the independent variables in the solutions       */
+/* produced by the linear solver are stored in ind_vars(linear_solver)   */
+linear_solver : linsolve;
+
+
+/* --------------------------------------------------------------------- */
+/* Numerical test through evalution and modular computation              */
+/* Numerical test flag */
+mod_test : false;
+
+/* Modular linear solver */
+modular_linear_solver : linsolve;
+
+/* Evaluation point used before modular_linear_solver */
+ev_point : big_primes[10];
+
+/* Big prime taken as the modulo in modular_linear_solver */
+mod_big_prime : big_primes[1];
+
+/* Heuristic threshold for the modular approach */
+/* The modular test is not performed above this order */
+mod_threshold:4;
+
+/* Warnings */
+warnings : true;
+
+/* Gosper tried as first attempt */
+Gosper_in_Zeilberger : true;
+
+/* Trivial solutions flag */
+/* When it is set to false solutions with zero certificate or */
+/* with all coefficients identically zero are excluded        */
+trivial_solutions : true;
+
+/* Level of details in "gs_prove" */
+gs_prove_detail : PROOF_MEDIUM;
+
+/* Level of details in "zb_prove" and "zb_test" */
+zb_prove_detail : PROOF_MEDIUM;

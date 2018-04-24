@@ -1,0 +1,208 @@
+setup_autoload("lodsav",lodesave)$
+
+ivtrns(wb,wc,wr):=block([],tn:ratsimp(tp/10),invsw:n,
+   if tp<=60 then (neq:dptarg(wb,wc,tn),
+                     if neq#f then return(neq)),
+   if tp= 10 then (ldf5(1),trtrig(wb,wc,wr)) else
+                    (ldf5(0),neq:ivexctrig(wb,wc,wr)),
+   if tp<100 then return(neq) else return(f))$
+ 
+dptarg(wb,wc,tn):=block([],wl:listofargs(za*q1+zb*q2+zc,tn),
+   lg:length(wl),if lg=0 then return(f),wlf:first(wl),
+ ll, if lg>1 then (wl:rest(wl),wlr:first(wl),wlf:gcd(wlf,wlr),lg:lg-1),
+   if lg>1 then go(ll),if wlf#x and wlf#2*x then (np:hipow(wlf,x),
+   if np>1 then (ldf0(14),if powr(wb,wc,np)=t then 
+                (ldf5(11),trpow(pown),return(neq)) else return(f)),
+   if np=1 then (ldf5(9),tivln(wb,wc,wr,wlf),return(neq)) else
+  if np=-1 then (ldf5(7),tivinv(wb,wc,wr),return(neq)) else
+                 return(f)) else return(f))$
+
+listofargs(exp,n):=block([],wl:[],elmf:matrix([5,sin,cos,tan,cot,0],
+   [2,%e,0,0,0,0],[2,log,0,0,0,0],[5,sinh,cosh,tanh,coth,0],
+   [6,sn,cn,dn,pe,th],[2,sqrt,0,0,0,0]),
+   for i:2 thru elmf[n,1] do wl:append(wl,farg(exp,elmf[n,i])),
+   return(wl))$
+
+farg(exp,f):=block([],wexp:args(exp),
+ ll,if atom(wexp) then lg:0 else lg:length(wexp),
+   if lg>0 then (rexp:rest(wexp),wexp:first(wexp)) else return([]),
+   if freeof(f,wexp) then (wexp:rexp,go(ll)),
+   if atom(wexp)     then return(rexp), wexp:args(wexp),
+   if freeof(f,wexp) then return(wexp) else go(ll))$
+
+ldf5(i):=block([],if ldsw[5,i]#y then (ldsw[5,i]:y,
+   if i=0 then load(pivtr2) else
+   if i=1 then load(ptrtrg) else
+   if i=2 then load(ptrexp) else
+   if i=3 then load(ptrlog) else
+   if i=4 then load(ptrhpb) else
+   if i=5 then load(ptrelp) else
+   if i=6 then load(ptrsqr) else
+   if i=7 then load(ptrinv) else
+   if i=8 then load(ptrasi) else
+   if i=9 then load(ptrln) else
+  if i=10 then load(peqp7) else
+  if i=11 then load(ptrpow) else
+  if i=12 then load(ptrsym) ))$
+
+lodesave([pivtr,fasl],ivtrns,dptarg,listofargs,farg,ldf5);
+
+ivexctrig(wb,wc,wr):=block([wexp,wb1,wc1],
+   if tp=15 or tp=16 then (ldf5(1),tivasin(wc,wr)) else
+   if tp= 20 then (ldf5(2),tivexp(wb,wc,wr))  else
+   if tp= 30 then (ldf5(3),tivlog(wb,wc))     else
+   if tp= 40 then (ldf5(4),trhpb(wb,wc,wr))   else
+   if tp= 50 then (ldf5(5),tivelp(wb,wc)),
+   if tp= 60 then (ldf5(6),tivsqrt(wb,wc,wr)) else
+   if tp=70 or tp=80 then (ldf5(11),trpow(pown)) else
+   if tp= 81 then (ldf5(12),trsymx(pt,qt,1))  else
+   if tp= 90 then (ldf5(7),tivinv(wb,wc,wr)) else
+   if tp= 91 or tp=92 then (ldf5(9),tivln(wb,wc,wr,axb)),
+   return(neq))$
+
+lodesave([pivtr2,fasl],ivexctrig);
+
+trtrig(wb,wc,wr):=block([],fp1:wb-sin(x)/cos(x),fp2:wb-cos(x)/sin(x),
+   if not freeof(tan,cot,wb*q1+wc) or freeof(sin,cos,fp1) 
+      or  freeof(sin,cos,fp2) then (ldf5(10),eqpt7(wb,wc,wr)),
+   if 10<tp and tp<15 then return(tp),swtrg:f,
+   wb1:prptrg(wb),wc1:prptrg(wc),
+   dbc1:tivsc(1,wb1,wc1),dbc2:tivsc(2,wb1,wc1),
+   neq:slctrg(dbc1,dbc2),if neq#f then swtrg:t)$
+
+prptrg(exp):=block([w1,w2,w3],trigexpand:true,w1:ratsimp(exp),
+   w2:ratsubst(sin(x)/cos(x),tan(x),w1),
+   w3:ratsubst(cos(x)/sin(x),cot(x),w2),trigexpand:false,
+   return(w3))$
+
+slctrg(w1,w2):=block([w3,w4,wt],wt:t^2-1,
+   w3:lcm(wt,w1,t),w4:lcm(wt,w2,t),
+   dg1:hipow(expand(w3),t),dg2:hipow(expand(w4),t),
+   if dg1>99 and dg2>99 then return(f),
+   if dg1<=dg2 then (vtr:t=sin(x),i:1) else (vtr:t=cos(x),i:2),
+   bt:coeff(cnd[i],q,1), ct:coeff(cnd[i],q,0),
+   bt:ratsimp((t-bt)/wt),ct:ratsimp(-ct/wt),
+   neq:dyt2+bt*dyt1+ct*y=0)$
+
+tivsc(i,wb,wc):=block([wb1,wc1,wt],wt:1-t^2, if i=1 then 
+   (cs:cos(x),sc:sin(x),ws:+1) else (cs:sin(x),sc:cos(x),ws:-1),
+   wb1:ratsubst(wt,cs^2,ws*wb*cs),wb1:subst(t,sc,wb1),
+   wc1:ratsubst(wt,cs^2,wc),      wc1:subst(t,sc,wc1),
+   cnd[i]:wb1*q+wc1,if freeof(sin,cos,x,cnd[i]) then
+   return(calca(wb1,wc1,t)) else return(t^99))$
+
+lodesave([ptrtrg,fasl],trtrig,prptrg,slctrg,tivsc);
+
+eqpt7(wb,wc,wr):=block([], 
+  if freeof(sin,cos,fp1) then (fq:-1/2-sin(x)^2/(4*cos(x)^2)
+    -wb*sin(x)/(2*cos(x))+wc,fq:subst(1-cos(x)^2,sin(x)^2,fq),
+    fq:expand(fq),if freeof(sin,cos,fq) then 
+    (fp:fp1,fr:wr/sqrt(cos(x)),tp:13,return(t))),
+  for i:1 thru 2 do
+    (if i=1 then (tc:tan(x),ws:+1) else (tc:cot(x),ws:-1),
+     db:hipow(wb,tc),dc:hipow(wc,tc), 
+     if db=1 and dc<=1 and coeff(wb,tc,1)=-2*ws then 
+      (fp:wb+2*ws*tc,if (dc=1 and coeff(wc,tc,1)=-fp*ws) or dc=0 then
+                     (tp:10+i,fq:coeff(wc,tc,0)+1),return(t))))$
+
+lodesave([peqp7,fasl],eqpt7);
+
+trhpb(wb,wc,wr):=block([],
+   wb1:prphpb(wb),wc1:prphpb(wc),wt[1]:t^2+1,wt[2]:t^2-1,
+   dbc1:tivhpb(1,wb1,wc1),dbc2:tivhpb(2,wb1,wc1),
+   neq:slchpb(dbc1,dbc2),if neq#f then swhpb:t,return(neq))$
+
+prphpb(exp):=block([w1,w2,w3],w1:ratsimp(exp),
+   w2:ratsubst(sinh(x)/cosh(x),tanh(x),w1),
+   w3:ratsubst(cosh(x)/sinh(x),coth(x),w2),return(w3))$
+
+slchpb(w1,w2):=block([w3,w4],
+   w3:lcm(wt[1],w1,t),w4:lcm(wt[2],w2,t),
+   dg1:hipow(expand(w3),t),dg2:hipow(expand(w4),t),
+   if dg1>99 and dg2>99 then return(f),
+   if dg1<dg2 then (vtr:t=sinh(x),i:1) else (vtr:t=cosh(x),i:2),
+   bt:coeff(cnd[i],q,1), ct:coeff(cnd[i],q,0),
+   bt:ratsimp((bt+t)/wt[i]),ct:ratsimp(ct/wt[i]),
+   neq:dyt2+bt*dyt1+ct*y=0)$
+
+tivhpb(i,wb,wc):=block([wb1,wc1], if i=1 then 
+  (cs:cosh(x),sc:sinh(x),ws:+1) else (cs:sinh(x),sc:cosh(x),ws:-1),
+   wb1:ratsubst(wt[i],cs^2,wb*cs), wb1:subst(t,sc,wb1),
+   wc1:ratsubst(wt[i],cs^2,wc),    wc1:subst(t,sc,wc1),
+   cnd[i]:wb1*q+wc1,if freeof(sinh,cosh,x,cnd[i]) then
+   return(calca(wb1,wc1,t)) else return(t^99))$
+
+lodesave([ptrhpb,fasl],trhpb,prphpb,slchpb,tivhpb);
+
+tivexp(wb,wc,wr):=block([wb1,wc1,wr1,bt,ct,rt],exptsubst:true,
+   wb1:subst(t,%e^x,wb),wc1:subst(t,%e^x,wc),wr1:subst(t,%e^x,wr),
+   bt:ratsimp((wb1+1)/t),ct:ratsimp(wc1/t^2),rt:ratsimp(wr1/t^2),
+   exptsubst:false,neq:dyt2+bt*dyt1+ct*y=rt, 
+   if freeof(%e,x,neq) then (vtr:t=%e^x,return(t)) else neq:f)$
+
+lodesave([ptrexp,fasl],tivexp);
+
+tivlog(wb,wc,wr):=block([wb1,wc1,wr1,bt,ct,rt],
+   wb1:subst(%e^t,x,x*wb),
+   wc1:subst(%e^t,x,x^2*wc),wr1:subst(%e^t,x,x^2*wr),
+   bt:ratsimp(wb1-1),ct:ratsimp(wc1),rt:ratsimp(wr1),
+   neq:dyt2+bt*dyt1+ct*y=rt, 
+   if freeof(x,neq) then (vtr:t=log(x),return(t)),
+   wb1:subst(t/x+1,log(x),wb/log(x)+1/(x*(log(x)^2))),
+   wc1:subst(t/x+1,log(x),wc/log(x)^2),
+   wr1:subst(t/x+1,log(x),wr/log(x)^2),
+   bt:ratsimp(wb1),ct:ratsimp(wc1),rt:ratsimp(wr1),
+   neq:dyt2+bt*dyt1+ct*y=rt,
+   if freeof(x,neq) then (vtr:t=x*log(x)-x,return(t))
+                          else return(f) )$
+
+lodesave([prtlog,fasl],tivlog);
+
+tivasin(wc,wr):=block([],
+   if tp=15 then neq:trasinh(wc,wr) else
+   if tp=16 then neq:trasin(wc,wr))$
+
+trasinh(wc,wr):=block([],alpha:sqrt(wa2),
+   vtr:alpha*x=sinh(alpha*t),neq:dyt2+zc*y=0)$
+
+trasin(wc,wr):=block([],vtr:x=sin(x),neq:dyt2-zc*y=0)$
+
+lodesave([ptrasin,fasl],tivasin,trasinh,trasin);
+
+tivinv(wb,wc,wr):=block([wb1,wc1,wr1,bt,ct,rt],
+   if invsw=y then return(f),
+   wb1:subst(1/t,x,wb),wc1:subst(1/t,x,wc),wr1:subst(1/t,x,wr),
+   bt:ratsimp((2*t-wb1)/t^2),ct:ratsimp(wc1/t^4),rt:ratsimp(wr1/t^4),
+   neq:dyt2+bt*dyt1+ct*y=rt, vtr:t=1/x, invsw:y)$
+
+lodesave([ptrinv,fasl],tivinv);
+
+tivsqrt(wb,wc,wr):=block([wb1,wc1,wr1,bt,ct,rt], vtr:t=sqrt(x),
+   wb1:subst(t^2,x,wb),wc1:subst(t^2,x,wc),wr1:subst(t^2,x,wr),
+   bt:ratsimp(2*t*wb1-1/t),ct:ratsimp(wc1*4*t^2),rt:ratsimp(wr1*4*t^2),
+   neq:dyt2+bt*dyt1+ct*y=rt, neq:subst(t,abs(t),neq))$
+
+lodesave([ptrsqr,fasl],tivsqrt);
+
+/* tivln do t=pa*(x-alpha) */
+tivln(wb,wc,wr,x1):=block([wb1,wc1,wr1,bt,ct,rt,x2,ws],
+   x2:expand(x1),pa:coeff(x2,x,1),ws:solve(x1,x),ws:first(ws),
+   alpha:part(ws,2), t1:t/pa+alpha, vtr:t=x1,
+   wb1:subst(t1,x,wb),wc1:subst(t1,x,wc),wr1:subst(t1,x,wr),
+   bt:ratsimp(wb1/pa),ct:ratsimp(wc1/pa^2),rt:ratsimp(wr1/pa^2),
+   neq:dyt2+bt*dyt1+ct*y=rt, 
+   if tp=92 then neq:ratsubst(ob,oa,neq))$
+
+lodesave([ptrln,fasl],tivln);
+
+trpow(r):=block([b1,c1],vtr:t=x^r,b1:ratsimp((bt+r-1)/(r*t)),
+   c1:ratsimp(ct/(r^2*t^2)),d1:ratsimp(rt/(r^2*t^2)),
+   neq:dyt2+b1*dyt1+c1*y=d1)$
+
+lodesave([ptrpow,fasl],trpow);
+
+trsymx(pt,qt,i):=block([], if i=1 then
+   (vtr:(x+1/x)/2,neq:(t^2-1)*dyt2+t*dyt1+qt*y=0) else
+   (vtr:t=log(x),qt:subst(cosh(2*t),t,qt),neq:dyt2+qt*y=0))$
+
+lodesave([ptrsym,fasl],trsymx);

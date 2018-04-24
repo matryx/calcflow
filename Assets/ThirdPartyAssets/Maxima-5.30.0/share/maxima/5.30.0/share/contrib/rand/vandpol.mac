@@ -1,0 +1,52 @@
+/* Filename vandpol.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+
+
+/*
+(d12) This program computes a perturbation solution for the
+
+
+limit cycle in Van der Pol's equation.  Call it by typing:
+
+
+                     VANDERPOL(N)
+
+
+where N is the order of truncation.
+*/
+
+vanderpol(n):=(setup1(n),setup2(n),
+	  for i thru n do
+	      block(step1(i),step2(i),if i > 1 then output1(i),
+		    if i = n then go(end),step3(i),step4(i),step5(i),end),
+	  output2(n))$
+setup1(n):=(w:1,for i thru n do w:w+k[i]*e^i,x:2*cos(t),
+       for i thru n do x:x+y[i](t)*e^i)$
+setup2(n):=(temp1:diff(x,t,2)+x/w^2-e*(1-x^2)*diff(x,t)/w,
+       temp1:taylor(temp1,e,0,n),for i thru n do eq[i]:coeff(temp1,e,i))$
+step1(i):=temp1
+      :expand(trigreduce(expand(ev(eq[i],makelist([e[j],f[j]],j,1,i-1),
+				   diff))))$
+step2(i):=(
+      if i = 1 then f[i]:solve(coeff(temp1,cos(t)),k[i])
+	  else f[i]:solve([coeff(temp1,cos(t)),coeff(temp1,sin(t))],
+			  [k[i],b[i-1]]),temp1:ev(temp1,f[i]))$
+step3(i):=(temp1:ode2(temp1,y[i](t),t),
+  temp1:subst(a[i],%k1,temp1),temp1:subst(b[i],%k2,temp1))$
+step4(i):=(temp2:rhs(temp1),temp2:diff(temp2,t),
+      temp2:solve(ev(temp2,t:0),a[i]))$
+step5(i):=e[i]:ev(temp1,temp2)$
+output1(i):=(print(expand(ev(e[i-1],f[i]))),print(" "))$
+output2(n):=(print("w=",ev(w,makelist([f[j]],j,1,n))),print(" "))$

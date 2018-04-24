@@ -1,0 +1,75 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Inequalities/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Inequalities ---------- */
+/* => True */
+is(%e^%pi > %pi^%e);
+/* => [True, False] */
+[is(x^4 - x + 1 > 0), is(x^4 - x + 1 > 1)];
+/* => True */
+assume(abs(x) < 1)$
+is(-1 < x and x < 1);
+forget(abs(x) < 1)$
+/* x > y > 0 and k, n > 0   =>   k x^n > k y^n */
+assume(x > y, y > 0);
+is(2*x^2 > 2*y^2);
+assume(k > 0);
+is(k*x^2 > k*y^2);
+assume(n > 0);
+is(k*x^n > k*y^n);
+forget(x > y, y > 0, k > 0, n > 0)$
+/* x > 1 and y >= x - 1   =>   y > 0 */
+assume(x > 1, y >= x - 1);
+is(y > 0);
+forget(y > 1, y >= x - 1)$
+/* x >= y, y >= z, z >= x   =>   x = y = z */
+assume(x >= y, y >= z, z >= x);
+[is(equal(x, y)), is(equal(x, z)), is(equal(y, z))];
+forget(x >= y, y >= z, z >= x)$
+/* x < -1 or x > 3 */
+ineq_linsolve(abs(x - 1) > 2, x);
+ineq_linsolve([-(x - 1) > 2, x - 1 > 2], x);
+/* x < 1 or 2 < x < 3 or 4 < x < 5 */
+ineq_linsolve(expand((x - 1)*(x - 2)*(x - 3)*(x - 4)*(x - 5)) < 0, x);
+/* x < 3 or x >= 5 */
+ineq_linsolve(6/(x - 3) <= 3, x);
+ratsimp(%);
+ineq_linsolve((x - 3)/6 >= 1/3, x);
+/* => 0 <= x < 4 */
+assume(sqrt(%r6) < 2)$   /* This is stupid, but does automate the demo. */
+ineq_linsolve(sqrt(x) < 2, x);
+forget(sqrt(%r6) < 2)$
+/* => x is real */
+assume(sin(%r7) < 2)$
+ineq_linsolve(sin(x) < 2, x);
+forget(sin(%r7) < 2)$
+/* => x != pi/2 + n 2 pi */
+assume(sin(%r8) < 1)$
+ineq_linsolve(sin(x) < 1, x);
+forget(sin(%r8) < 1)$
+/* The next two examples come from Abdubrahim Muhammad Farhat, _Stability
+   Analysis of Finite Difference Schemes_, Ph.D. dissertation, University of
+   New Mexico, Albuquerque, New Mexico, December 1993 => 0 <= A <= 1/2 */
+assume(abs(2*%r9*cos(t) - 2*%r9 + 1) - 1 < 0)$
+errcatch(ineq_linsolve(abs(2*A*(cos(t) - 1) + 1) <= 1, A));
+forget(abs(2*%r9*(cos(t) - 1) + 1) <= 1)$
+/* => 125 A^4 + 24 A^2 - 48 < 0   or   |A| < 2/5 sqrt([8 sqrt(6) - 3]/5) */
+ineq_linsolve(A^2*(cos(t) - 4)^2*sin(t)^2 < 9, A);
+/* => |x| < y */
+ineq_linsolve([x + y > 0, x - y < 0], [x, y]);
+/* ---------- Quit ---------- */
+quit();

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using NanoVRController;
+using Calcflow.UserStatistics;
 
 public class GraphDraw : MonoBehaviour {
     public VRController leftController;
@@ -17,6 +18,8 @@ public class GraphDraw : MonoBehaviour {
 
     void OnEnable()
     {
+        StatisticsTracking.StartEvent("Tool Switching", "To Drawing Tool");
+
         leftController.components[ButtonId.TRIGGER].ComponentPressing  += startDrawing;
         leftController.components[ButtonId.TRIGGER].ComponentUnpressed += stopDrawing;
         leftController.components[ButtonId.GRIP].ComponentPressed      += startErasing;
@@ -38,6 +41,8 @@ public class GraphDraw : MonoBehaviour {
 
     void OnDisable()
     {
+        StatisticsTracking.EndEvent("Tool Switching", "To Drawing Tool");
+
         leftController.components[ButtonId.TRIGGER].ComponentPressing += startDrawing;
         leftController.components[ButtonId.TRIGGER].ComponentUnpressed += stopDrawing;
         leftController.components[ButtonId.GRIP].ComponentPressed += startErasing;

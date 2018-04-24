@@ -1,0 +1,127 @@
+ttyoff:true $
+/* Functions and options for optimization using the algebraic
+manipulation language MACSYMA.  Programmed by STOUTE (David
+Stoutemyer), Electrical Engineering Department, University of Hawaii,
+4/3/74.  For a description of its usage, see text file OPTMIZ USAGE. */
+
+/* First, we set some options that respectively cause automatic
+   printing of cpu time in milliseconds, force attempted equation
+   solution even when there are more variables than unknowns, 
+   enables some (time consuming) techniques for solving equations that
+   contain logs and exponentials, and enables the solution
+   of consistent singular linear equations: */
+
+/* Next, we set a switch to suppress the message that ordinarily
+   occurs whenever a floating-point number is replaced with a rational
+   number, and to prevent 1-by-1 matrices from being converted
+   to scalars: */
+
+/* The following pattern-matching statements permit trailing
+[] arguments to be omitted: */
+
+/* updated by function stapoints(objective,[list_args])
+matchdeclare([a1,a2,a3,a4], true) $
+tellsimp (stap(a1), stapoints(a1,[],[],[])) $
+tellsimp (stap(a1,a2), stapoints(a1,a2,[],[])) $
+tellsimp (stap(a1,a2,a3), stapoints(a1,a2,a3,[])) $
+tellsimp (stap(a1,a2,a3,a4), stapoints(a1,a2,a3,a4)) $
+*/
+eval_when([translate,batch,demo,load,loadfile],rectform(sinh(1.2-.4*%i)),
+dv(a)::=buildq([a],define_variable(a,'a,any)))$
+
+dv(lagrangian)$ dv(eigen)$ dv(modhessian)$
+dv(grad)$ dv(gradsub)$ dv(stapts)$ dv(mhess)$ dv(objsub)$
+dv(mhesssub)$ dv(cpolysub)$ dv(eigen)$ dv(decslkmults)$
+dv(ndec)$ dv(neqz)$ dv(nlez)$ dv(ntot)$ dv(eigens)$
+
+gradient(decslkmults) := /* This function recursively defines
+      the gradient of the Lagrangian, with respect to the decision
+      variables, rtslacks, and Lagrange multipliers. */
+   if decslkmults = [] then []
+   else cons(diff(lagrangian, first(decslkmults)),
+      gradient(rest(decslkmults))) $
+
+eval_when([translate,batch,demo,load,loadfile],
+modh(g,d)::=buildq([g,d],
+apply('define,[arrayapply('modhessian,[i,j]),
+ /*internal array function for MODHESSIAN*/
+  '('(if j>i then modhessian[j,i] /*(symmetric)*/
+   else diff(g[i],d[j]) /*minus EIGEN from up-left diag*/
+      - (if i=j and j<=ndec+nlez then eigen  else 0)))])))$
+
+
+/* old definition
+stapoints(objective, lezeros, eqzeros, decisionvars) := block( */
+
+/* new definition */
+stapoints(objective,[list_args]):=
+block([lezeros, eqzeros, decisionvars],
+(if list_args=[] then  lezeros: eqzeros: decisionvars:[]
+else if length(list_args)=1 then (lezeros:first(list_args),
+eqzeros: decisionvars:[]) else if length(list_args)=2 then
+(lezeros:first(list_args),eqzeros:last(list_args),decisionvars:[])
+else if length(list_args)=3 then (lezeros:first(list_args), 
+eqzeros:first(rest(list_args)), decisionvars:last(list_args)) else
+error("wrong number of args to stapoints"), block(
+/* This is the major function, which prints information about any
+stationary points, then returns the value DONE. */
+
+   [grindswitch, solveradcan, singsolve, ratprint, scalarmatrixp,
+    dispflag,eqmult,rtslack,lemult,i,j], /* declare local variables */
+   grindswitch: solveradcan: singsolve: true,
+   ratprint: scalarmatrixp: false,
+if member('modhessian,arrays) then apply('remarray,['modhessian]),
+
+modh(grad,decslkmults) /*end MODHESSIAN*/,
+
+   if not listp(lezeros) then lezeros: [lezeros],/* ensure list args*/
+   if not listp(eqzeros) then eqzeros: [eqzeros],
+   if decisionvars = [] /*default to all decision variables*/
+      then decisionvars: listofvars([objective, lezeros, eqzeros])
+   else if not listp(decisionvars) then decisionvars: [decisionvars],
+
+   ndec: length(decisionvars), /*determine number of decision vars. */
+   nlez: length(lezeros),/*determine number of inequality constraints*/
+   neqz: length(eqzeros), /*determine number of equality constraints*/
+   lagrangian: objective + sum(eqzeros[i]*eqmult[i],i,1,neqz)
+      + sum((lezeros[i]+rtslack[i]**2)*lemult[i],i,1,nlez),
+
+   decslkmults: [], /*form list of dec.vars., rtslacks & multipliers*/
+   for i:neqz step -1 thru 1 do decslkmults: cons(eqmult[i],
+      decslkmults),
+   for i:nlez step -1 thru 1 do 
+      decslkmults: cons(lemult[i], decslkmults),
+   for i:nlez step -1 thru 1 do
+      decslkmults: cons(rtslack[i], decslkmults),
+   decslkmults: append(decisionvars, decslkmults),
+   grad: gradient(decslkmults),  /* form gradient  */
+   dispflag: false, /* supress automatic output from solve */
+   stapts: solve(grad,decslkmults),/* solve GRAD=0*/
+
+   if stapts = [] then apply('disp,["no stationary points found"])
+   else( ntot: ndec + nlez + nlez + neqz,
+      mhess:'mhess, mhesssub:'mhesssub,  /* unbind global matrices from
+         previous case to permit different sizes. */
+      mhess: genmatrix(modhessian, ntot, ntot), /*form HESS*/
+ apply('remarray,['modhessian]),
+ modhessian:'modhessian, /*destroy array to permit new
+         definition for next use of analyze. */
+      dispflag: true, /* permit automatic output from SOLVE */
+      for i thru length(stapts) do (
+         objsub: apply('ev,[objective,stapts[i],'rectform]),
+ /*evaluate objective.*/
+         gradsub:apply('ev,[grad,stapts[i],'rectform]),
+ /*eval. gradient at point*/
+         apply('ldisplay,[arrayapply('stapts,[i]), 'objsub, 'gradsub]),
+       /* output */
+         mhesssub:apply('ev,[mhess,stapts[i],'rectform]),
+ /*eval. modified Hessian */
+         cpolysub:rectform(newdet(mhesssub,ntot)),/*form poly in EIGEN*/
+            /* if CPOLYSUB is univariate use REALROOTS, otherwise
+            use the slower SOLVE function: */
+         if listofvars(cpolysub) = [eigen] and freeof('%i,cpolysub)
+            then eigens: apply('ev,[realroots(cpolysub,rootsepsilon),'numer])
+         else eigens: solve(cpolysub, eigen) )))))
+  /* end of function stapoints. */ $
+
+ttyoff:false$

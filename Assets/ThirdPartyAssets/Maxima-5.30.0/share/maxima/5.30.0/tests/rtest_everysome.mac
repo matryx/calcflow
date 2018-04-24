@@ -1,0 +1,270 @@
+(kill (all), 0);
+0;
+
+/* There are more tests for every and some in rtestnset; these tests mainly
+check these functions with matrix arguments. */
+
+emptyp(matrix());
+true$
+
+emptyp(matrix([]));
+true$
+
+emptyp(matrix([],[]));
+true$
+
+emptyp(matrix([9]));
+false$
+
+every('integerp, matrix());
+true$
+
+some('integerp, matrix());
+false$
+
+every("<", matrix([]));
+true$
+
+every("=", matrix([],[]));
+true$
+
+some("<", matrix([]));
+false$
+
+some("=", matrix([],[]));
+false$
+
+some("=",[[x],a],[x,b]);
+false$
+
+every("=",[[x],a],[x,b]);
+false$
+
+some(identity, [false,true]);
+true$
+
+every(identity, [false,true]);
+false$
+
+every(integerp, matrix([6,2],[7,21]));
+true$
+
+some(integerp, matrix([6,2],[7,21]));
+true$
+
+every(integerp, matrix([6,2],[7,%pi]));
+false$
+
+some(integerp, matrix([6,2],[7,%pi]));
+true$
+
+every(lambda([x], x < 1), matrix([-7,0],[-5,-13]));
+true$
+
+every(lambda([x], x < 1), matrix([-7,0],[5,13]));
+false$
+
+some(lambda([x], x < 1), matrix([-7,0],[5,13]));
+true$
+
+(booleanp(x) := is (x = 'true) or is (x = 'false),0);
+0$
+
+every('booleanp, matrix([false],[true]));
+true$
+
+every('booleanp, matrix([false],[45]));
+false$
+
+some('booleanp, matrix([false],[true]));
+true$
+
+some('booleanp, matrix([false],[45]));
+true$
+
+every("=", matrix([a,b],[c,d]), matrix([a,b],[c,d]));
+true$
+
+every("=", matrix([a,b],[c,d]), matrix([a,b],[c,29]));
+false$
+
+every('ratnump, genmatrix(lambda([i,j],1/(i+j)),101,103));
+true$
+
+some('integerp, genmatrix(lambda([i,j],1/(i+j)),101,92));
+false$
+
+(allrats(x) := if mapatom(x) then ratnump(x) else every('allrats, args(x)),0);
+0$
+
+every('allrats, matrix([matrix([4,5],[6,7]), matrix([8,9],[7,z])]));
+false$
+
+every('allrats, [[[5,19/3],[],[1,2]]]);
+true$
+
+(somerats(x) := if mapatom(x) then ratnump(x) else some('somerats, args(x)),0);
+0$
+
+some('somerats, matrix([matrix([4,5],[6,7]), matrix([8,9],[7,z])]));
+true$
+
+some('somerats, [[[u,[1/2],[],[n,k]]]]);
+true$
+
+some('somerats, [[[u,[%pi-%e],[],[n,k]]]]);
+false$
+
+some(listp,matrix([a]));
+false$
+
+some(integerp, [ [ 1 , 2 ] ] );
+false$
+       
+every(matrixp,matrix([matrix([a])]));
+true$
+
+every(listp,[]);
+true$
+
+every(listp,[a]);
+false$
+
+every(listp, [ [ ] ] );
+true$
+
+every(listp, [ [ a ] ] );
+true$
+       
+errcatch(some(listp,a[1]));
+[]$
+
+errcatch(every(listp,a[1]));
+[]$
+
+errcatch(some(numberp,a[1])); 
+[]$
+
+errcatch(some(listp,a[[x]]));
+[]$
+
+errcatch(some(integerp,f[1](2)));
+[]$
+
+some("<",[%i,3],[2,7]);
+true$
+
+some("<",[%i,3],[2,-7]);
+false$
+
+every("<",[%i,3],[2,7]);
+false$
+
+every("<",[%i,3],[2,-7]);
+false$
+
+(saveprederror : prederror, prederror : false,0);
+0$
+
+some('maybe,[6<5,a<b]);
+unknown$
+
+some("<", [a],[b]);
+unknown$
+
+every("<",[a],[b]);
+unknown$
+
+some('identity, [unknown, false]);
+unknown$
+
+every('identity, [unknown, false]);
+false$
+
+(betweenp(a,b,c) :=  (a-b)*(c-b) < 0,0);
+0$
+
+every('betweenp, matrix([1,2],[5,6]), matrix([2,3],[6,7]), matrix([3,4],[7,8]));
+true$
+
+some('betweenp, matrix([1,2],[5,6]), matrix([2,3],[6,7]), matrix([3,u],[n,k]));
+true$
+
+every('betweenp, matrix([1,2],[5,6]), matrix([2,3],[6,7]), matrix([3,u],[n,k]));
+unknown$
+
+some('identity,set(a,b,c));
+unknown$
+
+every('identity,set(a,b,c));
+unknown$
+
+some("<", [%i,2],[1,5]);
+true$
+
+every("<", [%i,2],[1,5]);
+false$
+
+some("<",[a,b],[c,d]);
+unknown$
+
+every("<",[a,b],[c,d]);
+unknown$
+
+(prederror : true,0);
+0$
+
+some('maybe,[6<5,a<b]);
+false$
+
+some("<", [a],[b]);
+false$
+
+every("<",[a],[b]);
+false$
+
+some('identity,set(a,b,c));
+false$
+
+every('identity,set(a,b,c));
+false$
+
+some("<", [%i,2],[1,5]);
+true$
+
+every("<", [%i,2],[1,5]);
+false$
+
+some("<",[a,b],[c,d]);
+false$
+
+every("<",[a,b],[c,d]);
+false$
+
+every('betweenp, matrix([1,2],[5,6]), matrix([2,3],[6,7]), matrix([3,u],[n,k]));
+false$
+
+(prederror : saveprederror,0);
+0$
+
+(remvalue(saveprederror),0);
+0$
+
+(remfunction(betweenp, booleanp, allrats, somerats),0);
+0$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,84 @@
+/* ode1_lagrange.mac
+
+   Solution of Lagrange equation y = x f(y') + g(y')
+
+   References:
+
+   Daniel Zwillinger, Handbook of Differential Equations, 3rd ed
+   Academic Press, (1997), pp 328-331
+
+  Copyright (C) 2004 David Billinghurst		 
+  		       								 
+  This program is free software; you can redistribute it and/or modify	 
+  it under the terms of the GNU General Public License as published by	 
+  the Free Software Foundation; either version 2 of the License, or		 
+  (at your option) any later version.					 
+ 		       								 
+  This program is distributed in the hope that it will be useful,		 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of		 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 
+  GNU General Public License for more details.				 
+ 		       								 
+  You should have received a copy of the GNU General Public License	
+  along with this program; if not, write to the Free Software 		 
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+*/ 
+
+put('ode1_lagrange,001,'version)$
+
+ode1_lagrange(eq,y,x):= block( 
+  [eqn,ans1,ans:[],e,t,f,g,t2,s,p,q,%t],
+
+  ode_disp("In ode1_lagrange"),
+  /* Express equation as y = x*f(p)+g(p), where p=y' */
+  eqn:subst(p,'diff(y,x),eq),
+  if freeof(y,eqn) then return(false),
+  eqn:solve(eqn,y),
+  if eqn=[] then return(false),
+
+  /* There may be multiple solutions */
+  for e in eqn do (
+    ans1:block(
+      if lhs(e)#y then return(false),
+      if not(freeof(y,rhs(e))) then return(false),
+      t:rhs(e),
+      f:ratcoeff(t,x),
+      g:t-f*x,
+      if not(freeof(x,y,f)) then return(false),
+      if not(freeof(x,y,g)) then return(false),
+      if f=p then return(false),
+
+      /* Transform ode */
+      t2:'diff(x,p)=x*diff(f,p)/(p-f)+diff(g,p)/(p-f),
+      ode_disp2("ode1_lagrange: Transform successful and new equation is ",t2),
+      s:ode2(t2,x,p),
+      if (s=false) then return(false),
+      ode_disp("Transformed equation solved"),
+      method:'lagrange,
+
+      t:y=x*f+g,
+      /* Simple test to prevent failures */
+      ode_disp("Need to eliminate p from"),
+      ode_disp2("  Equation t: ",t),
+      ode_disp2("  Solution s: ",s),
+      /* Eliminate is only for polynomials.  
+         Punt that it returns 1 when called inappropriately */
+      q:first(eliminate([t,s],[p])),
+      ode_disp("  and after eliminating p the result is"),
+      ode_disp2("  q: ",q),
+      if ( freeof(p,q) and (q#1) ) then (
+        q=0
+      ) 
+      else (
+        /* Return the parametric equation in %t=p */
+        [subst(%t,p,s),subst(%t,p,t)]
+      )
+    ),
+    if ans1#false then ans:endcons(ans1,ans)
+  ),
+  if ans=[] then
+    false
+  else
+    ans
+)$

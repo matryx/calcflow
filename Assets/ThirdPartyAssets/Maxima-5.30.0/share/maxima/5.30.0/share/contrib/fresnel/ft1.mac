@@ -1,0 +1,29 @@
+HannWindow:(1 - cos(2 * %pi * (t*SweepTime)))/2;
+signal:cos(2*%pi*f0*t*(1+t*(deviation/SweepTime)));
+delayedSignal:cos(2 * %pi * f0 * (t - delay) * (((deviation * (t - delay))/sweeptime) + 1));
+p:expand(
+  subst([f0=40*10^3,SweepTime=20*10^(-3),deviation=1/10,delay=80],
+    trigreduce(expand(demoivre(
+      exp(%i*2*%pi*f*t)*HannWindow*signal*delayedSignal)))));
+ip:map(lambda([x],'integrate(x,t)),p);
+matchdeclare(a,NON_ZERO_AND_FREEOF(t));
+matchdeclare([b,c],freeof(t));
+defrule(c1,'integrate(cos(t *b +a* t^2 +c),t),
+   sqrt(%pi/(2*a))*(cos((b^2-a*c)/a)*cfresnel(sqrt(2/(a*%pi))*(a*t+b))
+                   +sin((b^2-a*c)/a)*sfresnel(sqrt(2/(a*%pi))*(a*t+b))));
+defrule(s1,'integrate(sin(t *b +a* t^2 +c),t),
+   sqrt(%pi/(2*a))*(cos((b^2-a*c)/a)*sfresnel(sqrt(2/(a*%pi))*(a*t+b))
+                   -sin((b^2-a*c)/a)*cfresnel(sqrt(2/(a*%pi))*(a*t+b))));
+ip:apply1(ip,c1,s1);
+ip:apply_nouns(ip);
+matchdeclare(mv,true);
+defrule(fgc,cfresnel(mv),(1/2+fresnelF(mv)*sin((%pi/2)*mv^2)-fresnelG(mv)*cos((%pi/2)*mv^2)));
+defrule(fgs,sfresnel(mv),(1/2-fresnelF(mv)*cos((%pi/2)*mv^2)-fresnelG(mv)*sin((%pi/2)*mv^2)));
+ip:apply1(ip,fgc,fgs);
+ip:rncombine(trigreduce(expand(ip)));
+32000000 2.6318905168824d-9 - 1.43108843990402d-12 * %i
+1599999999/50 2.63187132363986d-9 - 6.40868894146518d-12 * %i
+1600000001/50 3.54691457600174d-12 * %i + 2.63189644230894d-9
+
+scanmap(dfloat,apply1(expand(dfloat(taylor(d1,f,(1599999999/50),0))),fa,ga))
+scanmap(dfloat,apply1(expand(dfloat(taylor(d1,f,(1600000001/50),0))),fa,ga))

@@ -1,0 +1,267 @@
+(kill(all), load(multiadditive), 0);
+0$
+
+(declare(f,threadable),0);
+0$
+
+f(a=b);
+f(a) = f(b)$
+
+f([]);
+[]$
+
+f([a]);
+[f(a)]$
+
+f([[a]]);
+[[f(a)]]$
+
+f([[a], b]);
+[[f(a)], f(b)]$
+
+f(set());
+set()$
+
+f(set(x));
+set(f(x))$
+
+f(set(set()));
+set(set())$
+
+f(set(x,y));
+set(f(x), f(y))$
+
+f(matrix());
+matrix()$
+
+f(matrix([]));
+matrix([])$
+
+f(matrix([1]));
+matrix([f(1)])$
+
+is(op(f(a < b)) = f);
+true$
+
+is(op(f(4.5)) = f);
+true$
+
+is(args(f(4.5)) = [4.5]);
+true$
+
+is(args(f(4.5b0, x, a=b)) = [4.5b0, x, a=b]);
+true$
+
+is(op(f(rat(x))) = f);
+true$
+
+is(args(f(rat(x)))= [x])$
+true$
+
+is(args(f(false)) = [false]);
+true$
+
+(matchdeclare(x, mapatom),0);
+0$
+
+(tellsimpafter(f(x),5),0);
+0$
+
+f([x,x + y]);
+[5,f(x+y)]$
+
+(declare(g,multiadditive, f, multiadditive),0);
+0$
+
+is(op(g(x)) = g);
+true$
+
+is(op(g(false)) = g);
+true$
+
+is(op(g()) = g);
+true$
+
+is(args(g(4.5)) = [4.5])$
+true$
+
+g(a + b);
+g(a) + g(b)$
+
+g(a+b,c);
+g(a,c) + g(b,c)$
+
+g(a,b+c);
+g(a,b) + g(a,c)$
+
+g(a+b,c+d);
+g(a,c) + g(a,d) + g(b,c) + g(b,d)$
+
+is(op(g(a*b)) = g) and is(args(g(a*b)) = [a*b]);
+true$
+
+f([x,x + y]);
+[5,10]$
+
+f([x*z]);
+[f(x*z)]$
+
+(declare([f,g],multiplicative),0);
+0$
+
+g(a+b*c);
+g(a) + g(b) * g(c)$
+
+f(a+b*c);
+30$
+
+f([a+b*c]);
+[30]$
+
+f(set(a+b*c,x,x^^2));
+set(30,5,f(x^^2))$
+
+(declare(h,involution),0);
+0$
+
+h(h(x));
+x$
+
+h(h(a+b));
+a+b$
+
+h(h([]));
+[]$
+
+h(h(false));
+false$
+
+h(h(true));
+true$
+
+h(h(h(x)));
+h(x)$
+
+is(op(h()) = h);
+true$
+
+is(args(h()) = []);
+true$
+
+is(args(h(8)) = [8]);
+true$
+
+is(op(h(8)) = h);
+true$
+
+h(h(f(a+b)));
+f(a) + f(b)$
+
+9 + h(h(x));
+9 + x$
+
+(matchfix("{{","}}"),0);
+0$
+
+(declare("{{",multiadditive),0);
+0$
+
+{{a+b}};
+{{a}} + {{b}}$
+
+{{a, b + c}};
+{{a,b}} + {{a,c}}$
+
+(declare(p, idempotent),0);
+0$
+
+p(p());
+p()$
+
+p(p(7));
+p(7)$
+
+p(p(x));
+p(x)$
+
+p(p(p(x)));
+p(x)$
+
+(mypos(e) := block([prederror : false], sign(e) = 'pos),0);
+0$
+
+(declare(myabs, idempotent, myabs, multiplicative),0);
+0$
+
+(declare(myabs, evenfun),0);
+0$
+
+(matchdeclare(e, mypos),0);
+0$
+
+(tellsimpafter(myabs(e),e),0);
+0$
+
+myabs(x*y);
+myabs(x) * myabs(y)$
+
+(assume(xp > 0),0);
+0$
+
+myabs(xp);
+xp$
+
+myabs(xp * myabs(z));
+xp * myabs(z)$
+
+myabs(x) - myabs(-x);
+0$
+
+(remove(f,threadable, f, multiadditive, g, multiadditive, h,involution, p,idempotent),0);
+0$
+
+(remove(myabs,[idempotent, multiplicative,evenfun]),0);
+0$
+
+(forget(xp > 0),0);
+0$
+
+(declare(f, symmetric),0);
+0$
+
+f(x,y) - f(y,x);
+0$
+
+29 * f(-a,b) - 29 * f(b,-a);
+0$
+
+f(a,b,c) + f(c,b,a) + f(a,c,b) + f(a,c,b) + f(b,a,c) + f(c,b,a);
+6 * f(a,b,c)$
+
+f(a,b) / f(b,a);
+1$
+
+(declare(g, antisymmetric),0);
+0$
+
+g(x,y,z) + g(x,z,y);
+0$
+
+s * g(z,y,x) + s * g(x,y,z);
+0$
+
+g(x,y) / g(y,x);
+-1$
+
+(remove(f, symmetric, g, antisymmetric),0);
+0$
+
+
+
+
+
+
+
+
+
+

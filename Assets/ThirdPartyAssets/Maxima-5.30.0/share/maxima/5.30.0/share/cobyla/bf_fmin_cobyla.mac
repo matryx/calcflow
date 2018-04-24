@@ -1,0 +1,52 @@
+/*
+ * bf_fmin_cobyla
+ *
+ * This is a maxima interface to the routine COBYLA.
+ * Interface Copyright Raymond Toy 2010
+ * Interface released under the terms of the GNU General Public License.
+ *
+ * This is identical to fmin_cobyla, but supports bigfloats.
+ */
+load("load-bf-cobyla.lisp");
+
+/* Define the maxima function so that maxima can catch errors in 
+ * the wrong number of arguments
+ */
+
+bf_fmin_cobyla(f, vars, initx, [options]) :=
+  block([constraints : assoc('constraints, options),
+	 ineq : [],
+	 eq : []],
+    /*
+     * Don't allow ineq and eq keyword args, because we use them for 
+     * %bf_fmin_cobyla 
+     */
+    if assoc('ineq, options) # false then
+       error("Unrecognized keyword: ", 'ineq),
+    if assoc('eq, options) # false then
+       error("Unrecognized keyword: ", 'eq),
+    /*
+     * Look through constraints and separate out the equality and 
+     * inequality constraints, if any
+     */
+    if not(constraints = false) then
+      for c in constraints do
+	block([op : op(c)],
+	  if op = "=" then eq : cons(c, eq)
+	  elseif op = ">=" or op = "<=" then ineq : cons(c, ineq)
+	  else
+	    error("Contraint must be =, <=, or >=, not", op)),
+    /*
+     * Convert inequalities g(x) >= h(x) to g(x) - h(x) >= 0
+     * and g(x) <= h(x) to h(x) - g(x) >= 0 
+     */
+    ineq : map(lambda([eqn], 
+	              if op(eqn) = ">=" then 
+		   	lhs(eqn) - rhs(eqn)
+	              else
+			rhs(eqn) - lhs(eqn)),
+		ineq),
+    eq : map(lambda([eqn], lhs(eqn) - rhs(eqn)), eq),
+    options : append(['ineq = ineq, 'eq = eq], delete('constraints = constraints, options)),
+    %bf_fmin_cobyla(f, vars, initx, options)
+);

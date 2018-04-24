@@ -1,0 +1,52 @@
+(1) vaxlsp.l is derived from maclsp.l which translates vaxima
+expressions into an intermediate expression based on franz lisp.
+
+(2) to handle the float-integer problem the following 
+is done:
+The expression context within which a number is used is kept track of.
+Variables either carry an implicit type or has been declared to
+be a specific type (by the user in the generated code).  Gentran
+figures out what is the right constant form to use and produces
+that form automatically.
+
+(3)
+gquote(expr)
+
+is introduced which allows the user to quote any expression
+within which transformations should be bared.  Thus using
+gentran(i:gquote(y=2*x);
+will give
+
+	 y=2*x
+while 
+gentran(y:2*x);
+will give
+	 y=2*j
+
+	
+(3) In the lisp input rep.  the symbol $t is a variable t and
+will become a fortran variable t.  On the other hand
+the list symbolc t will be treated as the logical constrant true
+(resulting from true at vaxima top level for example) and will
+become the frotran quantitie .true. or the C quantitie 1.
+
+
+A data statement is added to gentran to generate fortran data
+statements.
+
+For example, the macsyma level command
+
+gentran(data("a(10)", 3.1416159, 9.0, 8.1728907, 0.009988, 0.99887766, 8.7906, 6.5432, 1.2345, 0.12345, 98.098, 7654.0987, 11.1111111));
+
+gives the output
+
+      data a(10)/3.1416159,9.0,8.1728907,0.009988,0.99887766,8.7906,
+     . 6.5432,1.2345,0.12345,98.098,7654.0987,11.1111111/
+
+
+At the list level use 
+
+(gentran (list '($data) "a(10)" 3.14159 9.0 ...))
+
+will do the same thing.  Note that if the data statement is very large
+it may exceed the limit on the number of continuation lines allowable.

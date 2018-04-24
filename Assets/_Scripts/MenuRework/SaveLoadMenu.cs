@@ -8,7 +8,8 @@ using UnityEngine;
 public class SaveLoadMenu : MonoBehaviour
 {
     [Serializable]
-    internal class ColorSettings {
+    internal class ColorSettings
+    {
         [Header("Select Colors")]
         public Color selectColor;
         public Color deleteColor;
@@ -127,6 +128,14 @@ public class SaveLoadMenu : MonoBehaviour
                     break;
             }
         }
+
+        // @stats
+        // save load panel
+        Calcflow.UserStatistics.StatisticsTracking.InstantEvent("Save Load", source.name,
+        new Dictionary<string, object>()
+        {
+            {"Deletion", delete}
+        });
     }
 
     private void LoadFiles()
@@ -134,7 +143,7 @@ public class SaveLoadMenu : MonoBehaviour
         saves = loader.LoadExpressions();
 
         List<Transform> toAdd = new List<Transform>();
-        foreach(SavePackage save in saves.Values)
+        foreach (SavePackage save in saves.Values)
         {
             GameObject button = createButton(save);
             button.SetActive(false);
@@ -159,6 +168,10 @@ public class SaveLoadMenu : MonoBehaviour
     {
         GameObject button = Instantiate(Resources.Load("Screenshot", typeof(GameObject))) as GameObject;
         button.name = save.date;
+        // Parent the button's transform
+        Transform panelTransform = transform.Find("Panel");
+        button.transform.SetParent(panelTransform);
+
         initializeButton(save, button);
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());

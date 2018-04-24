@@ -1,0 +1,175 @@
+kill(all);
+done$
+(load(zeilberger),done);
+done$
+
+
+/* New regression tests are at end */
+
+/*=================================================================*/
+/* converted from testZeilberger.mac (mvdb) */
+
+
+
+/* ------------------------------ */
+/* Gosper's algorithm's Test File */
+
+/* GOSPER_TEST */
+g1:(-1)^k*k/(4*k^2-1);
+k*(-1)^k/(4*k^2-1)$
+zb_prove(g1,k,n,parGosper(g1,k,n,0));
+true$
+
+g2:1/(4*k^2-1);
+1/(4*k^2-1)$
+zb_prove(g2,k,n,parGosper(g2,k,n,0));
+true$
+
+g3:x^k;
+x^k$
+zb_prove(g3,k,n,parGosper(g3,k,n,0));
+true$
+
+g4:(-1)^k*a!/(k!*(a-k)!);
+(-1)^k*a!/(k!*(a-k)!)$
+zb_prove(g4,k,n,parGosper(g4,k,n,0));
+true$
+
+g5:k*k!;
+k*k!$
+zb_prove(g5,k,n,parGosper(g5,k,n,0));
+true$
+
+g6:(k+1)*k!/(k+1)!;
+(k+1)*k!/(k+1)!$
+zb_prove(g6,k,n,parGosper(g6,k,n,0));
+true$
+
+
+/* --------------------------------- */
+/* Zeiberger's Algorithm's Test File */
+
+/* EASY_TEST */
+f1 : binomial(n,k);
+binomial(n,k)$
+zb_prove(f1,k,n,parGosper(f1,k,n,1));
+true$
+
+f2 : binomial(n,k)^2;
+binomial(n,k)^2$
+zb_prove(f2,k,n,parGosper(f2,k,n,1));
+true$
+
+f3 : binomial(n,k)^3;
+binomial(n,k)^3$
+zb_prove(f3,k,n,parGosper(f3,k,n,2));
+true$
+
+f4 : binomial(n,k)^4;
+ binomial(n,k)^4$
+zb_prove(f4,k,n,parGosper(f4,k,n,2));
+true$
+
+/* Binomial theorem */
+h1: binomial(n,k)*x^k;
+ binomial(n,k)*x^k$
+zb_prove(h1,k,n,parGosper(h1,k,n,1));
+true$
+
+/* Vandermonde identity recurrence */
+h2: binomial(a, k)* binomial(b, n-k);
+ binomial(a, k)* binomial(b, n-k);
+zb_prove(h2,k,n,parGosper(h2,k,n,1));
+true$
+
+/*  Fibonacci-Recurrence */
+h8: (-k+n)! / k! / (-2*k+n)!;
+(-k+n)! / k! / (-2*k+n)!$
+zb_prove(h8,k,n,parGosper(h8,k,n,2));
+true$
+
+/* Trinomial coefficients */
+h9: n! / k! / (k+m)! / (-2*k-m+n)!;
+n! / k! / (k+m)! / (-2*k-m+n)!$
+zb_prove(h9,k,n,parGosper(h9,k,n,2));
+true$
+
+/*  First special case of Strehl identity (MEMO, Feb 25, 1992) */
+h10: binomial(n, k)^2 * binomial( 2*k, k);
+binomial(n, k)^2 * binomial( 2*k, k)$
+zb_prove(h10,k,n,parGosper(h10,k,n,2));
+true$
+
+/* Fibonacci recurrence */
+h13: (n+k)! * n! / k!^3 / (n-k)!^2;
+(n+k)! * n! / k!^3 / (n-k)!^2$
+zb_prove(h13,k,n,parGosper(h13,k,n,2));
+true$
+
+/* Debugging artificial examples */
+d1 : (2*n+k-1)!/(4*n+2*k)!;
+(2*n+k-1)!/(4*n+2*k)!$
+zb_prove(d1,k,n,parGosper(d1,k,n,1));
+true$
+
+d2 : (3*n+k-1)!/(6*n+2*k)!;
+(3*n+k-1)!/(6*n+2*k)!$
+zb_prove(d2,k,n,parGosper(d2,k,n,1));
+true$
+
+/* HARD_TEST */
+/* Dixon's identity */
+h3: binomial(n+b, n+k)* binomial(n+c, c+k)*binomial(b+c, b+k)*(-1)^k;
+ binomial(n+b, n+k)* binomial(n+c, c+k)*binomial(b+c, b+k)*(-1)^k$
+zb_prove(h3,k,n,parGosper(h3,k,n,1));
+true$
+
+/* Karlsson-Gosper identity 1 */
+h4: binomial(n,k)*(n-1/4)!/(n-k-1/4)!/(2*n+k + 1/4)!*9^(-k);
+binomial(n,k)*(n-1/4)!/(n-k-1/4)!/(2*n+k + 1/4)!*9^(-k)$
+zb_prove(h4,k,n,parGosper(h4,k,n,1));
+true$
+
+/* Karlsson-Gosper identity 2 */
+h5: binomial(n,k) * (n-1/4)! / (n-k-1/4)! / (2*n+k+5/4)! * 9^(-k);
+binomial(n,k) * (n-1/4)! / (n-k-1/4)! / (2*n+k+5/4)! * 9^(-k)$
+zb_prove(h5,k,n,parGosper(h5,k,n,1));
+true$
+
+/* Laguerre-Orthogonality */
+h7: (k+k2)! * (n1)! * (n2)! / (k)! / (n1-k)! / (k2)! / (n2-k2)! /
+               (k)! / (k2)! * (-1)^k;
+(k+k2)! * (n1)! * (n2)! / (k)! / (n1-k)! / (k2)! / (n2-k2)! /
+               (k)! / (k2)! * (-1)^k$
+zb_prove(h7,k,n1,parGosper(h7,k,n1,1));
+true$
+
+/* Second special case of Strehl identity (MEMO, Feb 25, 1992) */
+h11: binomial(n, k)^2 * binomial( 2*k, k+a);
+binomial(n, k)^2 * binomial( 2*k, k+a)$
+zb_prove(h11,k,n,parGosper(h11,k,n,3));
+true$
+
+/* EXTREME_TEST */
+/* See rtest_zeilberger_extreme.mac */
+
+
+/* End of converted file */
+/* ================================================== */
+
+
+/* test for unary minus, currently failing, fixed by Andrej */
+ratsimp(AntiDifference(-1/(k*(k+1)),k));
+1/k$
+
+/* suggested by Andrej */
+AntiDifference(2^(k^2), k);
+NON_HYPERGEOMETRIC$
+
+AntiDifference(k^k, k);
+NON_HYPERGEOMETRIC$
+
+Zeilberger(binomial(n,i), i, n);
+[[i/(n-i+1), [2, -1]]]$
+zb_prove(binomial(n,i),i,n,%);
+true$

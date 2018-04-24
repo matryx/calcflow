@@ -1,0 +1,26 @@
+fresnelC(z):=block([nn,BFLOAT_PRECISION,term,az:dfloat(abs(z)),
+   BL:ceiling(abs(log10(DFLOAT_PRECISION))),FLOAT2BF:true],
+   BFLOAT_PRECISION:BL,
+   for n:0 step 1 do (
+      term:dfloat(((%pi/2)^(2*n)/(((2*n)!)*(4*n+1)))*(az^(4*n+1))),
+      lterm:ceiling(log10(term)),
+      if (lterm+BL) > BFLOAT_PRECISION then BFLOAT_PRECISION:lterm+BL,
+      if term < DFLOAT_EPSILON then (nn:n,return(nn))
+   ),
+   BFLOAT_PRECISION:BFLOAT_PRECISION+2,
+   z:bfloat(z),
+   sum(bfloat((-1)^n*((%pi/2)^(2*n)/(((2*n)!)*(4*n+1)))*(z^(4*n+1))),n,0,nn)
+)$
+fresnelS(z):=block([nn,BFLOAT_PRECISION,term,az:dfloat(abs(z)),
+   BL:ceiling(abs(log10(DFLOAT_PRECISION))),FLOAT2BF:true],
+   BFLOAT_PRECISION:BL,
+   for n:0 step 1 do (
+      term:dfloat(((%pi/2)^(2*n+1)/(((2*n+1)!)*(4*n+3)))*(az^(4*n+3))),
+      lterm:ceiling(log10(term)),
+      if (lterm+BL) > BFLOAT_PRECISION then BFLOAT_PRECISION:lterm+BL,
+      if term < DFLOAT_EPSILON then (nn:n,return(nn))
+   ),
+   BFLOAT_PRECISION:BFLOAT_PRECISION+2,
+   z:bfloat(z),
+   sum(bfloat((-1)^n*((%pi/2)^(2*n+1)/(((2*n+1)!)*(4*n+3)))*(z^(4*n+3))),n,0,nn)
+)$

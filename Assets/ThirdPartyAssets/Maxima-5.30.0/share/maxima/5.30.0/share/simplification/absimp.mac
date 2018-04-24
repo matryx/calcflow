@@ -1,0 +1,130 @@
+ttyoff: nolabels: true $
+%signumdistribute:%absdistribute:false $
+%eligible:'[sinh,atan,tanh,atanh,erf,asinh,csch,coth,asin] $
+unitstep(u) := (1+signum(u))/2 $
+unitramp(u) := (u+abs(u))/2 $
+
+matchdeclare([utrue, vtrue], true,  eveninteger, evenintegerp) $
+oddintegerp(u):=
+   if integerp(u) and integerp((u+1)/2) or ?moddp(u)
+      then true else false $
+evenintegerp(u):=
+   if integerp(u) and integerp(u/2) or ?mevenp(u)
+     then true else false $
+tellsimpafter(abs(utrue)^eveninteger, utrue^eveninteger) $
+tellsimpafter('diff(abs(utrue),vtrue),signum(utrue)*diff(utrue,vtrue))$
+tellsimpafter(cosh(abs(utrue)), cosh(utrue)) $
+tellsimpafter(sech(abs(utrue)), sech(utrue)) $
+tellsimpafter(cos(abs(utrue)), cos(utrue)) $
+tellsimpafter(sec(abs(utrue)), sec(utrue)) $
+tellsimpafter(abs(utrue),  absimp(utrue)) $
+absimp(ut) :=block(
+   [partswitch, prederror, u, v, w, b, nomatch],
+   partswitch:true, prederror:false,
+   if atom(ut) or inpart(ut,0)="+"  then
+      if is(ut>0 or ut=0)=true then return(ut)
+      else if is(ut<0 or ut=0)=true then return(-ut)
+      else return(abs(ut)),
+   if piece="*" then(u:v:1,
+      w:[],
+      for j:1 step 1 while(b:inpart(ut,j))#end do
+         if is(b>0 or b=0)=true then u:u*b
+         else if is(b<0 or b=0)=true then u:-u*b
+         else if atom(b) or not(member(inpart(b,0), %eligible) or
+            piece="^" and oddintegerp(inpart(b,2))) then(nomatch:true,
+            for ww in w while nomatch do
+               if b=first(ww) then (nomatch:false,
+                  u: u*b*first(rest(ww)),
+                  w:delete(ww,w)),
+            if nomatch then w:cons([b,b],w))
+         else (nomatch:true,
+            inpart(b,1),
+            for ww in w while nomatch do
+               if piece=first(ww) then (nomatch:false,
+                  u: u*b*first(rest(ww)),
+                  w:delete(ww,w)),
+            if nomatch then w: cons([piece,b], w)),
+         if w=[] then return(u),
+      if %absdistribute then for ww in w do u:u*absimp(first(rest(ww)))
+      else (for ww in w do v:v*first(rest(ww)),
+         u:u*(if rest(w)=[] then absimp(v) else 'abs(v))),
+      return(u)),
+   if piece="^" then (u:inpart(ut,1),
+      if is(u>0 or u=0)=true then return(ut),
+      v:inpart(ut,2),
+      if evenintegerp(v) then return(ut),
+      if oddintegerp(v) and is(u<0 or u=0) then return(-ut),
+      return(abs(ut))),
+   if piece='log then(b:inpart(ut,1),
+      if is(b>1 or b=1)=true then return(ut),
+      if is(b<1 or b=1)=true then return(-ut),
+      return(abs(ut))),
+   if piece='cosh or piece='sech or piece='abs then return(ut),
+   if member(piece, %eligible)
+      then return(apply(piece, [absimp(inpart(ut,1))])),
+   return(abs(ut))) $
+
+matchdeclare(nonzero,nonzerop, oddinteger,oddintegerp) $
+nonzerop(u) :=
+   if ev(is(u>0 or u<0),prederror:false)=true then true
+   else false $
+
+tellsimpafter(signum(utrue)^oddinteger, signum(utrue)) $
+tellsimpafter(signum(nonzero)^eveninteger, 1) $
+tellsimpafter('diff(signum(utrue),vtrue),
+   2*delta(utrue)*diff(utrue,vtrue))$
+tellsimpafter(cosh(signum(nonzero)), cosh(1)) $
+tellsimpafter(sech(signum(nonzero)), sech(1)) $
+tellsimpafter(utrue*signum(utrue), absimp(utrue)) $
+tellsimpafter(cos(signum(utrue)), cos(1)) $
+tellsimpafter(sec(signum(utrue)), sec(1)) $
+tellsimpafter(signum(utrue), signumsimp(utrue)) $
+signumsimp(ut) := block(
+   [partswitch, prederror, u, v, b, nomatch],
+   partswitch:true, prederror:false,
+   if atom(ut) or inpart(ut,0)="+" then
+      if is(ut>0)=true then return(1)
+      else if is(ut<0)=true then return(-1)
+      else return(signum(ut)),
+   if piece="*" then(u:v:1, w:[],
+      for j:1 step 1 while(b:inpart(ut,j))#end do
+         if is(b<0)=true then u:-u
+         else if is(b>0)#true then 
+            if atom(b) or not(member(inpart(b,0),%eligible) or
+               piece="^" and oddintegerp(inpart(b,2))) then(
+               nomatch:true,
+               for ww in w while nomatch do
+                  if b=first(ww) then (nomatch:false,
+                     w:cons([b,not first(rest(ww))], delete(ww,w))),
+               if nomatch then w:cons([b,true],w))
+            else (nomatch:true,
+               inpart(b,1),
+               for ww in w while nomatch do
+                  if piece=first(ww) then (nomatch:false,
+                    w:cons([piece,not first(rest(ww))],delete(ww,w))),
+               if nomatch then w:cons([piece,true],w)),
+      if w=[] then return(u),
+      if %signumdistribute then for ww in w do u:u*
+         (if first(rest(ww)) then signumsimp(first(ww))
+         else signumsimp(first(ww)^2))
+      else (
+         for ww in w do v:v*(if first(rest(ww)) then first(ww)
+            else first(ww)^2),
+         u:u*(if rest(w)=[] then signumsimp(v) else 'signum(v))),
+      return(u)),
+   if piece="^" then(u:inpart(ut,1),
+      if is(u>0)=true then return(1),
+      v:inpart(ut,2),
+      if evenintegerp(v) and nonzerop(u) then return(1),
+      if oddintegerp(v) then return(signumsimp(u)),
+      return(signum(ut))),
+   if piece='log then(b:inpart(ut,1),
+      if is(b>1)=true then return(1),
+      if is(b<1)=true then return(-1),
+      if is(b=1)=true then return(0),
+      return(signum(ut))),
+   if piece='cosh or piece='sech then return(1),
+   if piece='signum then return(ut),
+   if member(piece, %eligible) then return(signumsimp(inpart(ut,1))),
+   return(signum(ut))) $
+ttyoff: nolabels: false $

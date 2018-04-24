@@ -1,0 +1,27 @@
+/* Test cases for ode1_lie functions */
+
+/* Some exact equations from rtestode */
+ 
+/* ode2(x^2*cos(x*y)*'diff(y,x) + (sin(x*y)+x*y*(cos(x*y)))=0, y, x); */
+sym:ode1_a(phi:(sin(x*y)+x*y*(cos(x*y)))/(x^2*cos(x*y)),y,x);
+[x,-y];
+symtest(phi,sym[1],sym[2],y,x);
+0;
+
+/* ode2( (2*x*y-exp(-2*y))*'diff(y,x)+y=0, y, x); */
+/* sym:ode1_a(phi:-y/(2*x*y-exp(-2*y)),y,x); BAD */
+
+/* ode2( 'diff(y,x)=(y/x)^2+2*(y/x), y, x); */
+sym:ode1_a(phi:(y/x)^2+2*(y/x), y, x); /* %psi_yyy=0 in ode1_a */
+[x^2,-x^2];
+symtest(phi,xi:sym[1],eta:sym[2],y,x);
+0;
+mu:lie_integrating_factor(phi,xi,eta);
+1/(-y^2-2*x*y-x^2);
+lie_exact(phi,mu,y,x);
+-y/(x*y+x^2) = %c;
+/* and the whole process */
+ans:ode1_lie(phi,y,x);
+-y/(x*y+x^2) = %c;
+ode_check('diff(y,x)=phi,first(solve(ans,y)));
+0;

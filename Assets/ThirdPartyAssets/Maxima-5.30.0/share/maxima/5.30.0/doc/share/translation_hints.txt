@@ -1,0 +1,61 @@
+Hints for compiling macsyma code.
+
+[1] Global variables.
+
+Definition: The list of variables in the first argument of a LAMBDA
+construct are defined to be lambda-bound within the lexical scope
+of the rest of the arguments of the LAMBDA, which called the body of the
+LAMBDA. This same term applies to the formal parameters of a function,
+which is also called a lambda list, and the constructs BLOCK,
+SUM, PRODUCT, and DO (also called FOR).
+
+Examples:
+
+LAMBDA([U,[L]], A*U*L /* U and L are bound here, A is not */);
+
+F(X):= (/* X is bound here */, X^2);
+
+SUM(J^N, /* J is bound here */
+      J,
+    J^2, /* J is not bound here */
+    100);
+
+Definition: If a variable in an expression is not bound lexicaly by
+            a LAMBDA construct, it is called a global variable.
+
+Hint #1: All global variables should be introduced with a DEFINE_VARIABLE.
+
+DEFINE_VARIABLE(name,default_initial_value,mode,"documentation string");
+
+The mode can be one of FIXNUM, FLOAT, BOOLEAN, or ANY.
+If the variable only takes on the values TRUE and FALSE, and its
+used in the construct IF name THEN this ELSE that; then it
+is commonly called a switch, and is of BOOLEAN mode.
+The FIXNUM and FLOAT modes set things up to make sure that
+the user only sets the variable legal fixnums (integers), and floating-point
+(real), numbers respectively. There can also be a gain in the efficiency
+of evaluating numerical expressions when the variables are of known
+fixnum or float modes. Efficiency is gained when it is know that
+the limits of DOloop's, SUM's, and PRODUCT's are FIXNUM.
+ANY mode specifies no information about the variables
+value.
+
+[2] MODEDECLARE.
+
+A modedeclaration can be given for lambda bound variables as
+the first expression within the scope of the lambda construct
+in which they are bound. e.g.
+
+F(X,Y,Z):=(MODEDECLARE([X,Y],FLOAT,Z,FIXNUM), X+Y+Z );
+
+G(Q):=BLOCK([SUM:0],
+            /* within the Block it is too late to modedeclare Q */
+            MODEDECLARE(SUM,FIXNUM), /* however here SUM can be declared. */
+            SUM:Q, SUM:SUM+Q, SUM);
+
+MAPLIST(LAMBDA([U],MODEDECLARE(U,BOOLEAN), IF U THEN PRINT("FOO")), LIST);
+
+
+Exceptions: SUM, PRODUCT and DO figure out the mode of the index by
+looking at the modes of the limits.
+

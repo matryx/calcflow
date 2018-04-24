@@ -1,0 +1,59 @@
+/*
+This subroutine does some matrix manipulations
+Copyright (C) 1999  Dan Stanger
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Dan Stanger dan.stanger@ieee.org
+*/
+/* these routines are here because of inconsistant behavior in mat_unblocker
+   if the matrix created by matrix([matrix(),matrix([r])],[matrix(),matrix()])
+   is passed into mat_unblocker, the result is matrix().  i would expect
+   that this is a error or that the matrix [r] is returned.
+   also if zeromatrix is passed 0,0 then the result is matrix(), 0,1 yields
+   matrix() also, but 1,0 yields matrix([]). */
+matrix2([l]):=matrix2aux(matrix(),apply(matrix,l))$
+matrix2aux(em,mat):=block([w:false,n,m],
+ block([ae:false,af:true], /* test matrix of all empty matrixes */
+  matrixmap(lambda([i],if i # em then ae:true else af:false), mat),
+  if ae = false then em
+  else(
+  if af then mat_unblocker(mat)
+  else (
+    block([e:false, c:col(mat,1)],
+	matrixmap(lambda([i],if i # em then e:true), c),
+	if e = false then (mat:submatrix(mat,1), w:true)),
+    block([e:false, c:col(mat,n:mat_ncols(mat))],
+	matrixmap(lambda([i],if i # em then e:true), c),
+	if e = false then (mat:submatrix(mat,n), w:true)), 
+    block([e:false, r:row(mat,1)],
+	matrixmap(lambda([i],if i # em then e:true), r),
+	if e = false then (mat:submatrix(1,mat), w:true)),
+    block([e:false, r:row(mat,m:mat_nrows(mat))],
+	matrixmap(lambda([i],if i # em then e:true), r),
+	if e = false then (mat:submatrix(m, mat), w:true)),
+    if w = true then mat:matrix2aux(em,mat)
+    else mat:blockmat(mat),
+    if matrixp(mat) and mat_nrows(mat) = 1 and mat_ncols(mat) = 1 then mat[1,1]
+    else mat
+  )
+ ))
+)$
+zeromatrix2(m,n):=if m = 0 or n = 0 then matrix() else zeromatrix(m,n)$
+submat_m(om,im,m,n)::=buildq([om,im,m,n],
+	(om:submat(im,m,n),put('om, length(m),'nrow),
+	put('om,length(n),'ncol)))$
+mat_nrows_m(om)::=buildq([om],get('om,'nrow))$
+mat_ncols_m(om)::=buildq([om],get('om,'ncol))$

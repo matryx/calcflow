@@ -1,0 +1,212 @@
+kill (all);
+done;
+
+string ('(if a > b then c else d));
+"if a > b then c else d";
+
+string ('if a > b then c else d);
+"if a > b then c else d";
+
+string ('(if a > b then c));
+"if a > b then c";
+
+string ('if a > b then c);
+"if a > b then c";
+
+string ('(if a then if b then if c then d else if e then f else g else if h then i else j else k));
+"if a then (if b then (if c then d else (if e then f else g)) else (if h then i else j)) else k";
+
+string ('if a then 'if b then 'if c then d else 'if e then f else g else 'if h then i else j else k);
+"if a then (if b then (if c then d else (if e then f else g)) else (if h then i else j)) else k";
+
+string ('(if a then b));
+"if a then b";
+
+string ('(if a then b else d));
+"if a then b else d";
+
+string ('(if a then b elseif c then false));
+"if a then b elseif c then false";
+
+string ('(if a then b elseif c then d));
+"if a then b elseif c then d";
+
+string ('(if a then b elseif c then d else f));
+"if a then b elseif c then d else f";
+
+string ('(if a then b elseif c then d elseif e then false));
+"if a then b elseif c then d elseif e then false";
+
+string ('(if a then b elseif c then d elseif e then f));
+"if a then b elseif c then d elseif e then f";
+
+string ('(if a then b elseif c then d elseif e then f else h));
+"if a then b elseif c then d elseif e then f else h";
+
+string ('(if a then b elseif c then d elseif e then f elseif g then false));
+"if a then b elseif c then d elseif e then f elseif g then false";
+
+string ('(if a then b elseif c then d elseif e then f elseif g then h));
+"if a then b elseif c then d elseif e then f elseif g then h";
+
+string ('if a then b);
+"if a then b";
+
+string ('if a then b else d);
+"if a then b else d";
+
+string ('if a then b elseif c then false);
+"if a then b elseif c then false";
+
+string ('if a then b elseif c then d);
+"if a then b elseif c then d";
+
+string ('if a then b elseif c then d else f);
+"if a then b elseif c then d else f";
+
+string ('if a then b elseif c then d elseif e then false);
+"if a then b elseif c then d elseif e then false";
+
+string ('if a then b elseif c then d elseif e then f);
+"if a then b elseif c then d elseif e then f";
+
+string ('if a then b elseif c then d elseif e then f else h);
+"if a then b elseif c then d elseif e then f else h";
+
+string ('if a then b elseif c then d elseif e then f elseif g then false);
+"if a then b elseif c then d elseif e then f elseif g then false";
+
+string ('if a then b elseif c then d elseif e then f elseif g then h);
+"if a then b elseif c then d elseif e then f elseif g then h";
+
+(a: z^3,
+b: q/p,
+c: x < 1024,
+d: 1729.0,
+e: 'if a > b then c else d,
+f: 'if c < d then a elseif c < b then e else g,
+g: abs(r),
+h: %pi*e,
+0);
+0;
+
+string ('if a then b);
+"if z^3 then q/p";
+
+string ('if a then b else d);
+"if z^3 then q/p else 1729.0";
+
+string ('if a then b elseif c then false);
+"if z^3 then q/p elseif x < 1024 then false";
+
+string ('if a then b elseif c then d);
+"if z^3 then q/p elseif x < 1024 then 1729.0";
+
+string ('if a then b elseif c then d else f);
+"if z^3 then q/p elseif x < 1024 then 1729.0 else (if x < 1024 < 1729.0 then z^3 elseif x < 1024 < q/p then (if z^3 > q/p then x < 1024 else 1729.0) else g)";
+
+string ('if a then b elseif c then d elseif e then false);
+"if z^3 then q/p elseif x < 1024 then 1729.0 elseif (if z^3 > q/p then x < 1024 else 1729.0) then false";
+
+string ('if a then b elseif c then d elseif e then f);
+"if z^3 then q/p elseif x < 1024 then 1729.0 elseif (if z^3 > q/p then x < 1024 else 1729.0) then (if x < 1024 < 1729.0 then z^3 elseif x < 1024 < q/p then (if z^3 > q/p then x < 1024 else 1729.0) else g)";
+
+string ('if a then b elseif c then d elseif e then f else h);
+"if z^3 then q/p elseif x < 1024 then 1729.0 elseif (if z^3 > q/p then x < 1024 else 1729.0) then (if x < 1024 < 1729.0 then z^3 elseif x < 1024 < q/p then (if z^3 > q/p then x < 1024 else 1729.0) else g) else %pi*(if z^3 > q/p then x < 1024 else 1729.0)";
+
+string ('if a then b elseif c then d elseif e then f elseif g then false);
+"if z^3 then q/p elseif x < 1024 then 1729.0 elseif (if z^3 > q/p then x < 1024 else 1729.0) then (if x < 1024 < 1729.0 then z^3 elseif x < 1024 < q/p then (if z^3 > q/p then x < 1024 else 1729.0) else g) elseif abs(r) then false";
+
+string ('if a then b elseif c then d elseif e then f elseif g then h);
+"if z^3 then q/p elseif x < 1024 then 1729.0 elseif (if z^3 > q/p then x < 1024 else 1729.0) then (if x < 1024 < 1729.0 then z^3 elseif x < 1024 < q/p then (if z^3 > q/p then x < 1024 else 1729.0) else g) elseif abs(r) then %pi*(if z^3 > q/p then x < 1024 else 1729.0)";
+
+(postfix ("abc"), postfix ("xyz"), grind: true, linel: 65, 0);
+0;
+
+/* NOTE: the literal strings in the remainder of this file
+ * contain embedded tabs and newlines.
+ */
+string (my_union(x,y):=if x = [] then y
+          else (if member(t:first(x),y) then my_union(rest(x),y)
+                    else cons(t,my_union(rest(x),y)))); 
+"my_union(x,y):=if x = [] then y
+          else (if member(t:first(x),y) then my_union(rest(x),y)
+                    else cons(t,my_union(rest(x),y)))" ; 
+
+string (g(l):=catch(map(lambda([x],if x < 0 then throw(x) else f(x)),l))); 
+"g(l):=catch(map(lambda([x],if x < 0 then throw(x) else f(x)),l))" ; 
+
+string (typeof(x):=block([q],if numberp(x) then return(algebraic),
+       if not atom(x) then return(maplist(typeof,x)),
+       q:get(x,type),
+       if q = false then error("not numeric") else q)); 
+"typeof(x):=block([q],if numberp(x) then return(algebraic),
+       if not atom(x) then return(maplist(typeof,x)),
+       q:get(x,type),
+       if q = false then error(\"not numeric\") else q)" ; 
+
+string (closeto(e,tol):=block([numer:true,abse],abse:abs(e),
+        if abse < tol then true else abse)); 
+"closeto(e,tol):=block([numer:true,abse],abse:abs(e),
+        if abse < tol then true else abse)" ; 
+
+string (fib[n]:=if n = 1 or n = 2 then 1 else fib[n-1]+fib[n-2]); 
+"fib[n]:=if n = 1 or n = 2 then 1 else fib[n-2]+fib[n-1]" ; 
+
+string (eta(mu,nu):=if mu = nu then mu
+     else (if mu > nu then mu-nu else mu+nu)); 
+"eta(mu,nu):=if mu = nu then mu
+     else (if mu > nu then mu-nu else nu+mu)" ; 
+
+string ('(if not 5 >= 2 and 6 <= 5 or 5 > 3 then a else b)); 
+"if 5 < 2 and 6 <= 5 or 5 > 3 then a else b" ; 
+
+string ('(for i thru 10 do
+      (guess:subst(guess,x,0.5*(x+10/x)),
+       if abs(guess^2-10) < 1/20000 then return(guess)))); 
+"for i thru 10 do
+    (guess:subst(guess,x,0.5*(x+10/x)),
+     if abs(guess^2-10) < 1/20000 then return(guess))" ; 
+
+string (newton(f,guess):=block([numer,y],local(f,df,x,guess),numer:true,
+       define(df(x),diff(f(x),x)),
+       do (y:df(guess),
+           if y = 0 then error("derivative at",guess,"is zero"),
+           guess:guess-f(guess)/y,
+           if abs(f(guess)) < 1/200000 then return(guess)))); 
+"newton(f,guess):=block([numer,y],local(f,df,x,guess),numer:true,
+       define(df(x),diff(f(x),x)),
+       do (y:df(guess),
+           if y = 0 then error(\"derivative at\",guess,\"is zero\"),
+           guess:guess-f(guess)/y,
+           if abs(f(guess)) < 1/200000 then return(guess)))" ; 
+
+string ('(extremal_subset(set(2*sqrt(7),1.4b0,a,b+a),
+                  lambda([x],if atom(x) then 0 else 1),max))); 
+"extremal_subset({2*sqrt(7),1.4b0,a,b+a},
+                lambda([x],if atom(x) then 0 else 1),max)" ; 
+
+string (rprimep(i,j):=block([],
+        if integerp(i) and integerp(j)
+            then (if gcd(i,j) > 1 then 0 else 1)
+            else funmake(rprimep,[i,j]))); 
+"rprimep(i,j):=block([],
+        if integerp(i) and integerp(j)
+            then (if gcd(i,j) > 1 then 0 else 1)
+            else funmake(rprimep,[i,j]))" ; 
+
+string ('(extremal_subset(set(2*sqrt(7),1.4b0,a,b+a),
+                  lambda([x],
+                         if foo(x)
+                             then (if atom(x) then 0
+                                       else 1)! abc! xyz!
+                             else (if bar(x) then glob
+                                       else blurf)),max))); 
+"extremal_subset({2*sqrt(7),1.4b0,a,b+a},
+                lambda([x],
+                       if foo(x)
+                           then (if atom(x) then 0
+                                     else 1)! abc! xyz!
+                           else (if bar(x) then glob
+                                     else blurf)),max)" ; 
+

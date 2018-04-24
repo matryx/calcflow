@@ -1,0 +1,3675 @@
+/******************************************************************************
+  rtest_gamma.mac
+  Test for Factorial, Gamma function and related functions ...
+******************************************************************************/
+
+kill(all);
+done;
+
+(oldfpprec:fpprec, fpprec:16, done);
+done;
+
+/* Two definitions for numerical test functions
+   For big results relerror is used */
+
+(closeto(value,compare,tol):=
+  block(
+    [abse],
+    abse:abs(value-compare),if(abse<tol) then true else abse),
+    done);
+done;
+
+(relerror(value,compare,tol):=
+  block(
+    [abse],
+    abse:abs((value-compare)/compare),
+    if(abse<tol) then true else abse),
+    done);
+done;
+
+/******************************************************************************
+  Factorial
+******************************************************************************/
+
+/* Factorial has mirror symmetry */
+
+declare(z,complex);
+done;
+
+conjugate(factorial(z));
+factorial(conjugate(z));
+
+conjugate(factorial(x+%i*y));
+factorial(x-%i*y);
+
+/* some small positive integers or the real representation */
+
+fpprec:16;
+16;
+
+map(factorial, [0,1,2,3,4]);
+[1,1,2,6,24];
+
+closeto(factorial(0.0),1.0,1e-13);
+true;
+closeto(factorial(1.0),1.0,1e-13);
+true;
+closeto(factorial(2.0),2.0,1e-13);
+true;
+closeto(factorial(3.0),6.0,1e-13);
+true;
+closeto(factorial(4.0),24.0,1e-13);
+true;
+
+closeto(factorial(0.0b0),1.0b0,1e-13);
+true;
+closeto(factorial(1.0b0),1.0b0,1e-13);
+true;
+closeto(factorial(2.0b0),2.0b0,1e-13);
+true;
+closeto(factorial(3.0b0),6.0b0,1e-13);
+true;
+closeto(factorial(4.0b0),24.0b0,1e-13);
+true;
+
+/* negative integers or there real representation */
+
+errcatch(factorial(-1));
+[];
+
+errcatch(factorial(-1.0));
+[];
+
+errcatch(factorial(-1.0b0));
+[];
+
+errcatch(factorial(-10));
+[];
+
+errcatch(factorial(-10.0));
+[];
+
+errcatch(factorial(-10.0b0));
+[];
+
+/* half integral values */
+
+factorial(1/2);
+sqrt(%pi)/2;
+factorial(-1/2);
+sqrt(%pi);
+factorial(3/2);
+3*sqrt(%pi)/4;
+factorial(-3/2);
+-2*sqrt(%pi);
+factorial(5/2);
+15*sqrt(%pi)/8;
+factorial(-5/2);
+4*sqrt(%pi)/3;
+
+/* Expansion for factorial(z+n) and integer n */
+
+factorial_expand:true;
+true;
+
+factorial(z+1);
+(z+1)*factorial(z);
+
+factorial(z+2);
+(z+1)*(z+2)*factorial(z);
+
+factorial(z+3);
+(z+1)*(z+2)*(z+3)*factorial(z);
+
+factorial(z-1);
+factorial(z)/z;
+
+factorial(z-1);
+factorial(z)/z;
+
+factorial(z-2);
+factorial(z)/(z*(z-1));
+
+factorial(z-3);
+factorial(z)/(z*(z-1)*(z-2));
+
+/* Nested factorials simplifies too, see SF[1486452] */
+
+factorial(factorial(n)/factorial(n-1));
+factorial(n);
+
+factorial(sin(factorial(n)/factorial(n-1)));
+factorial(sin(n));
+
+factorial_expand:false;
+false;
+
+/* minfactorial does not do this job */
+
+minfactorial(factorial(factorial(n)/factorial(n-1)));
+factorial(factorial(n)/factorial(n-1));
+
+/* factcomb is the inverse operation to minfactorial 
+   factorial_expand has to be false 
+*/
+
+factcomb((n+1)*(n+2)*(n+3)*n!);
+(n+3)!;
+
+factcomb(n!/(n*(n-1)*(n-2)));
+(n-3)!;
+
+/* No simplifcation for infinities and undeterminates 
+   with the exception of inf! -> inf */
+
+map(factorial, [inf,minf,infinity,und,ind]);
+[inf,factorial(minf),factorial(infinity),factorial(und),factorial(ind)];
+
+/* factlim is set to the value 100,000. This should work.  */
+
+fpprec:64;
+64;
+
+relerror(
+  factorial(factlim),
+  factorial(bfloat(factlim)),
+  1b-58);                      /* We loose a lost of digits in relerror */
+true;
+
+factorial(factlim+1);
+factorial(100000+1);
+
+/* Some real values in double float and bigfloat precision */
+
+fpprec:64;
+64;
+
+closeto(
+  factorial(1.3),
+  1.166711905198160345041881441202917938533994349719468893970206664b0,
+  1e-14);
+true;
+
+closeto(
+  factorial(2.3),
+  2.683437381955768793596327314766711258628187004354778456131475327b0,
+  1e-14);
+true;
+
+closeto(
+  factorial(3.3),
+  8.855343360454037018867880138730147153473017114370768905233868579b0,
+  1e-14);
+true;
+
+closeto(
+  factorial(1.3b0),
+  1.166711905198160345041881441202917938533994349719468893970206664b0,
+  1e-62);
+true;
+
+closeto(
+  factorial(2.3b0),
+  2.683437381955768793596327314766711258628187004354778456131475327b0,
+  1e-62);
+true;
+
+closeto(
+  factorial(3.3b0),
+  8.855343360454037018867880138730147153473017114370768905233868579b0,
+  1e-61);
+true;
+
+/* some complex values in double float and bigfloat precision */
+
+closeto(
+  factorial(1.3+%i),
+  (0.7191409365372817791473038599462048083254863806205029128993808432b0 
+  +0.5406144679098492753783510221774150545811250310680842509749769021b0*%i),
+  1e-14);
+true;
+
+closeto(
+  factorial(2.3+%i),
+  (1.113409686125898816660447855698856004567493644359072448693599037b0 
+  +1.962554212729935112517511210954259433862073952077096690141827718b0*%i),
+  1e-14);
+true;
+
+closeto(
+  factorial(3.3+%i),
+  (1.711697751485530982461966712851965381210655074307842390547049105b0 
+  +7.589838588134684687968234851847912136312337686213491526161630507b0*%i),
+  5.0e-14);
+true;
+
+closeto(
+  factorial(1.3b0+%i),
+  (0.7191409365372817791473038599462048083254863806205029128993808432b0 
+  +0.5406144679098492753783510221774150545811250310680842509749769021b0*%i),
+  1e-62);
+true;
+
+closeto(
+  factorial(2.3b0+%i),
+  (1.113409686125898816660447855698856004567493644359072448693599037b0 
+  +1.962554212729935112517511210954259433862073952077096690141827718b0*%i),
+  1e-62);
+true;
+
+closeto(
+  factorial(3.3b0+%i),
+  (1.711697751485530982461966712851965381210655074307842390547049105b0 
+  +7.589838588134684687968234851847912136312337686213491526161630507b0*%i),
+  1e-61);
+true;
+
+/******************************************************************************
+  General factorial: Tests for genfact(x,y,z)
+******************************************************************************/
+
+genfact(0,0,1);
+1;
+genfact(1,1,1);
+1;
+genfact(2,2,1);
+2;
+genfact(3,3,1);
+6;
+genfact(4,4,1);
+24;
+
+genfact(0,0/2,2);
+1;
+genfact(1,1/2,2);
+1;
+genfact(2,2/2,2);
+2;
+genfact(3,3/2,2);
+3;
+genfact(4,4/2,2);
+8;
+
+genfact(10,10,1);
+3628800;
+genfact(10,9,1);
+3628800;
+genfact(10,8,1);
+1814400;
+genfact(10,7,1);
+604800;
+genfact(10,6,1);
+151200;
+genfact(10,5,1);
+30240;
+genfact(10,4,1);
+5040;
+genfact(10,3,1);
+720;
+genfact(10,2,1);
+90;
+genfact(10,1,1);
+10;
+genfact(10,0,1);
+1;
+
+genfact(10,5,2);
+3840;
+genfact(10,4,2);
+1920;
+genfact(10,3,2);
+480;
+genfact(10,2,2);
+80;
+genfact(10,1,2);
+10;
+genfact(10,0,2);
+1;
+
+/* for non valid integers we get an error */
+errcatch(genfact(-2,-2,1));
+[];
+errcatch(genfact(2,5,2));
+[];
+
+/* for all other numbers we get a noun form */
+(3/2)!!;
+genfact(3/2,0,2);
+(2.5)!!;
+genfact(2.5,1,2);
+(2.5b0)!!;
+genfact(2.5b0,1,2);
+
+/******************************************************************************
+  Double factorial
+******************************************************************************/
+
+/* Double factorial has mirror symmetry */
+
+declare(z,complex);
+done;
+
+conjugate(double_factorial(z));
+double_factorial(conjugate(z));
+
+conjugate(double_factorial(x+%i*y));
+double_factorial(x-%i*y);
+
+/* No simplifcation for infinities and undeterminates 
+   with the exception of inf: inf! -> inf */
+
+map(factorial, [inf,minf,infinity,und,ind]);
+[inf,factorial(minf),factorial(infinity),factorial(und),factorial(ind)];
+
+/* Test the expansion of Double factorial */
+
+double_factorial(n+1);
+double_factorial(n+1);
+
+double_factorial(n+2),factorial_expand:true;
+(n+2)*double_factorial(n);
+
+double_factorial(n+3),factorial_expand:true;
+double_factorial(n+3);
+
+double_factorial(n+4),factorial_expand:true;
+(n+2)*(n+4)*double_factorial(n);
+
+double_factorial(n-1),factorial_expand:true;
+factorial(n)/double_factorial(n);
+
+double_factorial(n-2),factorial_expand:true;
+double_factorial(n)/n;
+
+double_factorial(n-3),factorial_expand:true;
+double_factorial(n-3);
+
+double_factorial(n-4),factorial_expand:true;
+double_factorial(n)/(n*(n-2));
+
+/* Some small numbers */
+
+double_factorial(-3);
+-1;
+errcatch(double_factorial(-2));
+[];
+double_factorial(-1);
+1;
+double_factorial(0);
+1;
+double_factorial(1);
+1;
+double_factorial(2);
+2;
+double_factorial(3);
+3;
+double_factorial(4);
+8;
+double_factorial(5);
+15;
+double_factorial(6);
+48;
+double_factorial(7);
+105;
+double_factorial(8);
+384;
+double_factorial(9);
+945;
+double_factorial(10);
+3840;
+
+/* The same for double float */
+
+closeto(
+  double_factorial(-3.0),
+  -1.0,
+  1e-13);
+true;
+
+errcatch(double_factorial(-2.0));
+[];
+
+closeto(
+  double_factorial(-1.0),
+  1.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(0.0),
+  1.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(1.0),
+  1.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(2.0),
+  2.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(3.0),
+  3.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(4.0),
+  8.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(5.0),
+  15.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(6.0),
+  48.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(7.0),
+  105.0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(8.0),
+  384.0,
+  1e-12);
+true;
+
+closeto(
+  double_factorial(9.0),
+  945.0,
+  1e-11);
+true;
+
+closeto(
+  double_factorial(10.0),
+  3840.0,
+  1.5E-12);
+true;
+
+/* The same with bigfloat */
+fpprec:64;
+64;
+
+closeto(
+  double_factorial(-3.0b0),
+  -1.0b0,
+  1e-13);
+true;
+
+errcatch(double_factorial(-2.0b0));
+[];
+
+closeto(
+  double_factorial(-1.0b0),
+  1.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(0.0b0),
+  1.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(1.0b0),
+  1.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(2.0b0),
+  2.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(3.0b0),
+  3.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(4.0b0),
+  8.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(5.0b0),
+  15.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(6.0b0),
+  48.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(7.0b0),
+  105.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(8.0b0),
+  384.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(9.0b0),
+  945.0b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(10.0b0),
+  3840.0b0,
+  1e-13);
+true;
+
+/* Some real and complex values */
+
+closeto(
+  double_factorial(-3.5),
+  -1.283770376595223397225456287264697304361344685971440894669095353b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(-3.5b0),
+  -1.283770376595223397225456287264697304361344685971440894669095353b0,
+  1e-60);
+true;
+
+closeto(
+  double_factorial(-3.5+%i),
+  (-0.0026442534512730229977827874410755514695008373007370518369259413b0 
+   +0.4140148090845355309500755922424659939330568167751526009311942842b0*%i),
+  1e-13);
+true;
+
+closeto(
+  double_factorial(3.5),
+  4.832319386136852665658314936437452651454869331098044546829825309b0,
+  1e-13);
+true;
+
+closeto(
+  double_factorial(3.5b0),
+  4.832319386136852665658314936437452651454869331098044546829825309b0,
+  1e-60);
+true;
+
+closeto(
+  double_factorial(3.5+%i),
+  (-2.165793510810110416038389252512222520262890874310470919228355939b0 
+   +4.032141259508464573377851775093179996368679285808989461893416849b0*%i),
+  1e-13);
+true;
+
+closeto(
+  double_factorial(-3.5b0+%i),
+  (-0.0026442534512730229977827874410755514695008373007370518369259413b0 
+   +0.4140148090845355309500755922424659939330568167751526009311942842b0*%i),
+  1e-60);
+true;
+
+closeto(
+  double_factorial(3.5b0+%i),
+  (-2.165793510810110416038389252512222520262890874310470919228355939b0 
+   +4.032141259508464573377851775093179996368679285808989461893416849b0*%i),
+  1b-60);
+true;
+
+closeto(
+  double_factorial(3.3b0+%i),
+  (-0.401169963963553982868990904015984192029807700247132080411340721b0 
+  + 1.778201955902329072861901606357849890890501421219437116360540910b0*%i),
+  1b-60);
+true;
+
+/******************************************************************************
+
+  Test the Gamma function
+
+  Numerical values are taken from functions/wolfram.com.
+******************************************************************************/
+
+/* The Gamma function has mirror symmetry */
+
+declare(z,complex);
+done;
+
+conjugate(gamma(z));
+gamma(conjugate(z));
+
+conjugate(gamma(x+%i*y));
+gamma(x-%i*y);
+
+/* Check some simple values for integer, float and bigfloat */
+
+map('gamma,[1,2,3,4,5]);
+[1,1,2,6,24];
+
+closeto(gamma(1.0),1.0,1e-13);
+true;
+
+closeto(gamma(2.0),1.0,1e-13);
+true;
+
+closeto(gamma(3.0),2.0,1e-13);
+true;
+
+closeto(gamma(4.0),6.0,1e-13);
+true;
+
+closeto(gamma(5.0),24.0,5e-13);  
+true;
+
+closeto(gamma(1.0b0),1.0b0,1e-13);
+true;
+
+closeto(gamma(2.0b0),1.0b0,1e-13);
+true;
+
+closeto(gamma(3.0b0),2.0b0,1e-13);
+true;
+
+closeto(gamma(4.0b0),6.0b0,1e-13);
+true;
+
+closeto(gamma(5.0b0),24.0b0,1e-13);
+true;
+
+/* Check for a zero argument */
+
+errcatch(gamma(0));
+[];
+errcatch(gamma(0.0));
+[];
+errcatch(gamma(0.0b0));
+[];
+
+/* Check test for negative integer or a representation of a negative integer */
+
+errcatch(gamma(-2));
+[];
+errcatch(gamma(-2.0));
+[];
+errcatch(gamma(-2.b0));
+[];
+
+/* Check the correct handling of the $numer flag */
+
+gamma(%e),numer;
+1.5674682557740529;
+gamma(%e),numer,%enumer;
+1.5674682557740529;
+gamma(a+b),numer;
+gamma(a+b);
+gamma(%i);
+gamma(%i);
+gamma(%i),numer;
+gamma(1.0*%i);   /* Evaluates to a complex number */
+
+/* Check half integral integers as values */
+
+gamma(1/2);
+sqrt(%pi);
+gamma(-1/2);
+-2*sqrt(%pi);
+gamma(3/2);
+sqrt(%pi)/2;
+gamma(-3/2);
+4*sqrt(%pi)/3;
+gamma(5/2);
+3*sqrt(%pi)/4;
+gamma(-5/2);
+-8*sqrt(%pi)/15;
+
+/* Check expansion of the Gamma function */
+
+gamma_expand:true;
+true;
+
+gamma(z+1)/gamma(z);
+z;
+
+gamma(gamma(z+1)/gamma(z));
+gamma(z);
+
+gamma(z+1)/gamma(z-1);
+(z-1)*z;
+
+gamma(z+2)/gamma(z-2);
+(z-2)*(z-1)*z*(z+1);
+
+gamma_expand:false;
+false;
+
+/* We check that the default values for $factlim:100000 and 
+   $gammalim:10000 work. */
+
+fpprec:16;
+16;
+
+relerror(
+  bfloat(gamma(factlim)),
+  gamma(bfloat(factlim)),
+  1b-14);
+true;
+
+relerror(
+  bfloat(gamma((gammalim-1)+1/2)),
+  gamma(bfloat((gammalim-1)+1/2)),
+  1b-15);
+true;
+
+relerror(
+  bfloat(gamma(-gammalim+1/2)),
+  gamma(bfloat(-gammalim+1/2)),
+  1b-15);
+true;
+
+/* Check test for overflow in flonum routine gamma-lanczos */
+
+relerror(
+  gamma(170.0),          /* should not overflow. For GCL 2.6.8 and */
+  float(gamma(170)),     /* and CLISP 2.44 the limit is ~171.6243  */
+  1e-12);
+true;       
+
+errcatch(gamma(175.0));  /* should overflow */
+[];
+
+errcatch(gamma(250.0));  /* should overflow */
+[];
+
+/* Simplifcation for infinities and undeterminates only for inf */
+
+map('gamma, [inf,minf,infinity,und,ind]);
+[inf,gamma(minf),gamma(infinity),gamma(und),gamma(ind)];
+
+/* Check real and complex arguments in double float precision. 
+   This is a check for the numerical routine gamma-lanczos */
+
+closeto(
+  gamma(1.5),
+  0.8862269254527580136490837416705725913987747280611935641069038949b0,
+  1e-14);
+true;
+
+closeto(
+  gamma(2.5),
+  1.329340388179137020473625612505858887098162092091790346160355842b0,
+  1e-14);
+true;
+
+closeto(
+  gamma(3.5),
+  3.323350970447842551184064031264647217745405230229475865400889606b0,
+  1e-14);
+true;
+
+relerror(
+  gamma(75.5),
+  2.859942315653572214189951793671955438617013849084406338093590075b108,
+  5e-14);
+true;
+
+closeto(
+  gamma(0.5+%i),
+  (0.3006946172606558162173894638352104402306759641691949986162475934b0 
+  -0.4249678794331238126098496402574059704734842223340586518754297249b0*%i),
+  1e-14);
+true;
+
+closeto(
+  gamma(1.5+%i),
+  (0.5753151880634517207185443721750111905888222044186561511835535216b0 
+  +0.0882106775440939099124646437065074549939338530021656726785327309b0*%i),
+  1e-14);
+true;
+
+closeto(
+  gamma(2.5+%i),
+  (0.7747621045510836711653519145560093308892994536258185540967975514b0 
+  +0.7076312043795925855872413377347723730797229839219046602013526179b0*%i),
+  1e-14);
+true;
+
+closeto(
+  gamma(3.5+%i),
+  (1.229274056998116592326138448655250954143525650142641725040641261b0 
+  +2.543840115500065135133455258892940263588606913430580204600179096b0*%i),
+  1e-14);
+true;
+
+relerror(
+  gamma(75.5+%i),
+  (-1.092860022497734443706055997676557155572470037327121860702819811b108 
+   -2.622326961675321010452173874453854546607804545768376326095021243b108*%i),
+  5e-14);
+true;
+
+/* Check negative real arguments in double float precision. 
+   This is a check for the reflection formula of gamma-lanzos */
+
+closeto(
+  gamma(-0.5),
+  -3.544907701811032054596334966682290365595098912244774256427615580b0,
+  1e-14);
+true;
+
+closeto(
+  gamma(-1.5),
+  2.363271801207354703064223311121526910396732608163182837618410386b0,
+  1e-14);
+true;
+
+closeto(
+  gamma(-2.5),
+  -0.9453087204829418812256893244486107641586930432652731350473641546b0,
+  1e-14);
+true;
+
+/* Check real arguments up to 64 digits. 
+   This is a check for the numerical routine bffac */
+
+fpprec:64; /* we have saved the actual value at the beginning of the file */
+64;
+
+closeto(
+  gamma(0.5b0),
+  1.772453850905516027298167483341145182797549456122387128213807790b0,
+  5.0b-64);
+true;
+
+closeto(
+  gamma(1.5b0),
+  0.8862269254527580136490837416705725913987747280611935641069038949b0,
+  5.0b-64);
+true;
+
+closeto(
+  gamma(2.5b0),
+  1.329340388179137020473625612505858887098162092091790346160355842b0,
+  5.0b-64);
+true;
+
+closeto(
+  gamma(3.5b0),
+  3.323350970447842551184064031264647217745405230229475865400889606b0,
+  5.0b-64);
+true;
+
+relerror(
+  gamma(75.5b0),
+  2.859942315653572214189951793671955438617013849084406338093590075b108,
+  5.0b-64);
+true;
+
+/* Check negative real arguments up to 64 digits. 
+   This is a check for the reflection formula of bffac */
+
+closeto(
+  gamma(-0.5b0),
+  -3.544907701811032054596334966682290365595098912244774256427615580b0,
+  5.0b-64);
+true;
+
+closeto(
+  gamma(-1.5b0),
+  2.363271801207354703064223311121526910396732608163182837618410386b0,
+  8.0b-64);
+true;
+
+closeto(
+  gamma(-2.5b0),
+  -0.9453087204829418812256893244486107641586930432652731350473641546b0,
+  5.0b-64);
+true;
+
+/* Check complex arguments up to 64 digits. 
+   This is a check for the numerical routine cbffac */
+
+closeto(
+  gamma(0.5b0+%i),
+  (0.3006946172606558162173894638352104402306759641691949986162475934b0 
+  -0.4249678794331238126098496402574059704734842223340586518754297249b0*%i),
+  5.0b-64);
+true;
+
+closeto(
+  gamma(1.5b0+%i),
+  (0.5753151880634517207185443721750111905888222044186561511835535216b0 
+  +0.0882106775440939099124646437065074549939338530021656726785327309b0*%i),
+  5.0b-64);
+true;
+
+closeto(
+  gamma(2.5b0+%i),
+  (0.7747621045510836711653519145560093308892994536258185540967975514b0 
+  +0.7076312043795925855872413377347723730797229839219046602013526179b0*%i),
+  5.0b-64);
+true;
+
+closeto(
+  gamma(3.5b0+%i),
+  (1.229274056998116592326138448655250954143525650142641725040641261b0 
+  +2.543840115500065135133455258892940263588606913430580204600179096b0*%i),
+  5.0b-64);
+true;
+
+relerror(
+  gamma(75.5b0+%i),
+  (-1.092860022497734443706055997676557155572470037327121860702819811b108 
+   -2.622326961675321010452173874453854546607804545768376326095021243b108*%i),
+  5.0b-64);
+true;
+
+(fpprec:oldfpprec,done); /* Reset the value of fpprec */
+done;
+
+/******************************************************************************
+
+  Test the Incomplete Gamma function
+
+******************************************************************************/
+
+(oldfpprec : fpprec,done);
+done;
+
+/* Some special values */
+
+gamma_incomplete(a,0);
+gamma_incomplete(a,0);
+
+(assume(am < 0, ap > 0),done);
+done;
+
+errcatch(gamma_incomplete(-1,0));
+[];
+errcatch(gamma_incomplete(-2,0));
+[];
+errcatch(gamma_incomplete(am,0));
+[];
+gamma_incomplete(1,0);
+1;
+gamma_incomplete(2,0);
+1;
+gamma_incomplete(3,0);
+2;
+gamma_incomplete(ap,0);
+gamma(ap);
+
+gamma_incomplete(a,inf);
+0;
+
+/* Expansion of the Incomplete Gamma function */
+
+gamma_expand:true;
+true;
+
+gamma_incomplete(0,z);
+-expintegral_ei(-z)+1/2*(log(-z)-log(-1/z))-log(z);
+
+gamma_incomplete(1/2,z);
+sqrt(%pi)*erfc(sqrt(z));
+
+gamma_incomplete(-1/2,z);
+2*%e^(-z)/sqrt(z)-2*sqrt(%pi)*erfc(sqrt(z));
+
+gamma_incomplete(1,z);
+%e^-z;
+ 
+gamma_incomplete(-1,z);
+log(z)-(log(-z)-log(-1/z))/2+expintegral_ei(-z)+%e^-z/z;
+
+gamma_incomplete(3/2,z);
+sqrt(z)*%e^-z+sqrt(%pi)*erfc(sqrt(z))/2;
+
+gamma_incomplete(-3/2,z);
+4*sqrt(%pi)*erfc(sqrt(z))/3-(4*z/3-2/3)*%e^-z/z^(3/2);
+
+gamma_incomplete(2,z);
+(z+1)*%e^-z;
+
+gamma_incomplete(a+1,z);
+z^a*%e^-z+a*gamma_incomplete(a,z);
+
+gamma_incomplete(a-1,z);
+-z^(a-1)*%e^-z/(a-1)-gamma_incomplete(a,z)/(1-a);
+
+gamma_incomplete(a+2,z);
+(1-(-a-1)/z)*z^(a+1)*%e^-z+a*(a+1)*gamma_incomplete(a,z);
+
+gamma_incomplete(a-2,z);
+gamma_incomplete(a,z)/((1-a)*(2-a))-z^(a-2)*(z/((a-2)*(a-1))+1/(a-2))*%e^-z;
+
+gamma_expand:false;
+false;
+
+/* The Incomplete Gamma function has not mirror symmetry on the negative
+   real axis. We have supported a conjugate-gamma-incomplete function */
+
+declare(ac, complex, zc,complex);
+done;
+
+conjugate(gamma_incomplete(ac,zc));
+conjugate(gamma_incomplete(ac,zc));
+
+conjugate(gamma_incomplete(a+b*%i,x+y*%i));
+conjugate(gamma_incomplete(a+b*%i,x+y*%i));
+
+conjugate(gamma_incomplete(a+b*%i,10));
+gamma_incomplete(a-b*%i,10);
+
+conjugate(gamma_incomplete(a+b*%i,-10));
+conjugate(gamma_incomplete(a+b*%i,-10));
+
+/* Derivatives of the Incomplete Gamma function */
+
+diff(gamma_incomplete(a,x),x);
+-x^(a-1)*%e^(-x);
+
+/* Noun form if sign of the parameter a is not known */
+diff(gamma_incomplete(a,x),a);
+'diff(gamma_incomplete(a,x),a);
+
+/* The parameter a has a positive sign */
+(assume(a>0),done);
+done;
+
+expand(diff(gamma_incomplete(a,x),a)-
+(-(gamma(a)-gamma_incomplete(a,x))*log(x)
+       +gamma(a)^2*hypergeometric_regularized([a,a],[a+1,a+1],-x)*x^a
+       +psi[0](a)*gamma(a)));
+0;
+
+(forget(a>0),done);
+done;
+
+/* Numerical tests for the Incomplete Gamma function */
+
+/* At first tests for a=0 and negative integers for a 
+   For this values the numerical algorithm of gamma-incomplete do not
+   work. The routines of the Exponential Integral E are used. */
+
+closeto(
+  gamma_incomplete(0,0.5),
+  0.55977359477616081174679593931509b0,
+  5e-15);
+true;
+
+closeto(
+  gamma_incomplete(0,-0.5),
+  -0.4542199048631735799205238126628b0-3.1415926535897932384626433832795b0*%i,
+  5e-15);
+true;
+
+closeto(
+  gamma_incomplete(0,0.5+%i),
+  -0.07139471104245272355588497993684b0-0.35749377365216265125485869345732b0*%i,
+  5e-15);
+true;
+
+closeto(
+  gamma_incomplete(0,-0.5+%i),
+  -0.92289919055678882179364241497461b0-0.81571273343182452677967141350955b0*%i,
+  5e-15);
+true;
+
+/* Now for bigfloat precision */
+
+fpprec:32;
+32;
+
+closeto(
+  gamma_incomplete(0,0.5b0),
+  0.55977359477616081174679593931509b0,
+  1b-30);
+true;
+
+closeto(
+  gamma_incomplete(0,-0.5b0),
+  -0.4542199048631735799205238126628b0-3.1415926535897932384626433832795b0*%i,
+  1b-30);
+true;
+
+closeto(
+  gamma_incomplete(0,0.5b0+%i),
+  -0.07139471104245272355588497993684b0-0.35749377365216265125485869345732b0*%i,
+  1b-30);
+true;
+
+closeto(
+  gamma_incomplete(0,-0.5b0+%i),
+  -0.92289919055678882179364241497461b0-0.81571273343182452677967141350955b0*%i,
+  1b-30);
+true;
+
+/* Tests with negative integers */
+
+closeto(
+  gamma_incomplete(-1,-0.5),
+  -2.8432226365370827137767777629655b0+3.1415926535897932384626433832795b0*%i,
+  5e-15);
+true;
+
+closeto(
+  gamma_incomplete(-5,-0.5),
+  -12.1692735494620863710665339515891b0+0.0261799387799149436538553615273b0*%i,
+  8e-15);
+true;
+
+closeto(
+  gamma_incomplete(-1,-0.5+%i),
+  -0.54330486022427331058655939975980b0+0.65800685452922697341354545991819b0*%i,
+  5e-15);
+true;
+
+closeto(
+  gamma_incomplete(-5,-0.5+%i),
+  0.08881923337904654547301590363812b0+0.18155943299796684573147338017934b0*%i,
+  5e-15);
+true;
+
+/* Again for bigfloat precision */
+
+closeto(
+  gamma_incomplete(-1,-0.5b0),
+  -2.8432226365370827137767777629655b0+3.1415926535897932384626433832795b0*%i,
+  1b-30);
+true;
+
+closeto(
+  gamma_incomplete(-5,-0.5b0),
+  -12.1692735494620863710665339515891b0+0.0261799387799149436538553615273b0*%i,
+  1b-30);
+true;
+
+closeto(
+  gamma_incomplete(-1,-0.5b0+%i),
+  -0.54330486022427331058655939975980b0+0.65800685452922697341354545991819b0*%i,
+  1b-30);
+true;
+
+closeto(
+  gamma_incomplete(-5,-0.5b0+%i),
+  0.08881923337904654547301590363812b0+0.18155943299796684573147338017934b0*%i,
+  1b-30);
+true;
+
+/* Test gamma_incomplete(0.25,2.5) for Float and Bigfloat */
+
+closeto(
+  gamma_incomplete(0.25,2.5),
+  0.03340545777928488523612480546612030546638337899458717728445920914b0,
+  1e-15);
+true;
+
+fpprec:32;
+32;
+
+closeto(
+  gamma_incomplete(0.25b0,2.5b0),
+  0.03340545777928488523612480546612030546638337899458717728445920914b0,
+  1b-31);
+true;
+
+fpprec:64;
+64;
+
+closeto(
+  gamma_incomplete(0.25b0,2.5b0),
+  0.03340545777928488523612480546612030546638337899458717728445920914b0,
+  1b-63);
+true;
+
+/* Test gamma_incomplete(0.25,0.25) for Float and Bigfloat */
+
+closeto(
+  gamma_incomplete(0.25,0.25),
+  0.9293237832774184425973508042578251762794944752213875213176435274b0,
+  5.0e-15);
+true;
+
+fpprec:32;
+32;
+
+closeto(
+  gamma_incomplete(0.25b0,0.25b0),
+  0.9293237832774184425973508042578251762794944752213875213176435274b0,
+  1.1b-31);
+true;
+
+fpprec:64;
+64;
+
+closeto(
+  gamma_incomplete(0.25b0,0.25b0),
+  0.9293237832774184425973508042578251762794944752213875213176435274b0,
+  1.1b-63);
+true;
+
+/* Test gamma_incomplete(0.25,0.50) for Float and Bigfloat */
+
+closeto(
+  gamma_incomplete(0.25,0.50),
+  0.55658041400942713438787175086207b0,
+  5.0e-15);
+true;
+
+fpprec:32;
+32;
+
+closeto(
+  gamma_incomplete(0.25b0,0.50b0),
+  0.55658041400942713438787175086207b0,
+  1b-31);
+true;
+
+fpprec:64;
+64;
+
+closeto(
+  gamma_incomplete(0.25b0,0.50b0),
+  0.5565804140094271343878717508620650091658338999776480841533264361b0,
+  2b-63);
+true;
+
+fpprec:128;
+128;
+
+closeto(
+  gamma_incomplete(0.25b0,0.50b0),
+  0.55658041400942713438787175086206500916583389997764808415332643613122015052649897833312327325822333229784708198027750127190766504b0,  
+  1.0b-127);
+true;
+
+/* Test gamma_incomplete(0.25,1.50) for Float and Bigfloat */
+
+closeto(
+  gamma_incomplete(0.25,1.50),
+  0.12115499104033848614860340878369b0,
+  1e-15);
+true;
+
+fpprec:32;
+32;
+
+closeto(
+  gamma_incomplete(0.25b0,1.50b0),
+  0.12115499104033848614860340878369b0,
+  1b-31);
+true;
+
+fpprec:64;
+64;
+
+closeto(
+  gamma_incomplete(0.25b0,1.50b0),
+  0.1211549910403384861486034087836891246955052387140720625064500006b0,
+  1b-63);
+true;
+
+fpprec:128;
+128;
+
+closeto(
+  gamma_incomplete(0.25b0,1.50b0),
+  0.12115499104033848614860340878368912469550523871407206250645000059332022509505923467877887847273887882437030555876962014143410940b0,
+  1b-127);
+true;
+
+closeto(
+  gamma_incomplete(0.25b0,1.50b0),
+  1.5b0^0.25b0*expintegral_e(1.0b0-0.25b0,1.50b0),
+  1b-128);
+true;
+
+fpprec:34; /* Two extra digits to get 32 digits in the following tests */
+34;
+
+relerror(
+  gamma_incomplete(1000b0,1000b0),
+  1.995014933549148239529838438260433407652488769526598301696165147b2564, 
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(1000b0,100b0),
+  4.023872600770937735437024339230039857193748642107146325437999104b2564,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(1000b0,10b0),
+  4.023872600770937735437024339230039857193748642107146325437999104b2564,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(1000b0,1b0),
+  4.023872600770937735437024339230039857193748642107146325437999104b2564,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(1000b0,-1b0),
+  4.023872600770937735437024339230039857193748642107146325437999104b2564,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(1000b0,-10b0),
+  4.023872600770937735437024339230039857193748642107146325437999104b2564,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(1000b0,-100b0),
+  4.023872600770937735437024339230039857193748642107146325437999104b2564,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(1000b0,-1000b0),
+  -9.852818774470566937423668137175694874333788729537950495924821627b3430,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(100b0,100b0),
+  4.542198120862669429369147083086235039624517049342017449058357596b155,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(100b0,10b0),
+  9.332621544394415268169923885626670049071596826438162146859296339b155,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(100b0,1b0),
+  9.332621544394415268169923885626670049071596826438162146859296390b155,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(100b0,-1b0),
+  9.332621544394415268169923885626670049071596826438162146859296390b155,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(100b0,-10b0),
+  9.332621544394415268169923885626670049071596826438162126818796880b155,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(100b0,-100b0),
+  -1.3474270960118181325667224386845432493096383414519386259680854024b241,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(10.0+10.0*%i,10.0+10.0*%i),
+  (712.747910954771249931938579893612285083502899995529160358791610b0 
+  -1614.519712336984904341104157868496978481416095290952330318983747b0*%i),
+  7.5e-15);
+true;
+
+relerror(
+  gamma_incomplete(10b0+10b0*%i,10b0+10b0*%i),
+  (712.747910954771249931938579893612285083502899995529160358791610b0 
+  -1614.519712336984904341104157868496978481416095290952330318983747b0*%i),
+  4b-32);
+true;
+
+relerror(
+  gamma_incomplete(10.0+10*%i,10.0+5*%i),
+  (3795.479456353067145208395441052660229834399956460948716792241863b0 
+  -1859.399046776284485239753978633491801182777480033526406270435152b0*%i),
+  6.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(10.0b0+10*%i,10.0b0+5*%i),
+  (3795.479456353067145208395441052660229834399956460948716792241863b0 
+  -1859.399046776284485239753978633491801182777480033526406270435152b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(10.0+5*%i,10.0+5*%i),
+  (22616.57428441264599471916533645601396385068769401974320192387776b0 
+  -41760.26634389514228374497096679850877647381173070930602051580693b0*%i),
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(10.0b0+5*%i,10.0b0+5*%i),
+  (22616.57428441264599471916533645601396385068769401974320192387776b0 
+  -41760.26634389514228374497096679850877647381173070930602051580693b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(10+5*%i,10+2.5*%i),
+  (55884.99767768350551452192526458363894624371018195106017631282130b0 
+  -30587.35558698211815103119732529095917842073159139555085583572089b0*%i),
+  8.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(10b0+5*%i,10b0+2.5*%i),
+  (55884.99767768350551452192526458363894624371018195106017631282130b0 
+  -30587.35558698211815103119732529095917842073159139555085583572089b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(10.0+2.5*%i,10.0+2.5*%i),
+  (98307.31859173691954817642978681043594336734907098079356276769738b0 
+  -69378.82767710646665454093742183442049572498499915146277510648781b0*%i),
+  7.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(10.0b0+2.5*%i,10.0b0+2.5*%i),
+  (98307.31859173691954817642978681043594336734907098079356276769738b0 
+  -69378.82767710646665454093742183442049572498499915146277510648781b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(10.0+2.5*%i,10.0+1.5*%i),
+  (119713.97958915216843109406780063078781556428789769599762881675530b0 
+  -44021.05551717694140528840726282083152859527358436513276174120234b0*%i),
+  9.5e-15);
+true;
+
+relerror(
+  gamma_incomplete(10.0b0+2.5*%i,10.0b0+1.5*%i),
+  (119713.97958915216843109406780063078781556428789769599762881675530b0 
+  -44021.05551717694140528840726282083152859527358436513276174120234b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(10.0+1.5*%i,10.0+1.5*%i),
+  (-143260.5455945276009736506823530548923946268185687353440779787855b0 
+  -36427.8601104063533811294405176711748076293661563594190640674077b0*%i),
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(10.0b0+1.5*%i,10.0b0+1.5*%i),
+  (-143260.5455945276009736506823530548923946268185687353440779787855b0 
+  -36427.8601104063533811294405176711748076293661563594190640674077b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(10.0+1.5*%i,10.0+0.5*%i),
+  (-134422.2837349310843015830622649231296922981730868773827217434186b0 
+  -76495.4696532860249045908863041952283847028641854696387454419024b0*%i),
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(10.0b0+1.5*%i,10.0b0+0.5*%i),
+  (-134422.2837349310843015830622649231296922981730868773827217434186b0 
+  -76495.4696532860249045908863041952283847028641854696387454419024b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(10+0.5*%i,10+0.5*%i),
+  (70217.4190738045440197722508789471776325390496700488861347101465b0 
+  +148228.5649085354026330085827685305718428914334429314381378279173b0*%i),
+  6.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(10b0+0.5*%i,10b0+0.5*%i),
+  (70217.4190738045440197722508789471776325390496700488861347101465b0 
+  +148228.5649085354026330085827685305718428914334429314381378279173b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(5.0+5*%i,5.0+5*%i),
+  (-0.4806117328699535298510981197039733622773799503543787399412087606b0 
+   +0.8919199556012029365414433316086474496955099800079200844577588174b0*%i),
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(5.0b0+5*%i,5.0b0+5*%i),
+  (-0.4806117328699535298510981197039733622773799503543787399412087606b0 
+   +0.8919199556012029365414433316086474496955099800079200844577588174b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(5.0+5*%i,5.0+2.5*%i),
+  (-1.564618625118515702134408016446776958254116141951281337045968096b0 
+   +0.763213115623024892186357289469889653460737525026968402880536542b0*%i),
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(5.0b0+5*%i,5.0b0+2.5*%i),
+  (-1.564618625118515702134408016446776958254116141951281337045968096b0 
+   +0.763213115623024892186357289469889653460737525026968402880536542b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(5.0+2.5*%i,5.0+2.5*%i),
+  (-3.966094476128530812031476427059327525923710898646502835891758741b0 
+   -3.843825405733108837026233752472379492035828310495276258481876760b0*%i),
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(5.0b0+2.5*%i,5.0b0+2.5*%i),
+  (-3.966094476128530812031476427059327525923710898646502835891758741b0 
+   -3.843825405733108837026233752472379492035828310495276258481876760b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(5.0+2.5*%i,5.0-2.5*%i),
+  (24.28851242625584709660092800462769890376139980405107830536077980b0
+  -13.30717877353455881129062577273028018783505328101266063709140224b0*%i),
+  2.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(5.0b0+2.5*%i,5.0b0-2.5*%i),
+  (24.28851242625584709660092800462769890376139980405107830536077980b0
+  -13.30717877353455881129062577273028018783505328101266063709140224b0*%i),
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(5.0-2.5*%i,5.0-2.5*%i),
+  (-3.966094476128530812031476427059327525923710898646502835891758741b0 
+   +3.843825405733108837026233752472379492035828310495276258481876760b0*%i),
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(5.0b0-2.5*%i,5.0b0-2.5*%i),
+  (-3.966094476128530812031476427059327525923710898646502835891758741b0 
+   +3.843825405733108837026233752472379492035828310495276258481876760b0*%i),
+  1b-32);
+true;
+
+/* Further tests after modication of the code */
+
+fpprec:35;
+35;
+
+/* We start with values on the real negative axis */
+
+/* Problem 6 */
+relerror(
+  gamma_incomplete(0.5,-10),
+  1.7724538509055160272981674833 - 7388.5381938108184552671664573665*%i,
+  2.0e-12);
+true;
+
+/* Problem 7 */
+relerror(
+  gamma_incomplete(0.5,-10b0),
+  1.7724538509055160272981674833b0 - 7388.5381938108184552671664573665b0*%i,
+  3.0b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5),
+  1.772453850905516027298167483341 - 76.796224205322062453935496965541*%i,
+  1.5e-14);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5b0),
+  1.772453850905516027298167483341b0 - 76.796224205322062453935496965541b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2.5),
+  1.7724538509055160272981674833411 - 9.8735082388772780413725529343873*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2.5b0),
+  1.7724538509055160272981674833411b0 - 9.8735082388772780413725529343873b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-0.25),
+  1.7724538509055160272981674833411 - 1.0899742083672444473248402628140*%i,
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-0.25b0),
+  1.7724538509055160272981674833411b0 - 1.0899742083672444473248402628140b0*%i,
+  5.0b-32);
+true;
+
+/* We add a small imaginary part
+   The continued fraction will fail, Maxima use the series expansion.
+*/
+
+relerror(
+  gamma_incomplete(0.5,-10+0.1*%i),
+  -693.7125259652496257225339009893 - 7355.4778982854340599489999722765*%i,
+  2.0e-12);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-10.0b0+0.1b0*%i),
+  -693.7125259652496257225339009893b0 - 7355.4778982854340599489999722765b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5+0.1*%i),
+  -4.855606925906958733850786731743 - 76.497762747671653356926921414108*%i,
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5b0+0.1b0*%i),
+  -4.855606925906958733850786731743b0 - 76.497762747671653356926921414108b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2.5+0.1*%i),
+  1.0028894769544495897063089678047 - 9.8427092366892270639885076130022*%i,
+  1.21e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2.5b0+0.1b0*%i),
+  1.0028894769544495897063089678047b0 - 9.8427092366892270639885076130022b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-0.25+0.1*%i),
+  1.5192534335558569724359463295125 - 1.1019363602857804797837310045806*%i,
+  2.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-0.25b0+0.1b0*%i),
+  1.5192534335558569724359463295125b0 - 1.1019363602857804797837310045806b0*%i,
+  2.0b-32);
+true;
+
+/* We add an imaginary part above the threshold for the series expansion
+*/
+
+relerror(
+  gamma_incomplete(0.5,-10+1.1*%i),
+  -6334.1948696342193438649689587744 - 3741.5383594183284610691163553403*%i,
+  4.0e-12);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-10b0+1.1b0*%i),
+  -6334.1948696342193438649689587744b0 - 3741.5383594183284610691163553403b0*%i,
+  5.0b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5b0+1.1b0*%i),
+  -59.650578505004222281783394220768b0 - 43.683456195166750403224017552560b0*%i,
+  5.0b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2.5+1.1*%i),
+  -5.5335063099201920292609023851020 - 6.4351290837917628991361018359964*%i,
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2.5b0+1.1b0*%i),
+  -5.5335063099201920292609023851020b0 - 6.4351290837917628991361018359964b0*%i,
+  1b-32);
+true;
+
+/* This is the serious expansion which works */
+
+relerror(
+  gamma_incomplete(0.5,-0.25+1.1*%i),
+  -0.13794253952035726152165921998252 - 1.06583290164642973789895384973429*%i,
+  2.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-0.25b0+1.1b0*%i),
+  -0.13794253952035726152165921998252b0 - 1.06583290164642973789895384973429b0*%i,
+  1b-32);
+true;
+
+/* Values on the imaginary axis */
+
+relerror(
+  gamma_incomplete(0.5,-100*%i),
+  0.096899159215326861150517776631041 + 0.024684086404223368298902429118542*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-100b0*%i),
+  0.096899159215326861150517776631041b0 + 0.024684086404223368298902429118542b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-50*%i),
+  0.123398939447119035626603437814684 + 0.069012601491650179241716316049576*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-50b0*%i),
+  0.123398939447119035626603437814684b0 + 0.069012601491650179241716316049576b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-10*%i),
+  -0.08046978022707502678937802264904 - 0.30392674968841293510316822780670*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-10b0*%i),
+  -0.08046978022707502678937802264904b0 - 0.30392674968841293510316822780670b0*%i,
+  2.0b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5*%i),
+  0.36441984106355895337750863822965 - 0.24368559063811288395048612967632*%i,
+  3.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5b0*%i),
+  0.36441984106355895337750863822965b0 - 0.24368559063811288395048612967632b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2.5*%i),
+  -0.59691417904238855062194720247331 + 0.00921495731742953647951029973386*%i,
+  2.81e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2.5b0*%i),
+  -0.59691417904238855062194720247331b0 + 0.00921495731742953647951029973386b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-0.25*%i),
+  1.01109069076165681623650036780470 + 0.64403710594044452447886365988086*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-0.25b0*%i),
+  1.01109069076165681623650036780470b0 + 0.64403710594044452447886365988086b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,0.25*%i),
+  1.01109069076165681623650036780470 - 0.64403710594044452447886365988086*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,0.25b0*%i),
+  1.01109069076165681623650036780470b0 - 0.64403710594044452447886365988086b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,2.5*%i),
+  -0.59691417904238855062194720247331 - 0.00921495731742953647951029973386*%i,
+ 2.81e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,2.5b0*%i),
+  -0.59691417904238855062194720247331b0 - 0.00921495731742953647951029973386b0*%i,
+ 1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,5*%i),
+  0.36441984106355895337750863822965 + 0.24368559063811288395048612967632*%i,
+  3.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,5b0*%i),
+  0.36441984106355895337750863822965b0 + 0.24368559063811288395048612967632b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,50*%i),
+  0.123398939447119035626603437814684 - 0.069012601491650179241716316049576*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,50b0*%i),
+  0.123398939447119035626603437814684b0 - 0.069012601491650179241716316049576b0*%i,
+  1b-32);
+true;
+
+relerror(
+  gamma_incomplete(0.5,100*%i),
+  0.096899159215326861150517776631041 - 0.024684086404223368298902429118542*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,100b0*%i),
+  0.096899159215326861150517776631041b0 - 0.024684086404223368298902429118542b0*%i,
+  1b-32);
+true;
+
+/* Along the boundary */
+
+relerror(
+  gamma_incomplete(0.5,-1+1.0*%i),
+  -0.6460866463446816469727499577965 - 2.2529846180884648591828756025081*%i,
+  1e-15);
+true;  
+
+relerror(
+  gamma_incomplete(0.5,-2+2.0*%i),
+  -4.6362149776912621823191772006210 - 0.6696404542328766212783095808086*%i,
+  4.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-3+3.0*%i),
+  -6.2748360165336721010541674791500 + 8.2442936688139837781281990469076*%i,
+  4.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-4+4.0*%i),
+  9.028176736353114550138088914592 + 22.441213878617781749976458917799*%i,
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5+5.0*%i),
+  57.540711282025537715729492821303 + 9.813229347687737256352386117430*%i,
+  3.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-6+6.0*%i),
+  95.71761436932787302240057885539 - 107.54220609035943742021479062686*%i,
+  2.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-10+10.0*%i),
+  921.0687349037275816861912330294 + 5931.0759029700741177372337479958*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-15+15.0*%i),
+  -649132.21386404102825777002406965 + 315145.50427275409146151580354200*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-1+1.0*%i),
+  -0.6460866463446816469727499577965 - 2.2529846180884648591828756025081*%i,
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-2+2.0*%i),
+  -4.6362149776912621823191772006210 - 0.6696404542328766212783095808086*%i,
+  4.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-3+3.0*%i),
+  -6.2748360165336721010541674791500 + 8.2442936688139837781281990469076*%i,
+  4.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-4+4.0*%i),
+  9.028176736353114550138088914592 + 22.441213878617781749976458917799*%i,
+  5.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-5+5.0*%i),
+  57.540711282025537715729492821303 + 9.813229347687737256352386117430*%i,
+  3.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-6+6.0*%i),
+  95.71761436932787302240057885539 - 107.54220609035943742021479062686*%i,
+  2.0e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-10+10.0*%i),
+  921.0687349037275816861912330294 + 5931.0759029700741177372337479958*%i,
+  1e-15);
+true;
+
+relerror(
+  gamma_incomplete(0.5,-15+15.0*%i),
+  -649132.21386404102825777002406965 + 315145.50427275409146151580354200*%i,
+  1e-15);
+true;
+
+/******************************************************************************
+  Test gamma_incomplete against expintegral_e
+******************************************************************************/
+
+block([badpoints : [], 
+       ratprint : false,
+       abserr : 0,
+       maxerr : -1,
+       zlimit : 5,
+       eps    : 1e-12],
+  for a:1 thru 2 step 0.1 do
+  (
+    for z: -zlimit thru zlimit step 1.0 do
+    (
+      if is(notequal(z,0.0) and notequal(a,0.0)) then
+      (
+        zf : float(z),
+        af : float(a),
+        result : gamma_incomplete(af,zf),
+        answer : rectform(zf^af*expintegral_e(1.0-af,zf)),
+        abserr : abs(result - answer),
+	maxerr : max(maxerr, abserr),
+        if abserr > eps then
+        (
+          badpoints : cons([[a, z], result, answer, abserr], badpoints)
+        ) 
+      )
+    )
+  ),
+  /* 
+   * For debugging, if there are any bad points, return the maximum error 
+   * found as the first element.
+   */
+  if badpoints # [] then
+    cons(maxerr, badpoints)
+  else
+    badpoints
+);
+[];
+
+
+/******************************************************************************
+  Test Generalized Incomplete Gamma function
+******************************************************************************/
+
+/* Some special values */
+
+(kill(a), assume(a>0), done);
+done;
+
+gamma_incomplete_generalized(a,z1,0);
+gamma_incomplete(a,z1)-gamma(a);
+
+gamma_incomplete_generalized(a,z1,0.0);
+gamma_incomplete(a,z1)-gamma(a);
+
+gamma_incomplete_generalized(a,z1,0.0b0);
+gamma_incomplete(a,z1)-gamma(a);
+
+gamma_incomplete_generalized(a,0,z2);
+gamma(a)- gamma_incomplete(a,z2);
+
+gamma_incomplete_generalized(a,0.0,z2);
+gamma(a)- gamma_incomplete(a,z2);
+
+gamma_incomplete_generalized(a,0.0b0,z2);
+gamma(a)- gamma_incomplete(a,z2);
+
+gamma_incomplete_generalized(a,z1,inf);
+gamma_incomplete(a,z1);
+
+gamma_incomplete_generalized(a,inf,z2);
+-gamma_incomplete(a,z2);
+
+gamma_incomplete_generalized(a,0,inf);
+gamma(a);
+
+gamma_incomplete_generalized(a,x,x);
+0;
+
+gamma_incomplete_generalized(a,1.0,1.0b0);
+0;
+
+/* Mirror symmetry, but not when z1 or z2 on the negative real axis */
+
+declare(a,complex, z1,complex, z2, complex);
+done;
+
+conjugate(gamma_incomplete_generalized(a,z1,z2));
+conjugate(gamma_incomplete_generalized(a,z1,z2));
+
+conjugate(gamma_incomplete_generalized(x+%i*y,1+%i,1-%i));
+gamma_incomplete_generalized(x-%i*y,1-%i,1+%i);
+
+(kill(a,z1,z2),done);
+done;
+
+/* Test numerical evaluation for some values */
+
+closeto(
+  gamma_incomplete_generalized(0.15,0.10,0.90),
+  1.285210772938496575538196624140369253496313719924712338486508252b0,
+  1e-14);
+true;
+
+fpprec:64;
+64;
+
+closeto(
+  gamma_incomplete_generalized(0.15b0,0.10b0,0.90b0),
+  1.285210772938496575538196624140369253496313719924712338486508252b0,
+  1b-62);
+true;
+
+closeto(
+  gamma_incomplete_generalized(0.15+%i,0.10+%i,0.90+%i),
+  (-0.03956290928621934869542750861441673192206453223955788892863857789b0 
+   -0.13316249485419500645510117515710482169661446536096647384481038655b0*%i),
+  1e-14);
+true;
+
+closeto(
+  gamma_incomplete_generalized(0.15b0+%i,0.10b0+%i,0.90b0+%i),
+  (-0.03956290928621934869542750861441673192206453223955788892863857789b0 
+   -0.13316249485419500645510117515710482169661446536096647384481038655b0*%i),
+  1b-62);
+true;
+
+closeto(
+  gamma_incomplete_generalized(-0.15+%i,0.10+%i,0.90+%i),
+  (-0.07903699552278027449948116754698066920498863638107044857029927559b0 
+   -0.10615739775378488990365404098165130400907362070260244159331987806b0*%i),
+  1e-14);
+true;
+
+closeto(
+  gamma_incomplete_generalized(-0.15b0+%i,0.10b0+%i,0.90b0+%i),
+  (-0.07903699552278027449948116754698066920498863638107044857029927559b0 
+   -0.10615739775378488990365404098165130400907362070260244159331987806b0*%i),
+  1b-62);
+true;
+
+/******************************************************************************
+
+  Test Regularized Incomplete Gamma function
+
+******************************************************************************/
+
+/* Specialized values */
+
+/* Check that gamma_incomplete_regularized (a, 0) just returns a noun
+   form (the correct one!) */
+block ([result_a0: gamma_incomplete_regularized(a,0)],
+  is (not (atom (result_a0)) and
+      op (result_a0) = 'gamma_incomplete_regularized and
+      args (result_a0) = [a, 0]));
+true$
+
+(assume(ap>0,am<0),done);
+done;
+
+errcatch(gamma_incomplete_regularized(am,0));
+[];
+gamma_incomplete_regularized(ap,0);
+1;
+gamma_incomplete_regularized(0,z);
+0;
+gamma_incomplete_regularized(a,inf);
+0;
+
+/* Expand gamma_incomplete_regularized */
+
+gamma_expand:true;
+true;
+
+gamma_incomplete_regularized(1,z);
+%e^(-z);
+
+gamma_incomplete_regularized(a+1,z);
+gamma_incomplete_regularized(a,z)+%e^(-z)*z^a/gamma(a+1);
+
+gamma_incomplete_regularized(a-1,z);
+gamma_incomplete_regularized(a,z)-%e^(-z)*z^(a-1)/gamma(a);
+
+gamma_incomplete_regularized(1/2,z);
+erfc(sqrt(z));
+gamma_incomplete_regularized(-1/2,z);
+erfc(sqrt(z))-%e^(-z)/sqrt(%pi)/sqrt(z);
+gamma_incomplete_regularized(3/2,z);
+erfc(sqrt(z))+2*sqrt(z)*%e^(-z)/sqrt(%pi);
+gamma_incomplete_regularized(-3/2,z);
+erfc(sqrt(z))-3*(4*z/3-2/3)*%e^(-z)/(4*sqrt(%pi)*z^(3/2));
+
+/* Test expansion for half integral values against expansion of 
+   gamma_incomplete 
+*/
+
+expand(gamma_incomplete_regularized(5/2,z)-gamma_incomplete(5/2,z)/gamma(5/2));
+0;
+expand(gamma_incomplete_regularized(-5/2,z)-gamma_incomplete(-5/2,z)/gamma(-5/2));
+0;
+expand(gamma_incomplete_regularized(7/2,z)-gamma_incomplete(7/2,z)/gamma(7/2));
+0;
+expand(gamma_incomplete_regularized(-7/2,z)-gamma_incomplete(-7/2,z)/gamma(-7/2));
+0;
+expand(gamma_incomplete_regularized(9/2,z)-gamma_incomplete(9/2,z)/gamma(9/2));
+0;
+expand(gamma_incomplete_regularized(-9/2,z)-gamma_incomplete(-9/2,z)/gamma(-9/2));
+0;
+
+gamma_expand:false;
+false;
+
+/* Some numerical tests */
+
+fpprec:64;
+64;
+
+closeto(
+  gamma_incomplete_regularized(0.25,0.15),
+  0.3331718023153566353128831003164180886983644245472471410932121590b0,
+  1e-15);
+true;
+
+closeto(
+  gamma_incomplete_regularized(0.25b0,0.15b0),
+  0.3331718023153566353128831003164180886983644245472471410932121590b0,
+  1b-62);
+true;
+
+closeto(
+  gamma_incomplete_regularized(-0.25,0.15),
+   -0.3747953569677745583399657181155178573572870781780605755597341785b0,
+  1e-15);
+true;
+
+closeto(
+  gamma_incomplete_regularized(-0.25b0,0.15b0),
+   -0.3747953569677745583399657181155178573572870781780605755597341785b0,
+  1b-61);
+true;
+
+closeto(
+  gamma_incomplete_regularized(-0.25,-0.15),
+  (0.1206888313473692669850487605186163406801228067412581029970643626b0 
+  +0.8793111686526307330149512394813836593198771932587418970029356374b0*%i),
+  1e-15);
+true;
+
+closeto(
+  gamma_incomplete_regularized(-0.25b0,-0.15b0),
+  (0.1206888313473692669850487605186163406801228067412581029970643626b0 
+  +0.8793111686526307330149512394813836593198771932587418970029356374b0*%i),
+  1e-15);
+true;
+
+closeto(
+  gamma_incomplete_regularized(0.25,0.15+%i),
+  (-0.0241833450538703040924257417951024895368614341619005659619193200b0 
+   -0.1759768209797086273285777898669237251900625192446301525551431309b0*%i),
+  1e-15);
+true;
+
+closeto(
+  gamma_incomplete_regularized(0.25b0,0.15b0+%i),
+  (-0.0241833450538703040924257417951024895368614341619005659619193200b0 
+   -0.1759768209797086273285777898669237251900625192446301525551431309b0*%i),
+  1b-62);
+true;
+
+closeto(
+  gamma_incomplete_regularized(0.25,0.15-%i),
+  (-0.0241833450538703040924257417951024895368614341619005659619193200b0 
+   +0.1759768209797086273285777898669237251900625192446301525551431309b0*%i),
+  1e-15);
+true;
+
+closeto(
+  gamma_incomplete_regularized(0.25b0,0.15b0-%i),
+  (-0.0241833450538703040924257417951024895368614341619005659619193200b0 
+   +0.1759768209797086273285777898669237251900625192446301525551431309b0*%i),
+  1b-62);
+true;
+
+/******************************************************************************
+  Test the Error functions: erf, erfc, erfi and erf_generalized
+******************************************************************************/
+
+/* Specific values */
+
+map(erf, [0,0.0,0.0b0,inf,minf,infinity,und,ind]);
+[0,0.0,0.0b0,1,-1,erf(infinity),erf(und),erf(ind)];
+
+limit(erf(z), z, inf);
+1;
+limit(erf(z), z, minf);
+-1;
+
+map(erfc, [0,inf,minf,infinity,und,ind]);
+[1,0,2,erfc(infinity),erfc(und),erfc(ind)];
+
+limit(erfc(z), z, inf);
+0;
+limit(erfc(z), z, minf);
+2;
+
+map(erfi, [0,inf,minf,infinity,und,ind]);
+[0,inf,minf,erfi(infinity),erfi(und),erfi(ind)];
+
+limit(erfi(z), z, inf);
+inf;
+limit(erfi(z), z, minf);
+minf;
+
+erf_generalized(z1,0);
+-erf(z1);
+
+erf_generalized(0,z2);
+erf(z2);
+
+erf_generalized(0,0);
+0;
+
+erf_generalized(0.0,0.0);
+0;
+
+erf_generalized(0.0b0,0.0b0);
+0;
+
+erf_generalized(z1,inf);
+1-erf(z1);
+limit(erf_generalized(z1, z2), z2, inf);
+1-erf(z1);
+
+erf_generalized(z1,minf);
+-erf(z1)-1;
+limit(erf_generalized(z1, z2), z2, minf);
+-erf(z1)-1;
+
+erf_generalized(inf,z2);
+erf(z2)-1;
+limit(erf_generalized(z1, z2), z1, inf);
+erf(z2)-1;
+
+erf_generalized(minf,z2);
+erf(z2)+1;
+limit(erf_generalized(z1, z2), z1, minf);
+erf(z2)+1;
+
+/* Parity */
+
+erf(-z);
+-erf(z);
+
+erfc(-z);
+2-erfc(z);
+
+erfi(-z);
+-erfi(z);
+
+erf_generalized(-z1,-z2);
+-erf_generalized(z1,z2);
+
+/* Mirror symmetry */
+
+declare(z,complex);
+done;
+
+conjugate(erf(z));
+erf(conjugate(z));
+
+conjugate(erf(x+%i*y));
+erf(x-%i*y);
+
+conjugate(erfc(z));
+erfc(conjugate(z));
+
+conjugate(erfc(x+%i*y));
+erfc(x-%i*y);
+
+conjugate(erfi(z));
+erfi(conjugate(z));
+
+conjugate(erfi(x+%i*y));
+erfi(x-%i*y);
+
+declare(z1,complex,z2,complex);
+done;
+
+conjugate(erf_generalized(z1,z2));
+erf_generalized(conjugate(z1),conjugate(z2));
+
+conjugate(erf_generalized(x1+%i*y1,x2+%i*y2));
+erf_generalized(x1-%i*y1,x2-%i*y2);
+
+/* Generalized Erf is antisymmetric */
+
+erf_generalized(x1,x2)+erf_generalized(x2,x1);
+0;
+
+/* For a pure real or imaginary argument of the error functions erf and erfi
+   we get pure real or imaginary result. We test it. */
+
+is(equal(imagpart(erf(1.0)),0));
+true;
+
+is(equal(imagpart(erfi(1.0)),0));
+true;
+
+is(equal(realpart(erf(1.0*%i)),0));
+true;
+
+is(equal(realpart(erfi(1.0*%i)),0));
+true;
+
+/* Again for bigfloats */
+
+is(equal(imagpart(erf(1.0b0)),0));
+true;
+
+is(equal(imagpart(erfi(1.0b0)),0));
+true;
+
+is(equal(realpart(erf(1.0b0*%i)),0));
+true;
+
+is(equal(realpart(erfi(1.0b0*%i)),0));
+true;
+
+/* Taylor expansion of the Error functions */
+
+taylor(erf(x),x,0,5) - 2/sqrt(%pi)*(x-x^3/3+x^5/10);
+0;
+
+(erf(taylor(x,x,0,5)) - 2/sqrt(%pi)*(x-x^3/3+x^5/10));
+0;
+
+taylor(erf(x),x,x0,2)
+  - (erf(x0)+2*%e^(-x0^2)/sqrt(%pi)*(x-x0)-2*x0*%e^(-x0^2)/sqrt(%pi)*(x-x0)^2);
+0;
+
+taylor(erfi(x),x,0,5) - 2/sqrt(%pi)*(x+x^3/3+x^5/10);
+0;
+
+erfi(taylor(x,x,0,5)) - 2/sqrt(%pi)*(x+x^3/3+x^5/10);
+0;
+
+taylor(erfi(x),x,x0,2)
+ -(erfi(x0)+2*%e^(x0^2)/sqrt(%pi)*(x-x0)+2*x0*%e^(x0^2)/sqrt(%pi)*(x-x0)^2);
+0;
+
+/* Numerical test for the Error functions 
+   First check erf in double float precision */
+
+closeto(
+  erf(-0.50),
+  -0.5204998778130465376827466538919645287364515757579637000588057256b0,
+  1e-15);
+true;
+
+closeto(
+  erf(0.50),
+  0.5204998778130465376827466538919645287364515757579637000588057256b0,
+  1e-15);
+true;
+
+closeto(
+  erf(0.75),
+  0.7111556336535151315989378345914107773742059540965372322781333971b0,
+  5.0e-15);
+true;
+
+closeto(
+  erf(-0.75+%i),
+  (-1.372897192365736489613456241111589390954675856186764729607156305b0 
+  + 0.539788632227100129936591912063260716699852732091113612337142798b0*%i),
+  6.0e-15);
+true;
+
+closeto(
+  erf(-0.50+%i),
+  (-1.204847558314218002702112682097006717296399718277162764595960866b0 
+  + 1.024400881608445881724860454410886676966127193189877583791256132b0*%i),
+  1e-15);
+true;
+
+closeto(
+  erf(0.50+%i),
+  ( 1.204847558314218002702112682097006717296399718277162764595960866b0 
+  + 1.024400881608445881724860454410886676966127193189877583791256132b0*%i),
+  1e-15);
+true;
+
+closeto(
+  erf(0.75+%i),
+  ( 1.372897192365736489613456241111589390954675856186764729607156305b0 
+  + 0.539788632227100129936591912063260716699852732091113612337142798b0*%i),
+  6.0e-15);
+true;
+
+/* Bug 3587184: erf inaccurate for small float values */
+relerror(
+  erf(1d-10),
+  float(2d-10/sqrt(%pi)),
+  1d-15);
+true;
+
+/* Erf with bigfloat precision */
+
+fpprec:64;
+64;
+
+closeto(
+  erf(-0.50b0),
+  -0.5204998778130465376827466538919645287364515757579637000588057256b0,
+  1b-61);
+true;
+
+closeto(
+  erf(0.50b0),
+  0.5204998778130465376827466538919645287364515757579637000588057256b0,
+  1b-61);
+true;
+
+closeto(
+  erf(0.75b0),
+  0.7111556336535151315989378345914107773742059540965372322781333971b0,
+  1b-61);
+true;
+
+closeto(
+  erf(-0.75b0+%i),
+  (-1.372897192365736489613456241111589390954675856186764729607156305b0 
+  + 0.539788632227100129936591912063260716699852732091113612337142798b0*%i),
+  1b-61);
+true;
+
+closeto(
+  erf(-0.50b0+%i),
+  (-1.204847558314218002702112682097006717296399718277162764595960866b0 
+  + 1.024400881608445881724860454410886676966127193189877583791256132b0*%i),
+  1b-61);
+true;
+
+closeto(
+  erf(0.50b0+%i),
+  ( 1.204847558314218002702112682097006717296399718277162764595960866b0 
+  + 1.024400881608445881724860454410886676966127193189877583791256132b0*%i),
+  1b-61);
+true;
+
+closeto(
+  erf(0.75b0+%i),
+  ( 1.372897192365736489613456241111589390954675856186764729607156305b0 
+  + 0.539788632227100129936591912063260716699852732091113612337142798b0*%i),
+  1b-61);
+true;
+
+/* Bug 3587191: erf inaccurate for small bigfloat values */
+relerror(
+  erf(1b-40),
+  bfloat(2b-40/sqrt(%pi)),
+  1b-65);
+true;
+
+/* Bug 3587304 erfc(x) for x > 6 is wrong */
+relerror(
+  erfc(6.0),
+  2.15197367124989131659335039918738463047751406e-17,
+  2e-15);
+true;
+
+relerror(
+  erfc(-4.0),
+  2-erfc(4.0),
+  1e-15);
+true;
+
+relerror(
+  erfc(6b0),
+  2.1519736712498913116593350399187384630477514061688542100527892051056337238484927860b-17,
+  1b-64);
+true;
+
+relerror(
+  erfc(-6b0),
+  1.9999999999999999784802632875010868834066496008126153695224859383114578994b0,
+  1b-64);
+true;
+
+/* Bug 3587362 inverse_erfc(1d-40) wrong */
+relerror(
+  inverse_erfc(1d-40),
+  9.448789766720855,
+  1d-15);
+true;
+
+relerror(
+  inverse_erfc(1b-50),
+  10.59209016952736518902166392532979911559420645541709912588406440119671044289134079569127583320351428635b0,
+  1d-64);
+true;
+
+/* We have done a check for the numerical algorithm of the Erf function which
+   calls the Incomplete Gamma function. 
+   We do not do further numerical tests for the other Error functions, 
+   but only check the correct implementation of the numercial routines
+   against the Erf function
+*/
+
+/* Check Erfc against Erf for some values */
+
+fpprec:32;
+32;
+
+closeto(
+  erfc(-0.25),
+  1-erf(-0.25),
+  1e-15);
+true;
+
+closeto(
+  erfc(0.25),
+  1-erf(0.25),
+  1e-15);
+true;
+
+closeto(
+  erfc(-0.25+%i),
+  1-erf(-0.25+%i),
+  1e-15);
+true;
+
+closeto(
+  erfc(0.25+%i),
+  1-erf(0.25+%i),
+  1e-15);
+true;
+
+closeto(
+  erfc(-0.25b0),
+  1-erf(-0.25b0),
+  1.0b-30);
+true;
+
+closeto(
+  erfc(0.25b0),
+  1-erf(0.25b0),
+  1b-30);
+true;
+
+closeto(
+  erfc(-0.25b0+%i),
+  1-erf(-0.25b0+%i),
+  1b-30);
+true;
+
+closeto(
+  erfc(0.25b0+%i),
+  1-erf(0.25b0+%i),
+  1b-30);
+true;
+
+/* Check Erfi against Erf for some values */
+
+closeto(
+  erfi(-0.15),
+  -%i*erf(-0.15*%i),
+  1e-15);
+true;
+
+closeto(
+  erfi(0.15),
+  -%i*erf(0.15*%i),
+  1e-15);
+true;
+
+closeto(
+  erfi(-0.15+%i),
+  -%i*erf((-0.15+%i)*%i),
+  1e-15);
+true;
+
+closeto(
+  erfi(0.15+%i),
+  -%i*erf((0.15+%i)*%i),
+  1e-15);
+true;
+
+closeto(
+  erfi(-0.15b0),
+  -%i*erf(-0.15b0*%i),
+  5.0b-30);
+true;
+
+closeto(
+  erfi(0.15b0),
+  -%i*erf(0.15b0*%i),
+  5.0b-30);
+true;
+
+closeto(
+  erfi(-0.15b0+%i),
+  expand(-%i*erf((-0.15b0+%i)*%i)),
+  1b-30);
+true;
+
+closeto(
+  erfi(0.15b0+%i),
+  expand(-%i*erf((0.15b0+%i)*%i)),
+  1b-30);
+true;
+
+/* Check Generalized Erf against Erf for some values */
+
+closeto(
+  erf_generalized(0.35,1.25),
+  erf(1.25)-erf(0.35),
+  1e-15);
+true;
+
+closeto(
+  erf_generalized(0.35+%i,1.25),
+  erf(1.25)-erf(0.35+%i),
+  1e-15);
+true;
+
+closeto(
+  erf_generalized(0.35,1.25+%i),
+  erf(1.25+%i)-erf(0.35),
+  1e-15);
+true;
+
+closeto(
+  erf_generalized(0.35+%i,1.25+%i),
+  erf(1.25+%i)-erf(0.35+%i),
+  1e-15);
+true;
+
+closeto(
+  erf_generalized(0.35b0,1.25b0),
+  erf(1.25b0)-erf(0.35b0),
+  1b-30);
+true;
+
+closeto(
+  erf_generalized(0.35b0+%i,1.25b0),
+  erf(1.25b0)-erf(0.35b0+%i),
+  1b-30);
+true;
+
+closeto(
+  erf_generalized(0.35b0,1.25b0+%i),
+  erf(1.25b0+%i)-erf(0.35b0),
+  1b-30);
+true;
+
+closeto(
+  erf_generalized(0.35b0+%i,1.25b0+%i),
+  erf(1.25b0+%i)-erf(0.35b0+%i),
+  1b-30);
+true;
+
+/******************************************************************************
+   Test the Fresnel Integrals S(z) and C(z) 
+******************************************************************************/
+
+/* Specific values for the Fresnel Integrals */
+
+map(fresnel_s,[0,0.0,0.0b0]);
+[0,0.0,0.b0];
+
+map(fresnel_c,[0,0.0,0.0b0]);
+[0,0.0,0.b0];
+
+/* Simplification of infinities 
+   The rules for an odd function and the simplifaction for imaginary
+   arguments are applied too.
+*/
+
+map(fresnel_s,[inf,-inf,minf,-minf,%i*inf,-%i*inf,%i*minf,-%i*minf]);
+[1/2,-1/2,-1/2,1/2,-%i/2,%i/2,%i/2,-%i/2];
+
+map(fresnel_c,[inf,-inf,minf,-minf,%i*inf,-%i*inf,%i*minf,-%i*minf]);
+[1/2,-1/2,-1/2,1/2,%i/2,-%i/2,-%i/2,%i/2];
+
+/* No simplification for other infinities and undeterminates */
+
+map(fresnel_s,[infinity,und,ind]);
+[fresnel_s(infinity),fresnel_s(und),fresnel_s(ind)];
+
+map(fresnel_c,[infinity,und,ind]);
+[fresnel_c(infinity),fresnel_c(und),fresnel_c(ind)];
+
+/* The Fresnel Integrals S(z) and C(z) are odd functions 
+   A reflection rule is given and the rule odd-function-reflect is applied */
+
+map(fresnel_s,[-x, (x-1), (-x+1), (-x-1)]);
+[-fresnel_s(x), fresnel_s(x-1), -fresnel_s(x-1),-fresnel_s(1+x)];
+
+map(fresnel_c,[-x, (x-1), (-x+1), (-x-1)]);
+[-fresnel_c(x), fresnel_c(x-1), -fresnel_c(x-1),-fresnel_c(1+x)];
+
+/* The Fresnel Integals simplify imaginary arguments */
+
+map(fresnel_s, [%i,%i*x,-%i*x,%i*(x+1)]);
+[-%i*fresnel_s(1),-%i*fresnel_s(x),%i*fresnel_s(x),-%i*fresnel_s(x+1)];
+
+map(fresnel_c, [%i,%i*x,-%i*x,%i*(x+1)]);
+[%i*fresnel_c(1),%i*fresnel_c(x),-%i*fresnel_c(x),%i*fresnel_c(x+1)];
+
+/* The Fresnel Integrals have Mirror Symmetry */
+
+declare(z,complex);
+done;
+
+conjugate(fresnel_s(z));
+fresnel_s(conjugate(z));
+
+conjugate(fresnel_s(x+%i*y));
+fresnel_s(x-%i*y);
+
+conjugate(fresnel_c(z));
+fresnel_c(conjugate(z));
+
+conjugate(fresnel_c(x+%i*y));
+fresnel_c(x-%i*y);
+
+/* Taylor expansion of the Fresnel Integrals to order O(z^12) */
+
+/* Expand the function */
+taylor(fresnel_s(x),x,0,12);
+%pi*x^3/6 - %pi^3*x^7/336 + %pi^5 *x^11/42240;
+
+taylor(fresnel_c(x),x,0,12);
+x - %pi^2*x^5/40 + %pi^4 *x^9/3456;
+
+/* Expand the argument and apply the function */
+fresnel_s(taylor(x,x,0,12));
+%pi*x^3/6 - %pi^3*x^7/336 + %pi^5 *x^11/42240;
+
+fresnel_c(taylor(x,x,0,12));
+x - %pi^2*x^5/40 + %pi^4 *x^9/3456;
+
+/* Differentiation of the Fresnel Integrals */
+
+diff(fresnel_s(x),x);
+sin(%pi*x^2/2);
+
+diff(fresnel_c(x),x);
+cos(%pi*x^2/2);
+
+/* The elementary Integral of the Fresnel Integrals 
+   More complicated integrals can be found in rtest_integrate_special.mac */
+
+integrate(fresnel_s(x),x);
+x*fresnel_s(x)+1/%pi*cos(%pi*x^2/2);
+
+integrate(fresnel_c(x),x);
+x*fresnel_c(x)-1/%pi*sin(%pi*x^2/2);
+
+/* Representation of the Fresnel Integrals through the Error function Erf */
+
+erf_representation:true;
+true;
+
+fresnel_s(x);
+(1+%i)/4*(erf((1+%i)/2*sqrt(%pi)*x) - %i* erf((1-%i)/2*sqrt(%pi)*x));
+
+fresnel_c(x);
+(1-%i)/4*(erf((1+%i)/2*sqrt(%pi)*x) + %i* erf((1-%i)/2*sqrt(%pi)*x));
+
+erf_representation:false;
+false;
+
+/* Representation of the Fresnel Integrals through the 
+   Hypergeometric function */
+
+hypergeometric_representation:true;
+true;
+
+fresnel_s(x);
+%pi*x^3/6*hypergeometric([3/4],[3/2,7/4],-%pi^2*x^4/16);
+
+fresnel_c(x);
+x*hypergeometric([1/4],[1/2,5/4],-%pi^2*x^4/16);
+
+hypergeometric_representation:false;
+false;
+
+/* Numerical tests for the Fresnel Integrals */
+
+fpprec:64;
+64;
+
+/* Tests for fresnel_s
+   Real argument 0.25,0.50,1.0,2.0,5.0,10.0 */
+
+relerror(
+  fresnel_s(0.25),
+  0.008175600235777755778102308866942774752486734698017086013976457144b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(0.25b0),
+  0.008175600235777755778102308866942774752486734698017086013976457144b0,
+  1b-64);
+true;
+
+relerror(
+  fresnel_s(0.50),
+  0.06473243285999927761148051223061476765072591849351249278758894565b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(0.50b0),
+  0.06473243285999927761148051223061476765072591849351249278758894565b0,
+  1b-64);
+true;
+
+relerror(
+  fresnel_s(1.0),
+  0.4382591473903547660767566966251526374937865724524165673344073263b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(1.0b0),
+  0.4382591473903547660767566966251526374937865724524165673344073263b0,
+  2.0b-64);
+true;
+
+relerror(
+  fresnel_s(2.0),
+  0.3434156783636982421953008159580684568865418122025247675792689204b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(2.0b0),
+  0.3434156783636982421953008159580684568865418122025247675792689204b0,
+  5.3b-64);
+true;
+
+relerror(
+  fresnel_s(5.0),
+  0.4991913819171168867519283804659916554084319970723881534101411152b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(5.0b0),
+  0.4991913819171168867519283804659916554084319970723881534101411152b0,
+  1b-64);
+true;
+
+relerror(
+  fresnel_s(10.0),
+  0.4681699785848822404033511108104469460538427245558302799270062272b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(10.0b0),
+  0.4681699785848822404033511108104469460538427245558302799270062272b0,
+  1b-64);
+true;
+
+/* Complex argument 0.25+%i,0.50+%i,1.0+%i,2.0+%i,5.0+%i */
+
+relerror(
+  fresnel_s(0.25+%i),
+  -0.2762104914409824591766528447060750469693825567583676638192814447b0
+  - 0.4331061708987372646968782339728450577465559834165609320175098398b0*%i,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(0.25b0+%i),
+  -0.2762104914409824591766528447060750469693825567583676638192814447b0
+  - 0.4331061708987372646968782339728450577465559834165609320175098398b0*%i,
+  1b-64);
+true;
+
+relerror(
+  fresnel_s(0.50+%i),
+   -0.7169788451833594258616872412575572495423663980107873580716959051b0
+  - 0.3393082523853171783825858066689424560943675693298848574923503884b0*%i,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(0.50b0+%i),
+   -0.7169788451833594258616872412575572495423663980107873580716959051b0
+  - 0.3393082523853171783825858066689424560943675693298848574923503884b0*%i,
+  1b-64);
+true;
+
+relerror(
+  fresnel_s(1.0+%i),
+  -2.061888219194840468080716536685708600815908323737868052048638806b0 
+  + 2.061888219194840468080716536685708600815908323737868052048638806b0*%i,
+  1e-15);
+true;
+
+relerror(
+  fresnel_s(1.0b0+%i),
+  -2.061888219194840468080716536685708600815908323737868052048638806b0 
+  + 2.061888219194840468080716536685708600815908323737868052048638806b0*%i,
+  2.0b-64);
+true;
+
+relerror(
+  fresnel_s(2.0+%i),
+  -15.58775110440458732748278797797881643198730378904101846898562610b0 
+  - 36.72546488399143842838787627677917885752587065976755449373500438b0*%i,
+  4.0e-13);
+true;
+
+relerror(
+  fresnel_s(2.0b0+%i),
+  -15.58775110440458732748278797797881643198730378904101846898562610b0 
+  - 36.72546488399143842838787627677917885752587065976755449373500438b0*%i,
+  4.0b-62);
+true;
+
+relerror(
+  fresnel_s(5.0+%i),
+  -204452.5505063210590493330126425293361797143144299005524393297869b0 
+  + 38438.9093777759513198736581956757227475265101347572827364567521b0*%i,
+  3.0e-14);
+true;
+
+relerror(
+  fresnel_s(5.0b0+%i),
+  -204452.5505063210590493330126425293361797143144299005524393297869b0 
+  + 38438.9093777759513198736581956757227475265101347572827364567521b0*%i,
+  4.0b-63);
+true;
+
+/* Tests for fresnel_c
+   Real argument 0.25,0.50,1.0,2.0,5.0,10.0 */
+
+relerror(
+  fresnel_c(0.25),
+  0.2497591503565431834592215178008857243781399770549380697377810451b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_c(0.25b0),
+  0.2497591503565431834592215178008857243781399770549380697377810451b0,
+  2.0b-64);
+true;
+
+relerror(
+  fresnel_c(0.50),
+  0.4923442258714463928788436651566816377660951457715012532946526193b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_c(0.50b0),
+  0.4923442258714463928788436651566816377660951457715012532946526193b0,
+  1b-64);
+true;
+
+relerror(
+  fresnel_c(1.0),
+  0.7798934003768228294742064136526901366306257081363209601031335832b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_c(1.0b0),
+  0.7798934003768228294742064136526901366306257081363209601031335832b0,
+  2.0b-64);
+true;
+
+relerror(
+  fresnel_c(2.0),
+  0.4882534060753407545002235033572610376883671545092153829475964427b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_c(2.0b0),
+  0.4882534060753407545002235033572610376883671545092153829475964427b0,
+  5.0b-64);
+true;
+
+relerror(
+  fresnel_c(5.0),
+  0.5636311887040122311021074044130139641207537623099921078616593412b0,
+  1e-15);
+true;
+
+relerror(
+  fresnel_c(5.0b0),
+  0.5636311887040122311021074044130139641207537623099921078616593412b0,
+  2.0b-64);
+true;
+
+relerror(
+  fresnel_c(10.0),
+  0.4998986942055157236141518477356211143923468402262626572074674093b0,
+  1.73e-15);
+true;
+
+relerror(
+  fresnel_c(10.0b0),
+  0.4998986942055157236141518477356211143923468402262626572074674093b0,
+  2.47b-64);
+true;
+
+/* Complex argument 0.25+%i,0.50+%i,1.0+%i,2.0+%i,5.0+%i */
+
+relerror(
+  fresnel_c(0.25+%i),
+  0.0097446563393801078320153856258158947458946246448139394089371651b0 
+  + 0.8830495953515316267486626148763161568578011755347662219418704558b0*%i,
+  1e-15);
+true;
+
+relerror(
+  fresnel_c(0.25b0+%i),
+  0.0097446563393801078320153856258158947458946246448139394089371651b0 
+  + 0.8830495953515316267486626148763161568578011755347662219418704558b0*%i,
+  1b-64);
+true;
+
+relerror(
+  fresnel_c(0.50+%i),
+  0.1199549363708813724035204126626172258713764410185526201803481040b0 
+  + 1.2468579809337107891237368150539206578767217615436096318514136378b0*%i,
+  1e-15);
+true;
+
+relerror(
+  fresnel_c(0.50b0+%i),
+  0.1199549363708813724035204126626172258713764410185526201803481040b0 
+  + 1.2468579809337107891237368150539206578767217615436096318514136378b0*%i,
+  1b-64);
+true;
+
+relerror(
+  fresnel_c(1.0+%i),
+  2.555793778102439024634522388352195842156623604203584296357752992b0 
+  + 2.555793778102439024634522388352195842156623604203584296357752992b0*%i,
+  1e-15);
+true;
+
+relerror(
+  fresnel_c(1.0b0+%i),
+  2.555793778102439024634522388352195842156623604203584296357752992b0 
+  + 2.555793778102439024634522388352195842156623604203584296357752992b0*%i,
+  2.0b-64);
+true;
+
+relerror(
+  fresnel_c(2.0+%i),
+  -36.22568799288165021578757830205090012554103292231420092205271528b0
+  + 16.08787137412548041729488986757594802326683407694887086741793640b0*%i,
+  4.0e-13);
+true;
+
+relerror(
+  fresnel_c(2.0b0+%i),
+  -36.22568799288165021578757830205090012554103292231420092205271528b0
+  + 16.08787137412548041729488986757594802326683407694887086741793640b0*%i,
+  4.0b-62);
+true;
+
+relerror(
+  fresnel_c(5.0+%i),
+  38439.4093777740143202918713550472184235160647415045418329908291b0 
+  + 204453.0505063119004499308897858846121088557663560705550579996093b0*%i,
+  3.0e-14);
+true;
+
+relerror(
+  fresnel_c(5.0b0+%i),
+  38439.4093777740143202918713550472184235160647415045418329908291b0 
+  + 204453.0505063119004499308897858846121088557663560705550579996093b0*%i,
+  4.0b-63);
+true;
+
+/* Bug #2509 fresnel_s incorrect for small values */
+relerror(
+  fresnel_c(1d-20),
+  1d-20,
+  1d-15);
+true;
+
+relerror(
+  fresnel_c(1b-40),
+  1b-40,
+  5b-63);
+true;
+
+relerror(
+  fresnel_s(1d-20),
+  float(%pi/6*(1d-20)^3),
+  1d-15);
+true;
+
+relerror(
+  fresnel_s(1b-40),
+  bfloat(%pi/6*(1b-40)^3),
+  5b-63);
+true;
+
+/******************************************************************************
+   Test the Beta incomplete function 
+******************************************************************************/
+
+/* Specialized values */
+
+(assume(am<0,ap>0,b>0),done);
+done;
+
+beta_incomplete(a,b,1);
+beta(a,b);
+
+beta_incomplete(ap,b,0);
+0;
+
+errcatch(beta_incomplete(am,b,0));
+[];
+
+(forget(am<0, ap>0,b>0),done);
+done;
+
+/* b is a positive integer */
+
+beta_incomplete(a,1,z);
+z^a/a;
+beta_incomplete(a,2,z);
+(a*(1-z)+1)*z^a/(a*(a+1));
+beta_incomplete(1,1,z);
+z;
+
+/* b is a positive integer.
+   Check the handling of float and bigfloat numbers */
+fpprec:16;
+16;
+
+beta_incomplete(1.0,1,z);
+1.0*z;
+/* Unfortunate, but we don't get exactly 1.0b0 */
+(closeto(beta_incomplete(1.0b0,1,z)/z,1b0,1b-15));
+true;
+beta_incomplete(1.0,1,1/2);
+0.5;
+beta_incomplete(1.0b0,1,1/2);
+0.5b0;
+beta_incomplete(1,1,1/2+%i);
+%i+1/2;
+beta_incomplete(1.0,1,1/2+%i);
+1.0*%i+0.5;
+beta_incomplete(1.0b0,1,1/2+%i);
+1.0b0*%i+0.5b0;
+beta_incomplete(1,2,1/2);
+3/8;
+beta_incomplete(1.0,2,1/2);
+0.375;
+beta_incomplete(1.0b0,2,1/2);
+0.375b0;
+beta_incomplete(1,2,1/2+%i);
+(3/2-%i)*(1/2+%i)/2;
+beta_incomplete(1.0,2,1/2+%i);
+0.875+0.5*%i;
+beta_incomplete(1.0b0,2,1/2+%i);
+0.875b0+0.5b0*%i;
+
+/* We check the expansion for b positive against the numerical evaluation */
+closeto(
+  float(beta_incomplete(1,1,1/2)) - beta_incomplete(1.0,1.0,0.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(3/2,2,1/2)) - beta_incomplete(1.5,2.0,0.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(2,3,1/2)) - beta_incomplete(2.0,3.0,0.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(5/2,4,1/2)) - beta_incomplete(2.5,4.0,0.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(3,5,1/2)) - beta_incomplete(3.0,5.0,0.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(2,6,1/2+%i)) - beta_incomplete(2.0,6.0,0.5+%i),
+  0.0,
+  1e-15);
+true;
+closeto(
+  /* We do this extra rectform, because of a bug in abs for expressions
+     with a complex exponent */
+  rectform(float(beta_incomplete(2+%i,7,1/2+%i)) 
+               - beta_incomplete(2.0+%i,7.0,0.5+%i)),
+  0.0,
+  1e-15);
+true;
+
+/* a is a positive integer we expand */
+beta_incomplete(1,b,z);
+(1-(1-z)^b)/b;
+beta_incomplete(2,b,z);
+ (1-(1-z)^b*(b*z+1))/(b*(b+1));
+beta_incomplete(3,b,z);
+ 2*(1-(1-z)^b*(b*(b+1)*z^2/2+b*z+1))/(b*(b+1)*(b+2));
+
+/* a is a positive integer. 
+   Check the expansion against numerically evaluation.
+   First we test for b a positive value. */
+
+closeto(
+  float(beta_incomplete(1,2,3/2))-beta_incomplete(1.0,2.0,1.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(2,5/2,3/2))-beta_incomplete(2.0,2.5,1.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(3,3,3/2))-beta_incomplete(3.0,3.0,1.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(2,7/2,3/2))-beta_incomplete(2.0,3.5,1.5),
+  0.0,
+  1e-15);
+true;
+closeto(
+  float(beta_incomplete(2,5/2,3/2+%i))-beta_incomplete(2.0,2.5,1.5+%i),
+  0.0,
+  1e-15);
+true;
+/* I (rtoy) think the limiting accuracy of the following test is the conversion of 
+ * the exact answer to floating point.  If the exact answer is converted to a 
+ * bfloat 32 digits, the difference is less than 1.6e-15 or so.
+*/
+closeto(
+  float(rectform(float(beta_incomplete(2,5/2,-3/2+%i))))
+                -beta_incomplete(2.0,2.5,-1.5+%i),
+  0.0,
+  4.35e-15); /* we have lost accuracy. More tests necessary? */
+true;
+
+/* Incomplete Beta is definied for negative integers a and b >= (-a) 
+   Add this point we have a problem. functions.wolfram.com gives different
+   numerical results for this cases. When b not equal -a Maxima and 
+   functions.wolfram.com differ by a factor 2. For other valid integer b
+   functions.wolfram.com gives ComplexInfinity and not an expected result.
+   What is wrong?
+*/
+
+beta_incomplete(-1,1,z);
+-1/z;
+beta_incomplete(-2,1,z);
+-1/(2*z^2);
+beta_incomplete(-2,2,z);
+(z-1/2)/z^2;
+beta_incomplete(-3,1,z);
+-1/(3*z^3);
+beta_incomplete(-3,2,z);
+(z/2-1/3)/z^3;
+beta_incomplete(-3,3,z);
+(-z^2+z-1/3)/z^3;
+
+/* Some numerical tests in double float precision */
+
+closeto(
+  beta_incomplete(0.5,1.0,0.10),
+  0.6324555320336758663997787088865437067439110278650433653715009706b0,
+  1e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.15),
+  0.7745966692414833770358530799564799221665843410583181653175147532b0,
+  1e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.20),
+  0.8944271909999158785636694674925104941762473438446102897083588982b0,
+  1e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.25),
+  1.000000000000000000000000000000000000000000000000000000000000000b0,
+  1e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.50),
+  1.414213562373095048801688724209698078569671875376948073176679738b0,
+  1e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.75),
+  1.732050807568877293527446341505872366942805253810380628055806979b0,
+  2.0e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,1.00),
+  2.000000000000000000000000000000000000000000000000000000000000000b0,
+  2.0e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,1.25),
+  2.236067977499789696409173668731276235440618359611525724270897245b0,
+  2.0e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,1.50),
+  2.449489742783178098197284074705891391965947480656670128432692567b0,
+  2.0e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,1.75),
+  2.645751311064590590501615753639260425710259183082450180368334459b0,
+  1e-15);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,2.00),
+  2.828427124746190097603377448419396157139343750753896146353359476b0,
+  1e-15);
+true;
+
+/* Some numerical tests in bigfloat precision */
+
+fpprec:64;
+64;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.10b0),
+  0.6324555320336758663997787088865437067439110278650433653715009706b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.15b0),
+  0.7745966692414833770358530799564799221665843410583181653175147532b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.20b0),
+  0.8944271909999158785636694674925104941762473438446102897083588982b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.25b0),
+  1.000000000000000000000000000000000000000000000000000000000000000b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.50b0),
+  1.414213562373095048801688724209698078569671875376948073176679738b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,0.75b0),
+  1.732050807568877293527446341505872366942805253810380628055806979b0,
+  1b-16);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,1.00b0),
+  2.000000000000000000000000000000000000000000000000000000000000000b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,1.25b0),
+  2.236067977499789696409173668731276235440618359611525724270897245b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,1.50b0),
+  2.449489742783178098197284074705891391965947480656670128432692567b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,1.75b0),
+  2.645751311064590590501615753639260425710259183082450180368334459b0,
+  1b-60);
+true;
+
+closeto(
+  beta_incomplete(0.5,1.0,2.00b0),
+  2.828427124746190097603377448419396157139343750753896146353359476b0,
+  1b-60);
+true;
+
+/* See Bug 3220128, but this isn't really that bug */
+closeto(
+  gamma_incomplete(0, 200b0*%i),
+  0.00437844609302782567916569771749325524128345091344187598851110680706344144459295b0
+  - %i*.00241398745542678587253611621620491057595401709907514761094360488114169654741b0,
+  3.4b-67);
+true;
+
+/* Make sure we don't overflow unnecessarily in gamma_incomplete_regularized */
+closeto(
+  gamma_incomplete_regularized(45001d0, 45000d0),
+  0.5012537510700691773177801688515861486945632498553288,
+  6.4e-12);
+true;
+
+/* Check accuracy on the negative real axis.
+ * See Bug  3526359 - gamma_incomplete(1/5,-32.0) not accurate
+ */
+relerror(
+  gamma_incomplete(1/5,-32.0),
+  -4.0986398326716649399d12 - %i*2.9778361454160762231d12,
+  2e-15);
+true;
+
+relerror(
+  gamma_incomplete(10,-100d0),
+  subst(x=-100d0, block([gamma_expand : true], gamma_incomplete(10,x))),
+  8.78e-15);
+true;
+      
+relerror(
+  gamma_incomplete(10,-100b0),
+  subst(x=-100b0, block([gamma_expand : true], gamma_incomplete(10,x))),
+  3.57b-64);
+true;
+      
+relerror(
+  gamma_incomplete(10,-100d0+%i),
+  subst(x=-100d0+%i, block([gamma_expand : true], gamma_incomplete(10,x))),
+  8.1e-15);
+true;
+      
+relerror(
+  gamma_incomplete(10,-100b0+%i),
+  subst(x=-100b0+%i, block([gamma_expand : true], gamma_incomplete(10,x))),
+  2.04b-64);
+true;
+
+relerror(
+ erf(inverse_erf(.5)),
+ 0.5,
+ 1.4d-14);
+true;
+      
+relerror(
+ erf(inverse_erf(-.5)),
+ -0.5,
+ 1.4e-14);
+true;
+
+relerror(
+ erf(inverse_erf(.5b0)),
+ 0.5b0,
+ 2b-64);
+true;
+
+relerror(
+ erf(inverse_erf(-.5b0)),
+ -0.5b0,
+ 2b-64);
+true;
+
+relerror(
+ erf(inverse_erf(2.0)),
+ 2.0,
+ 7.9d-15);
+true;
+
+relerror(
+ erf(inverse_erf(-2.0)),
+ -2.0,
+ 7.9d-15);
+true;
+
+/* These are a bit slow if fpprec is large.  Make fpprec a bit smaller */
+fpprec:24;
+24;
+
+relerror(
+ erf(inverse_erf(2b0)),
+ 2b0,
+ 2.9b-24);
+true;
+
+relerror(
+ erf(inverse_erf(-2b0)),
+ -2b0,
+ 2.9b-24);
+true;
+
+relerror(
+ erf(inverse_erf(2b0+2b0*%i)),
+ 2b0+2b0*%i,
+ 6.6b-25);
+true;
+
+relerror(
+ erf(inverse_erf(-2b0-2b0*%i)),
+ -2b0-2b0*%i,
+ 6.6b-25);
+true;
+
+relerror(
+ erf(inverse_erf(10b0+1000b0*%i)),
+ 10b0+1000b0*%i,
+ 2b-23);
+true;
+
+
+/* From the mailing list.  This should not signal an error and should give a simplifed answer */
+relerror(
+ expand(bfloat(erf((sqrt(2)*%i-sqrt(2))/2))),
+ 4.74147636640994245161681b-1 * %i - 9.69264211944215930381491b-1,
+ 1b-23);
+true;
+
+(fpprec:oldfpprec,done);
+done;
+

@@ -1,0 +1,65 @@
+/* written by Gosei Furuya <go.maxima@gmail.com> 
+#  This program is free software; you can redistribute it and/or modify        
+#  it under the terms of the GNU General Public License as published by        
+#  the Free Software Foundation; either version 2 of the License, or           
+#  (at your option) any later version.                
+*/
+
+dotdistrib:true$
+dotexptsimp:false $
+dotscrules:true $
+dotassoc:false$
+declare([i,j,k],nonscalar)$
+
+defrule(f1,j.j,-1)$
+defrule(f2,i.i,-1)$
+defrule(f3,k.k,-1)$
+defrule(f4,i.j,k)$
+defrule(f5,j.i,-k)$
+defrule(f6,j.k,i)$
+defrule(f7,k.j,-i)$
+defrule(f8,k.i,j)$
+defrule(f9,i.k,-j)$
+
+/*coeff4(a+b*i+c*j+d*k)--->[a,b,c,d]*/
+expand4(_ex):=block([_eex],_eex:apply2(expand(_ex),f1,f2,f3,f4,f5,f6,f7,f8,f9),
+_eex:apply2(_eex,f1,f2,f3,f4,f5,f6,f7,f8,f9),_eex)$
+
+conj4(_ex1):=block([_eex1],_eex1:expand4(_ex1),
+_ex1:coeff(_eex1,i)*i+coeff(_eex1,j)*j+coeff(_eex1,k)*k,ratsimp(_eex1-2*_ex1))$
+
+norm4(_ex1):= sqrt(expand4(_ex1 . conj4(_ex1)))$
+
+inv4(_ex):= block( if (norm4(_ex)#0) then conj4(_ex)/norm4(_ex)^2 else false)$
+
+scalarpart4(_ex1):=block([_eex1],_eex1:expand4(_ex1),
+_ex1:coeff(_eex1,i)*i+coeff(_eex1,j)*j+coeff(_eex1,k)*k,ratsimp(_eex1-_ex1))$
+
+vectorpart4(_ex1):=block([_eex1],_eex1:expand4(_ex1),
+coeff(_eex1,i)*i+coeff(_eex1,j)*j+coeff(_eex1,k)*k)$
+
+decomp4(_ex1):=block([_nn,_mm],_nn:norm4(_ex1),_mm:vectorpart4(_ex1),[acos(scalarpart4(_ex1)/_nn),_mm/norm4(_mm),_nn])$
+
+invdecomp4(_exlist):=block([_th,_pureq,_r],_th:_exlist[1],_pureq:_exlist[2],_r:_exlist[3],expand4(_r*cos(_th)+_r*sin(_th)*_pureq))$
+
+/*for matrix representation
+# matrix_element_mult:lambda([x,y],expand4(x.y))$
+# matrix([1,2*j],[3*i,4]).matrix([i,0],[j,k]);
+# result MATRIX([i-2,2*i],[4*j-3,4*k]) 
+# in this case a general inverse matrix exists.
+# for purpose of representing some matrix with basematrix of quaternion 
+# a:matrix([1,i,j,k],[i,-1,-k,j],[j,k,-1,-i],[k,-j,i,-1])$
+# a.a.a is  MATRIX([-8,0,0,0],[0,-8,0,0],[0,0,-8,0],[0,0,0,-8])
+# so inverse a is -1/8*(a.a)
+# inva:-1/8*(a.a)$
+# we obtain coeff by inva.b,b is a matrix
+*/
+
+basematrix1:[matrix([0,-%i],[-%i,0]),matrix([0,-1],[1,0]),matrix([-%i,0],[0,%i])];
+basematrix2:[matrix([0,0,-1,0],[0,0,0,1],[1,0,0,0],[0,-1,0,0]),matrix([0,-1,0,0],[1,0,0,0],[0,0,0,-1],[0,0,1,0]),matrix([0,0,0,1],[0,0,1,0],[0,-1,0,0],[-1,0,0,0])];
+matcoeff4(_xx,_basematrix):=block([xx,bmat:_basematrix],expand(subst([xx=_xx,i=bmat[1],j=bmat[2],k=bmat[3]],[xx/4-(k . xx . k)/4-(j . xx . j)/4-(i . xx . i)/4,-(xx . i)/4-(k . xx . j)/4+(j . xx . k)/4-(i . xx)/4,-(xx . j)/4+(k . xx . i)/4-(j . xx)/4-(i . xx . k)/4,-(xx . k)/4-(k . xx)/4-(j . xx . i)/4+(i . xx . j)/4])))$
+matrix_element_mult:lambda([x,y],expand4(x.y));
+/*
+matcoeff4(matrix([1,-2*%i-3],[3-2*%i,1]),basematrix1);
+gg:matcoeff4(matrix([1,3],[-2,1]),basematrix1);
+*/

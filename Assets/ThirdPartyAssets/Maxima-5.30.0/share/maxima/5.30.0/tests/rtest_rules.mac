@@ -1,0 +1,583 @@
+kill (all);
+done;
+
+/* Atoms, including false, are OK as rule productions.
+ * No matchdeclare predicates => match literal expressions only.
+ */
+
+(tellsimp (foo1 (x), true),
+ tellsimp (foo2 (x), false),
+ tellsimp (foo3 (x), %pi),
+ tellsimp (foo4 (x), 1729),
+
+ tellsimpafter (bar1 (x), true),
+ tellsimpafter (bar2 (x), false),
+ tellsimpafter (bar3 (x), %pi),
+ tellsimpafter (bar4 (x), 1729),
+
+ defrule (r1, baz1 (x), true),
+ defrule (r2, baz2 (x), false),
+ defrule (r3, baz3 (x), %pi),
+ defrule (r4, baz4 (x), 1729),
+
+ 0);
+0;
+
+[foo1 (x), foo2 (x), foo3 (x), foo4 (x), bar1 (x), bar2 (x), bar3 (x), bar4 (x)];
+[true, false, %pi, 1729, true, false, %pi, 1729];
+
+[r1 (baz1 (x)), r2 (baz2 (x)), r3 (baz3 (x)), r4 (baz4 (x))];
+[true, false, %pi, 1729];
+
+/* For defrule and defmatch, atoms (both literal and variable) are OK as rule templates.
+ * (Not OK for tellsimp and tellsimpafter, however.)
+ */
+
+(defrule (rx, xx, foo_xx),
+ defrule (r1, 1, foo_1),
+ defrule (rs, "string", foo_string),
+ defrule (r17, 17.0, foo_17),
+ defrule (rtrue, true, foo_true),
+ defrule (rfalse, false, foo_false),
+
+ defmatch (px, xx),
+ defmatch (p1, 1),
+ defmatch (ps, "string"),
+ defmatch (pfloat, 17.0),
+ defmatch (ptrue, true),
+ defmatch (pfalse, false),
+
+ 0);
+0;
+
+[rx (xx), r1 (1), rs ("string"), r17 (17.0), rtrue (true), rfalse (false)];
+[foo_xx, foo_1, foo_string, foo_17, foo_true, foo_false];
+
+[rx (yy), r1 (2), rs ("string2"), r17 (29.0), rtrue (truly), rfalse (falsely)];
+[false, false, false, false, false, false];
+
+[px (xx), p1 (1), ps ("string"), pfloat (17.0), ptrue (true), pfalse (false)];
+[true, true, true, true, true, true];
+
+[px (yy), p1 (2), ps ("string2"), pfloat (29.0), ptrue (truly), pfalse (falsely)];
+[false, false, false, false, false, false];
+
+(matchdeclare (aa, atom, ii, integerp, ss, stringp, ff, floatnump, bb, booleanp),
+ booleanp (e) := atom (e) and (e = true or e = false),
+
+ defrule (ra, aa, [aa]),
+ defrule (ri, ii, ii / 10.0),
+ defrule (rs, ss, concat (ss, "1729")),
+ defrule (rf, ff, floor (ff)),
+ defrule (rb, bb, if bb then 1 else 0),
+ 
+ defmatch (pa, aa),
+ defmatch (pi, ii),
+ defmatch (ps, ss),
+ defmatch (pf, ff),
+ defmatch (pb, bb),
+
+ 0);
+0;
+
+[ra (foobar), ri (17290), rs ("foobar"), rf (17.29), rb (false)];
+[[foobar], 1729.0, "foobar1729", 17, 0];
+ 
+[ra (foo + bar), ri (17290.0), rs (foobar), rf (1729), rb (foo (bar))];
+[false, false, false, false, false];
+ 
+[pa (foobar), pi (17290), ps ("foobar"), pf (1729.0), pb (false)];
+[[aa = foobar], [ii = 17290], [ss = "foobar"], [ff = 1729.0], [bb = false]];
+ 
+[pa (foo + bar), pi (17290.0), ps (foobar), pf (1729), pb (foo (bar))];
+[false, false, false, false, false];
+ 
+/* Match variables are OK as main operator names in defrule and defmatch,
+ * but not in tellsimp and tellsimpafter. Operators other than the main
+ * operator can be match variables in tellsimp and tellsimpafter.
+ * DROP A NOTE TO THIS EFFECT IN RULES.TEXI !!
+ */
+
+(matchdeclare
+  ([a, b], atom,
+    f, lambda ([e], featurep (e, increasing)),
+   [x, y], all), 0);
+0;
+
+(defrule (r1, a(b), b(a)),
+ defrule (r2, f(x) < f(y), x < y),
+ defmatch (p1, a(b)),
+ defmatch (p2, f(x) < f(y)),
+ 0);
+0;
+
+[r1 (foo (bar)), r2 (log (u + v) < log (u - v))];
+[bar (foo), u + v < u - v];
+
+[p1 (foo (bar)), p2 (log (u + v) < log (u - v))];
+[[b = bar, a = foo], [y = u - v, x = u + v, f = log]]; 
+
+for e in values do apply (remvalue, [e]);
+done;
+
+[r1 (foo (bar + baz)), r2 (cosh (x) < cosh (y))];
+[false, false];
+
+[p1 (foo (bar + baz)), p2 (cosh (x) < cosh (y))];
+[false, false];
+
+(tellsimp (f(x) < f(y), x < y),
+ tellsimpafter (f(x) > f(y), x > y),
+ 0);
+0;
+
+[log (u + v) < log (u - v), cosh (u + v) < cosh (u - v)];
+[u + v < u - v, cosh (u + v) < cosh (u - v)];
+
+[sinh (u + v) > sinh (u * v), sin (u + v) > sin (u * v)];
+[u + v > u * v, sin (u + v) > sin (u * v)];
+
+/* Various forms of matchdeclare predicates.
+ * These should different ways to say the same thing.
+ */
+
+matchdeclare (aa1, true, aa2, all);
+done;
+
+matchdeclare 
+  (bb1, integerp,
+  bb2, integerp(),
+  bb3, myintegerp_mmacro,
+  bb4, myintegerp_mmacro(),
+  bb3, myintegerp_mfunction,
+  bb4, myintegerp_mfunction(),
+  bb5, lambda ([x], integerp (x)),
+  bb6, lambda ([x], integerp (x)) (),
+  bb7, myintegerp_array_fcn [1234] ());
+done;
+
+(myintegerp_mmacro (x) ::= buildq ([x], integerp (x)), myintegerp_mfunction (x) := integerp (x), myintegerp_array_fcn [1234] (x) := integerp (x), 0);
+0;
+
+matchdeclare
+  (cc1, freeof (%e, %i),
+  cc2, myfreeof_mmacro (%e, %i),
+  cc3, myfreeof_mfunction (%e, %i),
+  cc4, lambda ([x, y, z], freeof (x, y, z)) (%e, %i),
+  cc5, lambda ([[L]], apply (freeof, L)) (%e, %i),
+  cc6, myfreeof_array_fcn [1234] (%e, %i));
+done;
+
+(myfreeof_mmacro ([L]) ::= buildq ([L], freeof (splice (L))), myfreeof_mfunction ([L]) := apply (freeof, L), myfreeof_array_fcn [1234] ([L]) := apply (freeof, L), 0);
+0;
+
+/* Rules using equivalent predicate defns should have the same effect.
+ */
+
+(tellsimpafter (fa1 (aa1), ga (aa1)),
+tellsimpafter (fa2 (aa2), ga (aa2)),
+
+tellsimpafter (fb1 (bb1), gb (bb1)),
+tellsimpafter (fb2 (bb2), gb (bb2)),
+tellsimpafter (fb3 (bb3), gb (bb3)),
+tellsimpafter (fb4 (bb4), gb (bb4)),
+tellsimpafter (fb5 (bb5), gb (bb5)),
+tellsimpafter (fb6 (bb6), gb (bb6)),
+tellsimpafter (fb7 (bb7), gb (bb7)),
+
+tellsimpafter (fc1 (cc1), gc (cc1)),
+tellsimpafter (fc2 (cc2), gc (cc2)),
+tellsimpafter (fc3 (cc3), gc (cc3)),
+tellsimpafter (fc4 (cc4), gc (cc4)),
+tellsimpafter (fc5 (cc5), gc (cc5)),
+tellsimpafter (fc6 (cc6), gc (cc6)),
+0);
+0;
+
+[fa1 (%pi + %i), fa2 (%pi + %i)];
+[ga (%pi + %i), ga (%pi + %i)];
+
+[fb1 (100), fb2 (100), fb3 (100), fb4 (100), fb5 (100), fb6 (100), fb7 (100)];
+[gb (100), gb (100), gb (100), gb (100), gb (100), gb (100), gb (100)];
+
+(L : [fb1 (x), fb2 (x), fb3 (x), fb4 (x), fb5 (x), fb6 (x), fb7 (x)], 0);
+0;
+ 
+simp : false;
+false;
+
+L;
+[fb1 (x), fb2 (x), fb3 (x), fb4 (x), fb5 (x), fb6 (x), fb7 (x)];
+
+simp : true;
+true;
+
+[fc1 (x + y), fc2 (x + y), fc3 (x + y), fc4 (x + y), fc5 (x + y), fc6 (x + y)];
+[gc (x + y), gc (x + y), gc (x + y), gc (x + y), gc (x + y), gc (x + y)];
+
+(L : [fc1 (%i + y), fc2 (%i + y), fc3 (%i + y), fc4 (%i + y), fc5 (%i + y), fc6 (%i + y)], 0);
+0;
+
+simp : false;
+false;
+
+L;
+[fc1 (%i + y), fc2 (%i + y), fc3 (%i + y), fc4 (%i + y), fc5 (%i + y), fc6 (%i + y)];
+
+simp : true;
+true;
+
+/* Repeat tellsimpafter examples using tellsimp.
+ */
+
+(tellsimp (f2a1 (aa1), ga (aa1)),
+tellsimp (f2a2 (aa2), ga (aa2)),
+
+tellsimp (f2b1 (bb1), gb (bb1)),
+tellsimp (f2b2 (bb2), gb (bb2)),
+tellsimp (f2b3 (bb3), gb (bb3)),
+tellsimp (f2b4 (bb4), gb (bb4)),
+tellsimp (f2b5 (bb5), gb (bb5)),
+tellsimp (f2b6 (bb6), gb (bb6)),
+tellsimp (f2b7 (bb7), gb (bb7)),
+
+tellsimp (f2c1 (cc1), gc (cc1)),
+tellsimp (f2c2 (cc2), gc (cc2)),
+tellsimp (f2c3 (cc3), gc (cc3)),
+tellsimp (f2c4 (cc4), gc (cc4)),
+tellsimp (f2c5 (cc5), gc (cc5)),
+tellsimp (f2c6 (cc6), gc (cc6)),
+0);
+0;
+
+[f2a1 (%pi + %i), f2a2 (%pi + %i)];
+[ga (%pi + %i), ga (%pi + %i)];
+
+[f2b1 (100), f2b2 (100), f2b3 (100), f2b4 (100), f2b5 (100), f2b6 (100), f2b7 (100)];
+[gb (100), gb (100), gb (100), gb (100), gb (100), gb (100), gb (100)];
+
+(L : [f2b1 (x), f2b2 (x), f2b3 (x), f2b4 (x), f2b5 (x), f2b6 (x), f2b7 (x)], 0);
+0;
+ 
+simp : false;
+false;
+
+L;
+[f2b1 (x), f2b2 (x), f2b3 (x), f2b4 (x), f2b5 (x), f2b6 (x), f2b7 (x)];
+
+simp : true;
+true;
+
+[f2c1 (x + y), f2c2 (x + y), f2c3 (x + y), f2c4 (x + y), f2c5 (x + y), f2c6 (x + y)];
+[gc (x + y), gc (x + y), gc (x + y), gc (x + y), gc (x + y), gc (x + y)];
+
+(L : [f2c1 (%i + y), f2c2 (%i + y), f2c3 (%i + y), f2c4 (%i + y), f2c5 (%i + y), f2c6 (%i + y)], 0);
+0;
+
+simp : false;
+false;
+
+L;
+[f2c1 (%i + y), f2c2 (%i + y), f2c3 (%i + y), f2c4 (%i + y), f2c5 (%i + y), f2c6 (%i + y)];
+
+simp : true;
+true;
+
+/* Repeat tellsimpafter examples using defrule.
+ */
+
+(defrule (rule_a1, f3a1 (aa1), ga (aa1)),
+defrule (rule_a2, f3a2 (aa2), ga (aa2)),
+
+defrule (rule_b1, f3b1 (bb1), gb (bb1)),
+defrule (rule_b2, f3b2 (bb2), gb (bb2)),
+defrule (rule_b3, f3b3 (bb3), gb (bb3)),
+defrule (rule_b4, f3b4 (bb4), gb (bb4)),
+defrule (rule_b5, f3b5 (bb5), gb (bb5)),
+defrule (rule_b6, f3b6 (bb6), gb (bb6)),
+defrule (rule_b7, f3b7 (bb7), gb (bb7)),
+
+defrule (rule_c1, f3c1 (cc1), gc (cc1)),
+defrule (rule_c2, f3c2 (cc2), gc (cc2)),
+defrule (rule_c3, f3c3 (cc3), gc (cc3)),
+defrule (rule_c4, f3c4 (cc4), gc (cc4)),
+defrule (rule_c5, f3c5 (cc5), gc (cc5)),
+defrule (rule_c6, f3c6 (cc6), gc (cc6)),
+0);
+0;
+
+map (lambda ([e, r], apply (apply1, [e, r])), [f3a1 (%pi + %i), f3a2 (%pi + %i)], [rule_a1, rule_a2]);
+[ga (%pi + %i), ga (%pi + %i)];
+
+map (lambda ([e, r], apply (apply1, [e, r])), [f3b1 (100), f3b2 (100), f3b3 (100), f3b4 (100), f3b5 (100), f3b6 (100), f3b7 (100)], [rule_b1, rule_b2, rule_b3, rule_b4, rule_b5, rule_b6, rule_b7]);
+[gb (100), gb (100), gb (100), gb (100), gb (100), gb (100), gb (100)];
+
+map (lambda ([e, r], apply (apply1, [e, r])), [f3b1 (x), f3b2 (x), f3b3 (x), f3b4 (x), f3b5 (x), f3b6 (x), f3b7 (x)], [rule_b1, rule_b2, rule_b3, rule_b4, rule_b5, rule_b6, rule_b7]);
+[f3b1 (x), f3b2 (x), f3b3 (x), f3b4 (x), f3b5 (x), f3b6 (x), f3b7 (x)];
+
+map (lambda ([e, r], apply (apply1, [e, r])), [f3c1 (x + y), f3c2 (x + y), f3c3 (x + y), f3c4 (x + y), f3c5 (x + y), f3c6 (x + y)], [rule_c1, rule_c2, rule_c3, rule_c4, rule_c5, rule_c6]);
+[gc (x + y), gc (x + y), gc (x + y), gc (x + y), gc (x + y), gc (x + y)];
+
+map (lambda ([e, r], apply (apply1, [e, r])), [f3c1 (%i + y), f3c2 (%i + y), f3c3 (%i + y), f3c4 (%i + y), f3c5 (%i + y), f3c6 (%i + y)], [rule_c1, rule_c2, rule_c3, rule_c4, rule_c5, rule_c6]);
+[f3c1 (%i + y), f3c2 (%i + y), f3c3 (%i + y), f3c4 (%i + y), f3c5 (%i + y), f3c6 (%i + y)];
+
+/* Repeat tellsimpafter examples using defmatch.
+ */
+
+(defmatch (prog_a1, f4a1 (aa1)),
+defmatch (prog_a2, f4a2 (aa2)),
+
+defmatch (prog_b1, f4b1 (bb1)),
+defmatch (prog_b2, f4b2 (bb2)),
+defmatch (prog_b3, f4b3 (bb3)),
+defmatch (prog_b4, f4b4 (bb4)),
+defmatch (prog_b5, f4b5 (bb5)),
+defmatch (prog_b6, f4b6 (bb6)),
+defmatch (prog_b7, f4b7 (bb7)),
+
+defmatch (prog_c1, f4c1 (cc1)),
+defmatch (prog_c2, f4c2 (cc2)),
+defmatch (prog_c3, f4c3 (cc3)),
+defmatch (prog_c4, f4c4 (cc4)),
+defmatch (prog_c5, f4c5 (cc5)),
+defmatch (prog_c6, f4c6 (cc6)),
+0);
+0;
+
+map (lambda ([e, r], r(e)), [f4a1 (%pi + %i), f4a2 (%pi + %i)], [prog_a1, prog_a2]);
+['[aa1 = %pi + %i], '[aa2 = %pi + %i]];
+
+map (lambda ([e, r], r(e)), [f4b1 (100), f4b2 (100), f4b3 (100), f4b4 (100), f4b5 (100), f4b6 (100), f4b7 (100)], [prog_b1, prog_b2, prog_b3, prog_b4, prog_b5, prog_b6, prog_b7]);
+['[bb1 = 100], '[bb2 = 100], '[bb3 = 100], '[bb4 = 100], '[bb5 = 100], '[bb6 = 100], '[bb7 = 100]];
+
+map (lambda ([e, r], r(e)), [f4b1 (x), f4b2 (x), f4b3 (x), f4b4 (x), f4b5 (x), f4b6 (x), f4b7 (x)], [prog_b1, prog_b2, prog_b3, prog_b4, prog_b5, prog_b6, prog_b7]);
+[false, false, false, false, false, false, false];
+
+map (lambda ([e, r], r(e)), [f4c1 (x + y), f4c2 (x + y), f4c3 (x + y), f4c4 (x + y), f4c5 (x + y), f4c6 (x + y)], [prog_c1, prog_c2, prog_c3, prog_c4, prog_c5, prog_c6]);
+['[cc1 = y + x], '[cc2 = y + x], '[cc3 = y + x], '[cc4 = y + x], '[cc5 = y + x], '[cc6 = y + x]];
+
+map (lambda ([e, r], r(e)), [f4c1 (%i + y), f4c2 (%i + y), f4c3 (%i + y), f4c4 (%i + y), f4c5 (%i + y), f4c6 (%i + y)], [prog_c1, prog_c2, prog_c3, prog_c4, prog_c5, prog_c6]);
+[false, false, false, false, false, false];
+
+/* Re-do above examples using DEFMSPEC functions in matchdeclare predicates.
+ * Commenting out this part because :lisp is not recognized in test scripts.
+:lisp (defmspec $myintegerp_mspec (l) ($integerp (meval (cadr l))))
+:lisp (defmspec $myfreeof_mspec (l) (apply '$freeof (mapcar #'meval (cdr l))))
+
+(matchdeclare
+   (dd1, myintegerp_mspec,
+    dd2, myintegerp_mspec (),
+    ee1, myfreeof_mspec (%e, %i)),
+ 0);
+0;
+
+(tellsimpafter (fd1 (dd1), gd (dd1)),
+ tellsimpafter (fd2 (dd2), gd (dd2)),
+ tellsimpafter (fe1 (ee1), ge (ee1)),
+
+ tellsimp (f2d1 (dd1), gd (dd1)),
+ tellsimp (f2d2 (dd2), gd (dd2)),
+ tellsimp (f2e1 (ee1), ge (ee1)),
+
+ defrule (rule_d1, f3d1 (dd1), gd (dd1)),
+ defrule (rule_d2, f3d2 (dd2), gd (dd2)),
+ defrule (rule_e1, f3e1 (ee1), ge (ee1)),
+
+ defmatch (prog_d1, f4d1 (dd1)),
+ defmatch (prog_d2, f4d2 (dd2)),
+ defmatch (prog_e1, f4e1 (ee1)),
+ 0);
+0;
+
+[fd1 (100), fd2 (100), fe1 (x + y),
+ f2d1 (100), f2d2 (100), f2e1 (x + y),
+ apply1 (f3d1 (100), rule_d1), apply1 (f3d2 (100), rule_d2), apply1 (f3e1 (x + y), rule_e1),
+ prog_d1 (f4d1 (100)), prog_d2 (f4d2 (100)), prog_e1 (f4e1 (x + y))];
+[gd (100), gd (100), ge (x + y),
+ gd (100), gd (100), ge (x + y),
+ gd (100), gd (100), ge (x + y),
+ '[dd1 = 100], '[dd2 = 100], '[ee1 = x + y]];
+
+(L : [fd1 (x), fd2 (x), f2d1 (x), f2d2 (x)], 0);
+0;
+
+simp : false;
+false;
+
+L;
+[fd1 (x), fd2 (x), f2d1 (x), f2d2 (x)];
+
+simp : true;
+true;
+ */
+
+/* Examples of built-in and user-defined binary operators.
+ */
+
+(infix ("@@"),
+ "@@" (a, b) := integerp(a) and integerp(b) and remainder(b, a) = 0,
+ matchdeclare (aa, "<"(100), bb, ">"(100), cc, "="(100), dd, "#"(100), ee, "@@"(100)),
+ tellsimpafter (FOO1 (aa, bb, cc, dd, ee), BAR1 (aa - 100, 100 - bb, cc - 100, dd - 100, ee / 100)),
+ 0);
+0;
+
+FOO1 (17, 29, 1729, 29, 17);
+FOO1 (17, 29, 1729, 29, 17);
+
+FOO1 (1729, 17, 100, 29, 172900);
+BAR1 (1729 - 100, 100 - 17, 0, 29 - 100, 1729);
+
+/* Undecided expressions should be treated as failed matches
+ * (i.e. without causing a predicate evaluation error,
+ * and without treating some non-false value as true)
+ */
+(matchdeclare (aa, "<"(foo0), bb, ">"(foo0), cc, "="(foo0), dd, "#"(foo0)),
+ tellsimpafter (BAZ1 (aa, bb, cc, dd), BLURF1 (aa - foo0, foo0 - bb, 0, dd - foo0)),
+ 0);
+0;
+
+(BAZ1 (1729, 17, 100, 29), [op (%%), args (%%)]);
+[BAZ1, [1729, 17, 100, 29]];
+
+foo0 : 100;
+100;
+
+BAZ1 (1729, 17, 100, 29);
+BLURF1 (1729 - 100, 100 - 17, 0, 29 - 100);
+
+/* Arguments appearing in matched expressions should be evaluated just once
+ * (just as they would be if there were no matching).
+ */
+
+/* NEED EXAMPLES HERE !! */
+
+/* Additional miscellaneous examples.
+ */
+(nzc (e) := constantp (e) and e # 0,
+ matchdeclare ([aa, bb], constantp, [xx, yy, zz], nzc),
+ declare (C1, constant),
+ r1: first (tellsimp (quux (aa, bb), foo (bb, aa))),
+ r2: first (tellsimp (foo (aa, bb), bar (aa*bb))),
+ r3: first (tellsimp (baz (aa, bb), foo (bb, aa))),
+ 0);
+0;
+
+/* tellsimp-defined rules are applied one after another.
+ * Not so with tellsimpafter -- *AFTERFLAG prevents successive simplifications.
+ * I suppose the difference is just an accident of history.
+ */
+
+baz (%pi, %i);
+bar (%i*%pi);
+
+q1: quux (73, C1);
+bar (C1*73);
+
+/* I'd like to kill just r1, but remrule has at least one bug (SF bug # 1204711)
+ */
+remrule (quux, all);
+quux;
+
+quux (73, C1);
+'(quux (73, C1));
+
+(r4: first (tellsimpafter (quux (xx, yy), glurf (xx^yy))), 0);
+0;
+
+quux (73, C1);
+glurf (73^C1);
+
+/* For bug [ 1120546 ] defrule (a, b, c) (all atoms) confuses kill (rules)
+ */
+
+kill (all);
+done;
+
+(defrule (a, b, c), 0);
+0;
+
+kill (rules);
+done;
+
+/* Unreported bug: patterns for + or * match any operator (not just + or *)
+ * when + or * is not the top-level operator and pattern variables
+ * partition the arguments of + or *.
+ */
+
+(matchdeclare (xx, integerp, yy, lambda ([ee], not integerp (ee))),
+ defrule (r1, FOO (xx + yy), FOOPLUS (xx, yy)),
+ defrule (r2, FOO (xx * yy), FOOTIMES (xx, yy)),
+ 0);
+0;
+
+apply1 (FOO (a + b + c + 123), r1);
+FOOPLUS (123, a + b + c);
+
+apply1 (FOO (x * y * z * 234), r2);
+FOOTIMES (234, x * y * z);
+
+apply1 (FOO (BAR (a, b, c, 123)), r1, r2);
+FOO (BAR (a, b, c, 123));
+
+apply1 (FOO (x + y + z + 345), r2);
+FOO (x + y + z + 345);
+
+apply1 (FOO (s * t * u * v * 456), r1);
+FOO (s * t * u * v * 456);
+
+/* Seems to work OK when pattern variables do not partition the arguments.
+ * Verify that continues to work after bug fix.
+ */
+(matchdeclare (xx, bfloatp, yy, symbolp),
+ defrule (r3, BAR (xx + yy), BARPLUS (xx, yy)),
+ defrule (r4, BAR (xx * yy), BARTIMES (xx, yy)),
+ 0);
+0;
+
+apply1 (BAR (1b0 + x + y), r3);
+BARPLUS (1b0, x + y);
+
+apply1 (BAR (2b0 * u * v), r4);
+BARTIMES (2b0, u * v);
+
+apply1 (BAR (FOO (3b0, g, h)), r3, r4);
+BAR (FOO (3b0, g, h));
+
+apply1 (BAR (4b0 * m * n), r3);
+BAR (4b0 * m * n);
+
+apply1 (BAR (5b0 + p + q), r4);
+BAR (5b0 + p + q);
+
+/* Examples derived from mailing list 2008-03-23
+ */
+
+(kill (aa, bb, foo, bar),
+ matchdeclare
+   (aa, integerp,
+    bb, floatnump,
+    foo, lambda ([ee], member (ee, '[sin, cos]))),
+ defmatch (bar, bb * foo (aa)),
+ 0);
+0;
+
+(bar (12.345 * sin (54321)),
+ if %% = false then false else sort (%%));
+[aa = 54321, bb = 12.345, foo = sin];
+
+(matchdeclare
+   (aa, floatnump,
+    bb, integerp),
+ defmatch (baztimes, aa * foo (bb)),
+ defmatch (bazplus, aa + foo (bb)),
+ 0);
+0;
+
+(baztimes (12.345 * sin (54321)),
+ if %% = false then false else sort (%%));
+[aa = 12.345, bb = 54321, foo = sin];
+
+(bazplus (12.345 + sin (54321)),
+ if %% = false then false else sort (%%));
+[aa = 12.345, bb = 54321, foo = sin];
+

@@ -1,0 +1,519 @@
+(kill(all),0);
+0$
+
+/*--- taylorinfo ---*/
+
+/* SF bug 867310 */
+
+taylorinfo(x);
+false$
+
+taylorinfo(a = b);
+false$
+
+taylorinfo(taylor(x,x,0,5));
+[[x,0,5]]$
+
+taylorinfo(taylor(x,[x,y],0,5));
+[[x,y],[0,0],[5,5]]$
+
+taylorinfo(taylor(x,[x,y],0,5,z,a,7));
+[[x,y],[0,0],[5,5],[z,a,7]]$
+
+(tp : taylor(x, [x, a, 5, asympt]),0);
+0$
+
+taylorinfo(tp);
+[[x,a,5, asympt]]$
+
+taylorinfo(taylor(taylor(x,x,a,7),y,b,9));
+[[y,b,9],[x,a,7]]$
+
+taylorinfo(taylor(x,x,0,inf));
+[[x,0,'inf]]$
+
+/*--- constants ----*/
+
+ratdisrep(taylor(0,x,1,2));
+0$
+
+ratdisrep(taylor(-42,x,1,2));
+-42$
+
+ratdisrep(taylor(6.023e23,x,1,2)), keepfloat ;
+6.023e23$
+
+ratdisrep(taylor(sqrt(5),x,1,2));
+sqrt(5)$
+
+ratdisrep(taylor(sqrt(5) - %i,x,1,2));
+sqrt(5) - %i$
+
+taylor(x[2],x[1],0,2);
+x[2]$
+
+/*---polynomials ---*/
+
+ratdisrep(taylor(x,x,1,2));
+x$
+
+ratdisrep(taylor(x + sqrt(y),x,1,2));
+x + sqrt(y)$
+
+ratdisrep(taylor(x*(x+1) + sqrt(y),x,1,2));
+sqrt(y)+(x-1)^2+3*(x-1)+2$
+
+ratdisrep(taylor(1 + sqrt(6) * x + %pi*x^2,x,-%phi,9));
+%pi*(x+%phi)^2+(sqrt(6)-2*%phi*%pi)*(x+%phi)+(%phi+1)*%pi-sqrt(6)*%phi+1$
+
+radcan(taylor((1 + x*y) * (1 - x),[x,y],sqrt(2),3));
+(x-x^2)*y-x+1$
+
+expand(taylor(x*y + x^2 * y,[x,y],5,3));
+x*y + x^2 * y$
+
+taylor(rat(x*(x-1)),x,0,5);
+x^2 - x$
+
+
+/* algebraic functions ---*/
+
+taylor(abs(x),x,-sqrt(2),2);
+-x$
+
+(tp : taylor(sqrt(1 + x),x,0,5),0);
+0$
+
+ratdisrep(tp^2);
+1+x$
+
+(tp : taylor((1 + x)^(3/4),x,0,5),0);
+0$
+
+ratdisrep(tp^(4/3));
+1+x$
+
+(tp : taylor((1 + x)^mu,x,0,5),0);
+0$
+
+ratdisrep(tp^(1/mu));
+1+x$
+
+(tp : taylor((1 - a * x)^mu,x,0,5),0);
+0$
+
+ratdisrep(tp^(1/mu));
+1-a * x$
+
+(tp : taylor((1 - x / sqrt(3))^(1/5),x,0,5),0);
+0$
+
+ratdisrep(tp^5 - (1-(sqrt(3)*x)/3));
+0$
+
+(tp : taylor(sqrt(x*(x-1)),x,1,5),0);
+0$
+
+ratdisrep(tp^2 - x * (x-1));
+0$
+
+(tp : taylor(sqrt((1-x)/(1-y)),[x,y],0,5),0);
+0$
+
+(1-y)*tp^2;
+1-x$
+
+/*---log and trig like ----*/
+
+taylor(cos(x),x,0,4);
+1 - x^2/2! + x^4 / 4!$
+
+taylor(sin(x),x,0,4);
+x - x^3 / 3!$
+
+taylor(tan(x),x,0,4);
+x + x^3/3$
+
+taylor(cosh(x),x,0,5);
+1 + ((x^2)/2) + ((x^4)/24)$
+
+taylor(sinh(x),x,0,5);
+x + ((x^3)/6) + ((x^5)/120)$
+
+taylor(tanh(x),x,0,5);
+x - ((x^3)/3) + ((2 * x^5)/15)$
+
+taylor(sin(x) / cos(x),x,0,10) - taylor(tan(x),x,0,10);
+0$
+
+taylor(sin(x) / cos(x),x, %pi/6,10) - taylor(tan(x),x, %pi/6,10);
+0$
+
+trigsimp(taylor(sin(x + x^2) / cos(x + x^2),x, %pi/6,10) - taylor(tan(x + x^2),x, %pi/6,10));
+0$
+
+taylor(sec(x),x,0,5) * taylor(cos(x),x,0,5);
+1$
+
+taylor(sec(x),x,%pi/3,5) * taylor(cos(x),x,%pi/3,5);
+1$
+
+taylor(csc(x),x,0,5) * taylor(sin(x),x,0,5);
+1$
+
+taylor(csc(x),x,%pi/4,5) * taylor(sin(x),x,%pi/4,5);
+1$
+
+taylor(cot(x),x,0,5) * taylor(tan(x),x,0,5);
+1$
+
+taylor(cot(x),x,12,5) * taylor(tan(x),x,12,5);
+1$
+
+trigsimp(taylor(sinh(x) / cosh(x),x,0,10) - taylor(tanh(x),x,0,10));
+0$
+
+trigsimp(taylor(sinh(x) / cosh(x),x, 1/6,10) - taylor(tanh(x),x, 1/6,10));
+0$
+
+trigsimp(taylor(sinh(x + x^2) / cosh(x + x^2),x, %pi/6,10) - taylor(tanh(x + x^2),x, %pi/6,10));
+0$
+
+taylor(sech(x),x,0,5) * taylor(cosh(x),x,0,5);
+1$
+
+taylor(sech(x),x,%pi/3,5) * taylor(cosh(x),x,%pi/3,5);
+1$
+
+taylor(csch(x),x,0,5) * taylor(sinh(x),x,0,5);
+1$
+
+taylor(csch(x),x,%pi/4,5) * taylor(sinh(x),x,%pi/4,5);
+1$
+
+taylor(coth(x),x,0,5) * taylor(tanh(x),x,0,5);
+1$
+
+taylor(coth(x),x,12,5) * taylor(tanh(x),x,12,5);
+1$
+
+taylor(log(x),x,1,3) - (x-1-(x-1)^2/2+(x-1)^3/3);
+0$
+
+taylor(exp(x),x,0,7);
+''(sum(x^k / k!,k,0,7))$
+
+taylor(exp(-x),x,0,7);
+''(sum((-x)^k / k!,k,0,7))$
+
+log(taylor(exp(x),x,0,10));
+x$
+
+exp(taylor(log(x),x,1,10));
+x$
+
+(tp : taylor(x,x,0,5),0);
+0$
+
+is(equal(taylor(cos(x),x,0,5), cos(tp)));
+true$
+
+is(equal(taylor(sin(x),x,0,5), sin(tp)));
+true$
+
+is(equal(taylor(tan(x),x,0,5), tan(tp)));
+true$
+
+is(equal(taylor(exp(x),x,0,5), exp(tp)));
+true$
+
+/*--- asymptotic ---*/
+
+taylor(x + 1/x + 2/x^2,[x,inf, 2, asympt]);
+x+1/x + 2/x^2$
+
+taylor(x + 1/x + 2/x^2,[x, inf, 1, asympt]);
+x + 1/x$
+
+/*--- jacobian elliptic ---*/
+
+/*  G&R 8.125 1 through 3  */
+
+taylor(jacobi_sn(x,k),x,0,5);
+x - (1 + k) * x^3 / 6 + (1 + 14*k + k^2) * x^5 / 120;
+
+taylor(jacobi_cn(x,k),x,0,4);
+1 - x^2 / 2 + (1 + 4 * k) * x^4 / 24$
+
+taylor(jacobi_dn(x,k),x,0,4);
+1 - (k * x^2 / 2) + (k^2 + 4 * k) * x^4 / 24$
+
+
+/*  G&R  8.154 1,2, 4, and 5 */
+
+taylor(jacobi_sn(x,k)^2,x,0,19) - taylor((1 - jacobi_cn(2*x,k))/(1 + jacobi_dn(2*x,k)),x,0,19);
+0$
+
+taylor(jacobi_cn(x,k)^2,x,0,19)-taylor((jacobi_cn(2*x,k) + jacobi_dn(2*x,k))/(1 + jacobi_dn(2*x,k)),x,0,19);
+0$
+
+taylor(jacobi_sn(x,k)^2,x,0,15) + taylor(jacobi_cn(x,k)^2,x,0,15);
+1$
+
+taylor(jacobi_dn(x,k)^2,x,0,15) + k * taylor(jacobi_sn(x,k)^2,x,0,15);
+1$
+
+taylor(inverse_jacobi_sn(jacobi_sn(x,k),k),x,0,4);
+x$
+
+taylor(jacobi_sn(inverse_jacobi_sn(x,k),k),x,0,4);
+x$
+
+/* The Jacobian elliptic function cd(u,m) = cn(u,m)/dn(u,m). */
+
+taylor(jacobi_cd(x,k),x,0,8) - taylor(jacobi_cn(x,k) / jacobi_dn(x,k),x,0,8);
+0$
+
+
+/*--- Bessel ---*/
+
+taylor(bessel_j(0,x),x,0,5);
+1 - x^2/4 + x^4/64$
+
+taylor(bessel_j(1,x),x,0,5);
+x/2 - x^3/16 + x^5/384$
+
+(assume(m > 0),0);
+0$
+
+taylor(bessel_j(m,x),x,0,1);
+x^m /(2^m * gamma(m + 1))$
+
+taylor(bessel_i(0,x),x,0,5);
+1 + x^2/4 + x^4/64$
+
+taylor(bessel_i(1,x),x,0,5);
+x/2 + x^3/16 + x^5/384$
+
+taylor(bessel_i(m,x) / x^m,x,0,0);
+1/(2^m * gamma(m + 1))$
+
+/*--- gamma, polylog,  and zeta --- */
+
+taylor(gamma(x),x,1,1);
+1 - %gamma * (x - 1)$
+
+taylor(log(gamma(x)),x,0,5);
+(-log(x))+ -%gamma*x+(%pi^2*x^2)/12-(zeta(3)*x^3)/3+(%pi^4*x^4)/360-(zeta(5)*x^5)/5$
+
+taylor(zeta(x),x,0,1);
+ -1/2 - (log(%pi) + log(2)) * x / 2$
+
+taylor(li[1](x),x,0,3);
+x + ((x^2)/2) + ((x^3)/3)$
+
+taylor(li[s](x),x,0,3);
+x + ((x^2)/(2^s)) + ((x^3)/(3^s))$
+
+
+/*--- deftaylor ---*/
+(deftaylor(unk(x), sum(x^k / k,k,1,inf)),0);
+0$
+
+taylor(unk(s),s,0,3);
+s + s^2/2 + s^3/3$
+
+/*--- SF bug 1641487 ---*/
+
+taylor(unk(x),x,1,2);
+unk(1)+(at('diff(unk(x),x,1),x=1))*(x-1)$
+
+(deftaylor(nam[n](x), sum(x^k/(k + n),k,0,inf)),0);
+0$
+
+taylor(nam[5](x),x,0,4);
+1/5+x/6+x^2/7+x^3/8+x^4/9$
+
+taylor(nam[q](x),x,0,4);
+1/q+x/(q+1)+x^2/(q+2)+x^3/(q+3)+x^4/(q+4)$
+
+/*---other ---*/
+
+(assume(t > 0),0);
+0$
+
+taylor('integrate(exp(-x^4),x,0,t),t,0,9) - integrate(taylor(exp(-x^4),x,0,8),x,0,t);
+0$
+
+(forget(t > 0),0);
+0$
+
+is(equal(taylor(taylor(sqrt(1+x+y),[x,0,5]),[y,0,7]), taylor(sqrt(1+x+y),[y,0,7], [x,0,5])));
+true$
+
+taylor(sum(x^k/gamma(k + 1/2),k,0,inf),x,0,3);
+sqrt(%pi)/%pi+(2*sqrt(%pi)*x)/%pi+(4*sqrt(%pi)*x^2)/(3*%pi)+(8*sqrt(%pi)*x^3)/(15*%pi)$
+
+taylor(sum(x^k * a[k],k,0,inf),x,0,1);
+a[0] + a[1] * x$
+
+taylor(a^x+b^x,[a,b],0,1);
+b^x + a^x$
+
+/* SF bug 902757  */
+
+taylor(x,[x],inf,2);
+x$
+
+/* SF bug 836780 */
+
+taylor(acosh(x),x,1,1) - taylor(logarc(acosh(x)),x,1,1);
+0$
+
+/*  SF bug 774065 */
+
+taylor(x/log(x),x,inf,1);
+x/log(x)$
+
+/* SF bug 788933 */
+
+/*
+taylor(x^y,x,0,1,y,0,1);
+1 + log(x) * y$ 
+
+taylor(taylor(x^y,y,0,1),x,0,1);
+1 + log(x) * y$ */
+
+
+/* SF bug  701628*/
+
+taylor(x^2,x,minf,2);
+x^2$
+
+/* SF bug 593449 -- fixed by gcd : spmod */
+
+taylor(log(sqrt(y^e*y+1)+y),e,0,2);
+log(sqrt(y+1)+y)+(sqrt(y+1)*log(y)*y*e)/(2*y^2+(2*sqrt(y+1)+2)*y+2*sqrt(y+1))+(((sqrt(y+1)+1)*log(y)^2*y^4+(2*sqrt(y+1)+5)*log(y)^2*y^3+(2*sqrt(y+1)+4)*log(y)^2*y^2+2*sqrt(y+1)*log(y)^2*y)*e^2)/(8*y^5+(24*sqrt(y+1)+40)*y^4+(56*sqrt(y+1)+80)*y^3+(48*sqrt(y+1)+72)*y^2+(24*sqrt(y+1)+24)*y+8*sqrt(y+1))$
+
+/* SF #817516 */
+
+taylor((log(n)-n)/(log(n)-1),n,inf,1);
+((-1/log(n)))*n+(1+1/log(n))$
+
+/* SF #939022 */
+
+(m: matrix([taylor(1+a*x,x,0,1),0], [0,taylor(1+d*x,x,0,1)]),0);
+0$
+
+(mi : m^^-1,0);
+0$
+
+is(mi[1,1] = taylor(1/(1+a*x),x,0,1));
+true$
+
+is(mi[2,2] = taylor(1/(1+d*x),x,0,1));
+true$
+
+taylorp(mi[1,1]);
+true$
+
+taylorp(mi[2,2]);
+true$
+
+/* SF #1203443 */
+
+taylor(1/x^2,x,minf,2);
+1/x^2$
+
+taylor(1/x^2,x,-inf,2);
+1/x^2$
+
+/* SF #910008 */
+
+taylor(exp(x),x,0,2) - taylor(exp(x),x,0,0);
+0$
+
+/* SF #709138 */
+
+errcatch(taylor(x^3,x,0,2)/taylor(x^3,x,0,2));
+[]$
+
+(remvalue(tp),0);
+0$
+
+/* [ 696818 ] Taylor internal error (rat problem?) */
+taylor(log(sqrt(e*%e^x+1)+e),x,0,2),gcd:subres;
+log(sqrt(e+1)+e)+sqrt(e+1)*e*x/(2*e^2+(2*sqrt(e+1)+2)*e+2*sqrt(e+1))
+                      +((sqrt(e+1)+1)*e^5+(3*sqrt(e+1)+6)*e^4
+                                         +(4*sqrt(e+1)+9)*e^3
+                                         +(4*sqrt(e+1)+4)*e^2+2*sqrt(e+1)*e)
+                       *x^2
+                       /(8*e^6+(24*sqrt(e+1)+48)*e^5+(80*sqrt(e+1)+120)*e^4
+                              +(104*sqrt(e+1)+152)*e^3+(72*sqrt(e+1)+96)*e^2
+                              +(32*sqrt(e+1)+24)*e+8*sqrt(e+1))$
+
+taylor(exp(x), x, minf, 1);
+exp(x)$
+
+/* [ 1682435 ] taylor of rat(factor(1+x)) gives internal error */
+taylor(rat(factor(1+x)),x,0,1);
+1+x$
+
+/* [ 807275 ] Taylor Illegal log kernel: log(cos(th)) @ %pi/2 */
+taylor(log(cos(th)),th,%pi/2,2);
+log((2*th-%pi)/2)+log(-1)-(th-%pi/2)^2/6$
+
+/* SF bug  752332 */
+(assume(a < 1),0);
+0;
+taylor(atan(1/sqrt(1-a))/sqrt(1-a),a,1,2);
+((%i * %pi)/(2 * sqrt(a - 1))) - 1 - ((a - 1)/3) - (((a - 1)^2)/5)$ 
+
+/* [ 1358239 ] taylor(exp(sqrt(log(x)*log(log(x))))@inf > stack overflow */
+taylor(exp(sqrt(log(x)*log(log(x)))), x, inf, 2);
+exp(sqrt(log(x))*sqrt(log(log(x))));
+
+/* [ 2010843 ] diff of Taylor poly */
+diff(taylor(sqrt((f - z^2/4/f)^2 + (d-z)^2) + sqrt((f - z^2/4/f)^2 + (zp-z)^2),
+	    [z, zp, d], 0, 4),
+     z);
+(z-zp-d)/f+((3*zp+3*d)*z^2+(-5*zp^2-5*d^2)*z+2*zp^3+2*d^3)/(4*f^3);
+
+/* [ 734851 ] pade interfered with by taylor */
+ts:taylor(sin(x),x,0,3);
+x-x^3/6;
+
+taylor(x,x,0,3);
++x;
+
+pade(ts,2,2);
+[6*x/(x^2+6)];
+
+/* [ 1729430 ] numberp of taylor poly */
+numberp(taylor(x^2, x, 0, 1));
+false;
+
+/* Bug ID: 2907952 - diff of a taylor series
+ */
+diff(taylor(1/(1-x^2),x,0,10),x);
+2*x+4*x^3+6*x^5+8*x^7+10*x^9;
+
+/* Bug ID: 660876 - taylor and keepfloat ERR
+ */
+(old:keepfloat, keepfloat:true);
+true;
+(qq: taylor((x+1.0)^2,x,1,3),done);
+done;
+keepfloat:false;
+false;
+qq^2;
+16+32*(x-1)+24*(x-1)^2+8*(x-1)^3;
+(keepfloat:old,done);
+done;
+
+/* Bug ID: 2985866 - derivatives of functions of taylor polys
+ */
+diff('(f(taylor(x,x,0,6))),x);
+'diff(f(taylor(x,x,0,6)),x,1);
+ev(%,nouns);
+'diff(f(+x),x,1);

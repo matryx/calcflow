@@ -1,0 +1,166 @@
+/*-*- Mode: macsyma; Package: MAXIMA-*-*/
+eval_when([translate,batch,demo,load,loadfile],
+dva(var)::=buildq([var],define_variable(var,'var,any)));
+dva(%n); dva(%pw); dva(%f); dva(%f1); dva(l%); dva(solvep);
+dva(%r); dva(p); dva(%cf);
+
+algebraicp(%1):=catch(
+	   subst("^" = lambda([%1,%2],if not integerp(%2) then throw(true)),%1),
+	   false);
+hicoef(x,n):=(x:ratsimp(x,n),coeff(x,n,hipow(x,n)));
+genpol(n):=if n < 0 then 0 else concat('%,n)+%n*genpol(n-1);
+clist(p):=if 0 = p then []
+       else cons(ratdisrep(%pw:ratcoef(p,%n,0)),clist(rat((p-%pw)/%n)));
+unsum(%g,%n):=if atom(%g) or part(%g,0) # "+"
+       then factor((num(%g)/subst(%n-1,%n,prodgunch(num(%g),%n,1))
+		    -denom(%g)/subst(%n-1,%n,prodgunch(denom(%g),%n,1)))
+		    *(subst(%n-1,%n,num(%g))/denom(%g)))
+       else map(lambda([x],unsum(x,%n)),%g);
+prodflip(%0):=subst(
+	 [nounify('product) = 'product,
+	  'product = lambda([%0,%1,%,%%],1/produ(1/%0,%1,%,%%))],%0);
+prodgunch(%0,%n,%2):=
+  subst([nounify('sin) = 
+    lambda([%0],
+	   sin(subst(%n+%2,%n,%0))
+	  *lambda([trigexpand],
+		  expand(sin(%0)/sin(subst(%n+%2,%n,%0))))
+	  (true)),
+	 nounify('product) = lambda([%0,%1,%,%3],
+				    funmake(nounify('product),
+					    [%0,%1,subst(%n+%2,%n,%),
+					     subst(%n+%2,%n,%3)])
+				   *produ(%0,%1,%,subst(%n+%2,%n,%)-1)
+				   /produ(%0,%1,%3+1,subst(%n+%2,%n,%3))),
+	 'binomial = lambda([%0,%1],
+			    subst(%n+%2,%n,binomial(%0,%1))
+			   *produ((%1+'%)/(%0+'%),'%,1,subst(%n+%2,%n,%1)-%1)
+			   *produ((-%1+%0+'%)/(subst(%n+%2,%n,%1)-%1+%0+'%),'%,
+				  1,subst(%n+%2,%n,%0-%1)+%1-%0)),
+	 'beta = lambda([%0,%1],
+			subst(%n+%2,%n,beta(%0,%1))
+		       *produ((%0+%1+'%)/(%0+'%),'%,0,ratcoef(%0,%n)*%2-1)
+		       *produ((%0+%1+%2*ratcoef(%0,%n)+'%)/(%1+'%),'%,0,
+			      ratcoef(%1,%n)*%2-1)),
+	 "!" = lambda([%0],
+		      subst(%n+%2,%n,%0)!
+			/produ(%0+'%,'%,1,subst(%n+%2,%n,%0)-%0)),
+	 'gamma = lambda([%0],
+			 gamma(subst(%n+%2,%n,%0))
+			/produ(%0+'%-1,'%,1,subst(%n+%2,%n,%0)-%0))],%0);
+produ(%0,%1,%,%3):=
+  lambda([x,y],
+	 if not integerp(y) then funmake(nounify('product),[%0,%1,%,%3])
+		 else (if y < -1 then 1/produ(%0,%1,%3+1,%-1)
+			   else (for i from 0 thru y do x:x*subst(i+%,%1,%0),x)))(
+      1,ratsimp(%3-%));
+nusum(%a,%n,%l,%h):=block([mapprint:false,programmode:true,solvenullwarn:false],
+      nusuml(%a,%n,%l,%h,[])[1]);
+nusum(%a,%n,%l,%h):=block([mapprint:false,programmode:true,solvenullwarn:false],
+      first(nusuml(%a,%n,%l,%h,[])));
+funcsolve(%a,%f):=block([mapprint:false,programmode:true,solvenullwarn:false],
+	  funcsol(%a,%f,[])[1]);
+dimsum(%cl):=block([ratfac:false,%cd,%pt,%pw],
+       %cd:map(lambda([x],hipow(ratsimp(x)+1/%n,%n)),
+	       [%cl[1]+%cl[2],%cl[1]-%cl[2],%cl[3]]),%cd[1]:max(%cd[1],%cd[2]-1),
+       inpart(subst(solvep:solve(clist(subst(
+					%pt
+					 :funmake('lambda,
+						  [[%n],
+						   genpol(
+						    if 
+						     %cd[1] < %cd[2]
+						       and integerp(
+						       %pw
+							:subst(
+							 solve(
+							  ratcoef(
+							   %cl[1]*(%n+'%)
+							    +%cl[2]*%n,%n,%cd[2]),
+							  '%),'%))
+						      then max(%pw,%cd[3]-%cd[1])
+						      else %cd[3]-%cd[1])]),
+					inpart(%f,0),%cl . [%f1,%f,1])),
+				 append(if listp(l%) then l% else l%:[l%],
+					clist(inpart(%pt,2)))),
+		    (l%:map("=",l%,subst(solvep,l%)),%pt)),2));
+		    
+ratsolve(p,x):=apply('append,
+	 maplist(lambda([p],
+			if hipow(p,x) = 1 or subst(0,x,p) = 0
+			    then solve(subst(lambda([x,y],x),"^",p),x) else []),
+		 2*factor(p)^2));
+prodshift(%0,%2):=subst(
+	  [nounify('product) = 'product,
+	   'product = lambda([%0,%1,%,%3],produ(subst(%1-%2,%1,%0),%1,%+%2,%3+%2))],
+	  %0);
+
+rforn(%3):=block([y:gcd(%r[2],subst(%n-%3,%n,%r[1])),ratfac:true],
+      p:p*produ(y,%n,%n,%n+%3-1),%r:ratsimp(%r/[subst(%n+%3,%n,y),y]))$
+
+/*  Note that this business of w/[a,b] is very sensitive to evaluation.  It 
+  is assumed that w is evaluated first but sometimes this doesn't happen 
+  resulting in wrong answer eg w/[a,b]==> [w/a,w/b] and then eval w:[1,2] bad!!*/
+/*rforn(%3):=block([y:gcd(%r[2],subst(%n-%3,%n,%r[1])),ratfac:true,vv],
+      p:p*produ(y,%n,%n,%n+%3-1),%r[1]:ratsimp(%r[1]/subst(%n+%3,%n,y)),%r[2]:ratsimp(%r[2]/y));*/
+
+rform(%r):=if ?ratp(%r[1]/%r[2],%n)
+       then (if algebraicp(%r) then (gcd:'red,algebraic:true),
+	     block([p:1],rforn(1),
+		   for %3 in ratsolve(resultant(%r[1],subst(%n+'%,%n,%r[2]),%n),'%)
+		       do
+		       (if integerp(%3:subst([%3],'%)) and %3 > 0 then rforn(%3)),
+		   [p,%r[1]/%r[2]]))
+       else error(%r[1]/%r[2],"non-rational term ratio to nusum");
+nusuml(%a,%n,%l,%h,l%):=
+  if %a = 0 
+    then [0]
+    else 
+      block([solvep:false,modulus:false,rv:ratvars,prodhack:true,
+	     ratfac:true,gcd:'spmod,algebraic:false,ratalgdenom:true,
+	     matrix_element_mult:"*",
+	     dispflag:false,maperror:false,%f:funmake('%f,[%n]),
+	     %f1:funmake('%f,[%n+1])],
+	ratvars(%n),
+	if [] # errcatch
+	  (%cf:dimsum
+	    ([-num(
+		  (%r
+		    :rform(
+			  lambda([%a],[num(%a),denom(%a)])
+			  (factor(
+				 subst(%n+1,%n,%a)
+				 /prodgunch(%a,%n,1)))))[
+				   2]),subst(%n-1,%n,denom(%r[2])),%r[1]]))
+	   and [] # solvep
+	     then cons((%f:prodgunch(num(%a),%n,1)/denom(%a),
+			%f1:ratsimp(radcan(%cf)),apply('ratvars,rv),
+			%f1:subst(lambda([%0,%1,%,%3],produ(%0,%1,%,%3)),
+				  nounify('product),
+				  factor(
+					subst(%h,%n,
+					      factor(
+						    num(%r[2])*%f
+						    *subst(%n+1,%n,%f1)
+						    /%r[1])))
+				 -factor(
+					subst(%l,%n,
+					      factor(
+						    %a*%f1
+						    *subst(%n-1,%n,denom(%r[2]))
+						    /%r[1])))),
+			if ?ratp(%a,%n) then factor(%f1) else %f1),l%)
+					else (apply('ratvars,rv),[apply('sum,[%a,%n,%l,%h])]));
+					  
+funcsol(%a,%f,l%):=block(
+  [ratfac:true,maperror:false,linenum:linenum,dispflag:false,%f1,%cl,%cm,%n:inpart(%f,1)],
+	%f1:subst(%n = %n+1,%f),
+	%cl:factor(augcoefmatrix([%a:num(xthru(lhs(%a)-rhs(%a)))],[%f1,%f])[1]),
+	%cm:rform(rest(%cl,-1)),%cm[2]:ratsimp(subst(%n+1,%n,%cm[1])/%cm[1]),
+	append(errcatch(%f = factor(dimsum(
+				     ratsimp(
+				      [%cl[1]/num(%cm[2]),%cl[2]/denom(%cm[2]),
+				       %cm[1]*%cl[3]/denom(%cm[2])]))
+				     /%cm[1])),l%));
+
+

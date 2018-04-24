@@ -1,0 +1,130 @@
+if get ('ezunits, 'version) = false then load (ezunits) else 'already_loaded;
+
+"... SI units ..."$
+
+foo : 10 ` m;
+
+qty (foo);
+
+units (foo);
+
+dimensions (foo);
+
+"... \"Customary\" units ..."$
+
+bar : x ` acre;
+
+dimensions (bar);
+
+fundamental_units (bar);
+
+"... Unit conversions ..."$
+
+1 ` ft `` m;
+
+%, numer;
+
+1 ` kg `` lbm;
+
+%, numer;
+
+1 ` W `` Btu/hour;
+
+%, numer;
+
+100 ` degC `` degF;
+
+-40 ` degF `` degC;
+
+1 ` acre*ft `` m^3;
+
+%, numer;
+
+"... Arithmetic operations on dimensional quantities ..."$
+
+100 ` m + 100 ` ft;
+
+(100 ` m + 100 ` ft) `` ft;
+
+%, numer;
+
+(100 ` m + 100 ` ft) `` m;
+
+%, numer;
+
+((10 ` acre) * (10 ` ft)) `` m^3;
+
+%, numer;
+
+quux : (144 ` Btu/hour) / (48 ` ft^2);
+
+dimensions (quux);
+
+fundamental_units (quux);
+
+quux `` fundamental_units (quux);
+
+foo^2;
+
+dimensions (foo^2);
+
+foo^2 `` acre;
+
+%, numer;
+
+bar `` m^2;
+
+%, numer;
+
+sqrt (bar);
+
+dimensions (sqrt (bar));
+
+"... Units ad hoc ..."$
+
+baz : 3 ` sheep + 8 ` goat + 1 ` horse;
+
+subst ([sheep = 3*goat, horse = 10*goat], baz);
+
+baz2 : 1000`gallon/fortnight;
+
+subst (fortnight = 14*day, baz2);
+
+% `` liter/hour;
+
+"... Declared unit conversions ..."$
+
+declare_unit_conversion (MMBtu = 10^6*Btu, kW = 1000*W, kWh = kW*hour, MWh = 1000*kWh);
+
+1 ` MMBtu `` MWh;
+
+1 ` MMBtu/day `` kW;
+
+"... Stefan-Boltzmann constant in customary units ..."$
+
+56697/10000/10^8 ` W/m^2/K^4;
+
+% `` Btu/hour/ft^2/R^4;
+
+%, numer;
+
+"... Velocity of sound in helium at 27 C, He(Cp/Cv) = 5/3, 4 g/mol ..."$
+
+if get ('physical_constants, 'version) = false then load (physical_constants) else 'already_loaded;
+
+v : sqrt (5/3 * %R/(4 ` g/mol) * (27 ` degC `` K));
+
+get (%R, 'description);
+
+constvalue (%R);
+
+constvalue (v);
+
+dimensions (v);
+
+fundamental_units (v);
+
+constvalue (v) `` %;
+
+%, numer;
+

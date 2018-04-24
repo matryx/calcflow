@@ -1,0 +1,28 @@
+load('lrats)$
+/* LRATS FASL contains two functions related to MACSYMA's 
+        RATSUBST.  The first is LRATSUBST(LIST_OF_EQUATIONS,EXP)
+	which provides the user with a RATSUBST capability for
+	multiple substitution similar to the existing capability
+	of SUBST.  Recall that SUBST can carry out multiple substi-
+	tutions: */
+subst([a=b,c=d],a+c);
+/* LRATSUBST works in an analogous way: */
+lratsubst([a^2=b,c^2=d],(a+e)*c*(a+c));
+/* If only one substitution is desired, then a single
+	equation may be given as first argument: */
+lratsubst(a^2=b,a^3);
+/* Another function contained in LRATS FASL is FULLRATSUBST,
+	which is equivalent to RATSUBST except that it recurses until
+	its result stops changing.  Note the difference between the
+	two results: */
+ratsubst(b*a,a^2,a^3);
+fullratsubst(b*a,a^2,a^3);
+/* FULLRATSUBST will also accept a list of equations or a single
+	equation as first argument. */
+fullratsubst([a^2=b,b^2=c,c^2=a],a^3*b*c);
+fullratsubst(a^2=b*a,a^3);
+/*  FULLRATSUBST can be dangerous, so care must be taken to avoid
+	infinite recursion.  An example of the kind of difficulty
+	that can arise is given below: */
+/* runs out of core in DOE MACSYMA without GC */
+errcatch(fullratsubst(b*a^2,a^2,a^3));

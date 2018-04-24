@@ -1,0 +1,47 @@
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Demonstrating the Bianchi identities and related results
+ */
+if get('itensor,'version)=false then load(itensor);
+("The curvature tensor satisfies the cyclic identity:")$
+icurvature([j,k,l],[i])+icurvature([k,l,j],[i])+icurvature([l,j,k],[i])$
+ishow(%)$
+canform(%);
+("And the Bianchi identity:")$
+canform(covdiff(icurvature([j,k,l],[i]),m)+covdiff(icurvature([j,l,m],[i]),k)+
+covdiff(icurvature([j,m,k],[i]),l));
+
+("A consequence is that the Einstein-tensor is divergence-free")$
+("We prove this for a conformal metric in the weak field:")$
+remcomps(g);
+imetric(g);
+declare(e,constant);
+defcon(e,e,kdelta);
+defcon(e,p,p);
+defcon(p,e,p);
+remsym(e,0,2);
+decsym(e,0,2,[],[sym(all)]);
+(ratfac:false,ratvars(l),ratweight(l,1),ratwtlvl:1);
+components(g([i,j],[]),e([i,j],[])+2*l*p([i,j],[]));
+components(g([],[i,j]),e([],[i,j])-2*l*p([],[i,j]));
+ishow(g([i,j],[]))$
+ishow(g([],[i,j]))$
+
+scurv:g([],[r,t])*icurvature([r,s,t],[s])$
+ricci:g([],[i,r])*g([],[j,t])*icurvature([r,s,t],[s])$
+canform(rename(contract(ratexpand(ev(-(ricci-1/2*scurv*g([],[i,j])))))))$
+ishow(%)$
+covdiff(%,j)$
+%,ichr2$
+ishow(canform(contract(ratexpand(%))))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

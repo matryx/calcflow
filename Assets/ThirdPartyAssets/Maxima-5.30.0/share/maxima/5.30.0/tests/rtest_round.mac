@@ -1,0 +1,311 @@
+(kill(all),0);
+0$
+
+round(0);
+0$
+
+round(0.0);
+0$
+
+round(0.0b0);
+0$
+
+round(-3);
+-3$
+
+round(0);
+0$
+
+round(42);
+42$
+
+round(-4/3);
+-1$
+
+round(16/29);
+1$
+
+round(-16/29);
+-1$
+
+round(172.23);
+172$
+
+round(-314.56);
+-315$
+
+round(191.45b0);
+191$
+
+round(191.501b0);
+192$
+
+round(sqrt(2));
+1$
+
+round(sqrt(5) - sqrt(2));
+1$
+
+round(sqrt(1932));
+44$
+
+(declare(n,integer),0);
+0$
+
+round(n);
+n$
+
+round(n+49/100);
+n$
+
+round(n + 51/100);
+n+1$
+
+round(5*n+7);
+5*n+7$
+
+round(n*(n+1));
+n*(n+1)$
+
+round(2*n + 1/2);
+2*n$
+
+round(2*n + 3/2);
+2*n + 2$
+
+(assume(n > 0),0);
+0$
+
+round(n!);
+n!$
+
+(forget(n,integer),0);
+0$
+
+(forget(n > 0),0);
+0$
+
+(declare(o,odd), declare(o,integer),0);
+0$
+
+round(o+1/2);
+o+1$
+
+round(o-1/2);
+o-1$
+
+round(2*o + 1/2);
+2*o$
+
+(declare(e,even), declare(e,integer),0);
+0$
+
+round(e+1/2);
+e$
+
+round(e-1/2);
+e$
+
+(forget(o,odd), forget(o,integer), forget(e,even), forget(e,integer),0);
+0$
+
+round(x) + round(-x);
+0$
+
+round(a-b) + round(b-a);
+0$
+
+round(round(a));
+round(a)$
+
+round(round(rat(a)));
+round(a)$
+
+round(floor(x));
+floor(x);
+
+round(ceiling(x));
+ceiling(x)$
+
+map('round,[inf, minf, und, ind]);
+[inf, minf, und, ind]$
+
+args(round(%i));
+[%i]$
+
+truncate(0);
+0$
+
+truncate(0.0);
+0$
+
+truncate(0.0b0);
+0$
+
+truncate(-3);
+-3$
+
+truncate(0);
+0$
+
+truncate(42);
+42$
+
+truncate(-4/3);
+-1$
+
+truncate(16/29);
+0$
+
+truncate(-16/29);
+0$
+
+truncate(172.23);
+172$
+
+truncate(-314.56);
+-314$
+
+truncate(191.45b0);
+191$
+
+truncate(191.501b0);
+191$
+
+truncate(sqrt(2));
+1$
+
+truncate(sqrt(5) - sqrt(2));
+0$
+
+truncate(sqrt(1932));
+43$
+
+(declare(n,integer),0);
+0$
+
+truncate(n);
+n$
+
+truncate(5*n+7);
+5*n+7$
+
+truncate(n*(n+1));
+n*(n+1)$
+
+(assume(n > 0),0);
+0$
+
+truncate(n!);
+n!$
+
+(forget(n,integer),0);
+0$
+
+(forget(n > 0),0);
+0$
+
+truncate(x) + truncate(-x);
+0$
+
+truncate(a-b) + truncate(b-a);
+0$
+
+truncate(truncate(a));
+truncate(a)$
+
+truncate(truncate(rat(a)));
+truncate(a)$
+
+truncate(floor(x));
+floor(x);
+
+truncate(ceiling(x));
+ceiling(x)$
+
+map('truncate,[inf, minf, und, ind]);
+[inf, minf, und, ind]$
+
+args(truncate(%i));
+[%i]$
+
+(tellsimp(truncate(x),%pi),0);
+0$
+
+truncate(-x);
+-%pi$
+
+(tellsimp(round(x), sqrt(3)),0);
+0$
+
+round(-x);
+-sqrt(3)$
+
+(clear_rules(),0);
+0$
+
+truncate(-truncate(-x));
+truncate(x)$
+
+round(-round(-x));
+round(x)$
+
+(e : round(x/3),0);
+0$
+
+ratsubst(6,x,e);
+2$
+
+(e : round(x/3),0);
+0$
+
+ratsubst(6,x,e);
+2$
+
+(remvalue(e),0);
+0$
+
+
+/* check for noun /verb weirdness */
+
+'round(0);
+0$
+
+'truncate(0);
+0$
+
+'(round(5));
+5$
+
+'(truncate(-7));
+-7$
+
+'round(-x) + round(x);
+0$
+
+'truncate(-x) + truncate(x);
+0$
+
+/* regression tests for SF bug 1867942 */
+
+map('round, [1.b0, 1.1b1, 1.11b2, 10.b-1, 100.b-2]);
+[1,11,111,1,1]$
+
+map('round, [-1.b0, -1.1b1, -1.11b2, -10.b-1, -100.b-2]);
+[-1,-11,-111,-1,-1]$
+
+map('round, [1.0, 1.1d1, 1.11d2, 10.d-1, 100.d-2]);
+[1,11,111,1,1]$
+
+map('round, [-1.0, -1.1d1, -1.11d2, -10.d-1, -100.d-2]);
+[-1,-11,-111,-1,-1]$
+
+
+
+
+
+
+
+
+
+

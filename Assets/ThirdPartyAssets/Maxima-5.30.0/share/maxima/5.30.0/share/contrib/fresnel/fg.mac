@@ -1,0 +1,21 @@
+matchdeclare(mv,true)$
+defrule(fg1,cfresnel(mv),(1/2+f(mv)*sin((%pi/2)*mv^2)-g(mv)*cos((%pi/2)*mv^2)))$
+defrule(fg2,sfresnel(mv),(1/2-f(mv)*cos((%pi/2)*mv^2)-g(mv)*sin((%pi/2)*mv^2)))$
+defrule(ga,g(mv),1/((%pi*mv)*(%pi*(mv)^2)))$
+defrule(fa,f(mv),1/(%pi*mv)+3/(%pi*(mv^2))^2)$
+batch("c:\randi.mac")$
+randi:apply1(randi,fg1)$
+randi:apply1(randi,fg2)$
+randi:expand(randi)$
+randi:trigreduce(randi)$
+randi:rncombine(randi)$
+randi:map(factor,randi)$
+randi:rncombine(randi);
+randi:apply1(randi,fa,ga);
+limit(randi,w,16000000 * %pi);
+plot(d15,w,float(%pi)*15700000,float(%pi)*16100000,linlog)
+plot(d15,w,float(%pi)*1000000,float(%pi)*15700000,linlog)
+plot(d15,w,float(%pi)*100000,float(%pi)*1000000,linlog)
+plot(d15,w,float(%pi)*10000,float(%pi)*100000,linlog)
+plot(d15,w,float(%pi)*1000,float(%pi)*10000,linlog)
+plot(d15,w,float(%pi)*100,float(%pi)*1000,linlog)

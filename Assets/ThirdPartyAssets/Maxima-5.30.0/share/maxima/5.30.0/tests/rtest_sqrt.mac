@@ -1,0 +1,1125 @@
+/*******************************************************************************
+ *
+ *          Sqrt function
+ *
+ * The examples show what a Maxima user can expect from the sqrt function.
+ * Examples are taken from functions.wolfram.com.
+ *
+ ******************************************************************************/
+
+/* ---------- Initialization ------------------------------------------------ */
+
+kill(all);
+done;
+
+(reset(domain), reset(radexpand), done);
+done;
+
+/* ---------- Specific values ----------------------------------------------- */
+
+sqrt([0, 0.0, 0.0b0]);
+[0, 0.0, 0.0b0];
+
+sqrt([-1, -1.0, -1.0b0]);
+[%i, 1.0*%i, 1.0b0*%i];
+
+/* Maxima does not simplify -%i -> -(-1)^(3/4) */
+sqrt([%i, -%i]);
+[(-1)^(1/4), sqrt(-%i)];
+
+/* --- Polarform of specific values --- */
+
+%emode:false;
+false;
+
+polarform(sqrt([-1, %i, -%i]));
+[%e^(%i*%pi/2), %e^(%i*%pi/4), %e^(-%i*%pi/4)];
+
+%emode:true;
+true;
+
+/* ---------- Values at infinities ------------------------------------------ */
+
+/* Only limit can handle infinities. We check this. */
+
+limit([sqrt(inf), sqrt(-inf), sqrt(minf), sqrt(-minf), sqrt(infinity)]);
+[inf, infinity, infinity, inf, infinity];
+
+limit(sqrt(x),x,inf);
+inf;
+limit(sqrt(x),x,-inf);
+infinity;
+limit(sqrt(x),x,minf);
+infinity;
+limit(sqrt(x),x,-minf);
+inf;
+
+/* ---------- Numerical evaluation ------------------------------------------ */
+
+/* Check only for some values to be sure that it works */
+
+(closeto(value,compare,tol):=
+  block(
+    [abse],
+    abse:abs(value-compare),if(abse<tol) then true else abse),
+    done);
+done;
+
+/* --- Float precision --- */
+
+closeto(
+  sqrt(0.5),
+  0.707106781186547524400844362104849039284835937688474036588339868995366239,
+  1.0e-15);
+true;
+
+closeto(
+  sqrt(0.5+%i),
+  0.899453719973933636130613791812127819163772491812606935297702716148303720 +
+  0.555892970251421171992048047897569250691057814997037061577650731037508243*%i,
+  1.0e-15);
+true;
+
+closeto(
+  sqrt(0.5*%i),
+  0.500000000000000000000000000000000000000000000000000000000000000000000000 +
+  0.500000000000000000000000000000000000000000000000000000000000000000000000*%i,
+  1.0e-15);
+true;
+
+closeto(
+  sqrt(-0.5+%i),
+  0.555892970251421171992048047897569250691057814997037061577650731037508243 + 
+  0.899453719973933636130613791812127819163772491812606935297702716148303720*%i,
+  1.0e-15);
+true;
+
+closeto(
+  sqrt(-0.5),
+  0.707106781186547524400844362104849039284835937688474036588339868995366239*%i,
+  1.0e-15);
+true;
+
+closeto(
+  sqrt(-0.5-%i),
+  0.555892970251421171992048047897569250691057814997037061577650731037508243 - 
+  0.899453719973933636130613791812127819163772491812606935297702716148303720*%i,
+  1.0e-15);
+true;
+
+closeto(
+  sqrt(-0.5*%i),
+  0.500000000000000000000000000000000000000000000000000000000000000000000000 - 
+  0.500000000000000000000000000000000000000000000000000000000000000000000000*%i,
+  1.0e-15);
+true;
+
+closeto(
+  sqrt(0.5-%i),
+  0.899453719973933636130613791812127819163772491812606935297702716148303720 - 
+  0.555892970251421171992048047897569250691057814997037061577650731037508243*%i,
+  1.0e-15);
+true;
+
+/* --- Bigfloat precision with fpprec 72 --- */
+
+(save_fpprec: fpprec, fpprec: 72);
+72;
+
+closeto(
+  sqrt(0.5b0),
+  0.707106781186547524400844362104849039284835937688474036588339868995366239b0,
+  1.0b-72);
+true;
+
+closeto(
+  sqrt(0.5b0+%i),
+  0.899453719973933636130613791812127819163772491812606935297702716148303720b0 +
+  0.555892970251421171992048047897569250691057814997037061577650731037508243b0*%i,
+  1.0b-72);
+true;
+
+closeto(
+  sqrt(0.5b0*%i),
+  0.500000000000000000000000000000000000000000000000000000000000000000000000b0 +
+  0.500000000000000000000000000000000000000000000000000000000000000000000000b0*%i,
+  1.0b-72);
+true;
+
+closeto(
+  sqrt(-0.5b0+%i),
+  0.555892970251421171992048047897569250691057814997037061577650731037508243b0 + 
+  0.899453719973933636130613791812127819163772491812606935297702716148303720b0*%i,
+  1.0b-72);
+true;
+
+closeto(
+  sqrt(-0.5b0),
+  0.707106781186547524400844362104849039284835937688474036588339868995366239b0*%i,
+  1.0b-72);
+true;
+
+closeto(
+  sqrt(-0.5b0-%i),
+  0.555892970251421171992048047897569250691057814997037061577650731037508243b0 - 
+  0.899453719973933636130613791812127819163772491812606935297702716148303720b0*%i,
+  1.0b-72);
+true;
+
+closeto(
+  sqrt(-0.5b0*%i),
+  0.500000000000000000000000000000000000000000000000000000000000000000000000b0 - 
+  0.500000000000000000000000000000000000000000000000000000000000000000000000b0*%i,
+  1.0b-72);
+true;
+
+closeto(
+  sqrt(0.5b0-%i),
+  0.899453719973933636130613791812127819163772491812606935297702716148303720b0 - 
+  0.555892970251421171992048047897569250691057814997037061577650731037508243b0*%i,
+  1.0b-72);
+true;
+
+fpprec:save_fpprec;
+''save_fpprec;
+
+/* ---------- Mirror symmetry ----------------------------------------------- */
+
+/* We have no Mirror symmetry on the real negative axis. Maxima knows this. */
+
+conjugate(sqrt(2+%i*y));
+sqrt(2-%i*y);
+
+conjugate(sqrt(-2+%i*y));
+conjugate(sqrt(-2+%i*y));
+
+conjugate(sqrt(x+%i*y));
+conjugate(sqrt(x+%i*y));
+
+assume(x>0);
+[x>0];
+
+conjugate(sqrt(x+%i*y));
+sqrt(x-%i*y);
+
+forget(x>0);
+[x>0];
+
+/* ---------- Series representations ---------------------------------------- */
+
+/* The Maxima user function powerseries does not know the definining
+ * powerseries for the sqrt function. At this time we include no further
+ * tests for the function powerseries.
+ */
+
+/* Check taylor expansion */
+
+taylor(sqrt(x), x, x0, 2);
+sqrt(x0)+sqrt(x0)*(x-x0)/2/x0-sqrt(x0)*(x-x0)^2/8/x0^2;
+
+/* Check taylor expansion as an argument to sqrt */
+sqrt(taylor(x,x,x0,2));
+sqrt(x0)+sqrt(x0)*(x-x0)/2/x0-sqrt(x0)*(x-x0)^2/8/x0^2;
+
+taylor(sqrt(x), x, 1, 3);
+1 + (x-1)/2 - (x-1)^2/8 + (x-1)^3/16;
+
+taylor(sqrt(x+1), x, 0, 3);
+1+x/2-x^2/8+x^3/16;
+
+taylor(sqrt(x), x, inf, 2);
+sqrt(x);
+
+/* ---------- Differential equations ---------------------------------------- */
+
+depends(y,x);
+[y(x)];
+%e_to_numlog:true; /* Simplify %e^log(x) -> x */
+true;
+
+ode2('diff(y,x)-y/(2*x), y, x);
+y=%c*sqrt(x);
+
+ode2(4*'diff(y,x,2)*x^2+y, y, x);
+y=sqrt(x)*(%k1 + %k2*log(x)/2);
+
+depends([g,h],x);
+[g(x), h(x)];
+
+ode2('diff(y,x)-'diff(g(x),x)/(2*g(x))*y, y,x);
+y=%c*sqrt(g(x));
+
+ode2('diff(y,x)-('diff(g(x),x)/(2*g(x))+'diff(h(x),x)/h(x))*y, y, x), expand;
+y=%c*h(x)*sqrt(g(x));
+
+remove([y,g,h], depends);
+done;
+%e_to_numlog:false;
+false;
+
+/* ---------- Transformations and argument simplifications ------------------ */
+
+declare(z,complex);
+done;
+
+assume(xp>0, xn<0);
+[xp>0, xn<0];
+
+/* --- sqrt(-z) --- */
+
+sqrt([-z,-x,-xp]);
+[sqrt(-z), sqrt(-x), %i*sqrt(xp)];
+
+sqrt([-1/2, -3/4, -1, -3/2, -2]);
+[%i/sqrt(2), %i*sqrt(3)/2, %i, %i*sqrt(3)/sqrt(2), %i*sqrt(2)];
+
+sqrt(-(xp+2));
+sqrt(-(xp+2));
+
+/* --- sqrt(%i*z) --- */
+
+sqrt([%i*z,%i*x,%i*xp]);
+[sqrt(%i*z), sqrt(%i*x), (-1)^(1/4)*sqrt(xp)];
+
+sqrt([%i*1/2, %i*3/4, %i, %i*3/2, %i*2]);
+[(-1)^(1/4)/sqrt(2), (-1)^(1/4)*sqrt(3)/2, (-1)^(1/4), 
+ (-1)^(1/4)*sqrt(3)/sqrt(2), (-1)^(1/4)*sqrt(2)];
+
+sqrt([%i*(xp+2), %i*xp+%i*2]);
+[(-1)^(1/4)*sqrt(xp+2),sqrt(%i*xp+%i*2)];
+
+/* --- sqrt(-%i*z) --- */
+
+sqrt([-%i*z,-%i*x,-%i*xp]);
+[sqrt(-%i*z), sqrt(-%i*x), sqrt(-%i)*sqrt(xp)];
+
+sqrt([-%i*1/2, -%i*3/4, -%i, -%i*3/2, -%i*2]);
+[sqrt(-%i)/sqrt(2), sqrt(-%i)*sqrt(3)/2, sqrt(-%i), 
+ sqrt(-%i)*sqrt(3)/sqrt(2), sqrt(-%i)*sqrt(2)];
+
+sqrt([-%i*(xp+2), -%i*xp-%i*2]);
+[sqrt(-%i)*sqrt(xp+2),sqrt(-%i*xp-%i*2)];
+
+/* --- sqrt(1/z) --- */
+
+sqrt(1/xp) - 1/sqrt(xp);
+0;
+sqrt(1/-xp) + 1/sqrt(-xp);
+0;
+sqrt(1/-xn) - 1/sqrt(-xn);
+0;
+
+/* --- sqrt(-1/z) --- */
+
+sqrt([-1/x, -1/xp, -1/xn, -1/(xn-2), -1/(xp+2)]);
+[%i/sqrt(x), %i/sqrt(xp), 1/sqrt(-xn), 1/sqrt(-xn+2), %i/sqrt(xp+2)];
+
+/* --- sqrt(%i/z) --- */
+
+sqrt([%i/x, %i/xp, %i/xn, %i/(xn-2), %i/(xp+2)]);
+[sqrt(%i/x), (-1)^(1/4)/sqrt(xp), sqrt(-%i)/sqrt(-xn), sqrt(-%i)/sqrt(-xn+2), 
+ (-1)^(1/4)/sqrt(xp+2)];
+
+ /* --- sqrt(-%i/z) --- */
+
+sqrt([-%i/x, -%i/xp, -%i/xn, -%i/(xn-2), -%i/(xp+2)]);
+[sqrt(-%i/x), sqrt(-%i)/sqrt(xp), (-1)^(1/4)/sqrt(-xn), (-1)^(1/4)/sqrt(-xn+2), 
+ sqrt(-%i)/sqrt(xp+2)];
+
+/* --- Half-angle formula --- */
+
+sqrt(z/2);
+sqrt(z)/sqrt(2);
+
+/* --- Multiple arguments for products --- */
+
+assume(a>0);
+[a>0];
+
+sqrt(a*z);
+sqrt(a)*sqrt(z);
+
+sqrt(b*z); /* Do not simplify if the sign is not known to be positive */
+sqrt(b*z);
+
+radcan(sqrt(z-z^2));
+sqrt(z)*sqrt(1-z);
+
+radcan(sqrt(-z^2-z));
+sqrt(z)*sqrt(-z-1);
+
+/* --- Multiple arguments for quotients --- */
+
+radcan(sqrt(z)/sqrt(z+1));
+sqrt(z)/sqrt(z+1);
+
+radcan(sqrt(z/(z-1)));
+sqrt(z)/sqrt(z-1);
+
+/* radcan always simplifies sqrt(z1/z2) -> sqrt(z1)/sqrt(z2). 
+ * That is not correct.
+ */
+
+declare([z1,z2],complex);
+done;
+
+radcan(sqrt(z1/z2));
+sqrt(z1)/sqrt(z2);
+
+/* More examples of this type */
+
+radcan(sqrt(z/(1-z)));
+sqrt(z)*sqrt(1/(1-z));
+
+radcan(sqrt(-z/(1+z)));
+sqrt(z)*sqrt(1/(-1+-z));
+
+/* --- Power of arguments --- */
+
+sqrt([z^2, x^2, xp^2, xn^2]);
+[sqrt(z^2), abs(x), xp, -xn];
+
+(domain:complex, done);
+done;
+
+res:sqrt(-z^2); /* Wrong: Maxima simplifies to %i*sqrt(z) */
+sqrt(-z^2);
+
+res,z=%i; /* We insert %i and get a wrong sign */
+1;
+
+(reset(domain), done);
+done;
+
+/* --- Exponent of arguments --- */
+
+/* Maxima simplifes immediately sqrt(exp(z)) -> exp(z/2) 
+ * That is wrong for imagpart(z) > %pi or < -%pi
+ * We give an example.
+ */
+
+sqrt(exp(2*%pi*%i)); /* That is the expected result */
+1;
+
+sqrt(exp(%i*y)); /* This expression simplifies wrongly */
+sqrt(exp(%i*y));
+
+%,y=2*%pi; /* We get a wrong sign */
+1;
+
+/* ---------- Nested sqrt functions ----------------------------------------- */
+
+/* The following 19 examples should simplify or evaluate to zero for all real
+ * or complex numbers. We check this. This way we can detect simplification
+ * errors for the sqrt function.
+ */
+ 
+(domain:complex, done);
+done;
+
+/* --- Example 1 --- */
+
+/* Wrong simplification because of sqrt(1/z) -> 1/sqrt(z) */
+
+expr(z):=sqrt(-1-z)*sqrt(1/(1+z))*sqrt(1/z)*sqrt(-z)+1;
+expr(z):=sqrt(-1-z)*sqrt(1/(1+z))*sqrt(1/z)*sqrt(-z)+1;
+
+/* Check correct simplification of expression */
+res:expr(z);
+sqrt(-1-z)*sqrt(1/(1+z))*sqrt(1/z)*sqrt(-z)+1;
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2; /* wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 2 --- */
+
+/* Wrong simplification because of sqrt(-1/z) -> 1/sqrt(-z) */
+
+expr(z):=sqrt((z-1)/z)*sqrt(z/(1-z))-sqrt(-1/z)*sqrt(z);
+expr(z):=sqrt((z-1)/z)*sqrt(z/(1-z))-sqrt(-1/z)*sqrt(z);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt((z-1)/z)*sqrt(z/(1-z))-sqrt(-1/z)*sqrt(z);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2; /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 3 --- */
+
+/* Wrong simplification because of sqrt(z^2)/sqrt(-z^2) -> -%i */
+
+expr(z):=sqrt(sqrt(z^2+1)-1)/sqrt(1-sqrt(z^2+1))-sqrt(z^2)/sqrt(-z^2);
+expr(z):=sqrt(sqrt(z^2+1)-1)/sqrt(1-sqrt(z^2+1))-sqrt(z^2)/sqrt(-z^2);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(sqrt(z^2+1)-1)/sqrt(1-sqrt(z^2+1))-sqrt(z^2)/sqrt(-z^2);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2; 
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;      /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;     /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;  /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;  
+true; 
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i; /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 4 --- */
+
+/* Wrong simplification sqrt(-z^2)/sqrt(z^2) -> %i */
+
+expr(z):=sqrt(sqrt(1-z^2)-1)/sqrt(1-sqrt(1-z^2))-sqrt(-z^2)/sqrt(z^2);
+expr(z):=sqrt(sqrt(1-z^2)-1)/sqrt(1-sqrt(1-z^2))-sqrt(-z^2)/sqrt(z^2);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(sqrt(1-z^2)-1)/sqrt(1-sqrt(1-z^2))-sqrt(-z^2)/sqrt(z^2);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;     /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;    /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i; /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i; /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 5 --- */
+
+/* Wrong simplification sqrt(-1/z) -> 1/sqrt(-z) */
+
+expr(z):=sqrt(sqrt(z^2+1)-z)/sqrt(z-sqrt(z^2+1))+sqrt(z)*sqrt(-1/z);
+expr(z):=sqrt(sqrt(z^2+1)-z)/sqrt(z-sqrt(z^2+1))+sqrt(z)*sqrt(-1/z);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(sqrt(z^2+1)-z)/sqrt(z-sqrt(z^2+1))+sqrt(z)*sqrt(-1/z);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2; /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 6 --- */
+
+/* Wrong simplification sqrt(1/z) -> 1/sqrt(z) */
+
+expr(z):=sqrt(z+sqrt(z^2+1))/sqrt(-z-sqrt(z^2+1))+sqrt(-z)*sqrt(1/z);
+expr(z):=sqrt(z+sqrt(z^2+1))/sqrt(-z-sqrt(z^2+1))+sqrt(-z)*sqrt(1/z);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(z+sqrt(z^2+1))/sqrt(-z-sqrt(z^2+1))+sqrt(-z)*sqrt(1/z);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2; /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 7 --- */
+
+/* This expression does not simplify at all. All numeric values are correct.
+ * rootscontract gives the result 2*%i. That is wrong. Because we have no
+ * problem with the simplification of the expression, the error is in 
+ * rootscontract for this example */
+
+expr(z):=sqrt(sqrt(1-z^2)-%i*z)/sqrt(%i*z-sqrt(1-z^2))+sqrt(%i*z)*sqrt(%i/z);
+expr(z):=sqrt(sqrt(1-z^2)-%i*z)/sqrt(%i*z-sqrt(1-z^2))+sqrt(%i*z)*sqrt(%i/z);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(sqrt(1-z^2)-%i*z)/sqrt(%i*z-sqrt(1-z^2))+sqrt(%i*z)*sqrt(%i/z);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 8 --- */
+
+/* This expression does not simplify at all. All numeric values are correct.
+ * rootscontract gives the result 2*%i. That is wrong. Because we have no
+ * problem with the simplification of the expression, the error is in 
+ * rootscontract for this example. See also example 7.
+ */
+
+expr(z):=sqrt(%i*z+sqrt(1-z^2))/sqrt(-%i*z-sqrt(1-z^2))+sqrt(-%i*z)*sqrt(-%i/z);
+expr(z):=sqrt(%i*z+sqrt(1-z^2))/sqrt(-%i*z-sqrt(1-z^2))+sqrt(-%i*z)*sqrt(-%i/z);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(%i*z+sqrt(1-z^2))/sqrt(-%i*z-sqrt(1-z^2))+sqrt(-%i*z)*sqrt(-%i/z);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 9 --- */
+
+/* This examples simplifies to zero immediately. This is by accident.
+ * We know that the applied simplifications are not correct.
+ */
+
+expr(z):=sqrt(z^2/(1-sqrt(1-z^2)))*sqrt((1-sqrt(1-z^2))/z^2)-1;
+expr(z):=sqrt(z^2/(1-sqrt(1-z^2)))*sqrt((1-sqrt(1-z^2))/z^2)-1;
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(z^2/(1-sqrt(1-z^2)))*sqrt((1-sqrt(1-z^2))/z^2)-1;
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 10 --- */
+
+/* Wrong simplification sqrt(1/z) -> 1/sqrt(z) */
+
+expr(z):=sqrt(z/(sqrt(z^2+1)-z))*sqrt((sqrt(z^2+1)-z)/z)-sqrt(1/(z^2+1))*sqrt(z^2+1)-sqrt(1/z)*sqrt(z)+1;
+expr(z):=sqrt(z/(sqrt(z^2+1)-z))*sqrt((sqrt(z^2+1)-z)/z)-sqrt(1/(z^2+1))*sqrt(z^2+1)-sqrt(1/z)*sqrt(z)+1;
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(z/(sqrt(z^2+1)-z))*sqrt((sqrt(z^2+1)-z)/z)-sqrt(1/(z^2+1))*sqrt(z^2+1)-sqrt(1/z)*sqrt(z)+1;
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2; /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2; /* Wrong -> 2 */
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 11 --- */
+
+/* This example is correct:
+ * No simplification of this expression. All numeric results are correct.
+ * radcan does not simplify too. That is not wrong.
+ * rootscontract simplifies correctly to zero.
+ */
+
+expr(z):=sqrt(sqrt(z)-1)*sqrt(sqrt(z)+1)-sqrt(z-1);
+expr(z):=sqrt(sqrt(z)-1)*sqrt(sqrt(z)+1)-sqrt(z-1);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(sqrt(z)-1)*sqrt(sqrt(z)+1)-sqrt(z-1);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 12 --- */
+
+/* This example is correct:
+ * No simplification of this expression. All numeric results are correct.
+ * radcan does not simplify too. That is not wrong.
+ * rootscontract simplifies correctly to zero. See also example 11.
+ */
+
+expr(z):=sqrt(sqrt(z+1)-1)*sqrt((sqrt(z+1)+1))-sqrt(z);
+expr(z):=sqrt(sqrt(z+1)-1)*sqrt((sqrt(z+1)+1))-sqrt(z);
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(sqrt(z+1)-1)*sqrt((sqrt(z+1)+1))-sqrt(z);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 13 --- */
+
+/* This example does not simplify. All numeric results are correct.
+ * radcan gives a modified result, which is correct too.
+ * rootscontract gives a wrong expression.
+ */
+
+expr(z):=sqrt(2)*sqrt(1-sqrt(1-z))*sqrt(sqrt(1-z)+%i*sqrt(z))/(%i*(1-sqrt(1-z))+sqrt(z))-1;
+expr(z):=sqrt(2)*sqrt(1-sqrt(1-z))*sqrt(sqrt(1-z)+%i*sqrt(z))/(%i*(1-sqrt(1-z))+sqrt(z))-1;
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(2)*sqrt(1-sqrt(1-z))*sqrt(sqrt(1-z)+%i*sqrt(z))/(%i*(1-sqrt(1-z))+sqrt(z))-1;
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 14 --- */
+
+/* This example does not simplify. All numeric results are correct.
+ * radcan gives the correct result zero.
+ * rootscontract gives a wrong expression.
+ */ 
+
+expr(z):=sqrt(1-z)*(1+z-%i*sqrt(1-z^2))/(sqrt(z+1)*(1-z+%i*sqrt(1-z^2)))+%i;
+expr(z):=sqrt(1-z)*(1+z-%i*sqrt(1-z^2))/(sqrt(z+1)*(1-z+%i*sqrt(1-z^2)))+%i;
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(1-z)*(1+z-%i*sqrt(1-z^2))/(sqrt(z+1)*(1-z+%i*sqrt(1-z^2)))+%i;
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 15 --- */
+
+/* This example does not simplify. All numeric results are correct.
+ * radcan gives the correct result zero.
+ * rootscontract gives a wrong expression.
+ */ 
+
+expr(z):=sqrt(1-z)*(1+z+%i*sqrt(1-z^2))/(sqrt(z+1)*(1-z-%i*sqrt(1-z^2)))-%i;
+expr(z):=sqrt(1-z)*(1+z+%i*sqrt(1-z^2))/(sqrt(z+1)*(1-z-%i*sqrt(1-z^2)))-%i;
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(1-z)*(1+z+%i*sqrt(1-z^2))/(sqrt(z+1)*(1-z-%i*sqrt(1-z^2)))-%i;
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 16 --- */
+
+/* This example does not simplify. All numeric results are correct.
+ * radcan gives a changed expression, which is correct too.
+ * rootscontract gives only a small change.
+ */ 
+
+expr(z):=1/sqrt(1-sqrt(z))+1/sqrt(1+sqrt(z))-sqrt(2)*sqrt(sqrt(1-z)+1)/sqrt(1-z);
+expr(z):=1/sqrt(1-sqrt(z))+1/sqrt(1+sqrt(z))-sqrt(2)*sqrt(sqrt(1-z)+1)/sqrt(1-z);
+
+/* Check correct simplification of equation */
+res:expr(z);
+1/sqrt(1-sqrt(z))+1/sqrt(1+sqrt(z))-sqrt(2)*sqrt(sqrt(1-z)+1)/sqrt(1-z);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 17 --- */
+
+/* This example does not simplify. All numeric results are correct.
+ * radcan gives a changed expression, which is correct too.
+ * rootscontract gives only a small change.
+ */ 
+
+expr(z):=1/sqrt(1-sqrt(z))-1/sqrt(1+sqrt(z))-sqrt(2)*sqrt(1-sqrt(1-z))/sqrt(1-z);
+expr(z):=1/sqrt(1-sqrt(z))-1/sqrt(1+sqrt(z))-sqrt(2)*sqrt(1-sqrt(1-z))/sqrt(1-z);
+
+/* Check correct simplification of equation */
+res:expr(z);
+1/sqrt(1-sqrt(z))-1/sqrt(1+sqrt(z))-sqrt(2)*sqrt(1-sqrt(1-z))/sqrt(1-z);
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 18 --- */
+
+/* All numeric values are correct. radcan and rootscontract does not
+ * change the expression.
+ */
+
+expr(z):=sqrt(1+sqrt(z))+sqrt(1-sqrt(z))-sqrt(2)*sqrt(1+sqrt(1-z));
+expr(z):=sqrt(1+sqrt(z))+sqrt(1-sqrt(z))-sqrt(2)*sqrt(1+sqrt(1-z));
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(1+sqrt(z))+sqrt(1-sqrt(z))-sqrt(2)*sqrt(1+sqrt(1-z));
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+/* --- Example 19 --- */
+
+/* All numeric values are correct. radcan and rootscontract does not
+ * change the expression.
+ */
+
+expr(z):=sqrt(1+sqrt(z))-sqrt(1-sqrt(z))-sqrt(2)*sqrt(1-sqrt(1-z));
+expr(z):=sqrt(1+sqrt(z))-sqrt(1-sqrt(z))-sqrt(2)*sqrt(1-sqrt(1-z));
+
+/* Check correct simplification of equation */
+res:expr(z);
+sqrt(1+sqrt(z))-sqrt(1-sqrt(z))-sqrt(2)*sqrt(1-sqrt(1-z));
+
+closeto(float(rectform(res)),0.0,1e-15), z=1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-%i/2;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2+%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=-1/2-%i;
+true;
+closeto(float(rectform(res)),0.0,1e-15), z=1/2-%i;
+true;
+
+(reset(domain), done);
+done;
+
+/* ---------- Complex characteristics --------------------------------------- */
+
+/* --- Real part --- */
+
+realpart(sqrt(x+%i*y));
+(x^2+y^2)^(1/4)*cos(1/2*atan2(y,x));
+
+/* --- Imaginary part --- */
+
+imagpart(sqrt(x+%i*y));
+(x^2+y^2)^(1/4)*sin(1/2*atan2(y,x));
+
+/* --- Absolute value --- */
+
+abs(sqrt(x+%i*y));
+abs(sqrt(%i*y+x))$
+
+/* --- Argument --- */
+
+carg(sqrt(x+%i*y));
+1/2*atan2(y,x);
+
+/* --- Conjugate value --- */
+
+conjugate(sqrt(xp+%i*y));
+sqrt(xp-%i*y);
+
+rectform(conjugate(sqrt(xp+%i*y)));
+(xp^2+y^2)^(1/4)*cos(1/2*atan(y/xp))-%i*(xp^2+y^2)^(1/4)*sin(1/2*atan(y/xp));
+
+/* --- Signum value --- */
+
+/* Maxima has no signum function for complex expressions */
+
+signum(sqrt(z));
+'signum(sqrt(z));
+
+signum(sqrt(xp));
+1;
+
+signum(sqrt(xn));
+'signum(sqrt(xn));
+
+/* ---------- Differentiation ----------------------------------------------- */
+
+diff(sqrt(z),z);
+1/(2*sqrt(z));
+
+diff(sqrt(z),z,2);
+-1/(4*z^(3/2));
+
+/* ---------- Integration --------------------------------------------------- */
+
+/* --- Indefinite integration --- */
+
+integrate(sqrt(z),z);
+2/3*z^(3/2);
+
+/* --- Definite integration --- */
+
+integrate(sqrt(t),t,0,1);
+2/3;
+
+integrate(sqrt(t)*log(t),t,0,1);
+-4/9;
+
+/* Maxima does not know the general result: -> 2/3*2F1(3/2,-a;5/2;-1) */
+integrate(sqrt(t)*(t+1)^a,t,0,1);
+'integrate(sqrt(t)*(t+1)^a,t,0,1);
+
+/* Maxima can evaluate the integral for a an integer or a half integral value */
+integrate(sqrt(t)*(t+1)^2,t,0,1);
+184/105;
+
+integrate(sqrt(t)*(t+1)^-2,t,0,1);
+(%pi-2)/4;
+
+integrate(sqrt(t)*(t+1)^(1/2),t,0,1);
+(log(sqrt(2)+1)-log(1-sqrt(2))-3*2^(3/2))/-8-log(-1)/8;
+
+integrate(sqrt(t)*(t+1)^(-1/2),t,0,1);
+-log(sqrt(2)+1)/2+log(1-sqrt(2))/2-log(-1)/2+sqrt(2);
+
+integrate(sqrt(t)*(t+1)^(3/2),t,0,1);
+(3*log(sqrt(2)+1)-3*log(1-sqrt(2))-25*2^(3/2))/-48-log(-1)/16;
+
+integrate(sqrt(t)*(t+1)^(-3/2),t,0,1);
+log(sqrt(2)+1)-log(1-sqrt(2))+log(-1)-sqrt(2);
+
+/* ---------- Integral transforms ------------------------------------------- */
+
+/* --- Laplace transform --- */
+
+laplace(sqrt(t),t,s);
+sqrt(%pi)/(2*s^(3/2));
+
+/* Maxima does not know the inverse laplace transform 
+ *    -> -1/(2*t^(3/2)*sqrt(%pi)
+ */
+ilt(sqrt(s),s,t);
+'ilt(sqrt(s),s,t);
+
+/* ---------- Limits -------------------------------------------------------- */
+
+assume(b>1);
+[b>1];
+
+limit(sqrt(z)/b^z,z,inf);
+0;
+
+forget(b>1);
+[b>1];
+
+limit(sqrt(z)*log(z),z,0);
+0;
+
+limit(log(z)/sqrt(z),z,inf);
+0;
+
+/* ---------- Representation through hypergeometric functions --------------- */
+
+hgfred([-1/2],[],1-z); 
+sqrt(z);
+
+hgfred([],[], 1/2*log(z)), %e_to_numlog:true;
+sqrt(z);
+
+hgfred([-1/2,b],[b],1-z);
+sqrt(z);
+
+(reset(domain), done);
+done;
+
+/* ---------- End of file rtest_sqrt.mac ------------------------------------ */
+

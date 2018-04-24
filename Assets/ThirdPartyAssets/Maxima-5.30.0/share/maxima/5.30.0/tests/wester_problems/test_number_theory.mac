@@ -1,0 +1,90 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/NumberTheory/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Number Theory ---------- */
+/* Display the largest 6-digit prime and the smallest 7-digit prime
+   => [999983, 1000003] */
+[prime(78498), prime(78499)];
+/* Primitive root => 19 */
+191;
+/* (a + b)^p mod p => a^p + b^p for p prime and a, b in Z_p   [Chris Hurlburt]
+   See Thomas W. Hungerford, _Algebra_, Springer-Verlag, 1974, p. 121 for a
+   more general simplification: (a +- b)^(p^n) => a^(p^n) +- b^(p^n) */
+assume(equal(primep(p), true))$
+errcatch(mod((a + b)^p, p));
+forget(equal(primep(p), true))$
+/* Congruence equations.  See Harold M. Stark, _An Introduction to Number
+   Theory_, The MIT press, 1984.
+   9 x = 15 mod 21 => x = 4 mod 7   or   {4, 11, 18} mod 21   [Stark, p. 68] */
+modulus: 21$
+errcatch(solve(9*x = 15, x));
+/* 7 x = 22 mod 39 => x = 5 mod 13   or   31 mod 39   [Stark, p. 69] */
+modulus: 39$
+solve(7*x = 22, x);
+/* x^2 + x + 4 = 0 mod 8 => x = {3, 4} mod 8   [Stark, p. 97] */
+modulus: 8$
+errcatch(solve(x^2 + x + 4 = 0, x));
+/* x^3 + 2 x^2 + 5 x + 6 = 0 mod 11 => x = 3 mod 11   [Stark, p. 97] */
+modulus: 11$
+solve(x^3 + 2*x^2 + 5*x + 6 = 0, x);
+multiplicities;
+/* {x = 7 mod 9, x = 13 mod 23, x = 1 mod 2} => x = 151 mod 414   [Stark,
+   p. 76] */
+/* {5 x + 4 y = 6 mod 7, 3 x - 2 y = 6 mod 7} => x = 1 mod 7, y = 2 mod 7
+   [Stark, p. 76] */
+modulus: 7$
+solve([5*x + 4*y = 6, 3*x - 2*y = 6], [x, y]);
+/* 2 x + 3 y = 1 mod 5 =>
+   (x, y) = {(0, 2), (1, 3), (2, 4), (3, 0), (4, 1)} mod 5 */
+modulus: 5$
+solve(2*x + 3*y = 1, [x, y]);
+/* 2 x + 3 y = 1 mod 6 =>   [Stark, p. 76]
+   (x, y) = {(2, 1), (2, 3), (2, 5), (5, 1), (5, 3), (5, 5)} mod 6 */
+modulus: 6$
+errcatch(solve(2*x + 3*y = 1, [x, y]));
+modulus: false$
+/* Diophantine equations => x = 2, y = 5 (Wallis)   [Stark, p. 147] */
+declare([x, y], integer)$
+solve(x^4 + 9 = y^2, [x, y]);
+/* => x = 11, y = 5 (Fermat)   [Stark, p. 147] */
+solve(x^2 + 4 = y^3, [x, y]);
+/* => (x, y, t, z, w) = (3, 4, 5, 12, 13), (7, 24, 25, 312, 313), ...
+      [Stark, p. 154] */
+declare([t, z, w], integer)$
+system: [x^2 + y^2 = t^2, t^2 + z^2 = w^2];
+solve(system, [x, y, t, z, w]);
+remvalue(system)$
+remove([t, w, x, t, z], integer)$
+/* Rational approximation of sqrt(3) with an error tolerance of 1/500 => 26/15
+   */
+ev(rat(sqrt(3.)), ratepsilon = 1/500);
+/* Continued fractions => 3 + 1/(7 + 1/(15 + 1/(1 + 1/(292 + ... */
+cf(3.1415926535d0);
+cfdisrep(%);
+/* => 4 + 1/(1 + 1/(3 + 1/(1 + 1/(8 + 1/(1 + 1/(3 + 1/(1 + 1/(8 + ...
+      [Stark, p. 340] */
+cf(sqrt(23));
+/* => 1 + 1/(1 + 1/(1 + 1/(1 + ...   See Oskar Perron, _Die Lehre von den
+      Kettenbr\"uchen_, Chelsea Publishing Company, 1950, p. 52. */
+cf((1 + sqrt(5))/2);
+/* => 1/(2 x + 1/(6 x + 1/(10 x + 1/(14 x + ...   [Perron, p. 353] */
+errcatch(cf((exp(1/x) - 1)/(exp(1/x) + 1)));
+/* => 1/(2 x + 1/(2 x + 1/(2 x + ...   (Re x > 0)   From Liyang Xu, ``Method
+      Derived from Continued Fraction Approximations'', draft. */
+errcatch(cf(sqrt(x^2 + 1) - x));
+/* ---------- Quit ---------- */
+quit();

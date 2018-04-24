@@ -1,0 +1,47 @@
+/* Filename hill2.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ /*
+(d4) This program generates the transition curves in
+
+
+Mathieu's equation via Hill's determinants.  Call it by
+
+
+typing:
+
+
+                       HILL()
+
+
+NOTE: File HILL1.MAC must be loaded before calling HILL().
+
+*/
+
+hill():=(input(),
+     if evenp(n) then (findaeven(n,m,n+m),if n > 0 then findbeven(n,m,n+m))
+	 else findaodd(n,m,n+m))$
+input():=(n:read("enter transition curve number n"),
+      m:read("enter degree of truncation"))$
+findaeven(n,m,p):=(d:'d,det:expand(makeaeven(p)),d:n^2/4+k[2]*e^2,
+	  for i from 2 step 2 thru m do
+	      (loop(i),if i < m then d:d+k[i+2]*e^(i+2)),print("delta=",d),
+	  print(" "))$
+findbeven(n,m,p):=(d:'d,det:expand(makebeven(p)),d:n^2/4+k[2]*e^2,
+	  for i from 2 step 2 thru m do
+	      (loop(i),if i < m then d:d+k[i+2]*e^(i+2)),print("delta=",d),
+	  print(" "))$
+findaodd(n,m,p):=(d:'d,det:expand(makeaodd(p)),d:n^2/4+k[1]*e,
+	 for i thru m do (loop(i),if i < m then d:d+k[i+1]*e^(i+1)),
+	 print("delta=",d),print(" "),print("delta=",ev(d,e:-e)),print(" "))$
+loop(i):=d:ev(d,solve(taylor(ev(det),e,0,i),k[i]))$

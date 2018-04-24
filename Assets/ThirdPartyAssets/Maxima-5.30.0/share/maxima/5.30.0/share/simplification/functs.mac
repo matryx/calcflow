@@ -1,0 +1,107 @@
+/* eval_when([translate,load,loadfile,batch,demo],
+ matchdeclare(a,nonzeroandfreeof(x),[b,c],freeof(x)))$ */
+
+define_variable(takegcd,true,boolean,"used in gcdivide to decide the
+gcd choice");
+
+rempart&&  rempart(exp,n):=
+    ?append(rest(exp,  /* combine two parts of exp
+	   first part is beginning to part to be removed
+	   specify that the first l-1 parts are retained */
+	(if listp(n) then n[1] else n)-1-length(exp)),
+	block([t],  /* last part is from removed part to end */
+	if atom(t:rest(exp,  /* last m-1 parts are retained */
+	    if listp(n) then n[2] else n))
+	then ?list(t) else ?cdr(t)))$
+
+wronskian&&  wronskian(functlist,var):=block([end],
+    end:length(functlist)-1,
+    functlist:[functlist],
+    thru end do functlist:endcons(map(lambda([x],diff(x,var)),
+	last(functlist)),functlist),
+    apply('matrix,functlist))$
+
+tracematrix&&  tracematrix(m):=block([sum,len],sum:0,len:length(m),
+for i:1 thru len do sum:sum+part(m,i,i),sum)$
+
+rational&&  rational(z):=block([n,d,cd,ratfac],
+    ratfac:false,
+    n:ratdisrep(ratnumer(z)*(cd:conjugate(d:ratdenom(z)))),
+    d:rat(n/ratdisrep(d*cd)),
+    if ratp(z) then d else ratdisrep(d))$
+
+logical&&  logand(x,y):=?boole(?boole\-and,x,y)$
+	logor(x,y):=?boole(?boole\-ior,x,y)$
+	logxor(x,y):=?boole(?boole\-xor,x,y)$
+
+nonzeroandfreeof&&  nonzeroandfreeof(x,e):=is(e#0 and freeof(x,e))$
+
+lcm&& lcm([list]):=block([listconstvars:false],if listofvars(list)=[] then
+lcm1(list) else factor(lcm1(list)))$
+
+/* Replaced by the following routine
+lcm1(list):=if list=[] then 1 else block([rlist:rest(list),flist:first(list),
+frlist,partswitch:true,inflag:true,piece], if rlist=[] then flist else
+lcm1(cons(flist*(frlist:first(rlist))/gcd(flist,frlist),rest(rlist))))$
+*/
+
+/* New implementation of the function lcm
+ * Do not use a recursive, but an iterative algorithm.
+ * Check more carefully the case division by zero.
+ */
+
+lcm1(list):=
+   block 
+   (
+    [flist, rlist, result, keepfloat:true, ratprint:false],
+    
+    result : flatten(list),
+    if result = [] then result : [1],
+    unless rest(result)=[] do
+    (
+     flist : first(result),
+     rlist : first(rest(result)),
+     if rlist=0 then
+        result : [0]
+     else
+        result : cons( (flist*rlist / gcd(flist, rlist)),
+                       (rest(rest(result))))
+    ),
+    first(result)
+)$
+
+gcdivide&&  gcdivide(poly1,poly2):=block([gcdlist],
+		gcdlist:if takegcd then ezgcd(poly1,poly2)
+			else [1,poly1,poly2],
+		gcdlist[2]/gcdlist[3])$
+
+series&&  arithmetic(a,d,n):=a+(n-1)*d$
+          geometric(a,r,n):=a*r^(n-1)$
+          harmonic(a,b,c,n):=a/(b+(n-1)*c)$
+          arithsum(a,d,n):=n*(a+(n-1)*d/2)$
+          geosum(a,r,n):=block([],
+            if r=1
+                then if n='inf
+                        then return(limit(i*a,i,'inf))
+                        else return(n*a),
+            if r=-1
+                then error("The series is not convergent"),
+            if n='inf 
+                then if abs(r) < 1 
+                        then a/(1-r)
+                        else limit(a*(1-r^i)/(1-r),i,'inf)
+                else a*(1-r^n)/(1-r)   )$
+
+gauss&&  gaussprob(x):=1/sqrt(2*%pi)*%e^(-x^2/2)$
+
+/* See, for example, http://en.wikipedia.org/wiki/Gudermannian_function */
+gd&&  gd(x):=2*atan(%e^x)-%pi/2$
+	agd(x):=log(tan(%pi/4+x/2))$
+
+trig&&  vers(x):=1-cos(x)$
+	covers(x):=1-sin(x)$
+	exsec(x):=sec(x)-1$
+	hav(x):=(1-cos(x))/2$
+
+combination&&  combination(n,r):=binomial(n,r)$
+	permutation(n,r):=binomial(n,r)*r!$

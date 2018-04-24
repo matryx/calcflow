@@ -1,0 +1,133 @@
+\documentclass[11pt]{article}
+
+\title{Clebsch-Gordan coefficients\footnote
+{Copyright 2007 by Edmond Orignac.
+This file is released under the terms of the GNU General Public License, version 2.}}
+
+\begin{document}
+
+\maketitle
+
+\section{Wigner recoupling coefficients}
+
+The Maxima script \texttt{clebsch\_gordan.mac} defines the $3j,6j$ and $9j$ 
+ coefficients that are used in the theory of addition of angular momenta 
+in quantum mechanics\cite{landau_mecaq,messiah_field_chapter}. 
+
+% The Book of Messiah is available from Dover in an english translation.
+% Angular momenta and Wigner coefficients can be found in Appendix C.  
+% An online reference is:
+% Weisstein, Eric W. "Wigner 9j-Symbol." From MathWorld--A Wolfram Web Resource.% http://mathworld.wolfram.com/Wigner9j-Symbol.html 
+
+\subsection{Wigner $3j$ coefficients}
+
+The Maxima function \texttt{wigner\_3j(j1,j2,m1,m2,j,m)} computes the $3j$ 
+coefficient of Wigner.
+
+The Wigner $3j$ coefficient appears in the addition of a pair of angular 
+momenta in Quantum Mechanics. 
+It is defined as\cite{landau_mecaq,messiah_field_chapter}:
+\begin{equation}
+  \label{eq:3j-def}
+  \left(\begin{array}{ccc} j_1 & j_2 & j \\ m_1 & m_2 & m\end{array} \right) = (-1)^{j_1-j_2-m} \frac 1 {\sqrt{2j+1}} \langle j_1,m_1; j_2, m_2 | j,-m\rangle,   
+\end{equation} 
+
+where $ \langle j_1,m_1; j_2, m_2 | j,m\rangle$ is the 
+Clebsch-Gordan coefficient. The Clebsch-Gordan coefficient is used to 
+construct the state of total angular momentum $j$ and total projection 
+of angular momentum $m$ as a linear combination of states of angular momenta 
+$j_1$ and $j_2$ and respective projections $m_1$ and $m_2$.
+One has:
+\begin{equation}
+  |j,m\rangle = \sum_{m_1,m_2} \langle j_1,m_1;j_2,m_2|j,m\rangle |j_1,m_1\rangle  |j_2,m_2\rangle  
+\end{equation}
+The advantage of working with the $3j$ coefficients instead of the 
+Clebsch-Gordan coefficients is that the former are more symmetric\cite{landau_mecaq}. 
+ 
+
+The $3j$ coefficient is computed by application of  
+Eq. (27.9.1) p. 1006 of \cite{abramowitz_math_functions}.  
+
+
+\subsection{Wigner $6j$ coefficients}
+
+The Maxima function \texttt{wigner\_6j(j1,j2,j3,j4,j5,j6)} computes the $6j$ 
+coefficient of Wigner.
+
+The Wigner $6j$ coefficients appears in the addition of three angular momenta. 
+When one is adding three angular momenta, one can form a first 
+pair of angular momenta, add them together to form a new angular momentum
+using the $3j$ coefficients, and add the resulting angular momenta with the
+remaining angular momentum\cite{landau_mecaq,messiah_field_chapter}.
+There are 3 different ways of grouping the angular momenta, which leads to 
+different representations of the total angular momentum. 
+The Wigner $6j$ coefficients are used to pass from one representation to the 
+other. 
+
+The notation for the $6j$ symbols is:
+\begin{equation}
+  \left\{\begin{array}{ccc}j_1 & j_2 & j_3 \\ j_4 & j_5 & j_6\end{array} \right\} 
+\end{equation}
+
+The $6j$ coefficient is computed by application of the formula  p. 513 Eq. (108,10) of \cite{landau_mecaq} or the equivalent formula  p. 915, Eq. (36) of \cite{messiah_field_chapter}. 
+
+
+\subsection{Wigner $9j$ coefficients}
+
+The function\texttt{wigner\_9j(a,b,c,d,e,f,h,i,j)} computes 
+the $9j$ coefficient of Wigner. 
+
+The $9j$ coefficients appears in the addition of four angular momenta. 
+To add these angular momenta, one can first form two pairs of angular 
+momenta and add them together to form the two resulting angular momenta 
+and then add together the two resulting angular momenta. 
+There are different ways to form the two pairs of angular momenta, and 
+the $9j$ coefficient is used to transform from one representation to
+the other\cite{landau_mecaq,messiah_field_chapter}. 
+
+The notation for the $9j$ coefficient is:
+\begin{equation}
+  \left\{\begin{array}{cccc} a & b & c \\ d & e & f \\ h & i & j \end{array} \right\} 
+\end{equation}
+
+The $9j$ coefficient is computed by applying Eq. (41) p. 917, of \cite{messiah_field_chapter}. 
+
+
+\section{Limitations}
+
+The $3nj$ with $n\ge 4$ (addition of $n+1$ angular momenta) are not 
+implemented. The theory of these coefficients 
+can be found in the book Edmonds Angular momentum 
+in quantum Mechanics (Princeton University Press). 
+
+Various other coefficients can be defined that are related to the $3nj$ 
+coefficients such as the Racah $W$ or $X$ coefficients\cite{messiah_field_chapter}. These coefficients are not implemented.
+
+ 
+As the computation is done using exact formulas, it will break down if the
+angular momenta that are entered are too large. For these cases, one should
+implement recurrence formulas or use asymptotic expansions. 
+ 
+
+
+\begin{thebibliography}{1}
+
+\bibitem{abramowitz_math_functions}
+{\sc Abramowitz, M., and Stegun, I.}
+\newblock {\em Handbook of mathematical functions}.
+\newblock Dover, New York, 1972.
+
+\bibitem{landau_mecaq}
+{\sc Landau, L.~D., and Lifshitz, E.~M.}
+\newblock {\em Quantum Mechanics : non-relativistic theory}.
+\newblock perg, New York, 1962.
+
+\bibitem{messiah_field_chapter}
+{\sc Messiah, A.}
+\newblock {\em M\'ecanique Quantique}, vol.~2.
+\newblock Dunod, Paris, 1995.
+
+\end{thebibliography}
+
+
+\end{document}

@@ -1,0 +1,50 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * MAXIMA CTENSOR demo: Proving that the Reissner-Nordstrom metric
+ * is that of a point charge.
+ *
+ */
+
+("
+
+Verify that the Reissner-Nordstrom metric is that of a point charge.
+First, we load ctensor...")$
+if get('ctensor,'version)=false then load(ctensor);
+("We also need NCHRPL that contains the MATTRACE function:")$
+load(nchrpl);
+("Now we set up the metric with (+,-,-,-) signature:")$
+dim:4;
+ct_coords:[t,r,o,f];
+lg:matrix([(r^2+4*%pi*q^2-2*m*r)/r^2,0,0,0],[0,r^2/(2*m*r-r^2-4*%pi*q^2),0,0],[0,0,-r^2,0],[0,0,0,-r^2*sin(o)^2]);
+ug:ratsimp(invert(lg));
+("Next, we compute the Christoffel-symbols:")$
+christof(false);
+("Predefine Ricci & Einstein tensors as matrices for later use:")$
+ric:lein:ident(4)$
+ricci(false);
+leinstein(false);
+
+("Part II: we set up the electromagnetic 4-potential:")$
+a:[q/r,0,0,0];
+("From which we compute the covariant electromagnetic field tensor:")$
+fl:ident(4)$
+for i thru dim do for j thru dim do fl[i,j]:diff(a[i],ct_coords[j])-diff(a[j],ct_coords[i]);
+("We can now obtain the mixed and contravariant EM field tensors:")$
+fm:ug.fl;
+fu:fm.ug;
+("And now we can compute the stress-energy tensor (times 8*%pi).")$
+t:ratsimp(8*%pi*(fl.fm-lg*mattrace(fl.fu)/4));
+("This and the covariant Einstein tensor should be identical:")$
+ratsimp(lein-t);
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

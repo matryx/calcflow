@@ -1,0 +1,165 @@
+/* Some algebraic/combinatorial auxiliary routines */
+
+/* RISC Institute, Linz, Austria */
+/* by Fabrizio Caruso            */
+
+
+/* Least common multiple */
+lcm(a,b) := a*b / gcd(a,b);
+
+
+/* Remove common gcd */
+clearGCD(pol,unkPar1,numUnkPar1,unkPar2,numUnkPar2) :=
+  block([pList,i,cmfact,res],
+
+  pList : [],
+  for i:1 thru numUnkPar1 do
+    pList : endcons(coeff(pol,unkPar1[i-1],1),pList),
+  for i:1 thru numUnkPar2 do
+    pList : endcons(coeff(pol,unkPar2[i-1],1),pList),
+  cmfact : first(pList),
+  for i : 2 thru numUnkPar1 + numUnkPar2 - 1 do
+    cmfact : gcd(cmfact,part(pList,i)),
+
+  
+  if (cmfact # 1) and (cmfact # 0) then
+   (
+   res : 0,
+   for i : 1 thru numUnkPar1 do
+     res : res + factor(part(pList,i)/cmfact) * unkPar1[i-1],
+   for i : 1 thru numUnkPar2 do
+     res : res + factor(part(pList,numUnkPar1+i)/cmfact) * unkPar2[i-1],
+
+   return(res)
+   )
+  else
+   return(pol)
+  );
+
+
+/* Make a polynomial primitive */
+primitive(pol,var) :=
+  block([polyList,coeGcd,i,res],
+    pol : expand(pol),
+    polyList : makelist(coeff(pol,var,i),i,0,degree(pol,var)),
+    coeGcd : part(polyList,1),
+    for i : 2 thru length(polyList) do
+      coeGcd : gcd(coeGcd,part(polyList,i)),
+     res : 0,
+    for i : 1 thru length(polyList) do
+      res : res + factor(part(polyList,i)/coeGcd) * var^(i-1),
+    return(res)
+    );      
+
+
+/* Make a list out of a product of powers of integers disregarding powers */
+factorsList(factors) :=
+  if zb_operatorp(factors,"^") then
+    first(factors)
+  else
+    if zb_operatorp(factors,"*") then
+       makelist(factorsList(part(factors,i)),i,1,length(factors))
+    else
+       factors;
+
+/* Minimum of a list */
+listMin(lst) := 
+  if length(lst) = 1 then
+    first(lst)
+  else
+    if length(lst) = 2 then
+       min(first(lst),second(lst))
+    else
+       min(first(lst),listMin(rest(lst)));
+
+/* Rising factorial */
+rFact(n,k) :=
+  if k = 0 then
+    1
+  else
+    n*rFact(n+1,k-1);
+
+
+/* Polynomial coef(deg)*indet^(deg) + coef(deg-1)*indet^(deg) + .... + coef(0)*/
+poly(indet,coef,deg) :=
+  if deg = -1 then
+    0
+  else
+    coef[deg]*indet^deg+poly(indet,coef,deg-1);
+
+
+
+/* It creates a polynomial out of a solution of a system of equations */
+/* The argument deg must be given the value 0 */
+sol2PolyAux(sol,indet,deg) :=
+  if sol = [] then  
+    0
+  else
+    first(sol)*indet^deg + sol2PolyAux(rest(sol),indet,deg+1);
+ 
+/* Interface macro without auxiliary argument */
+sol2Poly(sol,indet) ::=
+  buildq([sol,indet],
+         sol2PolyAux(sol,indet,0));     
+
+/* It creates a polynomial out of a solution of a system of equations given by equalities */
+/* The argument deg must be given the value 0 */
+Gsol2PolyAux(sol,indet,deg) :=
+  if sol = [] then  
+    0
+  else
+    rhs(first(sol))*indet^deg + Gsol2PolyAux(rest(sol),indet,deg+1);
+ 
+/* Interface macro without auxiliary argument */
+Gsol2Poly(sol,indet) ::=
+  buildq([sol,indet],
+         Gsol2PolyAux(sol,indet,0));     
+
+
+/* Degree of a polynomial (MACRO) */
+
+degree(poly,indet) ::=
+  buildq([poly,indet],if poly = 0 then -1 else hipow(poly,indet));
+
+
+/* Leading coefficient of a polynomial */
+leadCoeff(poly,indet)::=
+   buildq([poly,indet],
+          ratcoeff(poly,indet,hipow(poly,indet)));
+
+
+/* Leading term of a polynomial */
+leadTerm(poly,indet)::=
+   buildq([poly,indet],
+          indet^degree(poly,indet));
+
+/* Leading monomial of a polynomial */
+leadMono(poly,indet)::=
+   buildq([poly,indet],
+          leadCoeff(poly,indet)*leadTerm(poly,indet));
+
+/* Tail of a polynomial */
+Tail(poly,indet) ::=
+   buildq([poly,indet],
+          poly-leadMono(poly,indet));
+
+
+/* Given a polynomial, it creates a list of its coefficients */
+poly2List(poly,indet) :=
+  makelist(coeff(poly,indet,i),i,0,degree(poly,indet));
+
+
+/* Given a list and an array, it creates the corresponding substitution list */
+list2subst(list,vector) :=
+  makelist('vector[i]=list[i],i,0,length(vector)); 
+
+
+
+
+
+
+
+
+
+
+

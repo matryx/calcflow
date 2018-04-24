@@ -1,0 +1,817 @@
+/* ------------------------------------------------------------------- */
+/* SARAG - Topology                                                    */
+/* by Fabrizio Caruso                                                  */
+
+SARAG_LINE_COLOR : 1;
+SARAG_POINT_SIZE : 3;
+SARAG_POINT_STYLE_GENERIC : 3;
+SARAG_POINT_STYLE_CRITICAL : 2;
+SARAG_POINT_STYLE_NONCRITICAL : 1;
+
+signAtRoot(pol,x,polyInX,rootInX) :=
+  signsAtRoots([rootInX],polyInX,pol,x)[1][2];
+
+signAtRootVerbose(pol,x,polyInX,rootInX,verbosity) :=
+  signsAtRootsVerbose([rootInX],polyInX,pol,x,verbosity)[1][2];
+
+bivariateSignChanges(seq,x,polyInX,rootInX) :=
+  signChanges(map(lambda([arg],signAtRoot(arg,x,polyInX,rootInX)),seq));
+
+
+upperBoundAt(polyInX,interval,x) :=
+  UNIMPLEMENTED;
+
+upperBoundWithSignAt(polyInX,interval,x,sgnAtRoot) :=
+  block([signFound,bound,lhsBound,rhsBound],
+   signFound : false,
+   while(not(signFound)) do
+     (
+     bound : upperBoundAt(polyInX,interval,x),
+     lhsBound : bound[1],
+     rhsBound : bound[2],
+     if sgn(lhsBound)=sgnAtRoot and sgn(rhsBound)=sgnAtRoot then
+       signFound : true
+     else
+       interval : refineRoot(interval,polyInX,x)
+     ),
+   return([interval,[lhsBound,rhsBound]])
+   );
+
+bivariateCauchyRootUpperBound(pol,var,x,polyInX,rootInX) :=
+  UNIMPLEMENTED;
+
+
+
+
+bivariateIsolateRoots(pol,var,x,polyInX,rootInX) :=
+  deCasteljauBivariateIsolateRoots(pol,var,x,polyInX,rootInX);
+
+deCasteljauBivariateIsolateRoots(pol,var,x,polyInX,rootInX) :=
+  deCasteljauBivariateFindRootsVerbose(pol,var,x,polyInX,rootInX,inf,DEFAULT_VERBOSITY);
+
+/* Very experimental code */
+deCasteljauBivariateFindRootsVerbose(pol,var,x,polyInX,rootInX,threshold,verbosity) :=
+  block([leftEnd,rightEnd,midPoint,n,sqPol,bCoeffList,pos,
+         resList,item,sgnCh,splitRes,c,k,count],
+  
+  pol : expandIf(pol),
+
+
+  /* BOGUS: In order to compute the Cauchy Bound */
+  /* we take the mid point of the root of polyInX */
+  n : discreteLogInBaseTwo(cauchyRootUpperBound(expand(subst((rootInX[1]+rootInX[2])/2,x,pol)),var)),
+
+  /* modular test for square-freeness */
+  
+  /* BUGGY: Due to the behavious of "gcd" in Maxima */
+  /* the modular test has been commemted out */
+/*
+  modulus : MOD_TEST_PRIME,
+  if not(gcd(pol,diff(pol,var))=1) then
+    (
+    modulus : false,
+    sqPol : SQUARE_FREE_ALGORITHM(pol,var)
+    )
+  else
+    (
+    modulus : false,
+    sqPol : pol,
+    if verbosity>=NORMAL then
+      print("deCasteljauIsolateRoots) Polynomial already square free")
+    ),
+*/
+  sqPol : expand(SQUARE_FREE_ALGORITHM(pol,var)),
+  resList : [],   
+  bCoeffList : [[bernsteinCoeffList(sqPol,var,-2^n,2^n),-2^n,2^n]], 
+  count : 0,
+  while not(bCoeffList=[]) do
+    (
+    item : first(bCoeffList),
+    leftEnd : second(item),
+    rightEnd : third(item),
+
+    if verbosity>=NORMAL then
+      print("deCasteljauIsolateRoots) Scanning open interval : ]",
+        leftEnd, ",", rightEnd, "["),
+
+    item : expand(first(item)),
+    bCoeffList : rest(bCoeffList),
+    if verbosity>=EXTRA then
+      (
+      print("checking : ", item),
+      print("Sign vector : ", map(lambda([arg],signAtRoot(arg,x,polyInX,rootInX)),item))
+      ),
+    sgnCh : bivariateSignChanges(item,x,polyInX,rootInX),
+    if verbosity>=EXTRA then
+      print("sgnCh : ", sgnCh),
+    
+    if verbosity>=NORMAL then
+      print("deCasteljauIsolateRoots) Sign changes : ", sgnCh),
+    if (sgnCh = 1) and (rightEnd-leftEnd)<threshold then
+       (
+       resList : endcons([leftEnd,
+                       rightEnd],resList),
+       if verbosity>=NORMAL then
+         (
+         print("deCasteljauIsolateRoots) Isolating open interval found : ]",
+               leftEnd, ",", rightEnd, "["),
+         count : count + 1,
+         print("deCasteljauIsolateRoots) Root count : ", count)
+         )
+       )
+    else 
+       (
+       midPoint : (leftEnd+rightEnd)/2,
+       if (sgnCh>=1) then
+          (
+          print("value at ", midPoint, " is : ", subst(midPoint,var,pol)),
+          if signAtRoot(subst(midPoint,var,pol),x,polyInX,rootInX)=0 then
+             (
+             resList : endcons([midPoint],resList), 
+             if verbosity>=NORMAL then
+                (
+                print("deCasteljauIsolateRoots) Root found : ", midPoint).
+                count : count + 1,
+                print("deCasteljauIsolateRoots) Root count : ", count)
+                )
+             ),
+          splitRes : specialBernsteinSplit(item,leftEnd,rightEnd),
+          bCoeffList : append([[first(splitRes),leftEnd,midPoint],
+                               [second(splitRes),midPoint,rightEnd]],bCoeffList)
+          )
+       )
+
+    ), /* end while */
+ return(resList)
+);
+
+
+bivariateSSubResSignChanges(seq,x,polyInX,rootInX) :=
+  genPermMVar(map(lambda([arg],signAtRoot(arg,x,polyInX,rootInX)),seq));
+
+
+bivariateSSubResTarskiQuery(q,p,var,x,polyInX,rootInX) :=
+ bivariateSSubResTarskiQueryVerbose(q,p,var,x,polyInX,rootInX,DEFAULT_VERBOSITY);
+
+
+bivariateSSubResTarskiQueryVerbose(q,p,var,x,polyInX,rootInX,verbosity) :=
+  block([degQ, degP, sSRRes, sSR, seq, coeffSeq, j, b1, b0, Rbar],
+  
+  p : expandIf(p),
+  q : expandIf(q),
+  degQ : degree(q,var),
+  degP : degree(p,var),
+
+  if degQ = 0 then
+    (
+    if verbosity>=NORMAL then
+      print("bivariateSSubResTarskiQuery) degQ = 0"),
+      /*
+    sSRRes : sSubResVerbose(p,diff(p,var),var,verbosity-1), 
+
+    coeffSeq : second(sSRRes),
+*/
+    coeffSeq : sSubResCoeffVerbose(p,diff(p,var),var,verbosity-1),
+    return(signAtRoot(leadCoeff(q,var),x,polyInX,rootInX)*
+           bivariateSSubResSignChanges(coeffSeq,x,polyInX,rootInX)) 
+    )
+  else
+    if degQ = 1 then
+      (
+      if verbosity>=NORMAL then
+        print("bivariateSSubResTarskiQuery) degQ = 1"),
+
+      b0 : coeff(q,var,0),
+      b1 : coeff(q,var,1),
+
+
+      Rbar : expand(diff(p,var)*q-degP*b1*p),
+/*
+      sSRRes : sSubResVerbose(p,Rbar,var,verbosity-1),
+
+      coeffSeq : second(sSRRes),
+*/
+      coeffSeq : sSubResCoeffVerbose(p,Rbar,var,verbosity-1), /* SR(p b1 P - P' Q) */
+
+      return(bivariateSSubResSignChanges(coeffSeq,x,polyInX,rootInX))
+      )
+    else
+      (
+      if verbosity>=NORMAL then
+        print("bivariateSSubResTarskiQuery) degQ > 1"),
+        /*
+      sSRRes : sSubResVerbose(expand(-diff(p,var)*q),p,var,verbosity-1), 
+
+      coeffSeq : second(sSRRes),
+*/
+      coeffSeq : sSubResCoeffVerbose(expand(-diff(p,var)*q,p,var,verbosity-1)), /* SR(-P'Q,P) */
+      if oddp(degQ-1) then
+         return(bivariateSSubResSignChanges(coeffSeq,x,polyInX,rootInX) + signAtRoot(leadCoeff(q,var),x,polyInX,rootInX))
+      else
+         return(bivariateSSubResSignChanges(coeffSeq,x,polyInX,rootInX))
+      )
+  );
+
+
+multiplicity(sol,pol,var) :=
+  block([count],
+  count : 0,
+  while(expand(factor(subst(sol,var,pol)))=0) do
+    (
+    pol : diff(pol,var),
+    count : count + 1
+    ),
+  return(count)
+  );
+
+bivariateMultiplicity(sol,pol,var,x,polyInX,rootInX) :=
+  block([count],
+  count : 0,
+  while(signAtRoot(expand(factor(subst(sol,var,pol))),x,polyInX,rootInX)=0) do
+    (
+    pol : diff(pol,var),
+    count : count + 1
+    ),
+  return(count)
+  );
+  
+
+archimedianTopology(pol,isolAlg,x,y) :=
+  archimedianTopologyVerbose(pol,isolAlg,x,y,DEFAULT_VERBOSITY);
+
+archimedianTopologyVerbose(pol,isolAlg,x,y,verbosity) :=
+  block([sRes,sSR,sSRCoeff,discr,isolDiscr,i,j,jList,epsList,flag,rootSign,degP,
+         numOfRoots,rootsAtDiscr,numAbove,rootsAtDiscrAboveCr,taQ,
+         numBetween,rootsBetween,res,
+         coSys,generic,critY,multi],
+
+  pol : expand(pol), 
+
+  if constantp(pol) then
+    return([]),
+  
+  if verbosity>=NORMAL then
+    print("verbosity : ", verbosity),
+  if verbosity>=VERY then
+    print("topology) pol : ", pol),
+
+  if verbosity>=VERY then
+    print("topology) isolAlg : ", isolAlg),
+
+  coSys : 0,
+  while(not(degree(leadCoeff(pol,y),x)=0)) do
+    (
+    coSys : coSys + 1, 
+    if WARNINGS then
+      (
+      print("topology) WARNING: the function is not quasi-monomial in ", y),
+      print("topology) WARNING: new curve is : ", expand(subst(x+y,x,pol)))
+      ),
+    pol : expand(subst(x+y,x,pol))
+    ),
+  generic : false,
+
+  
+
+  while (not(generic)) do
+    (
+
+    sRes : sSubRes(pol,diff(pol,y),y),
+    sSR : sRes[1],
+    sSRCoeff : sRes[2],
+    discr : last(sRes[2]),
+    if verbosity>= NORMAL then
+      print("Discriminant : ", discr),
+    if verbosity >= VERY then
+      print("sSRCoeff : ", sSRCoeff),
+
+    isolDiscr : isListSort(isolAlg(discr,x)),
+
+    if length(isolDiscr)=0 then
+      (
+      if verbosity>=NORMAL then
+        print("topology) discriminant has no real roots")
+
+      ),
+
+
+
+    jList : [],
+    epsList : [],
+    rootsAtDiscr : [],
+    rootsAtDiscrAboveCr : [],
+    aboveCr : [],
+    rootsBeteeen : [],
+    degP : degree(expand(pol),y),
+    
+    if verbosity>=NORMAL then
+       print("topology)Number of roots of the discriminant : ", length(isolDiscr)),
+         
+    if verbosity>=NORMAL then         
+       print("topology)Roots of the discriminant : ", isolDiscr),
+
+    generic : true, /* It "hopes" the curve is in generic position but it will check during computation */
+    for i : 1 thru length(isolDiscr) do /* should insert check on generic position */
+      (
+      if generic then 
+        (
+        if verbosity>=NORMAL then
+           print("topology) critical point i : ", i, " at ", isolDiscr[i]),
+        
+      
+        if length(isolDiscr[i]) = 1 then
+          (
+          if verbosity>=EXTRA then
+             print("topology) solution as a point"),
+          j : 0,
+          flag : false,
+          while(not(flag)) do
+            (
+            rootSign : sgn(subst(isolDiscr[i][1],x,sSRCoeff[degP+1-j])),
+
+            if not(rootSign=0) then
+              flag : true
+            else
+              j : j + 1
+            ),
+          if verbosity>=VERY then
+             (
+             print("topology) j(",i,") : ",j),
+             print("topology) eps(",i,") : ", rootSign)
+             ),
+          jList : endcons(j,jList),
+          epsList : endcons(rootSign,epsList),
+
+          if not(ASSUME_GENERIC_POSITION) then 
+            (
+            critY : -1/j * coeff(subst(isolDiscr[i][1],x,sSR[degP+1-j]),y,j-1)/
+                           subst(isolDiscr[i][1],x,sSRCoeff[degP+1-j]),
+            if verbosity>=VERY then
+               print("topology) critY : ", critY),
+
+            multi : multiplicity(critY,subst(isolDiscr[i][1],x,sSR[degP+1-j]),y),
+            if multi<j then
+               (
+               generic:false,
+            
+               if WARNINGS then
+                 (
+                 print("topology) WARNING : Non-generic position --- multiplicity : ", 
+                        multi),
+                 print("topology) WARNING: new curve is : ", expand(subst(x+y,x,pol)))
+                 ),
+               pol : expand(subst(x+y,x,pol)),
+               coSys : coSys + 1,
+               while(not(degree(leadCoeff(pol,y),x)=0)) do
+                 (
+                 coSys : coSys + 1,
+                 if WARNINGS then
+                   (
+                   print("topology) WARNING: the function is not quasi-monomial in ", y),
+                   print("topology) WARNING: new curve is : ", expand(subst(x+y,x,pol)))
+                   ),
+                 pol : expand(subst(x+y,x,pol))
+                 )
+              
+               )
+            ),
+          
+          if generic then 
+            (
+              /*
+            numOfRoots : sSubResTarskiQueryVerbose(1,expand(subst(isolDiscr[i][1],x,pol)),
+                                                   y,verbosity-1),
+                                                 */
+            numOfRoots : genPermMVar(subst(isolDiscr[i][1],x,sSRCoeff)),
+            if verbosity>=VERY then
+               print("topology) numOfRoots : ", numOfRoots),
+            rootsAtDiscr : endcons(numOfRoots,rootsAtDiscr),
+            taQ : sSubResTarskiQueryVerbose(
+                               expand(subst(isolDiscr[i][1],x,
+                                 rootSign*(j*sSRCoeff[degP+1-j]*y+coeff(sSR[degP+1-j],y,j-1)))),
+                               expand(subst(isolDiscr[i][1],x,pol)),y,verbosity-1),
+
+            numAbove : (numOfRoots+taQ-1)/2,
+            if verbosity>=EXTRA then
+               print("topology) numAbove : ", numAbove),
+            rootsAtDiscrAboveCr : endcons(numAbove,rootsAtDiscrAboveCr)
+            )
+
+          ) /* end if */
+        else /* case when the root of the dicriminant is described by an open interval */
+          (
+          if verbosity>=EXTRA then
+             print("topology) solution as an interval"),
+          j : 0,
+          flag : false,
+          while(not(flag)and j <= degP+1) do
+            (
+
+            rootSign : signAtRootVerbose(sSRCoeff[degP+1-j],
+                                         x,discr,isolDiscr[i],verbosity-1), /* sSRCoeff must be fixed with trailing zeroes */
+
+            if not(rootSign=0) then
+              flag:true
+            else
+              j : j + 1
+            ),
+          if verbosity>=VERY then
+             (
+             print("j(",i,") : ",j),
+             print("eps(",i,") : ",rootSign)
+             ),
+          jList : endcons(j,jList),
+          epsList : endcons(rootSign,epsList),
+
+          if not(ASSUME_GENERIC_POSITION) then
+            (
+            critY : -1/j * coeff(sSR[degP+1-j],y,j-1)/sSRCoeff[degP+1-j], 
+
+            if verbosity>=EXTRA then
+               print("topology) sSR_j : ", sSR[degP+1-j]),
+
+            multi : bivariateMultiplicity(critY,sSR[degP+1-j],y,x,discr,isolDiscr[i]),
+            
+            if multi<j then
+               (
+               generic:false,
+           
+               if WARNINGS then
+                 (
+                 print("topology) WARNING : Non-generic position --- multiplicity : ", 
+                        multi),
+                 
+                 print("topology) WARNING: new curve is : ", expand(subst(x+y,x,pol)))
+                 ),
+               pol : expand(subst(x+y,x,pol)),
+               coSys : coSys + 1,
+               while(not(degree(leadCoeff(pol,y),x)=0)) do
+                 (
+                 coSys : coSys + 1,
+                 if WARNINGS then
+                   (
+                   print("topology) WARNING: the function is not quasi-monomial in ", y),
+                   print("topology) WARNING: new curve is : ", expand(subst(x+y,x,pol)))
+                   ),
+                 pol : expand(subst(x+y,x,pol))
+                 )
+               )
+            ),
+
+          if generic then
+            (
+              /*
+            numOfRoots : bivariateSSubResTarskiQueryVerbose(1,pol,
+                              y,x,expand(SQUARE_FREE_ALGORITHM(discr,x)),isolDiscr[i],verbosity-1),
+                            */
+            numOfRoots : bivariateSSubResSignChanges(sSRCoeff,x,discr,isolDiscr[i]),
+            if verbosity>=VERY then
+               print("topology) numOfRoots : ", numOfRoots),
+            rootsAtDiscr : endcons(numOfRoots,rootsAtDiscr),
+
+            taQ : bivariateSSubResTarskiQueryVerbose(
+                                      rootSign*(j*sSRCoeff[degP+1-j]*y+coeff(sSR[degP+1-j],y,j-1)),
+                                      pol,y,x,expand(SQUARE_FREE_ALGORITHM(discr,x)),isolDiscr[i],
+                                      verbosity-1),
+            if verbosity>=EXTRA then
+               print("topology) Tarski query : ", taQ),
+            numAbove : (numOfRoots+taQ-1)/2,
+            if verbosity>=EXTRA then
+               print("topology) numAbove : ", numAbove),
+            rootsAtDiscrAboveCr : endcons(numAbove,rootsAtDiscrAboveCr)
+            )
+          ) /* end else */
+        ) /* end if */
+      ) /* end for */ 
+  ), /* end while */
+
+if verbosity>= EXTRA then
+   print("topology) Number of roots of the discriminant : ", length(isolDiscr)),
+if length(isolDiscr)>0 then
+  (
+    /*
+  rootsBetween : [sSubResTarskiQuery(1,subst(isolDiscr[1][1]-1,x,pol),y)],
+*/
+  rootsBetween : [genPermMVar(subst(isolDiscr[1][1]-1,x,sSRCoeff))],
+
+  for i : 1 thru length(isolDiscr)-1 do
+    (
+/*
+    rootsBetween : endcons(sSubResTarskiQuery(1,
+                             subst(intermidiatePoint(isolDiscr[i],isolDiscr[i+1],discr,x),
+                                   x,pol),y),
+                           rootsBetween)
+                         */
+
+    rootsBetween : endcons(genPermMVar(
+                              subst(intermidiatePoint(isolDiscr[i],isolDiscr[i+1],discr,x),
+                                    x,sSRCoeff)),
+                          rootsBetween)
+
+    ),
+
+/*
+  rootsBetween : endcons(sSubResTarskiQueryVerbose(1,subst(last(last(isolDiscr))+1,x,pol),
+                                                  y,verbosity-1),rootsBetween),
+*/
+  rootsBetween : endcons(genPermMVar(subst(last(last(isolDiscr))+1,x,sSRCoeff)),rootsBetween),
+  i : 1,
+  res : [rootsBetween[1] ],
+  while i<=length(isolDiscr) do
+    (
+    res : append(res,[[rootsAtDiscr[i],rootsAtDiscr[i]-rootsAtDiscrAboveCr[i]],rootsBetween[i+1]]),
+    i : i + 1
+    ),
+  return([coSys,res])
+  )
+else
+  return([coSys,[sSubResTarskiQueryVerbose(1,subst(0,x,pol),y,verbosity-1)]])
+);
+
+
+
+/* ----------------------------------------------------------- */
+/* Plotting of the topological graph of a planar curve */
+/* Very preliminary */
+
+
+getPointsOnProj(num,projX,height):=makelist([projX,i*height/(num+1)],i,1,num);
+
+
+drawPoints(ptList) :=
+  plot2d([discrete,float(ptList)],
+['style,[points, SARAG_POINT_STYLE_GENERIC]],
+[gnuplot_preamble, "set grid; set xrange[-25:25]; set yrange[-10:10]; unset key"]);
+
+
+
+
+drawPointsOnProj(num,projX,height) :=
+  drawPoints(getPointsOnProj(num,projX,height));
+
+
+
+getPointsOnCrit(num,pos,projX,height):=
+  block([i,crit,nonCritBelow,nonCritAbove],
+  nonCritBelow : [],
+  nonCritAbove : [],
+  for i : 1 thru num do
+    if i=pos then
+      crit : [projX,i*height/(num+1)]
+    else
+      if i<pos then
+        nonCritBelow : append(nonCritBelow,[[projX,i*height/(num+1)]])
+      else
+        nonCritAbove : append(nonCritAbove,[[projX,i*height/(num+1)]]),
+  return([crit,nonCritBelow,nonCritAbove])
+  );
+      
+
+getTopologyPoints(tpg) :=
+  block([i,j,nonCritPts,critPts,ptsOnCritProj,previous,jump,newNonCritPts,lastCritPts,lastNonCritPts,
+         correct,newPtsAtInd,ptsAtInf,lineSegsAtInf],
+   nonCritPts : [],
+   lastCritPts : [0,[],[]],
+   lastNonCritPts : [],
+   critPts : [],
+   ptsOnCritProj : [0,[],[]],
+   lineSegs : [],
+
+
+/* It checks the form of the input */
+   i : 1,
+   correct : true,
+   while correct and i<= length(tpg) do
+     (
+     
+     if evenp(i) then       
+       (
+       if not(listp(tpg[i])) then
+          (
+          correct : false
+          )
+       else
+         if not(length(tpg[i])=2) or
+            not(numberp(first(tpg[i]))) or
+            not(numberp(second(tpg[i]))) then
+           (
+           
+           correct : false
+           )
+       )
+     else
+       (
+       if not(numberp(tpg[i])) then         
+         correct : false
+         
+       ),
+     i : i + 1
+     ), /* end of check of the input format */
+
+   if not(correct) then
+     (
+     return(false)
+     )
+   else
+   (
+   ptsAtInf : [],
+   lineSegsAtInf : [],
+   if PLOT_AT_INFINITY then
+    (
+    newPtsAtInf : getPointsOnProj(tpg[1],0,PLOT_HEIGHT),
+    ptsAtInf : append(ptsAtInf,newPtsAtInf),
+    newNonCritPts : getPointsOnProj(tpg[1],1*PLOT_SPACING,PLOT_HEIGHT),
+    for j : 1 thru tpg[1] do
+      lineSegsAtInf : append(lineSegsAtInf,[[discrete,
+                                   float([newPtsAtInf[j],
+                                          newNonCritPts[j]    ])]])
+      
+    
+    ),
+   for i : 1 thru length(tpg) do
+    (
+    if oddp(i) then /* non critical points */
+      (
+
+      newNonCritPts : getPointsOnProj(tpg[i],i*PLOT_SPACING,PLOT_HEIGHT),
+      nonCritPts : append(nonCritPts,newNonCritPts),
+
+      if not(ptsOnCritProj = [0,[],[]]) then
+        (
+
+        jump : length(newNonCritPts)-length(ptsOnCritProj[2])-length(ptsOnCritProj[3]),
+        
+      
+        for j : 1 thru length(ptsOnCritProj[2]) do
+          lineSegs : append(lineSegs,[[discrete,
+                                       float([ptsOnCritProj[2][j],
+                                              newNonCritPts[j]])]]),
+
+        for j : 1 thru length(ptsOnCritProj[3]) do
+          lineSegs : append(lineSegs,[[discrete,
+                                       float([ptsOnCritProj[3][j],
+                                              newNonCritPts[j+jump+length(ptsOnCritProj[2])]])]]),
+
+        for j : 1 thru jump do
+          lineSegs : append(lineSegs,[[discrete,
+                                       float([ptsOnCritProj[1],newNonCritPts[j+length(ptsOnCritProj[2])]])]])
+
+        )
+
+
+      )
+    else /* critical points */
+      (
+     
+
+      ptsOnCritProj : getPointsOnCrit(tpg[i][1],tpg[i][2],i*PLOT_SPACING,PLOT_HEIGHT),
+      jump : length(newNonCritPts)-(tpg[i][1]-1),
+
+
+      
+      for j : 1 thru length(ptsOnCritProj[3]) do
+          (        
+          lineSegs : append(lineSegs,[[discrete,
+                                       float([newNonCritPts[j+jump+length(ptsOnCritProj[2])],
+                                              ptsOnCritProj[3][j]])]])
+        
+          ),
+      
+      for j : 1 thru length(ptsOnCritProj[2]) do
+          lineSegs : append(lineSegs, [[discrete,
+                                       float([newNonCritPts[j],ptsOnCritProj[2][j]])]]),
+
+      for j : 1 thru jump do
+          lineSegs : append(lineSegs,[[discrete,
+                                      float([newNonCritPts[j+length(ptsOnCritProj[2])],
+                                             ptsOnCritProj[1]])]]),
+            
+
+      critPts : append(critPts,[ptsOnCritProj[1]]),
+      nonCritPts : append(nonCritPts,ptsOnCritProj[2],ptsOnCritProj[3])
+      )
+    ), /* end for */
+    if PLOT_AT_INFINITY then
+    (
+    newPtsAtInf : getPointsOnProj(tpg[length(tpg)],(length(tpg)+1)*PLOT_SPACING,PLOT_HEIGHT),
+    ptsAtInf : append(ptsAtInf,newPtsAtInf),
+
+    newNonCritPts : getPointsOnProj(tpg[length(tpg)],length(tpg)*PLOT_SPACING,PLOT_HEIGHT),
+    for j : 1 thru tpg[length(tpg)] do
+      lineSegsAtInf : append(lineSegsAtInf,[[discrete,
+                                             float([newPtsAtInf[j],
+                                             newNonCritPts[j]    ])]])
+      
+    
+
+
+    )
+  
+  ),
+
+/* TO BE REMOVED
+nonCritPts : append(nonCritPts,ptsAtInf),
+lineSegs : append(lineSegs,lineSegsAtInf),
+*/
+
+   return([nonCritPts,critPts,lineSegs,ptsAtInf,lineSegsAtInf])
+   );
+
+getCritPoint(critLine,projX,height) :=
+  [projX,critLine[2]*height/critLine[1]];
+
+drawTopology(tpg) :=
+  drawTopologyVerbose(tpg,DEFAULT_VERBOSITY);
+
+drawTopologyVerbose(tpg,verbosity) :=
+  block([nonCritPoints,critPoints,topologyPoints,style,preamble,i,
+         leftMost,rightMost,top,bottom,ptsAtInf],
+    topologyPoints : getTopologyPoints(tpg),
+    if topologyPoints=false then
+      (
+      print("Wrong input format"),
+      return(false)
+      )
+    else
+     (
+     nonCritPoints : topologyPoints[1],
+     critPoints : topologyPoints[2],
+     lineSegs : topologyPoints[3],
+
+/* DEBUGGING */
+/*
+nonCritPoints : append(nonCritPoints,topologyPoints[4]),
+*/
+     lineSegs : append(lineSegs,topologyPoints[5]),
+
+     ptsAtInf : topologyPoints[4],
+
+     if verbosity>= VERY then
+       (
+       print("drawTopology) critical points : ", critPoints),
+       print("drawTopology) non-critical points : ", nonCritPoints)
+       ),
+     if verbosity>= EXTRA then
+       print("drawTopology) line segments : ", lineSegs),
+     
+     leftMost : -2,
+     rightMost : PLOT_SPACING*length(tpg)+3,
+     bottom : -1,
+     top : PLOT_HEIGHT+1,
+     preamble : concat(PLOT_STYLE, "set xrange[-1:",rightMost,
+                       "]; set yrange[-1:",PLOT_HEIGHT,"];"), 
+ 
+  
+     if verbosity>= NORMAL then
+       print("preamble : ", preamble),
+
+     style : [],
+     for i : 1 thru length(lineSegs) do
+        style : cons([lines, 1, SARAG_LINE_COLOR],style),
+
+     if not(PS_OUTPUT) then 
+       if critPoints=[] then
+         plot2d(append([[discrete,float(nonCritPoints)]],
+                       lineSegs),
+                  cons('style,cons([points, SARAG_POINT_SIZE, SARAG_POINT_STYLE_NONCRITICAL],style)),
+                  [gnuplot_preamble, preamble])
+       else
+         if nonCritPoints = [] then
+            plot2d(append([[discrete,float(critPoints)]],
+                          lineSegs),
+                   cons('style,cons([points, SARAG_POINT_SIZE, SARAG_POINT_STYLE_CRITICAL],style)),
+                   [gnuplot_preamble,preamble])
+         else
+         plot2d(append([[discrete,float(nonCritPoints)],
+                        [discrete,float(critPoints)]],
+                       lineSegs),
+                  cons('style,append([[points, SARAG_POINT_SIZE, SARAG_POINT_STYLE_NONCRITICAL], 
+                                      [points, SARAG_POINT_SIZE, SARAG_POINT_STYLE_CRITICAL]],style)),
+                  [gnuplot_preamble,preamble])
+     else
+       if critPoints=[] then
+         plot2d(append([[discrete,float(nonCritPoints)]],
+                       lineSegs),
+                  cons('style,cons([points, SARAG_POINT_SIZE, SARAG_POINT_STYLE_NONCRITICAL],style)),  
+                  [gnuplot_preamble, preamble],
+                  [gnuplot_term, ps], [gnuplot_out_file, PS_OUTPUT_FILE_NAME])
+       else
+         if nonCritPoints = [] then
+            plot2d(append([[discrete,float(critPoints)]],
+                          lineSegs),
+                   cons('style,cons([points, SARAG_POINT_SIZE, SARAG_POINT_STYLE_CRITICAL],style)),
+                   [gnuplot_preamble,preamble],
+                   [gnuplot_term, ps], [gnuplot_out_file, PS_OUTPUT_FILE_NAME])
+         else
+         plot2d(append([[discrete,float(nonCritPoints)],
+                        [discrete,float(critPoints)]],
+                       lineSegs),
+                  cons('style,append([[points, SARAG_POINT_SIZE, SARAG_POINT_STYLE_NONCRITICAL], 
+                                      [points, SARAG_POINT_SIZE, SARAG_POINT_STYLE_CRITICAL]],style)),
+                  [gnuplot_preamble,preamble],
+                  [gnuplot_term, ps], [gnuplot_out_file, PS_OUTPUT_FILE_NAME])
+     ),
+
+return(true)
+);
+

@@ -1,0 +1,48 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Demonstrate the use of Taylor series in CTENSOR
+ *
+ */
+
+("Define a metric that is a perturbation of the Minkowski metric")$
+if get('ctensor,'version)=false then load(ctensor);
+ratfac:true;
+derivabbrev:true;
+ct_coords:[t,r,theta,phi];
+lg:matrix([-1,0,0,0],[0,1,0,0],[0,0,r^2,0],[0,0,0,r^2*sin(theta)^2]);
+h:matrix([h11,0,0,0],[0,h22,0,0],[0,0,h33,0],[0,0,0,h44]);
+("Spherically symmetric metric depends on the scalar field l")$
+depends(l,r);
+lg:lg+l*h;
+("First, we compute the Einstein tensor")$
+cmetric(false);
+("Be patient, this will take a while...")$
+einstein(false);
+("And it has far too many terms")$
+ntermst(ein);
+("Now let's drop terms higher order in l")$
+ctayswitch:true;
+ctayvar:l;
+ctaypov:1;
+ctaypt:0;
+("We now explicitly recompute the Christoffel symbols and the Ricci tensor")$
+christof(false);
+ricci(false);
+("So that we can recompute the Einstein tensor")$
+einstein(false);
+("Which now has far fewer terms:")$
+ntermst(ein);
+("The truncated terms are small enough for display")$
+for i thru dim do (ein[i,i]:ratsimp(ein[i,i]),ldisplay(ein[i,i]));
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

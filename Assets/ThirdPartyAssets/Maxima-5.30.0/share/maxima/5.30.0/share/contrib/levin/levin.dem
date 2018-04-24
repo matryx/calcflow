@@ -1,0 +1,52 @@
+/*               COPYRIGHT NOTICE
+ 
+Copyright (C) 2006-2007 Michel Van den Bergh
+ 
+This program is free software; you can redistribute
+it and/or modify it under the terms of the
+GNU General Public License as published by
+the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+ 
+This program is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details at
+http://www.gnu.org/copyleft/gpl.html
+*/
+fpprec:16$
+/* load necessary file */ 
+load("levin.mac")$
+ratprint:false$
+/* do a random test (Andrej Vodopivec) */
+approx:bfloat(bflevin_u_sum(n/((3*n+1)*(2*n+1)^2),n,1));
+exact:-(12*sqrt(3)*log(3)-16*sqrt(3)*log(2)-sqrt(3)*%pi^2+4*%pi)/(8*sqrt(3))$
+bfloat(approx-exact);
+/* increase precision */ 
+fpprec:50$
+approx:bfloat(bflevin_u_sum(n/((3*n+1)*(2*n+1)^2),n,1));
+bfloat(approx-exact);
+/* The sum sum(1/n-log(1+1/n),n,1,inf)  computes the
+Euler-Mascheroni constant */
+fpprec:16$
+levin_gamma:bflevin_u_sum(1/n-log(1+1/n),n,1);
+bfloat(levin_gamma-%gamma);
+/* a series with zero terms */
+pi4(k):=if oddp(k) then (-1)^((k-1)/2)/k else 0$
+/* we need to protect pi4(k) against premature evaluation */
+bfloat(bflevin_u_sum('(pi4(k)),k,1)-%pi/4);
+/* load package to compute zeta function numerically */
+load(bffac)$
+float2bf:true$
+/* approximation to the zeta function */
+levin_zeta(s):=levin_u_sum(1/n^s,n,1,5)$
+/* Levin can assign a meaningful value to some divergent series. 
+   Explanation : levin_zeta(s) is an approximate analytic continuation of  
+   zeta(s) for Re s>1. Hence it may be expected to be close to zeta(s) for 
+   (some) s with Re s<1 (by definition zeta(s) is analytic on the complex 
+   plane with 1 excluded).
+*/
+plot2d([levin_zeta(s),zeta(s)],[s,-2.0,2.0],[y,-10.0,10.0])$
+
+

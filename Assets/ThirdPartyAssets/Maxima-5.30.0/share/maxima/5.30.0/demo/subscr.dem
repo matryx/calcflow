@@ -1,0 +1,25 @@
+/* file: subscr.dem   */
+/* indices problem    */
+/* This file demonstates the subscript mapping capability in MACSYMA which */
+/* useful for manipulating matrices, arrays, and arbitrary dimension and   */
+/* order data objects constructed as lists of lists of lists...            */
+
+subscrmap:true				/* this enables subscript mapping */;
+a[[x1,x2],[y1,y2]]			/* map a[x,x] over the subscripts */;
+m:matrix([a,b],[c,d])			/* enter a matrix */;
+m[[1,1,1],[[1,1],[2,2]]]		/* create a new structure from m */;
+af[i,j]:=x^(i+j)			/* define a generating function */;
+iota(n):=				/* index list generator like apl */
+    block([l], l:[],
+          for i:1 thru n do l:endcons(i,l),
+	  l)$
+il:iota(8)				/* generate an index vector 8 long */;
+af[il,il],eval				/* construct a structure */;
+apply(matrix,%)				/* make it a matrix */;
+m[[2,1]],eval;
+apply(matrix,%);
+m[2]					/* select a row */;
+matrix(m[[1,2],[1]]),eval		/* select a column */;
+matrix(m[[2,1],''(iota(length(m[1])))]),eval /* select all of one dimension */;
+a['[1,2]]				/* use a list as a hashed ary subscript*/;
+arr[[1,2,3,4]]::0.0			/* assignment.  note use of ::      */;

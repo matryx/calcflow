@@ -1,0 +1,276 @@
+/* ODE tests */
+
+kill(all);
+done;
+
+/* Trivial ode - bug 866510 */
+ode2('diff(y,x),y,x);
+y=%c;
+
+/* Examples from "The Maxima Book" */
+
+ode2(x^2*'diff(y,x)+3*x*y=sin(x)/x, y, x);
+y = (%c-cos(x))/x^3;
+ic1(%, x=1, y=1);
+y = -((cos(x)-cos(1)-1)/x^3);
+method;
+linear;
+
+soln:ode2('diff(y,x,2) + y = 4*x, y, x);
+y = %k1*sin(x) + %k2*cos(x) + 4*x;
+method;
+variationofparameters;
+ic2(soln, x=0, y=1, 'diff(y,x)=3);
+y = -sin(x)+cos(x)+4*x;
+bc2(soln, x=0, y=3, x=2, y=1);
+y = -((3*cos(2)+7)*sin(x)/sin(2)) + 3*cos(x) + 4*x;
+
+ode2((3*x^2+4*x+2)=(2*y-1)*'diff(y,x), y, x);
+y^2-y = x^3+2*x^2+2*x+%c;
+method;
+separable;
+
+ode2(x^2*cos(x*y)*'diff(y,x) + (sin(x*y)+x*y*(cos(x*y)))=0, y, x);
+x*sin(x*y)=%c;
+method;
+exact;
+
+ode2( (2*x*y-exp(-2*y))*'diff(y,x)+y=0, y, x);
+x*exp(2*y) - log(y) = %c;
+method;
+exact; 
+intfactor;
+exp(2*y)/y;
+
+ode2( 'diff(y,x)=(y/x)^2+2*(y/x), y, x);
+-((x*y+x^2)/y) = %c;
+method;
+exact;
+
+ode2( 'diff(y,x)+(2/x)*y=(1/x^2)*y^3, y, x);
+y = 1/(sqrt( 2/(5*x^5) + %c)*x^2);
+method;
+bernoulli;
+odeindex;
+3;
+
+ode2( 'diff(y,x,2)-3*'diff(y,x)+2*y=0, y, x);
+y = %k1*exp(2*x) + %k2*exp(x);
+method;
+constcoeff;
+
+ode2( 'diff(y,x,2)-4*'diff(y,x)+4*y=0, y, x);
+y = (%k2*x + %k1)*exp(2*x);
+method;
+constcoeff;
+
+ode2(x^2*'diff(y,x,2)+x*'diff(y,x)-y=0, y, x);
+y=%k2*x-%k1/(2*x);
+method;
+exact;
+
+ode2( x^2*'diff(y,x,2)+4*x*'diff(y,x)+2*y=0, y, x);
+y=%k1/x+%k2/x^2;
+method;
+exact; /*euler*/
+
+ode2( x^2*'diff(y,x,2)+5*x*'diff(y,x)+4*y=0, y, x);
+y=(%k2*log(x)+%k1)/x^2;
+method;
+euler;
+
+ode2( x^2*'diff(y,x,2)+x*'diff(y,x)+(x^2-1/4)*y=0, y, x);
+y=(%k1*sin(x)+%k2*cos(x))/sqrt(x);
+method;
+bessel;
+
+ode2( x^2*'diff(y,x,2)+x*'diff(y,x)+(x^2-4)*y=0, y, x);
+y=%k1*bessel_j(2,x)+%k2*bessel_y(2,x);
+method;
+bessel;
+
+ode2( (x-1)^2*'diff(y,x,2)+(x-1)*'diff(y,x)+((x-1)^2-4)*y=0, y, x);
+y=%k1*bessel_j(2,x-1)+%k2*bessel_y(2,x-1);
+method;
+bessel;
+
+ode2( x^2*'diff(y,x,2)+x*'diff(y,x)+(x^2-1/9)*y=0, y, x);
+y=bessel_j(-1/3,x)*%k2+bessel_j(1/3,x)*%k1;
+method;
+bessel;
+
+/* Bug report 2876387: asks if obvious non-integers are integers */ 
+(declare(n,integer),ode2(x^2*'diff(y,x,2)+x*'diff(y,x)+(x^2-n^2)*y=0,y,x));
+y = %k2*bessel_y(n,x)+%k1*bessel_j(n,x);
+(remove(n,integer),method);
+bessel;
+
+(declare(v,noninteger),ode2(x^2*'diff(y,x,2)+x*'diff(y,x)+(x^2-v^2)*y=0,y,x));
+y = %k1*bessel_j(v,x)+%k2*bessel_j(-v,x);
+(remove(v,noninteger),method);
+bessel;
+ 
+ode2(x^2*'diff(y,x,2)+x*'diff(y,x)+(x^2-3)*y=0,y,x);
+y = %k1*bessel_j(sqrt(3),x)+%k2*bessel_j(-sqrt(3),x);
+method;
+bessel;
+
+ode2( 'diff(y,x,2)+2*'diff(y,x)+y=exp(x), y, x);
+y=exp(x)/4+(%k2*x+%k1)*exp(-x);
+method;
+variationofparameters;
+yp;
+exp(x)/4;
+
+ode2( x*'diff(y,x,2)+('diff(y,x))^2=0, y, x);
+/* y='integrate(1/(log(x)+%k1),x)+%k2;
+   Because of adding more integrals for the power function we get a result
+   12/2008 */
+y=%k2-expintegral_e(1,-log(x)-%k1)*%e^-%k1;
+method;
+freeofy;
+
+ode2( y*'diff(y,x,2)+('diff(y,x))^2=0, y, x);
+y^2/(2*%k1)=x+%k2;
+method;
+freeofx;
+
+eq: 'diff(y,x,2)+x*'diff(y,x)+exp(-x^2)*y=0;
+'diff(y,x,2)+x*'diff(y,x,1)+%e^-x^2*y = 0;
+ans:ode2(eq,y,x);
+y = %k1*sin((1/2) * sqrt(2)*sqrt(%pi)*erf(x/sqrt(2)))+%k2*cos((1/2) * sqrt(2)*sqrt(%pi)*erf(x/sqrt(2)));
+is(ratsimp(ev(eq,ans,diff)));
+true;
+method;
+xformtoconstcoeff;
+
+eq:x*'diff(y,x,2)+(x^2-1)*'diff(y,x,1)+x^3*y=0;
+x*'diff(y,x,2)+(x^2-1)*'diff(y,x,1)+x^3*y=0;
+ans:ode2(eq,y,x);
+y=%e^-(x^2/4)*(%k1*sin(sqrt(3)*x^2/4)+%k2*cos(sqrt(3)*x^2/4));
+is(ratsimp(ev(eq,ans,diff)));
+true;
+method;
+xformtoconstcoeff;
+
+/* Tests of desolve */
+
+eqn1:'diff(f(x),x) = sin(x)+'diff(g(x),x);
+'diff(f(x),x,1) = 'diff(g(x),x,1)+sin(x);
+eqn2:'diff(g(x),x,2) = 'diff(f(x),x)-cos(x);
+'diff(g(x),x,2) = 'diff(f(x),x,1)-cos(x);
+desolve([eqn1,eqn2],[f(x),g(x)]);
+[f(x)=%e^x*(at('diff(g(x),x,1),x = 0))-at('diff(g(x),x,1),x = 0)+f(0),g(x)=%e^x*(at('diff(g(x),x,1),x=0))-at('diff(g(x),x,1),x = 0)+cos(x)+g(0)-1];
+atvalue('diff(g(x),x),x = 0,a);
+a;
+atvalue(f(x),x = 0,1);
+1;
+desolve([eqn1,eqn2],[f(x),g(x)]);
+[f(x) = a*%e^x-a+1,g(x) = cos(x)+a*%e^x-a+g(0)-1];
+remove(f,atvalue,g,atvalue);
+done;
+
+atvalue('diff(g(x),x),x = 0,a);
+a;
+atvalue(f(x),x = 0,1);
+1;
+desolve([eqn1,eqn2],[f(x),g(x)]);
+[f(x) = a*%e^x-a+1,g(x) = cos(x)+a*%e^x-a+g(0)-1];
+
+eqn3: 'diff(f(x),x,2)+f(x)=2*x;
+'diff(f(x),x,2)+f(x)=2*x;
+desolve(eqn3,f(x));
+''(f(x) = sin(x)*(at('diff(f(x),x,1),x = 0)-2)+f(0)*cos(x)+2*x);
+
+/* Examples mentioned in bug report [ 1063454 ] bug in ode2
+ * First one was reported to fail in CMUCL with "run out of heap" message.
+ * Others were reported to be OK. Put them all here for good measure.
+ */
+
+(ode2 ('diff(y, t, 2) + 'diff(y, t) + y - sin(t), y, t),
+ rhs(%%), ratsimp (diff(%%, t, 2) + diff(%%, t) + %% - sin(t)));
+0;
+
+(ode2 ('diff(y, t, 2) + 'diff(y, t) + 2*y - sin(t), y, t),
+ rhs(%%), ratsimp (diff(%%, t, 2) + diff(%%, t) + 2*%% - sin(t)));
+0;
+
+(ode2 ('diff(y, t, 2) + 'diff(y, t) + y - exp(%i*t), y, t),
+ rhs(%%), ratsimp (diff(%%, t, 2) + diff(%%, t) + %% - exp(%i*t)));
+0;
+
+/* bug report 1063454 claims "maxima gets stuck" on the following */
+(integrate (my_integrand : exp(t/2) * sin(t) * sin(sqrt(3) * t/2), t),
+ ratsimp (exponentialize (diff (%%, t) - my_integrand)));
+0;
+
+/* Examples to show that ic2 works as expected after revision 1.5 of ode.mac
+ */
+
+'diff(y,x,2)+y*('diff(y,x,1))^3 = 0;
+'diff(y,x,2)+y*('diff(y,x,1))^3 = 0;
+
+soln:ode2(%,y,x);
+(y^3+6*%k1*y)/6 = x+%k2;
+
+ratsimp(ic2(soln, x=0, y=0, 'diff(y,x,1)=2));
+(y^3+3*y)/6=x;
+
+ratsimp(ic2(soln, x=0, y=0, 'diff(y,x,1)=1));
+(y^3+6*y)/6 = x$
+
+/* This is the example of the bug report 
+ * ID:2881021 - ic2 and bc2 may return incorrect results (solution suggeste)
+ */
+
+ratsimp(ic2(soln, x=0, y=1, 'diff(y,x,1)=2));
+y^3/6 = (6*x+1)/6;
+
+/* These examples show that ic2 works for a list of equation and nested
+ * lists of equation.
+ */
+
+ratsimp(ic2([soln, soln, soln], x=0, y=0, 'diff(y,x,1)=2));
+[(y^3+3*y)/6=x, (y^3+3*y)/6=x, (y^3+3*y)/6=x];
+
+ratsimp(ic2([soln, [soln, soln]], x=0, y=0, 'diff(y,x,1)=2));
+[(y^3+3*y)/6=x, [(y^3+3*y)/6=x, (y^3+3*y)/6=x]];
+
+/* Bug report ID: 1839088 - ic2 fails with division by 0
+ * Maxima no longer gives an error, but does not find the solution.
+ */
+
+ode2(y*'diff(y,x,2)=a, y, x);
+[sqrt(%pi)*%i*%e^-%k1*erf(%i*sqrt(a*log(y)+%k1*a)/sqrt(a))/(sqrt(2)*sqrt(a))
+   = x+%k2,
+ -sqrt(%pi)*%i*%e^-%k1*erf(%i*sqrt(a*log(y)+%k1*a)/sqrt(a))/(sqrt(2)*sqrt(a))
+   = x+%k2];
+
+ic2(%,x=0,y=b,diff(y,x)=0);
+[];
+
+/* Bug report ID: 2997443 - ic2 fails
+ * Maxima no longer gives an error, but does not find the solution.
+ * The solution of ic2 could be: y=1/20*(sqrt(160*x+1)-1)
+ */
+
+ode2('diff(x,t,2)+5*'diff(x,t)^3, x, t);
+[x = %k2-2*1/sqrt(1/(t+%k1))/sqrt(10),x = 2*1/sqrt(1/(t+%k1))/sqrt(10)+%k2];
+
+ic2(%,t=0,x=0,'diff(x,t)=4);
+[];
+
+/* Bug report ID: 1789213 - ic1 for solution containing indefinite integral
+ * More general implementation of ic1, which handles a noun form of an 
+ * integral correctly. The result simplifies correctly, if we define
+ * a function and reevaluate the result.
+ */
+sol: ode2(kappa(p) = -'diff(V, p) / V, V, p);
+V = %c*%e^-'integrate(kappa(p),p);
+
+ic1(sol, p = p0, V = V0);
+V = V0*%e^('at('integrate(kappa(p),p),[p = p0,V = V0])
+          -'integrate(kappa(p),p));
+
+(kappa(x):=x, ev(%,nouns));
+V = %e^(p0^2/2-p^2/2)*V0;

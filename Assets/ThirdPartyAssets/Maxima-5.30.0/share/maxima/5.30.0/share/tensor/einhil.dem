@@ -1,0 +1,103 @@
+/* Copyright (C) 2008 Viktor T. Toth <http://www.vttoth.com/>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Deriving the Einstein field equations from the Einstein-Hilbert action
+ *
+ */
+("Deriving the Einstein field equations in FLRW cosmology" )$
+if get('ctensor,'version)=false then load(ctensor);
+if get('itensor,'version)=false then load(itensor);
+("The first step is to construct a symmetrized Riemann tensor.")$
+("For this, we employ an auxiliary symmetrized metric.")$
+remsym(g,2,0);
+remsym(g,0,2);
+remsym(gg,2,0);
+remsym(gg,0,2);
+remcomps(gg);
+imetric(gg);
+icurvature([a,b,c],[e])*gg([d,e],[])$
+contract(rename(expand(%)))$
+%,ichr2$
+contract(rename(expand(%)))$
+canform(%)$
+contract(rename(expand(%)))$
+("We now reexpress gg by symmetrizing g using kdels and simplify:")$
+components(gg([a,b],[]),kdels([a,b],[u,v])*g([u,v],[])/2);
+components(gg([],[a,b]),kdels([u,v],[a,b])*g([],[u,v])/2);
+%th(5),gg$
+("Some of the following simplifications may take some time...")$
+contract(rename(expand(%th(2))))$
+contract(canform(%))$
+("Now we can switch to the real metric:")$
+imetric(g);
+contract(rename(expand(%th(3))))$
+("At last, we got the covariant Riemann tensor.")$
+remcomps(R);
+components(R([a,b,c,d],[]),%th(3));
+("What we really need, though, is the curvature scalar:")$
+g([],[a,b])*R([a,b,c,d])*g([],[c,d])$
+contract(rename(canform(%)))$
+contract(rename(canform(%)))$
+components(R([],[]),%);
+("Before going further, we establish the symmetry properties of g.")$
+decsym(g,2,0,[sym(all)],[]);
+decsym(g,0,2,[],[sym(all)]);
+("Now we can construct the Einstein-Hilbert action.")$
+ishow(1/(16*%pi*G)*((2*L+'R([],[])))*sqrt(-determinant(g)))$
+L0:%,R$
+("We construct and simplify the 2nd order Euler-Lagrange equation:")$
+canform(contract(canform(rename(contract(expand(diff(L0,g([],[m,n]))-idiff(diff(L0,g([],[m,n],k)),k)+idiff(rename(idiff(contract(diff(L0,g([],[m,n],k,l))),k),1000),l)))))))$
+ishow(e([m,n],[])=canform(%*16*%pi/sqrt(-determinant(g))))$
+("We build a ctensor program to calculate tensor components:")$
+EQ:ic_convert(%th(2))$
+("Now we set up the FLRW metric of cosmology:")$
+ct_coords:[t,r,u,v];
+lg:ident(4);
+lg[2,2]:-a^2/(1-k*r^2);
+lg[3,3]:-a^2*r^2;
+lg[4,4]:-a^2*r^2*sin(u)^2;
+dependencies(a(t));
+cmetric();
+derivabbrev:true;
+christof(false);
+("We can at last evaluate the Euler-Lagrange equation...")$
+e:zeromatrix(4,4);
+("This is definitely going to take a little time...")$
+ev(EQ);
+("...and obtain the Einstein tensor for cosmology.")$
+expand(radcan(ug.e));
+("What about the spherically symmetric case?")$
+lg:ident(4);
+lg[1,1]:B;
+lg[2,2]:-A;
+lg[3,3]:-r^2;
+lg[4,4]:-r^2*sin(u)^2;
+kill(dependencies);
+dependencies(A(r),B(r));
+cmetric();
+christof(false);
+e:zeromatrix(4,4);
+("We re-evaluate the Euler-Lagrange equation. Be patient...")$
+ev(EQ);
+E:expand(radcan(ug.e));
+("In a vacuum solution, E should be zero. Let's solve for it!")$
+exp:findde(E,2);
+solve(ode2(exp[1],A,r),A);
+%,%c=-2*M;
+a:%[1],%c=-2*M;
+ode2(ev(exp[2],a),B,r);
+b:ev(%,%c=rhs(solve(rhs(%)*rhs(a)=1,%c)[1]));
+("The solution must be consistent with the third equation")$
+factor(ev(ev(exp[3],a,b),diff));
+("Finally, we obtain the Schwarzschild-de Sitter metric")$
+expand(ev(lg,a,b));
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

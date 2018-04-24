@@ -1,0 +1,43 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/PDEs/heat.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+load(ndiff)$
+/* ---------- Partial Differential Equations ---------- */
+/* This is the heat equation */
+heat: 'diff(u, t) - 'diff(u, x, 2) = 0;
+/* This is the similarity form of the proposed solution */
+s: f(x/sqrt(t))/sqrt(t);
+/* Substitute s into the heat equation */
+subst(u = s, heat)$
+ev(%, diff);
+/* Change to the similarity variable z = x/sqrt(t) */
+subst(x = z*sqrt(t), %);
+/* Combine over a common denominator */
+ratsimp(%);
+/* Eliminate the denominator */
+% * denom(lhs(%));
+/* Rewrite the differential equation in MACSYMA's normal notation */
+convert_to_de(%);
+/* Now, solve the ordinary differential equation */
+ode2(%, f(z), z);
+/* Finally, transform back to the original variables */
+'s = subst(x/sqrt(t), z, rhs(%))/sqrt(t);
+/* If we set %k1 = 0 and %k2 = 1/(2 sqrt(pi)) in the previous expression,
+   we will obtain the usual fundamental solution of the heat equation */
+subst([%k1 = 0, %k2 = 1/(2*sqrt(%pi))], %);
+/* ---------- Quit ---------- */
+quit();

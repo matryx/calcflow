@@ -1,0 +1,22 @@
+/* written by Furuya <go.maxima@gmail.com> 
+#  This program is free software; you can redistribute it and/or modify        
+#  it under the terms of the GNU General Public License as published by        
+#  the Free Software Foundation; either version 2 of the License, or           
+#  (at your option) any later version.                
+*/
+
+/* need to do load("diag") */
+/* poisson braket operator */
+
+p_braket(_f,_g):= block([_x,_a,_b,_j,_jj:[],basis ],
+	mode_declare([_x,_a,_b],any),
+	basis:[],
+	for i:1 thru dim do (
+	basis:endcons(basis[i],basis)
+	),
+	_x:coefmatrix([d(_f)],basis),
+	_j:matrix([0,1],[-1,0]),
+	for i:1 thru dim/2 do (
+	_jj:cons(_j,_jj)),
+	_b:(_x.diag(_jj)).basis,
+	inner(d(_g),_b));

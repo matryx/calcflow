@@ -1,0 +1,380 @@
+/* Various tests of TeX output. Run it via batch("tests/rtest_tex.mac").
+ * This program is not organized (at present) in actual result -- expected result pairs.
+ */
+ 
+latex0 (s) :=
+    (print ("\\documentclass{article}"),
+    print (concat ("\\title{", s, "}")),
+    print ("\\author{by Maxim A.}"),
+    print ("\\begin{document}"),
+    print ("\\maketitle"));
+
+latex1 () := print ("\\end{document}");
+
+tex_text (s) := block ([linel: 2^16], print (s));
+
+/* These declarations must precede the first expression in which they occur.
+ * Maxima doesn't know how to parse "a foo b" in with_stdout (... infix("foo"), a foo b, ...).
+ */
+(prefix ("fooprefix"), infix ("implies"), infix ("iff"), nary ("foonary"),
+ postfix ("foopostfix"), matchfix ("<<", ">>"), nofix ("foonofix"));
+
+'((aa or bb) and not (cc or dd));
+
+with_stdout ("tmp-rtest-1.tex",
+    (latex0 ("Maxima \\TeX\\ test page"),
+
+    tex_text ("\\subsection*{Symbols and subscripts}"),
+    tex (riffraff),
+    tex (riff_raff),
+    tex ([inf, minf, true, false, done]),
+    tex (%pi + %e + %i + %gamma),
+    tex ('gamma(x)),
+    tex ([alpha, beta, verbify (gamma), delta, epsilon, zeta, eta, theta, iota, kappa, lambda, mu]),
+    tex ([nu, xi, omicron, pi, rho, sigma, tau, upsilon, phi, chi, psi, omega]),
+    tex ([Alpha, Beta, Gamma, Delta, Epsilon, Zeta, Eta, Theta, Iota, Kappa, Lambda, Mu]),
+    tex ([Nu, Xi, Omicron, Pi, Rho, Sigma, Tau, Upsilon, Phi, Chi, Psi, Omega]),
+    tex (A1 + B2 + C3 + A_1 + B_2 + C_3),
+    tex (A1a + B2b + C3c + A1_a + B2_b + C3_c),
+    tex (Foo[1] + BAR[2] + baz[3]),
+    tex (Mumble[i,j] + blurf[a][b]),
+    tex (\2F1 + ?lisp_symbol),
+    tex (embedded\$dollar + embedded%percent + embedded_underscore + embedded\&ampersand),
+
+    /* Maxima tex function doesn't escape special characters in symbol names,
+     * so don't bother with these unless TEX-STRIPDOLLAR is revised or something like that.
+     * tex (int\+float + int\*float + int\@float),
+     * tex (?\*lisp\-symbol\-2\*),
+     */
+
+    tex_text ("\\subsection*{Strings}"),
+    tex ("riff"),
+    tex ("Riff Raff"),
+    stringdisp: true,
+    tex ("Riff Raff (enclosed in `quote marks')"),
+    stringdisp: false,
+    tex ("String containing
+a newline."),
+    tex ("String containing \\ldots \\\"Oyster sh\\'ell \\ldots some \\TeX\\ commands."),
+    tex ("Some characters \\{ \\ \\^ % _ $ \\# \\~ & \\} which might be special to \\TeX\\ and \\LaTeX."),
+    tex_text ("String containing \\ldots \\\"Oyster sh\\'ell \\ldots some \\TeX\\ commands. Some characters \\{ \\ \\^ \\% \\_ \\$ \\# \\~ \\& \\} which might be special to \\TeX\\ and \\LaTeX. (Same as the preceding example, but output {\\it via} {\\bf print} instead of {\\bf tex}; should make a paragraph instead of an equation.)"),
+
+    tex_text ("\\subsection*{Different kinds of numbers}"),
+    ev (tex (1 + 1/1 + 1.0 + 1e0 + 1b0), simp=false),
+    ev (tex (12345678901234567890 + 1/12345678901234567890), simp=false),
+    ev (tex (12345678901234567890e200 + 12345678901234567890b-200), simp=false, fpprec=20),
+    tex (123b456/a + 123d42/b + (123/456)/c),
+    tex (123 + 456*x + 789.0*x^2 + 987e50*x^3 + 654b-50*x^4 + 1729b+42*x^5),
+    tex (123b-456^a + 123d-45^b + sqrt (123b-456) + sqrt (123d-45)),
+    /* Next few are specifically to test for a bug in TEX-MEXPT
+     */
+    tex (1.234^m + 5.678^n - 1.234b0^m + 5.678b0^n),
+    tex (1.234^m * 5.678^n . 1.234b0^m * 5.678b0^n),
+    tex ((1.234^m) ^ (5.678^n) ^^ (1.234b0^m) ^ (5.678b0^n)),
+
+    tex_text ("\\subsection*{Various operators}"),
+    tex (a + b),
+    tex (a - b),
+    tex (a*b),
+    tex (a.b),
+    tex (a.b * c.d + (a*b).(c*d)),
+    tex (a/b),
+    ev (tex ((a/b)/(c/d)), simp=false),
+    tex (a^b),
+    tex (a!),
+    tex (-a),
+    tex ('(a : b)),
+    tex ('(a :: b)),
+
+    tex (sin(a) + cos(a) + tan(a) + sec(a) + csc(a) + cot(a)),
+    tex (asin(a) + acos(a) + atan(a) + atan2(b,a) + asec(a) + acsc(a) + acot(a)),
+    tex (sinh(a) + cosh(a) + tanh(a) + sech(a) + csch(a) + coth(a)),
+    tex (asinh(a) + acosh(a) + atanh(a) + asech(a) + acsch(a) + acoth(a)),
+    tex (exp(x) + log(a) + erf(a)),
+
+    tex (sin(%pi*a/n) + cos(%pi*a/n) + tan(%pi*a/n) + sec(%pi*a/n) + csc(%pi*a/n) + cot(%pi*a/n)),
+    tex (asin(%pi*a/n) + acos(%pi*a/n) + atan(%pi*a/n) + atan2(%pi*a/n,%pi*b/n) + asec(%pi*a/n) + acsc(%pi*a/n) + acot(%pi*a/n)),
+    tex (sinh(%pi*a/n) + cosh(%pi*a/n) + tanh(%pi*a/n) + sech(%pi*a/n) + csch(%pi*a/n) + coth(%pi*a/n)),
+    tex (asinh(%pi*a/n) + acosh(%pi*a/n) + atanh(%pi*a/n) + asech(%pi*a/n) + acsch(%pi*a/n) + acoth(%pi*a/n)),
+
+    tex (exp(1 + x + x^2 + x^3) + exp (exp (-x))),
+    tex (log(b + a) + log((b + a)/(b - a))),
+
+    tex ('integrate (exp(-a*x^2), x, minf, inf)),
+    tex ('sum (1/k^2, k, 1, inf)),
+    tex ('lsum (1/k^2, k, Z)),
+    tex ('diff (F, x)),
+    tex ('diff (exp (-a*x), x)),
+    tex ('diff (a(x) * 'diff (F, x), x) + a(x) * 'diff (F, x, 2)),
+    tex ('limit (exp (-a*x), x, inf)),
+    tex ('limit (exp (-a*x), x, 0, plus)),
+    tex ('limit (exp (-a*x), x, 0, minus)),
+
+    tex ('(a and b)),
+    tex ('(a or b)),
+    tex ('(not a)),
+    tex ('((riff or raff) and not (roff or ruff))),
+    tex ('(not foo ((a + b)^2/(a - b)^2) or bar (x and baz (sqrt(y^n)) or z))),
+
+    tex_text ("\\subsection*{Lists, matrices, and sets}"),
+    tex ([a, b, c, d, e]),
+    tex ([a + b, a*b, a/b, a^b, a^b^c]),
+    tex (matrix ([a, b], [c, d])),
+    tex (matrix ([a + b, a*b], [a^b, a^b^c])),
+    tex ({a, b, c, d, e}),
+    tex ({a + b, a*b, a/b, a^b, a^b^c}),
+
+    tex_text ("\\subsubsection*{Binomial}"),
+    tex (xyz + binomial (foo(a)/foo(b), bar(a)/bar(b)) + abc),
+
+    tex_text ("\\subsection*{User-defined \\TeX\\ properties}"),
+
+    /* User-defined operator declarations have to be outside with_stdout.
+     * See note near top of file.
+     */
+
+    tex_text ("\\def\\sgn{\\mathop{\\rm sgn}}"),
+    tex ('("Before texput" : [foo, signum(x)])),
+    texput (signum, "\\sgn"),
+    texput (foo, "\\phi\\upsilon"),
+    tex ('("After texput" : [foo, signum(x)])),
+    
+    tex ('("Before texput" : [grad(x), fooprefix x, grad (fooprefix x)])),
+    texput (grad, "\\nabla ", prefix),
+    texput ("fooprefix", "\\mathrm{foo}\\;", prefix),
+    tex ('("After texput" : [grad(x), fooprefix x, grad (fooprefix x)])),
+
+    tex ('("Before texput" : ((foo or bar) implies (baz or quux)))),
+    texput ("implies", "\\Rightarrow", infix),
+    tex ('("After texput" : ((foo or bar) implies (baz or quux)))),
+
+    tex ('("Before texput" : ((foo or bar) iff (baz or quux)))),
+    texput ("iff", "\\Leftrightarrow", infix),
+    tex ('("After texput" : ((foo or bar) iff (baz or quux)))),
+
+    tex ('("Before texput" : aa foonary bb foonary cc foonary dd)),
+    texput ("foonary", "\\;\\mathbf{foo}\\;", nary),
+    tex ('("After texput" : aa foonary bb foonary cc foonary dd)),
+
+    tex ('("Before texput" : [degrees_F(85), x foopostfix, degrees_F (x foopostfix)])),
+    texput (degrees_F, "^o\\;{\\rm F}", postfix),
+    texput ("foopostfix", "\\;\\mathit{foo}", postfix),
+    tex ('("After texput" : [degrees_F(85), x foopostfix, degrees_F (x foopostfix)])),
+    
+    tex ('("Before texput" : <<x, y>>)),
+    texput ("<<", [" \\langle ", " \\rangle "], matchfix),
+    tex ('("After texput" : <<x, y>>)),
+
+    tex ('("Before texput" : foonofix)),
+    texput ("foonofix", "\\;\\mathsf{foo}\\;", nofix),
+    tex ('("After texput" : foonofix)),
+
+    tex ('("All together now" : <<fooprefix foo foonary foo foonary foonofix foopostfix>>)),
+
+    tex_text ("\\subsection*{Miscellany}"),
+
+    tex_text ("Next few should all be the same."),
+    tex ('((aa or bb) and not (cc or dd))),
+    '((aa or bb) and not (cc or dd)),
+    tex (%%),
+    tex (_),    /* refers to the input expression immediately preceding "with_stdout" */
+
+    tex_text ("I forget what this one is for."),
+    '((aa or bb) and not (cc or dd)),
+    (tex (''(second (labels (%i)))), tex (''(first (labels (%o))))),
+    tex ('((tex (''(second (labels (%i)))), tex (''(first (labels (%o))))))),
+
+    tex_text ("A function and its output."),
+    foo () :=
+        (tex ('integrate (x^n, x, 0, inf)),
+        tex ('sum (x^n, n, 1, inf)),
+        tex ('limit (x^n, x, inf)),
+        tex ('diff (x^n, x))),
+    tex (foo),
+    foo (),
+    
+    /* tex_text ("This one should be the whole with\\_stdout thing."),
+     * tex (''(first (labels (%i)))),
+     */
+    latex1 ()));
+
+/* Test output options: standard output, string, file, and stream.
+ */
+
+with_stdout ("tmp-rtest-2a.tex",
+    tex ("Capture standard output to tmp-rtest-2a.tex."));
+
+S : tex ("Capture string output to S, then write S to tmp-rtest-2b.tex.", false);
+s : openw ("tmp-rtest-2b.tex");
+printf (s, "~a~%", S);
+close (s);
+
+tex ("Write output directly to tmp-rtest-2c.tex.", "tmp-rtest-2c.tex");
+
+s : openw ("tmp-rtest-2d.tex");
+tex ("Write output to output stream opened to tmp-rtest-2d.tex.", s);
+close (s);
+
+/* Test TeX environment functions.
+ */
+
+set_tex_environment_default ("
+\\begin{equation}
+", "
+\\end{equation}
+");
+
+set_tex_environment ("=", "$", "$");
+set_tex_environment (":=", "$$", "$$");
+
+s : openw ("tmp-rtest-3.tex");
+
+with_stdout (s,
+    print ("\\documentclass{article}"),
+    print ("\\title{A \\TeX\\ environment test}"),
+    print ("\\author{Maxim A.}"),
+    print ("\\begin{document}"),
+    print ("\\maketitle"),
+    print ("Here are some formulas. These should be numbered."),
+    tex ((a + b)/(c + d)),
+    tex (sin(x)/(1-sin(x))),
+    tex (erf(x)*gamma(x)),
+    print ("More text here. Followed by a formula embedded in the text."),
+    tex (b - a = d - c),
+    print ("More text here. A function definition."),
+    tex (foo(x) := 1 - 1/x));
+
+with_stdout (s,
+    tex_text ("Let's take this opportunity to test the interaction of\
+ $\\mathbf{tex}$ and $\\mathbf{ordergreat}$."),
+    tex_text ("Here are some variables before calling $\\mathbf{ordergreat}$."),
+    tex (x + y + z + t = x * y * z * t));
+
+ordergreat (x, y, z, t);
+
+with_stdout (s,
+    tex_text ("After calling $\\mathbf{ordergreat}(x, y, z, t)$, which constructs alias variables.\
+ We should still see just the original variables."),
+    tex (x + y + z + t = x * y * z * t),
+    print ("That's all, folks."),
+    print ("\\end{document}"));
+
+close (s);
+unorder (); /* undo ordergreat above */
+
+s : openw ("tmp-rtest-4.tex");
+
+kill (a, b, c, d, foo, bar, baz, quux, u, v, w, x, y, z);
+
+with_stdout (s,
+    print ("\\documentclass{article}"),
+    print ("\\title{More \\TeX\\ examples}"),
+    print ("\\author{Maxim B.}"),
+    print ("\\begin{document}"),
+    print ("\\maketitle"),
+    tex_text ("Here are some more examples. Trying to cover all the bases here.\
+ These were discovered by tracing all the functions named in 'TEX properties\
+ and seeing which ones were not yet called."),
+
+    print (""),
+    print ("'at noun expressions."),
+    
+    tex ('at (f (u), u = 0)),
+    tex (1 / (1 - 'at (diff (f (u), u), u = 0))),
+    
+    print ("Bigfloats."),
+    
+    tex ([0b0, 1b0, -1b0, 1b100]),
+    tex ((foo (0b0) + bar (1b0))/(baz (-1b0) - quux (1b100))),
+    
+    print ("Binomials."),
+    
+    tex ('binomial (N, M)),
+    tex ((a + 'binomial (f (u), sqrt (v)))^(1/2)),
+    
+    print ("Cube roots."),
+    
+    tex (cubrt (%pi)),
+    tex (sin (cubrt (1 - %pi))),
+    
+    print ("Kronecker delta."),
+    
+    tex (kron_delta (0, u)),
+    tex ((x - kron_delta (cos (y), sin (z)))^n),
+    
+    /*
+     * OMIT -- BOX SEEMS TO BE AMSTEX-SPECIFIC.
+     *
+    print ("Stuff in boxes."),
+    tex (box (u)),
+    tex (sqrt (box (1 - box (tan (u))))),
+     */
+    
+    print ("Conditional expressions (verbs)."),
+    
+    tex (if 'a > 'b then a else b),
+    tex (if 'a > 'b then (if 'a > 'c then 'a else 'c) else b),
+    tex (if 'a > 'b then a elseif 'c > 'b then c else b),
+    tex (1 + if 'a > 'b then sqrt(a) else b^3),
+    
+    print ("Conditional expressions (nouns)."),
+    
+    tex ('if 'a > 'b then a else b),
+    tex ('if 'a > 'b then ('if 'a > 'c then 'a else 'c) else b),
+    tex ('if 'a > 'b then a elseif 'c > 'b then c else b),
+    tex (1 + 'if 'a > 'b then sqrt(a) else b^3),
+    
+    print ("For-loop expressions (nouns)."),
+    
+    tex ('for i thru n do print (i)),
+    tex (m * 'for i thru floor ((n + 1)/7) do print (i)),
+    
+    print ("For-loop expressions (verbs)."),
+    
+    tex ('(for i thru n do print (i))),
+    tex (m * '(for i thru floor ((n + 1)/7) do print (i))),
+    
+    print ("For-loops over lists (verbs)."),
+    
+    tex ('(for i in L do print (i))),
+    tex ((1 - a) / '(for i in foo (L[1], L[2]) do print (i))),
+    
+    print ("For-loops over lists (nouns)."),
+    
+    tex ('for i in L do print (i)),
+    tex ((1 - a) / 'for i in foo (L[1], L[2]) do print (i)),
+    
+    /* (GET 'MLABEL 'TEX) => TEX-MLABEL */
+    /* NOT SURE ?? !! */
+    
+    /* (GET 'MLABOX 'TEX) => TEX-MLABOX */
+    /* NOT SURE ?? !! */
+    
+    print ("Subscripted functions."),
+    
+    tex (F[x](y)),
+    tex (log (F[mod (x, m)](y!))),
+    
+    /* (GET 'TEXT-STRING 'TEX) => TEX-MTEXT */
+    /* NOT SURE ?? !! */
+    
+    /* (GET 'MTEXT 'TEX) => TEX-MTEXT */
+    /* NOT SURE ?? !! */
+    
+    print ("Rational numbers (RAT expressions)."),
+    
+    tex (ratsimp (17/19)),
+    tex (1/(a + ratsimp (17/19))),
+    
+    /* (GET 'SPACEOUT 'TEX) => TEX-SPACEOUT */
+    /* NOT SURE ?? !! */
+    
+    print ("Square roots."),
+    
+    tex (sqrt (u)),
+    tex (z - bessel_j (0, sqrt (1/(1 - u)))),
+
+    print ("The end!"),
+    print ("\\end{document}"));
+
+close (s);

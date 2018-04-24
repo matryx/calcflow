@@ -1,0 +1,328 @@
+\input texinfo   @c -*-texinfo-*-
+
+@setfilename abs_integrate.info
+@settitle abs_integrate
+
+@ifinfo 
+@macro var {expr}
+<\expr\>
+@end macro
+@end ifinfo
+
+@node Top, Introduction to abs_integrate, (dir), (dir)
+@top
+@menu
+* Introduction to abs_integrate::
+* Definitions for abs_integrate::
+* Function and variable index::
+@end menu
+@chapter abs_integrate
+
+@node Introduction to abs_integrate, Definitions for abs_integrate, Top, Top
+@section Introduction to abs_integrate
+
+The package @code{abs_integrate} extends Maxima's integration code to
+some integrands that involve the absolute value, max, min, signum, or
+unit step functions. For integrands of the form @math{p(x) |q(x)|},
+where @math{p} is a polynomial and @math{q} is a polynomial that
+@code{factor} is able to factor into a product of linear or constant
+terms, the @code{abs_integrate} package determines an antiderivative
+that is continuous on the entire real line. Additionally, for an
+integrand that involves one or more parameters, the function
+@code{conditional_integrate} tries to determine an antiderivative that
+is valid for all parameter values.
+
+
+@b{Examples} To use the @code{abs_integrate} package, you'll first need to load it:
+@example
+ (%i1) load("abs_integrate.mac")$
+
+ (%i2)  integrate(abs(x),x);
+ (%o2) (x^2*signum(x))/2
+@end example
+To convert (%o2) into an expression involving the absolute value function,
+apply @code{signum_to_abs}; thus
+@example
+ (%i3) signum_to_abs(%);
+ (%o3) (x*abs(x))/2
+@end example
+When the integrand has the form @math{p(x) |x - c1| |x - c2| ... |x - cn|},
+where @math{p(x)} is a polynomial and @math{c1, c2, ..., cn} are constants,
+the @code{abs_integrate} package returns an antiderivative that is valid on the
+entire real line; thus @i{without} making assumptions on @math{a} and @math{b};
+for example
+@example
+ (%i4) factor(convert_to_signum(integrate(abs((x-a)*(x-b)),x,a,b)));
+ (%o4) ((b-a)^3*signum(b-a)^2)/6
+@end example
+
+Additionally, @code{abs_integrate} is able to find antiderivatives of some
+integrands involving @code{max, min, signum}, and @code{unit_step};
+examples:
+@example
+ (%i5) integrate(max(x,x^2),x);
+ (%o5) signum(x-1)*((x^3*signum(x))/6-1/6)+signum(x-1)*(1/4-(x^2*signum(x))/4)+x^3/6+x^2/4
+
+ (%i6) integrate(signum(x) - signum(1-x),x);
+ (%o6) x*signum(x)+(x-1)*signum(x-1)
+@end example
+A plot indicates that indeed (%o5) and (%o6) are continuous at zero and at one.
+
+For definite integrals with numerical integration limits (including
+both minus and plus infinity), the @code{abs_integrate} package
+converts the integrand to signum form and then it tries to subdivide
+the integration region so that the integrand simplifies to a
+non-signum expression on each subinterval; for example
+@example
+ (%i1) integrate(1 / (1 + abs(x-5)),x,-5,6);
+ (%o1) log(11)+log(2)
+@end example
+
+Finally, @code{abs_integrate} is able to determine antiderivatives of @emph{some}
+functions of the form @math{F(x, |x - a|)}; examples
+@example
+ (%i2) integrate(1/(1 + abs(x)),x);
+ (%o2) ((signum(x)+1)*log(x+1))/2-(log(1-x)*(1-signum(x)))/2
+
+ (%i3) integrate(cos(x + abs(x)),x);
+ (%o3) ((signum(x)+1)*sin(2*x)-2*x*signum(x)+2*x)/4
+@end example
+
+Barton Willis (Professor of Mathematics, University of Nebraska at
+Kearney) wrote the @code{abs_integrate} package and its English
+language user documentation. This documentation also describes the
+@code{partition} package for integration. Richard Fateman wrote
+@code{partition}. Additional documentation for @code{partition} is
+located at http://www.cs.berkeley.edu/~fateman/papers/partition.pdf.
+
+
+@b{To use} @file{load(abs_integrate)}
+
+@node Definitions for abs_integrate, Function and variable index, Introduction to abs_integrate, Top
+@section Definitions for abs_integrate
+
+@defvr {Option} extra_integration_methods
+Default value: @code{['signum_int, 'abs_integrate_use_if]}
+
+The list @code{extra_integration_methods} is a list of functions for
+integration. When @code{integrate} is unable to find an
+antiderivative, Maxima uses the methods in
+@code{extra_integration_methods} to attempt to determine an
+antiderivative.
+
+Each function @code{f} in @code{extra_integration_methods} should have
+the form @code{f(integrand, variable)}. The function @code{f} may
+either return @code{false} to indicate failure, or it may return an
+expression involving an integration noun form. The integration methods
+are tried from the first to the last member of
+@code{extra_integration_methods}; when no method returns an expression
+that does not involve an integration noun form, the value of the
+integral is the last value that does not fail (or a pure noun form if
+all methods fail).
+
+When the function @code{abs_integrate_use_if} is successful, it returns
+a conditional expression; for example
+@example
+ (%i2) integrate(1/(1 + abs(x+1) + abs(x-1)),x);
+ (%o2) %if(-(x+1)>0,-log(1-2*x)/2+log(3)-2/3,%if(-(x-1)>0,x/3+log(3)/2-1/3,log(2*x+1)/2))
+
+ (%i3) integrate(exp(-abs(x-1) - abs(x)),x);
+ (%o3) %if(-x>0,%e^(2*x-1)/2-2*%e^(-1),%if(-(x-1)>0,%e^(-1)*x-(3*%e^(-1))/2,-%e^(1-2*x)/2))
+@end example
+For definite integration, these conditional expressions can cause trouble:
+@example
+ (%i4) integrate(exp(-abs(x-1) - abs(x)),x, minf,inf);
+ (%o4) limit(%if(-x>0,(%e^(-1)*(%e^(2*x)-4))/2,%if(-(x-1)>0,(%e^(-1)*(2*x-3))/2,-%e^(1-2*x)/2)),x,inf,minus)-limit(%if(-x>0,(%e^(-1)*(%e^(2*x)-4))/2,%if(-(x-1)>0,(%e^(-1)*(2*x-3))/2,-%e^(1-2*x)/2)),x,-inf,plus)
+@end example
+For such definite integrals, try disallowing the method @code{abs_integrate_use_if}:
+@example
+(%i9) integrate(exp(-abs(x-1) - abs(x)),x, minf,inf), extra_integration_methods : ['signum_int];
+(%o9) 2*%e^(-1)
+@end example
+
+@b{Related options} @i{extra_definite_integration_methods}
+
+@b{To use} @file{load(abs_integrate)}
+
+
+@end defvr
+
+@defvr {Option} extra_definite_integration_methods
+Default value: @code{['abs_defint]}
+
+The list @code{extra_definite_integration_methods} is a list of extra
+functions for @i{definite} integration.  When @code{integrate} is
+unable to find a definite integral, Maxima uses the methods in
+@code{extra_definite_integration_methods} to attempt to determine an
+antiderivative.
+
+Each function @code{f} in @code{extra_definite_integration_methods}
+should have the form @code{f(integrand, variable, lo, hi)}, where
+@code{lo} and @code{hi} are the lower and upper limits of integration,
+respectively.  The function @code{f} may either return @code{false} to
+indicate failure, or it may return an expression involving an
+integration noun form. The integration methods are tried from the
+first to the last member of @code{extra_definite_integration_methods};
+when no method returns an expression that does not involve an
+integration noun form, the value of the integral is the last value
+that does not fail (or a pure noun form if all methods fail).
+
+
+@b{Related options} @i{extra_integration_methods}
+
+@b{To use} @file{load(abs_integrate)}
+
+@end defvr
+
+@deffn {Function} intfudu(@var{e}, @var{x})
+
+This function uses the derivative divides rule for integrands of the
+form @math{f(w(x)) * diff(w(x),x)} When @code{infudu} is unable to find
+an antiderivative, it returns false.
+
+@example
+(%i1) intfudu(cos(x^2) * x,x);
+(%o1) sin(x^2)/2
+
+(%i3) intfudu(x * sqrt(1+x^2),x);
+(%o3) (x^2+1)^(3/2)/3
+
+(%i4) intfudu(x * sqrt(1 + x^4),x);
+(%o4) false
+@end example
+
+For the last example, the derivative divides rule fails, so
+@code{intfudu} returns false. 
+
+A hashed array @code{intable} contains the antiderivative data. To append a fact
+to the hash table, say @math{integrate(f) = g}, do this:
+
+@example
+(%i1) intable[f] : lambda([u],  [g(u),diff(u,%voi)]);
+(%o1) lambda([u],[g(u),diff(u,%voi)])
+
+(%i2) intfudu(f(z),z);
+(%o2) g(z)
+
+(%i3) intfudu(f(w(x)) * diff(w(x),x),x);
+(%o3) g(w(x))
+@end example
+
+An alternative to calling @code{intfudu} directly is to use the @code{extra_integration_methods}
+mechanism; an example:
+@example
+(%i1) load("abs_integrate.mac")$
+(%i2) load(basic)$
+(%i3) load("partition.mac")$
+
+(%i4) integrate(bessel_j(1,x^2) * x,x);
+(%o4) integrate(bessel_j(1,x^2)*x,x)
+
+(%i5) push('intfudu, extra_integration_methods)$
+
+(%i6) integrate(bessel_j(1,x^2) * x,x);
+(%o6) -bessel_j(0,x^2)/2
+@end example
+
+@b{To use} @file{load(partition)}
+
+@b{Additional documentation} http://www.cs.berkeley.edu/~fateman/papers/partition.pdf
+
+@b{Related functions} @i{intfugudu}
+
+@end deffn
+
+@deffn {Function} intfugudu (@var{e}, @var{x})
+
+This function uses the derivative divides rule for integrands of the
+form @math{f(w(x)) * g(w(x)) * diff(w(x),x)}. When @code{infudu} is
+unable to find an antiderivative, it returns false. 
+
+@example
+(%i1) diff(jacobi_sn(x,2/3),x);
+(%o1) jacobi_cn(x,2/3)*jacobi_dn(x,2/3)
+
+(%i2) intfugudu(%,x);
+(%o2) jacobi_sn(x,2/3)
+
+(%i3) diff(jacobi_dn(x^2,a),x);
+(%o3) -2*a*x*jacobi_cn(x^2,a)*jacobi_sn(x^2,a)
+
+(%i4) intfugudu(%,x);
+(%o4) jacobi_dn(x^2,a)
+@end example
+
+For a method for automatically calling @code{infugudu} from @code{integrate}, see
+the documentation for @code{intfudu}.
+
+@b{To use} @file{load(partition)}
+
+@b{Additional documentation} http://www.cs.berkeley.edu/~fateman/papers/partition.pdf
+
+@b{Related functions} @i{intfudu}
+
+@end deffn
+
+@deffn {Function} signum_to_abs (@var{e})
+ 
+This function replaces subexpressions of the form @math{q signum(q)} by
+@math{abs(q)}.  Before it does these substitutions, it replaces
+subexpressions of the form @math{signum(p) * signum(q)} by
+@math{signum(p * q)}; examples:
+
+@example
+ (%i1) map('signum_to_abs, [x * signum(x), x * y * signum(x)* signum(y)/2]);
+ (%o1) [abs(x),(abs(x)*abs(y))/2]
+@end example
+@b{To use} @file{load(abs_integrate)}
+
+@end deffn
+
+@deffn {Function} conditional_integrate (@var{e}, @var{x})
+
+For an integrand with one or more parameters, this function tries to determine an
+antiderivative that is valid for all parameter values. When successful, this
+function returns a conditional expression for the antiderivative.
+
+@example
+(%i1) conditional_integrate(cos(m*x),x);
+(%o1) %if(m#0,sin(m*x)/m,x)
+
+(%i2) conditional_integrate(cos(m*x)*cos(x),x);
+(%o2) %if((m-1#0) %and (m+1#0),-((m-1)*cos((m+1)*x)+(m+1)*cos((m-1)*x))/(2*m^2-2),(sin(2*x)+2*x)/4)
+
+(%i3) sublis([m=6],%);
+(%o3) -(5*cos(7*x)+7*cos(5*x))/70
+
+(%i4) conditional_integrate(exp(a*x^2+b*x),x);
+(%o4) %if(a#0,-(sqrt(%pi)*%e^(-b^2/(4*a))*erf((2*a*x+b)/(2*sqrt(-a))))/(2*sqrt(-a)),%if(b#0,%e^(b*x)/b,x))
+@end example
+
+@end deffn
+
+@deffn {Function} convert_to_signum (@var{e})
+
+This function replaces subexpressions of the form @math{abs(q), unit_step(q),
+ min(q1,q2, ..., qn)} and @math{max(q1,q2, ..., qn)} by equivalent @math{signum}
+terms.
+
+@example
+ (%i1) map('convert_to_signum, [abs(x), unit_step(x), max(a,2), min(a,2)]);
+ (%o1) [x*signum(x),(signum(x)+1)/2,((a-2)*signum(a-2)+a+2)/2,(-(a-2)*signum(a-2)+a+2)/2]
+@end example
+
+To convert @code{unit_step} to signum form, the function @code{convert_to_signum} 
+uses @math{unit_step(x) = (1 + signum(x))/2}. 
+
+@b{To use} @file{load(abs_integrate)}
+
+@b{Related functions} @i{signum_to_abs}
+
+@end deffn
+
+@node Function and variable index,  , Definitions for abs_integrate, Top
+@appendix Function and variable index
+@printindex fn
+@printindex vr
+
+@bye

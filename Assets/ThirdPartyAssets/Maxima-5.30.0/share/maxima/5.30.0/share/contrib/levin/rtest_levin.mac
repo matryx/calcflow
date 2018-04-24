@@ -1,0 +1,232 @@
+/*               COPYRIGHT NOTICE
+ 
+Copyright (C) 2006-2007 Michel Van den Bergh
+ 
+This program is free software; you can redistribute
+it and/or modify it under the terms of the
+GNU General Public License as published by
+the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+ 
+This program is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details at
+http://www.gnu.org/copyleft/gpl.html
+*/
+kill(all);
+done$ 
+block([],load("levin.mac"),done);
+done$
+cbfloat(c) := %i*bfloat(imagpart(c)) + bfloat(realpart(c));
+cbfloat(c) := %i*bfloat(imagpart(c)) + bfloat(realpart(c))$
+check_prec(app,exact,prec):=is(abs(cbfloat((app-exact)/exact))<10^(-prec));
+check_prec(app,exact,prec):=is(abs(cbfloat((app-exact)/exact))<10^(-prec))$
+fpprec:16;
+16$
+/* the next two tests are not genuine regression tests; they are
+here to check that a new implentation is functionally equivalent
+to the old one */
+levin_u_sum(1/n^2,n,1,10);
+3899836039/2370816000$
+check_prec(bflevin_u_sum(1/n^2,n,1),%pi^2/6,fpprec-1);
+true$
+levin_u_sum(1/n^2,n,1,10,levin_numeric);
+[1.644934081345756b0, 1.882785043290232b-12]$
+fpprec:30;
+30$
+check_prec(bflevin_u_sum(1/n^2,n,1),%pi^2/6,fpprec-1);
+true$
+pi_4(k):=(k-2*fix(k/2))*(-1)^((k-1)/2)/k;
+pi_4(k):=(k-2*fix(k/2))*(-1)^((k-1)/2)/k$
+check_prec(bflevin_u_sum(pi_4(k),k,1),%pi/4,fpprec-1);
+true$
+pi_4_alt1(k):=if oddp(k) then (-1)^((k-1)/2)/k else 0;
+pi_4_alt1(k):=if oddp(k) then (-1)^((k-1)/2)/k else 0$
+check_prec(bflevin_u_sum(funmake(pi_4_alt1,[k]),k,1),%pi/4,fpprec-1);
+true$
+check_prec(bflevin_u_sum('(pi_4_alt1(k)),k,1),%pi/4,fpprec-1);
+true$
+pi_4_alt2(k):=if oddp(k) then (-1)^((k-1)/2)/k else if evenp(k) then 0 else funmake(pi_4_alt2,[k]);
+pi_4_alt2(k):=if oddp(k) then (-1)^((k-1)/2)/k else if evenp(k) then 0 else funmake(pi_4_alt2,[k])$
+check_prec(bflevin_u_sum(pi_4_alt2(k),k,1),%pi/4,fpprec-1);
+true$
+levin_u_sum('(pi_4_alt1(k)),k,1,5);
+25/33$
+levin_u_sum('(if oddp(k) then (-1)^((k-1)/2)/k else 0),k,1,5);
+25/33$
+levin_u_sum(1/n^2,n,1,k);
+levin_u_sum_failed$
+levin_u_sum(1/n^2,n,1,-1);
+levin_u_sum_failed$
+levin_u_sum(1/n^2,n,1,0);
+0$
+levin_u_sum(1/n^2,n,1,1);
+1$
+bflevin_u_sum(1/n,n,1);
+levin_failed$
+levin_u_sum(1/n,n,1,10);
+levin_failed$
+sort(listofvars(levin_u_sum(b[k],k,n,2)));
+[b[n],b[n+1]]$
+a[2]:0;
+0$
+sort(listofvars(levin_u_sum(a[n],n,1,5)));
+[a[1],a[3],a[4],a[5]]$
+kill(a);
+done$
+assume(equal(a[2],0));
+[equal(a[2],0)]$
+sort(listofvars(levin_u_sum(a[n],n,1,5)));
+[a[1],a[3],a[4],a[5]]$
+forget(equal(a[2],0));
+[equal(a[2],0)]$
+kill(a);
+done$
+bflevin_u_sum(1/n^2,n,k);
+bflevin_u_sum_failed$
+/* below is a series of tests that no longer apply, I leave them in just
+in case somebody decides to give a parameter like "a__" the more 
+"user friendly" name "a" :-) */
+sort(listofvars(levin_u_sum(a[n],n,1,2)));
+[a[1],a[2]]$
+arrays;
+[levin_options]$
+a[n]:=n^2;
+a[n]:=n^2$
+levin_u_sum(a[n],n,1,2);
+5$
+sort(arrays);
+[a,levin_options]$
+kill(a);
+done$
+sort(listofvars(levin_u_sum(start[n],n,1,2)));
+[start[1],start[2]]$
+start[n]:=n^3;
+start[n]:=n^3$
+levin_u_sum(start[n],n,1,2);
+9$
+sort(arrays);
+[levin_options,start]$
+kill(start);
+done$
+sort(listofvars(levin_u_sum(index_var[n],n,1,2)));
+[index_var[1],index_var[2]]$
+index_var[n]:=n^4;
+index_var[n]:=n^4$
+levin_u_sum(index_var[n],n,1,2);
+17$
+sort(arrays);
+[index_var,levin_options]$
+kill(index_var);
+done$
+sort(listofvars(levin_u_sum(a[n],n,0,10)));
+[a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9]]$
+check_prec(bflevin_u_sum(1/a^2,a,1),%pi^2/6,fpprec-1);
+true$
+levin_u_sum(s[omega],omega,beta,2);
+s[beta]+s[beta+1]$
+/* end of name collision test */
+fpprec:16;
+16$
+levin_zeta(s):=levin_u_sum(1/n^s,n,1,10);
+levin_zeta(s):=levin_u_sum(1/n^s,n,1,10)$
+block([],load("bffac"),done);
+done$
+check_prec(levin_zeta(1.1),bfzeta(1.1,10),6);
+true$
+check_prec(levin_zeta(1.01),bfzeta(1.01,10),6);
+true$
+fpprec:10;
+10$
+levin_zeta(s):=bflevin_u_sum(1/n^(bfloat(s)),n,1);
+levin_zeta(s):=bflevin_u_sum(1/n^(bfloat(s)),n,1)$
+check_prec(levin_zeta(1.1),bfzeta(1.1,fpprec),fpprec-1);
+true$
+check_prec(levin_zeta(1.01b0),bfzeta(1.01b0,fpprec),fpprec-1);
+true$
+levin_u_sum(1/(n+a)^2,n,1,1);
+1/(a+1)^2$
+levin_u_sum(1/(n+a)^2,n,1,1,levin_numeric);
+levin_u_sum_failed$
+fpprec:60;
+60$
+check_prec(levin_u_sum(1/n-log(1+1/n),n,1,31),%gamma,27);
+true$
+fpprec:16;
+16$
+(omega:%e^(2*%pi*%i/10),0);
+0;
+check_prec(levin_u_sum(omega^n/n,n,1,20),-log(1-omega),11);
+true$
+check_prec(bflevin_u_sum(1/n-log(1+1/n),n,1),%gamma,fpprec-1);
+true$
+levin_check_lvalue(n);
+true$
+levin_check_lvalue(1);
+false$
+levin_check_lvalue("foo");
+false$
+levin_check_lvalue(a+b);
+false$
+levin_check_lvalue(a[3]);
+true$
+levin_check_lvalue((a+b)[3]);
+false$
+levin_check_lvalue(a[2][3][4]);
+true$
+kill(omega);
+done$
+levin_u_sum(1/(a+b)^2,a+b,1,5);
+levin_u_sum_failed$
+bflevin_u_sum(1/(a+b)^2,a+b,1);
+bflevin_u_sum_failed$
+levin_options["max_terms"]:1;
+1$
+bflevin_u_sum(1/n^2,n,1);
+bflevin_u_sum_failed$
+levin_options["max_terms"]:640;
+640$
+levin_options["max_precision"]:32;
+32$
+fpprec:100;
+100$
+bflevin_u_sum(1/n^2,n,1);
+bflevin_u_sum_failed$
+levin_options["max_precision"]:1000;
+1000$
+g(n):=1/n-log(1+1/n);
+g(n):=1/n-log(1+1/n)$
+fpprec:10;
+10$
+block([],a:levin_u_sum(g(n),n,1,100,levin_numeric),done);
+done$
+fpprec:100;
+100$
+block([],b:levin_u_sum(g(n),n,1,100,levin_numeric),done);
+done$
+is(abs((a[1]-b[1])/a[2])<10.0);
+true$
+kill(a,b);
+done$
+fpprec:10;
+10$
+g(n):=if oddp(n) then (-1)^((n-1)/2)/n else 0;
+g(n):=if oddp(n) then (-1)^((n-1)/2)/n else 0$
+block([],a:levin_u_sum('(g(n)),n,1,100,levin_numeric),done);
+done$
+fpprec:100;
+100$
+block([],b:levin_u_sum('(g(n)),n,1,100,levin_numeric),done);
+done$
+is(abs((a[1]-b[1])/a[2])<3.0);
+true$
+kill(a,b);
+done$
+fpprec:16;
+16$
+arrays;
+[levin_options]$
+values;
+[]$

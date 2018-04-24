@@ -1,0 +1,740 @@
+(prederror : false,0);
+0$
+
+/* bug 1489164 */
+is(equal(%i,0));
+false$
+
+/* bug 1547584 */
+is(equal([a],[a,b]));
+false$
+
+/* bug 1435600 */
+is(equal(false,false));
+true$
+
+is(equal(false,true));
+false$
+
+is(equal(true,true));
+true$
+
+/* bug 1496329 */
+is(equal(rat(matrix([x])),matrix([x])));
+true$
+
+is (equal (ident (2), rat (ident (2))));
+true$
+
+/* bug 649669*/
+is(equal([x],[rat(x)]));
+true$
+ 
+/* bug 990924 */
+is(equal((%e^(%i*z)-%e^-(%i*z)), 0));
+unknown$
+
+/* bug 851436 */
+
+is(equal(rat((x+y+a)^3,x),rat((x+y+a)^3,y)));
+true$
+
+/* bug 884947  */
+
+is(equal([1],[1]));
+true$
+
+is(equal([0],[1]));
+false$
+
+is(equal([a,0],[a,1]));
+false$
+
+is(equal([a,b],[a,c]));
+unknown$
+
+/* bug 812968 */
+
+is(equal(x/(2*x*sqrt(2)) - 1/(2*x*sqrt(2)), (x-1)/(2*x*sqrt(2))));
+true$
+
+is(equal(1/sqrt(2),sqrt(2)/2));
+true$
+
+/* bug 902694 */
+
+is(equal(ind,ind));
+false$
+
+is(equal(und,und));
+false$
+
+/* bug 885795 */
+
+(assume(equal(i,j)),0);
+0$
+
+is(equal(x[i], x[j]));
+true$
+
+is(equal(f(i),f(j)));
+true$
+
+(forget(equal(i,j)),0);
+0$
+
+is(equal(inf,infinity));
+false$
+
+is(equal(minf,minf));
+true$
+
+is(equal(minf,infinity));
+false$
+
+is(equal(minf,und));
+false$
+
+is(equal(minf,ind));
+false$
+
+
+is(equal(%i,0));
+false$
+
+is(equal(%i, x));
+false$
+
+is(equal(%i,x + %i));
+unknown$
+
+is(equal(und, x));
+false$
+
+is(equal(inf, x));
+false$
+
+is(equal(inf,0));
+false$
+
+is(equal(infinity,x));
+false$
+
+is(equal(0,1));
+false$
+
+is(equal(0.23, 9.78));
+false$
+
+is(equal(0.23, 9.78b0));
+false$
+
+is(equal(23/10, 9.78b0));
+false$
+
+is(equal(7,[1,2,3]));
+false$
+
+is(equal(%pi,22/7));
+false$
+
+is(equal(1/sqrt(2), sqrt(2)/2));
+true$
+
+is(equal(x,x));
+true$
+
+is(equal(x,x+%pi));
+false$
+
+is(equal((x+1)^2, x^2 + 2*x+1));
+true$
+
+is(equal(x,0));
+unknown$
+
+is(equal(x,%i));
+false$
+
+is(equal(x + %i,x));
+false$
+
+is(equal(x^2+1,x^2/5));
+false$
+
+is(equal(%i*x,%i));
+unknown$
+
+is(equal([a],[b]));
+unknown$
+
+is(equal([a],[a,b]));
+false$
+
+is(equal([a],[a]));
+true$
+
+is(equal(a < b, a <= b));
+false$
+
+is(equal(a <= b, a <= b));
+true$
+
+is(equal(rat(x),x));
+true$
+
+is(equal(matrix([x]), rat(matrix([x]))));
+true$
+
+is(equal(matrix([x,y]), matrix([x,z])));
+unknown$
+
+is(equal(matrix([x,y],[p,q]), matrix([p,q],[x,y])));
+unknown$
+
+is(equal(matrix([x,y],[p,q]), matrix([p,q,s],[x,y,8])));
+false$
+
+is(equal(set(u,n,k), set(u,n,k,u,n,k)));
+true$
+
+is(equal(set(a,b,c), set(b,a,a)));
+unknown$
+
+is(equal(abs(1 + %i*z), z - %i));
+false$
+
+
+(assume(equal(x,y),equal(y,z)),0);
+0$
+
+is(equal(x,z));
+true$
+
+is(equal([x],[z]));
+true$
+
+is(equal(f(x), f(z)));
+true$
+
+is(equal(f(x,y) + %pi, f(y,z) + %pi));
+true$
+
+is(equal(rat(x,y), rat(z,x)));
+true$
+
+is(equal(matrix([x,y],[4,5]), matrix([y,z],[4,5])));
+true$
+
+is(equal(matrix([x,y],[4,5]), matrix([y,z],[4,15])));
+false$
+
+is(equal(set(x,z),set(x)));
+true$
+
+is(equal(set(x,sqrt(2)), set(z,sqrt(2))));
+true$
+
+is(equal(x + %i * y, y + %i * z));
+true$
+
+is(equal(exp(%i * x), exp(%i * z)));
+true$
+
+is(equal([x,x],[y,z]));
+true$
+
+is(equal([y,y],[x,z]));
+true$
+
+is(equal(x+y,2*z));
+true$
+
+is(equal(x+y+z/3, 7*x/3));
+true$
+
+is(equal(max(x,a),max(y,a)));
+true$
+
+is(equal(max(x,y,z,8), max(x,8)));
+true$
+
+(forget(equal(x,y), equal(y,z)),0);
+0$
+
+is(equal(zeroa, zerob));
+false$
+
+is(equal([zeroa],[zerob]));
+false$
+
+is(equal(matrix(),matrix()));
+true$
+
+is(equal(matrix([]),matrix([])));
+true$
+
+is(equal(matrix([]),matrix([],[])));
+false$
+
+is(equal([],[]));
+true$
+
+is(equal(set(),set()));
+true$
+
+is(equal(a = b, a = b));
+true$
+
+is(equal(a = b, b = a));
+unknown$
+
+is(equal(a < b, b < a));
+unknown$
+
+is(equal(7,[a,b]));
+false$
+
+is(equal([a,b],7));
+false$
+
+is(equal([a,b], a = b));
+false$
+
+is(equal(a=b,[a,b]));
+false$
+
+is(equal(a < b, b <= b))$
+false$
+
+is(equal([true], []));
+false$
+
+is(equal([true], [true]));
+true$
+
+is(equal([false], [true]));
+false$
+
+is(equal(false,[false]));
+false$
+
+(oak : set(macrocarpa, rubra, alba),0);
+0$
+
+is(equal([macrocarpa, rubra, alba],oak))	;
+false$
+
+is(equal(oak, [macrocarpa, rubra, alba]));
+false$
+
+is(equal(set(macrocarpa, rubra, alba),oak));
+true$
+
+is(equal(oak, set(macrocarpa, rubra, alba)));
+true$
+
+(assume(equal(macrocarpa, burr), equal(rubra,red), equal(alba,white)),0);
+0$
+
+is(equal(oak,set(burr,red,white)));
+true$
+
+(remvalue(oak),0);
+0$
+
+(forget(equal(macrocarpa, burr), equal(rubra,red), equal(alba,white)),0);
+0$
+
+(assume(equal(a,b),equal(b,c),equal(c,d)),0);
+0$
+
+is(equal(a*d,b*c));
+true$
+
+is(equal(a+b+c, 2*a+d));
+true$
+
+is(equal(a+b^2-c^3, b + a^2 - a^3));
+true$
+
+is(equal(f(a,b,c),f(d,b,a)));
+true$
+
+is(equal(set(1,a,d^2), set(1+a-d,d,a,b,c-a+d,a^2)));
+true$
+
+(forget(equal(a,b),equal(b,c),equal(c,d)),0);
+0$
+
+is(equal(lambda([], 9), lambda([], 9)));
+true$
+
+is(equal(lambda([], x), lambda([], y)));
+unknown$
+
+is(equal(lambda([x], x), lambda([z],z)));
+true$
+
+is(equal(lambda([x], x), lambda([z],z^2)));
+unknown$
+
+is(equal(lambda([x,y], x), lambda([z],z)));
+false$
+
+is(equal(lambda([x],true), lambda([z],false)));
+false$
+
+is(equal(lambda([x],false), lambda([z],false)));
+true$
+
+(assume(equal(p,0)),0);
+0$
+
+is(equal(lambda([x],x+p), lambda([y],y-p)));
+true$
+
+(forget(equal(p,0)),0);
+0$
+
+is(equal(sum(1/kk,kk,1,n), sum(1/ii,ii,1,n)));
+true$
+
+is(equal(sum(1/kk,kk,1,m), sum(1/ii,ii,1,n)));
+unknown$
+
+is(equal(sqrt(5) - sum(%pi/kk,kk,1,n), sqrt(5) - sum(%pi/ii,ii,1,n)));
+true$
+
+is(equal(sqrt(5) - sum(%pi/kk,kk,1,m), sqrt(5) - sum(%pi/ii,ii,1,n)));
+unknown$
+
+is(equal(sum(sqrt(2)/i^2,i,1,inf), sum(sqrt(2)/j^2,j,1,inf)));
+true$
+
+is(equal(sum(sum(1/(i+j),i,1,j),j,1,n), sum(sum(1/(ii+jj),ii,1,jj),jj,1,n)));
+true$
+
+is(equal(sum(product((ii+jj)^2,ii,1,42*jj),jj,-7,n), sum(product((i+j)^2,i,1,42*j),j,-7,n)));
+true$
+
+is(equal(set(a), set(inf)));
+false$
+
+is(equal([a], [inf]));
+false$
+
+is(equal(set(a,b,c), set(a,b,c,minf)));
+false$
+
+is(equal(set(a,b,c), set(a,b,c,d)));
+unknown$
+
+is(equal(set(a), set(und)));
+false$
+
+is(equal(set(inf,und), set(inf,und)));
+true$
+
+is(equal(set(a), set(a,inf)));
+false$
+
+is(equal(set(a,inf),set(a)));
+false$
+
+is(equal(set(a,b), set(a,inf)));
+false$
+
+/* Ensure that equal is happy to compare objects of any
+ * Maxima or Lisp types.
+ *
+ * Stuff checked here (various Lisp types omitted):
+ *
+ *  string
+ *  Lisp array
+ *  Maxima declared array
+ *  Maxima undeclared array
+ */
+
+(string1a : "FOO",
+ string1b : "FOO",
+ string2 : "BAR",
+
+ larray1a : make_array (any, 5),
+ fillarray (larray1a, makelist (i, i, 1, 5)),
+ larray1b : make_array (any, 5),
+ fillarray (larray1b, makelist (i, i, 1, 5)),
+ larray2 : make_array (any, 5),
+ fillarray (larray2, makelist (i^2, i, 1, 5)),
+ larray3 : make_array (any, 10),
+ fillarray (larray3, makelist (i, i, 1, 10)),
+
+ array (marray_declared_1, fixnum, 3, 4),
+ fillarray (marray_declared_1, makelist (i, i, 1, 20)),
+ array (marray_declared_2, fixnum, 3, 4),
+ fillarray (marray_declared_2, makelist (i, i, 1, 20)),
+ array (marray_declared_3, flonum, 3, 4),
+ fillarray (marray_declared_3, makelist (float(i), i, 1, 20)),
+ array (marray_declared_4, fixnum, 4, 3),
+ fillarray (marray_declared_4, makelist (2*i, i, 1, 20)),
+
+ marray_undeclared_1 [foo, bar] : 1234,
+ marray_undeclared_1 [baz, quux] : 2345,
+ marray_undeclared_2 [foo, bar] : 1234,
+ marray_undeclared_2 [baz, quux] : 2345,
+ marray_undeclared_3 [foo, bar] : 3456,
+ marray_undeclared_3 [baz, quux] : 4567,
+ marray_undeclared_4 [foo, bar, baz] : 5678,
+
+ marray_array_fcn_1 [u, v, w] := u*v*w,
+ marray_array_fcn_1 [2, 3, 4],
+ marray_array_fcn_1 [a, b, c],
+ marray_array_fcn_2 [u, v, w] := u*v*w,
+ marray_array_fcn_2 [2, 3, 4],
+ marray_array_fcn_2 [a, b, c],
+ marray_array_fcn_3 [u, v, w] := u*v*w,
+ marray_array_fcn_3 [7, x, 4],
+ marray_array_fcn_3 [a, 3, c],
+ marray_array_fcn_4 [u, v, w] := u + v + w,
+ marray_array_fcn_4 [2, 3, 4],
+ marray_array_fcn_4 [a, b, c],
+
+ marray_subscripted_fcn_1 [a, b] (x, y) := x^a + y^b,
+ marray_subscripted_fcn_1 [3, 2] (u, 7),
+ marray_subscripted_fcn_1 [m, n] (2, z),
+ marray_subscripted_fcn_2 [a, b] (x, y) := x^a + y^b,
+ marray_subscripted_fcn_2 [3, 2] (u, 7),
+ marray_subscripted_fcn_2 [m, n] (2, z),
+ marray_subscripted_fcn_3 [a, b] (x, y) := x^a + y^b,
+ marray_subscripted_fcn_3 [2, 5] (8, q),
+ marray_subscripted_fcn_3 [1, t] (9, e),
+ marray_subscripted_fcn_4 [a, b] (x, y) := a*x - b*y,
+ marray_subscripted_fcn_4 [3, 2] (u, 7),
+ marray_subscripted_fcn_4 [m, n] (2, z),
+
+ 0);
+0;
+
+/* Comparisons to same type */
+
+is (equal (string1a, string1b));
+true;
+
+is (equal (string1a, string2));
+false;
+
+is (equal (larray1a, larray1b));
+true;
+
+is (equal (larray1a, larray2));
+false;
+
+is (equal (larray1a, larray3));
+false;
+
+is (equal (marray_declared_1, marray_declared_2));
+true;
+
+is (equal (marray_declared_1, marray_declared_3));
+true;
+
+is (equal (marray_declared_1, marray_declared_4));
+false;
+
+is (equal (marray_undeclared_1, marray_undeclared_2));
+true;
+
+is (equal (marray_undeclared_1, marray_undeclared_3));
+false;
+
+is (equal (marray_undeclared_1, marray_undeclared_4));
+false;
+
+is (equal (marray_array_fcn_1, marray_array_fcn_2));
+true;
+
+/* This test fails at present because array functions are
+ * compared via arrayinfo and listarray output,
+ * but array functions should be compared via their AEXPR properties.
+ */
+is (equal (marray_array_fcn_1, marray_array_fcn_3));
+true;
+
+is (equal (marray_array_fcn_1, marray_array_fcn_4));
+false;
+
+is (equal (marray_subscripted_fcn_1, marray_subscripted_fcn_2));
+true;
+
+/* This test fails at present because subscripted functions are
+ * compared via arrayinfo and listarray output,
+ * but subscripted functions should be compared via their AEXPR properties.
+ */
+is (equal (marray_subscripted_fcn_1, marray_subscripted_fcn_3));
+true;
+
+is (equal (marray_subscripted_fcn_1, marray_subscripted_fcn_4));
+unknown; /* comparison of non-identical lambda expressions yields unknown */
+
+/* Comparisons to different type */
+
+/* No automatic type conversion */
+is (equal (string1a, larray1a));
+false;
+
+is (equal (string1a, 1234));
+false;
+
+/* No automatic type conversion */
+is (equal (string1a, 'FOO));
+false;
+
+is (equal (string1a, sin('x)));
+false;
+
+
+is (equal (larray1a, string1a));
+false;
+
+is (equal (larray1a, 1234));
+false;
+
+is (equal (larray1a, 'FOO));
+false;
+
+is (equal (larray1a, sin('x)));
+false;
+
+/* No automatic conversions between array types */
+
+(similar_lisp_array : make_array (fixnum, 4, 5),
+ fillarray (similar_lisp_array, makelist (i, i, 1, 20)),
+ is (equal (marray_declared_1, similar_lisp_array)));
+false;
+
+(for i:0 thru 3
+   do for j:0 thru 4
+     do similar_undeclared_marray [i, j] : i*5 + j + 1,
+ is (equal (marray_declared_1, similar_undeclared_marray)));
+false;
+
+/* No automatic conversions between array and list or matrix */
+
+(similar_nested_list : [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15], [16, 17, 18, 19, 20]],
+ is (equal (marray_declared_1, similar_nested_list)));
+false;
+
+(similar_matrix : apply (matrix, similar_nested_list),
+ is (equal (marray_declared_1, similar_matrix)));
+false;
+
+/* Comparisons via = */
+
+/* Comparisons to same type */
+
+is (string1a = string1b);
+true;
+
+is (string1a = string2);
+false;
+
+is (larray1a = larray1b);
+true;
+
+is (larray1a = larray2);
+false;
+
+is (larray1a = larray3);
+false;
+
+
+/* Comparisons to different type */
+
+/* No automatic type conversion */
+is (string1a = larray1a);
+false;
+
+is (string1a = 1234);
+false;
+
+/* No automatic type conversion */
+is (string1a = 'FOO);
+false;
+
+is (string1a = sin('x));
+false;
+
+
+/* No automatic type conversion */
+is (larray1a = string1a);
+false;
+
+is (larray1a = 1234);
+false;
+
+is (larray1a = 'FOO);
+false;
+
+is (larray1a = sin('x));
+false;
+
+
+/* Comparison of arrays with multiple dimensions and non-literal elements */
+
+(a1 : make_array (any, 10),
+ a2a : make_array (any, 2, 5),
+ a2b : make_array (any, 2, 5),
+ a3 : make_array (any, 3, 5),
+ 0);
+0;
+
+[is (equal (a1, a2a)), is (equal (a1, a3)), is (equal (a2a, a3))];
+[false, false, false];
+
+(a2a [1, 4] : 1234, a2b [1, 4] : '(x/(1 - x)), is (equal (a2a, a2b)));
+unknown;
+
+(a2a [1, 4] : '(1/(1/x - 1)), a2b [1, 4] : '(x/(1 - x)), is (equal (a2a, a2b)));
+true;
+
+is(notequal(exp(x),0));
+true$
+
+is(notequal(exp(%i * x),0));
+true$
+
+is(notequal(exp(x - sqrt(3) * x^2 + 42*%i),0));
+true$
+
+is(notequal(%i * exp(x),0));
+true$
+
+is(notequal(exp(minf),0));
+false$
+
+is(equal(sqrt(1-x^2), conjugate(sqrt(1-x^2))));
+unknown$
+
+(assume(-1 < x, x < 1),0);
+0$
+
+is(equal(sqrt(1-x^2), conjugate(sqrt(1-x^2))));
+true$
+
+/* SF bug 2869181 */
+
+is(equal(exp(%i * x),0));
+false$
+
+is(equal(0, exp(%i * x)));
+false$
+
+(forget(-1 < x, x < 1),0);
+0$
+
+/* verify literal equality of CREs, especially as subexpressions */
+
+(kill (a, x, y, foo),
+ block ([x : rat(a), y : rat(a)],
+  [is (x = y), is ([x] = [y]), is (matrix ([x]) = matrix ([y])), is (foo (x) = foo (y))]));
+[true, true, true, true];

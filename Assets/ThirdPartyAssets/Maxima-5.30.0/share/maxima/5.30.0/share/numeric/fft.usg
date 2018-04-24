@@ -1,0 +1,143 @@
+FAST FOURIER TRANSFORMS
+
+To load the routines do LOADFILE(FFT,FASL,DSK,SHARE);
+
+The basic funtions are:
+	FFT --> fast fourier transform
+	IFT --> inverse fast fourier transform
+
+These functions perform a (complex) fast fourier transform on either
+1 or 2 dimensional FLOATING-POINT arrays, obtained by:
+ARRAY(<ary>,FLOAT,<dim1>); or ARRAY(<ary>,FLOAT,<dim1>,<dim2>);
+For 1D arrays <dim1> must equal 2^n-1, and for 2D arrays
+<dim1>=<dim2>=2^n-1 (i.e. the array is square).  (Recall that
+MACSYMA arrays are indexed from a 0 origin so that there will be
+2^n and (2^n)^2 arrays elements in the above two cases.)
+
+Calling sequence is:
+FFT(<real-array>,<imag-array>); or IFT(<real-array>,<imag-array>);
+
+The real and imaginary arrays must of course be the same size.
+The transforms are done in place so that <real-array> and <imag-
+array> will contain the real and imaginary parts of the transform.
+(If you want to keep the transformed and un-transfromed arrays
+separate copy the arrays before calling FFT or IFT using the
+FILLARRAY function - see SHARE;ARRAY USAGE.)
+
+The definitions of the Fast Fourier Transform and its inverse
+are given here.  Here A is the array to be transformed and AT is
+its transform.  Both A and AT are complex arrays, although as noted
+above FFT and IFT can only deal with separate real arrays for
+the real and imaginary parts of A and AT.  N (or N^2) is the number
+of elements in A in the 1D (or 2D) case.  (In fact these definitions
+are not of the FFTs but of the discrete Fourier transforms.  The
+FFT and IFT functions merely provided efficient algorithms for the
+implementation of these definitions.)
+
+1D case:
+
+      N - 1
+      ====		       - 1
+      \		 2 %I %PI I K N
+AT  =  >    A  %E		   
+  K   /	     I
+      ====
+      I = 0
+
+	  N - 1
+	  ====			      - 1
+      - 1 \	      - 2 %I %PI I K N
+A  = N	   >    AT  %E			  
+ I	  /	  K
+	  ====
+	  K = 0
+
+2D case:
+
+	 N - 1 N - 1
+	 ====  ====				   - 1
+	 \     \	     2 %I %PI (I K + J L) N
+AT     =  >     >    A	   %E			       
+  K, L	 /     /      I, J
+	 ====  ====
+	 I = 0 J = 0
+
+	     N - 1 N - 1
+	     ====  ====					  - 1
+	 - 2 \	   \		  - 2 %I %PI (I K + J L) N
+A     = N     >	    >	 AT     %E			      
+ I, J	     /	   /	   K, L
+	     ====  ====
+	     K = 0 L = 0
+
+Other functions included in this file are:
+
+POLARTORECT(<magnitude-array>,<phase-array>);
+converts from magnitude/phase form into real/imaginary form
+putting the real part in the magnitude array and the imaginary part
+into the phase array.  (<real>=<magnitude>*COS(<phase>)
+and <imaginary>=<magnitude>*SIN(<phase>).)
+
+RECTTOPOLAR(<real-array>,<imag-array>);
+undoes POLARTORECT.  The phase is given in the range
+from -%PI to %PI.
+
+Like FFT and IFT these function accept 1 or 2 dimensional
+arrays.  However, the array dimensions need not be a power of 2,
+nor need the 2D arrays be square.
+
+(The above 4 functions return a list of their arguments)
+
+EXAMPLE - do LOADFILE(FFT,FASL,DSK,SHARE); DEMO(FFT,DEMO,DSK,SHARE);
+
+DISCLAIMER - I didn't write these routines, but copied them from
+AI:LIBDOC;FFT BWOOD1.  However you can report bugs to me.
+
+						CFFK@MC
+GJC@MIT-MC 05/15/81 20:40:29 Re: FFT
+To: JPLJMR at MIT-MC, (FILE [SHARE;FFT MAIL]) at MIT-MC
+The FFT you get by doing LOAD("FFT") is the natural complex one:
+
+      N - 1
+      ====		       - 1
+      \		 2 %I %PI I K N
+ T  =  >    A  %E		   
+  K   /	     I
+      ====
+      I = 0
+
+So if you do FFT(A_REAL,A_IMAG); what you get back is the
+coefficients of an exponential series which is the inverse
+transform:
+
+	  N - 1
+	  ====			      - 1
+      - 1 \	      - 2 %I %PI I K N
+A  = N	   >     T  %E			  
+ I	  /	  K
+	  ====
+	  K = 0
+
+Your question: "What do you do if all you have is a real function,
+and what you want is the coefficients of the SIN and COS terms?"
+A simple way is to put the function in A_REAL, and set A_IMAG to
+all zeros. Then FFT. Using the exponential formula for SIN and
+COS you get that (T[K]-T[-K])/2 gives the SIN term, and
+(T[K]+T[-K])/2 gives the COS term.
+A clever way starts out by putting the odd part of the function in A_REAL,
+and the even part in A_IMAG. 
+
+Say you do FFT(REAL,IMAG); then:
+
+COSTERM[J]:(REAL[J]+REAL[N-J])/2;
+SINTERM[J]:(IMAG[J]-IMAG[N-J])/2;
+
+Now, there is this question about the factor N^(-1), which
+some people write as SQRT(2*%PI*N)^(-1).
+All I can suggest is that you take the above formuli and use
+macsyma to carefully check that what you want to do is
+represented correctly. Using the PLOT2 package can also help in
+debugging.
+
+
+-gjc

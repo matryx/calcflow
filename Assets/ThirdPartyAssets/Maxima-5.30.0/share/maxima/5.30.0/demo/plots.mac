@@ -1,0 +1,54 @@
+/* a few sample plots */
+
+  
+numer:true;  
+  
+/* some nice figures.   fig1.ps from fig1.mac
+  shows the units of a quadratic number field
+    as lying on the yx= +- 1
+  */    
+  
+viewps("fig1.ps");
+  
+/* REal part of z ^ 1/3 */
+
+viewps("maxout-3.ps");  
+  
+plot2d(sin(x),[-%pi,%pi]);  
+plot2d(3*sin(x),[-%pi,%pi]);  
+  
+block([ps_scale:[40,20],ps_translate:[5,15]],
+  psaxes(4,10),
+  plot2d(3*x^2*sin(x),[-%pi,%pi]));  
+  
+viewps("fig21.ps");  
+  
+/* REal part of z ^ 1/3 */
+  
+block([ps_scale:[200,200],
+  ps_translate:[1.5,1.5],
+  colour_z:true,transform_xy:polar_to_xy],
+  closeps(),
+  plot3d(r^.3333*cos(th/3),[1,1,1.4],[0,1,0,6*%pi],[12,81]),
+  closeps(),viewps());
+    
+    
+    
+/* REal part of z ^ 1/6 */  
+block([ps_scale:[200,200],
+  ps_translate:[1.5,1.5],
+  colour_z:true,transform_xy:polar_to_xy],
+  plot3d(r^(1/6.0)*cos(th/6),[1,1,1.4],[0,1,0,2*6*%pi],[12,121]),
+  closeps(),viewps()
+  );
+  
+    
+
+
+display2d:false;
+set_up_dot_simplifications([z.z+y.y+y.x+x.y,-a*z.z+y.x+x.y+x.x,a*z.y,z.x-a*y.z-x.z],4);
+centrals:fast_central_elements([x,y,z],3);
+centrals4:  fast_central_elements([x,y,z],4);
+set_up_dot_simplifications(append(centrals,centrals4,[z.z+y.y+y.x+x.y,-a*z.z+y.x+x.y+x.x,a*z.y,z.x-a*y.z-x.z]),8);
+monomial_dimensions(8);
+  

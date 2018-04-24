@@ -1,0 +1,9 @@
+/*-*-macsyma-*-*/
+
+eval_when([translate,batch,demo],
+	  load_package(sharem,"autolo"))$
+
+/* a sum convenient for the expression of certain formuli by CMA */
+
+defm(sum1('exp,'var,a,b),
+     if a > b then 0 else sum(exp,var,a,b))$

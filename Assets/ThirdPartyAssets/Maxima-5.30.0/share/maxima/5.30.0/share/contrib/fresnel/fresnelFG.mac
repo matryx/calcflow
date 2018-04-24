@@ -1,0 +1,11 @@
+fresnelFG(z):=block([fc,fs,cz2,sz2,zp2,FLOAT2BF:true],
+   z:bfloat(z),
+   zp2:bfloat(%pi)*z*z/2.0b0,
+   cz2:cos(zp2),
+   sz2:sin(zp2),
+   fc:fresnelC(z),
+   fs:fresnelS(z),
+   [z,
+    ((2 * fc * sz2 - sz2 - 2 * cz2 * fs + cz2)/(2 * sz2^2 + 2 * cz2^2)),
+    (( - 2 * fs * sz2 + sz2 - 2 * cz2 * fc + cz2)/(2 * sz2^2 + 2 * cz2^2))]
+)$

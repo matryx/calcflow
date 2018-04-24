@@ -1,0 +1,266 @@
+/* z-transform code
+ * Copyright 2007 by Robert Dodier
+ * I release this work under terms of GNU General Public License
+ *
+ * Summary. Z-transforms for various special cases are implemented as
+ * pattern-matching rules. Given an expression like z_transform(foo(n, z), n, z),
+ * for most rules it's necessary to have the variables n and z in hand before
+ * looking at foo(n, z). However, the Maxima pattern matcher does not have
+ * backtracking, so one rule (r0 below) captures n and z, then all other
+ * rules are applied.
+ */
+
+put ('z_transform, true, 'present);
+
+apply_z_transform (e) := apply1 (e, r0);
+
+matchdeclare ([nn, zz], symbolp);
+matchdeclare (aa, all);
+
+defrule (r0,
+    z_transform (aa, nn, zz),
+    block ([nn% : nn, zz% : zz],
+        apply1
+           (z_transform (aa, nn, zz),
+            r913_1a, r913_1b, r913_2a, r913_2b, r913_3a, r913_3b,
+            r913_4, r913_5, r913_6, r913_7, r913_10, r913_12, r914_4,
+            r914_6, /* r914_9, */ r914_10, r914_11a, r914_11b, r914_12,
+            r914_13, r914_14, r914_15a, r914_16)));
+
+/* Some specific transforms.
+ * Table 9.1.3 at: http://math.fullerton.edu/mathews/c2003/ZTransformIntroMod.html
+ */
+
+/* (1) delta[n] --> 1
+ * (have to try kron_delta both ways ... sigh)
+ */
+
+simp : false;
+
+defrule (r913_1a,
+    z_transform (kron_delta (nn%, aa), nn%, zz%),
+    zz^(- aa));
+
+defrule (r913_1b,
+    z_transform (kron_delta (aa, nn%), nn%, zz%),
+    zz^(- aa));
+
+simp : true;
+
+/* (2) u[n] --> z/(z - 1) */
+
+defrule (r913_2a,
+    z_transform (1, nn%, zz%),
+    zz/(zz - 1));
+
+defrule (r913_2b,
+    z_transform (unit_step (nn%), nn%, zz%),
+    zz/(zz - 1));
+
+/* (3) b^n --> z/(z - b) */
+
+matchdeclare (bb, freeof (nn%, zz%));
+
+defrule (r913_3a,
+    z_transform (bb^nn%, nn%, zz%),
+    zz/(zz - bb));
+
+defrule (r913_3b,
+    z_transform (1/(bb^nn%), nn%, zz%),
+    zz/(zz - 1/bb));
+
+/* (4) b^(n - 1) * u[n - 1] --> 1/(z - b) */
+
+defrule (r913_4,
+    z_transform (bb^(nn% - 1) * unit_step (nn% - 1), nn%, zz%),
+    1 / (zz - bb));
+
+/* (5) e^(a*n) --> z/(z - e^a) */
+
+matchdeclare (aa, lambda ([e], e # 0 and freeof (nn%, zz%, e)));
+
+defrule (r913_5,
+    z_transform (exp (aa * nn%), nn%, zz%),
+    zz / (zz - exp (aa)));
+
+/* (6) n --> z/(z - 1)^2 */
+
+defrule (r913_6,
+    z_transform (nn%, nn%, zz%),
+    zz / (zz - 1)^2);
+
+/* (7) n^2 --> z*(z + 1)/(z - 1)^3 */
+
+defrule (r913_7,
+    z_transform (nn%^2, nn%, zz%),
+    zz*(zz + 1) / (zz - 1)^3);
+
+/* (8) b^n*n --> b*z/(z - b)^2
+ * via (6) + frequency scaling
+ */
+
+/* (9) e^(a*n)*n --> z*e^a/(z - e^a)^2
+ * via (6) + complex translation
+ */
+
+/* (10) sin(a*n) --> sin(a)*z/(z^2 - 2*cos(a)*z + 1) */
+
+defrule (r913_10,
+    z_transform (sin (aa*nn%), nn%, zz%),
+    sin(aa)*zz / (zz^2 - 2*cos(aa)*zz + 1));
+
+/* (11) b^n*sin(a*n) --> sin(a)*b*z/(z^2 - 2*cos(a)*b*z + b^2)
+ * via (10) + frequency scaling
+ */
+
+/* (12) cos(a*n) --> z*(z - cos(a))/(z^2 - 2*cos(a)*z + 1) */
+
+defrule (r913_12,
+    z_transform (cos (aa*nn%), nn%, zz%),
+    zz*(zz - cos(aa)) / (zz^2 - 2*cos(aa)*zz + 1));
+
+/* (13) b^n*cos(a*n) --> z*(z - b*cos(a))/(z^2 - 2*cos(a)*b*z + b^2)
+ * via (11) + frequency scaling
+ */
+
+
+/* General properties.
+ * Table 9.1.4 at: http://math.fullerton.edu/mathews/c2003/ZTransformIntroMod.html
+ */
+
+/* (4) u[n - m] --> z^(1 - m)/(z - 1)
+ * (delayed unit step)
+ */
+
+matchdeclare (mm, integerp);
+
+defrule (r914_4,
+    z_transform (unit_step (nn% - mm), nn%, zz%),
+    zz^(1 - mm) / (zz - 1));
+    
+/* (5) x[n - 1]*u[n - 1] --> (1/z)*X(z)
+ * via (6) w/ m = 1
+ */
+
+/* (6) x[n - m]*u[n - m] --> z^(-m)*X(z)
+ * (time delayed shift)
+ */
+
+defrule (r914_6,
+    z_transform (aa * unit_step (nn% - mm), nn%, zz%),
+    z^(-m) * z_transform (subst (nn + mm, nn, aa), nn, zz));
+
+/* (7) x[n + 1] --> z*(X(z) - x[0])
+ * (8) x[n + 2] --> z^2*(X(z) - x[0] - x[1]*z^(-1))
+ * via (9) w/ m = 1 and m = 2 respectively
+ */
+
+/* (9) x[n + m] --> z^m*(X(z) - sum(x[i]*z^(-i), i, 0, m - 1))
+ * (time forward)
+ */
+
+/* HMM, NOT SURE HOW TO DO (9) ... FOLLOWING STUFF IS BROKEN */
+
+matchdeclare (mm, lambda ([e], integerp(e) and e > 0));
+defmatch (n_plus_m, nn% + mm);
+
+matchdeclare (xxnpm, lambda ([e], n_plus_m (e) # false));
+
+defrule (r914_9,
+    z_transform (ss, nn%, zz%),
+    zz^mm * z_transform (subst (nn - mm, nn, ss), nn, zz));
+
+/* (10) e^(a*n)*x[n] --> X(z*e^(-a))
+ * (complex translation)
+ */
+
+matchdeclare (nz, lambda ([e], e # 0 and freeof (nn%, zz%, e)));
+
+defrule (r914_10,
+    z_transform (exp (nz * nn%) * bb, nn%, zz%),
+    'subst (zz/exp(nz), zz, z_transform (bb, nn, zz)));
+
+/* (11) b^n*x[n] --> X(z/b)
+ * (frequency scaling)
+ */
+
+matchdeclare (xx, all);
+matchdeclare (bb, freeof (nn%, zz%));
+
+defrule (r914_11a,
+    z_transform (bb^nn% * xx, nn%, zz%),
+    'subst (zz/bb, zz, z_transform (xx, nn, zz)));
+
+defrule (r914_11b,
+    z_transform (1/(bb^nn%) * xx, nn%, zz%),
+    'subst (zz*bb, zz, z_transform (xx, nn, zz)));
+
+/* (12) n*x[n] --> -z X'(z)
+ * (differentiation)
+ */
+
+matchdeclare (aa, all);
+matchdeclare (kk, lambda ([e], integerp(e) and e > 0));
+
+defrule (r914_12,
+    z_transform (aa*nn%^kk, nn%, zz%),
+    block ([ee : - zz * 'diff (z_transform (aa, nn, zz), zz)],
+        for i:2 thru kk do ee : - zz * 'diff (ee, zz), ee));
+
+/* (13) (1/n)*x[n] --> - \int X(z)/z dz
+ * (integration)
+ */
+
+matchdeclare (uu, lambda ([e], not atom(e) and op(e) = "/" and member (nn%, second(e))));
+
+defrule (r914_13,
+    z_transform (uu, nn%, zz%),
+    'integrate (zz^-1 * z_transform (aa, nn, zz), zz));
+
+/* (14) 1/(n + m)*x[n] --> - z^(-m) * \int X(z)/z^(m + 1) dz
+ * (integration shift)
+ */
+
+matchdeclare (mm, lambda ([e], integerp(e) and e > 0));
+
+defrule (r914_14,
+    z_transform (aa/(nn% + mm), nn%, zz%),
+    - zz^(-mm) * 'integrate (z^-(mm + 1) * z_transform (aa, nn, zz), zz));
+
+/* (15) x[n] (star) y[n] = \sum_{i=0}^n x[i]*y[n - i] --> X(z)*Y(z)
+ * (discrete time convolution)
+ */
+
+matchdeclare (cc, lambda ([e], not atom(e) and op(e) = 'convolution));
+
+defrule (r914_15a,
+    z_transform (cc, nn%, zz%),
+    block ([a : args(cc)], product (z_transform (a[i], nn, zz), i, 1 , length(a))));
+
+/* ANOTHER RULE R914_15B FOR EXPLICIT 'SUM EXPRESSION WOULD BE NICE ... */
+
+/* (16) \sum_{i=0}^n x[i] --> z/(z - 1)*X(z)
+ * (convolution with y[n] = 1)
+ */
+
+matchdeclare (ii, symbolp);
+
+simp : false;
+
+defrule (r914_16,
+    z_transform ('sum (aa, ii, 0, nn%), nn%, zz%),
+    zz/(zz - 1) * z_transform (subst (nn, ii, aa), nn, zz));
+
+simp : true;
+
+/* ((17) & (18) -- not transform pairs) */
+
+/* (put linearity declaration last, otherwise messes up rules) */
+
+/* (1) addition
+ * (2) constant multiple
+ * (3) linearity
+ */
+
+declare (z_transform, linear);
+

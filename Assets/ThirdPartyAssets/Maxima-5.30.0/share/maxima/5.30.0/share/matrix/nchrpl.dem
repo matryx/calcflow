@@ -1,0 +1,15 @@
+/* First load the necessary file: */
+load('nchrpl);
+/* Now generate a 6 x 6 matrix to work with: */
+h[i,j]:=(i+j)/(i*j);
+test_matrix:60*genmatrix(h,6,6,1,1);
+/*  We wish to compare the 
+       performance of NCHARPOLY and CHARPOLY. */
+showtime:all$
+ncharpoly(test_matrix,x);
+ratsimp(charpoly(test_matrix,x));
+/*  The RATSIMP was necessary to obtain a form as neat as the
+      one returned by NCHARPOLY.
+      Another function in this package is MATTRACE, which takes
+      the trace of a matrix: */
+mattrace(test_matrix);
