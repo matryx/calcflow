@@ -1,0 +1,50 @@
+/*
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * Proving one of the Rainich conditions
+ */
+
+if get('itensor,'version)=false then load(itensor);
+("The Rainich-conditions apply to electrovacuum solutions.")$
+("The simplest of these states that the trace of the Ricci tensor is zero.")$
+("To begin, we set up the metric:")$
+imetric(g);
+("We also specify symmetry properties of the Ricci tensor:")$
+remcomps(F);
+remcomps(R);
+remcomps(T);
+decsym(R,2,0,[sym(all)],[]);
+decsym(R,0,2,[],[sym(all)]);
+("The Ricci tensor contracts to form the Ricci scalar:")$
+defcon(R,R,R);
+("The electromagnetic field tensor is antisymmetric:")$
+decsym(F,2,0,[anti(all)],[]);
+decsym(F,0,2,[],[anti(all)]);
+("Now we can write the Einstein equation for the electrovacuum field:")$
+Ein:R([i,j],[])-R([],[])*g([i,j],[])/2=-8*%pi*(F([i,b],[])*F([j],[b])-F([a,b],[])*F([],[a,b])*g([i,j],[])/4)$
+ishow(%)$
+("For the proof, we first contract it with the metric tensor:")$
+ishow(Ein*g([-i,-j],[]))$
+ishow(contract(expand(%)))$
+("We now express F using the mixed index form:")$
+components(F([a,b],[]),g([b,c],[])*F([a],[c]));
+components(F([],[a,b]),g([],[a,c])*F([c],[b]));
+ishow(%th(5))$
+%,F$  
+ishow(rename(contract(rename(contract(expand(%))))))$
+("We remove the definitions for F to avoid further substitutions.")$
+remcomps(F);
+("The remaining algebraic Rainich conditions are much harder to prove.")$
+("For reference, the other two conditions are:")$
+ishow(T([a,c],[])*T([b],[c])=-1/4*(R([d,e],[])*R([],[d,e]))*g([a,b],[]))$
+ishow(T([a,b],[])*v([],[a])*v([],[b])>=0)$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

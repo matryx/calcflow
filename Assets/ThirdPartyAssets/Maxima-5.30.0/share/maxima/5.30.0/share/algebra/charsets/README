@@ -1,0 +1,30 @@
+CharSets is a program which I translated from the Maple package CharSets,
+written by Dr. Dongming Wang.  His homepage is  http://calfor.lip6.fr/~wang.
+A good reference for Characteristic sets is his book Elimination Methods.
+
+I wish to thank Dr. Wang for making this code available to the maxima
+project.  I also wish to thank Dr. Willis, Dr. Fateman and Mr. Dotson for
+their assistance with this project.
+Finally, I wish to dedicate this work to the late Dr. Paul Karmel.
+Dan Stanger
+11/28/02
+
+The CharSets package depends on the set functions in set.lisp, which was
+previously in maxima/src/ and is now in maxima/share/algebra/charsets/.
+To use CharSets, set.lisp must be loaded first, as it is no longer part
+of the compiled Maxima code. For general use, nset.lisp in
+maxima/share/contrib/nset/ supersedes set.lisp.
+
+Robert Dodier
+2005/02/07
+
+src/flatten.lisp has also been moved to share/algebra/charsets/,
+with $every cut from src/mutils.lisp and pasted into flatten.lisp.
+$flatten and $every have been renamed to $charsets_flatten and 
+$charsets_every, and every function in set.lisp has been renamed
+from $foo to $charsets_foo. Function calls in charsets.mac and
+rtestflatten.mac have been fixed up from foo to charsets_foo to
+match set.lisp and flatten.lisp.
+
+Robert Dodier
+2005/02/23

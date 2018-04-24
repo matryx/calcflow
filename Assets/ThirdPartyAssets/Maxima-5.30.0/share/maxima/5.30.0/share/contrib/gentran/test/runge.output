@@ -1,0 +1,57 @@
+C fortran code generated from runge.template
+      program runge
+      implicit real (k,m)
+c
+c  Input
+c
+      write(6,*) 'Initial Value of p'
+      read(5,*) p
+      write(6,*) ' p = ', p
+      write(6,*) 'Initial Value of q'
+      read(5,*) q
+      write(6,*) ' q = ', q
+      write(6,*) 'Value of m'
+      read(5,*) m
+      write(6,*) ' m = ', m
+      write(6,*) 'Value of k0'
+      read(5,*) k0
+      write(6,*) ' k0 = ', k0
+      write(6,*) 'Value of b'
+      read(5,*) b
+      write(6,*) ' b = ', b
+      write(6,*) 'Step Size of t'
+      read(5,*) hh
+      write(6,*) ' Step Size of t = ', hh
+      write(6,*) 'Final Value of t'
+      read(5,*) tp
+      write(6,*) ' Final Value of t = ', tp
+c
+c  Initialization
+c
+      tt=0.0
+      write(9,*) ' h = p**2/2.0/m+k0*q**2/2.0'
+      write(9,*) ' d = b*qdot/2.0'
+      write(9,901) c
+901   format(' c= ',e20.10)
+      write(9,910) tt, q, p
+910   format(' ',3e20.10)
+c
+c  Loop
+c
+25009 if (tt .ge. tf) goto 25010
+          pn=-1.0/2.0*b*hh-1.0/96.0*b*hh**5*k0**2/m**2+b*hh**3*k0/12.0/m
+     .     +p-1.0/96.0*hh**6*k0**3*p/m**3+hh**4*k0**2*p/8.0/m**2-1.0/2.0
+     .     *hh**2*k0*p/m-hh*k0*q-1.0/48.0*hh**5*k0**3*q/m**2+hh**3*k0**2
+     .     *q/6.0/m
+          q=b*hh**8*k0**3/384.0/m**4-1.0/48.0*b*hh**6*k0**2/m**3+b*hh**4
+     .     *k0/12.0/m**2-1.0/4.0*b*hh**2/m+hh**9*k0**4*p/384.0/m**5-1.0/
+     .     32.0*hh**7*k0**3*p/m**4+hh**5*k0**2*p/6.0/m**3-1.0/2.0*hh**3*
+     .     k0*p/m**2+hh*p/m+q+hh**8*k0**4*q/192.0/m**4-1.0/24.0*hh**6*k0
+     .     **3*q/m**3+hh**4*k0**2*q/6.0/m**2-1.0/2.0*hh**2*k0*q/m
+          p=pn
+          tt=tt+hh
+          write(9,910) tt, q, p
+          goto 25009
+25010 continue
+      stop
+      end

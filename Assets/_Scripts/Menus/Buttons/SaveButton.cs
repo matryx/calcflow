@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SaveButton : QuickButton {
+public class SaveButton : QuickButton
+{
 
     public ExpressionSaveLoad saver;
 

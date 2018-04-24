@@ -1,0 +1,54 @@
+/*
+This subroutine computes pade approximants of multivariable functions
+Copyright (C) 1999  Dan Stanger
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Library General Public License for more details.
+
+You should have received a copy of the GNU Library General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Dan Stanger dan.stanger@ieee.org
+
+*/
+/* this function uses the pt_D matrix for temp storage */
+sortem(MN, MB):=block([
+    tkl:makelist(pt_aJT[i],i, 1, MN), /* make a list of tree element types */
+    lkl:makelist(pt_aJT[i],i,MN+1, MB), /* make a list of link element types */
+    lt:1..MN, /* make a list of the tree branch numbers */
+    ll:MN+1..MB,l], /* and the link branch numbers */
+    l:append(
+	sort_with_keylist(lt,tkl,
+	    lambda([x,y],getTreeElementIndex(x)<getTreeElementIndex(y))),
+	sort_with_keylist(ll,lkl,
+	    lambda([x,y],getLinkElementIndex(x)<getLinkElementIndex(y)))),
+    block([ii],
+	ii:0,
+	for i in l do (
+	    ii:ii+1,
+	    pt_D[0,ii]:pt_aJT[i],
+	    for j:1 thru MN do pt_D[j,ii]:pt_A[j,i]),
+	for i:1 thru MB do (
+	    pt_aJT[i]:pt_D[0,i],
+	    /* copy back to pt_A matrix just in case */
+	    for j:1 thru MN do pt_A[j,i]:pt_D[j,i]),
+	ii:0,
+	for i in l do (ii:ii+1, pt_D[0,ii]:pt_name[i]),
+	for i:1 thru MB do (pt_name[i]:pt_D[0,i]),
+	ii:0,
+	for i in l do (ii:ii+1, pt_D[0,ii]:pt_V[i]),
+	for i:1 thru MB do (pt_V[i]:pt_D[0,i])
+    ),
+
+    [genmatrix(pt_A,MN,MN,1,1),
+     genmatrix(pt_A,MN,MB,1,MN+1)] /* could use pt_D here instead */
+)
+$

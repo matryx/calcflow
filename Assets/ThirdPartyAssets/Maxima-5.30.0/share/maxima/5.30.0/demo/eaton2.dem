@@ -1,0 +1,26 @@
+showtime:true$
+loadprint:false$
+eqn1:a*cos(p2)=s+b*cos(p3);
+eqn2:a*sin(p2)=e+b*sin(p3);
+/* declare p2, p3 and s to be time-dependent. */
+depends([p2,p3,s],t);
+/* [1] from equations 1 and 2, eliminate p3: */
+eqn3:expand((eqn1-s)^2+(eqn2-e)^2);
+eqn3:trigsimp(eqn3);
+/* [2] using the results of step 1, solve for s in terms of
+       a,b,e,p2: */
+s_solution:solve(eqn3,s);
+/* note that this differs from the result given.
+   [3] take the derivative of eqn2 wrt t:  */
+eqn3:diff(eqn2,t);
+/* [4] solve for p3-dot in terms of a, b, p2, p2-dot,p3. */
+p3_dot:solve(%,diff(p3,t));
+/* [5] take the derivative of eqn2 wrt t:  */
+eqn5:diff(eqn1,t);
+/* [6] solve for s-dot in terms of a, b, p2, p2-dot,p3. */
+solve(eqn5,diff(s,t));
+%,p3_dot,factor;
+trigreduce(%);
+/* [7] */
+z:i*(a*cos(p2)/(b*cos(p3)))^2;
+diff(z,p2);

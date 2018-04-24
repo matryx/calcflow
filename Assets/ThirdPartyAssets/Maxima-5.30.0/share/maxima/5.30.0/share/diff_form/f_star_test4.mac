@@ -1,0 +1,86 @@
+/* written by Gosei Furuya <go.maxima@gmail.com> 
+#  This program is free software; you can redistribute it and/or modify        
+#  it under the terms of the GNU General Public License as published by        
+#  the Free Software Foundation; either version 2 of the License, or           
+#  (at your option) any later version.                
+*/
+
+
+infix("@");
+infix("&");
+
+f_star(newcoords,'a_form):=
+	block([dim,i:1,coords,extdim:2,basis,extsub,extsubb,pu_],
+	dim:length(newcoords),array(pu_,dim),
+	mode_declare([basis,extsub,extsubb],any),
+	coords:newcoords,
+	for i thru dim do
+	(
+	pu_[i]:concat(D,newcoords[i])
+	),basis:makelist(pu_[i],i,1,dim),
+	extsub[1]:[],
+	for i thru dim do
+	 (
+  	 extsub[i+1]:cons(basis[i]=-basis[i],extsub[i]),
+	
+ 	 extsubb[i]:cons(basis[i]=0,extsub[i])),ev(a_form)
+	);
+
+fstar_with_clf(newcoords,n_table,'a_form):=
+	block([dim,i:1,coords,extdim:2,basis,extsub,extsubb,extsubb2,
+	norm_table,scale_factor,volume,a_,b_,x_,pu_],
+	mode_declare([basis,extsub,extsubb,extsubb2],any),
+	dim:length(newcoords),
+	coords:newcoords,array(pu_,dim),
+	for i thru dim do
+	 (pu_[i]:concat(D,newcoords[i])
+	),
+	basis:makelist(pu_[i],i,1,dim),
+	extsub[1]:[],
+	for i thru dim do
+	 (
+  		extsub[i+1]:cons(basis[i]=-basis[i],extsub[i]),
+ 	 	extsubb[i]:cons(basis[i]=0,extsub[i])),
+	norm_table:clif_norm(n_table,coords),
+	a_:solve(x_^2-apply("*",norm_table),[x_]),
+	volume:rhs(a_[2]),volume:1/volume,
+	scale_factor:[],
+	for i:1 thru dim do 
+	( a_:solve(x_^2-1/norm_table[i],[x_]),
+	scale_factor:cons(rhs(a_[2]),scale_factor)
+	),
+	scale_factor:reverse(scale_factor),
+	for i:1 thru dim do
+ 	( extsubb2[i]:cons(basis[i]=norm_table[i]/basis[i],extsub[i])
+	),
+	ev(a_form)
+	);
+
+clif_norm(list_,coords_):=
+	block([dim,_p,coords,cliffordtype,ntable:[],_l:[]],
+	coords:coords_,
+	dim:length(coords),
+	cliffordtype:makelist(1,i,1,dim),
+	for i:1 thru dim do 
+	(_l:map(lambda([x],diff(x,coords[i])),list_),
+    		_l:map(lambda([x],x^2),_l),_p:ratsimp(trigsimp(apply("+",_l))),
+		ntable:endcons(cliffordtype[i]/_p,ntable)),
+	ntable
+	);
+
+/*inner[_f](_g) */
+inner(_f,_g):= block([_a,_b:[],_r],
+      _a:expand(_f),
+      for i:1 thru dim do (_b:endcons(ratcoef(_a,basis[i]),_b)),
+      _r:_b | _g);
+
+/*Lie[_f1](_g1)    Lie differntial operator*/
+Lie(_f1,_g1):=d(inner(_g1,_f1))+inner(d(_g1),_f1);
+
+
+
+
+ nest2(_f,_x):=block([_a:[_x],i],if listp(_f) then (
+	 _f:reverse(_f),for i:1 thru length(_f) do(_a:map(_f[i],_a))) 
+	else (_a:map(_f,_a)),_a[1])$
+ nest3(_f,_x,_n):=block([_a,i],_a:[_x],for i:1 thru _n do (_a:map(_f,_a)),_a)$ 

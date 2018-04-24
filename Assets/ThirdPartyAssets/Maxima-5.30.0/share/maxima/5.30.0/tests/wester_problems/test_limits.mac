@@ -1,0 +1,67 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Limits/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Limits ---------- */
+/* Start with a famous example => e */
+'limit((1 + 1/n)^n, n, inf);
+ev(%, limit);
+/* => 1/2 */
+limit((1 - cos(x))/x^2, x, 0);
+/* See Dominik Gruntz, _On Computing Limits in a Symbolic Manipulation System_,
+   Ph.D. dissertation, Swiss Federal Institute of Technology, Zurich,
+   Switzerland, 1996. => 5 */
+limit((3^x + 5^x)^(1/x), x, inf);
+/* => 1 */
+limit(log(x)/(log(x) + sin(x)), x, inf);
+/* => - e^2   [Gruntz] */
+'limit((exp(x*exp(-x)/(exp(-x) + exp(-2*x^2/(x + 1)))) - exp(x))/x, x, inf);
+ev(%, limit);
+/* => 1/3   [Gruntz] */
+'limit(x*log(x)*log(x*exp(x) - x^2)^2/log(log(x^2 + 2*exp(exp(3*x^3*log(x))))),
+       x, inf);
+ev(%, limit);
+/* => 1/e   [Knopp, p. 73] */
+limit(1/n * n!^(1/n), n, inf);
+/* Rewrite the above problem slightly => 1/e */
+limit(1/n * gamma(n + 1)^(1/n), n, inf);
+/* => 1   [Gradshteyn and Ryzhik 8.328(2)] */
+assume(a > 0)$
+limit(gamma(z + a)/gamma(z)*exp(-a*log(z)), z, inf);
+forget(a > 0)$
+assume(a < 0)$
+limit(gamma(z + a)/gamma(z)*exp(-a*log(z)), z, inf);
+forget(a < 0)$
+/* => e^z   [Gradshteyn and Ryzhik 9.121(8)] */
+limit(hgfred([1, k], [1], z/k), k, inf);
+/* => Euler's_constant   [Gradshteyn and Ryzhik 9.536] */
+limit(zeta(x) - 1/(x - 1), x, 1);
+/* => gamma(x)   [Knopp, p. 385] */
+'limit(n^x/(x * 'product((1 + x/k), k, 1, n)), n, inf);
+q: closedform(%);
+assume(x > 0)$
+ev(q, 'limit);
+forget(x > 0)$
+remvalue(q)$
+/* See Angus E. Taylor and W. Robert Mann, _Advanced Calculus_, Second Edition,
+   Xerox College Publishing, 1972, p. 125 => 1 */
+limit(x * integrate(exp(-t^2), t, 0, x)/(1 - exp(-x^2)), x, 0);
+/* => [-1, 1] */
+[limit(x/abs(x), x, 0, minus), limit(x/abs(x), x, 0, plus)];
+/* => pi/2   [Richard Q. Chen] */
+limit(atan(-log(x)), x, 0, plus);
+/* ---------- Quit ---------- */
+quit();

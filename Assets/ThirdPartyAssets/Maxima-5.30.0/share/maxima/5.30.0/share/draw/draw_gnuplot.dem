@@ -1,0 +1,677 @@
+/* Testing Maxima's package draw with Gnuplot
+ *
+ * To run this test package, type
+ *  demo ("draw_gnuplot.dem") $
+ *
+ */
+
+if not get('draw,'version) then load("draw") $
+
+
+("Axes with different styles")$
+draw2d(
+  explicit(x^3,x,-1,1),
+  xaxis       = true,
+  xaxis_color = blue,
+  yaxis       = true,
+  yaxis_width = 2,
+  yaxis_type  = solid,
+  yaxis_color = "#f3b507")$
+ 
+
+("Function defined by intervals")$
+draw2d(
+  color = green,
+  explicit(u^2,u,-2,2), 
+  explicit(sin(z),z,2,6),
+  title = "My Title") $
+
+
+("Rational function with asymptotes")$
+draw2d(
+  grid   = true,
+  key    = "y = x^2/(x-2)",
+  yrange = [-10,20],
+  color  = red,
+  explicit(x^2/(x-2),x,-9,15),
+  key       = "",
+  line_type = dots,
+  color     = blue,
+  explicit(x+2,x,-9,15),
+  nticks = 70,
+  parametric(2,t,t,-10,20),
+  head_length = 0.3,
+  color     = black,
+  line_type   = solid,
+  vector([5.35,2.45],[-1.53,3.25]),
+  vector([-1,7.5],[3,0]),
+  label_alignment = left,
+  label(["y = x+2",6,2.5]),
+  label_alignment = right,
+  label(["x = 2",-1.7,7.5]) ) $
+
+
+("Functions by name")$
+( F(x) := x^2,
+  G(x) := x^3,
+  H(x) := if x < 0 then x^4 - 1 else 1 - x^5,
+  draw2d (
+    explicit(F, u, -1, 1),
+    color = navy,
+    line_width = 2.5,
+    explicit(G, r, -1, 1),
+    color = "#45baf9",
+    line_width = 3,
+    explicit(H, s, -1, 1),
+    yrange = [-1.5, 1.5]) )$
+
+
+("Logarithmic scales")$
+draw2d(
+  logy=true,
+  xlabel = "x",
+  ylabel = "log(y)",
+  color  = red,
+  explicit(exp(x),x,0.1,20),
+  axis_top   = false,
+  axis_right = false,
+  grid       = true,
+  title      = "Logarithmic scale")$
+
+
+("Playing with tics")$
+draw2d(
+  xlabel     = "User selected tics on axis",
+  ylabel     = "Rotated labeled tics",
+  xtics      = {-1/2,-1/4,3/4}, /* set of numbers */
+  xtics_axis = true,            /* plot tics on x-axis */
+  ytics      = {["High",0.75],["Medium",0],["Low",-0.75]},
+  ytics_rotate = true,
+  grid       = true,
+  explicit(x^3,x,-1,1) )$
+
+
+("Shadowed area")$
+( f1: 2*x^2-5*x+3,
+  f2: -8*x^2-x+30,
+  [x1,x2]: map('rhs, solve(f1=f2)),
+  draw2d(
+    title       = "Region bounded by two functions",
+    fill_color  = grey,
+    filled_func = f2,
+    explicit(f1,x,x1,x2),
+    filled_func = false,
+    xaxis       = true,
+    xtics_axis  = true,
+    yaxis       = true,
+    line_width  = 2,
+    key         = string(f1),
+    color       = red,
+    explicit(f1,x,-3,3),
+    key         = string(f2),
+    color       = blue,
+    explicit(f2,x,-3,3)) )$
+
+
+("Complex values in 2D")$
+draw2d( 
+    explicit(sqrt(x^2-4*x)-x, x, -1, 5),
+    color = red,
+    draw_realpart = false,
+    explicit(sqrt(x^2-4*x)-x+2, x, -1, 5) )$
+
+
+("Complex values in 3D")$
+draw3d(
+    enhanced3d = x,
+    explicit(sqrt(x+y),x,-1,1,y,-1,1),
+    color = red,
+    draw_realpart = false,
+    enhanced3d = y,
+    explicit(sqrt(x+y)+1,x,-1,1,y,-1,1) )$
+
+
+("Bars")$
+draw2d(
+  key          = "Group A",
+  fill_color   = blue,
+  fill_density = 0.2,
+  bars([0.8,5,0.4],[1.8,7,0.4],[2.8,-4,0.4]),
+  key          = "Group B",
+  fill_color   = red,
+  fill_density = 0.6,
+  line_width   = 4,
+  bars([1.2,4,0.4],[2.2,-2,0.4],[3.2,5,0.4]),
+  xaxis = true) $
+
+
+("Error bars")$
+draw2d(
+  error_type        = xy,
+  points_joined     = true,
+  background_color  = orange,
+  color             = blue,
+  proportional_axes ='xy,
+  xrange            = [0, 18],
+  yrange            = [0,8],
+  grid              = true,
+  errors([[1,2,1,2], [3,5,2,1], [10,3,1,1], [17,6,1/2,2]])) $
+
+
+("Scaling and rotation in 2D")$
+( rect : rectangle([0,0],[3,1]),
+  th : 2*%pi/3,
+  draw2d(
+    proportional_axes = 'xy,
+    fill_color = red,
+    rect,
+    fill_color = blue,
+    transform = [x*2,-y,x,y],
+    rect,
+    fill_color = yellow,
+    transform = [cos(th)*x - sin(th)*y,
+                 sin(th)*x + cos(th)*y, x, y],
+    rect ))$
+
+
+("Scaling and reflection in 3D")$
+( my_grid : 
+    mesh([[1,1,3],[7,3,1],[12,-2,4],[15,0,5]],
+         [[2,7,8],[4,3,1],[10,5,8],[12,7,1]],
+         [[-2,11,10],[6,9,5],[6,15,1],[20,15,2]]),
+  draw3d(
+    my_grid,
+    color = red,
+    transform = [-2*x,-2*y,-2*z,x,y,z],
+    my_grid ) )$
+
+
+("Secondary y-scale")$
+draw2d(
+  xtics_secondary = auto,
+  ytics_secondary = auto,
+  xaxis_secondary = true,
+  color = red,
+  key = "top x, left y",
+  explicit(sin(x),x,0,20),
+  xaxis_secondary = false,
+  yaxis_secondary = true,
+  color = blue,
+  key = "bottom x, right y",
+  explicit(100*sin(x+0.3)+2,x,0,10)) $
+
+
+("Regions defined by inequalities")$
+draw2d(
+   x_voxel = 30,
+   y_voxel = 30,
+   fill_color = cyan,
+   region( not (x >1 or y > 2+x) and (sin(x+y) > 0) ,x,-20,5,y,-20,5)) $
+
+
+("Colored axes in 3D")$
+draw3d(
+  explicit(x^2+y^2,x,-1,1,y,-1,1),
+  xaxis_width = 2,  xaxis_color = orange,  xaxis_type  = solid,  xaxis=true,
+  yaxis_width = 2,  yaxis_color = orange,  yaxis_type  = solid,  yaxis=true,
+  zaxis_width = 2,  zaxis_color = blue,    zaxis_type  = solid,  zaxis=true,
+  grid=true,
+  user_preamble= "set xyplane at 0" ) $
+
+
+("3D surface with mesh lines")$
+draw3d(
+   enhanced3d = true,
+   wired_surface  = true,
+   explicit(x^2+y^2, x,-2,2,y,-2,2)) $
+
+
+("Enhanced 3D with logarithmic scale")$
+draw3d(
+  title = "Logarithmic scale to colors",
+  enhanced3d = true,
+  color      = green,
+  logcb = true,
+  logz  = true,
+  palette = [-15,24,-9],
+  explicit(exp(x^2-y^2), x,-2,2,y,-2,2)) $
+
+
+("Colored 4th dimension")$
+draw3d(
+  surface_hide = true,
+  enhanced3d   = sin(x*y),
+  explicit(20*exp(-x^2-y^2)-10, x ,-3, 3, y, -3, 3)) $
+
+
+("4th dimension in gray")$
+draw3d(
+  surface_hide = true,
+  palette      = gray,
+  xu_grid      = 50,
+  yv_grid      = 50,
+  enhanced3d   = true,
+  explicit(5*sin(x*y), x, -5, 5, y, -5, 5),
+  enhanced3d   = 5 * sin(v*u),
+  explicit(u^2+v^2+10, u, -5, 5, v, -5, 5))$
+
+
+("Multiple objects in 3D")$
+draw3d(
+  color = green,
+  explicit(exp(sin(x)+cos(x^2)),x,-3,3,y,-3,3),
+  color = blue,
+  parametric(cos(5*u)^2,sin(7*u),u-2,u,0,2),
+  color = brown,
+  line_width = 2,
+  parametric(t^2,sin(t),2+t,t,0,2),
+  surface_hide = true,
+  title = "Surface & curves",
+  color = red,
+  label(["UP",-2,0,3]),
+  label(["DOWN",2,0,-3]) )$
+
+
+("Parametric surface")$
+draw3d(
+  palette    = [7,-15,3],
+  enhanced3d = (1-0.2*cos(v))*sin(u),
+  parametric_surface(
+    (1-0.2*cos(v))*cos(u),
+    (1-0.2*cos(v))*sin(u),
+    0.2*sin(v),
+    u, 0, 2*%pi, v, 0, 2*%pi)) $
+
+
+("Curve with colored 4th dimension")$
+draw3d(
+  color      = blue,
+  nticks     = 60,
+  line_width = 3,
+  enhanced3d = (u-1)^2,
+  parametric(cos(5*u)^2,sin(7*u),u-2,u,0,2)) $
+
+
+("Sinusoidal tube with varying diameter")$
+draw3d(
+  surface_hide = true,
+  enhanced3d   = true,
+  palette      = gray,
+  xu_grid      = 50,
+  tube(cos(a), a, 0, cos(a/10)^2, a, 0, 4*%pi) )$
+
+
+("Implicit 2D")$
+draw2d(
+  grid      = true,
+  line_type = solid,
+  key       = "y^2=x^3-2*x+1",
+  implicit(y^2=x^3-2*x+1, x, -4,4, y, -4,4),
+  line_type = dots,
+  key       = "x^3+y^3 = 3*x*y^2-x-1",
+  implicit(x^3+y^3 = 3*x*y^2-x-1, x, -4,4, y, -4,4),
+  title     = "Two implicit functions" ) $
+
+
+("Implicit 3D")$
+draw3d(
+  color = red,
+  implicit(x^2+y^2+z^2=1,x,-1.5,1.5,y,-1.5,1.5,z,-1.5,1.5),
+  color = green,
+  implicit(2*x^2+2*y^2=1,x,-1.5,1.5,y,-1.5,1.5,z,-1.5,1.5),
+  surface_hide = true)$
+
+
+("Colored elevation grid")$
+(m: apply(
+      matrix,
+      makelist(makelist(random(1.0),k,1,5),i,1,5)),
+ draw3d(
+    enhanced3d    = true,
+    wired_surface = true,
+    elevation_grid(m,0,0,3,2)))$
+
+
+("Colored polygonal line")$
+(m: makelist([k, k, random(10)],k,1,10),
+ draw3d(
+    enhanced3d = [sin(j), j],
+    line_width = 3,
+    point_type = dot,
+    points_joined =true,
+    colorbox = false,
+    points(m))) $
+
+
+("Colored cloud of points")$
+(m: makelist([random(1.0),random(1.0),random(1.0)],k,1,2000),
+ draw3d(
+   point_type = filled_circle,
+   point_size = 2,
+   enhanced3d = [u+v-w,u,v,w], /* remember that variable names are arbitrary */
+   points(m)) )$
+
+
+("Colored implicit surface")$
+draw3d(
+  enhanced3d = [x-y,x,y,z],
+  implicit((x^2+y^2+z^2-1)*(x^2+(y-1.5)^2+z^2-0.5)=0.015,
+           x,-1,1, y,-1.2,2.3, z,-1,1)) $
+
+
+("Polar coordinates")$
+draw2d(
+  dimensions    = [400, 400],
+  file_name     = "polargrid",
+  user_preamble = "set grid polar",
+  nticks        = 200,
+  xrange        = [-5,5],
+  yrange        = [-5,5],
+  color         = red,
+  line_width    = 3,
+  title         = "Hyperbolic Spiral",
+  polar(10/theta,theta,1,10*%pi) )$
+
+
+("Spherical coordinates")$
+draw3d(
+  surface_hide = true,
+  axis_3d      = false,
+  color        = salmon,
+  spherical(sin(z)*cos(2*a),a,0,2*%pi,z,0,%pi))$
+
+
+("Cylindrical coordinates")$
+draw3d(
+  surface_hide = true,
+  axis_3d      = false,
+  xtics        = none,
+  ytics        = none,
+  ztics        = none,
+  color        = blue,
+  cylindrical(z,z,-2,2,a,0,2*%pi),
+  color        = brown,
+  cylindrical(3,z,-2,2,az,0,%pi),
+  color        = green,
+  cylindrical(sqrt(25-z^2),z,-5,5,a,0,%pi) )$
+
+
+("Contours")$
+draw3d(
+  color = green,
+  explicit(20*exp(-x^2-y^2)-10,x,0,2,y,-3,3),
+  contour_levels = 15,
+  contour        = both,
+  surface_hide   = true) $
+
+
+("Contours in enhanced3d mode")$
+draw3d(surface_hide =true,
+       color = green,
+       contour = both,
+       enhanced3d=true,
+       explicit(abs((x+y*%i)^3+1),x,-10,10,y,-10,10) ) $
+
+
+("Map contours")$
+draw3d(
+  title    = "Projecting contours",
+  explicit(20*exp(-x^2-y^2)-10,x,0,2,y,-3,3),
+  contour_levels = 15,
+  contour        = map,
+  surface_hide   = true) $
+
+
+("2D sammple")$
+draw2d(
+  key           = "Sample points",
+  point_type    = down_triangle,
+  point_size    = 3,
+  points(makelist([random(20),random(50)],k,1,10)),
+  point_type    = circle,
+  point_size    = 4,
+  points_joined = true,
+  color         = red,
+  key           = "puntazos",
+  points(makelist(k,k,1,20),makelist(random(30),k,1,20)) )$
+
+
+("Two samples in 3D")$
+( s2 : read_matrix (file_search ("wind.data")),
+  draw3d(
+    title      = "Daily average wind speeds. Two data sets",
+    point_size = 2,
+    color      = red,
+    key        = "Sample from stations 1, 2 and 3",
+    points(submatrix (s2, 4, 5)),
+    point_type = 4,
+    color      = green,
+    key        = "Sample from stations 1, 4 and 5",
+    points(submatrix (s2, 2, 3))) )$
+
+
+("Joined and disjoined points")$
+( xx: [1,2,3,4,5],
+  yy: [4,5,7,1,2],
+  zz: [3,2,1,9,4],
+  xyz: [[10,15,12],[11,13,16],[16,10,11],[15,15,15]],
+  draw3d(
+    point_size = 3,
+    point_type = filled_square,
+    color      = blue,
+    points(xx,yy,zz),
+    point_type = circle,
+    color      = green,
+    points_joined = true,
+    points(xyz)) )$
+
+
+("Impulses in 2D")$
+draw2d(
+  points_joined = impulses,
+  line_width    = 2,
+  color         = "light-blue",
+  points(makelist(exp(-k/10),k,0,50)) )$
+
+
+("Impulses in 3D")$
+draw3d(
+  points_joined = impulses,
+  line_width    = 2,
+  color         = "light-blue",
+  xyplane       = 0,
+  points(makelist([random(10.0),random(10.0),random(10.0)-5],k,0,25)) )$
+
+
+("2D shapes")$
+draw2d(
+  fill_color = "sea-green",
+  color      = aquamarine,
+  line_width = 6,
+  polygon([[1,1],[3,0],[4,5],[0,3]]),
+  transparent = true,
+  line_type   = dots,
+  color       = "dark-yellow",
+  polygon([4,5,7],[6,4,2]),
+  line_type   = solid,
+  transparent = false,
+  fill_color  = violet,
+  rectangle([-2,-2],[8,-1]),
+  transparent = true,
+  color       = "dark-goldenrod",
+  line_width  = 1,
+  rectangle([9,4],[2,-1.5]),
+  transparent = false,
+  fill_color  = grey80,
+  line_width  = 2,
+  ellipse(0,6,3,2,270,-270),
+  transparent = true,
+  color       = "NaVy",
+  line_width  = 3,
+  ellipse(7,6,2,3,30,-90),
+  xrange      = [-3,10],
+  yrange      = [-3,9] )$
+
+
+("Vectors in 2d")$
+draw2d(
+  xrange   = [-10,50],
+  yrange   = [-10,50],
+  color    = turquoise,
+  vector([1,1],[10,20]),
+  head_both   = true,
+  head_length = 5,
+  line_width  = 3,
+  color       = yellow,
+  head_angle  = 20,
+  vector([40,5],[-30,30]),
+  line_type = dots,
+  color     = "midnight-blue",
+  head_both = false,
+  vector([40,40],[-30,-40]))$
+
+
+("A vector field in 2D")$
+( /* vector origins are {(x,y)| x,y=1,...,10}  */
+  coord: setify(makelist(k,k,1,10)),
+  points2d: listify(cartesian_product(coord,coord)),
+  /* define the vector field */
+  vf2d(x,y):= vector([x,y],[sin(x),cos(y)]),
+  vect2: makelist(vf2d(k[1],k[2]),k,points2d),
+  draw2d([head_length=0.1, color=blue, unit_vectors=true], vect2))$
+
+
+("A vector field in 3D")$
+( coord: setify(makelist(k,k,1,5)),
+  points3d: listify(cartesian_product(coord,coord,coord)),
+  vf3d(x,y,z):= vector([x,y,z],[sin(x),cos(y),log(z)]),
+  vect3: makelist(vf3d(k[1],k[2],k[3]),k,points3d),
+  apply(draw3d,
+        append([head_length=0.1, color=blue],
+               vect3)) )$
+
+
+("Multiplot, one column")$
+draw(
+  gr2d(
+    title  = "Ellipse",
+    nticks = 30,
+    parametric(2*cos(t),5*sin(t),t,0,2*%pi)),
+  gr2d(
+    title  = "Triangle",
+    color      = blue,
+    fill_color = red,
+    polygon([4,5,7],[6,4,2])))$
+
+
+("Multiplot, two columns")$
+draw(
+  columns = 2,
+  gr2d(
+    title  = "Ellipse",
+    nticks = 30,
+    parametric(2*cos(t),5*sin(t),t,0,2*%pi)),
+  gr2d(
+    title  = "Triangle",
+    color      = blue,
+    fill_color = red,
+    polygon([4,5,7],[6,4,2])))$
+
+
+("Multiplots with arbitrary allocation")$
+draw(
+  columns=2,
+  gr2d(explicit(sin(x), x, -1, 1)),
+  gr2d(allocation = [[0.1,0.25], [0.3,0.5]],
+       color = red,
+       explicit(x^2, x, -1, 1)),
+  gr2d(explicit(cos(x), x, -1, 1)),
+  gr2d(allocation = [[0.6,0.2], [0.3,0.3]],
+       color = black,
+       parametric(u*cos(u),u*sin(u), u, 0, 25)) )$
+
+
+("Playing with multiplots and background colors")$
+draw( 
+    /* explicit surface in 3d */
+    gr3d(
+        background_color = yellow,
+        enhanced3d= x+y,
+        explicit(x^2+y^2, x, -1, 1, y, -1, 1) ),
+    /* explicit curve in 2d */
+    gr2d(
+        background_color = light_salmon,
+        allocation = [[0, 0],[1/3,1/3]],
+        explicit(x^2, x, -1, 1) ),
+   /* parametric curve in 3d */
+   gr3d(
+        background_color = cyan,
+        allocation = [[0.6, 0.2],[1/3,2/3]],
+        parametric(u,-u^2,cos(u), u, -1, 1) )  )$
+
+
+("Random images")$
+( im: apply('matrix, makelist(makelist(random(200),i,1,30),i,1,30)),
+  draw2d(
+    image(im,0,0,10,10),
+    image(im,10,10,15,15),
+    image(im,25,25,20,20)) )$
+
+
+("Matrix of 3D vectors interpreted as an image")$
+( rgb: apply('matrix,
+             makelist(
+               makelist(
+                 [random(300),random(300),random(300)],i,1,30),i,1,30)),
+  draw2d(image(rgb,0,0,30,30)) )$
+
+
+("European Union")$
+( load("worldmap"),
+  draw2d(
+    border=false,
+    fill_color=cyan,
+    rectangle([-28.80,27.53],[34.79,70.26]),
+    line_width = 3,
+    color      = dark_violet,
+    geomap(European_Union))  )$
+
+
+("Lists of options and objects are valid arguments")$
+( shadow_explicit(expr, var, vmin, vmax) :=
+     [line_width = 8,
+      color      = grey,
+      explicit(expr, var, vmin, vmax),
+      line_width = 1,
+      color      = blue,
+      color      = yellow,
+      explicit(expr, var, vmin, vmax) ],
+ draw2d(shadow_explicit(sin(x),x,0,10)) )$
+
+
+("Testing enhanced text in Postscript")$
+draw2d(
+  file_name = "maxima_draw_demo_1",
+  title = "Made by Maxima during package draw demo",
+  filled_func = 0,
+  fill_color  = cyan,
+  explicit(x^2-x+5, x, 1, 4),
+  filled_func = false,
+  explicit(x^2-x+5, x, -1, 5),
+  label(["A = {/Symbol=30 \\362@_{/=9.6 1}^{/=12 4}} ({/Symbol a} x^2 + {/Symbol b} x +{/Symbol g}) d x",1,17]),
+  yrange      = [-1,30],
+  grid        = true,
+  terminal    = eps ) $
+
+
+("Testing animated gif")$
+draw(
+  terminal   = animated_gif,
+  delay      = 40,
+  file_name  = "maxima_draw_demo_2",
+  dimensions  = [300, 300],
+  makelist(gr2d(explicit(x^(k/10),x,0,1)),k,1,10) )$
+
+
+("END OF DRAW DEMO") $
+

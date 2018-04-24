@@ -1,0 +1,64 @@
+Affine is a collection of programs for algebraic computing.  It currently
+uses maxima for some of the basic routines, as well as for display.
+
+If you have an executable 'saved_affine' you may just invoke that,
+or make a link to some place where executables are usually kept:
+ln -s /public/affine/saved_affine /public/bin/affine
+
+The maxima-*/info documentation covers maxima and affine.
+
+Much of the internal computation is done with polynomials or rational functions
+in simplified form.   Some functions for dealing with these:
+(st-rat form) --> internal format
+n*,n+, n- ,nred, n.  take general or   internal format arguments, always
+coercing to internal format.
+psublis, pcoeff, list-variables are some heavily used routines.
+The correspondence between variables and internal variables is 1-1 unlike
+ordinary maxima rat format.  (new-disrep form) and (fake-header form)
+put polynomials back into a format for maxima.
+
+fast_linsolve and other programs in the sparasemat.lisp file try to do
+a better job than maxima for large matrices.
+
+COMPILING AFFINE:
+
+(load "sysdef.lisp")
+(make:make :affine :compile t)
+
+
+LOADING AFFINE:
+(load "sysdef.lisp")
+(make:make :affine)
+
+Notes: You may want to change to proclaim about safety in sysdef.lisp
+0 will give maximum speed, but minimum error checking.   A function
+called with the wrong type arguments on safety 0, can give a segmentation
+fault very easily.
+
+
+If you are using akcl, you could usde the makefile and do
+
+make saved_affine
+
+to save out an image which can be reused without loading
+the files.   This will also look after compiling things.
+
+There is a tiny bit of documentation at the end of the maxima/doc/DOC
+file (eg grobner_basis, set_up_dot_simplifications,..) and of course
+there are the sources.   I know documentation should be much better.
+Ask me a question, and I will probably add it to the doc file too.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

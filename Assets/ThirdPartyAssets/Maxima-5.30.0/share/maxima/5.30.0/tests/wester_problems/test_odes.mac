@@ -1,0 +1,172 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/ODEs/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Ordinary Difference and Differential Equations ---------- */
+/* Second order linear recurrence equation: r(n) = (n - 1)^2 + m n */
+differenceq(r[n + 2] - 2 * r[n + 1] + r[n] = 2, r[n], [r[0] = 1, r[1] = m]);
+/* => r(n) = 3^n - 2^n   [Cohen, p. 67] */
+errcatch(differenceq(r[n] = 5*r[n - 1] - 6*r[n - 2], r[n],
+                     [r[0] = 0, r[1] = 1]))$
+differenceq(r[n + 2] = 5*r[n + 1] - 6*r[n], r[n], [r[0] = 0, r[1] = 1]);
+/* => r(n) = Fibonacci[n + 1]   [Cohen, p. 83] */
+errcatch(differenceq(r[n] = r[n - 1] + r[n - 2], r[n], [r[1] = 1, r[2] = 2]))$
+expr: differenceq(r[n + 2] = r[n + 1] + r[n], r[n], [r[1] = 1, r[2] = 2]);
+solve(2 = subst(n = 2, rhs(%)));
+expr: factorsum(subst(%, expr));
+subst(%phi = (1 + sqrt(5))/2, fibtophi(fib(n+1)));
+ratsimp(rhs(expr) - %);
+remvalue(expr)$
+/* => [c^(n+1) [c^(n+1) - 2 c - 2] + (n+1) c^2 + 2 c - n] / [(c-1)^3 (c+1)]
+      [Joan Z. Yu and Robert Israel in sci.math.symbolic] */
+eqn: r[n] = (1 + c - c^(n-1) - c^(n+1))/(1 - c^n)*r[n - 1]
+            - c*(1 - c^(n-2))/(1 - c^(n-1))*r[n - 2] + 1;
+errcatch(differenceq(eqn, r[n], [r[1] = 1, r[2] = (2 + 2*c + c^2)/(1 + c)]))$
+remvalue(eqn)$
+/* Second order ODE with initial conditions---solve first using Laplace
+   transforms: f(t) = sin(2 t)/8 - t cos(2 t)/4 */
+atvalue(f(t), t = 0, 0)$
+atvalue(diff(f(t), t), t = 0, 0)$
+printprops(all, atvalue)$
+ode: diff(f(t), t, 2) + 4*f(t) = sin(2*t);
+laplace(ode, t, s);
+solve(%, 'laplace(f(t), t, s));
+ilt(%[1], s, t);
+/* Now, solve the ODE directly */
+subst(f(t) = f, ode);
+ode(%, f, t);
+ode_ibc(%, t = 0, f = 0, t = 0, 'diff(f, t) = 0);
+remvalue(ode)$
+/* Separable equation => y(x)^2 = 2 log(x + 1) + (4 x + 3)/(x + 1)^2 + 2 A */
+'diff(y, x) = x^2/(y*(1 + x)^3);
+ode(%, y, x);
+lhs(%) = map('factorsum, rhs(%));
+/* Homogeneous equation.  See Emilio O. Roxin, _Ordinary Differential
+   Equations_, Wadsworth Publishing Company, 1972, p. 11
+   => y(x)^2 = 2 x^2 log|A x| */
+'diff(y, x) = y/x + x/y;
+ode(%, y, x);
+/* First order linear ODE: y(x) = [A - cos(x)]/x^3 */
+x^2*'diff(y, x) + 3*x*y = sin(x)/x;
+ode(%, y, x);
+/* Exact equation => x + x^2 sin y(x) + y(x) = A   [Roxin, p. 15] */
+'diff(y, x) = -(1 + 2*x*sin(y))/(1 + x^2*cos(y));
+ode(%, y, x);
+/* Nonlinear ODE => y(x)^3/6 + A y(x) = x + B */
+'diff(y, x, 2) + y*'diff(y, x)^3 = 0;
+ode(%, y, x);
+/* => y(x) = [3 x + sqrt(1 + 9 x^2)]^(1/3) - 1/[3 x + sqrt(1 + 9 x^2)]^(1/3)
+      [Pos96] */
+errcatch(ode_ibc(%, x = 0, y = 0, x = 0, 'diff(y, x) = 2));
+/* A simple parametric ODE: y(x, a) = A e^(a x) */
+diff(y(x, a), x) = a*y(x, a);
+ode(%, y(x, a), x);
+/* ODE with boundary conditions.  This problem has nontrivial solutions
+   y(x) = A sin([pi/2 + n pi] x) for n an arbitrary integer */
+assume(not(equal(k, 0)))$
+ode('diff(y, x, 2) + k^2*y = 0, y, x);
+ode_ibc(%, x = 0, y = 0, x = 1, 'diff(y, x) = 0);
+forget(not(equal(k, 0)))$
+/* => y(x) = Z_v[sqrt(x)] where Z_v is an arbitrary Bessel function of order v
+      [Gradshteyn and Ryzhik 8.491(9)] */
+eqn: 'diff(y, x, 2) + 1/x*'diff(y, x) + 1/(4*x)*(1 - v^2/x)*y = 0;
+declare(v, noninteger)$
+ode(eqn, y, x);
+remove(v, noninteger)$
+declare(v, integer)$
+ode(eqn, y, x);
+remove(v, integer)$
+/* Delay (or mixed differential-difference) equation.  See Daniel Zwillinger,
+   _Handbook of Differential Equations_, Second Edition, Academic Press, Inc.,
+   1992, p. 210 => y(t) = y0 sum((-a)^n (t - n + 1)^n/n!, n = 0..floor(t) + 1)
+   */
+'diff(y(t), t) + a*y(t - 1) = 0;
+ode(%, y(t), t);
+/* Discontinuous ODE   [Zwillinger, p. 221]
+   => y(t) = cosh t   (0 <= t < T)
+             (sin T cosh T + cos T sinh T) sin t
+             + (cos T cosh T - sin T sinh T) cos t   (T <= t) */
+sgn(t):= if t < 0 then -1 else 1$
+ode(diff(y(t), t, 2) + sgn(t - TT)*y(t) = 0, y(t), t);
+/*ode_ibc(%, t = 0, y(t) = 1, t = 0, 'diff(y(t), t) = 0);*/
+remfunction(sgn)$
+assume(pnz > 0)$
+ode(diff(y(t), t, 2) + sign(t - TT)*y(t) = 0, y(t), t);
+errcatch(ode_ibc(%, t = 0, y(t) = 1, t = 0, 'diff(y(t), t) = 0));
+forget(pnz > 0)$
+/* Integro-differential equation.  See A. E. Fitzgerald, David E. Higginbotham
+   and Arvin Grabel, _Basic Electrical Engineering_, Fourth Edition,
+   McGraw-Hill Book Company, 1975, p. 117.
+   => i(t) = 5/13 [-8 e^(-4 t) + e^(-t) (8 cos 2 t + sin 2 t)] */
+eqn: diff(i(t), t) + 2*i(t) + 5*integrate(i(tau), tau, 0, t) = 10*%e^(-4*t);
+ode(eqn, i(t), t);
+atvalue(i(t), t = 0, 0)$
+atvalue(diff(i(t), t), t = 0, 10)$
+laplace(eqn, t, s);
+solve(%, 'laplace(i(t), t, s));
+ilt(%[1], s, t);
+remvalue(eqn)$
+/* System of two linear, constant coefficient ODEs:
+   x(t) = e^t [A cos(t) - B sin(t)], y(t) = e^t [A sin(t) + B cos(t)] */
+system: [diff(x(t), t) = x(t) - y(t), diff(y(t), t) = x(t) + y(t)];
+expand(odelinsys(system, [x(t), y(t)]));
+/* Check the answer */
+ratsimp(ev(system, %, diff));
+map(lambda([q], is(equal(lhs(q), rhs(q)))), %);
+/* Triangular system of two ODEs: x(t) = A e^t [sin(t) + 2],
+      y(t) = A e^t [5 - cos(t) + 2 sin(t)]/5 + B e^(-t).
+   See Nicolas Robidoux, ``Does Axiom Solve Systems of O.D.E.'s Like
+   Mathematica?'', LA-UR-93-2235, Los Alamos National Laboratory, Los Alamos,
+   New Mexico. */
+system: [diff(x(t), t) = x(t) * (1 + cos(t)/(2 + sin(t))),
+         diff(y(t), t) = x(t) - y(t)];
+odelinsys(system, [x(t), y(t)]);
+/* Try solving this system one equation at a time */
+subst(%c = %c1, factor(ode(system[1], x(t), t)));
+map('factorsum, ode(subst(%, system[2]), y(t), t));
+/* 3 x 3 linear system with constant coefficients:
+   (1) real distinct characteristic roots (= 2, 1, 3)   [Roxin, p. 109]
+       => x(t) = A e^(2 t),   y(t) = B e^t + C e^(3 t),
+          z(t) = -A e^(2 t) - C e^(3 t) */
+system: [diff(x(t), t) =  2*x(t),
+         diff(y(t), t) = -2*x(t) + y(t) - 2*z(t),
+         diff(z(t), t) =    x(t)        + 3*z(t)];
+odelinsys(system, [x(t), y(t), z(t)]);
+/* (2) complex characteristic roots (= 0, -1 +- sqrt(2) i)   [Roxin, p. 111]
+       => x(t) = A + e^(-t)/3 [-(B + sqrt(2) C) cos(sqrt(2) t) +
+                                (sqrt(2) B - C) sin(sqrt(2) t)],
+          y(t) = e^(-t) [B cos(sqrt(2) t) + C sin(sqrt(2) t)],
+          z(t) = e^(-t) [(-B + sqrt(2) C) cos(sqrt(2) t)
+                         -(sqrt(2) B + C) sin(sqrt(2) t)] */
+system: [diff(x(t), t) = y(t), diff(y(t), t) = z(t),
+         diff(z(t), t) = -3*y(t) - 2*z(t)];
+odelinsys(system, [x(t), y(t), z(t)]);
+ratsimp(%);
+/* (3) multiple characteristic roots (= 2, 2, 2)   [Roxin, p. 113]
+       => x(t) = e^(2 t) [A + C (1 + t)],   y(t) = B e^(2 t),
+          z(t) = e^(2 t) [A + C t] */
+system: [diff(x(t), t) = 3*x(t) - z(t), diff(y(t), t) = 2*y(t),
+         diff(z(t), t) = x(t) + z(t)];
+odelinsys(system, [x(t), y(t), z(t)]);
+/* x(t) = x0 + [4 sin(w t)/w - 3 t] x0'   [Rick Niles]
+          + 6 [w t - sin(w t)] y0 + 2/w [1 - cos(w t)] y0',
+   y(t) = -2/w [1 - cos(w t)] x0' + [4 - 3 cos(w t)] y0 + sin(w t)/w y0' */
+system: [diff(x(t), t, 2) = 2*w*diff(y(t), t),
+         diff(y(t), t, 2) = -2*w*diff(x(t), t) + 3*w^2*y(t)];
+odelinsys(system, [x(t), y(t)]);
+remvalue(system)$
+/* ---------- Quit ---------- */
+quit();

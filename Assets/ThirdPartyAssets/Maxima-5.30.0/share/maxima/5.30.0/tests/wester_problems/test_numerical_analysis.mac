@@ -1,0 +1,74 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/NumericalAnalysis/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Numerical Analysis ---------- */
+/* This number should immediately simplify to 0.0 */
+0.0/sqrt(2);
+/* This number normally produces an underflow => 3.29683e-434295 */
+exp(-1000000.0);
+exp(-1000000.0b0);
+/* Arbitrary precision floating point numbers */
+oldprec: fpprec$
+fpprec: 50$
+/* This number is nearly an integer:
+   26253741 2640768743.9999999999 9925007259 7198185688 ... */
+bfloat(exp(sqrt(163)*%pi));
+fpprec: oldprec$
+remvalue(oldprec)$
+/* => [-2, -1] */
+[floor(-5/3), ceil(-5/3)];
+/* Generate a cubic natural spline s from x = [1, 2, 4, 5] and y = [1, 4, 2, 3]
+   and then compute s(3) => 27/8 */
+spline_coeff([1, 2, 4, 5], [1, 4, 2, 3], s, 4)$
+errcatch(spline_interpolate(3, [1, 2, 4, 5], [1, 4, 2, 3], s, 4));
+spline_interpolate(3., [1, 2, 4, 5], [1, 4, 2, 3], s, 4);
+/* Translation */
+p: sum(a[i]*x^i, i, 1, n);
+/* Convert into FORTRAN syntax */
+fortran(p)$
+gentran(p: eval(p))$
+/* Convert into C syntax */
+gentranlang: 'c$
+gentran(p: eval(p))$
+gentranlang: 'fortran$
+/* Horner's rule---this is important for numerical algorithms
+   => (a[1] + (a[2] + (a[3] + (a[4] + a[5] x) x) x) x) x */
+p: sum(a[i]*x^i, i, 1, 5);
+p: horner(p, x);
+/* Convert the result into FORTRAN syntax
+   => p = (a(1) + (a(2) + (a(3) + (a(4) + a(5)*x)*x)*x)*x)*x */
+fortran(p)$
+gentran(p: eval(p))$
+/* Convert the result into C syntax
+   => p = (a[1] + (a[2] + (a[3] + (a[4] + a[5]*x)*x)*x)*x)*x ; */
+gentranlang: 'c$
+gentran(p: eval(p))$
+gentranlang: 'fortran$
+remvalue(p)$
+/* Count the number of (floating point) operations needed to compute an
+   expression => {[+, n - 1], [*, (n^2 - n)/2], [f, (n^2 + n)/2]} */
+sum(product(f(i, k), i, 1, k), k, 1, n);
+count_ops(%);
+/* Interval analysis (interval polynomial example):
+   ([-4, 2] x + [1, 3])^2 => [-8, 16] x^2 + [-24, 12] x + [1, 9] */
+/* Discretize a PDE: for example, forward differencing time (explicit Euler)
+   and central differencing x on the heat equation =>
+   (f[i, j+1] - f[i, j])/dt = (f[i+1, j] - 2 f[i, j] + f[i-1, j])/dx^2 */
+diff(f(x, t), t) = diff(f(x, t), x, 2);
+difference_pde(%, f(x, t), x, f, dx, 'central, t, dt, 'exp_euler);
+/* ---------- Quit ---------- */
+quit();

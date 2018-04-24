@@ -1,0 +1,30 @@
+/*-*-macsyma-*-*/
+
+/* A macro for defining simple substitution macros.
+   George Carrette, 12:20am  Tuesday, 12 August 1980 */
+
+eval_when(translate,modedeclare(function(getcharn),fixnum))$
+
+gensym_conventionp(symbol):=
+ if getcharn(symbol,1)=getcharn('%,1) and
+    getcharn(symbol,2)=getcharn('%,1) then true else false$
+
+gensym_conventions(exp):=
+ if atom(exp) then exp else false
+ block([gens:[],temp:gensym_conventions(part(exp,0))],
+       if not temp=false then gens:cons(temp,gens),
+       exp:args(exp),
+       while not exp=[] do (temp:gensym_conventions(first(exp)),
+                            if not temp=false then gens:cons(temp,gens),
+			    exp:rest(exp)),
+       if gens=[] then false else gens)$
+
+infx("=>")$
+
+"=>"(header,body)::=
+ (if atom(header) then error("bad arg to \"=>\"")
+  maplist(lambda([u],if not atom(u)
+                       then error(u,"bad variable in arglist of \"=>\"")),
+	  args(header)), 
+  block([gens:gensym_conventions(body)],
+        

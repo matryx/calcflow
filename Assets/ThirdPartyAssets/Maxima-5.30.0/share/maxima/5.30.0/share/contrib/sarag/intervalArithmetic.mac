@@ -1,0 +1,64 @@
+/* ------------------------------------------------------------------- */
+/* SARAG - Interval Arithmetic                                         */
+/* by Fabrizio Caruso                                                  */
+
+
+intervalProduct(lhs,rhs) :=
+  [min(lhs[1]*rhs[1],lhs[1]*rhs[2],
+       lhs[2]*rhs[1],lhs[2]*rhs[2]),
+   max(lhs[1]*rhs[1],lhs[1]*rhs[2],
+       lhs[2]*rhs[1],lhs[2]*rhs[2])];
+
+
+squaredIntervalAt(interval) :=
+  squaredIntervalAtAux(interval[1],interval[2]);
+
+squaredIntervalAtAux(leftEnd,rightEnd) :=
+  if leftEnd*rightEnd<1 then
+    [0,max(leftEnd^2,rightEnd^2)]
+  else
+    [min(leftEnd^2,rightEnd^2),max(leftEnd^2,rightEnd^2)];
+
+
+powerIntervalAt(interval,p) :=
+  if oddp(p) then
+     [interval[1]^p,interval[2]^p]
+  else
+     if interval[1]*interval[2]<1 then
+         [0,max(interval[1],interval[2])^p]
+     else
+        if interval[1]>0 then
+          [interval[1]^p,interval[2]^p]
+        else
+          [interval[2]^p,interval[1]^p];
+
+
+constantByInterval(c,interval) :=
+  if c = 0 then 
+    [0]
+  else
+    if c>0 then
+      [c*interval[1],c*interval[2]]
+    else
+      [c*interval[2],c*interval[1]];
+
+constantPlusInterval(d,interval) :=
+  [interval[1]+d,interval[2]+d];
+
+evaluatePolAt(pol,var,interval) :=
+  if degree(pol,var) < 1 then
+    [pol]
+  else
+    evaluatePolAtAux(rest(reverse(poly2list(pol,var)),1),
+                     constantByInterval(coeff(pol,var,degree(pol,var)),interval));
+
+evaluatePolAtAux(revCoeffSeq,interval) := 
+  if revCoeffSeq=[] then
+    interval
+  else
+    evaluatePolAtAux(rest(revCoeffSeq,1),
+                     constantPlusInterval(first(revCoeffSeq),
+                                          interval)
+                    );
+
+0;

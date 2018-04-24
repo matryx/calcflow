@@ -1,0 +1,525 @@
+(kill (all), 0);
+0;
+
+(trig : [cos(x), sin(x), tan(x), csc(x), sec(x), cot(x)],0);
+0$
+
+(htrig : [cosh(x), sinh(x), tanh(x), csch(x), sech(x), coth(x)],0);
+0$
+
+(complexfloatp(x) := block([xr,xi],
+  x : rectform(x),
+  xr : realpart(x),
+  xi : imagpart(x),
+  (?floatp(xr) and (?floatp(xi) or integerp(xi))) or (?floatp(xi) and integerp(xr))), 0);
+0$
+  
+/*  Make sure that each trig function evaluates to a float for a float argument. */
+
+(ok : true,0);
+0$
+
+(for f in append(trig,htrig) do (
+  ok : ok and complexfloatp(subst(x = 1.2 + %i,f)),
+  ok : ok and complexfloatp(subst(x = 1 + %i/7.0,f)),
+  ok : ok and complexfloatp(subst(x = -2.3 + %i/7.0,f)),
+  ok : ok and complexfloatp(subst(x = -2.3 - %i,f))),0);
+0$
+
+ok;
+true$
+
+(complexbigfloatp(x) := block([xr,xi],
+  x : rectform(x),
+  xr : realpart(x),
+  xi : imagpart(x),
+  (bfloatp(xr) and (bfloatp(xi) or integerp(xi))) or (bfloatp(xi) and integerp(xr))), 0);
+0$
+
+/*  Make sure that each trig function evaluates to a big float for a big float argument. */
+
+(ok : true,0);
+0$
+
+(for f in append(trig,htrig) do (
+  ok : ok and complexbigfloatp(subst(x = 1.2b0,f))),0);
+0$
+
+ok;
+true$
+
+/*  Test %piargs  */
+
+(maxerror : 0.0, %piargs : true, save_flags_names : '[%piargs, %iargs, trigsign, listarith, exponentialize, halfangles, trigexpand, trigexpandplus, trigexpandtimes, triginverses], save_flags_values : ev (save_flags_names), 0);
+0;
+
+(for f in trig do (
+   for i : -24 thru 24 do (
+      z : errcatch(subst(x = %pi * i / 24, f)),
+      if z # [ ] then maxerror : max(maxerror, abs(float(first(z) - subst(x = %pi * i / 24.0, f)))))),
+ if is(maxerror < 1.0e-13) then true else maxerror);
+true$
+
+/* Test %iargs   */
+
+(%iargs : true, trigsign : true, 0);
+0$
+
+subst(-%i*x,x, subst(%i*x,x,append(trig,htrig))) - append(trig,htrig);
+''(makelist(0,i,1,length(append(trig,htrig))));
+
+(itrig : subst(%i*x,x,append(trig,htrig)),0);
+0$
+
+(%iargs : false, listarith : true,0);
+0$
+
+(itrig : itrig - subst(%i*x,x,append(trig,htrig)),0);
+0$
+
+ratsimp(taylor(itrig,x,0,5));
+''(makelist(0,i,1,length(append(trig,htrig))))$
+
+(exponentialize : false,0);
+0$
+
+taylor(exponentialize(append(trig,htrig)) - append(trig,htrig),x,0,5);
+''(makelist(taylor(0,x,0,5), i,1,length(append(trig,htrig))))$
+
+
+/*  Test reflection rules  */
+
+(trigsign : true,0);
+0$
+
+subst(-x,x, subst(-x,x, append(trig,htrig)));
+''(append(trig,htrig))$
+
+(mtrig : subst(x=5.6, subst(-x,x,append(trig,htrig))),0);
+0$
+
+(trigsign : false,0);
+0$
+
+mtrig - subst(x=-5.6, append(trig,htrig));
+''(makelist(0.0,i,1,length(append(trig,htrig))))$
+
+/* Test half angles */
+
+/* Because we have generalized the half-angle-transformation, we have to
+   restrict the arguments to a positive intervall (0,%pi). We take not %pi
+   but the number 3 as upper limit, because of problems with assume. */
+
+(assume(x>0,x<3),halfangles : true, 0);
+0$
+
+(xtrig : subst(x/2,x, append(trig,htrig)),0);
+0$
+
+(halfangles : false, 0);
+0$
+
+xtrig : taylor(xtrig - subst(x/2,x, append(trig, htrig)),x,0,5);
+''(makelist(taylor(0,x,0,5),i,1,length(append(trig,htrig))))$
+
+(forget(x>0,x<3),0);
+0;
+
+/* Test trig expand */
+
+(trigexpand : true, trigexpandplus : true, trigexpandtimes : true, 0);
+0$
+
+(xtrig : subst(x=x+y, append(trig,htrig)),0);
+0$
+
+(trigexpand : false,0);
+0$
+
+xtrig : taylor(xtrig - subst(x=x+y, append(trig, htrig)),[x,y],0,5);
+''(makelist(taylor(0,x,0,5),i,1,length(append(trig,htrig))))$
+
+(trigexpand : true, trigexpandplus : true, trigexpandtimes : true, 0);
+0$
+
+(xtrig : subst(x=x-y, append(trig,htrig)),0);
+0$
+
+(trigexpand : false,0);
+0$
+
+xtrig : taylor(xtrig - subst(x=x-y, append(trig, htrig)),[x,y],0,5);
+''(makelist(taylor(0,x,0,5),i,1,length(append(trig,htrig))))$
+
+(trigexpand : true, trigexpandplus : true, trigexpandtimes : true, 0);
+0$
+
+(xtrig : subst(x = 2*x, append(trig,htrig)),0);
+0$
+
+(trigexpand : false,0);
+0$
+
+xtrig : taylor(xtrig - subst(x=2*x, append(trig, htrig)),[x,y],0,5);
+''(makelist(taylor(0,x,0,5),i,1,length(append(trig,htrig))))$
+
+(trigexpand : true, trigexpandplus : true, trigexpandtimes : true, 0);
+0$
+
+(xtrig : subst(x = 3*x, append(trig,htrig)),0);
+0$
+
+(trigexpand : false,0);
+0$
+
+xtrig : taylor(xtrig - subst(x=3*x, append(trig, htrig)),[x,y],0,5);
+''(makelist(taylor(0,x,0,5),i,1,length(append(trig,htrig))))$
+
+(trigexpand : true, trigexpandplus : true, trigexpandtimes : true, 0);
+0$
+
+(xtrig : subst(x = 7*x, append(trig,htrig)),0);
+0$
+
+(trigexpand : false,0);
+0$
+
+xtrig : taylor(xtrig - subst(x=7*x, append(trig, htrig)),[x,y],0,5);
+''(makelist(taylor(0,x,0,5),i,1,length(append(trig,htrig))))$
+
+/* Test triginverses  */
+
+(invtrig : [acos(x), asin(x), atan(x), acsc(x), asec(x), acot(x)],0);
+0$
+
+block ([buggy : []],
+  for f in invtrig do (
+    triginverses : true,
+    xtrig : subst(f,x,trig),
+    triginverses : false,
+    xtrig : xtrig - subst(f,x,trig),
+
+    /* Paste expressions into a lambda to protect them from simplification and evaluation.
+     * Evaluate the lambda (no arguments) to get the test result.
+     */
+    xtrig : buildq ([L : map (nounify (cabs), xtrig)], lambda ([], L)),
+    for i : 1 thru 9 do block ([xi : i/10.0, xtrigi],
+      xtrigi : apply (buildq, [[funmake (":", ['x, xi])], xtrig]),
+      if apply ('max, ev (xtrigi(), nouns)) >= 1.0e-12
+        then buggy : cons (xtrigi, buggy))),
+
+  buggy);
+[]$
+
+(invhtrig : [acosh(x), asinh(x), atanh(x), acsch(x), asech(x), acoth(x)],0);
+0$
+
+block ([buggy : []],
+  for f in invhtrig do (
+    triginverses : true,
+    xtrig : subst(f,x,htrig),
+    triginverses : false,
+    xtrig : xtrig - subst(f,x,htrig),
+  
+    /* Paste expressions into a lambda to protect them from simplification and evaluation.
+     * Evaluate the lambda (no arguments) to get the test result.
+     */
+    xtrig : buildq ([L : map (nounify (cabs), xtrig)], lambda ([], L)),
+    for i : 1 thru 9 do block ([xi : i/10.0, xtrigi],
+      xtrigi : apply (buildq, [[funmake (":", ['x, xi])], xtrig]),
+      if apply ('max, ev (xtrigi(), nouns)) >= 1.0e-12
+        then buggy : cons (xtrigi, buggy))),
+
+  buggy);
+[]$
+
+(alltrig : append(trig, htrig, invtrig, invhtrig),0);
+0$
+
+(pts : [2,2+%i, 2-%i,-2,-2+%i,-2-%i,1/2,1/2 +%i/2,1/2-%i/2,-1/2,-1/2+%i/2,-1/2-%i/2],0);
+0$
+
+block ([buggy : []],
+  for f in alltrig do
+    for p in pts do block ([e, fop : op(f)],
+      e : buildq ([p, fop], lambda ([], cabs (float (rectform (fop (p))) - fop (float (p))))),
+      if e() > 1.0e-13
+        then buggy : cons (e, buggy)), buggy);
+[]$
+
+/* Like above, but for big floats.  We expect to be within 3 digits of the answer.
+   
+   Note that we might fail because the rectform and the function might
+   produce answers because of the branch cut!
+ */
+block ([buggy : []],
+  for f in alltrig do
+    for p in pts do block ([e, fop : op(f)],
+      e : buildq ([p, fop], lambda ([], cabs (bfloat (rectform (fop (p))) - fop (bfloat (p))))),
+      if e() > 10b0^(3-fpprec)
+        then buggy : cons (e, buggy)), buggy);
+[]$
+
+
+/*  Numerically check some identities  */
+
+(float_trig_test(id, threshold) :=
+  block([maxerror : 0],
+    for p in pts do block([numer : true],
+      maxerror : max(maxerror, cabs(expand(rectform(subst(x = p, id)))))),
+    if is(maxerror < threshold) then true else maxerror),
+ bfloat_trig_test(id, threshold) :=
+  block([maxerror : 0],
+    for p in pts do block([numer : true],
+      maxerror : max(maxerror, cabs(expand(subst(x = bfloat(p), id))))),
+    if is(maxerror < threshold) then true else maxerror),
+ 0);
+0;
+
+float_trig_test(cos(x)^2 + sin(x)^2 - 1, 1.0e-15);
+true$
+
+float_trig_test(cot(2*x) - (cot(x)^2-1)/(2*cot(x)), 1.0e-15);
+true$
+
+bfloat_trig_test(asin(x) + acos(x) - %pi/2, 1.0e-15);
+true$
+
+(declare(n,integer),0);
+0$
+
+/* see SF bug 1754072 */
+
+subst(n = 1, cos(%pi * n * 31 / 37));
+cos(%pi * 31 / 37);
+
+subst(n = 1, sin(%pi * n * 31 / 37));
+sin(%pi * 31 / 37);
+
+subst(n = 1, tan(%pi * n * 31 / 37));
+tan(%pi * 31 / 37);
+
+/* [ 580721 ] trigexpand bug */
+tan(%pi*x+%pi/2),trigexpand;
+-cot(%pi*x);
+
+tan(n*2*%pi);
+0;
+
+/* tan(%pi*integer) simplification - ID: 3058290 */
+tan(n*%pi);
+0;
+
+(kill(n,declare),0);
+0$
+
+/* [ 1553866 ] %piargs inconsistent behavior */
+cos(%pi*x + %pi);
+-cos(%pi*x);
+
+(remfunction(complexfloatp, complexbigfloatp),0);
+0$
+
+/* Probably we should beef up reset slightly to handle this, but for now this is OK. */
+(map (lambda ([a, b], a :: b), save_flags_names, save_flags_values), 0);
+0;
+
+/* [ 1644575 ] acot(0.0) vs acot(0) */
+acot(0.0);
+1.570796326794897;
+
+/* [ 620246 ] carg(complex) */
+(declare(u, complex),0);
+0;
+
+rectform(log(u));
+log(abs(u)) + %i*carg(u);
+
+cabs(u);
+abs(u); /* for a symbol we get a noun form with abs */
+/*sqrt(?%realpart(u)^2+?%imagpart(u)^2);*/
+
+/* [ 617699 ] carg([1]) is bogus */
+carg([1]);
+[0];
+
+/* Tests for half-angles simplification */
+
+kill(all);
+done;
+
+(old_halfangles:halfangles,halfangles:true,old_%iargs:%iargs,%iargs:false,done);
+done;
+
+/* Sin function: The general result for real argument */
+
+sin(x/2);
+(-1)^floor(x/(2*%pi))*sqrt(1-cos(x))/sqrt(2);
+
+/* The square simplifies correctly */
+
+sin(x/2)^2;
+(1-cos(x))/2;
+
+/* Correct sign for negative and positive real argument */
+
+(assume(x1>0,x1<2*%pi),done);
+done;
+
+sin(x1/2);
+sqrt(1-cos(x1))/sqrt(2);
+
+(assume(x2>-2*%pi,x2<0),done);
+done;
+
+sin(x2/2);
+-sqrt(1-cos(x2))/sqrt(2);
+
+/* Correct sign for pure imaginary argument
+   and complex argument with realpart a multiple of 2*%pi */
+
+(assume(y1>0,y2<0),done);
+done;
+
+sin(%i*y1/2);
+sqrt(1-cos(%i*y1))/sqrt(2);
+
+sin(%i*y2/2);
+-sqrt(1-cos(%i*y2))/sqrt(2);
+
+sin((2*%pi+%i*y2)/2);
+sqrt(1-cos(2*%pi+%i*y2))/sqrt(2);
+
+sin((2*%pi+%i*y1)/2);
+-sqrt(1-cos(2*%pi+%i*y1))/sqrt(2);
+
+/* Simplification for negative or postive imaginary part */
+(assume(yneg<0,ypos>0),done);
+done;
+
+sin((x1+%i*yneg)/2);
+sqrt(1-cos(x1+%i*yneg))/sqrt(2);
+
+sin((2*%pi+%i*yneg)/2);
+sqrt(1-cos(2*%pi+%i*yneg))/sqrt(2);
+
+sin((x1+%i*ypos)/2);
+sqrt(1-cos(x1+%i*ypos))/sqrt(2);
+
+sin((2*%pi+%i*ypos)/2);
+-sqrt(1-cos(2*%pi+%i*ypos))/sqrt(2); /* for this case an -1 */
+
+/* Cos function: The general result for real argument */
+
+cos(x/2);
+(-1)^floor((x+%pi)/(2*%pi))*sqrt(1+cos(x))/sqrt(2);
+
+/* The square simplifies correctly */
+
+cos(x/2)^2;
+(1+cos(x))/2;
+
+/* Correct sign for real argument in (-%pi,%pi) */
+
+(forget(x1<2*%pi,x1>0),assume(x1>-%pi,x1<%pi),done);
+done;
+
+cos(x1/2);
+sqrt(1+cos(x1))/sqrt(2);
+
+/* Correct sign for pure imaginary argument
+   and complex argument with realpart a multiple of %pi */
+
+cos(%i*y1/2);
+sqrt(1+cos(%i*y1))/sqrt(2);
+
+cos(%i*y2/2);
+sqrt(1+cos(%i*y2))/sqrt(2);
+
+cos((%pi+%i*y2)/2);
+sqrt(1+cos(%pi+%i*y2))/sqrt(2);
+
+cos((%pi+%i*y1)/2);
+-sqrt(1+cos(%pi+%i*y1))/sqrt(2);
+
+/* Simplification for negative or postive imaginary part */
+(assume(yneg<0,ypos>0),done);
+done;
+
+cos((x1+%i*yneg)/2);
+sqrt(1+cos(x1+%i*yneg))/sqrt(2);
+
+cos((%pi+%i*yneg)/2);
+sqrt(1+cos(%pi+%i*yneg))/sqrt(2);
+
+cos((x1+%i*ypos)/2);
+sqrt(1+cos(x1+%i*ypos))/sqrt(2);
+
+cos((%pi+%i*ypos)/2);
+-sqrt(1+cos(%pi+%i*ypos))/sqrt(2); /* for this case an -1 */
+
+/* Sinh function with Real arguments */
+
+(assume(xpos>0,xneg<0),done);
+done;
+
+sinh(x/2);
+abs(x)/x*sqrt((cosh(x)-1)/2);
+
+sinh(x/2)^2;
+(cosh(x)-1)/2;
+
+sinh(xpos/2);
+sqrt((cosh(xpos)-1)/2);
+
+sinh(xneg/2);
+-sqrt((cosh(xneg)-1)/2);
+
+/* Sinh function with Complex arguments */
+
+/* x1 is in (-%pi,%pi) */
+sinh(%i*x1/2);
+abs(x1)/x1*sqrt((cosh(%i*x1)-1)/2);
+
+sinh((xpos+%i*x1)/2);
+sqrt((xpos+%i*x1)^2)/(xpos+%i*x1)*sqrt((cosh(xpos+%i*x1)-1)/2);
+
+sinh((xneg+%i*x1)/2);
+sqrt((xneg+%i*x1)^2)/(xneg+%i*x1)*sqrt((cosh(xneg+%i*x1)-1)/2);
+
+/* Cosh function with Real arguments */
+
+cosh(x/2);
+sqrt((cosh(x)+1)/2);
+
+cosh(x/2)^2;
+(cosh(x)+1)/2;
+
+cosh(xpos/2);
+sqrt((cosh(xpos)+1)/2);
+
+cosh(xneg/2);
+sqrt((cosh(xneg)+1)/2);
+
+/* Cosh function with Complex arguments */
+
+/* x1 is in (-%pi,%pi) */
+cosh(%i*x1/2);
+sqrt((cosh(%i*x1)+1)/2);
+
+cosh((xpos+%i*x1)/2);
+sqrt((cosh(xpos+%i*x1)+1)/2);
+
+cosh((xneg+%i*x1)/2);
+sqrt((cosh(xneg+%i*x1)+1)/2);
+
+/* two tests for atan2(sqrt(1-u)*(u-1),1) - ID: 3521596 */
+atan2(sqrt(1-u)*(u-1),1);
+atan2(sqrt(1-u)*(u-1),1)$
+
+atan2((1-u)^(1/2^10)*(u-1),1);
+atan2((1-u)^(1/2^10)*(u-1),1)$
+
+/* Restore global flags */
+(halfangles:old_halfangles,%iargs:old_%iargs,done);
+done;

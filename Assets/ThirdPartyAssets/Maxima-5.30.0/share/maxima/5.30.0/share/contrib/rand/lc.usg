@@ -1,0 +1,59 @@
+lc.mac is from the book "Perturbation Methods, Bifurcation Theory and
+Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+It uses Lindstedt's method to calculate limit cycles.
+
+maxima-5.9.0 cvs reproduces the results from the book.  The routine is
+case sensitive, and failed when the data was entered in lower case.
+
+The first example is from p6.  The differential equation is van der Pol's
+equation
+
+    w^2 x'' + x + e (x^2-1) w x' = 0
+
+(C1) load("lc.mac");
+(D1)                                lc.mac
+(C2) lc();
+THE D.E. IS OF THE FORM:  X'' + X + E * F(X,X') = 0
+ENTER F(X,Y), REPRESENTING X' AS Y
+Y*(X^2-1);
+                             2
+THE D.E. IS: X'' + X + E ( (X  - 1) Y ) = 0
+ENTER TRUNCATION ORDER
+4;
+CHOICES FOR LIMIT CYCLE AMPLITUDE:
+1 )   - 2
+2 )   2
+3 )   0
+ENTER CHOICE NUMBER
+2;
+DONE WITH STEP 1 OF 4
+DONE WITH STEP 2 OF 4
+DONE WITH STEP 3 OF 4
+DONE WITH STEP 4 OF 4
+               (SIN(3 Z) - 3 SIN(Z)) E
+X = 2 COS(Z) - -----------------------
+                          4
+
+                                           2
+   (5 COS(5 Z) - 18 COS(3 Z) + 12 COS(Z)) E
+ - -----------------------------------------
+                      96
+
+                                                            3
+   (28 SIN(7 Z) - 140 SIN(5 Z) + 189 SIN(3 Z) - 63 SIN(Z)) E
+ + ---------------------------------------------------------- + . . .
+                              2304
+        4    2
+    17 E    E
+W = ----- - -- + 1
+    3072    16
+                                    4    2
+                                17 E    E
+(D2)                            ----- - -- + 1
+                                3072    16
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

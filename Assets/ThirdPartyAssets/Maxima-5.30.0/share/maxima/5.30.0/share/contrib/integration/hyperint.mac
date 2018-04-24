@@ -1,0 +1,211 @@
+/*
+  Copyright 2009 by Barton Willis
+  Maxima code for integration of some algebraic functions.
+
+  This is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License,
+  http://www.gnu.org/copyleft/gpl.html.
+
+ This software has NO WARRANTY, not even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+*/
+
+
+load("basic");
+if get('abs_integrate,'version) = false then load("abs_integrate.mac")$
+
+/* The function radcan isn't idempotent for some expressions that you might think
+   that it should be; for example
+
+     ((-x-1)^(-bb-aa-2)*(x+2)^aa)/(((x+2)/(x+1))^aa*(1/(x+1)-(x+2)/(x +1)^2)*(1-(x+2)/(x+1))^bb)
+
+   The function infapply works around this by doing fixed point iteration on a function f. */
+
+infapply(e,f) := block([ee],
+  while e # (ee : apply(f,[e])) do e : ee, e);
+
+
+/* Return a list of the coefficients of a polynomial p[x]. This function doesn't check
+   that p is a polynomial. */
+   
+all_poly_coefs(p,x) := (p : ratexpand(p), makelist(ratcoef(p,x,k),k,0, hipow(p,x)));
+
+collect_poly_factors(e,x) := block([l],
+  e : ratsimp(diff(e,x) / e),
+  e : factor(ratdenom(e)),
+  l : if safe_op(e) = "*" then args(e) else [e],
+  l : sublist(l, lambda([s], not freeof(x,s))),
+  if every(lambda([s], polynomialp(s,[x], lambda([u], freeof(x,u)), 'integerp)), l) then
+  setify(map(lambda([s], s / ratcoef(s,x,hipow(s,x))), l)) else false);
+
+generate_hyper_mu(p, r, a, b) := block([l : [], f, n, i, pt, rt,k],
+  n : 3^length(p) - 1,
+  while n > 0 do (
+    f : 0,
+    pt : p, /* pt = tail of p */
+    rt : r,
+    k : n,
+    i : 0, /* i counts the number of nonzero terms in f */
+    while k > 0 do (
+      k : divide(k,3),
+      if second(k) = 1 then (
+        i : i + 1,
+        f : f + first(pt) * (first(rt) + 1)/(a + 1))
+      else if second(k) = 2 then (
+        i : i + 1,
+        f : f + first(pt) * (first(rt) + 1)/(a + b + 1)),
+      k : first(k),
+      rt : rest(rt),
+      pt : rest(pt)),
+    n : n - 1,
+    l : push([i,f],l)),
+  l : sort(l, lambda([a,b], first(a) < first(b))),
+  l : map('second,l));
+
+/* Express sigma as a linear combination of the members of kern. */
+
+xresidue(sigma, kern, x) := block([zip, %g, i, n, k],
+  %g : new_variable('general),
+  n : length(kern),
+  zip : partfrac(sigma - kern . makelist(concat(%g,i),i,1,n),x),
+  zip : if safe_op(zip) = "+" then args(zip) else [zip],
+  map('rhs, linsolve(map('ratnumer,zip), makelist(concat(%g,k),k,1,n))));
+
+/* Return true if the function x |--> e is piecewise constant. We'll assume that
+if g is piecewise constant, so is the composition f(g). This isn't true for all
+functions f, (say f is 1 on the rational numbers and 0 otherwise). */
+
+piecewise_constant_p(e,x,[z]) := (
+  if z = [] then (
+    e : infapply(e,lambda([s], convert_to_signum(radcan(s))))),
+  if mapatom(e) then freeof(x,e)
+  else (
+    numberp(e) or
+    member(safe_op(e), ['floor, 'signum]) or
+    every(lambda([s], piecewise_constant_p(s,x, false)), args(e))));
+
+hyper_int(e,x) := block([kern, sigma, a, b, r, dkern, mu, eq, aa, l,
+                         sol, f, cnst, ie : false, %fo, %so, algexact : true],
+  kern : collect_poly_factors(e,x),
+  if kern # false then (
+    kern : listify(kern),
+    sigma : partfrac(ratsimp(diff(e,x) / e),x),
+    a : new_variable('general),
+    b : new_variable('general),
+ 
+    dkern : map(lambda([s], diff(s,x) / s), kern),
+    r : xresidue(sigma, dkern, x),    
+    l : if r = [ ] then [ ] else generate_hyper_mu(dkern, r, a, b),
+    for mu in l while ie = false do (
+
+      eq : mu^2*(b*diff(sigma,x,1)+sigma^2+b*diff(mu,x,1)+2*a*diff(mu,x,1)+2
+        *diff(mu,x,1))-mu*(b*diff(mu,x,1)*sigma+2*diff(mu,x,1)*sigma+b
+        *diff(mu,x,2))-(b+2*a+2)*mu^3*sigma+(2*b+1)*(diff(mu,x,1))^2+(a+1) *(b+a+1)*mu^4,
+        
+        eq : partfrac(eq,x),
+        eq : if safe_op(eq) = "+" then args(eq) else [eq],
+        eq : xreduce('append, map(lambda([s], all_poly_coefs(ratnumer(s),x)),eq)),
+        eq : listify(setify(eq)),
+        sol : algsys(eq, [a,b]),
+        for sk in sol while ie = false do (
+          f : radcan(exp(logcontract(integrate(mu,x)))),
+          f : block([?errorsw : true], errcatch(subst(sk, f))),
+          if f #  [] then (
+            f : first(f),
+            %fo : new_variable('general),
+            f : %fo * f,
+            cnst : subst(sk, diff(f,x) * f^a * (1 - f)^b / e),
+            cnst : infapply(cnst,lambda([s], radcan(rootscontract(s)))),
+            if cnst # 0 then (
+              cnst : ratnumer(ratsimp(diff(cnst,x) / cnst)),
+              cnst : solve(cnst, %fo),
+              aa : subst(sk,a))
+            else cnst : [ ],
+            if cnst # [] and not(integerp(aa) and aa < 0) then (
+              f : subst(cnst,f),
+              %so : ratsimp(subst(sk, diff(f,x) * f^a *  (1 - f)^b / e)),
+              if %so # 0 and piecewise_constant_p(%so,x) = true then (
+                ie : subst(sk, (1/%so) * f^(a+1) * hypergeometric([a+1,-b],[2+a], f)/(a+1)))))))),
+    ie);
+
+generate_elliptic_candidates(p, r, %k) := block([l : [], f, n, i, pt, rt, k],
+  n : 5^length(p) - 1,
+  while n > 0 do (
+    f : 0,
+    pt : p, /* pt = tail of p */
+    rt : r,
+    k : n,
+    i : 0, /* i counts the number of terms in f that involve %k */
+    while k > 0 do (
+      k : divide(k,5),
+      if second(k) = 1 then (
+        f : f + first(pt) * (first(rt) + 1))
+      else if second(k) = 2 then (
+        f : f - first(pt) * (first(rt) + 1))
+      else if second(k) = 3 then (
+        i : i + 1,
+        f : f + first(pt) * %i * (%k^2 - 1)*(first(rt) + 1) /(2 * %k))
+      else if second(k) = 4 then (
+        i : i + 1,
+        f : f - first(pt) * %i * (%k^2 - 1)*(first(rt) + 1) /(2 * %k)),
+      k : first(k),
+      rt : rest(rt),
+      pt : rest(pt)),
+    n : n - 1,
+    l : push([i,f],l)),
+  l : sort(l, lambda([a,b], first(a) < first(b))),
+  l : map('second,l));
+
+inverse_jacobi_int(e,x) := block([kern, sigma, %k, r, dkern, mu, eq, sol, f, cnst, ie : false,l,
+                              %fo, %so, algexact : true],
+  kern : collect_poly_factors(e,x),
+  if kern # false then (
+    kern : listify(kern),
+    sigma : partfrac(ratsimp(diff(e,x) / e),x),
+    %k : new_variable('general),
+    dkern : map(lambda([s], diff(s,x) / s), kern),
+    r : xresidue(sigma, dkern, x),
+    l : if r = [ ] then []  else generate_elliptic_candidates(dkern, r, %k),
+    for mu in l while ie = false do (
+ 
+      eq : -2*%k^2*(mu^2*(diff(sigma,x,1))^2-4*mu^2*sigma^2*(diff(sigma,x,1))+
+        6*mu*(diff(mu,x,1))*sigma*(diff(sigma,x,1))-2*mu*(diff(mu,x,2))*(diff(sigma,x,1))+
+        8*mu^4*(diff(sigma,x,1))+4*mu^2*sigma^4-12*mu*(diff(mu,x,1))*sigma^3+
+        4*mu*(diff(mu,x,2))*sigma^2+9* (diff(mu,x,1))^2*sigma^2-12*mu^4*sigma^2-
+        6*(diff(mu,x,1))*(diff(mu,x,2))*sigma+16*mu^3*(diff(mu,x,1))*sigma+
+        (diff(mu,x,2))^2-8*mu^3*(diff(mu,x,2))+4*mu^2*(diff(mu,x,1))^2+8*mu^6)+
+      %k^4* (mu*(diff(sigma,x,1))-2*mu*sigma^2+3*(diff(mu,x,1))*sigma-2*mu^2*sigma-
+        diff(mu,x,2)+2*mu*(diff(mu,x,1)))*(mu*(diff(sigma,x,1))-2*mu*sigma^2+
+        3*(diff(mu,x,1))*sigma+2*mu^2*sigma-diff(mu,x,2)-2*mu*(diff(mu,x,1)))+
+      (mu*(diff(sigma,x,1))-2*mu*sigma^2+3*(diff(mu,x,1))*sigma-2*mu^2*sigma-
+        diff(mu,x,2)+2*mu*(diff(mu,x,1)))*(mu*(diff(sigma,x,1))-2*mu*sigma^2+
+        3*(diff(mu,x,1))*sigma+2*mu^2*sigma-diff(mu,x,2)-2*mu*(diff(mu,x,1))),
+     
+      eq : partfrac(eq,x),
+      eq : if safe_op(eq) = "+" then args(eq) else [eq],
+      eq : xreduce('append, map(lambda([s], all_poly_coefs(ratnumer(s),x)),eq)),
+      eq : listify(setify(eq)),
+      sol : algsys(eq, [%k]),
+      for sk in sol while ie = false do (
+        f : radcan(exp(logcontract(integrate(mu,x)))),
+        f : block([?errorsw : true], errcatch(subst(sk, f))),
+        if f #  [] then (
+          f : first(f),
+          %fo : new_variable('general),
+          f : %fo * f,
+          cnst : subst(sk, (diff(f,x) / (sqrt(1-f^2) * (sqrt(1-%k^2 * f^2)))) / e),
+          cnst : infapply(cnst,lambda([s], radcan(rootscontract(s)))),
+          if cnst # 0 then (
+            cnst : ratnumer(ratsimp(diff(cnst,x) / cnst)),
+            cnst : algsys([cnst], [%fo]),
+            cnst : first(sublist(cnst, lambda([s], freeof(x, rhs(first(s)))))))
+          else cnst : [ ],
+
+          if cnst # [] then (
+            f : subst(cnst,f),
+            %so : ratsimp(subst(sk, diff(f,x) / (sqrt(1-f^2) * (sqrt(1-%k^2 * f^2))) / e)),
+            if %so # 0 and piecewise_constant_p(%so,x) = true then (
+              ie : subst(sk, (1/%so) * inverse_jacobi_sn(f, %k^2)))))))),
+    ie);
+  

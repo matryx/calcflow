@@ -1,0 +1,351 @@
+diff -r -c -C 5 maxima-5.9.0rc3_orig/doc/info/Input.texi maxima-5.9.0rc3/doc/info/Input.texi
+*** maxima-5.9.0rc3_orig/doc/info/Input.texi	Sat Mar 30 06:49:22 2002
+--- maxima-5.9.0rc3/doc/info/Input.texi	Sun Jan  5 17:17:20 2003
+***************
+*** 682,691 ****
+--- 682,733 ----
+  the LOADFILE command is used; 'AUTOLOAD means print only when a file
+  is automatically loaded in (e.g. the integration file SIN FASL); FALSE
+  means never print the loading message.
+  
+  @end defvar
++ @defun MATHML (expr)
++ @defunx MATHML (expr,filename)
++ @defunx MATHML (label,filename)
++ 
++ Convert an expression to Presentation MathML (v2).
++ 
++ In the case of a label,
++ an equation-number will be produced.
++ in case a file-name is supplied, the output will be appended to the
++ file.
++ 
++ @example
++ (C1) integrate(1/(1+x^3),x);
++ 
++ 					 2 x - 1
++ 		       2	    ATAN(-------)
++ 		  LOG(x  - x + 1)	 SQRT(3)    LOG(x + 1)
++ (D1) 	        - --------------- + ------------- + ----------
++ 			 6	       SQRT(3)	        3
++ (C2) mathml(d1);
++ <math xmlns="http://www.w3.org/1998/Math/MathML"> -<mfrac><mrow>
++  <mi>log</mi> <mfenced separators=""><msup><mrow><mi>x</mi> </mrow> 
++  <mn>2</mn> </msup> <mo>-</mo> <mi>x</mi> <mo>+</mo> <mn>1</mn> 
++  </mfenced> </mrow> <mrow><mn>6</mn> </mrow></mfrac> <mo>+</mo> 
++  <mfrac><mrow><mi>arctan</mi> <mfenced separators=""><mfrac><mrow>
++  <mn>2</mn> <mspace width="thinmathspace"/><mi>x</mi> <mo>-</mo> 
++  <mn>1</mn> </mrow> <mrow><msqrt><mn>3</mn> </msqrt></mrow></mfrac> 
++  </mfenced> </mrow> <mrow><msqrt><mn>3</mn> </msqrt></mrow></mfrac> 
++  <mo>+</mo> <mfrac><mrow><mi>log</mi> <mfenced separators="">
++  <mi>x</mi> <mo>+</mo> <mn>1</mn> </mfenced> </mrow> <mrow>
++  <mn>3</mn> </mrow></mfrac> <mspace width="verythickmathspace"/> 
++  <mtext>(D1)</mtext> </math>
++ (D2) 				     (D1)
++ (C6) mathml(integrate(sin(x),x));
++ <math xmlns="http://www.w3.org/1998/Math/MathML"> -<mi>cos</mi> 
++  <mi>x</mi> </math>
++ (D6) 				     FALSE
++ (C7) mathml(d1,"/tmp/jo.xml");
++ (D7) 				     (D1)
++ @end example
++ where the last expression will be appended to the file @file{/tmp/jo.xml}
++ @end defun
+  @c @node NOSTRING, OBASE, LOADPRINT, Input and Output
+  @c @unnumberedsec phony
+  @defun NOSTRING (arg)
+  displays all input lines when playing back rather than
+  STRINGing them.  If arg is GRIND then the display will be in a more
+diff -r -c -C 5 maxima-5.9.0rc3_orig/src/Makefile.am maxima-5.9.0rc3/src/Makefile.am
+*** maxima-5.9.0rc3_orig/src/Makefile.am	Sun Oct 27 21:16:27 2002
+--- maxima-5.9.0rc3/src/Makefile.am	Fri Nov 29 16:58:31 2002
+***************
+*** 191,200 ****
+--- 191,201 ----
+  macsys.lisp \
+  mactex.lisp \
+  marray.lisp \
+  mat.lisp \
+  matcom.lisp \
++ mathml.lisp \
+  matrix.lisp \
+  matrun.lisp \
+  max_ext.lisp \
+  maxima-package.lisp \
+  maxmac.lisp \
+diff -r -c -C 5 maxima-5.9.0rc3_orig/src/Makefile.in maxima-5.9.0rc3/src/Makefile.in
+*** maxima-5.9.0rc3_orig/src/Makefile.in	Tue Oct 29 22:06:15 2002
+--- maxima-5.9.0rc3/src/Makefile.in	Fri Nov 29 17:01:00 2002
+***************
+*** 159,168 ****
+--- 159,169 ----
+  macsys.lisp \
+  mactex.lisp \
+  marray.lisp \
+  mat.lisp \
+  matcom.lisp \
++ mathml.lisp \
+  matrix.lisp \
+  matrun.lisp \
+  max_ext.lisp \
+  maxima-package.lisp \
+  maxmac.lisp \
+diff -r -c -C 5 maxima-5.9.0rc3_orig/src/clisp-depends.mk maxima-5.9.0rc3/src/clisp-depends.mk
+*** maxima-5.9.0rc3_orig/src/clisp-depends.mk	Sun Oct 27 19:49:39 2002
+--- maxima-5.9.0rc3/src/clisp-depends.mk	Fri Nov 29 17:01:00 2002
+***************
+*** 238,247 ****
+--- 238,248 ----
+  binary-clisp/maxima.mem : invert.lisp
+  binary-clisp/maxima.mem : hypgeo.lisp
+  binary-clisp/maxima.mem : hyp.lisp
+  binary-clisp/maxima.mem : todd-coxeter.lisp
+  binary-clisp/maxima.mem : mactex.lisp
++ binary-clisp/maxima.mem : mathml.lisp
+  binary-clisp/maxima.mem : plot.lisp
+  binary-clisp/maxima.mem : autol.lisp
+  binary-clisp/maxima.mem : max_ext.lisp
+  binary-clisp/maxima.mem : autoconf-variables.lisp
+  binary-clisp/maxima.mem : init-cl.lisp
+diff -r -c -C 5 maxima-5.9.0rc3_orig/src/cmucl-depends.mk maxima-5.9.0rc3/src/cmucl-depends.mk
+*** maxima-5.9.0rc3_orig/src/cmucl-depends.mk	Sun Oct 27 19:49:37 2002
+--- maxima-5.9.0rc3/src/cmucl-depends.mk	Fri Nov 29 16:57:24 2002
+***************
+*** 238,247 ****
+--- 238,248 ----
+  binary-cmucl/maxima.core : invert.lisp
+  binary-cmucl/maxima.core : hypgeo.lisp
+  binary-cmucl/maxima.core : hyp.lisp
+  binary-cmucl/maxima.core : todd-coxeter.lisp
+  binary-cmucl/maxima.core : mactex.lisp
++ binary-cmucl/maxima.core : mathml.lisp
+  binary-cmucl/maxima.core : plot.lisp
+  binary-cmucl/maxima.core : autol.lisp
+  binary-cmucl/maxima.core : max_ext.lisp
+  binary-cmucl/maxima.core : autoconf-variables.lisp
+  binary-cmucl/maxima.core : init-cl.lisp
+diff -r -c -C 5 maxima-5.9.0rc3_orig/src/gcl-depends.mk maxima-5.9.0rc3/src/gcl-depends.mk
+*** maxima-5.9.0rc3_orig/src/gcl-depends.mk	Sun Oct 27 19:49:31 2002
+--- maxima-5.9.0rc3/src/gcl-depends.mk	Fri Nov 29 16:57:11 2002
+***************
+*** 237,246 ****
+--- 237,247 ----
+  binary-gcl/maxima : invert.lisp
+  binary-gcl/maxima : hypgeo.lisp
+  binary-gcl/maxima : hyp.lisp
+  binary-gcl/maxima : todd-coxeter.lisp
+  binary-gcl/maxima : mactex.lisp
++ binary-gcl/maxima : mathml.lisp
+  binary-gcl/maxima : plot.lisp
+  binary-gcl/maxima : autol.lisp
+  binary-gcl/maxima : max_ext.lisp
+  binary-gcl/maxima : autoconf-variables.lisp
+  binary-gcl/maxima : init-cl.lisp
+Only in maxima-5.9.0rc3/src: mathml.lisp
+diff -r -c -C 5 maxima-5.9.0rc3_orig/src/max_ext.lisp maxima-5.9.0rc3/src/max_ext.lisp
+*** maxima-5.9.0rc3_orig/src/max_ext.lisp	Mon Sep 23 23:32:55 2002
+--- maxima-5.9.0rc3/src/max_ext.lisp	Fri Nov 29 17:00:52 2002
+***************
+*** 1,9 ****
+--- 1,10 ----
+  ;;Autoloads for maxima
+  (in-package "MAXIMA")
+  
+  (AUTO-MSPEC '$TEX '|mactex|)
++ (AUTO-MSPEC '$MATHML '|mathml|)
+  (AUTOF '$FUNCSOL '|nusum|)
+  ;(AUTOF '$NUSUML '|nusum|)
+  (AUTOF '$RFORM '|nusum|)
+  ;(AUTOF '$RFORN '|nusum|)
+  ;(AUTOF '$PRODSHIFT '|nusum|)
+diff -r -c -C 5 maxima-5.9.0rc3_orig/src/maxima.system maxima-5.9.0rc3/src/maxima.system
+*** maxima-5.9.0rc3_orig/src/maxima.system	Tue Oct 22 23:52:03 2002
+--- maxima-5.9.0rc3/src/maxima.system	Fri Nov 29 17:00:19 2002
+***************
+*** 397,406 ****
+--- 397,407 ----
+  			 (:file "invert")
+  			 (:file "hypgeo")
+  			 (:file "hyp")
+  			 (:file "todd-coxeter")
+  			 (:file "mactex")
++ 			 (:file "mathml")
+  			 (:file "plot")))
+  	       (:module final :source-pathname ""
+  			;; These are not compiled, for whatever reason
+  			:load-only t
+  			:components ((:file "autol")
+Only in maxima-5.9.0rc3/tests: mathml_ref_list
+Only in maxima-5.9.0rc3/tests: mathmltest
+diff -r -c -C 5 maxima-5.9.0rc3_orig/tests/rtest11.mac maxima-5.9.0rc3/tests/rtest11.mac
+*** maxima-5.9.0rc3_orig/tests/rtest11.mac	Mon May  8 07:09:42 2000
+--- maxima-5.9.0rc3/tests/rtest11.mac	Sat Jan  4 11:14:58 2003
+***************
+*** 23,37 ****
+  EXP2:diff(EXP1,X);
+  1/(3*((2*X-2^(1/3))^2/(3*2^(2/3))+1))-(2*X-2^(1/3))
+                                 /(6*2^(2/3)*(X^2-2^(1/3)*X+2^(2/3)))
+                                +1/(3*2^(2/3)*(X+2^(1/3)))$  
+  				
+! /* was 1/(3*((2*2^(2/3)*X-2)^2/12+1))-2^(1/3)*(2*2^(2/3)*X-2)
+! 			       /(12*(2^(2/3)*X^2-2*X+2*2^(1/3)))
+! 			      +2^(1/3)/(6*(X+2^(1/3)))$
+! 				which is equal
+! */				
+  radcan(EXP2);
+  1/(X^3+2)$
+  reveal(EXP1:-LOG(X^2-2^(1/3)*X+2^(2/3))/(6*2^(2/3))+ATAN((2*X-2^(1/3))/(2^(1/3)*SQRT(3)))
+  					/(2^(2/3)*SQRT(3))
+  				       +LOG(X+2^(1/3))/(3*2^(2/3)),2);
+--- 23,36 ----
+  EXP2:diff(EXP1,X);
+  1/(3*((2*X-2^(1/3))^2/(3*2^(2/3))+1))-(2*X-2^(1/3))
+                                 /(6*2^(2/3)*(X^2-2^(1/3)*X+2^(2/3)))
+                                +1/(3*2^(2/3)*(X+2^(1/3)))$  
+  				
+! /* was 1/(3*((2*2^(2/3)*X-2)^2/12+1))-2^(1/3)*(2*2^(2/3)*X-2) */
+! /* 			       /(12*(2^(2/3)*X^2-2*X+2*2^(1/3))) */
+! /* 			      +2^(1/3)/(6*(X+2^(1/3)))$ */
+! /* 				which is equal */
+  radcan(EXP2);
+  1/(X^3+2)$
+  reveal(EXP1:-LOG(X^2-2^(1/3)*X+2^(2/3))/(6*2^(2/3))+ATAN((2*X-2^(1/3))/(2^(1/3)*SQRT(3)))
+  					/(2^(2/3)*SQRT(3))
+  				       +LOG(X+2^(1/3))/(3*2^(2/3)),2);
+diff -r -c -C 5 maxima-5.9.0rc3_orig/tests/rtest13.mac maxima-5.9.0rc3/tests/rtest13.mac
+*** maxima-5.9.0rc3_orig/tests/rtest13.mac	Mon May  8 07:09:42 2000
+--- maxima-5.9.0rc3/tests/rtest13.mac	Sat Jan  4 11:13:49 2003
+***************
+*** 50,87 ****
+  'DIFF(G(X),X,2) = 'DIFF(F(X),X,1)-COS(X)$
+  ATVALUE('DIFF(G(X),X),X = 0,A);
+  A$
+  ATVALUE(F(X),X = 0,1);
+  1$
+! /* The matchfix stuff seems to work but is difficult for batch to parse and check
+!  MATCHFIX("{","}");
+! "{"$
+! INFIX("|");
+! "|"$
+! EXP1:{X | X > 0};
+! {X | X > 0}$
+! EXP2:{X | X < 2};
+! {X | X < 2}$
+! INFIX("OU");
+! OU$
+! INFIX("OI");
+! OI$
+! EXP1 OU EXP2;
+! {X | X > 0} OU {X | X < 2}$
+! EXP1 OU EXP2;
+! {X | X > 0} OU {X | X < 2}$
+! EXP1:{1,2,3};
+! {1,2,3}$
+! {3,4,5};
+! {3,4,5}$
+! EXP1 OU EXP1 OU %;
+! {1,2,3} OU {1,2,3} OU {3,4,5}$
+! INFIX("ou",100,100);
+! OU$
+! EXP2:INFIX("OI",120,120);
+! OI$
+! EXP1 OU EXP1 OU %;
+! {1,2,3} OU {1,2,3} OU OI$
+! REMOVE("ou",OPERATOR);
+! DONE$
+! ERRCATCH(EXP1 OU EXP2);
+! [{1,2,3} OU OI]$  */
+--- 50,87 ----
+  'DIFF(G(X),X,2) = 'DIFF(F(X),X,1)-COS(X)$
+  ATVALUE('DIFF(G(X),X),X = 0,A);
+  A$
+  ATVALUE(F(X),X = 0,1);
+  1$
+! /* The matchfix stuff seems to work but is difficult for batch to parse and check */
+! /* MATCHFIX("{","}"); */
+! /* "{"$ */
+! /* INFIX("|"); */
+! /* "|"$ */
+! /* EXP1:{X | X > 0}; */
+! /* {X | X > 0}$ */
+! /* EXP2:{X | X < 2}; */
+! /* {X | X < 2}$ */
+! /* INFIX("OU"); */
+! /* OU$ */
+! /* INFIX("OI"); */
+! /* OI$ */
+! /* EXP1 OU EXP2; */
+! /* {X | X > 0} OU {X | X < 2}$ */
+! /* EXP1 OU EXP2; */
+! /* {X | X > 0} OU {X | X < 2}$ */
+! /* EXP1:{1,2,3}; */
+! /* {1,2,3}$ */
+! /* {3,4,5}; */
+! /* {3,4,5}$ */
+! /* EXP1 OU EXP1 OU %; */
+! /* {1,2,3} OU {1,2,3} OU {3,4,5}$ */
+! /* INFIX("ou",100,100); */
+! /* OU$ */
+! /* EXP2:INFIX("OI",120,120); */
+! /* OI$ */
+! /* EXP1 OU EXP1 OU %; */
+! /* {1,2,3} OU {1,2,3} OU OI$ */
+! /* REMOVE("ou",OPERATOR); */
+! /* DONE$ */
+! /* ERRCATCH(EXP1 OU EXP2); */
+! /* [{1,2,3} OU OI]$  */ 
+\ No newline at end of file
+diff -r -c -C 5 maxima-5.9.0rc3_orig/tests/rtest9a.mac maxima-5.9.0rc3/tests/rtest9a.mac
+*** maxima-5.9.0rc3_orig/tests/rtest9a.mac	Mon May  8 07:09:42 2000
+--- maxima-5.9.0rc3/tests/rtest9a.mac	Sat Jan  4 11:17:05 2003
+***************
+*** 29,41 ****
+  SIN(X+(O+1/2)*%PI);
+  -COS(X)$
+  (linel:500,DIFF(EXP(X^2+Y)/(X+Y),X,2));
+  4*X^2*%E^(Y+X^2)/(Y+X)+2*%E^(Y+X^2)/(Y+X)-4*X*%E^(Y+X^2)/(Y+X)^2
+  		      +2*%E^(Y+X^2)/(Y+X)^3$
+! /* we use sconcat here, because it is not possible to compare the
+!   output from optimize which involves gensyms whith something we read.
+! */
+  sconcat(OPTIMIZE(%));
+  sconcat("BLOCK([%1,%2,%3,%4],%1:Y+X,%2:X^2,%3:%E^(Y+%2),%4:1/%1,4*%2*%4*%3+2*%4*%3-4*X*%3/%1^2+2*%3/%1^3)")$
+  linel:79;
+  79$
+  LAPLACE(%E^(2*T+A)*SIN(T)*T,T,S);
+--- 29,40 ----
+  SIN(X+(O+1/2)*%PI);
+  -COS(X)$
+  (linel:500,DIFF(EXP(X^2+Y)/(X+Y),X,2));
+  4*X^2*%E^(Y+X^2)/(Y+X)+2*%E^(Y+X^2)/(Y+X)-4*X*%E^(Y+X^2)/(Y+X)^2
+  		      +2*%E^(Y+X^2)/(Y+X)^3$
+! /* we use sconcat here, because it is not possible to compare the */
+! /* output from optimize which involves gensyms whith something we read. */
+  sconcat(OPTIMIZE(%));
+  sconcat("BLOCK([%1,%2,%3,%4],%1:Y+X,%2:X^2,%3:%E^(Y+%2),%4:1/%1,4*%2*%4*%3+2*%4*%3-4*X*%3/%1^2+2*%3/%1^3)")$
+  linel:79;
+  79$
+  LAPLACE(%E^(2*T+A)*SIN(T)*T,T,S);
+***************
+*** 46,55 ****
+  B*LAPLACE(F(T),T,S)+A*LAPLACE(F(T),T,S)/(S^2-A^2) = 2/S^3$
+  LINSOLVE([%],['LAPLACE(F(T),T,S)]);
+  exp:['LAPLACE(F(T),T,S) = (2*S^2-2*A^2)/(B*S^5+(A-A^2*B)*S^3)]$
+  
+  /* This is ok but needs a response */
+! /*
+! ("respond POSITIVE to a*b(a*b-1) positive,negative,or zero", ILT(EV(exp[1]),S,T));
+! F(T) = -2*COSH(SQRT(A*B*(A*B-1))*T/B)/(A^3*B^2-2*A^2*B+A)
+!      +A*T^2/(A*B-1)+2/(A^3*B^2-2*A^2*B+A)$
+! */
+\ No newline at end of file
+--- 45,52 ----
+  B*LAPLACE(F(T),T,S)+A*LAPLACE(F(T),T,S)/(S^2-A^2) = 2/S^3$
+  LINSOLVE([%],['LAPLACE(F(T),T,S)]);
+  exp:['LAPLACE(F(T),T,S) = (2*S^2-2*A^2)/(B*S^5+(A-A^2*B)*S^3)]$
+  
+  /* This is ok but needs a response */
+! /* ("respond POSITIVE to a*b(a*b-1) positive,negative,or zero", ILT(EV(exp[1]),S,T)); */
+! /* F(T) = -2*COSH(SQRT(A*B*(A*B-1))*T/B)/(A^3*B^2-2*A^2*B+A) */
+! /*      +A*T^2/(A*B-1)+2/(A^3*B^2-2*A^2*B+A)$ */
+\ No newline at end of file

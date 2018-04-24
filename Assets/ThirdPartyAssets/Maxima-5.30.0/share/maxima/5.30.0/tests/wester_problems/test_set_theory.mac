@@ -1,0 +1,30 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/SetTheory/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Set Theory ---------- */
+x: '[a, b, b, c, c, c]$
+y: '[d, c, b]$
+z: '[b, e, b]$
+/* [x \/ y \/ z, x /\ y /\ z] => [{a, b, c, d, e}, {b}] */
+[union(x, y, z), intersect(x, y, z)];
+/* x \/ y \/ z - x /\ y /\ z => {a, c, d, e} */
+setdifference(%[1], %[2]);
+remvalue(x, y, z)$
+/* Cartesian product of sets => {(a, c), (a, d), (b, c), (b, d)} */
+apply('append, outermap("[", [a, b], [c, d]));
+/* ---------- Quit ---------- */
+quit();

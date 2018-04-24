@@ -1,0 +1,62 @@
+/* -*-Macsyma-*- */
+eval_when(batch,ttyoff:true)$
+/*SHARE1;ATRIG1 1
+12:01am  Friday, 14 January 1983
+  Created.
+*/
+
+eval_when(translate,
+	  transcompile:true,
+	  define_variable:'mode)$
+
+put('atrig1,1,'version)$
+
+/* Variable definitions */
+
+define_variable(piover4,%pi/4,any)$
+define_variable(piover3,%pi/3,any)$
+define_variable(piover6,%pi/6,any)$
+define_variable(piover8,%pi/8,any)$
+define_variable(sqrt3,sqrt(3),any)$
+define_variable(sqrt2,sqrt(2),any)$
+define_variable(angles_known_for_atrig,[0,piover6,piover4,piover3,%pi/2],
+		any)$
+
+/* For %PI/4 */
+
+tellsimpafter(acos(1/sqrt2),piover4)$
+tellsimpafter(acos(sqrt2/2),piover4)$
+tellsimpafter(asec(sqrt2),piover4)$
+tellsimpafter(acsc(sqrt2),piover4)$
+tellsimpafter(asin(1/sqrt2),piover4)$
+tellsimpafter(asin(sqrt2/2),piover4)$
+
+/* For %PI/3 */
+
+tellsimpafter(asin(sqrt3/2),piover3)$
+tellsimpafter(atan(sqrt3),  piover3)$
+tellsimpafter(acot(1/sqrt3),piover3)$
+tellsimpafter(acot(sqrt3/3),piover3)$
+tellsimpafter(acsc(2*sqrt3/3),piover3)$
+tellsimpafter(acsc(2/sqrt3),piover3)$
+tellsimpafter(asec(2),piover3)$
+
+/* For %PI/6 */
+
+tellsimpafter(acos(sqrt3/2),piover6)$
+tellsimpafter(atan(sqrt3/3),piover6)$
+tellsimpafter(atan(1/sqrt3),piover6)$
+tellsimpafter(acot(sqrt3),  piover6)$
+tellsimpafter(asec(2/sqrt3),piover6)$
+tellsimpafter(asec(2*sqrt3/3),piover6)$
+tellsimpafter(acsc(2),        piover6)$
+
+/* For %PI/8 */
+
+tellsimpafter(atan(sqrt2-1),piover8)$
+tellsimpafter(atan(sqrt2+1),3*piover8)$
+
+/* Could also do  [1,5,7,11]*%PI/12 if there is ever demand for it. */
+
+eval_when(batch,ttyoff:false)$
+

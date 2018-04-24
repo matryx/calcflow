@@ -1,0 +1,618 @@
+%%%% Identification
+\ProvidesPackage{emaxima}[2004/12/20]
+
+%%% Commentary
+% This package can be loaded with the command
+%   \usepackage[options...]{emaxima}
+% The possible options (explained below) are:
+%     breqn, lines, listings, preview
+% The breqn option will use the LaTeX breqn package (which must be
+% installed) to break long maxima lines into shorter lines
+% automatically.
+% The preview option will enable the Emacs preview package (which
+% must be installed) to preview the maxima environments.
+% The lines option will put lines before and after some of the
+% environments. 
+% The listings option will use the LaTeX listings package (which must
+% be installed) to typeset some of the maxima code.  To use this, the
+% file maxima.sty must be in the search path for TeX.
+%
+% This package provides the following environments:
+%   \begin{maxima}
+%   ...
+%   \end{maxima}
+% and
+%   \begin{maximasession}
+%   ...
+%   \end{maximasession}
+% (Both versions have starred forms: maxima* and maximasession*, which
+% will be skipped when the document is typeset.)
+% The maxima environments can be joined with [...] optional arguments
+% (as described in the documentation).
+% The maxima and maximasession environments are sometimes split into
+% input and output, separated by 
+%   \maximaoutput
+% or (if the output is in TeX form)
+%   \maximaoutput*
+%%%
+
+%%%% How to customize
+% Indentation
+%   \setlength{\maximaindent}{<len>} will set the indentation
+%   of all the maxima code
+% Colors
+%   \renewcommand{\maximapromptcolor}{<color>}
+%   \renewcommand{\maximainputcolor}{<color>}
+%   \renewcommand{\maximaoutputcolor}{<color>}
+%   will set the colors of the TeX output of the sessions.
+% Cell appearance
+%   The top, middle and bottom of a maxima cell are determined by the
+%   commands:  \maximatop, \maximamiddle, \maximabottom
+%   By default, \maximamiddle is set to \maximaoutputmarker.
+%   If the lines option is used, then \maximatop and \maximabottom
+%   are set to \maximaboxtop and \maximaboxbottom, respectively.
+%   Otherwise, \maximatop and \maximabottom are set to do nothing.
+%   The top and bottom of a maxima session are determined by
+%   \maximasessiontop and \maximasessionbottom, respectively.
+%   By default, they do nothing.
+% Fonts
+%   The verbatim output for maxima cells is inserted with
+%   \maximaverbatiminput.  This will do one of two things.
+%   If the listings option is used, this is defined by
+%   \lstinputlisting[style=emaxima]{#1}, and so can be adjusted by
+%   resetting the emaxima style.   By default, this style is given by
+%      \lstdefinestyle{emaxima}
+%                     {language=maxima,
+%                      aboveskip=0pt,
+%                      belowskip=0pt,
+%                      xleftmargin=\maximaindent}
+%   If the listings package is not used, then \maximaverbatiminput is 
+%   defined by \VerbatimInput[xleftmargin=\maximaindent]{#1}
+%   (\VerbatimInput is from the fancyvrb package.)
+%   In either case, it can be adjusted by redefining
+%   \maximaverbatiminput, which is expected to indent everything by
+%   \maximaindent
+%   The fonts used in the maximasessions is \maximafont, by default
+%   \ttfamily.
+
+
+%%%% Initial Code
+\RequirePackage{ifthen}
+\RequirePackage{alltt}
+\usepackage{ifpdf}
+\ifpdf
+\usepackage[pdftex]{color}
+\usepackage{pdfcolmk}
+\color{black}
+\else
+\usepackage{color}
+\fi
+\newboolean{m@ximapreview}
+\setboolean{m@ximapreview}{false}
+\newboolean{m@ximabreqn}
+\setboolean{m@ximabreqn}{false}
+\newboolean{m@ximalistings}
+\setboolean{m@ximalistings}{false}
+\newboolean{m@ximalines}
+\setboolean{m@ximalines}{false}
+\newboolean{m@ximainline}
+\setboolean{m@ximainline}{false}
+
+%%%% Declaration of options
+\DeclareOption{preview}
+{\setboolean{m@ximapreview}{true}}
+
+\DeclareOption{breqn}
+{\setboolean{m@ximabreqn}{true}}
+
+\DeclareOption{listings}
+{\setboolean{m@ximalistings}{true}}
+
+\DeclareOption{lines}
+{\setboolean{m@ximalines}{true}}
+
+\DeclareOption{inline}
+{\setboolean{m@ximainline}{true}}
+
+%%%% Execution of options
+\ProcessOptions
+
+%%%% Package loading
+
+%%%% Main code
+
+%%%% Some TeX coding
+% First of all, a command to deactivate everything except \
+\chardef \other = 12
+\def\m@ximadeactivate{%
+  \catcode`\$ = \other
+  \catcode`\& = \other
+  \catcode`\# = \other
+  \catcode`\% = \other
+  \catcode`\~ = \other
+  \catcode`\^ = \other
+  \catcode`\_ = \other
+  \catcode`\  = \other
+  \catcode`\{ = \other
+  \catcode`\} = \other}
+
+% Next, a comment environment which ends at the next \end,
+% \maximaoutput or \maximasessionoutput.
+% It does this by looking at the next token and seeing if it is
+% one of these.  If not, it discards it; if it is, it ends the
+% comment environment.
+% Putting \m@ximastartcomment (even inside a command) will start this.
+\def\m@ximacomment{%
+  \futurelet\m@xima@token\m@ximacommentl@@k}
+\def\m@ximacommentl@@k{%
+  \ifx\m@xima@token\end
+     \let\m@xima@next=\m@xima@endcomment
+  \else
+    \ifx\m@xima@token\maximaoutput
+      \let\m@xima@next=\m@xima@endcomment
+    \else
+      \ifx\m@xima@token\par
+        \let\m@xima@next=\m@ximaparcomment
+      \else
+        \let\m@xima@next=\m@ximacommenttwo
+      \fi
+    \fi
+  \fi
+  \m@xima@next}
+
+\def\m@ximaparcomment#1\par{%
+  \m@ximacomment}
+
+\def\m@ximacommenttwo#1 {%
+  \m@ximacomment}
+
+\def\m@ximastartcomment{%
+  \begingroup
+  \m@ximadeactivate
+  \m@ximacomment}
+
+\def\m@xima@endcomment{%
+  \endgroup}
+
+% Also, a comment environment which only ends with \end
+% Putting \m@ximastartfullcomment (even inside a command) will start this.
+\def\m@ximafullcomment{%
+  \futurelet\m@xima@token\m@ximafullcommentl@@k}
+\def\m@ximafullcommentl@@k{%
+  \ifx\m@xima@token\end
+     \let\m@xima@next=\m@xima@endfullcomment
+  \else
+    \ifx\m@xima@token\par
+      \let\m@xima@next=\m@ximaparfullcomment
+    \else
+      \let\m@xima@next=\m@ximafullcommenttwo
+    \fi
+  \fi
+  \m@xima@next}
+
+\def\m@ximaparfullcomment#1\par{%
+  \m@ximafullcomment}
+
+\def\m@ximafullcommenttwo#1 {%
+  \m@ximafullcomment}
+
+\def\m@ximastartfullcomment{%
+  \begingroup
+  \m@ximadeactivate
+  \m@ximafullcomment}
+
+\def\m@xima@endfullcomment{%
+  \endgroup}
+
+% Next, a write environment which ends at the next \maximaoutput or \end.
+% It does this by looking at the next token and seeing if it is
+% one of these.  If not, it writes it; if it is, it ends the
+% write environment.
+% It can be started with \m@ximastartwrite
+\def\m@ximatempfile{\jobname.tmp}
+
+\newwrite\m@ximaout
+
+\def\m@ximawriteskipline#1 {%
+  \m@ximawrite}
+
+\def\m@ximawrite{%
+  \futurelet\m@xima@token\m@ximawritel@@k}
+
+\def\m@ximawritel@@k{%
+  \ifx\m@xima@token\end
+    \let\m@xima@next=\m@xima@endwrite
+  \else
+     \ifx\m@xima@token\maximaoutput
+       \let\m@xima@next=\m@xima@endwrite
+     \else
+       \ifx\m@xima@token\par
+         \let\m@xima@next=\m@xima@parwrite
+       \else
+         \let\m@xima@next=\m@ximawritetwo
+       \fi
+     \fi
+  \fi
+  \m@xima@next}
+
+\def\m@xima@parwrite#1\par{%
+\immediate\write\m@ximaout{}
+\m@ximawrite}
+
+\def\m@ximawritetwo#1 {%
+  \immediate\write\m@ximaout{\noexpand#1}%
+  \m@ximawrite}
+
+\def\m@ximastartwriteskipline{%
+  \begingroup
+  \immediate\openout \m@ximaout \m@ximatempfile
+  \m@ximadeactivate
+  \m@ximawriteskipline}
+
+\def\m@ximastartwrite{%
+  \begingroup
+  \immediate\openout \m@ximaout \m@ximatempfile
+  \m@ximadeactivate
+  \m@ximawrite}
+
+\def\m@xima@endwrite{%
+%  \immediate\write\m@ximaout{ }
+  \immediate\closeout\m@ximaout%
+  \endgroup
+  \m@ximawritetempfile}
+
+% A command to verbatim typeset the file.
+% It is determined by the command \maximaverbatiminput,
+% whose default value depends on the option listings.
+
+\newcommand{\m@ximawritetempfile}
+{\par
+ \noindent
+ \maximaverbatiminput{\m@ximatempfile}
+ \par}
+
+% The \maximaverbatiminput command depends on whether the
+% listings option is given.
+% The command should indent the code to \maximaindent
+
+\newlength{\maximaindent}
+\setlength{\maximaindent}{2ex}
+\newcommand{\m@ximaindent}
+{\setlength{\leftskip}{\maximaindent}
+ \setlength{\rightskip}{\maximaindent}}
+
+
+\ifthenelse{\boolean{m@ximalistings}}
+{\RequirePackage{maxima}
+ \lstdefinestyle{emaxima}
+ {language=maxima,
+   aboveskip=0pt,
+   belowskip=0pt,
+   xleftmargin=\maximaindent}
+ \newcommand{\maximaverbatiminput}[1]
+ {\lstinputlisting[style=emaxima]{#1}}}
+{\RequirePackage{fancyvrb}
+ \newcommand{\maximaverbatiminput}[1]
+ {\VerbatimInput[xleftmargin=\maximaindent]{#1}}}
+
+% Now, a command to see if the argument ends in a colon or not
+% \maximaendsincolon{string} will set the boolean maximaendsincolon
+% to be true if string ends with a colon, false otherwise.
+
+\newboolean{m@ximaendsincolon}
+\newcommand{\maximaendsincolon}[1]
+{\setboolean{m@ximaendsincolon}{false}
+ \m@ximacheckcolon#1\end}
+
+\newcommand{\m@ximacheckcolon}[1]
+{\ifx#1\end 
+   \let\next=\relax
+ \else
+   \let\next=\m@ximacheckcolon
+   \ifx#1:
+      \setboolean{m@ximaendsincolon}{true}
+   \else
+      \setboolean{m@ximaendsincolon}{false}
+   \fi
+ \fi
+ \next}
+
+\newcommand{\m@ximaremovecolon}[1]
+{{\m@cstrip#1}}
+\def\m@cstrip#1:{#1}
+
+%% Now, set some environments
+
+%% We need environments for maxima, maxima*, maximasession, maximasession*
+%% Any environment that ends in * will be a comment environment
+
+\newenvironment{maxima*}[1][]
+{\m@ximastartfullcomment}
+{}
+
+\newenvironment{maximasession*}[1][]
+{\m@ximastartfullcomment}
+{}
+
+%% The maxima environment should write verbatim the ``top'' part 
+%% (before an output marker) and the the bottom verbatim or TeXed.
+
+%% A macro for writing Maxima in the ``proper'' font
+
+\newcommand{\Maxima}{\textsf{\textsl{Maxima}}}
+
+%% The top of the box
+
+\newcommand{\m@ximanoparttop}
+{\vskip -1ex
+ \hbox to \hsize{\vrule depth 1ex  height .3pt width .4pt
+                 \vrule height .4pt depth 0pt width 1.1em 
+                 \lower .4ex \hbox{\tiny ~\Maxima} 
+                 \hrulefill 
+                 \vrule depth 1ex height .3pt width .4pt}
+ \vskip 1ex}
+
+\newcommand{\m@ximaparttop}
+{\vskip -1ex
+ \hbox to \hsize{\vrule depth 1ex  height .3pt width .4pt
+                \vrule height .4pt depth 0pt width 1.1em 
+                \lower .4ex \hbox{\tiny ~\Maxima} 
+                \hrulefill
+                \lower .4ex \hbox{\tiny~\m@ximapartname}
+                \hrulefill
+                \vrule depth 1ex height .3pt width .4pt}
+\vskip 1ex}
+
+\newcommand{\maximaboxtop}
+{\ifthenelse{\equal{\m@ximapartname}{}}
+  {\m@ximanoparttop}
+  {\m@ximaparttop}}
+
+%% The bottom of the box
+
+\newcommand{\maximaboxbottom}
+{\hbox to \hsize{\vrule depth 0ex height 1ex width .4pt
+                 \hrulefill 
+                 \vrule depth 0ex height 1ex width .4pt}}
+
+%% The middle of the box
+
+\newcommand{\maximaoutputmarker}
+{\par\noindent
+ \hspace*{\maximaindent}
+ \rule{.4\linewidth}{0.4pt}
+ \par\noindent}
+
+% \newcommand{\maximaoutputmarker}
+% {\par\noindent
+%  \vskip -1ex
+%   \hbox to \hsize{\hskip 1.5em
+%     \vrule height .4pt depth 0pt width 3em
+%     \lower .4ex \hbox{\tiny Output}
+%     \hrulefill
+%     \hskip 1.5em}
+%   \vskip 1ex
+%   \par\noindent}
+
+%% Setting the name
+
+\newcommand{\m@ximasetname}[1]
+{\maximaendsincolon{#1}
+ \ifthenelse{\equal{#1}{}}
+   {\renewcommand{\m@ximapartname}{}}
+   {\ifthenelse{\boolean{m@ximaendsincolon}}
+%     {\renewcommand{\m@ximapartname}{Definition of #1}}
+     {\renewcommand{\m@ximapartname}{Definition of \m@ximaremovecolon{#1}}}
+     {\renewcommand{\m@ximapartname}{#1}}}}
+
+%% Now the environments
+
+\newboolean{m@ximaverbatimoutput}
+\newboolean{m@ximatexoutput}
+
+\newcommand{\m@ximapartname}{}
+
+% Default top, middle and bottom of the maxima environment
+\ifthenelse{\boolean{m@ximalines}}
+{\newcommand{\maximatop}{\maximaboxtop}
+ \newcommand{\maximamiddle}{\maximaoutputmarker}
+ \newcommand{\maximabottom}{\maximaboxbottom}}
+{\newcommand{\maximatop}{}
+ \newcommand{\maximamiddle}{\maximaoutputmarker}
+ \newcommand{\maximabottom}{}}
+
+\newcommand{\maximaoutput}{}
+
+\newenvironment{maxima}[1][]%
+{~\par\renewcommand{\maximaoutput}
+ {\@ifstar{\maximatexoutput}{\maximaverbatimoutput}}
+ \begingroup
+ \m@ximasetname{#1}
+ \setboolean{m@ximaverbatimoutput}{false}
+ \setboolean{m@ximatexoutput}{false}
+ \maximatop
+ \ifthenelse{\equal{\m@ximapartname}{}}
+ {\m@ximastartwrite}{\m@ximastartwriteskipline}}
+{\ifthenelse{\boolean{m@ximaverbatimoutput}}
+  {}                           % verbatim output
+  {\ifthenelse{\boolean{m@ximatexoutput}}
+    {\par\noindent}            % TeX output
+    {}}                        % no output
+ \maximabottom
+ \endgroup
+ \par\noindent}
+
+\newcommand{\maximaverbatimoutput}
+{\setboolean{m@ximaverbatimoutput}{true}
+ \maximamiddle
+ \m@ximastartwrite}
+
+\newcommand{\maximatexoutput}
+{\def\m##1\\{%
+    \par\noindent
+    \begingroup\maximafont\color{\maximaoutputcolor}
+    \begin{em@ximam@th} ##1 \end{em@ximam@th}\endgroup}
+ \def\t##1.##2\\{%
+   \par\noindent
+   \begingroup\maximafont\color{\maximaoutputcolor}\textcolor{\maximapromptcolor}
+   {(\%t##1)}\begin{em@ximam@th} ##2 \end{em@ximam@th}\endgroup}
+ \def\p{\begingroup\color{\maximaoutputcolor}
+   \setupm@ximasessionverbatim\dom@ximasessionpreprompt}
+ \setboolean{m@ximatexoutput}{true}
+ \maximamiddle
+ \m@ximaindent
+ \par\noindent}
+
+%% Some stuff to help with lists of examples
+
+\newcommand{\maximaexamplesname}{List of Maxima Examples}
+
+%% Some stuff of the list of examples
+\@ifclassloaded{book}
+{\newcounter{maximaexample}[chapter]
+ \newcommand\listofmaximaexamples{%
+   \if@twocolumn
+     \@restonecoltrue\onecolumn
+   \else
+     \@restonecolfalse
+   \fi
+   \chapter*{\maximaexamplesname}%
+     \@mkboth{\MakeUppercase\maximaexamplesname}%
+             {\MakeUppercase\maximaexamplesname}%
+   \@starttoc{lom}%
+   \if@restonecol\twocolumn\fi
+ }
+ \newcommand{\maxcaption}[1]{\addcontentsline{lom}{figure}
+   {\protect\numberline{\thechapter.\themaximaexample} {\protect\ignorespaces #1}}}}
+{\newcounter{maximaexample}
+ \newcommand\listofmaximaexamples{%
+     \if@twocolumn
+       \@restonecoltrue\onecolumn
+     \else
+       \@restonecolfalse
+     \fi
+     \section*{\maximaexamplesname}%
+       \@mkboth{\MakeUppercase\maximaexamplesname}%
+               {\MakeUppercase\maximaexamplesname}%
+     \@starttoc{lom}%
+     \if@restonecol\twocolumn\fi
+   }
+\newcommand{\maxcaption}[1]{\addcontentsline{lom}{figure}
+  {\protect\numberline{\themaximaexample}
+    {\protect\ignorespaces #1}}}}
+
+\newcommand{\l@example}[2]{\par\noindent#1 {\itshape #2}}
+
+
+%% The maximasession environment should ignore the ``top'' part
+%% (before an output marker) and the the bottom verbatim or TeXed.
+%% If TeXed, some commands need to be set up.
+
+\newboolean{m@ximasessionverbatimoutput}
+\newboolean{m@ximasessiontexoutput}
+
+\newcommand{\maximasessiontop}{}
+\newcommand{\maximasessionbottom}{}
+
+\newenvironment{maximasession}[1][]
+{~\par\renewcommand{\maximaoutput}
+  {\begingroup
+   \@ifstar{\maximasessiontexoutput}{\maximasessionverbatimoutput}}
+ \ifthenelse{\equal{#1}{}}
+  {}{\stepcounter{maximaexample}
+   \maxcaption{#1}}
+ \setboolean{m@ximasessionverbatimoutput}{false}
+ \setboolean{m@ximasessiontexoutput}{false}
+ \m@ximastartcomment}
+{\ifthenelse{\boolean{m@ximasessionverbatimoutput}} 
+ {\maximasessionbottom
+  \endgroup\par\noindent}  % verbatim output
+ {\ifthenelse{\boolean{m@ximasessiontexoutput}}
+   {\par\maximasessionbottom
+    \endgroup\par\noindent}               % TeX output
+   {}}}
+
+\newenvironment{maximanu}
+{\begin{maxima}}
+{\end{maxima}}
+
+\newenvironment{maximasessionnu}
+{\begin{maximasession}}
+{\end{maximasession}}
+
+\newenvironment{maximanu*}
+{\begin{maxima*}}
+{\end{maxima*}}
+
+\newenvironment{maximasessionnu*}
+{\begin{maximasession*}}
+{\end{maximasession*}}
+
+\ifthenelse{\boolean{m@ximapreview}}
+{\RequirePackage{preview}
+ \PreviewEnvironment[{[]}]{maxima}
+ \PreviewEnvironment{maximasession}}
+{}
+
+\newcommand{\maximasessionverbatimoutput}
+{\setboolean{m@ximasessionverbatimoutput}{true}
+ \maximasessiontop
+ \m@ximastartwrite}
+
+\ifthenelse{\boolean{m@ximainline}}
+{\newenvironment{em@ximam@th}
+  {\hfil\(}
+  {\)\hfil}}
+{\ifthenelse{\boolean{m@ximabreqn}}
+  {\RequirePackage[cmbase]{flexisym}
+    \RequirePackage{breqn}
+    \newenvironment{em@ximam@th}
+    {\begin{dmath*}}
+      {\end{dmath*}}}
+  {\newenvironment{em@ximam@th}
+    {\begin{displaymath}}
+      {\end{displaymath}}}}
+
+\newcommand{\maximapromptcolor}{red}
+\newcommand{\maximainputcolor}{blue}
+\newcommand{\maximaoutputcolor}{blue}
+\newcommand{\maximafont}{\ttfamily}
+
+
+\def\m@ximauncatcodespecials{\def\do##1{\catcode`##1=12 }\dospecials}
+\def\m@ximapercent{\%}
+\def\setupm@ximasessionverbatim{
+\obeylines \m@ximauncatcodespecials \obeyspaces}
+{\obeyspaces\global\let =\ }
+{\catcode`\|=0 \catcode`\\=12 %
+|obeylines|gdef|dom@ximatexsessionverbatim#1.#2\\{|maximafont|par|noindent|textcolor{|maximapromptcolor}{(|m@ximapercent{}i#1)}#2|par|endgroup}
+|obeylines|gdef|dom@ximasessionpreprompt#1\\{|par|noindent#1|par|endgroup}}
+
+\newcommand{\maximasessionpreoutput}{}
+
+\newcommand{\m@ximasetupsessiontexoutput}
+{\def\i{\begingroup\color{\maximainputcolor}
+    \setupm@ximasessionverbatim\dom@ximatexsessionverbatim}
+ \def\o##1.##2\\{%
+   \par\noindent
+   \begingroup\maximafont\color{\maximaoutputcolor}\textcolor{\maximapromptcolor}
+   {(\%o##1)}\begin{em@ximam@th} ##2 \end{em@ximam@th}\endgroup}
+ \def\oo##1\\{%
+   \par\noindent
+   \begingroup\maximafont\color{\maximaoutputcolor}
+   \begin{em@ximam@th} ##1 \end{em@ximam@th}\endgroup}
+ \def\t##1.##2\\{%
+   \par\noindent
+   \begingroup\maximafont\color{\maximaoutputcolor}\textcolor{\maximapromptcolor}
+   {(\%t##1)}\begin{em@ximam@th} ##2 \end{em@ximam@th}\endgroup}
+ \def\ps{maximasessionpreoutput}
+ \def\p{\begingroup\color{\maximaoutputcolor}
+   \setupm@ximasessionverbatim\dom@ximasessionpreprompt}}
+
+\newcommand{\maximasessiontexoutput}
+{\setboolean{m@ximasessiontexoutput}{true}
+ \maximasessiontop
+ \m@ximasetupsessiontexoutput
+ \m@ximaindent}
+
+

@@ -1,0 +1,10 @@
+
+traprule(f,a,b,n):=
+   (b-a)/n * ((apply(f,[b])+apply(f,[a]))/2 +
+   sum(apply(f,[a+(b-a)/n*i]),i,1,n-1))$
+
+simpson(f,a,b,n):=
+    block ([nn : ceiling (n / 2)],
+   (1/6)*(b-a)/nn * (apply(f,[a])+apply(f,[b]) +
+   4*sum(apply(f,[a+(b-a)/(2*nn)*(2*i-1)]),i,1,nn)
+ + 2*sum(apply(f,[a+(b-a)/(2*nn)*(2*i)]),i,1,nn-1)))$

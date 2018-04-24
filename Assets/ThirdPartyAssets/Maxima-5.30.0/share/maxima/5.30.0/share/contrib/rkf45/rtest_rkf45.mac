@@ -1,0 +1,50 @@
+/* ---------------------------------------------------------------------------*/
+/* Test file for rkf45.                                                       */
+/* Note: Expected results were obtained on a 64-bit GNU/Linux system. Results
+   obtained on 32-bit systems and/or different platforms may differ slightly.
+   However, float_approx_equal_tolerance is set to 2e-12, which should be
+   enough so that all tests should be passed on any system.                   */
+/* ---------------------------------------------------------------------------*/
+(kill(all), load('rkf45), float_approx_equal_tolerance:2e-12, 0);
+0$
+/* ---------------------------------------------------------------------------*/
+/* One differential equation of first order.                                  */
+rkf45(-3*x*y^2+1/(x^3+1),y,0,[x,0,5],full_solution=false);
+[5.0,0.039682302083817]$
+/* ---------------------------------------------------------------------------*/
+/* An initial value problem with threshold effect.                            */
+rkf45(0.206-1.51*f+3.03*f^2/(1+f^2),f,0,[t,0,100],full_solution=false);
+[100.0,1.557094207358533]$
+/* ---------------------------------------------------------------------------*/
+/* A system of two first-order differential equations.                        */
+rkf45([1.89247311827957*(C-L),52.757793764988*(32-C)+42.20623501199041*(L-C)],
+      [L,C],[150,150],[t,0,2],full_solution=false);
+[2.0,46.84310577179979,38.67012732884611]$
+/* ---------------------------------------------------------------------------*/
+/* A second-order differential equation: the van der Pol equation.            */
+rkf45([x2,4*(1-x1^2)*x2-x1],[x1,x2],[0.75,0],[t,0,20],full_solution=false);
+[20.0,1.185928216142604,-0.46868416821173]$
+/* ---------------------------------------------------------------------------*/
+/* A system of two second-order differential equations: the double pendulum.  */
+( m1:1, m2:1.5, l1:0.4, l2:0.6, g:9.81,
+  d2th1dt2:(-g*(2*m1+m2)*sin(th1)-m2*g*sin(th1-2*th2)
+            -2*sin(th1-th2)*m2*('diff(th2,t)^2*l2
+            +'diff(th1,t)^2*l1*cos(th1-th2)))
+           /(l1*(2*m1+m2-m2*cos(2*th1-2*th2))),
+  d2th2dt2:(2*sin(th1-th2)*('diff(th1,t)^2*l1*(m1+m2)+g*(m1+m2)*cos(th1)
+            +'diff(th2,t)^2*l2*m2*cos(th1-th2)))
+           /(l2*(2*m1+m2-m2*cos(2*th1-2*th2))),
+  equs:ev([omega1,omega2,d2th1dt2,d2th2dt2],'diff(th1,t)=omega1,
+          'diff(th2,t)=omega2),
+  sol:rkf45(equs,[th1,th2,omega1,omega2],
+            [float(%pi/8),float(%pi/4),0,0],[t,0,8],full_solution=false)
+);
+[8.0,0.43986621496349,0.31219001091419,-2.057936678736255,-1.092518484540562]$
+/* ---------------------------------------------------------------------------*/
+/* A mildly stiff problem: The Brusselator.                                   */
+rkf45([2+y1^2*y2-(8.533+1)*y1,8.533*y1-y1^2*y2],[y1,y2],[1,4.2665],[x,0,20],
+      full_solution=false);
+[20.0,6.871759807473679,6.850927787700432]$
+/* ---------------------------------------------------------------------------*/
+
+/* batch("/pap/Maxima/rkf45/rtest_rkf45.mac",'test); */

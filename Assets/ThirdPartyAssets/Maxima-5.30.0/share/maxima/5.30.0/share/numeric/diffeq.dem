@@ -1,0 +1,112 @@
+/* a demo of solving numerical differential equations and
+   using PLOT2 to plot the results. 
+
+   N.B. A better implementation is in NDIFFQ -GJC
+
+   This demo must be run in a BARE BARE fresh macsyma.
+
+   This also illustrates the use of compilation and MODEDECLARATION.
+
+   1:24pm  Tuesday, 8 July 1980 George Joseph Carrette.
+*/
+/*
+(DYNAMALLOC:TRUE,LOADFILE(NUMER,AUTOLOAD,DSK,NUMER))$
+
+LOAD_PACKAGE(DIFFEQ,"SHARE2\;DIFFEQ")$
+*/
+load("diffeq")$
+if showtime=false then showtime:'all$
+
+/* The van der Pol equation. */
+
+'diff('u,'t,2)='micro*(1-'u^2)*'diff('u,'t)-'u;
+
+/* RUNGE2(F,X0,X1,H,Y0,YP0) is the call for a second order equation. */
+
+define_variable(micro,1.0,float)$
+
+vander(t,y,yp):=(mode_declare([t,y,yp],float),micro*(1-y^2)*yp-y);
+/*
+COMPILE("DSK:NUMER\;.TEMP. DEMO",VANDER)$
+*/
+/* type VANDER and a semi-colon */
+compile();
+/* It is interesting to plot a few paths with different values of
+   micro. */
+vanderpol&&
+
+/* You can type control-U during the calculation to see how it
+   is progressing. */
+
+(x0:0.0,x1:10.0,npoints:100,dx:(x1-x0)/npoints)$
+
+vpm1:(micro:0.1,runge2('vander,x0,x1,dx,0.1,0.1))$
+(vpx:vpm1[1],vpm1:rest(vpm1))$
+vpm2:rest((micro:0.5,runge2('vander,x0,x1,dx,0.1,0.1)))$
+vpm3:rest((micro:1.5,runge2('vander,x0,x1,dx,0.1,0.1)))$	
+vpm4:rest((micro:3.5,runge2('vander,x0,x1,dx,0.1,0.1)))$	
+
+/* the plot will be phase space, Y vs. Y' */
+/* not in DOE MACSYMA at the present time
+ AP(X,Y):=APPLY('GRAPH2,[X,Y,[0,1,3,8]])$ */
+
+ap(x,y):=(apply('graph,[x[1],y[1],["*"]]),
+apply('graph,[x[2],y[2],["+"]]),
+apply('graph,[x[3],y[3],["^"]]),
+apply('graph,[x[4],y[4],["-"]]))$
+
+ap([vpm1[1],vpm2[1],vpm3[1],vpm4[1]],
+   [vpm1[2],vpm2[2],vpm3[2],vpm4[2]]);
+
+
+        /* A time X vs. Y graph. */
+
+ap([vpx,vpx,vpx,vpx],[vpm1[1],vpm2[1],vpm3[1],vpm4[1]]);
+
+
+        /* coupled equations. */
+kill(arrays,values,functions,labels)$
+spring&&
+
+'diff('x,'t,2)=-'k/'m*'x;
+
+/* reducing this to a system of first order equations ...
+   (somebody should write a macsyma program to do this
+    automatically!) */
+
+define_variable(k,1.0,float)$
+define_variable(m,1.0,float)$
+
+dvel(t,x,vel):=(modedeclare([t,x,vel],float),-k/m*x)$
+dx(t,x,vel):=(modedeclare([t,x,vel],float),vel)$
+/*
+COMPILE("DSK:NUMER\;.TEMP. DEMO",DVEL,DX)$
+*/
+/* answer '[DVEL,DX] followed by a semi-colon */
+compile();
+/* The general RUNGEN is not very efficient, it conses up
+   a lot of temporary lists to serve as vectors. So this
+   simple problem will take about 10 seconds CPU time.
+   Type control-U during the calculation to see how
+   far it has gotten. */
+
+sol:rungen('[dx,dvel],0,10,.15,'[1,0])$
+
+/* The solution is of the form
+   [ <list-of-t> , <list of [X,VEL] pairs>, <list of [X',VEL']> ]
+   of course in this case the X' is the same as VEL. The
+   generality leads to a little waste in this case. RUNGE2 is
+   better for solving second order equations. */
+
+t:sol[1]$
+x:maplist(lambda([u],u[1]),sol[2])$
+vel:maplist(lambda([u],u[2]),sol[2])$
+
+/* with K=1 and M=1 we should see a sine and cosine wave of
+   period 2*%PI, since I picked the initial conditions X=1 and VEL=0
+*/
+
+graph(t,[x,vel],["*","+"])$
+
+/* end of demo */
+"end of demo"$

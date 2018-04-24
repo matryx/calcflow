@@ -1,0 +1,21 @@
+/*
+Copyright 2009 by Barton Willis
+
+  This is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License,
+  http://www.gnu.org/copyleft/gpl.html.
+
+ This software has NO WARRANTY, not even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+
+/* Apply the hgfred simplifications. */
+
+hypergeometric_simp(e) := block([sublis_apply_lambda : true], 
+  e : sublis(['hypergeometric = lambda([a,b,x], hgfred(a,b,x))], e),
+  subst(['%f = lambda([[s]], hypergeometric)], e));
+
+/* Convert x to a float; if float fails (say overflow), convert to a big float. */
+safe_float(x) := block([y : errcatch(float(x))],
+ if y = [] then bfloat(x) else first(y));	

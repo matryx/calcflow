@@ -1,0 +1,154 @@
+/* ODE tests - Murphy equations 1.301 - 1.400
+
+  Reference: 
+    G M Murphy, Ordinary Differential Equations and Their 
+    Solutions, Van Nostrand, 1960
+
+  First Order and of First Degree, p 224 ff
+
+*/
+/* Don't kill(all); It messes up trigsimp */
+
+/* Print ode number*/
+(pn_(n_):=print("Murphy ODE 1.",n_),true);
+true;
+
+/* 301 Riccati */
+
+/* 304 - Abel eqn od 1st kind */
+(pn_(304),ans:contrib_ode(eqn:(1+x^2)*'diff(y,x)=1+y^2-2*x*y*(1+y^2),y,x)); 
+false;
+
+/* 311 */
+(pn_(311),ans:contrib_ode(eqn:(a^2+x^2)*'diff(y,x)=a^2+3*x*y-2*y^2,y,x));
+ [y = (2*x^3*sqrt(x^2+a^2)+%c*x^4+x^2*(%c*(x^2+a^2)+%c*a^2)
+                                +%c*a^2*(x^2+a^2)+2*a^2*x*sqrt(x^2+a^2))
+          /(2*%c*x*(x^2+a^2)+2*x^2*sqrt(x^2+a^2)+2*a^2*sqrt(x^2+a^2))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 324 Riccati */
+
+/* 329 Riccati */
+
+/* 333 Riccati 
+      Solution should simplify to y=x*(%c*x+sin(x))/(%c*x-sin(x)) ?
+*/
+/*  FIXME:  This test now prompts - 2006-10-02
+(pn_(333),ans:contrib_ode(eqn:2*x^2*'diff(y,x)=2*x*y+(1-x*cot(x))*(x^2-y^2),y,x));
+[y=sqrt(4*x^3*cot(x)-4*x^2)*sqrt(-x^3*cot(x)^3+3*x^2*cot(x)^2-3*x*cot(x)+1)*(%c*sin('integrate(sqrt(-x^3*cot(x)^3+3*x^2*cot(x)^2-3*x*cot(x)+1)/sqrt(4*x^3*cot(x)-4*x^2),x))-cos('integrate(sqrt(-x^3*cot(x)^3+3*x^2*cot(x)^2-3*x*cot(x)+1)/sqrt(4*x^3*cot(x)-4*x^2),x)))/((2*x^2*cot(x)^2-4*x*cot(x)+2)*sin('integrate(sqrt(-x^3*cot(x)^3+3*x^2*cot(x)^2-3*x*cot(x)+1)/sqrt(4*x^3*cot(x)-4*x^2),x))+(2*%c*x^2*cot(x)^2-4*%c*x*cot(x)+2*%c)*cos('integrate(sqrt(-x^3*cot(x)^3+3*x^2*cot(x)^2-3*x*cot(x)+1)/sqrt(4*x^3*cot(x)-4*x^2),x)))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+*/
+
+/* 336 Riccati */
+(pn_(336),ans:contrib_ode(eqn:x*(1-2*x)*'diff(y,x)=4*x-(1+4*x)*y+y^2,y,x));
+[-((x*y-2*x^2)/(y-1)) = %c];
+ans:first(solve(ans[1],y));
+y=(2*x^2+%c)/(x+%c);
+[exact,ode_check(eqn,ans)];
+[exact,0];
+
+/* 337  - check this*/
+(pn_(337),ans:contrib_ode(eqn:2*x*(1-x)*'diff(y,x)+x+(1-2*x)*y=0,y,x));
+[y = %e^-(log(2*x^2-2*x)/2)*(log(2*sqrt(2*x^2-2*x)/sqrt(2)+2*x-1)
+         /(2*sqrt(2))+sqrt(2*x^2-2*x)/2+%c)];
+[method,radcan(ode_check(eqn,ans[1]))];
+[linear,0];
+
+/* 338 - Runs "forever" with odelin 2006-12-10 */
+/* (pn_(338),ans:contrib_ode(eqn:2*x*(1-x)*'diff(y,x)+x+(1-2*x)*y^2=0,y,x));
+[[y='diff(%u,x,1)*(2*x^2-2*x)/(%u*(2*x-1)),-'diff(%u,x,1)*((2*x-1)*(4*x-2)/(2*x^2-2*x)^2-2/(2*x^2-2*x))-'diff(%u,x,2)*(2*x-1)/(2*x^2-2*x)+%u*(2*x-1)^2/((2*x-2)*(2*x^2-2*x)^2)=0]];
+method;
+riccati; */
+
+/* 345 - Abel eqn of 1st kind */
+(pn_(345),ans:contrib_ode(eqn:(a+b*x)^2*'diff(y,x)+c*y^2+(a+b*x)*y^3=0,y,x));
+false;
+
+/* 347 */
+(pn_(347),ans:contrib_ode(eqn:x^3*'diff(y,x)=3-x^2+x^2*y,y,x));
+[y=x*((x^2-1)/x^3+%c)];
+[method,ode_check(eqn,ans[1])];
+[linear,0];
+
+/* 348 Riccati */
+(pn_(348),ans:contrib_ode(eqn:x^3*'diff(y,x)=x^4+y^2,y,x));
+[x=%c*%e^-(x^2/(y-x^2))]; 
+ans:first(solve(ans[1],y));
+y=(log(%c/x)+1)*x^2/log(%c/x);
+[method,ode_check(eqn,ans)];
+[genhom,0];
+
+/* 352 Riccati */
+(pn_(352),ans:contrib_ode(eqn:x^3*'diff(y,x)+20+x^2*y*(1-x^2*y)=0,y,x));
+[x=%c*%e^-((log(x^2*y+5)-log(x^2*y-4))/9)];
+ans:first(solve((ans[1]/%c)^9,y));
+y=-((5*x^9+4*%c^9)/(x^11-%c^9*x^2));
+[method,ode_check(eqn,ans)];
+[genhom,0];
+
+/* 353 Riccati */
+(pn_(353),ans:contrib_ode(eqn:x^3*'diff(y,x)+3+(3-2*x)*x^2*y-x^6*y^2=0,y,x));
+[y=-((3*%e^(4*x)-%c)/(x^3*%e^(4*x)+%c*x^3))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 366 Riccati */
+
+/* 371 Riccati */
+
+/* 373 */
+assume(a>0);
+[a>0];
+ans:contrib_ode(eqn:x^4*'diff(y,x)+a^2+x^4*y^2=0,y,x);
+[y=(x*tan((%c*x-a)/x)+a)/(x^2*tan((%c*x-a)/x))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+forget(a>0);
+[a>0];
+
+/* 377 */
+(pn_(377),ans:contrib_ode(eqn:x*(1-x^3)*'diff(y,x)=x^2+(1-2*x*y)*y,y,x));
+[y = (2*%c*(x-1)*x^6+x*(3*%c*(x-1)*(x^2+x+1)-2*(x-1))
+                           +x^4*(2*(x-1)-3*%c*(x-1)*(x^2+x+1))
+                           +x^5*(%c*(x^2+x+1)+%c*(x-1))
+                           +x^2*(-%c*(x^2+x+1)-%c*(x-1))
+                           +x^3*(x^2+x+(1-2*%c)*(x-1)+1)-x^2-2*x)
+          /(3*%c*(x-1)*x^2*(x^2+x+1)+3*(x-1)*(x^2+x+1))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 380 Riccati */
+
+/* 383 Abel eqn of 1st kind */
+(pn_(383),ans:contrib_ode(eqn:x^7*'diff(y,x)+5*x^3*y^2+2*(1+x^2)*y^3=0,y,x));
+false;
+
+/* 385 Riccati */
+(pn_(385),ans:contrib_ode(eqn:x^n*'diff(y,x)=x^(2*n-1)-y^2,y,x));
+[y = -(((%c*'bessel_y(n,2*sqrt(-x))+'bessel_j(n,2*sqrt(-x))
+                                  -%c*'bessel_y(n-2,2*sqrt(-x))
+                                  -'bessel_j(n-2,2*sqrt(-x)))
+   *sqrt(-x)
+   +n*(%c*'bessel_y(n-1,2*sqrt(-x))+'bessel_j(n-1,2*sqrt(-x)))
+   -%c*'bessel_y(n-1,2*sqrt(-x))-'bessel_j(n-1,2*sqrt(-x)))
+   *x^(n-1)
+   /(2*%c*'bessel_y(n-1,2*sqrt(-x))+2*'bessel_j(n-1,2*sqrt(-x))))];
+[method,ode_check(eqn,ans[1])];
+[riccati,0];
+
+/* 387 Riccati */
+(pn_(387),ans:contrib_ode(eqn:x^n*'diff(y,x)+x^(2*n-2)+y^2+(1-n)*x^(n-1)*y=0,y,x));
+[x=%c*%e^-atan(x^(1-n)*y)];
+ans:map(log,ans[1]/%c);
+log(x/%c)=-atan(x^(1-n)*y);
+ans:map(tan,ans);
+tan(log(x/%c))=-x^(1-n)*y;
+ans:first(solve(ans,y));
+y=-x^(n-1)*tan(log(x/%c));
+[method,ode_check(eqn,%)];
+[genhom,0];
+
+/* 388 Riccati */
+

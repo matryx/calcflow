@@ -1,0 +1,157 @@
+/* Filename takens.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: "Determinacy of Degenerate Equilibria"       *
+   *                  by Rand & Keith  Applied Mathematics       *
+   *		     and Computation 21:1-19 (1987)              *
+   *		                                                 *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+*/ 
+/* takens' blow-up calculation */
+
+/* main program */
+takens():=block(
+/* variable i tags loop */
+for i:1 thru 8 do 
+	(setup1(),
+	if i=1 then inputrhs() ,
+	if i>1 then blowup(),
+	setup2(),
+	deffg(),
+	print(" takens' test "),
+	print(" truncate f and g to homogeneous polynomials "),
+	print(truncate()),
+	getroots(),
+	print(test()),
+	if flag=green then return("done"),
+	defpq(),
+	defppqq(),
+	sroots()) )$
+
+/* subroutines to create variable names at ith loop */
+setup1():=(
+u:concat('u,i),
+v:concat('v,i),
+x:concat('x,i),
+y:concat('y,i))$
+
+setup2():=(
+f:concat('f,i),
+g:concat('g,i),
+p:concat('p,i),
+q:concat('q,i),
+r:concat('r,i),
+s:concat('s,i),
+pp:concat('pp,i),
+qq:concat('qq,i))$
+
+/* subroutine to input the rhs's from keyboard */
+inputrhs():=(
+print(" enter the rhs's to be studied "),
+print(" use variables x,y, they will be converted to x1,y1 "),
+u::read(u,"="),
+print(ev(u)),
+v::read(v,"="),
+print(ev(v)))$
+
+/* subroutine to truncate f and g to terms of lowest degree */
+truncate():=block(
+for j from 2 thru 8 do
+	(temp1:ratexpand([ev(f),ev(g)]),
+	temp2:taylor(temp1,[ev(x),ev(y)],0,j),
+	if temp2 # taylor([0,0],dummy,0,1) then return(temp2)))$
+
+/* subroutine to solve gtrunc = 0 */
+getroots():=(
+print("solving gtrunc = 0"),
+ftrunc:part(temp2,1),
+gtrunc:part(temp2,2),
+gtruncx:diff(gtrunc,ev(x)),
+gtruncy:diff(gtrunc,ev(y)),
+xroots:solve(gtrunc,ev(x)),
+yroots:solve(gtrunc,ev(y)),
+rootnum:0,
+for k:1 thru length(xroots) do
+	(rootnum:rootnum+1,
+	root[rootnum]:part(xroots,k)),
+for k:1 thru length(yroots) do
+	(rootnum:rootnum+1,
+	root[rootnum]:part(yroots,k)),
+print("total no. of roots =",rootnum))$
+
+/* perform takens' test for each root */
+test():=(block(
+flag:green,
+for k:1 thru rootnum do (print(root[k]),
+	ftest:ev(ftrunc,root[k]),
+	gxtest:ev(gtruncx,root[k]),
+	gytest:ev(gtruncy,root[k]),
+/*	print("ftrunc =",ftest),
+	print("gxtrunc =",gxtest),
+	print("gytrunc =",gytest),             */
+	if ftest=0 then (print("ftrunc is zero!"), flag:red)  else
+	if gxtest=0 and gytest=0 then (print("dg trunc is zero!"),flag:red)),
+	if flag=green then "passed test" else "failed test"))$
+
+/* subroutine to define f and g */
+deffg():=(
+f::expand(ev(x*u+y*v)),
+print(f,"=",ev(f)),
+g::expand(ev(x*v-y*u)),
+print(g,"=",ev(g)))$
+
+/* subroutine to define p and q */
+defpq():=(
+trans:[ev(x)=r*cos(s),ev(y)=r*sin(s)],
+p::ev(f)/r,p::expand(ev(ev(p),trans)),
+print(p,"=",ev(p)),
+q::ev(g)/r^2,q::expand(ev(ev(q),trans)),
+print(q,"=",ev(q)))$
+
+/* subroutine to define pp and qq */
+defppqq():=(
+exponent:min(lopow(ev(p),r),lopow(ev(q),r)),
+pp::expand(ev(p)/r^exponent),
+qq::expand(ev(q)/r^exponent),
+print("divide out",r^exponent),
+/*       print(pp,"=",ev(pp)),
+         print(qq,"=",ev(qq)),           */
+print("now set",r,"= 0"),
+ptemp:ev(ev(pp),r::0),
+qtemp:ev(ev(qq),r::0),
+print(pp,"=",ptemp),
+print("note: previous should be zero!"),
+print(qq,"=",qtemp))$
+
+/* subroutine to find roots s of qq=0 when r=0 */
+/*     user selects root sstar to be used      */
+sroots():=(
+stemp:solve(qtemp,ev(s)),
+for k:1 thru length(stemp) do 
+	print("root no.",k,",",part(stemp,k)),
+	print("there are",length(stemp),"roots"),
+	rootno:read("pick a root no., or 0 to enter one"),
+	if rootno=0 then sstar:read("enter root") else
+	sstar:rhs(part(stemp,rootno)),
+	print(s,"star =",sstar))$
+
+/* subroutine to taylor expand pp and qq about r=0, s=star */
+/*        returns new u and v for next iteration           */
+     
+blowup():=(
+r::ev(x),
+s::sstar+ev(y),
+pow:read("keep terms of what power?"),
+print(u,"="),
+u::taylor(ev(ev(pp)),[ev(x),ev(y)],0,pow),
+print(ev(u)),
+print(v,"="),
+v::taylor(ev(ev(qq)),[ev(x),ev(y)],0,pow),
+print(ev(v)) )$

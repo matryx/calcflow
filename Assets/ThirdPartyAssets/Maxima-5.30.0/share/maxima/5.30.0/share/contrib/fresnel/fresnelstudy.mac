@@ -1,0 +1,155 @@
+matchdeclare(a,NON_ZERO_AND_FREEOF(t))
+matchdeclare([b,c],freeof(t))
+defrule(c1,'integrate(cos(t *b +a* t^2 +c),t),
+   sqrt(%pi/(2*a))*(cos((b^2-a*c)/a)*cfresnel(sqrt(2/(a*%pi))*(a*t+b))
+                   +sin((b^2-a*c)/a)*sfresnel(sqrt(2/(a*%pi))*(a*t+b))))
+defrule(s1,'integrate(sin(t *b +a* t^2 +c),t),
+   sqrt(%pi/(2*a))*(cos((b^2-a*c)/a)*sfresnel(sqrt(2/(a*%pi))*(a*t+b))
+                   -sin((b^2-a*c)/a)*cfresnel(sqrt(2/(a*%pi))*(a*t+b))))
+matchdeclare(q,freeof(%i))
+defrule(cfi,cfresnel(%i*q),%i*cfresnel(q))
+defrule(sfi,sfresnel(%i*q),-%i*sfresnel(q))
+trigreduce(demoivre(subst([ia=%i*w,ib= - 15840000 * %pi, ic=16000000 * %pi,
+ id=16000000 * %pi ], (exp(-ia*t)*(cos(ib*t+ic*t^2)+cos(id*t))))))
+map(lambda([x],'integrate(x,t)),%)
+
+fresnelF(u):=block([x:abs(u)],signum(u)*(1.0+0.926*x)/(2.0+1.792*x+3.104*x^2));
+fresnelG(u):=block([x:abs(u)],signum(u)/(2.0+4.142*x+3.492*x^2+6.670*X^3));
+cfresnel(x):=block([fg:dfloat(((1+%i)/2)*werf(abs(x)*(1+%i)*sqrt(%pi)/2)),f,g],
+   f:realpart(fg),g:imagpart(fg),
+   signum(x)*(0.5+f*sin((%pi/2)*x^2)-g*cos((%pi/2)*x^2))
+)$
+sfresnel(x):=block([fg:dfloat(((1+%i)/2)*werf(abs(x)*(1+%i)*sqrt(%pi)/2)),f,g],
+   f:realpart(fg),g:imagpart(fg),
+   signum(x)*(0.5d0-f*cos((%pi/2)*x^2)-g*sin((%pi/2)*x^2))
+)$
+addem(l):=block([p:0,n:0],
+   l:sort(l,lambda([x,y],if abs(x) < abs(y) then true else false)),
+   for i in l do if i > 0 then p:p+i else n:n+i,
+   p+n)
+
+matchdeclare(mv,any)
+defrule(fg1,cfresnel(mv),(1/2+f(mv)*sin((%pi/2)*mv^2)-g(mv)*cos((%pi/2)*mv^2)))
+defrule(fg2,sfresnel(mv),(1/2-f(mv)*cos((%pi/2)*mv^2)-g(mv)*sin((%pi/2)*mv^2)))
+g:realpart(dfloat(expand((1+%i)/2*werf(dfloat((sqrt(%pi)/2)*(1+%i)*40*sqrt(2))))))
+1/((%pi*x)*(%pi*(x)^2))
+defrule(ga,fresnelG(mv),1/((%pi*mv)*(%pi*(mv)^2)))
+defrule(fa,fresnelF(mv),1/(%pi*mv)+3/(%pi*(mv^2))^2)
+maplist(dfloat,expand(taylor(d17,w,16000000 * %pi,0)))
+funcargs(d78,[fresnelF,fresnelG])
+atvalue(f(x),[x=0],1/2)
+atvalue(g(x),[x=0],1/2)
+atvalue(fresnelf(x),[x=0],1/2)
+atvalue(fresnelg(x),[x=0],1/2)
+atvalue(fresnelf(x),x=((1596000001 * sqrt(2))/(5000 * sqrt(5))),0);
+
+array(fresnel_array,65);
+fresnelG(z):=block(
+   if abs(z) > 4.0d0 then (
+      [ORDER:65,df:1,pz:dfloat(%pi*z),pz2:dfloat(%pi*z^2),pz2m,pzpz2,
+          m1:1,term,n:65],
+      fresnel_array[0]:1/(pz*pz2),
+      pz2m:1,
+      pzpz2:pz*pz2,
+      for m:1 thru ORDER do (
+         m1:m1*(-1),
+         df:df*(4*m-1)*(4*m+1),
+	 pz2m:pz2m*(pz2^2),
+	 term:m1*dfloat((df)/(pzpz2*pz2m)),
+         if abs(term) > abs(fresnel_array[m-1]) then (n:(m-1),return(n)),
+	 if abs(term/fresnel_array[0]) < DFLOAT_EPSILON then (n:m,return(n))
+	 else fresnel_array[m]:term
+      ),
+      sum(fresnel_array[n-i],i,0,n))
+   else
+      realpart(dfloat(expand((1+%i)/2*werf(dfloat((sqrt(%pi)/2)*(1+%i)*z)))))
+)$
+fresnelF(z):=block(
+   if abs(z) > 4.0d0 then (
+      [ORDER:65,df:1,pz:dfloat(%pi*z),pz2:dfloat(%pi*z^2),pz2m,pzpz2,
+          m1:1,term,n:65],
+      fresnel_array[0]:1/pz,
+      pz2m:1,
+      pzpz2:pz*pz2,
+      for m:1 thru ORDER do (
+         m1:m1*(-1),
+         df:df*(4*m-3)*(4*m-1),
+	 pz2m:pz2m*(pz2^2),
+	 term:m1*dfloat((df)/(pz*pz2m)),
+         if abs(term) > abs(fresnel_array[m-1]) then (n:(m-1),return(n)),
+	 if abs(term/fresnel_array[0]) < DFLOAT_EPSILON then (n:m,return(n))
+	 else fresnel_array[m]:term
+      ),
+      sum(fresnel_array[n-i],i,0,n))
+   else
+      realpart(dfloat(expand((1+%i)/2*werf(dfloat((sqrt(%pi)/2)*(1+%i)*z)))))
+)$
+
+'diff(fresnelF,x)=-%pi*x*fresnelG
+'diff(fresnelG,x)=%pi*x*fresnelF-1
+taylor_ode(['diff(fresnelF,x)=-%pi*x*fresnelG,'diff(fresnelG,x)=%pi*x*fresnelF-1],
+[fresnelF,fresnelG],x,3,[0,[1/2],[1/2]]);
+reverse(maplist(lambda([u],dfloat(ev(u,x=1/%pi))),(1/2) - x + ((%pi * x^2)/4) - (((%pi)^2 * x^4)/16) + (((%pi)^2 * x^5)/15) - (((%pi)^3 * x^6)/96) + (((%pi)^4 * x^8)/768) - (((%pi)^4 * x^9)/945) + (((%pi)^5 * x^10)/7680) ))
+
+'diff(fresnelg,x,2)*x = -%pi^2*fresnelg*x^3+'diff(fresnelg,x,1)+1
+ev(((%pi)^(2*n)/((4*n+1)!!))*(z^(4*n+1)),n=2)
+map(lambda([n],dfloat(ev(((%pi)^(2*n)/((4*n+1)!!))*(z^(4*n+1)),z=1.0d0))),[0,1,2,4])
+makelist(dfloat(((-1)^m)*ev((4*m+1)!!/((%pi*z)*((%pi*z^2)^(2*m+1))),z=1/0.3d0)),m,0,8)
+
+fresnelA(z):=block([nn,BFLOAT_PRECISION:24],
+   for n:0 step 1 do (
+      if abs(dfloat(((%pi)^(2*n)/((4*n+1)!!))*(z^(4*n+1)))) < DFLOAT_EPSILON
+         then (nn:n,return(nn))
+   ),
+   sum(bfloat(((-1)^n)*((%pi)^(2*n)/((4*n+1)!!))*(z^(4*n+1))),n,0,nn)
+)$
+
+fresnelB(z):=block([nn,BFLOAT_PRECISION:24],
+   for n:0 step 1 do (
+      if abs(dfloat(((%pi)^(2*n+1)/((4*n+3)!!))*(z^(4*n+3)))) < DFLOAT_EPSILON
+         then (nn:n,return(nn))
+   ),
+   sum(bfloat(((-1)^n)*((%pi)^(2*n+1)/((4*n+3)!!))*(z^(4*n+3))),n,0,nn)
+)$
+fresnelC(z):=block([nn,BFLOAT_PRECISION,term,az:dfloat(abs(z)),
+   BL:ceiling(abs(log10(DFLOAT_PRECISION))),FLOAT2BF:true],
+   BFLOAT_PRECISION:BL,
+   for n:0 step 1 do (
+      term:dfloat(((%pi/2)^(2*n)/(((2*n)!)*(4*n+1)))*(az^(4*n+1))),
+      lterm:ceiling(log10(term)),
+      if (lterm+BL) > BFLOAT_PRECISION then BFLOAT_PRECISION:lterm+BL,
+      if term < DFLOAT_EPSILON then (nn:n,return(nn))
+   ),
+   BFLOAT_PRECISION:BFLOAT_PRECISION+2,
+   z:bfloat(z),
+   sum(bfloat((-1)^n*((%pi/2)^(2*n)/(((2*n)!)*(4*n+1)))*(z^(4*n+1))),n,0,nn)
+)$
+fresnelS(z):=block([nn,BFLOAT_PRECISION,term,az:dfloat(abs(z)),
+   BL:ceiling(abs(log10(DFLOAT_PRECISION))),FLOAT2BF:true],
+   BFLOAT_PRECISION:BL,
+   for n:0 step 1 do (
+      term:dfloat(((%pi/2)^(2*n+1)/(((2*n+1)!)*(4*n+3)))*(az^(4*n+3))),
+      lterm:ceiling(log10(term)),
+      if (lterm+BL) > BFLOAT_PRECISION then BFLOAT_PRECISION:lterm+BL,
+      if term < DFLOAT_EPSILON then (nn:n,return(nn))
+   ),
+   BFLOAT_PRECISION:BFLOAT_PRECISION+2,
+   z:bfloat(z),
+   sum(bfloat((-1)^n*((%pi/2)^(2*n+1)/(((2*n+1)!)*(4*n+3)))*(z^(4*n+3))),n,0,nn)
+)$
+rncombine(expand(linsolve([fc = f * sz2 - cz2 * g + (1/2), fs =  - g * sz2 - cz2 * f + (1/2)], [f, g])))
+fresnelFG(z):=block([fc,fs,cz2,sz2,zp2,FLOAT2BF:true],
+   z:bfloat(z),
+   zp2:bfloat(%pi)*z*z/2.0b0,
+   cz2:cos(zp2),
+   sz2:sin(zp2),
+   fc:fresnelC(z),
+   fs:fresnelS(z),
+   [z,
+    ((2 * fc * sz2 - sz2 - 2 * cz2 * fs + cz2)/(2 * sz2^2 + 2 * cz2^2)),
+    (( - 2 * fs * sz2 + sz2 - 2 * cz2 * fc + cz2)/(2 * sz2^2 + 2 * cz2^2))]
+)$
+ODNS_EPS:1.0d-14
+ode_numsol(['diff(fresnelF,x)=-%pi*x*fresnelG,'diff(fresnelG,x)=%pi*x*fresnelF-1],[fresnelF,fresnelG],x,['at(fresnelg,x = 1) = 0.06174085260964d0, 'at(fresnelf,x = 1) = 0.27989340037682d0],1.0d0,1.005d0,1.005d0,'rk5a)
+
+subst([sin(%pi*u/25)=%pi*u/25,sin(%pi/1250)=%pi/1250,cos(%pi*u/25)=1,cos(%pi/1250)=1],d93)

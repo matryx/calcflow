@@ -1,0 +1,196 @@
+/* modified for doe macsyma with define_variable */
+
+/*	this is the file eigen > dsk:share;.
+	this is the source code for the new eigen package and it is
+	macsyma batchable, i.e. batch(eigen,>,dsk,share);.  if you do not want
+	to waste time (and/or paper...) the fastloadable version is on the file
+	eigen fasl dsk:share;.  you can load the latter using macsyma's 
+	loadfile command, i.e. loadfile(eigen,fasl,dsk,share);. the functions
+	are described in the file eigen usage dsk:share;, and the demo file in
+	which the functions are demonstrated is eigen demo dsk:share;.     */
+
+/* commented out of doe macsyma
+eval_when(translate_file,
+        modedeclare([hermitianmatrix,nondiagonalizable,knowneigvals,
+	knowneigvects],boolean,
+	[index1,index2,index3,index4,dimnsn,count,%rnum],fixnum),
+        declare([hermitianmatrix,nondiagonalizable,knowneigvals,
+        knowneigvects,listeigvects,listeigvals,%rnum,listarith,programmode,
+	algebraic,realonly,multiplicities,solveexplicit],special))$ */
+
+eval_when([translate,batch,demo,load,loadfile],
+mi(var)::=buildq([var],mode_identity(fixnum,var)),
+dv(var)::=buildq([var],define_variable(var,false,boolean)))$
+
+/* commented out of doe macsyma
+sstatus(feature,eigen)$
+
+hermitianmatrix:false$
+
+nondiagonalizable:false$
+
+knowneigvals:false$
+
+knowneigvects:false$
+
+listeigvects:[]$
+
+listeigvals:[]$
+*/
+
+dv(hermitianmatrix)$ dv(nondiagonalizable)$ dv(knowneigvals)$
+dv(knowneigvects)$
+
+define_variable(listeigvects,[],list)$
+define_variable(listeigvals,[],list)$
+define_variable(rightmatrix,[],any)$
+define_variable(leftmatrix,[],any)$
+
+/* conjugate(x):=sublis('[%i=-%i],x)$ */
+
+innerproduct(x,y):=block([listarith],listarith:true,ratsimp(conjugate(x).y))$
+/*
+unitvector(x):=block([listarith,intrn],listarith:true,intrn:innerproduct(x,x),
+intrn:sqrt(intrn),x/intrn)$
+*/
+unitvector(x):=block([listarith],listarith:true,x/sqrt(innerproduct(x,x)))$
+
+columnvector(x):=transpose(matrix(x))$
+
+
+gramschmidt(x,[myinnerproduct]):=
+		block([listarith,dimnsn,listall,intern,count,denom,unit,index1,
+		index2],
+                if myinnerproduct=[] then myinnerproduct:innerproduct
+                else myinnerproduct:first(myinnerproduct),
+                mode_declare([dimnsn,count,index1,index2],fixnum,
+                              [listall],list,[intern,denom,unit],any),
+		listarith:true,dimnsn:mi(length(x)),listall:[part(x,1)],
+		count:1,if dimnsn=1 then return(x)
+		else (for index1:2 thru dimnsn do
+		(unit:part(x,index1),for index2 thru count do
+		(intern:part(listall,index2),denom : apply (myinnerproduct, [intern, intern]),
+		unit:factor(ratsimp(unit - apply (myinnerproduct, [intern, unit])*intern/denom
+		))),
+		count:count+1,listall:endcons(unit,listall)),
+		return(listall)))$
+
+
+eigenvalues(mat):=
+		block([dimnsn,listall,solution,multiplicities,solveexplicit,
+	        dummy:?gensym(),index2],
+                mode_declare([dimnsn,index2],fixnum,[listall,solution],list,
+                             [dummy],any),
+		listall:[],
+		solveexplicit:true,
+		dimnsn:mi(length(mat)),
+		solution:block([programmode:true],
+	        solve(charpoly(mat,dummy),dummy)),
+		if solution=[] then 
+		(print(" "),print("solve is unable to find the roots of"),
+		print("the characteristic polynomial."),
+		return(listall))
+		else (for index2 thru dimnsn do
+		(dimnsn:mi(dimnsn-part(multiplicities,index2)+1),
+		listall:endcons(rhs(part(solution,index2)),listall)),
+		listall:endcons(multiplicities,[listall]),
+		return(listall)))$
+
+eigenvectors(mat):=
+		block([eigvecs,equations,unknowns,solution,eigvals,dimnsn,
+		count,vectr,index3,index4,index2,index1,matrx,mmatrx,notknwn,
+		unit,multiplicities,%rnum,realonly,algebraic,interm,intern],
+                mode_declare([equations,unknowns,solution,eigvals,
+                              unit,interm],list,
+                             [dimnsn,count,index3,index4,index2,index1],fixnum,
+                             [vectr,matrx,mmatrx,intern,notknwn],any),
+                unknowns:[],dimnsn:mi(length(mat)),
+                count:mi(dimnsn),notknwn:?gensym(),
+		if knowneigvals then eigvals:listeigvals
+		else eigvals:eigenvalues(mat),
+		if eigvals=[] then (nondiagonalizable:true,return(eigvals))
+		else (multiplicities:part(eigvals,2),
+		for index1 thru dimnsn do
+		unknowns:endcons(concat(notknwn,index1),unknowns),
+		vectr:columnvector(unknowns),matrx:mat.vectr,
+		nondiagonalizable:false,
+		eigvecs:[],realonly:false,algebraic:true,
+		for index1 thru count do 
+		(count:mi(count-part(multiplicities,index1)+1),
+		mmatrx:matrx-part(eigvals,1,index1)*vectr,
+		equations:[],
+		for index2 thru dimnsn do
+		equations:cons(mmatrx[index2,1],equations),%rnum:0,
+		solution:algsys(equations,unknowns),
+		interm:map('rhs,solution[1]),
+		unit:[],if %rnum#part(multiplicities,index1)
+		then nondiagonalizable:true,
+		for index3 thru %rnum do
+		(intern:substvectk(%rnum_list,index3,interm),
+                unit:append(unit,[intern])),
+	        if unit=[] then
+		(print(" "),print("algsys failure: the eigenvector(s) for the",
+		index1,"th eigenvalue will be missing.")),
+		if hermitianmatrix and %rnum>1 then unit:gramschmidt(unit),
+		eigvecs:append(eigvecs,[unit])),
+		return([eigvals, eigvecs])))$
+
+
+/* the first arg is of the form [r1,r2,r3].
+   we want to construct [r1=0,r2=1,r3=0] for example. */		
+
+substvectk(l,n,exp):=(mode_declare(l,list,n,fixnum,exp,any),
+                block([sub_list:[],j:0],mode_declare(sub_list,list,j,fixnum),
+                for var in l do (mode_declare(var,any),
+                 j:j+1,sub_list:cons(var = if j=n then 1 else 0,sub_list)),
+                sublis(sub_list,exp)))$
+
+
+uniteigenvectors (M):= block ([uv],
+    mode_declare (uv, list, [i, j], fixnum),
+
+    if knowneigvects
+        then uv : copy (listeigvects)
+        else uv : copy (eigenvectors (M)),
+
+    if uv = []
+        then []
+        else
+           (for i thru length (uv[2])
+                do for j thru length (uv[2][i])
+                    /* modification in-place (OK due to copy above) */
+                    do uv[2][i][j] : ratsimp (unitvector (uv[2][i][j])),
+            uv));
+
+
+similaritytransform(mat):=
+		block([listvec,listuevec],
+                mode_declare([listvec,listuevec],list),
+		listuevec:uniteigenvectors(mat),
+		if nondiagonalizable then return(listuevec)
+		else (listvec: apply (append, listuevec[2]),
+		rightmatrix:transpose(apply('matrix,listvec)),
+		if hermitianmatrix then
+		leftmatrix:conjugate(transpose(rightmatrix))
+		else leftmatrix:rightmatrix^^-1,
+		return(listuevec)))$
+
+
+conj(x):=conjugate(x)$
+
+inprod(x,y):=innerproduct(x,y)$
+
+uvect(x):=unitvector(x)$
+
+covect(x):=columnvector(x)$
+
+gschmit(x, [f]):= if f = [] then gramschmidt(x) else gramschmidt (x, f[1])$
+
+eivals(mat):=eigenvalues(mat)$
+
+eivects(mat):=eigenvectors(mat)$
+
+ueivects(mat):=uniteigenvectors(mat)$
+
+simtran(mat):=similaritytransform(mat)$
+

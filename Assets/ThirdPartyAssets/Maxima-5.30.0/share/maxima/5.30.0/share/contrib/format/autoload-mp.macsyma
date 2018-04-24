@@ -1,0 +1,15 @@
+/* -*- Mode: Macsyma -*- */
+/*************************************************************************************
+ Autoload definitions for Miller's formatting & Poisson packages
+*************************************************************************************/
+
+setup_autoload("coeflistp", matching_parts,function_calls,function_arguments,
+			   coeffs,trig_coeffs,series_coeffs,taylor_coeffs,get_coef,uncoef,
+			   partition_poly,partition_trig,partition_series,partition_taylor)$
+
+setup_autoload("format", format)$
+
+/* (TEMPORARY?) This causes the enhanced Poisson package pois2m to be used instead of pois2. */
+setup_autoload("pois2m", poissimp,intopois,outofpois,poismap,printpois,
+		         poisplus,poisctimes,poistimes,poisexpt,poissquare,
+			 poisdiff,poisint,poissubst)$

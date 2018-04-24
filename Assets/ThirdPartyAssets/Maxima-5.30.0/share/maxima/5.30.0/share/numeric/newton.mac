@@ -1,0 +1,10 @@
+
+newton(expr,guess):=block([y,prec:10^(fpprec/-2.0b0),var,dif, listconstvars : false],
+       var:listofvars(expr)[1],
+       dif:diff(expr,var),
+       guess:bfloat(guess),
+       do (y:sublis([var=guess],dif),y:expand(y),if abs(y) < prec then error("derivative at",guess,"is zero"),
+	   guess:guess-sublis([var=(guess)],expr)/y,guess:rectform(expand(guess)), 
+	   if abs(sublis([var=(guess)],expr)) < prec then return(guess)));
+
+

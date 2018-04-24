@@ -1,0 +1,111 @@
+takens.mac is from the paper "Determinacy of Degenerate Equilibria
+with Linear Part x'=y, y'=0 Using MACSYMA", R.H.Rand, W.L.Keith
+Applied Mathematics and Computation 21:1-19 (1987)
+(http://tam.cornell.edu/Rand.html)
+
+The program implements Taken's method of proving the determinacy of a
+flow in the neighbourhood of a equilibrium point by successive blowup
+transformations.
+
+The appendix in the paper is reproduced with maxima-5.9.0-cvs.  Some
+of the inputs are case sensitive - when I entered the equations in
+lower case the answers differed.
+
+(C1) load("takens.mac");
+(D1)                              takens.mac
+(C2) takens();
+ ENTER THE RHS'S TO BE STUDIED
+ USE VARIABLES X,Y, THEY WILL BE CONVERTED TO X1,Y1
+U1 =
+Y+B2*X^2+B3*X^3;
+          3        2
+Y1 + B3 X1  + B2 X1
+V1 =
+A3*X^3+A4*X^4;
+     4        3
+A4 X1  + A3 X1
+          4           3                   4        3
+F1 = A4 X1  Y1 + A3 X1  Y1 + X1 Y1 + B3 X1  + B2 X1
+         2        3           2           5        4
+G1 = - Y1  - B3 X1  Y1 - B2 X1  Y1 + A4 X1  + A3 X1
+ TAKENS' TEST
+ TRUNCATE F AND G TO HOMOGENEOUS POLYNOMIALS
+                    2
+[Y1 X1 + . . ., - Y1  + . . .]
+SOLVING GTRUNC = 0
+TOTAL NO. OF ROOTS = 1
+Y1 = 0
+FTRUNC IS ZERO!
+FAILED TEST
+          4    4                    3    3
+P1 = A4 R1  COS (S1) SIN(S1) + A3 R1  COS (S1) SIN(S1) + R1 COS(S1) SIN(S1)
+
+                                                  3    4            2    3
+                                           + B3 R1  COS (S1) + B2 R1  COS (S1)
+          2            2    3                        2
+Q1 = - SIN (S1) - B3 R1  COS (S1) SIN(S1) - B2 R1 COS (S1) SIN(S1)
+
+                                                  3    5            2    4
+                                           + A4 R1  COS (S1) + A3 R1  COS (S1)
+DIVIDE OUT 1
+NOW SET R1 = 0
+PP1 = 0
+NOTE: PREVIOUS SHOULD BE ZERO!
+           2
+QQ1 = - SIN (S1)
+
+SOLVE is using arc-trig functions to get a solution.
+Some solutions will be lost.
+ROOT NO. 1 , S1 = 0
+THERE ARE 1 ROOTS
+PICK A ROOT NO., OR 0 TO ENTER ONE
+1;
+S1 STAR = 0
+KEEP TERMS OF WHAT POWER?
+3;
+U2 =
+             2        3
+Y2 X2 + B2 X2  + B3 X2  + . . .
+V2 =
+    2                   2         3           2
+- Y2  - B2 Y2 X2 + A3 X2  + (A4 X2  - B3 Y2 X2 ) + . . .
+         3        2   2           2        3           2        2           4
+F2 = - Y2  - B3 X2  Y2  - B2 X2 Y2  + A4 X2  Y2 + A3 X2  Y2 + X2  Y2 + B3 X2
+
+                                                                             3
+                                                                      + B2 X2
+              2          3             2           4        3
+G2 = - 2 X2 Y2  - 2 B3 X2  Y2 - 2 B2 X2  Y2 + A4 X2  + A3 X2
+ TAKENS' TEST
+ TRUNCATE F AND G TO HOMOGENEOUS POLYNOMIALS
+     3        2                    2        3
+[- Y2  - B2 Y2  X2 + (A3 + 1) Y2 X2  + B2 X2  + . . .,
+
+                                          2                2        3
+                                    - 2 Y2  X2 - 2 B2 Y2 X2  + A3 X2  + . . .]
+SOLVING GTRUNC = 0
+TOTAL NO. OF ROOTS = 5
+              2
+       SQRT(B2  + 2 A3) Y2 - B2 Y2
+X2 = - ---------------------------
+                   A3
+            2
+     SQRT(B2  + 2 A3) Y2 + B2 Y2
+X2 = ---------------------------
+                 A3
+X2 = 0
+              2
+       SQRT(B2  + 2 A3) X2 + B2 X2
+Y2 = - ---------------------------
+                    2
+            2
+     SQRT(B2  + 2 A3) X2 - B2 X2
+Y2 = ---------------------------
+                  2
+PASSED TEST
+(D2)                                 DONE
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

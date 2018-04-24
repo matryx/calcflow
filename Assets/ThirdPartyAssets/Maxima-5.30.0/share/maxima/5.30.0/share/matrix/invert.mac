@@ -1,0 +1,18 @@
+
+/* the following routines compute inverses and adjoints of matrices */
+/* if ratmx is false [the default] then the elements will not be converted
+to cre-form */
+
+adjoint(mat):= block([adj,n], n:length(mat), adj:ident(n),
+		     if n#1 then 
+		       for i thru n do for j thru n do
+		           adj[i,j]:(-1)^(i+j)*determinant(minor(mat,j,i)),
+		     adj)$
+
+invert(mat):= block([adj,ans], adj:adjoint(mat),
+			ans:block([scalarmatrixp:true],
+				adj/(row(mat,1).col(adj,1))),
+		if scalarmatrixp=true and length(mat)=1
+/* row(mat,1).col(adj,1) = determinant(mat) */
+			 then ans[1,1] else ans)$
+

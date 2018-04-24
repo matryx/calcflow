@@ -1,0 +1,82 @@
+reduct2.mac is from the book "Perturbation Methods, Bifurcation Theory
+and Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+It performs a Liapunov-Schmidt reduction for steady state bifurcations
+in systems of ordinary differential equations. 
+
+The example is from p178.  maxima-5.9.0 cvs reproduces the
+results from the book.
+
+The system of equations is the Lorenz system
+
+    x1' = sigma (x2-x1)
+    x2' = rho x1 - x2 - x1 x3
+    x3' = -beta x3 + x1 x2
+
+It is know that for rho=1 one of the eigenvalues is zero with critical
+eigenvector [1,1,0] and the adjoint critical eigenvector [1/sigma,1,0]
+The following run determines the bifurcation equation for the
+instability.
+
+(C1) load("./reduct2.mac");
+(D1)                             ./reduct2.mac
+(C2) reduction2();
+NUMBER OF EQUATIONS
+3;
+ENTER VARIABLE NUMBER 1
+x1;
+ENTER VARIABLE NUMBER 2
+x2;
+ENTER VARIABLE NUMBER 3
+x3;
+ENTER THE BIFURCATION PARAMETER
+rho;
+ENTER THE CRITICAL BIFURCATION VALUE RHO
+1;
+WE DEFINE LAM = RHO - 1
+ENTER THE CRITICAL EIGENVECTOR AS A LIST
+[1,1,0];
+ENTER THE ADJOINT CRITICAL EIGENVECTOR
+[1/sigma,1,0];
+ENTER THE DIFFERENTIAL EQUATION
+DIFF( x1 ,T)=
+sigma*(x2-x1);
+DIFF( x2 ,T)=
+-x1*x3+rho*x1-x2;
+DIFF( x3 ,T)=
+x1*x2-beta*x3;
+[SIGMA (x2 - x1), - x1 x3 - x2 + (LAM + 1) x1, x1 x2 - BETA x3]
+DO YOU KNOW APRIORI THAT SOME TAYLOR COEFFICENTS
+ ARE ZERO, Y/N
+N;
+TO WHICH ORDER DO YOU WANT TO CALCULATE
+3;
+
+Dependent equations eliminated:  (1)
+  2          2          2
+ d W1       d W2       d W3     2
+[----- = 0, ----- = 0, ----- = ----]
+     2          2          2   BETA
+ dAMP       dAMP       dAMP
+
+Dependent equations eliminated:  (1)
+    2                                   2
+   d W1               SIGMA            d W2               1
+[--------- = - --------------------, --------- = --------------------,
+ dAMP dLAM          2                dAMP dLAM        2
+               SIGMA  + 2 SIGMA + 1              SIGMA  + 2 SIGMA + 1
+
+                                                                   2
+                                                                  d W3
+                                                                --------- = 0]
+                                                                dAMP dLAM
+                                             3
+                                          AMP
+(D2)                            AMP LAM - ----
+                                          BETA
+
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

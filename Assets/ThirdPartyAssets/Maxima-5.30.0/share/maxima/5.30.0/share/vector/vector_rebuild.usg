@@ -1,0 +1,251 @@
+
+***********************************************************************
+
+Some utilities for working with vectors.
+
+Copyright (C)  Nov. 2008  Volker van Nek (van dot nek at arcor dot de)
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+MA 02110-1301, USA.
+
+***********************************************************************
+
+vector_rebuild.mac provides to do basic vector calculations in a
+readable form. Choose lists or one column matrices to represent vectors.
+
+Loading vector_rebuild.mac sets the option variables listarith, 
+doallmxops and domxmxops to false. Then addition, scalar multiplication 
+and non commutative multiplication are not carried out automatically. 
+These operations  need an additional step which is done by vector_simp:
+
+(%i1) load(vector_rebuild)$
+(%i2) line: [1,2]+t*[3,4];
+(%o2)                          t [3, 4] + [1, 2]
+(%i3) %, vector_simp;
+(%o3)                         [3 t + 1, 4 t + 2]
+
+Such expanded expressions can be reconstructed by vector_rebuild:
+
+(%i4) vector_rebuild(%,[t]);
+(%o4)                          t [3, 4] + [1, 2]
+
+Vector calculations can be directly reconstructed:
+
+(%i5) [1,2]+t*[3,4]+[5,6]+(t/2-1)*[7,8]$
+(%i6) vector_rebuild(%,[t]);
+                                13
+(%o6)                        t [--, 8] + [- 1, 0]
+                                2
+
+While working with column vectors it can be usefull to pull out the gcd:
+
+(%i7) covect([1/2,1/3,1/4])$
+(%i8) %, vector_factor;
+                                      [ 6 ]
+                                   1  [   ]
+(%o8)                              -- [ 4 ]
+                                   12 [   ]
+                                      [ 3 ]
+
+The option variable vector_factor_minus controls whether a common 
+minus sign is also pulled out (true) or not (false=default):
+
+(%i9) vector_factor([-2,-4]), vector_factor_minus:true;
+(%o9)                             - 2 [1, 2]
+
+The function extract_equations extracts the system of equations from 
+a vector equation:
+
+(%i10) veq: line = [4,3]+s*[2,1];
+(%o10)               t [3, 4] + [1, 2] = s [2, 1] + [4, 3]
+(%i11) sys: extract_equations(veq);
+(%o11)               [3 t + 1 = 2 s + 4, 4 t + 2 = s + 3]
+
+This system can now be solved by e.g. algsys.
+
+The calculation of a cross product and the vector length is carried 
+out immediately:
+
+(%i12) [1,0,0]~[0,1,0];
+(%o12)                             [0, 0, 1]
+(%i13) (v:covect([1,2]), 1/|v|*v);
+                                    1    [ 1 ]
+(%o13)                           ------- [   ]
+                                 sqrt(5) [ 2 ]
+
+***********************************************************************
+
+vector_rebuild.mac is in a very experimental state of development. 
+Be warned: It is not compatible with vect.mac. 
+
+***********************************************************************
+
+Example: Calculating common points of two planes (e.g. identical planes)
+
+(%i1) load(vector_rebuild)$
+(%i2) v([args]):= covect(args)$
+(%i3) plane1: v(1,2,3)+p*v(4,5,6)+q*v(7,8,9);
+                             [ 7 ]     [ 4 ]   [ 1 ]
+                             [   ]     [   ]   [   ]
+(%o3)                      q [ 8 ] + p [ 5 ] + [ 2 ]
+                             [   ]     [   ]   [   ]
+                             [ 9 ]     [ 6 ]   [ 3 ]
+(%i4) plane2: v(3,2,1)+r*v(6,5,4)+s*v(9,8,7)$
+(%i5) veq: plane1 = plane2;
+               [ 7 ]     [ 4 ]   [ 1 ]     [ 9 ]     [ 6 ]   [ 3 ]
+               [   ]     [   ]   [   ]     [   ]     [   ]   [   ]
+(%o5)        q [ 8 ] + p [ 5 ] + [ 2 ] = s [ 8 ] + r [ 5 ] + [ 2 ]
+               [   ]     [   ]   [   ]     [   ]     [   ]   [   ]
+               [ 9 ]     [ 6 ]   [ 3 ]     [ 7 ]     [ 4 ]   [ 1 ]
+(%i6) map(disp, sys: extract_equations(veq))$
+                         7 q + 4 p + 1 = 9 s + 6 r + 3
+
+                         8 q + 5 p + 2 = 8 s + 5 r + 2
+
+                         9 q + 6 p + 3 = 7 s + 4 r + 1
+
+(%i7) params: algsys(sys,[p,q,r,s]);
+                                16 %r2 + 13 %r1 + 16
+(%o7) [[p = %r1, q = %r2, r = - --------------------, 
+                                         3
+                                                         13 %r2 + 10 %r1 + 10
+                                                     s = --------------------]]
+                                                                  3
+(%i8) params: %, %r1=u, %r2=v;
+                              16 v + 13 u + 16      13 v + 10 u + 10
+(%o8)   [[p = u, q = v, r = - ----------------, s = ----------------]]
+                                     3                     3
+(%i9) subst(params,plane1);
+                             [ 7 ]     [ 4 ]   [ 1 ]
+                             [   ]     [   ]   [   ]
+(%o9)                      v [ 8 ] + u [ 5 ] + [ 2 ]
+                             [   ]     [   ]   [   ]
+                             [ 9 ]     [ 6 ]   [ 3 ]
+(%i10) subst(params,plane2);
+                               [ 6 ]                    [ 9 ]   [ 3 ]
+             16 v + 13 u + 16  [   ]   13 v + 10 u + 10 [   ]   [   ]
+(%o10)    (- ----------------) [ 5 ] + ---------------- [ 8 ] + [ 2 ]
+                    3          [   ]          3         [   ]   [   ]
+                               [ 4 ]                    [ 7 ]   [ 1 ]
+(%i11) vector_rebuild(%,[u,v]);
+                             [ 7 ]     [ 4 ]   [ 1 ]
+                             [   ]     [   ]   [   ]
+(%o11)                     v [ 8 ] + u [ 5 ] + [ 2 ]
+                             [   ]     [   ]   [   ]
+                             [ 9 ]     [ 6 ]   [ 3 ]
+
+
+***********************************************************************
+
+Some more examples:
+
+(%i1) load(vector_rebuild)$
+(%i2) n: [1,2,3]$
+(%i3) a: [2,0,1]$
+(%i4) plane: x.n = a.n;
+(%o4)                x . [1, 2, 3] = [2, 0, 1] . [1, 2, 3]
+(%i5) %, vector_simp;
+(%o5)                          x . [1, 2, 3] = 5
+(%i6) %, x=[x1,x2,x3], vector_simp;
+(%o6)                        3 x3 + 2 x2 + x1 = 5
+
+***********************************************************************
+
+(%i1) load(vector_rebuild)$
+(%i2) v([args]):= covect(args)$
+(%i3) n: v(1,2,3)$
+(%i4) en: 1/|n|*n;
+                                         [ 1 ]
+                                   1     [   ]
+(%o4)                           -------- [ 2 ]
+                                sqrt(14) [   ]
+                                         [ 3 ]
+(%i5) a: v(2,0,1)$
+(%i6) plane: x.n = a.n;
+                               [ 1 ]   [ 2 ]   [ 1 ]
+                               [   ]   [   ]   [   ]
+(%o6)                      x . [ 2 ] = [ 0 ] . [ 2 ]
+                               [   ]   [   ]   [   ]
+                               [ 3 ]   [ 1 ]   [ 3 ]
+(%i7) %, vector_simp;
+                                     [ 1 ]
+                                     [   ]
+(%o7)                            x . [ 2 ] = 5
+                                     [   ]
+                                     [ 3 ]
+(%i8) %, x=v(x1,x2,x3), vector_simp;
+(%o8)                        3 x3 + 2 x2 + x1 = 5
+(%i9) point: v(0,1,2)$
+(%i10) plane, x=point, vector_simp;
+(%o10)                               8 = 5
+(%i11) distance: |(point-a)*en|;
+                                   sqrt(17)
+(%o11)                             --------
+                                   sqrt(14)
+
+
+(%i12) line: a+t*en;
+                                     [ 1 ]   [ 2 ]
+                               t     [   ]   [   ]
+(%o12)                      -------- [ 2 ] + [ 0 ]
+                            sqrt(14) [   ]   [   ]
+                                     [ 3 ]   [ 1 ]
+(%i13) vector_simp(%);
+                               [    t         ]
+                               [ -------- + 2 ]
+                               [ sqrt(14)     ]
+                               [              ]
+                               [     2 t      ]
+(%o13)                         [   --------   ]
+                               [   sqrt(14)   ]
+                               [              ]
+                               [   3 t        ]
+                               [ -------- + 1 ]
+                               [ sqrt(14)     ]
+(%i14) vector_rebuild(%,[t]), vector_factor;
+                                     [ 1 ]   [ 2 ]
+                               t     [   ]   [   ]
+(%o14)                      -------- [ 2 ] + [ 0 ]
+                            sqrt(14) [   ]   [   ]
+                                     [ 3 ]   [ 1 ]
+(%i15) vector_factor(v(-2,-4));
+                                     [ - 1 ]
+(%o15)                             2 [     ]
+                                     [ - 2 ]
+(%i16) vector_factor(v(-2,-4)), vector_factor_minus:true;
+                                       [ 1 ]
+(%o16)                             - 2 [   ]
+                                       [ 2 ]
+
+***********************************************************************
+
+Factoring matrices:
+
+(%i1) load(vector_rebuild)$
+(%i2) M: matrix([1,2],[3,-1]);
+                                  [ 1   2  ]
+(%o2)                             [        ]
+                                  [ 3  - 1 ]
+(%i3) M_1: M^^-1, vector_factor;
+                                 1 [ 1   2  ]
+(%o3)                            - [        ]
+                                 7 [ 3  - 1 ]
+(%i5) M.M_1, vector_simp;
+                                   [ 1  0 ]
+(%o5)                              [      ]
+                                   [ 0  1 ]
+
+***********************************************************************
+

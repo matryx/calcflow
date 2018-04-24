@@ -1,0 +1,70 @@
+(kill (all), 0);
+0;
+
+(remvalue(a,b,c,d,x,y),0);
+0$
+
+(declare([a,b],scalar),0);
+0$
+
+(sc : [-5 ,0, 8, 7.8, 1.23b0, %pi, %phi, %i, sqrt(1+%pi), a, a*b, a+b, a/b,a^3, b^a, a^sqrt(2)],0);
+0$
+
+(buggy : [],0);
+0$
+
+(for si in sc do if not(scalarp(si)) then buggy : cons(si,buggy),0);
+0$
+
+buggy;
+[]$
+
+(nsc : [x,x+y,x*y,x^3, x = y, x < y, x^^5, cosh(x), sqrt(x), [5,x], matrix([1,2],[3,4])],0);
+0$
+
+(buggy : [],0);
+0$
+
+(for si in nsc do if scalarp(si) then buggy : cons(si,buggy),0);
+0$
+
+buggy;
+[]$
+
+determinant(matrix([1,2],[3,4]));
+-2$
+
+determinant(matrix([a,b],[c,d]));
+a*d - b * c$
+
+determinant(a);
+a$
+
+is(verbify(op(determinant(x))) = 'determinant);
+true$
+
+determinant(sqrt(5));
+sqrt(5)$
+
+determinant(7*%i + 5);
+7*%i + 5$
+
+block([matrix_element_add:'f, matrix_element_mult:'g],
+  determinant( matrix([a,b],[c,d]) ) );
+f(f(0,g(1,a,d)),g(-1,b,c))$
+
+(remove([a,b],scalar),0);
+0$
+
+(remvalue(sc, nsc,buggy),0);
+0$
+
+
+
+
+
+
+
+
+
+

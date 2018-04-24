@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html401/loose.dtd">
+<html>
+<!-- Created on April, 2 2013 by texi2html 1.76 -->
+<!--
+Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
+            Karl Berry  <karl@freefriends.org>
+            Olaf Bachmann <obachman@mathematik.uni-kl.de>
+            and many others.
+Maintained by: Many creative people <dev@texi2html.cvshome.org>
+Send bugs and suggestions to <users@texi2html.cvshome.org>
+
+-->
+<head>
+<title>Xmaxima Manual: 5. Openmath plots</title>
+
+<meta name="description" content="Xmaxima Manual: 5. Openmath plots">
+<meta name="keywords" content="Xmaxima Manual: 5. Openmath plots">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="texi2html 1.76">
+<meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+pre.display {font-family: serif}
+pre.format {font-family: serif}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: serif; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: serif; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.sansserif {font-family:sans-serif; font-weight:normal;}
+ul.toc {list-style: none}
+body
+{
+    color: black;
+    background: white; 
+    margin-left: 8%;
+    margin-right: 13%;
+}
+
+h1
+{
+    margin-left: +8%;
+    font-size: 150%;
+    font-family: sans-serif
+}
+
+h2
+{
+    font-size: 125%;
+    font-family: sans-serif
+}
+
+h3
+{
+    font-size: 100%;
+    font-family: sans-serif
+}
+
+h2,h3,h4,h5,h6 { margin-left: +4%; }
+
+div.textbox
+{
+    border: solid;
+    border-width: thin;
+    /* width: 100%; */
+    padding-top: 1em;
+    padding-bottom: 1em;
+    padding-left: 2em;
+    padding-right: 2em
+}
+
+div.titlebox
+{
+    border: none;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    padding-left: 2em;
+    padding-right: 2em;
+    background: rgb(200,255,255);
+    font-family: sans-serif
+}
+
+div.synopsisbox
+{
+    border: none;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    padding-left: 2em;
+    padding-right: 2em;
+     background: rgb(255,220,255);
+    /*background: rgb(200,255,255); */
+    /* font-family: fixed */
+}
+
+pre.example
+{
+    border: 1px solid gray;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    padding-left: 1em;
+    padding-right: 1em;
+    /* background: rgb(247,242,180); */ /* kind of sandy */
+    /* background: rgb(200,255,255); */ /* sky blue */
+    background-color: #F1F5F9; /* light blue-gray */
+    /* font-family: "Lucida Console", monospace */
+}
+
+div.spacerbox
+{
+    border: none;
+    padding-top: 2em;
+    padding-bottom: 2em
+}
+
+div.image
+{
+    margin: 0;
+    padding: 1em;
+    text-align: center;
+}
+
+div.categorybox
+{
+    border: 1px solid gray;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 1em;
+    padding-right: 1em;
+    background: rgb(247,242,220);
+}
+
+
+-->
+</style>
+
+<link rel="icon" href="http://maxima.sourceforge.net/favicon.ico"/>
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+
+<a name="Openmath-plots"></a>
+<a name="SEC8"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Previous section in reading order"> &lt; </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_6.html#SEC9" title="Next section in reading order"> &gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Up section"> Up </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_6.html#SEC9" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_8.html#SEC11" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1 class="chapter"> 5. Openmath plots </h1>
+
+<p><em>Openmath</em> can be used either directly or from Maxima, to plot 2d
+and 3d graphs. From Maxima, it will be used by the functions
+<code>plot2d</code> and <code>plot3d</code>, if the option <code>[plot_format,
+openmath]</code> is used. There are other plotting functions in Maxima that
+will only work in openmath: <code>plotdf</code>, <code>openplot_curves</code>
+and <code>graph2d</code>. All those plotting functions are documented in
+the Maxima Reference Manual.
+<a name="IDX46"></a>
+<a name="IDX47"></a>
+<a name="IDX48"></a>
+<a name="IDX49"></a>
+<a name="IDX50"></a>
+</p>
+<p>A command used to create a 2d openmath plot, for example:
+</p>
+<pre class="example">plot2d(sin(x), [x, -%pi, %pi], [plot_format, openmath]);
+</pre>
+<p>creates a window with a menu bar with the following options:
+</p>
+<ul>
+<li> <em>Close</em>. Destroys the plot window and sends the control back
+to Maxima.
+<a name="IDX51"></a>
+
+</li><li> <em>Config</em>. Allows you to change some configurations of the
+plot.
+<a name="IDX52"></a>
+
+</li><li> <em>Replot</em>. After configuration changes are made, this
+menu option should be selected, to activate the new settings.
+<a name="IDX53"></a>
+
+</li><li> <em>Zoom</em>. Will change the behavior of the mouse so that it will
+allow you to zoom in on a region of the plot by clicking with the left
+button. Each click near a point magnifies the plot, keeping the center
+at the point where you clicked. Holding the <kbd>Shift</kbd> key while
+clicking, zooms out to the previous magnification.
+<a name="IDX54"></a>
+
+</li><li> <em>Dragging</em>.  Holding the right mouse button down while the
+cursor is moved, the plot can be moved sideways or up and down.
+<a name="IDX55"></a>
+
+</li><li> <em>Save</em>. Can be used to save a copy of the plot in a Postscript
+file.
+<a name="IDX56"></a>
+
+</li><li> <em>Help</em>. Will show a short summary of the plot window options.
+<a name="IDX57"></a>
+
+</li></ul>
+
+<p><div class="image"><img src="./figures/plot2d.gif" alt="figures/plot2d"></div>
+</p>
+<p>By default, each plot will be opened in a new separate window. However,
+the plot windows can be embedded into Xmaxima's text window, by
+selecting the option <samp>`Plot windows -&gt; Embedded'</samp> in the
+<code>Options</code> menu, before the plot command is issued.
+<a name="IDX58"></a>
+</p>
+<p><div class="image"><img src="./figures/plot3d.gif" alt="figures/plot3d"></div>
+</p>
+<p>The 3d plot has a menu very similar to that obtained with
+<code>plot2d</code>, but with one additional option: <em>Rotate</em>. Normally,
+if you click on the plot, it will not be enlarged, as the 2d
+plots. Clicking on the left button, while dragging the mouse, will
+rotate the plot, allowing to control two angles: azimuth and elevation.
+<a name="IDX59"></a>
+</p>
+<p>The menu option <samp>`Zoom'</samp>, will change that default behavior, making
+the mouse enlarge the plot, as in the 2d case. To return to the default
+behavior (the mouse makes the plot rotate), the Rotate button should be
+used.
+</p>
+<p>If Xmaxima is executed from the command line, giving as argument the
+name of a file, it will open that file and interpret it as a plot command,
+with a syntax specific of openmath. The graph generated by the commands
+in the file will be plotted in a plot window, and the main window of
+Xmaxima will not be opened and no communication with Maxima will be
+established. An example of the contents of a file that can be passed
+directly to Xmaxima is the following:
+</p>
+<pre class="example">plot2d -xfun &quot;sin(A*x);cos(x)&quot; -yradius 10
+       -sliders {A=1:6} -parameters {A=1}
+</pre>
+<p>that file will generate a plot of a cosine function with fixed period,
+and a sine function with a period that can be changed by moving the
+slider that appears on the bottom.
+</p>
+<p><div class="image"><img src="./figures/sliders.gif" alt="figures/sliders"></div>
+</p>
+<p>the sliders option of openmath is one feature that cannot be accessed
+directly from <code>plot2d</code> in Maxima. Other examples of input
+files for openmath are the files <tt>`maxout.openmath'</tt> that Maxima
+creates; when Maxima is run from the command line, and a plotting
+function that involves openmath is used, the data is not passed directly
+to Xmaxima, but it is rather saved into that file and then xmaxima is
+executed with the name of that file as argument.
+</p>
+<p>The strings used in those files must be properly represented as Tcl/Tk
+strings. 
+</p>
+<hr size="6">
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="xmaxima_4.html#SEC7" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_6.html#SEC9" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="xmaxima.html#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_toc.html#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_8.html#SEC11" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="xmaxima_abt.html#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<p>
+ <font size="-1">
+  This document was generated by <em>Robert</em> on <em>April, 2 2013</em> using <a href="http://texi2html.cvshome.org/"><em>texi2html 1.76</em></a>.
+ </font>
+ <br>
+
+</p>
+</body>
+</html>

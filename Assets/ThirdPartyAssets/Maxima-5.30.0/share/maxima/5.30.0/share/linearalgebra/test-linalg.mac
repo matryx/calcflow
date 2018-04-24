@@ -1,0 +1,711 @@
+(matrix_element_add : "+", matrix_element_mult : "*",0);
+0$
+
+/*--- ctranspose -----*/
+
+(m : matrix([%i,1],[2,%i],[0,2]),0);
+0$
+
+ctranspose(m);
+matrix([-%i,2,0],[1,-%i,2])$
+
+zeromatrixp(m - ctranspose(ctranspose(m)));
+true$
+
+(m : matrix([m,m]),0);
+0$
+
+(matrix_element_transpose : 'transpose,0);
+0$
+
+zeromatrixp(ctranspose(mat_unblocker(m)) - mat_unblocker(ctranspose(m)));
+true$
+
+ctranspose(matrix([%i]));
+matrix([-%i])$
+
+(matrix_element_transpose : false,0);
+0$
+
+/*--- matrix norm ----*/
+
+(m : matrix([2,3],[6,7]), 0);
+0$
+
+mat_norm(m,1);
+10$
+
+mat_norm(m,'inf);
+13$
+
+mat_norm(m,'frobenius);
+sqrt(2^2 + 3^2 + 6^2 + 7^2)$
+
+(m : matrix([2*%i,3],[6,7]), 0);
+0$
+
+mat_norm(m,1);
+10$
+
+mat_norm(m,'inf);
+13$
+
+mat_norm(m,'frobenius);
+sqrt(2^2 + 3^2 + 6^2 + 7^2)$
+
+
+/*--- matrix size ----*/
+
+matrix_size(matrix([1]));
+[1,1]$
+
+matrix_size(matrix([false],[false]));
+[2,1]$
+
+matrix_size(matrix([false,false]));
+[1,2]$
+
+/*--- matrix linalg_rank and nullity -----*/
+
+linalg_rank(matrix([0]));
+0$
+
+nullity(matrix([0]));
+1$
+
+linalg_rank(matrix([1]));
+1$
+
+nullity(matrix([1]));
+0$
+
+linalg_rank(matrix([0,0]));
+0$
+
+nullity(matrix([0,0]));
+2$
+
+linalg_rank(matrix([0,1]));
+1$
+
+nullity(matrix([0,1]));
+1$
+
+linalg_rank(matrix([0],[0]));
+0$
+
+nullity(matrix([0],[0]));
+1$
+
+linalg_rank(matrix([1],[0]));
+1$
+
+nullity(matrix([1],[0]));
+0$
+
+linalg_rank(matrix([0],[1]));
+1$
+
+nullity(matrix([0],[1]));
+0$
+
+linalg_rank(matrix([1],[1]));
+1$
+
+nullity(matrix([1],[1]));
+0$
+
+linalg_rank(matrix([0],[%i]));
+1$
+
+nullity(matrix([0],[%i]));
+0$
+
+linalg_rank(matrix([1],[1]));
+1$
+
+nullity(matrix([1],[1]));
+0$
+
+linalg_rank(matrix([1],[%i]));
+1$
+
+nullity(matrix([1],[%i]));
+0$
+
+linalg_rank(matrix([1,2],[0,0]));
+1$
+
+nullity(matrix([1,2],[0,0]));
+1$
+
+linalg_rank(matrix([1,2],[0,1]));
+2$
+
+nullity(matrix([1,2],[0,1]));
+0$
+
+
+/*--- dotproducts ------*/
+
+dotproduct(matrix([1]),matrix([1]));
+1$
+
+dotproduct(matrix([%i]),matrix([%i]));
+1$
+
+dotproduct(matrix([1],[2]),matrix([-2],[1]));
+0$
+
+dotproduct(matrix([1],[%i]),matrix([1],[%i]));
+2$
+
+/*--- matrix nullity ----*/
+
+nullity(matrix([0]));
+1$
+
+nullity(matrix([1]));
+0$
+
+nullity(matrix([0,0]));
+2$
+
+nullity(matrix([0,1]));
+1$
+
+nullity(matrix([1,0]));
+1$
+
+nullity(matrix([1,2],[0,0]));
+1$
+
+nullity(matrix([1,2],[0,1]));
+0$
+
+/*---orthogonal complements ---*/
+
+(m : matrix([1,2,3]),0);
+0$
+
+(s1 : args(columnspace(m)),0);
+0$
+
+(s2 : args(nullspace(ctranspose(m))),0);
+0$
+
+every(lambda([e], e=0), map(lambda([e], apply('dotproduct,e)), 
+     cartesian_product(setify(s1),setify(s2))));
+true$
+
+/*----*/
+
+(m : matrix([0,0,3]),0);
+0$
+
+(s1 : args(columnspace(m)),0);
+0$
+
+(s2 : args(nullspace(ctranspose(m))),0);
+0$
+
+every(lambda([e], e=0), map(lambda([e], apply('dotproduct,e)), 
+     cartesian_product(setify(s1),setify(s2))));
+
+true$
+
+/*----*/
+
+(m : matrix([0,0,0]),0);
+0$
+
+(s1 : args(columnspace(m)),0);
+0$
+
+(s2 : args(nullspace(ctranspose(m))),0);
+0$
+
+every(lambda([e], e=0), map(lambda([e], apply('dotproduct,e)), 
+     cartesian_product(setify(s1),setify(s2))));
+
+true$
+
+/*----*/
+
+(m : matrix([0,0,3],[0,0,1]),0);
+0$
+
+(s1 : args(columnspace(m)),0);
+0$
+
+(s2 : args(nullspace(ctranspose(m))),0);
+0$
+
+every(lambda([e], e=0), map(lambda([e], apply('dotproduct,e)), 
+     cartesian_product(setify(s1),setify(s2))));
+
+true$
+
+/*----*/
+
+(m : matrix([1,2,3],[%i,2,1]),0);
+0$
+
+(s1 : args(columnspace(m)),0);
+0$
+
+(s2 : args(nullspace(ctranspose(m))),0);
+0$
+
+every(lambda([e], e=0), map(lambda([e], apply('dotproduct,e)), 
+     cartesian_product(setify(s1),setify(s2))));
+
+true$
+
+
+/*----*/
+
+(m : matrix([1,2,3],[%i,2,1],[1,2,3],[1,2,3]),0);
+0$
+
+(s1 : args(columnspace(m)),0);
+0$
+
+(s2 : args(nullspace(ctranspose(m))),0);
+0$
+
+every(lambda([e], e=0), map(lambda([e], expand(apply('dotproduct,e))), 
+     cartesian_product(setify(s1),setify(s2))));
+
+true$
+
+/*----*/
+
+(m : matrix([1,2,3],[4,5,6],[7,8,9]),0);
+0$
+
+(s1 : args(columnspace(m)),0);
+0$
+
+(s2 : args(nullspace(ctranspose(m))),0);
+0$
+
+every(lambda([e], e=0), map(lambda([e], apply('dotproduct,e)), 
+     cartesian_product(setify(s1),setify(s2))));
+
+true$
+
+
+/*-----*/
+
+ptriangularize(matrix([1]),z);
+matrix([1])$
+
+ptriangularize(matrix([0]),z);
+matrix([0])$
+
+ptriangularize(matrix([z]),z);
+matrix([z])$
+
+(m : matrix([1,2],[3,4]) - z*ident(2),0);
+0$
+
+abs(ratsimp(determinant(m) / determinant(ptriangularize(m,z))));
+1$
+
+(m : matrix([1,2,3],[4,5,6], [7,8,9]) - z*ident(3),0);
+0$
+
+abs(ratsimp(determinant(m) / determinant(ptriangularize(m,z))));
+1$
+
+(m : matrix([1-z,2,3-z],[4,5-z,6], [7-z,8,9+z]),0);
+0$
+
+abs(ratsimp(determinant(m) / determinant(ptriangularize(m,z))));
+1$
+
+locate_matrix_entry(matrix([1]),1,1,1,1,lambda([e],e # 0), 'bool);
+[1,1]$
+
+locate_matrix_entry(matrix([0]),1,1,1,1,lambda([e],e # 0), 'bool);
+false$
+
+locate_matrix_entry(matrix([1]),1,1,1,1,identity, 'min);
+[1,1]$
+
+locate_matrix_entry(matrix([1]),1,1,1,1,identity, 'max);
+[1,1]$
+
+locate_matrix_entry(matrix([1,1]),1,1,1,2,identity, 'min);
+[1,1]$
+
+locate_matrix_entry(matrix([1,1]),1,1,1,2,identity, 'max);
+[1,1]$
+
+locate_matrix_entry(matrix([1,2]),1,1,1,2,identity, 'max);
+[1,2]$
+
+locate_matrix_entry(matrix([1,2]),1,1,1,2,identity, 'min);
+[1,1]$
+
+(m : matrix([1,2,3],[4,5,6],[7,8,9]),0);
+0$
+
+locate_matrix_entry(m,1,1,3,3,lambda([e],e+%pi), min);
+[1,1]$
+
+locate_matrix_entry(m,1,1,3,3,lambda([e],e+%pi), max);
+[3,3]$
+
+locate_matrix_entry(m,1,2,3,3,lambda([e],e+%pi), min);
+[1,2]$
+
+locate_matrix_entry(m,1,2,3,3,lambda([e],e+%pi), max);
+[3,3]$
+
+columnop(matrix([2,1]),1,2,-2);
+matrix([4,1])$
+
+columnop(matrix([2,1]),2,1,x);
+matrix([2,1-2*x])$
+
+columnswap(matrix([a,b]),1,2);
+matrix([b,a])$
+
+columnswap(matrix([a,b,c]),2,3);
+matrix([a,c,b])$
+
+columnswap(columnswap(matrix([a,b],[c,d]),1,2),1,2);
+matrix([a,b],[c,d])$
+
+ctranspose(matrix([5+%i*6]));
+matrix([5-%i*6])$
+
+ctranspose(matrix([1],[%i]));
+matrix([1,-%i])$
+
+rowop(matrix([a],[b]),1,2,x);
+matrix([a-b*x],[b]);
+
+rowswap(rowswap(matrix([a,b],[c,d]),1,2),1,2);
+matrix([a,b],[c,d])$
+
+(m : matrix([0,1,1],[0,0,0],[0,0,0]),0);
+0$
+
+nullspace(m);
+''(funmake('span, sort([matrix([1],[0],[0]),matrix([0],[-1],[1])])))$
+
+columnspace(m);
+span(matrix([1],[0],[0]))$
+
+zeromatrixp(ctranspose(apply(addcol,args(columnspace(ctranspose(m))))) . apply(addcol,args(nullspace(m))));
+true$
+
+(m : matrix([0,1,2,3],[0,0,1,0],[0,0,0,0]),0);
+0$
+
+zeromatrixp(ctranspose(apply(addcol,args(columnspace(ctranspose(m))))) . apply(addcol,args(nullspace(m))));
+true$
+
+(m : matrix([0,0,2,3],[0,0,1,0],[0,0,0,0]),0);
+0$
+
+zeromatrixp(ctranspose(apply(addcol,args(columnspace(ctranspose(m))))) . apply(addcol,args(nullspace(m))));
+true$
+
+(m : matrix([0,0,%i,3],[0,0,%i,0],[0,0,0,0]),0);
+0$
+
+zeromatrixp(ctranspose(apply(addcol,args(columnspace(ctranspose(m))))) . apply(addcol,args(nullspace(m))));
+true$
+
+(remvalue(s1,s2,m),0);
+0$
+
+hilbert_matrix(2);
+matrix([1,1/2],[1/2,1/3])$
+
+kronecker_product(matrix([a]),matrix([b]));
+matrix([a*b]);
+
+kronecker_product(matrix([1,2],[3,4]),matrix([a,b],[c,d]));
+''(mat_unblocker(matrix([matrix([a,b],[c,d]), 2*matrix([a,b],[c,d])],[3*matrix([a,b],[c,d]),4*matrix([a,b],[c,d])])))$
+
+every(lambda([e], is(e < 0)), [-1,-2,3]);
+false$
+
+every(lambda([e], ratnump(e)), [-1,-2,3]);
+true$
+
+every('bfloatp, matrix([1.3b0,7.8b0],[5.7b0, 9.1b0]));
+true$
+
+every('bfloatp, matrix([matrix([1.3b0,7.8b0],[5.7b0, 7/8])]));
+false$
+
+polytocompanion(a*x^3+b*x^2+c*x+d,x);
+matrix([0,0,-d/a],[1,0,-c/a],[0,1,-b/a])$
+
+vandermonde_matrix([a]);
+matrix([1])$
+
+vandermonde_matrix([a,b]);
+matrix([1,a],[1,b])$
+
+vandermonde_matrix([]);
+matrix()$
+
+/* SF bug #1659985 */
+
+vandermonde_matrix([0]);
+matrix([1])$
+
+vandermonde_matrix([0,1]);
+matrix([1,0],[1,1])$
+
+
+/*--- copylist and copymatrix ----*/
+
+(m :  [1,[2,3]],0);
+0$
+
+(mm : copylist(m),0);
+0$
+
+(mm[2][1] : x,0);
+0$
+
+is(m[2][1] = 2);
+true$
+
+(m :  matrix([1,2],[3,4]),0);
+0$
+
+(mm : copymatrix(m),0);
+0$
+
+(mm[2,2] : x,0);
+0$
+
+is(m[2,2] = 4);
+true$
+
+/*-- mat_unblocker & friends --*/
+
+(m : matrix([0,1],[1,0]),0);
+0$
+
+(m1 : matrix([m,m],[m,m]),0);
+0$
+
+mat_unblocker(m1);
+matrix([0,1,0,1],[1,0,1,0],[0,1,0,1],[1,0,1,0])$
+
+mat_fullunblocker(m1);
+matrix([0,1,0,1],[1,0,1,0],[0,1,0,1],[1,0,1,0])$
+
+(m2 : matrix([m1,m1],[m1,m1]),0);
+0$
+
+mat_unblocker(m2);
+''(matrix([m,m,m,m],[m,m,m,m],[m,m,m,m],[m,m,m,m]))$
+
+mat_fullunblocker(m2);
+ matrix([0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,0],[0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,0],[0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,0],[0,1,0,1,0,1,0,1],[1,0,1,0,1,0,1,0])$
+
+mat_trace(m1);
+0$
+
+mat_trace(identfor(m1));
+4$
+
+mat_trace(m1 + identfor(m1));
+4$
+
+mat_norm(m1,1);
+2$
+
+mat_norm(m2,inf) - mat_norm(mat_fullunblocker(m2),inf);
+0$
+
+blockmatrixp(m);
+false$
+
+blockmatrixp(m1);
+true$
+
+blockmatrixp(2/3);
+false$
+
+blockmatrixp(rat(x));
+false$
+
+/*---add matrices---*/
+
+(m1 : matrix([8,2],[7,4]),0);
+0$
+
+(m2 : matrix([1,2],[3,42]),0);
+0$
+
+(m3 : matrix([96,5],[3,42]),0);
+0$
+
+addmatrices('max,m1,m2,m3);
+matrix([96,5],[7,42])$
+
+addmatrices("+", m1,m2);
+matrix([9,4],[10,46])$
+
+toeplitz([1,2,3],[x,y,z]);
+matrix([1,y,z],[2,1,y],[3,2,1])$
+
+toeplitz([1,2,3]);
+matrix([1,2,3],[2,1,2],[3,2,1])$
+
+toeplitz([1,2,3],[x]);
+matrix([1],[2],[3])$
+
+hankel([1,2,3]);
+matrix([1,2,3],[2,3,0],[3,0,0])$
+
+hankel([1,2,3],[x]);
+matrix([1],[2],[3])$
+
+diag_matrix(1);
+matrix([1])$
+
+diag_matrix(1,2);
+matrix([1,0],[0,2])$
+
+diag_matrix(diag_matrix(1,2),diag_matrix(3,4));
+matrix([matrix([1,0],[0,2]),matrix([0,0],[0,0])],[matrix([0,0],[0,0]),matrix([3,0],[0,4])])$
+
+identfor(diag_matrix(diag_matrix(1,2),diag_matrix(3,4)));
+''(diag_matrix(diag_matrix(1,1),diag_matrix(1,1)))$
+
+zerofor(diag_matrix(diag_matrix(1,2),diag_matrix(3,4)));
+''(diag_matrix(diag_matrix(0,0),diag_matrix(0,0)))$
+
+(m : diag_matrix(diag_matrix(5,6),diag_matrix(8,10)),0);
+0$
+
+mat_norm(m,inf) - mat_norm(mat_unblocker(m),inf);
+0$
+
+mat_trace(m) - mat_trace(mat_unblocker(m));
+0$
+
+hilbert_matrix(3);
+matrix([1,1/2,1/3],[1/2,1/3,1/4],[1/3,1/4,1/5])$
+
+vandermonde_matrix([a,b,c]);
+matrix([1,a,a^2],[1,b,b^2],[1,c,c^2])$
+
+every('integerp, [1,2,3]);
+true$
+
+every('integerp, []);
+true$
+
+every('integerp, [1,2,3,x]);
+false$
+
+every('integerp, [false]);
+false$
+
+every(lambda([x], is (x < 5)), [4,5,6,7]);
+false$
+
+errcatch(every('integerp, false));
+[]$
+
+every(lambda([x], is(x < 1932)), matrix([1,2,3],[8,8,74]));
+true$
+
+(remvalue(mm,m1,m2,m3,m),0);
+0$
+
+columnspace(matrix([0,1],[0,1]));
+span(matrix([1],[1]))$
+
+linalg_rank(matrix([0,1],[0,1]));
+1$
+
+sylvester_matrix(0, 0, x);
+matrix()$
+
+sylvester_matrix(1, 0, x);
+matrix()$
+
+sylvester_matrix(0, 1, x);
+matrix()$
+
+sylvester_matrix(1, 1, x);
+matrix()$
+
+sylvester_matrix(x, 1, x);
+matrix([1])$
+
+sylvester_matrix(1, x, x);
+matrix([1])$
+
+sylvester_matrix(x, x, x);
+matrix([1,0],[1,0])$
+
+sylvester_matrix(-x, x, x);
+matrix([-1,0],[1,0])$
+
+sylvester_matrix(a+b*x, x, x);
+matrix([b,a],[1,0])$
+
+sylvester_matrix(a+b*x, x^2, x);
+matrix([b,a,0],[0,b,a],[1,0,0])$
+
+/* blockmatrixp -- SF bug # 1905668*/
+
+blockmatrixp(matrix());
+false$
+
+blockmatrixp(matrix([]));
+false$
+
+blockmatrixp(matrix([],[]));
+false$
+
+blockmatrixp(matrix([false]));
+false$
+
+blockmatrixp(matrix([matrix()]));
+true$
+
+blockmatrixp(matrix([matrix([false])]));
+true$
+
+mat_cond(matrix([1,2,3],[4,5,6],[7,8,10]),1);
+133$
+
+mat_cond(matrix([1,2,3],[4,5,6],[7,8,10]),inf);
+475/3$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

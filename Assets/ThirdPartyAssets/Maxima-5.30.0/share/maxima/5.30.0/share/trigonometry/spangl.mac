@@ -1,0 +1,45 @@
+/* -*- Mode: MACSYMA; BASE: 10 -*- */
+matchdeclare(greater1,greater1p,onetofour,onetofourp)$
+greater1p(n):=ratnump(n) and n>1$
+onetofourp(n):=greater1p(n) and n<4$
+
+tellsimp(sin(2*greater1*%pi),sin(leastremainder(2*greater1,2)*%pi))$
+tellsimp(cos(2*greater1*%pi),cos(leastremainder(2*greater1,2)*%pi))$
+tellsimp(csc(2*greater1*%pi),csc(leastremainder(2*greater1,2)*%pi))$
+tellsimp(sec(2*greater1*%pi),sec(leastremainder(2*greater1,2)*%pi))$
+tellsimp(tan(greater1*%pi),tan(leastremainder(greater1,1)*%pi))$
+tellsimp(cot(greater1*%pi),cot(leastremainder(greater1,1)*%pi))$
+
+leastremainder(dividend,divisor):=dividend-divisor*entier(dividend/divisor+1/2)$
+
+tellsimp(sin(onetofour*%pi),-sin((onetofour-1)*%pi))$
+tellsimp(cos(onetofour*%pi),-cos((onetofour-1)*%pi))$
+tellsimp(csc(onetofour*%pi),-csc((onetofour-1)*%pi))$
+tellsimp(sec(onetofour*%pi),-sec((onetofour-1)*%pi))$
+
+tellsimp(sin(onetofour*%pi/4),cos((1/2-onetofour/4)*%pi))$
+tellsimp(cos(onetofour*%pi/4),sin((1/2-onetofour/4)*%pi))$
+tellsimp(csc(onetofour*%pi/4),sec((1/2-onetofour/4)*%pi))$
+tellsimp(sec(onetofour*%pi/4),csc((1/2-onetofour/4)*%pi))$
+tellsimp(tan(onetofour*%pi/4),cot((1/2-onetofour/4)*%pi))$
+tellsimp(cot(onetofour*%pi/4),tan((1/2-onetofour/4)*%pi))$
+
+tellsimpafter(sin(%pi/10),(%phi-1)/2)$
+tellsimpafter(cos(%pi/5),%phi/2)$
+tellsimpafter(csc(%pi/10),2*%phi)$
+tellsimpafter(sec(%pi/5),2*(%phi-1))$
+
+tellsimpafter(sin(%pi/12),(sqrt(6)-sqrt(2))/4)$
+tellsimpafter(cos(%pi/12),(sqrt(6)+sqrt(2))/4)$
+tellsimpafter(csc(%pi/12),sqrt(6)+sqrt(2))$
+tellsimpafter(sec(%pi/12),sqrt(6)-sqrt(2))$
+
+tellsimpafter(tan(%pi/8),sqrt(2)-1)$
+tellsimpafter(cot(%pi/8),sqrt(2)+1)$
+
+tellsimpafter(tan(%pi/12),2-sqrt(3))$
+tellsimpafter(cot(%pi/12),2+sqrt(3))$
+tellsimpafter(tan(%pi/24),(sqrt(3)-sqrt(2))*(sqrt(2)-1))$
+tellsimpafter(cot(%pi/24),(sqrt(3)+sqrt(2))*(sqrt(2)+1))$
+tellsimpafter(tan(5*%pi/24),(sqrt(3)-sqrt(2))*(sqrt(2)+1))$
+tellsimpafter(cot(5*%pi/24),(sqrt(3)+sqrt(2))*(sqrt(2)-1))$

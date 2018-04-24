@@ -1,0 +1,212 @@
+printf(false, "|~5a|~5:a|~5@a|~5:@a|", 42,42,42,42);
+"|42   |42   |   42|   42|"$
+
+printf(false, "|~5a|~5:a|~5@a|~5:@a|", "42","42","42","42");
+"|42   |42   |   42|   42|"$
+
+printf(false, "|~5s|~5:s|~5@s|~5:@s|", "42","42","42","42");
+"|\"42\" |\"42\" | \"42\"| \"42\"|"$
+
+printf(false, "|~10b|~10:b|~10@b|~10:@b|", 42,42,42,42);
+"|    101010|   101,010|   +101010|  +101,010|"$
+
+printf(false, "~{ ~c ~:c ~@c ~:@c ~}", makelist("w", n,1,4) );
+" w w #\\w w "$
+
+printf(false, "|~10d|~10:d|~10@d|~10:@d|", 42,42,42,42);
+"|        42|        42|       +42|       +42|"$
+
+printf(false, "~{~a ~s ~d ~f ~h ~}", makelist( sqrt(2), n,1,5) ), fpprec: 24$
+"sqrt(2) \"sqrt(2)\" 1 1.4142135623730951 1.41421356237309504880169 "$
+
+printf(false, "|~v,v,v,,vf|", 12, 3, 0 ,"f", 9);
+"|fffffff9.000|"$
+
+printf(false, "|~v,v,v,,,vh|", 12, 3, 0 ,"h", 9);
+"|hhhh9.000b+0|"$
+
+printf(false , "|~#,vf|", 2,3,4,5,6,7);
+"|  3.00|"$
+
+printf(false , "|~#,vh|", 2,3,4,5,6,7);
+"|  3.00|"$
+
+printf(false, "~{~[Siamese~;Manx~;Persian~] Cat ~%~}", [1,2,3,4]);
+"Siamese Cat 
+Manx Cat 
+Persian Cat 
+ Cat 
+"$
+
+printf(false, "~{~[Siamese~;Manx~:;Persian~] Cat ~%~}", [1,2,3,4]);
+"Siamese Cat 
+Manx Cat 
+Persian Cat 
+Persian Cat 
+"$
+
+printf(false, "~{~:[Siamese~;Manx~] Cat ~%~}", [true,false,1,0]);
+"Manx Cat 
+Siamese Cat 
+Manx Cat 
+Manx Cat 
+"$
+
+printf(false, "|~@[x~]|", true );
+"|x|"$
+
+printf(false, "|~@[x~]|", false );
+"||"$
+
+printf(false, "|~@{~#d|~}",6,5,4,3,2,1);
+"|     6|    5|   4|  3| 2|1|"$
+
+printf(false, "~d ~{~d ~}~d",7,[6,5,4,3,2,1],0);
+"7 6 5 4 3 2 1 0"$
+printf(false, "~d ~@{~d ~}",7,6,5,4,3,2,1,0);
+"7 6 5 4 3 2 1 0 "$
+printf(false, "~d ~{~{~d ~}~}",7,[[6,5],[4,3],[2,1],[0]]);
+"7 6 5 4 3 2 1 0 "$
+printf(false, "~d ~:{~d ~}",7,[[6,5],[4,3],[2,1],[0]]);
+"7 6 4 2 0 "$
+printf(false, "~d ~:{~d ~^~d ~}",7,[[6,5],[4,3],[2,1],[0]]);
+"7 6 5 4 3 2 1 0 "$
+printf(false, "~d ~:@{~d ~^~d ~}",7,[6,5],[4,3],[2,1],[0]);
+"7 6 5 4 3 2 1 0 "$
+printf(false, "~d ~:@{~d ~}",7,[6,5],[4,3],[2,1],[0]);
+"7 6 4 2 0 "$
+
+printf(false, "~{~h|~%~16,10h|~%~16,10,,,,'#h|~%~16,10@h|~%~,10,4,-3h|~%~10,,,,'xh|~%~}", 
+   makelist( sqrt(2), n,1,6) ), fpprec: 24;
+"1.41421356237309504880169|
+    1.4142135624|
+####1.4142135624|
+   +1.4142135624|
+1414.2135623731b-003|
+xxxxxxxxxx|
+"$
+
+printf(false, "|~10<foo~;bar~>|");
+"|foo    bar|"$
+printf(false, "|~30<foo~;bar~;baz~>|");
+"|foo          bar           baz|"$
+
+printf(false, "~:{/~a~^ ...~}", [[hot, dog], [hamburger], [ice, cream]] );
+"/hot .../hamburger/ice ..."$
+
+printf(false, "~:{/~a~:^ ...~}", [[hot, dog], [hamburger], [ice, cream]] );
+"/hot .../hamburger"$
+
+printf(false, "~? ~d", "|~a ~f|", ["Foo", 5], 7 );
+"|Foo 5.0| 7"$
+
+printf(false, "~@? ~d", "|~a ~f|", "Foo", 5, 7 );
+"|Foo 5.0| 7"$
+
+
+
+printf(false,"~{|~a|~5a|~5@a|~5,,,'.a|~5,,3,'.a|~6,2,,'.a|~6,5,,'.a|~}", makelist('foo,n,1,7));
+"|foo|foo  |  foo|foo..|foo...|foo....|foo.....|"$
+
+printf(false,"~{|~s|~5s|~5@s|~5,,,'.s|~5,,3,'.s|~6,2,,'.s|~6,5,,'.s|~}", makelist('f,n,1,7));
+"|\"f\"|\"f\"  |  \"f\"|\"f\"..|\"f\"...|\"f\"....|\"f\".....|"$
+
+
+printf(false,"[~a, ~a, ~a, ~a, ~a, ~a, ~a]", true,sqrt(2),%pi,2/6,1.234b0,[a+a,[b,c]],"foo");
+"[true, sqrt(2), %pi, 1/3, 1.234b0, [2*a,[b,c]], foo]"$
+
+printf(false,"[~s, ~s, ~s, ~s, ~s, ~s, ~s]", true,sqrt(2),%pi,2/6,1.234b0,[a+a,[b,c]],"foo");
+"[\"true\", \"sqrt(2)\", \"%pi\", \"1/3\", \"1.234b0\", \"[2*a,[b,c]]\", \"foo\"]"$
+
+
+
+args: [42,1.5,sqrt(2),%pi,7/2,1.234b0];
+[42,1.5,sqrt(2),%pi,7/2,1.234b0]$
+
+printf(false,"[~{~d~^, ~}]", args);
+"[42, 1, 1, 3, 3, 1]"$
+
+printf(false,"[~{~e~^, ~}]", args);
+"[4.2E+1, 1.5E+0, 1.4142135623730951E+0, 3.1415926535897931E+0, 3.5E+0, 1.234E+0]"$
+
+printf(false,"[~{~f~^, ~}]", args);
+"[42.0, 1.5, 1.4142135623730951, 3.1415926535897931, 3.5, 1.234]"$
+
+printf(false,"[~{~g~^, ~}]", args);
+"[42., 1.5, 1.4142135623730951, 3.1415926535897931, 3.5, 1.234]"$
+
+printf(false,"[~{~h~^, ~}]", args);
+"[42.0, 1.5, 1.414213562373095, 3.141592653589793, 3.5, 1.234]"$
+
+
+printf(false,"~{[~b, ~o, ~x, ~2r, ~3r, ~4r, ~10r, ~22r, ~36r]~}", makelist(42,n,1,9) );
+"[101010, 52, 2A, 101010, 1120, 222, 42, 1K, 16]"$
+
+printf(false,"~{[~r, ~:r, ~@r, ~:@r]~}", makelist(42,n,1,4) );
+"[forty-two, forty-second, XLII, XXXXII]"$
+
+
+printf(false,"~d dog~p. ~d bone~p.", 2, 2, 1, 1 );
+"2 dogs. 1 bone."$
+
+printf(false,"~d dog~:p. ~d bone~:p.", 2, 1 );
+"2 dogs. 1 bone."$
+
+printf(false,"~d fl~:@p. ~d fl~:@p.", 1, 2 );
+"1 fly. 2 flies."$
+
+
+printf(false,"[~$, ~$, ~$, ~@$]", 2, 1.985, 1.995, 2 );
+"[2.00, 1.98, 2.00, +2.00]"$
+
+
+printf(false,"0123456789~%|~5t|~4,3t|~,2t|~%|~4,3t|~,2t|");
+"0123456789
+|    | | |
+|   ||"$
+
+
+printf(false,"012345678901234~%|~5@t|~4,3@t|~,2@t|~%|~4,3@t|~,2@t|");
+"012345678901234
+|     |     | |
+|     | |"$
+
+
+printf(false,"~~  ~3~");
+"~  ~~~"$
+
+
+printf(false, "A long format string can simply be sepa~
+      rated by a single ~~ immediately ~%followed by newline. Add~
+      itional blanks are ignored.~:
+      ~~: causes the ~%blanks to be printed. ~~@ enf~
+      orces the linebrea~@
+      k and ignores following blanks.");
+"A long format string can simply be separated by a single ~ immediately 
+followed by newline. Additional blanks are ignored.      ~: causes the 
+blanks to be printed. ~@ enforces the linebrea
+k and ignores following blanks."$
+
+
+printf(false, "~d aaa ~? bbb ~d", 0, "~d ~d ~d", [1,2,3], 4);
+"0 aaa 1 2 3 bbb 4"$
+
+printf(false, "~d aaa ~@? bbb ~d", 0, "~d ~d ~d", 1,2,3, 4);
+"0 aaa 1 2 3 bbb 4"$
+
+printf(false, "~d ~v,v^~f ", 0, 1, 2, 3);
+"0 3.0 "$
+printf(false, "~d ~v,v^~f ", 0, 1, 1, 3);
+"0 "$
+
+fpprec:100;
+100$
+printf(false,"~h",2.b0^-64);
+"0.0000000000000000000542101086242752217003726400434970855712890625"$
+printf(false,"~,17,0h",1.23456789012345678901234567890b9);
+"1234567890.12345678901234568b+0"$
+printf(false,"~50h",2.b0^64);
+"                            18446744073709551616.0"$
+fpprec:16;
+16$
+

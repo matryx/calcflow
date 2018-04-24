@@ -1,0 +1,88 @@
+/* Copyright (C) 2004 Viktor T. Toth <http://www.vttoth.com/>
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE.  See the GNU General Public License for more details.
+ *
+ * ITENSOR frames, torsion, and nonmetricity demo
+ */
+
+if get('itensor,'version)=false then load(itensor);
+
+("In a frame base, partial derivatives do not commute")$
+idiff(v([i],[]),j,1,k,1)-idiff(v([i],[]),k,1,j,1);
+iframe_flag:true;
+ishow(idiff(v([i],[]),j,1,k,1)-idiff(v([i],[]),k,1,j,1))$
+
+("The Christoffel-symbols are replaced by connection coefficients")$
+ishow(covdiff(v([i],[]),j))$
+
+("Which in turn are the sum of Christoffel-symbols and frame coefficients")$
+ishow(icc2([i,j],[k]))$
+
+("The latter are defined in terms of the frame bracket and frame metric")$
+ishow(ifc2([i,j],[k]))$
+
+("The frame bracket has two definitions which are equivalent")$
+block([iframe_bracket_form:false],ishow(ifb([i,j,k])))$
+block([iframe_bracket_form:true],ishow(ifb([i,j,k])))$
+
+("To explore torsion, we set up a metric but no contraction properties")$
+remcomps(g);
+imetric:g;
+decsym(g,2,0,[sym(all)],[]);
+decsym(g,0,2,[],[sym(all)]);
+("First demonstrate that covariant differentiation commutes for scalars")$
+iframe_flag:false;
+itorsion_flag:false;
+inonmet_flag:false;
+ishow(covdiff(covdiff(f([],[]),i),j)-covdiff(covdiff(f([],[]),j),i))$
+ishow(canform(%))$
+
+("Now we introduce torsion")$
+itorsion_flag:true;
+ishow(covdiff(covdiff(f([],[]),i),j)-covdiff(covdiff(f([],[]),j),i))$
+exp:ishow(canform(%))$
+ishow(ev(%,icc2))$
+ishow(canform(%))$
+
+("Now we're ready to evaluate the contortion coefficients")$
+ishow(ev(exp,ikt2))$
+exp:ishow(ev(%,ikt1))$
+
+("Noun forms of g are a side effect which we must get rid of")$
+ishow(subst(g,nounify(g),exp))$
+exp:ishow(canform(%))$
+
+("We declare itr antisymmetric, and contract g^2 to kdelta")$
+decsym(itr,2,1,[anti(all)],[]);
+defcon(g,g,kdelta);
+exp:ishow(canform(exp))$
+("And we're quite done")$
+ishow(contract(exp))$
+
+("We can verify torsion in a frame base, too")$
+iframe_flag:true;
+covdiff(v([i]),j)-covdiff(v([j]),i)$
+ishow(contract(canform(ev(%,icc2,ifc2,ifc1,ikt2,ikt1,ifg))))$
+
+("Next, we verify the nonmetricity tensor")$
+iframe_flag:false;
+inonmet_flag:true;
+itorsion_flag:false;
+("We need all the metric tensor's contraction properties")$
+imetric(g);
+ishow(covdiff(g([i,j],[]),k))$
+exp:ishow(ev(%,icc2))$
+("Now we can evaluate ichr2, inmc1, and simplify")$
+exp:ishow(canform(contract(rename(expand(ev(exp,ichr2))))))$
+("In order to get the expected result:")$
+ishow(canform(ev(exp,inmc1)))$
+
+/* End of demo -- comment line needed by MAXIMA to resume demo menu */

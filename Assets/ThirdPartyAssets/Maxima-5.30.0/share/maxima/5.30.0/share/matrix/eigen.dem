@@ -1,0 +1,250 @@
+/* modified for doe macsyma */
+/* this is the file eigen demo dsk:share;.
+ (you can batch or demo this file, i.e. batch(eigen,demo,dsk,share);, or
+ demo(eigen,demo,dsk,share);.  note that in the demo mode you have to hit the
+ space key after each step...)
+ the functions in the new eigen package are demonstrated here. the  description
+ of the functions can be found in the file eigen usage dsk:share;, the 
+ source code is on the file eigen > dsk:share; and the fastload file is 
+ eigen fasl dsk:share;.  ( you can load this one  using macsyma's loadfile 
+ command, i.e. loadfile(eigen,fasl,dsk,share);.)
+
+
+	we start with loading the eigen package :      */
+/*
+if not status(feature,eigen) then loadfile(eigen,fasl,dsk,share);
+*/
+load("eigen")$
+/* let us start with the first function.  (see the descriptions...)
+	first let's define a complex variable... */
+
+
+z:a+%i*b;
+
+/* the conjugate function simply returns the complex conjugate of its
+	argument...    */
+
+
+conjugate(z);
+
+/* note that z could be a matrix, a list, etc...   */
+
+z:matrix([%i,0],[0,1+%i]);
+conjugate(z);
+
+/* the next function calculates the inner  product of two lists...*/
+
+list1:[a,b,c,d];
+list2:[f,g,h,i];
+innerproduct(list1,list2);
+
+/* the elements of the lists could be complex also...  */
+
+list1:[a+%i*b,c+%i*d];
+innerproduct(list1,list1);
+
+/* the next function takes a list as its argument and returns a unit
+	list...   */
+
+list1:[1,1,1,1,1];
+unitvector(list1);
+list2:[1,%i,1-%i,1+%i];
+unitvector(list2);
+
+/* the next function takes a list as its argument and returns a column 
+	vector...      */
+
+list1:[a,b,c,d];
+columnvector(list1);
+
+/* the next function takes a list of lists as its argument and
+	orthogonalizes them using the gram-schmidt algorithm...*/
+
+listoflists:[[1,2,3,4],[0,5,4,7],[4,5,6,7],[0,0,1,0]];
+
+/* note that the lists in this list of lists are not orthogonal to each
+	other...   */
+
+innerproduct([1,2,3,4],[0,5,4,7]);
+innerproduct([1,2,3,4],[4,5,6,7]);
+
+/* but after applying the gramschmidt function...  */
+
+orthogonallists:gramschmidt(listoflists);
+innerproduct(part(orthogonallists,1),part(orthogonallists,2));
+innerproduct(part(orthogonallists,2),part(orthogonallists,3));
+
+/* note that orhtogonallists contains integers that are factored.
+	if you do not like this form, you can simply ratsimp the result :  */
+
+ratsimp(orthogonallists);
+
+/* the next function takes a matrix as its argument and returns the
+	eigenvalues of that matrix...    */
+
+matrix1:matrix([m1,0,0,0,m5],[0,m2,0,0,m5],[0,0,m3,0,m5],[0,0,0,m4,m5],[0,0,0,0,0]);
+
+/* this is the matrix that caused a lot of trouble for the old eigen
+	package...  it took ~170 seconds to find the eigen vectors of this 
+	matrix...  you should be able to do it in your head in about 20 seconds
+        [note: pdp-10 timings]
+	...  the new eigen package handles it in about 10 seconds...  anyway,
+	let's keep going... */
+
+
+eigenvalues(matrix1);
+
+/* the first sublist in the answer is the eigenvalues, second list is
+ 	their multiplicities in the corresponding order...
+	the next function takes a matrix as its argument and returns the
+	eigen values and the eigen vectors of that matrix...  */
+
+eigenvectors(matrix1);
+
+/* first sublist in the answer is the output of the eigenvalues command
+	the others are the eigen vectors corresponding to those eigen values...
+	notice that this command is more powerful than the eigenvalues command
+	because it determines both the eigen values and the eigen vectors...
+	if you already know the eigen values, you can set the knowneigvals flag
+	to true and the global variable listeigvals to the list of eigen
+	values...  this will make the execution of eigenvectors command faster 
+	because it doesn't have to find the eigen values itself... */
+/* commented out here and placed in [share]eigen.dm1 because lack of gc
+in 8.11 version of doe macsyma 
+matrix1:matrix([m1,0,0,0,m5],[0,m2,0,0,m5],[0,0,m3,0,m5],[0,0,0,m4,m5],[0,0,0,0,0]);
+
+matrix2:matrix([1,2,3,4],[0,3,4,5],[0,0,5,6],[0,0,0,9]);
+
+/* the next function takes a matrix as its argument and returns the
+	eigenvalues and the unit eigen vectors of that matrix... */
+
+uniteigenvectors(matrix2);
+
+/* if you already know the eigenvectors you can set the flag 
+	knowneigvects to true and the global variable listeigvects to the
+	list of the eigen vectors... 
+	the next function takes a matrix as its argument and returns the eigen
+	values and the unit eigen vectors of that matrix.  in addition if
+	the flag nondiagonalizable is false,two global matrices leftmatrix and
+	rightmatrix will be generated.  these matrices have the property that
+	leftmatrix.(matrix).rightmatrix is a diagonal matrix with the eigen 
+	values of the (matrix) on the diagonal...  */
+
+similaritytransform(matrix1)$
+nondiagonalizable;
+ratsimp(leftmatrix.matrix1.rightmatrix);
+
+/* now that you know how to use the eigen package, here are some
+	examples about how not to use it.
+	consider the following matrix :   */
+
+matrix3:matrix([1,0],[0,1]);
+
+/* as you've undoubtedly noticed, this is the 2*2 identity matrix.
+	let's find the eigen values and the eigen vectors of this matrix...
+*/
+
+eigenvectors(matrix3);
+
+/* "nothing special happened", you say.  everyone knows what the eigen
+	values and the eigen vectors of the identity matrix are, right?
+	right.  now consider the following matrix :  */
+
+matrix4:matrix([1,e],[e,1]);
+
+/* let e>0, but as small as you can imagine.  say 10^(-100).
+	let's find the eigen values and the eigen vectors of this matrix :
+*/
+
+eigenvectors(matrix4);
+
+/* since e~10^(-100), the eigen values of matrix4 are equal to the
+	eigen values of matrix3 to a very good accuracy.  but, look
+	at the eigen vectors!!!  eigen vectors of matrix4 are nowhere
+	near the eigen vectors of matrix3.  there is angle of %pi/4
+	between the corresponding eigen vectors.  so, one learns
+	another fact of life :
+
+	matrices which have approximately the same eigen values do not
+	have approximately the same eigen vectors in general.
+
+	this example may seem artificial to you, but it is not if you think
+	a little bit more about it.  so, please be careful when you
+	approximate the entries of whatever matrix you have.  you may
+	get good approximations to its eigen values, however the eigen
+	vectors you get may be entirely spurious( or some may be correct,
+	but some others may be totally wrong ).
+
+	now, here is another sad story :
+	let's take a look at the following matrix :  */
+
+matrix5:matrix([5/2,50-25*%i],[50+25*%i,2505/2]);
+
+/* nice looking matrix, isn't it?  as usual, we will find the eigen
+	values and the eigen vectors of it :  */
+
+eigenvectors(matrix5);
+
+/* well, here they are.  suppose that this was not what you wanted.
+	instead of those sqrt(70)'s, you want the numerical values of
+	everything.  one way of doing this is to set the flag "numer"
+	to true and use the eigenvectors command again :  */
+
+numer:true;
+eigenvectors(matrix5);
+
+/* ooops!!!  what happened??  we got the eigen values, but there are
+	no eigenvectors.  nonsense, there must be a bug in eigen, right?
+	wrong.  there is no bug in eigen.  we have done something which
+	we should not have done.  let me explain : 
+	when one is solving for the eigen vectors, one has to find the
+	solution to homogeneous equations like :  */
+
+equation1:a*x+b*y=0;
+equation2:c*x+d*y=0;
+
+/* in order for this set of equations to have a solution other than
+	the trivial solution ( the one in which x=0 and y=0 ), the 
+	determinant of the coefficients ( in this case a*d-b*c ) should
+	vanish.  exactly.   if the determinant does not vanish the only
+	solution will be the trivial solution and we will get no eigen
+	vectors.  during this demo, i did not set a,b,c,d to any
+	particular values.  let's see what happens when we try to solve
+	the set above :  */
+
+algsys([equation1,equation2],[x,y]);
+
+/* you see?  the infamous trivial solution.  now let me set a,b,c,d
+	to some numerical values :  */
+
+a:4;
+b:6;
+c:2;
+d:3;
+a*d-b*c;
+equation1:ev(equation1);
+equation2:ev(equation2);
+algsys([equation1,equation2],[x,y]);
+
+/* now we have a nontrivial solution with one arbitrary constant.
+	( %r(something) ).  what happened in the previous case is that
+	the numerical errors caused the determinant not to vanish, hence
+	algsys gave the trivial solution and we got no eigen vectors.
+	if you want a numerical answer, first calculate it exactly,
+	then set "numer" to true and evaluate the answer.  */
+
+numer:false;
+notnumerical:eigenvectors(matrix5);
+numer:true;
+ev(notnumerical);
+
+/* you see, it works now.  actually, if you have a matrix with
+	numerical entries and you can live with reasonably accurate
+	answers, there are much better (faster) programs.  ask somebody
+	about the imsl routines on the share directory... 
+	this is all...  if you think that the names of the functions are too 
+	long, there are shorter names for them and they are given in the file
+	eigen usage dsk:share;.  good luck!!!!!!!!!!!!!...... yekta  */
+*/
+
+"end of demo"$

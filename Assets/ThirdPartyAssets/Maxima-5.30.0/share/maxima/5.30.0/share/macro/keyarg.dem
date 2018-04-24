@@ -1,0 +1,30 @@
+/* Demo of argument passing by Key words, in this way
+   arbitrary arguments and default options may
+   be specified. The names of arguments and the default values
+   are available for inspection by the user as the TRANSLATE_KEYARG
+   property of the function.
+*/
+
+if get('sharem,'version)=false then loadfile(autolo,fasl,dsk,sharem)$
+
+def_keyarg(bar(foop,maxi=33,time=4.4),
+	   ['foop=foop,'maxi=maxi,'time=time])$
+
+/* In the argument specification VARIABLE = DEFAULT_VALUE
+   indicates a variable which can be specified in a call to the
+   function by VARIABLE = USERS_VALUE.
+   An atom is the same thing as VARIABLE = FALSE.
+
+   When the call to the function is parsed an atom indicator is the
+   same thing as VARIABLE=TRUE.
+
+*/
+
+bar(maxi=100000,foop);
+
+bar();
+
+/* mispell an argument on purpose: */
+
+errcatch(bar(maxi=10,timem=33));
+

@@ -1,0 +1,247 @@
+/* -*- Macsyma -*- */
+eval_when(batch,ttyoff:true)$
+/*ASB;DECLIN 6
+12:28pm  Saturday, 13 March 1982
+  Removed GETSYMBOL and PUTSYMBOL to GENUT.  Not recompiled.
+7:42pm  Saturday, 29 May 1982
+  Added a DIAGEVAL_VERSION for this file.
+1:18pm  Saturday, 12 June 1982
+  Changed loadflags to getversions, DEFINE_VARIABLE:'MODE.
+*/
+
+eval_when(batch,
+	  if get('debug,'version)=false and status(feature,its)=true
+	  then load('[debug,fasl,dsk,dgval]))$
+
+/* can't be translated in DOE-MACSYMA without extra files
+EVAL_WHEN([TRANSLATE],
+	  IF GET('GRAPH,'VERSION)=FALSE AND INDEPENDENT#TRUE
+	  THEN LOAD(graph),
+	  TRANSCOMPILE:TRUE,
+	  DEFINE_VARIABLE:'MODE,
+	  MODEDECLARE(FUNCTION(NULLLISTP,ZEROLISTP,LCLINEARP1,LCLINEARP2,
+			       LCPRED,ONEONLY),
+		      BOOLEAN),
+	  DECLARE([GNAUTOLOAD,OPDUM,LINPREDDUM,LINPOSNS],SPECIAL))$
+*/
+put('declin,6,'version)$
+/* don't have this file in DOE-MACSYMA
+EVAL_WHEN(LOADFILE,
+	  IF GET('GNAUTO,'VERSION)=FALSE
+	  THEN LOAD(['GNAUTO,'FASL,'DSK,'DGVAL]))$
+*/
+
+/* GNU Maxima */
+
+/* Commented out all local SPECIAL declarations.
+   Replaced PUTSYMBOL by PUT and GETSYMBOL by GET (there were no PUT or GET).
+   For other changes, search for `Maxima:' below. -wj */
+
+eval_when([batch,loadfile],
+  if get('gnauto,'diageval_version)=false
+  then load("simplification/genut"))$
+
+eval_when(translate,
+	  declare_translated(unscramble,factorargs,linopprod,linopprod0,
+			     rloiewl,predpartition,zerolistp,explicitfactor,
+			     orpartitionlist,linopsum2,lclinearp,linopsum1,
+			     linopprod1,setlist,findasymbol,noopsubst,
+			     linopsum0,lcpred,lclinearp1,nulllistp),
+          mode_declare(function(nulllistp,zerolistp,lclinearp1,lclinearp2,
+                                lcpred,oneonly),boolean))$
+
+define_variable(messdeclin1,
+		"contains an undeclared operator--linsimp.",
+		any)$
+
+lclinearp(list,opdum):=block(
+  [yesopsdum:last(partition(list,opdum))],
+  is(nulllistp(yesopsdum) or lclinearp1(apply("+",yesopsdum),opdum)))$
+
+lclinearp1(exp,opdum):=
+  lcpred(lambda([dum],lclinearp1(dum,opdum)),
+	 lambda([dum],is(inpart(dum,0)=opdum)),exp)$
+
+linsimp(exp,opdum1,[opdumlist]):=
+  if opdumlist=[]
+  then linopsum0(exp,opdum1)
+  else apply('linsimp,cons(linopsum0(exp,opdum1),opdumlist))$
+
+linopsum0(exp,opdum):=block(
+  [linposns,getdum,linpreddum,lvarsdum:listofvars(exp),substflag:false,newdum,
+   ansdum,piece,inflag:true,partswitch:true],
+  modedeclare(substflag,boolean),
+  if (getdum:get(opdum,'linear_operator))=false
+  then error(opdum,messdeclin1),
+  if member(opdum,lvarsdum)
+  then (substflag:true,
+	exp:noopsubst(newdum:findasymbol(lvarsdum),opdum,exp)),
+  setlist(getdum,'linposns,'linpreddum),
+    ansdum:linopprod1(subst(lambda([[sulist]],
+			      if freeof(opdum,sulist)
+			      then apply("+",sulist)
+			      else linopsum1(sulist,opdum)),"+",exp),
+		    opdum,linposns,linpreddum),
+  if not substflag
+  then ansdum
+  else subst(opdum,newdum,ansdum))$
+
+linopsum1(list,opdum):=block(
+  [ansdum,linopansdum],
+  if not lclinearp(list,opdum) then return(apply("+",list)),
+  setlist(partition(list,opdum),'ansdum,'linopansdum),
+  apply("+",ansdum)
+  +if length(linopansdum)<2
+   then first(linopansdum)
+   else linopsum2([first(linopansdum)],rest(linopansdum),opdum))$
+
+linopsum2(examineddum,unexaminedyetdum,opdum):=block(
+  [cofexdum,cofunexdum,exdum,unexdum,lexdum:1,exfoundflag:false,argsundum,
+   argsexadum,lunexdum,argsundum456,undum,exadum,newargsdum,fnewargsdum],
+  modedeclare([lunexdum,lexdum],fixnum,exfoundflag,boolean),
+  setlist(orpartitionlist(examineddum,"*",opdum),'cofexdum,'exdum),
+  setlist(orpartitionlist(unexaminedyetdum,"*",opdum),
+	  'cofunexdum,'unexdum),
+  lunexdum:length(unexdum),
+  for idum thru lunexdum do
+     (argsundum456:inpart(argsundum:
+			  args(undum:inpart(unexdum,idum)),
+			  apply('allbut,linposns)),
+      for jdum thru lexdum do
+	 (exadum:inpart(exdum,jdum),
+	  if argsundum456=inpart(argsexadum:args(exadum),
+				 apply('allbut,linposns))
+	  then (newargsdum:
+		explicitfactor(inpart(argsundum,linposns)
+				*inpart(cofunexdum,idum)
+				+inpart(argsexadum,linposns)
+				*inpart(cofexdum,jdum)),
+		if zerolistp(last(newargsdum))
+		then (exdum:inpart(exdum,allbut(jdum)),
+		      cofexdum:inpart(cofexdum,allbut(jdum)),
+		      lexdum:lexdum-1,
+		      return(exfoundflag:true)),
+		fnewargsdum:
+		maplist(lambda([dum],apply("*",dum)),
+			predpartition(rloiewl("*",first(newargsdum)),
+				      linpreddum)),
+		cofexdum:substinpart(first(fnewargsdum),cofexdum,jdum),
+		exdum:substinpart(apply(opdum,
+					append(last(newargsdum)
+						*last(fnewargsdum),
+					       argsundum456)),
+				  exdum,jdum),
+		return(exfoundflag:true))),
+      if not exfoundflag
+      then (exdum:endcons(undum,exdum),
+	    cofexdum:endcons(inpart(cofunexdum,idum),cofexdum),
+	    lexdum:lexdum+1)
+      else exfoundflag:false),
+  apply("+",cofexdum*exdum))$
+
+linopprod(exp,opdum1,[opdumlist]):=
+  if opdumlist=[]
+  then linopprod0(exp,opdum1)
+  else linopprod(linopprod0(exp,opdum1),first(opdumlist),rest(opdumlist))$
+
+linopprod0(exp,opdum):=block(
+  [linposns,getdum,linpreddum,newdum,lvarsdum:listofvars(exp),
+   piece,inflag:true,partswitch:true],
+  if (getdum:get(opdum,'linear_operator))=false
+  then error(opdum,messdeclin1),
+  setlist(getdum,'linposns,'linpreddum),
+  if member(opdum,lvarsdum)
+  then subst(opdum,newdum:findasymbol(lvarsdum),
+	     linopprod1(noopsubst(newdum,opdum,exp),opdum,linposns,linpreddum))
+  else linopprod1(exp,opdum,linposns,linpreddum))$
+
+linopprod1(exp,opdum,linposns,linpreddum):=
+  subst(lambda([[arglist]],factorargs(arglist,opdum,linposns,linpreddum)),
+	       	opdum,exp)$
+
+findasymbol(lvarsdum):=block(
+  [newdum:?gensym()],
+  if not member(newdum,lvarsdum)
+  then newdum
+  else findasymbol(lvarsdum))$
+
+noopsubst(expdum1,expdum2,expdum3):=block(
+  [opsubst:false],
+  subst(expdum1,expdum2,expdum3))$
+
+factorargs(argsdum,opdum,linposns,linpreddum):=block(
+  [newargsdum:explicitfactor(inpart(argsdum,linposns)),lastnewargsdum,
+   fnewargsdum],
+  if zerolistp(lastnewargsdum:last(newargsdum)) then return(0),
+  fnewargsdum:maplist('listtoprod,
+		      predpartition(rloiewl("*",first(newargsdum)),
+				    linpreddum)),
+  if orderlessp(last(fnewargsdum),-last(fnewargsdum))
+  then fnewargsdum:-fnewargsdum,
+  apply(opdum,unscramble(argsdum,lastnewargsdum*last(fnewargsdum),linposns))
+	*first(fnewargsdum))$
+
+unscramble(list,newlist,linposns):=block(
+  [llist:length(newlist)],
+  modedeclare(llist,fixnum),
+  for idum thru llist do
+      list:substinpart(inpart(newlist,idum),list,inpart(linposns,idum)),
+  list)$
+
+declare_linear_operator(opdum,linposns,predicate):=block(
+  [piece,inflag:true,partswitch:true],
+  put(opdum,[linposns,predicate],'linear_operator))$
+
+sym&&
+
+/* symmetry declarations */
+
+declare_symmetry(opdum,symfcn,symsortfcn,symtype):=block(
+  [piece,inflag:true,partswitch:true],
+  put(opdum,[symfcn,symsortfcn],symtype))$
+
+applysymmetry(exp,opdum,symtype):=block(
+  [getdum:get(opdum,symtype),piece,inflag:true,partswitch:true],
+  if getdum=false then return(exp),
+  subst(lambda([[arglist]],
+	       apply('aplsym1,append(getdum,[arglist,opdum]))),
+	opdum,exp))$
+
+aplsym1(symfcn,symsortfcn,list,opdum):=block(
+  [allsyms:apply(symfcn,[apply(opdum,list)]),allsymsdum,exitblock:false],
+  modedeclare(exitblock,boolean),
+  allsymsdum:allsyms,
+  for idum in allsyms do
+      if member(-idum,allsymsdum:rest(allsymsdum))
+      then return(exitblock:true),
+  if exitblock
+  then 0
+  else first(sort(allsyms,symsortfcn)))$
+
+declare_zero(opdum,preddum,zerotype):=block(
+  [piece,inflag:true,partswitch:true],
+  put(opdum,preddum,zerotype))$
+
+applyzero(exp,opdum,zerotype):=block(
+  [getdum:get(opdum,zerotype),piece,inflag:true,partswitch:true],
+  if getdum=false then return(exp),
+  subst(lambda([[arglist]],if mode_identity(boolean,apply(getdum,[arglist]))
+			   then 0
+			   else apply(opdum,arglist)),
+	opdum,exp))$
+
+dev&&
+eval_when(batch,
+	  if development=true
+	  then (declare_linear_operator(f,[1,2,3],kpred),
+	  	declare_symmetry(f,fsym,sort,all),
+	  	fsym(fesp):=[inpart(fesp,[2,3,1,5,6,4]),
+		       	     inpart(fesp,[3,1,2,6,4,5]),
+		       	     inpart(fesp,[1,2,3,4,5,6]),
+		       	     -inpart(fesp,[3,2,1,6,5,4]),
+		       	     -inpart(fesp,[2,1,3,5,4,6]),
+		       	     -inpart(fesp,[1,3,2,4,6,5])],
+	  	t1():=linsimp(f(a,b,c,d,e,h)-f(a,b,c,d,h,e),f),
+	  	kpred(exp):=freeofl([k1,k2,k3,k4],exp)))$
+
+eval_when(batch,ttyoff:false)$

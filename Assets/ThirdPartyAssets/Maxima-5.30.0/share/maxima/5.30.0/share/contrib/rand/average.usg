@@ -1,0 +1,130 @@
+average.mac is from the book "Perturbation Methods, Bifurcation Theory and
+Computer Algebra" by Rand & Armbruster (Springer 1987)
+
+average() allows one to perform first and second order averaging on an
+n-dimensional system of nonautonomous odes.  Averaging is performed
+by converting trig terms to complex exponentials, then killing
+exponentials.
+
+The example is from p114.  The method of averaging is applied to the
+van der Pol oscillator
+
+	z'' + z = e*(1-z^2)*z'
+
+In the following transcript: 
+ - first order averaging is performed 
+ - second order averaging is performed without re-entering the equations
+ - the second order solution is transformed to polar coordinates
+maxima-5.9.0 cvs reproduces the results from the book.
+
+(C1) load("./average.mac");
+(D1)                             ./average.mac
+(C2) average();
+DO YOU WANT TO ENTER A NEW PROBLEM? (Y/N)
+Y;
+ARE YOU CONSIDERING A WEAKLY NONLINEAR OSCILLATOR OF THE FORM
+Z'' + OMEGA0^2 Z = EPS F(Z,ZDOT,T) ? (Y/N)
+Y;
+ENTER OMEGA0
+1;
+ENTER F(Z,ZDOT,T)
+(1-Z^2)*ZDOT;
+DO YOU WANT FIRST OR SECOND ORDER AVERAGING?  (1/2)
+1;
+                         2     3                 3     2
+                    Y1 Y2    Y1    Y1          Y2    Y1  Y2   Y2
+(D2)        [EPS (- ------ - --- + --), EPS (- --- - ------ + --)]
+                      8       8    2            8      8      2
+
+(C3) average();
+DO YOU WANT TO ENTER A NEW PROBLEM? (Y/N)
+N;
+DO YOU WANT FIRST OR SECOND ORDER AVERAGING?  (1/2)
+2;
+                        5        2   3       3        4          2
+                2  11 Y2    11 Y1  Y2    3 Y2    11 Y1  Y2   3 Y1  Y2   Y2
+(D3) MATRIX([EPS  (------ + ---------- - ----- + --------- - -------- + --)
+                    256        128        16        256         16      8
+
+               2     3                          4        3   2          2
+          Y1 Y2    Y1    Y1        2    11 Y1 Y2    11 Y1  Y2    3 Y1 Y2
+ + EPS (- ------ - --- + --)], [EPS  (- --------- - ---------- + --------
+            8       8    2                 256         128          16
+
+        5       3                  3     2
+   11 Y1    3 Y1    Y1           Y2    Y1  Y2   Y2
+ - ------ + ----- - --) + EPS (- --- - ------ + --)])
+    256      16     8             8      8      2
+
+(C4) load("./transfor.mac");
+(D4)                            ./transfor.mac
+(C5) transform();
+ENTER NUMBER OF EQUATIONS
+2;
+ENTER SYMBOL FOR ORIGINAL VARIABLE 1
+Y1;
+ENTER SYMBOL FOR ORIGINAL VARIABLE 2
+Y2;
+ENTER SYMBOL FOR TRANSFORMED VARIABLE 1
+R;
+ENTER SYMBOL FOR TRANSFORMED VARIABLE 2
+THETA;
+THE RHS'S OF THE D.E.'S ARE FUNCTIONS OF THE ORIGINAL VARIABLES:
+ENTER RHS OF Y1 D.E.
+D Y1 /DT =
+RESULT[1,1];
+                      5        2   3       3        4          2
+              2  11 Y2    11 Y1  Y2    3 Y2    11 Y1  Y2   3 Y1  Y2   Y2
+D Y1 /DT = EPS  (------ + ---------- - ----- + --------- - -------- + --)
+                  256        128        16        256         16      8
+
+                                                                 2     3
+                                                            Y1 Y2    Y1    Y1
+                                                   + EPS (- ------ - --- + --)
+                                                              8       8    2
+ENTER RHS OF Y2 D.E.
+D Y2 /DT =
+RESULT[2,1];
+                           4        3   2          2        5       3
+              2    11 Y1 Y2    11 Y1  Y2    3 Y1 Y2    11 Y1    3 Y1    Y1
+D Y2 /DT = EPS  (- --------- - ---------- + -------- - ------ + ----- - --)
+                      256         128          16       256      16     8
+
+                                                              3     2
+                                                            Y2    Y1  Y2   Y2
+                                                   + EPS (- --- - ------ + --)
+                                                             8      8      2
+THE TRANSFORMATION IS ENTERED NEXT:
+ENTER Y1 AS A FUNCTION OF THE NEW VARIABLES
+Y1 =
+R*COS(THETA);
+Y1 = R COS(THETA)
+ENTER Y2 AS A FUNCTION OF THE NEW VARIABLES
+Y2 =
+R*SIN(THETA);
+Y2 = R SIN(THETA)
+                   3    2               3    2
+       dR     EPS R  SIN (THETA) + EPS R  COS (THETA) - 4 EPS R
+(D5) [[-- = - -------------------------------------------------,
+       dT                             8
+
+dTHETA            2  4    4                 2  4    2                2  2
+------ = - (11 EPS  R  SIN (THETA) + (22 EPS  R  COS (THETA) - 48 EPS  R )
+  dT
+
+    2                2  4    4                2  2    2                2
+ SIN (THETA) + 11 EPS  R  COS (THETA) - 48 EPS  R  COS (THETA) + 32 EPS )/256]]
+
+
+(C6) trigsimp(%);
+                   3                             2  4         2  2         2
+       dR     EPS R  - 4 EPS R  dTHETA     11 EPS  R  - 48 EPS  R  + 32 EPS
+(D6) [[-- = - ----------------, ------ = - ---------------------------------]]
+       dT            8            dT                      256
+
+
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

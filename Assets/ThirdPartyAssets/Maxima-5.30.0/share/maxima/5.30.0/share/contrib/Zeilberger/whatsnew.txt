@@ -1,0 +1,73 @@
+WHAT'S NEW (Version 4.1)
+
+(Only minor aesthetic changes that make the use
+of "zb_prove" simpler and make Zeilberger do 
+also what parGosper does).
+
+(i) zb_prove produces proofs with more details by default
+
+(ii) zb_prove also takes 3 arguments (it computes the fourth by itself)
+
+(iii) Zeilberger also takes four arguments (in this case parGosper is invoked)
+
+
+----------------------------------------------------------------------------
+WHAT'S NEW (Version 4.0)
+
+(i) Bugs:
+With this version I have removed an ugly bug
+in the optimization related to constant factors 
+(non-dependent on the summation variable).
+
+(ii) Wrong input detection:
+The package detects non-hypergeometric input
+for "Gosper", "parGosper" and "Zeilberger".
+
+(iii) New features:
+This version adds some functions that produce 
+human readable proofs of the results 
+and some others that test the result produced by
+"parGosper", "Gosper" and "Zeilberger":
+
+(1) "gs_prove" proves the result of "Gosper" 
+(2) "zb_prove" proves the result of "parGosper" and "Zeilberger"
+(3) "zb_meaning" writes down the recurrence corresponding to
+the output of "parGosper" and "Zeilberger"
+(4) "zb_test" performs a test on a list of inputs for "parGosper"
+
+----------------------------------------------------------------------------
+WHAT'S NEW (Version 3.0)
+
+The new version of the package adds the following features
+to version 2.0:
+
+(i) Gosper's algorithm for indefinite summation
+available through the new commands: 
+(1) "Gosper" (finds the rational certificate) 
+(2) "AntiDifference" (finds the hypergeometric antidifference)
+(3) "GosperSum" (sums over a given interval by invoking "AntiDifference")
+
+Remark: Gosper's algorithm is now integrated in "Zeilberger" and it
+is invoked by default as first attempt.
+
+(ii) Warnings (about trivial solutions, terms not depending on the
+recurrence variable, dimension of the solutions higher than one, etc...).
+
+(iii) Numerical/Modular test for discarding zero-solution systems
+in "parGosper" and "Zeilberger".
+
+(iv) Lots of settings available (see "readme.txt" and "settings.mac").
+
+(v)  Cleaner code.
+
+(vi) More verbosity levels.
+
+------------------------------------------------------------------------------
+WHAT'S NEW (Version 2.0)
+
+(i) A few changes necessary to port the package from Macsyma to Maxima
+
+(ii) Fewer bugs
+
+(iii) Axel Riese's "filtering" optimization
+

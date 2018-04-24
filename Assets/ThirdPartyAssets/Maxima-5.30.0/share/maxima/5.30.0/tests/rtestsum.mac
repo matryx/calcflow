@@ -1,0 +1,1046 @@
+kill (all);
+done;
+
+(assume_pos_save: assume_pos, assume_pos: true);
+true;
+
+/* Known failure: concat (q, k) => gensym
+ */
+sum (concat (q, k), k, a, b);
+(b - a + 1) * qk;
+
+/* Known failure: concat (q, k) => gensym
+ */
+product (concat (q, k), k, a, b);
+qk ^ (b - a + 1);
+
+/* Known failure: causes asksign to ask an unanswerable question about index variable;
+ * this is a bug in integrate and/or asksign.
+(assume (b > 0, a > 0, b > a), sum (integrate (1/x^k, x, a, b), k, 1, n));
+integrate (1/x, x, a, b) + sum (integrate (1/x^k, x, a, b), k, 2, n);
+ */
+
+/* Known failure: causes asksign to ask an unanswerable question about index variable;
+ * this is a bug in integrate and/or asksign.
+product (integrate (1/x^k, x, a, b), k, 1, n);
+integrate (1/x, x, a, b) * product (integrate (1/x^k, x, a, b), k, 2, n);
+ */
+
+block ([prederror: false], sum(if k < 1 then a else b,k,0,n));
+'( 'sum(if k < 1 then a else b,k,0,n));
+
+/* see SF bug report # 625278 */
+
+'sum(binomial(2,2-k)-binomial(2,1-k),k,1,2),simpsum;
+2;
+
+'sum(binomial(2,2-k)-binomial(2,1-k),k,1,2),sum;
+2;
+
+'sum(binomial(x,2-k)-binomial(x,1-k),k,1,2),simpsum;
+x;
+
+'sum(binomial(x,2-k)-binomial(x,1-k),k,1,2),sum;
+x;
+
+sum (f(k) + 1, k, 1, n), simpsum;
+n + 'sum (f(k), k, 1, n);
+
+/* further examples in the same vein: part of summand depends on index, part doesn't. */
+
+sum (sin(g(j)) - %pi^j + cos(h(k)) - %e^l, j, 1, m), simpsum;
+m*cos(h(k)) - m*%e^l + sum (sin(g(j)), j, 1, m) - ((%pi^(m + 1) - %pi)/(%pi - 1));
+
+sum (sum (f(j) + g(k), j, 1, m), k, 1, n), simpsum;
+m * 'sum (g(k), k, 1, n) + n * 'sum (f(j), j, 1, m);
+
+sum (sum (f(j) + g(k) - %pi^l + 2, j, 1, m), k, 1, n), simpsum;
+m * 'sum (g(k), k, 1, n) + n * 'sum (f(j), j, 1, m) - m*n*%pi^l + 2*m*n;
+
+sum (sum (sum (%pi + %phi - 1, i, 1, n_i), j, 1, n_j), k, 1, n_k);
+n_i * n_j * n_k * (%pi + %phi - 1);
+
+sum (sum (sum (f(%pi, i) + g(%phi, j) - h(k), i, 1, n_i), j, 1, n_j), k, 1, n_k);
+'sum ('sum ('sum (f(%pi, i) + g(%phi, j) - h(k), i, 1, n_i), j, 1, n_j), k, 1, n_k);
+
+/* see SF bug report # 649428 */
+
+(factsum3 (mt, ej) := sum ((-1)^(k + 1)/(k*mt^k)*sum((1 - l)^k - l^k, l, 1, ej),k,1,inf), t% : taylor (factsum3 (mt, ej), [mt, 0, 3, asymp])); 
+'sum(1-2*l,l,1,ej)/mt-('sum(1-2*l,l,1,ej)/(2*mt^2))+'sum(-2*l^3+3*l^2-3*l+1,l,1,ej)/(3*mt^3);
+
+%, simpsum, ratsimp;
+-((6*ej^2*mt^2-3*ej^2*mt+ej^4+ej^2)/(6*mt^3));
+
+/* Known failure: interaction of taylor and simpsum
+ */
+taylor (factsum3 (mt, ej), [mt, 0, 3, asymp]), simpsum;
+-(6*ej^2*mt^2-3*ej^2*mt+ej^4+ej^2)/(6*mt^3);
+
+/* see SF bug report # 740134 */
+
+(foo: i^2, [sum ('foo, i, 0, 2), sum (foo, i, 0, 2), sum (foo, i, 0, n)]);
+[3*foo, 5, 'sum (i^2, i, 0, n)];
+
+/* summand is a function which has a side effect --
+ * outcome here differs from recommendation by Stavros in 740134
+ */
+block ([L:[]], f(i) := (L: append (L, [i]), i), S: sum (f (i), i, 1, 3), [S, L]);
+[6, [1, 2, 3]];
+
+sum (integrate (x^i ,x), i, 0, 2);
+x^3/3 + x^2/2 + x;
+
+sum (integrate (1/(x^i + 1), x), i, 0, 1);
+log(x+1) + x/2;
+
+(f[i](x) := x^i, g[i](x) := x^i, h[i](x) := x^i, 0);
+0;
+
+(f[i], g[i](t), 0);
+0;
+
+sum (f[i](x), i, 0, n);
+'sum (x^i, i, 0, n);
+
+sum (g[i](x), i, 0, n);
+'sum (x^i, i, 0, n);
+
+sum (h[i](x), i, 0, n);
+'sum (x^i, i, 0, n);
+
+/* see SF bug report # 817521 */
+
+(kill (foo), foo (n):= block([aaa,m], modedeclare([m,n], fixnum), m:n, [ aaa[1], aaa[n], aaa[m], aaa[1]+aaa[2], sum(aaa[i],i,1,m) ] ), foo (2));
+[aaa[1],aaa[2],aaa[2],aaa[2]+aaa[1], aaa[2]+aaa[1]];
+
+(translate(foo), 0);
+0;
+
+foo (2);
+[aaa[1],aaa[2],aaa[2],aaa[2]+aaa[1], aaa[2]+aaa[1]];
+
+/* see SF bug report # 851765 */
+
+(apply (forget, facts ()), assume (i >= a), sum (i, i, a, b), facts ());
+[i >= a];
+
+is (i >= a);
+true;
+
+(assume (i < 0), sum (abs (i), i, 1, a));
+'sum (i, i, 1, a);
+
+(apply (forget, facts ()), 0);
+0;
+
+/* see SF bug report # 1007094 */
+
+(u: 'sum((-1/(8*i+6)-1/(8*i+5)-2/(8*i+4)+4/ (8*i+1))/16^i,i,1,a), 0);
+0;
+
+u, a=2, simpsum;
+1618091/196035840;
+
+%, numer;
+0.0082540570132481894$ 
+
+u, a=2, simpsum, numer;
+0.0082540570132481911$ 
+
+u, a=2, simpsum, bfloat;
+8.25405701324819B-3;
+
+/* see SF bug report # 1192935 */
+
+(f(x) := x^2, b: 1/10, Ak: b*f(k*b), sum (Ak, k, 0, 9));
+57/200;
+
+/* When A(k) is defined as A(k) := b*f(k*b) instead of define(A(k), b*f(k*b)),
+ * A(k) evaluates to k^2/n^3 even if n is bound to something;
+ * this is a consequence of Maxima's evaluation policies:
+ * rhs of := is not evaluated, and variables (b in this case)
+ * are evaluated just once.
+ */
+(b:1/n, define (A(k), b*f(k*b)), A(k));
+k^2/n^3;
+
+sum (A(k), k, 0, n-1);
+('sum (k^2, k, 0, n-1))/n^3;
+
+sum (A(k), k, 0, n-1), simpsum;
+(n+2*(n-1)^3+3*(n-1)^2-1)/(6*n^3);
+
+[''%, sum (A(k), k, 0, n-1)], n=10;
+[57/200, 57/200];
+
+(B(k) := k*f(k*b), B(k));
+k^3/n^2;
+
+sum (B(k), k, 0, n-1), simpsum;
+((n-1)^4 + 2*(n-1)^3 + (n-1)^2) / (4*n^2);
+
+/* see SF bug report # 1363411 */
+
+(kill (f), 'sum(1+f(k),k,1,2)), simpsum;
+2 + f(1) + f(2);
+
+is(equal(block([gcd:subres], ratsimp((-x^3+1)/(2*x^5+2) + (-sqrt(5)+5)/(20*x^2+(-10*sqrt(5)-10)*x+20))),
+         block([gcd:spmod],  ratsimp((-x^3+1)/(2*x^5+2) + (-sqrt(5)+5)/(20*x^2+(-10*sqrt(5)-10)*x+20)))));
+true;
+
+/* General tests from here on */
+
+sum (x, x, p, p + 2);
+p + (p + 1) + (p + 2);
+
+product (x, x, p, p + 2);
+p * (p + 1) * (p + 2);
+
+sum (x, x, %i, %i + 2);
+%i + (%i + 1) + (%i + 2);
+
+product (x, x, %i, %i + 2);
+%i * (%i + 1) * (%i + 2);
+
+sum (imagpart (1 + %i*k), k, 1, n), simpsum;
+(n^2 + n)/2;
+
+product (imagpart (1 + %i*k), k, 1, n), simpproduct;
+n!;
+
+(g(x) := q(x^2), sum (g(k), k, 1, n));
+'sum (q (k^2), k, 1, n);
+
+(g(x) := q(x^2), product (g(k), k, 1, n));
+'product (q (k^2), k, 1, n);
+
+sum (integrate (x^k, x, 0, 1), k, 1, n);
+'sum (1/(k + 1), k, 1, n);
+
+product (integrate (x^k, x, 0, 1), k, 1, n);
+'product (1/(k + 1), k, 1, n);
+
+(kill(b), sum ('concat (q, k), k, a, b));
+'sum ('concat (q, k), k, a, b);
+
+sum ('concat (q, k), k, a, b), nouns, a=1, b=5;
+q5 + q4 + q3 + q2 + q1;
+
+product ('concat (q, k), k, a, b);
+'product ('concat (q, k), k, a, b);
+
+product ('concat (q, k), k, a, b), nouns, a=1, b=5;
+q5 * q4 * q3 * q2 * q1;
+
+(assume (n>= 1), sum (if k <= n then a else b, k, 1, n));
+a * n$
+
+product (if k <= n then a else b, k, 1, n);
+a ^ n$
+
+sum (sin (%pi * k), k, 0, nn);
+0$
+
+product (cos (2 * %pi * k), k, 0, nn);
+1$
+
+sum (lambda ([x], x^i), i, 1, 3);
+lambda ([x], x) + lambda ([x], x^2) + lambda ([x], x^3);
+
+sum (k: k^2, k, 1, 3);
+14;
+
+sum (a, k, inf, minf);
+0;
+
+(assume (i < 0, j < 0, n > 0), sum(sum(abs(i) + abs(j),i,1,j),j,1,n));
+'sum ('sum (i + j, i, 1, j), j, 1, n);
+
+sum (sum (sqrt (i + j), i, 1, j), j, 1, n), simpsum;
+'sum ('sum (sqrt (i + j), i, 1, j), j, 1, n);
+
+sum (1/k, k, rat(1), rat(n));
+'sum (1/k, k, 1, n);
+
+sum (taylor (x^i, x, 0, 5), i, 0, 5);
+''(taylor (x^5 + x^4 + x^3 + x^2 + x + 1,x,0,5));
+
+(i: 888, sum (lambda ([i], i^2), i, 1, 3));
+3 * lambda ([i], i^2);
+
+sum (lambda ([i], i^2), i, 1, n);
+n * lambda ([i], i^2);
+
+(f(x) := sum (x, i, 1, 3), f(-x));
+-3*x;
+
+(ak : k^2,  g(a,n) := sum(a,k,1,n), g(ak, 5));
+55;
+
+(translate (g), g(ak,5));
+55;
+
+sum (integrate (x^i, x), i, 0, n);
+'sum (x^(i+1) / (i+1), i, 0, n);
+
+(assume (k < 0), assume (0 < n, m > n), sum (sqrt (k^2), k, n, m));
+'sum (k, k, n, m);
+
+(assume (i >= n_1, i <= n_2), sum (z(i), i, n_1, n_2));
+'sum (z(i), i, n_1, n_2);
+
+block ([prederror: false], [is (i >= n_1), is (i <= n_2)]);
+[true, true];
+
+/* some examples adapted from describe("sum") */
+
+(old_facts: facts (), foo: 42, bar: 12 + exp(7), baz: 1/quux, 0);
+0;
+
+sum (foo^2, foo, 1, 7);
+140;
+
+sum (aa[bar], bar, 1, 7);
+aa[7] + aa[6] + aa[5] + aa[4] + aa[3] + aa[2] + aa[1];
+
+sum (aa(baz), baz, 1, 7);
+aa(7) + aa(6) + aa(5) + aa(4) + aa(3) + aa(2) + aa(1);
+
+sum (aa(foo), foo, 1, n);
+'sum (aa(foo), foo, 1, n);
+
+sum (2^bar + bar^2, bar, 0, n), simpsum;
+2^(n + 1) + (2*n^3 + 3*n^2 + n)/6 - 1;
+
+sum (1/3^baz, baz, 1, inf), simpsum;
+1/2;
+
+sum (foo^2, foo, 1, 4) * sum (1/foo^2, foo, 1, inf), simpsum;
+5*%pi^2;
+
+(gg(bar) := 1/bar^2, sum (gg(bar)^2, bar, 1, inf));
+sum (1/bar^4, bar, 1, inf);
+
+sum (gg(baz)^2, baz, 1, inf), simpsum;
+%pi^4/90;
+
+[is (foo = 42), is (bar = 12 + exp(7)), is (baz = 1/quux)];
+[true, true, true];
+
+(new_facts: facts(), is (sort (old_facts) = sort (new_facts)));
+true;
+
+/* redo all of the tests, this time with product */
+
+product (lambda ([x], x^i), i, 1, 3);
+lambda ([x], x) * lambda ([x], x^2) * lambda ([x], x^3);
+
+product (k: k^2, k, 1, 3);
+36;
+
+product (a, k, inf, minf);
+1;
+
+(assume (i < 0, j < 0, n > 0), product(product(abs(i) + abs(j),i,1,j),j,1,n));
+'product ('product (i + j, i, 1, j), j, 1, n);
+
+product (1/k, k, rat(1), rat(n));
+'product (1/k, k, 1, n);
+
+product (taylor (x^i, x, 0, 5), i, 0, 5);
+''(taylor (x^15,x,0,15));
+
+(i: 888, product (lambda ([i], i^2), i, 1, 3));
+(lambda ([i], i^2))^3;
+
+product (lambda ([i], i^2), i, 1, n);
+lambda([i],i^2)^n;
+
+(f(x) := product (x, i, 1, 3), f(-x));
+-x^3;
+
+(f(x) := x^2, b: 1/10, Ak: b*f(k*b), product (Ak, k, 1, 9));
+(9!)^2/1000^9;
+
+(A(k) := k*f(k*b), b:1/n, A(k));
+k^3/n^2;
+
+product (A(k), k, 0, n-1);
+('product (k^3/n^2, k, 0, n-1));
+
+(assume (n > 0, m > n), ev (product (k, k, n, m), simpproduct));
+m!/(n - 1)!;
+
+(ak : k^2,  g(a,n) := product(a,k,1,n), g(ak, 5));
+(5!)^2;
+
+(translate (g), g(ak,5));
+(5!)^2;
+
+/* multiplicand is a function which has a side effect */
+
+block ([L:[]], f(i) := (L: append (L, [i]), i), S: product (f (i), i, 1, 3), [S, L]);
+[6, [1, 2, 3]];
+
+product (integrate (x^i ,x), i, 0, 2);
+x^3/3 * x^2/2 * x;
+
+product (integrate (1/(x^i + 1), x), i, 0, 1);
+log(x+1) * x/2;
+
+(f[i](x) := x^i, g[i](x) := x^i, h[i](x) := x^i, 0);
+0;
+
+/* reference f[i] and g[i] -- see 740134 for the effect this has on previous defn of sum */
+
+(f[i], g[i](t), 0);
+0;
+
+product (f[i](x), i, 0, n);
+'product (x^i, i, 0, n);
+
+product (g[i](x), i, 0, n);
+'product (x^i, i, 0, n);
+
+product (h[i](x), i, 0, n);
+'product (x^i, i, 0, n);
+
+product (integrate (x^i, x), i, 0, n);
+'product (x^(i+1) / (i+1), i, 0, n);
+
+(assume (k < 0), assume (0 < n, m > n), ev (product (sqrt (k^2), k, n, m), simpproduct));
+m!/(n - 1)!;
+
+(assume (i >= n_1, i <= n_2), product (z(i), i, n_1, n_2));
+'product (z(i), i, n_1, n_2);
+
+block ([prederror: false], [is (i >= n_1), is (i <= n_2)]);
+[true, true];
+
+/* some examples adapted from describe("sum") */
+
+(old_facts: facts (), foo: 42, bar: 12 + exp(7), baz: 1/quux, 0);
+0;
+
+product (foo^2, foo, 1, 7);
+(7!)^2;
+
+product (aa[bar], bar, 1, 7);
+aa[7] * aa[6] * aa[5] * aa[4] * aa[3] * aa[2] * aa[1];
+
+product (aa(baz), baz, 1, 7);
+aa(7) * aa(6) * aa(5) * aa(4) * aa(3) * aa(2) * aa(1);
+
+product (aa(foo), foo, 1, n);
+product (aa(foo), foo, 1, n);
+
+product (2^bar + bar^2, bar, 0, n), simpsum;
+product (2^bar + bar^2, bar, 0, n);
+
+product (1/3^baz, baz, 1, inf), simpsum;
+product (1/3^baz, baz, 1, inf);
+
+product (foo^2, foo, 1, 4) * product (1/foo^2, foo, 1, inf), simpsum;
+(4!)^2 * 'product (1/'foo^2, 'foo, 1, inf);
+
+(gg(bar) := 1/bar^2, product (gg(bar)^2, bar, 1, inf));
+'product (1/'bar^4, 'bar, 1, inf);
+
+product (gg(baz)^2, baz, 1, inf), simpsum;
+'product (1/'baz^4, 'baz, 1, inf);
+
+[is (foo = 42), is (bar = 12 + exp(7)), is (baz = 1/quux)];
+[true, true, true];
+
+(new_facts: facts(), is (sort (old_facts) = sort (new_facts)));
+true;
+
+/*---- new tests from bw ------*/
+
+sum(0,i,a,b);
+0$
+
+sum(0,i,minf,inf);
+0$
+
+sum(0,i,42,inf);
+0$
+
+sum(sqrt(3),i,0,inf);
+inf$
+
+sum(sqrt(3),i,-1932,inf);
+inf$
+
+sum(5,i,minf, inf);
+inf$
+
+sum(-sqrt(3),i,0,inf);
+minf$
+
+sum(sqrt(3),i,1,3);
+3 * sqrt(3)$
+
+sum(sqrt(3),i,-1,1);
+3 * sqrt(3)$
+
+sum(p(i + 1) - p(i),i,1,5);
+p(6) - p(1)$
+
+product(1,i,a,b);
+1$
+
+product(1,i,minf,inf);
+1$
+
+product(1,i,-42,inf);
+1$
+
+product(%pi,i,1,3);
+%pi^3$
+
+product(%pi,i,-1,1);
+%pi^3$
+
+product(%pi,i,0,inf);
+inf$
+
+product(%pi - 3,i,0,inf);
+0$
+
+product(%pi - 3,i,minf,inf);
+0$
+
+product(-%pi,i,0,inf);
+infinity$
+
+product(0,i,0,n);
+0$
+
+product(-%pi,i,minf,inf);
+infinity$
+
+product((1 + %i)/sqrt(2),k,1,inf);
+und$
+
+product(-1,k,1,inf);
+und$
+
+product(a,i,0,inf);
+'product(a,i,0,inf);
+
+product(p(i + 1) / p(i),i,1,5);
+p(6) / p(1)$
+
+sum(lambda([x],x^i),i,1,3);
+lambda([x],x) + lambda([x],x^2) + lambda([x],x^3);
+
+product(lambda([x],x^i),i,1,3);
+lambda([x],x) * lambda([x],x^2) * lambda([x],x^3);
+
+sum([1,k],k,1,5);
+[5,15];
+
+sum([1,k],k,1,n),simpsum;
+[n, (n^2 + n)/2];
+
+(old_facts : facts(),0);
+0$
+
+errcatch(sum(1/k,k,-1,1));
+[];
+
+(new_facts: facts(), is (sort (old_facts) = sort (new_facts)));
+true;
+
+(old_facts : facts(),0);
+0$
+
+errcatch(product(1/k,k,-1,1));
+[];
+
+(new_facts: facts(), is (sort (old_facts) = sort (new_facts)));
+true;
+
+sum(diff(log(x),x,k),k,1,2);
+1/x - 1/x^2$
+
+product(diff(log(x),x,k),k,1,2);
+-1/x^3;
+
+sum(x^k * at(diff(sin(x),x,k)/k!,x=0),k,0,5) - taylor(sin(x),x,0,5);
+''(taylor(0,x,0,5));
+
+product(%i-x,k,1,inf);
+'product(%i-x,k,1,inf);
+
+sum(%i,k,0,-1);
+0$
+
+sum(%i,k,inf,minf);
+0$
+
+sum(%i,k, 0, minf);
+0$
+
+product(%i,k,0,-1);
+1$
+
+product(%i,k,inf,minf);
+1$
+
+product(%i,k, 0, minf);
+1$
+
+sum(p,p,p,p);
+p$
+
+product(p,p,p,p);
+p$
+
+sum(k,k,p,p+1);
+2*p+1$
+
+sum(k,k,p,p-1);
+0$
+
+sum(k,k,%i,%i+1);
+2*%i + 1$
+
+product(k,k,%i,%i+1);
+%i * (%i + 1)$
+
+product(k,k,p,p+1);
+p*(p+1)$
+
+product(k,k,p,p-1);
+1$
+
+sum(k,k,1,entier(4/3));
+1$
+
+sum(k,k,entier(4/3),1);
+1$
+
+sum(a,k,entier(4/3),entier(5/2));
+2*a$
+
+product(k,k,1,entier(4/3));
+1$
+
+product(k,k,entier(4/3),1);
+1$
+
+product(a,k,entier(4/3),entier(5/2));
+a^2$
+
+sum(q(k),k,n^2 + 1,-n^2 - 1); /* It's an empty sum */
+0$
+
+product(q(k),k,n^2 + 1,-n^2 - 1);
+1$
+
+sum(concat(q,k),k,1,3);
+q1 + q2 + q3$
+
+(s : sum('concat(q,k),k,1,n),0);
+0$
+
+(s : subst(n=3,s), ev(s,nouns));
+q1 + q2 + q3$
+
+sum(product(concat(q,i),i,1,j),j,1,3);
+q1 + q1 * q2 + q1 * q2 * q3$
+
+product(concat(q,k),k,1,3);
+q1 * q2 * q3$
+
+(s : product('concat(q,k),k,1,n),0);
+0$
+
+(s : subst(n=3,s), ev(s,nouns));
+q1 * q2 * q3$
+
+(a : k^2,0);
+0$
+
+sum(realpart(a + %i * k),k,1,3);
+14$
+
+(assume(k < 0),0);
+0$
+
+sum(sum(abs(k),k,1,n),n,1,m);
+sum(sum(k,k,1,n),n,1,m)$
+
+sum(sum(k,k,1,i),i,1,n),simpsum,ratsimp;
+''(ratsimp(n^3/6+n^2/2+n/3))$
+
+sum(sum(abs(k),k,1,n) + sum(abs(k),k,1,n),n,1,m);
+2 * sum(sum(k,k,1,n),n,1,m)$
+
+(forget(k < 0),0);
+0$
+
+(remvalue(a,b),0);
+0$
+
+sum(if k < 1 then a else b,k,0,2);
+a + 2*b$
+
+block ([prederror : true], sum(if k < 1 then a else b,k,0,2));
+a + 2*b$
+
+sum(1/3^k,k,1,inf),simpsum;
+1/2$
+
+sum(3^-i,i,1,inf),simpsum;
+1/2$
+
+(kill(x), assume(abs(x)-1 < 0));
+[abs(x) < 1];
+
+sum(x^k,k,0,inf),simpsum;
+1/(1-x)$
+
+(forget(abs(x) - 1 < 0),0);
+0$
+
+/*--- A few challenging sums ----*/
+
+(assume (n >= 1), sum (if k <= n then a else b, k, 1, n));
+a * n$
+
+(declare(nn,integer), sum(sin(%pi * k),k,0,nn));
+0$
+
+sum(sin(x),x,1/2,1/2 + nn);
+'sum(sin(x),x,1/2,1/2 + nn);
+
+remove (nn, integer);
+done;
+
+(assume_pos: assume_pos_save, apply (forget, facts ()), 0);
+0;
+
+nusum ((n - 1)*(n - 1)!, n, 1, n);
+n! - 1;
+
+nusum (n!, n, 1, n);
+'sum (n!, n, 1, n);
+
+nusum ((2*m)!/(m!*(m + 1)!), m, 0, n);
+'sum ((2*m)!/(m!*(m + 1)!), m, 0, n);
+
+
+/*--- A test for sumcontract ---*/
+
+sumcontract(sum(k,k,1,n) + sum(k^2, k, 1, n));
+sum(k^2+k,k,1,n);
+
+/* Bug ID: 2770575 - rtestsum test 226
+ * This test simplifies correctly after revision 1.12 of sumcon.lisp.
+ */
+sumcontract(sum(k, k, 1, n) + sum(k, k, 1, n+1));
+n+2*sum(k,k,1,n)+1;
+
+/* Tests for bug report [ 1497706 ] sum(1/k^2,k,2,inf), simpsum; */
+
+/* sum (1/k^2, ...) not simplified unless specifically requested */
+(sum (1/k^2, k, 1, inf), [op (%%), args (%%)]);
+[''(nounify (sum)), [1/k^2, k, 1, inf]];
+
+sum (1/k^2, k, 1, inf), simpsum;
+%pi^2/6;
+
+/* this is the case cited in the bug report */
+sum (1/k^2, k, 2, inf), simpsum;
+%pi^2/6 - 1;
+
+sum (1/k^2, k, 1, 9);
+9778141/6350400;
+
+sum (1/k^2, k, 10, inf), simpsum;
+%pi^2/6 - 9778141/6350400;
+
+sum (1/k^4, k, 1, 5);
+14001361/12960000;
+
+sum (1/k^4, k, 6, inf), simpsum;
+%pi^4/90 - 14001361/12960000;
+
+sum (1/k^7, k, 1, inf), simpsum;
+zeta (7);
+
+sum (1/k^7, k, 1, 3);
+282251/279936;
+
+sum (1/k^7, k, 4, inf), simpsum;
+zeta (7) - 282251/279936;
+
+/* Tests for bug report [ 1550985 ] niceindices
+ * Test the cases mentioned in the bug report & some others for good measure
+ */
+
+(reset (niceindicespref), 0);
+0;
+
+niceindices (sum (1/kk, kk, 1, n) - sum (1/ii, ii, 1, n));
+0;
+
+niceindices (sum (1/k, k, 1, n) - sum(1/i, i, 1, n));
+0;
+
+niceindices (sum (F(foo), foo, 1, inf));
+'sum (F(i), i, 1, inf);
+
+(niceindicespref : '[foo, bar, baz, quux], 0);
+0;
+
+niceindices (sum (1/kk, kk, 1, n) - sum (1/ii, ii, 1, n));
+0;
+
+niceindices (sum (1/k, k, 1, n) - sum(1/i, i, 1, n));
+0;
+
+niceindices (sum (F(foo), foo, 1, inf));
+'sum (F(foo), foo, 1, inf);
+
+niceindices (product (sum (product (sum (product (m*F(i) + cos(G(j))^k/sin(l), m, 1, n5), l, 1, n4), k, 1, n3), j, 1, n2), i, 1, n1));
+'product ('sum ('product ('sum ('product (foo*F(foo0) + cos(G(quux))^baz/sin(bar), foo, 1, n5), bar, 1, n4), baz, 1, n3), quux, 1, n2), foo0, 1, n1);
+
+niceindices (sum (sum (foo/foo0, foo, 1, n), foo0, 1, m));
+('sum (1/foo, foo, 1, m)) * 'sum (foo, foo, 1, n);
+
+niceindices (sum (sum (1/(foo + foo0), foo, 1, n), foo0, 1, m));
+'sum ('sum (1/(foo + bar), foo, 1, n), bar, 1, m);
+
+(reset (niceindicespref), 0);
+0;
+
+/* Test for bug report [ 1552710 ] product(sum(f(i),i,1,inf),j,1,inf) => inf (wrong) */
+
+/* Since sum(f(i), i, 1, inf) is free of j, another result
+ * such as limit(sum(f(i), i, 1, inf)^n, n, inf) would be OK, too.
+ * In any event, inf (observed in the bug report) is not OK.
+ */
+(kill(f), block ([x : product (sum (f(i), i, 1, inf), j, 1, inf)], block ([simp : false], is (x = 'product ('sum (f(i), i, 1, inf), j, 1, inf)))));
+
+true;
+
+/* Test for bug reported by Amit Aronovitch to mailing list 2006/01/06
+ */
+
+(kill(f), f(x) := sum (x^n/n!, n, 0, inf), f(2*x));
+'sum (2^n*x^n/n!, n, 0, inf);
+
+
+/* Test for intosum */
+
+intosum(2*sum(k,k,1,inf));
+sum(2*k,k,1,inf);
+
+/* correct a bug in SUBST-IF-NOT-FREEOF (src/asum.lisp):
+ * array flag in CAR was lost before, but it's OK now
+ */
+(kill (a, i), x : a[i], sum (x, i, 1, 3));
+a[1] + a[2] + a[3];
+
+/* Restore treatment of definite summations as it was before summation
+ * revisions of December 2005: simplify definite summation to explicit
+ * sum only if simpsum is true.
+ */
+
+(kill (f), sum (f(i), i, 1, 3));
+f(1) + f(2) + f(3);
+
+'sum (f(i), i, 1, 3);
+'sum (f(i), i, 1, 3);
+
+'sum (f(i), i, 1, 3), simpsum;
+f(1) + f(2) + f(3);
+
+/* (analogous tests for product) */
+
+product (f(i), i, 1, 3);
+f(1)*f(2)*f(3);
+
+'product (f(i), i, 1, 3);
+'product (f(i), i, 1, 3);
+
+'product (f(i), i, 1, 3), simpproduct;
+f(1)*f(2)*f(3);
+
+/* Differentiate wrt a subscripted symbol in a summation.
+ * Should work the same as for an ordinary symbol.
+ */
+(kill (x, a, a1), 0);
+0;
+
+diff ('sum (sin (a1 * x[i]), i, 1, n), a1);
+'sum (x[i] * cos (a1 * x[i]), i, 1, n);
+
+diff ('sum (x[i]^a1, i, 1, n), a1);
+'sum (x[i]^a1 * log(x[i]), i, 1, n);
+
+diff ('sum (sin (a[1] * x[i]), i, 1, n), a[1]);
+'sum (x[i] * cos (a[1] * x[i]), i, 1, n);
+
+diff ('sum (x[i]^a[1], i, 1, n), a[1]);
+'sum (x[i]^a[1] * log(x[i]), i, 1, n);
+
+/* Feature request 1848704: no way to convert log(product(...)) to sum(log(...)...)
+ */
+
+(kill (u, a, x, T), 0);
+0;
+
+log (product (u[k], k, 1, n));
+log (product (u[k], k, 1, n));
+
+log (product (u[k], k, 1, n)), logexpand=true;
+log (product (u[k], k, 1, n));
+
+log (product (u[k], k, 1, n)), logexpand=all;sum (log (u[k]), k, 1, n);
+
+log (product (u[k], k, 1, n)), logexpand=super;
+sum (log (u[k]), k, 1, n);
+
+log (product (a*%e^x(i), i, 1, T));
+log (product (a*%e^x(i), i, 1, T));
+
+log (product (a*%e^x(i), i, 1, T)), logexpand=all;
+/* Yields sum(const + ...) instead of const*T + sum(...)
+ * since sum is not known to be linear by default.
+ * Change this result if default ever changes.
+ */
+sum (log(a) + x(i), i, 1, T);
+
+/* bug reported to mailing list 2008-04-17:
+ * simpsum causes two evaluations of summand, should be only one
+ */
+(bar (x, y) := sum (F (i, x, y), i, 1, n),
+ ev (bar (y, x), simpsum=false));
+'sum (F (i, y, x), i, 1, n);
+
+ev (bar (y, x), simpsum=true);
+'sum (F (i, y, x), i, 1, n);
+
+/* original problem */
+
+(kill (all),
+ geom(x,m,n):= (x^m-x^(n+1))/(1-x),
+ B(s,sp):=-phi[1](s)*phi[1](s+sp)*phi[0](s+sp)/(1-phi[1](s+sp)*phi[0](s +sp))
+ +(1-phi[1](s))*sum((phi[1](s)*phi[0](s))^n*(
+     geom( (phi[0](s+sp)*phi[1](s+sp))/(phi[0](s)*phi[1](s)), 1, n-1 )
+     -phi[1](s+sp)/phi[1](s)
+     *geom((phi[0](s+sp)*phi[1](s+sp))/(phi[0](s)*phi[1](s)), 0, n-1))
+   , n , 1, inf ),
+ A(s):=phi[1](s)*(1+phi[0](s))/(1-phi[1](s)*phi[0](s)),
+ C(s,sp):=A(s+sp)+B(s,sp)+B(sp,s),
+ 0);
+0;
+
+(expr_1 : ev (C (s, sp), simpsum=false),
+ expr_2 : ev (C (s, sp), simpsum=true),
+ is (expr_1 = expr_2));
+true;
+
+(expr_1 : ev (C (sp, s), simpsum=false),
+ expr_2 : ev (C (sp, s), simpsum=true),
+ is (expr_1 = expr_2));
+true;
+
+is (sublis ([s=sp, sp=s], C (s, sp)) = C (s, sp)), simpsum;
+true;
+
+is (sublis ([s=sp, sp=s], C (sp, s)) = C (sp, s)), simpsum;
+true;
+
+is (C (sp, s) = C (s, sp)), simpsum;
+true;
+
+/* Tests for fbino in combin.lisp */
+sum(binomial(2*n-k,k), k, 0, n), simpsum;
+fib(2*n+1);
+
+sum(binomial(n-k,k), k, 1, n), simpsum;
+fib(n+1)-1;
+
+(assume(n>1), 0);
+0;
+
+sum(binomial(n-k,k+1), k, 1, n-1), simpsum;
+fib(n+2)-n-1;
+
+sum(binomial(2*n,2*k), k, 0, n), simpsum;
+2^(2*n-1);
+
+sum(binomial(n,2*k+1), k, 0, n), simpsum;
+2^(n-1);
+
+sum(binomial(n,2*k), k, 0, n), simpsum;
+2^(n-1);
+
+sum(binomial(n,2*k), k, 1, n), simpsum;
+2^(n-1)-1;
+
+sum(binomial(n+1,k), k, 1, n), simpsum;
+2^(n+1)-2;
+
+sum(binomial(n,k), k, -1, n+1), simpsum;
+2^n;
+
+sum(binomial(t+i,t),i,0,k), simpsum;
+binomial(t+k+1,t+1);
+
+/* Because of revision 1.43 of csimp2.lisp binomial(x,x) no longer simplifies
+ * automatically to 1. The sign must be known not be negative. 
+ * Therefore, we add a fact about the sign of t.
+ */ 
+(assume(t>0),done);
+done;
+sum(binomial(t+i,t),i,1,k), simpsum;
+binomial(t+k+1,t+1)-1;
+(forget(t>0),done);
+done;
+
+sum(binomial(t+i,i),i,0,k), simpsum;
+binomial(t+k+1,t+1);
+
+(forget(n>1), 0);
+0;
+
+/* bug in assume database causes trouble for conditional in summation
+ * see mailing list 2009-07-29 "Fourier Series using fourie.mac"
+ */
+
+/* If ever the assume stuff is revised, this next test can go away.
+ * It's here to ensure the underlying problem is fixed.
+ */
+?dcomp (1, 1.0);
+zero;
+
+(kill (all), assume (xx >= 1), 0);
+0;
+
+is (xx > 1);
+unknown;
+
+if xx > 1 then aa else bb;
+if xx > 1 then aa else bb;
+
+sum (if xx > 1 then aa else bb, xx, 1, 3);
+2*aa + bb;
+
+foo : 'sum (if xx > 1 then aa else bb, xx, 1, 3);
+'sum (if xx > 1 then aa else bb, xx, 1, 3);
+
+ev (foo, nouns);
+2*aa + bb;
+
+foo : sum (if equal (xx, 1) then aa else bb, xx, 1, nn);
+'sum (if equal (xx, 1) then aa else bb, xx, 1, nn);
+
+ev (foo, nouns, nn=3);
+aa + 2*bb;

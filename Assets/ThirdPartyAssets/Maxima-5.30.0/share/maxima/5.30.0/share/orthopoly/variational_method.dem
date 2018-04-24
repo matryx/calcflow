@@ -1,0 +1,113 @@
+/* Use the variational method to estimate the eigenvalues of
+
+   -f'' + (x^2 + epsilon * x^4) * f = mu * f
+
+for epsilon near zero.  The hamiltonian is   
+*/
+
+ham (e)  := -diff(e, x, 2) + (x^2  + epsilon * x^4 ) * e;
+
+/*  Assume a trial solution psi that is a linear combination of n+1 even 
+order Hermite polynomials times a Gaussian function. We'll need to
+assign a value to n, load orthopoly, and assign psi.
+*/
+
+n : 3;
+
+if get('orthopoly,'version) = 'false then load("orthopoly")$
+
+psi : sum(c[2*k] * hermite(2*k,x) * exp(-x^2 / 2),k,0,n) / %pi^(1/4)$
+
+/*  The denominator %pi^(1/4) makes the computation easier. Let
+vars be a list of the unknown c's.  Although the c's really aren't
+positive, we'll set assume_pos to true; doing so prevents 
+Maxima from asking lots of questions about the signs of the
+c's.
+*/
+
+vars : makelist(c[ 2*i ],i,0,n)$
+
+assume_pos : true;
+
+/* Define the L2 inner product with the match fix operator
+<< , >>. Everything is  real, so we don't need a conjugate.
+*/
+
+matchfix("<<", ">>")$
+
+"<<" (f, g) := integrate(expand (f * g), x,-inf, inf)$
+
+/*  Minimize << psi, ham(psi) >> subject to the constraint 
+<< psi, psi >> =1; let mu be the Lagrange multiplier.
+*/
+
+min_this : << psi, ham(psi) >> - mu * << psi, psi >>;
+
+eqs : makelist(diff(min_this,vars[ i ]),i,1,n+1)$
+
+/* The equations are linear and homogeneous in the c's.  Demand
+that the coefficient matrix is singular.
+*/
+m_det : determinant(coefmatrix(eqs, vars))$
+m_det : ratsimp(m_det)$
+
+/* Solve for mu as power series in epsilon.  Thus assume
+mu = cf[ 0] + cf[1] * epsilon + ... + cf[solve_ord] epsilon^solve_ord.
+*/
+
+solve_ord : 3;
+pows : makelist(epsilon^i,i,0,solve_ord)$
+unks : makelist(cf[ i ],i,0,solve_ord)$
+eq : ev(m_det, mu = unks . pows)$
+eq : taylor(eq, epsilon, 0, solve_ord)$
+eq : expand(eq)$
+eq : makelist(coeff(eq,epsilon,i),i,0,solve_ord)$
+ans : algsys(eq, unks)$
+
+for i : 1 thru length(ans) do (
+       ans[ i ] : map(rhs, ans[ i ]) . pows)$
+
+ans : reverse(ans);
+
+/* Look at the solution graphically.*/
+
+plot2d(ans, [epsilon,0,0.25]);
+
+/*  Let's solve the equations using allroots instead of the series method. */
+
+f(x,k) := part(sort(map('rhs, allroots(subst('epsilon=x,m_det)))),k);
+
+/* Compare the allroots solution to the series solution. */
+
+plot2d([ans[1], '(f(epsilon,1))], [epsilon,0.0,0.4]);
+plot2d([ans[2], '(f(epsilon,2))], [epsilon,0.0,0.4]);
+plot2d([ans[3], '(f(epsilon,3))], [epsilon,0.0,0.4]);
+plot2d([ans[4], '(f(epsilon,4))], [epsilon,0.0,0.4]);
+
+plot2d(['(f(epsilon,1)),'(f(epsilon,2)),'(f(epsilon,3)),'(f(epsilon,4))],[epsilon,0,0.4]);
+
+remfunction(ham,"<<",f);
+remvalue(n,psi,vars,min_this,eqs,m_det,solve_ord,pows,unks,eq,ans);
+assume_pos : false;
+
+
+/* Let's apply a variational method to the potential x^2 / 2 + x^4. We'll assume
+a trial wavefuction of the form qo * exp(-%alpha * abs(x)^(2*n) / 2) where the
+parameters are %alpha and n. See "Post-Gaussian variational method for quantum anharmonic
+oscillator," by Akihiro Ogura." */
+
+kill(all)$
+assume(qo > 0, %alpha > 0, n > 1/2)$
+f : qo * exp(-%alpha * abs(x)^(2*n) / 2);
+1 = integrate(f^2,x,minf,inf);
+solve(%,qo);
+f : subst(second(%), f);
+v : x^2 / 2 + x^4$
+ham(f) := -diff(f,x,2) / 2 + v * f$
+energy : integrate(f * ham(f),x,minf,inf);
+eqs : [diff(energy,n), diff(energy,%alpha)]$
+load(mnewton)$
+newtonepsilon : 1.0e-15$
+sol : mnewton(eqs,[n,%alpha],[1.1, 2.0]);
+subst(sol, energy);
+

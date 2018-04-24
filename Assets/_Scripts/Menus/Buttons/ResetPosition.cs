@@ -33,7 +33,9 @@ public class ResetPosition : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
+        print("resetting position");
         if (!ready) return;
+        print(" 1");
 
         if (SoundFXManager.instance != null)
             SoundFXManager.instance.PlayTeleportFX();

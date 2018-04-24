@@ -1,0 +1,510 @@
+eval_when([translate,batch,demo,load,loadfile],
+dv(a)::=buildq([a],define_variable(a,'a,any)),
+dvl(a)::=buildq([a],define_variable(a,[],list)),ttyoff:true)$
+
+/*  (c) Copyright 1981 Massachusetts Institute of Technology  */
+
+/* dynamalloc:true$ */
+define_variable(ieqnprint,true,boolean)$
+define_variable(techlist,'[first,all,vlfrnk,transform,collocate,
+		flfrnk2nd,tailor,fredseries,neumann,
+		flfrnk1st,abel,firstkindseries],list)$
+dv(tech)$
+dv(px)$
+dv(eqn)$
+dv(fx)$
+dv(uvar)$
+dv(xvar)$
+dv(kxu)$
+dv(ax)$
+dv(bx)$
+dv(iesoln)$
+dv(napprox)$
+dv(pxlist)$
+dv(eqnlist)$
+dv(inteqn)$
+dv(lowlim)$
+dv(pofx)$
+dv(iclist)$
+dvl(unklist)$
+dv(highlim)$
+dv(%c)$
+dv(eqno)$
+dvl(ueqnlist)$
+dv(x)$
+dv(xhat)$
+dv(opr)$
+dv(guesslist)$
+dv(guess)$
+
+ieqn([arglist]):=
+   if length(arglist)<2 then error("ieqn requires at least two arguments") else
+	ieqn1(arglist[1], arglist[2],
+		if length(arglist)>2 then arglist[3] else [],
+		if length(arglist)>3 then arglist[4] else [],
+		if length(arglist)>4 then arglist[5] else [])$
+
+opr(e):=if mapatom(e) then 'none else inpart(e,0)$
+arg(e):=inpart(e,1)$
+alias(exitfor, return)$
+
+/* identifies functions unknown to macsyma */
+unfun(e):=is(?getchar(e,1)='?\$)$
+
+/* ***** main program *****/
+ieqn1(eqnlist,pxlist,tech,napprox,guesslist):=
+   block([iesoln, xvar, uvar, ax, bx, kxu, fx, eqn, px, guess, system,
+	  inflag, dispflag, singsolve, solveradcan, keepfloat],
+	inflag:true, dispflag:false, system:false,
+	if not listp(eqnlist) then eqnlist:[eqnlist],
+	if not listp(pxlist) then pxlist:[pxlist],
+	if length(eqnlist)#length(pxlist) then
+	  error("number of equations # number of unknowns"),
+	for unk in pxlist do
+	  if mapatom(unk) or length(unk)#1 or not atom(xvar:arg(unk)) or
+	     numberp(xvar) then error(unk," improperly specified unknown"),
+	if tech=[] then myprint("default 3rd arg, technique: ",tech:'first) else
+	if not member(tech,techlist) then error(tech," invalid technique - see techlist"),
+	if napprox=[] then myprint("default 4th arg, number of iterations or coll. parms.: ",napprox:1) else
+	if not integerp(napprox) or napprox<=0 then error("napprox must be a pos. integer"),
+	if guesslist=[] then myprint("default 5th arg, initial guess: ",guesslist:'none),
+	if guesslist='none then guess:'none else
+	  (if not listp(guesslist) then guesslist:[guess:guesslist],
+	   if length(guesslist)#length(pxlist) then error("number of guesses # number of unknowns")),
+	singsolve:solveradcan:keepfloat:true, iesoln:[],
+	eqnlist:maplist(lambda([eqn],num(ratsimp(lhs(eqn)-rhs(eqn)))),eqnlist),
+	if length(pxlist)=1 then (px:first(pxlist), eqn:first(eqnlist))
+	  else system:true,
+	if not system then
+	   (try('vlfrnk), if tech='done then return(reverse(iesoln))),
+	try('transform),
+	if tech='done then return(reverse(iesoln)),
+	for eqnlist in solvesys(eqnlist,pxlist) do
+	   (try('flfrnk2nd), try('tailor),
+	   if not system then try('fredseries), try('neumann)),
+	if not system and firstkind() then
+	   (try('flfrnk1st), try('abel), try('firstkindseries)),
+	try('collocate), return(reverse(iesoln)))$
+
+/* invokes solution method catching and containing errors.  globals: tech */
+try(routine):=if member(tech,['all, 'first, routine]) then
+	block([attempt], attempt:errcatch(catch(apply(routine,[]))),
+	  if attempt=[] then (?princ('? in\ ), ?princ(?stripdollar(routine)),
+		?terpri()) else
+	    if first(attempt) and tech='first then tech:'done)$
+
+
+/* test for 1st kind and extracts parts.
+  globals: eqn, kxu, uvar, xvar, ax, bx */
+firstkind():=block([integral, xpoints, consistent],
+	if not freeof(px,eqn) then return(false),
+	integral:catch(findint(eqn)),
+	if integral=false then return(false),
+	fx:mysolve(eqn,integral), if fx=[] then return(false),
+	fx:first(fx), uvar:inpart(integral,2),
+	kxu:lin(arg(integral), subst(uvar,xvar,px)),
+	if kxu=false then return(false),
+	ax:inpart(integral,3), bx:inpart(integral,4),
+	if kxu[2]#0 then fx:ratsimp(fx-myint(kxu[2],uvar,ax,bx)),
+	xpoints:mysolve(ax-bx,xvar), kxu:kxu[1],
+	if xpoints=[] then return(true) else consistent:false,
+	for xv in xpoints do
+	  if ratsubst(xv,xvar,fx)=0 then exitfor(consistent:true),
+	return(consistent))$
+
+/* returns first integral found in expr */
+findint(expr):=if not mapatom(expr) then
+		(if opr(expr)#'?%integrate then
+			(for i in expr do findint(i), false)
+		 else throw(expr))$
+
+/* globals: ieqnprint, iesoln */
+printsoln(soln,tech,order,kind):=block([dispflag, den],
+	dispflag:ieqnprint, if kind#[] then kind:[kind],
+	if order#[] then kind:cons(order,kind),
+	if not listp(soln) then soln:[soln],
+	soln:maplist(lambda([elmt], block([elem,den],
+	elem:ratsimp(elmt), den:denom(elem),
+	if numberp(den) and den#1 and opr(num(elem))="+" then
+	  multthru(elem) else elem)),soln),
+	if rest(soln)=[] then soln:first(soln),
+	iesoln:cons(?displine(cons(soln,cons(tech,kind))),iesoln),
+	return(true))$
+
+alias(myint, integrate)$
+
+myprint(msg1,msg2):=if ieqnprint then print(msg1,msg2)$
+
+/* if expr = a*var+b returns [a,b] else false */
+lin(expr,var):= block([lc],
+	lc:ratsimp(diff(expr,var)),
+	if freeof(var,lc) then [lc, ratsubst(0,var,expr)])$
+
+/* solves eqn for unk and returns a list of actual solution values */
+mysolve(eqn,unk):=block([result], result:[],
+	eqn:solve(eqn,unk), eqn:maplist('rhs, apply('ev,[eqn])),
+	for ans in eqn do
+	  if freeof(unk, ans) then result:cons(ans, result),
+	return(result))$
+
+/* similar to mysolve but for systems. */
+solvesys(eqns,unks):=
+	(eqns:solve(eqns,unks), eqns:apply('ev,[eqns]), maplist(lambda([el],
+	 if listp(el) then maplist('rhs,el) else [rhs(el)]), eqns))$
+
+/* if expr can be expressed as sum(f[i](x)*g[i](u),i,1,n) then
+  result is [[f1,g1],...[fn,gn]] else [].  globals: xvar  */
+sumfactors(expr,uvar):=block([other, rem],
+	expr:catch(frnk(expr)), if expr=false then return([]),
+	if freeof(uvar,expr) then return([[expr,1]]),
+	if freeof(xvar,expr) then return([[1,expr]]),
+	expr:expand(expr),
+	other:mypartition(expr,uvar), expr:mypartition(expr,xvar),
+	if other[1]<expr[1] then expr:other,
+	rem:if expr[3]=0 then [] else [[expr[3],1]],
+	if expr[4]#0 then rem:cons([1,expr[4]],rem),
+	if expr[2]#0 then for fc in expr[2] do rem:cons(partition(fc,uvar),rem),
+	return(rembox(rem)))$
+
+/* converts e to finiterank form if possible otherwise throws false.
+  globals: xvar, uvar  */
+frnk(e):=
+	if freeof(xvar,e) or freeof(uvar,e) then e else
+	block([op,ar,up], op:opr(e), ar:arg(e), 
+	  if member(op,["+","*"]) then return(map('frnk,e)),
+	  if op="^" then (up:inpart(e,2),
+	   if integerp(up) then
+		if up>0 then return(frnk(ar)^up) else throw(false),
+	   up:plussplit(expand(up)),
+	   if up#[] and freeof(uvar,xvar,ar) then
+	       return(box(ar^up[1])*box(ar^up[2])) else throw(false)),
+	  if member(opr(ar),["*","+"]) then (e:partition(ar,xvar),
+	    if not freeof(uvar,e[2]) then throw(false)),
+	  if op='?%log and opr(ar)="*" then log(e[1])+log(e[2]) else
+	  if opr(ar)="+" then
+	    if op='?%sin  then sin(e[1])*cos(e[2])+cos(e[1])*sin(e[2]) else
+	    if op='?%cos  then cos(e[1])*cos(e[2])-sin(e[1])*sin(e[2]) else
+	    if op='?%sinh then sinh(e[1])*cosh(e[2])+cosh(e[1])*sinh(e[2]) else
+	    if op='?%cosh then cosh(e[1])*cosh(e[2])+sinh(e[1])*sinh(e[2]) else
+	    throw(false) else
+	  throw(false))$
+
+/* if e=f(x)+g(u) returns [f(x),g(u)] else [].  globals: xvar, uvar */
+plussplit(e):=
+	if opr(e)="+" then (e:partition(e,uvar),
+	    if freeof(xvar,e[2]) then e else []) else
+	if freeof(uvar,e) then [e,0] else
+	if freeof(xvar,e) then [0,e] else []$
+
+/* solves exs for unks and substitutes in form */
+solveandsubst(exs,unks,form,tech):=block([soln,trial],
+	if (soln:solve(exs,unks))=[] then
+	  (print("for a ",tech," solution substitute in the expression:"),
+	   ldisp(form), apply('print,cons("the values of ",unks)),
+	   print("that make the following expressions simultaneously zero"),
+	   apply('ldisp,exs), return(false)),
+	for sol in apply('ev,[soln]) do (trial:apply('ev,[form,sol]),
+	  apply('printsoln,append([trial,tech],
+	    if tech='collocate then [napprox,testsoln(trial)] else [[],[]]))),
+	return(true))$
+
+/* tests solution for exactness.  globals: eqnlist, pxlist */
+testsoln(resultlist):=block([flag], apply('local,maplist('opr,pxlist)),
+	flag:[], maplist('define,pxlist,resultlist),
+	resultlist:apply('ev,[eqnlist,'integrate,'ratsimp]),
+	for val in resultlist do
+	  if val#0 then exitfor(flag:'approximate),
+	return(flag))$
+
+
+/* fout=h(x,u)+q(x)+r(u).  returns [n,h(x,u),q(x),r(u)] where
+  n is the rank of fout.  globals: xvar, uvar */
+mypartition(fout,var):=block([qx, ru, rem, con],
+	if opr(fout)#"+" or opr(fout:factorout(fout,var))#"+" then
+		return([1,[fout],0,0]),
+	rem:con:qx:ru:0,
+	for fc in fout do
+	  if freeof(uvar,fc) then
+		(if freeof(xvar,fc) then con:con+fc else qx:qx+fc) else
+	  if freeof(xvar,fc) then ru:ru+fc else rem:rem+fc,
+	fout:if rem=0 then 0 else
+	     if opr(rem)="+" then length(rem) else (rem:[rem], 1),
+	if qx#0 then (fout:fout+1, qx:qx+con, con:0),
+	if ru#0 then (fout:fout+1, ru:ru+con),
+	return([fout, rem, qx, ru]))$
+
+/* replaces all integrals and unknown functions in ex with zero  */
+zeroint(ex):=
+	if mapatom(ex) then ex else
+	if opr(ex)='?%integrate or unfun(opr(ex)) then 0 else
+	map('zeroint,ex)$
+
+/* ----------- the following functions apply to 1st or 2nd kind eqns */
+
+/* variable-limit finite-rank 1st or 2nd kind. reduction to ode.
+  globals: eqn, xvar, px */
+vlfrnk():=block([initial, lowlim, unklist, inteqn, pofx, kind,
+			firstkind, difflist, iclist],
+	pofx:px, initial:true, unklist:difflist:[], kind:'incomplete,
+	firstkind:is(freeof(px,eqn)), inteqn:vconvert(eqn), 
+	iclist:[xvar=lowlim],
+	for count thru length(unklist) do
+	  ( if firstkind then firstkind:false else
+	      (if initial then getics(), pofx:diff(pofx,xvar)),
+	    difflist:cons(inteqn,difflist), inteqn:diff(inteqn,xvar),
+	    if freeof('?%integrate, inteqn) then exitfor(false)),
+	apply('remove,[opr(px), 'atvalue]),
+	if not freeof('?%integrate, inteqn) then
+	  ( difflist:solve(difflist, unklist),
+	    if difflist=[] then throw(false),
+ inteqn:apply('ev,[inteqn,difflist])),
+	lowlim:derivdegree(inteqn,px,xvar), iclist:reverse(iclist),
+	if lowlim=0 then (iclist:[], lowlim:3,
+	  if (pofx:mysolve(inteqn,px))#[] then (inteqn:first(pofx), kind:[])),
+	if lowlim>2 or (pofx:ode2(inteqn,px,xvar))=false then
+	    return(printsoln(inteqn, 'vlfrnk, iclist, kind)),
+	pofx:ratsimp(pofx),
+	if initial and length(iclist)-1=lowlim and (inteqn:errcatch(
+	   apply(if lowlim=1 then 'ic1 else 'ic2, cons(pofx,iclist))))#[] then
+	     (pofx:first(inteqn), iclist:[]),
+	if opr(pofx)="=" and lhs(pofx)=px then (pofx:rhs(pofx), kind:[]),
+	if iclist=[] and kind#[] then iclist:0,
+	printsoln(pofx, 'vlfrnk, iclist, kind))$
+
+/* obtains initial conditions.
+   globals: inteqn, xvar, lowlim, pofx, iclist, initial */
+getics():=block([val, init],
+	val:at(inteqn, xvar=lowlim), init:at(pofx, xvar=lowlim),
+	init:mysolve(val, init), if init#[] then
+	  ( init:first(init), atvalue(pofx, xvar=lowlim, init),
+	    iclist:cons(pofx=init, iclist)) else initial:false)$
+
+
+/* converts integrands in fun to finiterank form. upper limit must
+be xvar and lower limit must be a constant.
+  globals: initial, lowlim, unklist, xvar */
+vconvert(fun):=
+	if mapatom(fun) then fun else
+	if opr(fun)#'?%integrate then map('vconvert, fun) else
+	if not freeof(xvar,inpart(fun,3)) or
+	   inpart(fun,4)#xvar then throw(false) else
+	block([intgr, newfun, int],
+		if lowlim='lowlim then lowlim:inpart(fun,3) else
+		if lowlim#inpart(fun,3) then initial:false,
+		intgr:sumfactors(arg(fun), inpart(fun,2)),
+		if intgr=[] then throw(false), newfun:0,
+		for term in intgr do
+		  (int:substinpart(term[2], fun, 1),
+		   if not member(int,unklist) then unklist:cons(int, unklist),
+		   newfun:newfun+term[1]*int),
+		return(newfun))$
+
+
+/* laplace transform.   globals: eqnlist, pxlist, xvar  */
+transform():=block([teqnlist, translist, %s, ps, flag],
+	ps:lambda([fun], laplace(fun, xvar, %s)), flag:false,
+	teqnlist:maplist('ps,eqnlist), translist:maplist('ps,pxlist),
+	for soln in solvesys(teqnlist,translist) do
+	 if freeof('?%integrate, '?%laplace, soln) then
+	   (soln:maplist(lambda([fun], ilt(fun,%s,xvar)), soln),
+	   ps:freeof('?%ilt, soln),
+	   printsoln(soln, 'transform, if ps then [] else 0, if ps then [] else 'incomplete),
+	   flag:flag or ps),
+	return(flag))$
+
+/* collocation.  globals: eqnlist, pxlist, napprox, xvar */
+collocate():=block([lowlim, highlim, unklist, %c, elist, form, incr, point,
+			name, listeqns, solnlist],
+	apply('local, cons('%c,maplist('opr,pxlist))), lowlim:'minf, 
+highlim:'inf,
+	map('getlimits, eqnlist), if highlim<=lowlim then throw(false),
+	solnlist:listeqns:unklist:[],
+	for unk in pxlist do
+	( name:opr(unk), form:approx(name,napprox,xvar),
+	  apply('define,[unk,form]), solnlist:cons(form,solnlist),
+	  for parm:0 thru napprox-1 do unklist:cons(%c[name,parm],unklist)),
+	elist:apply('ev,[eqnlist,'integrate,'expand]),
+	if not freeof('?%integrate,elist) then throw(false),
+	if freeof(xvar,elist) then listeqns:elist else (point:lowlim,
+	 incr:if napprox>1 then (highlim-lowlim)/(napprox-1) else 0,
+	 for i thru napprox do
+	   (listeqns:append(subst(point,xvar,elist),listeqns),
+	   point:point+incr)),
+	solveandsubst(listeqns,unklist,reverse(solnlist),'collocate))$
+
+/* obtains largest lower limit and least upper limit for collocation points
+	globals: lowlim, highlim */
+getlimits(expr):=
+	if not mapatom(expr) then
+	  if opr(expr)#'?%integrate then
+		for sub in expr do getlimits(sub) else
+	  block([low,high], low:inpart(expr,3), high:inpart(expr,4),
+		if not numberp(low) or not numberp(high) then throw(false),
+		lowlim:max(low,lowlim), highlim:min(high,highlim))$
+
+/* approximation function for unknown function fun(var)  */
+approx(fun,nparms,var):=sum(%c[fun,i-1]*var^(i-1),i,1,nparms)$
+
+/* ---- the following functions apply only to 2nd kind eqns */
+
+/*  fixed-limit, finite-rank, 2nd kind  globals:  eqnlist, pxlist  */
+flfrnk2nd():=block([frlist, unklist, ueqnlist, eqno, %c],
+	apply('local, cons('%c,maplist('opr, pxlist))),
+	unklist:ueqnlist:[], eqno:0,
+	frlist:maplist('fconvert, eqnlist),
+	maplist('define, pxlist, frlist),
+	ueqnlist:apply('ev,[ueqnlist,'integrate]),
+	solveandsubst(ueqnlist, unklist, frlist, 'flfrnk2nd))$
+
+/*  returns result of replacing all occurences of
+	'integrate(f(x,u),u,a,b) in fun with
+	sum(q[j](x)*%c[j],j,1,n) where %c[j] is 'integrate(r[j](u),u,a,b)
+	after expressing integrands in finite-rank form
+	(here f(x,u) becomes sum(q[j](x)*r[j](u),j,1,n).
+	globals: eqno (current number of subscripted unknowns %c),
+		 ueqnlist (list of equations relating %c's)
+		 unklist (list of all %c unknowns to be solved for)
+		 xvar (indepedent variable) */
+fconvert(fun):=
+	if mapatom(fun) then fun else
+	if opr(fun)#'?%integrate then map('fconvert, fun) else
+	if not freeof(xvar,inpart(fun,3)) or not freeof(xvar, inpart(fun,4))
+	 then throw(false) else
+	block([newfun, intgrnd],
+	  intgrnd:sumfactors(arg(fun), inpart(fun,2)),
+	  if intgrnd=[] then throw(false),  newfun:0,
+	  for term in intgrnd do
+		(eqno:eqno+1, newfun:newfun+%c[eqno]*term[1],
+		 ueqnlist:cons(%c[eqno]-substinpart(term[2],fun,1), ueqnlist),
+		 unklist:cons(%c[eqno], unklist)),
+	  return(newfun))$
+
+/*  taylor series. globals: eqnlist, pxlist, xvar, napprox  */
+tailor():=block([xhat, ufun, eqtn, tfun, neqns, vlist, order, value, fact],
+	apply('local,append([ufun,eqtn,tfun],maplist('opr,pxlist))),
+	map('getxhat, eqnlist), neqns:0, vlist:pxlist,
+	for expr in eqnlist do
+	( neqns:neqns+1, eqtn[neqns]:expr, ufun[neqns]:first(vlist),
+	  vlist:rest(vlist), tfun[neqns]:value:subst(xhat,xvar,expr),
+	  atvalue(ufun[neqns], xvar=xhat, value)),
+	fact:1, order:napprox,
+	for i thru napprox do
+	( fact:fact*i,
+	  for j thru neqns do
+	  ( value:errcatch(diff(eqtn[j],x)),
+	    if value=[] then exitfor(order:i-1),
+	    eqtn[j]:first(value), value:errcatch(ratsimp(at(eqtn[j],xvar=xhat))),
+	    if value=[] then exitfor(order:i-1),
+	    ufun[j]:diff(ufun[j],x), value:first(value),
+	    atvalue(ufun[j], xvar=xhat, value),
+	    tfun[j]:tfun[j]+value*(x-xhat)^i/fact),
+	  if order#napprox then exitfor(false)),
+	for i:neqns step -1 thru 1 do vlist:cons(tfun[i],vlist),
+	printsoln(vlist, 'tailor, order, testsoln(vlist)))$
+
+/* obtains expansion point for taylor series by solving b(x)=a(x).
+  globals: xvar, xhat */
+getxhat(expr):=
+	if mapatom(expr) then false else
+	if opr(expr)#'?%integrate then for sub in expr do getxhat(sub) else
+	if xhat='xhat then
+	  (xhat:mysolve(inpart(expr,3)-inpart(expr,4),xvar),
+	   if xhat=[] then throw(false) else xhat:first(xhat),
+	   if ratsubst(xhat, xvar, inpart(expr,3))#xhat then throw(false)) else
+	if subst(xhat,xvar,expr)#0 then throw(false)$
+
+/* fredholm-carleman series.   globals: napprox, kxu, ax, bx, fx, xvar, uvar */
+fredseries():=block([order, alpha, bta, top, bot, kind, tvar, eqtn, kxt],
+	eqtn:first(eqnlist),
+	alpha:catch(findint(eqtn)), if alpha=false then return(false),
+	uvar:inpart(alpha,2), bta:lin(eqtn,alpha),
+	if bta=false then return(false),
+	kxu:lin(arg(alpha),subst(uvar,xvar,px)),
+	if kxu=false then return(false),
+	ax:inpart(alpha,3), bx:inpart(alpha,4), fx:bta[2],
+	if kxu[2]#0 then fx:fx+myint(bta[1]*kxu[2],uvar,ax,bx),
+	kxu:kxu[1]*bta[1], order:napprox, kind:'approximate,
+	kxt:subst(tvar,uvar,kxu), bot:bta:1,
+	top:alpha:rat(kxu,uvar,xvar),
+	for i thru napprox do
+	( bta:-myint(ratsubst(uvar,xvar,alpha),uvar,ax,bx)/i,
+	  alpha:bta*kxu+myint(kxt*ratsubst(tvar,xvar,alpha),tvar,ax,bx),
+	  bot:bot+bta,
+	  if alpha=0 then exitfor(kind:[]),
+	  top:top+alpha),
+	kxt:fx+myint(subst(uvar,xvar,fx)*top,uvar,ax,bx)/ratdisrep(bot),
+	printsoln(kxt, 'fredseries, order, kind))$
+
+
+/* neumann series.   globals: eqnlist, pxlist, guesslist, napprox  */
+neumann():=block([order, newguess],
+	apply('local, maplist('opr,pxlist)), order:napprox,
+	if guesslist='none then guesslist:maplist('zeroint, eqnlist),
+	for count thru napprox do
+	  (maplist('define, pxlist, guesslist),
+	   newguess:apply('ev,[eqnlist,'integrate]),
+	   if not freeof('?%integrate, newguess) then exitfor(order:count-1),
+	   guesslist:maplist('ratsimp,newguess)),
+	printsoln(guesslist, 'neumann, order, testsoln(guesslist)))$
+
+
+
+/* ---- the following functions apply only to 1st kind eqns */
+
+/* fixed-limit finite-rank 1st kind.  globals: kxu, fx, uvar, xvar, ax, bx */
+flfrnk1st():=block([sf, cnt, intg, form, %c, unklist, eqlist,res],
+	
+	local(%c), cnt:form:0, unklist:[],
+	if not freeof(xvar,[ax,bx]) then return(false),
+	intg:sumfactors(kxu,uvar),
+	for term in intg do
+	  (cnt:cnt+1, form:form+term[2]*%c[cnt],
+	   unklist:cons(%c[cnt],unklist)),
+	eqlist:[],
+	sf:num(ratsimp(myint(kxu*form,uvar,ax,bx)-fx,xvar)),
+	res:0, if opr(sf)#"+" then sf:[sf],
+	for term in sf do
+	  if opr(term)="*" then
+	    (intg:partition(term,xvar),
+	     if intg[2]=1 then res:res+term else eqlist:cons(intg[1],eqlist))
+	  else if freeof(xvar,term) then res:res+term else error("error 1"),
+	if res#0 then eqlist:cons(res,eqlist),
+	if length(eqlist)#cnt then error("error 2"),
+	solveandsubst(eqlist, unklist, subst(xvar,uvar,form), 'flfrnk1st))$
+
+/* some=one*peace+two, where peace could be a product. */
+mydivide(some,peace,var):=block([res, one, two],
+	one:two:0, if opr(some)#"+" then some:[some],
+	for prt in some do
+	  (res:quotient(prt,peace),
+	   if res#0 and freeof(var,res) then one:one+res else two:two+prt),
+	return([one,two]))$
+
+
+/* generalized abel method.  globals: kxu, ax, bx, fx, xvar, uvar */
+abel():=block([power,den,fun],
+	if not freeof(xvar,ax) or bx#xvar or opr(kxu)#"^" then throw(false),
+	power:-inpart(kxu,2), den:inpart(kxu,1),
+	if not freeof(uvar, power) or opr(den)#"+" then throw(false),
+	fun:partition(den,uvar),
+	if not freeof(xvar, fun[2]) or
+	   ratsimp(subst(uvar,xvar,fun[1])+fun[2])#0 then throw(false),
+	if sign(power)#'pos or sign(power-1)#'neg then throw(false),
+	fun:myint(diff(-fun[2],uvar)*subst(uvar,xvar,fx)*den^(power-1),uvar,ax,bx),
+	fun:sin(%pi*power)/%pi*diff(fun,xvar),
+	printsoln(fun, 'abel, [], []))$
+
+
+/* firstkindseries.  globals: px, napprox, guess, eqn, px  */
+firstkindseries():=block([kind, order, correction, trial],
+	apply('local,[opr(px)]), kind:'approximate, order:napprox,
+	trial:if guess='none then zeroint(eqn) else guess,
+	for i thru napprox do
+	  (apply('define,[px, trial]), correction:apply('ev,[eqn,'integrate]),
+	   if not freeof('?%integrate, correction) then exitfor(order:i-1),
+	   if (correction:ratsimp(correction))=0 then exitfor(kind:[]),
+	   trial:ratsimp(trial-correction)),
+	printsoln(trial, 'firstkindseries, order, kind))$
+
+/* kill(labels)$ */
+ttyoff:false$

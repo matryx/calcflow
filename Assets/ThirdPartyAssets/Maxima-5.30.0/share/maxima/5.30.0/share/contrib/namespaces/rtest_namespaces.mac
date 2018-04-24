@@ -1,0 +1,267 @@
+kill(all);
+done;
+
+(if maxima = 'maxima then load (namespaces), 0);
+0;
+
+maxima;
+''(?find\-package ("MAXIMA"));
+
+load_namespace (foo);
+true;
+
+foo;
+''(?find\-package ("$FOO"));
+
+namespaces;
+'[foo];
+
+symbols (foo);
+[foo|a, foo|f, foo|g, foo|hh, foo|my_constant, foo|n, foo|x, foo|z];
+
+external_symbols (foo);
+[foo|f, foo|g];
+
+functions;
+[foo|f(foo|x), foo|g(foo|n), foo|hh(foo|z)];
+
+values;
+[foo|my_constant];
+
+foo|my_constant;
+1729;
+
+string ('foo|my_constant);
+"foo|my_constant";
+
+('foo|my_constant, ev (%%));
+1729;
+
+(my_constant : 1729, [is (my_constant = foo|my_constant), is ('my_constant = 'foo|my_constant)]);
+[true, false];
+
+(my_constant : 1 - %pi, is (my_constant = foo|my_constant));
+false;
+
+(hh(x) := (1/2) * x^2, 0);
+0;
+
+import (foo);
+[[foo|f, foo|g]];
+
+map (fundef, [f, g, hh, foo|hh]);
+[foo|f(foo|x) := foo|my_constant*sin(foo|x),
+ foo|g(foo|n) := expand ((foo|f(foo|a) + foo|n!)^foo|n),
+ hh(x) := 1/2*x^2,
+ foo|hh(foo|z) := foo|f(foo|z) - foo|g(2)];
+
+f(%pi/4);
+1729/sqrt(2);
+
+g(3);
+5168743489*sin(foo|a)^3 + 53809938*sin(foo|a)^2 + 186732*sin(foo|a) + 216;
+
+hh(u - v);
+(u - v)^2/2;
+
+foo|hh(u - v);
+-1729*sin(v - u) - 2989441*sin(foo|a)^2 - 6916*sin(foo|a) - 4;
+
+kill (foo|hh);
+done;
+
+foo|hh(u - v);
+'(foo|hh(u - v));
+
+hh(u - v);
+(u - v)^2/2;
+
+in_namespace (aa);
+''(?find\-package ("$AA"));
+
+x_aa : y_aa + z_aa;
+y_aa + z_aa;
+
+(f_aa (p, q) := (q - p)/x_aa, 0);
+0;
+
+my_constant;
+'my_constant;
+
+maxima|my_constant;
+1 - maxima|%pi;
+
+maxima|my_constant, numer;
+- 2.141592653589793;
+
+maxima|foo|my_constant;
+1729;
+
+in_namespace (bb);
+''(?find\-package ("$BB"));
+
+x_bb : sin(y_bb);
+sin(y_bb);
+
+(f_bb (r) := exp(r) - 1, [lhs (%%), rhs (%%)]);
+[f_bb(r), maxima|exp(r) - 1];
+
+in_namespace (cc);
+''(?find\-package ("$CC"));
+
+x_cc : maxima|foo|my_constant - maxima|my_constant;
+%pi + 1728;
+
+x_cc, numer;
+1731.14159265359;
+
+(f_cc (s, t) := x_cc * s / t, [lhs (%%), rhs (%%)]);
+[f_cc(s, t), x_cc * s / t];
+
+in_namespace (maxima);
+''(?find\-package ("MAXIMA"));
+
+in_namespace ();
+''(?find\-package ("MAXIMA"));
+
+aa|bb|cc|f_cc (aa|x_aa, aa|bb|x_bb);
+(%pi + 1728)*(aa|z_aa + aa|y_aa)/sin(aa|bb|y_bb);
+
+in_namespace (xx);
+''(?find\-package ("$XX"));
+
+in_namespace (yy);
+''(?find\-package ("$YY"));
+
+in_namespace (zz);
+''(?find\-package ("$ZZ"));
+
+(abc : 7654,
+ fgh (xyz) := xyz^abc,
+ pqr : fgh (uvw));
+uvw^7654;
+
+export (abc, fgh);
+[true, true];
+
+in_namespace ();
+''(?find\-package ("$ZZ"));
+
+in_namespace (maxima);
+''(?find\-package ("MAXIMA"));
+
+[xx, xx|yy, xx|yy|zz];
+''([?find\-package ("$XX"), ?find\-package ("$YY"), ?find\-package ("$ZZ")]);
+
+[xx|yy|zz|abc, xx|yy|zz|pqr];
+[7654, xx|yy|zz|uvw^7654];
+
+(fundef (xx|yy|zz|fgh), [lhs (%%), rhs (%%)]);
+[xx|yy|zz|fgh (xx|yy|zz|xyz), xx|yy|zz|xyz^xx|yy|zz|abc];
+
+in_namespace (maxima|xx|yy|zz);
+''(?find\-package ("$ZZ"));
+
+abc;
+7654;
+
+in_namespace (maxima|xx|yy);
+''(?find\-package ("$YY"));
+
+zz|abc;
+7654;
+
+in_namespace (maxima|xx);
+''(?find\-package ("$XX"));
+
+yy|zz|abc;
+7654;
+
+namespaces;
+[maxima|foo, maxima|aa, maxima|aa|bb, maxima|aa|bb|cc, maxima|xx, maxima|xx|yy, maxima|xx|yy|zz];
+
+in_namespace (maxima);
+''(?find\-package ("MAXIMA"));
+
+namespaces;
+[foo, aa, aa|bb, aa|bb|cc, xx, xx|yy, xx|yy|zz];
+
+import (xx|yy|zz);
+[[xx|yy|zz|abc, xx|yy|zz|fgh]];
+
+abc;
+7654;
+
+fgh;
+xx|yy|zz|fgh;
+
+/* verify that keywords are recognized */
+
+in_namespace (maxima|xx|yy);
+''(?find\-package ("$YY"));
+
+if true then 1 elseif false then -1 else 0;
+1;
+
+if false then 1 elseif true then -1 else 0;
+-1;
+
+for x in [1, 2, 3] do x;
+done;
+
+for i:1 thru 10 do i;
+done;
+
+/* verify that operators are recognized */
+
+6 + 3;
+9;
+
+6 - 2;
+4;
+
+3!;
+6;
+
+2^3;
+8;
+
+2*5;
+10;
+
+10/2;
+5;
+
+true and false;
+false;
+
+false or true;
+true;
+
+not false;
+true;
+
+is (1 > 0);
+true;
+
+is (1 = 0);
+false;
+
+is (1 # 0);
+true;
+
+is (equal (x, (x^2 + x)/(x + 1)));
+true;
+
+is (notequal (x, (x^2 + x)/(x + 1)));
+false;
+
+is (notequal (x, y));
+unknown;
+
+(defstruct (foo (a=1, b=2)), new (foo), [%%@a, %%@b]);
+[1, 2];
+
+in_namespace (maxima);
+''(?find\-package ("MAXIMA"));
+

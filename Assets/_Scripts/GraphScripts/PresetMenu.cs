@@ -27,13 +27,13 @@ public class PresetMenu : MonoBehaviour
     CalculatorManager calcManager;
     public static PresetMenu _instance;
 
-    [SerializeField]    
+    [SerializeField]
     private bool cinquefoilKnot, circle, sphereOutline, hypocloid, hypocloidSurface, trefoilKnot,
              turnip, wavySurface, highResSphere;
-    [SerializeField]    
-    private bool astroidalEllipse, bumpySphere, dinisSurface, figure8, graysSurface, knot, mobius, 
+    [SerializeField]
+    private bool astroidalEllipse, bumpySphere, dinisSurface, figure8, graysSurface, knot, mobius,
                  radialWave, torus;
-    [SerializeField]    
+    [SerializeField]
     private bool cone, cube, cylinder, sphere, tetrahedron;
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();

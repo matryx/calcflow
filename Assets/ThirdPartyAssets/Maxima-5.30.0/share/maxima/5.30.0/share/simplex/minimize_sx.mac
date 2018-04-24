@@ -1,0 +1,176 @@
+/*****************************************************************************
+ *                                                                           *
+ * ************************************************************************* *
+ * ***                                                                   *** *
+ * ***                         ~*~ SIMPLEX ~*~                           *** *
+ * ***                                                                   *** *
+ * ***               A simple implementation of the simplex              *** *
+ * ***             algorithm for Linear Programming for Maxima.          *** *
+ * ***                                                                   *** *
+ * ***   This file provides functions minimize_lp and maximize_lp. This  *** *
+ * ***   file is part of the simplex package for Maxima.                 *** *
+ * ***                                                                   *** *
+ * ***                                                                   *** *
+ * ***   Copyright:  Andrej Vodopivec <andrejv@users.sourceforge.net>    *** *
+ * ***   Version:    1.01                                                *** *
+ * ***   License:    GPL                                                 *** *
+ * ***                                                                   *** *
+ * ************************************************************************* *
+ *                                                                           *
+ * Demo                                                                      *
+ * =====                                                                     *
+ *                                                                           *
+ * 1) We want to minimize x with constraints y>=x-1, y>=-x-1, y<=x+1, y<=1-x *
+ *    and y=x/2                                                              *
+ *                                                                           *
+ * Solution:                                                                 *
+ *                                                                           *
+ * load("simplex");                                                          *
+ * minimize_lp(x, [y>=x-1, y>=-x-1, y<=x+1, y<=1-x, y=x/2]);                 *
+ * => [-3/2, [x=-2/3, y=-1/3]]                                               *
+ *                                                                           *
+ *                                                                           *
+ * 2) If any variable is known to be positive, you should add an optional    *
+ *    argument to minimize_lp/maximize_lp.                                   *
+ *    We want to maximize x+y subject to x>=0, y>=0, y<=-x/2+3, y<=-x+4.     *
+ *                                                                           *
+ * Solution:                                                                 *
+ *                                                                           *
+ * maximize_lp(x+y, [y<=-x/2+3, y<=-x+4], [x, y])                            *
+ * => [4, [x = 2, y = 2]]                                                    *
+ *                                                                           *
+ *****************************************************************************/
+
+define_variable(nonegative_lp,   false, boolean,
+               "Assume all variables are nonegative!")$
+define_variable(return_input_lp, false, boolean,
+               "Return the input to linear program, not solution!")$
+
+/*****************************************************************************
+ *                                                                           *
+ * The minimize_lp function.                                                 *
+ *                                                                           *
+ *****************************************************************************/
+
+minimize_lp(target, constraints, [pozitive]) := block(
+  [var : [], A, b, c, inequalities:0, count, eq, t:expand(target), sol, s,
+   nonpozitive : 0, j, tmpvar, keepfloat:true],
+
+/*******************************************************************
+ * Get the list of variables                                       *
+ *******************************************************************/
+
+  for e in constraints do (
+    tmpvar : listofvars(e),
+    for v in tmpvar do
+      if not(member(v, var)) then var : cons(v, var),
+    if op(e)#"=" then inequalities : inequalities+1
+  ),
+
+  if length(pozitive)>0 then (
+    if listp(pozitive[1]) then pozitive : pozitive[1]
+    else if pozitive[1]='all then pozitive : copylist(var)
+  )
+  else if nonegative_lp=true then
+    pozitive : copylist(var),
+
+  for v in var do
+    if not(member(v,pozitive)) then nonpozitive : nonpozitive+1,
+
+/*******************************************************************
+ * Setup A and b for linear program                                *
+ *******************************************************************/
+ 
+  b : makelist(0, i, 1, length(constraints)),
+  A : zeromatrix(length(constraints), length(var)+nonpozitive+inequalities),
+  count : 0,
+  for i:1 thru length(constraints) do (
+    eq : expand(part(constraints[i],1)-part(constraints[i],2)),
+    j : 1,
+    for v in var do (
+      A[i,j] : ratcoeff(eq, v),
+      if not(floatp_sx(A[i,j])) then
+        error("Error: constraint not linear (1)."),
+      eq : eq-A[i,j]*v,
+      j : j+1,
+      if not(member(v,pozitive)) then (
+        A[i,j] : -A[i,j-1],
+        j : j+1
+      )
+    ),
+    if op(constraints[i])="<=" or op(constraints[i])="<" then (
+      count : count+1,
+      A[i, length(var)+nonpozitive+count] : 1
+    )
+    else if op(constraints[i])=">=" or op(constraints[i])=">" then (
+      count : count+1,
+      A[i, length(var)+nonpozitive+count] : -1
+    )
+    else if op(constraints[i])#"=" then
+      error("Error: not a proper constraint:", constraints[i]),
+    b[i] : -eq,
+    if not(floatp_sx(b[i])) then
+      error("Error: constraint not linear (2).")
+  ),
+  
+/*******************************************************************
+ * Setup c for linear program                                      *
+ *******************************************************************/
+ 
+  c : makelist(0, i, 1, length(var)+nonpozitive+count),
+  j : 1,
+  for v in var do (
+    c[j] : ratcoeff(t, v),
+    if not(floatp_sx(c[j])) then
+      error("Error: cost funtion not linear."),
+    t : t-c[j]*v,
+    j : j+1,
+    if not(member(v,pozitive)) then (
+      c[j] : -c[j-1],
+      j : j+1
+    )
+  ),
+
+  if not(floatp_sx(t)) then
+    error("Error: cost funtion not linear in constrained variables."),
+
+  if return_input_lp then return([A, b, c]),
+
+/*******************************************************************
+ * Solve the linear program                                        *
+ *******************************************************************/
+
+  sol : linear_program(A, b, c),
+  
+  if not(listp(sol)) then sol
+  else (
+    if sol[2]=-inf then [-inf, []]
+    else (
+      s : [],
+      j : 1,
+      for v in var do (
+        if member(v,pozitive) then (
+          s : append(s, [v=sol[1][j]]),
+          j : j+1
+        )
+        else (
+          s : append(s, [v=sol[1][j]-sol[1][j+1]]),
+          j : j+2
+        )
+      ),
+      [sol[2]+t, s]
+    )
+  )
+)$
+
+floatp_sx(x) := block(
+  [xx],
+  xx : ev(float(x), numer),
+  floatnump(xx)
+)$
+
+maximize_lp(target, constraints, [pozitive]) := block(
+  [sol : apply(minimize_lp, append([-target], [constraints], pozitive))],
+  if not(listp(sol)) then sol
+  else [-sol[1], sol[2]]
+)$

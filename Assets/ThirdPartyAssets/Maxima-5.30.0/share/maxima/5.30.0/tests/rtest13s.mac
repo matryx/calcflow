@@ -1,0 +1,58 @@
+/*************** -*- Mode: MACSYMA; Package: MAXIMA -*-  ******************/
+/***************************************************************************
+***                                                                    *****
+***     Copyright (c) 1984 by William Schelter,University of Texas     *****
+***     All rights reserved                                            *****
+***************************************************************************/
+
+infix("|");
+"|"$
+
+exp1:{x | x > 0};
+set(x | x > 0)$
+
+exp2:{x | x < 2};
+set(x | x < 2)$
+
+infix("ou");
+"ou"$
+
+infix("oi");
+"oi"$
+
+exp1 ou exp2;
+set(x | x > 0) ou set(x | x < 2)$
+
+exp1 ou exp2;
+set(x | x > 0) ou set(x | x < 2)$
+
+exp1:{1,2,3};
+set(1,2,3)$
+
+{3,4,5};
+set(3,4,5)$
+
+exp1 ou exp1 ou %;
+set(1,2,3) ou set(1,2,3) ou set(3,4,5)$
+
+infix("ou",100,100);
+"ou"$
+
+exp2:infix("oi",120,120);
+"oi"$
+
+exp1 ou exp1 ou {7};
+set(1,2,3) ou set(1,2,3) ou set(7)$
+
+/* Make sure we didn't make the uppercase versions also operators */
+x + OU;
+x + OU$
+x + OI;
+x + OI$
+/*kill("ou");*/
+remove("ou",operator);
+done$
+foo(ou);
+foo(ou);
+
+

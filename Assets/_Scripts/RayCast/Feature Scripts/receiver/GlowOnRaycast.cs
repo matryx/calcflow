@@ -68,7 +68,7 @@ public class GlowOnRaycast : MonoBehaviour
         }
     }
 
-    public void RecursiveChangeLayer(Transform transform, int toLayer)
+    public virtual void RecursiveChangeLayer(Transform transform, int toLayer)
     {
             transform.gameObject.layer = toLayer;
 

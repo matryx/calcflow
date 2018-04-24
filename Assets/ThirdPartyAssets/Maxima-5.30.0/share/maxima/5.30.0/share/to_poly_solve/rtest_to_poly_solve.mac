@@ -1,0 +1,1218 @@
+(kill(all), %start : absolute_real_time(),algexact : true, load("to_poly_solve"),0);
+0$
+
+/* equation and variable coercion */
+
+to_poly_solve(x = 0, x);
+%union([x=0])$
+
+to_poly_solve(x, x);
+%union([x=0])$
+
+to_poly_solve(x = 0, [x]);
+%union([x=0])$
+
+to_poly_solve(x = %i, [x]);
+%union([x=%i])$
+
+to_poly_solve([x = %i], [x]);
+%union([x=%i])$
+
+to_poly_solve([x[1]=%pi],[x[1]]);
+%union([x[1]=%pi])$
+
+to_poly_solve(set(x=1),x);
+%union([x=1])$
+
+to_poly_solve(set(x=1,y-2),set(x,y));
+%union([x=1, y=2])$
+
+to_poly_solve(set(x=1,y-2),set(x,y,x));
+%union([x=1, y=2])$
+
+/* absolute value */
+
+to_poly_solve(abs(x)=0,x);
+%union([x=0])$
+
+to_poly_solve(abs(x) = -1,x);
+%union()$
+
+to_poly_solve(abs(x) = 1,x);
+%union([x=-1] , [x = 1])$
+
+to_poly_solve(abs(x) = 42.1,x);
+%union([x= ''(rationalize(-42.1))] , [x = ''(rationalize(42.1))])$
+
+to_poly_solve(abs(x) = -42.1,x);
+%union()$
+
+to_poly_solve(abs(x) = 42.1b0,x);
+%union([x=''(rationalize(-42.1b0))] , [x = ''(rationalize(42.1b0))])$
+
+to_poly_solve(abs(x) = -42.1b0,x);
+%union()$
+
+to_poly_solve(abs(x) = a,x);
+%union(%if(isnonnegative_p(a),[x=-a],%union()),%if(isnonnegative_p(a),[x=a],%union()))$
+
+to_poly_solve(abs(1/5-abs(1/5-x)) = abs(1/5 - abs(1/5-sqrt(5))),x, simpfuncs = ['expand]);
+%union([x=2/5-sqrt(5)] , [x=sqrt(5)])$
+
+to_poly_solve(abs(x - 1) = 2, x);
+%union([x=-1] , [x=3])$
+
+to_poly_solve(abs(2*x + 5) = abs(x - 2), x);
+%union([x=-7] , [x=-1])$
+
+to_poly_solve(1 - abs(x) = max(-x - 2, x - 2), x);
+%union([x=-3/2] , [x = 3/2])$
+
+/* min and max */
+
+to_poly_solve(max(x,1) = 2,x);
+%union([x=2])$
+
+to_poly_solve(max(x,1) = 1/2,x);
+%union()$
+
+sol : to_poly_solve(max(x,1) = a,x);
+%union(%if(isnonnegative_p(a-1),[x=a],%union()))$
+
+subst(a=1/2, sol);
+%union()$
+
+subst(a=2, sol);
+%union([x=2])$
+
+to_poly_solve(min(x,1) = 2,x);
+%union()$
+
+to_poly_solve(min(x,1) = 1/2,x);
+%union([x=1/2])$
+
+sol : to_poly_solve(min(x,1) = a,x);
+%union(%if(isnonnegative_p(1-a),[x=a],%union()))$
+
+subst(a=1/2, sol);
+%union([x=1/2])$
+
+subst(a=2, sol);
+%union()$
+
+to_poly_solve(max(2 - x^2, x) = max(-x, x^3/9), x);
+%union([x=-1] , [x=3])$
+
+block([algexact : false], to_poly_solve(max(2 - x^2, x) = x^3/9, x));
+%union([x=-3] , [x=-1.55489417989418] , [x=3])$
+
+to_poly_solve(max(x,x^2)=1, x);
+%union([x=-1] , [x=1])$
+
+to_poly_solve(min(x,x^2)=1, x);
+%union([x=1])$
+
+to_poly_solve([max(x,y) = a, min(x,y) = b],[x,y]);
+%union(%if(isnonnegative_p(a-b),[x=a,y=b],%union()),%if(isnonnegative_p(a-b),[x=b,y=a],%union()))$
+
+to_poly_solve([max(x,1) + min(x,y) = 7, x-y=a],[x,y], simpfuncs = ['expand]);
+%union(%if(isnonnegative_p(-a-5) %and isnonnegative_p(a),[x=a+6,y=6],%union()),%if(isnonnegative_p(a/2+5/2) %and isnonnegative_p(a),[x=a/2+7/2,y=7/2-a/2],%union()),%if(isnonnegative_p(-a),[x=7/2,y=7/2-a],%union()))$
+
+/* algebraic */
+
+to_poly_solve(sqrt(x)=1+%i,x);
+%union([x=2*%i])$
+
+to_poly_solve(sqrt(x)=-1+%i,x);
+%union()$
+
+to_poly_solve(sqrt(x) = a,x);
+%union(%if((-%pi/2<parg(a))  %and  (parg(a)<=%pi/2),[x=a^2],%union()))$
+
+to_poly_solve(x^(1/3)=-1,x);
+%union()$
+
+to_poly_solve(x^(1/3)=1 + %i,x);
+%union([x=2*%i-2])$
+
+to_poly_solve(x^(1/3)=a,x);
+%union(%if((-%pi/3<parg(a))  %and  (parg(a)<=%pi/3),[x=a^3],%union()))$
+
+to_poly_solve(sqrt(x^2 + 1) = x - 2, x);
+%union()$
+
+to_poly_solve(x + sqrt(x) = 2, x);
+%union([x=1])$
+
+to_poly_solve(2*sqrt(x) + 3*x^(1/4) - 2 = 0, x);
+%union([x=1/16])$
+
+to_poly_solve(x = 1/sqrt(1 + x^2), x, simpfuncs = ['expand]);
+%union([x=sqrt(2)/sqrt(sqrt(5)+1)] , [x=-(sqrt(2)*%i)/sqrt(sqrt(5)-1)])$
+
+sol : to_poly_solve(sqrt(x) - sqrt(1-x) = a,x,simpfuncs = ['expand]);
+%union(%if((-%pi/2<parg(-sqrt(2-a^2)/2-a/2))  %and  (-%pi/2<parg(a/2-sqrt(2-a^2)/2))  %and  (parg(-sqrt(2-a^2)/2-a/2)<=%pi/2)  %and  (parg(a/2-sqrt(2-a^2)/2)<=%pi/2),[x=1/2-(a*sqrt(2-a^2))/2],%union()),%if((-%pi/2<parg(sqrt(2-a^2)/2-a/2))  %and  (-%pi/2<parg(sqrt(2-a^2)/2+a/2))  %and  (parg(sqrt(2-a^2)/2-a/2)<=%pi/2)  %and  (parg(sqrt(2-a^2)/2+a/2)<=%pi/2),[x=(a*sqrt(2-a^2))/2+1/2],%union()))$
+
+[subst(a=-10,sol), subst(a=-1,sol), subst(a=0,sol), subst(a=1,sol), subst(a=10,sol)];
+[%union(),%union([x=0]),%union([x=1/2]),%union([x=1]),%union()]$
+
+/* basic trig facts */
+
+nicedummies(to_poly_solve(cos(x)=0,x));
+%union([x=(2*%pi*%z0+%pi)/2])$
+
+nicedummies(to_poly_solve(sin(x)=0,x));
+%union([x=%pi*%z0])$
+
+nicedummies(to_poly_solve(cos(x)=1,x));
+%union([x=2*%pi*%z0])$
+
+nicedummies(to_poly_solve(sin(x)=1,x));
+%union([x=2*%pi*%z0+%pi/2])$
+
+nicedummies(to_poly_solve(sin(x)=1/2,x));
+%union([x=2*%pi*%z0+%pi/6],[x=2*%pi*%z1+(5*%pi)/6])$
+
+nicedummies(to_poly_solve(cos(x)=1/2,x));
+%union([x=2*%pi*%z0-%pi/3],[x=2*%pi*%z1+%pi/3])$
+
+nicedummies(to_poly_solve(sin(x) = cos(x), x, simpfuncs = ['expand]));
+%union([x = %pi*%z0+%pi/4])$
+
+nicedummies(to_poly_solve(tan(x) = 1, x, simpfuncs = ['expand]));
+%union([x=%pi*%z0+%pi/4])$
+
+nicedummies(to_poly_solve(tan(x) = 0,x));
+%union([x=%pi*%z0])$
+
+nicedummies(to_poly_solve(tan(x) = -1, x, simpfuncs = ['expand]));
+%union([x = %pi*%z0 - %pi/4])$
+
+(eq : [x +   y +   z =  6,  2*x +   y + 2*z = 10, x + 3*y +   z = 10], sol : to_poly_solve(eq,[x,y,z]),0);
+0$
+
+expand(subst(first(sol),eq));
+[6=6,10=10, 10=10]$
+
+/* identities */
+
+nicedummies(to_poly_solve(x=x,x));
+%union([x = %c0])$
+
+nicedummies(to_poly_solve(abs(x) = max(-x,x),x));
+%union([x = %r0])$
+
+nicedummies(to_poly_solve(x^2 - 1 = (x-1)*(x+1),x));
+%union([x = %c0])$
+ 
+nicedummies(to_poly_solve(cos(x)^2 + sin(x)^2 = 1,x));
+%union([x = %c0])$
+
+/* trig polynomials */
+
+nicedummies(to_poly_solve(sin(x) * cos(x) = sin(%pi/4) * cos(%pi/4),x, simpfuncs = ['expand]));
+%union([x=%pi*%z0+%pi/4])$
+
+nicedummies(to_poly_solve(sin(x)=sin(2),x));
+%union([x = 2*%pi*%z0+2],[x = 2*%pi*%z1-%pi-2])$
+
+/* actual regressions! */
+
+to_poly_solve(x=exp(9),x);
+%union([x = exp(9)])$
+
+nicedummies(to_poly_solve(sin(sqrt(x))=0,x));
+%union(%if((-%pi/2<parg(%z0)) %and (parg(%z0)<=%pi/2),[x=%pi^2*%z0^2],%union()))$
+
+nicedummies(to_poly_solve(sin(a*x)=1/2,x, simpfuncs = ['expand]));
+%union([x=(2*%pi*%z0)/a+(5*%pi)/(6*a)],[x=(2*%pi*%z1)/a+%pi/(6*a)])$
+
+block([domain : complex], (to_poly_solve(x^(1/3) = a^(1/3),x), subst(a=-1,%%)));
+%union([x=-1])$
+
+(to_poly_solve(x^(1/3) = a^(1/3),x), subst(a=1,%%));
+%union([x=1])$
+
+to_poly_solve(x^(1/3) = (-1)^(1/3),x);
+%union([x=-1])$
+
+(sol : to_poly_solve([abs(1-abs(x))=abs(1-abs(a))],[x]), 0);
+0$
+
+subst(a=7,sol);
+%union([x=-7] , [x=7])$
+
+subst(a=%i,sol);
+%union([x=-1] , [x=1])$
+
+(assume(abs(a)<1), to_poly_solve([abs(1-abs(x))=abs(1-abs(a))],[x]));
+%union([x=2-abs(a)] , [x=abs(a)-2] , [x=-abs(a)] , [x=abs(a)])$
+
+(forget(abs(a) < 1),0);
+0$
+
+to_poly_solve(x^(3/2)=(a)^(3/2),x, simpfuncs = ['expand]);
+%union([x=a] , [x=-(sqrt(3)*%i*a)/2-a/2] , [x=(sqrt(3)*%i*a)/2-a/2])$
+
+to_poly_solve(x^3=8,x);
+%union([x=2] , [x=-sqrt(3)*%i-1] , [x=sqrt(3)*%i-1])$
+
+(to_poly_solve(x*(x-1)=0,x), ev(%%));
+%union([x=0] , [x=1])$
+
+/* See SF bug [ 2032110 ] spurious solution of trig equation, missed actual solution */
+
+nicedummies(to_poly_solve((sin(x)-8*cos(x)*sin(x))*(sin(x)^2+cos(x))-(2*cos(x)*sin(x)-sin(x))
+    *(-2*sin(x)^2+2*cos(x)^2-cos(x)),x));
+%union([x=2*%pi*%z0+%pi],[x=2*%pi*%z1],[x=2*%pi*%z2-atan(2*sqrt(2))+%pi],[x=2*%pi*%z3+atan(2*sqrt(2))-%pi])$
+
+nicedummies(to_poly_solve(sin(a*x)=1/2,x, simpfuncs = ['expand]));
+%union([x=(2*%pi*%z0)/a+(5*%pi)/(6*a)],[x=(2*%pi*%z1)/a+%pi/(6*a)])$
+
+to_poly_solve(x+sqrt(sqrt(195)*%i+1),x);
+%union([x=-sqrt(sqrt(195)*%i+1)])$
+
+to_poly_solve([abs(x)=abs(a)],[x]);
+%union([x=-abs(a)] , [x=abs(a)])$
+
+to_poly_solve([abs(1-abs(x))=abs(1-abs(a))],[x]);
+%union(%if(isnonnegative_p(1-abs(abs(a)-1)),[x=1-abs(abs(a)-1)],%union()),%if(isnonnegative_p(1-abs(abs(a)-1)),[x=abs(abs(a)-1)-1],%union()),[x=-abs(abs(a)-1)-1],[x=abs(abs(a)-1)+1])$
+
+to_poly_solve(x^(3/2)=a,x);
+%union(%if((-%pi/2<parg(a^(1/3)))  %and  (parg(a^(1/3))<=%pi/2),[x=a^(2/3)],%union()),%if((-%pi/2<parg(((sqrt(3)*%i-1)*a^(1/3))/2))  %and  (parg(((sqrt(3)*%i-1)*a^(1/3))/2)<=%pi/2),[x=-((sqrt(3)*%i+1)*a^(2/3))/2],%union()),%if((-%pi/2<parg(-((sqrt(3)*%i+1)*a^(1/3))/2))  %and  (parg(-((sqrt(3)*%i+1)*a^(1/3))/2)<=%pi/2),[x=((sqrt(3)*%i-1)*a^(2/3))/2],%union()))$
+
+to_poly_solve(abs(abs(x-1/5)-1/5)=sqrt(5),[x]);
+%union([x=-sqrt(5)] , [x=(5*sqrt(5)+2)/5])$
+
+to_poly_solve(abs(x)=sqrt(5),[x]);
+%union([x=-sqrt(5)] , [x=sqrt(5)])$
+
+/* log stuff */
+
+to_poly_solve(log(x)=9,x);
+%union([x = exp(9)])$
+
+to_poly_solve(log(x^2-1)=log(9^2-1),x);
+%union([x = -9] , [x=9])$ 
+
+to_poly_solve(log(x^2+1)-log(9^2+1),[x]);
+%union([x = -9] , [x=9])$
+
+to_poly_solve(log(x)=log(a),x);
+%union([x = a])$
+
+to_poly_solve(2*%i*%pi*%Z5+log(-1)=%i*x,[x]);
+%union([x=2*%pi*%Z5+%pi])$
+
+to_poly_solve(23=sqrt(1-x)*sqrt(x+1)+%i*x,x, simpfuncs = ['rectform]);
+%union([x=-(264*%i)/23])$
+
+
+to_poly_solve(log(sqrt(1-x^2)+%i*x)=(%i*%pi)/6,x);
+%union([x=1/2])$
+
+to_poly_solve(asin(x) = %pi/6,x);
+%union([x=1/2])$
+
+
+/* linear equations and frational linear */
+
+to_poly_solve(4*x + 5 = 2* x + 13,x);
+%union([x=4])$
+
+to_poly_solve(17 + x = 68,x);
+%union([x=51])$
+
+to_poly_solve(2*t - 29 = 7,t);
+%union([t=18])$
+
+to_poly_solve(sqrt(3) * x = cos(2) - 1/sqrt(42),x);
+%union([x=(sqrt(42)*cos(2)-1)/(sqrt(3)*sqrt(42))])$
+
+to_poly_solve(50/(n+5) = 10,n);
+%union([n=0])$
+
+to_poly_solve((x-1)/(x+1)=1,x);
+%union()$
+
+to_poly_solve((x-1)/(1+x)=a,x,simpfuncs = ['expand])$
+%union([x=-a/(a-1)-1/(a-1)])$
+
+to_poly_solve(1/x = 1/a,x);
+%union(%if(a#0,[x=a],%union()))$
+
+(to_poly_solve(1/x = 1/a,x), subst(a=0,%%));
+%union()$
+
+to_poly_solve(1/x^2 = 1/a^2,x);
+%union(%if(a#0,[x=-a],%union()),%if(a#0,[x=a],%union()))$
+
+/* hyperbolic */
+nicedummies(to_poly_solve(sinh(x) = 0,x));
+%union([x=2*%i*%pi*%z0+%i*%pi],[x=2*%i*%pi*%z1])$
+
+nicedummies(to_poly_solve(cosh(x) = 0,x));
+%union([x=2*%i*%pi*%z0-(%i*%pi)/2],[x=2*%i*%pi*%z1+(%i*%pi)/2])$
+
+nicedummies(to_poly_solve(cosh(x) - sinh(2*x)/2 = 0,x));
+%union([x=2*%i*%pi*%z0+log(sqrt(2)-1)+%i*%pi],[x=2*%i*%pi*%z1+log(sqrt(2)+1)],[x=2*%i*%pi*%z2-(%i*%pi)/2],[x=2*%i*%pi*%z3+(%i*%pi)/2])$
+
+nicedummies(to_poly_solve(sinh(x) + cosh(x) = 1,x));
+%union([x=2*%i*%pi*%z0])$
+
+/* miscelaneous */
+
+nicedummies(to_poly_solve(sin(x) = cos(x), x,simpfuncs = ['expand]));
+%union([x = %pi*%z0+%pi/4])$
+
+nicedummies(to_poly_solve(42*cos(x)+sin(x)=42*cos(%pi/4)+sin(%pi/4),x, simpfuncs =['logcontract,'trigreduce]));
+%union([x=2*%pi*%z0+%pi/4],[x=2*%pi*%z1-atan(1679/1847)])$
+
+nicedummies(to_poly_solve(sin(x)*cos(x) = 1/2, x,simpfuncs = ['expand]));
+%union([x=%pi*%z0+%pi/4])$
+
+nicedummies(to_poly_solve(cos(3*x)-2*cos(2*x)+cos(x)=1/2,x, simpfuncs=['expand]));
+/* Because of rev. 1.8 of psolve.lisp the ordering of the results has changed.
+ * The solutions 3 and 4 are better simplified.
+%union([x = 2*%pi*%z0-%i*log(sqrt(13)/4-sqrt(sqrt(13)-1)/2^(3/2)+1/4)],
+       [x = 2*%pi*%z1-%i*log(sqrt(13)/4+sqrt(sqrt(13)-1)/2^(3/2)+1/4)],
+       [x = 2*%pi*%z2-%pi/3],
+       [x = 2*%pi*%z3+%pi/3],
+       [x = 2*%pi*%z4-atan(sqrt(sqrt(13)+1)/(1/sqrt(2)-sqrt(13)/sqrt(2)))-%pi],
+       [x = 2*%pi*%z5+atan(sqrt(sqrt(13)+1)/(1/sqrt(2)-sqrt(13)/sqrt(2)))+%pi])$
+*/
+
+%union([x = 2*%pi*%z0-atan(sqrt(sqrt(13)/2+1/2)/(1/2-sqrt(13)/2))-%pi],
+       [x = 2*%pi*%z1+atan(sqrt(sqrt(13)/2+1/2)/(1/2-sqrt(13)/2))+%pi],
+       [x = 2*%pi*%z2-%i*log(sqrt(13)/4-sqrt(sqrt(13)/2-1/2)/2+1/4)],
+       [x = 2*%pi*%z3-%i*log(sqrt(13)/4+sqrt(sqrt(13)/2-1/2)/2+1/4)],
+       [x = 2*%pi*%z4-%pi/3],
+       [x = 2*%pi*%z5+%pi/3]);
+
+nicedummies(to_poly_solve(sin(2*x) + cos(2*x) = 1,x,simpfuncs = ['expand]));
+%union([x=%pi*%z0],[x=%pi*%z1+%pi/4])$
+
+nicedummies(to_poly_solve(sin(x) * (x + 1), x));
+%union([x=-1],[x=%pi*%z0])$
+
+nicedummies(to_poly_solve(5^x = 5^%e, x));
+%union([x = ((2 * %i * %pi * %z0 + %e * log(5))/(log(5)))])$
+
+to_poly_solve(sqrt(x^2+1) = 2 - x,x);
+%union([x=3/4])$
+
+/* subset of the Michael Wester test suite */
+
+nicedummies(to_poly_solve(%e^(2*x) + 2*%e^x + 1 = z,x));
+%union([x=log(-sqrt(z)-1)+2*%i*%pi*%z0],[x=log(sqrt(z)-1)+2*%i*%pi*%z1])$
+
+to_poly_solve(exp(2 - x^2) = exp(-x), x, simpfuncs = ['nicedummies]);
+%union([x=-((sqrt(9-8*%i*%pi*%z0)-1)/2)],[x=(sqrt(9-8*%i*%pi*%z0)+1)/2])$
+
+to_poly_solve((x - 2)/x^(1/3) = 0, x);
+%union([x=2])$
+
+to_poly_solve(sqrt(x^2 + 1) = x - 2, x);
+%union()$
+
+to_poly_solve(x + sqrt(x) = 2, x);
+%union([x=1])$
+
+to_poly_solve(2*sqrt(x) + 3*x^(1/4) - 2 = 0, x);
+%union([x=1/16])$
+
+to_poly_solve(sqrt(log(x)) = log(sqrt(x)), x);
+%union([x=1] , [x=%e^4])$
+
+
+/* pargs isn't strong enough to simplify this, I think. For now, let me leave 
+to_poly_solve(log(acos(asin(x^(2/3) - b) - 1)) + 2 = 0, x);
+%union([x = -(b + sin(1 + cos(1/e^2)))^(3/2)] , [x = (b + sin(1 + cos(1/e^2)))^(3/2)])$
+*/
+
+to_poly_solve(abs(x - 1) = 2, x);
+%union([x=-1] , [x=3])$
+
+to_poly_solve(abs(2*x + 5) = abs(x - 2), x);
+%union([x=-7] , [x=-1])$
+
+to_poly_solve(1 - abs(x) = max(-x - 2, x - 2), x);
+%union([x=-3/2] , [x=3/2])$
+
+nicedummies(to_poly_solve( (x + 1)*(sin(x)^2 + 1)^2*cos(3*x)^3 = 0,x ));
+%union([x = -1],[x = 2*%pi*%z0-%i*(log(sqrt(2)+1)+%i*%pi)],
+             [x = 2*%pi*%z1-%i*(log(sqrt(2)-1)+%i*%pi)],
+             [x = 2*%pi*%z2-%i*log(sqrt(2)-1)],
+             [x = 2*%pi*%z3-%i*log(sqrt(2)+1)],[x = 2*%pi*%z4-%pi/2],
+             [x = 2*%pi*%z5+%pi/2],[x = 2*%pi*%z6+5*%pi/6],
+             [x = 2*%pi*%z7-%pi/6],[x = 2*%pi*%z8-5*%pi/6],
+             [x = 2*%pi*%z9+%pi/6])$
+
+nicedummies(to_poly_solve( %e^z = 1,z));
+%union([z = 2*%i*%pi*%z0])$
+
+nicedummies(to_poly_solve( tan(x) = 1,x));
+%union([x = -((-2*%pi*%z0-%pi/2)/2)])$
+
+/* Oops! to_poly_solve( sin(x) = tan(x),x); */
+
+to_poly_solve( sqrt(log(x)) = log(sqrt(x)),x);
+%union([x = 1],[x = %e^4])$
+
+/* conjugate solver */
+
+(declare(z, complex), to_poly_solve((1 + %i)*z + (2 - %i)*conjugate(z) = -3*%i,z, 'simpfuncs = ['rectform]));
+%union([z = 2 + 3 * %i])$
+
+to_poly_solve(z + (5-%i)* conjugate(z) = 42,z, simpfuncs = ['rectform]);
+%union([z=168/25-(42*%i)/25])$
+
+to_poly_solve(z + (5-%i)* z + conjugate(z) = 42,z);
+%union([z = -((7*%i+217)/(6*%i-36))])$
+
+to_poly_solve(z + z * conjugate(z)= 23,z, 'simpfuncs = ['expand]);
+%union([z=-sqrt(93)/2-1/2],[z=sqrt(93)/2-1/2])$
+
+to_poly_solve(z + z * realpart(z)= 23,z);
+%union([z=(sqrt(93)-1)/2],[z=-((sqrt(93)+1)/2)])$
+
+nicedummies(to_poly_solve(realpart(z)+imagpart(z)=23,z));
+%union(%if(%i*conjugate(%c0)-conjugate(%c0)-%i*%c0-%c0+46 = 0, [z = ((%i+1)*%c0-46)/(%i-1)],%union()))$
+
+nicedummies(to_poly_solve(imagpart(z) / realpart(z)= 12,z));
+%union(%if(%c0#0,%if(%i*conjugate(%c0)+12*conjugate(%c0)-%i*%c0+12*%c0=0,[z=((%i-12)*%c0)/(%i+12)],%union()),%union()))$
+
+(eqn1 :   x +   y +   z =  6,
+eqn2 : 2*x +   y + 2*z = 10,
+eqn3 :   x + 3*y +   z = 10,
+nicedummies(to_poly_solve([eqn1, eqn2, eqn3], [x, y, z])));
+%union([x=%c0,y=2,z=4-%c0])$
+
+/* from Maxima and Sage mailing lists */
+
+/* Sat Sep 9 14:02:31 CDT 2006 */
+to_poly_solve(a+x-sqrt(x),x, simpfuncs = ['expand]);
+%union(%if((-%pi/2<parg(1/2-sqrt(1-4*a)/2)) %and
+(parg(1/2-sqrt(1-4*a)/2)<=%pi/2),[x=-a-sqrt(1-4*a)/2+1/2],%union()),%if((-%pi/2<parg(sqrt(1-4*a)/2+1/2))
+%and
+(parg(sqrt(1-4*a)/2+1/2)<=%pi/2),[x=-a+sqrt(1-4*a)/2+1/2],%union()))$
+
+
+
+/* Thu, 24 Apr 2003 15:50:25 +0300 */
+to_poly_solve(x - 2 * sqrt (x) = 10,x);
+%union([x=2*sqrt(11)+12])$
+
+/* Thu, Aug 28, 2008 at 8:57 AM, sage-support */
+nicedummies(to_poly_solve([x=0, 1-exp(y)=0],[x,y]));
+%union([x=0,y=2*%i*%pi*%z0])$
+
+nicedummies(to_poly_solve([y*sin(x)=0, cos(x)=0],[x,y]));
+%union([x=(2*%pi*%z0+%pi)/2,y=0])$
+
+nicedummies(to_poly_solve(0.004*(8*%e^(-300*t)-8*%e^(-1200*t))*(720000*%e^(-300*t)-11520000*%e^(-1200*t))+0.004*(9600*%e^(-1200*t)-2400*%e^(-300*t))^2,t));
+%union([t=(2*%i*%pi*%z0+log(25/4-(3*sqrt(41))/4))/900],[t=(2*%i*%pi*%z1+log((3*sqrt(41))/4+25/4))/900])$
+
+/* Sat Oct 6 05:39:51 CDT 2007, maxima list */
+
+to_poly_solve([abs(a00-4*a02)=1,abs(a00-4*a01+4*a02)=1,abs(a00+4*a01+4*a02)=1],[a00,a01,a02]);
+%union([a00=-1,a01=0,a02=0],[a00=-1/2,a01=-1/4,a02=1/8],[a00=-1/2,a01=1/4,a02=1/8],[a00=0,a01=0
+,a02=-1/4],[a00=0,a01=0,a02=1/4],[a00=1/2,a01=-1/4,a02=-1/8],[a00=1/2,a01=1/4,a02=-1/8],[a00=1,a01=0,a02
+=0])$
+
+/* Sat Sep 9 14:02:31 CDT 2006 */
+to_poly_solve(x - sqrt(x) + a,x, 'simpfuncs = ['expand]);
+%union(%if((-%pi/2<parg(1/2-sqrt(1-4*a)/2)) %and (parg(1/2-sqrt(1-4*a)/2)<=%pi/2),[x=-a-sqrt(1-4*a)/2+1/2],
+%union()),%if((-%pi/2<parg(sqrt(1-4*a)/2+1/2)) %and (parg(sqrt(1-4*a)/2+1/2)<=%pi/2),
+[x=-a+sqrt(1-4*a)/2+1/2],%union()))$
+
+/* Tue Apr 3 10:18:12 CDT 2007 */
+to_poly_solve([x=2, y=3], [x]);
+%union()$
+
+to_poly_solve([x=a, y=b], [x]);
+%union()$
+
+to_poly_solve([x=a, y=b], [x]);
+%union()$
+
+to_poly_solve([x=2, y=3], [y,x]);
+%union([x=2,y=3])$
+
+to_poly_solve([a*x=x], [x]);
+%union([x=0])$
+
+to_poly_solve([a*x=x], [x]);
+%union([x=0])$
+
+nicedummies(to_poly_solve([x/x=1], [x]));
+%union([x=%c0])$
+
+to_poly_solve([x=2, y=x+3, y=1], [x,y]);
+%union()$
+
+to_poly_solve([x=2, y=3, y=1], [x,y]);
+%union()$
+
+/* Thu, 24 Apr 2003 15:50:25 +0300 */
+
+to_poly_solve(x - 2 * sqrt (x) = 10,x);
+%union([x=2*sqrt(11)+12])$
+
+/* Wed Sep 20 11:41:42 CDT 2006 */
+to_poly_solve(sin(x)+cos(x)=0,x, 'simpfuncs = ['nicedummies,'expand]);
+%union([x=2*%pi*%z0-%pi/4],[x=2*%pi*%z0+(3*%pi)/4])$
+
+/* Fri Feb 1 05:31:56 CST 2008 9changed 0.05 to 5/100) */
+to_poly_solve(x*exp(-x)-5/100 = 0,x); 
+%union([x = -lambert_w(-1/20)])$
+
+/* Sun May 11 11:52:05 CDT 2008 */
+to_poly_solve(2*x=sqrt(x^2+3),x);
+%union([x=1])$
+
+/*Tue Apr 22 14:24:13 CDT 2008 */
+to_poly_solve([log(y^2+x^2)+2*x^2/(y^2+x^2)=0,2*x*y/(y^2+x^2)],[x,y]);
+%union([x=0,y=-1],[x=0,y=1],[x=-%e^(-1),y=0],[x=%e^(-1),y=0])$
+
+/* Wed Oct 25 06:00:39 CDT 2006 */
+block([algexact : false], to_poly_solve([10*q/sqrt(q^2 + 3) - 5*q^3/(q^2+3)^(3/2) = 5.07],[q]));
+%union([q = 1.423962227031281],
+       [q = 10.01077844311377],
+       [q = -2.201201253088263*%i])$
+
+/* Sat Feb 23 20:23:50 CST 2008 */
+to_poly_solve([x2=x*cos(phi)-y*sin(phi), y2=x*sin(phi)+y*cos(phi)], [x,y], 'simpfuncs=['trigreduce]);
+%union([x=sin(phi)*y2+cos(phi)*x2,y=cos(phi)*y2-sin(phi)*x2])$
+
+/* Thu May 25 09:22:09 CDT 2006 */
+block([algexact:true],to_poly_solve(1+x^(5/2),x, 'simpfuncs = ['expand]));
+%union([x = -sqrt(5-sqrt(5))*sqrt(5)*%i/2^(5/2)
+                -sqrt(5-sqrt(5))*%i/2^(5/2)+sqrt(5)/4-1/4],
+             [x = sqrt(5-sqrt(5))*sqrt(5)*%i/2^(5/2)
+                +sqrt(5-sqrt(5))*%i/2^(5/2)+sqrt(5)/4-1/4])$
+
+/* Thu Oct 12 14:55:03 CDT 2006 */
+nicedummies(to_poly_solve([a1+b2=r2,a1*b2=r3,a3*b1+a2*b2=r4,r4+a5+a3*b2=d5,a5*b1=0],
+[a1,a2,a3,a5,r2,r3,r4,b1,b2]));
+%union([a1 = %c0,a2 = %c1,a3 = %c2,a5 = d5+(-%c2-%c1)*%c3,b1 = 0,
+               b2 = %c3,r2 = %c3+%c0,r3 = %c0*%c3,r4 = %c1*%c3],
+              [a1 = %c4,a2 = (d5-%c5*%c7-%c5*%c6)/%c7,a3 = %c5,a5 = 0,
+               b1 = %c6,b2 = %c7,r2 = %c7+%c4,r3 = %c4*%c7,r4 = d5-%c5*%c7])$
+
+/* Sun Apr 2 08:31:17 CDT 2006 */
+block([algexact : true, eq : x^3-8*x^2-197*x-502], 
+   every(lambda([s], is(abs(subst(s,eq)) < 1.0e-12)), args(to_poly_solve(eq,x, simpfuncs = ['dfloat]))));
+true$
+
+
+/* Mon Dec 17 06:08:28 CST 2007 */
+to_poly_solve([x^2+y^2=2^2,(x-1)^2+(y-1)^2=2^2],[x,y], 'use_grobner = true, 'simpfuncs=['expand]);
+%union([x=1/2-sqrt(7)/2,y=sqrt(7)/2+1/2],[x=sqrt(7)/2+1/2,y=1/2-sqrt(7)/2])$
+
+/* Wed Mar 28 16:33:34 CDT 2007 */
+block([algexact : false], to_poly_solve([(2*x+1)^3=13.5*(x^5+1)],[x],'simpfuncs=['rationalize]));
+%union([x=-2287278158804185/2251799813685248],[x=7473047756518961/9007199254740992],[x=1],[x=-(135947138237407*%i)/140737488355328-3665567315448253/9007199254740992],[x=(135947138237407*%i)/140737488355328-3665567315448253/9007199254740992])$
+
+nicedummies(to_poly_solve(sin(x)=sin(x),x));
+%union([x=%c0])$
+
+to_poly_solve(0=1,x);
+%union()$
+
+/* Mon Jan 29 08:57:41 CST 2007 */
+to_poly_solve([x+3*y=5,sqrt(x+y)-1=y],[x,y]);
+%union([x=11-6*sqrt(2),y=2*sqrt(2)-2])$
+
+/* more miscellaneous */
+
+to_poly_solve(log(x+1) = log(a+1),x);
+%union([x=a])$
+
+to_poly_solve(log(x+1) = 2*log(a+1),x);
+%union([x=a^2+2*a])$
+
+to_poly_solve(log(x+1) = -log(a+1),x);
+%union(%if(a+1 # 0,[x = -a/(a+1)],%union()))$
+
+to_poly_solve(log(1+x)=-2*log(1+a),x, simpfuncs = ['ratsimp]);
+%union(%if(a+1 # 0,[x = -((a^2+2*a)/(a^2+2*a+1))],%union()))$
+
+to_poly_solve(log(x+1) = 5*log(a+1),x);
+%union([x=a^5+5*a^4+10*a^3+10*a^2+5*a])$
+
+to_poly_solve(x^(3/2)=1,x);
+%union([x=1])$
+
+to_poly_solve(x^(4/3)=1,x);
+%union([x=1])$
+
+to_poly_solve(x^(5/3)=1,x);
+%union([x=1])$
+
+to_poly_solve(x^4=1,x);
+%union([x=-1],[x=1],[x=-%i],[x=%i])$
+
+to_poly_solve(x^8=1,x, simpfuncs = ['rectform]);
+%union([x=-1],[x=1],[x=-%i],[x=%i],[x=-%i/sqrt(2)-1/sqrt(2)],[x=1/sqrt(2)-%i/sqrt(2)],
+[x=%i/sqrt(2)-1/sqrt(2)],[x=%i/sqrt(2)+1/sqrt(2)])$
+
+block([algexact:true],to_poly_solve(sqrt(x)+x^(3/2)=1,x, simpfuncs = ['expand]));
+%union([x = sqrt(31)/(3*2^(2/3)*(sqrt(31)+3^(3/2))^(1/3))
+                +sqrt(3)/(2^(2/3)*(sqrt(31)+3^(3/2))^(1/3))
+                +2^(2/3)/(3*(sqrt(31)+3^(3/2))^(2/3))-2/3])$
+
+to_poly_solve(a*x=b, x,'simpfuncs = ['rectform]);
+%union([x=b/a])$
+
+to_poly_solve(x^2 + a^2, [x,a],simpfuncs = ['nicedummies]);
+%union([a=%c0,x=%i*%c0],[a=%c0,x=-%i*%c0])$
+
+to_poly_solve(x^4 + a^4, [x,a],simpfuncs = ['nicedummies]);
+%union([a=%c0,x=(-1)^(1/4)*%c0],[a=%c0,x=-(-1)^(1/4)*%i*%c0],
+       [a=%c0,x=-(-1)^(1/4)*%c0],[a=%c0,x=(-1)^(1/4)*%i*%c0])$
+
+to_poly_solve((x-1)/(x+1) = 1, [x]);
+%union()$
+
+nicedummies(to_poly_solve(sin(x+a)=sin(x),a, simpfuncs = ['trigrat]));
+%union([a = 2*%pi*%z0],[a = -2*x+2*%pi*%z1-%pi])$
+
+to_poly_solve(cos(x+a)=cos(x),a, simpfuncs = ['trigrat,'nicedummies]);
+%union([a=2*%pi*%z0],[a=2*%pi*%z0-2*x])$
+
+to_poly_solve(tan(x+a)=tan(x),a, simpfuncs = ['nicedummies]);
+%union(%if(cos(x)#0,[a=%pi*%z0],%union()))$
+
+to_poly_solve(cosh(x+a)=cosh(x),a, 'simpfuncs = ['exponentialize, 'ratsimp, 'nicedummies]);
+%union([a=2*%i*%pi*%z0],[a=2*%i*%pi*%z0-2*x])$
+
+to_poly_solve(sin(x^2)=0,x, 'simpfuncs = ['nicedummies]);
+%union([x=-sqrt(%pi)*sqrt(%z0)],[x=sqrt(%pi)*sqrt(%z0)])$
+
+to_poly_solve(x^2+2*x+sqrt(5),x);
+%union([x=-sqrt(1-sqrt(5))-1],[x=sqrt(1-sqrt(5))-1])$
+
+/* nonsymbol solve */
+
+to_poly_solve([x^2 + y^2 + x*y = 1, x^2 * y^2 = 2],[x^2 + y^2, x*y]);
+%union([x*y=-sqrt(2),y^2+x^2=sqrt(2)+1],[x*y=sqrt(2),y^2+x^2=1-sqrt(2)])$
+
+to_poly_solve([x + x*y = a, x*y = 8],[x,x*y]);
+%union([x*y=8,x=a-8])$
+
+to_poly_solve([x + x*y = a, x*y = 8 + z, x-z+78],[x,x*y,z]);
+%union([x*y=(a+86)/2,x=(a-86)/2,z=(a+70)/2])$
+
+to_poly_solve([abs(x*y-1) = a, a^2 - x*y],[x*y,a]);
+%union([x*y=-((sqrt(5)-3)/2),a=(sqrt(5)-1)/2],[x*y=(sqrt(5)+3)/2,a=(sqrt(5)+1)/2])$
+
+/* parameter solve */
+to_poly_solve([m*x = b],[x], 'parameters = [m,b], 'simpfuncs = ['nicedummies]);
+%union(%if((b=0)  %and  (m=0),[x=%c0],%union()),%if(m#0,[x=b/m],%union()))$
+
+to_poly_solve([y^2+x^2=a^2,y+x=1],[x,y],'parameters=[a,b],'simpfuncs=['nicedummies,'expand]);
+%union(%if(2*a^2-1#0,[x=-((sqrt(2*a^2-1)-1)/2),y=(sqrt(2*a^2-1)+1)/2],%union()),
+       %if(2*a^2-1#0,[x=(sqrt(2*a^2-1)+1)/2,y=-((sqrt(2*a^2-1)-1)/2)],%union()),
+       %if((a=-1/sqrt(2))  %and  (b=%c0),[x=1/2,y=1/2],%union()),
+       %if((a=1/sqrt(2)) %and (b=%c0),[x=1/2,y=1/2],%union()))$
+
+to_poly_solve([x + y = a, x + y = b],[x,y], 'parameters = [a], 'simpfuncs = ['nicedummies]);
+%union(%if(b-a=0,[x=%c0,y=b-%c0],%union()))$
+
+to_poly_solve([x + y = a, x + a*y = b],[x,y], 'parameters = [a,b], 'simpfuncs = ['nicedummies,'expand]);
+%union(%if(a-1#0,[x=-((b-a^2)/(a-1)),y=(b-a)/(a-1)],%union()),%if((a=1) %and (b=1),[x=%c0,y=1-%c0],%union()))$
+
+to_poly_solve([y+b*x=a,a*y+x=b],[x,y],'parameters=[],'simpfuncs=['nicedummies,'ratsimp]);
+%union([x=-((b-a^2)/(a*b-1)),y=(b^2-a)/(a*b-1)])$
+
+to_poly_solve([y+x=a,a*y+x=b],[x,y],'parameters=[a,b],'simpfuncs=['nicedummies, 'expand]);
+%union(%if(a-1#0,[x=-((b-a^2)/(a-1)),y=(b-a)/(a-1)],%union()),
+%if((a=1)  %and  (b=1),[x=%c0,y=1-%c0],%union()))$
+
+/* Actual regressions */
+to_poly_solve(sin(x+p)=sin(x),p, 'simpfuncs = ['trigrat, 'nicedummies]);
+%union([p = 2*%pi*%z0],[p = -2*x+2*%pi*%z0-%pi])$
+
+nicedummies(to_poly_solve(sin(s)=0, s));
+%union([s=%pi*%z0])$
+
+/* buglist equations--Some of these bugs have already been fixed in algsys / solve. So don't
+think that to_poly_solve fixes these bugs. */
+
+/*  [ 2041214 ] unable solve */
+to_poly_solve([x+y=1,sqrt(x+1)=1],[x,y]);
+%union([x=0,y=1])$
+
+/* [ 1852178 ] Another solve() problem */
+to_poly_solve([x^2+y^2=2^2,(x-1)^2+(y-1)^2=2^2],[x,y], 'use_grobner = true, 'simpfuncs=['expand]);
+%union([x=1/2-sqrt(7)/2,y=sqrt(7)/2+1/2],[x=sqrt(7)/2+1/2,y=1/2-sqrt(7)/2])$
+
+/* [ 1845370 ] Division by 0 in solve() */
+to_poly_solve(x^4+(8*n+2*c+4)*x^3+(24*n^2+12*c*n+24*n+c^2+7*c+5)*x^2+(32*n^3+24*c*n^2
+ +48*n^2+4*c^2*n+28*c*n+20*n+3*c^2+7*c+2)*x+20*n^4+24*c*n^3+38*n^3+9*c^2*n^2+39*c*n^2
+ +22*n^2+c^3*n+12*c^2*n+17*c*n+4*n+c^3+3*c^2+2*c,x, 'simpfuncs = ['expand]);
+
+%union([x=-sqrt(-2*sqrt(-16*n^4-32*c*n^3-24*n^3-20*c^2*n^2-44*c*n^2-8*n^2-4*c^3*n-24*c^2*n-12*c*n-4*c^3-3*c^2-2*c+1)+c^2-2*c+2)/2-2*n-c/2-1],[x=sqrt(-2*sqrt(-16*n^4-32*c*n^3-24*n^3-20*c^2*n^2-44*c*n^2-8*n^2-4*c^3*n-24*c^2*n-12*c*n-4*c^3-3*c^2-2*c+1)+c^2-2*c+2)/2-2*n-c/2-1],[x=-sqrt(2*sqrt(-16*n^4-32*c*n^3-24*n^3-20*c^2*n^2-44*c*n^2-8*n^2-4*c^3*n-24*c^2*n-12*c*n-4*c^3-3*c^2-2*c+1)+c^2-2*c+2)/2-2*n-c/2-1],[x=sqrt(2*sqrt(-16*n^4-32*c*n^3-24*n^3-20*c^2*n^2-44*c*n^2-8*n^2-4*c^3*n-24*c^2*n-12*c*n-4*c^3-3*c^2-2*c+1)+c^2-2*c+2)/2-2*n-c/2-1])$
+
+/* [ 1663399 ] solve/algsys bug */
+nicedummies(to_poly_solve([b2 + a1 = r2, a1 * b2 = r3, a2 * b2 + a3 * b1 = r4, a3
+  * b2 + a5 + r4= d5, a5 * b1 = 0],[a1, a2, a3, a5, r2, r3, r4, b1, b2], 'simpfuncs = ['expand]));
+
+%union([a1 = %c0,a2 = %c1,a3 = %c2,a5 = d5-%c2*%c3-%c1*%c3,b1 = 0,
+  b2 = %c3,r2 = %c3+%c0,r3 = %c0*%c3,r4 = %c1*%c3],
+  [a1 = %c4,a2 = d5/%c7-%c5*%c6/%c7-%c5,a3 = %c5,a5 = 0,b1 = %c6,
+  b2 = %c7,r2 = %c7+%c4,r3 = %c4*%c7,r4 = d5-%c5*%c7])$
+
+/* [ 1603369 ] Solve bind stack overflow */
+to_poly_solve([product(x-i,i,1,20),x=5],x);
+%union([x=5])$
+
+to_poly_solve([product(x-i,i,1,75)],x);
+''(apply('%union, (makelist([x=i],i,1,75))))$
+
+/* [ 1602426 ] solve([a=b,b=3],[a]) */
+to_poly_solve([a=b,b=3],[a]);
+%union()$
+
+to_poly_solve([a=b,b=3],[a], 'parameters = [b]);
+%union(%if(b-3=0,[a=3],%union()))$
+
+/* [ 1570828 ] (lin)solve of inconsistent equations */
+to_poly_solve([x=1,x=2],x);
+%union()$
+
+/* [ 1452341 ] solve(x^(5/2)+1,x) produces incorrect roots */
+block([algexact:true],to_poly_solve(1+x^(5/2),x, 'simpfuncs = ['expand]));
+%union([x = -sqrt(5-sqrt(5))*sqrt(5)*%i/2^(5/2)
+                -sqrt(5-sqrt(5))*%i/2^(5/2)+sqrt(5)/4-1/4],
+             [x = sqrt(5-sqrt(5))*sqrt(5)*%i/2^(5/2)
+                +sqrt(5-sqrt(5))*%i/2^(5/2)+sqrt(5)/4-1/4])$
+
+
+/* [ 1105366 ] SOLVE gives a wrong answer */
+nicedummies(to_poly_solve(sqrt(%e^(2*t)*sin(t)^2+%e^(2*t)*cos(t)^2+3*%e^(2*t))=2,t));
+%union([t=%i*%pi*%z0])$
+
+/* [ 932395 ] solve confused by ratvars */
+nicedummies(to_poly_solve(rat(a+c,a,b,c,d),[a,b]));
+%union([a=-c,b=%c0])$
+
+/* [ 826915 ] Solve wrong with irreducible polydecomp */
+block([algexact : false, sol, eq], 
+   eq :  (x^5+x-3)^5+x^5+x-6, 
+   sol : to_poly_solve(eq,x, 'simpfuncs = ['dfloat]),
+   every(lambda([s], is(cabs(subst(s, eq)) < 1.0e-6)), args(sol)));
+true$
+
+/* [ 607079 ] solve with repeated variable */
+to_poly_solve([x=1],[x,x]);
+%union([x=1])$
+
+/* [ 589970 ] Solve of quadratic gives error */
+to_poly_solve((4*k^2-4)*y^2 + (4-4*k^2)*y + 6*k^2-1,y);
+%union([y=-((sqrt(5)*k*sqrt(1-k^2)-k^2+1)/(2*k^2-2))],[y=(sqrt(5)*k*sqrt(1-k^2)+k^2-1)/(2*k^2-2)])$
+
+to_poly_solve((4*k^2-4)*y^2 + (4-4*k^2)*y + 6*k^2-1,y, 'parameters = [k]);
+%union(%if(k=0,[y=1/2],%union()),
+%if((k-1#0) %and (k#0) %and (k+1#0),[y=-((sqrt(5)*k*sqrt(1-k^2)-k^2+1)/(2*k^2-2))],%union()),
+%if((k-1#0) %and (k#0) %and (k+1#0),[y=(sqrt(5)*k*sqrt(1-k^2)+k^2-1)/(2*k^2-2)],%union()))$
+
+/* Lambert solver */
+
+to_poly_solve(x*exp(x) = a,x);
+%union([x=lambert_w(a)])$
+
+to_poly_solve(exp(x) = a/x,x);
+%union([x = lambert_w(a)])$
+
+to_poly_solve(56 * %e^(x) * x - a,x);
+%union([x='lambert_w(a/56)])$
+
+to_poly_solve(5^x * x = 42,x);
+%union([x = lambert_w(42*log(5))/log(5)])$
+
+to_poly_solve(5^(x^2 - 1) * (x^2-1) / %pi = 42,x);
+%union([x = -sqrt(lambert_w(42*%pi*log(5))+log(5))/sqrt(log(5))],
+       [x = sqrt(lambert_w(42*%pi*log(5))+log(5))/sqrt(log(5))])$
+            
+/* Examples from wikipedia.org -- http://en.wikipedia.org/wiki/Lambert_W_function*/
+
+to_poly_solve(2^x = 5*x,x);
+%union([x = -lambert_w(-log(2)/5)/log(2)])$
+
+to_poly_solve(x^x = z,x);
+%union([x = log(z)/lambert_w(log(z))])$
+
+to_poly_solve(x * log(x) = a,x);
+%union([x = a / lambert_w(a)])$ 
+
+/* one-to-one cruncher & related */
+
+to_poly_solve(exp(x) = exp(x^2-1),x, 'simpfuncs = ['nicedummies]);
+%union([x=-((sqrt(5-8*%i*%pi*%z0)-1)/2)],[x=(sqrt(5-8*%i*%pi*%z0)+1)/2])$
+
+to_poly_solve(exp(x) - exp(x^2-1),x, 'simpfuncs = ['nicedummies]);
+%union([x=-((sqrt(5-8*%i*%pi*%z0)-1)/2)],[x=(sqrt(5-8*%i*%pi*%z0)+1)/2])$
+
+to_poly_solve(x = sqrt(x) -1/4,x, 'simpfuncs = ['nicedummies]);
+%union([x=1/4])$
+
+to_poly_solve(x = sqrt(x) + a * %i,x, 'simpfuncs = ['nicedummies]);
+%union(%if((-%pi/2<parg(-((sqrt(4*%i*a+1)-1)/2)))  %and  (parg(-((sqrt(4*%i*a+1)-1)/2))<=%pi/2),
+[x=-((sqrt(4*%i*a+1)-2*%i*a-1)/2)],%union()),%if((-%pi/2<parg((sqrt(4*%i*a+1)+1)/2))  %and  (parg((sqrt(4*%i*a+1)+1)/2)<=%pi/2),[x=(sqrt(4*%i*a+1)+2*%i*a+1)/2],%union()))$
+
+/* previously commented out */
+
+to_poly_solve(log(x+1) - log(x-67) = log(a+1) - log(a-67),x);
+%union(%if((a-67#0) %and (a+1#0),[x=a],%union()))$
+
+/* f(x) = f(a) equations */
+to_poly_solve(log(x)=log(a),x);
+%union([x=a])$
+
+to_poly_solve(exp(x)=exp(a),x, simpfuncs = ['nicedummies]);
+%union([x=a+2*%i*%pi*%z0])$
+
+to_poly_solve(exp(x*(x-1))=exp(a*(a-1)),x, simpfuncs = ['nicedummies]);
+%union([x=-((sqrt(4*a^2-4*a+8*%i*%pi*%z0+1)-1)/2)],[x=(sqrt(4*a^2-4*a+8*%i*%pi*%z0+1)+1)/2])$
+
+to_poly_solve(log(x*(x-1))=log(a*(a-1)),x, simpfuncs = ['nicedummies]);
+%union([x=1-a],[x=a])$
+
+block([algebraic : true], to_poly_solve(x^(3/2) = (1 + %i) / sqrt(2),x, simpfuncs = ['rectform]));
+%union([x=%i/2+sqrt(3)/2])$
+
+block([algebraic : true], to_poly_solve(x^(3/2) = (-1 + %i) / sqrt(2),x, simpfuncs = ['rectform]));
+%union([x=-%i/2-sqrt(3)/2],[x=%i])$
+
+block([algebraic : true], to_poly_solve(x^(3/2) = (-1 - %i) / sqrt(2),x, simpfuncs = ['rectform]));
+%union([x=%i/2-sqrt(3)/2],[x=-%i])$
+
+block([algebraic : true], to_poly_solve(x^(3/2) = - 1,x, simpfuncs = ['rectform]));
+%union([x=-(sqrt(3)*%i)/2-1/2],[x=(sqrt(3)*%i)/2-1/2])$
+
+block([algebraic : true], to_poly_solve(x^(3/2) = 1,x, simpfuncs = ['rectform]));
+%union([x=1])$
+
+block([algebraic : true], to_poly_solve(x^(3/2) = (1/2 + sqrt(3) * %i/2),x, simpfuncs = ['rectform]));
+%union([x=%i*sin((2*%pi)/9)+cos((2*%pi)/9)])$
+
+sol : to_poly_solve([x/a = a/x],[x], 'parameters = ['a]);
+
+%union(%if(a#0,[x=-a],%union()),%if(a#0,[x=a],%union()))$
+
+ev(sol);
+%union(%if(a#0,[x=-a],%union()),%if(a#0,[x=a],%union()))$
+
+/* Maxima testsuite */
+to_poly_solve('diff(y,x),'diff(y,x));
+%union(['diff(y,x,1)=0])$
+
+nicedummies(to_poly_solve(5^f(x) = 125,f(x)));
+%union([f(x)=(2*%i*%pi*%z0+log(125))/log(5)])$
+
+to_poly_solve ('[x = 1], '[x, x]);
+%union([x=1])$
+
+to_poly_solve ('[u = v], '[u, u, u, u]);
+%union([u = v])$
+
+/* The use_grobner is a workaround for an algsys bug, I think.*/
+nicedummies(to_poly_solve(asin(cos(x)),x, 'use_grobner = true));
+%union([x=(2*%pi*%z0+%pi)/2])$
+
+to_poly_solve ([x + 2*y = 5, 2*x - y = 5], [x, y]);
+%union([x = 3, y = 1])$
+
+to_poly_solve(sec(x)=0,x);
+%union()$
+
+to_poly_solve(csc(x)=0,x);
+%union()$
+
+to_poly_solve(csc(x*(x-1))=0,x);
+%union()$
+
+to_poly_solve(sech(x)=0,x);
+%union()$
+
+to_poly_solve(cot(x)=0,x, 'simpfuncs = ['expand,'nicedummies]);
+%union([x=%pi*%z0+%pi/2])$
+
+to_poly_solve(tan(x)=0,x, 'simpfuncs = ['nicedummies]);
+%union([x=%pi*%z0])$
+
+to_poly_solve(asin(x)=1/2,x, 'simpfuncs = ['expand,'demoivre, 'expand]);
+%union([x=sin(1/2)])$
+
+to_poly_solve(asin(x^2)=1/5,x, 'simpfuncs = ['expand,'demoivre, 'expand]);
+%union([x=-sqrt(sin(1/5))],[x=sqrt(sin(1/5))])$
+
+to_poly_solve(asin(sqrt(x))=1/5,x, 'simpfuncs = ['expand,'demoivre,'expand]);
+%union([x = sin(1/5)^2])$
+
+to_poly_solve(acos(sqrt(x))=1/5,x, 'simpfuncs = ['expand,'demoivre,'expand]);
+%union([x = cos(1/5)^2])$
+
+to_poly_solve(acos(x)=1/5,x, 'field = 'complex,'simpfuncs = ['expand,'demoivre, 'expand]);
+%union([x=cos(1/5)])$
+
+to_poly_solve(taylor(cos(x),x,0,4),x);
+%union([x=-sqrt(2)*sqrt(3-sqrt(3))],[x=sqrt(2)*sqrt(3-sqrt(3))],
+       [x=-sqrt(2)*sqrt(sqrt(3)+3)],[x=sqrt(2)*sqrt(sqrt(3)+3)])$
+
+to_poly_solve(taylor(sin(x),x,0,4),x);
+%union([x=0],[x=-sqrt(6)],[x=sqrt(6)])$
+
+nicedummies(to_poly_solve(a,x, 'parameters = [a]));
+%union(%if(a=0,[x=%c0],%union()))$
+
+nicedummies(to_poly_solve(a,x, 'parameters = []));
+%union()$
+
+nicedummies(to_poly_solve(a, x, 'parameters = [a,b]));
+%union(%if((a=0)  %and  (b=%c0),[x=%c1],%union()))$
+
+to_poly_solve(abs(x) = 0,x);
+%union([x=0])$
+
+(declare(z,complex),0);
+0$
+
+to_poly_solve(abs(z) = 0,z);
+%union([z=0])$
+
+to_poly_solve(abs(x)*e = 10,[x]);
+%union(%if(isnonnegative_p(10/e),[x=-10/e],%union()),%if(isnonnegative_p(10/e),[x=10/e],%union()))$
+
+/* Maxima mailing list, "Equation with conjugate()," October 21, 2008 11:30AM */
+to_poly_solve(z*conjugate(z)+3*(z-conjugate(z))=13+12*%i, z);
+%union([z=2*%i-3],[z=2*%i+3])$
+
+to_poly_solve(x^(3)=1,x, 'simpfuncs = ['log,'polarform]);
+%union([x = 0],[x = -(2*%i*%pi/3)],[x = 2*%i*%pi/3])$
+
+to_poly_solve(x^(3)+x^2 + x + 1,x, 'simpfuncs = ['log,'polarform]);
+%union([x = -(%i*%pi/2)],[x = %i*%pi/2],[x = %i*%pi])$
+
+/* Next two equations are from comp.soft-sys.math.maple, 25 Oct 2008 */
+
+nicedummies(to_poly_solve([x + a*y = 0,a*x + b^2*y = 0,a^2*x + a*b^2*y = 0], [x,y], 'parameters = ['a,'b]));
+%union(%if((a=0) %and (b=0),[x=0,y=%c6],%union()),%if((a=%c0) %and (b=%c0),[x=-%c0*%c1,y=%c1],%union()),%if((a=%c2) %and (b=-%c2),[x=-%c2*%c3,y=%c3],%union()),%if((a=%c4) %and (b=%c5),[x=0,y=0],%union()))$
+
+nicedummies(to_poly_solve(a*x=0, [x], 'parameters = ['a]));
+%union(%if(a = 0, [x = %c0], %union()), %if(a # 0, [x = 0], %union()))$
+
+/* inverse trig */
+
+to_poly_solve(asin(1/x) =3/8,x, 'simpfuncs =['expand]);
+%union([x = 1/sin(3/8)])$
+
+to_poly_solve(acos(1/x) =3/8,x, 'simpfuncs =['expand]);
+%union([x = 1/cos(3/8)])$
+
+to_poly_solve(acos(x) =  acos(a),x, 'simpfuncs =['expand]);
+%union([x=a])$
+
+to_poly_solve(min(x,1) = 1/2,x);
+%union([x = 1/2])$
+
+to_poly_solve(min(x,1) = a,x);
+%union(%if(isnonnegative_p(1 - a), [x = a], %union()))$
+
+
+to_poly_solve([sqrt(x) - 1], [x]);
+%union([x = 1])$
+
+to_poly_solve([x^(1/3) = 1],[x]);
+%union([x = 1])$
+
+to_poly_solve([x^(1/4) = 1],[x]);
+%union([x = 1])$
+
+to_poly_solve([max(x,1)-5],[x]);
+%union([x = 5])$
+
+to_poly_solve([min(x,1) = max(2,7-x)],[x]);
+%union()$
+
+to_poly_solve([abs(1-abs(1-abs(x))) = 42],[x]);
+%union([x = - 44], [x = 44])$
+
+to_poly_solve([sqrt(x) = 10 - sqrt(x-1)],[x]);
+%union([x = 10201/400])$
+
+to_poly_solve([sqrt(x) = min(x,35)],[x]);
+%union([x = 0], [x = 1], [x = 1225])$
+
+to_poly_solve([sqrt(x-y) = 2, sqrt(x+y) = 5],[x,y]);
+%union([x = 29/2,y = 21/2])$
+
+/* problem from sage mailing list circa 2009-05-18 */
+
+to_poly_solve (Q*sqrt(Q^2 + 2) - 1, Q);
+%union([Q = 1/sqrt(1-sqrt(2))], [Q = 1/sqrt(sqrt(2)+1)]);
+
+(remvalue(e,s), remfunction(chk_sol),0);
+0$
+
+/* source code comment in /solver/linsolve.mac */
+
+nicedummies(to_poly_solve([x+y=p1-p2, x+3*y=p2-p3, 3*x-y=p1+p2+p3], [x,y], 'parameters = [p1,p2,p3]));
+%union(%if((p1 = %c0) %and (p2 = %c1) %and (p3 = 8*%c1-4*%c0),
+   [x = (4*%c1-%c0)/2,y = -((6*%c1-3*%c0)/2)],%union()))$
+
+subst(a=1,to_poly_solve(log(x + sqrt(x^2-1))=a,x));
+%union([x = %e^-1*(%e^2+1)/2])$
+
+to_poly_solve(log(x+1)+log(x) = log(6)+log(5),x);
+%union([x = -6],[x = 5])$
+
+/* From RJF, Maxima mailing list, Tuesday, September 01, 2009 12:54PM */
+to_poly_solve((x-%pi)/sin(x)=0, x);
+%union()$
+
+to_poly_solve((sqrt(x)-1)/(x-1),x);
+%union()$
+
+to_poly_solve((x^2 - 2) * (sqrt(x)-1)/(x-1),x);
+%union([x = -sqrt(2)],[x = sqrt(2)])$
+
+nicedummies(to_poly_solve(sin(x)/x,x));
+%union(%if(%z0#0,[x=%pi*%z0],%union()))$
+
+/* From sci.math.symbolic, 29 September 2009; OK, but could be better. In the same
+thread is -3 + cosh(x) - cos(x) = 0. The to_poly_solve either takes a long time or
+gets stuck on -3 + cosh(x) - cos(x) = 0.*/
+
+nicedummies(to_poly_solve(-3+cosh(x)-sinh(x)/tanh(x) = 0,x));
+%union(%if(tan(%pi*%z0) # 0, [x = %i*%pi*%z0], %union()));
+
+/* From Sage Mailing list 8 Oct 2009, 3:21 a.m */
+
+to_poly_solve(acot(x)=0,x);
+%union()$
+
+to_poly_solve(x * log(x) * (x-1),x);
+%union([x = 1])$
+
+/* Sage Ticket 2617; see also Sage mailing list 18 March 2008 */
+
+nicedummies(to_poly_solve(sin(x^2)/x,x));
+%union(%if(%z0#0,[x=-sqrt(%pi)*sqrt(%z0)],%union()),%if(%z0#0,[x=sqrt(%pi)*sqrt(%z0)],%union()))$
+
+nicedummies(to_poly_solve(sin(x^2)/x^2,x));
+%union(%if(%z0#0,[x=-sqrt(%pi)*sqrt(%z0)],%union()),%if(%z0#0,[x=sqrt(%pi)*sqrt(%z0)],%union()))$
+
+nicedummies(to_poly_solve(sin(x^2)/x^3,x));
+%union(%if(%z0#0,[x=-sqrt(%pi)*sqrt(%z0)],%union()),%if(%z0#0,[x=sqrt(%pi)*sqrt(%z0)],%union()))$
+
+nicedummies(to_poly_solve(x^a = 1,x));
+%union([x = %e^(2*%i*%pi*%z0/a)])$
+
+nicedummies(to_poly_solve(x^(2*a) + 2 * x^a + 1,x));
+%union([x = (-1)^(1/a)*%e^(2*%i*%pi*%z0/a)])$
+
+nicedummies(to_poly_solve((x^a-1)/(x^2 + 1),x));
+%union([x = %e^(2*%i*%pi*%z0/a)])$
+
+/* Two equations from Axiom Developer mailing list Fri, 02 Oct 2009 13:29:29 -0600. There
+are other equations in this thread that the to_poly_solve cannot do:
+
+  solve([ tan(bt)=(a*r)/(s*(r-d)), x=100*cos(bt), y=d*sin(bt)],[x,y,bt]),
+  solve([bt=atan((a*r)/(s*(r-d))),x=100*cos(bt),y=d*sin(bt)],[x,y,bt]).
+*/  
+
+to_poly_solve([a=3+x,b=1-x,x=2],[x], 'parameters=[a,b]);
+%union(%if((a = 5) %and (b = - 1), [x = 2], %union()))$
+
+nicedummies(to_poly_solve(tan(a)=b,a, 'simpfuncs = ['ratsimp]));
+%union([a = -((%i*log(-((b-%i)/(b+%i)))-2*%pi*%z0)/2)])$
+
+nicedummies(to_poly_solve(sin(x) = sin(x - p[0]),x));
+%union([x = (2*%pi*%z0+p[0]-%pi)/2])$
+
+nicedummies(to_poly_solve(sin(x) = cos(x),x));
+%union([x = (4*%pi*%z0+%pi)/4])$
+
+nicedummies(to_poly_solve(sin(x-5) - sin(5-x),x, 'simpfuncs = ['trigreduce]));
+%union([x=%pi*%z0+5])$
+
+nicedummies(to_poly_solve(cos(x-5) - cos(5-x),x, 'simpfuncs = ['trigreduce]));
+%union([x = %c0])$	
+
+nicedummies(to_poly_solve(cos(x^2-1)=0,x, 'simpfuncs = ['trigreduce]));
+%union([x=-sqrt(2*%pi*%z0+%pi+2)/sqrt(2)],[x=sqrt(2*%pi*%z0+%pi+2)/sqrt(2)])$
+
+to_poly_solve(log(x-sqrt(x-1)) = 0,x);
+%union([x = 1],[x = 2])$
+
+to_poly_solve(log(x-sqrt(x-1)) = log(2009),x);
+%union([x = (sqrt(29)*sqrt(277)+4019)/2])$
+
+/* From Sage developer Karl-Dieter Crisman (changed floats to rationals) */
+nicedummies(to_poly_solve(23040 *(4*%e^-(1200*t)-%e^-(300*t))^2-720000*(16*%e^-(1200*t)-%e^-(300*t))*
+((4/125)*%e^-(300*t)-(4/125)*%e^-(1200*t)),t));
+%union([t = (2*%i*%pi*%z0+log(25/4-3*sqrt(41)/4))/900],[t = (2*%i*%pi*%z1+log(3*sqrt(41)/4+25/4))/900])$
+
+/* From 19 Aug 2010 Sage-support mailing list (reported by R. Hankin, 19 August, 2010) */
+(declare(a,complex, b,complex), 
+   sol : ratsimp(nicedummies(%solve([a*b=15*%i-5,a*conjugate(b)=-13*%i+9],[a,b]))),0);
+0$
+
+sol : subst(%c0 = sqrt((13*%i-9)/(15*%i+5)), sol);
+%union([a=sqrt((13*%i-9)/(15*%i+5)),b=(15*%i-5)/sqrt((13*%i-9)/(15*%i+5))])$
+
+rectform(subst(first(sol), [a*b=15*%i-5,a*conjugate(b)=-13*%i+9]));
+[15*%i-5=15*%i-5,9-13*%i=9-13*%i]$
+
+/* enhanced catch_easy_cases--5 January 2013 */
+nicedummies(%solve(sin(x),x));
+%union([x=%pi*%z0])$
+
+nicedummies(%solve(cos(x),x));
+%union([x=(2*%pi*%z0+%pi)/2])$
+
+nicedummies(%solve(sin(5*x+7),x));
+%union([x=(%pi*%z0-7)/5])$
+
+expand(nicedummies(%solve(2013*sin(x)*cos(x),x)));
+%union([x=%pi*%z0+%pi/2],[x=%pi*%z1])$
+
+expand(nicedummies(%solve(2013*sin(x)*cos(x)*sin(sqrt(5)*x),x)));
+%union([x=%pi*%z0+%pi/2],[x=%pi*%z1],[x=(%pi*%z2)/sqrt(5)])$
+
+/* maybe this should be %union([x=-sqrt(%pi)*sqrt(%z0)],[x=sqrt(%pi)*sqrt(%z1)]) ... */
+nicedummies(%solve(sin(x^2),x));
+%union([x=-sqrt(%pi)*sqrt(%z0)],[x=sqrt(%pi)*sqrt(%z0)])$
+
+nicedummies(%solve(abs(x+7)*sin(x),x));
+%union([x=-7],[x=%pi*%z0])$
+
+nicedummies(%solve(abs(x+7)*sin(x)*cos(x),x));
+%union([x=-7],[x=(2*%pi*%z0+%pi)/2],[x=%pi*%z1])$
+
+nicedummies(%solve(tan(x)=tan(zzz),x));
+%union(%if((cos(zzz)#0) %and (cos(zzz+%pi*%z0)#0),[x=zzz+%pi*%z0],%union()))$
+
+expand(nicedummies(%solve(tan(x)=tan(%pi/4),x)));
+%union([x=%pi*%z0+%pi/4])$
+
+/* this could be better--so it goes */
+nicedummies(%solve(tan(x)=tan(%pi/5),x));
+%union(%if(cos((%pi*(5*%z0+1))/5)#0,[x=(5*%pi*%z0+%pi)/5],%union()))$
+
+/* conjugate(atanh(x)) doesn't simplify to atanh(x), by the way.*/
+%solve(conjugate(atanh(x)),x);
+%union([x=0])$
+
+%solve(conjugate(atanh(x/8+7)),x);
+%union([x=-56])$
+
+/* clean up */
+(print("time = ", absolute_real_time() - %start), is(absolute_real_time() - %start < 200));
+true$
+
+(reset(algexact), forget(z,complex,a,complex,b,complex), remvalue(sol,%time,eq,eqn1,eqn2,eqn3),0);
+0$

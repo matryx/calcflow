@@ -1,0 +1,318 @@
+
+/*
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+   MA 02110-1301, USA.
+   
+   
+**** AES en/decryption *********************************************************
+   
+   Copyright Volker van Nek, 2012 - 2013
+   
+   
+   This file shows the polynomial aspects of the AES algorithm and its functions 
+   repeatedly convert bytes to polynomials and vice versa. The additional file 
+   gf/aes2.mac directly works at byte level.
+   
+   In this file states are implemented as 4x4 matrices.
+   
+   The examples at the bottom of this file are taken from the AES specification
+   document (URL see below). One of these is also demonstrated in the excellent
+   Rijndael_Animation_v4_en.swf (http://www.formaestudio.com/rijndaelinspector/)
+   which I highly recommend to set next to this code.
+   
+   All functions are compiled when loading aes.mac. Takes a few seconds.
+   
+   Functions in this file work in Maxima version 5.29 or higher.
+   (Or download from git, compile and load src/numth.lisp.)
+*/
+
+
+/* sub_bytes **************************************************************** */
+
+%_byte_sub[byte] := block([poly, inv, p1, p2],
+   gf_minimal_set(2, x^8+x^4+x^3+x+1),
+   poly : gf_n2p(byte),
+   inv : if poly = 0 then 0 else gf_inv(poly),
+
+   gf_minimal_set(2, x^8+1),
+   p1 : x^4+x^3+x^2+x+1,
+   p2 : x^6+x^5+x+1, 
+   poly : gf_add(gf_mult(p1, inv), p2),
+   gf_p2n(poly) )$
+
+for byte:0 thru 255 do %_byte_sub[byte]$
+
+sub_bytes(state) := matrixmap(lambda([byte], %_byte_sub[byte]), state)$
+
+
+/* inv_sub_bytes ************************************************************ */
+
+%_inv_byte_sub[byte] := block([poly, inv, p1, p2],
+   gf_minimal_set(2, x^8+1),
+   poly : gf_n2p(byte),
+   p1 : x^4+x^3+x^2+x+1,
+   p2 : x^6+x^5+x+1, 
+   poly : gf_div(gf_sub(poly, p2), p1),
+   
+   gf_minimal_set(2, x^8+x^4+x^3+x+1),
+   inv : if poly = 0 then 0 else gf_inv(poly),
+   gf_p2n(inv) )$
+
+for byte:0 thru 255 do %_inv_byte_sub[byte]$
+
+inv_sub_bytes(state) := matrixmap(lambda([byte], %_inv_byte_sub[byte]), state)$
+
+
+/* shift_rows *************************************************************** */
+
+rotate(row, i) := append(rest(row, i), rest(row, i-4))$
+
+shift_rows(state) := apply('matrix, makelist(rotate(state[i], i-1), i,1,4))$
+
+
+/* inv_shift_rows *********************************************************** */
+
+inv_rotate(row, i) := append(rest(row, 4-i), rest(row, -i))$
+
+inv_shift_rows(M) := apply('matrix, makelist(inv_rotate(M[i], i-1), i,1,4))$
+
+
+/* mix_columns ************************************************************** */
+
+gf_set_data(2, x^8+x^4+x^3+x+1)$
+
+mat_n2p(num_mat) := matrixmap('gf_n2p, num_mat)$
+mat_p2n(poly_mat) := matrixmap('gf_p2n, poly_mat)$
+
+%_MIX_COLUMNS : mat_n2p( matrix(
+   [2, 3, 1, 1], 
+   [1, 2, 3, 1], 
+   [1, 1, 2, 3], 
+   [3, 1, 1, 2] ))$
+
+mix_columns(state) := block([mixed],
+   state : mat_n2p(state),
+   mixed : matrix(),
+   for i:1 thru 4 do 
+      mixed : addcol(mixed, gf_matmult(%_MIX_COLUMNS, col(state, i))),
+   mat_p2n(mixed) )$
+
+
+/* inv_mix_columns ********************************************************** */
+
+%_INV_MIX_COLUMNS : gf_matinv(%_MIX_COLUMNS)$
+
+inv_mix_columns(state) := block([mixed],
+   state : mat_n2p(state),
+   mixed : matrix(),
+   for n:1 thru 4 do 
+      mixed : addcol(mixed, gf_matmult(%_INV_MIX_COLUMNS, col(state, n))),
+   mat_p2n(mixed) )$
+
+
+/* add_round_key ************************************************************ */
+
+add_round_key(state, key) := 
+   mat_p2n( gf_matadd( mat_n2p(state), mat_n2p(key) ))$
+
+
+/* key_expansion ************************************************************ */
+
+%_rcon : addrow(
+   matrix([1, 2, 4, 8, 16, 32, 64, 128, 27, 54]),
+   zeromatrix(3, 10) )$
+
+rot_word(col) := addrow(submatrix(1, col), col[1])$
+
+key_expansion1(col1, col4, i) := block([rcon_col],
+   col1 : mat_n2p(col1),
+   col4 : matrixmap(lambda([byte], %_byte_sub[byte]), rot_word(col4)),
+   col4 : mat_n2p(col4),
+   rcon_col : mat_n2p(col(%_rcon, i)),
+   mat_p2n( gf_matadd(col1, col4, rcon_col) ))$
+
+key_expansion2(col_i, col_j) := 
+   mat_p2n( gf_matadd( mat_n2p(col_i), mat_n2p(col_j) ))$
+
+next_round_key(old, n) := block([new],
+   new : key_expansion1(col(old, 1), col(old, 4), n),
+   for i:2 thru 4 do
+      new : addcol(new, key_expansion2(col(old, i), col(new, i-1))),
+   new )$
+
+%_round_key : make_array(any, 11)$
+
+key_expansion(key) := (
+   kill(round_key),
+   %_round_key[0] : key,
+   for n:1 thru 10 do 
+      %_round_key[n] : next_round_key(%_round_key[n-1], n) )$
+
+
+/* cipher ******************************************************************* */
+
+cipher(state) := (
+   state : add_round_key(state, %_round_key[0]),
+   
+   for i:1 thru 9 do (
+      state : shift_rows( sub_bytes(state) ), 
+      state : mix_columns(state), 
+      state : add_round_key(state, %_round_key[i]) ),
+   
+   state : shift_rows( sub_bytes(state) ), 
+   add_round_key(state, %_round_key[10]) )$
+
+
+/* inv_cipher *************************************************************** */
+
+inv_cipher(state) := (
+   state : add_round_key(state, %_round_key[10]),
+   
+   for n:9 step -1 thru 1 do (
+      state : inv_shift_rows( inv_sub_bytes(state) ), 
+      state : add_round_key(state, %_round_key[n]),
+      state : inv_mix_columns(state) ),
+   
+   state : inv_shift_rows( inv_sub_bytes(state) ), 
+   add_round_key(state, %_round_key[0]) )$
+
+
+/* user interface *********************************************************** */
+
+print_block(block) := 
+   printf(true, "~{~{~2,'0x ~}~%~}", block)$
+
+text2state(text) := block([state, c,r],
+   state : zeromatrix(4, 4),
+   c : r : 1,
+   for char in map('cint, charlist(text)) do (
+      state[r, c] : char,
+      if (r : r+1) = 5 then (r : 1, c : c+1) ),
+   state )$
+
+state2text(state) := 
+   simplode(map('ascii, flatten(args(transpose(state)))))$
+
+bytestring2state(bytestring) := block([num, state, ibase:16],
+   num : parse_string(bytestring),
+   state : zeromatrix(4, 4),
+   for c:4 thru 1 step -1 do
+      for r:4 thru 1 step -1 do (
+         state[r, c] : ?logand(num, 255),
+         num : ?ash(num, - 8) ),
+   state )$
+
+state2bytestring(state) := 
+   printf(false, "~{~2,'0x~}", flatten(args(transpose(state))))$
+
+
+/* compilation ************************************************************** */
+
+define_variable(old_io, ?\*standard\-output\*, any_check)$
+define_variable(redirection, make_string_output_stream(), any_check)$
+?\*standard\-output\* : redirection$
+
+compile(
+   sub_bytes, inv_sub_bytes, 
+   rotate, shift_rows, inv_rotate, inv_shift_rows, 
+   mat_n2p, mat_p2n, mix_columns, inv_mix_columns, 
+   add_round_key, 
+   rot_word, key_expansion1, key_expansion2, next_round_key, key_expansion, 
+   cipher, inv_cipher, 
+   print_block, text2state, state2text, bytestring2state, state2bytestring )$
+
+?\*standard\-output\* : old_io$
+close(redirection)$
+
+
+/* examples ***************************************************************** */
+
+/*
+http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+(Nov 26, 2001, AES specification) 
+page 35/36:
+
+(%i2) state : bytestring2state("00112233445566778899aabbccddeeff")$
+(%i3) key : bytestring2state("000102030405060708090a0b0c0d0e0f")$
+(%i4) key_expansion(key)$
+(%i5) state : cipher(state)$
+(%i6) state2bytestring(state);
+(%o6)                  69C4E0D86A7B0430D8CDB78070B4C55A
+(%i7) state : inv_cipher(state)$
+(%i8) state2bytestring(state);
+(%o8)                  00112233445566778899AABBCCDDEEFF
+
+
+fips-197.pdf, page 33/34:
+
+(%i9) state : bytestring2state("3243f6a8885a308d313198a2e0370734")$
+(%i10) key : bytestring2state("2b7e151628aed2a6abf7158809cf4f3c")$
+(%i11) key_expansion(key)$
+
+(%i12) obase : 16$
+(%i13) key;
+                             [ 2B  28   0AB   9  ]
+                             [                   ]
+                             [ 7E  0AE  0F7  0CF ]
+(%o0D)                       [                   ]
+                             [ 15  0D2  15   4F  ]
+                             [                   ]
+                             [ 16  0A6  88   3C  ]
+(%i14) state;
+                             [ 32   88  31   0E0 ]
+                             [                   ]
+                             [ 43   5A  31   37  ]
+(%o0E)                       [                   ]
+                             [ 0F6  30  98    7  ]
+                             [                   ]
+                             [ 0A8  8D  0A2  34  ]
+(%i15) obase : 10.$
+(%i16) print_block(state)$
+32 88 31 E0 
+43 5A 31 37 
+F6 30 98 07 
+A8 8D A2 34 
+(%i17) state : cipher(state)$
+
+(%i18) print_block(state)$
+39 02 DC 19 
+25 DC 11 6A 
+84 09 85 0B 
+1D FB 97 32 
+(%i19) state : inv_cipher(state)$
+
+(%i20) print_block(state)$
+32 88 31 E0 
+43 5A 31 37 
+F6 30 98 07 
+A8 8D A2 34 
+
+
+(%i21) state : text2state("Computer Algebra")$
+
+(%i22) matrixmap(ascii, state);
+                                [ C  u     e ]
+                                [            ]
+                                [ o  t  A  b ]
+(%o22)                          [            ]
+                                [ m  e  l  r ]
+                                [            ]
+                                [ p  r  g  a ]
+(%i23) state2text(state);
+(%o23)                         Computer Algebra
+*/
+
+
+'done$

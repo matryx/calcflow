@@ -1,0 +1,281 @@
+/*******************************************************************************
+ *
+ *          Power function
+ *
+ ******************************************************************************/
+ 
+/* ---------- Initialization ------------------------------------------------ */
+ 
+kill(all);
+done;
+ 
+declare(z,complex, j,imaginary, x,real, n,integer, odd, odd, even, even);
+done;
+
+(assume(xp>0,xn<0), reset(domain), reset(radexpand), done);
+done;
+
+/* ---------- Specific values ------------------------------------------------*/
+
+errcatch(0^[0, 0.0, 0.0b0]);
+[];
+
+/* The type of the exponent is preserved */
+z^[0, 0.0, 0.0b0];
+[1, 1.0, 1.0b0];
+ 
+z^(1/2);
+sqrt(z);
+
+/* A float or bigfloat exponent is not simplified */
+z^[1, 1.0, 1.0b0];
+[z, z^1.0, z^1.0b0];
+
+assume(a>0);
+[a>0];
+
+/* a positive and real -> 0 */
+[0, 0.0, 0.0b0]^a;
+[0, 0.0, 0.0b0];
+
+0^[(a+%i),(2+%i)];
+[0,0];
+
+/* Exponent is negative and real -> infinity */
+errcatch([0, 0.0, 0.0b0]^(-a));
+[];
+
+forget(a>0);
+[a>0];
+
+/* Exponent is pure imaginary -> 'und */
+errcatch([0, 0.0, 0.b0]^%i);
+[];
+
+/* Exponent is a symbol declared to be imaginary -> 'und */
+errcatch([0, 0.0, 0.0b0]^j);
+[];
+
+/* Again for a imaginary expression */
+errcatch([0, 0.0, 0.0b0]^(%i*(x+y)));
+[];
+
+/* The type of the base is preserved */
+[1, 1.0, 1.0b0]^z;
+[1, 1.0, 1.0b0];
+
+/* No simplification for general symbols, but for symbols declared to be 
+ * even or odd. This works for expressions and integer numbers too.
+ */
+(-1)^[z, j, x, n, odd, even, 2*odd, even+1];
+[(-1)^z, (-1)^j, (-1)^x, (-1)^n, -1, 1, 1, -1];
+
+(-1)^[-2, -1, 0, 1, 2, 3];
+[1, -1, 1, -1, 1, -1];
+
+/* Polarform for  (-1)^x -> exp(%i*%pi*x)
+ * Maxima does not simplify atan2(sin(%pi*x), cos(%pi*x))
+ * Mark the following two examples as expected failures.
+ */
+polarform((-1)^x);
+%e^(%i*%pi*x);
+
+polarform(%i^x);
+%e^(%i*%pi*x/2);
+
+/* ---------- Values at infinities ------------------------------------------ */
+
+/* Only the limit routines can handle infinities and indeterminates.
+ * We check this.
+ */
+
+(assume(abs(x1)<1, x2>1, x3<-1), done);
+done;
+
+/* Check limits against inf --- */
+
+/* limit(x^inf) -> 0 for abs(x)<1 */
+limit([x1,1/2,-1/2]^x,x,inf);
+[0,0,0];
+
+/* limit(x^inf) -> inf for x>1 */
+limit([x2,-x3,2]^x,x,inf);
+[inf,inf,inf];
+
+/* limit(x^inf) -> infinity for x<-1 */
+limit([x3,-x2,-2]^x,x,inf);
+[infinity, infinity, infinity];
+
+/* limit(x^inf) -> 1 for x=1, and ind for x= -1, %i and -%i */
+limit([1,-1,%i,-%i]^x,x,inf);
+[1,ind,ind,ind];
+
+/* --- Check limit against minf --- */
+
+/* limit(x^minf) -> infinity for abs(x)<1 */
+limit([x1, 1/2,-1/2]^x,x,minf);
+[infinity,inf,infinity];
+
+/* limit(x^minf) -> 0 for x>1 */
+limit([x2,-x3,2]^x,x,minf);
+[0,0,0];
+
+/* limit(x^minf) -> 0 for x<-1 */
+limit([x3,-x2,-2]^x,x,minf);
+[0,0,0];
+
+/* limit(x^minf) -> 1 for x=1, and ind for x= -1, %i and -%i */
+limit([1,-1,%i,-%i]^x,x,minf);
+[1,und,und,und];
+
+/* ---------- General characteristics --------------------------------------- */
+
+/* Parity: n is declared to be an integer */
+(-z)^n;
+(-1)^n*z^n;
+
+/* Mirror symmetry for z not a negative real number */
+conjugate((xp+%i*y)^(a+%i*b));
+(xp-%i*y)^(a-%i*b);
+
+/* Homogencity */
+assume(b>0, c<0);
+[b>0, c<0];
+
+(b*z)^a;
+b^a*z^a;
+
+(-b*z)^a;
+b^a*(-z)^a;
+
+(c*z)^a;
+(-c)^a*(-z)^a;
+
+(-c*z)^a;
+(-c)^a*z^a;
+
+forget(b>0, c<0);
+[b>0, c<0];
+
+/* Scale symmetry */
+(z^a)^n;
+z^(n*a);
+
+/* ---------- Series representations ---------------------------------------- */
+
+/* ---------- Differential equations ---------------------------------------- */
+
+/* ---------- Transformations and argument simplifications ------------------ */
+
+(radexpand: all, domain:complex, done);
+done;
+
+(a^b)^c;
+a^(b*c);
+
+(a*b*c)^x;
+a^x*b^x*c^x;
+
+(a*b/c)^x;
+a^x*b^x/c^x;
+
+(radexpand: true, domain:real, done);
+done;
+
+(a^b)^[-3,-2,-1,1,2,3];
+[1/a^(3*b),1/a^(2*b),1/a^b,a^b,a^(2*b),a^(3*b)]$
+
+(a^b)^[-2/3, -1/3, 1/3, 2/3];
+[1/a^(2*b/3),1/a^(b/3),a^(b/3),a^(2*b/3)]$
+
+(a^[-3,-2,-1, 1,2,3])^c;
+[1/a^(3*c),1/abs(a)^(2*c),1/a^c,a^c,abs(a)^(2*c),a^(3*c)]$
+
+(a^[-1/4,-1/3,-1/2, 1/2,1/3, 1/4])^c;
+[1/a^(c/4),1/a^(c/3),1/a^(c/2),a^(c/2),a^(c/3),a^(c/4)]$
+
+(a^[1/5,2/5,3/5, 4/5,6/5, 7/5, 8/5, 9/5])^c;
+[a^(c/5),abs(a)^(2*c/5),a^(3*c/5),abs(a)^(4*c/5),abs(a)^(6*c/5),a^(7*c/5),
+ abs(a)^(8*c/5),a^(9*c/5)]$
+
+(1/z^a)^b;
+1/(z^a)^b;
+
+(-1/x)^a;
+(-1)^a/x^a;
+
+(domain:complex, done);
+done;
+
+(a^b)^[-3,-2,-1,1,2,3];
+[1/a^(3*b),1/a^(2*b),1/a^b,a^b,a^(2*b),a^(3*b)]$
+
+(a^[-1/4,-1/3,-1/2, 1/2,1/3, 1/4])^c;
+[1/a^(c/4),1/a^(c/3),1/a^(c/2),a^(c/2),a^(c/3),a^(c/4)]$
+
+(a^[1/5,2/5,3/5, 4/5])^c;
+[a^(c/5),a^(2*c/5),a^(3*c/5),a^(4*c/5)]$
+
+(xp^b)^[-2/3, -1/3, 1/3, 2/3];
+[1/xp^(2*b/3),1/xp^(b/3),xp^(b/3),xp^(2*b/3)]$
+
+(xp^[1/5,2/5,3/5, 4/5,6/5, 7/5, 8/5, 9/5])^c;
+[xp^(c/5),xp^(2*c/5),xp^(3*c/5),xp^(4*c/5),xp^(6*c/5),xp^(7*c/5),xp^(8*c/5),
+ xp^(9*c/5)]$
+
+
+/* ---------- Limits -------------------------------------------------------- */
+
+limit((z^v-1)/v,v,0);
+log(z);
+
+limit(v*(z^(1/v)-1),v,inf);
+log(z);
+
+(declare(a, noninteger), assume(a>0,b>1), done);
+done;
+
+limit(x^a/b^x,x,inf);
+0;
+
+forget(a>0,b>1);
+[a>0,b>1];
+
+limit(z^a/a!,a,inf);
+0;
+
+declare(v,noninteger);
+done;
+assume(v>0);
+[v>0];
+
+/* Maxima ask the unnecessary question: is v an integer */
+limit(z^v*log(z),z,0);
+0;
+
+limit(z^-v*log(z),z,inf);
+0;
+
+remove(v,noninteger);
+done;
+forget(v>0);
+[v>0];
+
+
+/* ---------- Representations through hypergeometric functions -------------- */
+
+hgfred([-a],[],1-z);
+z^a;
+
+/* %e_to_numlog does not simplify %e^(a*log(z)) -> z^a */
+hgfred([],[],a*log(z)), radcan;
+z^a;
+
+hgfred([-a,b],[b],1-z);
+z^a;
+
+/* Reseting the option variables to the default values */
+(reset(domain), reset(radexpand), done);
+done;
+
+/* ---------- End of file rtest_power.mac ----------------------------------- */

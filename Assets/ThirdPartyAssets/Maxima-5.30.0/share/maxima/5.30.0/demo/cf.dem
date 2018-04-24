@@ -1,0 +1,35 @@
+/* ===================================================================== */
+/* file: cf.dem    */
+/* the line cf(frac1+frac2) loops !!!!  */
+/* the 2 last lines gives erroneous results  */
+/* CONTINUED FRACTIONS. THIS IS GOOD STUFF. */
+
+frac1:cf([1,2,3,4]);
+frac2:cf([2,3,4,5]);
+cfdisrep(frac1);
+cf(frac1+frac2);
+cfdisrep(%);
+
+
+cf(467288576/469097433);
+cfdisrep(%);
+ratsimp(%);
+
+
+/* cf can make the continued fraction expansion of sqrt(n) to
+   cflength terms. */
+
+block([cflength:4],cfdisrep(cf(sqrt(3))));
+ratsimp(%);
+%^2-3;
+
+ratsqrt(n,cflength):=ratsimp(cfdisrep(cf(sqrt(n))))$
+
+ratsqrt(1776,25);
+%^2-1776;
+
+/* With the primitives of SQRT and rational operations 
+   continued fraction expansions of many trancendental expressions
+   may be made in the classical way. */
+
+/* ======================== END ==== END  ====================== */

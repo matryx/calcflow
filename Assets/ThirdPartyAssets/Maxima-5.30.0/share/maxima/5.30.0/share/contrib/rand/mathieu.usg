@@ -1,0 +1,66 @@
+mathieu0.mac and mathieu.mac are from the book "Computer Algebra in
+Applied Mathematics: An introduction to MACSYMA", by Richard H Rand,
+Pitman (1984).
+
+Mathieu's equation is x''+(delta+e*cos(t))*x=0 
+
+For given values of the parameters delta and e, either all the
+solutions are bounded (the equation is stable) or there exist
+unbounded solutions (the equation is unstable).  The regions of
+stability are separated from thos of instability by "transition
+curves".
+
+This program computes the transition curves for n=0 (mathieu0.mac) and
+n>0 (mathieu.mac) in Mathieu's equation using a perturbation method.
+
+The run below, using maxima-5.9.0cvs, reproduces the result on pages
+90-94 of the book.
+
+(C1) load("./mathieu0.mac");
+(D1)                            ./mathieu0.mac
+(C2) mathieu0();
+ENTER DEGREE OF TRUNCATION
+8;
+              8       6      4    2
+       68687 e    29 e    7 e    e
+delta= -------- - ----- + ---- - --
+        294912     144     32    2
+
+
+(C1) load("./mathieu.mac");
+(D1)                             ./mathieu.mac
+(C2) mathieu();
+ENTER TRANSITION CURVE NUMBER N
+1;
+ENTER DEGREE OF TRUNCATION
+6;
+           6       5    4     3    2
+       49 e    11 e    e     e    e    e   1
+delta= ----- - ----- - --- + -- - -- - - + -
+       36864   4608    384   32   8    2   4
+
+           6       5    4     3    2
+       49 e    11 e    e     e    e    e   1
+delta= ----- + ----- - --- - -- - -- + - + -
+       36864   4608    384   32   8    2   4
+
+(D2)
+(C3) mathieu();
+ENTER TRANSITION CURVE NUMBER N
+2;
+ENTER DEGREE OF TRUNCATION
+6;
+                6        4      2
+       1002401 e    763 e    5 e
+delta= ---------- - ------ + ---- + 1
+        4976640      3456     12
+
+              6       4    2
+         289 e     5 e    e
+delta= - ------- + ---- - -- + 1
+         4976640   3456   12
+
+
+Local Variables: ***
+mode: Text ***
+End: ***

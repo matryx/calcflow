@@ -1,0 +1,56 @@
+polynomialp(1,[x])$
+true$
+
+polynomialp(%pi,[x])$
+true$
+
+polynomialp(sqrt(23),[x])$
+true$
+
+polynomialp(1+x,[x])$
+true$
+
+polynomialp(1 + x * (sqrt(5) + x),[x])$
+true$
+
+polynomialp(1 + x * (sqrt(5) + x),[y])$
+false$
+
+polynomialp(1 + x * (sqrt(5) + y),[x,y])$
+true$
+
+polynomialp(1 + sqrt(x),[x], 'numberp, 'numberp);
+true$
+
+polynomialp(1 + sqrt(1 + sqrt(x)),[x], 'numberp, 'numberp);
+true$
+
+polynomialp(1 + sqrt(x + sqrt(1 + x*y)),[x,y], 'numberp, 'numberp);
+true$
+
+polynomialp(cos(x),[x]);
+false$
+
+polynomialp(cos(x),[x], 'numberp, 'numberp);
+false$
+
+polynomialp([x],[x], 'numberp, 'numberp);
+false$
+
+polynomialp((1+x)^a,[x], 'constantp, lambda([e],freeof(x,e)));
+true$
+
+polynomialp((1+x)^a,[x], 'constantp);
+false$
+
+
+
+
+
+
+
+
+
+
+
+

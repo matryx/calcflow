@@ -1,0 +1,23 @@
+      i=5+j*2
+
+      x=y/6.0-3.0
+
+      implicit real*8 (a-h,o-z)
+      real*8 m(4,4)
+      integer i,j
+      do 25009 i=1,4
+          do 25010 j=1,4
+              if ( .not. i .eq. j) goto 25011
+                  m(i,j)=1.0
+                  goto 25012
+25011         continue
+                  m(i,j)=0.0
+25012         continue
+25010     continue
+25009 continue
+
+
+      double x
+      integer y
+      i=9*y
+      x=7.d0*x/u

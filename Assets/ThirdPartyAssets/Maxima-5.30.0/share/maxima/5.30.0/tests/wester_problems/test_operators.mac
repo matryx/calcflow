@@ -1,0 +1,58 @@
+/* Original version of this file copyright 1999 by Michael Wester,
+ * and retrieved from http://www.math.unm.edu/~wester/demos/Operators/problems.macsyma
+ * circa 2006-10-23.
+ *
+ * Released under the terms of the GNU General Public License, version 2,
+ * per message dated 2007-06-03 from Michael Wester to Robert Dodier
+ * (contained in the file wester-gpl-permission-message.txt).
+ *
+ * See: "A Critique of the Mathematical Abilities of CA Systems"
+ * by Michael Wester, pp 25--60 in
+ * "Computer Algebra Systems: A Practical Guide", edited by Michael J. Wester
+ * and published by John Wiley and Sons, Chichester, United Kingdom, 1999.
+ */
+/* ----------[ M a c s y m a ]---------- */
+/* ---------- Initialization ---------- */
+showtime: all$
+prederror: false$
+/* ---------- Operators ---------- */
+load(opalg)$
+f(x):= exp(x);
+g(x):= x^2;
+/* (f + 2 g)(y) => e^y + 2 y^2 */
+(f + 2*g)(y);
+/* (f o g)(y) => e^(y^2) */
+(f . g)(y);
+remfunction(f, g)$
+/* Linear differential operator */
+L: (diffop(x) - 1) . (diffop(x) + 2);
+/* => f'' + f' - 2 f */
+depends(f, x);
+L(f);
+remove(f, dependency)$
+/* => g''(y) + g'(y) - 2 g(y) */
+subst(x = y, L)(g(y));
+/* => 2 A [(1 + z) cos(z^2) - (1 + 2 z^2) sin(z^2)] */
+subst(x = z, L)(A * sin(z^2));
+/* Truncated Taylor series operator */
+T: lambda([f, x, a],
+          sum(subst(x = a, (diffop(x)^^k)(f(x)))/k! * (x - a)^k, k, 0, 2));
+/* => f(a) + f'(a) (x - a) + f''(a) (x - a)^2/2 */
+T(f, x, a);
+/* => g(b) + g'(b) (y - b) + g''(b) (y - b)^2/2 */
+T(g, y, b);
+/* => sin(c) + cos(c) (z - c) - sin(c) (z - c)^2/2 */
+T(sin, z, c);
+remvalue(L, T)$
+/* Define the binary infix operator ~ so that x ~ y => sqrt(x^2 + y^2) */
+infix("~")$
+"~"(x, y):= sqrt(x^2 + y^2)$
+3 ~ 4;
+/* Make it associative: 3 ~ 4 ~ 12 => 13 */
+3 ~ 4 ~ 12;
+/* Define the matchfix pair of operators | and | so that | x | => abs(x) */
+matchfix("|", "|")$
+"|"(x):= abs(x)$
+| -2 |;
+/* ---------- Quit ---------- */
+quit();

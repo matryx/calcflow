@@ -1,0 +1,47 @@
+/* Filename <name>.mac
+
+   ***************************************************************
+   *							         *
+   *                     <package name>                          *
+   *                <functionality description>                  *
+   *                                                             *
+   *          from: Computer Algebra in Applied Math.            *
+   *                   by Rand (Pitman,1984)                     *
+   *                Programmed by Richard Rand                   *
+   *      These files are released to the public domain          *
+   *            						 *
+   ***************************************************************
+(d4) This program generates the Taylor series solution
+
+
+to the Nth order ODE:
+
+
+            (N)                             (N-1)
+
+
+	   Y    =  F ( X, Y, Y', Y'', ..., Y      )
+
+
+for arbitrary initial conditions at X = 0.
+
+
+To call it, type:
+
+
+                   SOLUTION()
+
+*/
+
+solution():=(input(),step1(),step2(),v:f,
+	 for i from n thru m do (u:u+evaluate(v)*x^i/i!,v:deriv(v)),output())$
+input():=(n:read("ENTER ORDER OF D.E."),m:read("ENTER DEGREE OF TRUNCATION"),
+      f:read("ENTER RIGHT HAND SIDE OF ODE.\
+REPRESENT Y BY Y[0], Y' BY Y[1], ETC."),
+      print(" "),print(f),print(" "),
+      for i from 0 thru n-1 do z[i]:read("ENTER INITIAL VALUE OF Y[",i,"]"))$
+step1():=u:sum(z[i]*x^i/i!,i,0,n-1)$
+step2():=initial:makelist([y[i] = z[i]],i,0,n-1)$
+deriv(g):=diff(g,x)+sum(diff(g,y[i])*y[i+1],i,0,n-2)+diff(g,y[n-1])*f$
+evaluate(g):=ev(g,x:0,initial)$
+output():=print("Y =",u)$

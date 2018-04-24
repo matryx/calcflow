@@ -5,7 +5,8 @@ using UnityEngine;
 
 [RequireComponent(typeof(RayCastSender))]
 
-public class RayCastGrabber : MonoBehaviour {
+public class RayCastGrabber : MonoBehaviour
+{
 
     Grabber rayGrabber;
     public VRController controller;
@@ -86,6 +87,14 @@ public class RayCastGrabber : MonoBehaviour {
 
     void PushSelected(VRController c, ControllerComponentArgs e)
     {
+        // @stats
+        // joystick pushpull
+        // Calcflow.UserStatistics.StatisticsTracking.StartEvent("Joystick", "Push-Pull",
+        // new Dictionary<string, object>()
+        // {
+        //     {"Hand", rayGrabber.gameObject.name}
+        // });
+
         if (Mathf.Abs(e.x) > Mathf.Abs(e.y)) return;
 
         Vector3 currPos = rayGrabber.transform.position;
@@ -98,12 +107,36 @@ public class RayCastGrabber : MonoBehaviour {
         {
             rayGrabber.transform.position = nextPos;
         }
+
+        // @stats
+        // joystick pushpull
+        // Calcflow.UserStatistics.StatisticsTracking.EndEvent("Joystick", "Push-Pull",
+        // new Dictionary<string, object>()
+        // {
+        //     {"Hand", rayGrabber.gameObject.name}
+        // });
     }
 
     void RotateSelected(VRController c, ControllerComponentArgs e)
     {
+        // @stats
+        // joystick rotate
+        // Calcflow.UserStatistics.StatisticsTracking.StartEvent("Joystick", "Rotate",
+        // new Dictionary<string, object>()
+        // {
+        //     {"Hand", rayGrabber.gameObject.name}
+        // });
+
         if (Mathf.Abs(e.y) > Mathf.Abs(e.x)) return;
 
         rayGrabber.transform.RotateAround(rayGrabber.transform.position, Vector3.up, e.x * 4);
+
+        // @stats
+        // joystick pushpull
+        // Calcflow.UserStatistics.StatisticsTracking.EndEvent("Joystick", "Rotate",
+        // new Dictionary<string, object>()
+        // {
+        //     {"Hand", rayGrabber.gameObject.name}
+        // });
     }
 }

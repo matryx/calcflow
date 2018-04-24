@@ -1,0 +1,365 @@
+
+/* Gosper's equation-related routines */
+
+/* RISC Institite, Linz, Austria */
+/* by Fabrizio Caruso            */
+
+
+
+
+
+/* It creates the Gosper's polynomial out of the following parameters:*/
+/* polynomials p,q,r + */ 
+/* Ansatz degree deg of the solution + */ 
+/* indeterminate + */
+/* unknown coefficients name */
+AnsatzDegreeVerboseOpt(p,q,r,indet,mode) :=
+  block(
+  [qp,qm,degqp,degqm,degp,qpCoeff,qmCoeff,alpha],
+  
+  /* Initialization */ 
+  qp : expand(q + r),
+  qm : expand(q - r),
+  degqp : degree(expand(qp),indet),
+  degqm : degree(expand(qm),indet),
+  degp : degree(expand(p),indet),
+  
+  if mode >= verbose then
+    (
+    print("(Ansatz) Degree of qplus:" , degqp),
+    print("(Ansatz) Degree of qminus: " , degqm),
+    print("(Ansatz) Degree of p: " , degp)
+    ),  
+
+  /* Case distinction */
+  if degqm >= degqp then 
+     (
+     if mode >= verbose then
+       (
+       print("(Ansatz degree) Ordinary case (degqm>=degqp)"),
+       print("(Ansatz degree) Degree : ", degp-degqm)
+       ),
+     return(degp - degqm)
+     )
+  else
+     (
+     if mode >= verbose then
+       print("(Ansatz degree) Non-ordinary case (degqm<degqp)"),
+     qpCoeff : leadCoeff(qp,indet),
+     if mode >= verbose then
+       print("(Ansatz degree) Leading coeff. of qplus: ", qpCoeff),
+     qmCoeff : leadCoeff(qm,indet),
+     if mode >= verbose then
+       print("(Ansatz degree) Leading coeff. of qminus: ", qmCoeff),
+     alpha : -2*(qmCoeff/qpCoeff),
+     if mode >= verbose then
+       print("(Ansatz degree) alpha :", alpha),
+     if integerp(alpha) then
+        (
+        if mode >= verbose then
+          print("(Ansatz degree) Nasty case (int(-2*qmC/qpC))"),
+        return(max(alpha,degp-degqp+1,0)) /* 0??? */
+        )
+     else
+        (
+        if mode >= verbose then
+          print("(Ansatz degree) Easy case (not(int(-2*qmC/qpC)))"),
+        return(max(degp-degqp+1,0)) /* 0??? */
+        )
+     )
+   );
+
+
+
+
+/* p,q,r: Gosper's form polynomials */
+/* indet: indeterminate */
+/* coef: prefix of the coefficients */
+/* deg: desidered degree of the Gosper's polynomial */
+GosperPoly(p,q,r,indet,coef,deg) :=
+   expand(q*subst(k+1,k,poly(indet,coef,deg))-r*poly(indet,coef,deg)-p);
+
+
+
+
+/* It solves the Gosper's equation (Gosper's polynomial=0) */
+/* and yields the coefficients of the solution in a list */
+/* */
+/* We are assuming that Gpoly is fully expanded */
+
+
+/* It solves the Gosper's equation (Gosper's polynomial=0) */
+/* and yields the coefficients of the solution in a list */
+/* */
+/* We are assuming that Gpoly is fully expanded */
+
+/* Gpoly: Gosper polynomial */
+/* unkPar: */
+/* numUnkPar: */
+/* indet : */
+SolveSysVerboseOpt(Gpoly,unkPar,numUnkPar,indet,mode) :=
+   block([dim,base,baseElem,sol],
+
+   if mode >= verbose then
+     (
+     print("(SolveSys) Poly2List: ", poly2List(Gpoly,indet)),
+     print("(SolveSys) Variables: ", 
+            makelist(unkPar[i],i,0,numUnkPar-1))
+     ),
+   
+  sol : linear_solver(poly2List(Gpoly,indet),
+                      makelist(unkPar[i],i,0,numUnkPar-1)),
+
+  dim : length(ind_vars(linear_solver)),
+  if mode >= verbose then
+    (
+    print("mode : ", mode),
+    print("dim : ", dim),
+    print("debug : ", ind_vars(linear_solver)),
+    print("sol : ", sol)
+    ),   
+
+  if dim>0 and not(sol=[]) then
+     (
+     base : [],
+     for i:1 thru dim do
+       (
+       baseElem : sol,
+       for j:1 thru dim do
+          if j = i then
+             baseElem : subst(0,ind_vars(linear_solver)[j],baseElem)
+          else
+             baseElem : subst(1,ind_vars(linear_solver)[j],baseElem),
+       base : endcons(baseElem,base)
+       ),
+     return(base)
+     )
+  else
+     return([sol])
+   );
+
+
+/* It solves the Gosper's equation (Gosper's polynomial=0) */
+/* and yields the coefficients of the solution in a list */
+/* */
+/* We are assuming that Gpoly is fully expanded */
+
+/* Gpoly: Gosper polynomial */
+/* unkPar: */
+/* numUnkPar: */
+/* indet : */
+SolveZSysVerboseOpt(Gpoly,unkPar1,numUnkPar1,unkPar2,numUnkPar2,indet,
+                    solver,mode) :=
+   block([sol,dim,base,i,j,baseElem],
+
+   if mode>=verbose then
+     (
+     print("inside : ", mode),
+     print("(SolveZSys) Unknowns: ", unkPar1, unkPar2),
+     print("(SolveZSys) Number of unknowns: ", numUnkPar1, numUnkPar2),
+     print("(SolveZSys) Gpoly : ", Gpoly),
+     print("(SolveZSys) Poly2List: ", poly2List(Gpoly,indet)),
+     print("(SolveZSys) Variables: ", 
+         append( 
+         makelist(unkPar1[i],i,0,numUnkPar1-1),
+         makelist(unkPar2[i],i,0,numUnkPar2-1))),
+     print("Gpoly : ", Gpoly)
+     ),
+   sys : poly2List(Gpoly,indet),
+   
+   if mode=verbose then
+     print("sys : ", sys),
+
+   sys : makelist(clearGCD(part(sys,i),unkPar1,numUnkPar1,
+                                       unkPar2,numUnkPar2),i,1,length(sys)),
+
+   sol : solver(poly2List(Gpoly,indet),
+         append(
+         makelist(unkPar1[i],i,0,numUnkPar1-1), 
+         makelist(unkPar2[i],i,0,numUnkPar2-1))),
+   if mode=verbose then
+     (
+     print("sys : ", sys),
+     print("sol : ", sol)
+     ),
+   dim : length(ind_vars(solver)),
+   base : [],
+   for i:1 thru dim do
+      (
+      baseElem : sol,
+      for j:1 thru dim do
+         if j = i then
+            baseElem : subst(1,ind_vars(solver)[j],baseElem)
+         else
+            baseElem : subst(0,ind_vars(solver)[j],baseElem),
+      base : endcons(baseElem,base)
+      ),
+   return(base)
+        );
+
+checkSol(sys,sol) :=
+  block([i,res],
+res : sys,
+for i:1 thru length(sol) do
+   res : subst(second(sol[i]),first(sol[i]),res),
+return(factor(res))
+);
+
+
+/* It solves the Gosper's equation (Gosper's polynomial=0) */
+/* and yields the coefficients of the solution in a list */
+/* */
+/* We are assuming that Gpoly is fully expanded */
+
+/* Gpoly: Gosper polynomial */
+/* unkPar: */
+/* numUnkPar: */
+/* indet : */
+SolveZSysVerboseSys(Gpoly,unkPar1,numUnkPar1,unkPar2,numUnkPar2,indet) :=
+   block(
+   print("(SolveZSys) Unknowns: ", unkPar1, unkPar2),
+   print("(SolveZSys) Number of unknowns: ", numUnkPar1, numUnkPar2),
+   print("(SolveZSys) Poly2List: ", poly2List(Gpoly,indet)),
+   print("First equation : ", part(poly2List(Gpoly,indet),1)),
+   print("Coeff in _z[0] of degree 0 : ", coeff(part(poly2List(Gpoly,indet),1),n,0)),
+   print("(SolveZSys) Variables: ", 
+         append( 
+         makelist(unkPar1[i],i,0,numUnkPar2-1),
+         makelist(unkPar2[i],i,0,numUnkPar1-1))),
+   print(""),
+   print("(SolveZSys) LINEAR SYSTEM OF EQUATIONS"), 
+   showSys(Gpoly,indet),
+
+   [linear_solver(poly2List(Gpoly,indet),
+         append(
+         makelist(unkPar1[i],i,0,numUnkPar2-1), 
+         makelist(unkPar2[i],i,0,numUnkPar1-1)))]
+        );
+
+
+
+/* It shows the corresponding linear system of a Gosper-polynomial */
+showSys(Gpoly,indet) :=
+   printSys(poly2List(Gpoly,indet),1);
+
+
+/* Pretty print of am homogeneus system of linear equations */
+printSys(list,num) :=
+   block(
+
+   print(""),
+   if length(list) = 1 then
+      print(first(list)," = 0.    (",num,")" )
+   else
+      (
+      print(""),
+      print(first(list)," = 0,    (",num,")" ),
+      printSys(rest(list),num+1)
+      )
+   );
+
+
+/* Pretty print of the degrees of the solutions of a system of linear equations */
+/* Separates the Gosper and Zeilberger Ansatz coefficients */
+getDegrees(Gres,GLength,ZLength,n) := 
+  block(
+  [GDegList,ZDegList],
+
+  minListLength : min(GLength,ZLength),
+  GDegList:[],
+  ZDegList:[],
+
+  for i : 1 thru minListLength*2 do
+     (
+     if oddp(i) then
+        (
+        print(lhs(Gres[i]), "=", factor(xthru(rhs(Gres[i]))), "  deg: ", 
+              degree(expand(factor(xthru(rhs(Gres[i])))),n)),
+        print(""),
+        GDegList : endcons(expand(rhs(Gres[i])),GDegList)
+        ),
+  
+     if evenp(i) then
+        (
+        print(lhs(Gres[i]), "=", factor(xthru(rhs(Gres[i]))), "  deg: ", 
+              degree(expand(factor(xthru(rhs(Gres[i])))),n)), 
+        print(""),
+        ZDegList : endcons(expand(rhs(Gres[i])),ZDegList)
+        )
+     ),
+  if GLength > ZLength then
+     for i: minListLength*2+1 thru GLength+ZLength do          
+         (
+         print(lhs(Gres[i]), "=", factor(xthru(rhs(Gres[i]))), "  deg: ", 
+               degree(expand(factor(xthru((rhs(Gres[i]))))),n)),
+         print(""),
+         GDegList : endcons(expand(rhs(Gres[i])),GDegList)
+         ),
+  if ZLength > GLength then
+     for i: minListLength*2+1 thru GLength+ZLength do 
+         (
+         print(lhs(Gres[i]), "=", factor(xthru(rhs(Gres[i]))), "  deg: ", 
+               degree(expand(factor(xthru(rhs(Gres[i])))),n)),
+         print(""),
+         ZDegList : endcons(expand(rhs(Gres[i])),ZDegList)
+         ),
+
+  [GDegList,ZDegList]
+  );     
+
+
+
+/* It solves the Gosper's equation (Gosper's polynomial=0) */
+/* and yields the coefficients of the solution in a list */
+/* */
+/* We are assuming that Gpoly is fully expanded */
+
+/* Gpoly: Gosper polynomial */
+/* unkPar: */
+/* numUnkPar: */
+/* indet : */
+
+
+SolveZSys(Gpoly,unkPar1,numUnkPar1,unkPar2,numUnkPar2,indet) :=
+   block([sol,dim,base,i,j,baseElem,pList,sys,clearedSys],
+   sys : poly2List(Gpoly,indet),
+
+
+   sys : makelist(clearGCD(part(sys,i),unkPar1,numUnkPar1,unkPar2,numUnkPar2),i,1,length(sys)),
+
+   sol : linear_solver(sys,
+         append(
+         makelist(unkPar1[i],i,0,numUnkPar1-1), 
+         makelist(unkPar2[i],i,0,numUnkPar2-1))),
+
+   dim : length(ind_vars(linear_solver)),
+   base : [],
+   for i:1 thru dim do
+      (
+      baseElem : sol,
+      for j:1 thru dim do
+         if j = i then
+            baseElem : subst(1,ind_vars(linear_solver)[j],baseElem)
+         else
+            baseElem : subst(0,ind_vars(linear_solver)[j],baseElem),
+      base : endcons(baseElem,base)
+      ),
+   return(base)
+    );
+
+checkSol(sys,sol) :=
+  block([i,res],
+res : sys,
+for i:1 thru length(sol) do
+   res : subst(second(sol[i]),first(sol[i]),res),
+return(factor(res))
+);
+
+
+
+
+
+
+
+
+

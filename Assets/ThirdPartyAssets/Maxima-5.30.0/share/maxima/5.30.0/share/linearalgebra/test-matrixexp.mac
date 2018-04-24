@@ -1,0 +1,258 @@
+(load("matrixexp.lisp"),0);
+0$
+
+(remvalue(a,b,c,x),0);
+0$
+
+(xequal(a,b) := block([gcd : 'spmod, algebraic : true],
+   ratvars(),
+   is(fullratsimp(a) = fullratsimp(b)) or 
+      is(fullratsimp(rectform(a)) = fullratsimp(rectform(b)))),0);
+0$
+
+scalarmatrixp : false;
+false$
+
+(check(mat,n) := block([s, okay, z : ?gensym(), i : 0, m],
+
+  s : spectral_rep(mat),
+  okay : xequal(mat - s[1] . s[2] - s[3] , zeromatrix(n,n)),
+  print(i : i + 1, okay),
+
+  okay : okay and xequal(mat . s[3], s[3] . mat),
+  print(i : i + 1, okay),
+
+  okay : okay and xequal(s[3]^^n, zeromatrix(n,n)),
+  print(i : i + 1, okay),
+
+  okay : okay and xequal(matrixfun(lambda([x],1), mat), ident(n)),
+  print(i : i + 1, okay),
+
+  okay : okay and xequal(matrixfun(lambda([x], 1+x+x^2), mat), ident(n) + mat + mat . mat),
+  print(i : i + 1, okay),
+
+  okay : okay and xequal(matrixfun(lambda([x], x^2/5), mat), mat . mat / 5),
+  print(i : i + 1, okay),
+
+  okay : okay and xequal(matrixfun(lambda([x],x^8),mat), mat^^8),
+  print(i : i + 1, okay),
+
+  m : errcatch(matrixfun(lambda([z],sqrt(z)), mat)),
+  okay : okay and if m = [ ] then member(0, s[1]) else xequal(m[1] . m[1], mat),
+  print(i : i + 1, okay),
+
+  m : errcatch(matrixfun(lambda([mat], 1/mat^2), mat)),
+  okay : okay and if m = [ ] then member(0, s[1]) else xequal(m[1], mat^^-2),   
+  print(i : i + 1, okay),
+
+  m : fullratsimp(matrixexp(mat,z) . matrixexp(mat, -z)),
+  okay : okay and xequal(m, ident(n)),
+  print(i : i + 1, okay),
+
+  m : matrixexp(mat,z),
+  okay : okay and xequal(diff(m,z) - m . mat, zeromatrix(n,n)),
+  print(i : i + 1, okay),
+
+  okay), 0);
+0$
+
+check(matrix([1]),1);
+true$
+
+check(matrix([x]),1);
+true$
+
+check(matrix([1,0],[0,1]),2);
+true$
+
+check(matrix([1,0],[0,0]),2);
+true$
+
+check(matrix([0,0],[0,1]),2);
+true$
+
+check(matrix([0,1],[1,0]),2);
+true$
+
+check(matrix([0,1],[-1,0]),2);
+true$
+
+check(matrix([0,%i],[-%i,0]),2);
+true$
+
+check(matrix([0,a],[0,b]),2);
+true$
+
+check(matrix([1,2],[2,1]),2);
+true$
+
+check(matrix([1,%i],[-%i,1]),2);
+true$
+
+check(matrix([1,2],[3,1]),2);
+true$
+
+check(matrix([1,6],[0,1]),2);
+true$
+
+check(matrix([x,1],[1,1]), 2);
+true$
+
+check(matrix([sqrt(3), sqrt(2)],[sqrt(2), 9]),2);
+true$
+
+check(matrix([sqrt(6),1],[1, -9]),2);
+true$
+
+check(matrix([sqrt(3), sqrt(2)],[sqrt(2), 9]),2);
+true$
+
+check(matrix([a,b],[c,d]),2);
+true$
+
+check(matrix([1,0,0],[0,1,0],[0,0,1]),3);
+true$
+
+check(matrix([1,0,0],[0,1,0],[0,0,-1]),3);
+true$
+
+check(matrix([1,1,0],[1,1,1],[0,1,1]),3);
+true$
+
+check(matrix([1,%i,0],[-%i,1,%i],[0,-%i,1]),3);
+true$
+
+check(matrix([1,2,3],[4,5,6],[7,8,9]),3);
+true$
+
+check(matrix([1,a,b],[0,1,c],[0,0,2]),3);
+true$
+
+check(matrix([1,a,b],[0,1,c],[0,0,1]),3);
+true$
+
+check(matrix([1,a,b],[0,2,c],[0,0,1]),3);
+true$
+
+check(matrix([2,a,b],[0,2,c],[0,0,1]),3);
+true$
+
+check(matrix([1,a,b],[0,1,c],[0,0,2]),3);
+true$
+
+check(matrix([1,0,0],[a,1,0],[b,c,1]),3);
+true$
+
+check(matrix([1,0,0],[a,%i,0],[b,c,%i]),3);
+true$
+
+check(matrix([1,0,0],[a,%i,0],[b,c,1]),3);
+true$
+
+check(matrix([1,0,0],[a,%i,0],[b,c,sqrt(7)]),3);
+true$
+
+check(matrix([1,0,0],[a,%i,0],[b,c,%i]),3);
+true$
+
+/* spectral_rep checks its results--so this really does testing.*/
+
+(spectral_rep(matrix([x,1,0],[1,1,1],[0,1,1])),0);
+0$
+
+
+check(matrix([1,1,0],[1,1,1],[0,1,1]),3);
+true$
+
+(s : matrix([1,2],[2,3]), 0);
+0$
+
+(m : s . matrix([1,0],[0,-1]) . s^^-1, 0);
+0$
+
+xequal(s . matrix([exp(1),0],[0,exp(-1)]) . s^^-1, matrixexp(m));
+true$
+
+
+/* Matrices from Gosei Furuya's Jordan form code. */
+
+(m : matrix([2,0,0,0,0,0,0,0],
+       	 [1,2,0,0,0,0,0,0],
+	 [-4,1,2,0,0,0,0,0],
+	 [2,0,0,2,0,0,0,0],
+	 [-7,2,0,0,2,0,0,0],
+	 [9,0,-2,0,1,2,0,0],
+	 [-34,7,1,-2,-1,1,2,0],
+	 [145,-17,-16,3,9,-2,0,3]), 0)$
+0$
+
+xequal(matrixfun(lambda([x],x^2), m), m.m);
+true$
+
+
+(m : matrix([2,1,0,0,0,0],
+       	  [-1,4,0,0,0,0],
+	  [-1,1,2,1,0,0],
+	  [-1,1,-1,4,0,0],
+	  [-1,1,-1,1,3,0],
+	  [-1,1,-1,1,1,2]),0)$
+0$
+
+xequal(matrixfun(lambda([x],x^2), m), m.m);
+true$
+
+(m : matrix([0,1,0],
+       	  [0,0,1],
+	  [1,-3,3]),0);
+0$
+
+xequal(matrixfun(lambda([x],1+x^5), m), ident(3)+m^^5);
+true$
+
+(m : matrix([0,1,2],
+       	  [0,0,0],
+	  [0,0,0]),0);
+0$
+
+xequal(matrixfun(lambda([x],1+x^5), m), ident(3)+m^^5);
+true$
+
+(m : matrix([3,1,0,0],
+       	  [-4,-1,0,0],
+	  [7,1,2,1],
+	  [-17,-6,-1,0]),0);
+0$
+
+xequal(matrixfun(lambda([x],1+x^2), m), ident(4)+m^^2);
+true$
+
+(m : matrix([2,1,2,0],
+       	  [-2,2,1,2],
+	  [-2,-1,-1,1],
+	  [3,1,2,-1]),0);
+0$
+
+xequal(matrixfun(lambda([x],1+x^2), m), ident(4)+m^^2);
+true$
+	 
+(m : matrix([0,0,1,1,1],
+       	  [0,0,0,1,1],
+	  [0,0,0,0,1],
+	  [0,0,0,0,0],
+	  [0,0,0,0,0]),0);
+0$
+
+xequal(matrixfun(lambda([x],1+x^2), m), ident(5)+m^^2);
+true$
+
+(m : matrix([0,1,0],
+	  [0,0,1],
+	  [-1,-3,-3]),0);
+0$
+
+xequal(matrixfun(lambda([x],1+x^5), m), ident(3)+m^^5);
+true$
+
+
+
+

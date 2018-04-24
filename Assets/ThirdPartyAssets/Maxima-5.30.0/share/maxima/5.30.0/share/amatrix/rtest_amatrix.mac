@@ -1,0 +1,194 @@
+/* copyright 2007 by Robert Dodier
+ * I release this file under the terms of the GNU General Public License.
+ */
+
+(set_random_state (make_random_state (12345)),
+ kill (all),
+ file_search_maxima : cons ("./###.mac", file_search_maxima),
+ file_search_lisp : cons ("./###.lisp", file_search_lisp),
+ load (amatrix), 0);
+0;
+
+(M0 : make_matrix (0, 0), [nrows (%%), ncols (%%)]);
+[0, 0];
+
+[errcatch (M0[0, 0]), errcatch (M0[1, 0]), errcatch (M0[0, 1]), errcatch (M0[1, 1]), errcatch (M0[2, 2])];
+[[], [], [], [], []];
+
+(M1 : make_matrix (10, 0), [nrows (%%), ncols (%%)]);
+[10, 0];
+
+[errcatch (M1[0, 0]), errcatch (M1[1, 0]), errcatch (M1[0, 1]), errcatch (M1[1, 1]), errcatch (M1[2, 2])];
+[[], [], [], [], []];
+
+(M1 : make_matrix (0, 10), [nrows (%%), ncols (%%)]);
+[0, 10];
+
+[errcatch (M1[0, 0]), errcatch (M1[1, 0]), errcatch (M1[0, 1]), errcatch (M1[1, 1]), errcatch (M1[2, 2])];
+[[], [], [], [], []];
+
+(M : make_matrix (5, 3),
+ a : M@storage,
+ fillarray (?get (M@storage, '?storage_array), makelist (i, i, 1, 15)),
+ [M, new2old_matrix (M)]);
+''([amatrix (5, 0, 1, 3, 0, 5, a),
+ matrix ([1, 6, 11], [2, 7, 12], [3, 8, 13], [4, 9, 14], [5, 10, 15])]);
+
+[M[1, 1], M[2, 2], M[3, 3], M[4, 2], M[5, 1], M[5, 3]];
+[1, 7, 13, 9, 5, 15];
+
+[errcatch (M[0, 0]), errcatch (M[10, 10])];
+[[], []];
+
+[M2 : t (M), new2old_matrix (M2)];
+''([amatrix (3, 0, 5, 5, 0, 1, a),
+ matrix ([1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15])]);
+
+[M [all, 2], new2old_matrix (M [all, 2])];
+''([amatrix (5, 0, 1, 1, 1, 5, a),
+ matrix ([6], [7], [8], [9], [10])]);
+
+[M [2, all], new2old_matrix (M [2, all])];
+''([amatrix (1, 1, 1, 3, 0, 5, a),
+ matrix ([2, 7, 12])]);
+
+[M2 [all, 2], new2old_matrix (M2 [all, 2])];
+''([amatrix (3, 0, 5, 1, 1, 1, a),
+ matrix ([2], [7], [12])]);
+
+[M2 [2, all], new2old_matrix (M2 [2, all])];
+''([amatrix (1, 1, 5, 5, 0, 1, a),
+ matrix ([6, 7, 8, 9, 10])]);
+
+[M [all, all], new2old_matrix (M [all, all])];
+''([amatrix (5, 0, 1, 3, 0, 5, a),
+ matrix ([1, 6, 11], [2, 7, 12], [3, 8, 13], [4, 9, 14], [5, 10, 15])]);
+
+[M2 [all, all], new2old_matrix (M2 [all, all])];
+''([amatrix (3, 0, 5, 5, 0, 1, a),
+ matrix ([1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15])]);
+
+args (M);
+''([5, 0, 1, 3, 0, 5, a]);
+
+args (M2);
+''([3, 0, 5, 5, 0, 1, a]);
+
+is (M@storage = M2@storage);
+true;
+
+M2 [2, 2] : FOOBAR;
+FOOBAR;
+
+M [2, 2];
+7;
+
+new2old_matrix (M);
+matrix ([1, 6, 11], [2, 7, 12], [3, 8, 13], [4, 9, 14], [5, 10, 15]);
+
+new2old_matrix (M2);
+matrix ([1, 2, 3, 4, 5], [6, FOOBAR, 8, 9, 10], [11, 12, 13, 14, 15]);
+
+is (M@storage = M2@storage);
+false;
+
+[M3 : M[all, 3], new2old_matrix (M[all, 3])];
+''([amatrix (5, 0, 1, 1, 2, 5, a),
+ matrix ([11], [12], [13], [14], [15])]);
+
+is (M@storage = M3@storage);
+true;
+
+M[3, 3] : XYZ;
+XYZ;
+
+M3[3, 1];
+13;
+
+is (M@storage = M3@storage);
+false;
+
+(A1 : make_matrix (10, 10), 0);
+0;
+
+for i:1 thru 10 do A1[i, i] : i;
+done;
+
+(A2 : A1[all, all], A3 : A1[all, 1], A4 : A1[1, all], 0);
+0;
+
+?get(A3@storage, '?refcount);
+4;
+
+(A1[1, 1] : 321, [A1[1, 1], A2[1, 1], A3[1, 1], A4[1, 1]]);
+[321, 1, 1, 1];
+
+?get(A3@storage, '?refcount);
+3;
+
+(A4[1, 1] : 678, [A1[1, 1], A2[1, 1], A3[1, 1], A4[1, 1]]);
+[321, 1, 1, 678];
+
+?get(A3@storage, '?refcount);
+2;
+
+(A2[1, 1] : 456, [A1[1, 1], A2[1, 1], A3[1, 1], A4[1, 1]]);
+[321, 456, 1, 678];
+
+?get(A3@storage, '?refcount);
+1;
+
+(A3[1, 1] : 543, [A1[1, 1], A2[1, 1], A3[1, 1], A4[1, 1]]);
+[321, 456, 543, 678];
+
+(B : random_matrix (10, 3),
+ elements (B));
+''(flatten (args (new2old_matrix (B))));
+
+(Bt : t (B),
+ Bt_old : new2old_matrix (Bt),
+ [elements (B1 : B[all, 1]), elements (B2 : B[all, 2]), elements (B3 : B[all, 3])]);
+''([Bt_old [1], Bt_old [2], Bt_old [3]]);
+
+(amatrixmap (">", B1, B2), [%%@nr, %%@nc, elements (%%)]);
+[10, 1, [0.0703125 > 0.0390625, 0.375 > 0.73046875, 
+0.8515625 > 0.9921875, 0.08203125 > 0.25390625, 
+0.390625 > 0.65234375, 0.04296875 > 0.578125, 
+0.046875 > 0.859375, 0.62890625 > 0.0, 0.578125 > 0.30859375, 
+0.76953125 > 0.796875]];
+
+(amatrixmap (lambda ([x, y], is (x < y)),  B2, B3), [%%@nr, %%@nc, elements (%%)]);
+[10, 1, [true, false, false, false, true, true, true, true, true, false]];
+
+(amatrixmap ("+", B1, B2, B3), [%%@nr, %%@nc, elements (%%)]);
+[10, 1, [0.4453125, 1.72265625, 1.90625, 0.45703125, 
+1.71484375, 1.30078125, 1.8828125, 1.20703125, 1.25390625, 
+2.30859375]];
+
+(amatrixmap ("/", B, amatrixmap (lambda ([x], 1/2 + x), B)), new2old_matrix (%%));
+matrix([.1232876712328767,.07246376811594203,.4018691588785047],
+[.4285714285714285,.5936507936507937,.5524475524475524],
+[0.630057803468208,.6649214659685864,.1111111111111111],
+[.1409395973154362,.3367875647668394,.1949685534591195],
+[.4385964912280702,.5661016949152542,.5733333333333334],
+[.07913669064748201,.5362318840579711,.5761589403973509],
+[.08571428571428572,0.632183908045977,.6613756613756614],
+[.5570934256055363,0.0,.5362318840579711],
+[.5362318840579711,.3816425120772947,.4234234234234234],
+[.6061538461538462,.6144578313253012,.5974842767295597]);
+
+(infix ("binary-"),
+ "binary-" (x, y) := x - y,
+ random_matrix (B@nr, B@nc),
+ amatrixmap ("binary-", %%, B),
+ new2old_matrix (%%));
+matrix([0.12890625,0.875,0.4765625],
+[0.6015625,0.06640625,0.28125],
+[-0.4375,-0.921875,0.54296875],
+[0.12890625,0.078125,0.64453125],
+[0.06640625,0.09765625,0.1171875],
+[0.140625,0.37890625,-0.4453125],
+[0.1953125,-0.80859375,-0.38671875],
+[-0.1640625,0.61328125,-0.46484375],
+[0.328125,0.08203125,-0.01953125],
+[0.06640625,-0.08984375,-0.23828125]);

@@ -1,0 +1,99 @@
+
+;; Maxima bit functions
+
+;; bit_not      bitwise NOT
+;; bit_and      bitwise AND
+;; bit_xor      bitwise XOR
+;; bit_or       bitwise OR
+;; bit_lsh      bitwise LEFT SHIFT
+;; bit_rsh      bitwise RIGHT SHIFT
+
+;; bit_length   number of necessary bits to represent a positive integer
+;; bit_onep     test for bit 1
+
+
+;; all functions except bit_onep have the property 'integer-valued
+;; I'm not sure, if this is correct
+;; if we allow bit_not(bit_not(x)) --> x, bit_and(x) --> x, etc. for any expression x
+
+
+;; abbreviations:
+;; i,j,k : literal integers
+;; x,y,z : any expression
+;; di,dj,dk : declared integer
+;; de, do : declared even resp. odd
+
+
+;; ERROR if at least one arg to bit_function is a non-integer constant, string or Maxima list
+
+
+;; bitwise NOT:
+;; bit_not(i) --> bitwise NOT i
+;; bit_not(bit_not(x)) --> x  ;; di instead of x ?
+;; bit_not(di) -->  - di - 1
+
+
+;; bitwise AND:
+;; bit_and() --> -1
+;; bit_and(x,x,y) --> bit_and(x,y)
+;; bit_and(i,j) --> bitwise i AND j
+;; bit_and(0,x) --> 0
+;; bit_and(-1,x) --> bit_and(x)
+;; bit_and(i,j,x) --> bit_and(bit_and(i,j),x)        
+;; bit_and(x,bit_not(x),y) --> 0
+;; bit_and(1,de,y) --> 0
+;; bit_and(1,do) --> 1
+;; bit_and(x) --> x  ;; di instead of x ?
+  
+
+
+;; bitwise EXCLUSIVE OR:
+;; bit_xor() --> 0
+;; bit_xor(x,x,y,z) --> bit_xor(y,z)
+;; bit_xor(i,j) --> bitwise i XOR j
+;; bit_xor(i,j,x) --> bit_xor(bit_xor(i,j),x)
+;; bit_xor(x,bit_not(x),y,z) --> bit_xor(-1,y,z)
+;; bit_xor(0,x) --> bit_xor(x)    
+;; bit_xor(1,de,y) --> bit_xor(de+1,y)
+;; bit_xor(1,do,y) --> bit_xor(do-1,y)
+;; bit_xor(-1,x,y) --> bit_xor(bit_not(x),y)
+;; bit_xor(x) --> x  ;; di instead of x ?
+
+
+
+;; bitwise OR:
+;; bit_or() --> 0
+;; bit_or(x,x,y) --> bit_or(x,y)
+;; bit_or(i,j) --> bitwise i OR j
+;; bit_or(-1,x) --> -1
+;; bit_or(0,x) --> bit_or(x)
+;; bit_or(i,j,x) --> bit_or(bit_or(i,j),x)        
+;; bit_or(x,bit_not(x),y) --> -1
+;; bit_or(1,de,y) --> bit_or(de+1,y)
+;; bit_or(1,do,y) --> bit_or(do,y)
+;; bit_or(x) --> x  ;; di instead of x ?
+
+
+;; bitwise LEFT SHIFT:
+;; bit_lsh(i,k) --> bitwise LEFT SHIFT i,k
+;; bit_lsh(x,dk) --> 2^dk*x, where dk>=0  ;; di instead of x ?
+
+
+
+;; bitwise RIGHT SHIFT:
+;; bit_rsh(x,y) --> bit_lsh(x,-y)
+
+
+
+;; ONE-BIT TEST:
+;; bit_onep(i,k) --> ONE-BIT TEST i,k, k>=0
+;; bit_onep(de,0) --> false
+;; bit_onep(do,0) --> true
+;; bit_onep(x,dk) where 0<=x<2^dk, dk>=0 --> false
+;; bit_onep(di^dj,y) where di^dj = 2^y --> true
+
+
+
+;; BIT LENGTH:
+;; bit_length(i) --> BIT LENGTH i, i>=0
+;; bit_length(2^dk) --> dk+1, bit_length(4^dk) --> 2*dk+1, etc., where dk>=0

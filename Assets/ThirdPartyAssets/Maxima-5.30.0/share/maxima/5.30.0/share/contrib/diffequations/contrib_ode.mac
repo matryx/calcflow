@@ -1,0 +1,345 @@
+/* contrib_ode.mac
+
+  Driver for contributed ODE routines
+
+
+  Copyright (C) 2004,2006,2007 David Billinghurst
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version. 
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License	
+  along with this program; if not, write to the Free Software 		 
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+if get('ode1_nonlinear,'version)=false then
+  load('ode1_nonlinear)$
+
+if get('odelin,'version)=false then
+  load('odelin)$
+
+load('opsubst)$
+
+contrib_ode(eqn,y,x) := block(
+  [soln,degree:derivdegree(eqn,y,x)],
+  
+  ode_disp("-> ode_contrib"),
+
+  /* Try ode2 if first or second order*/
+  if (degree < 1) then (
+    ode_disp("   Degree of equation less than 1"),
+    false
+  ) 
+  else if (degree > 2) then (
+    ode_disp("   Degree of equation greater then 2"),
+    false
+  ) 
+  else if (degree=1) then (
+    ode_disp("   First order equation"),
+    ode_disp("   -> ode2"),
+    soln:ode2(eqn,y,x),
+    if (soln#false) then (
+      ode_disp("    Successful"),
+      return([soln])
+    )
+    else (
+      return(ode1_nonlinear(eqn,y,x))
+    )
+  )
+  else if (degree=2) then (
+    return(ode2_linear(eqn,y,x))
+  )
+  else (
+    error("contrib_ode: This case cannot occur"),
+    false
+  )
+)$
+
+/* Try methods for linear 2nd order ODEs.
+   eqn is a 2nd order ODE.
+   FIXME: Remove multiple checks for linearity 
+*/
+ode2_linear(eqn,y,x) := block(
+  [de,a1,a2,a3,a4,soln,%k1,%k2],
+  ode_disp("   Second order equation"),
+  de: desimp(lhs(eqn)-rhs(eqn)),
+  a1: coeff(de,'diff(y,x,2)), 
+  a2: coeff(de,'diff(y,x)), 
+  a3: coeff(de,y),
+  a4: expand(de - a1*'diff(y,x,2) - a2*'diff(y,x) - a3*y),
+  if (freeof(y,[a1,a2,a3,a4])) then (
+    ode_disp("     Linear 2nd order ODE"),
+    /* Try the ode2 routines first */
+    ode_disp("    -> ode2"),
+    soln:ode2(eqn,y,x),
+    /* ode2 can return [] on failure */
+    if (soln#false and soln#[]) then (
+      ode_disp("     Successful"),
+      [soln]
+    ) else if is(a4=0) then (
+      /* Now try the routines in odelin */
+      ode_disp("    -> odelin"),
+      soln:odelin(eqn,y,x),
+      if (soln#false) then (
+        ode_disp("     Successful"),
+        method:'odelin,
+        ode_disp(soln),
+        /* odelin returns a fundamental soln set */
+        soln:listify(soln),
+        [y=%k1*soln[1]+%k2*soln[2]]
+      ) else (
+        false
+      )
+    )
+  ) else (
+    ode_disp("     Non-linear 2nd order ODE"),
+    false
+  )
+)$
+
+ode_disp(msg) := block(
+  if get('contrib_ode,'verbose) then print(msg)
+)$
+
+ode_disp2(msg,e) := block(
+  if get('contrib_ode,'verbose) then print(msg,e)
+)$
+
+/* recurse through expression eq looking for a derivative
+   Return the derivative if found, false otherwise
+ */
+ode_deriv(eq) := block( 
+  [u,v:false],
+  eq:expand(eq),
+  if atom(eq) then return(false),
+  if operatorp(eq,nounify('diff)) then return(eq),
+  for u in eq do 
+    (if (v:ode_deriv(u))#false then return(true)),
+  v
+)$
+
+/* Check the solution of an ode. */
+ode_check(e_,a_) := block(
+  [deriv,x_,y_,diff_e,u,v],
+
+  deriv:ode_deriv(e_),
+  if deriv=false then (
+    print("Not a differential equation"),
+    return(false)
+  ),
+  x_:part(deriv,2),  /* Independent variable */
+  y_:part(deriv,1),  /* Dependent variable */
+
+  if not(atom(x_)) then (
+    print("Independent variable ",x_," not an atom"),
+    return(false)
+  ),
+  if not(atom(y_)) then (
+    print("Dependent variable ",y_," not an atom"),
+    return(false)
+  ),
+
+  /* Is it a simple solution */
+  if lhs(a_)=y_ then (
+    return(ode_check_tidy(ratsimp(ev(lhs(e_)-rhs(e_),a_,diff))))
+  ),
+
+  /* Must be an implicit solution */
+  diff_e:diff(subst(v(x),y_,a_),x_),
+  diff_e:subst(y_,v(x),diff_e),
+  u:solve(diff_e,'diff(y_,x_)),
+  if u=[] then (
+    print("Problem - dy/dx is ",u),
+    return(false)
+  ),
+  u:first(u),
+  if ( lhs(u)#'diff(y_,x_) or not(freeof('diff(y_,x_),rhs(u))) ) then (
+    print("Problem - dy/dx is ",u),
+    return(false)
+  ),
+  ode_check_tidy(fullratsimp(ev(lhs(e_)-rhs(e_),u)))
+)$
+
+/* Attempt to simplify the result from ode_check() */
+ode_check_tidy(e) := block(
+  for f in ['bessimp, 'expintegral_e_simp,'ode_trig_simp]
+  do 
+    (if (f(e)=0) then return(e:0)),
+  return(e)
+)$
+
+/*  This Bessel function simplification code can be improved,
+    but is does work well on the contrib_ode testsuite.
+*/
+bessimp(e) := block(
+ for f in ['besksimp, 'besisimp, 'besysimp, 'besjsimp, 
+           'hankel1simp, 'hankel2simp, 'struvehsimp, 'struvelsimp]
+ do
+  e:f(e),
+ return(e))$
+
+freeof_bessel(e):=freeof(bessel_j,bessel_y,bessel_i,bessel_k,e);
+
+/* Simplify expressions containing bessel_F, where F in {j,y,i,k}.
+   Repeatedly find the highest order term F and substitute Fsub for F 
+
+   When F is a Bessel function of order n and argument x, then
+   Fsub is contains Bessel functions of order n-1 and n-2.
+
+   We separate the set of arguments into classes that have identical
+   second arguments and orders that differ by integers, then work on each
+   class until all the orders differ by less than 2. 
+*/
+besFsimp(ex,F,Fsub) := block([arglist,ords,ord2,max,min,s,t,u,m,n,x,e:ex],
+  if freeof(F,ex) then return(ex),
+  argset:setify(gatherargs(ex,F)),
+  /*  partition arguments into sets with same second argument and
+      orders that differ by an integer */
+  argset:equiv_classes(argset,lambda([x,y],
+    (second(x)=second(y)) and integerp(ratsimp(first(x)-first(y))))),
+
+  /* Iterate over each equivalance class */
+
+  for s in argset do (
+    x:second(first(s)),  /* The common argument for s */
+    ords:map('first,s),  /* List of orders */
+    t:first(ords),          /* One element of the list of orders */
+    ord2:map(lambda([m],ratsimp(m-t)),ords), /* List of differences */
+    max:lmax(ord2),      /* maximum order is t+max */
+    min:lmin(ord2),      /* minimum order is t+min */
+    for m: max step -1 unless ratsimp(m-min)<2 do (
+      n:subset(ords,lambda([u],is(ratsimp(u-t-m)=0))),
+      n:if emptyp(n) then ratsimp(t+m) else first(n),
+      e:subst(apply(Fsub,[n,x]),apply(F,[n,x]),e),
+      e:ratsimp(e)
+    ) 
+  ),
+  ratsimp(e)
+)$
+
+/* Recurrence for Bessel and Hankel functions A&S 9.1.27, DLMF 10.6.1 */
+
+besjsimp(ex):=besFsimp(ex,bessel_j,
+  lambda([n,x], 2*(n-1)*bessel_j(n-1,x)/x-bessel_j(n-2,x)));
+
+besysimp(ex):=besFsimp(ex,bessel_y,
+  lambda([n,x], 2*(n-1)*bessel_y(n-1,x)/x-bessel_y(n-2,x)));
+
+besisimp(ex):=besFsimp(ex,bessel_i,
+  lambda([n,x],-2*(n-1)*bessel_i(n-1,x)/x+bessel_i(n-2,x)));
+
+hankel1simp(ex):=besFsimp(ex,hankel_1,
+  lambda([n,x], 2*(n-1)*hankel_1(n-1,x)/x-hankel_1(n-2,x)));
+
+hankel2simp(ex):=besFsimp(ex,hankel_2,
+  lambda([n,x], 2*(n-1)*hankel_2(n-1,x)/x-hankel_2(n-2,x)));
+
+
+/* bessel_k requires special treatment due to the simplification
+   bessel_k(-n,x) => bessel_k(n,x), which upsets the recurrence 
+   relationship.  */
+besksimp(ex):=block(
+  [bk:gensym(),e],
+  e:opsubst(bk,bessel_k,ex),
+  e:besksimp_1(e,bk),
+  /* Recurrence relation for bessel_k */
+  e:besFsimp(e,bk,lambda([n,x], 2*(n-1)*bk(n-1,x)/x+bk(n-2,x))),
+  opsubst(bessel_k,bk,e)
+);
+
+/* This is a helper function for besksimp.
+  - the function bk has been substituted for bessel_k in ex
+  - collect all the arguments of each occurence of bk in e
+  - partition arguements into sets with same argument and where 
+    either the orders m and n differ by integer or m and (-n) 
+    differ by integer (so m+n is an integer).
+  - for the elements where  m+n is an integer, substitute
+    bk(-n,x) for bk(n,x) in e
+  - return e
+*/
+besksimp_1(e,bk):=block(
+  [s,argset],
+  /* Break into equivalence classes */ 
+  argset:equiv_classes(setify(gatherargs(e,bk)),
+    lambda([x,y],
+      (second(x)=second(y)) 
+      and 
+           (integerp(ratsimp(first(x)-first(y))) 
+        or  integerp(ratsimp(first(x)+first(y)))))),
+  /* For each equivalnce class */
+  for s in argset do block(
+    [x,ords,t,n],
+    x:second(first(s)),  /* The common argument for s */
+    ords:map('first,s),  /* Set of orders */
+    /* t is an element of ords, If ords are numbers then t is the largest */
+    t:first(ords), if every(numberp,ords) then t:lmax(ords),
+    /* Find the subset that do not differ by an integer from t 
+       and change sign of the order for those orders */
+    for n in subset(ords,lambda([i],integerp(ratsimp(t+i)))) do (
+      e:subst(bk(-n,x),bk(n,x),e) )
+  ),
+  e
+);
+
+/* Recurrence for struve_h DLMF 11.4.23 */
+struvehsimp(ex):=besFsimp(ex,struve_h,
+  lambda([n,x],2^(1-n)*x^(n-1)/(sqrt(%pi)*gamma(n+1/2))
+              +2*(n-1)*struve_h(n-1,x)/x-struve_h(n-2,x)))$
+
+/* Recurrence for struve_l DLMF 11.4.25 */
+struvelsimp(ex):=besFsimp(ex,struve_l,
+  lambda([n,x],-2^(1-n)*x^(n-1)/(sqrt(%pi)*gamma(n+1/2))
+               -2*(n-1)*struve_l(n-1,x)/x+struve_l(n-2,x)))$
+
+/* Simplify expressions containing exponential integral expintegral_e
+   using the recurrence (A&S 5.1.14).
+
+   expintegral_e(n+1,z) 
+        = (1/n) * (exp(-z)-z*expintegral_e(n,z))      n = 1,2,3 ....
+
+   functions.wolfram.com indicates that it also applies for non-integer n,
+   and this is supported by some numerical tests.
+
+   This is a support routine for checking solutions of differential equations 
+   in the contrib_ode testsuite.  Assumes numberp(n) but this could be relaxed,
+   as was done for Bessel functions.  Not required for existing testsuite.
+*/
+
+expintegral_e_simp(ex) := block( [argset],
+  if freeof(expintegral_e,ex) then return(ex),
+  /* Get the set of arguments. Partition into sets with orders that
+     differ by an integer and with common second arguments.  */
+  argset:setify(gatherargs(ex,expintegral_e)),
+  argset:equiv_classes(argset,
+           lambda([x,y], integerp(x[1]-y[1]) and (second(x)=second(y)))),
+
+  /* Iterate over each equivalance class */
+  for s in argset do block( [z, ords],
+    z:second(first(s)),  /* The common argument for s */
+    ords:map('first,s),  /* List of orders */
+    for n: lmax(ords)-1 step -1 thru lmin(ords) do (
+      ex:subst((1/n)*(exp(-z)-z*expintegral_e(n,z)), expintegral_e(n+1,z), ex)
+    )
+  ),
+  /* Note: When ratsimp was in the loop, then z within the expression 
+     was sometimes altered and subst didn't work */
+  ratsimp(ex)
+);
+
+ode_freeof_trig(e) := 
+  freeof(cos,sin,tan,cot,sec,csc,cosh,sinh,tanh,coth,sech,csch,e)$
+
+ode_trig_simp(e) := block(
+  if ode_freeof_trig(e) then 
+    e
+  else
+    radcan(trigrat(trigsimp(e)))
+)$
