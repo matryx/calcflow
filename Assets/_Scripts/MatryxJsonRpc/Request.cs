@@ -27,6 +27,7 @@ using Nanome.Maths.Serializers.JsonSerializer;
 
 using Calcflow.UserStatistics;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Linq;
 
 namespace MatryxJsonRpc
 {
@@ -35,6 +36,7 @@ namespace MatryxJsonRpc
     {
         private static Serializer serializer = new Serializer();
         private static string explorerEndpt = "http://13.57.163.24";
+        //private static string explorerEndpt = "http://13.56.237.75/";
         private static string latestPlatformInfoEndpt = explorerEndpt+"/platform/getLatestInfo";
         private static string latestTokenInfoEndpt = explorerEndpt + "/token/getLatestInfo";
         private static string allTournamentsEndpt = "/tournaments";
@@ -49,10 +51,12 @@ namespace MatryxJsonRpc
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
+        private static string customRPCNode = "http://customrpc.matryx.ai:8545";
         private static string mtxContractAddr = "0x7c4970b887cfa95062ead0708267009dcd564017";
-        private static Contract mtxContract;
+        private static Contract platformContract;
         private static Contract tokenContract;
         private static Contract tournamentContract;
+        private static string tournamentAbi;
 
         // Public api
         public delegate void ResultDelegate(object obj);
@@ -81,7 +85,7 @@ namespace MatryxJsonRpc
         private static IEnumerator CoroutineListTournaments(RoutineContext context)
         {
             // Prepare
-            var function = mtxContract.GetFunction("tournamentByIndex");
+            var function = platformContract.GetFunction("tournamentByIndex");
             var tournaments = new List<Tournament>();
             // Parse routine params
             var param = (object[])context.param;
@@ -187,7 +191,7 @@ namespace MatryxJsonRpc
         private static IEnumerator CoroutineListSumbissions(RoutineContext context)
         {
             // Prepare
-            var function = mtxContract.GetFunction("submissionByIndex");
+            var function = platformContract.GetFunction("submissionByIndex");
             var submissions = new List<Submission>();
             // Parse routine params
             var param = (object[])context.param;
@@ -376,7 +380,7 @@ namespace MatryxJsonRpc
             var usedAccount = resultsAccounts[0];
 
             // Try to create a peer.
-            var createPeerFunction = mtxContract.GetFunction("createPeer");
+            var createPeerFunction = platformContract.GetFunction("createPeer");
             object[] createPeerParams = { };
             var createPeerInput = createPeerFunction.CreateTransactionInput(usedAccount, createPeerParams);
             createPeerInput.Gas = new HexBigInteger(3000000);
@@ -394,9 +398,28 @@ namespace MatryxJsonRpc
                 context.done(null);
             }
 
+            //var getOwnerFunction = platformContract.GetFunction("getOwner");
+            //object[] getOwnerParams = { };
+            //var getOwnerInput = getOwnerFunction.CreateCallInput(getOwnerParams);
+            //getOwnerInput.Gas = new HexBigInteger(3000000);
+            //var getOwnerCall = new EthCallUnityRequest(mtxNode);
+            //yield return getOwnerCall.SendRequest(getOwnerInput, BlockParameter.CreateLatest());
+            //try
+            //{
+            //    var resultsTransaction = getOwnerCall.Result;
+            //}
+            //catch
+            //{
+            //    // Error
+            //    Debug.Log("Could not check peer status");
+            //    //Debug.Log(e);
+            //    context.done(null);
+            //}
+
+
             // tournament.entryFee();
             var submission = (Submission)((object[])context.param)[0];
-            tournamentContract.Address = submission.tournamentAddress;
+            tournamentContract = new Contract(null, tournamentAbi, submission.tournamentAddress);
             var entryFeeFunction = tournamentContract.GetFunction("entryFee");
             var entryFeeInput = entryFeeFunction.CreateCallInput(new object[0]);
             entryFeeInput.Gas = new HexBigInteger(300000);
@@ -416,9 +439,9 @@ namespace MatryxJsonRpc
             // token.approve(tournament.address, tournament.entryFee)
             if (entryFee.entryFee > 0)
             {
-                
+
                 var tokenApproveFunction = tokenContract.GetFunction("approve");
-                object[] tokenApproveParams = { submission.tournamentAddress, entryFee };
+                object[] tokenApproveParams = { submission.tournamentAddress, entryFee.entryFee };
                 var tokenApproveInput = tokenApproveFunction.CreateTransactionInput(usedAccount, tokenApproveParams);
                 tokenApproveInput.Gas = new HexBigInteger(300000);
                 var tokenApproveTransaction = new EthSendTransactionUnityRequest(mtxNode);
@@ -435,10 +458,10 @@ namespace MatryxJsonRpc
             }
 
             //platform.enterTournament(tournament.address)
-            var enterTournamentFunction = mtxContract.GetFunction("enterTournament");
+            var enterTournamentFunction = platformContract.GetFunction("enterTournament");
             object[] enterTournamentParams = { submission.tournamentAddress };
             var enterTournamentInput = enterTournamentFunction.CreateTransactionInput(usedAccount, enterTournamentParams);
-            enterTournamentInput.Gas = new HexBigInteger(300000);
+            enterTournamentInput.Gas = new HexBigInteger(3300000);
             var enterTournamentTransaction = new EthSendTransactionUnityRequest(mtxNode);
             yield return enterTournamentTransaction.SendRequest(enterTournamentInput);
             try
@@ -457,7 +480,6 @@ namespace MatryxJsonRpc
             // Parse routine params
             var tournamentAddress = (submission.tournamentAddress);
             var title = submission.title;
-            tournamentContract.Address = submission.tournamentAddress;
 
             //List<IMultipartFormSection> submissionFormData = new List<IMultipartFormSection>();
             //MultipartFormDataSection formDataSection = new MultipartFormDataSection("description", "hello");
@@ -491,12 +513,27 @@ namespace MatryxJsonRpc
                 print("Request Response: " + ipfsRequest.downloadHandler.text);
             }
 
-            var bodyHash = Encoding.UTF8.GetString(ipfsRequest.downloadHandler.data);
-            var references = submission.references + "\n";
-            var contributors = submission.contributors + "\n";
+            var response = serializer.Deserialize<object>(ipfsRequest.downloadHandler.data) as Dictionary<string, object>;
+            var folderHash = Encoding.UTF8.GetBytes((string)response["folderHash"]);
+            string[] contributors = { };
+            int[] contributorDistribution = { };
+            string[] references = { };
+
+            if (submission.references != string.Empty)
+            {
+                references = submission.references.Split(',');
+            }
+            if (submission.contributors != string.Empty)
+            {
+                contributors = submission.contributors.Split(',');
+                contributorDistribution = Enumerable.Range(0, contributors.Length).Select(x => 1).ToArray();
+            }
+
             // Make input
-            var transactionInput = createSubmissionFunction.CreateTransactionInput(usedAccount, tournamentAddress, title, bodyHash, references, contributors);
+            object[] inputParams = { title, usedAccount, folderHash, contributors, contributorDistribution, references };
+            var transactionInput = createSubmissionFunction.CreateTransactionInput(usedAccount, inputParams);
             transactionInput.Gas = new HexBigInteger(3000000);
+            transactionInput.GasPrice = new HexBigInteger(20);
             // Do request
             var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
             yield return requestTransaction.SendRequest(transactionInput);
@@ -514,8 +551,6 @@ namespace MatryxJsonRpc
                 //Debug.Log(e);
                 context.done(null);
             }
-
-            // If we're not, create a peer.
         }
 
         private static ulong ParseHexString(string hexNumber)
@@ -542,7 +577,7 @@ namespace MatryxJsonRpc
                 var platformAddress = jsonObj["address"] as string;
 
                 var platformAbi = Encoding.UTF8.GetString(serializer.Serialize(jsonObj["abi"]));
-                mtxContract = new Contract(null, platformAbi, mtxContractAddr);
+                platformContract = new Contract(null, platformAbi, mtxContractAddr);
             }
 
             // instantiate token contract
@@ -561,40 +596,35 @@ namespace MatryxJsonRpc
             {
                 yield return www3;
                 var tournyJsonObj = serializer.Deserialize<object>(www3.bytes) as Dictionary<string, object>;
-                var tournamentAbi = Encoding.UTF8.GetString(serializer.Serialize(tournyJsonObj["abi"]));
+                tournamentAbi = Encoding.UTF8.GetString(serializer.Serialize(tournyJsonObj["abi"]));
                 //var tournamentAbi = Encoding.UTF8.GetString(serializer.Serialize(tournyJsonObj["abi"]));
-                tournamentContract = new Contract(null, tournamentAbi, null);
             }
 
             // Get accounts
             var requestAccounts = new EthAccountsUnityRequest(mtxNode);
             yield return requestAccounts.SendRequest();
             var resultsAccounts = requestAccounts.Result;
-            try
-            {
-                var usedAccountLol = resultsAccounts[0];
+			if(resultsAccounts != null && resultsAccounts[0] != null)
+			{
                 StatisticsTracking.InstantEvent("Matryx Init", "Eth Node", new Dictionary<string, object>(){
                     {"Node Found", true},
                 });
+
+                var usedAccount = resultsAccounts[0];
+				Debug.Log("Used account:" + usedAccount);
+                var function = platformContract.GetFunction("prepareBalance");
+                var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
+                transactionInput.Gas = new HexBigInteger(3000000);
+                // Do request
+                var requestTransaction = new EthSendTransactionUnityRequest(customRPCNode);
+                yield return requestTransaction.SendRequest(transactionInput);
+                var resultsTransaction = requestTransaction.Result;
             }
-            catch (Exception e)
+            else
             {
                 StatisticsTracking.InstantEvent("Matryx Init", "Eth Node", new Dictionary<string, object>(){
                     {"Node Found", false},
                 });
-            }
-
-			if(resultsAccounts != null && resultsAccounts[0] != null)
-			{
-				var usedAccount = resultsAccounts[0];
-				Debug.Log("Used account:" + usedAccount);
-                var function = mtxContract.GetFunction("prepareBalance");
-                var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
-                transactionInput.Gas = new HexBigInteger(3000000);
-                // Do request
-                var requestTransaction = new EthSendTransactionUnityRequest(mtxNode);
-                yield return requestTransaction.SendRequest(transactionInput);
-                var resultsTransaction = requestTransaction.Result;
             }
         }
 
