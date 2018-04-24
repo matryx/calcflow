@@ -21,7 +21,7 @@ using System.Collections;
 using System;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+[RuntimeSerializable(typeof(FlexActionableComponent), true, true)]
 public class FlexButtonComponent : FlexActionableComponent
 {
     public Color passiveColor;

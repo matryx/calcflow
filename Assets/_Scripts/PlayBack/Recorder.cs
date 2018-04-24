@@ -36,7 +36,7 @@ public class Recorder : MonoBehaviour
         foreach(UIDSystem uid in AllUIDs){
             RecordSpawn(uid);
         }
-        //PlaybackClock.AddToTimer(CheckForSpawns);
+        PlaybackClock.AddToTimer(CheckForSpawns);
     }
 
     private static void StopRecording()
@@ -88,44 +88,8 @@ public class Recorder : MonoBehaviour
 
     private static void CheckForSpawns()
     {
-        foreach (GameObject gObj in (GameObject[])GameObject.FindObjectsOfType<GameObject>())
-        {
-            // if (!AllGameObjects.Contains(gObj.GetInstanceID()))
-            // {
-            //     AllGameObjects.Add(gObj.GetInstanceID());
-
-            //     if (gObj.GetComponent<UIDSystem>())
-            //     {
-            //         LogSpawn(gObj);
-            //         if (gObj.GetComponent<Button>() != null)
-            //         {
-            //             gObj.EnsureOneOf<ButtonLogger>();
-            //         }
-            //         gObj.EnsureOneOf<EnableLogger>();
-            //         gObj.EnsureOneOf<MovementLogger>();
-            //     }
-                //Transform child1 = gObj.transform;
-                //Transform parent1 = child1.parent;
-
-                //while (parent1 != null && !AllGameObjects.Contains(parent1.GetInstanceID()))
-                //{
-                //    child1 = parent1;
-                //    parent1 = child1.parent;
-                //}
-
-                //foreach (Transform descendent in child1.GetComponentsInChildren<Transform>())
-                //{
-                //    if (child1.gameObject.GetComponent<UIDSystem>())
-                //    {
-                //        AllGameObjects.Add(descendent.gameObject.GetInstanceID());
-                //        descendent.gameObject.EnsureOneOf<EnableLogger>();
-                //        descendent.gameObject.EnsureOneOf<MovementLogger>();
-                //        LogSpawn(child1.gameObject);
-                //    }
-                //}
-                //if(child1.gameObject.GetComponent<UIDSystem>())
-                //    LogSpawn(child1.gameObject);
-            //}
+        while (UIDSystem.newUIDs.Count>0){
+            RecordSpawn(UIDSystem.newUIDs.Dequeue());
         }
     }
 

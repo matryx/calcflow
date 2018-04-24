@@ -115,7 +115,6 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
     }
     public override void OnAfterRuntimeSerialize()
     {
-        print("particleCount: " + particleCount);
     }
 
     private void restoreGradient()
