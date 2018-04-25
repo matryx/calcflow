@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AxisLabelManager : MonoBehaviour {
 
-    private float min = 0;
+    private float min = -10;
     private float max = 10;
 
     public bool skipFirst = false;
