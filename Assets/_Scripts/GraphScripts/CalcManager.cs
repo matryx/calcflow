@@ -179,9 +179,15 @@ public class CalcManager : MonoBehaviour
 
         connectedMenus.saveLoadMenu.Initialize(this);
 
-        connectedMenus.tournamentMenu.Initialize(this);
+        if(connectedMenus.tournamentMenu != null)
+        {
+            connectedMenus.tournamentMenu.Initialize(this);
+        }
 
-        connectedMenus.submissionsMenu.Initialize(this);
+        if(connectedMenus.submissionsMenu != null)
+        {
+            connectedMenus.submissionsMenu.Initialize(this);
+        }
 
         if (connectedMenus.particleAnimationSettings != null)
             connectedMenus.particleAnimationSettings.Initialize(this);
