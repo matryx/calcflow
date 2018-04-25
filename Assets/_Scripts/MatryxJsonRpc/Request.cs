@@ -398,25 +398,6 @@ namespace MatryxJsonRpc
                 context.done(null);
             }
 
-            //var getOwnerFunction = platformContract.GetFunction("getOwner");
-            //object[] getOwnerParams = { };
-            //var getOwnerInput = getOwnerFunction.CreateCallInput(getOwnerParams);
-            //getOwnerInput.Gas = new HexBigInteger(3000000);
-            //var getOwnerCall = new EthCallUnityRequest(mtxNode);
-            //yield return getOwnerCall.SendRequest(getOwnerInput, BlockParameter.CreateLatest());
-            //try
-            //{
-            //    var resultsTransaction = getOwnerCall.Result;
-            //}
-            //catch
-            //{
-            //    // Error
-            //    Debug.Log("Could not check peer status");
-            //    //Debug.Log(e);
-            //    context.done(null);
-            //}
-
-
             // tournament.entryFee();
             var submission = (Submission)((object[])context.param)[0];
             tournamentContract = new Contract(null, tournamentAbi, submission.tournamentAddress);
@@ -495,24 +476,6 @@ namespace MatryxJsonRpc
             // Parse routine params
             var tournamentAddress = (submission.tournamentAddress);
             var title = submission.title;
-
-            //List<IMultipartFormSection> submissionFormData = new List<IMultipartFormSection>();
-            //MultipartFormDataSection formDataSection = new MultipartFormDataSection("description", "hello");
-            //submissionFormData.Add(formDataSection);
-            //UnityWebRequest ipfsRequest = UnityWebRequest.Post(submissionUploadEndpt, submissionFormData, Encoding.ASCII.GetBytes("----WebKitFormBoundary7MA4YWxkTrZu0gW"));
-            //ipfsRequest.SetRequestHeader("Content-Type", "multipart/form-data");
-            //ipfsRequest.chunkedTransfer = true;
-            ////www.uploadHandler.contentType = "multipart/form-data";
-            //yield return ipfsRequest.Send();
-
-            //if (ipfsRequest.isError)
-            //{
-            //    Debug.Log(ipfsRequest.error);
-            //}
-            //else
-            //{
-            //    Debug.Log("Form upload complete!");
-            //}
 
             WWWForm form = new WWWForm();
             form.AddBinaryData("description", Encoding.ASCII.GetBytes("hello world"));
