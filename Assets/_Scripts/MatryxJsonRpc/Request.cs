@@ -52,7 +52,7 @@ namespace MatryxJsonRpc
         // Contract info
         private static string mtxNode = "http://localhost:8545";
         private static string customRPCNode = "http://customrpc.matryx.ai:8545";
-        private static string mtxContractAddr = "0x7c4970b887cfa95062ead0708267009dcd564017";
+        private static string platformAddress;
         private static Contract platformContract;
         private static Contract tokenContract;
         private static Contract tournamentContract;
@@ -441,10 +441,25 @@ namespace MatryxJsonRpc
             {
 
                 var tokenApproveFunction = tokenContract.GetFunction("approve");
+                object[] tokenClearApproveParams = { submission.tournamentAddress, 0 };
                 object[] tokenApproveParams = { submission.tournamentAddress, entryFee.entryFee };
+                var tokenClearApproveInput = tokenApproveFunction.CreateTransactionInput(usedAccount, tokenClearApproveParams);
                 var tokenApproveInput = tokenApproveFunction.CreateTransactionInput(usedAccount, tokenApproveParams);
-                tokenApproveInput.Gas = new HexBigInteger(300000);
+                tokenClearApproveInput.Gas = new HexBigInteger(3000000);
+                tokenApproveInput.Gas = new HexBigInteger(3000000);
+                var tokenClearApproveTransaction = new EthSendTransactionUnityRequest(mtxNode);
                 var tokenApproveTransaction = new EthSendTransactionUnityRequest(mtxNode);
+                yield return tokenClearApproveTransaction.SendRequest(tokenClearApproveInput);
+                try
+                {
+                    var tokenClearApprovalResult = tokenClearApproveTransaction.Result;
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("Could not approve tournament to withdraw entry fee.");
+                    context.done(null);
+                }
+
                 yield return tokenApproveTransaction.SendRequest(tokenApproveInput);
                 try
                 {
@@ -574,10 +589,10 @@ namespace MatryxJsonRpc
             {
                 yield return www;
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
-                var platformAddress = jsonObj["address"] as string;
 
                 var platformAbi = Encoding.UTF8.GetString(serializer.Serialize(jsonObj["abi"]));
-                platformContract = new Contract(null, platformAbi, mtxContractAddr);
+                platformAddress = jsonObj["address"] as string;
+                platformContract = new Contract(null, platformAbi, platformAddress);
             }
 
             // instantiate token contract
