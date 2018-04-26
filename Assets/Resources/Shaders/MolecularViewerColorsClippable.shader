@@ -17,7 +17,7 @@ Shader "MolecularViewerColorsClippable"
         Tags
         {
             "RenderType" = "Transparent"
-            "Queue" = "Transparent"
+            "Queue" = "Transparent+1000"
         }
 
         LOD 200
