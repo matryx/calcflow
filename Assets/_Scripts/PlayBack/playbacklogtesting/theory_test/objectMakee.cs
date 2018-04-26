@@ -6,7 +6,7 @@ public class objectMakee : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+		Debug.Log("I was made");
 	}
 	
 	// Update is called once per frame

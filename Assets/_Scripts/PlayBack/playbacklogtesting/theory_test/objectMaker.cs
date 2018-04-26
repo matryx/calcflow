@@ -4,13 +4,19 @@ using UnityEngine;
 
 public class objectMaker : MonoBehaviour {
 
-	// Use this for initialization
+	bool starting = true;
+	public	GameObject go;
 	void Start () {
 		
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if (starting)
+		{
+			starting = false;
+			Instantiate(go);
+			Debug.Log("made something!");
+		}
 	}
 }

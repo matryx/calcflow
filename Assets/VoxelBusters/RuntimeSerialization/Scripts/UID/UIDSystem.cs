@@ -45,10 +45,9 @@ namespace VoxelBusters.RuntimeSerialization
         #endregion
 
 
-		public static Queue<UIDSystem> newUIDs = new Queue<UIDSystem>();
         public UIDSystem()
         {
-            //newUIDs.Enqueue(this);
+            Recorder.AddUID(this);
         }
 
         #region Properties
@@ -117,7 +116,7 @@ namespace VoxelBusters.RuntimeSerialization
 
         private void Awake()
         {
-            // Initialize component
+            //Recorder.UIDAdded(this);
             CachedGameObject = gameObject;
             CachedTransform = transform;
             IsPrefab = false;

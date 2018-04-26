@@ -11,17 +11,48 @@ using CalcFlowUI;
 public class Recorder : MonoBehaviour
 {
 
+    public static Recorder _instance;
+    public static GameObject _instanceGO;
+
     public bool EditorRecord = false;
     private static HashSet<int> AllGameObjects = new HashSet<int>();
-    private static List<UIDSystem> AllUIDs = new List<UIDSystem>();
+    private static List<UIDSystem> allUIDs = new List<UIDSystem>();
     private static bool record = false;
     [SerializeField]
     public static PlaybackLog2 recordLog = new PlaybackLog2();
 
     private void Start()
     {
-        //AllGameObjects.Add(gameObject.GetInstanceID());
-        AllUIDs.Remove(gameObject.GetComponent<UIDSystem>());
+        if (_instance == null)
+        {
+            _instance = this;
+            _instanceGO = this.gameObject;
+        }
+        else
+        {
+            Debug.LogWarning("Two instances of one-of: Recorder");
+        }
+        allUIDs.Clear();
+        allUIDs = GetAllUIDSInScene();
+        allUIDs.Remove(gameObject.GetComponent<UIDSystem>());
+
+    }
+
+    List<UIDSystem> GetAllUIDSInScene()
+    {
+        List<UIDSystem> objectsInScene = new List<UIDSystem>();
+
+        foreach (UIDSystem go in Resources.FindObjectsOfTypeAll(typeof(UIDSystem)) as UIDSystem[])
+        {
+            if (go.gameObject.hideFlags == HideFlags.NotEditable || go.gameObject.hideFlags == HideFlags.HideAndDontSave)
+                continue;
+            if (go.gameObject.scene.name == null)
+                continue;
+
+            objectsInScene.Add(go);
+        }
+
+        return objectsInScene;
     }
 
     private void Update()
@@ -33,9 +64,6 @@ public class Recorder : MonoBehaviour
     {
         print("start recording");
         PlaybackClock.StartClock();
-        foreach(UIDSystem uid in AllUIDs){
-            RecordSpawn(uid);
-        }
         PlaybackClock.AddToTimer(CheckForSpawns);
     }
 
@@ -69,13 +97,23 @@ public class Recorder : MonoBehaviour
 
     public static void UIDAdded(UIDSystem uid)
     {
-        AllUIDs.Add(uid);
-        if (Recording){
+        allUIDs.Add(uid);
+        if (Recording)
+        {
             RecordSpawn(uid);
         }
     }
 
-    private static void RecordSpawn(UIDSystem uid){
+    public static void AddUID(UIDSystem uid)
+    {
+        if (_instance != null)
+        {
+            allUIDs.Add(uid);
+        }
+    }
+
+    private static void RecordSpawn(UIDSystem uid)
+    {
         GameObject gObj = uid.gameObject;
         LogSpawn(gObj);
         if (gObj.GetComponent<Button>() != null)
@@ -88,8 +126,12 @@ public class Recorder : MonoBehaviour
 
     private static void CheckForSpawns()
     {
-        while (UIDSystem.newUIDs.Count>0){
-            RecordSpawn(UIDSystem.newUIDs.Dequeue());
+        while (allUIDs.Count > 0)
+        {
+            UIDSystem uid;
+            uid = allUIDs[allUIDs.Count-1];
+            allUIDs.RemoveAt(allUIDs.Count-1);
+            RecordSpawn(uid);
         }
     }
 
