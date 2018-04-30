@@ -394,8 +394,6 @@ namespace MatryxJsonRpc
             {
                 // Error
                 Debug.Log("Could not check peer status");
-                //Debug.Log(e);
-                context.done(null);
             }
 
             // tournament.entryFee();
@@ -414,7 +412,6 @@ namespace MatryxJsonRpc
             catch (Exception e)
             {
                 Debug.Log("Could not get tournament entry fee.");
-                context.done(null);
             }
 
             // token.approve(tournament.address, tournament.entryFee)
@@ -438,7 +435,6 @@ namespace MatryxJsonRpc
                 catch (Exception e)
                 {
                     Debug.Log("Could not approve tournament to withdraw entry fee.");
-                    context.done(null);
                 }
 
                 yield return tokenApproveTransaction.SendRequest(tokenApproveInput);
@@ -449,7 +445,6 @@ namespace MatryxJsonRpc
                 catch (Exception e)
                 {
                     Debug.Log("Could not approve tournament to withdraw entry fee.");
-                    context.done(null);
                 }
             }
 
@@ -467,7 +462,6 @@ namespace MatryxJsonRpc
             catch (Exception e)
             {
                 Debug.Log("Could not enter tournament.");
-                context.done(null);
             }
 
             // Fix the below code
@@ -478,7 +472,8 @@ namespace MatryxJsonRpc
             var title = submission.title;
 
             WWWForm form = new WWWForm();
-            form.AddBinaryData("description", Encoding.ASCII.GetBytes("hello world"));
+            form.AddBinaryData("description", Encoding.ASCII.GetBytes(((Submission)((object[])(context.param))[0]).title), "description.txt", "text/plain");
+            form.AddBinaryData("jsonContent", Encoding.ASCII.GetBytes(((Submission)((object[])(context.param))[0]).body), "jsonContent.json", "application/json");
             UnityWebRequest ipfsRequest = UnityWebRequest.Post(submissionUploadEndpt, form);
             yield return ipfsRequest.Send();
             print("request completed with code: " + ipfsRequest.responseCode);
