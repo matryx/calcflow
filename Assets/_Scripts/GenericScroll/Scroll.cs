@@ -379,6 +379,14 @@ public class Scroll : MonoBehaviour
         }
     }
 
+    public void clear()
+    {
+        if(objects != null)
+        {
+            deleteObjects(objects);
+        }
+    }
+
     //TODO: account for deleting a single object
     public void deleteObjects(List<Transform> objs)
     {

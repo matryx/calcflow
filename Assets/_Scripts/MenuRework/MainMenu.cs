@@ -41,7 +41,10 @@ public class MainMenu : QuickButton
         resetPos.gameObject.SetActive(false);
         resetScene.gameObject.SetActive(false);
         home.gameObject.SetActive(false);
-        matryx.gameObject.SetActive(false);
+        if (matryx) 
+        {
+            matryx.gameObject.SetActive(false);
+        }
 
         if (menus != null)
         {

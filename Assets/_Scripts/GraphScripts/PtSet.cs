@@ -149,7 +149,11 @@ public class PtCoord
 public class AxisCoord : CalcOutput
 {
     float val;
-
+    public override List<string> ClearTokens()
+    {
+        return null;
+    }
+    
     public float Value
     {
         get
@@ -350,7 +354,10 @@ public class EqnSet
 public class EqnCoef : CalcOutput
 {
     float val;
-
+    public override List<string> ClearTokens()
+    {
+        return null;
+    }
     public float Value
     {
         get
