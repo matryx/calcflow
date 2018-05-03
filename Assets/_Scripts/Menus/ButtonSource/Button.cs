@@ -11,6 +11,9 @@ namespace CalcFlowUI
         public event ButtonCallBack OnButtonEnter;
         public event ButtonCallBack OnButtonExit;
 
+        [SerializeField]
+        public Color disabledColor;
+
         public virtual void PressButton(GameObject other)
         {
             #if UNITY_EDITOR
@@ -59,6 +62,22 @@ namespace CalcFlowUI
                 }
             }
         }
+
+        public void Disable()
+        {
+            GetComponent<Renderer>().material.color = disabledColor;
+            foreach (ButtonCallBack b in OnButtonEnter.GetInvocationList())
+            {
+                OnButtonEnter -= b;
+            }
+
+            HighlightOnRaycast highlight = GetComponent<HighlightOnRaycast>();
+            if (highlight != null)
+            {
+                Destroy(highlight);
+            }
+        }
+
         public void Update()
         {
             Pressed = press;

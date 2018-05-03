@@ -125,7 +125,7 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
         foreach (ExpressionSet expressionSet in expressionSets)
         {
-            tessel.EnqueueEquation(expressionSet.expressions["X"].expression, expressionSet.expressions["Y"].expression, 
+            tessel.EnqueueEquation(currentScale, expressionSet.expressions["X"].expression, expressionSet.expressions["Y"].expression, 
                                    expressionSet.expressions["Z"].expression, expressionSet.ranges["u"].Min.Value, 
                                    expressionSet.ranges["u"].Max.Value, expressionSet.ranges["v"].Min.Value, 
                                    expressionSet.ranges["v"].Max.Value);

@@ -42,12 +42,13 @@ public class OutputManager : MonoBehaviour {
             case "GenerateMesh":
                 calcManager.toExport = true;
                 break;
-                //case "Save":
-                //    if (Saveable)
-                //    {
-                //        calcManager.saveLoadMenu.Save();
-                //    }
-                //    break;
+            case "Save":
+                //calcManager.saveLoadMenu.Save();
+
+                //if (Saveable)
+                //{
+                //}
+                break;
         }
         //calcManager.manageText();
     }
