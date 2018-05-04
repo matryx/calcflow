@@ -23,7 +23,6 @@ public class SaveLoadMenu : MonoBehaviour
 
     private List<Transform> buttons = new List<Transform>();
     public ExpressionSaveLoad loader;
-    //private CalcManager calcManager;
     private CalculatorManager calcManager;
     public static SaveLoadMenu _instance;
 

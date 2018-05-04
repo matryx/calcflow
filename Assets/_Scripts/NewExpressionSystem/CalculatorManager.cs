@@ -100,6 +100,7 @@ public class CalculatorManager : MonoBehaviour
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
+        inputReceived = true;
     }
 
     public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
@@ -146,6 +147,8 @@ public class CalculatorManager : MonoBehaviour
             int displayLength = (exprBody.isVariable()) ? rangeDisplayLength : expressionDisplayLength;
             textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
         }
+
+        inputReceived = true;
     }
 
     public void ManageFeedback()

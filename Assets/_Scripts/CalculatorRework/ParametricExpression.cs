@@ -19,7 +19,7 @@ public class ParametricExpression : MonoBehaviour
     bool deleteVar = false;
     bool destroyCalled = false;
     bool isActive = true;
-    string varName;
+    List<string> varsToDelete;
 
     void Awake()
     {
@@ -32,6 +32,7 @@ public class ParametricExpression : MonoBehaviour
         variables = new Dictionary<string, Transform>();
         hiddenVariables = new Dictionary<string, Transform>();
         emptyList = new List<Transform>();
+        varsToDelete = new List<string>();
 
         scroll = expressionsClass.getScroll("param");
         initialized = true;
@@ -171,8 +172,9 @@ public class ParametricExpression : MonoBehaviour
 
     public void deleteVariable(string varToDelete)
     {
-        varName = varToDelete;
         deleteVar = true;
+        varsToDelete.Add(varToDelete);
+        //print("<color=red>deleting VAR</color>: " + deleteVar);
     }
 
     private void addToVarClump(Transform var)
@@ -214,8 +216,16 @@ public class ParametricExpression : MonoBehaviour
 
     void Update()
     {
+        //TODO:
+        // deactivate everything at once 
+        // in destroycalled, look through each spot, if a spot is empty, find the next non empty
+        // and move it to the empty spot
+        // when an empty spot cant find a new slot to move, rearranging is done and delete all
+        // empty clumps
         if (deleteVar)
         {
+            string varName = varsToDelete[0];
+
             if (variables.ContainsKey(varName))
             {
                 Transform temp = variables[varName];
@@ -234,6 +244,10 @@ public class ParametricExpression : MonoBehaviour
         {
             for (int i = 0; i < variableClumps.Count; i++)
             {
+                //if (variableClumps[i].childCount == 0)
+                //{
+
+                //}
                 if (variableClumps[i].childCount == 1)
                 {
                     StartCoroutine(MoveTo(variableClumps[i].GetChild(0), variableClumps[i].GetChild(0).localPosition, new Vector3(-xPos, 0, 0), 0.3f));
@@ -258,6 +272,12 @@ public class ParametricExpression : MonoBehaviour
             }
 
             destroyCalled = false;
+            print("count: " + varsToDelete.Count);
+            if (varsToDelete.Count != 0)
+            {
+                deleteVar = true;
+                print("<color=red>deleting VAR</color>: " + deleteVar);
+            }
         }
     }
 }
