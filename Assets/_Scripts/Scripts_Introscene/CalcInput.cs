@@ -166,16 +166,20 @@ public class CalcInput : MonoBehaviour
                 break;
             #region control_buttons
             case "Button_del":
+                List<string> toDelete = new List<string>();
+
                 if (index > 0)
                 {
-                    string toDelete = currExpression.tokens[index - 1];
+                    string s = currExpression.tokens[index - 1];
+                    toDelete.Add(s);
                     currExpression.tokens.RemoveAt(index - 1);
                     index--;
 
                     if (currExpression.expSet == null) break;
-                    if (currExpression.expSet.GetTotalOccurence(toDelete) == 0)
+                    if (currExpression.expSet.GetTotalOccurence(s) == 0)
                     {
-                        calcManager.expressionSet.RemoveVariable(toDelete);
+                        calcManager.expressionSet.RemoveVariable(s);
+
                         expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDelete);
                     }
                 }
@@ -192,8 +196,9 @@ public class CalcInput : MonoBehaviour
                 {
                     print("to del: " + del);
                     calcManager.expressionSet.RemoveVariable(del);
-                    expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(del);
                 }
+
+                expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDel);
 
                 break;
             case "Button_Enter":
