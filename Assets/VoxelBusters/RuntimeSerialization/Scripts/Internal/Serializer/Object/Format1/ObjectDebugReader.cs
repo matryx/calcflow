@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -8,9 +9,44 @@ using VoxelBusters.Utility;
 
 namespace VoxelBusters.RuntimeSerialization.Internal
 {
-    internal class ObjectReaderSFV1 : ObjectReader
+
+    internal class ObjectDebugReader : ObjectReader
     {
+
         #region Methods
+
+        string logPath;
+        static int filenum = 0;
+
+        StreamWriter sw;
+
+        internal void ReadObjectValueEntry(RSBinaryReader _binaryReader, out Type _objectType, object _object = null)
+        {
+            logPath = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Calcflow"), "Logs");
+            Debug.Log("Failed to deserialize. Writing to log: " + logPath);
+            if (!Directory.Exists(logPath))
+            {
+                Directory.CreateDirectory(logPath);
+            }
+            logPath = Path.Combine(logPath, "failedSerialization" + filenum++);
+            //System.IO.File.WriteAllText(logPath, String.Empty);
+            sw = File.AppendText(logPath);
+            sw.WriteLine("1");
+            sw.WriteLine("2");
+            _objectType = null;
+            try
+            {
+                ReadObjectValue(_binaryReader, out _objectType, _object);
+            }
+            catch (Exception p)
+            {
+                Debug.Log("<color=red>Debugger Error</color>");
+                Debug.LogError(p);
+            }
+            sw.Close();
+
+        }
+
 
         internal override object ReadObjectValue(RSBinaryReader _binaryReader, out Type _objectType, object _object = null)
         {

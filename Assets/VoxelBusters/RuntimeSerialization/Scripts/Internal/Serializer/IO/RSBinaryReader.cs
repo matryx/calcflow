@@ -8,6 +8,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 {
 	internal class RSBinaryReader : BinaryReader
 	{
+
 		#region Constructors
 		
 		internal RSBinaryReader (int _bufferCapacity) : base (new MemoryStream(_bufferCapacity))

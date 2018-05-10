@@ -35,6 +35,7 @@ public class ExpressionSaveLoad : MonoBehaviour
     {
         savePath = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Calcflow"), "Saves");
         imagePath = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Calcflow"), "Images");
+        SceneExtension = gameObject.scene.name;
 
         if (!Directory.Exists(savePath))
         {
