@@ -18,22 +18,23 @@ namespace VoxelBusters.RuntimeSerialization.Internal
         string logPath;
         static int filenum = 0;
 
-        StreamWriter sw;
-
         internal void ReadObjectValueEntry(RSBinaryReader _binaryReader, out Type _objectType, object _object = null)
         {
             logPath = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Calcflow"), "Logs");
-            Debug.Log("Failed to deserialize. Writing to log: " + logPath);
-            if (!Directory.Exists(logPath))
+            Debug.Log("Failed to deserialize. Writing to log: " +  logPath);
+            if (!Directory.Exists( logPath))
             {
-                Directory.CreateDirectory(logPath);
+                Directory.CreateDirectory( logPath);
             }
-            logPath = Path.Combine(logPath, "failedSerialization" + filenum++);
+            logPath = Path.Combine(logPath, "failedSerialization" + filenum++ + ".txt");
             //System.IO.File.WriteAllText(logPath, String.Empty);
-            sw = File.AppendText(logPath);
-            sw.WriteLine("1");
-            sw.WriteLine("2");
             _objectType = null;
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+            {
+                sw.WriteLine("1");
+                sw.WriteLine("2");
+            }
+
             try
             {
                 ReadObjectValue(_binaryReader, out _objectType, _object);
@@ -43,7 +44,6 @@ namespace VoxelBusters.RuntimeSerialization.Internal
                 Debug.Log("<color=red>Debugger Error</color>");
                 Debug.LogError(p);
             }
-            sw.Close();
 
         }
 
@@ -74,36 +74,67 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 
                 case eTypeTag.PRIMITIVE:
                     _objectValue = ReadPrimitiveTypeValue(_binaryReader, out _objectType);
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+                    {
+                        sw.WriteLine("Type: primitive " + _objectType.ToString());
+                    }
                     break;
 
                 case eTypeTag.STRUCT:
                     _objectValue = ReadStructTypeValue(_binaryReader, out _objectType, _object);
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+                    {
+                        sw.WriteLine("Type: struct " + _objectType.ToString());
+                    }
                     break;
 
                 case eTypeTag.STRING:
                     _objectValue = ReadStringTypeValue(_binaryReader, out _objectType);
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+                    {
+                        sw.WriteLine("Type: STRING");
+                    }
                     break;
 
                 case eTypeTag.ENUM:
                     _objectValue = ReadEnumTypeValue(_binaryReader, out _objectType);
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+                    {
+                        sw.WriteLine("Type: ENUM " + _objectType.ToString());
+                    }
                     break;
 
                 case eTypeTag.ARRAY:
                     _objectValue = ReadArrayTypeValue(_binaryReader, out _objectType);
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+                    {
+                        sw.WriteLine("Type: array " + _objectType.ToString());
+                    }
                     break;
 
                 case eTypeTag.CLASS:
                     _objectValue = ReadClassTypeValue(_binaryReader, out _objectType, _object);
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+                    {
+                        sw.WriteLine("Type: class " + _objectType.ToString());
+                    }
                     break;
 
                 case eTypeTag.OBJECT_REFERENCE:
                     _objectValue = ReadObjectReferenceValue(_binaryReader, out _objectType);
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+                    {
+                        sw.WriteLine("Type: object reference " + _objectType.ToString());
+                    }
                     break;
 
                 default:
                     throw new Exception(string.Format("[RS] Unsupported type tag{0}.", _typeTag));
             }
-
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+            {
+                sw.WriteLine("Value: " + _objectValue);
+            }
             return _objectValue;
         }
 
@@ -635,7 +666,6 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             UInt32 _objectReferenceID = _binaryReader.ReadUInt32();
             object _object;
 
-
             foreach (object key in ObjectReferenceCache.Keys)
             {
                 UInt32 _currentReferenceID = ObjectReferenceCache[key];
@@ -644,9 +674,16 @@ namespace VoxelBusters.RuntimeSerialization.Internal
                 {
                     _object = key;
                     _objectType = _object.GetType();
-
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+                    {
+                        sw.WriteLine("ReferenceNumber: " + _objectReferenceID);
+                    }
                     return _object;
                 }
+            }
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter( logPath, true))
+            {
+                sw.WriteLine("===================Broken Object Reference: " + _objectReferenceID + "=======================");
             }
 
             throw new Exception(string.Format("[RS] Object Reference not found for ID={0}.", _objectReferenceID));
