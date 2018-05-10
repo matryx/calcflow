@@ -13,8 +13,6 @@ public class Expressions : MonoBehaviour
     List<Transform> expressions;
     public enum ExpressionType { Constant, Paramet, VecField }
 
-    public Transform remove, hide, flowLine;
-    Color actionActiveColor, actionInactiveColor;
     //Color expressionActiveColor, expressionInactiveColor;
 
     //TODO:
@@ -29,6 +27,8 @@ public class Expressions : MonoBehaviour
     // 2 - creating empty game object everytime a letter is pressed
     // 3 - scroll bug? when adding expressions and not at top of page, UI gets broken
     //      - x input's local position is off
+    // 4 - when changing selected expression, action buttons of prev selected remains active
+    // 5 - when hiding an expression, action buttons remain active
 
     void Awake()
     {
@@ -39,12 +39,7 @@ public class Expressions : MonoBehaviour
         constantScroll = transform.parent.Find("ConstantPanel").GetComponentInChildren<Scroll>();
 
         expressions = new List<Transform>();
-        remove.gameObject.SetActive(true);
-        hide.gameObject.SetActive(true);
-        flowLine.gameObject.SetActive(true);
 
-        actionActiveColor = remove.Find("Body").GetComponent<Renderer>().material.color;
-        actionInactiveColor = Color.gray;
         //ColorUtility.TryParseHtmlString("#64C3A7FF", out expressionActiveColor);
         //ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
     }

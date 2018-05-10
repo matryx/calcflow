@@ -14,7 +14,7 @@ public class ExpressionBody : QuickButton
     ParametricExpression param;
     CalculatorManager calcManager;
 
-    private bool thisBodyActive = false;
+    private bool thisBodySelected = false;
     private bool finishedScaling = false;
     private bool retracting = false;
     private bool variable = false;
@@ -133,14 +133,14 @@ public class ExpressionBody : QuickButton
         scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
         StartCoroutine(scaleUp);
         finishedScaling = false;
-        thisBodyActive = true;
+        thisBodySelected = true;
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
         deselectPrevBody();
 
-        if (thisBodyActive)
+        if (thisBodySelected)
         {
             if (retracting && backToSelected != null)
             {
@@ -153,7 +153,7 @@ public class ExpressionBody : QuickButton
             finishedScaling = false;
             expression.setSelectedExpr(null, null);
 
-            thisBodyActive = false;
+            thisBodySelected = false;
         }
         else
         {
@@ -193,7 +193,7 @@ public class ExpressionBody : QuickButton
         retracting = true;
 
         expression.setSelectedExpr(null, null);
-        thisBodyActive = false;
+        thisBodySelected = false;
     }
 
     //BUG: null feedback when adding a new variable that's offscreen
@@ -201,16 +201,18 @@ public class ExpressionBody : QuickButton
     {
         if (feedBack && feedBack.localScale == selectedScale)
         {
+            if (transform.parent.name.Equals("Delete")) print("ON DISABLE");
+
             feedBack.localScale = idleScale;
             feedBack.gameObject.SetActive(false);
 
-            if (thisBodyActive)
+            if (thisBodySelected)
             {
                 ExpressionBody selectedBody = expression.getSelectedBody();
                 TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
                 oldTextInput.text = oldTextInput.text.Replace("_", "");
                 expression.setSelectedExpr(null, null);
-                thisBodyActive = false;
+                thisBodySelected = false;
                 calcInput.ChangeOutput(null);
             }
         }

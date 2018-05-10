@@ -190,11 +190,8 @@ public class CalcInput : MonoBehaviour
                 List<string> toDel = currExpression.ClearTokens();
                 if (toDel == null) break;
 
-                //BUG: only deleting last thing in list
-                // toDel's count is correct but only deleting last thing for some reason
                 foreach (string del in toDel)
                 {
-                    print("to del: " + del);
                     calcManager.expressionSet.RemoveVariable(del);
                 }
 

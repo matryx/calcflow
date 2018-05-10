@@ -174,7 +174,7 @@ public class ParametricExpression : MonoBehaviour
     {
         varsToDelete = vars;
         deleteVar = true;
-        //print("<color=red>deleting VAR</color>: " + deleteVar);
+        //print("<color=red>deleting var count</color>: " + varsToDelete.Count);
     }
 
     private void addToVarClump(Transform var)
@@ -216,29 +216,8 @@ public class ParametricExpression : MonoBehaviour
 
     void Update()
     {
-        //TODO:
-        // deactivate everything at once 
-        // in destroycalled, look through each spot, if a spot is empty, find the next non empty
-        // and move it to the empty spot
-        // when an empty spot cant find a new slot to move, rearranging is done and delete all
-        // empty clumps
         if (deleteVar)
         {
-            //string varName = varsToDelete[0];
-
-            //if (variables.ContainsKey(varName))
-            //{
-            //    Transform temp = variables[varName];
-            //    temp.gameObject.SetActive(false);
-            //    temp.SetParent(null);
-            //    hiddenVariables.Add(varName, temp);
-            //    variables.Remove(varName);
-
-            //    destroyCalled = true;
-            //    deleteVar = false;
-            //    return;
-            //}
-
             foreach (string s in varsToDelete)
             {
                 if (variables.ContainsKey(s))
@@ -251,12 +230,11 @@ public class ParametricExpression : MonoBehaviour
 
                     destroyCalled = true;
                     deleteVar = false;
-                    return;
                 }
             }
-        }
 
-        List<int> emptyClumps = new List<int>();
+            return;
+        }
 
         if (destroyCalled)
         {
@@ -288,7 +266,7 @@ public class ParametricExpression : MonoBehaviour
                     }
 
                     //look for next available slot
-                    for (int ni = i; ni < variableClumps.Count; ni++)
+                    for (int ni = i + 1; ni < variableClumps.Count; ni++)
                     {
                         Transform nSlot = variableClumps[ni];
 
@@ -303,8 +281,8 @@ public class ParametricExpression : MonoBehaviour
 
             }
 
-            //BETTER IMPLEMENTATION
             int removeFrom = 0;
+
             for (int ind = 0; ind < variableClumps.Count; ind++)
             {
                 if (variableClumps[ind].childCount == 0)
@@ -314,59 +292,14 @@ public class ParametricExpression : MonoBehaviour
                 }
             }
 
-            if (removeFrom != 0) variableClumps.RemoveRange(removeFrom, variableClumps.Count-1);
+            List<Transform> emptyClumps = new List<Transform>();
 
-            //POSSIBLE IMP
-            //for (int ind = 0; ind < variableClumps.Count; ind++)
-            //{
-            //    if (variableClumps[ind].childCount == 0) emptyClumps.Add(ind);
-            //}
-
-            //foreach (int delInd in emptyClumps)
-            //{
-            //    Transform clump = variableClumps[delInd];
-            //    variableClumps.RemoveAt(delInd);
-            //    List<Transform> temp = new List<Transform>();
-            //    temp.Add(clump);
-            //    scroll.deleteObjects(temp);
-            //}
-
-            #region old imp
-            //for (int i = 0; i < variableClumps.Count; i++)
-            //{
-            //    if (variableClumps[i].childCount == 1)
-            //    {
-            //        StartCoroutine(MoveTo(variableClumps[i].GetChild(0), variableClumps[i].GetChild(0).localPosition, new Vector3(-xPos, 0, 0), 0.3f));
-
-            //        if (i + 1 < variableClumps.Count)
-            //        {
-            //            variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
-            //            StartCoroutine(MoveTo(variableClumps[i].GetChild(1), variableClumps[i].GetChild(1).localPosition, new Vector3(xPos, 0, 0), 0.3f));
-            //        }
-            //    }
-
-            //}
-
-            //Transform last = variableClumps[variableClumps.Count - 1];
-
-            //if (last.childCount == 0)
-            //{
-            //    variableClumps.Remove(last);
-            //    List<Transform> temp = new List<Transform>();
-            //    temp.Add(last);
-            //    scroll.deleteObjects(temp);
-            //}
-
-            //destroyCalled = false;
-            //print("count: " + varsToDelete.Count);
-            //if (varsToDelete.Count != 0)
-            //{
-            //    deleteVar = true;
-            //    print("<color=red>deleting VAR</color>: " + deleteVar);
-            //}
-            #endregion
+            if (removeFrom != 0)
+            {
+                emptyClumps = variableClumps.GetRange(removeFrom, variableClumps.Count - removeFrom);
+                variableClumps.RemoveRange(removeFrom, variableClumps.Count - removeFrom);
+                scroll.deleteObjects(emptyClumps);
+            }
         }
     }
-
-
 }
