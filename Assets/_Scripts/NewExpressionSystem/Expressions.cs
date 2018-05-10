@@ -28,7 +28,7 @@ public class Expressions : MonoBehaviour
     // 3 - scroll bug? when adding expressions and not at top of page, UI gets broken
     //      - x input's local position is off
     // 4 - when changing selected expression, action buttons of prev selected remains active
-    // 5 - when hiding an expression, action buttons remain active
+    //      - when hiding an expression, action buttons remain active
 
     void Awake()
     {

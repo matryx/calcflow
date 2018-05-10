@@ -29,6 +29,7 @@ public class ExpressionBody : QuickButton
         calcManager = CalculatorManager._instance;
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
+
         if (transform.parent.parent.Find("VariableTitle")) variable = true;
 
         if (!variable) title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
@@ -50,6 +51,11 @@ public class ExpressionBody : QuickButton
     protected override void Start()
     {
         base.Start();
+    }
+
+    public ExpressionComponent getExpComp()
+    {
+        return expComp;
     }
 
     public Transform getFeedBack()
@@ -85,6 +91,8 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
+            param = selectedBody.getExpComp().getExpressionParent().GetComponent<ParametricExpression>();
+            param.getExpActions().disableButtons();
             unSelect();
         }
     }
@@ -96,6 +104,8 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
+            param = selectedBody.getExpComp().getExpressionParent().GetComponent<ParametricExpression>();
+            param.getExpActions().disableButtons();
 
             if (selectedBody.transform != transform)
             {
@@ -111,7 +121,7 @@ public class ExpressionBody : QuickButton
         if (expComp == null) expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
         expression.setSelectedExpr(expComp.getExpressionParent(), this);
 
-        if (!param) param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
+        param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
         calcManager.ChangeExpressionSet(param.getExpSet());
 
         if (variable)
@@ -138,8 +148,6 @@ public class ExpressionBody : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        deselectPrevBody();
-
         if (thisBodySelected)
         {
             if (retracting && backToSelected != null)
@@ -157,7 +165,7 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            if (!param) param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
+            param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
             if (param.getActiveStatus()) selectBody();
         }
     }

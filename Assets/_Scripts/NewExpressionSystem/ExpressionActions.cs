@@ -13,6 +13,9 @@ public class ExpressionActions : QuickButton
 
     public void disableButtons()
     {
+        if (delete == null) delete = transform.parent.Find("Delete");
+        if (toggleHide == null) toggleHide = transform.parent.Find("ToggleHide");
+
         if (scaleButtonsUp != null) StopCoroutine(scaleButtonsUp);
 
         scaleButtonsDown = ScaleButtonsDown();

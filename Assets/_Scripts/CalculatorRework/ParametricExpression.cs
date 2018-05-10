@@ -7,6 +7,8 @@ public class ParametricExpression : MonoBehaviour
     Expressions.ExpressionType type;
     Expressions expressionsClass;
     ExpressionSet expSet;
+    ExpressionActions expActions;
+
     List<Transform> expressionsList;
     List<Transform> variableClumps;
     Dictionary<string, Transform> variables;
@@ -33,6 +35,7 @@ public class ParametricExpression : MonoBehaviour
         hiddenVariables = new Dictionary<string, Transform>();
         emptyList = new List<Transform>();
         varsToDelete = new List<string>();
+        expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
 
         scroll = expressionsClass.getScroll("param");
         initialized = true;
@@ -47,6 +50,11 @@ public class ParametricExpression : MonoBehaviour
             variableClumps = new List<Transform>();
             initialized = true;
         }
+    }
+
+    public ExpressionActions getExpActions()
+    {
+        return expActions;
     }
 
     public void setActiveStatus(bool status)
