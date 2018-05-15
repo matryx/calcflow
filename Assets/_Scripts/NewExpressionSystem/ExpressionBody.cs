@@ -15,14 +15,13 @@ public class ExpressionBody : QuickButton
     CalculatorManager calcManager;
 
     private bool thisBodySelected = false;
-    private bool finishedScaling = false;
-    private bool retracting = false;
+    private bool finishedScalingUp = true;
+    private bool finishedScalingDown = true;
     private bool variable = false;
 
     private Vector3 idleScale, selectedScale;
 
     private IEnumerator scaleUp, scaleDown;
-    private IEnumerator backToSelected, backToIdle;
 
     private void Awake()
     {
@@ -84,6 +83,23 @@ public class ExpressionBody : QuickButton
         return variable;
     }
 
+    //NOTE: sets selected expression and body to be null
+    public void unSelect()
+    {
+        if (!finishedScalingUp)
+        {
+            StopCoroutine(scaleUp);
+            finishedScalingUp = true;
+        }
+
+        scaleDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
+        StartCoroutine(scaleDown);
+        finishedScalingDown = false;
+
+        expression.setSelectedExpr(null, null);
+        thisBodySelected = false;
+    }
+
     public void deselectCurrBody()
     {
         ExpressionBody selectedBody = expression.getSelectedBody();
@@ -134,15 +150,15 @@ public class ExpressionBody : QuickButton
             calcManager.SetOutput(calcManager.expressionSet.expressions[title]);
         }
 
-        if (retracting && backToIdle != null)
+        if (!finishedScalingDown)
         {
-            StopCoroutine(backToIdle);
+            StopCoroutine(scaleDown);
+            finishedScalingDown = true;
         }
 
-        retracting = false;
         scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
         StartCoroutine(scaleUp);
-        finishedScaling = false;
+        finishedScalingUp = false;
         thisBodySelected = true;
     }
 
@@ -150,18 +166,7 @@ public class ExpressionBody : QuickButton
     {
         if (thisBodySelected)
         {
-            if (retracting && backToSelected != null)
-            {
-                StopCoroutine(backToSelected);
-                retracting = false;
-            }
-
-            scaleDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.3f);
-            StartCoroutine(scaleDown);
-            finishedScaling = false;
-            expression.setSelectedExpr(null, null);
-
-            thisBodySelected = false;
+            deselectCurrBody();
         }
         else
         {
@@ -188,20 +193,12 @@ public class ExpressionBody : QuickButton
         if (end == idleScale)
         {
             obj.gameObject.SetActive(false);
-            finishedScaling = true;
+            finishedScalingDown = true;
+        } 
+        else if (end == selectedScale)
+        {
+            finishedScalingUp = true;
         }
-    }
-
-    //NOTE: sets selected expression and body to be null
-    public void unSelect()
-    {
-        if (!finishedScaling && scaleUp != null) StopCoroutine(scaleUp);
-        backToIdle = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
-        StartCoroutine(backToIdle);
-        retracting = true;
-
-        expression.setSelectedExpr(null, null);
-        thisBodySelected = false;
     }
 
     //BUG: null feedback when adding a new variable that's offscreen

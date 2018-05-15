@@ -13,13 +13,12 @@ public class Expressions : MonoBehaviour
     List<Transform> expressions;
     public enum ExpressionType { Constant, Paramet, VecField }
 
-    //Color expressionActiveColor, expressionInactiveColor;
-
     //TODO:
     // main functionalities for parametric - DONE / NEED TO TEST HEAVILY
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
+    //  3 - make grayed out element lighter
 
 
     //BUGS:
@@ -27,8 +26,8 @@ public class Expressions : MonoBehaviour
     // 2 - creating empty game object everytime a letter is pressed
     // 3 - scroll bug? when adding expressions and not at top of page, UI gets broken
     //      - x input's local position is off
-    // 4 - when changing selected expression, action buttons of prev selected remains active
-    //      - when hiding an expression, action buttons remain active
+    // 4 - calculator doesn't graph until a variable is added
+    //      - doesn't clear graph when expression is cleared
 
     void Awake()
     {
@@ -56,7 +55,7 @@ public class Expressions : MonoBehaviour
                 return constantScroll;
         }
 
-        print("GET SCROLL RETURNED NULL");
+        print("<color=red>GET SCROLL RETURNED NULL</color>");
         return null;
     }
 

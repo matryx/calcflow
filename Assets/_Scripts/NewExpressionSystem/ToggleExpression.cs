@@ -14,6 +14,7 @@ public class ToggleExpression : QuickButton
     ParametricExpression param;
 
     Material showMat, hideMat;
+    Texture quadShow, quadHide;
     Color grayHide, grayShow;
 
     bool active = true;
@@ -31,6 +32,8 @@ public class ToggleExpression : QuickButton
 
         showMat = transform.GetComponent<Renderer>().material;
         hideMat = Resources.Load("Icons/HideMat", typeof(Material)) as Material; 
+        quadShow = Resources.Load("Icons/element", typeof(Texture2D)) as Texture;
+        quadHide = Resources.Load("Icons/gray_element", typeof(Texture2D)) as Texture;
         ColorUtility.TryParseHtmlString("#9E9E9EFF", out grayShow);
         ColorUtility.TryParseHtmlString("#D4D4D4FF", out grayHide);
     }
@@ -47,6 +50,7 @@ public class ToggleExpression : QuickButton
                 param.setTextColor(grayHide);
                 expressionActions.GetComponent<ExpressionActions>().disableButtons();
                 param.setButtonInputColor(grayHide);
+                param.setElementQuadTex(quadHide);
                 param.setActiveStatus(false);
             }
 
@@ -59,6 +63,7 @@ public class ToggleExpression : QuickButton
             expressions.setSelectedExpr(thisExpr, thisBody);
             thisBody.selectBody();
             param.setTextColor(Color.black);
+            param.setElementQuadTex(quadShow);
             param.setButtonInputColor(grayShow);
         }
 

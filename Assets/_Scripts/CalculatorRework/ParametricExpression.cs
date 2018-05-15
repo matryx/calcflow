@@ -78,13 +78,20 @@ public class ParametricExpression : MonoBehaviour
         {
             t.Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
         }
+
+        foreach (KeyValuePair<string, Transform> t in variables)
+        {
+            t.Value.Find("Min").Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
+            t.Value.Find("Max").Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
+        }
     }
 
-    public void setElementQuadtex(Texture tex)
+    public void setElementQuadTex(Texture tex)
     {
         foreach (KeyValuePair<string, Transform> t in variables)
         {
-            t.Value.GetChild(0).Find("Quad").GetComponent<Renderer>().material.SetTexture("_MainTex", tex);
+            t.Value.GetChild(0).Find("Quad").GetComponent<Renderer>().material.mainTexture = tex;
+            //t.Value.GetChild(0).Find("Quad").GetComponent<Renderer>().material.SetTexture("_MainTex", tex);
         }
     }
 
