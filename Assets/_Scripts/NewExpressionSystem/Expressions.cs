@@ -18,8 +18,6 @@ public class Expressions : MonoBehaviour
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
-    //  3 - make grayed out element lighter
-
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
@@ -38,9 +36,6 @@ public class Expressions : MonoBehaviour
         constantScroll = transform.parent.Find("ConstantPanel").GetComponentInChildren<Scroll>();
 
         expressions = new List<Transform>();
-
-        //ColorUtility.TryParseHtmlString("#64C3A7FF", out expressionActiveColor);
-        //ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
     }
 
     public Scroll getScroll(string type)
@@ -87,8 +82,6 @@ public class Expressions : MonoBehaviour
 
     public void deleteExpression(Transform del)
     {
-        //expressions.Remove(selectedExpression);
-
         if (del)
         {
             ParametricExpression param = del.GetComponent<ParametricExpression>();

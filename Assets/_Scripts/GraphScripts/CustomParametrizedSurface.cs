@@ -208,10 +208,10 @@ public class CustomParametrizedSurface : MonoBehaviour
     {
         if (setup != null) StopCoroutine(setup);
 
-        foreach (ExpressionSet es in expressionSets)
-        {
-            if (es.ranges.Count == 0) return;
-        }
+        //foreach (ExpressionSet es in expressionSets)
+        //{
+        //    if (es.ranges.Count == 0) return;
+        //}
 
         //if (!expressionSets.Contains(emptyExprSet))
         //    expressionSets.Add(emptyExprSet);
@@ -291,18 +291,26 @@ public class CustomParametrizedSurface : MonoBehaviour
             }
 
             int depth = expressionSet.ranges.Count;
-            int width = (int)Mathf.Pow(particlesPerES, 1f / (float)depth);
+            int width = 1;
+            if (depth == 0)
+            {
+                depth = 1;
+            }
+            else
+            {
+                width = (int)Mathf.Pow(particlesPerES, 1f / (float)depth);
+            }
             List<int[]> samples = SetupSamples(depth, width);
-            int thread_chunk = Mathf.CeilToInt(samples.Count / 4);
+            int thread_chunk = Mathf.CeilToInt((float)samples.Count / (float)num_threads);
+            int used_threads = Math.Min(num_threads, samples.Count);
             missingParticles += particlesPerES - samples.Count;
-
+            Debug.Log("samples: " + samples.Count);
             Thread[] threads = new Thread[num_threads];
             int t = 0;
-            for (t = 0; t < num_threads; t++)
+            for (t = 0; t < used_threads; t++)
             {
                 int tc = t;
                 int TIDc = tc;
-
 
                 threads[t] = new Thread(() => ThreadedEvaluate(samples.GetRange(tc * thread_chunk, Math.Min(thread_chunk, samples.Count - tc * thread_chunk)), expressionSet, TIDc));
                 threads[t].Start();
@@ -311,7 +319,7 @@ public class CustomParametrizedSurface : MonoBehaviour
             {
                 yield return null;
             }
-            for (t = 0; t < num_threads; t++)
+            for (t = 0; t < used_threads; t++)
             {
                 threads[t].Join();
             }
@@ -367,22 +375,29 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
 
         int iterations = Math.Min(particlesPerES - samples.Count * TID, samples.Count);
+        Debug.Log("samples: " + samples.Count);
+
+        Debug.Log("iterations: " + iterations);
         Particle[] particles = new Particle[iterations];
         for (int i = 0; i < iterations; i++)
         {
-            int[] arr = samples[i];
-            for (int j = 0; j < depth; j++)
+            if (expressionSet.ranges.Count != 0)
             {
-                int val = arr[j];
-                string name = indexedParam[j];
-                AK.Variable var = vars[name];
+                int[] arr = samples[i];
+                for (int j = 0; j < depth; j++)
+                {
+                    int val = arr[j];
+                    string name = indexedParam[j];
+                    AK.Variable var = vars[name];
 
-                var.value = threadHelper.parameterMin[name] + (float)val / (width-1) * (threadHelper.parameterMax[name] - threadHelper.parameterMin[name]);
+                    var.value = threadHelper.parameterMin[name] + (float)val / (width - 1) * (threadHelper.parameterMax[name] - threadHelper.parameterMin[name]);
+                }
             }
-
+            Debug.Log("before evaluate");
             float x = (float)threadHelper.expressionList[0].Evaluate();
             float z = (float)threadHelper.expressionList[1].Evaluate();
             float y = (float)threadHelper.expressionList[2].Evaluate();
+            Debug.Log("after evaluate");
 
             lock (lck)
             {
