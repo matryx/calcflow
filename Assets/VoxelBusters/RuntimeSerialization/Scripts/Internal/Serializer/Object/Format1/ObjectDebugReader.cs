@@ -635,16 +635,31 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             ReadObjectGraphValuesCollection(_binaryReader, ref _initializerValuesCollection);
 
             if (_object == null)
+            {
                 _object = CreateInstance(_binaryReader, _serializationInfo);
+                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                {
+                    sw.WriteLine("Object being initialized");
+                }
+            }
 
             //Ethan's attempt at fixing error when using deserialize to clone object. Might cause something buggy to happen during reuse.
             if (ObjectReferenceCache.ContainsKey(_object))
             {
+                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                {
+                    sw.WriteLine("object exists. Updating dictionary");
+                    sw.WriteLine("old value: " + ObjectReferenceCache[_object]);
+                }
                 ObjectReferenceCache[_object] = _objectReferenceID;
             }
             else
             {
                 ObjectReferenceCache.Add(_object, _objectReferenceID);
+                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                {
+                    sw.WriteLine("Object new. adding to dictionary");
+                }
             }
 
             // Read properties
@@ -657,6 +672,13 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             if (typeof(IRuntimeSerializationCallback).IsAssignableFrom(_objectType))
                 ((IRuntimeSerializationCallback)_object).OnAfterRuntimeDeserialize();
 
+            if (_object == null)
+            {
+                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                {
+                    sw.WriteLine("Written object is broken!");
+                }
+            }
             return _object;
         }
 
@@ -672,7 +694,10 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             foreach (object key in ObjectReferenceCache.Keys)
             {
                 UInt32 _currentReferenceID = ObjectReferenceCache[key];
-
+                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                {
+                    sw.WriteLine("checking ID: " + _currentReferenceID);
+                }
                 if (_currentReferenceID == _objectReferenceID)
                 {
                     _object = key;
