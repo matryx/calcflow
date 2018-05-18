@@ -225,27 +225,12 @@ public class ParametricExpression : MonoBehaviour
     {
         if (deleteVar)
         {
-            foreach (string s in varsToDelete)
-            {
-                if (variables.ContainsKey(s))
-                {
-                    Transform temp = variables[s];
-                    temp.gameObject.SetActive(false);
-                    temp.SetParent(null);
-                    hiddenVariables.Add(s, temp);
-                    variables.Remove(s);
-
-                    destroyCalled = true;
-                    deleteVar = false;
-                }
-            }
-
+            hideVariables();
             return;
         }
 
         bool noMoreSlots = false;
 
-        //TODO: finish refactoring, out of bounds error
         if (destroyCalled)
         {
             for (int i = 0; i < variableClumps.Count; i++)
@@ -262,37 +247,10 @@ public class ParametricExpression : MonoBehaviour
                     }
                     else
                     {
-                        //look for next available slot
-                        //for (int ni = i; ni < variableClumps.Count; ni++)
-                        //{
-                        //    Transform nSlot = variableClumps[ni];
-
-                        //    if (nSlot.childCount > 0)
-                        //    {
-                        //        nSlot.GetChild(0).SetParent(currSlot);
-                        //        StartCoroutine(MoveTo(currSlot.GetChild(0), currSlot.GetChild(0).localPosition, new Vector3(-xPos, 0, 0), 0.3f));
-                        //        break;
-                        //    }
-                        //}
-                        findNextSlot(currSlot, i, 0, -xPos, noMoreSlots);
+                        noMoreSlots = findNextSlot(currSlot, i, 0, -xPos, false);
                     }
 
-
-                    //look for next available slot
-                    //for (int ni = i + 1; ni < variableClumps.Count; ni++)
-                    //{
-                    //    Transform nSlot = variableClumps[ni];
-
-                    //    if (nSlot.childCount > 0)
-                    //    {
-                    //        nSlot.GetChild(0).SetParent(currSlot);
-                    //        StartCoroutine(MoveTo(currSlot.GetChild(1), currSlot.GetChild(1).localPosition, new Vector3(xPos, 0, 0), 0.3f));
-                    //        break;
-                    //    }
-
-                    //    if (ni == variableClumps.Count - 1) noMoreSlots = true;
-                    //}
-                    findNextSlot(currSlot, i, 1, xPos, noMoreSlots);
+                    noMoreSlots = findNextSlot(currSlot, i, 1, xPos, true);
                 }
             }
 
@@ -301,7 +259,25 @@ public class ParametricExpression : MonoBehaviour
         }
     }
 
-    private void findNextSlot(Transform currClump, int currClumpIndex, int childIndex, float xpos, bool noMoreSlots)
+    private void hideVariables()
+    {
+        foreach (string s in varsToDelete)
+        {
+            if (variables.ContainsKey(s))
+            {
+                Transform temp = variables[s];
+                temp.gameObject.SetActive(false);
+                temp.SetParent(null);
+                hiddenVariables.Add(s, temp);
+                variables.Remove(s);
+
+                destroyCalled = true;
+                deleteVar = false;
+            }
+        }
+    }
+
+    private bool findNextSlot(Transform currClump, int currClumpIndex, int childIndex, float xpos, bool checkNoSlot)
     {
         for (int ni = currClumpIndex + 1; ni < variableClumps.Count; ni++)
         {
@@ -310,30 +286,35 @@ public class ParametricExpression : MonoBehaviour
             if (nSlot.childCount > 0)
             {
                 nSlot.GetChild(0).SetParent(currClump);
-                StartCoroutine(MoveTo(currClump.GetChild(childIndex), currClump.GetChild(1).localPosition, new Vector3(xpos, 0, 0), 0.3f));
-                break;
+                StartCoroutine(MoveTo(currClump.GetChild(childIndex), currClump.GetChild(childIndex).localPosition, new Vector3(xpos, 0, 0), 0.3f));
+                return false;
             }
 
-            if (ni == variableClumps.Count - 1) noMoreSlots = true;
+            //only want to do check when finding a slot for second var spot
+            if (checkNoSlot && ni == variableClumps.Count - 1) return true;
         }
+
+        return false;
     }
 
     private void destroyEmptyClumps()
     {
         int removeFrom = 0;
+        bool remove = false;
 
         for (int ind = 0; ind < variableClumps.Count; ind++)
         {
             if (variableClumps[ind].childCount == 0)
             {
                 removeFrom = ind;
+                remove = true;
                 break;
             }
         }
 
         List<Transform> emptyClumps = new List<Transform>();
 
-        if (removeFrom != 0)
+        if (remove)
         {
             emptyClumps = variableClumps.GetRange(removeFrom, variableClumps.Count - removeFrom);
             variableClumps.RemoveRange(removeFrom, variableClumps.Count - removeFrom);
