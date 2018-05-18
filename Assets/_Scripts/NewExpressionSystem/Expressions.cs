@@ -24,8 +24,6 @@ public class Expressions : MonoBehaviour
     // 2 - creating empty game object everytime a letter is pressed
     // 3 - scroll bug? when adding expressions and not at top of page, UI gets broken
     //      - x input's local position is off
-    // 4 - calculator doesn't graph until a variable is added
-    //      - doesn't clear graph when expression is cleared
 
     void Awake()
     {

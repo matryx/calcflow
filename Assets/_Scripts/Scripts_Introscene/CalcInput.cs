@@ -134,7 +134,7 @@ public class CalcInput : MonoBehaviour
                     variableShortcut.recordVarPress(buttonID);
 
                     //creates new variable button when new letter pressed
-                    if (param != null) 
+                    if (param != null)
                     {
                         if (calcManager.expressionSet.hiddenRanges.ContainsKey(buttonID))
                         {
@@ -144,8 +144,9 @@ public class CalcInput : MonoBehaviour
                         else if (!calcManager.expressionSet.ranges.ContainsKey(buttonID))
                         {
                             GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-                            var.GetComponent<ExpressionComponent>().setExpressionParent(param);
-                            var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
+
+                            var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
+                            var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setPanel(transform.parent.Find("ParametrizationPanel"));
                             param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
                             var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
                             calcManager.expressionSet.AddRange(buttonID);

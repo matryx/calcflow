@@ -66,8 +66,8 @@ public class ExpressionSelector : QuickButton
 
                         if (gchild.name == "Button_Xinput") xButton = gchild;
 
-                        gchild.GetComponent<ExpressionComponent>().setExpressionParent(param.transform);
-                        gchild.GetComponentInChildren<ExpressionComponent>().setPanel(currPanel);
+                        gchild.GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
+                        gchild.GetComponentInChildren<ExpressionBody>().setPanel(currPanel);
                         toAdd.Add(gchild);
                     }
                 }
@@ -80,8 +80,6 @@ public class ExpressionSelector : QuickButton
             param.GetComponent<ParametricExpression>().setSeparator(sep.transform);
 
             expressions.addExpr(param.transform);
-            //NOTE: COMMENTED OUT IN CURR IMPLEMENTATION 
-            //expressions.setSelectedExpr(param.transform, xButton.GetComponentInChildren<ExpressionBody>());
         }
         else if (vecPanel.gameObject.activeSelf)
         {
@@ -92,7 +90,6 @@ public class ExpressionSelector : QuickButton
             vec.GetComponent<VectorFieldExpression>().Initialize();
             expressionSet = vec.GetComponent<VectorFieldExpression>().getExpSet();
             calcManager.SetVecFieldES(expressionSet);
-            //expressions.setSelectedExpr(vec.transform, null);
             addForwarders(vec.transform);
 
             foreach (Transform child in vec.transform.Find("ExpressionSet"))
@@ -150,8 +147,6 @@ public class ExpressionSelector : QuickButton
         }
         else
         {
-            //BUG: scoots scroll down when adding and not at top of page
-            // - put on hold for now since it's a very specific case and need to merge with master
             thisScroll.addToScroll(toAdd, null, 0); 
         }
 

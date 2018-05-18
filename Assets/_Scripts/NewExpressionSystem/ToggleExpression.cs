@@ -9,7 +9,6 @@ public class ToggleExpression : QuickButton
     ExpressionSet expressionSet;
     Transform expressionActions;
     Transform thisExpr;
-    ExpressionComponent expComp;
     ExpressionBody thisBody;
     ParametricExpression param;
 
@@ -25,9 +24,10 @@ public class ToggleExpression : QuickButton
         expressions = Expressions._instance;
         calcManager = CalculatorManager._instance;
         expressionSet = expressions.getSelectedExprSet();
-        expComp = transform.parent.parent.parent.GetComponent<ExpressionComponent>();
-        thisExpr = expComp.getExpressionParent();
+
         thisBody = transform.parent.parent.parent.Find("Button_Input").GetComponent<ExpressionBody>();
+        thisExpr = thisBody.getExpressionParent();
+
         expressionActions = transform.parent.parent.Find("Body");
 
         showMat = transform.GetComponent<Renderer>().material;

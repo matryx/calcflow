@@ -389,7 +389,6 @@ public class Expression : CalcOutput
         List<string> temp = new List<string>(tokens);
 
         tokens.Clear();
-        Debug.Log("tokens: " + tokens.Count);
         foreach (string s in temp)
         {
             if (expSet.GetTotalOccurence(s) == 0)

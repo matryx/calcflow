@@ -5,7 +5,8 @@ using UnityEngine;
 public class ExpressionBody : QuickButton
 {
     Expressions expression;
-    ExpressionComponent expComp;
+    Transform expressionParent;
+    Transform panel;
     Transform feedBack;
     TMPro.TextMeshPro textInput;
     string title = "X";
@@ -33,9 +34,6 @@ public class ExpressionBody : QuickButton
 
         if (!variable) title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
 
-        expComp = (variable) ? transform.parent.GetComponentInParent<ExpressionComponent>() :
-                               transform.GetComponentInParent<ExpressionComponent>();
-
         if (transform.parent.Find("Text_Input"))
             textInput = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
 
@@ -52,9 +50,24 @@ public class ExpressionBody : QuickButton
         base.Start();
     }
 
-    public ExpressionComponent getExpComp()
+    public void setExpressionParent(Transform p)
     {
-        return expComp;
+        expressionParent = p;
+    }
+
+    public Transform getExpressionParent()
+    {
+        return expressionParent;
+    }
+
+    public void setPanel(Transform p)
+    {
+        panel = p;
+    }
+
+    public Transform getPanel()
+    {
+        return panel;
     }
 
     public Transform getFeedBack()
@@ -107,7 +120,7 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
-            param = selectedBody.getExpComp().getExpressionParent().GetComponent<ParametricExpression>();
+            param = selectedBody.getExpressionParent().GetComponent<ParametricExpression>();
             param.getExpActions().disableButtons();
             unSelect();
         }
@@ -120,7 +133,7 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
-            param = selectedBody.getExpComp().getExpressionParent().GetComponent<ParametricExpression>();
+            param = selectedBody.getExpressionParent().GetComponent<ParametricExpression>();
             param.getExpActions().disableButtons();
 
             if (selectedBody.transform != transform)
@@ -134,10 +147,8 @@ public class ExpressionBody : QuickButton
     {
         deselectPrevBody();
 
-        if (expComp == null) expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
-        expression.setSelectedExpr(expComp.getExpressionParent(), this);
-
-        param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
+        expression.setSelectedExpr(expressionParent, this);
+        param = expressionParent.GetComponent<ParametricExpression>();
         calcManager.ChangeExpressionSet(param.getExpSet());
 
         if (variable)
@@ -170,7 +181,7 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
+            param = expressionParent.GetComponent<ParametricExpression>();
             if (param.getActiveStatus()) selectBody();
         }
     }
@@ -201,13 +212,10 @@ public class ExpressionBody : QuickButton
         }
     }
 
-    //BUG: null feedback when adding a new variable that's offscreen
     private void OnDisable()
     {
         if (feedBack && feedBack.localScale == selectedScale)
         {
-            if (transform.parent.name.Equals("Delete")) print("ON DISABLE");
-
             feedBack.localScale = idleScale;
             feedBack.gameObject.SetActive(false);
 
