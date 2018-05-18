@@ -23,6 +23,8 @@ public class ExpressionTabHandler : MonoBehaviour {
     public Transform paramPanel;
     public Transform vecFieldPanel;
     public Transform constantPanel;
+    public Transform linTransPanel;
+    public Transform longCube;
 
     ExpressionTabResponder responder;
 
@@ -34,6 +36,8 @@ public class ExpressionTabHandler : MonoBehaviour {
         vecFieldPanel.gameObject.SetActive(false);
         constantPanel.GetComponentInChildren<Scroll>().setUpMenu();
         constantPanel.gameObject.SetActive(false);
+        linTransPanel.GetComponentInChildren<Scroll>().setUpMenu();
+        linTransPanel.gameObject.SetActive(false);
 
         responder = new ExpressionTabResponder();
         responder.initialize(this);
@@ -48,16 +52,29 @@ public class ExpressionTabHandler : MonoBehaviour {
                 paramPanel.gameObject.SetActive(true);
                 vecFieldPanel.gameObject.SetActive(false);
                 constantPanel.gameObject.SetActive(false);
+                linTransPanel.gameObject.SetActive(false);
+                longCube.gameObject.SetActive(false);
                 break;
             case "VectorFieldTab":
                 paramPanel.gameObject.SetActive(false);
                 vecFieldPanel.gameObject.SetActive(true);
                 constantPanel.gameObject.SetActive(false);
+                linTransPanel.gameObject.SetActive(false);
+                longCube.gameObject.SetActive(false);
                 break;
             case "ConstantTab":
                 paramPanel.gameObject.SetActive(false);
                 vecFieldPanel.gameObject.SetActive(false);
                 constantPanel.gameObject.SetActive(true);
+                linTransPanel.gameObject.SetActive(false);
+                longCube.gameObject.SetActive(false);
+                break;
+            case "LinearTransTab":
+                paramPanel.gameObject.SetActive(false);
+                vecFieldPanel.gameObject.SetActive(false);
+                constantPanel.gameObject.SetActive(false);
+                linTransPanel.gameObject.SetActive(true);
+                longCube.gameObject.SetActive(true);
                 break;
         }
     }

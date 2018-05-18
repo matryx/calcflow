@@ -5,7 +5,7 @@ using UnityEngine;
 public class Expressions : MonoBehaviour
 {
     CalculatorManager calcManager;
-    Scroll paramScroll, vecFieldScroll, constantScroll;
+    Scroll paramScroll, vecFieldScroll, constantScroll, linTransScroll;
     public static Expressions _instance;
     ExpressionSet selectedExpSet;
     Transform selectedExpression;
@@ -37,6 +37,7 @@ public class Expressions : MonoBehaviour
         paramScroll = transform.parent.Find("ParametrizationPanel").GetComponentInChildren<Scroll>();
         vecFieldScroll = transform.parent.Find("VectorFieldPanel").GetComponentInChildren<Scroll>();
         constantScroll = transform.parent.Find("ConstantPanel").GetComponentInChildren<Scroll>();
+        linTransScroll = transform.parent.Find("LinearTransPanel").GetComponentInChildren<Scroll>();
 
         expressions = new List<Transform>();
         remove.gameObject.SetActive(true);
@@ -59,6 +60,8 @@ public class Expressions : MonoBehaviour
                 return vecFieldScroll;
             case "cons":
                 return constantScroll;
+            case "lintrans":
+                return linTransScroll;
         }
 
         print("GET SCROLL RETURNED NULL");

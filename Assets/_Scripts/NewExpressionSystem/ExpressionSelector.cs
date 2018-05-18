@@ -8,7 +8,7 @@ public class ExpressionSelector : QuickButton
     Expressions expressions;
     JoyStickAggregator joyStickAggregator;
     Transform currPanel;
-    Transform paramPanel, vecPanel, constPanel;
+    Transform paramPanel, vecPanel, constPanel, linTransPanel;
     private CalculatorManager calcManager;
     Transform xButton;
 
@@ -21,6 +21,7 @@ public class ExpressionSelector : QuickButton
         paramPanel = transform.parent.parent.Find("ParametrizationPanel");
         vecPanel = transform.parent.parent.Find("VectorFieldPanel");
         constPanel = transform.parent.parent.Find("ConstantPanel");
+        linTransPanel = transform.parent.parent.Find("LinearTransPanel");
 
         thisScroll = expressions.getScroll("param");
         currPanel = paramPanel;
@@ -139,6 +140,46 @@ public class ExpressionSelector : QuickButton
             toAdd.Add(sepConst.transform);
 
             expressions.addExpr(cons.transform);
+        }
+        else if (linTransPanel.gameObject.activeSelf)
+        {
+            panelType = "lintrans";
+            currPanel = linTransPanel;
+
+            //TODO: How to add object
+            /*
+            GameObject mtx = Instantiate(Resources.Load("Expressions/MatrixExpression", typeof(GameObject))) as GameObject;
+            mtx.GetComponent<ParametricExpression>().Initialize();
+
+            expressionSet = mtx.GetComponent<ParametricExpression>().getExpSet();
+            calcManager.AddExpressionSet(expressionSet);
+            addForwarders(mtx.transform);
+
+            foreach (Transform child in mtx.transform)
+            {
+                if (child.name == "ExpressionSet")
+                {
+                    foreach (Transform gchild in child)
+                    {
+                        mtx.GetComponent<ParametricExpression>().addExpression(gchild);
+
+                        if (gchild.name == "Button_Xinput") xButton = gchild;
+
+                        gchild.GetComponent<ExpressionComponent>().setExpressionParent(mtx.transform);
+                        gchild.GetComponentInChildren<ExpressionComponent>().setPanel(currPanel);
+                        toAdd.Add(gchild);
+                    }
+                }
+            }
+
+            GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+            addForwarders(sep.transform);
+            toAdd.Add(sep.transform);
+
+            mtx.GetComponent<ParametricExpression>().setSeparator(sep.transform);
+
+            expressions.addExpr(mtx.transform);
+            */
         }
 
         thisScroll = expressions.getScroll(panelType);

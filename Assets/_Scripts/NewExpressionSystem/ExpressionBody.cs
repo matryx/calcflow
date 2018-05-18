@@ -18,6 +18,7 @@ public class ExpressionBody : QuickButton
     private bool finishedScaling = false;
     private bool retracting = false;
     private bool variable = false;
+    private bool matrix = false;
 
     private Vector3 idleScale, selectedScale;
 
@@ -30,10 +31,11 @@ public class ExpressionBody : QuickButton
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
         if (transform.parent.parent.Find("VariableTitle")) variable = true;
+        if (transform.parent.parent.Find("MatrixTitle")) matrix = true;
 
         if (!variable) title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
 
-        expComp = (variable) ? transform.parent.GetComponentInParent<ExpressionComponent>() :
+        expComp = (variable || matrix) ? transform.parent.GetComponentInParent<ExpressionComponent>() :
                                transform.GetComponentInParent<ExpressionComponent>();
 
         if (transform.parent.Find("Text_Input"))
@@ -43,6 +45,7 @@ public class ExpressionBody : QuickButton
         calcInput = CalcInput._instance;
 
         selectedScale = (variable) ? new Vector3(0.7f, 0.04f, 0.002f) :
+                        (matrix)?    new Vector3(3.926f, 0.04f, 0.002f) :
                                      new Vector3(4.3f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
     }
