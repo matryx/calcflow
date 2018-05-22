@@ -35,10 +35,7 @@ public class CalcInput : MonoBehaviour
     bool capitalized = false;
 
     KeyboardInputResponder responder;
-    Expressions expressions;
-    Scroll paramScroll;
     VariableShortcut variableShortcut;
-    JoyStickAggregator joyStickAggregator;
     Color errorColor;
     Color selectedColor;
     GameObject errorPopup;
@@ -55,30 +52,19 @@ public class CalcInput : MonoBehaviour
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);
-        expressions = Expressions._instance;
         variableShortcut = VariableShortcut._instance;
         letterPanel = transform.Find("LetterPanel");
         variablePanel = transform.Find("VariableShortcut");
-        paramScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
-        joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
         errorColor = Color.red;
         ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
         errorPopup = Instantiate(Resources.Load("Popups/VariableError")) as GameObject;
         errorPopup.SetActive(false);
     }
 
-    private void addForwarders(Transform obj)
-    {
-        JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>();
-        foreach (JoyStickForwarder j in forwarders)
-        {
-            joyStickAggregator.AddForwarder(j);
-        }
-    }
-
     //called by CalculatorManager
-    public void ChangeOutput(CalcOutput calcOutput)
+    public void ChangeOutput(CalcOutput calcOutput, CalculatorManager cm)
     {
+        this.calcManager = cm;
         currExpression = calcOutput;
         index = (currExpression == null) ?
                 0 : currExpression.tokens.Count;
@@ -112,15 +98,14 @@ public class CalcInput : MonoBehaviour
         switch (buttonID)
         {
             default:
-                Transform param = expressions.getSelectedExpr();
                 letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(selectedColor);
                 variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(selectedColor);
 
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
                 {
-                    //prevents typing of letters when a variable body is selected
-                    if (expressions.getSelectedBody() && expressions.getSelectedBody().isVariable())
+
+                    if (!calcManager.letterPressed(buttonID))
                     {
                         errorPopup.SetActive(true);
                         errorPopup.transform.position = transform.position + new Vector3(0, -1.5f, -1);
@@ -132,28 +117,6 @@ public class CalcInput : MonoBehaviour
 
                     if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
                     variableShortcut.recordVarPress(buttonID);
-
-                    //creates new variable button when new letter pressed
-                    if (param != null)
-                    {
-                        if (calcManager.expressionSet.hiddenRanges.ContainsKey(buttonID))
-                        {
-                            currExpression.expSet.ReAddVariable(buttonID);
-                            param.GetComponent<ParametricExpression>().addVariable(buttonID, null);
-                        }
-                        else if (!calcManager.expressionSet.ranges.ContainsKey(buttonID))
-                        {
-                            GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-
-                            var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
-                            var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setPanel(transform.parent.Find("ParametrizationPanel"));
-                            param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
-                            var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
-                            calcManager.expressionSet.AddRange(buttonID);
-                            addForwarders(var.transform);
-                        }
-
-                    }
                 }
 
                 currExpression.tokens.Insert(index, buttonID);
@@ -179,9 +142,7 @@ public class CalcInput : MonoBehaviour
                     if (currExpression.expSet == null) break;
                     if (currExpression.expSet.GetTotalOccurence(s) == 0)
                     {
-                        calcManager.expressionSet.RemoveVariable(s);
-
-                        expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDelete);
+                        calcManager.deleteVariables(toDelete);
                     }
                 }
 
@@ -191,12 +152,7 @@ public class CalcInput : MonoBehaviour
                 List<string> toDel = currExpression.ClearTokens();
                 if (toDel == null) break;
 
-                foreach (string del in toDel)
-                {
-                    calcManager.expressionSet.RemoveVariable(del);
-                }
-
-                expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDel);
+                calcManager.deleteVariables(toDel);
 
                 break;
             case "Button_Enter":

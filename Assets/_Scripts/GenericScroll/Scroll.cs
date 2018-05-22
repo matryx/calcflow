@@ -189,40 +189,7 @@ public class Scroll : MonoBehaviour
         {
             placeObject(objects[ind], ind, false);
         }
-    }
-
-    #region old executeAdd
-    //private void executeAdd()
-    //{
-    //    if (objects == null) objects = new List<Transform>();
-    //    int firstNewIndex = (objects.Count > 0) ? objects.Count : 0;
-
-
-    //    foreach (Transform t in toAdd)
-    //    {
-    //        if (t == null)
-    //        {
-    //            toAdd.Clear();
-    //            adding = false;
-    //            return;
-    //        }
-    //        objects.Add(t);
-    //    }
-
-
-    //    setNumPagesAndHighestVisIndex();
-
-    //    foreach (Transform t in toAdd)
-    //    {
-    //        placeObject(t, firstNewIndex, false);
-    //        t.localScale = Vector3.one;
-    //        ++firstNewIndex;
-    //    }
-
-    //    toAdd.Clear();
-    //    adding = false;
-    //}
-    #endregion
+    } 
 
     private void executeAdd()
     {
@@ -296,39 +263,6 @@ public class Scroll : MonoBehaviour
         newObj.localScale = Vector3.zero;
         toAdd.Add(newObj);
     }
-
-    //old add implementation
-    //public void addToIndex(int atIndex, List<Transform> objs, Transform obj, bool secondToLast)
-    //{
-    //    if (objects == null) objects = new List<Transform>();
-
-    //    if (secondToLast) atIndex = objects.Count - 1;
-    //    if (atIndex < 0 || atIndex > objects.Count)
-    //    {
-    //        return;
-    //    }
-
-    //    if (objs.Count > 0)
-    //    {
-    //        int temp = atIndex;
-    //        foreach (Transform o in objs)
-    //        {
-    //            objects.Insert(temp, o);
-    //            temp++;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        objects.Insert(atIndex, obj);
-    //    }
-
-    //    setNumPagesAndHighestVisIndex();
-
-    //    for (int i = atIndex; i < objects.Count; i++)
-    //    {
-    //        placeObject(objects[i], i, false);
-    //    }
-    //}
 
     public int getIndex(Transform obj)
     {
