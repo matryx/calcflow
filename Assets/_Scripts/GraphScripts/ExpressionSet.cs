@@ -275,8 +275,6 @@ public abstract class CalcOutput //: ManualSerialize
         return true;
     }
 
-
-
     #region helper Functions
     /// <summary>
     /// checks if string represents a variable.
