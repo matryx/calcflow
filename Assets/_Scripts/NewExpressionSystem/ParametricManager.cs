@@ -20,14 +20,12 @@ public class ParametricManager : CalculatorManager
     SaveLoadMenu saveLoadMenu;
     OutputManager outputManager;
 
-
     Expressions expressions;
     Transform selectedExpr;
     //Variables in calcManager:
 
     //public bool updateOverlay = false;
     //internal bool toExport = false;
-
 
     //called by calculatorManager on start
     protected override void Initialize()
@@ -114,7 +112,6 @@ public class ParametricManager : CalculatorManager
 
     public override void SetOutput(CalcOutput output)
     {
-        print("TEST: " + calcInput);
         calcInput.ChangeOutput(output, this);
         inputReceived = true;
     }
@@ -185,7 +182,6 @@ public class ParametricManager : CalculatorManager
     {
         Transform param = expressions.getSelectedExpr();
 
-
         //prevents typing of letters when a variable body is selected
         if (expressions.getSelectedBody() && expressions.getSelectedBody().isVariable())
         {
@@ -213,7 +209,6 @@ public class ParametricManager : CalculatorManager
                 expressionSet.AddRange(buttonID);
                 addForwarders(var.transform);
             }
-
         }
 
         return true;
@@ -228,5 +223,4 @@ public class ParametricManager : CalculatorManager
 
         expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDelete);
     }
-
 }

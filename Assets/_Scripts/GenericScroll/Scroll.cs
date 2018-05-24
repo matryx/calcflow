@@ -70,17 +70,17 @@ public class Scroll : MonoBehaviour
         if (transform.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local rotation of object with Scroll script needs to be zero");
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-#endif
+        #endif
         }
 
         if (objectParent.localScale != Vector3.one || objectParent.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local scale and local rotation of Object Parent needs to be one and zero");
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-#endif
+        #endif
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
@@ -165,20 +165,6 @@ public class Scroll : MonoBehaviour
         setup = true;
     }
 
-    private void setNumPagesAndHighestVisIndex()
-    {
-        numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
-            1 + (int)System.Math.Ceiling((double)(objects.Count - numberOfVisibleThings) / fixedRowOrCol);
-        scrollBar.GetComponent<ScrollBar>().setNumPages(numPages);
-
-        if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == numPages)
-            highestVisIndex = objects.Count - 1;
-
-        if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == 1 && numPages > 1)
-            highestVisIndex = numberOfVisibleThings - 1;
-
-    }
-
     public void initializeObjects(List<Transform> objectList)
     {
         objects = objectList;
@@ -212,6 +198,20 @@ public class Scroll : MonoBehaviour
 
         toAdd.Clear();
         adding = false;
+    }
+
+    private void setNumPagesAndHighestVisIndex()
+    {
+        numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
+            1 + (int)System.Math.Ceiling((double)(objects.Count - numberOfVisibleThings) / fixedRowOrCol);
+        scrollBar.GetComponent<ScrollBar>().setNumPages(numPages);
+
+        if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == numPages)
+            highestVisIndex = objects.Count - 1;
+
+        if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == 1 && numPages > 1)
+            highestVisIndex = numberOfVisibleThings - 1;
+
     }
 
     public int getScrollObjectCount()
@@ -250,7 +250,6 @@ public class Scroll : MonoBehaviour
         adding = true;
     }
 
-    //old add implementation
     public void addObject(Transform newObj)
     {
         adding = true;
@@ -274,24 +273,7 @@ public class Scroll : MonoBehaviour
         obj.SetParent(objectParent);
         obj.transform.localEulerAngles = Vector3.zero;
 
-        float offset = (float)System.Math.Floor((double)ind / fixedRowOrCol);
-
-        float xPos = (currOrientation == orientation.VERTICAL) ?
-                      padding.x * (ind % fixedRowOrCol) : padding.x * offset;
-        float yPos = (currOrientation == orientation.VERTICAL) ?
-                      -padding.y * offset : -padding.y * (ind % fixedRowOrCol);
-
-        float xOffset = (highestVisIndex == objects.Count - 1 && deleting) ?
-                         xPos - (padding.x * (numPages - 1)) : xPos + objects[0].localPosition.x;
-        float yOffset = (highestVisIndex == objects.Count - 1 && deleting) ?
-                         yPos + (padding.y * (numPages - 1)) : yPos + objects[0].localPosition.y;
-
-        Vector3 offsetToFirst = (currOrientation == orientation.VERTICAL) ?
-                                 new Vector3(xPos, yOffset, objectParent.localPosition.z) :
-                                 new Vector3(xOffset, yPos, objectParent.localPosition.z);
-
-        Vector3 newPos = (lowestVisIndex == 0) ?
-                          new Vector3(xPos, yPos, objectParent.localPosition.z) : offsetToFirst;
+        Vector3 newPos = calculateNewPos(ind, deleting);
 
         if (deleting)
         {
@@ -313,6 +295,28 @@ public class Scroll : MonoBehaviour
         }
     }
 
+    private Vector3 calculateNewPos(int ind, bool deleting)
+    {
+        float offset = (float)System.Math.Floor((double)ind / fixedRowOrCol);
+
+        float xPos = (currOrientation == orientation.VERTICAL) ?
+                      padding.x * (ind % fixedRowOrCol) : padding.x * offset;
+        float yPos = (currOrientation == orientation.VERTICAL) ?
+                      -padding.y * offset : -padding.y * (ind % fixedRowOrCol);
+
+        float xOffset = (highestVisIndex == objects.Count - 1 && deleting) ?
+                         xPos - (padding.x * (numPages - 1)) : xPos + objects[0].localPosition.x;
+        float yOffset = (highestVisIndex == objects.Count - 1 && deleting) ?
+                         yPos + (padding.y * (numPages - 1)) : yPos + objects[0].localPosition.y;
+
+        Vector3 offsetToFirst = (currOrientation == orientation.VERTICAL) ?
+                                 new Vector3(xPos, yOffset, objectParent.localPosition.z) :
+                                 new Vector3(xOffset, yPos, objectParent.localPosition.z);
+
+        return (lowestVisIndex == 0) ?
+                new Vector3(xPos, yPos, objectParent.localPosition.z) : offsetToFirst;
+    }
+
     public void clear()
     {
         if (objects != null)
@@ -321,8 +325,24 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    //TODO: account for deleting a single object
     public void deleteObjects(List<Transform> objs)
+    {
+        List<int> indecesToDelete = getIndeces(objs);
+        indecesToDelete.Reverse(); //delete from end of list to beginning so that indeces don't get messed up
+
+        for (int i = 0; i < indecesToDelete.Count; i++)
+        {
+            Transform d = objects[indecesToDelete[i]];
+            objects.Remove(d);
+            Destroy(d.gameObject);
+        }
+
+        reassignVisIndeces();
+
+        for (int i = 0; i < objects.Count; i++) placeObject(objects[i], i, true);
+    }
+
+    private List<int> getIndeces(List<Transform> objs)
     {
         List<int> indeces = new List<int>();
 
@@ -339,15 +359,11 @@ public class Scroll : MonoBehaviour
             }
         }
 
-        indeces.Reverse(); //delete from end of list to beginning so that indeces don't get messed up
+        return indeces;
+    }
 
-        for (int i = 0; i < indeces.Count; i++)
-        {
-            Transform d = objects[indeces[i]];
-            objects.Remove(d);
-            Destroy(d.gameObject);
-        }
-
+    private void reassignVisIndeces()
+    {
         int prevNum = numPages;
         numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
                     1 + (int)System.Math.Ceiling((double)(objects.Count - numberOfVisibleThings) / fixedRowOrCol);
@@ -366,8 +382,6 @@ public class Scroll : MonoBehaviour
 
             if (numPages == 1) lowestVisIndex = 0;
         }
-
-        for (int i = 0; i < objects.Count; i++) placeObject(objects[i], i, true);
     }
 
     private void moveObjects()
@@ -378,7 +392,6 @@ public class Scroll : MonoBehaviour
             ((currDirection == direction.UP || currDirection == direction.LEFT) && highestVisIndex == objects.Count - 1))
             return;
 
-
         if (!moving && !fading)
         {
             moving = true;
@@ -387,51 +400,60 @@ public class Scroll : MonoBehaviour
             for (int i = 0; i < objects.Count; i++)
             {
                 Transform obj = objects[i];
-
-                float newX = (currDirection == direction.RIGHT) ?
-                             (float)System.Math.Round((double)obj.localPosition.x + padding.x, 2) :
-                             (float)System.Math.Round((double)obj.localPosition.x - padding.x, 2);
-
-                float newY = (currDirection == direction.UP) ?
-                             (float)System.Math.Round((double)obj.localPosition.y + padding.y, 2) :
-                             (float)System.Math.Round((double)obj.localPosition.y - padding.y, 2);
-
-                Vector3 newPos = (currOrientation == orientation.VERTICAL) ?
-                                  new Vector3(obj.localPosition.x, newY, obj.localPosition.z) :
-                                  new Vector3(newX, obj.localPosition.y, obj.localPosition.z);
+                Vector3 newPos = calculateMovedPos(obj);
 
                 if (i == 0) toPos = newPos;
 
                 StartCoroutine(MoveTo(obj, obj.localPosition, newPos, movementSpeed));
 
-                if (currDirection == direction.UP || currDirection == direction.LEFT)
-                {
-                    if (i >= lowestVisIndex && i < lowestVisIndex + fixedRowOrCol)
-                    {
-                        StartCoroutine(FadeButton(obj, true));
-                    }
-                    else if (i > highestVisIndex && i <= highestVisIndex + fixedRowOrCol)
-                    {
-                        StartCoroutine(FadeButton(obj, false));
-                    }
-                }
-                else if (currDirection == direction.DOWN || currDirection == direction.RIGHT)
-                {
-                    if (i < lowestVisIndex && i >= lowestVisIndex - fixedRowOrCol)
-                    {
-                        StartCoroutine(FadeButton(obj, false));
-                    }
-                    else if (i <= highestVisIndex && i > highestVisIndex - fixedRowOrCol)
-                    {
-                        if (((highestVisIndex + 1) % fixedRowOrCol == 0) ||
-                            (i > (highestVisIndex - ((highestVisIndex + 1) % fixedRowOrCol))))
-                            StartCoroutine(FadeButton(obj, true));
-                    }
-                }
+                tryFadeObject(obj, i);
             }
 
             scrollBar.GetComponent<ScrollBar>().moveScroller(currDirection);
             setLowAndHighIndeces();
+        }
+    }
+
+    private Vector3 calculateMovedPos(Transform obj)
+    {
+        float newX = (currDirection == direction.RIGHT) ?
+                          (float)System.Math.Round((double)obj.localPosition.x + padding.x, 2) :
+                          (float)System.Math.Round((double)obj.localPosition.x - padding.x, 2);
+
+        float newY = (currDirection == direction.UP) ?
+                     (float)System.Math.Round((double)obj.localPosition.y + padding.y, 2) :
+                     (float)System.Math.Round((double)obj.localPosition.y - padding.y, 2);
+
+        return (currOrientation == orientation.VERTICAL) ?
+                new Vector3(obj.localPosition.x, newY, obj.localPosition.z) :
+                new Vector3(newX, obj.localPosition.y, obj.localPosition.z);
+    }
+
+    private void tryFadeObject(Transform obj, int i)
+    {
+        if (currDirection == direction.UP || currDirection == direction.LEFT)
+        {
+            if (i >= lowestVisIndex && i < lowestVisIndex + fixedRowOrCol)
+            {
+                StartCoroutine(FadeButton(obj, true));
+            }
+            else if (i > highestVisIndex && i <= highestVisIndex + fixedRowOrCol)
+            {
+                StartCoroutine(FadeButton(obj, false));
+            }
+        }
+        else if (currDirection == direction.DOWN || currDirection == direction.RIGHT)
+        {
+            if (i < lowestVisIndex && i >= lowestVisIndex - fixedRowOrCol)
+            {
+                StartCoroutine(FadeButton(obj, false));
+            }
+            else if (i <= highestVisIndex && i > highestVisIndex - fixedRowOrCol)
+            {
+                if (((highestVisIndex + 1) % fixedRowOrCol == 0) ||
+                    (i > (highestVisIndex - ((highestVisIndex + 1) % fixedRowOrCol))))
+                    StartCoroutine(FadeButton(obj, true));
+            }
         }
     }
 

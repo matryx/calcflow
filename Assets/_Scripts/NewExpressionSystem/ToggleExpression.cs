@@ -5,12 +5,14 @@ using UnityEngine;
 public class ToggleExpression : QuickButton
 {
     Expressions expressions;
-    ParametricManager calcManager;
+    ExpressionBody thisBody;
     ExpressionSet expressionSet;
+
+    ParametricManager calcManager;
+    ParametricExpression param;
+
     Transform expressionActions;
     Transform thisExpr;
-    ExpressionBody thisBody;
-    ParametricExpression param;
 
     Material showMat, hideMat;
     Texture quadShow, quadHide;
@@ -38,6 +40,7 @@ public class ToggleExpression : QuickButton
         ColorUtility.TryParseHtmlString("#D4D4D4FF", out grayHide);
     }
 
+    //TODO: extend to vec field
     protected override void ButtonEnterBehavior(GameObject other)
     {
         if (active)     //HIDE

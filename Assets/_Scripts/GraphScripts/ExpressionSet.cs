@@ -7,11 +7,6 @@ using Calcflow.UserStatistics;
 [System.Serializable]
 public class ExpressionSet
 {
-    //public enum string
-    //{
-    //    X, Y, Z
-    //}
-
     public Dictionary<string, Expression> expressions;
     public Dictionary<string, RangePair> ranges;
     public Dictionary<string, RangePair> hiddenRanges;
