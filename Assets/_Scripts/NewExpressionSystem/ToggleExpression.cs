@@ -5,7 +5,7 @@ using UnityEngine;
 public class ToggleExpression : QuickButton
 {
     Expressions expressions;
-    CalculatorManager calcManager;
+    ParametricManager calcManager;
     ExpressionSet expressionSet;
     Transform expressionActions;
     Transform thisExpr;
@@ -22,7 +22,7 @@ public class ToggleExpression : QuickButton
     {
         base.Start();
         expressions = Expressions._instance;
-        calcManager = CalculatorManager._instance;
+        calcManager = ParametricManager._instance;
         expressionSet = expressions.getSelectedExprSet();
 
         thisBody = transform.parent.parent.parent.Find("Button_Input").GetComponent<ExpressionBody>();

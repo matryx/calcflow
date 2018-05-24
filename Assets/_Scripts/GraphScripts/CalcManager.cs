@@ -100,7 +100,7 @@ public class CalcManager : MonoBehaviour
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
-        calcInput.ChangeOutput(expressionSet.expressions["X"]);
+        //calcInput.ChangeOutput(expressionSet.expressions["X"]);
         manageText();
         if (boundsManager != null) boundsManager.UpdateButtonText();
     }
@@ -116,14 +116,14 @@ public class CalcManager : MonoBehaviour
         paramSurface.expressionSets = ess;
         pieceWiseControl.ForceNumberOfTabs(ess.Count);
         expressionSet = paramSurface.expressionSets[0];
-        calcInput.ChangeOutput(expressionSet.expressions["X"]);
+        //calcInput.ChangeOutput(expressionSet.expressions["X"]);
         if(boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
 
     public void SetOutput(CalcOutput output)
     {
-        calcInput.ChangeOutput(output);
+        //calcInput.ChangeOutput(output);
     }
 
     private void Initialize()
@@ -142,7 +142,7 @@ public class CalcManager : MonoBehaviour
         //Req: calcInput
         connectedMenus.pieceWiseControl.Initialize(this);
         //Req: calcInput
-        calcInput.ChangeOutput(expressionSet.expressions["X"]);
+        //calcInput.ChangeOutput(expressionSet.expressions["X"]);
         //Req: calcInput
         //connectedMenus.presetMenu.Initialize(this);
 
@@ -154,7 +154,7 @@ public class CalcManager : MonoBehaviour
 
     public void PresetPressed()
     {
-        calcInput.ChangeOutput(expressionSet.expressions["X"]);
+        //calcInput.ChangeOutput(expressionSet.expressions["X"]);
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }

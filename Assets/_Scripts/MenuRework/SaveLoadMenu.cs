@@ -23,7 +23,7 @@ public class SaveLoadMenu : MonoBehaviour
 
     private List<Transform> buttons = new List<Transform>();
     public ExpressionSaveLoad loader;
-    private CalculatorManager calcManager;
+    private ParametricManager calcManager;
     public static SaveLoadMenu _instance;
 
     private MultiSelectFlexPanel selectPanel;
@@ -57,9 +57,9 @@ public class SaveLoadMenu : MonoBehaviour
     }
 
     //public void Initialize(CalcManager calcManager)
-    public void Initialize(CalculatorManager calcManager)
+    public void Initialize(ParametricManager paramManager)
     {
-        this.calcManager = calcManager;
+        this.calcManager = paramManager;
 
         scroll = GetComponentInChildren<Scroll>(true);
         flexMenu = GetComponent<FlexMenu>();

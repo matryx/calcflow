@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Expressions : MonoBehaviour
 {
-    CalculatorManager calcManager;
+    ParametricManager calcManager;
     Scroll paramScroll, vecFieldScroll, constantScroll;
     public static Expressions _instance;
     ExpressionSet selectedExpSet;
@@ -28,7 +28,7 @@ public class Expressions : MonoBehaviour
     void Awake()
     {
         _instance = this;
-        calcManager = CalculatorManager._instance;
+        calcManager = ParametricManager._instance;
         paramScroll = transform.parent.Find("ParametrizationPanel").GetComponentInChildren<Scroll>();
         vecFieldScroll = transform.parent.Find("VectorFieldPanel").GetComponentInChildren<Scroll>();
         constantScroll = transform.parent.Find("ConstantPanel").GetComponentInChildren<Scroll>();
@@ -117,7 +117,7 @@ public class Expressions : MonoBehaviour
         selectedExpression = expr;
         selectedBody = body;
 
-        if (!calcManager) calcManager = CalculatorManager._instance;
+        if (!calcManager) calcManager = ParametricManager._instance;
 
         //if (expr.GetComponent<ParametricExpression>())
         //{

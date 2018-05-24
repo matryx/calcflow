@@ -4643,7 +4643,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   index: -1
   modelOverride: 
-  shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 3}
   verbose: 0
   createComponents: 1
   updateDynamically: 1
@@ -22865,7 +22865,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   index: -1
   modelOverride: 
-  shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 3}
   verbose: 0
   createComponents: 1
   updateDynamically: 1
@@ -54194,6 +54194,7 @@ GameObject:
   - component: {fileID: 1700445635}
   - component: {fileID: 1700445634}
   - component: {fileID: 1700445637}
+  - component: {fileID: 1700445641}
   m_Layer: 11
   m_Name: Calculator
   m_TagString: Untagged
@@ -54246,13 +54247,11 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1700445633}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: af3a4f95b8440bb47af57ccc99b8e1a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputReceived: 0
-  updateOverlay: 0
 --- !u!136 &1700445638
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -54293,6 +54292,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1700445641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1700445633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e18412e082fd724bb9c13343bacf651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputReceived: 0
+  updateOverlay: 0
+  inputReceived: 0
+  updateOverlay: 0
 --- !u!1 &1708093341
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,13 +9,13 @@ public class ExpressionSelector : QuickButton
     JoyStickAggregator joyStickAggregator;
     Transform currPanel;
     Transform paramPanel, vecPanel, constPanel;
-    private CalculatorManager calcManager;
+    private ParametricManager calcManager;
     Transform xButton;
 
     protected override void Start()
     {
         base.Start();
-        calcManager = CalculatorManager._instance;
+        calcManager = ParametricManager._instance;
         expressions = GameObject.Find("ExpressionMenu").GetComponentInChildren<Expressions>();
 
         paramPanel = transform.parent.parent.Find("ParametrizationPanel");
@@ -91,7 +91,7 @@ public class ExpressionSelector : QuickButton
             GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
             vec.GetComponent<VectorFieldExpression>().Initialize();
             expressionSet = vec.GetComponent<VectorFieldExpression>().getExpSet();
-            calcManager.SetVecFieldES(expressionSet);
+            //calcManager.SetVecFieldES(expressionSet);
             addForwarders(vec.transform);
 
             foreach (Transform child in vec.transform.Find("ExpressionSet"))

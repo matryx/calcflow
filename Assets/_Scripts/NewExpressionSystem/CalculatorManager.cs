@@ -8,23 +8,23 @@ public abstract class CalculatorManager : MonoBehaviour
     public bool inputReceived;
 
 
-    CalcInput calcInput;
+    protected CalcInput calcInput;
 
-    Transform feedBack;
-    TMPro.TextMeshPro textInput;
-    string title;
+    protected Transform feedBack;
+    protected TMPro.TextMeshPro textInput;
+    protected string title;
 
-    private Color positiveFeedback;  //GREEN
-    private Color negativeFeedback = Color.red;
+    protected Color positiveFeedback;  //GREEN
+    protected Color negativeFeedback = Color.red;
 
-    int expressionDisplayLength = 20;
+    protected int expressionDisplayLength = 20;
     //TODO: decrease text size to increase range length
-    int rangeDisplayLength = 3;
+    protected int rangeDisplayLength = 3;
 
     public bool updateOverlay = false;
-    internal bool toExport = false;
+    public bool toExport = false;
 
-    void Awake()
+    void Start()
     {
         Initialize();
     }

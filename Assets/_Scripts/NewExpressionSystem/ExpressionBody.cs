@@ -13,7 +13,7 @@ public class ExpressionBody : QuickButton
     OutputManager outputManager;
     CalcInput calcInput;
     ParametricExpression param;
-    CalculatorManager calcManager;
+    ParametricManager calcManager;
 
     private bool thisBodySelected = false;
     private bool finishedScalingUp = true;
@@ -26,7 +26,7 @@ public class ExpressionBody : QuickButton
 
     private void Awake()
     {
-        calcManager = CalculatorManager._instance;
+        calcManager = ParametricManager._instance;
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
 
@@ -226,7 +226,7 @@ public class ExpressionBody : QuickButton
                 oldTextInput.text = oldTextInput.text.Replace("_", "");
                 expression.setSelectedExpr(null, null);
                 thisBodySelected = false;
-                calcInput.ChangeOutput(null);
+                calcInput.ChangeOutput(null, calcManager);
             }
         }
     }

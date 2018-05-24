@@ -7,15 +7,14 @@ public class ParametricManager : CalculatorManager
     [HideInInspector]
     public ExpressionSet expressionSet;
 
-    [HideInInspector]
-    public bool inputReceived;
+    //[HideInInspector]
+    //public bool inputReceived;
 
     public static ParametricManager _instance;
     JoyStickAggregator joyStickAggregator;
     Scroll paramScroll;
     CustomParametrizedSurface paramSurface;
     List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
-    CalcInput calcInput;
     BoundsManager boundsManager;
     PresetMenu presetMenu;
     SaveLoadMenu saveLoadMenu;
@@ -24,27 +23,16 @@ public class ParametricManager : CalculatorManager
 
     Expressions expressions;
     Transform selectedExpr;
-    Transform feedBack;
-    TMPro.TextMeshPro textInput;
-    string title;
+    //Variables in calcManager:
 
-    private Color positiveFeedback;  //GREEN
-    private Color negativeFeedback = Color.red;
+    //public bool updateOverlay = false;
+    //internal bool toExport = false;
 
-    int expressionDisplayLength = 20;
-    //TODO: decrease text size to increase range length
-    int rangeDisplayLength = 3;
 
-    public bool updateOverlay = false;
-    internal bool toExport = false;
-
-    void Awake()
-    {
-        Initialize();
-    }
-
+    //called by calculatorManager on start
     protected override void Initialize()
     {
+        _instance = this;
         expressions = Expressions._instance;
 
         paramSurface = CustomParametrizedSurface._instance;
@@ -124,8 +112,9 @@ public class ParametricManager : CalculatorManager
         inputReceived = true;
     }
 
-    public void SetOutput(CalcOutput output)
+    public override void SetOutput(CalcOutput output)
     {
+        print("TEST: " + calcInput);
         calcInput.ChangeOutput(output, this);
         inputReceived = true;
     }
@@ -214,9 +203,11 @@ public class ParametricManager : CalculatorManager
             else if (!expressionSet.ranges.ContainsKey(buttonID))
             {
                 GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-
                 var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
-                var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setPanel(transform.parent.Find("ParametrizationPanel"));
+                var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
+                var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
+                var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
+
                 param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
                 var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
                 expressionSet.AddRange(buttonID);
