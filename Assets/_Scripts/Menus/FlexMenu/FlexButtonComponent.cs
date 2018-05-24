@@ -24,6 +24,7 @@ using VoxelBusters.RuntimeSerialization;
 [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class FlexButtonComponent : FlexActionableComponent
 {
+    private Transform body;
     public Color passiveColor;
     public Color hoveringColor;
     public Color selectedColor;
@@ -31,6 +32,9 @@ public class FlexButtonComponent : FlexActionableComponent
 
     private void Start()
     {
+        if(!body){
+            body = transform.Find("Body");
+        }
         State = -1;
         SetState(0);
     }
@@ -106,25 +110,25 @@ public class FlexButtonComponent : FlexActionableComponent
 
     protected override void StateChanged(int _old, int _new)
     {
-        if (transform.Find("Body") == null)
+        if (body == null)
         {
             print("body not found: " + gameObject.name);
         }
         else if (_new == -1)
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;
+            body.GetComponent<Renderer>().material.color = disabledColor;
         }
         else if (_new == 1)
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
+            body.GetComponent<Renderer>().material.color = hoveringColor;
         }
         else if (_new == 2)
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = selectedColor;
+            body.GetComponent<Renderer>().material.color = selectedColor;
         }
         else
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = passiveColor;
+            body.GetComponent<Renderer>().material.color = passiveColor;
         }
     }
 

@@ -186,7 +186,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             Array _arrayObject = Array.CreateInstance(_elementType, _elementCount);
 
             // Add object to cached references
-            ObjectReferenceCache.Add(_arrayObject, _objectReferenceID);
+            ObjectReferenceCache.Add(_objectReferenceID, _arrayObject);
 
             // Read elements based on type
             if (TypeMetadata.IsPrimitive(_elementTypeID))
@@ -364,7 +364,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             Array _arrayObject = Array.CreateInstance(_elementType, _outerArrayLength, _innerArrayLength);
 
             // Add object to cached references
-            ObjectReferenceCache.Add(_arrayObject, _objectReferenceID);
+            ObjectReferenceCache.Add(_objectReferenceID, _arrayObject);
 
             // Read all the elements
             // Read elements based on type
@@ -567,15 +567,8 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             if (_object == null)
                 _object = CreateInstance(_binaryReader, _serializationInfo);
 
-            //Ethan's attempt at fixing error when using deserialize to clone object. Might cause something buggy to happen during reuse.
-            if (ObjectReferenceCache.ContainsKey(_object))
-            {
-                ObjectReferenceCache[_object] = _objectReferenceID;
-            }
-            else
-            {
-                ObjectReferenceCache.Add(_object, _objectReferenceID);
-            }
+
+            ObjectReferenceCache.Add(_objectReferenceID, _object);
 
             // Read properties
             ReadObjectGraphValuesCollection(_binaryReader, ref _nonInitializerValuesCollection);
@@ -599,21 +592,15 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             UInt32 _objectReferenceID = _binaryReader.ReadUInt32();
             object _object;
 
-
-            foreach (object key in ObjectReferenceCache.Keys)
+            if (ObjectReferenceCache.TryGetValue(_objectReferenceID, out _object))
             {
-                UInt32 _currentReferenceID = ObjectReferenceCache[key];
-
-                if (_currentReferenceID == _objectReferenceID)
-                {
-                    _object = key;
-                    _objectType = _object.GetType();
-
-                    return _object;
-                }
+                _objectType = _object.GetType();
+                return _object;
             }
-
-            throw new Exception(string.Format("[RS] Object Reference not found for ID={0}.", _objectReferenceID));
+            else
+            {
+                throw new Exception(string.Format("[RS] Object Reference not found for ID={0}.", _objectReferenceID));
+            }
         }
 
         #endregion

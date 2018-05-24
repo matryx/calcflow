@@ -9,7 +9,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 	{
 		#region Properties
 		
-		protected Dictionary<object, UInt32> ObjectReferenceCache
+		protected Dictionary<UInt32, object> ObjectReferenceCache
 		{
 			get;
 			private set;
@@ -27,7 +27,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 
 		internal ObjectReader ()
 		{
-			ObjectReferenceCache	= new Dictionary<object, UInt32>();
+			ObjectReferenceCache	= new Dictionary<UInt32, object>();
 			TypeMetadata			= new SerializationTypeMetadata();
 		}
 
