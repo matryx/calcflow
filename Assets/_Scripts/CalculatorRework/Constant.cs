@@ -11,7 +11,7 @@ public class Constant : MonoBehaviour {
 
 	void Awake () {
         if (initialized) return;
-        type = Expressions.ExpressionType.Constant;
+        type = Expressions.ExpressionType.CONSTANT;
         components = new List<Transform>();
         initialized = true;
 	}
@@ -20,7 +20,7 @@ public class Constant : MonoBehaviour {
     {
         if (!initialized)
         {
-            type = Expressions.ExpressionType.Constant;
+            type = Expressions.ExpressionType.CONSTANT;
             components = new List<Transform>();
             initialized = true;
         }

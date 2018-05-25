@@ -11,7 +11,7 @@ public class Expressions : MonoBehaviour
     Transform selectedExpression;
     ExpressionBody selectedBody;
     List<Transform> expressions;
-    public enum ExpressionType { Constant, Paramet, VecField }
+    public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
     // main functionalities for parametric - DONE / NEED TO TEST HEAVILY
@@ -36,15 +36,15 @@ public class Expressions : MonoBehaviour
         expressions = new List<Transform>();
     }
 
-    public Scroll getScroll(string type)
+    public Scroll getScroll(ExpressionType type)
     {
         switch (type)
         {
-            case "param":
+            case ExpressionType.PARAMET:
                 return paramScroll;
-            case "vec":
+            case ExpressionType.VECFIELD:
                 return vecFieldScroll;
-            case "cons":
+            case ExpressionType.CONSTANT:
                 return constantScroll;
         }
 

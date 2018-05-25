@@ -275,8 +275,6 @@ public abstract class CalcOutput
             {
                 equation.Insert(i++, "*");
             }
-
-
         }
         while (paren < 0)
         {

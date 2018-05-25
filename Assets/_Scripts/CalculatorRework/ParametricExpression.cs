@@ -4,40 +4,39 @@ using UnityEngine;
 
 public class ParametricExpression : MonoBehaviour
 {
-    Expressions.ExpressionType type;
     Expressions expressionsClass;
     ExpressionSet expSet;
     ExpressionActions expActions;
 
     List<Transform> expressionsList;
     List<Transform> variableClumps;
+    List<string> varsToDelete;
+
     Dictionary<string, Transform> variables;
     Dictionary<string, Transform> hiddenVariables;
-    List<Transform> emptyList;
+
     Transform separator;
     Scroll scroll;
+
     bool initialized = false;
     float xPos = 1.2f;
     bool deleteVar = false;
     bool destroyCalled = false;
     bool isActive = true;
-    List<string> varsToDelete;
 
     void Awake()
     {
         if (initialized) return;
-        type = Expressions.ExpressionType.Paramet;
         expressionsClass = Expressions._instance;
         expSet = new ExpressionSet();
         expressionsList = new List<Transform>();
         variableClumps = new List<Transform>();
         variables = new Dictionary<string, Transform>();
         hiddenVariables = new Dictionary<string, Transform>();
-        emptyList = new List<Transform>();
         varsToDelete = new List<string>();
         expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
 
-        scroll = expressionsClass.getScroll("param");
+        scroll = expressionsClass.getScroll(Expressions.ExpressionType.PARAMET);
         initialized = true;
     }
 
@@ -45,7 +44,6 @@ public class ParametricExpression : MonoBehaviour
     {
         if (!initialized)
         {
-            type = Expressions.ExpressionType.Paramet;
             expressionsList = new List<Transform>();
             variableClumps = new List<Transform>();
             initialized = true;
@@ -162,11 +160,6 @@ public class ParametricExpression : MonoBehaviour
         }
 
         variables.Add(varName, varValue);
-    }
-
-    public Expressions.ExpressionType getType()
-    {
-        return type;
     }
 
     //TODO: fix the fade in from scroll (fading in too early, when it's still out of the board's dimensions

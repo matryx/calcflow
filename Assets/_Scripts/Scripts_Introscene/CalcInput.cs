@@ -104,7 +104,6 @@ public class CalcInput : MonoBehaviour
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
                 {
-
                     if (!calcManager.letterPressed(buttonID))
                     {
                         errorPopup.SetActive(true);
@@ -153,7 +152,6 @@ public class CalcInput : MonoBehaviour
                 if (toDel == null) break;
 
                 calcManager.deleteVariables(toDel);
-
                 break;
             case "Button_Enter":
                 calcManager.inputReceived = true;

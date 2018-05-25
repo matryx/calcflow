@@ -22,7 +22,7 @@ public class ExpressionSelector : QuickButton
         vecPanel = transform.parent.parent.Find("VectorFieldPanel");
         constPanel = transform.parent.parent.Find("ConstantPanel");
 
-        thisScroll = expressions.getScroll("param");
+        thisScroll = expressions.getScroll(Expressions.ExpressionType.PARAMET);
         currPanel = paramPanel;
 
         joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
@@ -40,25 +40,25 @@ public class ExpressionSelector : QuickButton
     protected override void ButtonEnterBehavior(GameObject other)
     {
         List<Transform> toAdd = new List<Transform>();
-        string panelType = "";
+        Expressions.ExpressionType panelType = Expressions.ExpressionType.PARAMET;
 
         if (paramPanel.gameObject.activeSelf)
         {
-            panelType = "param";
+            panelType = Expressions.ExpressionType.PARAMET;
             currPanel = paramPanel;
 
             toAdd = createParametricExpression();
         }
         else if (vecPanel.gameObject.activeSelf)
         {
-            panelType = "vec";
+            panelType = Expressions.ExpressionType.VECFIELD;
             currPanel = vecPanel;
 
             toAdd = createVecExpression();
         }
         else if (constPanel.gameObject.activeSelf)
         {
-            panelType = "cons";
+            panelType = Expressions.ExpressionType.CONSTANT;
             currPanel = constPanel;
 
             toAdd = createConstant();
@@ -90,6 +90,7 @@ public class ExpressionSelector : QuickButton
         param.GetComponent<ParametricExpression>().Initialize();
 
         expressionSet = param.GetComponent<ParametricExpression>().getExpSet();
+        if (!paramManager) paramManager = ParametricManager._instance;
         paramManager.AddExpressionSet(expressionSet);
         addForwarders(param.transform);
 
