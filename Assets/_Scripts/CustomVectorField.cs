@@ -42,7 +42,7 @@ public class CustomVectorField : MonoBehaviour
     public float zmin = -4.5f;
     public float zmax = 4.5f;
     public float delta = 1f;
-    public enum SampleDensity { HIGH, MEDIUM, LOW};
+    public enum SampleDensity { HIGH, MEDIUM, LOW };
     public SampleDensity dens = SampleDensity.LOW;
 
     private void Awake()
@@ -116,7 +116,7 @@ public class CustomVectorField : MonoBehaviour
                     Vector3 target = new Vector3(x_temp, y_temp, z_temp);
 
                     Vector3 result = new Vector3(x, z, y);
-                    if(float.IsNaN(x) 
+                    if (float.IsNaN(x)
                         || float.IsNaN(y)
                         || float.IsNaN(z)
                         || result.magnitude == 0)
@@ -211,9 +211,9 @@ public class CustomVectorField : MonoBehaviour
         //if (es.CompileAll())
         //{
         es.CompileAll();
-            expX = solver.SymbolicateExpression(es.expressions["X"].expression);
-            expY = solver.SymbolicateExpression(es.expressions["Y"].expression);
-            expZ = solver.SymbolicateExpression(es.expressions["Z"].expression);
+        expX = solver.SymbolicateExpression(es.GetExpression("X").expression);
+        expY = solver.SymbolicateExpression(es.GetExpression("Y").expression);
+        expZ = solver.SymbolicateExpression(es.GetExpression("Z").expression);
         //}
         //else
         //{

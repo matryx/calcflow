@@ -54,42 +54,42 @@ public class OverlayCalcInput : MonoBehaviour {
     {
         if (xInput != null)
         {
-            xInput.text = es.expressions["X"].expression;
+            xInput.text = es.GetExpression("X").expression;
         }
         if (yInput != null)
         {
-            yInput.text = es.expressions["Y"].expression;
+            yInput.text = es.GetExpression("Y").expression;
         }
         if (zInput != null)
         {
-            zInput.text = es.expressions["Z"].expression;
+            zInput.text = es.GetExpression("Z").expression;
         }
         if (uInput != null)
         {
-            uInput.text = RangePairToText(es.ranges["u"]);
+            uInput.text = RangePairToText(es.GetRange("u"));
         }
         if (vInput != null)
         {
-            vInput.text = RangePairToText(es.ranges["v"]);
+            vInput.text = RangePairToText(es.GetRange("v"));
         }
         if (wInput != null)
         {
-            wInput.text = RangePairToText(es.ranges["w"]);
+            wInput.text = RangePairToText(es.GetRange("w"));
         }
         if (tInput != null)
         {
-            tInput.text = RangePairToText(es.ranges["t"]);
+            tInput.text = RangePairToText(es.GetRange("t"));
         }
     }
 
     void ToExpressionSet(ExpressionSet es)
     {
         List<string> tokens = ExpressionParser.Parse(xInput.text);
-        es.AddExpression("X", new Expression(tokens, es));
+        es.AddExpression("X", new Expression(tokens));
         tokens = ExpressionParser.Parse(yInput.text);
-        es.AddExpression("Y", new Expression(tokens, es));
+        es.AddExpression("Y", new Expression(tokens));
         tokens = ExpressionParser.Parse(zInput.text);
-        es.AddExpression("Z", new Expression(tokens, es));
+        es.AddExpression("Z", new Expression(tokens));
 
         if (uInput != null)
         {

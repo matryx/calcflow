@@ -125,10 +125,10 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
         foreach (ExpressionSet expressionSet in expressionSets)
         {
-            tessel.EnqueueEquation(currentScale, expressionSet.expressions["X"].expression, expressionSet.expressions["Y"].expression, 
-                                   expressionSet.expressions["Z"].expression, expressionSet.ranges["u"].Min.Value, 
-                                   expressionSet.ranges["u"].Max.Value, expressionSet.ranges["v"].Min.Value, 
-                                   expressionSet.ranges["v"].Max.Value);
+            tessel.EnqueueEquation(currentScale, expressionSet.GetExpression("X").expression, expressionSet.GetExpression("Y").expression, 
+                                   expressionSet.GetExpression("Z").expression, expressionSet.GetRange("u").Min.Value, 
+                                   expressionSet.GetRange("u").Max.Value, expressionSet.GetRange("v").Min.Value, 
+                                   expressionSet.GetRange("v").Max.Value);
         }
     }
 
@@ -210,7 +210,7 @@ public class CustomParametrizedSurface : MonoBehaviour
 
         //foreach (ExpressionSet es in expressionSets)
         //{
-        //    if (es.ranges.Count == 0) return;
+        //    if (es.GetRangeCount() == 0) return;
         //}
 
         //if (!expressionSets.Contains(emptyExprSet))
@@ -272,25 +272,25 @@ public class CustomParametrizedSurface : MonoBehaviour
             //soft copy of the expressionSet. Do not edit actual expressions using this.
             ExpressionSet expressionSet = es.ShallowCopy();
             //remove unused parameters
-            string[] keys = new string[expressionSet.ranges.Keys.Count];
-            expressionSet.ranges.Keys.CopyTo(keys, 0);
+            string[] keys = new string[expressionSet.GetRangeCount()];
+            expressionSet.GetRangeKeys().CopyTo(keys, 0);
             foreach (string op in keys)
             {
                 bool used = false;
-                foreach (string key in expressionSet.expressions.Keys)
+                foreach (string key in expressionSet.GetExprKeys())
                 {
-                    if (expressionSet.expressions[key].tokens.Contains(op))
+                    if (expressionSet.GetExpression(key).tokens.Contains(op))
                     {
                         used = true;
                     }
                 }
-                if (!used && expressionSet.ranges.Count > 1)
+                if (!used && expressionSet.GetRangeCount() > 1)
                 {
                     expressionSet.RemoveRange(op);
                 }
             }
 
-            int depth = expressionSet.ranges.Count;
+            int depth = expressionSet.GetRangeCount();
             int width = 1;
             if (depth == 0)
             {
@@ -357,7 +357,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     internal void ThreadedEvaluate(List<int[]> samples, ExpressionSet expressionSet, int TID)
     {
         Dictionary<string, AK.Variable> vars = new Dictionary<string, AK.Variable>();
-        int depth = expressionSet.ranges.Count;
+        int depth = expressionSet.GetRangeCount();
         int width = (int)Mathf.Pow(particlesPerES, 1f / (float)depth);
         System.Random rand = new System.Random();
 
@@ -365,7 +365,7 @@ public class CustomParametrizedSurface : MonoBehaviour
 
         Dictionary<int, string> indexedParam = new Dictionary<int, string>();
         int k = 0;
-        foreach (string name in expressionSet.ranges.Keys)
+        foreach (string name in expressionSet.GetRangeKeys())
         {
             AK.Variable var = threadHelper.solver.GetGlobalVariable(name);
             indexedParam.Add(k, name);
@@ -378,7 +378,7 @@ public class CustomParametrizedSurface : MonoBehaviour
         Particle[] particles = new Particle[iterations];
         for (int i = 0; i < iterations; i++)
         {
-            if (expressionSet.ranges.Count != 0)
+            if (expressionSet.GetRangeCount() != 0)
             {
                 int[] arr = samples[i];
                 for (int j = 0; j < depth; j++)
@@ -463,25 +463,25 @@ public class CustomParametrizedSurface : MonoBehaviour
         threadHelper.solver = new AK.ExpressionSolver();
         threadHelper.expressionList = new List<AK.Expression>();
 
-        foreach (string name in es.ranges.Keys)
+        foreach (string name in es.GetRangeKeys())
         {
-            threadHelper.parameterMin[name] = (float)threadHelper.solver.EvaluateExpression(es.ranges[name].Min.expression);
-            float range = es.ranges[name].Max.Value - es.ranges[name].Min.Value;
-            if (es.ranges[name].Min.Exclusive)
+            threadHelper.parameterMin[name] = (float)threadHelper.solver.EvaluateExpression(es.GetRange(name).Min.expression);
+            float range = es.GetRange(name).Max.Value - es.GetRange(name).Min.Value;
+            if (es.GetRange(name).Min.Exclusive)
             {
                 threadHelper.parameterMin[name] += exclusiveModifier * range;
             }
-            threadHelper.parameterMax[name] = (float)threadHelper.solver.EvaluateExpression(es.ranges[name].Max.expression);
-            if (es.ranges[name].Max.Exclusive)
+            threadHelper.parameterMax[name] = (float)threadHelper.solver.EvaluateExpression(es.GetRange(name).Max.expression);
+            if (es.GetRange(name).Max.Exclusive)
             {
                 threadHelper.parameterMax[name] -= exclusiveModifier * range;
             }
             threadHelper.solver.SetGlobalVariable(name, threadHelper.parameterMin[name]);
         }
 
-        foreach (string op in es.expressions.Keys)
+        foreach (string op in es.GetExprKeys())
         {
-            Expression ex = es.expressions[op];
+            Expression ex = es.GetExpression(op);
             AK.Expression exp = threadHelper.solver.SymbolicateExpression(ex.expression);
 
             threadHelper.expressionList.Add(exp);

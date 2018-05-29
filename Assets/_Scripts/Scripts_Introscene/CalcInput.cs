@@ -138,8 +138,8 @@ public class CalcInput : MonoBehaviour
                     currExpression.tokens.RemoveAt(index - 1);
                     index--;
 
-                    if (currExpression.expSet == null) break;
-                    if (currExpression.expSet.GetTotalOccurence(s) == 0)
+                    if (ExpressionSet.getExpressionSet(currExpression) == null) break;
+                    if (ExpressionSet.getExpressionSet(currExpression).GetTotalOccurence(s) == 0)
                     {
                         calcManager.deleteVariables(toDelete);
                     }

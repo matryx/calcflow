@@ -46,7 +46,7 @@ public class ParametricManager : CalculatorManager
         if (boundsManager != null) boundsManager.Initialize(this);
         calcInput.Initialize(this);
 
-        calcInput.ChangeOutput(expressionSet.expressions["X"], this); //need to fix
+        calcInput.ChangeOutput(expressionSet.GetExpression("X"), this); //need to fix
         if (outputManager != null)
         {
             print("OUTPUT INIIALIZED");
@@ -72,7 +72,7 @@ public class ParametricManager : CalculatorManager
 
     public void PresetPressed()
     {
-        calcInput.ChangeOutput(expressionSet.expressions["X"], this); //need to fix
+        calcInput.ChangeOutput(expressionSet.GetExpression("X"), this); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
@@ -105,7 +105,7 @@ public class ParametricManager : CalculatorManager
         }
         paramSurface.expressionSets = ess;
         expressionSet = paramSurface.expressionSets[0];
-        calcInput.ChangeOutput(expressionSet.expressions["X"], this); //need to fix
+        calcInput.ChangeOutput(expressionSet.GetExpression("X"), this); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
@@ -193,10 +193,10 @@ public class ParametricManager : CalculatorManager
         {
             if (expressionSet.hiddenRanges.ContainsKey(buttonID))
             {
-                calcInput.currExpression.expSet.ReAddVariable(buttonID);
+                ExpressionSet.getExpressionSet(calcInput.currExpression).ReAddVariable(buttonID);
                 param.GetComponent<ParametricExpression>().addVariable(buttonID, null);
             }
-            else if (!expressionSet.ranges.ContainsKey(buttonID))
+            else if (expressionSet.GetRange(buttonID) == null)
             {
                 GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
                 var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);

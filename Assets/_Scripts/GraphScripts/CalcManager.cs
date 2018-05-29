@@ -201,39 +201,39 @@ public class CalcManager : MonoBehaviour
     public void manageText()
     {
         #region expressions
-        if (expressionSet.expressions.ContainsKey("X") && inputs.xInputbox != null)
+        if (expressionSet.GetExpression("X") != null && inputs.xInputbox != null)
         {
-            inputs.xInputbox.text = displayText(expressionSet.expressions["X"].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions["X"], maxDisplayLength);
+            inputs.xInputbox.text = displayText(expressionSet.GetExpression("X").tokens, calcInput.index, calcInput.currExpression == expressionSet.GetExpression("X"), maxDisplayLength);
         }
-        if (expressionSet.expressions.ContainsKey("Y") && inputs.yInputbox != null)
+        if (expressionSet.GetExpression("Y") != null && inputs.yInputbox != null)
         {
-            inputs.yInputbox.text = displayText(expressionSet.expressions["Y"].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions["Y"], maxDisplayLength);
+            inputs.yInputbox.text = displayText(expressionSet.GetExpression("Y").tokens, calcInput.index, calcInput.currExpression == expressionSet.GetExpression("Y"), maxDisplayLength);
         }
-        if (expressionSet.expressions.ContainsKey("Z") && inputs.zInputbox != null)
+        if (expressionSet.GetExpression("Z") != null && inputs.zInputbox != null)
         {
-            inputs.zInputbox.text = displayText(expressionSet.expressions["Z"].tokens, calcInput.index, calcInput.currExpression == expressionSet.expressions["Z"], maxDisplayLength);
+            inputs.zInputbox.text = displayText(expressionSet.GetExpression("Z").tokens, calcInput.index, calcInput.currExpression == expressionSet.GetExpression("Z"), maxDisplayLength);
         }
         #endregion
         #region params
-        if (expressionSet.ranges.ContainsKey("t") && inputs.tMinInput != null)
+        if (expressionSet.GetRange("t") != null && inputs.tMinInput != null)
         {
-            inputs.tMinInput.text = displayText(expressionSet.ranges["t"].Min.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["t"].Min, rangeDisplayLength);
-            inputs.tMaxInput.text = displayText(expressionSet.ranges["t"].Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["t"].Max, rangeDisplayLength);
+            inputs.tMinInput.text = displayText(expressionSet.GetRange("t").Min.tokens, calcInput.index, calcInput.currExpression == expressionSet.GetRange("t").Min, rangeDisplayLength);
+            inputs.tMaxInput.text = displayText(expressionSet.GetRange("t").Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.GetRange("t").Max, rangeDisplayLength);
         }
-        if (expressionSet.ranges.ContainsKey("u") && inputs.uMinInput != null)
+        if (expressionSet.GetRange("u") != null && inputs.uMinInput != null)
         {
-            inputs.uMinInput.text = displayText(expressionSet.ranges["u"].Min.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["u"].Min, rangeDisplayLength);
-            inputs.uMaxInput.text = displayText(expressionSet.ranges["u"].Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["u"].Max, rangeDisplayLength);
+            inputs.uMinInput.text = displayText(expressionSet.GetRange("u").Min.tokens, calcInput.index, calcInput.currExpression == expressionSet.GetRange("u").Min, rangeDisplayLength);
+            inputs.uMaxInput.text = displayText(expressionSet.GetRange("u").Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.GetRange("u").Max, rangeDisplayLength);
         }
-        if (expressionSet.ranges.ContainsKey("v") && inputs.vMinInput != null)
+        if (expressionSet.GetRange("v") != null && inputs.vMinInput != null)
         {
-            inputs.vMinInput.text = displayText(expressionSet.ranges["v"].Min.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["v"].Min, rangeDisplayLength);
-            inputs.vMaxInput.text = displayText(expressionSet.ranges["v"].Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["v"].Max, rangeDisplayLength);
+            inputs.vMinInput.text = displayText(expressionSet.GetRange("v").Min.tokens, calcInput.index, calcInput.currExpression == expressionSet.GetRange("v").Min, rangeDisplayLength);
+            inputs.vMaxInput.text = displayText(expressionSet.GetRange("v").Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.GetRange("v").Max, rangeDisplayLength);
         }
-        if (expressionSet.ranges.ContainsKey("w") && inputs.wMinInput != null)
+        if (expressionSet.GetRange("w") != null && inputs.wMinInput != null)
         {
-            inputs.wMinInput.text = displayText(expressionSet.ranges["w"].Min.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["w"].Min, rangeDisplayLength);
-            inputs.wMaxInput.text = displayText(expressionSet.ranges["w"].Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.ranges["w"].Max, rangeDisplayLength);
+            inputs.wMinInput.text = displayText(expressionSet.GetRange("w").Min.tokens, calcInput.index, calcInput.currExpression == expressionSet.GetRange("w").Min, rangeDisplayLength);
+            inputs.wMaxInput.text = displayText(expressionSet.GetRange("w").Max.tokens, calcInput.index, calcInput.currExpression == expressionSet.GetRange("w").Max, rangeDisplayLength);
         }
         #endregion
 

@@ -25,19 +25,19 @@ public class OutputManager : MonoBehaviour {
                 print("unknown input: " + source);
                 break;
             case "Button_Xinput":
-                paramManager.SetOutput(paramManager.expressionSet.expressions["X"]);
+                paramManager.SetOutput(paramManager.expressionSet.GetExpression("X"));
                 break;
             case "Button_Yinput":
-                paramManager.SetOutput(paramManager.expressionSet.expressions["Y"]);
+                paramManager.SetOutput(paramManager.expressionSet.GetExpression("Y"));
                 break;
             case "Button_Zinput":
-                paramManager.SetOutput(paramManager.expressionSet.expressions["Z"]);
+                paramManager.SetOutput(paramManager.expressionSet.GetExpression("Z"));
                 break;
             case "Min":
-                paramManager.SetOutput(paramManager.expressionSet.ranges[rangeTitle].Min); 
+                paramManager.SetOutput(paramManager.expressionSet.GetRange(rangeTitle).Min); 
                 break;
             case "Max":
-                paramManager.SetOutput(paramManager.expressionSet.ranges[rangeTitle].Max); 
+                paramManager.SetOutput(paramManager.expressionSet.GetRange(rangeTitle).Max); 
                 break;
             case "GenerateMesh":
                 paramManager.toExport = true;

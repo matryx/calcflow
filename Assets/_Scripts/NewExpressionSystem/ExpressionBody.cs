@@ -158,7 +158,7 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            calcManager.SetOutput(calcManager.expressionSet.expressions[title]);
+            calcManager.SetOutput(calcManager.expressionSet.GetExpression(title));
         }
 
         if (!finishedScalingDown)
