@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class OutputManager : MonoBehaviour {
-    CalculatorManager calcManager;
+    ParametricManager paramManager;
     public static OutputManager _instance;
 
     private void Awake()
@@ -11,9 +11,9 @@ public class OutputManager : MonoBehaviour {
         _instance = this;
     }
 
-    public void Initialize(CalculatorManager cm)
+    public void Initialize(ParametricManager pm)
     {
-        calcManager = cm;
+        paramManager = pm;
         //saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
     }
 
@@ -25,29 +25,30 @@ public class OutputManager : MonoBehaviour {
                 print("unknown input: " + source);
                 break;
             case "Button_Xinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
+                paramManager.SetOutput(paramManager.expressionSet.GetExpression("X"));
                 break;
             case "Button_Yinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions["Y"]);
+                paramManager.SetOutput(paramManager.expressionSet.GetExpression("Y"));
                 break;
             case "Button_Zinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions["Z"]);
+                paramManager.SetOutput(paramManager.expressionSet.GetExpression("Z"));
                 break;
             case "Min":
-                calcManager.SetOutput(calcManager.expressionSet.ranges[rangeTitle].Min); 
+                paramManager.SetOutput(paramManager.expressionSet.GetRange(rangeTitle).Min); 
                 break;
             case "Max":
-                calcManager.SetOutput(calcManager.expressionSet.ranges[rangeTitle].Max); 
+                paramManager.SetOutput(paramManager.expressionSet.GetRange(rangeTitle).Max); 
                 break;
             case "GenerateMesh":
-                calcManager.toExport = true;
+                paramManager.toExport = true;
                 break;
-                //case "Save":
-                //    if (Saveable)
-                //    {
-                //        calcManager.saveLoadMenu.Save();
-                //    }
-                //    break;
+            case "Save":
+                //calcManager.saveLoadMenu.Save();
+
+                //if (Saveable)
+                //{
+                //}
+                break;
         }
         //calcManager.manageText();
     }

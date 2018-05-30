@@ -2,162 +2,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CalculatorManager : MonoBehaviour
+public abstract class CalculatorManager : MonoBehaviour
 {
-    [HideInInspector]
-    public ExpressionSet expressionSet;
-
     [HideInInspector]
     public bool inputReceived;
 
-    public static CalculatorManager _instance;
 
-    CustomParametrizedSurface paramSurface;
-    CustomVectorField vecField;
-    List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
-    CalcInput calcInput;
-    BoundsManager boundsManager;
-    PresetMenu presetMenu;
-    SaveLoadMenu saveLoadMenu;
-    OutputManager outputManager;
+    protected CalcInput calcInput;
 
-    Expressions expressions;
-    Transform selectedExpr;
-    Transform feedBack;
-    TMPro.TextMeshPro textInput;
-    string title;
+    protected Transform feedBack;
+    protected TMPro.TextMeshPro textInput;
+    protected string title;
 
-    private Color positiveFeedback;  //GREEN
-    private Color negativeFeedback = Color.red;
+    protected Color positiveFeedback;  //GREEN
+    protected Color negativeFeedback = Color.red;
 
-    int expressionDisplayLength = 20;
+    protected int expressionDisplayLength = 20;
     //TODO: decrease text size to increase range length
-    int rangeDisplayLength = 3;
+    protected int rangeDisplayLength = 3;
 
     public bool updateOverlay = false;
-    internal bool toExport = false;
+    public bool toExport = false;
 
-    void Awake()
+    void Start()
     {
         Initialize();
     }
 
-    private void Initialize()
+    protected abstract void Initialize();
+
+    public virtual void SetOutput(CalcOutput output)
     {
-        _instance = this;
-        expressions = Expressions._instance;
-
-        paramSurface = CustomParametrizedSurface._instance;
-        vecField = CustomVectorField._instance;
-        calcInput = CalcInput._instance;
-        boundsManager = BoundsManager._instance;
-        outputManager = OutputManager._instance;
-        //saveLoadMenu = SaveLoadMenu._instance;
-        //presetMenu = PresetMenu._instance;
-
-        if (boundsManager != null) boundsManager.Initialize(this);
-        calcInput.Initialize(this);
-
-        calcInput.ChangeOutput(expressionSet.expressions["X"]); //need to fix
-        if (outputManager != null)
-        {
-            print("OUTPUT INIIALIZED");
-            outputManager.Initialize(this);
-        }
-        //presetMenu.Initialize(this);
-        //saveLoadMenu.Initialize(this);
-
-        ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback);
-
-        //if (connectedMenus.particleAnimationSettings != null)
-        //    connectedMenus.particleAnimationSettings.Initialize(this);
-    }
-
-    public void PresetPressed()
-    {
-        calcInput.ChangeOutput(expressionSet.expressions["X"]); //need to fix
-        if (boundsManager != null) boundsManager.UpdateButtonText();
+        calcInput.ChangeOutput(output, this);
         inputReceived = true;
-    }
-
-    public void AddExpressionSet(ExpressionSet ES)
-    {
-        expressionSetList.Add(ES);
-        inputReceived = true;
-    }
-
-    public void RemoveExpressionSet(ExpressionSet ES)
-    {
-        expressionSetList.Remove(ES);
-        inputReceived = true;
-    }
-
-    public void SetVecFieldES(ExpressionSet ES)
-    {
-        vecField.SetES(ES);
-    }
-
-    public void ChangeExpressionSet(ExpressionSet ES)
-    {
-        expressionSet = ES;
-    }
-
-    public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
-    {
-        List<ExpressionSet> ess = new List<ExpressionSet>();
-        for (int i = 0; i < expressionSets.Count; i++)
-        {
-            ess.Add(expressionSets[i].DeepCopy());
-            ess[ess.Count - 1].CompileAll();
-        }
-        paramSurface.expressionSets = ess;
-        expressionSet = paramSurface.expressionSets[0];
-        calcInput.ChangeOutput(expressionSet.expressions["X"]); //need to fix
-        if (boundsManager != null) boundsManager.UpdateButtonText();
-        inputReceived = true;
-    }
-
-    public void SetOutput(CalcOutput output)
-    {
-        calcInput.ChangeOutput(output);
-        inputReceived = true;
-    }
-
-    private string getExpOption()
-    {
-        title = (expressions.getSelectedBody()) ? expressions.getSelectedBody().getTitle() : "X";
-        return title;
-    }
-
-    public void manageText()
-    {
-        selectedExpr = expressions.getSelectedExpr();
-        ExpressionBody exprBody = expressions.getSelectedBody();
-
-        if (selectedExpr == null || exprBody == null) return;
-
-        if (expressions.selectedNotNull())
-        {
-            textInput = exprBody.getTextInput();
-        }
-
-        if (textInput != null)
-        {
-            int displayLength = (exprBody.isVariable()) ? rangeDisplayLength : expressionDisplayLength;
-            textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
-        }
-    }
-
-    public void ManageFeedback()
-    {
-        selectedExpr = expressions.getSelectedExpr();
-        if (expressions.selectedNotNull())
-        {
-            feedBack = expressions.getSelectedBody().getFeedBack();
-            title = expressions.getSelectedBody().getTitle();
-        }
-
-        if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity[title] ? positiveFeedback : negativeFeedback;
     }
 
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)
@@ -246,27 +123,8 @@ public class CalculatorManager : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        if (inputReceived)
-        {
-            manageText();
-            inputReceived = false;
-            updateOverlay = true;
-            bool isValid = expressionSet.CompileAll();
-            ManageFeedback();
-            vecField.UpdateFunctions();
-            if (isValid)
-            {
-                paramSurface.UpdateExpressionSet(expressionSetList);
-                paramSurface.GenerateParticles();
-            }
-        }
-        if (toExport)
-        {
-            toExport = false;
-            paramSurface.GenerateMesh();
-        }
-    }
+    public abstract bool letterPressed(string buttonID);
 
+    //handles process of deleting variables
+    public abstract void deleteVariables(List<string> toDelete);
 }

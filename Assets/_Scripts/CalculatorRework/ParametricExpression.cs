@@ -4,36 +4,39 @@ using UnityEngine;
 
 public class ParametricExpression : MonoBehaviour
 {
-    Expressions.ExpressionType type;
     Expressions expressionsClass;
     ExpressionSet expSet;
+    ExpressionActions expActions;
+
     List<Transform> expressionsList;
     List<Transform> variableClumps;
+    List<string> varsToDelete;
+
     Dictionary<string, Transform> variables;
     Dictionary<string, Transform> hiddenVariables;
-    List<Transform> emptyList;
+
     Transform separator;
     Scroll scroll;
+
     bool initialized = false;
     float xPos = 1.2f;
     bool deleteVar = false;
     bool destroyCalled = false;
     bool isActive = true;
-    string varName;
 
     void Awake()
     {
         if (initialized) return;
-        type = Expressions.ExpressionType.Paramet;
         expressionsClass = Expressions._instance;
         expSet = new ExpressionSet();
         expressionsList = new List<Transform>();
         variableClumps = new List<Transform>();
         variables = new Dictionary<string, Transform>();
         hiddenVariables = new Dictionary<string, Transform>();
-        emptyList = new List<Transform>();
+        varsToDelete = new List<string>();
+        expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
 
-        scroll = expressionsClass.getScroll("param");
+        scroll = expressionsClass.getScroll(Expressions.ExpressionType.PARAMET);
         initialized = true;
     }
 
@@ -41,11 +44,15 @@ public class ParametricExpression : MonoBehaviour
     {
         if (!initialized)
         {
-            type = Expressions.ExpressionType.Paramet;
             expressionsList = new List<Transform>();
             variableClumps = new List<Transform>();
             initialized = true;
         }
+    }
+
+    public ExpressionActions getExpActions()
+    {
+        return expActions;
     }
 
     public void setActiveStatus(bool status)
@@ -69,13 +76,19 @@ public class ParametricExpression : MonoBehaviour
         {
             t.Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
         }
+
+        foreach (KeyValuePair<string, Transform> t in variables)
+        {
+            t.Value.Find("Min").Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
+            t.Value.Find("Max").Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
+        }
     }
 
-    public void setElementQuadtex(Texture tex)
+    public void setElementQuadTex(Texture tex)
     {
         foreach (KeyValuePair<string, Transform> t in variables)
         {
-            t.Value.GetChild(0).Find("Quad").GetComponent<Renderer>().material.SetTexture("_MainTex", tex);
+            t.Value.GetChild(0).Find("Quad").GetComponent<Renderer>().material.mainTexture = tex;
         }
     }
 
@@ -149,17 +162,6 @@ public class ParametricExpression : MonoBehaviour
         variables.Add(varName, varValue);
     }
 
-    public void ReAddVariable(string varName)
-    {
-
-
-    }
-
-    public Expressions.ExpressionType getType()
-    {
-        return type;
-    }
-
     //TODO: fix the fade in from scroll (fading in too early, when it's still out of the board's dimensions
     //      - make it so that objects don't start fading in until they're inside the board's dimensions
     public void deleteExpressionFromScroll()
@@ -169,9 +171,9 @@ public class ParametricExpression : MonoBehaviour
         scroll.deleteObjects(expressionsList);
     }
 
-    public void deleteVariable(string varToDelete)
+    public void deleteVariable(List<string> vars)
     {
-        varName = varToDelete;
+        varsToDelete = vars;
         deleteVar = true;
     }
 
@@ -216,48 +218,100 @@ public class ParametricExpression : MonoBehaviour
     {
         if (deleteVar)
         {
-            if (variables.ContainsKey(varName))
-            {
-                Transform temp = variables[varName];
-                temp.gameObject.SetActive(false);
-                temp.SetParent(null);
-                hiddenVariables.Add(varName, temp);
-                variables.Remove(varName);
-
-                destroyCalled = true;
-                deleteVar = false;
-                return;
-            }
+            hideVariables();
+            return;
         }
+
+        bool noMoreSlots = false;
 
         if (destroyCalled)
         {
             for (int i = 0; i < variableClumps.Count; i++)
             {
-                if (variableClumps[i].childCount == 1)
+                if (noMoreSlots) break;
+
+                Transform currSlot = variableClumps[i];
+
+                if (currSlot.childCount < 2)
                 {
-                    StartCoroutine(MoveTo(variableClumps[i].GetChild(0), variableClumps[i].GetChild(0).localPosition, new Vector3(-xPos, 0, 0), 0.3f));
-
-                    if (i + 1 < variableClumps.Count)
+                    if (currSlot.childCount == 1)
                     {
-                        variableClumps[i + 1].GetChild(0).SetParent(variableClumps[i]);
-                        StartCoroutine(MoveTo(variableClumps[i].GetChild(1), variableClumps[i].GetChild(1).localPosition, new Vector3(xPos, 0, 0), 0.3f));
+                        StartCoroutine(MoveTo(currSlot.GetChild(0), currSlot.GetChild(0).localPosition, new Vector3(-xPos, 0, 0), 0.3f));
                     }
+                    else
+                    {
+                        noMoreSlots = findNextSlot(currSlot, i, 0, -xPos, false);
+                    }
+
+                    noMoreSlots = findNextSlot(currSlot, i, 1, xPos, true);
                 }
-
             }
 
-            Transform last = variableClumps[variableClumps.Count - 1];
-
-            if (last.childCount == 0)
-            {
-                variableClumps.Remove(last);
-                List<Transform> temp = new List<Transform>();
-                temp.Add(last);
-                scroll.deleteObjects(temp);
-            }
-
+            destroyEmptyClumps();
             destroyCalled = false;
+        }
+    }
+
+    private void hideVariables()
+    {
+        foreach (string s in varsToDelete)
+        {
+            if (variables.ContainsKey(s))
+            {
+                Transform temp = variables[s];
+                temp.gameObject.SetActive(false);
+                temp.SetParent(null);
+                hiddenVariables.Add(s, temp);
+                variables.Remove(s);
+
+                destroyCalled = true;
+                deleteVar = false;
+            }
+        }
+    }
+
+    private bool findNextSlot(Transform currClump, int currClumpIndex, int childIndex, float xpos, bool checkNoSlot)
+    {
+        for (int ni = currClumpIndex + 1; ni < variableClumps.Count; ni++)
+        {
+            Transform nSlot = variableClumps[ni];
+
+            if (nSlot.childCount > 0)
+            {
+                nSlot.GetChild(0).SetParent(currClump);
+                StartCoroutine(MoveTo(currClump.GetChild(childIndex), currClump.GetChild(childIndex).localPosition, new Vector3(xpos, 0, 0), 0.3f));
+                return false;
+            }
+
+            //only want to do check when finding a slot for second var spot
+            if (checkNoSlot && ni == variableClumps.Count - 1) return true;
+        }
+
+        return false;
+    }
+
+    private void destroyEmptyClumps()
+    {
+        int removeFrom = 0;
+        bool remove = false;
+
+        for (int ind = 0; ind < variableClumps.Count; ind++)
+        {
+            if (variableClumps[ind].childCount == 0)
+            {
+                removeFrom = ind;
+                remove = true;
+                break;
+            }
+        }
+
+        List<Transform> emptyClumps = new List<Transform>();
+
+        if (remove)
+        {
+            emptyClumps = variableClumps.GetRange(removeFrom, variableClumps.Count - removeFrom);
+            variableClumps.RemoveRange(removeFrom, variableClumps.Count - removeFrom);
+            scroll.deleteObjects(emptyClumps);
         }
     }
 }

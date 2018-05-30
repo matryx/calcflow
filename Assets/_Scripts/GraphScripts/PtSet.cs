@@ -153,7 +153,6 @@ public class AxisCoord : CalcOutput
     {
         return null;
     }
-    
     public float Value
     {
         get
