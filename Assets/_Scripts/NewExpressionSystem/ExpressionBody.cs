@@ -19,7 +19,6 @@ public class ExpressionBody : QuickButton
     private bool finishedScalingUp = true;
     private bool finishedScalingDown = true;
     private bool variable = false;
-    private bool matrix = false;
 
     private Vector3 idleScale, selectedScale;
 
@@ -32,7 +31,6 @@ public class ExpressionBody : QuickButton
         feedBack = transform.parent.Find("Feedback");
 
         if (transform.parent.parent.Find("VariableTitle")) variable = true;
-        if (transform.parent.parent.Find("MatrixTitle")) matrix = true;
 
         if (!variable) title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
 
@@ -43,7 +41,6 @@ public class ExpressionBody : QuickButton
         calcInput = CalcInput._instance;
 
         selectedScale = (variable) ? new Vector3(0.7f, 0.04f, 0.002f) :
-                        (matrix)?    new Vector3(3.926f, 0.04f, 0.002f) :
                                      new Vector3(4.3f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
     }

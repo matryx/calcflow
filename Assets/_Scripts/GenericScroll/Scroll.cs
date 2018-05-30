@@ -9,7 +9,6 @@ public class Scroll : MonoBehaviour
 {
     //REQUIRED: some type of transparent shaders(not standard), Unlit/UnlitAlphaWithFade recommended
 
-    [SerializeField]
     private List<Transform> objects;
     private List<Transform> toAdd = new List<Transform>();
 
@@ -108,7 +107,6 @@ public class Scroll : MonoBehaviour
             case 90:
                 if (currOrientation != orientation.VERTICAL) return;
                 currDirection = direction.DOWN;
-                print("down");
                 break;
             case 180:
                 if (currOrientation != orientation.HORIZONTAL) return;
@@ -117,7 +115,6 @@ public class Scroll : MonoBehaviour
             case 270:
                 if (currOrientation != orientation.VERTICAL) return;
                 currDirection = direction.UP;
-                print("up");
                 break;
         }
 
