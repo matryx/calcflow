@@ -9,7 +9,7 @@ public class BoundsManager : MonoBehaviour {
     //private CalcManager calcManager;
     public static BoundsManager _instance;
 
-    private CalculatorManager calcManager;
+    private ParametricManager calcManager;
     public TMPro.TextMeshPro tParam1, tParam2;
     public TMPro.TextMeshPro uParam1, uParam2;
     public TMPro.TextMeshPro vParam1, vParam2;
@@ -38,7 +38,7 @@ public class BoundsManager : MonoBehaviour {
     }
 
     //public void Initialize(CalcManager cm)
-    public void Initialize(CalculatorManager cm)
+    public void Initialize(ParametricManager cm)
     {
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);
@@ -52,11 +52,11 @@ public class BoundsManager : MonoBehaviour {
         string index = q[q.Length - 1]; 
         if (index == "1")
         {
-            calcManager.expressionSet.ranges[param].Min.Exclusive = !calcManager.expressionSet.ranges[param].Min.Exclusive;
+            calcManager.expressionSet.GetRange(param).Min.Exclusive = !calcManager.expressionSet.GetRange(param).Min.Exclusive;
         }
         if (index == "2")
         {
-            calcManager.expressionSet.ranges[param].Max.Exclusive = !calcManager.expressionSet.ranges[param].Max.Exclusive;
+            calcManager.expressionSet.GetRange(param).Max.Exclusive = !calcManager.expressionSet.GetRange(param).Max.Exclusive;
         }
 
         calcManager.inputReceived = true;
@@ -91,7 +91,7 @@ public class BoundsManager : MonoBehaviour {
 
     private void UpdateSingleButtonText(TMPro.TextMeshPro tm1, TMPro.TextMeshPro tm2, string param)
     {
-        Range r = calcManager.expressionSet.ranges[param].Min;
+        Range r = calcManager.expressionSet.GetRange(param).Min;
         if (r.Exclusive)
         {
             tm1.text = "(";
@@ -100,7 +100,7 @@ public class BoundsManager : MonoBehaviour {
         {
             tm1.text = "[";
         }
-        r = calcManager.expressionSet.ranges[param].Max;
+        r = calcManager.expressionSet.GetRange(param).Max;
         if (r.Exclusive)
         {
             tm2.text = ")";

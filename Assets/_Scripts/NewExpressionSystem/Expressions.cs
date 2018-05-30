@@ -4,25 +4,20 @@ using UnityEngine;
 
 public class Expressions : MonoBehaviour
 {
-    CalculatorManager calcManager;
-    Scroll paramScroll, vecFieldScroll, constantScroll, linTransScroll;
+    ParametricManager calcManager;
+    Scroll paramScroll, vecFieldScroll, constantScroll;
     public static Expressions _instance;
     ExpressionSet selectedExpSet;
     Transform selectedExpression;
     ExpressionBody selectedBody;
     List<Transform> expressions;
-    public enum ExpressionType { Constant, Paramet, VecField }
-
-    public Transform remove, hide, flowLine;
-    Color actionActiveColor, actionInactiveColor;
-    //Color expressionActiveColor, expressionInactiveColor;
+    public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
     // main functionalities for parametric - DONE / NEED TO TEST HEAVILY
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
-
 
     //BUGS:
     // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
@@ -33,38 +28,27 @@ public class Expressions : MonoBehaviour
     void Awake()
     {
         _instance = this;
-        calcManager = CalculatorManager._instance;
+        calcManager = ParametricManager._instance;
         paramScroll = transform.parent.Find("ParametrizationPanel").GetComponentInChildren<Scroll>();
         vecFieldScroll = transform.parent.Find("VectorFieldPanel").GetComponentInChildren<Scroll>();
         constantScroll = transform.parent.Find("ConstantPanel").GetComponentInChildren<Scroll>();
-        linTransScroll = transform.parent.Find("LinearTransPanel").GetComponentInChildren<Scroll>();
 
         expressions = new List<Transform>();
-        remove.gameObject.SetActive(true);
-        hide.gameObject.SetActive(true);
-        flowLine.gameObject.SetActive(true);
-
-        actionActiveColor = remove.Find("Body").GetComponent<Renderer>().material.color;
-        actionInactiveColor = Color.gray;
-        //ColorUtility.TryParseHtmlString("#64C3A7FF", out expressionActiveColor);
-        //ColorUtility.TryParseHtmlString("#FFFFFFFF", out expressionInactiveColor);
     }
 
-    public Scroll getScroll(string type)
+    public Scroll getScroll(ExpressionType type)
     {
         switch (type)
         {
-            case "param":
+            case ExpressionType.PARAMET:
                 return paramScroll;
-            case "vec":
+            case ExpressionType.VECFIELD:
                 return vecFieldScroll;
-            case "cons":
+            case ExpressionType.CONSTANT:
                 return constantScroll;
-            case "lintrans":
-                return linTransScroll;
         }
 
-        print("GET SCROLL RETURNED NULL");
+        print("<color=red>GET SCROLL RETURNED NULL</color>");
         return null;
     }
 
@@ -96,8 +80,6 @@ public class Expressions : MonoBehaviour
 
     public void deleteExpression(Transform del)
     {
-        //expressions.Remove(selectedExpression);
-
         if (del)
         {
             ParametricExpression param = del.GetComponent<ParametricExpression>();
@@ -135,7 +117,7 @@ public class Expressions : MonoBehaviour
         selectedExpression = expr;
         selectedBody = body;
 
-        if (!calcManager) calcManager = CalculatorManager._instance;
+        if (!calcManager) calcManager = ParametricManager._instance;
 
         //if (expr.GetComponent<ParametricExpression>())
         //{

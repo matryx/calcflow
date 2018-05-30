@@ -24,7 +24,7 @@ public class PresetMenu : MonoBehaviour
     public FlexMenu menu;
     public string defaultFunction = "Astroidal Ellipse";
     //CalcManager calcManager;
-    CalculatorManager calcManager;
+    ParametricManager calcManager;
     public static PresetMenu _instance;
 
     [SerializeField]
@@ -46,11 +46,11 @@ public class PresetMenu : MonoBehaviour
     }
 
     //public void Initialize(CalcManager cm)
-    public void Initialize(CalculatorManager cm)
+    public void Initialize(ParametricManager pm)
     {
         scroll = GetComponentInChildren<Scroll>(true);
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
-        calcManager = cm;
+        calcManager = pm;
         HandleInput(defaultFunction);
         KeyboardInputResponder responder = new KeyboardInputResponder(this);
         menu.RegisterResponder(responder);

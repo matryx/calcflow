@@ -13,6 +13,9 @@ public class ExpressionActions : QuickButton
 
     public void disableButtons()
     {
+        if (delete == null) delete = transform.parent.Find("Delete");
+        if (toggleHide == null) toggleHide = transform.parent.Find("ToggleHide");
+
         if (scaleButtonsUp != null) StopCoroutine(scaleButtonsUp);
 
         scaleButtonsDown = ScaleButtonsDown();
@@ -95,18 +98,16 @@ public class ExpressionActions : QuickButton
     {
         if (delete == null) delete = transform.parent.Find("Delete");
 
-        if (!delete.gameObject.activeSelf)
+        if (delete.gameObject.activeSelf)
         {
-            delete.gameObject.SetActive(true);
             delete.localScale = Vector3.zero;
             delete.gameObject.SetActive(false);
         }
 
         if (toggleHide == null) toggleHide = transform.parent.Find("ToggleHide");
 
-        if (!toggleHide.gameObject.activeSelf)
+        if (toggleHide.gameObject.activeSelf)
         {
-            toggleHide.gameObject.SetActive(true);
             toggleHide.localScale = Vector3.zero;
             toggleHide.gameObject.SetActive(false);
         }

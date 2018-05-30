@@ -65,43 +65,45 @@ public class OutputMenu : MonoBehaviour
 
     protected void HandleInput(string source)
     {
+        ExpressionSet es = calcManager.expressionSet;
+
         switch (source)
         {
             default:
                 print("unknown input: " + source);
                 break;
             case "Button_Xinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
+                calcManager.SetOutput(es.GetExpression("X"));
                 break;
             case "Button_Yinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions["Y"]);
+                calcManager.SetOutput(es.GetExpression("Y"));
                 break;
             case "Button_Zinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions["Z"]);
+                calcManager.SetOutput(es.GetExpression("Z"));
                 break;
             case "umin":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["u"].Min);
+                calcManager.SetOutput(es.GetRange("u").Min);
                 break;
             case "umax":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["u"].Max);
+                calcManager.SetOutput(es.GetRange("u").Max);
                 break;
             case "tmin":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["t"].Min);
+                calcManager.SetOutput(es.GetRange("t").Min);
                 break;
             case "tmax":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["t"].Max);
+                calcManager.SetOutput(es.GetRange("t").Max);
                 break;
             case "vmin":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["v"].Min);
+                calcManager.SetOutput(es.GetRange("v").Min);
                 break;
             case "vmax":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["v"].Max);
+                calcManager.SetOutput(es.GetRange("v").Max);
                 break;
             case "wmin":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["w"].Min);
+                calcManager.SetOutput(es.GetRange("w").Min);
                 break;
             case "wmax":
-                calcManager.SetOutput(calcManager.expressionSet.ranges["w"].Max);
+                calcManager.SetOutput(es.GetRange("w").Max);
                 break;
             case "GenerateMesh":
                 calcManager.toExport = true;

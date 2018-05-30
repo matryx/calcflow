@@ -125,7 +125,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                Debug.Log("EventTracking Start: " + eventType + " -> " + eventName);
+                // Debug.Log("EventTracking Start: " + eventType + " -> " + eventName);
                 // Build props
                 var props = EventProperties(eventName, "Start", extras);
                 // Event key
@@ -155,7 +155,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                Debug.Log("EventTracking End: " + eventType + " -> " + eventName);
+                //Debug.Log("EventTracking End: " + eventType + " -> " + eventName);
                 // Build props
                 var props = EventProperties(eventName, "End", extras);
                 // Event key
@@ -192,7 +192,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                Debug.Log("EventTracking, Clearing pending started events");
+                //Debug.Log("EventTracking, Clearing pending started events");
                 // Fetch non finished events
                 var keys = new List<string>();
                 lock (startTimes)

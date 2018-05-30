@@ -2,18 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VectorFieldExpression : MonoBehaviour {
-    Expressions.ExpressionType type;
+public class VectorFieldExpression : MonoBehaviour
+{
+    Expressions expressionsClass;
     ExpressionSet expSet;
-    List<Transform> expressions;
+    ExpressionActions expActions;
+
+    List<Transform> expressionsList;
+
     Transform range;
+    Transform separator;
+    Scroll scroll;
+
     bool initialized = false;
+    bool isActive = true;
 
     void Awake () {
         if (initialized) return;
-        type = Expressions.ExpressionType.VecField;
+        expressionsClass = Expressions._instance;
         expSet = new ExpressionSet();
-        expressions = new List<Transform>();
+        expressionsList = new List<Transform>();
+
+        expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
+        scroll = expressionsClass.getScroll(Expressions.ExpressionType.VECFIELD);
+
         initialized = true;
     }
 
@@ -21,10 +33,19 @@ public class VectorFieldExpression : MonoBehaviour {
     {
         if (!initialized)
         {
-            type = Expressions.ExpressionType.VecField;
-            expressions = new List<Transform>();
+            expressionsList = new List<Transform>();
             initialized = true;
         }
+    }
+
+    public void setSeparator(Transform sep)
+    {
+        separator = sep;
+    }
+
+    public Transform getSeparator()
+    {
+        return separator;
     }
 
     public ExpressionSet getExpSet()
@@ -32,14 +53,24 @@ public class VectorFieldExpression : MonoBehaviour {
         return expSet;
     }
 
-    public void addExpression(Transform expr)
+    public bool getActiveStatus()
     {
-        expressions.Add(expr);
+        return isActive;
     }
 
-    public void setRange(Transform ran)
+    public Scroll getScroll()
     {
-        range = ran;
+        return scroll;
+    }
+
+    public void addExpression(Transform expr)
+    {
+        expressionsList.Add(expr);
+    }
+
+    public void setRange(Transform r)
+    {
+        range = r;
     }
 
     void Update () {

@@ -5,38 +5,34 @@ using UnityEngine;
 public class ExpressionBody : QuickButton
 {
     Expressions expression;
-    ExpressionComponent expComp;
+    Transform expressionParent;
+    Transform panel;
     Transform feedBack;
     TMPro.TextMeshPro textInput;
     string title = "X";
     OutputManager outputManager;
     CalcInput calcInput;
     ParametricExpression param;
-    CalculatorManager calcManager;
+    ParametricManager calcManager;
 
-    private bool thisBodyActive = false;
-    private bool finishedScaling = false;
-    private bool retracting = false;
+    private bool thisBodySelected = false;
+    private bool finishedScalingUp = true;
+    private bool finishedScalingDown = true;
     private bool variable = false;
-    private bool matrix = false;
 
     private Vector3 idleScale, selectedScale;
 
     private IEnumerator scaleUp, scaleDown;
-    private IEnumerator backToSelected, backToIdle;
 
     private void Awake()
     {
-        calcManager = CalculatorManager._instance;
+        calcManager = ParametricManager._instance;
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
+
         if (transform.parent.parent.Find("VariableTitle")) variable = true;
-        if (transform.parent.parent.Find("MatrixTitle")) matrix = true;
 
         if (!variable) title = transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text.Substring(0, 1);
-
-        expComp = (variable || matrix) ? transform.parent.GetComponentInParent<ExpressionComponent>() :
-                               transform.GetComponentInParent<ExpressionComponent>();
 
         if (transform.parent.Find("Text_Input"))
             textInput = transform.parent.Find("Text_Input").GetComponent<TMPro.TextMeshPro>();
@@ -45,7 +41,6 @@ public class ExpressionBody : QuickButton
         calcInput = CalcInput._instance;
 
         selectedScale = (variable) ? new Vector3(0.7f, 0.04f, 0.002f) :
-                        (matrix)?    new Vector3(3.926f, 0.04f, 0.002f) :
                                      new Vector3(4.3f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
     }
@@ -53,6 +48,26 @@ public class ExpressionBody : QuickButton
     protected override void Start()
     {
         base.Start();
+    }
+
+    public void setExpressionParent(Transform p)
+    {
+        expressionParent = p;
+    }
+
+    public Transform getExpressionParent()
+    {
+        return expressionParent;
+    }
+
+    public void setPanel(Transform p)
+    {
+        panel = p;
+    }
+
+    public Transform getPanel()
+    {
+        return panel;
     }
 
     public Transform getFeedBack()
@@ -81,6 +96,23 @@ public class ExpressionBody : QuickButton
         return variable;
     }
 
+    //NOTE: sets selected expression and body to be null
+    public void unSelect()
+    {
+        if (!finishedScalingUp)
+        {
+            StopCoroutine(scaleUp);
+            finishedScalingUp = true;
+        }
+
+        scaleDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
+        StartCoroutine(scaleDown);
+        finishedScalingDown = false;
+
+        expression.setSelectedExpr(null, null);
+        thisBodySelected = false;
+    }
+
     public void deselectCurrBody()
     {
         ExpressionBody selectedBody = expression.getSelectedBody();
@@ -88,6 +120,8 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
+            param = selectedBody.getExpressionParent().GetComponent<ParametricExpression>();
+            param.getExpActions().disableButtons();
             unSelect();
         }
     }
@@ -99,6 +133,8 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
+            param = selectedBody.getExpressionParent().GetComponent<ParametricExpression>();
+            param.getExpActions().disableButtons();
 
             if (selectedBody.transform != transform)
             {
@@ -111,10 +147,8 @@ public class ExpressionBody : QuickButton
     {
         deselectPrevBody();
 
-        if (expComp == null) expComp = transform.parent.GetComponentInParent<ExpressionComponent>();
-        expression.setSelectedExpr(expComp.getExpressionParent(), this);
-
-        if (!param) param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
+        expression.setSelectedExpr(expressionParent, this);
+        param = expressionParent.GetComponent<ParametricExpression>();
         calcManager.ChangeExpressionSet(param.getExpSet());
 
         if (variable)
@@ -124,43 +158,30 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            calcManager.SetOutput(calcManager.expressionSet.expressions[title]);
+            calcManager.SetOutput(calcManager.expressionSet.GetExpression(title));
         }
 
-        if (retracting && backToIdle != null)
+        if (!finishedScalingDown)
         {
-            StopCoroutine(backToIdle);
+            StopCoroutine(scaleDown);
+            finishedScalingDown = true;
         }
 
-        retracting = false;
         scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
         StartCoroutine(scaleUp);
-        finishedScaling = false;
-        thisBodyActive = true;
+        finishedScalingUp = false;
+        thisBodySelected = true;
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        deselectPrevBody();
-
-        if (thisBodyActive)
+        if (thisBodySelected)
         {
-            if (retracting && backToSelected != null)
-            {
-                StopCoroutine(backToSelected);
-                retracting = false;
-            }
-
-            scaleDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.3f);
-            StartCoroutine(scaleDown);
-            finishedScaling = false;
-            expression.setSelectedExpr(null, null);
-
-            thisBodyActive = false;
+            deselectCurrBody();
         }
         else
         {
-            if (!param) param = expComp.getExpressionParent().GetComponent<ParametricExpression>();
+            param = expressionParent.GetComponent<ParametricExpression>();
             if (param.getActiveStatus()) selectBody();
         }
     }
@@ -183,23 +204,14 @@ public class ExpressionBody : QuickButton
         if (end == idleScale)
         {
             obj.gameObject.SetActive(false);
-            finishedScaling = true;
+            finishedScalingDown = true;
+        } 
+        else if (end == selectedScale)
+        {
+            finishedScalingUp = true;
         }
     }
 
-    //NOTE: sets selected expression and body to be null
-    public void unSelect()
-    {
-        if (!finishedScaling && scaleUp != null) StopCoroutine(scaleUp);
-        backToIdle = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
-        StartCoroutine(backToIdle);
-        retracting = true;
-
-        expression.setSelectedExpr(null, null);
-        thisBodyActive = false;
-    }
-
-    //BUG: null feedback when adding a new variable that's offscreen
     private void OnDisable()
     {
         if (feedBack && feedBack.localScale == selectedScale)
@@ -207,14 +219,14 @@ public class ExpressionBody : QuickButton
             feedBack.localScale = idleScale;
             feedBack.gameObject.SetActive(false);
 
-            if (thisBodyActive)
+            if (thisBodySelected)
             {
                 ExpressionBody selectedBody = expression.getSelectedBody();
                 TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
                 oldTextInput.text = oldTextInput.text.Replace("_", "");
                 expression.setSelectedExpr(null, null);
-                thisBodyActive = false;
-                calcInput.ChangeOutput(null);
+                thisBodySelected = false;
+                calcInput.ChangeOutput(null, calcManager);
             }
         }
     }
