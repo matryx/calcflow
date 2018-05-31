@@ -5,13 +5,13 @@ using UnityEngine;
 public class Expressions : MonoBehaviour
 {
     ParametricManager calcManager;
-    Scroll paramScroll, vecFieldScroll, constantScroll;
+    Scroll paramScroll, vecFieldScroll, constantScroll, linearTransScroll;
     public static Expressions _instance;
     ExpressionSet selectedExpSet;
     Transform selectedExpression;
     ExpressionBody selectedBody;
     List<Transform> expressions;
-    public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
+    public enum ExpressionType { CONSTANT, PARAMET, VECFIELD, LINEAR}
 
     //TODO:
     // main functionalities for parametric - DONE / NEED TO TEST HEAVILY
@@ -32,6 +32,7 @@ public class Expressions : MonoBehaviour
         paramScroll = transform.parent.Find("ParametrizationPanel").GetComponentInChildren<Scroll>();
         vecFieldScroll = transform.parent.Find("VectorFieldPanel").GetComponentInChildren<Scroll>();
         constantScroll = transform.parent.Find("ConstantPanel").GetComponentInChildren<Scroll>();
+        //linearTransScroll = transform.parent.Find("linearTransformationPanel").GetComponentInChildren<Scroll>();
 
         expressions = new List<Transform>();
     }
@@ -46,6 +47,8 @@ public class Expressions : MonoBehaviour
                 return vecFieldScroll;
             case ExpressionType.CONSTANT:
                 return constantScroll;
+            case ExpressionType.LINEAR:
+                return linearTransScroll;
         }
 
         print("<color=red>GET SCROLL RETURNED NULL</color>");

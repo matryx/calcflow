@@ -11,6 +11,59 @@ public class MatrixSet
 	public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
 
+    private static Dictionary<CalcOutput, MatrixSet> matrixSetDict = new Dictionary<CalcOutput, MatrixSet>();
+
+    private void setMatrixSet(CalcOutput calcOutput)
+    {
+        if (matrixSetDict.ContainsKey(calcOutput))
+        {
+            matrixSetDict[calcOutput] = this;
+        }
+        else
+        {
+            matrixSetDict.Add(calcOutput, this);
+        }
+    }
+
+    public static MatrixSet getMatrixSet(CalcOutput calcOutput)
+    {
+        MatrixSet result;
+        if (matrixSetDict.TryGetValue(calcOutput, out result))
+        {
+            return result;
+        }
+        else
+        {
+            Debug.Log("<color=red> calcOutput not in any MatrixSet </color>");
+            return null;
+        }
+    }
+
+    private static void removeMatrixSet(CalcOutput calcOutput)
+    {
+        matrixSetDict.Remove(calcOutput);
+    }
+
+    public Element getElement(string mtxName, int x, int y)
+    {
+        Matrix currMtx;
+        if (matrices.TryGetValue(mtxName, out currMtx)) 
+        {
+            if(currMtx.xDim <= x || currMtx.yDim <= y)
+                return null;
+            return currMtx.mtx[x,y];
+        }
+        else
+        {
+            Debug.Log("<color=red> Matrix does not exist </color>");
+            return null;
+        }
+    }
+
+
+
+
+
     public MatrixSet() 
     {
         matrices = new Dictionary<string, Matrix>();

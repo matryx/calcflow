@@ -69,7 +69,7 @@ public class ExpressionTabHandler : MonoBehaviour {
                 linTransPanel.gameObject.SetActive(false);
                 longCube.gameObject.SetActive(false);
                 break;
-            case "LinearTransTab":
+            case "LinearTransformationTab":
                 paramPanel.gameObject.SetActive(false);
                 vecFieldPanel.gameObject.SetActive(false);
                 constantPanel.gameObject.SetActive(false);

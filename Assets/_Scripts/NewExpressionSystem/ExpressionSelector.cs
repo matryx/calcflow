@@ -8,7 +8,7 @@ public class ExpressionSelector : QuickButton
     Expressions expressions;
     JoyStickAggregator joyStickAggregator;
     Transform currPanel;
-    Transform paramPanel, vecPanel, constPanel;
+    Transform paramPanel, vecPanel, constPanel, linearTransPanel;
     private ParametricManager paramManager;
     Transform xButton;
 
@@ -21,6 +21,7 @@ public class ExpressionSelector : QuickButton
         paramPanel = transform.parent.parent.Find("ParametrizationPanel");
         vecPanel = transform.parent.parent.Find("VectorFieldPanel");
         constPanel = transform.parent.parent.Find("ConstantPanel");
+        linearTransPanel = transform.parent.parent.Find("LinearTransformationPanel");
 
         thisScroll = expressions.getScroll(Expressions.ExpressionType.PARAMET);
         currPanel = paramPanel;
@@ -62,7 +63,15 @@ public class ExpressionSelector : QuickButton
             currPanel = constPanel;
 
             toAdd = createConstant();
+        } 
+        else if (linearTransPanel.gameObject.activeSelf)
+        {
+            panelType = Expressions.ExpressionType.LINEAR;
+            currPanel = linearTransPanel;
+
+            toAdd = createMatrix();
         }
+
 
         thisScroll = expressions.getScroll(panelType);
 
@@ -81,6 +90,19 @@ public class ExpressionSelector : QuickButton
         xButton = null;
     }
 
+    private List<Transform> createMatrix() 
+    {
+        List<Transform> mtxComponents = new List<Transform>();
+        MatrixSet matrixSet = null;
+
+        GameObject mtx = Instantiate(Resources.Load("Expressions/MatrixExpression", typeof(GameObject))) as GameObject;
+        mtx.GetComponent<ParametricExpression>().Initialize();
+
+
+        return mtxComponents;
+
+        
+    }
     private List<Transform> createParametricExpression()
     {
         List<Transform> paramComponents = new List<Transform>();
@@ -90,7 +112,8 @@ public class ExpressionSelector : QuickButton
         param.GetComponent<ParametricExpression>().Initialize();
 
         expressionSet = param.GetComponent<ParametricExpression>().getExpSet();
-        if (!paramManager) paramManager = ParametricManager._instance;
+        if (!paramManager) 
+            paramManager = ParametricManager._instance;
         paramManager.AddExpressionSet(expressionSet);
         addForwarders(param.transform);
 
