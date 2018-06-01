@@ -13,15 +13,18 @@ public class MatrixSet
 
     private static Dictionary<CalcOutput, MatrixSet> matrixSetDict = new Dictionary<CalcOutput, MatrixSet>();
 
-    private void setMatrixSet(CalcOutput calcOutput)
+    // Adding each element in the the mtx into the matrixSetDic 
+    private void setMatrixSet(Matrix mtx)
     {
-        if (matrixSetDict.ContainsKey(calcOutput))
-        {
-            matrixSetDict[calcOutput] = this;
-        }
-        else
-        {
-            matrixSetDict.Add(calcOutput, this);
+        foreach (CalcOutput ele in mtx.mtx) {
+            if (matrixSetDict.ContainsKey(ele))
+            {
+                matrixSetDict[ele] = this;
+            }
+            else
+            {
+                matrixSetDict.Add(ele, this);
+            }
         }
     }
 
@@ -44,6 +47,7 @@ public class MatrixSet
         matrixSetDict.Remove(calcOutput);
     }
 
+    // Get the element from a single matrix 
     public Element getElement(string mtxName, int x, int y)
     {
         Matrix currMtx;
@@ -55,21 +59,49 @@ public class MatrixSet
         }
         else
         {
-            Debug.Log("<color=red> Matrix does not exist </color>");
+            Debug.Log("<color=red> [getElement]: matrix does not exist </color>");
             return null;
+        }
+    }
+    
+    // Add element into a matrix
+    public void addElement(string mtxName, int x, int y, Element ele)
+    {
+        Matrix currMtx;
+        if (matrices.TryGetValue(mtxName, out currMtx)) 
+        {
+           currMtx.mtx[x,y] = ele;
+        }
+        else
+        {
+            Debug.Log("<color=red> [addElement]: matrix does not exist </color>");
         }
     }
 
 
-
-
+    // Add a mtx into the dictionary of the matrices
+    public void AddMatrix(string mtxName, Matrix mtx)
+    {
+        if (mtx != null)
+        {
+            if (matrices.ContainsKey(mtxName)) 
+            {
+                matrices[mtxName] = mtx;
+            }
+            else
+            {
+                matrices.Add(mtxName, mtx);
+            }
+            setMatrixSet(mtx);
+        }
+    }
 
     public MatrixSet() 
     {
         matrices = new Dictionary<string, Matrix>();
-        matrices.Add("A", new Matrix(new Element[3,3]));
-        matrices.Add("x", new Matrix(new Element[3,1]));
-        matrices.Add("b", new Matrix(new Element[3,1]));
+        AddMatrix("A", new Matrix(new Element[3,3]));
+        AddMatrix("x", new Matrix(new Element[3,1]));
+        AddMatrix("b", new Matrix(new Element[3,1]));
     }
 
     public MatrixSet(Dictionary<string, Matrix> newDictionary) 
