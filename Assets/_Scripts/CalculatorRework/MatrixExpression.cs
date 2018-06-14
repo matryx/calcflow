@@ -58,17 +58,51 @@ public class MatrixExpression : MonoBehaviour
     {
         return scroll;
     }
+    public void setButtonInputColor(Color col)
+    {
+        foreach (Transform t in matricesList)
+        {
+            t.Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
+        }
+    }
 
+    public void setTextColor(Color c)
+    {
+        foreach (Transform t in matricesList)
+        {
+            foreach (Transform child in t)
+            {
+                if (child.GetComponent<TMPro.TextMeshPro>())
+                {
+                    child.GetComponent<TMPro.TextMeshPro>().color = c;
+                }
+            }
+        }
+    }
+    public void setSeparator(Transform sep)
+    {
+        separator = sep;
+    }
 
-	// Use this for initialization
-	void Start () 
-	{
-		
-	}
-	
-	// Update is called once per frame
-	void Update () 
-	{
-		
-	}
+    public Transform getSeparator()
+    {
+        return separator;
+    }
+
+    public MatrixSet getMtxSet()
+    {
+        return mtxSet;
+    }
+    public void addExpression(Transform expr)
+    {
+        matricesList.Add(expr);
+    }
+
+    //TODO: fix the fade in from scroll (fading in too early, when it's still out of the board's dimensions
+    //      - make it so that objects don't start fading in until they're inside the board's dimensions
+    public void deleteExpressionFromScroll()
+    {
+        matricesList.Add(separator);
+        scroll.deleteObjects(matricesList);
+    }
 }

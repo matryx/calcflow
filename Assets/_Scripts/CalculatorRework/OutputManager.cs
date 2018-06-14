@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class OutputManager : MonoBehaviour {
     ParametricManager paramManager;
+    LinearTransManager linearTransManager;
     public static OutputManager _instance;
 
     private void Awake()
@@ -16,6 +17,12 @@ public class OutputManager : MonoBehaviour {
         paramManager = pm;
         //saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
     }
+    public void Initialize(LinearTransManager lm)
+    {
+        linearTransManager = lm;
+        //saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
+    }
+
 
     public void HandleInput(string source, string rangeTitle)
     {
