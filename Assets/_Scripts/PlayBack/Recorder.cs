@@ -62,6 +62,8 @@ public class Recorder : MonoBehaviour
     private static void StartRecording()
     {
         print("start recording");
+        CheckForSpawns();
+        print("preRecording finished");
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
     }

@@ -324,20 +324,11 @@ public class PlaybackLogAction2
 
                     if (objectMap.ContainsKey(parentKey))
                     {
-                        if (subject.name == "delete")
-                        {
-                            Debug.Log("DELETE: ABLE TO REPARENT: " + timeStamp);
-                            //
-                        }
                         subject.transform.SetParent((parentKey == 0) ? null : objectMap[parentKey].transform, false);
                     }
                     else
                     {
-                        if (subject.name == "delete")
-                        {
-                            Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist.");
-                        }
-                        //Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist." );
+                        Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist." );
                     }
 
                     subject.LocalMoveTo(position, PlaybackLog.Period);

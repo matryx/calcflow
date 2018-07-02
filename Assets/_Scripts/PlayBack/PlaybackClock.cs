@@ -22,6 +22,7 @@ public class PlaybackClock : Nanome.Core.Behaviour
 
     public static long GetTime()
     {
+        if (!running) return -666;
         return timer.ElapsedMilliseconds;
     }
 

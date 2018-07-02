@@ -36,8 +36,44 @@ public class Replayer : MonoBehaviour
     private static void StartReplaying()
     {
         _instance.LoadReplay(JsonUtility.ToJson(Recorder.recordLog));
+
+        PreLoad();
+
         PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
+    }
+
+    private static void PreLoad()
+    {
+        while (true)
+        {
+            if (log.Count == 0)
+            {
+                print("replay finished");
+
+                Replaying = false;
+                break;
+            }
+            if (log[0].timeStamp <= 0)
+            {
+                PlaybackLogAction2 item = log[0];
+                log.RemoveAt(0);
+
+                try
+                {
+                    item.Reenact();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message);
+                }
+            }
+            else
+            {
+                Debug.Log("<color=yellow>preLoad Finished</color>");
+                break;
+            }
+        }
     }
 
     private void FixedUpdate()

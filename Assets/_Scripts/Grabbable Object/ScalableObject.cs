@@ -45,9 +45,10 @@ public class ScalableObject : GrabbableObject
         }
     }
 
+
     protected override void CreatePivot()
     {
-        pivot = new GameObject();
+        pivot = Instantiate(Resources.Load(EmptyUIDPrefab, typeof(GameObject))) as GameObject;
         pivot.name = "pivot";
 
         if (activeGrabbers.Count == 1)
