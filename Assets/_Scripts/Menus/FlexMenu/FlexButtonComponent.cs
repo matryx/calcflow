@@ -24,14 +24,16 @@ using VoxelBusters.RuntimeSerialization;
 [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class FlexButtonComponent : FlexActionableComponent
 {
-    private Transform body;
+    [RuntimeSerializeField]
+    public Transform body;
     public Color passiveColor;
     public Color hoveringColor;
     public Color selectedColor;
     public Color disabledColor;
 
     private void Start()
-    {
+    {   
+        //Debug.Log(gameObject.name + " start");
         if(!body){
             body = transform.Find("Body");
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), false)]
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class SecondaryMenu : MonoBehaviour
 {
     [RuntimeSerializable(null, true, true)]

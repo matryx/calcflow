@@ -35,7 +35,6 @@ public class Recorder : MonoBehaviour
         allUIDs.Clear();
         allUIDs = GetAllUIDSInScene();
         allUIDs.Remove(gameObject.GetComponent<UIDSystem>());
-
     }
 
     List<UIDSystem> GetAllUIDSInScene()
@@ -129,9 +128,16 @@ public class Recorder : MonoBehaviour
         while (allUIDs.Count > 0)
         {
             UIDSystem uid;
-            uid = allUIDs[allUIDs.Count-1];
-            allUIDs.RemoveAt(allUIDs.Count-1);
-            RecordSpawn(uid);
+            uid = allUIDs[allUIDs.Count - 1];
+            allUIDs.RemoveAt(allUIDs.Count - 1);
+            if (uid)
+            {
+                RecordSpawn(uid);
+            }
+            else
+            {
+                Debug.Log("uid was deleted");
+            }
         }
     }
 

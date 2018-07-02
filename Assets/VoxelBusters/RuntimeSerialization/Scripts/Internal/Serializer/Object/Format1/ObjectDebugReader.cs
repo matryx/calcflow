@@ -52,8 +52,13 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             }
 
             if (_curBinaryElement != BinaryElement.OBJECT_DATA)
+            {
+                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                {
+                    sw.WriteLine(string.Format("[RS] Parsing error. BinaryElement={0}.", _curBinaryElement));
+                }
                 throw new Exception(string.Format("[RS] Parsing error. BinaryElement={0}.", _curBinaryElement));
-
+            }
             // Deserialize based on value
             eTypeTag _typeTag = _binaryReader.ReadTypeTag();
             object _objectValue = null;
@@ -68,34 +73,34 @@ namespace VoxelBusters.RuntimeSerialization.Internal
 
                 case eTypeTag.PRIMITIVE:
                     _objectValue = ReadPrimitiveTypeValue(_binaryReader, out _objectType);
-                    // using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
-                    // {
-                    //     sw.WriteLine("Type: primitive " + _objectType.ToString());
-                    // }
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                    {
+                        sw.WriteLine("Type: primitive " + _objectType.ToString());
+                    }
                     break;
 
                 case eTypeTag.STRUCT:
                     _objectValue = ReadStructTypeValue(_binaryReader, out _objectType, _object);
-                    // using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
-                    // {
-                    //     sw.WriteLine("Type: struct " + _objectType.ToString());
-                    // }
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                    {
+                        sw.WriteLine("Type: struct " + _objectType.ToString());
+                    }
                     break;
 
                 case eTypeTag.STRING:
                     _objectValue = ReadStringTypeValue(_binaryReader, out _objectType);
-                    // using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
-                    // {
-                    //     sw.WriteLine("Type: STRING");
-                    // }
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                    {
+                        sw.WriteLine("Type: STRING");
+                    }
                     break;
 
                 case eTypeTag.ENUM:
                     _objectValue = ReadEnumTypeValue(_binaryReader, out _objectType);
-                    // using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
-                    // {
-                    //     sw.WriteLine("Type: ENUM " + _objectType.ToString());
-                    // }
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                    {
+                        sw.WriteLine("Type: ENUM " + _objectType.ToString());
+                    }
                     break;
 
                 case eTypeTag.ARRAY:
@@ -123,8 +128,14 @@ namespace VoxelBusters.RuntimeSerialization.Internal
                     break;
 
                 default:
+
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                    {
+                        sw.WriteLine(string.Format("[RS] Unsupported type tag{0}.", _curBinaryElement));
+                    }
                     throw new Exception(string.Format("[RS] Unsupported type tag{0}.", _typeTag));
             }
+
             using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
             {
                 sw.WriteLine("Value: " + _objectValue);
@@ -402,7 +413,12 @@ namespace VoxelBusters.RuntimeSerialization.Internal
                         }
 
                     default:
+                        using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                        {
+                            sw.WriteLine(string.Format("[RS] Unsupported primitive type code=" + _typeCode));
+                        }
                         throw new NotSupportedException("[RS] Unsupported primitive type code=" + _typeCode);
+
                 }
             }
             else
@@ -588,6 +604,10 @@ namespace VoxelBusters.RuntimeSerialization.Internal
                         }
 
                     default:
+                        using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                        {
+                            sw.WriteLine("[RS] Unsupported primitive type code = " + _typeCode);
+                        }
                         throw new NotSupportedException("[RS] Unsupported primitive type code=" + _typeCode);
                 }
             }
@@ -698,24 +718,34 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             //         return _object;
             //     }
             // }
-
-            if (ObjectReferenceCache.TryGetValue(_objectReferenceID, out _object))
+            try
             {
-                _objectType = _object.GetType();
-                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                if (ObjectReferenceCache.TryGetValue(_objectReferenceID, out _object))
                 {
-                    sw.WriteLine("ReferenceNumber: " + _objectReferenceID);
+                    _objectType = _object.GetType();
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                    {
+                        sw.WriteLine("ReferenceNumber: " + _objectReferenceID);
+                    }
+                    return _object;
                 }
-                return _object;
+                else
+                {
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
+                    {
+                        sw.WriteLine("===================Broken Object Reference: " + _objectReferenceID + "=======================");
+                    }
+
+                    throw new Exception(string.Format("[RS] Object Reference not found for ID={0}.", _objectReferenceID));
+                }
             }
-            else
+            catch (Exception e)
             {
                 using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true))
                 {
-                    sw.WriteLine("===================Broken Object Reference: " + _objectReferenceID + "=======================");
+                    sw.WriteLine("===================Broken Object Reference: " + _objectReferenceID + "=======================" + e);
                 }
-
-                throw new Exception(string.Format("[RS] Object Reference not found for ID={0}.", _objectReferenceID));
+                throw e;
             }
         }
 
@@ -767,6 +797,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
                         return _staticInstanceCreator.Invoke(null, new object[] { _serilizationInfo });
                 }
             }
+
 
             // Check if custom instance is defined in extension class
             if (_extensionObjectType != null)

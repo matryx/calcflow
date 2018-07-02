@@ -8,14 +8,13 @@ public class ScrollBar : MonoBehaviour
 {
     Transform bar, scroller, scroll;
     Scroll.orientation orientation;
-
     float scrollerHeight, scrollerWidth;
     int numPages;
     int currPage = 1;
     public float moveSpeed;
     Material scrollerMaterial;
 
-    void Awake()
+    void Start()
     {
         currPage = 1;
         scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
@@ -30,10 +29,8 @@ public class ScrollBar : MonoBehaviour
         if (scroll == null) scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
         scrollerMaterial = scroll.GetComponent<Scroll>().scrollerMaterial;
 
-        bar = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
-        bar.gameObject.AddComponent<UIDSystem>();
+        bar = transform.Find("Bar");
 
-        bar.name = "Bar";
         bar.GetComponent<Renderer>().material = scroll.GetComponent<Renderer>().material;
         bar.transform.SetParent(scroll.parent);
         bar.transform.localPosition = Vector3.zero;
@@ -51,9 +48,8 @@ public class ScrollBar : MonoBehaviour
         bar.transform.localPosition = (orientation == Scroll.orientation.VERTICAL) ?
                                new Vector3(moveBy, 0, 0) : new Vector3(0, -moveBy, 0);
 
-        scroller = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
-        scroll.gameObject.AddComponent<UIDSystem>();
-        scroller.name = "Scroller";
+        scroller = transform.Find("Scroller");
+
         scroller.GetComponent<Renderer>().material = scrollerMaterial;
         scroller.transform.SetParent(transform);
         scroller.transform.localScale = Vector3.zero;

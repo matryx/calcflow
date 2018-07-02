@@ -21,7 +21,7 @@ using System.Collections;
 using System;
 using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), false, false)]
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 abstract public class FlexActionableComponent : MonoBehaviour
 {
 

@@ -251,7 +251,6 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
             particleAnimation.SetBuffer(kID, "source", sBuffer);
             particleAnimation.SetBuffer(kID, "dest", dBuffer);
         }
-        Debug.Log("particle Shader: " + particleShader.ToString());
         particleMaterial = new Material(particleShader);
         particleMaterial.SetTexture("_Sprite", particleSprite);
         particleMaterial.SetBuffer("particles", pBuffer);
@@ -556,11 +555,11 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
     {
         base.OnDestroy();
         releaseBuffers();
-        Debug.Log("Destroying Compute Buffers");
 
     }
     private void releaseBuffers()
-    {
+    {  
+        Debug.Log("Releasing Buffers");
         pBuffer.Release();
         sBuffer.Release();
         dBuffer.Release();

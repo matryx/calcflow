@@ -10,11 +10,11 @@ using VoxelBusters.RuntimeSerialization;
 public class Scroll : MonoBehaviour
 {
     //REQUIRED: some type of transparent shaders(not standard), Unlit/UnlitAlphaWithFade recommended
-
+    string scrollBarPrefab = "Prefabs/ScrollBar";
     private List<Transform> objects;
     private List<Transform> toAdd = new List<Transform>();
 
-    private Transform scrollBar;
+    private ScrollBar scrollBar;
     private Vector3 toPos;
     private JoyStickReceiver jsReceiver;
 
@@ -124,17 +124,14 @@ public class Scroll : MonoBehaviour
 
         if (scrollBar == null)
         {
-            scrollBar = new GameObject().transform;
-            scrollBar.name = "ScrollBar";
-            scrollBar.SetParent(transform.parent);
-            scrollBar.localScale = Vector3.one;
-            scrollBar.localPosition = Vector3.zero;
-            scrollBar.localEulerAngles = Vector3.zero;
-            scrollBar.gameObject.AddComponent<ScrollBar>();
+            Transform sbTransform = (Instantiate(Resources.Load(scrollBarPrefab, typeof(GameObject)), transform.parent) as GameObject).transform;
 
-            scrollBar.GetComponent<ScrollBar>().setOrientation(currOrientation);
-            scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
-            scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
+            //sbTransform.SetParent(transform.parent);
+        
+            scrollBar = sbTransform.GetComponent<ScrollBar>();
+            scrollBar.setOrientation(currOrientation);
+            scrollBar.moveSpeed = movementSpeed;
+            scrollBar.initializeScrollBar();
         }
 
         Vector3 startPos = transform.localPosition;
@@ -157,14 +154,14 @@ public class Scroll : MonoBehaviour
     {
         numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
             1 + (int)System.Math.Ceiling((double)(objects.Count - numberOfVisibleThings) / fixedRowOrCol);
-        scrollBar.GetComponent<ScrollBar>().setNumPages(numPages);
+        scrollBar.setNumPages(numPages);
 
-        if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == numPages)
+        if (scrollBar.getCurrPage() == numPages)
         {
             highestVisIndex = objects.Count - 1;
         }
 
-        if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == 1 && numPages > 1)
+        if (scrollBar.getCurrPage() == 1 && numPages > 1)
             highestVisIndex = numberOfVisibleThings - 1;
     }
 
@@ -281,7 +278,7 @@ public class Scroll : MonoBehaviour
         int prevNum = numPages;
         numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
                     1 + (int)System.Math.Ceiling((double)(objects.Count - numberOfVisibleThings) / fixedRowOrCol);
-        scrollBar.GetComponent<ScrollBar>().setNumPages(numPages);
+        scrollBar.setNumPages(numPages);
 
         if (highestVisIndex > objects.Count - 1) //if now on the last page
         {
@@ -359,7 +356,7 @@ public class Scroll : MonoBehaviour
                 }
             }
 
-            scrollBar.GetComponent<ScrollBar>().moveScroller(currDirection);
+            scrollBar.moveScroller(currDirection);
             setLowAndHighIndeces();
         }
     }
