@@ -307,7 +307,6 @@ public class PlaybackLogAction2
                 // {
                 //     Debug.Log("delete parent is being made. key: " + subjectKey);
                 // }
-
                 subject.MoveTo(position, 0);
                 subject.RotateTo(rotation, 0);
                 subject.GlobalScaleTo(scale, 0);
@@ -332,8 +331,8 @@ public class PlaybackLogAction2
                     }
 
                     subject.LocalMoveTo(position, PlaybackLog.Period);
-                    subject.RotateTo(rotation, PlaybackLog.Period);
-                    subject.GlobalScaleTo(scale, PlaybackLog.Period);
+                    subject.LocalRotateTo(rotation, PlaybackLog.Period);
+                    subject.LocalScaleTo(scale, PlaybackLog.Period);
                     //if (!objectMap.ContainsKey(parentKey)){
                     //    Debug.Log("movement Action\n" +
                     //          "parentkey: " + parentKey + "\n" +

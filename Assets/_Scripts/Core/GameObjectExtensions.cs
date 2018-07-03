@@ -126,6 +126,14 @@ namespace Extensions
         }
 
         /// <summary>
+        /// Lerps the local rotation to the target rotation over a number of seconds
+        /// </summary>
+        public static void LocalRotateTo(this GameObject gObj, Quaternion destination, float seconds)
+        {
+            LerpRotator.LocalLerpRotate(gObj, destination, seconds);
+        }
+
+        /// <summary>
         /// Lerps the localScale to the targetScale over a number of seconds
         /// </summary>
         public static void LocalScaleTo(this GameObject gObj, Vector3 destination, float seconds)
@@ -165,9 +173,11 @@ namespace Extensions
                 try
                 {
                     UnityEngine.Object.DestroyImmediate(t, true);
-                } catch (Exception e){
-                    Debug.Log ("Failed to remove object of type " + t.ToString() + " from object " + gameObject);
-                    throw(e);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("Failed to remove object of type " + t.ToString() + " from object " + gameObject);
+                    throw (e);
                 }
 
                 return;
@@ -241,6 +251,9 @@ namespace Extensions
     {
         LerpQuaternion lerper;
 
+        bool local;
+
+
         public static void LerpRotate(GameObject gObj, Quaternion destination, float seconds)
         {
             Quaternion badQ = new Quaternion(0, 0, 0, 0);
@@ -250,7 +263,23 @@ namespace Extensions
                 return;
             }
             gObj.EnsureNoneOf<LerpRotator>();
-            gObj.AddComponent<LerpRotator>().lerper = new LerpQuaternion(gObj.transform.rotation, destination, seconds);
+            LerpRotator l = gObj.AddComponent<LerpRotator>();
+            l.lerper = new LerpQuaternion(gObj.transform.localRotation, destination, seconds);
+            l.local = true;
+        }
+
+        public static void LocalLerpRotate(GameObject gObj, Quaternion destination, float seconds)
+        {
+            Quaternion badQ = new Quaternion(0, 0, 0, 0);
+            if (destination.Equals(badQ))
+            {
+                Debug.Log("Impossible lerpRotation being attempted on object " + gObj.name);
+                return;
+            }
+            gObj.EnsureNoneOf<LerpRotator>();
+            LerpRotator l = gObj.AddComponent<LerpRotator>();
+            l.lerper = new LerpQuaternion(gObj.transform.localRotation, destination, seconds);
+            l.local = true;
         }
 
         public void StopLerping()
@@ -263,7 +292,15 @@ namespace Extensions
         {
             if (!lerper.done())
             {
-                transform.rotation = lerper.current();
+                if (local)
+                {
+                    transform.localRotation = lerper.current();
+
+                }
+                else
+                {
+                    transform.rotation = lerper.current();
+                }
             }
             else
             {

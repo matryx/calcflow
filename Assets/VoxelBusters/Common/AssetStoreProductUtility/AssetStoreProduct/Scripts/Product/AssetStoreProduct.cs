@@ -68,24 +68,24 @@ namespace VoxelBusters.AssetStoreProductUtility
 			// Set properties
 			ProductName					= _pName;
 			ProductVersion				= _pVersion;
+			//Disabled auto update.
 
 #if UNITY_EDITOR
 			// Load logo texture
-			LogoTexture					= AssetDatabase.LoadAssetAtPath(_logoPath, typeof(Texture2D)) as Texture2D;
+			// LogoTexture					= AssetDatabase.LoadAssetAtPath(_logoPath, typeof(Texture2D)) as Texture2D;
 
-			if (LogoTexture != null)
-				LogoTexture.hideFlags	= HideFlags.HideAndDontSave;
+			// if (LogoTexture != null)
+			// 	LogoTexture.hideFlags	= HideFlags.HideAndDontSave;
 
-			float _recheckAfterSecs		= kCheckForUpdatesAfterMinutes * 60f;
-			float _firstCheckAfterSecs	= _recheckAfterSecs;
+			// float _recheckAfterSecs		= kCheckForUpdatesAfterMinutes * 60f;
+			// float _firstCheckAfterSecs	= _recheckAfterSecs;
 
-			// Check at unity application launch
-			if (EditorApplication.timeSinceStartup < 100f)
-			{
-				_firstCheckAfterSecs	= 1f;
-			}
-
-			EditorInvoke.InvokeRepeating(AutoCheckForUpdates, _firstCheckAfterSecs, _recheckAfterSecs);
+			// // Check at unity application launch
+			// if (EditorApplication.timeSinceStartup < 100f)
+			// {
+			// 	_firstCheckAfterSecs	= 1f;
+			// }
+			//EditorInvoke.InvokeRepeating(AutoCheckForUpdates, _firstCheckAfterSecs, _recheckAfterSecs);
 #endif
 		}
 

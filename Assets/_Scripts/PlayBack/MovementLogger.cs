@@ -17,12 +17,12 @@ public class MovementLogger : Nanome.Core.Behaviour
 
     void RecordPosition()
     {
-        if (lastParent != transform.parent || lastLocalPos != transform.localPosition || lastRotation != transform.rotation || lastScale != transform.lossyScale)
+        if (lastParent != transform.parent || lastLocalPos != transform.localPosition || lastRotation != transform.localRotation || lastScale != transform.localScale)
         {
             lastParent = transform.parent;
             lastLocalPos = transform.localPosition;
-            lastRotation = transform.rotation;
-            lastScale = transform.lossyScale;
+            lastRotation = transform.localRotation;
+            lastScale = transform.localScale;
 
             GameObject nextParent;
             if (transform.parent == null)
@@ -34,7 +34,7 @@ public class MovementLogger : Nanome.Core.Behaviour
                 nextParent = transform.parent.gameObject;
             }
 
-            Recorder.LogMovement(gameObject, transform.localPosition, transform.rotation, transform.lossyScale, nextParent);
+            Recorder.LogMovement(gameObject, lastLocalPos, lastRotation, lastScale, nextParent);
         }
     }
 
