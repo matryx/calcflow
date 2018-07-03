@@ -99,7 +99,6 @@ public abstract class CalculatorManager : MonoBehaviour
         return displayList;
     }
 
-    //TODO: Euler's fix
     string CleanRepresentation(string input)
     {
         switch (input)

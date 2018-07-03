@@ -34,7 +34,7 @@ public class Scroll : MonoBehaviour
     [SerializeField]
     private float fadeSpeed = 0.15f;
     [SerializeField]
-    private float fadeInDelay = 0.10f;
+    private float fadeInDelay = 0.2f;
 
     public enum orientation { VERTICAL, HORIZONTAL }
     public enum placement { RIGHT, BOTTOM, LEFT, TOP }
@@ -70,35 +70,29 @@ public class Scroll : MonoBehaviour
         if (transform.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local rotation of object with Scroll script needs to be zero");
-        #if UNITY_EDITOR
+            #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+            #endif
         }
 
         if (objectParent.localScale != Vector3.one || objectParent.localEulerAngles != Vector3.zero)
         {
             Debug.LogError("Local scale and local rotation of Object Parent needs to be one and zero");
-        #if UNITY_EDITOR
+            #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+            #endif
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
         if (jsReceiver != null) jsReceiver.JoyStickTouched += scroll;
     }
 
+    //TODO: make sure scroll still works
     void scroll(VRController c, ControllerComponentArgs e)
     {
-        float roundBy = 90;
-        float temp = Mathf.Atan2(e.y, e.x);             //calculate angle in rad
-        temp = temp * (180 / Mathf.PI);                 //rad to degree
-        temp = Mathf.Round(temp / roundBy) * roundBy;   //round to nearest set degree 
-        temp = (temp + 360) % 360;                      //positive
-        int angle = (int)temp;
-
         if (e.x == 0 && e.y == 0) return;
 
-        switch (angle)
+        switch (calculateJoystickAngle(e))
         {
             case 0:
                 if (currOrientation != orientation.HORIZONTAL) return;
@@ -118,7 +112,17 @@ public class Scroll : MonoBehaviour
                 break;
         }
 
-        moveObjects();
+        tryMoveObjects();
+    }
+
+    private int calculateJoystickAngle(ControllerComponentArgs e)
+    {
+        float roundBy = 90;
+        float temp = Mathf.Atan2(e.y, e.x);             //calculate angle in rad
+        temp = temp * (180 / Mathf.PI);                 //rad to degree
+        temp = Mathf.Round(temp / roundBy) * roundBy;   //round to nearest set degree 
+        temp = (temp + 360) % 360;                      //positive
+        return (int)temp;
     }
 
     public orientation getOrientation()
@@ -135,18 +139,7 @@ public class Scroll : MonoBehaviour
     {
         if (setup) return;
 
-        if (scrollBar == null)
-        {
-            scrollBar = new GameObject().transform;
-            scrollBar.name = "ScrollBar";
-            scrollBar.SetParent(transform.parent);
-            scrollBar.localScale = Vector3.one;
-            scrollBar.localPosition = Vector3.zero;
-            scrollBar.localEulerAngles = Vector3.zero;
-            scrollBar.gameObject.AddComponent<ScrollBar>();
-            scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
-            scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
-        }
+        if (scrollBar == null) createScrollBar();
 
         Vector3 startPos = transform.localPosition;
 
@@ -165,6 +158,19 @@ public class Scroll : MonoBehaviour
         setup = true;
     }
 
+    private void createScrollBar()
+    {
+        scrollBar = new GameObject().transform;
+        scrollBar.name = "ScrollBar";
+        scrollBar.SetParent(transform.parent);
+        scrollBar.localScale = Vector3.one;
+        scrollBar.localPosition = Vector3.zero;
+        scrollBar.localEulerAngles = Vector3.zero;
+        scrollBar.gameObject.AddComponent<ScrollBar>();
+        scrollBar.GetComponent<ScrollBar>().moveSpeed = movementSpeed;
+        scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
+    }
+
     public void initializeObjects(List<Transform> objectList)
     {
         objects = objectList;
@@ -175,7 +181,7 @@ public class Scroll : MonoBehaviour
         {
             placeObject(objects[ind], ind, false);
         }
-    } 
+    }
 
     private void executeAdd()
     {
@@ -290,8 +296,7 @@ public class Scroll : MonoBehaviour
         }
         else
         {
-            if (deleting && !obj.gameObject.activeSelf) StartCoroutine(FadeButton(obj, false));
-            obj.gameObject.SetActive(true);
+            if (deleting && !obj.gameObject.activeSelf) fadeButton(obj, true);
         }
     }
 
@@ -384,7 +389,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    private void moveObjects()
+    private void tryMoveObjects()
     {
         if (objects == null || objects.Count == 0) return;
 
@@ -394,24 +399,28 @@ public class Scroll : MonoBehaviour
 
         if (!moving && !fading)
         {
-            moving = true;
-            fading = true;
-
-            for (int i = 0; i < objects.Count; i++)
-            {
-                Transform obj = objects[i];
-                Vector3 newPos = calculateMovedPos(obj);
-
-                if (i == 0) toPos = newPos;
-
-                StartCoroutine(MoveTo(obj, obj.localPosition, newPos, movementSpeed));
-
-                tryFadeObject(obj, i);
-            }
-
-            scrollBar.GetComponent<ScrollBar>().moveScroller(currDirection);
-            setLowAndHighIndeces();
+            moveObjects();
         }
+    }
+
+    private void moveObjects()
+    {
+        moving = true;
+        fading = true;
+
+        for (int i = 0; i < objects.Count; i++)
+        {
+            Transform obj = objects[i];
+            Vector3 newPos = calculateMovedPos(obj);
+
+            if (i == 0) toPos = newPos;
+
+            StartCoroutine(MoveTo(obj, obj.localPosition, newPos, movementSpeed));
+            tryFadeObject(obj, i);
+        }
+
+        scrollBar.GetComponent<ScrollBar>().moveScroller(currDirection);
+        setLowAndHighIndeces();
     }
 
     private Vector3 calculateMovedPos(Transform obj)
@@ -435,24 +444,24 @@ public class Scroll : MonoBehaviour
         {
             if (i >= lowestVisIndex && i < lowestVisIndex + fixedRowOrCol)
             {
-                StartCoroutine(FadeButton(obj, true));
+                fadeButton(obj, false);
             }
             else if (i > highestVisIndex && i <= highestVisIndex + fixedRowOrCol)
             {
-                StartCoroutine(FadeButton(obj, false));
+                fadeButton(obj, true);
             }
         }
         else if (currDirection == direction.DOWN || currDirection == direction.RIGHT)
         {
-            if (i < lowestVisIndex && i >= lowestVisIndex - fixedRowOrCol)
-            {
-                StartCoroutine(FadeButton(obj, false));
-            }
-            else if (i <= highestVisIndex && i > highestVisIndex - fixedRowOrCol)
+            if (i <= highestVisIndex && i > highestVisIndex - fixedRowOrCol)
             {
                 if (((highestVisIndex + 1) % fixedRowOrCol == 0) ||
                     (i > (highestVisIndex - ((highestVisIndex + 1) % fixedRowOrCol))))
-                    StartCoroutine(FadeButton(obj, true));
+                    fadeButton(obj, false);
+            }
+            else if (i < lowestVisIndex && i >= lowestVisIndex - fixedRowOrCol)
+            {
+                fadeButton(obj, true);
             }
         }
     }
@@ -476,16 +485,11 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    #region Coroutines
-    IEnumerator FadeButton(Transform obj, bool fadeOut)
+    void fadeButton(Transform obj, bool fadeIn)
     {
-        if (!fadeOut)
-        {
-            yield return new WaitForSeconds(fadeInDelay);
-            obj.gameObject.SetActive(true);
-        }
+        if (fadeIn) StartCoroutine(DelayFadeIn(obj));
 
-        float to = (fadeOut) ? transparent : opaque;
+        float to = (fadeIn) ? opaque : transparent;
         Renderer[] childrenRenderer = obj.GetComponentsInChildren<Renderer>(true);
 
         foreach (Renderer r in childrenRenderer)
@@ -495,8 +499,13 @@ public class Scroll : MonoBehaviour
                           r.material.GetColor("_Color").a;
             StartCoroutine(FadeObj(r, obj, from, to));
         }
+    }
 
-        yield return null;
+    #region Coroutines
+    IEnumerator DelayFadeIn(Transform obj)
+    {
+        yield return new WaitForSecondsRealtime(fadeInDelay);
+        obj.gameObject.SetActive(true);
     }
 
     IEnumerator FadeObj(Renderer rend, Transform rootParent, float start, float end)

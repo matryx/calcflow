@@ -162,8 +162,6 @@ public class ParametricExpression : MonoBehaviour
         variables.Add(varName, varValue);
     }
 
-    //TODO: fix the fade in from scroll (fading in too early, when it's still out of the board's dimensions
-    //      - make it so that objects don't start fading in until they're inside the board's dimensions
     public void deleteExpressionFromScroll()
     {
         variableClumps.Add(separator);
