@@ -4,7 +4,6 @@ using UnityEditor;
 using Extensions;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
-using Extensions;
 using CalcFlowUI;
 
 
@@ -62,10 +61,15 @@ public class Recorder : MonoBehaviour
     private static void StartRecording()
     {
         print("start recording");
+        SetupLoggers();
         CheckForSpawns();
         print("preRecording finished");
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
+    }
+    private static void SetupLoggers()
+    {
+        LoggerManager.SetupLoggers();
     }
 
     private static void StopRecording()
@@ -145,48 +149,48 @@ public class Recorder : MonoBehaviour
 
     public static void LogSpawn(GameObject subject)
     {
-        long time = PlaybackClock.GetTime() - ((long)PlaybackLog2.Period * 1001);
-        recordLog.log.Add(PlaybackLogAction2.CreateSpawn(time,
+        long time = PlaybackClock.GetTime() - ((long)PlaybackLog2.Period * 1005);
+        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateSpawn(time,
                                                             subject,
                                                             subject.transform.position,
                                                             subject.transform.rotation,
                                                             subject.transform.lossyScale));
     }
 
-    public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
+    public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent, bool useLerp)
     {
         long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period * 1000);
-        recordLog.log.Add(PlaybackLogAction2.CreateMovement(time,
-                          subject, destination, rotation, scale, parent));
+        long duration = useLerp ? ((long)PlaybackLog.Period * 1000) : 0;
+        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateMovement(time, duration, subject, destination, rotation, scale, parent));
     }
 
     public static void LogEnable(GameObject subject)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.CreateEnable(time, subject));
+        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateEnable(time, subject));
     }
 
     public static void LogDisable(GameObject subject)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.CreateDisable(time, subject));
+        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateDisable(time, subject));
     }
 
     public static void LogDestroy(GameObject subject)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.CreateDestroy(time, subject));
+        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateDestroy(time, subject));
     }
 
     public static void LogButtonPress(GameObject subject, GameObject presser)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.CreateButtonPress(time, subject, presser));
+        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateButtonPress(time, subject, presser));
     }
 
     public static void LogButtonUnpress(GameObject subject, GameObject presser)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.CreateButtonUnpress(time, subject, presser));
+        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateButtonUnpress(time, subject, presser));
     }
 }

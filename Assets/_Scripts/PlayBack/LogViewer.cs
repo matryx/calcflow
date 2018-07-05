@@ -19,11 +19,11 @@ public class LogViewer : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         numCurrentSpawns = PlaybackLogAction2.numRunningSerializations;
-        if (PlaybackLogAction2.objectMap[lookupKey] != null){
-            lookupResult = PlaybackLogAction2.objectMap[lookupKey].name;
-        } else {
-            lookupResult = "______";
-        }
+        // if (PlaybackLogAction2.objectMap[lookupKey] != null){
+        //     lookupResult = PlaybackLogAction2.objectMap[lookupKey].name;
+        // } else {
+        //     lookupResult = "______";
+        // }
         //if (numCurrentSpawns > 0) print(numCurrentSpawns);
         if (showFullLog_ThisCausesLag)
             log = Recorder.recordLog.GetLogCopy();

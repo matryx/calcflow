@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovementLogger : Nanome.Core.Behaviour
+public class MovementLogger : PlayBackLogger
 {
     Vector3 lastLocalPos;
     Vector3 lastScale;
@@ -11,7 +11,7 @@ public class MovementLogger : Nanome.Core.Behaviour
 
     private void Start()
     {
-        if(Recorder.Recording)
+        if (Recorder.Recording)
             PlaybackClock.AddToTimer(RecordPosition);
     }
 
@@ -19,27 +19,21 @@ public class MovementLogger : Nanome.Core.Behaviour
     {
         if (lastParent != transform.parent || lastLocalPos != transform.localPosition || lastRotation != transform.localRotation || lastScale != transform.localScale)
         {
+            bool lerp = lastParent == transform.parent;
             lastParent = transform.parent;
             lastLocalPos = transform.localPosition;
             lastRotation = transform.localRotation;
             lastScale = transform.localScale;
 
-            GameObject nextParent;
-            if (transform.parent == null)
-            {
-                nextParent = null;
-            }
-            else
-            {
-                nextParent = transform.parent.gameObject;
-            }
+            GameObject nextParent = (transform.parent == null) ? null : transform.parent.gameObject;
 
-            Recorder.LogMovement(gameObject, lastLocalPos, lastRotation, lastScale, nextParent);
+            Recorder.LogMovement(gameObject, lastLocalPos, lastRotation, lastScale, nextParent, lerp);
         }
     }
 
-    private void OnDestroy()
+    public override void OnDestroy()
     {
+        base.OnDestroy();
         PlaybackClock.RemoveFromTimer(RecordPosition);
     }
 }

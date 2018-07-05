@@ -25,12 +25,6 @@ public class PlaybackLog2
     static string jsonExtension = "json";
     static string fileName = "recording1";
 
-    public PlaybackLog2()
-    {
-        if (!PlaybackLogAction2.objectMap.ContainsKey(0))
-            PlaybackLogAction2.objectMap.Add(0, null);
-    }
-
     public static void SaveLog()
     {
         string savePath = Path.Combine(Path.Combine(
@@ -75,26 +69,22 @@ public class PlaybackLog2
 }
 
 [Serializable]
-public class PlaybackLogAction2
+public partial class PlaybackLogAction2
 {
-    public static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>();
+    #region other stuff
+    private static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>(){{0,null}};
 
-    public enum ActionType
+    public delegate void ReenactAction(LogInfo info, GameObject subject, PlaybackLogAction2 entry);
+    protected static Dictionary<string, ReenactAction> Reenactors = new Dictionary<string, ReenactAction>();
+    public static void registerReenactor(string key, ReenactAction ra)
     {
-        Spawn,
-        Destroy,
-        Movement,
-        ButtonPress,
-        ButtonUnpress,
-        Enable,
-        Disable
+        Reenactors.Add(key, ra);
     }
+
     [SerializeField]
     public int subjectKey;
     [SerializeField]
     public long timeStamp;
-    [SerializeField]
-    public ActionType type;
 
     [SerializeField]
     public LogInfo _info = new LogInfo();
@@ -103,28 +93,11 @@ public class PlaybackLogAction2
     [SerializeField]
     internal string binaryRepresentation;
 
-    internal void SetType(string type)
-    {
-        switch (type)
-        {
-            case "Movement":
-                this.type = ActionType.Movement;
-                break;
-            case "ButtonPress":
-                this.type = ActionType.ButtonPress;
-                break;
-            default:
-                break;
-        }
-    }
-    internal void SetType(ActionType type)
-    {
-        this.type = type;
-    }
-
     //how many serializations are left before the scene is done recording.
     public static int numRunningSerializations;
+    #endregion
     public static Queue<Action> spawnQueue = new Queue<Action>();
+
     public static IEnumerator spawner;
     public static int spawnsPerFrame = 10;
 
@@ -142,117 +115,11 @@ public class PlaybackLogAction2
         spawner = null;
     }
 
-    //Creates a spawn PlayBackLogAction. The action will not have an accurate binaryRepresentation until later.
-    internal static PlaybackLogAction2 CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
-    {
-        int key = subject.GetInstanceID();
-        PlaybackLogAction2 newAction = new PlaybackLogAction2
-        {
-            type = ActionType.Spawn,
-            timeStamp = timestamp,
-            subjectKey = key
-        };
-        newAction._info.AddValue("name", subject.name);
-        newAction._info.AddValue("position", position);
-        newAction._info.AddValue("rotation", rotation);
-        newAction._info.AddValue("scale", scale);
-
-        numRunningSerializations++;
-        //enqueue a function that will perform the serialization of the data at a later time.
-        spawnQueue.Enqueue(delegate ()
-        {
-            //Debug.Log(numRunningSerializations);
-            numRunningSerializations--;
-            newAction.SerializeForSpawn(subject, key.ToString());
-        });
-        if (spawner == null)
-        {
-            spawner = steadySpawn();
-            Dispatcher.queue(spawner);
-        }
-        return newAction;
-    }
-
     // function that will serialize the spawn and assign the binary output to "binaryRepresentation".
-    void SerializeForSpawn(GameObject subject, string key)
+    public void SerializeForSpawn(GameObject subject, string key)
     {
         binaryRepresentation = "";
         binaryRepresentation = RSManager.Serialize(subject, key);
-    }
-
-    internal static PlaybackLogAction2 CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
-    {
-        int parentKey = (parent == null) ? 0 : parent.GetInstanceID();
-        int key = subject.GetInstanceID();
-        PlaybackLogAction2 newAction = new PlaybackLogAction2
-        {
-            type = ActionType.Movement,
-            timeStamp = timestamp,
-            subjectKey = key,
-        };
-
-        newAction._info.AddValue("position", destination);
-        newAction._info.AddValue("rotation", rotation);
-        newAction._info.AddValue("scale", scale);
-        newAction._info.AddValue("parentKey", parentKey);
-        return newAction;
-    }
-
-    internal static PlaybackLogAction2 CreateEnable(long timestamp, GameObject subject)
-    {
-        PlaybackLogAction2 newAction = new PlaybackLogAction2
-        {
-            type = ActionType.Enable,
-            timeStamp = timestamp,
-            subjectKey = subject.GetInstanceID(),
-        };
-        return newAction;
-    }
-
-    internal static PlaybackLogAction2 CreateDisable(long timestamp, GameObject subject)
-    {
-        PlaybackLogAction2 newAction = new PlaybackLogAction2
-        {
-            type = ActionType.Disable,
-            timeStamp = timestamp,
-            subjectKey = subject.GetInstanceID(),
-        };
-        return newAction;
-    }
-
-    internal static PlaybackLogAction2 CreateDestroy(long timestamp, GameObject subject)
-    {
-        PlaybackLogAction2 newAction = new PlaybackLogAction2
-        {
-            type = ActionType.Destroy,
-            timeStamp = timestamp,
-            subjectKey = subject.GetInstanceID(),
-        };
-        return newAction;
-    }
-
-    internal static PlaybackLogAction2 CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
-    {
-        PlaybackLogAction2 newAction = new PlaybackLogAction2
-        {
-            type = ActionType.ButtonPress,
-            timeStamp = timestamp,
-            subjectKey = subject.GetInstanceID()
-        };
-        newAction._info.AddValue("buttonPresser", presser.GetInstanceID());
-        return newAction;
-    }
-
-    internal static PlaybackLogAction2 CreateButtonUnpress(long timestamp, GameObject subject, GameObject presser)
-    {
-        PlaybackLogAction2 newAction = new PlaybackLogAction2
-        {
-            type = ActionType.ButtonUnpress,
-            timeStamp = timestamp,
-            subjectKey = subject.GetInstanceID()
-        };
-        newAction._info.AddValue("buttonPresser", presser);
-        return newAction;
     }
 
     void Spawn()
@@ -291,135 +158,155 @@ public class PlaybackLogAction2
         Vector3 scale;
         Quaternion rotation;
         GameObject buttonPresser;
+        long duration;
         int parentKey;
 
-        switch (type)
+        string key = _info.GetValue<string>("key");
+
+        switch (key)
         {
-            case ActionType.Spawn:
-                //Debug.Log("spawning");
-                Spawn();
-                subject = objectMap[subjectKey];
-                position = _info.GetValue<Vector3>("position");
-                scale = _info.GetValue<Vector3>("scale");
-                rotation = _info.GetValue<Quaternion>("rotation");
-
-                // if (subject.name == "PieceWiseTabs")
-                // {
-                //     Debug.Log("delete parent is being made. key: " + subjectKey);
-                // }
-                subject.MoveTo(position, 0);
-                subject.RotateTo(rotation, 0);
-                subject.GlobalScaleTo(scale, 0);
-                break;
-            case ActionType.Movement:
+            case "spawn":
                 subject = getObject(subjectKey);
-
-                if (subject != null)
-                {
-                    position = _info.GetValue<Vector3>("position");
-                    scale = _info.GetValue<Vector3>("scale");
-                    rotation = _info.GetValue<Quaternion>("rotation");
-                    parentKey = _info.GetValue<int>("parentKey");
-
-                    if (objectMap.ContainsKey(parentKey))
-                    {
-                        subject.transform.SetParent((parentKey == 0) ? null : objectMap[parentKey].transform, false);
-                    }
-                    else
-                    {
-                        Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist." );
-                    }
-
-                    subject.LocalMoveTo(position, PlaybackLog.Period);
-                    subject.LocalRotateTo(rotation, PlaybackLog.Period);
-                    subject.LocalScaleTo(scale, PlaybackLog.Period);
-                    //if (!objectMap.ContainsKey(parentKey)){
-                    //    Debug.Log("movement Action\n" +
-                    //          "parentkey: " + parentKey + "\n" +
-                    //          "ParentExists: " + false);
-                    //}
-                    //Debug.Log("movement Action\n" + 
-                    //          "parentkey: " + parentKey + "\n" +
-                    //          "ParentExists: " + true + "\n" +
-                    //          "ParentName: " + ((objectMap[parentKey] != null) ? objectMap[parentKey].name : " N/A"));
-
-                }
-                else
-                {
-                    //Debug.Log(timeStamp + " subject " + subjectKey + " could not be moved because subject does not exist.");
-                }
+                ReenactSpawn(_info, subject, this);
                 break;
-            case ActionType.Enable:
-                // if (objectMap.ContainsKey(subjectKey))
-                // {
-                //     subject = objectMap[subjectKey];
-                //     subject.SetActive(true);
-                // }
-                // else
-                // {
-                //     Debug.Log(timeStamp + " " + subjectKey);
-                // }
-                break;
-            case ActionType.Disable:
+            case "movement":
                 subject = getObject(subjectKey);
+                ReenactMovement(_info, subject, this);
 
-                if (subject != null)
-                {
-                    subject.SetActive(false);
-                }
-                else
-                {
-                    Debug.Log(timeStamp + " " + subjectKey);
-                }
                 break;
-            case ActionType.Destroy:
+            case "enable":
                 subject = getObject(subjectKey);
-
-                if (subject != null)
-                {
-                    UnityEngine.Object.Destroy(subject, 0);
-                }
-                else
-                {
-                    Debug.Log(timeStamp + " " + subjectKey);
-                }
+                ReenactEnable(_info, subject, this);
                 break;
-            case ActionType.ButtonPress:
+            case "disable":
                 subject = getObject(subjectKey);
-
-                if (subject != null)
-                {
-                    button = subject.GetComponent<Button>();
-                    buttonPresser = getObject(_info.GetValue<int>("buttonPresser"));
-                    button.PressButton(buttonPresser);
-                }
-                else
-                {
-                    Debug.Log(timeStamp + " " + subjectKey);
-                }
+                ReenactEnable(_info, subject, this);
                 break;
-            case ActionType.ButtonUnpress:
+            case "destroy":
                 subject = getObject(subjectKey);
-
-                if (subject != null)
-                {
-                    button = subject.GetComponent<Button>();
-
-                    buttonPresser = getObject(_info.GetValue<int>("buttonPresser"));
-
-                    button.UnpressButton(buttonPresser);
-                }
-                else
-                {
-                    Debug.Log(timeStamp + " " + subjectKey);
-                }
+                ReenactDestroy(_info, subject, this);
+                break;
+            default:
+                subject = getObject(subjectKey);
+                Reenactors[key](_info, subject, this);
                 break;
         }
     }
 
+    //Basic Reenactors
+    #region basic reenactors
+    private void ReenactSpawn(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    {
+        Vector3 position;
+        Vector3 scale;
+        Quaternion rotation;
+        long duration;
+
+        Spawn();
+        subject = objectMap[subjectKey];
+        position = _info.GetValue<Vector3>("position");
+        scale = _info.GetValue<Vector3>("scale");
+        rotation = _info.GetValue<Quaternion>("rotation");
+
+        // if (subject.name == "PieceWiseTabs")
+        // {
+        //     Debug.Log("delete parent is being made. key: " + subjectKey);
+        // }
+        subject.MoveTo(position, 0);
+        subject.RotateTo(rotation, 0);
+        subject.GlobalScaleTo(scale, 0);
+    }
+    private void ReenactMovement(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    {
+        int parentKey;
+        Vector3 position;
+        Vector3 scale;
+        Quaternion rotation;
+        long duration;
+        if (subject != null)
+        {
+            position = _info.GetValue<Vector3>("position");
+            scale = _info.GetValue<Vector3>("scale");
+            rotation = _info.GetValue<Quaternion>("rotation");
+            parentKey = _info.GetValue<int>("parentKey");
+            duration = _info.GetValue<long>("duration");
+            if (objectMap.ContainsKey(parentKey))
+            {
+                subject.transform.SetParent((parentKey == 0) ? null : objectMap[parentKey].transform, false);
+            }
+            else
+            {
+                Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist.");
+            }
+
+            subject.LocalMoveTo(position, duration);
+            subject.LocalRotateTo(rotation, duration);
+            subject.LocalScaleTo(scale, duration);
+        }
+        else
+        {
+            Debug.Log(timeStamp + " subject " + subjectKey + " could not be moved because subject does not exist.");
+        }
+
+    }
+
+    private void ReenactEnable(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    {
+        int parentKey;
+        Vector3 position;
+        Vector3 scale;
+        Quaternion rotation;
+        long duration;
+
+        // if (objectMap.ContainsKey(subjectKey))
+        // {
+        //     subject = objectMap[subjectKey];
+        //     subject.SetActive(true);
+        // }
+        // else
+        // {
+        //     Debug.Log(timeStamp + " " + subjectKey);
+        // }
+    }
+
+    private void ReenactDisable(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    {
+        int parentKey;
+        Vector3 position;
+        Vector3 scale;
+        Quaternion rotation;
+        long duration;
+
+        subject = getObject(subjectKey);
+
+        if (subject != null)
+        {
+            subject.SetActive(false);
+        }
+        else
+        {
+            Debug.Log(timeStamp + " " + subjectKey);
+        }
+
+    }
+
+    private void ReenactDestroy(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    {
+        subject = getObject(subjectKey);
+
+        if (subject != null)
+        {
+            UnityEngine.Object.Destroy(subject, 0);
+        }
+        else
+        {
+            Debug.Log(timeStamp + " " + subjectKey);
+        }
+    }
 
 
-    GameObject getObject(int ID)
+    #endregion
+    public GameObject getObject(int ID)
     {
         if (objectMap.ContainsKey(ID))
         {
