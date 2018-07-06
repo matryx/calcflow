@@ -36,8 +36,6 @@ public static class LoggerManager
         }
     }
 
-
-
     public static void SetupLoggers()
     {
         foreach (Tuple<Type, Type> t in loggerList)
@@ -53,8 +51,27 @@ public static class LoggerManager
                 Debug.LogError("Class " + t.First + " does not have method AddLoggers.");
             }
             //(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, System.Globalization.CultureInfo culture)
-            object[] parameters = {t.Second};
+            object[] parameters = { t.Second };
             m.Invoke(null, parameters: parameters);
+        }
+    }
+
+    public static void SetupReenactors()
+    {
+        foreach (Tuple<Type, Type> t in loggerList)
+        {
+            Debug.Log(t.First);
+            if (!t.First.IsSubclassOf(typeof(PlayBackLogger)))
+            {
+                Debug.LogError("Class " + t.First + " does not inherit " + typeof(PlayBackLogger));
+            }
+            MethodInfo m = t.First.GetMethod("GetReenactors", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+            if (m == null)
+            {
+                Debug.LogError("Class " + t.First + " does not have method GetReenactors.");
+            }
+            //(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, System.Globalization.CultureInfo culture)
+            m.Invoke(null, null);
         }
     }
 

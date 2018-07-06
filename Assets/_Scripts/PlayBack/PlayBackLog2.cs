@@ -152,14 +152,7 @@ public partial class PlaybackLogAction2
 
     public void Reenact()
     {
-        Button button;
         GameObject subject;
-        Vector3 position;
-        Vector3 scale;
-        Quaternion rotation;
-        GameObject buttonPresser;
-        long duration;
-        int parentKey;
 
         string key = _info.GetValue<string>("key");
 

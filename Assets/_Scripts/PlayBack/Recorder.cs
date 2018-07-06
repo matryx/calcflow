@@ -70,6 +70,7 @@ public class Recorder : MonoBehaviour
     private static void SetupLoggers()
     {
         LoggerManager.SetupLoggers();
+        LoggerManager.SetupReenactors();
     }
 
     private static void StopRecording()

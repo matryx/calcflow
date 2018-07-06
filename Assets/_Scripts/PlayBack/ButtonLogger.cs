@@ -56,6 +56,15 @@ public class ButtonLogger : PlayBackLogger
     #endregion
 
     #region reenact code
+
+    public override Dictionary<string, PlaybackLogAction2.ReenactAction> GetReenactors(){
+        Dictionary<string, PlaybackLogAction2.ReenactAction> reenactors = new Dictionary<string, PlaybackLogAction2.ReenactAction>(){
+            {"buttonUnpressed", ReenactUnpress},
+            {"buttonPressed", ReenactPress}
+        };
+
+        return reenactors;
+    }
     protected static void ReenactPress(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
     {
         Button button;

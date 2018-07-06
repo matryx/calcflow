@@ -8,7 +8,7 @@ using System.Reflection;
 public abstract class PlayBackLogger : Nanome.Core.Behaviour
 {
 
-
+    public abstract Dictionary<string, PlaybackLogAction2.ReenactAction> GetReenactors();
 
     public static void AddLoggers(Type t)
     {
