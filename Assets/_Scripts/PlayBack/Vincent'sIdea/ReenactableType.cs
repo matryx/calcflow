@@ -1,16 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using UnityEngine;
-using System;
 using System.Reflection;
+using System;
+using UnityEngine;
 
-public abstract class PlayBackLogger : Nanome.Core.Behaviour
+public abstract class ReenactableType
 {
-    public static void AddLoggers(Type t)
+    protected abstract ReenactableAction[] Actions { get; }
+    public ReenactableAction[] GetReenactors()
+    {
+        return Actions;
+    }
+    public static void AddLoggers(Type targetType)
     {
         List<Component> objectsInScene = new List<Component>();
-        Component[] comps = Resources.FindObjectsOfTypeAll(t) as Component[];
+        Component[] comps = Resources.FindObjectsOfTypeAll(targetType) as Component[];
         foreach (Component co in comps)
         {
             if (co.gameObject.hideFlags == HideFlags.NotEditable || co.gameObject.hideFlags == HideFlags.HideAndDontSave)
@@ -21,5 +26,6 @@ public abstract class PlayBackLogger : Nanome.Core.Behaviour
         }
     }
 
-    //public abstract void GetReenactors();
+    public ReenactableType() { }
+
 }

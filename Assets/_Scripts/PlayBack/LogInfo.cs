@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System;
-//using VoxelBusters.Utility;
+using System.Collections.ObjectModel;
+using System.Reflection;
+
 using Nanome.Core;
 
 [Serializable]
@@ -55,15 +57,15 @@ public class LogInfo : ISerializationCallbackReceiver
     #region Add Value Methods
 
 
-    public void AddValue<T>(string _name, T _value)
+    public void AddValue<T>(string _name, T _value, bool overrideWarning = false)
     {
         AddValue(_name, _value, typeof(T));
     }
 
 
-    public void AddValue(string _name, object _value, Type _valueType)
+    public void AddValue(string _name, object _value, Type _valueType, bool overrideWarning = false)
     {
-        LogInfoEntry _newEntry = new LogInfoEntry(_name, _value, _valueType);
+        LogInfoEntry _newEntry = new LogInfoEntry(_name, _value, _valueType, overrideWarning);
         entryMap.Add(_name, _newEntry);
         keys.Add(_name);
         entries.Add(_newEntry);
@@ -133,10 +135,15 @@ public class LogInfoEntry : ISerializationCallbackReceiver
 {
     #region Properties
 
+    [NonSerialized]
+    bool overrideWarning = false;
+
     [SerializeField]
     private string _name;
     [SerializeField]
     public int intValue;
+    [SerializeField]
+    public long longValue;
     [SerializeField]
     public UnityEngine.Object objectValue;
     [SerializeField]
@@ -156,7 +163,7 @@ public class LogInfoEntry : ISerializationCallbackReceiver
     public string Name
     {
         get { return _name; }
-        internal set { _name = value; }
+        private set { _name = value; }
     }
 
     public Type Type
@@ -196,20 +203,25 @@ public class LogInfoEntry : ISerializationCallbackReceiver
 
     #region Constructors
 
-    internal LogInfoEntry(string name, object value, Type type)
+    internal LogInfoEntry(string name, object value, Type type, bool _overrideWarning = false)
     {
         Name = name;
         Type = type;
         setValue(value);
+        overrideWarning = _overrideWarning;
     }
 
     #endregion
 
-    void makeSerializable(object obj, string _type)
+    void makeSerializable()
     {
         if (_type == "System.Int32")
         {
             intValue = (int)_value;
+        }
+        else if (_type == "System.Int64")
+        {
+            longValue = (long)_value;
         }
         else if (_type == "System.Single")
         {
@@ -227,27 +239,34 @@ public class LogInfoEntry : ISerializationCallbackReceiver
         {
             quaternionValue = (Quaternion)_value;
         }
-        else if (_type == "UnityEngine.Object")
-        {
-            objectValue = (UnityEngine.Object)_value;
-        }
         else
         {
-            Debug.Log("unsupported type: " + _type);
+            Type t = Type.GetType(_type);
+            if (t != null && t.IsAssignableFrom(typeof(UnityEngine.Object)))
+            {
+                if (!overrideWarning)
+                {
+                    throw new Exception("LogInfo does not support Unity Objects by default.");
+                }
+                objectValue = (UnityEngine.Object)_value;
+                Debug.Log("<color=orange>saving an object: " + _value + ". Object serialization not recommended.</color>");
+            }
+            else
+            {
+                Debug.LogError("unsupported type " + _type + " on object " + _value);
+            }
         }
     }
 
-    public void OnBeforeSerialize()
-    {
-        makeSerializable(_value, _type);
-    }
-    public void OnAfterSerialize() { }
-    public void OnBeforeDeserialize() { }
-    public void OnAfterDeserialize()
+    void restoreValue()
     {
         if (_type == "System.Int32")
         {
             _value = intValue;
+        }
+        else if (_type == "System.Int64")
+        {
+            _value = longValue;
         }
         else if (_type == "System.Single")
         {
@@ -265,14 +284,31 @@ public class LogInfoEntry : ISerializationCallbackReceiver
         {
             _value = quaternionValue;
         }
-        else if (_type == "UnityEngine.Object")
-        {
-            _value = objectValue;
-        }
+
         else
         {
-            _value = null;
+            Type t = Type.GetType(_type);
+            if (t != null && t.IsAssignableFrom(typeof(UnityEngine.Object)))
+            {
+                _value = objectValue;
+            }
+            else
+            {
+                Debug.LogError("unsupported type: " + _type);
+                _value = null;
+            }
         }
+    }
+
+    public void OnBeforeSerialize()
+    {
+        makeSerializable();
+    }
+    public void OnAfterSerialize() { }
+    public void OnBeforeDeserialize() { }
+    public void OnAfterDeserialize()
+    {
+        restoreValue();
     }
 }
 

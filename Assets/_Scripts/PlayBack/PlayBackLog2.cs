@@ -72,10 +72,14 @@ public class PlaybackLog2
 public partial class PlaybackLogAction2
 {
     #region other stuff
-    private static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>(){{0,null}};
+    private static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>() { { 0, null } };
 
     public delegate void ReenactAction(LogInfo info, GameObject subject, PlaybackLogAction2 entry);
-    protected static Dictionary<string, ReenactAction> Reenactors = new Dictionary<string, ReenactAction>();
+    protected static Dictionary<string, ReenactAction> Reenactors = new Dictionary<string, ReenactAction>(){
+        // {"buttonPressed", ButtonLogger.ReenactPress},
+        // {"buttonUnpressed", ButtonLogger.ReenactUnpress}
+
+    };
     public static void registerReenactor(string key, ReenactAction ra)
     {
         Reenactors.Add(key, ra);
@@ -165,7 +169,6 @@ public partial class PlaybackLogAction2
             case "movement":
                 subject = getObject(subjectKey);
                 ReenactMovement(_info, subject, this);
-
                 break;
             case "enable":
                 subject = getObject(subjectKey);
@@ -181,7 +184,15 @@ public partial class PlaybackLogAction2
                 break;
             default:
                 subject = getObject(subjectKey);
-                Reenactors[key](_info, subject, this);
+                ReenactAction reenactor;
+                if (Reenactors.TryGetValue(key, out reenactor))
+                {
+                    reenactor(_info, subject, this);
+                }
+                else
+                {
+                    Debug.LogError("Could not find reenactor for key " + key);
+                }
                 break;
         }
     }

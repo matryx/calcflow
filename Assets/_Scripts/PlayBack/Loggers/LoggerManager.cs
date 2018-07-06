@@ -13,8 +13,7 @@ public static class LoggerManager
     // {typeof(<loggerClass>), typeof (<targetClass>)}
     private static TupleList<Type, Type> loggerList = new TupleList<Type, Type> {
         { typeof (ButtonLogger), typeof (Button) },
-        { typeof (MovementLogger), typeof (Transform) },
-
+        { typeof (MovementLogger), typeof (Transform) }
     };
 
     public class Tuple<T1, T2>
@@ -50,7 +49,6 @@ public static class LoggerManager
             {
                 Debug.LogError("Class " + t.First + " does not have method AddLoggers.");
             }
-            //(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, System.Globalization.CultureInfo culture)
             object[] parameters = { t.Second };
             m.Invoke(null, parameters: parameters);
         }
@@ -61,17 +59,20 @@ public static class LoggerManager
         foreach (Tuple<Type, Type> t in loggerList)
         {
             Debug.Log(t.First);
-            if (!t.First.IsSubclassOf(typeof(PlayBackLogger)))
+            if (!t.First.IsSubclassOf(typeof(ReenactableType)))
             {
-                Debug.LogError("Class " + t.First + " does not inherit " + typeof(PlayBackLogger));
+                Debug.LogError("Class " + t.First + " does not inherit " + typeof(ReenactableType));
             }
-            MethodInfo m = t.First.GetMethod("GetReenactors", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-            if (m == null)
+
+            ConstructorInfo c = t.First.GetConstructor(
+                BindingFlags.Instance | BindingFlags.Public, null,
+                CallingConventions.HasThis, new Type[0], null);
+
+            if (c == null)
             {
-                Debug.LogError("Class " + t.First + " does not have method GetReenactors.");
+                Debug.LogError("Class " + t.First + " does not have an empty constructor.");
             }
-            //(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, System.Globalization.CultureInfo culture)
-            m.Invoke(null, null);
+            ReenactableType con = c.Invoke(null);
         }
     }
 

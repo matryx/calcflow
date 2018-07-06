@@ -1,0 +1,4378 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abbdaf27627b9479bb9281c2eb8c0d34, type: 3}
+  m_Name: ShaderUtility 17
+  m_EditorClassIdentifier: 
+  m_shaderInfoList:
+  - m_name: Hidden/Internal-StencilWrite
+    m_propertyList: []
+  - m_name: Hidden/Internal-CombineDepthNormals
+    m_propertyList: []
+  - m_name: Hidden/BlitCopy
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: Hidden/BlitCopyDepth
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/ConvertTexture
+    m_propertyList: []
+  - m_name: Standard (Specular setup)
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _Glossiness
+      m_type: 3
+    - m_name: _GlossMapScale
+      m_type: 3
+    - m_name: _SmoothnessTextureChannel
+      m_type: 2
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _SpecGlossMap
+      m_type: 4
+    - m_name: _SpecularHighlights
+      m_type: 2
+    - m_name: _GlossyReflections
+      m_type: 2
+    - m_name: _BumpScale
+      m_type: 2
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _OcclusionStrength
+      m_type: 3
+    - m_name: _OcclusionMap
+      m_type: 4
+    - m_name: _EmissionColor
+      m_type: 0
+    - m_name: _EmissionMap
+      m_type: 4
+    - m_name: _DetailMask
+      m_type: 4
+    - m_name: _DetailAlbedoMap
+      m_type: 4
+    - m_name: _DetailNormalMapScale
+      m_type: 2
+    - m_name: _DetailNormalMap
+      m_type: 4
+    - m_name: _UVSec
+      m_type: 2
+    - m_name: _Mode
+      m_type: 2
+    - m_name: _SrcBlend
+      m_type: 2
+    - m_name: _DstBlend
+      m_type: 2
+    - m_name: _ZWrite
+      m_type: 2
+  - m_name: Standard
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _Glossiness
+      m_type: 3
+    - m_name: _GlossMapScale
+      m_type: 3
+    - m_name: _SmoothnessTextureChannel
+      m_type: 2
+    - m_name: _Metallic
+      m_type: 3
+    - m_name: _MetallicGlossMap
+      m_type: 4
+    - m_name: _SpecularHighlights
+      m_type: 2
+    - m_name: _GlossyReflections
+      m_type: 2
+    - m_name: _BumpScale
+      m_type: 2
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _OcclusionStrength
+      m_type: 3
+    - m_name: _OcclusionMap
+      m_type: 4
+    - m_name: _EmissionColor
+      m_type: 0
+    - m_name: _EmissionMap
+      m_type: 4
+    - m_name: _DetailMask
+      m_type: 4
+    - m_name: _DetailAlbedoMap
+      m_type: 4
+    - m_name: _DetailNormalMapScale
+      m_type: 2
+    - m_name: _DetailNormalMap
+      m_type: 4
+    - m_name: _UVSec
+      m_type: 2
+    - m_name: _Mode
+      m_type: 2
+    - m_name: _SrcBlend
+      m_type: 2
+    - m_name: _DstBlend
+      m_type: 2
+    - m_name: _ZWrite
+      m_type: 2
+  - m_name: Hidden/Internal-PrePassLighting
+    m_propertyList:
+    - m_name: _LightTexture0
+      m_type: 4
+    - m_name: _LightTextureB0
+      m_type: 4
+    - m_name: _ShadowMapTexture
+      m_type: 4
+  - m_name: Hidden/Internal-ScreenSpaceShadows
+    m_propertyList:
+    - m_name: _ShadowMapTexture
+      m_type: 4
+  - m_name: Hidden/Internal-DepthNormalsTexture
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 2
+    - m_name: _Color
+      m_type: 0
+  - m_name: Hidden/Internal-DeferredReflections
+    m_propertyList:
+    - m_name: _SrcBlend
+      m_type: 2
+    - m_name: _DstBlend
+      m_type: 2
+  - m_name: Hidden/Internal-DeferredShading
+    m_propertyList:
+    - m_name: _LightTexture0
+      m_type: 4
+    - m_name: _LightTextureB0
+      m_type: 4
+    - m_name: _ShadowMapTexture
+      m_type: 4
+    - m_name: _SrcBlend
+      m_type: 2
+    - m_name: _DstBlend
+      m_type: 2
+  - m_name: Hidden/Internal-MotionVectors
+    m_propertyList: []
+  - m_name: Legacy Shaders/VertexLit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Emission
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Legacy Shaders/Diffuse Fast
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Legacy Shaders/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Legacy Shaders/Bumped Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Legacy Shaders/Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Legacy Shaders/Bumped Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Legacy Shaders/Diffuse Detail
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Detail
+      m_type: 4
+  - m_name: Legacy Shaders/Self-Illumin/VertexLit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _Emission
+      m_type: 2
+  - m_name: Legacy Shaders/Self-Illumin/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _Emission
+      m_type: 2
+  - m_name: Legacy Shaders/Self-Illumin/Bumped Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Emission
+      m_type: 2
+  - m_name: Legacy Shaders/Self-Illumin/Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _Emission
+      m_type: 2
+  - m_name: Legacy Shaders/Self-Illumin/Bumped Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Emission
+      m_type: 2
+  - m_name: Legacy Shaders/Reflective/VertexLit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+  - m_name: Legacy Shaders/Reflective/Bumped Unlit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Legacy Shaders/Reflective/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+  - m_name: Legacy Shaders/Reflective/Bumped Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Legacy Shaders/Reflective/Bumped VertexLit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Legacy Shaders/Reflective/Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+  - m_name: Legacy Shaders/Reflective/Bumped Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/VertexLit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Emission
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/Bumped Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/Bumped Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/Cutout/VertexLit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Emission
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+  - m_name: Legacy Shaders/Transparent/Cutout/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+  - m_name: Legacy Shaders/Transparent/Cutout/Bumped Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+  - m_name: Legacy Shaders/Transparent/Cutout/Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+  - m_name: Legacy Shaders/Transparent/Cutout/Bumped Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+  - m_name: Legacy Shaders/Parallax Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+  - m_name: Legacy Shaders/Parallax Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+  - m_name: Legacy Shaders/Self-Illumin/Parallax Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _Emission
+      m_type: 2
+  - m_name: Legacy Shaders/Self-Illumin/Parallax Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _Emission
+      m_type: 2
+  - m_name: Legacy Shaders/Reflective/Parallax Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+  - m_name: Legacy Shaders/Reflective/Parallax Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/Parallax Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/Parallax Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+  - m_name: Legacy Shaders/Transparent/Cutout/Soft Edge Unlit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+  - m_name: Legacy Shaders/Decal
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _DecalTex
+      m_type: 4
+  - m_name: Hidden/Internal-Flare
+    m_propertyList: []
+  - m_name: FX/Flare
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Skybox/Cubemap
+    m_propertyList:
+    - m_name: _Tint
+      m_type: 0
+    - m_name: _Exposure
+      m_type: 3
+    - m_name: _Rotation
+      m_type: 3
+    - m_name: _Tex
+      m_type: 4
+  - m_name: Skybox/6 Sided
+    m_propertyList:
+    - m_name: _Tint
+      m_type: 0
+    - m_name: _Exposure
+      m_type: 3
+    - m_name: _Rotation
+      m_type: 3
+    - m_name: _FrontTex
+      m_type: 4
+    - m_name: _BackTex
+      m_type: 4
+    - m_name: _LeftTex
+      m_type: 4
+    - m_name: _RightTex
+      m_type: 4
+    - m_name: _UpTex
+      m_type: 4
+    - m_name: _DownTex
+      m_type: 4
+  - m_name: Hidden/Internal-Halo
+    m_propertyList: []
+  - m_name: Skybox/Procedural
+    m_propertyList:
+    - m_name: _SunDisk
+      m_type: 2
+    - m_name: _SunSize
+      m_type: 3
+    - m_name: _AtmosphereThickness
+      m_type: 3
+    - m_name: _SkyTint
+      m_type: 0
+    - m_name: _GroundColor
+      m_type: 0
+    - m_name: _Exposure
+      m_type: 3
+  - m_name: Particles/Additive
+    m_propertyList:
+    - m_name: _TintColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+  - m_name: Particles/~Additive-Multiply
+    m_propertyList:
+    - m_name: _TintColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+  - m_name: Particles/Additive (Soft)
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+  - m_name: Particles/Alpha Blended
+    m_propertyList:
+    - m_name: _TintColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+  - m_name: Particles/Multiply
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+  - m_name: Particles/Multiply (Double)
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+  - m_name: Particles/Alpha Blended Premultiply
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+  - m_name: Particles/VertexLit Blended
+    m_propertyList:
+    - m_name: _EmisColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Particles/Anim Alpha Blended
+    m_propertyList:
+    - m_name: _TintColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+  - m_name: Sprites/Diffuse
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: PixelSnap
+      m_type: 2
+    - m_name: _RendererColor
+      m_type: 0
+    - m_name: _Flip
+      m_type: 1
+    - m_name: _AlphaTex
+      m_type: 4
+    - m_name: _EnableExternalAlpha
+      m_type: 2
+  - m_name: Hidden/TerrainEngine/Details/Vertexlit
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/TerrainEngine/Details/WavingDoublePass
+    m_propertyList:
+    - m_name: _WavingTint
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _WaveAndDistance
+      m_type: 1
+    - m_name: _Cutoff
+      m_type: 2
+  - m_name: Hidden/TerrainEngine/Details/BillboardWavingDoublePass
+    m_propertyList:
+    - m_name: _WavingTint
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _WaveAndDistance
+      m_type: 1
+    - m_name: _Cutoff
+      m_type: 2
+  - m_name: Nature/Terrain/Diffuse
+    m_propertyList:
+    - m_name: _Control
+      m_type: 4
+    - m_name: _Splat3
+      m_type: 4
+    - m_name: _Splat2
+      m_type: 4
+    - m_name: _Splat1
+      m_type: 4
+    - m_name: _Splat0
+      m_type: 4
+    - m_name: _Normal3
+      m_type: 4
+    - m_name: _Normal2
+      m_type: 4
+    - m_name: _Normal1
+      m_type: 4
+    - m_name: _Normal0
+      m_type: 4
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: Hidden/TerrainEngine/Splatmap/Diffuse-AddPass
+    m_propertyList:
+    - m_name: _Control
+      m_type: 4
+    - m_name: _Splat3
+      m_type: 4
+    - m_name: _Splat2
+      m_type: 4
+    - m_name: _Splat1
+      m_type: 4
+    - m_name: _Splat0
+      m_type: 4
+    - m_name: _Normal3
+      m_type: 4
+    - m_name: _Normal2
+      m_type: 4
+    - m_name: _Normal1
+      m_type: 4
+    - m_name: _Normal0
+      m_type: 4
+  - m_name: Hidden/TerrainEngine/BillboardTree
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Legacy Shaders/Lightmapped/VertexLit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _LightMap
+      m_type: 4
+  - m_name: Legacy Shaders/Lightmapped/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _LightMap
+      m_type: 4
+  - m_name: Legacy Shaders/Lightmapped/Bumped Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _LightMap
+      m_type: 4
+  - m_name: Legacy Shaders/Lightmapped/Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _LightMap
+      m_type: 4
+  - m_name: Legacy Shaders/Lightmapped/Bumped Specular
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _LightMap
+      m_type: 4
+  - m_name: Hidden/Internal-GUITextureClip
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/Internal-GUITextureClipText
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/Internal-GUITexture
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/Internal-GUITextureBlit
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/Nature/Tree Soft Occlusion Bark Rendertex
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BaseLight
+      m_type: 3
+    - m_name: _AO
+      m_type: 3
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Nature/Tree Soft Occlusion Bark
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BaseLight
+      m_type: 3
+    - m_name: _AO
+      m_type: 3
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Hidden/Nature/Tree Soft Occlusion Leaves Rendertex
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _HalfOverCutoff
+      m_type: 3
+    - m_name: _BaseLight
+      m_type: 3
+    - m_name: _AO
+      m_type: 3
+    - m_name: _Occlusion
+      m_type: 3
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Nature/Tree Soft Occlusion Leaves
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _BaseLight
+      m_type: 3
+    - m_name: _AO
+      m_type: 3
+    - m_name: _Occlusion
+      m_type: 3
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Nature/Tree Creator Bark
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _GlossMap
+      m_type: 4
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Nature/Tree Creator Leaves
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _GlossMap
+      m_type: 4
+    - m_name: _TranslucencyMap
+      m_type: 4
+    - m_name: _ShadowOffset
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Hidden/Nature/Tree Creator Bark Rendertex
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpSpecMap
+      m_type: 4
+    - m_name: _TranslucencyMap
+      m_type: 4
+    - m_name: _SpecColor
+      m_type: 0
+  - m_name: Hidden/Nature/Tree Creator Leaves Rendertex
+    m_propertyList:
+    - m_name: _TranslucencyColor
+      m_type: 0
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _HalfOverCutoff
+      m_type: 3
+    - m_name: _TranslucencyViewDependency
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpSpecMap
+      m_type: 4
+    - m_name: _TranslucencyMap
+      m_type: 4
+  - m_name: Hidden/Nature/Tree Creator Bark Optimized
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpSpecMap
+      m_type: 4
+    - m_name: _TranslucencyMap
+      m_type: 4
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Hidden/Nature/Tree Creator Leaves Optimized
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _TranslucencyColor
+      m_type: 0
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _TranslucencyViewDependency
+      m_type: 3
+    - m_name: _ShadowStrength
+      m_type: 3
+    - m_name: _ShadowOffsetScale
+      m_type: 2
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _ShadowTex
+      m_type: 4
+    - m_name: _BumpSpecMap
+      m_type: 4
+    - m_name: _TranslucencyMap
+      m_type: 4
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Nature/Tree Creator Leaves Fast
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _TranslucencyColor
+      m_type: 0
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _TranslucencyViewDependency
+      m_type: 3
+    - m_name: _ShadowStrength
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Hidden/Nature/Tree Creator Leaves Fast Optimized
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _TranslucencyColor
+      m_type: 0
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _TranslucencyViewDependency
+      m_type: 3
+    - m_name: _ShadowStrength
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _ShadowTex
+      m_type: 4
+    - m_name: _TreeInstanceColor
+      m_type: 1
+    - m_name: _TreeInstanceScale
+      m_type: 1
+    - m_name: _SquashAmount
+      m_type: 2
+  - m_name: Nature/Terrain/Specular
+    m_propertyList:
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Control
+      m_type: 4
+    - m_name: _Splat3
+      m_type: 4
+    - m_name: _Splat2
+      m_type: 4
+    - m_name: _Splat1
+      m_type: 4
+    - m_name: _Splat0
+      m_type: 4
+    - m_name: _Normal3
+      m_type: 4
+    - m_name: _Normal2
+      m_type: 4
+    - m_name: _Normal1
+      m_type: 4
+    - m_name: _Normal0
+      m_type: 4
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: Hidden/TerrainEngine/Splatmap/Specular-AddPass
+    m_propertyList:
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Control
+      m_type: 4
+    - m_name: _Splat3
+      m_type: 4
+    - m_name: _Splat2
+      m_type: 4
+    - m_name: _Splat1
+      m_type: 4
+    - m_name: _Splat0
+      m_type: 4
+    - m_name: _Normal3
+      m_type: 4
+    - m_name: _Normal2
+      m_type: 4
+    - m_name: _Normal1
+      m_type: 4
+    - m_name: _Normal0
+      m_type: 4
+  - m_name: Hidden/TerrainEngine/Splatmap/Specular-Base
+    m_propertyList:
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: Nature/Terrain/Standard
+    m_propertyList:
+    - m_name: _Control
+      m_type: 4
+    - m_name: _Splat3
+      m_type: 4
+    - m_name: _Splat2
+      m_type: 4
+    - m_name: _Splat1
+      m_type: 4
+    - m_name: _Splat0
+      m_type: 4
+    - m_name: _Normal3
+      m_type: 4
+    - m_name: _Normal2
+      m_type: 4
+    - m_name: _Normal1
+      m_type: 4
+    - m_name: _Normal0
+      m_type: 4
+    - m_name: _Metallic0
+      m_type: 3
+    - m_name: _Metallic1
+      m_type: 3
+    - m_name: _Metallic2
+      m_type: 3
+    - m_name: _Metallic3
+      m_type: 3
+    - m_name: _Smoothness0
+      m_type: 3
+    - m_name: _Smoothness1
+      m_type: 3
+    - m_name: _Smoothness2
+      m_type: 3
+    - m_name: _Smoothness3
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: Hidden/TerrainEngine/Splatmap/Standard-AddPass
+    m_propertyList:
+    - m_name: _Control
+      m_type: 4
+    - m_name: _Splat3
+      m_type: 4
+    - m_name: _Splat2
+      m_type: 4
+    - m_name: _Splat1
+      m_type: 4
+    - m_name: _Splat0
+      m_type: 4
+    - m_name: _Normal3
+      m_type: 4
+    - m_name: _Normal2
+      m_type: 4
+    - m_name: _Normal1
+      m_type: 4
+    - m_name: _Normal0
+      m_type: 4
+    - m_name: _Metallic0
+      m_type: 3
+    - m_name: _Metallic1
+      m_type: 3
+    - m_name: _Metallic2
+      m_type: 3
+    - m_name: _Metallic3
+      m_type: 3
+    - m_name: _Smoothness0
+      m_type: 3
+    - m_name: _Smoothness1
+      m_type: 3
+    - m_name: _Smoothness2
+      m_type: 3
+    - m_name: _Smoothness3
+      m_type: 3
+  - m_name: Hidden/TerrainEngine/Splatmap/Standard-Base
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MetallicTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: Mobile/Skybox
+    m_propertyList:
+    - m_name: _FrontTex
+      m_type: 4
+    - m_name: _BackTex
+      m_type: 4
+    - m_name: _LeftTex
+      m_type: 4
+    - m_name: _RightTex
+      m_type: 4
+    - m_name: _UpTex
+      m_type: 4
+    - m_name: _DownTex
+      m_type: 4
+  - m_name: Mobile/VertexLit
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Mobile/Diffuse
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Mobile/Bumped Diffuse
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Mobile/Bumped Specular
+    m_propertyList:
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Mobile/Bumped Specular (1 Directional Light)
+    m_propertyList:
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: Mobile/VertexLit (Only Directional Lights)
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Mobile/Unlit (Supports Lightmap)
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Mobile/Particles/Additive
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Mobile/Particles/Alpha Blended
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Mobile/Particles/VertexLit Blended
+    m_propertyList:
+    - m_name: _EmisColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Mobile/Particles/Multiply
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Unlit/Transparent
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Unlit/Transparent Cutout
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+  - m_name: Unlit/Texture
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Sprites/Default
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: PixelSnap
+      m_type: 2
+    - m_name: _RendererColor
+      m_type: 0
+    - m_name: _Flip
+      m_type: 1
+    - m_name: _AlphaTex
+      m_type: 4
+    - m_name: _EnableExternalAlpha
+      m_type: 2
+  - m_name: Unlit/Color
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+  - m_name: UI/Unlit/Transparent
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Unlit/Detail
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _DetailTex
+      m_type: 4
+    - m_name: _Strength
+      m_type: 3
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Unlit/Text
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Unlit/Text Detail
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _DetailTex
+      m_type: 4
+    - m_name: _Strength
+      m_type: 3
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Lit/Transparent
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Specular
+      m_type: 0
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Lit/Bumped
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Specular
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MainBump
+      m_type: 4
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Lit/Detail
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Specular
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MainBump
+      m_type: 4
+    - m_name: _DetailTex
+      m_type: 4
+    - m_name: _DetailBump
+      m_type: 4
+    - m_name: _Strength
+      m_type: 3
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Lit/Refraction
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Specular
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MainBump
+      m_type: 4
+    - m_name: _Mask
+      m_type: 4
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Focus
+      m_type: 3
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Lit/Refraction Detail
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Specular
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MainBump
+      m_type: 4
+    - m_name: _Mask
+      m_type: 4
+    - m_name: _DetailTex
+      m_type: 4
+    - m_name: _DetailBump
+      m_type: 4
+    - m_name: _DetailMask
+      m_type: 4
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Focus
+      m_type: 3
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Default
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/Default Font
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: UI/DefaultETC1
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _AlphaTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: Nature/SpeedTree
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _HueVariation
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _DetailTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _Cull
+      m_type: 2
+    - m_name: _WindQuality
+      m_type: 3
+  - m_name: Nature/SpeedTree Billboard
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _HueVariation
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _WindQuality
+      m_type: 3
+  - m_name: Hidden/GIDebug/TextureUV
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/GIDebug/ShowLightMask
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _LightTexture
+      m_type: 4
+    - m_name: _SrcBlend
+      m_type: 2
+    - m_name: _DstBlend
+      m_type: 2
+  - m_name: Hidden/GIDebug/UV1sAsPositions
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+  - m_name: Hidden/GIDebug/VertexColors
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/CubeBlur
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Texel
+      m_type: 2
+    - m_name: _Level
+      m_type: 2
+    - m_name: _Scale
+      m_type: 2
+  - m_name: Hidden/CubeCopy
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Level
+      m_type: 2
+  - m_name: Hidden/CubeBlend
+    m_propertyList:
+    - m_name: _TexA
+      m_type: 4
+    - m_name: _TexB
+      m_type: 4
+    - m_name: _value
+      m_type: 3
+  - m_name: VR/SpatialMapping/Occlusion
+    m_propertyList: []
+  - m_name: VR/SpatialMapping/Wireframe
+    m_propertyList:
+    - m_name: _WireThickness
+      m_type: 3
+  - m_name: Hidden/VR/BlitCopyFromTexArray
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/VR/Internal-VRDistortion
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/VideoDecode
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _SecondTex
+      m_type: 4
+    - m_name: _ThirdTex
+      m_type: 4
+  - m_name: Hidden/VideoDecodeOSX
+    m_propertyList: []
+  - m_name: Hidden/VideoDecodeAndroid
+    m_propertyList: []
+  - m_name: Hidden/InternalErrorShader
+    m_propertyList: []
+  - m_name: Hidden/InternalClear
+    m_propertyList: []
+  - m_name: Hidden/Internal-Colored
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SrcBlend
+      m_type: 2
+    - m_name: _DstBlend
+      m_type: 2
+    - m_name: _ZWrite
+      m_type: 2
+    - m_name: _ZTest
+      m_type: 2
+    - m_name: _Cull
+      m_type: 2
+    - m_name: _ZBias
+      m_type: 2
+  - m_name: GUI/Text Shader
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: Hidden/FrameDebuggerRenderTargetDisplay
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: MK/MKGlow/Mobile/Diffuse
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Illumin/Glossy
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _EmissionLM
+      m_type: 2
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: TextMeshPro/Mobile/Bitmap
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _DiffusePower
+      m_type: 3
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+    - m_name: _MaskSoftnessX
+      m_type: 2
+    - m_name: _MaskSoftnessY
+      m_type: 2
+    - m_name: _ClipRect
+      m_type: 1
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+  - m_name: MK/MKGlow/Cutout/Glossy
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Custom/NewSurfaceShader
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Glossiness
+      m_type: 3
+    - m_name: _Metallic
+      m_type: 3
+  - m_name: MK/MKGlow/Transparent/DiffuseBumpRim
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _RimColor
+      m_type: 0
+    - m_name: _RimPower
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Sprites/Default
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: PixelSnap
+      m_type: 2
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Cutout/SoftEdgeUnlit
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Transparent/DiffuseRim
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _RimColor
+      m_type: 0
+    - m_name: _RimPower
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Custom/SteamVR_Fade
+    m_propertyList: []
+  - m_name: MK/MKGlow/Reflective/ParallaxSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Unlit/TransparentCutout
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Custom/SteamVR_BlitFlip
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: MK/MKGlow/Normal/ParallaxSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Unlit/Transparent
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: TextMeshPro/Distance Field (Surface)
+    m_propertyList:
+    - m_name: _FaceTex
+      m_type: 4
+    - m_name: _FaceUVSpeedX
+      m_type: 3
+    - m_name: _FaceUVSpeedY
+      m_type: 3
+    - m_name: _FaceColor
+      m_type: 0
+    - m_name: _FaceDilate
+      m_type: 3
+    - m_name: _OutlineColor
+      m_type: 0
+    - m_name: _OutlineTex
+      m_type: 4
+    - m_name: _OutlineUVSpeedX
+      m_type: 3
+    - m_name: _OutlineUVSpeedY
+      m_type: 3
+    - m_name: _OutlineWidth
+      m_type: 3
+    - m_name: _OutlineSoftness
+      m_type: 3
+    - m_name: _Bevel
+      m_type: 3
+    - m_name: _BevelOffset
+      m_type: 3
+    - m_name: _BevelWidth
+      m_type: 3
+    - m_name: _BevelClamp
+      m_type: 3
+    - m_name: _BevelRoundness
+      m_type: 3
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _BumpOutline
+      m_type: 3
+    - m_name: _BumpFace
+      m_type: 3
+    - m_name: _ReflectFaceColor
+      m_type: 0
+    - m_name: _ReflectOutlineColor
+      m_type: 0
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _EnvMatrixRotation
+      m_type: 1
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _FaceShininess
+      m_type: 3
+    - m_name: _OutlineShininess
+      m_type: 3
+    - m_name: _GlowColor
+      m_type: 0
+    - m_name: _GlowOffset
+      m_type: 3
+    - m_name: _GlowInner
+      m_type: 3
+    - m_name: _GlowOuter
+      m_type: 3
+    - m_name: _GlowPower
+      m_type: 3
+    - m_name: _WeightNormal
+      m_type: 2
+    - m_name: _WeightBold
+      m_type: 2
+    - m_name: _ShaderFlags
+      m_type: 2
+    - m_name: _ScaleRatioA
+      m_type: 2
+    - m_name: _ScaleRatioB
+      m_type: 2
+    - m_name: _ScaleRatioC
+      m_type: 2
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _TextureWidth
+      m_type: 2
+    - m_name: _TextureHeight
+      m_type: 2
+    - m_name: _GradientScale
+      m_type: 2
+    - m_name: _ScaleX
+      m_type: 2
+    - m_name: _ScaleY
+      m_type: 2
+    - m_name: _PerspectiveFilter
+      m_type: 3
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+  - m_name: Custom/SteamVR_ClearAll
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: TextMeshPro/Distance Field
+    m_propertyList:
+    - m_name: _FaceTex
+      m_type: 4
+    - m_name: _FaceUVSpeedX
+      m_type: 3
+    - m_name: _FaceUVSpeedY
+      m_type: 3
+    - m_name: _FaceColor
+      m_type: 0
+    - m_name: _FaceDilate
+      m_type: 3
+    - m_name: _OutlineColor
+      m_type: 0
+    - m_name: _OutlineTex
+      m_type: 4
+    - m_name: _OutlineUVSpeedX
+      m_type: 3
+    - m_name: _OutlineUVSpeedY
+      m_type: 3
+    - m_name: _OutlineWidth
+      m_type: 3
+    - m_name: _OutlineSoftness
+      m_type: 3
+    - m_name: _Bevel
+      m_type: 3
+    - m_name: _BevelOffset
+      m_type: 3
+    - m_name: _BevelWidth
+      m_type: 3
+    - m_name: _BevelClamp
+      m_type: 3
+    - m_name: _BevelRoundness
+      m_type: 3
+    - m_name: _LightAngle
+      m_type: 3
+    - m_name: _SpecularColor
+      m_type: 0
+    - m_name: _SpecularPower
+      m_type: 3
+    - m_name: _Reflectivity
+      m_type: 3
+    - m_name: _Diffuse
+      m_type: 3
+    - m_name: _Ambient
+      m_type: 3
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _BumpOutline
+      m_type: 3
+    - m_name: _BumpFace
+      m_type: 3
+    - m_name: _ReflectFaceColor
+      m_type: 0
+    - m_name: _ReflectOutlineColor
+      m_type: 0
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _EnvMatrixRotation
+      m_type: 1
+    - m_name: _UnderlayColor
+      m_type: 0
+    - m_name: _UnderlayOffsetX
+      m_type: 3
+    - m_name: _UnderlayOffsetY
+      m_type: 3
+    - m_name: _UnderlayDilate
+      m_type: 3
+    - m_name: _UnderlaySoftness
+      m_type: 3
+    - m_name: _GlowColor
+      m_type: 0
+    - m_name: _GlowOffset
+      m_type: 3
+    - m_name: _GlowInner
+      m_type: 3
+    - m_name: _GlowOuter
+      m_type: 3
+    - m_name: _GlowPower
+      m_type: 3
+    - m_name: _WeightNormal
+      m_type: 2
+    - m_name: _WeightBold
+      m_type: 2
+    - m_name: _ShaderFlags
+      m_type: 2
+    - m_name: _ScaleRatioA
+      m_type: 2
+    - m_name: _ScaleRatioB
+      m_type: 2
+    - m_name: _ScaleRatioC
+      m_type: 2
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _TextureWidth
+      m_type: 2
+    - m_name: _TextureHeight
+      m_type: 2
+    - m_name: _GradientScale
+      m_type: 2
+    - m_name: _ScaleX
+      m_type: 2
+    - m_name: _ScaleY
+      m_type: 2
+    - m_name: _PerspectiveFilter
+      m_type: 3
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+    - m_name: _MaskCoord
+      m_type: 1
+    - m_name: _ClipRect
+      m_type: 1
+    - m_name: _MaskSoftnessX
+      m_type: 2
+    - m_name: _MaskSoftnessY
+      m_type: 2
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+  - m_name: Valve/VR/ControllerButtonHints
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SceneTint
+      m_type: 0
+  - m_name: MK/MKGlow/Normal/DiffuseBumped
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Normal/DiffuseBumpSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Emission/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+    - m_name: _Emission
+      m_type: 3
+  - m_name: Hidden/MKGlowCompose
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _GlowTex
+      m_type: 4
+  - m_name: Hidden/MKGlowBlur
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: GUI/3D Text Shader
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: MK/MKGlow/Particles/AdditiveSoft
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Particles/AdditiveMultiply
+    m_propertyList:
+    - m_name: _TintColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: TextMeshPro/Mobile/Distance Field Overlay
+    m_propertyList:
+    - m_name: _FaceColor
+      m_type: 0
+    - m_name: _FaceDilate
+      m_type: 3
+    - m_name: _OutlineColor
+      m_type: 0
+    - m_name: _OutlineWidth
+      m_type: 3
+    - m_name: _OutlineSoftness
+      m_type: 3
+    - m_name: _UnderlayColor
+      m_type: 0
+    - m_name: _UnderlayOffsetX
+      m_type: 3
+    - m_name: _UnderlayOffsetY
+      m_type: 3
+    - m_name: _UnderlayDilate
+      m_type: 3
+    - m_name: _UnderlaySoftness
+      m_type: 3
+    - m_name: _WeightNormal
+      m_type: 2
+    - m_name: _WeightBold
+      m_type: 2
+    - m_name: _ShaderFlags
+      m_type: 2
+    - m_name: _ScaleRatioA
+      m_type: 2
+    - m_name: _ScaleRatioB
+      m_type: 2
+    - m_name: _ScaleRatioC
+      m_type: 2
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _TextureWidth
+      m_type: 2
+    - m_name: _TextureHeight
+      m_type: 2
+    - m_name: _GradientScale
+      m_type: 2
+    - m_name: _ScaleX
+      m_type: 2
+    - m_name: _ScaleY
+      m_type: 2
+    - m_name: _PerspectiveFilter
+      m_type: 3
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+    - m_name: _ClipRect
+      m_type: 1
+    - m_name: _MaskSoftnessX
+      m_type: 2
+    - m_name: _MaskSoftnessY
+      m_type: 2
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+  - m_name: MK/MKGlow/Transparent/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Transparent/DiffuseBumpSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Unlit/UnlitAlphaWithFade
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: OVRColorRampAlpa
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _ColorRamp
+      m_type: 4
+    - m_name: _ColorRampOffset
+      m_type: 3
+  - m_name: OvrAvatar/AvatarSurfaceShader
+    m_propertyList:
+    - m_name: _Alpha
+      m_type: 3
+    - m_name: _DarkMultiplier
+      m_type: 0
+    - m_name: _BaseColor
+      m_type: 0
+    - m_name: _BaseMaskType
+      m_type: 2
+    - m_name: _BaseMaskParameters
+      m_type: 1
+    - m_name: _BaseMaskAxis
+      m_type: 1
+    - m_name: _AlphaMask
+      m_type: 4
+    - m_name: _NormalMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _RoughnessMap
+      m_type: 4
+    - m_name: _LayerSampleMode0
+      m_type: 2
+    - m_name: _LayerBlendMode0
+      m_type: 2
+    - m_name: _LayerMaskType0
+      m_type: 2
+    - m_name: _LayerColor0
+      m_type: 0
+    - m_name: _LayerSurface0
+      m_type: 4
+    - m_name: _LayerSampleParameters0
+      m_type: 1
+    - m_name: _LayerMaskParameters0
+      m_type: 1
+    - m_name: _LayerMaskAxis0
+      m_type: 1
+    - m_name: _LayerSampleMode1
+      m_type: 2
+    - m_name: _LayerBlendMode1
+      m_type: 2
+    - m_name: _LayerMaskType1
+      m_type: 2
+    - m_name: _LayerColor1
+      m_type: 0
+    - m_name: _LayerSurface1
+      m_type: 4
+    - m_name: _LayerSampleParameters1
+      m_type: 1
+    - m_name: _LayerMaskParameters1
+      m_type: 1
+    - m_name: _LayerMaskAxis1
+      m_type: 1
+    - m_name: _LayerSampleMode2
+      m_type: 2
+    - m_name: _LayerBlendMode2
+      m_type: 2
+    - m_name: _LayerMaskType2
+      m_type: 2
+    - m_name: _LayerColor2
+      m_type: 0
+    - m_name: _LayerSurface2
+      m_type: 4
+    - m_name: _LayerSampleParameters2
+      m_type: 1
+    - m_name: _LayerMaskParameters2
+      m_type: 1
+    - m_name: _LayerMaskAxis2
+      m_type: 1
+    - m_name: _LayerSampleMode3
+      m_type: 2
+    - m_name: _LayerBlendMode3
+      m_type: 2
+    - m_name: _LayerMaskType3
+      m_type: 2
+    - m_name: _LayerColor3
+      m_type: 0
+    - m_name: _LayerSurface3
+      m_type: 4
+    - m_name: _LayerSampleParameters3
+      m_type: 1
+    - m_name: _LayerMaskParameters3
+      m_type: 1
+    - m_name: _LayerMaskAxis3
+      m_type: 1
+    - m_name: _LayerSampleMode4
+      m_type: 2
+    - m_name: _LayerBlendMode4
+      m_type: 2
+    - m_name: _LayerMaskType4
+      m_type: 2
+    - m_name: _LayerColor4
+      m_type: 0
+    - m_name: _LayerSurface4
+      m_type: 4
+    - m_name: _LayerSampleParameters4
+      m_type: 1
+    - m_name: _LayerMaskParameters4
+      m_type: 1
+    - m_name: _LayerMaskAxis4
+      m_type: 1
+    - m_name: _LayerSampleMode5
+      m_type: 2
+    - m_name: _LayerBlendMode5
+      m_type: 2
+    - m_name: _LayerMaskType5
+      m_type: 2
+    - m_name: _LayerColor5
+      m_type: 0
+    - m_name: _LayerSurface5
+      m_type: 4
+    - m_name: _LayerSampleParameters5
+      m_type: 1
+    - m_name: _LayerMaskParameters5
+      m_type: 1
+    - m_name: _LayerMaskAxis5
+      m_type: 1
+    - m_name: _LayerSampleMode6
+      m_type: 2
+    - m_name: _LayerBlendMode6
+      m_type: 2
+    - m_name: _LayerMaskType6
+      m_type: 2
+    - m_name: _LayerColor6
+      m_type: 0
+    - m_name: _LayerSurface6
+      m_type: 4
+    - m_name: _LayerSampleParameters6
+      m_type: 1
+    - m_name: _LayerMaskParameters6
+      m_type: 1
+    - m_name: _LayerMaskAxis6
+      m_type: 1
+    - m_name: _LayerSampleMode7
+      m_type: 2
+    - m_name: _LayerBlendMode7
+      m_type: 2
+    - m_name: _LayerMaskType7
+      m_type: 2
+    - m_name: _LayerColor7
+      m_type: 0
+    - m_name: _LayerSurface7
+      m_type: 4
+    - m_name: _LayerSampleParameters7
+      m_type: 1
+    - m_name: _LayerMaskParameters7
+      m_type: 1
+    - m_name: _LayerMaskAxis7
+      m_type: 1
+  - m_name: MK/MKGlow/Mobile/DiffuseBumped
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Custom/SteamVR_HiddenArea
+    m_propertyList: []
+  - m_name: TextMeshPro/Mobile/Distance Field (Surface)
+    m_propertyList:
+    - m_name: _FaceTex
+      m_type: 4
+    - m_name: _FaceColor
+      m_type: 0
+    - m_name: _FaceDilate
+      m_type: 3
+    - m_name: _OutlineColor
+      m_type: 0
+    - m_name: _OutlineTex
+      m_type: 4
+    - m_name: _OutlineWidth
+      m_type: 3
+    - m_name: _OutlineSoftness
+      m_type: 3
+    - m_name: _GlowColor
+      m_type: 0
+    - m_name: _GlowOffset
+      m_type: 3
+    - m_name: _GlowInner
+      m_type: 3
+    - m_name: _GlowOuter
+      m_type: 3
+    - m_name: _GlowPower
+      m_type: 3
+    - m_name: _WeightNormal
+      m_type: 2
+    - m_name: _WeightBold
+      m_type: 2
+    - m_name: _ShaderFlags
+      m_type: 2
+    - m_name: _ScaleRatioA
+      m_type: 2
+    - m_name: _ScaleRatioB
+      m_type: 2
+    - m_name: _ScaleRatioC
+      m_type: 2
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _TextureWidth
+      m_type: 2
+    - m_name: _TextureHeight
+      m_type: 2
+    - m_name: _GradientScale
+      m_type: 2
+    - m_name: _ScaleX
+      m_type: 2
+    - m_name: _ScaleY
+      m_type: 2
+    - m_name: _PerspectiveFilter
+      m_type: 3
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+  - m_name: Valve/VR/Highlight
+    m_propertyList:
+    - m_name: _TintColor
+      m_type: 0
+    - m_name: _SeeThru
+      m_type: 3
+    - m_name: _Darken
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: MK/MKGlow/Particles/MulitplyDouble
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Particles/Additive
+    m_propertyList:
+    - m_name: _TintColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Normal/DiffuseDetail
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Detail
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: OvrAvatar/AvatarSurfaceShaderSelfOccluding
+    m_propertyList:
+    - m_name: _Alpha
+      m_type: 3
+    - m_name: _DarkMultiplier
+      m_type: 0
+    - m_name: _BaseColor
+      m_type: 0
+    - m_name: _BaseMaskType
+      m_type: 2
+    - m_name: _BaseMaskParameters
+      m_type: 1
+    - m_name: _BaseMaskAxis
+      m_type: 1
+    - m_name: _AlphaMask
+      m_type: 4
+    - m_name: _NormalMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _RoughnessMap
+      m_type: 4
+    - m_name: _LayerSampleMode0
+      m_type: 2
+    - m_name: _LayerBlendMode0
+      m_type: 2
+    - m_name: _LayerMaskType0
+      m_type: 2
+    - m_name: _LayerColor0
+      m_type: 0
+    - m_name: _LayerSurface0
+      m_type: 4
+    - m_name: _LayerSampleParameters0
+      m_type: 1
+    - m_name: _LayerMaskParameters0
+      m_type: 1
+    - m_name: _LayerMaskAxis0
+      m_type: 1
+    - m_name: _LayerSampleMode1
+      m_type: 2
+    - m_name: _LayerBlendMode1
+      m_type: 2
+    - m_name: _LayerMaskType1
+      m_type: 2
+    - m_name: _LayerColor1
+      m_type: 0
+    - m_name: _LayerSurface1
+      m_type: 4
+    - m_name: _LayerSampleParameters1
+      m_type: 1
+    - m_name: _LayerMaskParameters1
+      m_type: 1
+    - m_name: _LayerMaskAxis1
+      m_type: 1
+    - m_name: _LayerSampleMode2
+      m_type: 2
+    - m_name: _LayerBlendMode2
+      m_type: 2
+    - m_name: _LayerMaskType2
+      m_type: 2
+    - m_name: _LayerColor2
+      m_type: 0
+    - m_name: _LayerSurface2
+      m_type: 4
+    - m_name: _LayerSampleParameters2
+      m_type: 1
+    - m_name: _LayerMaskParameters2
+      m_type: 1
+    - m_name: _LayerMaskAxis2
+      m_type: 1
+    - m_name: _LayerSampleMode3
+      m_type: 2
+    - m_name: _LayerBlendMode3
+      m_type: 2
+    - m_name: _LayerMaskType3
+      m_type: 2
+    - m_name: _LayerColor3
+      m_type: 0
+    - m_name: _LayerSurface3
+      m_type: 4
+    - m_name: _LayerSampleParameters3
+      m_type: 1
+    - m_name: _LayerMaskParameters3
+      m_type: 1
+    - m_name: _LayerMaskAxis3
+      m_type: 1
+    - m_name: _LayerSampleMode4
+      m_type: 2
+    - m_name: _LayerBlendMode4
+      m_type: 2
+    - m_name: _LayerMaskType4
+      m_type: 2
+    - m_name: _LayerColor4
+      m_type: 0
+    - m_name: _LayerSurface4
+      m_type: 4
+    - m_name: _LayerSampleParameters4
+      m_type: 1
+    - m_name: _LayerMaskParameters4
+      m_type: 1
+    - m_name: _LayerMaskAxis4
+      m_type: 1
+    - m_name: _LayerSampleMode5
+      m_type: 2
+    - m_name: _LayerBlendMode5
+      m_type: 2
+    - m_name: _LayerMaskType5
+      m_type: 2
+    - m_name: _LayerColor5
+      m_type: 0
+    - m_name: _LayerSurface5
+      m_type: 4
+    - m_name: _LayerSampleParameters5
+      m_type: 1
+    - m_name: _LayerMaskParameters5
+      m_type: 1
+    - m_name: _LayerMaskAxis5
+      m_type: 1
+    - m_name: _LayerSampleMode6
+      m_type: 2
+    - m_name: _LayerBlendMode6
+      m_type: 2
+    - m_name: _LayerMaskType6
+      m_type: 2
+    - m_name: _LayerColor6
+      m_type: 0
+    - m_name: _LayerSurface6
+      m_type: 4
+    - m_name: _LayerSampleParameters6
+      m_type: 1
+    - m_name: _LayerMaskParameters6
+      m_type: 1
+    - m_name: _LayerMaskAxis6
+      m_type: 1
+    - m_name: _LayerSampleMode7
+      m_type: 2
+    - m_name: _LayerBlendMode7
+      m_type: 2
+    - m_name: _LayerMaskType7
+      m_type: 2
+    - m_name: _LayerColor7
+      m_type: 0
+    - m_name: _LayerSurface7
+      m_type: 4
+    - m_name: _LayerSampleParameters7
+      m_type: 1
+    - m_name: _LayerMaskParameters7
+      m_type: 1
+    - m_name: _LayerMaskAxis7
+      m_type: 1
+  - m_name: MK/MKGlow/Lightmapped/DiffuseBumped
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _LightMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Toon/Basic
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _ToonShade
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Cutout/DiffuseBumpSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Illumin/DiffuseBumpSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _EmissionLM
+      m_type: 2
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Sprites/Diffuse
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: PixelSnap
+      m_type: 2
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Reflective/Glossy
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: TextMeshPro/Distance Field Overlay
+    m_propertyList:
+    - m_name: _FaceTex
+      m_type: 4
+    - m_name: _FaceUVSpeedX
+      m_type: 3
+    - m_name: _FaceUVSpeedY
+      m_type: 3
+    - m_name: _FaceColor
+      m_type: 0
+    - m_name: _FaceDilate
+      m_type: 3
+    - m_name: _OutlineColor
+      m_type: 0
+    - m_name: _OutlineTex
+      m_type: 4
+    - m_name: _OutlineUVSpeedX
+      m_type: 3
+    - m_name: _OutlineUVSpeedY
+      m_type: 3
+    - m_name: _OutlineWidth
+      m_type: 3
+    - m_name: _OutlineSoftness
+      m_type: 3
+    - m_name: _Bevel
+      m_type: 3
+    - m_name: _BevelOffset
+      m_type: 3
+    - m_name: _BevelWidth
+      m_type: 3
+    - m_name: _BevelClamp
+      m_type: 3
+    - m_name: _BevelRoundness
+      m_type: 3
+    - m_name: _LightAngle
+      m_type: 3
+    - m_name: _SpecularColor
+      m_type: 0
+    - m_name: _SpecularPower
+      m_type: 3
+    - m_name: _Reflectivity
+      m_type: 3
+    - m_name: _Diffuse
+      m_type: 3
+    - m_name: _Ambient
+      m_type: 3
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _BumpOutline
+      m_type: 3
+    - m_name: _BumpFace
+      m_type: 3
+    - m_name: _ReflectFaceColor
+      m_type: 0
+    - m_name: _ReflectOutlineColor
+      m_type: 0
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _EnvMatrixRotation
+      m_type: 1
+    - m_name: _UnderlayColor
+      m_type: 0
+    - m_name: _UnderlayOffsetX
+      m_type: 3
+    - m_name: _UnderlayOffsetY
+      m_type: 3
+    - m_name: _UnderlayDilate
+      m_type: 3
+    - m_name: _UnderlaySoftness
+      m_type: 3
+    - m_name: _GlowColor
+      m_type: 0
+    - m_name: _GlowOffset
+      m_type: 3
+    - m_name: _GlowInner
+      m_type: 3
+    - m_name: _GlowOuter
+      m_type: 3
+    - m_name: _GlowPower
+      m_type: 3
+    - m_name: _WeightNormal
+      m_type: 2
+    - m_name: _WeightBold
+      m_type: 2
+    - m_name: _ShaderFlags
+      m_type: 2
+    - m_name: _ScaleRatioA
+      m_type: 2
+    - m_name: _ScaleRatioB
+      m_type: 2
+    - m_name: _ScaleRatioC
+      m_type: 2
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _TextureWidth
+      m_type: 2
+    - m_name: _TextureHeight
+      m_type: 2
+    - m_name: _GradientScale
+      m_type: 2
+    - m_name: _ScaleX
+      m_type: 2
+    - m_name: _ScaleY
+      m_type: 2
+    - m_name: _PerspectiveFilter
+      m_type: 3
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+    - m_name: _MaskCoord
+      m_type: 1
+    - m_name: _ClipRect
+      m_type: 1
+    - m_name: _MaskSoftnessX
+      m_type: 2
+    - m_name: _MaskSoftnessY
+      m_type: 2
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+  - m_name: Wireframe
+    m_propertyList:
+    - m_name: _LineColor
+      m_type: 0
+    - m_name: _FillColor
+      m_type: 0
+    - m_name: _WireThickness
+      m_type: 3
+    - m_name: UseDiscard
+      m_type: 2
+  - m_name: Custom/SteamVR_Overlay
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: MK/MKGlow/Transparent/ParallaxSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Unlit/Crosshair
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: MK/MKGlow/Illumin/DiffuseBumped
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _EmissionLM
+      m_type: 2
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Normal/Glossy
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Lightmapped/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _LightMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Oculus/Unlit Transparent Color
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+  - m_name: Custom/RenderBW
+    m_propertyList: []
+  - m_name: MK/MKGlow/Toon/BasicOutline
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _OutlineColor
+      m_type: 0
+    - m_name: _Outline
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _ToonShade
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: TextMeshPro/Mobile/Distance Field - Masking
+    m_propertyList:
+    - m_name: _FaceColor
+      m_type: 0
+    - m_name: _FaceDilate
+      m_type: 3
+    - m_name: _OutlineColor
+      m_type: 0
+    - m_name: _OutlineWidth
+      m_type: 3
+    - m_name: _OutlineSoftness
+      m_type: 3
+    - m_name: _UnderlayColor
+      m_type: 0
+    - m_name: _UnderlayOffsetX
+      m_type: 3
+    - m_name: _UnderlayOffsetY
+      m_type: 3
+    - m_name: _UnderlayDilate
+      m_type: 3
+    - m_name: _UnderlaySoftness
+      m_type: 3
+    - m_name: _WeightNormal
+      m_type: 2
+    - m_name: _WeightBold
+      m_type: 2
+    - m_name: _ShaderFlags
+      m_type: 2
+    - m_name: _ScaleRatioA
+      m_type: 2
+    - m_name: _ScaleRatioB
+      m_type: 2
+    - m_name: _ScaleRatioC
+      m_type: 2
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _TextureWidth
+      m_type: 2
+    - m_name: _TextureHeight
+      m_type: 2
+    - m_name: _GradientScale
+      m_type: 2
+    - m_name: _ScaleX
+      m_type: 2
+    - m_name: _ScaleY
+      m_type: 2
+    - m_name: _PerspectiveFilter
+      m_type: 3
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+    - m_name: _ClipRect
+      m_type: 1
+    - m_name: _MaskSoftnessX
+      m_type: 2
+    - m_name: _MaskSoftnessY
+      m_type: 2
+    - m_name: _MaskTex
+      m_type: 4
+    - m_name: _MaskInverse
+      m_type: 2
+    - m_name: _MaskEdgeColor
+      m_type: 0
+    - m_name: _MaskEdgeSoftness
+      m_type: 3
+    - m_name: _MaskWipeControl
+      m_type: 3
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+  - m_name: Unlit/Transparent Fader
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: MK/MKGlow/Unlit/Texture
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: TextMeshPro/Bitmap
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _FaceTex
+      m_type: 4
+    - m_name: _FaceColor
+      m_type: 0
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+    - m_name: _MaskSoftnessX
+      m_type: 2
+    - m_name: _MaskSoftnessY
+      m_type: 2
+    - m_name: _ClipRect
+      m_type: 1
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+  - m_name: MK/MKGlow/Reflective/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Hidden/MKGlowFullScreenDownSample
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: TextMeshPro/Sprite
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+    - m_name: _ClipRect
+      m_type: 1
+    - m_name: _UseUIAlphaClip
+      m_type: 2
+  - m_name: TextMeshPro/Mobile/Distance Field
+    m_propertyList:
+    - m_name: _FaceColor
+      m_type: 0
+    - m_name: _FaceDilate
+      m_type: 3
+    - m_name: _OutlineColor
+      m_type: 0
+    - m_name: _OutlineWidth
+      m_type: 3
+    - m_name: _OutlineSoftness
+      m_type: 3
+    - m_name: _UnderlayColor
+      m_type: 0
+    - m_name: _UnderlayOffsetX
+      m_type: 3
+    - m_name: _UnderlayOffsetY
+      m_type: 3
+    - m_name: _UnderlayDilate
+      m_type: 3
+    - m_name: _UnderlaySoftness
+      m_type: 3
+    - m_name: _WeightNormal
+      m_type: 2
+    - m_name: _WeightBold
+      m_type: 2
+    - m_name: _ShaderFlags
+      m_type: 2
+    - m_name: _ScaleRatioA
+      m_type: 2
+    - m_name: _ScaleRatioB
+      m_type: 2
+    - m_name: _ScaleRatioC
+      m_type: 2
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _TextureWidth
+      m_type: 2
+    - m_name: _TextureHeight
+      m_type: 2
+    - m_name: _GradientScale
+      m_type: 2
+    - m_name: _ScaleX
+      m_type: 2
+    - m_name: _ScaleY
+      m_type: 2
+    - m_name: _PerspectiveFilter
+      m_type: 3
+    - m_name: _VertexOffsetX
+      m_type: 2
+    - m_name: _VertexOffsetY
+      m_type: 2
+    - m_name: _ClipRect
+      m_type: 1
+    - m_name: _MaskSoftnessX
+      m_type: 2
+    - m_name: _MaskSoftnessY
+      m_type: 2
+    - m_name: _StencilComp
+      m_type: 2
+    - m_name: _Stencil
+      m_type: 2
+    - m_name: _StencilOp
+      m_type: 2
+    - m_name: _StencilWriteMask
+      m_type: 2
+    - m_name: _StencilReadMask
+      m_type: 2
+    - m_name: _ColorMask
+      m_type: 2
+  - m_name: MK/MKGlow/Particles/MultiplyPremultiplyBlend
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Particles/Blend
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Oculus/Underlay Transparent Occluder
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Hidden/MKGlowFastBlur
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+  - m_name: Oculus/Alpha Premultiply
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: MK/MKGlow/Transparent/DiffuseBumped
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: OvrAvatar/AvatarSurfaceShaderPBS
+    m_propertyList:
+    - m_name: _Alpha
+      m_type: 3
+    - m_name: _Albedo
+      m_type: 4
+    - m_name: _Surface
+      m_type: 4
+  - m_name: MK/MKGlow/Transparent/Parallax
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Custom/SteamVR_Blit
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: PerVertexColor
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Glossiness
+      m_type: 3
+    - m_name: _Metallic
+      m_type: 3
+  - m_name: MK/MKGlow/Normal/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Particles/Multiply
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Illumin/Parallax
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _EmissionLM
+      m_type: 2
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Normal/ParallaxDiffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Unlit/OVRMRCameraFrame
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Visible
+      m_type: 3
+    - m_name: _ChromaAlphaCutoff
+      m_type: 3
+    - m_name: _ChromaToleranceA
+      m_type: 3
+    - m_name: _ChromaToleranceB
+      m_type: 3
+    - m_name: _ChromaShadows
+      m_type: 3
+  - m_name: MK/MKGlow/Normal/DiffuseBumpedRim
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _RimColor
+      m_type: 0
+    - m_name: _RimPower
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Mobile/DiffuseBump-1DirectionalLight
+    m_propertyList:
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Particles/AdditiveBlend
+    m_propertyList:
+    - m_name: _TintColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _InvFade
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Unlit/OVRMRClipPlane
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _Visible
+      m_type: 3
+  - m_name: Custom/Particle Billboard
+    m_propertyList:
+    - m_name: _Sprite
+      m_type: 4
+  - m_name: Custom/SteamVR_SphericalProjection
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _N
+      m_type: 1
+    - m_name: _Phi0
+      m_type: 2
+    - m_name: _Phi1
+      m_type: 2
+    - m_name: _Theta0
+      m_type: 2
+    - m_name: _Theta1
+      m_type: 2
+    - m_name: _UAxis
+      m_type: 1
+    - m_name: _VAxis
+      m_type: 1
+    - m_name: _UOrigin
+      m_type: 1
+    - m_name: _VOrigin
+      m_type: 1
+    - m_name: _UScale
+      m_type: 2
+    - m_name: _VScale
+      m_type: 2
+  - m_name: Custom/SteamVR_AlphaOut
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: MK/MKGlow/Illumin/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _EmissionLM
+      m_type: 2
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Normal/DiffuseRim
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Color
+      m_type: 0
+    - m_name: _RimColor
+      m_type: 0
+    - m_name: _RimPower
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Illumin/ParallaxSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Illum
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _EmissionLM
+      m_type: 2
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: NanoPro-Lifesciences/AnisotropicSpecularShader
+    m_propertyList:
+    - m_name: _MainTint
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _SpecularColor
+      m_type: 0
+    - m_name: _SpecPower
+      m_type: 3
+    - m_name: _Specular
+      m_type: 3
+    - m_name: _AnisoDir
+      m_type: 4
+    - m_name: _AnisoOffset
+      m_type: 3
+  - m_name: MK/MKGlow/Transparent/Glossy
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Valve/VR/Silhouette
+    m_propertyList:
+    - m_name: g_vOutlineColor
+      m_type: 0
+    - m_name: g_flOutlineWidth
+      m_type: 3
+    - m_name: g_flCornerAdjust
+      m_type: 3
+  - m_name: MK/MKGlow/Cutout/Diffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Custom/SteamVR_ColorOut
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+  - m_name: Valve/VR/SeeThru
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+  - m_name: Hidden/MKGlowRender
+    m_propertyList: []
+  - m_name: Oculus/Underlay Impostor
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Glossiness
+      m_type: 3
+    - m_name: _Metallic
+      m_type: 3
+  - m_name: MK/MKGlow/Reflective/DiffuseBumpedNoLight
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Reflective/DiffuseBumpSpec
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _SpecColor
+      m_type: 0
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: Custom/Glow
+    m_propertyList:
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _SceneTex
+      m_type: 4
+  - m_name: MK/MKGlow/Cutout/DiffuseBumped
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _Cutoff
+      m_type: 3
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Reflective/ParallaxDiffuse
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _Parallax
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _ParallaxMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: RS/DiffuseBump
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+  - m_name: MK/MKGlow/Mobile/DiffuseBumpSpec
+    m_propertyList:
+    - m_name: _Shininess
+      m_type: 3
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3
+  - m_name: MK/MKGlow/Reflective/DiffuseBumped
+    m_propertyList:
+    - m_name: _Color
+      m_type: 0
+    - m_name: _ReflectColor
+      m_type: 0
+    - m_name: _MainTex
+      m_type: 4
+    - m_name: _Cube
+      m_type: 4
+    - m_name: _BumpMap
+      m_type: 4
+    - m_name: _MKGlowColor
+      m_type: 0
+    - m_name: _MKGlowPower
+      m_type: 3
+    - m_name: _MKGlowTex
+      m_type: 4
+    - m_name: _MKGlowTexColor
+      m_type: 0
+    - m_name: _MKGlowTexStrength
+      m_type: 3
+    - m_name: _MKGlowOffSet
+      m_type: 3

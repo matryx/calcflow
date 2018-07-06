@@ -30,7 +30,7 @@ public class MovementLogger : PlayBackLogger
             Recorder.LogMovement(gameObject, lastLocalPos, lastRotation, lastScale, nextParent, lerp);
         }
     }
-    public override Dictionary<string, PlaybackLogAction2.ReenactAction> GetReenactors(){
+    public  Dictionary<string, PlaybackLogAction2.ReenactAction> GetReenactors(){
         print("suh");
         return new Dictionary<string, PlaybackLogAction2.ReenactAction>();
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Nanome.Core;
 using Nanome.Core.Daemon;
+using Extensions;
 
 public partial class PlaybackLogAction2
 {
@@ -84,7 +85,7 @@ public partial class PlaybackLogAction2
                 subjectKey = subject.GetInstanceID()
             };
             newAction._info.AddValue("key", "buttonUnpressed");
-            newAction._info.AddValue("buttonPresser", presser);
+            newAction._info.AddValue("buttonPresser", presser.GetInstanceID());
             return newAction;
         }
         #endregion
@@ -106,8 +107,8 @@ public partial class PlaybackLogAction2
             //enqueue a function that will perform the serialization of the data at a later time.
             PlaybackLogAction2.spawnQueue.Enqueue(delegate ()
             {
-            //Debug.Log(numRunningSerializations);
-            PlaybackLogAction2.numRunningSerializations--;
+                //Debug.Log(numRunningSerializations);
+                PlaybackLogAction2.numRunningSerializations--;
                 newAction.SerializeForSpawn(subject, key.ToString());
             });
             if (PlaybackLogAction2.spawner == null)

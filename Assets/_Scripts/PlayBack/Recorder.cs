@@ -13,10 +13,13 @@ public class Recorder : MonoBehaviour
     public static Recorder _instance;
     public static GameObject _instanceGO;
 
+    public static string SavedLog;
     public bool EditorRecord = false;
+    public bool EditorPause = false;
     private static HashSet<int> AllGameObjects = new HashSet<int>();
     private static List<UIDSystem> allUIDs = new List<UIDSystem>();
-    private static bool record = false;
+    private static bool recording = false;
+    private static bool paused = false;
     [SerializeField]
     public static PlaybackLog2 recordLog = new PlaybackLog2();
 
@@ -56,6 +59,7 @@ public class Recorder : MonoBehaviour
     private void Update()
     {
         Recording = EditorRecord;
+        Paused = EditorPause;
     }
 
     private static void StartRecording()
@@ -66,38 +70,74 @@ public class Recorder : MonoBehaviour
         print("preRecording finished");
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
+        recording = true;
+        paused = false;
     }
     private static void SetupLoggers()
     {
         LoggerManager.SetupLoggers();
-        LoggerManager.SetupReenactors();
+        //LoggerManager.SetupReenactors();
     }
 
+    private static void PauseRecording()
+    {
+        print("paused recording");
+        PlaybackClock.StopClock();
+        PlaybackClock.RemoveFromTimer(CheckForSpawns);
+        paused = true;
+
+    }
+    private static void ResumeRecording()
+    {
+        print("resumed recording");
+        PlaybackClock.StartClock();
+        PlaybackClock.AddToTimer(CheckForSpawns);
+        paused = false;
+    }
     private static void StopRecording()
     {
         print("stop recording");
         PlaybackClock.StopClock();
-
         PlaybackClock.RemoveFromTimer(CheckForSpawns);
+        SavedLog = JsonUtility.ToJson(recordLog);
+        recording = false;
+        paused = false;
     }
 
     public static bool Recording
     {
         get
         {
-            return record;
+            return recording && !paused;
         }
         set
         {
-            if (value && !record)
+            if (value && !recording)
             {
                 StartRecording();
             }
-            if (!value && record)
+            else if (!value && recording)
             {
                 StopRecording();
             }
-            record = value;
+        }
+    }
+    public static bool Paused
+    {
+        get
+        {
+            return paused;
+        }
+        set
+        {
+            if (value && !paused)
+            {
+                PauseRecording();
+            }
+            else if (!value && paused)
+            {
+                ResumeRecording();
+            }
         }
     }
 
