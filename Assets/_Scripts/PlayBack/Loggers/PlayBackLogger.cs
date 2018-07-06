@@ -12,16 +12,17 @@ public abstract class PlayBackLogger : Nanome.Core.Behaviour
 
     public static void AddLoggers(Type t)
     {
-        List<MonoBehaviour> objectsInScene = new List<MonoBehaviour>();
-
-        foreach (MonoBehaviour go in Resources.FindObjectsOfTypeAll(t) as MonoBehaviour[])
+        List<Component> objectsInScene = new List<Component>();
+        Debug.Log(t);
+         Component[] comps = Resources.FindObjectsOfTypeAll(t) as Component[];
+        Debug.Log(comps);
+        foreach (Component co in comps)
         {
-            if (go.gameObject.hideFlags == HideFlags.NotEditable || go.gameObject.hideFlags == HideFlags.HideAndDontSave)
+            if (co.gameObject.hideFlags == HideFlags.NotEditable || co.gameObject.hideFlags == HideFlags.HideAndDontSave)
                 continue;
-            if (go.gameObject.scene.name == null)
+            if (co.gameObject.scene.name == null)
                 continue;
-
-            objectsInScene.Add(go);
+            objectsInScene.Add(co);
         }
     }
 }

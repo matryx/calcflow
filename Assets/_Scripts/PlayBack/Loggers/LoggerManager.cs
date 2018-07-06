@@ -1,39 +1,60 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using UnityEngine;
-using CalcFlowUI;
-using System;
 using System.Reflection;
-
-
-
+using CalcFlowUI;
+using UnityEngine;
 
 public static class LoggerManager
 {
-
     //ADD YOUR LOGGERS HERE
-    public static List<(Type, Type)> loggerList = new List<(Type, Type)> {
-        (typeof(ButtonLogger), typeof(Button)),
+    // Format:
+    // {typeof(<loggerClass>), typeof (<targetClass>)}
+    private static TupleList<Type, Type> loggerList = new TupleList<Type, Type> {
+        { typeof (ButtonLogger), typeof (Button) },
+        { typeof (MovementLogger), typeof (Transform) },
 
-        typeof(MovementLogger)
-        };
+    };
+
+    public class Tuple<T1, T2>
+    {
+
+        public T1 First;
+        public T2 Second;
+        public Tuple(T1 first, T2 second)
+        {
+            First = first;
+            Second = second;
+        }
+    }
+    private class TupleList<T1, T2> : List<Tuple<T1, T2>>
+    {
+        public void Add(T1 item, T2 item2)
+        {
+            Add(new Tuple<T1, T2>(item, item2));
+        }
+    }
+
+
 
     public static void SetupLoggers()
     {
-        foreach (Type t in loggerList)
+        foreach (Tuple<Type, Type> t in loggerList)
         {
-            if (!t.IsSubclassOf(typeof(PlayBackLogger)))
+            Debug.Log(t.First);
+            if (!t.First.IsSubclassOf(typeof(PlayBackLogger)))
             {
-                Debug.LogError("Class " + t + " does not inherit " + typeof(PlayBackLogger));
+                Debug.LogError("Class " + t.First + " does not inherit " + typeof(PlayBackLogger));
             }
-            MethodInfo m = t.GetMethod("AddLoggers", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+            MethodInfo m = t.First.GetMethod("AddLoggers", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
             if (m == null)
             {
-                Debug.LogError("Class " + t + " does not have method AddLoggers.");
+                Debug.LogError("Class " + t.First + " does not have method AddLoggers.");
             }
-
-            m.Invoke(null, null);
+            //(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, System.Globalization.CultureInfo culture)
+            object[] parameters = {t.Second};
+            m.Invoke(null, parameters: parameters);
         }
     }
 
