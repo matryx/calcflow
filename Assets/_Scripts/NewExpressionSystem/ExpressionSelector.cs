@@ -69,7 +69,7 @@ public class ExpressionSelector : QuickButton
         if (expressions.getSelectedExpr())
         {
             Transform prevSep = expressions.getSelectedExpr().GetComponent<ParametricExpression>().getSeparator();
-            thisScroll.addToScroll(toAdd, null, thisScroll.getIndex(prevSep) + 1);
+            thisScroll.addToScroll(toAdd, null, thisScroll.getIndex(prevSep) - 3);
         }
         else
         {
@@ -126,6 +126,8 @@ public class ExpressionSelector : QuickButton
         }
     }
 
+    //BUG: vec field expressions added to scroll properly but cant be selected 
+    //BUG: adding new expression while variable min or max is selected causes new exp to be inserted in the middle of existing expression (right after X)
     private List<Transform> createVecExpression()
     {
         List<Transform> vecComponents = new List<Transform>();
@@ -161,11 +163,12 @@ public class ExpressionSelector : QuickButton
     private Transform createVariable(Transform v)
     {
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+        var.gameObject.SetActive(true);
         var.GetComponent<ExpressionComponent>().setExpressionParent(v.transform);
         var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
         var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle("t");
-        v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("t");
 
+        v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("t");
         return var.transform;
     }
 

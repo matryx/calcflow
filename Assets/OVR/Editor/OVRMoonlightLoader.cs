@@ -105,7 +105,7 @@ class OVRMoonlightLoader
 
 #if UNITY_5_6_OR_NEWER
 				bool oculusFound = false;
-				foreach (var device in UnityEngine.VR.VRSettings.supportedDevices)
+				foreach (var device in UnityEngine.XR.XRSettings.supportedDevices)
 					oculusFound |= (device == "Oculus");
 
 				if (!oculusFound)

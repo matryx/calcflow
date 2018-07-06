@@ -222,7 +222,7 @@ namespace Calcflow.UserStatistics
             props["Scene"] = SceneManager.GetActiveScene().name;
             props["User"] = user;
             props["Session"] = session;
-            props["Hardware"] = UnityEngine.VR.VRDevice.model;
+            props["Hardware"] = UnityEngine.XR.XRDevice.model;
             if (extras != null)
             {
                 foreach (var extra in extras)

@@ -179,6 +179,8 @@ public class ParametricExpression : MonoBehaviour
     {
         var.SetParent(variableClumps[variableClumps.Count - 1]);
         var.localPosition = new Vector3(xPos, 0, 0);
+        var.localScale = Vector3.one;
+        var.gameObject.SetActive(true);
     }
 
     private void addNewVariableClump(Transform var)
@@ -196,6 +198,8 @@ public class ParametricExpression : MonoBehaviour
 
         var.SetParent(newVarClump);
         var.localPosition = new Vector3(-xPos, 0, 0);
+        var.localScale = Vector3.one;
+        var.gameObject.SetActive(true);
     }
 
     IEnumerator MoveTo(Transform obj, Vector3 start, Vector3 end, float overTime)

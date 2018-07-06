@@ -14,7 +14,8 @@ public class Expressions : MonoBehaviour
     public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
-    // main functionalities for parametric - DONE / NEED TO TEST HEAVILY
+    // 1 - main functionalities for parametric - DONE / NEED TO TEST HEAVILY
+    // 2 - need to figure out how ExpressionBody will handle vec expressions
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit

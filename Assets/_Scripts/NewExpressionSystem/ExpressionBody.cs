@@ -13,6 +13,7 @@ public class ExpressionBody : QuickButton
     OutputManager outputManager;
     CalcInput calcInput;
     ParametricExpression param;
+    VectorFieldExpression vec;
     ParametricManager calcManager;
 
     private bool thisBodySelected = false;
@@ -120,9 +121,51 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
+
+            disableActionButtons(selectedBody);
+            unSelect();
+        }
+    }
+
+    private void disableActionButtons(ExpressionBody selectedBody)
+    {
+        if (selectedBody.getExpressionParent().GetComponent<ParametricExpression>())
+        {
             param = selectedBody.getExpressionParent().GetComponent<ParametricExpression>();
             param.getExpActions().disableButtons();
-            unSelect();
+        }
+        else if (selectedBody.getExpressionParent().GetComponent<VectorFieldExpression>())
+        {
+            vec = selectedBody.getExpressionParent().GetComponent<VectorFieldExpression>();
+            vec.getExpActions().disableButtons();
+        }
+    }
+
+    private void changeExpressionSet()
+    {
+        if (expressionParent.GetComponent<ParametricExpression>())
+        {
+            param = expressionParent.GetComponent<ParametricExpression>();
+            calcManager.ChangeExpressionSet(param.getExpSet());
+        }
+        else if (expressionParent.GetComponent<VectorFieldExpression>())
+        {
+            vec = expressionParent.GetComponent<VectorFieldExpression>();
+            calcManager.ChangeExpressionSet(vec.getExpSet());
+        }
+    }
+
+    private void selectBodyIfActive()
+    {
+        if (expressionParent.GetComponent<ParametricExpression>())
+        {
+            param = expressionParent.GetComponent<ParametricExpression>();
+            if (param.getActiveStatus()) selectBody();
+        }
+        else if (expressionParent.GetComponent<VectorFieldExpression>())
+        {
+            vec = expressionParent.GetComponent<VectorFieldExpression>();
+            if (vec.getActiveStatus()) selectBody();
         }
     }
 
@@ -133,8 +176,8 @@ public class ExpressionBody : QuickButton
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
-            param = selectedBody.getExpressionParent().GetComponent<ParametricExpression>();
-            param.getExpActions().disableButtons();
+
+            disableActionButtons(selectedBody);
 
             if (selectedBody.transform != transform)
             {
@@ -146,10 +189,8 @@ public class ExpressionBody : QuickButton
     public void selectBody()
     {
         deselectPrevBody();
-
         expression.setSelectedExpr(expressionParent, this);
-        param = expressionParent.GetComponent<ParametricExpression>();
-        calcManager.ChangeExpressionSet(param.getExpSet());
+        changeExpressionSet();
 
         if (variable)
         {
@@ -181,8 +222,7 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            param = expressionParent.GetComponent<ParametricExpression>();
-            if (param.getActiveStatus()) selectBody();
+            selectBodyIfActive();
         }
     }
 

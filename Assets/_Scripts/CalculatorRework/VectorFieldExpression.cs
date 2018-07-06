@@ -17,7 +17,8 @@ public class VectorFieldExpression : MonoBehaviour
     bool initialized = false;
     bool isActive = true;
 
-    void Awake () {
+    void Awake()
+    {
         if (initialized) return;
         expressionsClass = Expressions._instance;
         expSet = new ExpressionSet();
@@ -33,7 +34,13 @@ public class VectorFieldExpression : MonoBehaviour
     {
         if (!initialized)
         {
+            expressionsClass = Expressions._instance;
+            expSet = new ExpressionSet();
             expressionsList = new List<Transform>();
+
+            expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
+            scroll = expressionsClass.getScroll(Expressions.ExpressionType.VECFIELD);
+
             initialized = true;
         }
     }
@@ -53,9 +60,55 @@ public class VectorFieldExpression : MonoBehaviour
         return expSet;
     }
 
+    public ExpressionActions getExpActions()
+    {
+        return expActions;
+    }
+
     public bool getActiveStatus()
     {
         return isActive;
+    }
+
+    public void setButtonInputColor(Color col)
+    {
+        foreach (Transform t in expressionsList)
+        {
+            t.Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
+        }
+
+        range.Find("Min").Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
+        range.Find("Max").Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
+    }
+
+    public void setElementQuadTex(Texture tex)
+    {
+        range.GetChild(0).Find("Quad").GetComponent<Renderer>().material.mainTexture = tex;
+    }
+
+    public void setTextColor(Color c)
+    {
+        foreach (Transform t in expressionsList)
+        {
+            foreach (Transform child in t)
+            {
+                if (child.GetComponent<TMPro.TextMeshPro>())
+                {
+                    child.GetComponent<TMPro.TextMeshPro>().color = c;
+                }
+            }
+        }
+
+        foreach (Transform child in range)
+        {
+            foreach (Transform gchild in child)
+            {
+                if (gchild.GetComponent<TMPro.TextMeshPro>())
+                {
+                    gchild.GetComponent<TMPro.TextMeshPro>().color = c;
+                }
+            }
+        }
     }
 
     public Scroll getScroll()
@@ -73,7 +126,8 @@ public class VectorFieldExpression : MonoBehaviour
         range = r;
     }
 
-    void Update () {
-		
-	}
+    void Update()
+    {
+
+    }
 }

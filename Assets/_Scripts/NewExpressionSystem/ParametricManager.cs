@@ -199,6 +199,7 @@ public class ParametricManager : CalculatorManager
             else if (expressionSet.GetRange(buttonID) == null)
             {
                 GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                var.transform.localScale = Vector3.one;
                 var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
                 var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
                 var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
