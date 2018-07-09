@@ -72,7 +72,7 @@ public partial class PlaybackLogAction2
                 timeStamp = timestamp,
                 subjectKey = subject.GetInstanceID()
             };
-            newAction._info.AddValue("key", "buttonPressed");
+            newAction._info.AddValue("key", "buttonPress");
             newAction._info.AddValue("buttonPresser", presser.GetInstanceID());
             return newAction;
         }
@@ -84,7 +84,7 @@ public partial class PlaybackLogAction2
                 timeStamp = timestamp,
                 subjectKey = subject.GetInstanceID()
             };
-            newAction._info.AddValue("key", "buttonUnpressed");
+            newAction._info.AddValue("key", "buttonUnpress");
             newAction._info.AddValue("buttonPresser", presser.GetInstanceID());
             return newAction;
         }

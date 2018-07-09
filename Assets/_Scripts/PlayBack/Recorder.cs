@@ -65,18 +65,13 @@ public class Recorder : MonoBehaviour
     private static void StartRecording()
     {
         print("start recording");
-        SetupLoggers();
         CheckForSpawns();
         print("preRecording finished");
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
+        LoggerManager.SetupReenactors();
         recording = true;
         paused = false;
-    }
-    private static void SetupLoggers()
-    {
-        LoggerManager.SetupLoggers();
-        //LoggerManager.SetupReenactors();
     }
 
     private static void PauseRecording()
@@ -162,12 +157,6 @@ public class Recorder : MonoBehaviour
     {
         GameObject gObj = uid.gameObject;
         LogSpawn(gObj);
-        if (gObj.GetComponent<Button>() != null)
-        {
-            gObj.EnsureOneOf<ButtonLogger>();
-        }
-        gObj.EnsureOneOf<EnableLogger>();
-        gObj.EnsureOneOf<MovementLogger>();
     }
 
     private static void CheckForSpawns()
@@ -179,6 +168,7 @@ public class Recorder : MonoBehaviour
             allUIDs.RemoveAt(allUIDs.Count - 1);
             if (uid)
             {
+                LoggerManager.SetupLoggers(uid.gameObject);
                 RecordSpawn(uid);
             }
             else
@@ -186,6 +176,11 @@ public class Recorder : MonoBehaviour
                 Debug.Log("uid was deleted");
             }
         }
+    }
+
+    public static void LogAction(PlaybackLogAction2 entry)
+    {
+        recordLog.log.Add(entry);
     }
 
     public static void LogSpawn(GameObject subject)

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovementLogger : PlayBackLogger
+public class ReenactableLoggerMove : ReenactableLogger
 {
     Vector3 lastLocalPos;
     Vector3 lastScale;
@@ -30,6 +30,7 @@ public class MovementLogger : PlayBackLogger
             Recorder.LogMovement(gameObject, lastLocalPos, lastRotation, lastScale, nextParent, lerp);
         }
     }
+
     public override void OnDestroy()
     {
         base.OnDestroy();

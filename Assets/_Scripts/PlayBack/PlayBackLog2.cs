@@ -75,14 +75,17 @@ public partial class PlaybackLogAction2
     private static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>() { { 0, null } };
 
     public delegate void ReenactAction(LogInfo info, GameObject subject, PlaybackLogAction2 entry);
-    protected static Dictionary<string, ReenactAction> Reenactors = new Dictionary<string, ReenactAction>(){
-        // {"buttonPressed", ButtonLogger.ReenactPress},
-        // {"buttonUnpressed", ButtonLogger.ReenactUnpress}
-
-    };
-    public static void registerReenactor(string key, ReenactAction ra)
+    protected static Dictionary<string, ReenactAction> Reenactors = new Dictionary<string, ReenactAction>();
+    public static void RegisterReenactor(string key, ReenactAction ra)
     {
-        Reenactors.Add(key, ra);
+        if (!Reenactors.ContainsKey(key))
+        {
+            Reenactors.Add(key, ra);
+        }
+        else
+        {
+            Debug.Log("Reenactors already contains key: " + key);
+        }
     }
 
     [SerializeField]
@@ -163,27 +166,23 @@ public partial class PlaybackLogAction2
         switch (key)
         {
             case "spawn":
-                subject = getObject(subjectKey);
+                subject = GetObject(subjectKey);
                 ReenactSpawn(_info, subject, this);
                 break;
-            case "movement":
-                subject = getObject(subjectKey);
-                ReenactMovement(_info, subject, this);
-                break;
             case "enable":
-                subject = getObject(subjectKey);
+                subject = GetObject(subjectKey);
                 ReenactEnable(_info, subject, this);
                 break;
             case "disable":
-                subject = getObject(subjectKey);
+                subject = GetObject(subjectKey);
                 ReenactEnable(_info, subject, this);
                 break;
             case "destroy":
-                subject = getObject(subjectKey);
+                subject = GetObject(subjectKey);
                 ReenactDestroy(_info, subject, this);
                 break;
             default:
-                subject = getObject(subjectKey);
+                subject = GetObject(subjectKey);
                 ReenactAction reenactor;
                 if (Reenactors.TryGetValue(key, out reenactor))
                 {
@@ -220,39 +219,6 @@ public partial class PlaybackLogAction2
         subject.RotateTo(rotation, 0);
         subject.GlobalScaleTo(scale, 0);
     }
-    private void ReenactMovement(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
-    {
-        int parentKey;
-        Vector3 position;
-        Vector3 scale;
-        Quaternion rotation;
-        long duration;
-        if (subject != null)
-        {
-            position = _info.GetValue<Vector3>("position");
-            scale = _info.GetValue<Vector3>("scale");
-            rotation = _info.GetValue<Quaternion>("rotation");
-            parentKey = _info.GetValue<int>("parentKey");
-            duration = _info.GetValue<long>("duration");
-            if (objectMap.ContainsKey(parentKey))
-            {
-                subject.transform.SetParent((parentKey == 0) ? null : objectMap[parentKey].transform, false);
-            }
-            else
-            {
-                Debug.Log(timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist.");
-            }
-
-            subject.LocalMoveTo(position, duration);
-            subject.LocalRotateTo(rotation, duration);
-            subject.LocalScaleTo(scale, duration);
-        }
-        else
-        {
-            Debug.Log(timeStamp + " subject " + subjectKey + " could not be moved because subject does not exist.");
-        }
-
-    }
 
     private void ReenactEnable(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
     {
@@ -281,7 +247,7 @@ public partial class PlaybackLogAction2
         Quaternion rotation;
         long duration;
 
-        subject = getObject(subjectKey);
+        subject = GetObject(subjectKey);
 
         if (subject != null)
         {
@@ -296,7 +262,7 @@ public partial class PlaybackLogAction2
 
     private void ReenactDestroy(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
     {
-        subject = getObject(subjectKey);
+        subject = GetObject(subjectKey);
 
         if (subject != null)
         {
@@ -310,15 +276,24 @@ public partial class PlaybackLogAction2
 
 
     #endregion
-    public GameObject getObject(int ID)
+    public static GameObject GetObject(int ID)
+    {
+        GameObject outObject;
+        TryGetObject(ID, out outObject);
+        return outObject;
+    }
+
+    public static bool TryGetObject(int ID, out GameObject outObject)
     {
         if (objectMap.ContainsKey(ID))
         {
-            return objectMap[ID];
+            outObject = objectMap[ID];
+            return true;
         }
         else
         {
-            return null;
+            outObject = null;
+            return false;
         }
     }
 

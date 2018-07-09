@@ -1,12 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CalcFlowUI;
 
-public class ButtonLogger : PlayBackLogger
+public class ButtonReenactableLogger : ReenactableLogger
 {
-
-    #region logging code
     protected void Start()
     {
         #region register to any and all buttons
@@ -52,41 +49,4 @@ public class ButtonLogger : PlayBackLogger
         if (Recorder.Recording)
             Recorder.LogButtonUnpress(gameObject, other);
     }
-    #endregion
-
-    #region reenact code
-
-    public static void ReenactPress(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
-    {
-        Button button;
-        GameObject buttonPresser;
-
-        if (subject != null)
-        {
-            button = subject.GetComponent<Button>();
-            buttonPresser = PlaybackLogAction2.GetObject(_info.GetValue<int>("buttonPresser"));
-            button.PressButton(buttonPresser);
-        }
-        else
-        {
-            Debug.Log(entry.timeStamp + " " + entry.subjectKey);
-        }
-    }
-
-    public static void ReenactUnpress(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
-    {
-        Button button;
-        GameObject buttonPresser;
-        if (subject != null)
-        {
-            button = subject.GetComponent<Button>();
-            buttonPresser = PlaybackLogAction2.GetObject(_info.GetValue<int>("buttonPresser"));
-            button.UnpressButton(buttonPresser);
-        }
-        else
-        {
-            Debug.Log(entry.timeStamp + " " + entry.subjectKey);
-        }
-    }
-    #endregion
 }
