@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class ParametricManager : CalculatorManager
 {
-    [HideInInspector]
-    public ExpressionSet expressionSet;
-
     //[HideInInspector]
     //public bool inputReceived;
 
@@ -14,7 +11,6 @@ public class ParametricManager : CalculatorManager
     JoyStickAggregator joyStickAggregator;
     Scroll paramScroll;
     CustomParametrizedSurface paramSurface;
-    List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
     BoundsManager boundsManager;
     PresetMenu presetMenu;
     SaveLoadMenu saveLoadMenu;
@@ -50,7 +46,7 @@ public class ParametricManager : CalculatorManager
         if (outputManager != null)
         {
             print("OUTPUT INIIALIZED");
-            outputManager.Initialize(this);
+            outputManager.Initialize(this, null);
         }
         //presetMenu.Initialize(this);
         //saveLoadMenu.Initialize(this);
@@ -74,24 +70,6 @@ public class ParametricManager : CalculatorManager
     {
         calcInput.ChangeOutput(expressionSet.GetExpression("X"), this); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
-        inputReceived = true;
-    }
-
-    public void AddExpressionSet(ExpressionSet ES)
-    {
-        expressionSetList.Add(ES);
-        inputReceived = true;
-    }
-
-    public void RemoveExpressionSet(ExpressionSet ES)
-    {
-        expressionSetList.Remove(ES);
-        inputReceived = true;
-    }
-
-    public void ChangeExpressionSet(ExpressionSet ES)
-    {
-        expressionSet = ES;
         inputReceived = true;
     }
 

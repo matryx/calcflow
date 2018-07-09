@@ -14,7 +14,9 @@ public class ExpressionBody : QuickButton
     CalcInput calcInput;
     ParametricExpression param;
     VectorFieldExpression vec;
-    ParametricManager calcManager;
+    ParametricManager paramManager;
+    VecFieldManager vecFieldManager;
+    CalculatorManager calcManager;
 
     private bool thisBodySelected = false;
     private bool finishedScalingUp = true;
@@ -27,7 +29,10 @@ public class ExpressionBody : QuickButton
 
     private void Awake()
     {
-        calcManager = ParametricManager._instance;
+        paramManager = ParametricManager._instance;
+        vecFieldManager = VecFieldManager._instance;
+        calcManager = paramManager;
+
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
 
@@ -116,6 +121,7 @@ public class ExpressionBody : QuickButton
 
     public void deselectCurrBody()
     {
+        if (expression == null) expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         ExpressionBody selectedBody = expression.getSelectedBody();
         if (selectedBody)
         {
@@ -146,23 +152,27 @@ public class ExpressionBody : QuickButton
         if (expressionParent.GetComponent<ParametricExpression>())
         {
             param = expressionParent.GetComponent<ParametricExpression>();
+            if (!paramManager) paramManager = ParametricManager._instance;
+            calcManager = paramManager;
             calcManager.ChangeExpressionSet(param.getExpSet());
         }
         else if (expressionParent.GetComponent<VectorFieldExpression>())
         {
             vec = expressionParent.GetComponent<VectorFieldExpression>();
+            if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
+            calcManager = vecFieldManager;
             calcManager.ChangeExpressionSet(vec.getExpSet());
         }
     }
 
     private void selectBodyIfActive()
     {
-        if (expressionParent.GetComponent<ParametricExpression>())
+        if (expressionParent.GetComponent<ParametricExpression>() != null)
         {
             param = expressionParent.GetComponent<ParametricExpression>();
             if (param.getActiveStatus()) selectBody();
         }
-        else if (expressionParent.GetComponent<VectorFieldExpression>())
+        else if (expressionParent.GetComponent<VectorFieldExpression>() != null)
         {
             vec = expressionParent.GetComponent<VectorFieldExpression>();
             if (vec.getActiveStatus()) selectBody();
@@ -171,6 +181,7 @@ public class ExpressionBody : QuickButton
 
     public void deselectPrevBody()
     {
+        if (expression == null) expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         ExpressionBody selectedBody = expression.getSelectedBody();
         if (selectedBody)
         {
@@ -190,6 +201,7 @@ public class ExpressionBody : QuickButton
     {
         deselectPrevBody();
         expression.setSelectedExpr(expressionParent, this);
+        
         changeExpressionSet();
 
         if (variable)
@@ -199,7 +211,20 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            calcManager.SetOutput(calcManager.expressionSet.GetExpression(title));
+            if (expressionParent.GetComponent<ParametricExpression>())
+            {
+                param = expressionParent.GetComponent<ParametricExpression>();
+                if (!paramManager) paramManager = ParametricManager._instance;
+                calcManager = paramManager;
+                calcManager.SetOutput(paramManager.expressionSet.GetExpression(title));
+            }
+            else if (expressionParent.GetComponent<VectorFieldExpression>())
+            {
+                vec = expressionParent.GetComponent<VectorFieldExpression>();
+                if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
+                calcManager = vecFieldManager;
+                calcManager.SetOutput(vecFieldManager.expressionSet.GetExpression(title));
+            }
         }
 
         if (!finishedScalingDown)
@@ -208,7 +233,9 @@ public class ExpressionBody : QuickButton
             finishedScalingDown = true;
         }
 
+        if (!feedBack) feedBack = transform.parent.Find("Feedback");
         scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
+        //BUG: couroutine won't start because ButtonInput isn't active at this point
         StartCoroutine(scaleUp);
         finishedScalingUp = false;
         thisBodySelected = true;
@@ -266,7 +293,21 @@ public class ExpressionBody : QuickButton
                 oldTextInput.text = oldTextInput.text.Replace("_", "");
                 expression.setSelectedExpr(null, null);
                 thisBodySelected = false;
-                calcInput.ChangeOutput(null, calcManager);
+                calcInput.ChangeOutput(null, paramManager);
+
+                if (expressionParent.GetComponent<ParametricExpression>())
+                {
+                    if (!paramManager) paramManager = ParametricManager._instance;
+                    calcManager = paramManager;
+                    calcInput.ChangeOutput(null, paramManager);
+                }
+                else if (expressionParent.GetComponent<VectorFieldExpression>())
+                {
+                    vec = expressionParent.GetComponent<VectorFieldExpression>();
+                    if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
+                    calcManager = vecFieldManager;
+                    calcInput.ChangeOutput(null, vecFieldManager);
+                }
             }
         }
     }

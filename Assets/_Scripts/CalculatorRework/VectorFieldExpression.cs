@@ -125,9 +125,6 @@ public class VectorFieldExpression : MonoBehaviour
     {
         range = r;
     }
-
-    void Update()
-    {
-
-    }
+    
+    void Update() { }
 }

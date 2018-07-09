@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class OutputManager : MonoBehaviour {
     ParametricManager paramManager;
+    VecFieldManager vecFieldManager;
     public static OutputManager _instance;
 
     private void Awake()
@@ -11,9 +12,10 @@ public class OutputManager : MonoBehaviour {
         _instance = this;
     }
 
-    public void Initialize(ParametricManager pm)
+    public void Initialize(ParametricManager pm, VecFieldManager vm)
     {
         paramManager = pm;
+        vecFieldManager = vm;
         //saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
     }
 

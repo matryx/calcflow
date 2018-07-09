@@ -6,7 +6,7 @@ public abstract class CalculatorManager : MonoBehaviour
 {
     [HideInInspector]
     public bool inputReceived;
-
+    public ExpressionSet expressionSet;
 
     protected CalcInput calcInput;
 
@@ -23,6 +23,7 @@ public abstract class CalculatorManager : MonoBehaviour
 
     public bool updateOverlay = false;
     public bool toExport = false;
+    public List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
 
     void Start()
     {
@@ -30,10 +31,31 @@ public abstract class CalculatorManager : MonoBehaviour
     }
 
     protected abstract void Initialize();
+    public abstract bool letterPressed(string buttonID);
+    //handles process of deleting variables
+    public abstract void deleteVariables(List<string> toDelete);
 
     public virtual void SetOutput(CalcOutput output)
     {
         calcInput.ChangeOutput(output, this);
+        inputReceived = true;
+    }
+
+    public void AddExpressionSet(ExpressionSet ES)
+    {
+        expressionSetList.Add(ES);
+        inputReceived = true;
+    }
+
+    public void RemoveExpressionSet(ExpressionSet ES)
+    {
+        expressionSetList.Remove(ES);
+        inputReceived = true;
+    }
+
+    public void ChangeExpressionSet(ExpressionSet ES)
+    {
+        expressionSet = ES;
         inputReceived = true;
     }
 
@@ -121,9 +143,4 @@ public abstract class CalculatorManager : MonoBehaviour
                 return input;
         }
     }
-
-    public abstract bool letterPressed(string buttonID);
-
-    //handles process of deleting variables
-    public abstract void deleteVariables(List<string> toDelete);
 }

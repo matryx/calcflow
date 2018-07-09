@@ -76,7 +76,10 @@ public class ExpressionSelector : QuickButton
             thisScroll.addToScroll(toAdd, null, 0);
         }
 
-        if (xButton) xButton.GetComponentInChildren<ExpressionBody>().selectBody();
+        if (xButton)
+        {
+            xButton.GetComponentInChildren<ExpressionBody>().selectBody();
+        }
 
         xButton = null;
     }
@@ -136,14 +139,14 @@ public class ExpressionSelector : QuickButton
         GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
         vec.GetComponent<VectorFieldExpression>().Initialize();
         expressionSet = vec.GetComponent<VectorFieldExpression>().getExpSet();
-        //calcManager.SetVecFieldES(expressionSet);
         addForwarders(vec.transform);
 
         foreach (Transform child in vec.transform.Find("ExpressionSet"))
         {
+            if (child.name == "Button_Xinput") xButton = child;
             vec.GetComponent<VectorFieldExpression>().addExpression(child);
-            child.GetComponent<ExpressionComponent>().setExpressionParent(vec.transform);
-            child.GetComponentInChildren<ExpressionComponent>().setPanel(currPanel);
+            child.GetComponentInChildren<ExpressionBody>().setExpressionParent(vec.transform);
+            child.GetComponentInChildren<ExpressionBody>().setPanel(currPanel);
             vecComponents.Add(child);
         }
 
@@ -164,8 +167,9 @@ public class ExpressionSelector : QuickButton
     {
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
         var.gameObject.SetActive(true);
-        var.GetComponent<ExpressionComponent>().setExpressionParent(v.transform);
-        var.GetComponent<ExpressionComponent>().setPanel(transform.parent.Find("ParametrizationPanel"));
+
+        var.GetComponentInChildren<ExpressionBody>().setExpressionParent(v);
+        var.GetComponentInChildren<ExpressionBody>().setPanel(currPanel);
         var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle("t");
 
         v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("t");
@@ -192,7 +196,7 @@ public class ExpressionSelector : QuickButton
         expressions.addExpr(cons.transform);
 
         return constComponents;
-    } 
+    }
 
     protected override void ButtonExitBehavior(GameObject other) { }
 

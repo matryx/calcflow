@@ -35,6 +35,8 @@ public class CustomVectorField : MonoBehaviour
     AK.Variable varX, varY, varZ;
     public ExpressionSet es;
 
+    public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
+
     public float xmin = -4.5f;
     public float xmax = 4.5f;
     public float ymin = -4.5f;
@@ -71,10 +73,28 @@ public class CustomVectorField : MonoBehaviour
 
     }
 
-    public void SetES(ExpressionSet ES)
+    public void CreateExpressionSet()
     {
-        es = ES;
+        expressionSets.Add(new ExpressionSet());
     }
+
+    public void UpdateExpressionSet(List<ExpressionSet> expSet)
+    {
+        expressionSets = expSet;
+    }
+
+    public void RemoveExpressionSet(int index)
+    {
+        if (index < expressionSets.Count)
+        {
+            expressionSets.RemoveAt(index);
+        }
+    }
+
+    //public void SetES(ExpressionSet ES)
+    //{
+    //    es = ES;
+    //}
 
     void CalculateVectors()
     {
@@ -137,7 +157,7 @@ public class CustomVectorField : MonoBehaviour
         }
     }
 
-    void DrawVectorField()
+    public void DrawVectorField()
     {
         List<Geometry> rawGeom = new List<Geometry>();
 
