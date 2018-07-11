@@ -28,7 +28,7 @@ public static class LoggerManager
         {
             foreach (ReenactableAction action in t.GetReenactors())
             {
-                PlaybackLogAction2.RegisterReenactor(action.key, action.Reenact);
+                PlaybackLogEntry.RegisterReenactor(action.key, action.Reenact);
             }
         }
     }

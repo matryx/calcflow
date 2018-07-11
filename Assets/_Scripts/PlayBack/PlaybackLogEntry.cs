@@ -1,80 +1,20 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using UnityEngine;
-using Nanome.Maths;
 using Extensions;
 using CalcFlowUI;
-using VoxelBusters.RuntimeSerialization;
 using Nanome.Core.Daemon;
-using Priority_Queue;
-using System.Threading;
 using Nanome.Core;
 
 
 [Serializable]
-public class PlaybackLog2
-{
-    public const float Period = .03f;
-
-    [SerializeField]
-    public float period = .03f;
-
-    static string jsonExtension = "json";
-    static string fileName = "recording1";
-
-    public static void SaveLog()
-    {
-        string savePath = Path.Combine(Path.Combine(
-            System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments),
-            "Calcflow"), "Recordings");
-
-        if (!System.IO.Directory.Exists(savePath))
-        {
-            System.IO.Directory.CreateDirectory(savePath);
-        }
-
-        //System.IO.File.WriteAllText(Path.Combine(savePath, fileName) + jsonExtension, JsonUtility.ToJson(recordingInstance.log));
-
-    }
-
-    [SerializeField]
-    public List<PlaybackLogAction2> log = new List<PlaybackLogAction2>();
-    public List<PlaybackLogAction2> GetLogCopy()
-    {
-        //This sort removes a bug caused by the way movement is logged. 
-        //Movement's time is logged as 1 timer period earlier than it actually happened to improve the accuracy of the lerp.
-        //This doesn't work if it gets stuck behind something that isn't logged early since the recorder goes in list order.
-        log.Sort(new myReverserClass());
-        return log.ToList();
-    }
-
-    public class myReverserClass : IComparer<PlaybackLogAction2>
-    {
-        public int Compare(PlaybackLogAction2 x, PlaybackLogAction2 y)
-        {
-            if (x.timeStamp > y.timeStamp) return 1;
-            if (x.timeStamp < y.timeStamp) return -1;
-            return 0;
-        }
-    }
-
-    public void Add(PlaybackLogAction2 action)
-    {
-        log.Add(action);
-    }
-
-}
-
-[Serializable]
-public partial class PlaybackLogAction2
+public partial class PlaybackLogEntry
 {
     #region other stuff
     private static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>() { { 0, null } };
 
-    public delegate void ReenactAction(LogInfo info, GameObject subject, PlaybackLogAction2 entry);
+    public delegate void ReenactAction(LogInfo info, GameObject subject, PlaybackLogEntry entry);
     protected static Dictionary<string, ReenactAction> Reenactors = new Dictionary<string, ReenactAction>();
     public static void RegisterReenactor(string key, ReenactAction ra)
     {
@@ -156,7 +96,6 @@ public partial class PlaybackLogAction2
 
     }
 
-
     public void Reenact()
     {
         GameObject subject;
@@ -198,7 +137,7 @@ public partial class PlaybackLogAction2
 
     //Basic Reenactors
     #region basic reenactors
-    private void ReenactSpawn(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    private void ReenactSpawn(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
     {
         Vector3 position;
         Vector3 scale;
@@ -220,7 +159,7 @@ public partial class PlaybackLogAction2
         subject.GlobalScaleTo(scale, 0);
     }
 
-    private void ReenactEnable(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    private void ReenactEnable(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
     {
         int parentKey;
         Vector3 position;
@@ -239,7 +178,7 @@ public partial class PlaybackLogAction2
         // }
     }
 
-    private void ReenactDisable(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    private void ReenactDisable(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
     {
         int parentKey;
         Vector3 position;
@@ -260,7 +199,7 @@ public partial class PlaybackLogAction2
 
     }
 
-    private void ReenactDestroy(LogInfo _info, GameObject subject, PlaybackLogAction2 entry)
+    private void ReenactDestroy(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
     {
         subject = GetObject(subjectKey);
 
@@ -273,7 +212,6 @@ public partial class PlaybackLogAction2
             Debug.Log(timeStamp + " " + subjectKey);
         }
     }
-
 
     #endregion
     public static GameObject GetObject(int ID)

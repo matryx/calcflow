@@ -17,11 +17,6 @@ using Nanome.Core;
 [Serializable]
 public class PlaybackLog
 {
-    [SerializeField]
-    private void Start()
-    {
-    }
-
     public const float Period = .03f;
 
     [SerializeField]
@@ -29,10 +24,6 @@ public class PlaybackLog
 
     static string jsonExtension = "json";
     static string fileName = "recording1";
-
-    public PlaybackLog()
-    {
-    }
 
     public static void SaveLog()
     {
@@ -50,237 +41,29 @@ public class PlaybackLog
     }
 
     [SerializeField]
-    public List<PlayBackLogAction> log = new List<PlayBackLogAction>();
-
-    public List<PlayBackLogAction> GetLogCopy()
+    public List<PlaybackLogEntry> log = new List<PlaybackLogEntry>();
+    public List<PlaybackLogEntry> GetLogCopy()
     {
+        //This sort removes a bug caused by the way movement is logged. 
+        //Movement's time is logged as 1 timer period earlier than it actually happened to improve the accuracy of the lerp.
+        //This doesn't work if it gets stuck behind something that isn't logged early since the recorder goes in list order.
+        log.Sort(new myReverserClass());
         return log.ToList();
     }
 
-    public class myReverserClass : IComparer
+    public class myReverserClass : IComparer<PlaybackLogEntry>
     {
-        public int Compare(object x, object y)
+        public int Compare(PlaybackLogEntry x, PlaybackLogEntry y)
         {
-            PlayBackLogAction first = (PlayBackLogAction)x;
-            PlayBackLogAction second = (PlayBackLogAction)y;
-
-            if (first.timeStamp > second.timeStamp) return 1;
-            if (first.timeStamp < second.timeStamp) return -1;
+            if (x.timeStamp > y.timeStamp) return 1;
+            if (x.timeStamp < y.timeStamp) return -1;
             return 0;
         }
     }
 
-}
-[Serializable]
-public class PlayBackLogAction
-{
-    internal static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>();
-
-    public enum ActionType
+    public void Add(PlaybackLogEntry action)
     {
-        Spawn,
-        Movement,
-        ButtonPress,
-        ButtonUnpress
+        log.Add(action);
     }
-    [SerializeField]
-    public int subjectKey;
-    [SerializeField]
-    public long timeStamp;
-    [SerializeField]
-    internal Vector3 position;
-    [SerializeField]
-    internal Quaternion rotation;
-    [SerializeField]
-    internal Vector3 scale;
-    [SerializeField]
-    internal GameObject buttonPresser;
-    [SerializeField]
-    internal int parentKey;
-    [SerializeField]
-    [HideInInspector]
-    internal string binaryRepresentation;
-
-
-    [SerializeField]
-    public ActionType type;
-
-    internal void SetType(string type)
-    {
-        switch (type)
-        {
-            case "Movement":
-                this.type = ActionType.Movement;
-                break;
-            case "ButtonPress":
-                this.type = ActionType.ButtonPress;
-                break;
-            default:
-                break;
-        }
-    }
-    internal void SetType(ActionType type)
-    {
-        this.type = type;
-    }
-
-    //how many serializations are left before the scene is done recording.
-    public static int numRunningSerializations;
-    public static Queue<Action> spawnQueue = new Queue<Action>();
-    public static IEnumerator spawner;
-
-    public static IEnumerator steadySpawn()
-    {
-        while (spawnQueue.Count != 0)
-        {
-
-            spawnQueue.Dequeue().Invoke();
-            yield return null;
-        }
-        spawner = null;
-    }
-
-
-    //Creates a spawn PlayBackLogAction. The action will not have an accurate binaryRepresentation until later.
-    internal static PlayBackLogAction CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
-    {
-        int key = subject.GetInstanceID();
-        PlayBackLogAction newAction = new PlayBackLogAction
-        {
-            type = ActionType.Spawn,
-            timeStamp = timestamp,
-            position = position,
-            rotation = rotation,
-            scale = scale,
-            subjectKey = key
-        };
-
-        numRunningSerializations++;
-        //enqueue a function that will perform the serialization of the data at a later time.
-        spawnQueue.Enqueue(delegate () 
-        {
-            //Debug.Log(numRunningSerializations);
-            numRunningSerializations--;
-            newAction.SerializeForSpawn(subject, key.ToString());
-        });
-        if (spawner == null)
-        {
-            spawner = steadySpawn();
-            Dispatcher.queue(spawner);
-        }
-        return newAction;
-    }
-
-    // function that will serialize the spawn and assign the binary output to "binaryRepresentation".
-    void SerializeForSpawn(GameObject subject, string key)
-    {
-        binaryRepresentation = "";
-        binaryRepresentation = RSManager.Serialize(subject, key);
-    }
-
-    internal static PlayBackLogAction CreateMovement(long timestamp, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
-    {
-        int parentKey = (parent == null) ? 0 : parent.GetInstanceID();
-        PlayBackLogAction newAction = new PlayBackLogAction
-        {
-            type = ActionType.Movement,
-            timeStamp = timestamp,
-            position = destination,
-            rotation = rotation,
-            scale = scale,
-            subjectKey = subject.GetInstanceID(),
-            parentKey = parentKey
-        };
-
-        return newAction;
-    }
-
-    internal static PlayBackLogAction CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
-    {
-        PlayBackLogAction newAction = new PlayBackLogAction
-        {
-            type = ActionType.ButtonPress,
-            timeStamp = timestamp,
-            buttonPresser = presser,
-            subjectKey = subject.GetInstanceID()
-        };
-        return newAction;
-    }
-
-    internal static PlayBackLogAction CreateButtonUnpress(long timestamp, GameObject subject, GameObject presser)
-    {
-        PlayBackLogAction newAction = new PlayBackLogAction
-        {
-            type = ActionType.ButtonUnpress,
-            timeStamp = timestamp,
-            buttonPresser = presser,
-            subjectKey = subject.GetInstanceID()
-        };
-        return newAction;
-    }
-
-    void Spawn()
-    {
-        GameObject subject;
-        subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
-        //yield return null;
-        if (objectMap.ContainsKey(subjectKey))
-        {
-            objectMap[subjectKey] = subject;
-        }
-        else
-        {
-            objectMap.Add(subjectKey, subject);
-        }
-
-    }
-
-
-    public void Reenact()
-    {
-        Button button;
-        GameObject subject;
-        switch (type)
-        {
-            case ActionType.Spawn:
-                //Dispatcher.queue(Spawn());
-                Spawn();
-                //Thread thread = new Thread(() => Spawn());
-
-                //thread.Join();
-                subject = objectMap[subjectKey];
-                subject.MoveTo(position, 0);
-                subject.RotateTo(rotation, 0);
-                subject.GlobalScaleTo(scale, 0);
-                break;
-            case ActionType.Movement:
-                if (objectMap.ContainsKey(subjectKey))
-                {
-                    subject = objectMap[subjectKey];
-                    subject.LocalMoveTo(position, PlaybackLog.Period);
-                    subject.RotateTo(rotation, PlaybackLog.Period);
-                    subject.GlobalScaleTo(scale, PlaybackLog.Period);
-                    subject.transform.parent = (parentKey == 0) ? null : objectMap[parentKey].transform;
-                }
-                else
-                {
-                    Debug.Log(timeStamp + " " + subjectKey);
-                }
-                break;
-            case ActionType.ButtonPress:
-                subject = objectMap[subjectKey];
-                button = subject.GetComponent<Button>();
-                button.PressButton(this.buttonPresser);
-                break;
-            case ActionType.ButtonUnpress:
-                subject = objectMap[subjectKey];
-                button = subject.GetComponent<Button>();
-                button.UnpressButton(this.buttonPresser);
-                break;
-        }
-    }
-
-
 
 }
-

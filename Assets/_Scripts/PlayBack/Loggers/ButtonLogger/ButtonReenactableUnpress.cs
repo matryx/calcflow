@@ -14,14 +14,14 @@ public class ButtonReenactableUnpress : ReenactableAction
         }
     }
 
-    public override void Reenact(LogInfo info, GameObject subject, PlaybackLogAction2 entry)
+    public override void Reenact(LogInfo info, GameObject subject, PlaybackLogEntry entry)
     {
         Button button;
         GameObject buttonPresser;
         if (subject != null)
         {
             button = subject.GetComponent<Button>();
-            buttonPresser = PlaybackLogAction2.GetObject(info.GetValue<int>("buttonPresser"));
+            buttonPresser = PlaybackLogEntry.GetObject(info.GetValue<int>("buttonPresser"));
             button.UnpressButton(buttonPresser);
         }
         else

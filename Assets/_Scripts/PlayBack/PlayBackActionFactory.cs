@@ -5,17 +5,17 @@ using Nanome.Core;
 using Nanome.Core.Daemon;
 using Extensions;
 
-public partial class PlaybackLogAction2
+public partial class PlaybackLogEntry
 {
     public class PlayBackActionFactory
     {
 
         #region other constructors
-        public static PlaybackLogAction2 CreateMovement(long timestamp, long duration, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
+        public static PlaybackLogEntry CreateMovement(long timestamp, long duration, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
         {
             int parentKey = (parent == null) ? 0 : parent.GetInstanceID();
             int key = subject.GetInstanceID();
-            PlaybackLogAction2 newAction = new PlaybackLogAction2
+            PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = key,
@@ -29,9 +29,9 @@ public partial class PlaybackLogAction2
             return newAction;
         }
 
-        public static PlaybackLogAction2 CreateEnable(long timestamp, GameObject subject)
+        public static PlaybackLogEntry CreateEnable(long timestamp, GameObject subject)
         {
-            PlaybackLogAction2 newAction = new PlaybackLogAction2
+            PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = subject.GetInstanceID(),
@@ -41,9 +41,9 @@ public partial class PlaybackLogAction2
             return newAction;
         }
 
-        public static PlaybackLogAction2 CreateDisable(long timestamp, GameObject subject)
+        public static PlaybackLogEntry CreateDisable(long timestamp, GameObject subject)
         {
-            PlaybackLogAction2 newAction = new PlaybackLogAction2
+            PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = subject.GetInstanceID(),
@@ -53,9 +53,9 @@ public partial class PlaybackLogAction2
             return newAction;
         }
 
-        public static PlaybackLogAction2 CreateDestroy(long timestamp, GameObject subject)
+        public static PlaybackLogEntry CreateDestroy(long timestamp, GameObject subject)
         {
-            PlaybackLogAction2 newAction = new PlaybackLogAction2
+            PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = subject.GetInstanceID(),
@@ -65,9 +65,9 @@ public partial class PlaybackLogAction2
             return newAction;
         }
 
-        public static PlaybackLogAction2 CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
+        public static PlaybackLogEntry CreateButtonPress(long timestamp, GameObject subject, GameObject presser)
         {
-            PlaybackLogAction2 newAction = new PlaybackLogAction2
+            PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = subject.GetInstanceID()
@@ -77,9 +77,9 @@ public partial class PlaybackLogAction2
             return newAction;
         }
 
-        public static PlaybackLogAction2 CreateButtonUnpress(long timestamp, GameObject subject, GameObject presser)
+        public static PlaybackLogEntry CreateButtonUnpress(long timestamp, GameObject subject, GameObject presser)
         {
-            PlaybackLogAction2 newAction = new PlaybackLogAction2
+            PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = subject.GetInstanceID()
@@ -89,10 +89,10 @@ public partial class PlaybackLogAction2
             return newAction;
         }
         #endregion
-        public static PlaybackLogAction2 CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
+        public static PlaybackLogEntry CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
         {
             int key = subject.GetInstanceID();
-            PlaybackLogAction2 newAction = new PlaybackLogAction2
+            PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = key
@@ -103,18 +103,18 @@ public partial class PlaybackLogAction2
             newAction._info.AddValue("rotation", rotation);
             newAction._info.AddValue("scale", scale);
 
-            PlaybackLogAction2.numRunningSerializations++;
+            PlaybackLogEntry.numRunningSerializations++;
             //enqueue a function that will perform the serialization of the data at a later time.
-            PlaybackLogAction2.spawnQueue.Enqueue(delegate ()
+            PlaybackLogEntry.spawnQueue.Enqueue(delegate ()
             {
                 //Debug.Log(numRunningSerializations);
-                PlaybackLogAction2.numRunningSerializations--;
+                PlaybackLogEntry.numRunningSerializations--;
                 newAction.SerializeForSpawn(subject, key.ToString());
             });
-            if (PlaybackLogAction2.spawner == null)
+            if (PlaybackLogEntry.spawner == null)
             {
-                PlaybackLogAction2.spawner = PlaybackLogAction2.steadySpawn();
-                Dispatcher.queue(PlaybackLogAction2.spawner);
+                PlaybackLogEntry.spawner = PlaybackLogEntry.steadySpawn();
+                Dispatcher.queue(PlaybackLogEntry.spawner);
             }
             return newAction;
         }

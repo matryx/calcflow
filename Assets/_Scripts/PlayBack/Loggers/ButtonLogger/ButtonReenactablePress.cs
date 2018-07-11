@@ -12,7 +12,7 @@ public class ButtonReenactablePress : ReenactableAction
             return "buttonPress";
         }
     }
-    public override void Reenact(LogInfo info, GameObject subject, PlaybackLogAction2 entry)
+    public override void Reenact(LogInfo info, GameObject subject, PlaybackLogEntry entry)
     {
         Button button;
         GameObject buttonPresser;
@@ -20,7 +20,7 @@ public class ButtonReenactablePress : ReenactableAction
         if (subject != null)
         {
             button = subject.GetComponent<Button>();
-            buttonPresser = PlaybackLogAction2.GetObject(info.GetValue<int>("buttonPresser"));
+            buttonPresser = PlaybackLogEntry.GetObject(info.GetValue<int>("buttonPresser"));
             button.PressButton(buttonPresser);
         }
         else

@@ -9,7 +9,7 @@ public class ReenactableActionMove : ReenactableAction
     public override string key { get { return "movement"; } }
 
 
-    public override void Reenact(LogInfo info, GameObject subject, PlaybackLogAction2 entry)
+    public override void Reenact(LogInfo info, GameObject subject, PlaybackLogEntry entry)
     {
         int parentKey;
         Vector3 position;
@@ -24,7 +24,7 @@ public class ReenactableActionMove : ReenactableAction
             parentKey = info.GetValue<int>("parentKey");
             duration = info.GetValue<long>("duration");
             GameObject newParent;
-            if (PlaybackLogAction2.TryGetObject(parentKey, out newParent))
+            if (PlaybackLogEntry.TryGetObject(parentKey, out newParent))
             {
                 subject.transform.SetParent((parentKey == 0) ? null : newParent.transform, false);
             }

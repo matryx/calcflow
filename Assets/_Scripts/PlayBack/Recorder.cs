@@ -1,45 +1,33 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
+using CalcFlowUI;
 using Extensions;
+using Nanome.Core;
+using Nanome.Core.Daemon;
+using UnityEditor;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
-using CalcFlowUI;
 
-
-public class Recorder : MonoBehaviour
+public static class Recorder
 {
-
-    public static Recorder _instance;
     public static GameObject _instanceGO;
 
     public static string SavedLog;
-    public bool EditorRecord = false;
-    public bool EditorPause = false;
     private static HashSet<int> AllGameObjects = new HashSet<int>();
     private static List<UIDSystem> allUIDs = new List<UIDSystem>();
-    private static bool recording = false;
-    private static bool paused = false;
-    [SerializeField]
-    public static PlaybackLog2 recordLog = new PlaybackLog2();
-
-    private void Start()
+    //DEBUGGING.
+    public static int SpawnQueueSize()
     {
-        if (_instance == null)
-        {
-            _instance = this;
-            _instanceGO = this.gameObject;
-        }
-        else
-        {
-            Debug.LogWarning("Two instances of one-of: Recorder");
-        }
-        allUIDs.Clear();
-        allUIDs = GetAllUIDSInScene();
-        allUIDs.Remove(gameObject.GetComponent<UIDSystem>());
+        return allUIDs.Count;
     }
+    private static bool recording;
+    public static bool Recording { get { return recording; } }
+    private static bool paused = false;
+    public static bool Paused { get { return paused; } }
+    [SerializeField]
+    public static PlaybackLog recordLog = new PlaybackLog();
 
-    List<UIDSystem> GetAllUIDSInScene()
+    private static List<UIDSystem> GetAllUIDSInScene()
     {
         List<UIDSystem> objectsInScene = new List<UIDSystem>();
 
@@ -56,84 +44,93 @@ public class Recorder : MonoBehaviour
         return objectsInScene;
     }
 
-    private void Update()
+    static int recsPerFrame = 5;
+
+    private static IEnumerator PreSave2(Async routine)
     {
-        Recording = EditorRecord;
-        Paused = EditorPause;
+        LoadingScreen loadingScreen = StartLoadingScreen();
+        yield return null;
+        int numRecs = 0;
+        while (allUIDs.Count > 0)
+        {
+            while (numRecs < recsPerFrame && allUIDs.Count > 0)
+            {
+                numRecs++;
+                UIDSystem uid;
+                uid = allUIDs[allUIDs.Count - 1];
+                allUIDs.RemoveAt(allUIDs.Count - 1);
+                if (uid)
+                {
+                    LoggerManager.SetupLoggers(uid.gameObject);
+                    RecordSpawn(uid);
+                }
+                else
+                {
+                    Debug.Log("uid was deleted");
+                }
+            }
+            numRecs = 0;
+            yield return null;
+        }
+        Debug.Log("preRecording finished");
+        routine.pushEvent("SaveComplete", loadingScreen);
+
     }
 
-    private static void StartRecording()
+    private static void StartUpProcess(object loadingScreen)
     {
-        print("start recording");
-        CheckForSpawns();
-        print("preRecording finished");
+        LoggerManager.SetupReenactors();
+        EndLoadingScreen((LoadingScreen)loadingScreen);
+        Debug.Log("startingClock");
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
-        LoggerManager.SetupReenactors();
         recording = true;
         paused = false;
     }
-
-    private static void PauseRecording()
+    #region loadingScreenStuff
+    static string LoadingScreenPrefab = "Prefabs\\LoadingScreen";
+    static LoadingScreen StartLoadingScreen()
     {
-        print("paused recording");
+        GameObject LoadingScreen = GameObject.Instantiate(Resources.Load(LoadingScreenPrefab, typeof(GameObject))) as GameObject;
+        return LoadingScreen.GetComponent<LoadingScreen>();
+    }
+    static void EndLoadingScreen(LoadingScreen loadingScreen)
+    {
+        loadingScreen.StopLoading();
+        GameObject.Destroy(loadingScreen.gameObject);
+    }
+    #endregion
+    public static void StartRecording()
+    {
+        allUIDs.Clear();
+        allUIDs = GetAllUIDSInScene();
+        recording = true;
+        paused = false;
+        Async startup = Async.runInCoroutine(PreSave2);
+        startup.onEvent("SaveComplete", StartUpProcess);
+    }
+    public static void PauseRecording()
+    {
+        Debug.Log("paused recording");
         PlaybackClock.StopClock();
         PlaybackClock.RemoveFromTimer(CheckForSpawns);
         paused = true;
-
     }
-    private static void ResumeRecording()
+    public static void ResumeRecording()
     {
-        print("resumed recording");
+        Debug.Log("resumed recording");
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
         paused = false;
     }
-    private static void StopRecording()
+    public static void EndRecording()
     {
-        print("stop recording");
+        Debug.Log("stop recording");
         PlaybackClock.StopClock();
         PlaybackClock.RemoveFromTimer(CheckForSpawns);
         SavedLog = JsonUtility.ToJson(recordLog);
         recording = false;
         paused = false;
-    }
-
-    public static bool Recording
-    {
-        get
-        {
-            return recording && !paused;
-        }
-        set
-        {
-            if (value && !recording)
-            {
-                StartRecording();
-            }
-            else if (!value && recording)
-            {
-                StopRecording();
-            }
-        }
-    }
-    public static bool Paused
-    {
-        get
-        {
-            return paused;
-        }
-        set
-        {
-            if (value && !paused)
-            {
-                PauseRecording();
-            }
-            else if (!value && paused)
-            {
-                ResumeRecording();
-            }
-        }
     }
 
     public static void UIDAdded(UIDSystem uid)
@@ -147,10 +144,7 @@ public class Recorder : MonoBehaviour
 
     public static void AddUID(UIDSystem uid)
     {
-        if (_instance != null)
-        {
-            allUIDs.Add(uid);
-        }
+        allUIDs.Add(uid);
     }
 
     private static void RecordSpawn(UIDSystem uid)
@@ -177,56 +171,57 @@ public class Recorder : MonoBehaviour
             }
         }
     }
-
-    public static void LogAction(PlaybackLogAction2 entry)
+    #region logCode
+    public static void LogAction(PlaybackLogEntry entry)
     {
         recordLog.log.Add(entry);
     }
 
     public static void LogSpawn(GameObject subject)
     {
-        long time = PlaybackClock.GetTime() - ((long)PlaybackLog2.Period * 1005);
-        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateSpawn(time,
-                                                            subject,
-                                                            subject.transform.position,
-                                                            subject.transform.rotation,
-                                                            subject.transform.lossyScale));
+        long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period * 1005);
+        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateSpawn(time,
+            subject,
+            subject.transform.position,
+            subject.transform.rotation,
+            subject.transform.lossyScale));
     }
 
     public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent, bool useLerp)
     {
         long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period * 1000);
         long duration = useLerp ? ((long)PlaybackLog.Period * 1000) : 0;
-        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateMovement(time, duration, subject, destination, rotation, scale, parent));
+        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(time, duration, subject, destination, rotation, scale, parent));
     }
 
     public static void LogEnable(GameObject subject)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateEnable(time, subject));
+        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateEnable(time, subject));
     }
 
     public static void LogDisable(GameObject subject)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateDisable(time, subject));
+        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateDisable(time, subject));
     }
 
     public static void LogDestroy(GameObject subject)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateDestroy(time, subject));
+        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateDestroy(time, subject));
     }
 
     public static void LogButtonPress(GameObject subject, GameObject presser)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateButtonPress(time, subject, presser));
+        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateButtonPress(time, subject, presser));
     }
 
     public static void LogButtonUnpress(GameObject subject, GameObject presser)
     {
         long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogAction2.PlayBackActionFactory.CreateButtonUnpress(time, subject, presser));
+        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateButtonUnpress(time, subject, presser));
     }
+    #endregion
 }

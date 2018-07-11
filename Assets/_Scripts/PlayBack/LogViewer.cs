@@ -9,8 +9,7 @@ public class LogViewer : MonoBehaviour {
 
     public string lookupResult;
     public bool showFullLog_ThisCausesLag = false;
-    public List<PlaybackLogAction2> log;
-    public Recorder rec;
+    public List<PlaybackLogEntry> log;
 	// Use this for initialization
 	void Start () {
 		
@@ -18,7 +17,7 @@ public class LogViewer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        numCurrentSpawns = PlaybackLogAction2.numRunningSerializations;
+        numCurrentSpawns = Recorder.SpawnQueueSize();
         // if (PlaybackLogAction2.objectMap[lookupKey] != null){
         //     lookupResult = PlaybackLogAction2.objectMap[lookupKey].name;
         // } else {
