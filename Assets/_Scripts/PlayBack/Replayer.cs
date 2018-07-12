@@ -11,7 +11,7 @@ public static class Replayer
 
     private static List<PlaybackLogEntry> log;
     private static bool replaying = false;
-    public static bool Replaying { get { return false; } }
+    public static bool Replaying { get { return replaying; } }
 
     private static void LoadReplay(string json)
     {
@@ -128,7 +128,7 @@ public static class Replayer
             }
             else
             {
-                UnityEngine.Debug.Log("<color=yellow>Breaking for now:</color>");
+                //UnityEngine.Debug.Log("<color=yellow>Breaking for now:</color>");
                 yield return null;
             }
         }

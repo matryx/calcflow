@@ -59,18 +59,23 @@ public partial class PlaybackLogEntry
     public void Reenact()
     {
         GameObject subject;
+        subject = GetObject(subjectKey);
+
 
         string key = _info.GetValue<string>("key");
 
         switch (key)
         {
             case "spawn":
-                subject = GetObject(subjectKey);
                 ReenactSpawn(_info, subject, this);
                 break;
             default:
-                subject = GetObject(subjectKey);
                 ReenactAction reenactor;
+                if (subject == null)
+                {
+                    Debug.LogError("Could not reenact " + key + " becaused object with id " + subjectKey + "does not exist");
+                    return;
+                }
                 if (Reenactors.TryGetValue(key, out reenactor))
                 {
                     reenactor(_info, subject, this);
