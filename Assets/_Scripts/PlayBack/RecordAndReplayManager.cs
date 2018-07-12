@@ -7,23 +7,24 @@ public class RecordAndReplayManager : MonoBehaviour
     public bool EditorRecord = false;
     public bool EditorPause = false;
     public bool EditorReplay = false;
-
+    private static bool recording = false;
     public static bool Recording
     {
         get
         {
-            return Recorder.Recording && !Recorder.Paused;
+            return recording;
         }
         set
         {
-            if (value && !Recorder.Recording)
+            if (value && !recording)
             {
                 Recorder.StartRecording();
             }
-            else if (!value && Recorder.Recording)
+            else if (!value && recording)
             {
                 Recorder.EndRecording();
             }
+            recording = value;
         }
     }
     public static bool Paused
@@ -44,23 +45,24 @@ public class RecordAndReplayManager : MonoBehaviour
             }
         }
     }
-
+    private static bool replaying = false;
     public static bool Replaying
     {
         get
         {
-            return Replaying;
+            return Replayer.Replaying;
         }
         set
         {
-            if (value && !Replayer.Replaying)
+            if (value && !replaying)
             {
                 Replayer.StartReplaying();
             }
-            if (!value && Replayer.Replaying)
+            if (!value && replaying)
             {
                 Replayer.StopReplaying();
             }
+            replaying = value;
         }
     }
 

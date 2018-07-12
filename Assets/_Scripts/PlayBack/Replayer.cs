@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using Nanome.Core;
 using UnityEngine;
+using System.Diagnostics;
 
 public static class Replayer
 {
+    public static Stopwatch timer = new Stopwatch();
 
     private static List<PlaybackLogEntry> log;
     private static bool replaying = false;
@@ -27,28 +29,35 @@ public static class Replayer
     }
     private static IEnumerator StartUpProcess(Async routine)
     {
+        timer.Start();
         LoadReplay(Recorder.SavedLog);
         LoadingScreen loadingScreen = StartLoadingScreen();
         loadingScreen.SetBarLimit(100);
         loadingScreen.SetRemaining(100);
+        LoggerManager.SetupReenactors();
         yield return null;
         PreLoad();
         yield return null;
         EndLoadingScreen(loadingScreen);
-        LoggerManager.SetupReenactors();
+        UnityEngine.Debug.Log("ended loadingScreen");
         replaying = true;
         PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
-        PlaybackClock.AddToTimer(ReplayFromLog);
+        Async.runInCoroutine(ReplayFromLog);
+        timer.Stop();
+        UnityEngine.Debug.Log("LoadTime: " + timer.Elapsed);
     }
     static string LoadingScreenPrefab = "Prefabs\\LoadingScreen";
     static LoadingScreen StartLoadingScreen()
     {
         GameObject LoadingScreen = GameObject.Instantiate(Resources.Load(LoadingScreenPrefab, typeof(GameObject))) as GameObject;
-        return LoadingScreen.GetComponent<LoadingScreen>();
+        LoadingScreen ls = LoadingScreen.GetComponent<LoadingScreen>();
+        ls.StartLoading();
+        return ls;
     }
     static void EndLoadingScreen(LoadingScreen loadingScreen)
     {
+        UnityEngine.Debug.Log("ending loadingScreen");
         loadingScreen.StopLoading();
         GameObject.Destroy(loadingScreen.gameObject);
     }
@@ -60,7 +69,7 @@ public static class Replayer
         {
             if (log.Count == 0)
             {
-                Debug.Log("replay finished");
+                UnityEngine.Debug.Log("replay finished");
 
                 StopReplaying();
                 break;
@@ -76,53 +85,51 @@ public static class Replayer
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e.Message);
+                    UnityEngine.Debug.LogError(e.Message);
                 }
             }
             else
             {
-                Debug.Log("<color=yellow>preLoad Finished</color>");
+                UnityEngine.Debug.Log("<color=yellow>preLoad Finished</color>");
                 break;
             }
         }
     }
 
-    private static void ReplayFromLog()
+    private static IEnumerator ReplayFromLog(Async process)
     {
-        if (Replaying)
+
+        while (true)
         {
-            while (true)
+            //print("attempting pop");
+            if (log.Count == 0)
             {
-                //print("attempting pop");
-                if (log.Count == 0)
-                {
-                    Debug.Log("replay finished");
+                UnityEngine.Debug.Log("replay finished");
 
-                    //print("nothing to pop");
-                    StopReplaying();
-                    break;
-                }
-                if (log[0].timeStamp <= PlaybackClock.GetTime())
-                {
-                    //print("popping next instruction");
-                    PlaybackLogEntry item = log[0];
-                    log.RemoveAt(0);
-                    item.Reenact();
+                //print("nothing to pop");
+                StopReplaying();
+                break;
+            }
+            if (log[0].timeStamp <= PlaybackClock.GetTime())
+            {
+                //print("popping next instruction");
+                PlaybackLogEntry item = log[0];
+                log.RemoveAt(0);
+                item.Reenact();
 
-                    // try
-                    // {
-                    //     item.Reenact();
-                    // }
-                    // catch (Exception e)
-                    // {
-                    //     Debug.LogError(e.Message);
-                    // }
-                }
-                else
-                {
-                    //Debug.Log("<color=yellow>Breaking for now:</color>");
-                    break;
-                }
+                // try
+                // {
+                //     item.Reenact();
+                // }
+                // catch (Exception e)
+                // {
+                //     UnityEngine.Debug.LogError(e.Message);
+                // }
+            }
+            else
+            {
+                UnityEngine.Debug.Log("<color=yellow>Breaking for now:</color>");
+                yield return null;
             }
         }
     }

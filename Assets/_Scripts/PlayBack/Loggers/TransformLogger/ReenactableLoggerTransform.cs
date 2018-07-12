@@ -11,8 +11,11 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
     private void Start()
     {
+
         if (Recorder.Recording)
+        {
             PlaybackClock.AddToTimer(RecordPosition);
+        }
     }
 
     void RecordPosition()
@@ -26,7 +29,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
                 long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period * 1000);
                 long duration = lerp ? ((long)PlaybackLog.Period * 1000) : 0;
-                Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(time, duration, gameObject, transform.localPosition, 
+                Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(time, duration, gameObject, transform.localPosition,
                                                                                          transform.localRotation, transform.localScale, nextParent));
 
                 lastParent = transform.parent;

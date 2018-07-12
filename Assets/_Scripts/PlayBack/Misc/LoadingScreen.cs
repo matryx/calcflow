@@ -12,7 +12,7 @@ public class LoadingScreen : MonoBehaviour
     Transform loadingBar;
     float barStartingWidth = 0;
     bool loading;
-    void Start()
+    public void StartLoading()
     {
         loading = true;
         loadingText = GetComponentInChildren<TextMeshPro>();
@@ -40,7 +40,7 @@ public class LoadingScreen : MonoBehaviour
     {
         float newscale = barStartingWidth * percent;
         loadingBar.localScale = new Vector3(barStartingWidth * percent, loadingBar.localScale.y, loadingBar.localScale.z);
-        loadingBar.localPosition = new Vector3(-2+percent*2, loadingBar.localPosition.y, loadingBar.localPosition.z);
+        loadingBar.localPosition = new Vector3(-2 + percent * 2, loadingBar.localPosition.y, loadingBar.localPosition.z);
     }
 
     IEnumerator UpdateStatus()
@@ -50,11 +50,6 @@ public class LoadingScreen : MonoBehaviour
         {
             numDots = (numDots + 1) % 4;
             UpdateText(numDots);
-            UpdateBar();
-            Debug.Log("numdots: " + numDots);
-            Debug.Log("loadingBar.localScale: " + loadingBar.localScale);
-            Debug.Log("percent: " + percent);
-            Debug.Log("limit: " + limit);
 
             yield return new WaitForSeconds(.25f);
         }
@@ -69,6 +64,7 @@ public class LoadingScreen : MonoBehaviour
     public void SetRemaining(float status)
     {
         percent = 1 - status / limit;
+        UpdateBar();
     }
 
     //returns percent (between 0 and 1)

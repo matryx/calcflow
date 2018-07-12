@@ -193,10 +193,10 @@ namespace Extensions
             {
                 t = gameObject.AddComponent<T>();
             }
-            else
-            {
-                Debug.Log(gameObject.name + " already contains " + typeof(T));
-            }
+            // else
+            // {
+            //     Debug.Log(gameObject.name + " already contains " + typeof(T));
+            // }
             return t;
         }
     }

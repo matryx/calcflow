@@ -4,6 +4,7 @@ using UnityEngine;
 using Nanome.Core;
 using Nanome.Core.Daemon;
 using Extensions;
+using VoxelBusters.RuntimeSerialization;
 
 public partial class PlaybackLogEntry
 {
@@ -13,8 +14,8 @@ public partial class PlaybackLogEntry
         #region other constructors
         public static PlaybackLogEntry CreateMovement(long timestamp, long duration, GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent)
         {
-            int parentKey = (parent == null) ? 0 : parent.GetInstanceID();
-            int key = subject.GetInstanceID();
+            string parentKey = (parent == null) ? "" : PlaybackLogEntry.GetUniqueID(parent);
+            string key = PlaybackLogEntry.GetUniqueID(subject);
             PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
@@ -34,7 +35,7 @@ public partial class PlaybackLogEntry
             PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
-                subjectKey = subject.GetInstanceID(),
+                subjectKey = PlaybackLogEntry.GetUniqueID(subject),
             };
             newAction._info.AddValue("key", "enable");
 
@@ -46,7 +47,7 @@ public partial class PlaybackLogEntry
             PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
-                subjectKey = subject.GetInstanceID(),
+                subjectKey = PlaybackLogEntry.GetUniqueID(subject),
             };
             newAction._info.AddValue("key", "disable");
 
@@ -58,7 +59,7 @@ public partial class PlaybackLogEntry
             PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
-                subjectKey = subject.GetInstanceID(),
+                subjectKey = PlaybackLogEntry.GetUniqueID(subject),
             };
             newAction._info.AddValue("key", "destroy");
 
@@ -70,10 +71,10 @@ public partial class PlaybackLogEntry
             PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
-                subjectKey = subject.GetInstanceID()
+                subjectKey = PlaybackLogEntry.GetUniqueID(subject)
             };
             newAction._info.AddValue("key", "buttonPress");
-            newAction._info.AddValue("buttonPresser", presser.GetInstanceID());
+            newAction._info.AddValue("buttonPresser", GetUniqueID(presser));
             return newAction;
         }
 
@@ -82,16 +83,16 @@ public partial class PlaybackLogEntry
             PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
-                subjectKey = subject.GetInstanceID()
+                subjectKey = PlaybackLogEntry.GetUniqueID(subject)
             };
             newAction._info.AddValue("key", "buttonUnpress");
-            newAction._info.AddValue("buttonPresser", presser.GetInstanceID());
+            newAction._info.AddValue("buttonPresser", GetUniqueID(presser));
             return newAction;
         }
         #endregion
         public static PlaybackLogEntry CreateSpawn(long timestamp, GameObject subject, Vector3 position, Quaternion rotation, Vector3 scale)
         {
-            int key = subject.GetInstanceID();
+            string key = PlaybackLogEntry.GetUniqueID(subject);
             PlaybackLogEntry newAction = new PlaybackLogEntry
             {
                 timeStamp = timestamp,
@@ -104,18 +105,7 @@ public partial class PlaybackLogEntry
             newAction._info.AddValue("scale", scale);
 
             PlaybackLogEntry.numRunningSerializations++;
-            //enqueue a function that will perform the serialization of the data at a later time.
-            PlaybackLogEntry.spawnQueue.Enqueue(delegate ()
-            {
-                //Debug.Log(numRunningSerializations);
-                PlaybackLogEntry.numRunningSerializations--;
-                newAction.SerializeForSpawn(subject, key.ToString());
-            });
-            if (PlaybackLogEntry.spawner == null)
-            {
-                PlaybackLogEntry.spawner = PlaybackLogEntry.steadySpawn();
-                Dispatcher.queue(PlaybackLogEntry.spawner);
-            }
+            newAction.SerializeForSpawn(subject, key);
             return newAction;
         }
     }

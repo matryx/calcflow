@@ -21,7 +21,7 @@ public class ButtonReenactableUnpress : ReenactableAction
         if (subject != null)
         {
             button = subject.GetComponent<Button>();
-            buttonPresser = PlaybackLogEntry.GetObject(info.GetValue<int>("buttonPresser"));
+            buttonPresser = PlaybackLogEntry.GetObject(info.GetValue<string>("buttonPresser"));
             button.UnpressButton(buttonPresser);
         }
         else

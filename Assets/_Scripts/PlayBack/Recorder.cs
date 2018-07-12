@@ -7,9 +7,13 @@ using Nanome.Core.Daemon;
 using UnityEditor;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
+using System.Diagnostics;
+
 
 public static class Recorder
 {
+    public static Stopwatch timer = new Stopwatch();
+
     public static GameObject _instanceGO;
 
     public static string SavedLog;
@@ -44,7 +48,6 @@ public static class Recorder
         return objectsInScene;
     }
 
-    static int recsPerFrame = 5;
 
     private static IEnumerator PreSave(Async routine)
     {
@@ -52,30 +55,29 @@ public static class Recorder
         loadingScreen.SetBarLimit(allUIDs.Count);
         loadingScreen.SetRemaining(allUIDs.Count);
         yield return null;
-        int numRecs = 0;
+        bool saved = false;
         while (allUIDs.Count > 0)
         {
-            while (numRecs < recsPerFrame && allUIDs.Count > 0)
+            while (!saved && allUIDs.Count > 0)
             {
-                numRecs++;
                 UIDSystem uid;
                 uid = allUIDs[allUIDs.Count - 1];
                 allUIDs.RemoveAt(allUIDs.Count - 1);
                 if (uid)
                 {
                     LoggerManager.SetupLoggers(uid.gameObject);
-                    RecordSpawn(uid);
+                    saved = SaveObject(uid);
                 }
                 else
                 {
-                    Debug.Log("uid was deleted");
+                    UnityEngine.Debug.Log("uid was deleted");
                 }
             }
             loadingScreen.SetRemaining(allUIDs.Count);
-            numRecs = 0;
+            saved = false;
             yield return null;
         }
-        Debug.Log("preRecording finished");
+        UnityEngine.Debug.Log("preRecording finished");
         routine.pushEvent("SaveComplete", loadingScreen);
 
     }
@@ -83,18 +85,22 @@ public static class Recorder
     private static void StartUpProcess(object loadingScreen)
     {
         EndLoadingScreen((LoadingScreen)loadingScreen);
-        Debug.Log("startingClock");
+        UnityEngine.Debug.Log("startingClock");
+        PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
-        recording = true;
         paused = false;
+        timer.Stop();
+        UnityEngine.Debug.Log("SaveTime: " + timer.Elapsed);
     }
     #region loadingScreenStuff
     static string LoadingScreenPrefab = "Prefabs\\LoadingScreen";
     static LoadingScreen StartLoadingScreen()
     {
         GameObject LoadingScreen = GameObject.Instantiate(Resources.Load(LoadingScreenPrefab, typeof(GameObject))) as GameObject;
-        return LoadingScreen.GetComponent<LoadingScreen>();
+        LoadingScreen ls = LoadingScreen.GetComponent<LoadingScreen>();
+        ls.StartLoading();
+        return ls;
     }
     static void EndLoadingScreen(LoadingScreen loadingScreen)
     {
@@ -104,6 +110,7 @@ public static class Recorder
     #endregion
     public static void StartRecording()
     {
+        timer.Start();
         allUIDs.Clear();
         allUIDs = GetAllUIDSInScene();
         recording = true;
@@ -113,21 +120,21 @@ public static class Recorder
     }
     public static void PauseRecording()
     {
-        Debug.Log("paused recording");
+        UnityEngine.Debug.Log("paused recording");
         PlaybackClock.StopClock();
         PlaybackClock.RemoveFromTimer(CheckForSpawns);
         paused = true;
     }
     public static void ResumeRecording()
     {
-        Debug.Log("resumed recording");
+        UnityEngine.Debug.Log("resumed recording");
         PlaybackClock.StartClock();
         PlaybackClock.AddToTimer(CheckForSpawns);
         paused = false;
     }
     public static void EndRecording()
     {
-        Debug.Log("stop recording");
+        UnityEngine.Debug.Log("stop recording");
         PlaybackClock.StopClock();
         PlaybackClock.RemoveFromTimer(CheckForSpawns);
         SavedLog = JsonUtility.ToJson(recordLog);
@@ -138,12 +145,6 @@ public static class Recorder
     public static void AddUID(UIDSystem uid)
     {
         allUIDs.Add(uid);
-    }
-
-    private static void RecordSpawn(UIDSystem uid)
-    {
-        GameObject gObj = uid.gameObject;
-        LogSpawn(gObj);
     }
 
     private static void CheckForSpawns()
@@ -160,7 +161,7 @@ public static class Recorder
             }
             else
             {
-                Debug.Log("uid was deleted");
+                UnityEngine.Debug.Log("uid was deleted");
             }
         }
     }
@@ -168,6 +169,22 @@ public static class Recorder
     public static void LogAction(PlaybackLogEntry entry)
     {
         recordLog.log.Add(entry);
+    }
+    private static void RecordSpawn(UIDSystem uid)
+    {
+        GameObject gObj = uid.gameObject;
+        LogSpawn(gObj);
+    }
+
+    private static bool SaveObject(UIDSystem uid)
+    {
+        GameObject gObj = uid.gameObject;
+        if (gObj.transform.parent == null)
+        {
+            LogSpawn(gObj);
+            return true;
+        }
+        else { return false; };
     }
 
     public static void LogSpawn(GameObject subject)

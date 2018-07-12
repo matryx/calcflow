@@ -11,7 +11,7 @@ public class ReenactableActionMove : ReenactableAction
 
     public override void Reenact(LogInfo info, GameObject subject, PlaybackLogEntry entry)
     {
-        int parentKey;
+        string parentKey;
         Vector3 position;
         Vector3 scale;
         Quaternion rotation;
@@ -21,12 +21,12 @@ public class ReenactableActionMove : ReenactableAction
             position = info.GetValue<Vector3>("position");
             scale = info.GetValue<Vector3>("scale");
             rotation = info.GetValue<Quaternion>("rotation");
-            parentKey = info.GetValue<int>("parentKey");
+            parentKey = info.GetValue<string>("parentKey");
             duration = info.GetValue<long>("duration");
             GameObject newParent;
             if (PlaybackLogEntry.TryGetObject(parentKey, out newParent))
             {
-                subject.transform.SetParent((parentKey == 0) ? null : newParent.transform, false);
+                subject.transform.SetParent((parentKey == "") ? null : newParent.transform, false);
             }
             else
             {
@@ -39,7 +39,7 @@ public class ReenactableActionMove : ReenactableAction
         }
         else
         {
-            Debug.Log(entry.timeStamp + " subject " + info.GetValue<int>("subjectKey") + " could not be moved because subject does not exist.");
+            Debug.Log(entry.timeStamp + " subject #" + entry.subjectKey + " could not be moved because subject does not exist.");
         }
 
     }
