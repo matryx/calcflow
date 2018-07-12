@@ -6,7 +6,7 @@ public class RecordAndReplayManager : MonoBehaviour
 {
     public bool EditorRecord = false;
     public bool EditorPause = false;
-    Replayer replayer = new Replayer();
+    public bool EditorReplay = false;
 
     public static bool Recording
     {
@@ -45,9 +45,30 @@ public class RecordAndReplayManager : MonoBehaviour
         }
     }
 
+    public static bool Replaying
+    {
+        get
+        {
+            return Replaying;
+        }
+        set
+        {
+            if (value && !Replayer.Replaying)
+            {
+                Replayer.StartReplaying();
+            }
+            if (!value && Replayer.Replaying)
+            {
+                Replayer.StopReplaying();
+            }
+        }
+    }
+
     void Update()
     {
         Paused = EditorPause;
         Recording = EditorRecord;
+        Replaying = EditorReplay;
+
     }
 }

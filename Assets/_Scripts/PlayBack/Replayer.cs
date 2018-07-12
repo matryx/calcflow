@@ -1,57 +1,68 @@
-﻿using UnityEngine;
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Nanome.Core;
+using UnityEngine;
 
-public class Replayer : MonoBehaviour
+public static class Replayer
 {
 
-    public bool EditorReplay = false;
     private static List<PlaybackLogEntry> log;
-    private static bool replay = false;
+    private static bool replaying = false;
+    public static bool Replaying { get { return false; } }
 
-    public static Replayer _instance;
-
-    private void Start()
-    {
-        _instance = this;
-    }
-
-    private void Update()
-    {
-        Replaying = EditorReplay;
-    }
-
-    private void LoadReplay(string json)
+    private static void LoadReplay(string json)
     {
         LoadReplay(JsonUtility.FromJson<PlaybackLog>(json));
     }
 
-    private void LoadReplay(PlaybackLog replay)
+    private static void LoadReplay(PlaybackLog replay)
     {
         log = replay.GetLogCopy();
     }
 
-    private static void StartReplaying()
+    public static void StartReplaying()
     {
-        _instance.LoadReplay(Recorder.SavedLog);
-
+        Async.runInCoroutine(StartUpProcess);
+    }
+    private static IEnumerator StartUpProcess(Async routine)
+    {
+        LoadReplay(Recorder.SavedLog);
+        LoadingScreen loadingScreen = StartLoadingScreen();
+        loadingScreen.SetBarLimit(100);
+        loadingScreen.SetRemaining(100);
+        yield return null;
         PreLoad();
-
+        yield return null;
+        EndLoadingScreen(loadingScreen);
+        LoggerManager.SetupReenactors();
+        replaying = true;
         PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
+        PlaybackClock.AddToTimer(ReplayFromLog);
+    }
+    static string LoadingScreenPrefab = "Prefabs\\LoadingScreen";
+    static LoadingScreen StartLoadingScreen()
+    {
+        GameObject LoadingScreen = GameObject.Instantiate(Resources.Load(LoadingScreenPrefab, typeof(GameObject))) as GameObject;
+        return LoadingScreen.GetComponent<LoadingScreen>();
+    }
+    static void EndLoadingScreen(LoadingScreen loadingScreen)
+    {
+        loadingScreen.StopLoading();
+        GameObject.Destroy(loadingScreen.gameObject);
     }
 
     private static void PreLoad()
     {
+
         while (true)
         {
             if (log.Count == 0)
             {
                 Debug.Log("replay finished");
 
-                Replaying = false;
+                StopReplaying();
                 break;
             }
             if (log[0].timeStamp <= 0)
@@ -76,7 +87,7 @@ public class Replayer : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
+    private static void ReplayFromLog()
     {
         if (Replaying)
         {
@@ -88,7 +99,7 @@ public class Replayer : MonoBehaviour
                     Debug.Log("replay finished");
 
                     //print("nothing to pop");
-                    Replaying = false;
+                    StopReplaying();
                     break;
                 }
                 if (log[0].timeStamp <= PlaybackClock.GetTime())
@@ -109,37 +120,17 @@ public class Replayer : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("<color=yellow>Breaking for now:</color>");
+                    //Debug.Log("<color=yellow>Breaking for now:</color>");
                     break;
                 }
             }
         }
     }
 
-    private static void StopReplaying()
+    public static void StopReplaying()
     {
         PlaybackClock.StopClock();
-        _instance.EditorReplay = false;
-        replay = false;
+        replaying = false;
     }
 
-    public static bool Replaying
-    {
-        get
-        {
-            return replay;
-        }
-        set
-        {
-            if (value && !replay)
-            {
-                StartReplaying();
-            }
-            if (!value && replay)
-            {
-                StopReplaying();
-            }
-            replay = value;
-        }
-    }
 }

@@ -19,7 +19,7 @@ public static class Recorder
     {
         return allUIDs.Count;
     }
-    private static bool recording;
+    private static bool recording = false;
     public static bool Recording { get { return recording && !paused; } }
     private static bool paused = false;
     public static bool Paused { get { return paused; } }
@@ -46,7 +46,7 @@ public static class Recorder
 
     static int recsPerFrame = 5;
 
-    private static IEnumerator PreSave2(Async routine)
+    private static IEnumerator PreSave(Async routine)
     {
         LoadingScreen loadingScreen = StartLoadingScreen();
         loadingScreen.SetBarLimit(allUIDs.Count);
@@ -82,7 +82,6 @@ public static class Recorder
 
     private static void StartUpProcess(object loadingScreen)
     {
-        LoggerManager.SetupReenactors();
         EndLoadingScreen((LoadingScreen)loadingScreen);
         Debug.Log("startingClock");
         PlaybackClock.StartClock();
@@ -109,7 +108,7 @@ public static class Recorder
         allUIDs = GetAllUIDSInScene();
         recording = true;
         paused = false;
-        Async startup = Async.runInCoroutine(PreSave2);
+        Async startup = Async.runInCoroutine(PreSave);
         startup.onEvent("SaveComplete", StartUpProcess);
     }
     public static void PauseRecording()
