@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: NanoPro-Lifesciences Floor Material
   m_Shader: {fileID: 4800000, guid: cc59baed7a731bc4891e8a2377dc8c98, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: USEDISCARD_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -42,6 +42,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _GlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: c55b198229ebc0a48a113e7944dfd47d, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -58,11 +62,28 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SceneTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShadowOffset:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Sprite:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TranslucencyMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
+    - UseDiscard: 1
     - _AnisoOffset: -0.2
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -75,16 +96,25 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _Shininess: 0.078125
+    - _Smoothness: 0.45
     - _SmoothnessTextureChannel: 0
     - _SpecPower: 0.97
     - _Specular: 0.14
     - _SpecularHighlights: 1
+    - _SquashAmount: 1
     - _SrcBlend: 1
     - _UVSec: 0
+    - _WireThickness: 100
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.5955882, g: 0.5955882, b: 0.5955882, a: 0.8980392}
+    - _Emission: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FillColor: {r: 0, g: 0, b: 0, a: 0}
+    - _LineColor: {r: 1, g: 1, b: 1, a: 1}
     - _MainTint: {r: 0.2794118, g: 0.2794118, b: 0.2794118, a: 0.8980392}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _SpecularColor: {r: 0.8602941, g: 0.8602941, b: 0.8602941, a: 1}
+    - _TreeInstanceColor: {r: 1, g: 1, b: 1, a: 1}
+    - _TreeInstanceScale: {r: 1, g: 1, b: 1, a: 1}

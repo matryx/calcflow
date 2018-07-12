@@ -128,12 +128,12 @@ public class Plotter3D : MonoBehaviour {
 
         frameLine.startWidth = 0.02f;
         frameLine.endWidth = 0.02f;
-		frameLine.positionCount = 13;
+		frameLine.positionCount = 3;
 		frameLine.material = frameMaterial;
 
 		// Draws over the vertical parts of the frame twice
 		// but uses only one gameobject and only one linerenderer
-		frameLine.SetPosition (0, transform.TransformPoint(topLeft));
+		/*frameLine.SetPosition (0, transform.TransformPoint(topLeft));
 		frameLine.SetPosition (1, transform.TransformPoint(new Vector3 (maxX, 0.0f, minZ)));
 		frameLine.SetPosition (2, transform.TransformPoint(new Vector3 (maxX, 0.0f, maxZ)));
 		frameLine.SetPosition (3, transform.TransformPoint(topRight));
@@ -145,7 +145,11 @@ public class Plotter3D : MonoBehaviour {
 		frameLine.SetPosition (9, transform.TransformPoint(bottomLeft));
 		frameLine.SetPosition (10, transform.TransformPoint(new Vector3 (minX, 0.0f, minZ)));
 		frameLine.SetPosition (11, transform.TransformPoint(new Vector3 (maxX, 0.0f, minZ)));
-		frameLine.SetPosition (12, transform.TransformPoint(topLeft));
+		frameLine.SetPosition (12, transform.TransformPoint(topLeft));*/
+
+		frameLine.SetPosition(0, transform.TransformPoint(new Vector3(0,0,0)));
+		frameLine.SetPosition(1, transform.TransformPoint(new Vector3(1,1,0)));
+		frameLine.SetPosition(2, transform.TransformPoint(new Vector3(2,2,3)));
 	}
 
     public void ClearMesh()
