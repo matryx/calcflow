@@ -39,26 +39,45 @@ public class ReenactableLoggerTransform : ReenactableLogger
             }
         }
     }
+
+    private bool gObjEnabled = false;
+    void Awake()
+    {
+        if (!Recorder.Recording)
+        {
+            gObjEnabled = true;
+        }
+    }
     void OnDisable()
     {
-        if (Replayer.Replaying)
+        if (Recorder.Recording)
         {
-            long time = PlaybackClock.GetTime();
-            Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateDisable(time, gameObject));
+            if (!gameObject.activeSelf && gObjEnabled)
+            {
+                long time = PlaybackClock.GetTime();
+                Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateDisable(time, gameObject));
+                Debug.Log("logged Disable");
+            }
         }
+        gObjEnabled = true;
     }
 
     void OnEnable()
     {
-        if (Replayer.Replaying)
+
+        if (Recorder.Recording)
         {
-            long time = PlaybackClock.GetTime();
-            Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateEnable(time, gameObject));
+            if (gameObject.activeSelf && !gObjEnabled)
+            {
+                long time = PlaybackClock.GetTime();
+                Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateEnable(time, gameObject));
+            }
         }
+        gObjEnabled = true;
     }
     public override void OnDestroy()
     {
-        if (Replayer.Replaying)
+        if (Recorder.Recording)
         {
             long time = PlaybackClock.GetTime();
             Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateDestroy(time, gameObject));

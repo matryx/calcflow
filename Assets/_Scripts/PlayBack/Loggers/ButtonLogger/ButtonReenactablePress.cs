@@ -17,6 +17,12 @@ public class ButtonReenactablePress : ReenactableAction
         Button button;
         GameObject buttonPresser;
 
+        if (subject == null)
+        {
+            Debug.LogError("Could not reenact " + key + " becaused object with id " + entry.subjectKey + "does not exist");
+            return;
+        }
+
         button = subject.GetComponent<Button>();
         buttonPresser = PlaybackLogEntry.GetObject(info.GetValue<string>("buttonPresser"));
         button.PressButton(buttonPresser);

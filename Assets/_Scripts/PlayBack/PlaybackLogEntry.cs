@@ -71,11 +71,7 @@ public partial class PlaybackLogEntry
                 break;
             default:
                 ReenactAction reenactor;
-                if (subject == null)
-                {
-                    Debug.LogError("Could not reenact " + key + " becaused object with id " + subjectKey + "does not exist");
-                    return;
-                }
+
                 if (Reenactors.TryGetValue(key, out reenactor))
                 {
                     reenactor(_info, subject, this);

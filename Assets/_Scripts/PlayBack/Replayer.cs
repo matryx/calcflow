@@ -78,15 +78,15 @@ public static class Replayer
             {
                 PlaybackLogEntry item = log[0];
                 log.RemoveAt(0);
-
-                try
-                {
-                    item.Reenact();
-                }
-                catch (Exception e)
-                {
-                    UnityEngine.Debug.LogError(e.Message);
-                }
+                item.Reenact();
+                // try
+                // {
+                //     item.Reenact();
+                // }
+                // catch (Exception e)
+                // {
+                //     UnityEngine.Debug.LogError(e.Message);
+                // }
             }
             else
             {
