@@ -41,12 +41,18 @@ public class ButtonReenactableLogger : ReenactableLogger
     protected void ButtonEnterBehavior(GameObject other)
     {
         if (Recorder.Recording)
-            Recorder.LogButtonPress(gameObject, other);
+        {
+            long time = PlaybackClock.GetTime();
+            Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateButtonPress(time, gameObject, other));
+        }
     }
 
     protected void ButtonExitBehavior(GameObject other)
     {
         if (Recorder.Recording)
-            Recorder.LogButtonUnpress(gameObject, other);
+        {
+            long time = PlaybackClock.GetTime();
+            Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateButtonUnpress(time, gameObject, other));
+        }
     }
 }

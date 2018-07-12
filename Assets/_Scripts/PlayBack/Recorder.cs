@@ -15,15 +15,15 @@ public static class Recorder
     public static string SavedLog;
     private static HashSet<int> AllGameObjects = new HashSet<int>();
     private static List<UIDSystem> allUIDs = new List<UIDSystem>();
-    //DEBUGGING.
     public static int SpawnQueueSize()
     {
         return allUIDs.Count;
     }
     private static bool recording;
-    public static bool Recording { get { return recording; } }
+    public static bool Recording { get { return recording && !paused; } }
     private static bool paused = false;
     public static bool Paused { get { return paused; } }
+
     [SerializeField]
     public static PlaybackLog recordLog = new PlaybackLog();
 
@@ -49,6 +49,8 @@ public static class Recorder
     private static IEnumerator PreSave2(Async routine)
     {
         LoadingScreen loadingScreen = StartLoadingScreen();
+        loadingScreen.SetBarLimit(allUIDs.Count);
+        loadingScreen.SetRemaining(allUIDs.Count);
         yield return null;
         int numRecs = 0;
         while (allUIDs.Count > 0)
@@ -69,6 +71,7 @@ public static class Recorder
                     Debug.Log("uid was deleted");
                 }
             }
+            loadingScreen.SetRemaining(allUIDs.Count);
             numRecs = 0;
             yield return null;
         }
@@ -133,15 +136,6 @@ public static class Recorder
         paused = false;
     }
 
-    public static void UIDAdded(UIDSystem uid)
-    {
-        allUIDs.Add(uid);
-        if (Recording)
-        {
-            RecordSpawn(uid);
-        }
-    }
-
     public static void AddUID(UIDSystem uid)
     {
         allUIDs.Add(uid);
@@ -185,43 +179,6 @@ public static class Recorder
             subject.transform.position,
             subject.transform.rotation,
             subject.transform.lossyScale));
-    }
-
-    public static void LogMovement(GameObject subject, Vector3 destination, Quaternion rotation, Vector3 scale, GameObject parent, bool useLerp)
-    {
-        long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period * 1000);
-        long duration = useLerp ? ((long)PlaybackLog.Period * 1000) : 0;
-        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(time, duration, subject, destination, rotation, scale, parent));
-    }
-
-    public static void LogEnable(GameObject subject)
-    {
-        long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateEnable(time, subject));
-    }
-
-    public static void LogDisable(GameObject subject)
-    {
-        long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateDisable(time, subject));
-    }
-
-    public static void LogDestroy(GameObject subject)
-    {
-        long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateDestroy(time, subject));
-    }
-
-    public static void LogButtonPress(GameObject subject, GameObject presser)
-    {
-        long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateButtonPress(time, subject, presser));
-    }
-
-    public static void LogButtonUnpress(GameObject subject, GameObject presser)
-    {
-        long time = PlaybackClock.GetTime();
-        recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateButtonUnpress(time, subject, presser));
     }
     #endregion
 }

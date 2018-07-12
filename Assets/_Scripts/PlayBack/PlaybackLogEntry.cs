@@ -1,30 +1,24 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using Extensions;
 using CalcFlowUI;
-using Nanome.Core.Daemon;
+using Extensions;
 using Nanome.Core;
-
+using Nanome.Core.Daemon;
+using UnityEngine;
 
 [Serializable]
-public partial class PlaybackLogEntry
-{
+public partial class PlaybackLogEntry {
     #region other stuff
-    private static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject>() { { 0, null } };
+    private static Dictionary<int, GameObject> objectMap = new Dictionary<int, GameObject> () { { 0, null } };
 
-    public delegate void ReenactAction(LogInfo info, GameObject subject, PlaybackLogEntry entry);
-    protected static Dictionary<string, ReenactAction> Reenactors = new Dictionary<string, ReenactAction>();
-    public static void RegisterReenactor(string key, ReenactAction ra)
-    {
-        if (!Reenactors.ContainsKey(key))
-        {
-            Reenactors.Add(key, ra);
-        }
-        else
-        {
-            Debug.Log("Reenactors already contains key: " + key);
+    public delegate void ReenactAction (LogInfo info, GameObject subject, PlaybackLogEntry entry);
+    protected static Dictionary<string, ReenactAction> Reenactors = new Dictionary<string, ReenactAction> ();
+    public static void RegisterReenactor (string key, ReenactAction ra) {
+        if (!Reenactors.ContainsKey (key)) {
+            Reenactors.Add (key, ra);
+        } else {
+            Debug.Log ("Reenactors already contains key: " + key);
         }
     }
 
@@ -34,7 +28,7 @@ public partial class PlaybackLogEntry
     public long timeStamp;
 
     [SerializeField]
-    public LogInfo _info = new LogInfo();
+    public LogInfo _info = new LogInfo ();
 
     [HideInInspector]
     [SerializeField]
@@ -43,19 +37,16 @@ public partial class PlaybackLogEntry
     //how many serializations are left before the scene is done recording.
     public static int numRunningSerializations;
     #endregion
-    public static Queue<Action> spawnQueue = new Queue<Action>();
+    public static Queue<Action> spawnQueue = new Queue<Action> ();
 
     public static IEnumerator spawner;
     public static int spawnsPerFrame = 10;
 
-    public static IEnumerator steadySpawn()
-    {
-        while (spawnQueue.Count != 0)
-        {
-            for (int i = 0; i < spawnsPerFrame; i++)
-            {
+    public static IEnumerator steadySpawn () {
+        while (spawnQueue.Count != 0) {
+            for (int i = 0; i < spawnsPerFrame; i++) {
                 if (spawnQueue.Count == 0) break;
-                spawnQueue.Dequeue().Invoke();
+                spawnQueue.Dequeue ().Invoke ();
             }
             yield return null;
         }
@@ -63,177 +54,90 @@ public partial class PlaybackLogEntry
     }
 
     // function that will serialize the spawn and assign the binary output to "binaryRepresentation".
-    public void SerializeForSpawn(GameObject subject, string key)
-    {
+    public void SerializeForSpawn (GameObject subject, string key) {
         binaryRepresentation = "";
-        binaryRepresentation = RSManager.Serialize(subject, key);
+        binaryRepresentation = RSManager.Serialize (subject, key);
     }
 
-    void Spawn()
-    {
+    public void Reenact () {
+        GameObject subject;
+
+        string key = _info.GetValue<string> ("key");
+
+        switch (key) {
+            case "spawn":
+                subject = GetObject (subjectKey);
+                ReenactSpawn (_info, subject, this);
+                break;
+            default:
+                subject = GetObject (subjectKey);
+                ReenactAction reenactor;
+                if (Reenactors.TryGetValue (key, out reenactor)) {
+                    reenactor (_info, subject, this);
+                } else {
+                    Debug.LogError ("Could not find reenactor for key " + key);
+                }
+                break;
+        }
+    }
+    public GameObject Spawn () {
         GameObject subject;
         //subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
 
-        try
-        {
-            subject = RSManager.DeserializeData<GameObject>(binaryRepresentation, subjectKey.ToString());
-        }
-        catch (Exception e)
-        {
-            Debug.Log("Exception found in gameobject: " + _info.GetValue<string>("name") + " with subject key " + subjectKey);
-            Debug.LogError(e.Message);
+        try {
+            subject = RSManager.DeserializeData<GameObject> (binaryRepresentation, subjectKey.ToString ());
+        } catch (Exception e) {
+            Debug.Log ("Exception found in gameobject: " + _info.GetValue<string> ("name") + " with subject key " + subjectKey);
+            Debug.LogError (e.Message);
             throw e;
         }
 
-        if (objectMap.ContainsKey(subjectKey))
-        {
+        if (objectMap.ContainsKey (subjectKey)) {
             objectMap[subjectKey] = subject;
+        } else {
+            objectMap.Add (subjectKey, subject);
         }
-        else
-        {
-            objectMap.Add(subjectKey, subject);
-        }
+        return subject;
 
     }
-
-    public void Reenact()
-    {
-        GameObject subject;
-
-        string key = _info.GetValue<string>("key");
-
-        switch (key)
-        {
-            case "spawn":
-                subject = GetObject(subjectKey);
-                ReenactSpawn(_info, subject, this);
-                break;
-            case "enable":
-                subject = GetObject(subjectKey);
-                ReenactEnable(_info, subject, this);
-                break;
-            case "disable":
-                subject = GetObject(subjectKey);
-                ReenactEnable(_info, subject, this);
-                break;
-            case "destroy":
-                subject = GetObject(subjectKey);
-                ReenactDestroy(_info, subject, this);
-                break;
-            default:
-                subject = GetObject(subjectKey);
-                ReenactAction reenactor;
-                if (Reenactors.TryGetValue(key, out reenactor))
-                {
-                    reenactor(_info, subject, this);
-                }
-                else
-                {
-                    Debug.LogError("Could not find reenactor for key " + key);
-                }
-                break;
-        }
-    }
-
     //Basic Reenactors
     #region basic reenactors
-    private void ReenactSpawn(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
-    {
+    private void ReenactSpawn (LogInfo _info, GameObject subject, PlaybackLogEntry entry) {
         Vector3 position;
         Vector3 scale;
         Quaternion rotation;
         long duration;
 
-        Spawn();
+        Spawn ();
         subject = objectMap[subjectKey];
-        position = _info.GetValue<Vector3>("position");
-        scale = _info.GetValue<Vector3>("scale");
-        rotation = _info.GetValue<Quaternion>("rotation");
+        position = _info.GetValue<Vector3> ("position");
+        scale = _info.GetValue<Vector3> ("scale");
+        rotation = _info.GetValue<Quaternion> ("rotation");
 
         // if (subject.name == "PieceWiseTabs")
         // {
         //     Debug.Log("delete parent is being made. key: " + subjectKey);
         // }
-        subject.MoveTo(position, 0);
-        subject.RotateTo(rotation, 0);
-        subject.GlobalScaleTo(scale, 0);
-    }
-
-    private void ReenactEnable(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
-    {
-        int parentKey;
-        Vector3 position;
-        Vector3 scale;
-        Quaternion rotation;
-        long duration;
-
-        // if (objectMap.ContainsKey(subjectKey))
-        // {
-        //     subject = objectMap[subjectKey];
-        //     subject.SetActive(true);
-        // }
-        // else
-        // {
-        //     Debug.Log(timeStamp + " " + subjectKey);
-        // }
-    }
-
-    private void ReenactDisable(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
-    {
-        int parentKey;
-        Vector3 position;
-        Vector3 scale;
-        Quaternion rotation;
-        long duration;
-
-        subject = GetObject(subjectKey);
-
-        if (subject != null)
-        {
-            subject.SetActive(false);
-        }
-        else
-        {
-            Debug.Log(timeStamp + " " + subjectKey);
-        }
-
-    }
-
-    private void ReenactDestroy(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
-    {
-        subject = GetObject(subjectKey);
-
-        if (subject != null)
-        {
-            UnityEngine.Object.Destroy(subject, 0);
-        }
-        else
-        {
-            Debug.Log(timeStamp + " " + subjectKey);
-        }
+        subject.MoveTo (position, 0);
+        subject.RotateTo (rotation, 0);
+        subject.GlobalScaleTo (scale, 0);
     }
 
     #endregion
-    public static GameObject GetObject(int ID)
-    {
+    public static GameObject GetObject (int ID) {
         GameObject outObject;
-        TryGetObject(ID, out outObject);
+        TryGetObject (ID, out outObject);
         return outObject;
     }
 
-    public static bool TryGetObject(int ID, out GameObject outObject)
-    {
-        if (objectMap.ContainsKey(ID))
-        {
+    public static bool TryGetObject (int ID, out GameObject outObject) {
+        if (objectMap.ContainsKey (ID)) {
             outObject = objectMap[ID];
             return true;
-        }
-        else
-        {
+        } else {
             outObject = null;
             return false;
         }
     }
 
 }
-

@@ -11,7 +11,7 @@ public static class LoggerManager
 {
     private static List<ReenactableType> loggerList = new List<ReenactableType> {
         new ButtonReenactableType(),
-        new ReenactabeTypeMove(),
+        new ReenactabeTypeTransform(),
     };
 
     public static void SetupLoggers(GameObject gobj)
