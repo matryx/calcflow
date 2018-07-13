@@ -27,7 +27,7 @@ public class testScript : MonoBehaviour {
 
 		readPrices datas = new readPrices();
 		//datas.Start();
-		currPrices = datas.getPrices();
+		currPrices = null;
 		Debug.Log("prices: " + currPrices.Count);
 
 		float[] Ys = new float [numPoints];
