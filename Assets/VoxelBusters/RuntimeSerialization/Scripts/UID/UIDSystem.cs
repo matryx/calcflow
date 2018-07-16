@@ -38,15 +38,23 @@ namespace VoxelBusters.RuntimeSerialization
         [SerializeField, RuntimeSerializeField]
         [ExecuteOnValueChange(kMethodUpdateUIDs), Tooltip("Mark this enabled only for Prefab.")]
         private bool m_isPrefab = false;
-
         private GameObject m_cGameObject;
         private Transform m_cTransform;
 
+        [RuntimeSerializeField]
+        private static long uidCounter = 1;
+        [RuntimeSerializeField]
+        private long trueUniqueID = 0;
         #endregion
 
 
         public UIDSystem()
         {
+            if (trueUniqueID == 0)
+            {
+                trueUniqueID = uidCounter;
+                uidCounter++;
+            }
             Recorder.AddUID(this);
         }
 
@@ -270,6 +278,10 @@ namespace VoxelBusters.RuntimeSerialization
                 Debug.LogException(new Exception(string.Format("[RS] UID value for Gameobject with name {0} is corrupt.", CachedGameObject.name)), CachedGameObject);
 
             return m_gameObjectUIDMap.UniqueIdentifier;
+        }
+        public string GetTrueUniqueID()
+        {
+            return trueUniqueID.ToString();
         }
 
         #endregion
