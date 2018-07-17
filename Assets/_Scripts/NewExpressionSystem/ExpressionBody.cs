@@ -147,24 +147,6 @@ public class ExpressionBody : QuickButton
         }
     }
 
-    private void changeExpressionSet()
-    {
-        if (expressionParent.GetComponent<ParametricExpression>())
-        {
-            param = expressionParent.GetComponent<ParametricExpression>();
-            if (!paramManager) paramManager = ParametricManager._instance;
-            calcManager = paramManager;
-            calcManager.ChangeExpressionSet(param.getExpSet());
-        }
-        else if (expressionParent.GetComponent<VectorFieldExpression>())
-        {
-            vec = expressionParent.GetComponent<VectorFieldExpression>();
-            if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
-            calcManager = vecFieldManager;
-            calcManager.ChangeExpressionSet(vec.getExpSet());
-        }
-    }
-
     private void selectBodyIfActive()
     {
         if (expressionParent.GetComponent<ParametricExpression>() != null)
@@ -235,10 +217,27 @@ public class ExpressionBody : QuickButton
 
         if (!feedBack) feedBack = transform.parent.Find("Feedback");
         scaleUp = ScaleTo(feedBack, feedBack.localScale, selectedScale, 0.3f);
-        //BUG: couroutine won't start because ButtonInput isn't active at this point
         StartCoroutine(scaleUp);
         finishedScalingUp = false;
         thisBodySelected = true;
+    }
+
+    private void changeExpressionSet()
+    {
+        if (expressionParent.GetComponent<ParametricExpression>())
+        {
+            param = expressionParent.GetComponent<ParametricExpression>();
+            if (!paramManager) paramManager = ParametricManager._instance;
+            calcManager = paramManager;
+            calcManager.ChangeExpressionSet(param.getExpSet());
+        }
+        else if (expressionParent.GetComponent<VectorFieldExpression>())
+        {
+            vec = expressionParent.GetComponent<VectorFieldExpression>();
+            if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
+            calcManager = vecFieldManager;
+            calcManager.ChangeExpressionSet(vec.getExpSet());
+        }
     }
 
     protected override void ButtonEnterBehavior(GameObject other)

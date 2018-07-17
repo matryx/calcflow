@@ -243,12 +243,14 @@ public class Scroll : MonoBehaviour
         {
             foreach (Transform o in objs)
             {
+                o.SetParent(objectParent);
                 o.localScale = Vector3.zero;
                 toAdd.Add(o);
             }
         }
         else
         {
+            obj.SetParent(objectParent);
             obj.localScale = Vector3.zero;
             toAdd.Add(obj);
         }
@@ -276,7 +278,6 @@ public class Scroll : MonoBehaviour
 
     private void placeObject(Transform obj, int ind, bool deleting)
     {
-        obj.SetParent(objectParent);
         obj.transform.localEulerAngles = Vector3.zero;
 
         Vector3 newPos = calculateNewPos(ind, deleting);

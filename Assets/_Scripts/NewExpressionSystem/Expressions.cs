@@ -15,7 +15,6 @@ public class Expressions : MonoBehaviour
 
     //TODO:
     // 1 - main functionalities for parametric - DONE / NEED TO TEST HEAVILY
-    // 2 - need to figure out how ExpressionBody will handle vec expressions
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
@@ -117,24 +116,6 @@ public class Expressions : MonoBehaviour
 
         selectedExpression = expr;
         selectedBody = body;
-
-        if (!calcManager) calcManager = ParametricManager._instance;
-
-        //if (expr.GetComponent<ParametricExpression>())
-        //{
-        //    selectedExpSet = expr.GetComponent<ParametricExpression>().getExpSet();
-        //    calcManager.ChangeExpressionSet(selectedExpSet);
-
-        //}
-        //else if (expr.GetComponent<VectorFieldExpression>())
-        //{
-        //    selectedExpSet = expr.GetComponent<VectorFieldExpression>().getExpSet();
-        //    calcManager.ChangeExpressionSet(selectedExpSet);
-        //}
-        //else if (expr.GetComponent<Constant>())
-        //{
-        //    //TODO: implement constants
-        //}
     }
 
     void Update() { }

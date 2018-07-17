@@ -5,6 +5,7 @@ using UnityEngine;
 public class Constant : MonoBehaviour {
     Expressions.ExpressionType type;
     List<Transform> components;
+    Transform separator;
     bool initialized = false;
 
     //NOTE: list not necessary just need to figure out how to group constants together and where to put them
@@ -26,6 +27,15 @@ public class Constant : MonoBehaviour {
         }
     }
 
+    public void setSeparator(Transform sep)
+    {
+        separator = sep;
+    }
+
+    public Transform getSeparator()
+    {
+        return separator;
+    }
 
     public void addComponent(Transform comp)
     {
