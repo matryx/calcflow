@@ -39,7 +39,7 @@ public class CalcInput : MonoBehaviour
     ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
 
-    public void ChangeOutput(CalcOutput calcOutput) 
+    public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
         index = currExpression.tokens.Count;
@@ -94,7 +94,7 @@ public class CalcInput : MonoBehaviour
             case "Button_end":
                 index = currExpression.tokens.Count;
                 break;
-            #endregion
+                #endregion
         }
         #endregion
         calcManager.updateText = true;

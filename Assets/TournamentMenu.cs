@@ -85,12 +85,12 @@ public class TournamentMenu : MonoBehaviour
         var newTournaments = new List<Matryx_Tournament>();
         foreach (var rpcTournament in rpcTournaments)
         {
-            var unique = rpcTournament.UniqueId;
+            var address = rpcTournament.address;
             var title = rpcTournament.title;
             var bounty = rpcTournament.bounty;
-            Matryx_Tournament aTournament = new Matryx_Tournament(unique, title, bounty);
+            Matryx_Tournament aTournament = new Matryx_Tournament(address, title, bounty);
             aTournament.description = rpcTournament.description;
-            tournaments.Add(unique, aTournament);
+            tournaments.Add(address, aTournament);
             newTournaments.Add(aTournament);
         }
         DisplayTournaments(newTournaments);
@@ -161,7 +161,7 @@ public class TournamentMenu : MonoBehaviour
 
     private void removeLoadButton()
     {
-        if(loadButton != null)
+        if (loadButton != null)
         {
             List<Transform> loadButtonTransform = new List<Transform>();
             loadButtonTransform.Add(loadButton.transform);
@@ -187,17 +187,17 @@ public class TournamentMenu : MonoBehaviour
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
-    
+
         return button;
     }
 
     private void HandleInput(GameObject source)
     {
-        if(source.name == "Load_Button")
+        if (source.name == "Load_Button")
         {
             LoadMoreTournaments();
         }
-        else if(source.GetComponent<TournamentContainer>() != null)
+        else if (source.GetComponent<TournamentContainer>() != null)
         {
             string name = source.name;
 
