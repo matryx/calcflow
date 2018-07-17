@@ -14,25 +14,36 @@ public class Control2DViewer : MonoBehaviour
     shift : Makes camera accelerate
     space : Moves camera on X and Z axis only.  So camera doesn't gain any height*/
 
+    private float dragSpeed = 200;
+    private float slowDragSpeed = 20;
+    private Vector3 dragOrigin;
 
     float mainSpeed = 20.0f; //regular speed
     float shiftAdd = 2.0f; //multiplied by how long shift is held.  Basically running
     float camSens = 0.125f; //How sensitive it with mouse
     private Vector3 lastMouse = new Vector3(255, 255, 255); //kind of in the middle of the screen, rather than at the top (play)
-
-    void Update()
+    void ManageRotation(bool shiftMode)
     {
-        lastMouse = Input.mousePosition - lastMouse;
-        lastMouse = new Vector3(-lastMouse.y * camSens, lastMouse.x * camSens, 0);
-        lastMouse = new Vector3(transform.eulerAngles.x + lastMouse.x, transform.eulerAngles.y + lastMouse.y, 0);
-        transform.eulerAngles = lastMouse;
-        lastMouse = Input.mousePosition;
-        //Mouse  camera angle done.  
+        if (Input.GetMouseButtonDown(0))
+        {
+            dragOrigin = Input.mousePosition;
+            return;
+        }
 
+        if (!Input.GetMouseButton(0)) return;
+
+        Vector3 pos = Camera.main.ScreenToViewportPoint(Input.mousePosition - lastMouse);
+        float speed = shiftMode ? slowDragSpeed : dragSpeed;
+        Vector3 move = new Vector3(-pos.y * speed, pos.x * speed);
+        //transform.Translate(move, Space.World);
+        transform.eulerAngles += move;
+    }
+    void ManageMovement(bool shiftMode)
+    {
         //Keyboard commands
         float f = 0.0f;
         Vector3 p = GetBaseInput();
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (shiftMode)
         {
             p = p * shiftAdd;
         }
@@ -42,20 +53,21 @@ public class Control2DViewer : MonoBehaviour
         }
 
         p = p * Time.deltaTime;
-        Vector3 newPosition = transform.position;
-        if (Input.GetKey(KeyCode.Space))
-        { //If player wants to move on X and Z axis only
-            transform.Translate(p);
-            newPosition.x = transform.position.x;
-            newPosition.z = transform.position.y+1;
-            newPosition.z = transform.position.z;
-            transform.position = newPosition;
-        }
-        else
-        {
-            transform.Translate(p);
-        }
+        transform.Translate(p);
 
+    }
+
+    bool GetShiftMode()
+    {
+        return Input.GetKey(KeyCode.LeftShift);
+    }
+
+    void Update()
+    {
+        bool shiftMode = GetShiftMode();
+        ManageRotation(shiftMode);
+        ManageMovement(shiftMode);
+        lastMouse = Input.mousePosition;
     }
 
     private Vector3 GetBaseInput()
@@ -76,6 +88,14 @@ public class Control2DViewer : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             p_Velocity += new Vector3(1, 0, 0);
+        }
+        if (Input.GetKey(KeyCode.Space))
+        {
+            p_Velocity += new Vector3(0, 1, 0);
+        }
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            p_Velocity += new Vector3(0, -1, 0);
         }
         return p_Velocity;
     }
