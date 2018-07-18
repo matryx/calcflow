@@ -84,14 +84,15 @@ public static class Recorder
 
     private static void StartUpProcess(object loadingScreen)
     {
+        timer.Stop();
+        UnityEngine.Debug.Log("SaveTime: " + timer.Elapsed);
         EndLoadingScreen((LoadingScreen)loadingScreen);
         UnityEngine.Debug.Log("startingClock");
         PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
+        recording = true;
         PlaybackClock.AddToTimer(CheckForSpawns);
         paused = false;
-        timer.Stop();
-        UnityEngine.Debug.Log("SaveTime: " + timer.Elapsed);
     }
     #region loadingScreenStuff
     static string LoadingScreenPrefab = "Prefabs\\LoadingScreen";
@@ -110,13 +111,12 @@ public static class Recorder
     #endregion
     public static void StartRecording()
     {
-        timer.Start();
         allUIDs.Clear();
         allUIDs = GetAllUIDSInScene();
-        recording = true;
         paused = false;
         Async startup = Async.runInCoroutine(PreSave);
         startup.onEvent("SaveComplete", StartUpProcess);
+        timer.Start();
     }
     public static void PauseRecording()
     {

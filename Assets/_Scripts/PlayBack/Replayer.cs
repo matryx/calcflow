@@ -9,7 +9,7 @@ public static class Replayer
 {
     public static Stopwatch timer = new Stopwatch();
 
-    private static List<PlaybackLogEntry> log;
+    public static List<PlaybackLogEntry> log;
     private static bool replaying = false;
     public static bool Replaying { get { return replaying; } }
 
@@ -29,23 +29,23 @@ public static class Replayer
     }
     private static IEnumerator StartUpProcess(Async routine)
     {
-        timer.Start();
         LoadReplay(Recorder.SavedLog);
         LoadingScreen loadingScreen = StartLoadingScreen();
         loadingScreen.SetBarLimit(100);
         loadingScreen.SetRemaining(100);
         LoggerManager.SetupReenactors();
         yield return null;
+        timer.Start();
         PreLoad();
+        timer.Stop();
         yield return null;
+        UnityEngine.Debug.Log("LoadTime: " + timer.Elapsed);
+
         EndLoadingScreen(loadingScreen);
-        UnityEngine.Debug.Log("ended loadingScreen");
         replaying = true;
         PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
         Async.runInCoroutine(ReplayFromLog);
-        timer.Stop();
-        UnityEngine.Debug.Log("LoadTime: " + timer.Elapsed);
     }
     static string LoadingScreenPrefab = "Prefabs\\LoadingScreen";
     static LoadingScreen StartLoadingScreen()
@@ -57,7 +57,6 @@ public static class Replayer
     }
     static void EndLoadingScreen(LoadingScreen loadingScreen)
     {
-        UnityEngine.Debug.Log("ending loadingScreen");
         loadingScreen.StopLoading();
         GameObject.Destroy(loadingScreen.gameObject);
     }

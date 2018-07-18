@@ -2,29 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LogViewer : MonoBehaviour {
+public class LogViewer : MonoBehaviour
+{
     public int numCurrentSpawns;
 
-    public int lookupKey;
+    public int replayLogCount;
+    public int recordLogCount;
 
-    public string lookupResult;
-    public bool showFullLog_ThisCausesLag = false;
-    public List<PlaybackLogEntry> log;
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    // Use this for initialization
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
         numCurrentSpawns = Recorder.SpawnQueueSize();
-        // if (PlaybackLogAction2.objectMap[lookupKey] != null){
-        //     lookupResult = PlaybackLogAction2.objectMap[lookupKey].name;
-        // } else {
-        //     lookupResult = "______";
-        // }
-        //if (numCurrentSpawns > 0) print(numCurrentSpawns);
-        if (showFullLog_ThisCausesLag)
-            log = Recorder.recordLog.GetLogCopy();
+        if (Replayer.log != null)
+        {
+            replayLogCount = Replayer.log.Count;
+        }
+        if (Recorder.recordLog != null)
+        {
+            recordLogCount = Recorder.recordLog.log.Count;
+        }
+
     }
 }

@@ -9,14 +9,16 @@ public class ReenactableLoggerTransform : ReenactableLogger
     Quaternion lastRotation;
     Transform lastParent;
 
-    private void Start()
-    {
+    bool added = false;
 
-        if (Recorder.Recording)
+    private void Update()
+    {
+        if (Recorder.Recording && !added)
         {
             PlaybackClock.AddToTimer(RecordPosition);
         }
     }
+
 
     void RecordPosition()
     {
