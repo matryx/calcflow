@@ -19,6 +19,7 @@
 using UnityEngine;
 using System.Collections;
 using System;
+using Calcflow.UserStatistics;
 
 public class FlexButtonComponent : FlexActionableComponent
 {
@@ -110,6 +111,15 @@ public class FlexButtonComponent : FlexActionableComponent
         } else if (_new == 1)
         {
             transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
+            string eventName = "Unknown";
+            if (gameObject != null)
+            {
+                eventName = gameObject.name;
+            }
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.StartEvent("Button Hover", eventName);
+            }
         }
         else if (_new == 2)
         {
@@ -118,6 +128,15 @@ public class FlexButtonComponent : FlexActionableComponent
         else
         {
             transform.Find("Body").GetComponent<Renderer>().material.color = passiveColor;
+            string eventName = "Unknown";
+            if (gameObject != null)
+            {
+                eventName = gameObject.name;
+            }
+            if (!eventName.Equals("Body") && _old == 1)
+            {
+                StatisticsTracking.EndEvent("Button Hover", eventName);
+            }
         }
     }
 
@@ -137,3 +156,4 @@ public class FlexButtonComponent : FlexActionableComponent
         }
     }
 }
+

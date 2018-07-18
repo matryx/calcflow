@@ -98,6 +98,8 @@ namespace NanoVRController
             position = OVRInput.GetLocalControllerPosition(ovrController);
             rotation = OVRInput.GetLocalControllerRotation(ovrController);
 
+			// Debug.Log(hand.ToString() + " POSITION" + position);
+
             foreach (ControllerComponent c in components.Values)
             {
                 c.UpdateComponent();

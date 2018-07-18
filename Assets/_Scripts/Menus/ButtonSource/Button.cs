@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Calcflow.UserStatistics;
 
 namespace CalcFlowUI
 {
@@ -25,6 +26,14 @@ namespace CalcFlowUI
 #endif
             if (OnButtonEnter != null)
                 OnButtonEnter.Invoke(other);
+
+            string eventName = gameObject.name;
+            var extra = new Dictionary<string, object>();
+            extra["parent"] = gameObject.transform.parent.name;
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.StartEvent("Button Press", eventName, extra);
+            }
         }
 
         public virtual void UnpressButton(GameObject other)
@@ -37,6 +46,12 @@ namespace CalcFlowUI
 #endif
             if (OnButtonExit != null)
                 OnButtonExit.Invoke(other);
+
+            string eventName = gameObject.name;
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.EndEvent("Button Press", eventName);
+            }
         }
 
 #if UNITY_EDITOR
