@@ -279,10 +279,6 @@ namespace VoxelBusters.RuntimeSerialization
 
             return m_gameObjectUIDMap.UniqueIdentifier;
         }
-        public string GetTrueUniqueID()
-        {
-            return trueUniqueID.ToString();
-        }
 
         #endregion
 

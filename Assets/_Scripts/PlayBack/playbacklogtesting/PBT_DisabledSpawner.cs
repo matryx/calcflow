@@ -18,7 +18,8 @@ public class PBT_DisabledSpawner : MonoBehaviour
             {
                 lastSpawned.SetActive(true);
             }
-            lastSpawned = Instantiate(Resources.Load("Prefabs\\PBT_Prefabs\\DisabledSphere", typeof(GameObject))) as GameObject;
+            lastSpawned = RSUtility.Instantiate(Resources.Load("Prefabs\\PBT_Prefabs\\DisabledSphere", typeof(GameObject)) as GameObject, transform.position, Quaternion.identity);
+
             elapsedTime = 0;
         }
 

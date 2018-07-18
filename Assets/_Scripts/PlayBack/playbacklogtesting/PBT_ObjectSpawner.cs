@@ -14,7 +14,7 @@ public class PBT_ObjectSpawner : MonoBehaviour
         if (elapsedTime > 2)
         {
 
-            Instantiate(Resources.Load("Prefabs\\PBT_Prefabs\\Sphere", typeof(GameObject)));
+            RSUtility.Instantiate(Resources.Load("Prefabs\\PBT_Prefabs\\Sphere", typeof(GameObject)) as GameObject);
             elapsedTime = 0;
         }
 

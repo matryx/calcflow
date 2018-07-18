@@ -11,7 +11,7 @@ public class ReenactableActionEnable : ReenactableAction
     {
         if (subject == null)
         {
-            Debug.LogError("Could not reenact " + key + " becaused object with id " + entry.subjectKey + " does not exist");
+             Debug.LogError("Could not reenact " + key + " becaused object with id " + entry.subjectKey + " does not exist");
             return;
         }
 
