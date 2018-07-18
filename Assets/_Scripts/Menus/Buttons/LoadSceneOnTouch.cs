@@ -5,7 +5,8 @@ using UnityEngine.SceneManagement;
 using CalcFlowUI;
 
 
-public class LoadSceneOnTouch : QuickButton {
+public class LoadSceneOnTouch : QuickButton
+{
 
     public int targetSceneIndex;
     public bool reset;
