@@ -13,7 +13,7 @@ public class LineChart : MonoBehaviour {
 		return _instance;
 	}
 
-	private string URL;
+	private string URL = "https://graphs2.coinmarketcap.com/currencies/bitcoin/1367174841000/1532036340000/";
 	public void SetURL(string newURL){
 		URL = newURL;
 	}
@@ -23,6 +23,8 @@ public class LineChart : MonoBehaviour {
 	StringBuilder builder = new StringBuilder();
 	public List<string> times = new List<string>();
 	public List<string> prices = new List<string>();
+
+	public List<GameObject> pointList = new List<GameObject>();
 	float[]scaledPrices;
 
 	GameObject frameObj;
@@ -39,7 +41,42 @@ public class LineChart : MonoBehaviour {
 	}
 
 	 void Start () {
-		//builder.Append ("test");
+			//SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/1367174841000/1532036340000/");
+			//updateGraph();
+	}
+
+	public void kill(){
+		StopAllCoroutines();
+		Destroy(frameLine);
+		times = new List<string>();
+		prices = new List<string>();
+
+		foreach(Transform child in transform){
+			Destroy(child.gameObject);
+		}
+
+		pointList = new List<GameObject>();
+		builder = new StringBuilder();
+	}
+
+/*	int count = 0;
+	void Update(){
+		if(count < 200){
+			++count;
+			Debug.Log(count);
+		}
+		if(count == 200){
+			count = 201;
+			kill();
+			SetURL("https://graphs2.coinmarketcap.com/currencies/matryx/1514931258000/1532023752000/");
+			Debug.Log(URL);
+			Debug.Log("----------------UPDATING----------------");
+			updateGraph();
+		}
+
+	}
+*/
+	public void updateGraph(){
 		Async obj = Async.runInCoroutine(GetText);
 		obj.onEvent ("Done", parseData);
 	}
@@ -101,6 +138,8 @@ public class LineChart : MonoBehaviour {
 			frameLine.SetPosition (i, new Vector3 (xPos, scaledPrices[i], 0));
 			Transform currPoint = Instantiate (point, new Vector3 (0, 0, 0), Quaternion.identity, transform);
 			currPoint.localPosition = new Vector3 (xPos, scaledPrices[i], 0);
+
+			//pointList.Add(currPoint);
 			
 
 		}
@@ -143,7 +182,6 @@ public class LineChart : MonoBehaviour {
 	}
 
 	IEnumerator GetText(Async routine){
-		Debug.Log("getText");
 		using(WWW www = new WWW (URL)) {
 			yield return www;
 			yield return www.text;
