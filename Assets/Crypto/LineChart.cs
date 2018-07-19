@@ -8,6 +8,16 @@ using Nanome.Core;
 
 public class LineChart : MonoBehaviour {
 
+	private static LineChart _instance;
+	public static LineChart GetInstance(){
+		return _instance;
+	}
+
+	private string URL;
+	public void SetURL(string newURL){
+		URL = newURL;
+	}
+
 	// Use this for initialization
 	string output;
 	StringBuilder builder = new StringBuilder();
@@ -24,13 +34,14 @@ public class LineChart : MonoBehaviour {
 	public Material frameMaterial;
 	public Transform point;
 
+	void Awake () {
+		_instance = this;
+	}
+
 	 void Start () {
 		//builder.Append ("test");
-		Debug.Log("started");
 		Async obj = Async.runInCoroutine(GetText);
-		Debug.Log("started1");
 		obj.onEvent ("Done", parseData);
-		Debug.Log("started2");
 	}
 
 	// Extracts the usd price time/price data from the text
@@ -133,8 +144,7 @@ public class LineChart : MonoBehaviour {
 
 	IEnumerator GetText(Async routine){
 		Debug.Log("getText");
-		string url = "https://graphs2.coinmarketcap.com/currencies/bitcoin/1367174841000/1531512240000/";
-		using(WWW www = new WWW (url)) {
+		using(WWW www = new WWW (URL)) {
 			yield return www;
 			yield return www.text;
 			builder.Append (www.text);

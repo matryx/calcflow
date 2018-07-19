@@ -27,10 +27,6 @@ public class ToggleSecondaryMenu : QuickButton {
         circle.localScale = new Vector3(0.5f, 0.01f, 0.5f);
     }
 
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
     protected override void Start()
     {
