@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using Nanome.Core;
 using UnityEngine.Networking;
+using TMPro;
 
 public class CryptoPresetMenu : MonoBehaviour
 {
@@ -35,9 +36,13 @@ public class CryptoPresetMenu : MonoBehaviour
 
     double first, second;
     string baseURL = "https://graphs2.coinmarketcap.com/currencies/";
-    string currCrypto, currTime = "1yr", toSearch;
+    string currCrypto, currTime = "All", toSearch;
     StringBuilder builder = new StringBuilder();
     StringBuilder customInput = new StringBuilder();
+
+    public GameObject inputButton;
+    private TextMeshPro textMesh;
+    public Transform view;
 
     
 
@@ -86,15 +91,22 @@ public class CryptoPresetMenu : MonoBehaviour
     }
     protected void HandleInput(string source)
     {
+        textMesh = inputButton.GetComponent<TextMeshPro>();
         switch (source)
         {
             default:
             if(source.Equals("Enter")){
                 Keyboard.SetActive(false);
                 toSearch = customInput.ToString();
+                textMesh.text = "Custom Input";
+                Debug.Log("CUSTOM INPUT: " + toSearch);
                 webCall();
+            }else if (source.Equals("Del")){
+                customInput.Remove(customInput.Length-1, 1);
+                textMesh.text = customInput.ToString();
             }else{
                 customInput.Append(source);
+                textMesh.text = customInput.ToString();
             }
                 break;
             //R1 -> R1
@@ -113,6 +125,7 @@ public class CryptoPresetMenu : MonoBehaviour
             case "Custom":
                 // TODO: make keyboard for custom input.
                 customInput = new StringBuilder();
+                setKeyboardPos();
                 Keyboard.SetActive(true);
                 break;
             case "1d":
@@ -141,7 +154,17 @@ public class CryptoPresetMenu : MonoBehaviour
                 break;
         }
     }
-
+    void setKeyboardPos()
+    {
+        Transform Keyboardt = Keyboard.transform;
+        Keyboardt.SetParent(view);
+        Keyboardt.localPosition = new Vector3(0, 0, 0.7f);
+        Keyboardt.localEulerAngles = new Vector3(0, 0, 0);
+        Keyboardt.SetParent(null);
+        Keyboardt.localEulerAngles = new Vector3(Keyboardt.localEulerAngles.x,
+        Keyboardt.localEulerAngles.y, Keyboardt.localEulerAngles.z);
+        //Keyboardt.localScale = Vector3.one;
+    }
     void newGraph()
     {
         chart.kill();
@@ -201,6 +224,7 @@ public class CryptoPresetMenu : MonoBehaviour
 
     void webCall()
     {
+        builder = new StringBuilder();
         Async obj = Async.runInCoroutine(GetJSON);
         obj.onEvent("Finished", parseJSON);
     }
@@ -218,18 +242,22 @@ public class CryptoPresetMenu : MonoBehaviour
 
 	void parseJSON(object tmp){ 
 		string data = ((StringBuilder)tmp).ToString ();
+        Debug.Log("SEARCHING FOR: " + toSearch);
 		findName(data, toSearch);
 	}
 
     void findName(string text, string search){
         text = text.ToLower();
         search = search.ToLower();
-
-        int start = text.IndexOf(search);
+        Debug.Log("FINDING: " + search);
+        search = "\"" + search + "\"";
+        Debug.Log(search);
+        int start = text.IndexOf(search)+1;
         text = text.Substring(start, text.Length-1-start);
         int name = text.IndexOf("website_slug") + 16;
         int nameEnd = text.IndexOf("}");
         currCrypto = text.Substring(name, nameEnd - name-10);
+        Debug.Log("SUBSTRING: " + text.Substring(name, nameEnd - name-10));
         Debug.Log("CURR CRYPTO: " + currCrypto);
         newGraph();
     }
