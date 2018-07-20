@@ -31,11 +31,13 @@ public class CryptoPresetMenu : MonoBehaviour
     LineChart chart;
 
     GameObject graph;
+    public GameObject Keyboard;
 
     double first, second;
     string baseURL = "https://graphs2.coinmarketcap.com/currencies/";
     string currCrypto, currTime = "1yr", toSearch;
     StringBuilder builder = new StringBuilder();
+    StringBuilder customInput = new StringBuilder();
 
     
 
@@ -79,12 +81,21 @@ public class CryptoPresetMenu : MonoBehaviour
         }
     }
 
+    public void sendSignal(string source){
+        HandleInput(source);
+    }
     protected void HandleInput(string source)
     {
         switch (source)
         {
             default:
-                Debug.Log("unknown preset pressed");
+            if(source.Equals("Enter")){
+                Keyboard.SetActive(false);
+                toSearch = customInput.ToString();
+                webCall();
+            }else{
+                customInput.Append(source);
+            }
                 break;
             //R1 -> R1
             case "MTX":
@@ -101,9 +112,8 @@ public class CryptoPresetMenu : MonoBehaviour
                 break;
             case "Custom":
                 // TODO: make keyboard for custom input.
-                toSearch = "veltor";
-                webCall();
-                //Debug.Log("CURR CRYPTO: " + currCrypto);
+                customInput = new StringBuilder();
+                Keyboard.SetActive(true);
                 break;
             case "1d":
                 getTimeStamps(source);

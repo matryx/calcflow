@@ -26,6 +26,8 @@ public class KeyboardMenu : MonoBehaviour
     }
 
     public FlexMenu menu;
+
+    public CryptoPresetMenu cryptoMenu;
     public string defaultFunction = "MTX";
     CalcManager calcManager;
     LineChart chart;
@@ -83,17 +85,8 @@ public class KeyboardMenu : MonoBehaviour
         switch (source)
         {
             default:
-                //Debug.Log("unknown preset pressed");
-                Debug.Log("Button Pressed: " + source);
+                cryptoMenu.sendSignal(source);
                 break;
-            //R1 -> R1
-            case "MTX":
-                currCrypto = "matryx";
-                break;
-            case "BTC":
-                currCrypto = "bitcoin";
-                break;
-
         }
     }
 
