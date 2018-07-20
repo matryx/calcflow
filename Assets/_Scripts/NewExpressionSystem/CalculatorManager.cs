@@ -25,15 +25,26 @@ public abstract class CalculatorManager : MonoBehaviour
     public bool toExport = false;
     public List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
 
+    protected Expressions expressions;
+    protected Transform selectedExpr;
+    protected JoyStickAggregator joyStickAggregator;
+
     void Start()
     {
         Initialize();
     }
 
     protected abstract void Initialize();
-    public abstract bool letterPressed(string buttonID);
-    //handles process of deleting variables
     public abstract void deleteVariables(List<string> toDelete);
+
+    protected void addForwarders(Transform obj)
+    {
+        JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>();
+        foreach (JoyStickForwarder j in forwarders)
+        {
+            joyStickAggregator.AddForwarder(j);
+        }
+    }
 
     public virtual void SetOutput(CalcOutput output)
     {
@@ -57,6 +68,82 @@ public abstract class CalculatorManager : MonoBehaviour
     {
         expressionSet = ES;
         inputReceived = true;
+    }
+
+    private string getExpOption()
+    {
+        title = (expressions.getSelectedBody()) ? expressions.getSelectedBody().getTitle() : "X";
+        return title;
+    }
+
+    public void ManageFeedback()
+    {
+        selectedExpr = expressions.getSelectedExpr();
+        if (expressions.selectedNotNull())
+        {
+            feedBack = expressions.getSelectedBody().getFeedBack();
+            title = expressions.getSelectedBody().getTitle();
+        }
+
+        if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity[title] ? positiveFeedback : negativeFeedback;
+    }
+
+    public void manageText()
+    {
+        selectedExpr = expressions.getSelectedExpr();
+        ExpressionBody exprBody = expressions.getSelectedBody();
+
+        if (selectedExpr == null || exprBody == null) return;
+
+        if (expressions.selectedNotNull())
+        {
+            textInput = exprBody.getTextInput();
+        }
+
+        if (textInput != null)
+        {
+            int displayLength = (exprBody.isVariable()) ? rangeDisplayLength : expressionDisplayLength;
+            textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
+        }
+
+        inputReceived = true;
+    }
+
+    public bool letterPressed(string buttonID)
+    {
+        Transform param = expressions.getSelectedExpr();
+
+        //prevents typing of letters when a variable body is selected
+        if (expressions.getSelectedBody() && expressions.getSelectedBody().isVariable())
+        {
+            return false;
+        }
+
+        //creates new variable button when new letter pressed
+        if (param != null)
+        {
+            if (expressionSet.hiddenRanges.ContainsKey(buttonID))
+            {
+                ExpressionSet.getExpressionSet(calcInput.currExpression).ReAddVariable(buttonID);
+                param.GetComponent<ParametricExpression>().addVariable(buttonID, null);
+            }
+            else if (expressionSet.GetRange(buttonID) == null)
+            {
+                GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+                var.transform.localScale = Vector3.one;
+                var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
+                var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
+                var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
+                var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
+
+                param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
+                var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
+                expressionSet.AddRange(buttonID);
+                addForwarders(var.transform);
+            }
+        }
+
+        return true;
     }
 
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)

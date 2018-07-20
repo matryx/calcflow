@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ParametricExpression : MonoBehaviour
+public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
 {
     Expressions expressionsClass;
     ExpressionSet expSet;

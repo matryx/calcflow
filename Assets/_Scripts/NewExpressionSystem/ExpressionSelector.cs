@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Extensions;
 
 public class ExpressionSelector : QuickButton
 {
     Scroll thisScroll;
     Expressions expressions;
     JoyStickAggregator joyStickAggregator;
-    Transform currPanel;
     Transform paramPanel, vecPanel, constPanel;
     private ParametricManager paramManager;
     private VecFieldManager vecFieldManager;
@@ -23,9 +23,7 @@ public class ExpressionSelector : QuickButton
         paramPanel = transform.parent.parent.Find("ParametrizationPanel");
         vecPanel = transform.parent.parent.Find("VectorFieldPanel");
         constPanel = transform.parent.parent.Find("ConstantPanel");
-
         thisScroll = expressions.getScroll(Expressions.ExpressionType.PARAMET);
-        currPanel = paramPanel;
 
         joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
     }
@@ -39,114 +37,76 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    //private List<Transform> 
-
-    //TODO: refactor in progress, buggy
-    //protected override void ButtonEnterBehavior(GameObject other)
-    //{
-    //    List<Transform> toAdd = new List<Transform>();
-    //    Expressions.ExpressionType panelType = Expressions.ExpressionType.PARAMET;
-    //    Transform prevSep = null;
-
-    //    if (paramPanel.gameObject.activeSelf)
-    //    {
-    //        panelType = Expressions.ExpressionType.PARAMET;
-
-    //        toAdd = createParametricExpression();
-    //        prevSep = expressions.getSelectedExpr().GetComponent<ParametricExpression>().getSeparator();
-    //    }
-    //    else if (vecPanel.gameObject.activeSelf)
-    //    {
-    //        panelType = Expressions.ExpressionType.VECFIELD;
-
-    //        toAdd = createVecExpression();
-    //        prevSep = expressions.getSelectedExpr().GetComponent<VectorFieldExpression>().getSeparator();
-    //    }
-    //    else if (constPanel.gameObject.activeSelf)
-    //    {
-    //        panelType = Expressions.ExpressionType.CONSTANT;
-
-    //        toAdd = createConstant();
-    //        prevSep = expressions.getSelectedExpr().GetComponent<Constant>().getSeparator();
-    //    }
-
-    //    thisScroll = expressions.getScroll(panelType);
-
-    //    if (expressions.getSelectedExpr())
-    //    {
-    //        thisScroll.addToScroll(toAdd, null, thisScroll.getIndex(prevSep) - 3);
-    //    }
-    //    else
-    //    {
-    //        thisScroll.addToScroll(toAdd, null, 0);
-    //    }
-
-    //    if (xButton)
-    //    {
-    //        xButton.GetComponentInChildren<ExpressionBody>().selectBody();
-    //    }
-
-    //    xButton = null;
-    //}
-
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        List<Transform> toAdd = new List<Transform>();
-        Expressions.ExpressionType panelType = Expressions.ExpressionType.PARAMET;
+        List<Transform> toAdd = setToAdd();
+        Expressions.ExpressionType panelType = setPanelType();
 
+        thisScroll = expressions.getScroll(panelType);
+        addExpressionToScroll(toAdd);
+
+        if (xButton)
+        {
+            xButton.GetComponentInChildren<ExpressionBody>().selectBody();
+            xButton = null;
+        }
+    }
+
+    private List<Transform> setToAdd()
+    {
         if (paramPanel.gameObject.activeSelf)
         {
-            panelType = Expressions.ExpressionType.PARAMET;
-            currPanel = paramPanel;
-
-            toAdd = createParametricExpression();
+            return createParametricExpression();
         }
         else if (vecPanel.gameObject.activeSelf)
         {
-            panelType = Expressions.ExpressionType.VECFIELD;
-            currPanel = vecPanel;
-
-            toAdd = createVecExpression();
+            return createVecExpression();
         }
         else if (constPanel.gameObject.activeSelf)
         {
-            panelType = Expressions.ExpressionType.CONSTANT;
-            currPanel = constPanel;
-
-            toAdd = createConstant();
+            return createConstant();
         }
+        else
+        {
+            return null;
+        }
+    }
 
-        thisScroll = expressions.getScroll(panelType);
+    private Expressions.ExpressionType setPanelType()
+    {
+        if (paramPanel.gameObject.activeSelf)
+        {
+            return Expressions.ExpressionType.PARAMET;
+        }
+        else if (vecPanel.gameObject.activeSelf)
+        {
+            return Expressions.ExpressionType.VECFIELD;
+        }
+        else if (constPanel.gameObject.activeSelf)
+        {
+            return Expressions.ExpressionType.CONSTANT;
+        }
+        else
+        {
+            Debug.Log("<color=red>PANEL TYPE NOT SET</color>");
+            return Expressions.ExpressionType.PARAMET;
+        }
+    }
+
+    private void addExpressionToScroll(List<Transform> toAdd)
+    {
         Transform prevSep = null;
 
         if (expressions.getSelectedExpr())
         {
-            if (currPanel == paramPanel)
-            {
-                prevSep = expressions.getSelectedExpr().GetComponent<ParametricExpression>().getSeparator();
-            }
-            else if (currPanel == vecPanel)
-            {
-                prevSep = expressions.getSelectedExpr().GetComponent<VectorFieldExpression>().getSeparator();
-            }
-            else if (currPanel == constPanel)
-            {
-                prevSep = expressions.getSelectedExpr().GetComponent<Constant>().getSeparator();
-            }
-
+            prevSep = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getSeparator();
+            print("INDEX: " + thisScroll.getIndex(prevSep));
             thisScroll.addToScroll(toAdd, null, thisScroll.getIndex(prevSep) - 3);
         }
         else
         {
             thisScroll.addToScroll(toAdd, null, 0);
         }
-
-        if (xButton)
-        {
-            xButton.GetComponentInChildren<ExpressionBody>().selectBody();
-        }
-
-        xButton = null;
     }
 
     private List<Transform> createParametricExpression()
@@ -194,7 +154,7 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    //BUG: adding new expression while variable min or max is selected causes new exp to be inserted in the middle of existing expression (right after X)
+    //BUG: new exp to inserted in the middle of existing expression (right after X)
     private List<Transform> createVecExpression()
     {
         List<Transform> vecComponents = new List<Transform>();
@@ -207,11 +167,9 @@ public class ExpressionSelector : QuickButton
 
         if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
         vecFieldManager.AddExpressionSet(expressionSet);
-
         vecSetUp(vec.transform, vecComponents);
 
         Transform var = createVariable(vec.transform);
-        addForwarders(var.transform);
         vecComponents.Add(var.transform);
 
         GameObject sepVec = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
@@ -241,12 +199,15 @@ public class ExpressionSelector : QuickButton
     {
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
         var.gameObject.SetActive(true);
-
-        var.GetComponentInChildren<ExpressionBody>().setExpressionParent(v);
-        var.GetComponentInChildren<ExpressionBody>().setPanel(vecPanel);
+        var.transform.localScale = Vector3.one;
+        var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(v.transform);
+        var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setExpressionParent(v.transform);
+        var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/VectorFieldPanel").transform);
+        var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/VectorFieldPanel").transform);
         var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle("t");
-
+        v.GetComponent<VectorFieldExpression>().setRange(var.transform);
         v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("t");
+        addForwarders(v.transform);
         return var.transform;
     }
 

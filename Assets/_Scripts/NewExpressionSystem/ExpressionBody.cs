@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Extensions;
 
 public class ExpressionBody : QuickButton
 {
@@ -149,15 +150,9 @@ public class ExpressionBody : QuickButton
 
     private void selectBodyIfActive()
     {
-        if (expressionParent.GetComponent<ParametricExpression>() != null)
+        if (expressionParent.gameObject.GetInterface<ExpressionTabInterface>().getActiveStatus())
         {
-            param = expressionParent.GetComponent<ParametricExpression>();
-            if (param.getActiveStatus()) selectBody();
-        }
-        else if (expressionParent.GetComponent<VectorFieldExpression>() != null)
-        {
-            vec = expressionParent.GetComponent<VectorFieldExpression>();
-            if (vec.getActiveStatus()) selectBody();
+            selectBody();
         }
     }
 

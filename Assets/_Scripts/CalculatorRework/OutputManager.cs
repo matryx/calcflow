@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class OutputManager : MonoBehaviour {
-    ParametricManager paramManager;
-    VecFieldManager vecFieldManager;
+    CalculatorManager calcManager;
     public static OutputManager _instance;
 
     private void Awake()
@@ -12,11 +11,14 @@ public class OutputManager : MonoBehaviour {
         _instance = this;
     }
 
-    public void Initialize(ParametricManager pm, VecFieldManager vm)
+    public void Initialize()
     {
-        paramManager = pm;
-        vecFieldManager = vm;
         //saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
+    }
+
+    public void setManager(CalculatorManager cm)
+    {
+        calcManager = cm;
     }
 
     public void HandleInput(string source, string rangeTitle)
@@ -27,22 +29,22 @@ public class OutputManager : MonoBehaviour {
                 print("unknown input: " + source);
                 break;
             case "Button_Xinput":
-                paramManager.SetOutput(paramManager.expressionSet.GetExpression("X"));
+                calcManager.SetOutput(calcManager.expressionSet.GetExpression("X"));
                 break;
             case "Button_Yinput":
-                paramManager.SetOutput(paramManager.expressionSet.GetExpression("Y"));
+                calcManager.SetOutput(calcManager.expressionSet.GetExpression("Y"));
                 break;
             case "Button_Zinput":
-                paramManager.SetOutput(paramManager.expressionSet.GetExpression("Z"));
+                calcManager.SetOutput(calcManager.expressionSet.GetExpression("Z"));
                 break;
             case "Min":
-                paramManager.SetOutput(paramManager.expressionSet.GetRange(rangeTitle).Min); 
+                calcManager.SetOutput(calcManager.expressionSet.GetRange(rangeTitle).Min); 
                 break;
             case "Max":
-                paramManager.SetOutput(paramManager.expressionSet.GetRange(rangeTitle).Max); 
+                calcManager.SetOutput(calcManager.expressionSet.GetRange(rangeTitle).Max); 
                 break;
             case "GenerateMesh":
-                paramManager.toExport = true;
+                calcManager.toExport = true;
                 break;
             case "Save":
                 //calcManager.saveLoadMenu.Save();

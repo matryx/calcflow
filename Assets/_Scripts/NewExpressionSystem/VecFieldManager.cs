@@ -8,17 +8,12 @@ public class VecFieldManager : CalculatorManager
     //public bool inputReceived;
 
     public static VecFieldManager _instance;
-    JoyStickAggregator joyStickAggregator;
-    Scroll paramScroll;
+    Scroll vecScroll;
     CustomVectorField vecField;
     //BoundsManager boundsManager;
     PresetMenu presetMenu;
     SaveLoadMenu saveLoadMenu;
     OutputManager outputManager;
-
-    Expressions expressions;
-    Transform selectedExpr;
-    //Variables in calcManager:
 
     //public bool updateOverlay = false;
     //internal bool toExport = false;
@@ -36,8 +31,8 @@ public class VecFieldManager : CalculatorManager
         //saveLoadMenu = SaveLoadMenu._instance;
         //presetMenu = PresetMenu._instance;
 
-        paramScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
-        joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
+        vecScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
+        joyStickAggregator = vecScroll.GetComponent<JoyStickAggregator>();
 
         //if (boundsManager != null) boundsManager.Initialize(this);
         calcInput.Initialize(this);
@@ -46,7 +41,7 @@ public class VecFieldManager : CalculatorManager
         if (outputManager != null)
         {
             print("OUTPUT INIIALIZED");
-            outputManager.Initialize(null, this);
+            outputManager.Initialize();
         }
         //presetMenu.Initialize(this);
         //saveLoadMenu.Initialize(this);
@@ -57,23 +52,12 @@ public class VecFieldManager : CalculatorManager
         //    connectedMenus.particleAnimationSettings.Initialize(this);
     }
 
-    private void addForwarders(Transform obj)
-    {
-        JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>();
-        foreach (JoyStickForwarder j in forwarders)
-        {
-            joyStickAggregator.AddForwarder(j);
-        }
-    }
-
     public void PresetPressed()
     {
         calcInput.ChangeOutput(expressionSet.GetExpression("X"), this); //need to fix
         //if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
-
-
 
     public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
     {
@@ -88,51 +72,6 @@ public class VecFieldManager : CalculatorManager
         calcInput.ChangeOutput(expressionSet.GetExpression("X"), this); //need to fix
         //if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
-    }
-
-    public override void SetOutput(CalcOutput output)
-    {
-        calcInput.ChangeOutput(output, this);
-        inputReceived = true;
-    }
-
-    private string getExpOption()
-    {
-        title = (expressions.getSelectedBody()) ? expressions.getSelectedBody().getTitle() : "X";
-        return title;
-    }
-
-    public void manageText()
-    {
-        selectedExpr = expressions.getSelectedExpr();
-        ExpressionBody exprBody = expressions.getSelectedBody();
-
-        if (selectedExpr == null || exprBody == null) return;
-
-        if (expressions.selectedNotNull())
-        {
-            textInput = exprBody.getTextInput();
-        }
-
-        if (textInput != null)
-        {
-            int displayLength = (exprBody.isVariable()) ? rangeDisplayLength : expressionDisplayLength;
-            textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
-        }
-
-        inputReceived = true;
-    }
-
-    public void ManageFeedback()
-    {
-        selectedExpr = expressions.getSelectedExpr();
-        if (expressions.selectedNotNull())
-        {
-            feedBack = expressions.getSelectedBody().getFeedBack();
-            title = expressions.getSelectedBody().getTitle();
-        }
-
-        if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity[title] ? positiveFeedback : negativeFeedback;
     }
 
     void Update()
@@ -154,11 +93,6 @@ public class VecFieldManager : CalculatorManager
             toExport = false;
             vecField.DrawVectorField();
         }
-    }
-
-    public override bool letterPressed(string buttonID)
-    {
-        return false;
     }
 
     public override void deleteVariables(List<string> toDelete) { }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VectorFieldExpression : MonoBehaviour
+public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
 {
     Expressions expressionsClass;
     ExpressionSet expSet;
