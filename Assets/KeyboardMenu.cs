@@ -37,16 +37,7 @@ public class KeyboardMenu : MonoBehaviour
     public FlexMenu menu;
 
     public CryptoPresetMenu cryptoMenu;
-    public string defaultFunction = "MTX";
-    CalcManager calcManager;
     LineChart chart;
-
-    GameObject graph;
-
-    double first, second;
-    string baseURL = "https://graphs2.coinmarketcap.com/currencies/";
-    string currCrypto, currTime = "1yr", toSearch;
-    StringBuilder builder = new StringBuilder();
     TextMeshPro textMesh;
     public GameObject outputObject;
     StringBuilder output = new StringBuilder();
@@ -109,6 +100,8 @@ public class KeyboardMenu : MonoBehaviour
                 }else if (source.Equals("Enter")){
                     output = new StringBuilder();
                     textMesh.text = output.ToString();
+                }else if (source.Equals("Exit")){
+                    //gameObject.SetActive(false);
                 }else{
                     output.Append(source);
                     textMesh.text = output.ToString();

@@ -101,11 +101,13 @@ public class CryptoPresetMenu : MonoBehaviour
             default:
             if(source.Equals("Enter")){
                 toSearch = customInput.ToString();
-                textMesh.text = "Custom Input";
+                textMesh.text = "Custom Input " + "(" + toSearch + ")";
                 webCall();
                 customInput = new StringBuilder();
             }else if (source.Equals("Del")){
                 customInput.Remove(customInput.Length-1, 1);
+            }else if (source.Equals("Exit")){
+                Keyboard.SetActive(false);
             }else{
                 customInput.Append(source);
             }
@@ -114,14 +116,17 @@ public class CryptoPresetMenu : MonoBehaviour
             case "MTX":
                 currCrypto = "matryx";
                 newGraph();
+                textMesh.text = "Custom Input";
                 break;
             case "BTC":
                 currCrypto = "bitcoin";
                 newGraph();
+                textMesh.text = "Custom Input";
                 break;
             case "ETH":
                 currCrypto = "ethereum";
                 newGraph();
+                textMesh.text = "Custom Input";
                 break;
             case "Custom":
                 // TODO: make keyboard for custom input.
@@ -171,7 +176,6 @@ public class CryptoPresetMenu : MonoBehaviour
     {
         chart.kill();
         chart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
-        Debug.Log("URL: " + baseURL + currCrypto + "/" + first + "/" + second + "/");
         chart.updateGraph();
     }
 
@@ -251,13 +255,11 @@ public class CryptoPresetMenu : MonoBehaviour
         search = search.ToLower();
         search = "\"" + search + "\"";
         int start = text.IndexOf(search)+1;
-        Debug.Log("START: " + start);
-        Debug.Log("SEARC: " + search);
         if(start == 0){
             Keyboard.SetActive(true);
             board.notFoundError();
         }else{
-            Keyboard.SetActive(false);
+            //Keyboard.SetActive(false);
             text = text.Substring(start, text.Length-1-start);
             int name = text.IndexOf("website_slug") + 16;
             int nameEnd = text.IndexOf("}");
