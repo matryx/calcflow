@@ -1,7 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Text;
 using UnityEngine;
+using Nanome.Core;
+using UnityEngine.Networking;
 
 public class CryptoPresetMenu : MonoBehaviour
 {
@@ -31,7 +34,10 @@ public class CryptoPresetMenu : MonoBehaviour
 
     double first, second;
     string baseURL = "https://graphs2.coinmarketcap.com/currencies/";
-    string currCrypto, currTime = "1yr";
+    string currCrypto, currTime = "1yr", toSearch;
+    StringBuilder builder = new StringBuilder();
+
+    
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
     Scroll scroll;
@@ -93,21 +99,27 @@ public class CryptoPresetMenu : MonoBehaviour
                 currCrypto = "ethereum";
                 newGraph();
                 break;
+            case "Custom":
+                // TODO: make keyboard for custom input.
+                toSearch = "veltor";
+                webCall();
+                //Debug.Log("CURR CRYPTO: " + currCrypto);
+                break;
             case "1d":
                 getTimeStamps(source);
                 newGraph();
                 break;
             case "7d":
-                 getTimeStamps(source);
-                 newGraph();
+                getTimeStamps(source);
+                newGraph();
                 break;
             case "1m":
-                 getTimeStamps(source);
-                 newGraph();
+                getTimeStamps(source);
+                newGraph();
                 break;
             case "3m":
-                 getTimeStamps(source);
-                 newGraph();
+                getTimeStamps(source);
+                newGraph();
                 break;
             case "1yr":
                 getTimeStamps(source);
@@ -120,14 +132,16 @@ public class CryptoPresetMenu : MonoBehaviour
         }
     }
 
-    void newGraph(){
-            chart.kill();
-            chart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
-            Debug.Log("URL: " + baseURL + currCrypto + "/" + first + "/" + second + "/");
-            chart.updateGraph();
+    void newGraph()
+    {
+        chart.kill();
+        chart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
+        Debug.Log("URL: " + baseURL + currCrypto + "/" + first + "/" + second + "/");
+        chart.updateGraph();
     }
 
-    void getTimeStamps(string source){
+    void getTimeStamps(string source)
+    {
         second = Math.Round(getCurrTime());
         switch (source)
         {
@@ -141,19 +155,19 @@ public class CryptoPresetMenu : MonoBehaviour
                 break;
             case "7d":
                 currTime = source;
-                 first = second - getMillis(24*7);
+                first = second - getMillis(24 * 7);
                 break;
             case "1m":
                 currTime = source;
-                 first = second - getMillis(24*30);
+                first = second - getMillis(24 * 30);
                 break;
             case "3m":
                 currTime = source;
-                first = second - getMillis(24*30*3);
+                first = second - getMillis(24 * 30 * 3);
                 break;
             case "1yr":
                 currTime = source;
-                first = second - getMillis(24*7*52);
+                first = second - getMillis(24 * 7 * 52);
                 break;
             case "All":
                 currTime = source;
@@ -164,13 +178,49 @@ public class CryptoPresetMenu : MonoBehaviour
         Debug.Log("FIRST: " + first + ", " + "SECOND: " + second);
     }
 
-    double getCurrTime(){
-        DateTime epochstart = new DateTime(1970,1,1,0,0,0, DateTimeKind.Utc);
+    double getCurrTime()
+    {
+        DateTime epochstart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         double currTime = (double)(DateTime.UtcNow - epochstart).TotalMilliseconds;
         return currTime;
     }
-
-    double getMillis(double numHours){
+    double getMillis(double numHours)
+    {
         return numHours * 3600 * 1000;
+    }
+
+    void webCall()
+    {
+        Async obj = Async.runInCoroutine(GetJSON);
+        obj.onEvent("Finished", parseJSON);
+    }
+
+    IEnumerator GetJSON(Async routine)
+    {
+        using (WWW www = new WWW("https://api.coinmarketcap.com/v2/listings/"))
+        {
+            yield return www;
+            yield return www.text;
+            builder.Append(www.text);
+            routine.pushEvent("Finished", builder);
+        }
+    }
+
+	void parseJSON(object tmp){ 
+		string data = ((StringBuilder)tmp).ToString ();
+		findName(data, toSearch);
+	}
+
+    void findName(string text, string search){
+        text = text.ToLower();
+        search = search.ToLower();
+
+        int start = text.IndexOf(search);
+        text = text.Substring(start, text.Length-1-start);
+        int name = text.IndexOf("website_slug") + 16;
+        int nameEnd = text.IndexOf("}");
+        currCrypto = text.Substring(name, nameEnd - name-10);
+        Debug.Log("CURR CRYPTO: " + currCrypto);
+        newGraph();
     }
 }
