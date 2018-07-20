@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using Nanome.Core;
 using UnityEngine.Networking;
+using TMPro;
 
 public class KeyboardMenu : MonoBehaviour
 {
@@ -25,6 +26,14 @@ public class KeyboardMenu : MonoBehaviour
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
     }
 
+    private static KeyboardMenu _instance;
+	void Awake () {
+		_instance = this;
+	}
+
+    public static KeyboardMenu GetInstance(){
+	    return _instance;
+	}
     public FlexMenu menu;
 
     public CryptoPresetMenu cryptoMenu;
@@ -38,6 +47,10 @@ public class KeyboardMenu : MonoBehaviour
     string baseURL = "https://graphs2.coinmarketcap.com/currencies/";
     string currCrypto, currTime = "1yr", toSearch;
     StringBuilder builder = new StringBuilder();
+    TextMeshPro textMesh;
+    public GameObject outputObject;
+    StringBuilder output = new StringBuilder();
+
 
     
 
@@ -54,6 +67,7 @@ public class KeyboardMenu : MonoBehaviour
         //HandleInput(defaultFunction);
         KeyboardInputResponder responder = new KeyboardInputResponder(this);
         menu.RegisterResponder(responder);
+        textMesh = outputObject.GetComponent<TextMeshPro>();
         initializePresetButtons();
     }
 
@@ -85,9 +99,29 @@ public class KeyboardMenu : MonoBehaviour
         switch (source)
         {
             default:
+                if(textMesh.text.Equals("Currency not found")){
+                    textMesh.text = "";
+                }
                 cryptoMenu.sendSignal(source);
+                if(source.Equals("Del")){
+                    output.Remove(output.Length-1,1);
+                    textMesh.text = output.ToString();
+                }else if (source.Equals("Enter")){
+                    output = new StringBuilder();
+                    textMesh.text = output.ToString();
+                }else{
+                    output.Append(source);
+                    textMesh.text = output.ToString();
+                }
+
                 break;
         }
+    }
+
+    public void notFoundError(){
+        textMesh = outputObject.GetComponent<TextMeshPro>();
+        textMesh.text = "Currency not found";
+        Debug.Log("Here!");
     }
 
 

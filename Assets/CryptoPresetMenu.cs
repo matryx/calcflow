@@ -31,6 +31,8 @@ public class CryptoPresetMenu : MonoBehaviour
     CalcManager calcManager;
     LineChart chart;
 
+    KeyboardMenu board;
+
     GameObject graph;
     public GameObject Keyboard;
 
@@ -54,6 +56,7 @@ public class CryptoPresetMenu : MonoBehaviour
     {
         Debug.Log("Initialize");
         chart = LineChart.GetInstance();
+        board = KeyboardMenu.GetInstance();
         scroll = GetComponentInChildren<Scroll>(true);
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
         //HandleInput(defaultFunction);
@@ -61,6 +64,7 @@ public class CryptoPresetMenu : MonoBehaviour
         menu.RegisterResponder(responder);
         initializePresetButtons();
         getTimeStamps(currTime);
+        //HandleInput(defaultFunction);
     }
 
     private void initializePresetButtons()
@@ -96,17 +100,14 @@ public class CryptoPresetMenu : MonoBehaviour
         {
             default:
             if(source.Equals("Enter")){
-                Keyboard.SetActive(false);
                 toSearch = customInput.ToString();
                 textMesh.text = "Custom Input";
-                Debug.Log("CUSTOM INPUT: " + toSearch);
                 webCall();
+                customInput = new StringBuilder();
             }else if (source.Equals("Del")){
                 customInput.Remove(customInput.Length-1, 1);
-                textMesh.text = customInput.ToString();
             }else{
                 customInput.Append(source);
-                textMesh.text = customInput.ToString();
             }
                 break;
             //R1 -> R1
@@ -127,6 +128,7 @@ public class CryptoPresetMenu : MonoBehaviour
                 customInput = new StringBuilder();
                 setKeyboardPos();
                 Keyboard.SetActive(true);
+                board = KeyboardMenu.GetInstance();
                 break;
             case "1d":
                 getTimeStamps(source);
@@ -208,7 +210,6 @@ public class CryptoPresetMenu : MonoBehaviour
                 break;
         }
 
-        Debug.Log("FIRST: " + first + ", " + "SECOND: " + second);
     }
 
     double getCurrTime()
@@ -242,23 +243,26 @@ public class CryptoPresetMenu : MonoBehaviour
 
 	void parseJSON(object tmp){ 
 		string data = ((StringBuilder)tmp).ToString ();
-        Debug.Log("SEARCHING FOR: " + toSearch);
 		findName(data, toSearch);
 	}
 
     void findName(string text, string search){
         text = text.ToLower();
         search = search.ToLower();
-        Debug.Log("FINDING: " + search);
         search = "\"" + search + "\"";
-        Debug.Log(search);
         int start = text.IndexOf(search)+1;
-        text = text.Substring(start, text.Length-1-start);
-        int name = text.IndexOf("website_slug") + 16;
-        int nameEnd = text.IndexOf("}");
-        currCrypto = text.Substring(name, nameEnd - name-10);
-        Debug.Log("SUBSTRING: " + text.Substring(name, nameEnd - name-10));
-        Debug.Log("CURR CRYPTO: " + currCrypto);
-        newGraph();
+        Debug.Log("START: " + start);
+        Debug.Log("SEARC: " + search);
+        if(start == 0){
+            Keyboard.SetActive(true);
+            board.notFoundError();
+        }else{
+            Keyboard.SetActive(false);
+            text = text.Substring(start, text.Length-1-start);
+            int name = text.IndexOf("website_slug") + 16;
+            int nameEnd = text.IndexOf("}");
+            currCrypto = text.Substring(name, nameEnd - name-10);
+            newGraph();
+        }
     }
 }

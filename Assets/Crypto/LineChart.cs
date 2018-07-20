@@ -13,7 +13,7 @@ public class LineChart : MonoBehaviour {
 		return _instance;
 	}
 
-	private string URL = "https://graphs2.coinmarketcap.com/currencies/bitcoin/1367174841000/1532036340000/";
+	private string URL;
 	public void SetURL(string newURL){
 		URL = newURL;
 	}
@@ -30,6 +30,9 @@ public class LineChart : MonoBehaviour {
 	GameObject frameObj;
 	LineRenderer frameLine;
 	
+	// The factor by which number of points are determined. 1 = full points = lag
+	public int numPoints = 3;
+	
 	// Higher resolution will stretch out the graph, lower will compress it.
 	float resolution = 25f;
 	//public int numPoints = 10;
@@ -41,8 +44,11 @@ public class LineChart : MonoBehaviour {
 	}
 
 	 void Start () {
-			//SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/1367174841000/1532036340000/");
-			//updateGraph();
+		 	DateTime epoch = new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc);
+		 	double currTime = Math.Round((double)(DateTime.UtcNow - epoch).TotalMilliseconds);
+			Debug.Log("CURRTIME: " + currTime);
+			SetURL("https://graphs2.coinmarketcap.com/currencies/matryx/0/" + currTime + "/");
+			updateGraph();
 	}
 
 	public void kill(){
@@ -58,24 +64,6 @@ public class LineChart : MonoBehaviour {
 		pointList = new List<GameObject>();
 		builder = new StringBuilder();
 	}
-
-/*	int count = 0;
-	void Update(){
-		if(count < 200){
-			++count;
-			Debug.Log(count);
-		}
-		if(count == 200){
-			count = 201;
-			kill();
-			SetURL("https://graphs2.coinmarketcap.com/currencies/matryx/1514931258000/1532023752000/");
-			Debug.Log(URL);
-			Debug.Log("----------------UPDATING----------------");
-			updateGraph();
-		}
-
-	}
-*/
 	public void updateGraph(){
 		Async obj = Async.runInCoroutine(GetText);
 		obj.onEvent ("Done", parseData);
@@ -136,8 +124,11 @@ public class LineChart : MonoBehaviour {
 			//Ys [i] = Random.Range (-2f, 2f);
 			float xPos = ((float)i)/ (prices.Count/resolution) - 12.5f;
 			frameLine.SetPosition (i, new Vector3 (xPos, scaledPrices[i], 0));
-			Transform currPoint = Instantiate (point, new Vector3 (0, 0, 0), Quaternion.identity, transform);
-			currPoint.localPosition = new Vector3 (xPos, scaledPrices[i], 0);
+			if(i%numPoints == 0){
+				Transform currPoint = Instantiate (point, new Vector3 (0, 0, 0), Quaternion.identity, transform);
+				currPoint.localPosition = new Vector3 (xPos, scaledPrices[i], 0);
+			}
+
 
 			//pointList.Add(currPoint);
 			
