@@ -35,8 +35,10 @@ public class Control2DViewer : MonoBehaviour
         Vector3 pos = Camera.main.ScreenToViewportPoint(Input.mousePosition - lastMouse);
         float speed = shiftMode ? slowDragSpeed : dragSpeed;
         Vector3 move = new Vector3(0,pos.x * speed, -pos.y * speed);
+        transform.eulerAngles = new Vector3(0, transform.eulerAngles.y + move.y, transform.eulerAngles.z + move.z);
         //transform.Translate(move, Space.World);
-        transform.eulerAngles += move;
+        //transform.eulerAngles += move;
+        
     }
     void ManageMovement(bool shiftMode)
     {
