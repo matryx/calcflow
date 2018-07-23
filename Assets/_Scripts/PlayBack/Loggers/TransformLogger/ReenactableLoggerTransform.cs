@@ -16,6 +16,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
         if (Recorder.Recording && !added)
         {
             PlaybackClock.AddToTimer(RecordPosition);
+            added = true;
         }
     }
 
