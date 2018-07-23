@@ -8,9 +8,6 @@ using VoxelBusters.RuntimeSerialization;
 public class CalcManager : Nanome.Core.Behaviour
 {
 
-    [RuntimeSerializeField]
-    public int testint = 100;
-
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
