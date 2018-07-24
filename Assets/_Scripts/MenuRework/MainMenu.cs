@@ -9,7 +9,6 @@ public class MainMenu : QuickButton
     public Transform resetScene;
     public Transform home;
     public Transform menus;
-    public Transform outerRing, innerRing;
 
     private Vector3 idleScale, selectedScale;
     private Vector3 buttonScale;
@@ -28,11 +27,6 @@ public class MainMenu : QuickButton
         idleScale = new Vector3(0.02f, 0.001f, 0.02f);
         buttonScale = new Vector3(0.003f, 0.05f, 0.07f);
 
-        outerRing.SetParent(transform);
-        innerRing.SetParent(transform);
-
-        outerRing.SetParent(transform.parent);
-        innerRing.SetParent(transform.parent);
         transform.localScale = idleScale;
 
         resetPos.gameObject.SetActive(false);

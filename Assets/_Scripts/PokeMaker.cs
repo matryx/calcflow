@@ -40,7 +40,7 @@ public class PokeMaker : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("ButtonPresser");
         SphereCollider col = gameObject.AddComponent<SphereCollider>();
         col.radius = .01f;
-        col.center = new Vector3 (.01f,0,0);
+        col.center = new Vector3 (-.01f,0,0);
         col.isTrigger = true;
         gameObject.AddComponent<Rigidbody>().isKinematic = true;
     }
