@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NanoVRController;
+using Extensions;
 
 [RequireComponent(typeof(RayCastSender))]
 
-public class ModeSwitcher : MonoBehaviour {
+public class ModeSwitcher : MonoBehaviour
+{
 
     RayCastSender sender;
     OvrAvatar avatar;
@@ -13,21 +15,24 @@ public class ModeSwitcher : MonoBehaviour {
     ToggleRayCastOnGrabbable otherToggler;
     Grabber grabber;
 
-    public FreeMarker marker;
+    private FreeMarker marker;
     public Transform penPose;
-    public GameObject penModel;
+    private GameObject penModel;
 
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         sender = GetComponent<RayCastSender>();
         avatar = GetComponentInParent<OvrAvatar>();
-        grabber = GetComponentInParent<Grabber>();
+        grabber = GetComponentInChildren<Grabber>();
 
-        otherToggler = GetComponentInParent<ToggleRayCastOnGrabbable>();
-        controller = marker.controller;
+        otherToggler = GetComponentInChildren<ToggleRayCastOnGrabbable>();
+        controller = gameObject.GetComponent<VRController>();
+        marker = gameObject.GetComponentInChildren<FreeMarker>(true);
+        penModel = transform.Find("Pen").gameObject;
         ConnectController(controller);
-	}
+    }
 
     void ConnectController(VRController c)
     {
@@ -40,7 +45,8 @@ public class ModeSwitcher : MonoBehaviour {
         if (penMode)
         {
             SwitchToRayCastMode();
-        } else
+        }
+        else
         {
             SwitchToPenMode();
         }
@@ -50,6 +56,8 @@ public class ModeSwitcher : MonoBehaviour {
 
     void SwitchToPenMode()
     {
+        penModel.SetActive(true);
+
         marker.ConnectController();
         grabber.DisconnectController();
 
@@ -57,13 +65,36 @@ public class ModeSwitcher : MonoBehaviour {
         grabber.enabled = false;
         otherToggler.enabled = false;
 
-        penModel.SetActive(true);
-        if (controller.hand == Handedness.LEFT)
+        SetPenPose();
+    }
+
+    void SetPenPose()
+    {
+        if (avatar)
         {
-            avatar.LeftHandCustomPose = penPose;
-        } else
+            if (controller.hand == Handedness.LEFT)
+            {
+                avatar.LeftHandCustomPose = penPose;
+            }
+            else
+            {
+                avatar.RightHandCustomPose = penPose;
+            }
+        }
+    }
+
+    void SetDefaultMode()
+    {
+        if (avatar)
         {
-            avatar.RightHandCustomPose = penPose;
+            if (controller.hand == Handedness.LEFT)
+            {
+                avatar.LeftHandCustomPose = null;
+            }
+            else
+            {
+                avatar.RightHandCustomPose = null;
+            }
         }
     }
 
@@ -77,13 +108,6 @@ public class ModeSwitcher : MonoBehaviour {
         otherToggler.enabled = true;
 
         penModel.SetActive(false);
-        if (controller.hand == Handedness.LEFT)
-        {
-            avatar.LeftHandCustomPose = null;
-        }
-        else
-        {
-            avatar.RightHandCustomPose = null;
-        }
+        SetDefaultMode();
     }
 }

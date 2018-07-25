@@ -2,19 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ToggleSecondaryMenu : QuickButton {
+public class ToggleSecondaryMenu : QuickButton
+{
     public Transform secondaryMenu;
     public Transform view;
     public Transform circle;
     float zRotation;
 
-	// Use this for initialization
-	void Awake () {
+    // Use this for initialization
+    void Awake()
+    {
+        GameObject.Find("/SecondaryMenus");
+        if (!secondaryMenu)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
         setMenuPos();
         zRotation = secondaryMenu.localEulerAngles.z;
         secondaryMenu.gameObject.SetActive(false);
-	}
-	
+    }
+
     void setMenuPos()
     {
         secondaryMenu.SetParent(view);
@@ -24,13 +32,13 @@ public class ToggleSecondaryMenu : QuickButton {
         secondaryMenu.localEulerAngles = new Vector3(secondaryMenu.localEulerAngles.x,
             secondaryMenu.localEulerAngles.y, zRotation);
         secondaryMenu.localScale = Vector3.one;
-        circle.localScale = new Vector3(0.5f, 0.01f, 0.5f);
     }
 
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     protected override void Start()
     {
@@ -48,11 +56,12 @@ public class ToggleSecondaryMenu : QuickButton {
         {
             secondaryMenu.gameObject.SetActive(true);
             setMenuPos();
+            circle.localScale = new Vector3(0.5f, 0.01f, 0.5f);
         }
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
-        
+
     }
 }
