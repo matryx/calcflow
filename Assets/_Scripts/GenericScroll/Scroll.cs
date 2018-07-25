@@ -226,7 +226,6 @@ public class Scroll : MonoBehaviour
         return objects.Count;
     }
 
-    //BUG: adding to beginning isn't accounted for, always added at the end (index is correct)
     public void addToScroll(List<Transform> objs, Transform obj, int atIndex)
     {
         if (objects == null) objects = new List<Transform>();

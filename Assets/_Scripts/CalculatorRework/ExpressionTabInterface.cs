@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface ExpressionTabInterface  {
 
-    Transform getSeparator();
-    void setSeparator(Transform sep);
+    Transform getExpressionX();
+    void setExpressionX(Transform sep);
     bool getActiveStatus();
 }

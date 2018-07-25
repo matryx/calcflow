@@ -15,7 +15,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
     Dictionary<string, Transform> variables;
     Dictionary<string, Transform> hiddenVariables;
 
-    Transform separator;
+    Transform expressionX;
     Scroll scroll;
 
     bool initialized = false;
@@ -120,14 +120,14 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void setSeparator(Transform sep)
+    public void setExpressionX(Transform e)
     {
-        separator = sep;
+        expressionX = e;
     }
 
-    public Transform getSeparator()
+    public Transform getExpressionX()
     {
-        return separator;
+        return expressionX;
     }
 
     public ExpressionSet getExpSet()
@@ -164,7 +164,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
 
     public void deleteExpressionFromScroll()
     {
-        variableClumps.Add(separator);
+        variableClumps.Add(expressionX);
         scroll.deleteObjects(variableClumps);
         scroll.deleteObjects(expressionsList);
     }

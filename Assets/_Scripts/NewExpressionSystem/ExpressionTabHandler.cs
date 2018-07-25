@@ -41,7 +41,6 @@ public class ExpressionTabHandler : MonoBehaviour {
         GetComponent<FlexMenu>().RegisterResponder(responder);
 
         outputManager = OutputManager._instance;
-        outputManager.setManager(ParametricManager._instance);
     }
 
     void toggleMenu(string menuName)

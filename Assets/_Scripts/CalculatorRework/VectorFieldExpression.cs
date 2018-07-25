@@ -11,7 +11,7 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
     List<Transform> expressionsList;
 
     Transform range;
-    Transform separator;
+    Transform expressionX;
     Scroll scroll;
 
     bool initialized = false;
@@ -45,14 +45,14 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void setSeparator(Transform sep)
+    public void setExpressionX(Transform e)
     {
-        separator = sep;
+        expressionX = e;
     }
 
-    public Transform getSeparator()
+    public Transform getExpressionX()
     {
-        return separator;
+        return expressionX;
     }
 
     public ExpressionSet getExpSet()

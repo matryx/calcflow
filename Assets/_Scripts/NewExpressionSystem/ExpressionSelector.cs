@@ -95,18 +95,18 @@ public class ExpressionSelector : QuickButton
 
     private void addExpressionToScroll(List<Transform> toAdd)
     {
-        Transform prevSep = null;
+        Transform prevXExpression = null;
+        int startingIndex = 0;
 
         if (expressions.getSelectedExpr())
         {
-            prevSep = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getSeparator();
-            print("INDEX: " + thisScroll.getIndex(prevSep));
-            thisScroll.addToScroll(toAdd, null, thisScroll.getIndex(prevSep) - 3);
+            prevXExpression = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getExpressionX();
+            startingIndex = thisScroll.getIndex(prevXExpression) - 1;
+
+            if (startingIndex < 0) startingIndex = 0;
         }
-        else
-        {
-            thisScroll.addToScroll(toAdd, null, 0);
-        }
+
+        thisScroll.addToScroll(toAdd, null, startingIndex);
     }
 
     private List<Transform> createParametricExpression()
@@ -127,7 +127,6 @@ public class ExpressionSelector : QuickButton
         GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
         addForwarders(sep.transform);
         paramComponents.Add(sep.transform);
-        param.GetComponent<ParametricExpression>().setSeparator(sep.transform);
 
         expressions.addExpr(param.transform);
 
@@ -144,7 +143,11 @@ public class ExpressionSelector : QuickButton
                 {
                     p.GetComponent<ParametricExpression>().addExpression(gchild);
 
-                    if (gchild.name == "Button_Xinput") xButton = gchild;
+                    if (gchild.name == "Button_Xinput")
+                    {
+                        p.GetComponent<ParametricExpression>().setExpressionX(gchild);
+                        xButton = gchild;
+                    }
 
                     gchild.GetComponentInChildren<ExpressionBody>().setExpressionParent(p);
                     gchild.GetComponentInChildren<ExpressionBody>().setPanel(paramPanel);
@@ -154,7 +157,6 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    //BUG: new exp to inserted in the middle of existing expression (right after X)
     private List<Transform> createVecExpression()
     {
         List<Transform> vecComponents = new List<Transform>();
@@ -175,7 +177,6 @@ public class ExpressionSelector : QuickButton
         GameObject sepVec = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
         addForwarders(sepVec.transform);
         vecComponents.Add(sepVec.transform);
-        vec.GetComponent<VectorFieldExpression>().setSeparator(sepVec.transform);
 
         expressions.addExpr(vec.transform);
 
@@ -186,7 +187,11 @@ public class ExpressionSelector : QuickButton
     {
         foreach (Transform child in vec.transform.Find("ExpressionSet"))
         {
-            if (child.name == "Button_Xinput") xButton = child;
+            if (child.name == "Button_Xinput")
+            {
+                vec.GetComponent<VectorFieldExpression>().setExpressionX(child);
+                xButton = child;
+            }
 
             vec.GetComponent<VectorFieldExpression>().addExpression(child);
             child.GetComponentInChildren<ExpressionBody>().setExpressionParent(vec.transform);

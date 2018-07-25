@@ -11,6 +11,8 @@ public class ExpressionActions : QuickButton
     private bool menuActive = false;
     private IEnumerator scaleButtonsUp, scaleButtonsDown;
 
+    //TODO: handle discrepancy between toggle button for param and select button for vec field
+
     public void disableButtons()
     {
         if (delete == null) delete = transform.parent.Find("Delete");

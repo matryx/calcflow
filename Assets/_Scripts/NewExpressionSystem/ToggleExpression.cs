@@ -40,7 +40,6 @@ public class ToggleExpression : QuickButton
         ColorUtility.TryParseHtmlString("#D4D4D4FF", out grayHide);
     }
 
-    //TODO: extend to vec field
     protected override void ButtonEnterBehavior(GameObject other)
     {
         if (active)     //HIDE

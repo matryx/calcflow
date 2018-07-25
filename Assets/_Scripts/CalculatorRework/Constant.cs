@@ -29,12 +29,12 @@ public class Constant : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void setSeparator(Transform sep)
+    public void setExpressionX(Transform sep)
     {
         separator = sep;
     }
 
-    public Transform getSeparator()
+    public Transform getExpressionX()
     {
         return separator;
     }

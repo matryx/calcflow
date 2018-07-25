@@ -29,7 +29,7 @@ public abstract class CalculatorManager : MonoBehaviour
     protected Transform selectedExpr;
     protected JoyStickAggregator joyStickAggregator;
 
-    void Start()
+    void Awake()
     {
         Initialize();
     }

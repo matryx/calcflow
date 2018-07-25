@@ -9,6 +9,7 @@ public class OutputManager : MonoBehaviour {
     private void Awake()
     {
         _instance = this;
+        calcManager = ParametricManager._instance;
     }
 
     public void Initialize()
