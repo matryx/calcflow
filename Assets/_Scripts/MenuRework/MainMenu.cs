@@ -41,18 +41,21 @@ public class MainMenu : MonoBehaviour
         Vector3 idleScale, selectedScale;
 
         FindButtons();
+        buttonScale = new Vector3(0.003f, 0.05f, 0.07f);
+        matryxScale = new Vector3(0.003f, 0.025f, 0.1475f);
+
+        fuseButton = GetComponent<FuseButton>();
+
         selectedScale = new Vector3(0.02f, 0.0004f, 0.02f);
         fuseButton.SetExpandedScale(selectedScale);
 
         idleScale = new Vector3(0.0075f, 0.0004f, 0.0075f);
         fuseButton.SetContractedScale(idleScale);
 
-        buttonScale = new Vector3(0.003f, 0.05f, 0.07f);
-        matryxScale = new Vector3(0.003f, 0.025f, 0.1475f);
+        fuseButton.FuseHot += RevealButtons;
+        fuseButton.FuseCold += HideButtons;
 
-        fuseButton = GetComponent<FuseButton>();
-        fuseButton.FuseHot += HideButtons;
-        fuseButton.FuseCold += RevealButtons;
+        fuseButton.ForceCold();
 
         DeactivateButtons();
     }

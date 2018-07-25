@@ -72,9 +72,7 @@ public class Mapping1D : MonoBehaviour
             AK.ExpressionSolver solver = es.solver;
             if (es.ranges.ContainsKey("t")) solver.SetGlobalVariable("t", uvw.x);
         }
-        if (es.expressions[X].AKExpression != null &&
-            es.expressions[Y].AKExpression != null &&
-            es.expressions[Z].AKExpression != null)
+        if (es.IsCompiled())
         {
             output.x = (float)es.expressions[X].AKExpression.Evaluate();
             output.y = (float)es.expressions[Y].AKExpression.Evaluate();

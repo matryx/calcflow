@@ -35,8 +35,8 @@ public class Mapping3D : MonoBehaviour
             CorrespondingPoint.transform.localPosition = swapYandZ(xyz);
             if (tmpro != null)
             {
-                tmpro.text = "(x,y,z) = (" + System.String.Format("{0:F2}", xyz.x) + "," 
-                                           + System.String.Format("{0:F2}", xyz.y) + "," 
+                tmpro.text = "(x,y,z) = (" + System.String.Format("{0:F2}", xyz.x) + ","
+                                           + System.String.Format("{0:F2}", xyz.y) + ","
                                            + System.String.Format("{0:F2}", xyz.z) + ")";
             }
             ManageText();
@@ -104,10 +104,12 @@ public class Mapping3D : MonoBehaviour
             if (es.ranges.ContainsKey("v")) solver.SetGlobalVariable("v", uvw.y);
             if (es.ranges.ContainsKey("w")) solver.SetGlobalVariable("w", uvw.z);
         }
-
-        output.x = (float)es.expressions[X].AKExpression.Evaluate();
-        output.y = (float)es.expressions[Y].AKExpression.Evaluate();
-        output.z = (float)es.expressions[Z].AKExpression.Evaluate();
+        if (es.IsCompiled())
+        {
+            output.x = (float)es.expressions[X].AKExpression.Evaluate();
+            output.y = (float)es.expressions[Y].AKExpression.Evaluate();
+            output.z = (float)es.expressions[Z].AKExpression.Evaluate();
+        }
         return output * scale;
     }
 

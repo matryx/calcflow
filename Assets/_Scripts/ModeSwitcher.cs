@@ -4,8 +4,6 @@ using UnityEngine;
 using NanoVRController;
 using Extensions;
 
-[RequireComponent(typeof(RayCastSender))]
-
 public class ModeSwitcher : MonoBehaviour
 {
 
@@ -23,7 +21,7 @@ public class ModeSwitcher : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        sender = GetComponent<RayCastSender>();
+        sender = GetComponentInChildren<RayCastSender>();
         avatar = GetComponentInParent<OvrAvatar>();
         grabber = GetComponentInChildren<Grabber>();
 
