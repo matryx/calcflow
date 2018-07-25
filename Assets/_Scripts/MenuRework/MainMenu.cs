@@ -10,7 +10,6 @@ public class MainMenu : QuickButton
     public Transform home;
     public Transform menus;
     public Transform matryx;
-    public Transform outerRing, innerRing;
 
     private Vector3 idleScale, selectedScale;
     private Vector3 buttonScale;
@@ -31,11 +30,6 @@ public class MainMenu : QuickButton
         buttonScale = new Vector3(0.003f, 0.05f, 0.07f);
         matryxScale = new Vector3(0.003f, 0.025f, 0.1475f);
 
-        outerRing.SetParent(transform);
-        innerRing.SetParent(transform);
-
-        outerRing.SetParent(transform.parent);
-        innerRing.SetParent(transform.parent);
         transform.localScale = idleScale;
 
         resetPos.gameObject.SetActive(false);

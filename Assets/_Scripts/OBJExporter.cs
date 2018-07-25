@@ -1,11 +1,12 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Nanome.Core;
+using UnityEngine;
 
-public class ObjExporter
-{
+public class ObjExporter {
     //public static string MeshToString(MeshFilter mf)
     //{
     //    Mesh m = mf.mesh;
@@ -53,47 +54,81 @@ public class ObjExporter
     //    }
     //}
 
-   public static void SaveMesh(MeshFilter mf, string filename)
-    {
-        string name = string.Copy(mf.name);
-        Vector3[] vertices = mf.mesh.vertices.Clone() as Vector3[];
-        Vector3[] normals = mf.mesh.normals.Clone() as Vector3[];
-        Vector2[] uvs = mf.mesh.uv.Clone() as Vector2[];
-        int[] faces = mf.mesh.triangles.Clone() as int[];
+    // Sets up the name, vertices, normals, uvs, and triangles in one
+    // unified list to send to the saving function
+    public static void SaveMesh (List<MeshFilter> mfs, string filename) {
 
-        Thread t = new Thread(() => ThreadedMeshSave(name, vertices, normals, uvs, faces, filename));
-        t.Start();
+        string name = string.Format ("CreatedMesh");
+
+        int verticesSize = 0, normalsSize = 0, uvsSize = 0, facesSize = 0;
+
+        for (int i = 0; i < mfs.Count; i++) {
+            verticesSize += mfs[i].mesh.vertices.Length;
+            normalsSize += mfs[i].mesh.normals.Length;
+            uvsSize += mfs[i].mesh.uv.Length;
+            facesSize += mfs[i].mesh.triangles.Length;
+        }
+
+        Vector3[] vertices = new Vector3[verticesSize];
+        Vector3[] normals = new Vector3[normalsSize];
+        Vector2[] uvs = new Vector2[uvsSize];
+        int[] faces = new int[facesSize];
+        mfs[0].mesh.vertices.CopyTo (vertices, 0);
+        mfs[0].mesh.normals.CopyTo (normals, 0);
+        mfs[0].mesh.uv.CopyTo (uvs, 0);
+        mfs[0].mesh.triangles.CopyTo (faces, 0);
+        int numFinished = 1;
+        if (mfs.Count == 1){
+            Thread t = new Thread (() => ThreadedMeshSave (name, vertices, normals, uvs, faces, filename));
+            t.Start ();
+        }
+        for (int i = 1; i < mfs.Count; i++) {
+            int m = i;
+            mfs[i].mesh.vertices.CopyTo (vertices, mfs[i - 1].mesh.vertices.Length);
+            mfs[i].mesh.normals.CopyTo (normals, mfs[i - 1].mesh.normals.Length);
+            mfs[i].mesh.uv.CopyTo (uvs, mfs[i - 1].mesh.uv.Length);
+            int[] shiftFaces = mfs[i].mesh.triangles.Clone () as int[];
+            int offsetVal = mfs[i-1].mesh.vertices.Length;
+            Async.runInThread ((Async thread) => {
+                for (int sf = 0; sf < shiftFaces.Length; sf++) {
+                    shiftFaces[sf] += offsetVal;
+                }
+                thread.pushEvent ("Finished", null);
+            }).onEvent ("Finished", (object data) => {
+                shiftFaces.CopyTo (faces, mfs[m - 1].mesh.triangles.Length);
+                numFinished++;
+                if (numFinished == mfs.Count){
+                    Thread t = new Thread (() => ThreadedMeshSave (name, vertices, normals, uvs, faces, filename));
+                    t.Start ();
+                }
+            });
+        }
     }
 
-    public static void ThreadedMeshSave(string name, Vector3[] vertices, Vector3[] normals, Vector2[] uvs, int[] faces, string filename)
-    {
-        StringBuilder sb = new StringBuilder();
+    // Formats and then writes the data to the designated file
+    public static void ThreadedMeshSave (string name, Vector3[] vertices, Vector3[] normals, Vector2[] uvs, int[] faces, string filename) {
+        StringBuilder sb = new StringBuilder ();
 
-        sb.Append("g ").Append(name).Append("\n");
-        foreach (Vector3 v in vertices)
-        {
-            sb.Append(string.Format("v {0} {1} {2}\n", v.x, v.y, v.z));
+        sb.Append ("g ").Append (name).Append ("\n");
+        foreach (Vector3 v in vertices) {
+            sb.Append (string.Format ("v {0} {1} {2}\n", v.x, v.y, v.z));
         }
-        sb.Append("\n");
-        foreach (Vector3 v in normals)
-        {
-            sb.Append(string.Format("vn {0} {1} {2}\n", v.x, v.y, v.z));
+        sb.Append ("\n");
+        foreach (Vector3 v in normals) {
+            sb.Append (string.Format ("vn {0} {1} {2}\n", v.x, v.y, v.z));
         }
-        sb.Append("\n");
-        foreach (Vector3 v in uvs)
-        {
-            sb.Append(string.Format("vt {0} {1}\n", v.x, v.y));
+        sb.Append ("\n");
+        foreach (Vector3 v in uvs) {
+            sb.Append (string.Format ("vt {0} {1}\n", v.x, v.y));
         }
 
-        for (int i = 0; i < faces.Length; i += 3)
-        {
-            sb.Append(string.Format("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}\n",
+        for (int i = 0; i < faces.Length; i += 3) {
+            sb.Append (string.Format ("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}\n",
                 faces[i] + 1, faces[i + 1] + 1, faces[i + 2] + 1));
         }
-        string content = sb.ToString();
-        using (StreamWriter sw = new StreamWriter(filename))
-        {
-            sw.Write(content);
+        string content = sb.ToString ();
+        using (StreamWriter sw = new StreamWriter (filename)) {
+            sw.Write (content);
         }
     }
 }

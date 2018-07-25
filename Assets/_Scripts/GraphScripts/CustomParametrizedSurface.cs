@@ -112,6 +112,7 @@ public class CustomParametrizedSurface : MonoBehaviour
         if (tessel != null)
         {
             tessel.gameObject.SetActive(true);
+            tessel.ClearMeshVisualizers();
         }
         foreach (ExpressionSet expressionSet in expressionSets)
         {
