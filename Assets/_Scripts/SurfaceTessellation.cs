@@ -546,7 +546,7 @@ public class SurfaceTessellation : MonoBehaviour
             {
                 Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
             }
-            ObjExporter.SaveMesh(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename + ".obj"));
+            FileExporter.SaveMeshObj(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
         }
         isRunning = false;
         return null;
