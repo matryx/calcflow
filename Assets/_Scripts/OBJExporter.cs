@@ -179,13 +179,39 @@ public class FileExporter {
     }
 
     // Formats and then writes the given data to the designated filepath as a Binary StL file
-    public static void ThreadedMeshSaveStl (Vector3[] vertices, Vector3[] normals, int[] faces, string filename){
-        uint numFacets = (uint) normals.Length;
+    public static void ThreadedMeshSaveStl (Vector3[] vertices, Vector3[] normals, int[] faces, string filename) {
+        uint numFacets = (uint) (faces.Length/3);
+        Vector3 triangleNormal;
         using (BinaryWriter bw = new BinaryWriter (File.Open(filename + ".stl", FileMode.Create), new ASCIIEncoding())) {           
             bw.Write(new byte[80]);
             bw.Write(numFacets);
+            for (int i = 0; i < faces.Length; i += 3) {
+                triangleNormal = CalculateTriangleNormal(normals[faces[i]], normals[faces[i+1]], normals[faces[i+2]]);
+                bw.Write(triangleNormal.x);
+                bw.Write(triangleNormal.y);
+                bw.Write(triangleNormal.z);
 
+                bw.Write(vertices[faces[i]].x);
+                bw.Write(vertices[faces[i]].y);
+                bw.Write(vertices[faces[i]].z);
+
+                bw.Write(vertices[faces[i+1]].x);
+                bw.Write(vertices[faces[i+1]].y);
+                bw.Write(vertices[faces[i+1]].z);
+
+                bw.Write(vertices[faces[i+2]].x);
+                bw.Write(vertices[faces[i+2]].y);
+                bw.Write(vertices[faces[i+2]].z);
+
+                bw.Write((ushort)0);
+            }
         }
+    }
+
+    /* Calculates the value of the normal of a triangle face by averaging the value
+     *  of its vertex normals */
+    private static Vector3 CalculateTriangleNormal(Vector3 a, Vector3 b, Vector3 c) {
+        return new Vector3((a.x + b.x + c.x)/3f, (a.y + b.y + c.y)/3f, (a.z + b.z + c.z)/3f);
     }
 
 }
