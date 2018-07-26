@@ -6,39 +6,21 @@ public class ToggleSecondaryMenu : QuickButton
 {
     Transform secondaryMenu;
     FuseButton fuseButton;
-    float zRotation;
 
-    // Use this for initialization
-    void Awake()
+    protected override void Start()
     {
-        GameObject secondary = GameObject.Find("/SecondaryMenus");
+        base.Start();
+        SecondaryMenu secondary = SecondaryMenu.GetInstance();
         if (secondary != null)
         {
-            secondaryMenu = secondary.transform;
+            secondaryMenu = secondary.transform.parent;
+            fuseButton = this.transform.parent.GetComponentInChildren<FuseButton>();
         }
         else
         {
             Destroy(this.gameObject);
             return;
         }
-        //setMenuPos();
-        //zRotation = secondaryMenu.localEulerAngles.z;
-        secondaryMenu.gameObject.SetActive(false);
-
-        fuseButton = this.transform.parent.GetComponentInChildren<FuseButton>();
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    protected override void Start()
-    {
-        base.Start();
-
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
@@ -55,6 +37,6 @@ public class ToggleSecondaryMenu : QuickButton
 
     protected override void ButtonExitBehavior(GameObject other)
     {
-        fuseButton.ForceCold();
+        //fuseButton.ForceCold();
     }
 }
