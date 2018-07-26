@@ -111,6 +111,9 @@ public class MainMenu : MonoBehaviour
 
         while (Time.time < startTime + overTime)
         {
+            if (obj == null){
+                yield break;
+            }
             obj.localScale = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
             yield return null;
         }

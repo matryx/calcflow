@@ -97,7 +97,7 @@ public class FlowLineParticles : MonoBehaviour
     void Update()
     {
         transform.position = referencePoint.transform.position;
-        
+
         if ((currLocalPos != referencePoint.lastLocalPos
             || currExpX != vectorField.expressionX
             || currExpY != vectorField.expressionY
@@ -110,7 +110,7 @@ public class FlowLineParticles : MonoBehaviour
             thread.Start();
         }
 
-        if(need_final_update && thread_finished)
+        if (need_final_update && thread_finished)
         {
             Thread thread = new Thread(() => SamplePoints());
             need_final_update = false;
@@ -118,9 +118,9 @@ public class FlowLineParticles : MonoBehaviour
             thread.IsBackground = true;
             thread.Start();
         }
-        
 
-        if(last_grab_state == true && referencePoint.IsGrabbed == false)
+
+        if (last_grab_state == true && referencePoint.IsGrabbed == false)
         {
             need_final_update = true;
         }
@@ -171,7 +171,14 @@ public class FlowLineParticles : MonoBehaviour
 
         //thread_num = 1;
         //thread_num = (thread_num > 2) ? 2 : thread_num;
-
+        if (t_min == "")
+        {
+            t_min = "0";
+        }
+        if (t_max == "")
+        {
+            t_max = "0";
+        }
         tmin = (float)solver.EvaluateExpression(t_min);
         tmin = (tmin > 0) ? 0 : tmin;
         tmax = (float)solver.EvaluateExpression(t_max);
@@ -239,19 +246,19 @@ public class FlowLineParticles : MonoBehaviour
         //}
 
         Vector3 curr = start;
-        for(int i = 0; i < positiveCount; i++)
+        for (int i = 0; i < positiveCount; i++)
         {
             curr = RK4(curr, time_step);
             positions.Add(i + 1, curr);
         }
         curr = start;
-        for(int i = 0; i < negativeCount; i++)
+        for (int i = 0; i < negativeCount; i++)
         {
             curr = RK4(curr, -time_step);
             positions.Add(-i, curr);
         }
 
-        if(positions.Count != lastCount)
+        if (positions.Count != lastCount)
         {
             InitializeParticleSystem();
         }
@@ -265,18 +272,18 @@ public class FlowLineParticles : MonoBehaviour
     void ThreadedSampling(int TID, Vector3 startPos, float step, float positiveCount, float negativeCount)
     {
         Vector3 curr = startPos;
-        for(int i = 0; i < positiveCount; i++)
+        for (int i = 0; i < positiveCount; i++)
         {
             curr = ThreadedRK4(TID, curr, step);
             lock (lck)
             {
                 //curr = RK4(curr, step);
                 //positions.AddFirst(curr);
-                positions.Add(TID+thread_num*(i + 1), curr);
+                positions.Add(TID + thread_num * (i + 1), curr);
             }
         }
         curr = startPos;
-        for(int i = 0; i < negativeCount; i++)
+        for (int i = 0; i < negativeCount; i++)
         {
             curr = ThreadedRK4(TID, curr, -step);
             lock (lck)
@@ -373,9 +380,9 @@ public class FlowLineParticles : MonoBehaviour
     void Highlight()
     {
         if (dest == null) return;
-        for(int i = 0; i < dest.Length; i++)
+        for (int i = 0; i < dest.Length; i++)
         {
-            if(i > currHighlight && i < currHighlight + 40)
+            if (i > currHighlight && i < currHighlight + 40)
             {
                 dest[i].color = Color.red;
             }
@@ -384,7 +391,7 @@ public class FlowLineParticles : MonoBehaviour
                 dest[i].color = Color.white;
             }
         }
-        currHighlight+=4;
+        currHighlight += 4;
         if (currHighlight > dest.Length)
         {
             currHighlight = 0;
