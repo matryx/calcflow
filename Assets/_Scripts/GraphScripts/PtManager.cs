@@ -95,7 +95,12 @@ public class PtManager : MonoBehaviour
         ptInput = connectedMenus.ptInput;
         connectedMenus.ptInput.Initialize(this);
         connectedMenus.ptOutputMenu.Initialize(this);
+        List<string> neg1 = new List<string>(){"-","1"};
+        List<string> pos1 = new List<string>(){"1"};
         ptSet = new PtSet();
+        ptSet.AddPtCoord("pt1", neg1, pos1, pos1);
+        ptSet.AddPtCoord("pt2", pos1, neg1, pos1);
+        ptSet.AddPtCoord("pt3", pos1, pos1, neg1);
         eqnSet = new EqnSet();
         ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
     }
