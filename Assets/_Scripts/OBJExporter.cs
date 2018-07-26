@@ -54,6 +54,8 @@ public class FileExporter {
     //    }
     //}
 
+    // TODO: Combine SaveMeshXYZ functions into one SaveMesh function
+
     /* Sets up the vertices and normals in unified lists to send to
      * the saving function as a StL file */
     public static void SaveMeshStl (List<MeshFilter> mfs, string filename) {
