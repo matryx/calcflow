@@ -95,21 +95,23 @@ public class PtManager : MonoBehaviour
         ptInput = connectedMenus.ptInput;
         connectedMenus.ptInput.Initialize(this);
         connectedMenus.ptOutputMenu.Initialize(this);
-        List<string> neg1 = new List<string>(){"-","1"};
-        List<string> pos1 = new List<string>(){"1"};
+        List<string> neg1 = new List<string>() { "-", "1" };
+        List<string> pos1 = new List<string>() { "1" };
         ptSet = new PtSet();
-        ptSet.AddPtCoord("pt1", neg1, pos1, pos1);
-        ptSet.AddPtCoord("pt2", pos1, neg1, pos1);
-        ptSet.AddPtCoord("pt3", pos1, pos1, neg1);
+        
         eqnSet = new EqnSet();
+
         ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
+        updatePoint("pt1", new Vector3(-1, 1, 1), false);
+        updatePoint("pt2", new Vector3(1, -1, 1), false);
+        updatePoint("pt3", new Vector3(1, 1, -1), false);
     }
 
 
-    void Awake()
+    void Start()
     {
-        inputReceived =true;
-        eqnInput=false;
+        inputReceived = true;
+        //eqnInput = false;
         Initialize();
     }
     public bool updateText = false;
@@ -176,7 +178,7 @@ public class PtManager : MonoBehaviour
     public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
     {
         CalcOutput originalExpression = ptInput.currExpression;
-        eqnInput = false; 
+        eqnInput = false;
         //inputReceived = true;
 
         SetOutput(ptSet.ptCoords[ptName].X);
