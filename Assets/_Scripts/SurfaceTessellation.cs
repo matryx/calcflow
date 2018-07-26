@@ -29,6 +29,7 @@ public class SurfaceTessellation : MonoBehaviour
     Coroutine tessel;
     bool isRunning;
     bool isDone;
+    bool saveAsStl = true;
     List<MeshFilter> meshVisuals = new List<MeshFilter>();
 
     private void Awake()
@@ -546,7 +547,14 @@ public class SurfaceTessellation : MonoBehaviour
             {
                 Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
             }
-            FileExporter.SaveMeshObj(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
+            if (saveAsStl)
+            {
+                FileExporter.SaveMeshStl(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
+            }
+            else
+            {
+                FileExporter.SaveMeshObj(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
+            }
         }
         isRunning = false;
         return null;

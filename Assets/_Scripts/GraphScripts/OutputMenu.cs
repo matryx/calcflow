@@ -110,6 +110,9 @@ public class OutputMenu : MonoBehaviour
             case "GenerateMesh":
                 calcManager.toExport = true;
                 break;
+            case "GenerateStl":
+                calcManager.toStl = true;
+                break;
             case "Save":
                 if (Saveable)
                 {
