@@ -43,7 +43,6 @@ public class CalcManager : MonoBehaviour
     int rangeDisplayLength = 5;
 
     internal bool toExport = false;
-    internal bool toStl = false;
 
     [SerializeField]
     public FlexActionableComponent defaultSpeed;
@@ -227,11 +226,6 @@ public class CalcManager : MonoBehaviour
             ManageFeedback();
             if (isValid)
                 paramSurface.GenerateParticles();
-        }
-        if (toStl)
-        {
-            toStl = false;
-            //paramSurface.FileType()
         }
         if (toExport)
         {
