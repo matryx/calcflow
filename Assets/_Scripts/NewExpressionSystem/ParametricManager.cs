@@ -76,6 +76,16 @@ public class ParametricManager : CalculatorManager
         inputReceived = true;
     }
 
+    public override void deleteVariables(List<string> toDelete)
+    {
+        foreach (string del in toDelete)
+        {
+            expressionSet.RemoveVariable(del);
+        }
+
+        expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDelete);
+    }
+
     void Update()
     {
         if (inputReceived)
@@ -96,15 +106,5 @@ public class ParametricManager : CalculatorManager
             toExport = false;
             paramSurface.GenerateMesh();
         }
-    }
-
-    public override void deleteVariables(List<string> toDelete)
-    {
-        foreach (string del in toDelete)
-        {
-            expressionSet.RemoveVariable(del);
-        }
-
-        expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDelete);
     }
 }

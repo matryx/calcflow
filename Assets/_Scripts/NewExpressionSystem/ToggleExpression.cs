@@ -50,7 +50,6 @@ public class ToggleExpression : QuickButton
                 expressionSet = param.getExpSet();
                 calcManager.RemoveExpressionSet(expressionSet);
                 param.setTextColor(grayHide);
-                expressionActions.GetComponent<ExpressionActions>().disableButtons();
                 param.setButtonInputColor(grayHide);
                 param.setElementQuadTex(quadHide);
                 param.setActiveStatus(false);
@@ -62,13 +61,13 @@ public class ToggleExpression : QuickButton
         {
             calcManager.AddExpressionSet(expressionSet);
             param.setActiveStatus(true);
-            expressions.setSelectedExpr(thisExpr, thisBody);
             thisBody.selectBody();
             param.setTextColor(Color.black);
             param.setElementQuadTex(quadShow);
             param.setButtonInputColor(grayShow);
         }
 
+        expressionActions.GetComponent<ExpressionActions>().disableButtons();
         transform.GetComponent<Renderer>().material = (active) ? hideMat : showMat;
         active = !active;
     }

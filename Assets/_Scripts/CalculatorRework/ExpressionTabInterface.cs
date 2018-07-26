@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ExpressionTabInterface  {
-
+public interface ExpressionTabInterface
+{
+    ExpressionSet getExpSet();
     Transform getExpressionX();
-    void setExpressionX(Transform sep);
+    void setExpressionX(Transform e);
+    void setSeparator(Transform sep);
+    void deleteExpressionFromScroll();
     bool getActiveStatus();
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Constant : MonoBehaviour, ExpressionTabInterface
+public class Constant : MonoBehaviour
 {
     Expressions.ExpressionType type;
     List<Transform> components;
@@ -42,6 +42,17 @@ public class Constant : MonoBehaviour, ExpressionTabInterface
     public void addComponent(Transform comp)
     {
         components.Add(comp);
+    }
+
+    //TODO: implement
+    public void deleteExpressionFromScroll()
+    {
+
+    }
+
+    public void setSeparator (Transform sep)
+    {
+        separator = sep;
     }
 
     //NOT NEEDED

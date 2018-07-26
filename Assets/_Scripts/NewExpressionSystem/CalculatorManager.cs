@@ -106,7 +106,7 @@ public abstract class CalculatorManager : MonoBehaviour
             textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
         }
 
-        inputReceived = true;
+        //inputReceived = true;
     }
 
     public bool letterPressed(string buttonID)

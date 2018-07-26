@@ -12,6 +12,8 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
 
     Transform range;
     Transform expressionX;
+    Transform separator;
+
     Scroll scroll;
 
     bool initialized = false;
@@ -43,6 +45,16 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
 
             initialized = true;
         }
+    }
+
+    public void setRange(Transform r)
+    {
+        range = r;
+    }
+
+    public void setSeparator(Transform sep)
+    {
+        separator = sep;
     }
 
     public void setExpressionX(Transform e)
@@ -121,9 +133,14 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
         expressionsList.Add(expr);
     }
 
-    public void setRange(Transform r)
+    public void deleteExpressionFromScroll()
     {
-        range = r;
+        List<Transform> rest = new List<Transform>();
+        rest.Add(range);
+        rest.Add(separator);
+
+        scroll.deleteObjects(expressionsList);
+        scroll.deleteObjects(rest);
     }
     
     void Update() { }

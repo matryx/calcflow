@@ -26,6 +26,7 @@ public class ExpressionTabHandler : MonoBehaviour {
 
     ExpressionTabResponder responder;
     OutputManager outputManager;
+    Expressions expressions;
 
     void Start()
     {
@@ -41,6 +42,10 @@ public class ExpressionTabHandler : MonoBehaviour {
         GetComponent<FlexMenu>().RegisterResponder(responder);
 
         outputManager = OutputManager._instance;
+        outputManager.setManager(ParametricManager._instance);
+
+        expressions = Expressions._instance;
+        expressions.setManager(ParametricManager._instance);
     }
 
     void toggleMenu(string menuName)
@@ -53,6 +58,7 @@ public class ExpressionTabHandler : MonoBehaviour {
                 constantPanel.gameObject.SetActive(false);
 
                 outputManager.setManager(ParametricManager._instance);
+                expressions.setManager(ParametricManager._instance);
                 break;
             case "VectorFieldTab":
                 paramPanel.gameObject.SetActive(false);
@@ -60,6 +66,7 @@ public class ExpressionTabHandler : MonoBehaviour {
                 constantPanel.gameObject.SetActive(false);
 
                 outputManager.setManager(VecFieldManager._instance);
+                expressions.setManager(VecFieldManager._instance);
                 break;
             case "ConstantTab":
                 paramPanel.gameObject.SetActive(false);

@@ -4,35 +4,32 @@ using UnityEngine;
 
 public class ExpressionActions : QuickButton
 {
+    List<Transform> buttons;
     Transform delete;
     Transform toggleHide;
+    Transform select;
     private Vector3 buttonActiveScale;
 
     private bool menuActive = false;
     private IEnumerator scaleButtonsUp, scaleButtonsDown;
 
-    //TODO: handle discrepancy between toggle button for param and select button for vec field
-
-    public void disableButtons()
-    {
-        if (delete == null) delete = transform.parent.Find("Delete");
-        if (toggleHide == null) toggleHide = transform.parent.Find("ToggleHide");
-
-        if (scaleButtonsUp != null) StopCoroutine(scaleButtonsUp);
-
-        scaleButtonsDown = ScaleButtonsDown();
-        StartCoroutine(scaleButtonsDown);
-
-        menuActive = false;
-    }
-
     private void Initialize()
     {
-        delete = transform.parent.Find("Delete");
-        toggleHide = transform.parent.Find("ToggleHide");
+        buttons = new List<Transform>();
 
-        delete.gameObject.SetActive(false);
-        toggleHide.gameObject.SetActive(false);
+        Transform check = transform.parent.Find("Delete");
+        if (check != null) buttons.Add(check);
+
+        check = transform.parent.Find("ToggleHide");
+        if (check != null) buttons.Add(check);
+
+        check = transform.parent.Find("Select");
+        if (check != null) buttons.Add(check);
+
+        foreach (Transform b in buttons)
+        {
+            b.gameObject.SetActive(false);
+        }
 
         buttonActiveScale = new Vector3(1f, 1f, 1f);
     }
@@ -43,22 +40,36 @@ public class ExpressionActions : QuickButton
         Initialize();
     }
 
+    public void disableButtons()
+    {
+        if (scaleButtonsUp != null) StopCoroutine(scaleButtonsUp);
+
+        scaleButtonsDown = ScaleButtonsDown();
+        StartCoroutine(scaleButtonsDown);
+
+        menuActive = false;
+    }
+
     IEnumerator ScaleButtonsDown()
     {
-        yield return StartCoroutine(ScaleTo(toggleHide, buttonActiveScale, Vector3.zero, 0.1f));
-        toggleHide.gameObject.SetActive(false);
-
-        yield return StartCoroutine(ScaleTo(delete, buttonActiveScale, Vector3.zero, 0.1f));
-        delete.gameObject.SetActive(false);
+        foreach (Transform b in buttons)
+        {
+            yield return StartCoroutine(ScaleTo(b, buttonActiveScale, Vector3.zero, 0.1f));
+            b.gameObject.SetActive(false);
+        }
     }
 
     IEnumerator ScaleButtonsUp()
     {
-        delete.gameObject.SetActive(true);
-        yield return StartCoroutine(ScaleTo(delete, Vector3.zero, buttonActiveScale, 0.1f));
+        buttons.Reverse();
 
-        toggleHide.gameObject.SetActive(true);
-        yield return StartCoroutine(ScaleTo(toggleHide, Vector3.zero, buttonActiveScale, 0.1f));
+        foreach (Transform b in buttons)
+        {
+            b.gameObject.SetActive(true);
+            yield return StartCoroutine(ScaleTo(b, Vector3.zero, buttonActiveScale, 0.1f));
+        }
+
+        buttons.Reverse();
     }
 
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
@@ -98,20 +109,13 @@ public class ExpressionActions : QuickButton
 
     private void OnDisable()
     {
-        if (delete == null) delete = transform.parent.Find("Delete");
-
-        if (delete.gameObject.activeSelf)
+        foreach(Transform b in buttons)
         {
-            delete.localScale = Vector3.zero;
-            delete.gameObject.SetActive(false);
-        }
-
-        if (toggleHide == null) toggleHide = transform.parent.Find("ToggleHide");
-
-        if (toggleHide.gameObject.activeSelf)
-        {
-            toggleHide.localScale = Vector3.zero;
-            toggleHide.gameObject.SetActive(false);
+            if (b.gameObject.activeSelf)
+            {
+                b.localScale = Vector3.zero;
+                b.gameObject.SetActive(false);
+            }
         }
 
         menuActive = false;

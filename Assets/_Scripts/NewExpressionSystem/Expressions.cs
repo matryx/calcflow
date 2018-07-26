@@ -1,20 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Extensions;
 
 public class Expressions : MonoBehaviour
 {
-    ParametricManager calcManager;
+    CalculatorManager calcManager;
+    //ParametricManager calcManager;
+
     Scroll paramScroll, vecFieldScroll, constantScroll;
     public static Expressions _instance;
     ExpressionSet selectedExpSet;
+    [SerializeField]
     Transform selectedExpression;
     ExpressionBody selectedBody;
     List<Transform> expressions;
     public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
-    // 1 - main functionalities for parametric - DONE / NEED TO TEST HEAVILY
+    // 1 - implement select button for vec fields and fix UI so that 
+    //     only one vec field expression is active at a time
+    //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
@@ -24,16 +30,24 @@ public class Expressions : MonoBehaviour
     // 2 - creating empty game object everytime a letter is pressed
     // 3 - scroll bug? when adding expressions and not at top of page, UI gets broken
     //   - NOTE: pretty sure I already fixed this but need a headset to test
+    //           but there still should be a bug: check what happens when X isn't visible 
+    //           on scroll and add a new expr while that expr with the hidden x is selected
 
     void Awake()
     {
         _instance = this;
         calcManager = ParametricManager._instance;
+
         paramScroll = transform.parent.Find("ParametrizationPanel").GetComponentInChildren<Scroll>();
         vecFieldScroll = transform.parent.Find("VectorFieldPanel").GetComponentInChildren<Scroll>();
         constantScroll = transform.parent.Find("ConstantPanel").GetComponentInChildren<Scroll>();
 
         expressions = new List<Transform>();
+    }
+
+    public void setManager(CalculatorManager cm)
+    {
+        calcManager = cm;
     }
 
     public Scroll getScroll(ExpressionType type)
@@ -73,37 +87,6 @@ public class Expressions : MonoBehaviour
         return selectedExpSet;
     }
 
-    public bool selectedNotNull()
-    {
-        return (selectedExpression != null);
-    }
-
-    public void deleteExpression(Transform del)
-    {
-        if (del)
-        {
-            ParametricExpression param = del.GetComponent<ParametricExpression>();
-            if (param)
-            {
-                calcManager.RemoveExpressionSet(param.getExpSet());
-                param.deleteExpressionFromScroll();
-                expressions.Remove(del);
-            }
-        }
-        else
-        {
-            if (selectedExpression.GetComponent<ParametricExpression>())
-            {
-                //deletes expression from graph
-                //have to do this first because deleting UI sets expression set to null
-                calcManager.RemoveExpressionSet(selectedExpSet);
-                //deletes expression from UI
-                selectedExpression.GetComponent<ParametricExpression>().deleteExpressionFromScroll();
-                expressions.Remove(selectedExpression);
-            }
-        }
-    }
-
     public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
         if (expr == null)
@@ -116,6 +99,18 @@ public class Expressions : MonoBehaviour
 
         selectedExpression = expr;
         selectedBody = body;
+    }
+
+    public bool selectedNotNull()
+    {
+        return (selectedExpression != null);
+    }
+
+    public void deleteExpression(Transform del)
+    {
+        calcManager.RemoveExpressionSet(del.gameObject.GetInterface<ExpressionTabInterface>().getExpSet());
+        del.gameObject.GetInterface<ExpressionTabInterface>().deleteExpressionFromScroll();
+        expressions.Remove(del);
     }
 
     void Update() { }

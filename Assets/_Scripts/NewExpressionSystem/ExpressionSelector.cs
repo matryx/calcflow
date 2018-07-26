@@ -125,6 +125,7 @@ public class ExpressionSelector : QuickButton
         paramSetUp(param.transform, paramComponents);
 
         GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+        param.GetComponent<ParametricExpression>().setSeparator(sep.transform);
         addForwarders(sep.transform);
         paramComponents.Add(sep.transform);
 
@@ -175,6 +176,7 @@ public class ExpressionSelector : QuickButton
         vecComponents.Add(var.transform);
 
         GameObject sepVec = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+        vec.GetComponent<VectorFieldExpression>().setSeparator(sepVec.transform);
         addForwarders(sepVec.transform);
         vecComponents.Add(sepVec.transform);
 
