@@ -28,8 +28,6 @@ public class SurfaceTessellation : MonoBehaviour
 
     Coroutine tessel;
     bool isRunning;
-    bool isDone;
-    bool saveAsStl = true;
     List<MeshFilter> meshVisuals = new List<MeshFilter>();
 
     private void Awake()
@@ -41,6 +39,10 @@ public class SurfaceTessellation : MonoBehaviour
         uvs = new List<Vector2>();
         faces = new List<int>();
         gameObject.SetActive(false);
+        ExportMenu em = this.transform.Find("ExportMenu").gameObject.GetComponent<ExportMenu>();
+        if (em != null){
+            em.Initialize(this);
+        }
     }
 
     private void Update()
@@ -50,14 +52,6 @@ public class SurfaceTessellation : MonoBehaviour
             if (isRunning == false)
             {
                 EquationSet es = queue.Dequeue();
-                if (queue.Count == 0)
-                {
-                    isDone = true;
-                }
-                else
-                {
-                    isDone = false;
-                }
                 var go = new GameObject("Mesh Visualizer" + meshVisuals.Count);
                 go.transform.SetParent(transform);
                 go.transform.localPosition = Vector3.zero;
@@ -539,24 +533,29 @@ public class SurfaceTessellation : MonoBehaviour
         meshVisual.mesh.SetTriangles(faces, 0);
         //inst.AddComponent<MeshCollider>();
         //inst.GetComponent<MeshCollider>().sharedMesh = newMesh;
-
-        if (isDone){
-            string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
-            string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-            if (!Directory.Exists(Path.Combine(path, "CalcflowExports")))
-            {
-                Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
-            }
-            if (saveAsStl)
-            {
-                FileExporter.SaveMeshStl(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
-            }
-            else
-            {
-                FileExporter.SaveMeshObj(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
-            }
-        }
         isRunning = false;
         return null;
+    }
+
+    public void ExportAsStl()
+    {
+        string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
+        string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        if (!Directory.Exists(Path.Combine(path, "CalcflowExports")))
+        {
+            Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
+        }
+        FileExporter.SaveMeshStl(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
+    }
+
+    public void ExportAsObj()
+    {
+        string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
+        string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        if (!Directory.Exists(Path.Combine(path, "CalcflowExports")))
+        {
+            Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
+        }
+        FileExporter.SaveMeshObj(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
     }
 }
