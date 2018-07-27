@@ -76,23 +76,32 @@ public class FileExporter {
         mfs[0].mesh.triangles.CopyTo (faces, 0);
 
         int numFinished = 1;
+
+        int offsetVertices = 0;
+        int offsetNormals = 0;
+        int offsetFaces = 0;
+
         if (mfs.Count == 1){
             Thread t = new Thread (() => ThreadedMeshSaveStl (vertices, normals, faces, filename));
             t.Start ();
         }
         for (int i = 1; i < mfs.Count; i++) {
-            int m = i;
-            mfs[i].mesh.vertices.CopyTo (vertices, mfs[i - 1].mesh.vertices.Length);
-            mfs[i].mesh.normals.CopyTo (normals, mfs[i - 1].mesh.normals.Length);
+            offsetVertices += mfs[i-1].mesh.vertices.Length;
+            offsetNormals += mfs[i-1].mesh.normals.Length;
+            offsetFaces += mfs[i-1].mesh.triangles.Length;
+            int saveOffsetFaces = offsetFaces;
+            int saveOffsetVert = offsetVertices;
+            mfs[i].mesh.vertices.CopyTo (vertices, offsetVertices);
+            mfs[i].mesh.normals.CopyTo (normals, offsetNormals);
             int[] shiftFaces = mfs[i].mesh.triangles.Clone () as int[];
-            int offsetVal = mfs[i-1].mesh.vertices.Length;
+
             Async.runInThread ((Async thread) => {
                 for (int sf = 0; sf < shiftFaces.Length; sf++) {
-                    shiftFaces[sf] += offsetVal;
+                    shiftFaces[sf] += saveOffsetVert;
                 }
                 thread.pushEvent ("Finished", null);
             }).onEvent ("Finished", (object data) => {
-                shiftFaces.CopyTo (faces, mfs[m - 1].mesh.triangles.Length);
+                shiftFaces.CopyTo (faces, saveOffsetFaces);
                 numFinished++;
                 if (numFinished == mfs.Count){
                     Thread t = new Thread (() => ThreadedMeshSaveStl (vertices, normals, faces, filename));
@@ -121,29 +130,42 @@ public class FileExporter {
         Vector3[] normals = new Vector3[normalsSize];
         Vector2[] uvs = new Vector2[uvsSize];
         int[] faces = new int[facesSize];
+
         mfs[0].mesh.vertices.CopyTo (vertices, 0);
         mfs[0].mesh.normals.CopyTo (normals, 0);
         mfs[0].mesh.uv.CopyTo (uvs, 0);
         mfs[0].mesh.triangles.CopyTo (faces, 0);
+
         int numFinished = 1;
+
+        int offsetVertices = 0;
+        int offsetNormals = 0;
+        int offsetUvs = 0;
+        int offsetFaces = 0;
+
         if (mfs.Count == 1){
             Thread t = new Thread (() => ThreadedMeshSaveObj (name, vertices, normals, uvs, faces, filename));
             t.Start ();
         }
         for (int i = 1; i < mfs.Count; i++) {
-            int m = i;
-            mfs[i].mesh.vertices.CopyTo (vertices, mfs[i - 1].mesh.vertices.Length);
-            mfs[i].mesh.normals.CopyTo (normals, mfs[i - 1].mesh.normals.Length);
-            mfs[i].mesh.uv.CopyTo (uvs, mfs[i - 1].mesh.uv.Length);
+            offsetVertices += mfs[i-1].mesh.vertices.Length;
+            offsetNormals += mfs[i-1].mesh.normals.Length;
+            offsetUvs += mfs[i-1].mesh.uv.Length;
+            offsetFaces += mfs[i-1].mesh.triangles.Length;
+            int saveOffsetFaces = offsetFaces;
+            int saveOffsetVert = offsetVertices;
+            mfs[i].mesh.vertices.CopyTo (vertices, offsetVertices);
+            mfs[i].mesh.normals.CopyTo (normals, offsetNormals);
+            mfs[i].mesh.uv.CopyTo (uvs, offsetUvs);
             int[] shiftFaces = mfs[i].mesh.triangles.Clone () as int[];
-            int offsetVal = mfs[i-1].mesh.vertices.Length;
+
             Async.runInThread ((Async thread) => {
                 for (int sf = 0; sf < shiftFaces.Length; sf++) {
-                    shiftFaces[sf] += offsetVal;
+                    shiftFaces[sf] += saveOffsetVert;
                 }
                 thread.pushEvent ("Finished", null);
             }).onEvent ("Finished", (object data) => {
-                shiftFaces.CopyTo (faces, mfs[m - 1].mesh.triangles.Length);
+                shiftFaces.CopyTo (faces, saveOffsetFaces);
                 numFinished++;
                 if (numFinished == mfs.Count){
                     Thread t = new Thread (() => ThreadedMeshSaveObj (name, vertices, normals, uvs, faces, filename));
