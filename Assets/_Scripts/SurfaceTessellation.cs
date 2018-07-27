@@ -55,6 +55,7 @@ public class SurfaceTessellation : MonoBehaviour
                 var go = new GameObject("Mesh Visualizer" + meshVisuals.Count);
                 go.transform.SetParent(transform);
                 go.transform.localPosition = Vector3.zero;
+                go.transform.localRotation = Quaternion.identity;
                 var mrenderer = go.AddComponent<MeshRenderer>();
                 mrenderer.material = new Material(Shader.Find("Wireframe"));
                 MeshFilter meshVisual = go.AddComponent<MeshFilter>();
