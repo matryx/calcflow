@@ -537,7 +537,7 @@ public class SurfaceTessellation : MonoBehaviour
         return null;
     }
 
-    public void ExportAsStl()
+    public void ExportAsFile(string filetype)
     {
         string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
         string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
@@ -545,17 +545,6 @@ public class SurfaceTessellation : MonoBehaviour
         {
             Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
         }
-        FileExporter.SaveMeshStl(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
-    }
-
-    public void ExportAsObj()
-    {
-        string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
-        string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-        if (!Directory.Exists(Path.Combine(path, "CalcflowExports")))
-        {
-            Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
-        }
-        FileExporter.SaveMeshObj(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename));
+        FileExporter.SaveMesh(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename), filetype);
     }
 }

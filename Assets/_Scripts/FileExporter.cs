@@ -54,66 +54,9 @@ public class FileExporter {
     //    }
     //}
 
-    // TODO: Combine SaveMeshXYZ functions into one SaveMesh function
-
-    /* Sets up the vertices and normals in unified lists to send to
-     * the saving function as a StL file */
-    public static void SaveMeshStl (List<MeshFilter> mfs, string filename) {
-
-        int verticesSize = 0, normalsSize = 0, facesSize = 0;
-
-        for (int i = 0; i < mfs.Count; i++) {
-            verticesSize += mfs[i].mesh.vertices.Length;
-            normalsSize += mfs[i].mesh.normals.Length;
-            facesSize += mfs[i].mesh.triangles.Length;
-        }
-
-        Vector3[] vertices = new Vector3[verticesSize];
-        Vector3[] normals = new Vector3[normalsSize];
-        int[] faces = new int[facesSize];
-        mfs[0].mesh.vertices.CopyTo (vertices, 0);
-        mfs[0].mesh.normals.CopyTo (normals, 0);
-        mfs[0].mesh.triangles.CopyTo (faces, 0);
-
-        int numFinished = 1;
-
-        int offsetVertices = 0;
-        int offsetNormals = 0;
-        int offsetFaces = 0;
-
-        if (mfs.Count == 1){
-            Thread t = new Thread (() => ThreadedMeshSaveStl (vertices, normals, faces, filename));
-            t.Start ();
-        }
-        for (int i = 1; i < mfs.Count; i++) {
-            offsetVertices += mfs[i-1].mesh.vertices.Length;
-            offsetNormals += mfs[i-1].mesh.normals.Length;
-            offsetFaces += mfs[i-1].mesh.triangles.Length;
-            int saveOffsetFaces = offsetFaces;
-            int saveOffsetVert = offsetVertices;
-            mfs[i].mesh.vertices.CopyTo (vertices, offsetVertices);
-            mfs[i].mesh.normals.CopyTo (normals, offsetNormals);
-            int[] shiftFaces = mfs[i].mesh.triangles.Clone () as int[];
-
-            Async.runInThread ((Async thread) => {
-                for (int sf = 0; sf < shiftFaces.Length; sf++) {
-                    shiftFaces[sf] += saveOffsetVert;
-                }
-                thread.pushEvent ("Finished", null);
-            }).onEvent ("Finished", (object data) => {
-                shiftFaces.CopyTo (faces, saveOffsetFaces);
-                numFinished++;
-                if (numFinished == mfs.Count){
-                    Thread t = new Thread (() => ThreadedMeshSaveStl (vertices, normals, faces, filename));
-                    t.Start ();
-                }
-            });
-        }
-    }
-
-    /* Sets up the name, vertices, normals, uvs, and triangles in
-     * unified lists to send to the saving function as an obj file */
-    public static void SaveMeshObj (List<MeshFilter> mfs, string filename) {
+    /* Sets up the name, vertices, normals, uvs, and triangles in unified lists to send 
+     * to the saving function as a file of the given format */
+    public static void SaveMesh (List<MeshFilter> mfs, string filename, string filetype) {
 
         string name = string.Format ("CreatedMesh");
 
@@ -144,8 +87,19 @@ public class FileExporter {
         int offsetFaces = 0;
 
         if (mfs.Count == 1){
-            Thread t = new Thread (() => ThreadedMeshSaveObj (name, vertices, normals, uvs, faces, filename));
-            t.Start ();
+            switch (filetype.ToLower()) {
+                default:
+                    Debug.LogError("Unsupported filetype: " + filetype);
+                    break;
+                case "stl":
+                    Thread tstl = new Thread (() => ThreadedMeshSaveStl (vertices, normals, faces, filename));
+                    tstl.Start ();
+                    break;
+                case "obj":
+                    Thread tobj = new Thread (() => ThreadedMeshSaveObj (name, vertices, normals, uvs, faces, filename));
+                    tobj.Start ();
+                    break;
+            }
         }
         for (int i = 1; i < mfs.Count; i++) {
             offsetVertices += mfs[i-1].mesh.vertices.Length;
@@ -168,8 +122,19 @@ public class FileExporter {
                 shiftFaces.CopyTo (faces, saveOffsetFaces);
                 numFinished++;
                 if (numFinished == mfs.Count){
-                    Thread t = new Thread (() => ThreadedMeshSaveObj (name, vertices, normals, uvs, faces, filename));
-                    t.Start ();
+                    switch (filetype.ToLower()) {
+                        default:
+                            Debug.LogError("Unsupported filetype: " + filetype);
+                            break;
+                        case "stl":
+                            Thread tstl = new Thread (() => ThreadedMeshSaveStl (vertices, normals, faces, filename));
+                            tstl.Start ();
+                            break;
+                        case "obj":
+                            Thread tobj = new Thread (() => ThreadedMeshSaveObj (name, vertices, normals, uvs, faces, filename));
+                            tobj.Start ();
+                            break;
+                    }
                 }
             });
         }

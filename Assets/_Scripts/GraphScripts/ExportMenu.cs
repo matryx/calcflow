@@ -83,12 +83,12 @@ public class ExportMenu : MonoBehaviour
                 print("unknown input: " + source);
                 break;
             case "ExportObj":
-                tessel.ExportAsObj();
+                tessel.ExportAsFile("obj");
                 break;
             case "ExportStl":
                 //if (Saveable)
                 //{
-                tessel.ExportAsStl();
+                tessel.ExportAsFile("StL");
                 //}
                 break;
         }
