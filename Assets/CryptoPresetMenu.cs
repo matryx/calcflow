@@ -29,7 +29,8 @@ public class CryptoPresetMenu : MonoBehaviour
     public FlexMenu menu;
     public string defaultFunction = "MTX";
     CalcManager calcManager;
-    LineChart chart;
+    LineChart lineChart;
+    CandleChart candleChart;
 
     KeyboardMenu board;
 
@@ -54,8 +55,8 @@ public class CryptoPresetMenu : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Initialize");
-        chart = LineChart.GetInstance();
+        lineChart = LineChart.GetInstance();
+        candleChart = CandleChart.GetInstance();
         board = KeyboardMenu.GetInstance();
         scroll = GetComponentInChildren<Scroll>(true);
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
@@ -113,6 +114,10 @@ public class CryptoPresetMenu : MonoBehaviour
             }
                 break;
             //R1 -> R1
+            case "Toggle":
+                lineChart.gameObject.SetActive(!lineChart.gameObject.activeInHierarchy);
+                candleChart.gameObject.SetActive(!candleChart.gameObject.activeInHierarchy);
+                break;
             case "MTX":
                 currCrypto = "matryx";
                 newGraph();
@@ -174,9 +179,9 @@ public class CryptoPresetMenu : MonoBehaviour
     }
     void newGraph()
     {
-        chart.kill();
-        chart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
-        chart.updateGraph();
+        lineChart.kill();
+        lineChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
+        lineChart.updateGraph();
     }
 
     void getTimeStamps(string source)

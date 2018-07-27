@@ -9,7 +9,7 @@ using Nanome.Core;
 public class CandleChart : MonoBehaviour
 {
 
-     internal class monthData
+    internal class monthData
     {
         public double open, close, high, low;
 
@@ -98,11 +98,16 @@ public class CandleChart : MonoBehaviour
     public Transform boorish;
     public Transform line;
 
+    public Transform dataPoint;
+
+    private TextMesh dataContent;
+
     float max, min;
 
     void Awake()
     {
         _instance = this;
+        //gameObject.SetActive(false);
     }
 
     void Start()
@@ -110,7 +115,7 @@ public class CandleChart : MonoBehaviour
         DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         double currTime = Math.Round((double)(DateTime.UtcNow - epoch).TotalMilliseconds);
         // Debug.Log("CURRTIME: " + currTime);
-        // SetURL("https://graphs2.coinmarketcap.com/currencies/matryx/0/" + currTime + "/");
+        //SetURL("https://graphs2.coinmarketcap.com/currencies/matryx/0/" + currTime + "/");
         SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/1367174841000/1532635142000/");
         updateGraph();
     }
@@ -139,7 +144,7 @@ public class CandleChart : MonoBehaviour
     // Extracts the usd price time/price data from the text
     void parseData(object tmp)
     {
-      //  Debug.Log("parseData");
+        //  Debug.Log("parseData");
         string data = ((StringBuilder)tmp).ToString();
         int startIndex = data.IndexOf("price_usd");
         int endIndex = data.IndexOf("]]", startIndex);
@@ -165,7 +170,7 @@ public class CandleChart : MonoBehaviour
         }
 
         //Debug.Log("Times: " + times.Count + ", Prices: " + prices.Count);
-      //  Debug.Log("lastTime: " + times[times.Count - 1] + ", lastPrice: " + prices[prices.Count - 1]);
+        //  Debug.Log("lastTime: " + times[times.Count - 1] + ", lastPrice: " + prices[prices.Count - 1]);
 
         makeGraph(times, prices);
     }
@@ -175,98 +180,100 @@ public class CandleChart : MonoBehaviour
         this.times = times;
         this.prices = prices;
 
-        /*
-        frameObj = transform.gameObject;
-
-        // Setting up the linerenderer
-        frameLine = frameObj.AddComponent<LineRenderer>();
-        frameLine.startWidth = 0.02f;
-        frameLine.endWidth = 0.02f;
-        frameLine.positionCount = prices.Count;
-        frameLine.material = frameMaterial;
-        frameLine.useWorldSpace = false;
-
-        string[] Ys = prices.ToArray();
-        rescaleData(Ys, 0);
-
-        //Debug.Log("test: " + prices.Count);
-
-        // Creates lines between points, places point prefabs
-        for (int i = 0; i < prices.Count; ++i)
-        {
-            //Ys [i] = Random.Range (-2f, 2f);
-            float xPos = ((float)i) / (prices.Count / resolution) - 12.5f;
-            frameLine.SetPosition(i, new Vector3(xPos, scaledPrices[i], 0));
-            if (i % numPoints == 0)
-            {
-                Transform currPoint = Instantiate(point, new Vector3(0, 0, 0), Quaternion.identity, transform);
-                currPoint.localPosition = new Vector3(xPos, scaledPrices[i], 0);
-            }
-            //pointList.Add(currPoint);
-        }
-        */
-
         int numMonths = (int)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1]));
         fillMonthData();
         string[] Ys = prices.ToArray();
         rescaleData(Ys, 0);
 
-        for (int i =0; i < (numMonths) - 1; i++)
+        for (int i = 0; i < (numMonths-1); i++)
         {
-            float xPos = ((float)i) / (numMonths / resolution) - 12.1f;
+            float xPos = ((float)i) / ((numMonths-1) / resolution) - 12.25f;
             float hiLowDiff = (float)scaledMonths[i].getHigh() - (float)scaledMonths[i].getLow();
+            float barLen = (float)months[i].getHigh() - (float)months[i].getLow();
             float openCloseDiff = Math.Abs((float)months[i].getClose() - (float)months[i].getOpen());
-            float topDiff, botDiff;
+            float topDiff, botDiff, botPercent, topPercent;
+            float barPercent = openCloseDiff / ((float)months[i].getHigh() - (float)months[i].getLow());
 
             Transform barType;
             barType = months[i].getOpen() < months[i].getClose() ? bullish : boorish;
 
-            if(months[i].getOpen() < months[i].getClose())
+            // Green
+            if (months[i].getOpen() < months[i].getClose())
             {
-                topDiff = (float)scaledMonths[i].getHigh() - (float)scaledMonths[i].getClose();
-                botDiff = (float)scaledMonths[i].getLow() - (float)scaledMonths[i].getOpen();
+                topDiff = (float)months[i].getHigh() - (float)months[i].getClose();
+                botDiff = (float)months[i].getOpen() - (float)months[i].getLow();
+                botPercent = 1- ((float)months[i].getLow() / (float)months[i].getOpen());
+                topPercent = (float)months[i].getClose() / (float)months[i].getHigh();
             }
+            // Red
             else
             {
-                topDiff = (float)scaledMonths[i].getHigh() - (float)scaledMonths[i].getOpen();
-                botDiff = (float)scaledMonths[i].getLow() - (float)scaledMonths[i].getClose();
+                topDiff = (float)months[i].getHigh() - (float)months[i].getOpen();
+                botDiff = (float)months[i].getClose() - (float)months[i].getLow();
+                botPercent = 1-((float)months[i].getLow() /(float)months[i].getClose());
+                topPercent = (float)months[i].getOpen() / (float)months[i].getHigh();
             }
+/* 
+            Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
+            Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose());
+            Debug.Log("MONTH: " + i + ", TOPD: " + topDiff + ", BOTD: " + botDiff);
+            Debug.Log("MONTH: " + i + ", TOPP: " + topPercent + ", BOTP: " + botPercent);
+ */
 
-             // Debug.Log("MONTH: " + i + ", HIGH: " + scaledMonths[i].getHigh() + ", LOW: " + scaledMonths[i].getLow());
-             // Debug.Log("MONTH: " + i + ", OPEN: " + scaledMonths[i].getOpen() + ", CLOSE: " + scaledMonths[i].getClose());
-              
 
-            float barPos = Math.Abs(topDiff - botDiff);
-            float lineScale = Math.Abs(hiLowDiff);
-         //   Debug.Log("MONTH: " + i + ", TOPDIFF: " + topDiff + ", BOTDIFF: " + botDiff + ", BARPOS: " + barPos);
+            float lineScale = Math.Abs(hiLowDiff) + .5f;
+            float height = ((float)scaledMonths[i].getHigh() + (float)scaledMonths[i].getLow()) / 2;
+
+            height = height < 0 ? height - .5f : height + .25f;
+            hiLowDiff = hiLowDiff < 0.5f ? hiLowDiff : hiLowDiff + .5f;
+
+            //Debug.Log("MONTH: " + i + ", HEIGHT: " + height);
+            //Debug.Log("MONTH: " + i + ", TOPDIFF: " + topDiff + ", BOTDIFF: " + botDiff + ", BARPOS: " + barPos);
 
             // Debug.Log("DIFF: " + hiLowDiff);
 
             GameObject stickHolderObj = new GameObject();
-            stickHolderObj.name = "stickHolder" + i;
+            stickHolderObj.name = "candleHolder" + i;
 
             Transform stickHolder = stickHolderObj.transform;
             stickHolder.parent = transform;
-            stickHolder.localPosition = new Vector3(xPos, (lineScale)-2, 0);
-           // Debug.Log("MONTH: " + i + ", scaledPrice: " + monthlyPrices[i]);
-
-
-     
-            Debug.Log("Index: " + i + ", hiLowDiff: " + hiLowDiff + ", scale: " + (lineScale-2));
+            stickHolder.localPosition = new Vector3(xPos, height, 0);
+            stickHolder.localRotation = Quaternion.identity;
+            // Debug.Log("MONTH: " + i + ", scaledPrice: " + monthlyPrices[i]);
 
             //Debug.Log("MONTH: " + i + ", POS: " + lineScale/2);
-            Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, stickHolder);
+            Transform currLine = Instantiate(line, Vector3.zero, Quaternion.identity, stickHolder);
             //currLine.localPosition = new Vector3(xPos, scaledPrices[i], 0);
-            currLine.localPosition = new Vector3(0, 0, 0);
-            currLine.localScale += new Vector3(0, lineScale, 0);
+            currLine.localRotation = Quaternion.identity;
+            currLine.localPosition = Vector3.zero;
+            currLine.localScale += new Vector3(0, -1 + hiLowDiff, 0);
 
+            createDataPoint(stickHolder, "HIGH: " + months[i].getHigh(), new Vector3(.05f,0,0));
 
-            float barScale = Math.Abs(openCloseDiff / hiLowDiff);
-    
-            Transform currbar = Instantiate(barType, new Vector3(0, 0, 0), Quaternion.identity, stickHolder);
-            currbar.localPosition = new Vector3(0, 0, 0);
-            currbar.localScale += new Vector3(0, -1+.005f, 0);
+            float barSize = -1 + barPercent * hiLowDiff;
+            // Debug.Log("MONTH: " + i + ", SIZE: " + barSize);
+            float barPos = (.5f * barSize) * botDiff;
 
+            float diffToUse = 0;
+
+            Transform currBar = Instantiate(barType, Vector3.zero, Quaternion.identity, stickHolder);
+            currBar.localScale += new Vector3(0, barSize, 0);
+
+            if (botDiff == 0)
+            {
+                diffToUse = (-currLine.localScale.y / 2) + currBar.localScale.y / 2 - 0.01f;
+            }
+            else if (topDiff == 0)
+            {
+                diffToUse = currLine.localScale.y / 2 - currBar.localScale.y / 2 + 0.01f;
+            }
+            else
+            {
+                diffToUse = (-currLine.localScale.y / 2) + (currLine.localScale.y * (((topPercent+botPercent)/2)));
+            }
+
+            currBar.localPosition = new Vector3(0, diffToUse, 0);
+            currBar.localRotation = Quaternion.identity;
 
         }
 
@@ -276,34 +283,46 @@ public class CandleChart : MonoBehaviour
 
     }
 
+    void createDataPoint(Transform parent, string text, Vector3 pos){
+            Transform currData = Instantiate(dataPoint, Vector3.zero, Quaternion.identity, parent);
+            currData.localRotation = Quaternion.identity;
+            currData.localPosition = pos;
+            dataContent = currData.GetComponent<TextMesh>();
+            dataContent.text = text;
+    }
+
     void fillMonthData()
     {
         int numMonths = (int)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1]));
         monthlyPrices = new float[numMonths];
-        for(int i = 0; i < numMonths; ++i)
+        for (int i = 0; i < numMonths; ++i)
         {
             months.Add(new monthData());
             scaledMonths.Add(new monthData());
         }
 
-
-        int currMonthNum = convertFromEpoch(times[0]).Month-1;
+        int currMonthNum = convertFromEpoch(times[0]).Month - 1;
         int currMonthIndex = -1;
         float monthlyTotal = 0;
         int dayCount = 0;
 
-        for (int i = -1; i < times.Count-1; ++i)
+        for (int i = -1; i < times.Count - 1; ++i)
         {
-            if (currMonthNum != convertFromEpoch(times[i+1]).Month)
+            if (currMonthNum != convertFromEpoch(times[i + 1]).Month)
             {
-                months[currMonthIndex+1].setOpen(Convert.ToDouble(prices[i+1]));
-                months[currMonthIndex+1].setClose(Convert.ToDouble(prices[i+1]));
-                months[currMonthIndex+1].setHigh(Convert.ToDouble(prices[i+1]));
-                months[currMonthIndex+1].setLow(Convert.ToDouble(prices[i+1]));
+                months[currMonthIndex + 1].setOpen(Convert.ToDouble(prices[i + 1]));
+                months[currMonthIndex + 1].setClose(Convert.ToDouble(prices[i + 1]));
+                months[currMonthIndex + 1].setHigh(Convert.ToDouble(prices[i + 1]));
+                months[currMonthIndex + 1].setLow(Convert.ToDouble(prices[i + 1]));
 
                 if (i != -1)
                 {
                     months[currMonthIndex].setClose(Convert.ToDouble(prices[i]));
+                    if (Convert.ToDouble(prices[i]) > months[currMonthIndex].getHigh())
+                        months[currMonthIndex].setHigh(Convert.ToDouble(prices[i]));
+
+                    if (Convert.ToDouble(prices[i]) < months[currMonthIndex].getLow())
+                        months[currMonthIndex].setLow(Convert.ToDouble(prices[i]));
 
                     monthlyPrices[currMonthIndex] = monthlyTotal / dayCount;
                     dayCount = 0;
@@ -317,12 +336,11 @@ public class CandleChart : MonoBehaviour
 
                 currMonthNum++;
 
-                
             }
             else
             {
                 // Checks for and sets a new high
-                if (Convert.ToDouble(prices[i] ) > months[currMonthIndex].getHigh())
+                if (Convert.ToDouble(prices[i]) > months[currMonthIndex].getHigh())
                 {
                     months[currMonthIndex].setHigh(Convert.ToDouble(prices[i]));
                 }
@@ -337,16 +355,17 @@ public class CandleChart : MonoBehaviour
                 dayCount++;
             }
 
-
         }
 
-       
-        for(int i = 0; i < numMonths; ++i)
-        {
-          //  Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
-          //  Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose());
-        }
-        
+        /* 
+                for (int i = 0; i < numMonths; ++i)
+                {
+                    if(months[i].getHigh() < months[i].getClose() || months[i].getHigh() < months[i].getOpen() || months[i].getLow() > months[i].getClose() || months[i].getLow() > months[i].getOpen()){
+                      Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
+                      Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose());
+                    }
+                }
+         */
 
     }
 
@@ -388,7 +407,7 @@ public class CandleChart : MonoBehaviour
             if (scaledPrices[i] < -2.5)
             {
                 fineTune -= 5;
-               // goto scalePrices;
+                // goto scalePrices;
             }
         }
     }
