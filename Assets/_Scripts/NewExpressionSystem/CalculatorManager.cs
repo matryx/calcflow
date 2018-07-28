@@ -113,14 +113,8 @@ public abstract class CalculatorManager : MonoBehaviour
     {
         Transform param = expressions.getSelectedExpr();
 
-        //prevents typing of letters when a variable body is selected
-        if (expressions.getSelectedBody() && expressions.getSelectedBody().isVariable())
-        {
-            return false;
-        }
-
         //creates new variable button when new letter pressed
-        if (param != null)
+        if (param != null && ParametricManager._instance == this)
         {
             if (expressionSet.hiddenRanges.ContainsKey(buttonID))
             {
@@ -141,9 +135,11 @@ public abstract class CalculatorManager : MonoBehaviour
                 expressionSet.AddRange(buttonID);
                 addForwarders(var.transform);
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)

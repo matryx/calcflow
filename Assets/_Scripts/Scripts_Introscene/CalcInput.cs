@@ -30,6 +30,8 @@ public class CalcInput : MonoBehaviour
     private CalculatorManager calcManager;
     public static CalcInput _instance;
 
+    Expressions expressions;
+
     private FlexMenu keyboard;
     private Transform letterPanel, variablePanel;
     bool capitalized = false;
@@ -49,6 +51,8 @@ public class CalcInput : MonoBehaviour
     public void Initialize(CalculatorManager cm)
     {
         calcManager = cm;
+        expressions = Expressions._instance;
+
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);
@@ -103,8 +107,9 @@ public class CalcInput : MonoBehaviour
 
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
-                {
-                    if (!calcManager.letterPressed(buttonID))
+                { 
+                    //prevents typing of letters when a variable body is selected
+                    if (expressions.getSelectedBody() && expressions.getSelectedBody().isVariable())
                     {
                         errorPopup.SetActive(true);
                         errorPopup.transform.position = transform.position + new Vector3(0, -1.5f, -1);
@@ -114,8 +119,11 @@ public class CalcInput : MonoBehaviour
                         break;
                     }
 
-                    if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
-                    variableShortcut.recordVarPress(buttonID);
+                    if (calcManager.letterPressed(buttonID))
+                    {
+                        if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
+                        variableShortcut.recordVarPress(buttonID);
+                    }
                 }
 
                 currExpression.tokens.Insert(index, buttonID);

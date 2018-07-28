@@ -13,6 +13,9 @@ public class ExpressionSelector : QuickButton
     private VecFieldManager vecFieldManager;
     Transform xButton;
 
+    List<string> min = new List<string>();
+    List<string> max = new List<string>();
+
     protected override void Start()
     {
         base.Start();
@@ -26,6 +29,10 @@ public class ExpressionSelector : QuickButton
         thisScroll = expressions.getScroll(Expressions.ExpressionType.PARAMET);
 
         joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
+
+        min.Add("-");
+        min.Add("9");
+        max.Add("9");
     }
 
     private void addForwarders(Transform obj)
@@ -142,14 +149,14 @@ public class ExpressionSelector : QuickButton
             {
                 foreach (Transform gchild in child)
                 {
-                    p.GetComponent<ParametricExpression>().addExpression(gchild);
-
                     if (gchild.name == "Button_Xinput")
                     {
                         p.GetComponent<ParametricExpression>().setExpressionX(gchild);
                         xButton = gchild;
                     }
 
+                    p.GetComponent<ParametricExpression>().addExpression(gchild);
+                    gchild.GetComponentInChildren<ExpressionBody>().setManager(ParametricManager._instance);
                     gchild.GetComponentInChildren<ExpressionBody>().setExpressionParent(p);
                     gchild.GetComponentInChildren<ExpressionBody>().setPanel(paramPanel);
                     pComp.Add(gchild);
@@ -196,6 +203,7 @@ public class ExpressionSelector : QuickButton
             }
 
             vec.GetComponent<VectorFieldExpression>().addExpression(child);
+            child.GetComponentInChildren<ExpressionBody>().setManager(VecFieldManager._instance);
             child.GetComponentInChildren<ExpressionBody>().setExpressionParent(vec.transform);
             child.GetComponentInChildren<ExpressionBody>().setPanel(vecPanel);
             vComp.Add(child);
@@ -214,6 +222,11 @@ public class ExpressionSelector : QuickButton
         var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle("t");
         v.GetComponent<VectorFieldExpression>().setRange(var.transform);
         v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("t");
+
+        v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("x", min, max);
+        v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("y", min, max);
+        v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("z", min, max);
+
         addForwarders(v.transform);
         return var.transform;
     }

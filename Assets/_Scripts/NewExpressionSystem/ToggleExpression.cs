@@ -33,7 +33,8 @@ public class ToggleExpression : QuickButton
         expressionActions = transform.parent.parent.Find("Body");
 
         showMat = transform.GetComponent<Renderer>().material;
-        hideMat = Resources.Load("Icons/HideMat", typeof(Material)) as Material; 
+        hideMat = Resources.Load("Icons/HideMat", typeof(Material)) as Material;
+
         quadShow = Resources.Load("Icons/element", typeof(Texture2D)) as Texture;
         quadHide = Resources.Load("Icons/element_gray", typeof(Texture2D)) as Texture;
         ColorUtility.TryParseHtmlString("#9E9E9EFF", out grayShow);

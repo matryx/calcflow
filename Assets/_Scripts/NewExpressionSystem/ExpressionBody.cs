@@ -15,9 +15,11 @@ public class ExpressionBody : QuickButton
     CalcInput calcInput;
     ParametricExpression param;
     VectorFieldExpression vec;
-    ParametricManager paramManager;
-    VecFieldManager vecFieldManager;
+    [SerializeField]
     CalculatorManager calcManager;
+
+    Texture quadShow, quadHide;
+    Color grayHide, grayShow;
 
     private bool thisBodySelected = false;
     private bool finishedScalingUp = true;
@@ -30,9 +32,7 @@ public class ExpressionBody : QuickButton
 
     private void Awake()
     {
-        paramManager = ParametricManager._instance;
-        vecFieldManager = VecFieldManager._instance;
-        calcManager = paramManager;
+        calcManager = ParametricManager._instance;
 
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
@@ -50,11 +50,26 @@ public class ExpressionBody : QuickButton
         selectedScale = (variable) ? new Vector3(0.7f, 0.04f, 0.002f) :
                                      new Vector3(4.3f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
+
+        quadShow = Resources.Load("Icons/element", typeof(Texture2D)) as Texture;
+        quadHide = Resources.Load("Icons/element_gray", typeof(Texture2D)) as Texture;
+        ColorUtility.TryParseHtmlString("#9E9E9EFF", out grayShow);
+        ColorUtility.TryParseHtmlString("#D4D4D4FF", out grayHide);
     }
 
     protected override void Start()
     {
         base.Start();
+    }
+
+    public void setManager(CalculatorManager cm)
+    {
+        calcManager = cm;
+    }
+
+    public CalculatorManager getManager()
+    {
+        return calcManager;
     }
 
     public void setExpressionParent(Transform p)
@@ -160,6 +175,7 @@ public class ExpressionBody : QuickButton
     {
         if (expression == null) expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         ExpressionBody selectedBody = expression.getSelectedBody();
+
         if (selectedBody)
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
@@ -171,6 +187,14 @@ public class ExpressionBody : QuickButton
             {
                 selectedBody.unSelect();
             }
+
+            //TODO: handle hiding of graph
+            if (selectedBody.expressionParent != expressionParent && selectedBody.getManager() == VecFieldManager._instance)
+            {
+                selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(grayHide);
+                selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setButtonInputColor(grayHide);
+                selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setElementQuadTex(quadHide);
+            }
         }
     }
 
@@ -178,8 +202,15 @@ public class ExpressionBody : QuickButton
     {
         deselectPrevBody();
         expression.setSelectedExpr(expressionParent, this);
-        
-        changeExpressionSet();
+        calcManager.ChangeExpressionSet(expressionParent.gameObject.GetInterface<ExpressionTabInterface>().getExpSet());
+
+        //TODO: handle showing of graph
+        if (calcManager == VecFieldManager._instance)
+        {
+            expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(Color.black);
+            expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setButtonInputColor(grayShow);
+            expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setElementQuadTex(quadShow);
+        }
 
         if (variable)
         {
@@ -188,20 +219,7 @@ public class ExpressionBody : QuickButton
         }
         else
         {
-            if (expressionParent.GetComponent<ParametricExpression>())
-            {
-                param = expressionParent.GetComponent<ParametricExpression>();
-                if (!paramManager) paramManager = ParametricManager._instance;
-                calcManager = paramManager;
-                calcManager.SetOutput(paramManager.expressionSet.GetExpression(title));
-            }
-            else if (expressionParent.GetComponent<VectorFieldExpression>())
-            {
-                vec = expressionParent.GetComponent<VectorFieldExpression>();
-                if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
-                calcManager = vecFieldManager;
-                calcManager.SetOutput(vecFieldManager.expressionSet.GetExpression(title));
-            }
+            calcManager.SetOutput(calcManager.expressionSet.GetExpression(title));
         }
 
         if (!finishedScalingDown)
@@ -215,24 +233,6 @@ public class ExpressionBody : QuickButton
         StartCoroutine(scaleUp);
         finishedScalingUp = false;
         thisBodySelected = true;
-    }
-
-    private void changeExpressionSet()
-    {
-        if (expressionParent.GetComponent<ParametricExpression>())
-        {
-            param = expressionParent.GetComponent<ParametricExpression>();
-            if (!paramManager) paramManager = ParametricManager._instance;
-            calcManager = paramManager;
-            calcManager.ChangeExpressionSet(param.getExpSet());
-        }
-        else if (expressionParent.GetComponent<VectorFieldExpression>())
-        {
-            vec = expressionParent.GetComponent<VectorFieldExpression>();
-            if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
-            calcManager = vecFieldManager;
-            calcManager.ChangeExpressionSet(vec.getExpSet());
-        }
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
@@ -287,21 +287,7 @@ public class ExpressionBody : QuickButton
                 oldTextInput.text = oldTextInput.text.Replace("_", "");
                 expression.setSelectedExpr(null, null);
                 thisBodySelected = false;
-                calcInput.ChangeOutput(null, paramManager);
-
-                if (expressionParent.GetComponent<ParametricExpression>())
-                {
-                    if (!paramManager) paramManager = ParametricManager._instance;
-                    calcManager = paramManager;
-                    calcInput.ChangeOutput(null, paramManager);
-                }
-                else if (expressionParent.GetComponent<VectorFieldExpression>())
-                {
-                    vec = expressionParent.GetComponent<VectorFieldExpression>();
-                    if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
-                    calcManager = vecFieldManager;
-                    calcInput.ChangeOutput(null, vecFieldManager);
-                }
+                calcInput.ChangeOutput(null, calcManager);
             }
         }
     }

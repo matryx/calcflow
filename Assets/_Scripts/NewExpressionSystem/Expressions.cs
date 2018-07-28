@@ -6,7 +6,6 @@ using Extensions;
 public class Expressions : MonoBehaviour
 {
     CalculatorManager calcManager;
-    //ParametricManager calcManager;
 
     Scroll paramScroll, vecFieldScroll, constantScroll;
     public static Expressions _instance;
@@ -18,17 +17,17 @@ public class Expressions : MonoBehaviour
     public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
-    // 1 - implement select button for vec fields and fix UI so that 
-    //     only one vec field expression is active at a time
+    // 1 - add x, y and z ranges to every vector field expression
+    //     note that these ranges don't need to be shown in UI
+    //     their ranges should be -9 to 9
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
 
     //BUGS:
-    // 1 - typing letters in vector fields creating variables in parametrization tab (handle in the future)
-    // 2 - creating empty game object everytime a letter is pressed
-    // 3 - scroll bug? when adding expressions and not at top of page, UI gets broken
+    // 1 - creating empty game object everytime a letter is pressed
+    // 2 - scroll bug? when adding expressions and not at top of page, UI gets broken
     //   - NOTE: pretty sure I already fixed this but need a headset to test
     //           but there still should be a bug: check what happens when X isn't visible 
     //           on scroll and add a new expr while that expr with the hidden x is selected
