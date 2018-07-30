@@ -30,8 +30,8 @@ public class ReenactableLoggerTransform : ReenactableLogger
                 GameObject nextParent = (transform.parent == null) ? null : transform.parent.gameObject;
                 bool lerp = lastParent == transform.parent;
 
-                long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period * 1000);
-                long duration = lerp ? ((long)PlaybackLog.Period * 1000) : 0;
+                long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period);
+                long duration = lerp ? ((long)PlaybackLog.Period) : 0;
                 Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(time, duration, gameObject, transform.localPosition,
                                                                                          transform.localRotation, transform.localScale, nextParent));
 

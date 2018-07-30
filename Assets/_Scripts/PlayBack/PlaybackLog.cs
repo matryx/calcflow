@@ -17,10 +17,10 @@ using Nanome.Core;
 [Serializable]
 public class PlaybackLog
 {
-    public const float Period = .03f;
+    public const long Period = 30;
 
     [SerializeField]
-    public float period = .03f;
+    public long period = 30;
 
     static string jsonExtension = "json";
     static string fileName = "recording1";

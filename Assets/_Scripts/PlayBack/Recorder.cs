@@ -189,7 +189,7 @@ public static class Recorder
 
     public static void LogSpawn(GameObject subject)
     {
-        long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period * 1005);
+        long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1.05f);
         recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateSpawn(time,
             subject,
             subject.transform.position,

@@ -12,6 +12,18 @@ public class PlaybackClock : Nanome.Core.Behaviour
     private static event ClockCallBack triggerTimer;
     static bool running;
 
+
+    static int numUpdates = 0;
+    static int numFUpdates = 0;
+
+    void Update()
+    {
+        numUpdates++;
+    }
+    void FixedUpdate()
+    {
+        numFUpdates++;
+    }
     public static void StartClock()
     {
         print("clock start");
@@ -58,7 +70,12 @@ public class PlaybackClock : Nanome.Core.Behaviour
         {
             if (CheckTimer())
             {
-                if (triggerTimer != null){
+                UnityEngine.Debug.Log("updates: " + numUpdates);
+                UnityEngine.Debug.Log("fupdates: " + numFUpdates);
+                numUpdates = 0; numFUpdates = 0;
+
+                if (triggerTimer != null)
+                {
                     triggerTimer.Invoke();
                 }
             }
