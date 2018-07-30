@@ -43,7 +43,7 @@ public class ButtonReenactableLogger : ReenactableLogger
         if (Recorder.Recording)
         {
             long time = PlaybackClock.GetTime();
-            Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateButtonPress(time, gameObject, other));
+            Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateButtonPress(time, gameObject, other));
         }
     }
 
@@ -52,7 +52,7 @@ public class ButtonReenactableLogger : ReenactableLogger
         if (Recorder.Recording)
         {
             long time = PlaybackClock.GetTime();
-            Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateButtonUnpress(time, gameObject, other));
+            Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateButtonUnpress(time, gameObject, other));
         }
     }
 }

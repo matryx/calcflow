@@ -23,9 +23,9 @@ public class LogViewer : MonoBehaviour
         {
             replayLogCount = Replayer.log.Count;
         }
-        if (Recorder.recordLog != null)
+        if (Recorder.debugRecordLog != null)
         {
-            recordLogCount = Recorder.recordLog.log.Count;
+            recordLogCount = Recorder.debugRecordLog.log.Count;
         }
 
     }

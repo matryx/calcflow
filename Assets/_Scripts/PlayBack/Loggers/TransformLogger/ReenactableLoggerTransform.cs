@@ -32,7 +32,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
                 long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period);
                 long duration = lerp ? ((long)PlaybackLog.Period) : 0;
-                Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(time, duration, gameObject, transform.localPosition,
+                Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(time, duration, gameObject, transform.localPosition,
                                                                                          transform.localRotation, transform.localScale, nextParent));
 
                 lastParent = transform.parent;
@@ -58,7 +58,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
             if (!gameObject.activeSelf && gObjEnabled)
             {
                 long time = PlaybackClock.GetTime();
-                Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateDisable(time, gameObject));
+                Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateDisable(time, gameObject));
                 Debug.Log("logged Disable");
             }
         }
@@ -73,7 +73,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
             if (gameObject.activeSelf && !gObjEnabled)
             {
                 long time = PlaybackClock.GetTime();
-                Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateEnable(time, gameObject));
+                Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateEnable(time, gameObject));
             }
         }
         gObjEnabled = true;
@@ -83,7 +83,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
         if (Recorder.Recording)
         {
             long time = PlaybackClock.GetTime();
-            Recorder.LogAction(PlaybackLogEntry.PlayBackActionFactory.CreateDestroy(time, gameObject));
+            Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateDestroy(time, gameObject));
         }
         PlaybackClock.RemoveFromTimer(RecordPosition);
         base.OnDestroy();
