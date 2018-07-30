@@ -70,8 +70,11 @@ public class MainMenu : MonoBehaviour
     }
     IEnumerator HideButtonsCoroutine()
     {
-        yield return StartCoroutine(ScaleTo(matryx, matryxScale, Vector3.zero, 0.1f));
-        matryx.gameObject.SetActive(false);
+        if (matryx != null)
+        {
+            yield return StartCoroutine(ScaleTo(matryx, matryxScale, Vector3.zero, 0.1f));
+            matryx.gameObject.SetActive(false);
+        }
         yield return StartCoroutine(ScaleTo(resetScene, buttonScale, Vector3.zero, 0.1f));
         resetScene.gameObject.SetActive(false);
         yield return StartCoroutine(ScaleTo(home, buttonScale, Vector3.zero, 0.1f));
@@ -101,9 +104,11 @@ public class MainMenu : MonoBehaviour
         yield return StartCoroutine(ScaleTo(home, Vector3.zero, buttonScale, 0.1f));
         resetScene.gameObject.SetActive(true);
         yield return StartCoroutine(ScaleTo(resetScene, Vector3.zero, buttonScale, 0.1f));
-        matryx.gameObject.SetActive(true);
-        yield return StartCoroutine(ScaleTo(matryx, Vector3.zero, matryxScale, 0.1f));
-
+        if (matryx != null)
+        {
+            matryx.gameObject.SetActive(true);
+            yield return StartCoroutine(ScaleTo(matryx, Vector3.zero, matryxScale, 0.1f));
+        }
     }
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
     {
@@ -111,7 +116,8 @@ public class MainMenu : MonoBehaviour
 
         while (Time.time < startTime + overTime)
         {
-            if (obj == null){
+            if (obj == null)
+            {
                 yield break;
             }
             obj.localScale = Vector3.Lerp(start, end, (Time.time - startTime) / overTime);
