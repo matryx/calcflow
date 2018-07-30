@@ -33,6 +33,8 @@ public class PresetMenu : MonoBehaviour
                  radialWave, torus;
     [SerializeField]
     private bool cone, cube, cylinder, sphere, tetrahedron;
+    [SerializeField]
+    private bool s, px, py, pz, dz2, dxz, dyz, dxy, dx2y2;
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
     Scroll scroll;
@@ -81,6 +83,17 @@ public class PresetMenu : MonoBehaviour
         presets.Add("Cylinder", cylinder);
         presets.Add("Sphere", sphere);
         presets.Add("Tetrahedron", tetrahedron);
+
+        //Oribals
+        presets.Add("S", s);
+        presets.Add("Px", px);
+        presets.Add("Py", py);
+        presets.Add("Pz", pz);
+        presets.Add("Dz\x00B2", dz2);
+        presets.Add("Dxz", dxz);
+        presets.Add("Dyz", dyz);
+        presets.Add("Dxy", dxy);
+        presets.Add("Dx\x00B2-y\x00B2", dx2y2);
         #endregion
 
         foreach (KeyValuePair<string, bool> pair in presets)
@@ -327,6 +340,93 @@ public class PresetMenu : MonoBehaviour
                 vmax = ExpressionParser.Parse("1");
                 wmin = ExpressionParser.Parse("0");
                 wmax = ExpressionParser.Parse("1");
+                break;
+            // Orbitals
+            case "S":
+                x = ExpressionParser.Parse("(1/2*1/pi^(1/2))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(1/2*1/pi^(1/2))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(1/2*1/pi^(1/2))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Px":
+                // NOTE : Unsure whether the last part of the angular function is sin or cos
+                x = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Py":
+                x = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*cos(v))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*cos(v))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*cos(v))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Pz":
+                x = ExpressionParser.Parse("(3^(1/2)/2*cos(u)*1/pi^(1/2))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(3^(1/2)/2*cos(u)*1/pi^(1/2))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(3^(1/2)/2*cos(u)*1/pi^(1/2))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Dz\x00B2":
+                goto case "Dz2";
+            case "Dz2":
+                x = ExpressionParser.Parse("(5^(1/2)/4*(3*((cos(u))^2)-1)*1/pi^(1/2))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(5^(1/2)/4*(3*((cos(u))^2)-1)*1/pi^(1/2))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(5^(1/2)/4*(3*((cos(u))^2)-1)*1/pi^(1/2))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Dxz":
+                x = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*sin(v))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*sin(v))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*sin(v))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Dyz":
+                x = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*cos(v))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*cos(v))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*cos(v))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Dxy":
+                x = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*sin(2v))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*sin(2v))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*sin(2v))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Dx\x00B2-y\x00B2":
+                goto case "Dx2-y2";
+            case "Dx2-y2":
+                x = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
                 break;
         }
 
