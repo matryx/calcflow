@@ -136,10 +136,10 @@ public class ExpressionSet
         return newEs;
     }
 
-    internal ExpressionSet (string[] rangeKeys, List<RangePair> rangePairs, ExpOptions[] ExpressionKeys, List<Expression> ExpressionValues)
+    internal ExpressionSet(string[] rangeKeys, List<RangePair> rangePairs, ExpOptions[] ExpressionKeys, List<Expression> ExpressionValues)
     {
         ranges = new Dictionary<string, RangePair>();
-        for (int i =0; i < rangePairs.Count; i++)
+        for (int i = 0; i < rangePairs.Count; i++)
         {
             ranges.Add(rangeKeys[i], rangePairs[i]);
         }
@@ -153,6 +153,7 @@ public class ExpressionSet
 
     public bool CompileAll()
     {
+        Debug.Log("compiling");
         bool isValid = true;
         foreach (string RO in ranges.Keys)
         {
@@ -171,6 +172,16 @@ public class ExpressionSet
         }
         StatisticsTracking.InstantEvent("Expression Value", "Value Updated", new Dictionary<string, object>() { { "valid", isValid } });
         return isValid;
+    }
+
+    public bool IsCompiled()
+    {
+        bool isCompiled = true;
+        foreach (ExpOptions EX in expressions.Keys)
+        {
+            isCompiled &= (expressions[EX].AKExpression != null);
+        }
+        return isCompiled;
     }
 
     public void PrintOut()
@@ -253,7 +264,7 @@ public abstract class CalcOutput
 
     public virtual bool GenerateAKSolver(AK.ExpressionSolver solver)
     {
-        try 
+        try
         {
             AKExpression = solver.SymbolicateExpression(rawText);
         }

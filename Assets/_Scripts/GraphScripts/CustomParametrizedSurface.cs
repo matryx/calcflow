@@ -87,7 +87,10 @@ public class CustomParametrizedSurface : MonoBehaviour
         solver = new AK.ExpressionSolver();
         InitializeParticleSystem();
 
-        tessel.gameObject.SetActive(false);
+        if (tessel != null)
+        {
+            tessel.gameObject.SetActive(false);
+        }
     }
 
     public MeshFilter mesh;

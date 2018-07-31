@@ -41,17 +41,17 @@ namespace Calcflow.UserStatistics
                     inited = true;
 
                     // Log
-                    Debug.Log("Starting user statistics");
+                    ColorPrint("Starting user statistics");
 
                     // Generate unique session id
                     session = Guid.NewGuid().ToString();
 
                     // Choose a token
-                    #if UNITY_EDITOR
+#if UNITY_EDITOR
                     token = tokenDebug;
-                    #else
+#else
                     token = tokenProduction;
-                    #endif
+#endif
 
                     // Create tracking components
                     var trackingObject = new GameObject("Calcflow.UserStatistics.StatisticsTracking");
@@ -64,7 +64,7 @@ namespace Calcflow.UserStatistics
                     tracking = true;
 
                     // Log
-                    Debug.Log("Initialized tracking objects");
+                    ColorPrint("Initialized tracking objects");
 
                     // Mac addresses
                     var macAddresses =
@@ -80,7 +80,7 @@ namespace Calcflow.UserStatistics
                     user = host + ":" + mac;
 
                     // Log
-                    Debug.Log("Read user infos");
+                    ColorPrint("Read user infos");
 
                     // Machine details
                     var machine = new Dictionary<string, object>();
@@ -93,7 +93,7 @@ namespace Calcflow.UserStatistics
                     StatsIdentify(user, host, machine);
 
                     // Log
-                    Debug.Log("Start the tracking");
+                    ColorPrint("Start the tracking");
                 }
             }
             catch (Exception e)
@@ -112,7 +112,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                Debug.Log("EventTracking Instant: " + eventType + " -> " + eventName);
+                ColorPrint("EventTracking Instant: " + eventType + " -> " + eventName);
                 // Build props
                 var props = EventProperties(eventName, "Unique", extras);
                 // Send stats
@@ -125,7 +125,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                Debug.Log("EventTracking Start: " + eventType + " -> " + eventName);
+                ColorPrint("EventTracking Start: " + eventType + " -> " + eventName);
                 // Build props
                 var props = EventProperties(eventName, "Start", extras);
                 // Event key
@@ -155,7 +155,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                Debug.Log("EventTracking End: " + eventType + " -> " + eventName);
+                ColorPrint("EventTracking End: " + eventType + " -> " + eventName);
                 // Build props
                 var props = EventProperties(eventName, "End", extras);
                 // Event key
@@ -192,7 +192,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                Debug.Log("EventTracking, Clearing pending started events");
+                ColorPrint("EventTracking, Clearing pending started events");
                 // Fetch non finished events
                 var keys = new List<string>();
                 lock (startTimes)
@@ -380,6 +380,14 @@ namespace Calcflow.UserStatistics
         }
 
         static Nanome.Maths.Serializers.JsonSerializer.Serializer jsonWriter = new Nanome.Maths.Serializers.JsonSerializer.Serializer();
+
+        private static void ColorPrint(string toPrint)
+        {
+            string prepend = "<color=#707000>";
+            string append = "</color>";
+
+            Debug.Log(prepend + toPrint + append);
+        }
 
     }
 

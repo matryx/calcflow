@@ -23,8 +23,8 @@ public class Collapse : QuickButton {
         collapsedScale = new Vector3(1f, 0f, 1f);
         uncollapsedScale = new Vector3(1f, 1f, 1f);
 
-        buttonCollPos = new Vector3(1.882f, -0.75f, 0);
-        buttonUncollPos = new Vector3(1.882f, -6.718f, -0.025f);
+        buttonCollPos = new Vector3(1.797f, -0.768f, 0);
+        buttonUncollPos = new Vector3(1.73f, -6.695f, 0);
     }
 	
 	void Update ()
