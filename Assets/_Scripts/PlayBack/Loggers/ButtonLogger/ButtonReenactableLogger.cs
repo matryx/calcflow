@@ -14,14 +14,6 @@ public class ButtonReenactableLogger : ReenactableLogger
             virtualButton.OnButtonExit += ButtonExitBehavior;
         }
 
-        TouchRayButton rayTouchButton = GetComponent<TouchRayButton>();
-        if (rayTouchButton != null)
-        {
-            rayTouchButton.OnButtonEnter += ButtonEnterBehavior;
-            rayTouchButton.OnButtonExit += ButtonExitBehavior;
-            return;
-        }
-
         RayCastButton rcButton = GetComponent<RayCastButton>();
         if (rcButton != null)
         {
