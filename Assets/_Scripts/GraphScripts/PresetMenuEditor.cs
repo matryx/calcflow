@@ -16,7 +16,7 @@ public class PresetMenuEditor : Editor
     SerializedProperty cone, cube, cylinder, sphere, tetrahedron;
     SerializedProperty cinquefoilKnot, circle, sphereOutline, hypocloid, hypocloidSurface, trefoilKnot,
                        turnip, wavySurface, highResSphere;
-    SerializedProperty s, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3;
+    SerializedProperty s, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3, fxz2, fyz2, fxyz, fzx2y2, fxx23y2, fy3x2y2;
 
     private void OnEnable()
     {
@@ -63,6 +63,12 @@ public class PresetMenuEditor : Editor
         dxy = serializedObject.FindProperty("dxy");
         dx2y2 = serializedObject.FindProperty("dx2y2");
         fz3 = serializedObject.FindProperty("fz3");
+        fxz2 = serializedObject.FindProperty("fxz2");
+        fyz2 = serializedObject.FindProperty("fyz2");
+        fxyz = serializedObject.FindProperty("fxyz");
+        fzx2y2 = serializedObject.FindProperty("fzx2y2");
+        fxx23y2 = serializedObject.FindProperty("fxx23y2");
+        fy3x2y2 = serializedObject.FindProperty("fy3x2y2");
     }
 
     protected static bool presetsFold = true;
@@ -124,6 +130,12 @@ public class PresetMenuEditor : Editor
             EditorGUILayout.PropertyField(dxy);
             EditorGUILayout.PropertyField(dx2y2);
             EditorGUILayout.PropertyField(fz3);
+            EditorGUILayout.PropertyField(fxz2);
+            EditorGUILayout.PropertyField(fyz2);
+            EditorGUILayout.PropertyField(fxyz);
+            EditorGUILayout.PropertyField(fzx2y2);
+            EditorGUILayout.PropertyField(fxx23y2);
+            EditorGUILayout.PropertyField(fy3x2y2);
             EditorGUI.indentLevel--;
         }
 
