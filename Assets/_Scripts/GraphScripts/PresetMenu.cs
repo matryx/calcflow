@@ -34,7 +34,7 @@ public class PresetMenu : MonoBehaviour
     [SerializeField]
     private bool cone, cube, cylinder, sphere, tetrahedron;
     [SerializeField]
-    private bool s, px, py, pz, dz2, dxz, dyz, dxy, dx2y2;
+    private bool s, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3;
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
     Scroll scroll;
@@ -94,6 +94,7 @@ public class PresetMenu : MonoBehaviour
         presets.Add("Dyz", dyz);
         presets.Add("Dxy", dxy);
         presets.Add("Dx\x00B2-y\x00B2", dx2y2);
+        presets.Add("Fz\x00B3", fz3);
         #endregion
 
         foreach (KeyValuePair<string, bool> pair in presets)
@@ -423,6 +424,17 @@ public class PresetMenu : MonoBehaviour
                 x = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*sin(u)*cos(v)");
                 y = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*sin(u)*sin(v)");
                 z = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*cos(u)");
+                umin = ExpressionParser.Parse("0");
+                umax = ExpressionParser.Parse("pi");
+                vmin = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("2pi");
+                break;
+            case "Fz\x00B3":
+                goto case "Fz3";
+            case "Fz3":
+                x = ExpressionParser.Parse("(7^(1/2)/4*(5*((cos(u))^2)-3)*cos(u)*1/pi^(1/2))^2*sin(u)*cos(v)");
+                y = ExpressionParser.Parse("(7^(1/2)/4*(5*((cos(u))^2)-3)*cos(u)*1/pi^(1/2))^2*sin(u)*sin(v)");
+                z = ExpressionParser.Parse("(7^(1/2)/4*(5*((cos(u))^2)-3)*cos(u)*1/pi^(1/2))^2*cos(u)");
                 umin = ExpressionParser.Parse("0");
                 umax = ExpressionParser.Parse("pi");
                 vmin = ExpressionParser.Parse("0");

@@ -16,7 +16,7 @@ public class PresetMenuEditor : Editor
     SerializedProperty cone, cube, cylinder, sphere, tetrahedron;
     SerializedProperty cinquefoilKnot, circle, sphereOutline, hypocloid, hypocloidSurface, trefoilKnot,
                        turnip, wavySurface, highResSphere;
-    SerializedProperty s, px, py, pz, dz2, dxz, dyz, dxy, dx2y2;
+    SerializedProperty s, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3;
 
     private void OnEnable()
     {
@@ -62,6 +62,7 @@ public class PresetMenuEditor : Editor
         dyz = serializedObject.FindProperty("dyz");
         dxy = serializedObject.FindProperty("dxy");
         dx2y2 = serializedObject.FindProperty("dx2y2");
+        fz3 = serializedObject.FindProperty("fz3");
     }
 
     protected static bool presetsFold = true;
@@ -122,6 +123,7 @@ public class PresetMenuEditor : Editor
             EditorGUILayout.PropertyField(dyz);
             EditorGUILayout.PropertyField(dxy);
             EditorGUILayout.PropertyField(dx2y2);
+            EditorGUILayout.PropertyField(fz3);
             EditorGUI.indentLevel--;
         }
 
