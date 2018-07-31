@@ -123,7 +123,7 @@ public class PieceWiseControl : MonoBehaviour
         GameObject g = tabList[i];
         tabList.RemoveAt(i);
         paramSurface.RemoveExpressionSet(i);
-        if(tabList.Count != 0)
+        if (tabList.Count != 0)
         {
             ShiftTab(plusTab);
         }
@@ -137,14 +137,14 @@ public class PieceWiseControl : MonoBehaviour
 
     void SwitchToTab(GameObject tab)
     {
-        if (currTab != null)    
+        if (currTab != null)
         {
             currTab.GetComponent<FlexActionableComponent>().SetState(0);
         }
         currTab = tab;
         currTab.GetComponent<FlexActionableComponent>().SetState(2);
         int index = tabList.FindIndex(x => x.name == tab.name);
-        index = System.Math.Min(index, paramSurface.expressionSets.Count-1);
+        index = System.Math.Min(index, paramSurface.expressionSets.Count - 1);
         calcManager.ChangeExpressionSet(paramSurface.expressionSets[index]);
     }
 
@@ -161,11 +161,11 @@ public class PieceWiseControl : MonoBehaviour
 
     void ShiftTabsFromIndex(int i)
     {
-        List<GameObject> temp= tabList.GetRange(i, tabList.Count - i);
+        List<GameObject> temp = tabList.GetRange(i, tabList.Count - i);
         StartCoroutine(ShiftAllTabs(temp));
-        foreach(GameObject g in temp)
+        foreach (GameObject g in temp)
         {
-            g.name = "" + (System.Convert.ToInt32(g.name)-1);
+            g.name = "" + (System.Convert.ToInt32(g.name) - 1);
             g.GetComponentInChildren<TMPro.TextMeshPro>().text = g.name;
         }
         --tabIndex;
@@ -208,7 +208,7 @@ public class PieceWiseControl : MonoBehaviour
 
     void EnsureOne()
     {
-        if(tabList.Count == 0)
+        if (tabList.Count == 0)
         {
             tabIndex = 0;
             AddPieceWise();
@@ -217,7 +217,7 @@ public class PieceWiseControl : MonoBehaviour
 
     public void ForceNumberOfTabs(int n)
     {
-        while(tabList.Count < n)
+        while (tabList.Count < n)
         {
             AddTab();
         }

@@ -1,9 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class Mapping3D : MonoBehaviour
 {
 
@@ -99,35 +97,19 @@ public class Mapping3D : MonoBehaviour
         ExpressionSet es = calcManager.expressionSet;
         float scale = calcManager.paramSurface.currentScale;
 
-        if (es == null)
+        foreach (ExpressionSet.ExpOptions key in es.expressions.Keys)
         {
-            Debug.Log("ES is null. Cannot Map");
-            return Vector3.zero;
+            AK.ExpressionSolver solver = es.solver;
+            if (es.ranges.ContainsKey("u")) solver.SetGlobalVariable("u", uvw.x);
+            if (es.ranges.ContainsKey("v")) solver.SetGlobalVariable("v", uvw.y);
+            if (es.ranges.ContainsKey("w")) solver.SetGlobalVariable("w", uvw.z);
         }
-        else if (es.expressions == null)
+        if (es.IsCompiled())
         {
-            Debug.Log("ES.expressions is null. Cannot Map");
-            return Vector3.zero;
+            output.x = (float)es.expressions[X].AKExpression.Evaluate();
+            output.y = (float)es.expressions[Y].AKExpression.Evaluate();
+            output.z = (float)es.expressions[Z].AKExpression.Evaluate();
         }
-        else if (es.expressions[X] == null)
-        {
-            Debug.Log("ES.expressions[x] is null. Cannot Map");
-            return Vector3.zero;
-        }
-        else if (es.expressions[X].AKExpression == null)
-        {
-            Debug.Log("ES.expressions[X].AKExpression is null. Cannot Map");
-            return Vector3.zero;
-        }
-
-        AK.ExpressionSolver solver = es.solver;
-        if (es.ranges.ContainsKey("u")) solver.SetGlobalVariable("u", uvw.x);
-        if (es.ranges.ContainsKey("v")) solver.SetGlobalVariable("v", uvw.y);
-        if (es.ranges.ContainsKey("w")) solver.SetGlobalVariable("w", uvw.z);
-
-        output.x = (float)es.expressions[X].AKExpression.Evaluate();
-        output.y = (float)es.expressions[Y].AKExpression.Evaluate();
-        output.z = (float)es.expressions[Z].AKExpression.Evaluate();
         return output * scale;
     }
 

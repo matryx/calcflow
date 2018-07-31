@@ -1,5 +1,8 @@
 # Calcflow
-![interpolations](https://user-images.githubusercontent.com/27929626/30620444-6667fa74-9d73-11e7-9b2b-342171dc5139.gif)
+
+A Virtual Reality Tool for Mathematical Modeling!
+
+![interpolations](https://github.com/matryx/matryx-alpha-source/blob/master/assets/calcflow_gif.gif?raw=true)
 
 The repository contains the open-sourced code to Calcflow, a powerful mathematical visualization tool designed to give students, educators, and engineers a better grasp on some of the most difficult concepts in vector calculus. Utilizing the best UI/UX theory, Calcflow is an intuitive VR interface for vector calculus and is used by scientists and engineers for both educational and commercial applications. Some core features:
 
@@ -37,6 +40,8 @@ Currently, the version is 5.6.2f1
 * **Ethan Vander Horn** - *Lead Calcflow Developer* - [EthanVanderHorn](https://github.com/EthanVanderHorn)
 * **Edward Zhou** - *Lead Calcflow Developer* - [YangZ530](https://github.com/YangZ530)
 * **Jacqueline Bontigao** - *UI Developer* - [Calcodeus](https://github.com/calcodeus)
+* **Max Howard** - *Matryx Developer* - [astrovicis](https://github.com/astrovicis)
+* **Sam Hessenauer** - *Engineering Project Leader* - [shessenauer](https://github.com/shessenauer)
 
 ## License
 

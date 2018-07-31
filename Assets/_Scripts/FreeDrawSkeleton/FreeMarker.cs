@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using NanoVRController;
+using Extensions;
 //using OvrTouch.Hands;
 
 public class FreeMarker : ControlScheme {
@@ -22,7 +23,7 @@ public class FreeMarker : ControlScheme {
     private bool freeDrawing = false;
     private bool freeErasing;
 
-    public VRController controller;
+    private VRController controller;
 
     private ControllerComponent dummyArgs;
 
@@ -91,6 +92,7 @@ public class FreeMarker : ControlScheme {
     // Description: initializes instance variables, called on awake
     private void initialize()
     {
+        SetController(gameObject.GetComponentInParent<VRController>());
         lineMat = (Material)Resources.Load("WhiteBoard/LineMat", typeof(Material));
         freeEraser = Instantiate(Resources.Load("WhiteBoard/FreeEraser", typeof(GameObject))) as GameObject;
         freeEraser.transform.localScale = new Vector3(eraserRadius, eraserRadius, eraserRadius);

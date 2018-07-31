@@ -1,27 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class VolumeControl : MonoBehaviour
 {
     Vector3 lastPos;
-    TextMesh volumeValue;
-    private ConstraintGrabbable ball;
-
+    TMPro.TextMeshPro volumeValue;
+    public ConstraintGrabbable ball;
     AudioSource[] soundFiles;
 
     void Start()
     {
-        if (!volumeValue)
-        {
-            volumeValue = transform.Find("VolumeValue").GetComponent<TextMesh>();
-            if (!volumeValue)
-            {
-                Debug.Log("no volumeball found");
-            }
-        }
+        volumeValue = transform.Find("VolumeValue").GetComponent<TMPro.TextMeshPro>();
         soundFiles = GameObject.FindObjectsOfType(typeof(AudioSource)) as AudioSource[];
 
         foreach (AudioSource aud in soundFiles)
@@ -37,7 +27,7 @@ public class VolumeControl : MonoBehaviour
     {
         float roundedX = (float)System.Math.Round(ball.lastLocalPos.x, 2);
         int newVolume = (int)(roundedX * 100) % 2 == 0 ?
-                        (int)(roundedX / 0.02f) : (int)Mathf.Round(roundedX / 0.02f);
+                        (int)(roundedX / 0.02f): (int)Mathf.Round(roundedX / 0.02f);
 
         volumeValue.text = newVolume.ToString();
         SettingsVariables.volume = ((float)newVolume) / 100f;
@@ -61,19 +51,13 @@ public class VolumeControl : MonoBehaviour
 
     private void OnEnable()
     {
-        if (ball)
-        {
-            ball.gameObject.GetComponent<Collider>().enabled = true;
-            ball.gameObject.GetComponent<MeshRenderer>().enabled = true;
-        }
+        ball.gameObject.GetComponent<Collider>().enabled = true;
+        ball.gameObject.GetComponent<MeshRenderer>().enabled = true;
     }
 
     private void OnDisable()
     {
-        if (ball)
-        {
-            ball.gameObject.GetComponent<Collider>().enabled = false;
-            ball.gameObject.GetComponent<MeshRenderer>().enabled = false;
-        }
+        ball.gameObject.GetComponent<Collider>().enabled = false;
+        ball.gameObject.GetComponent<MeshRenderer>().enabled = false;
     }
 }

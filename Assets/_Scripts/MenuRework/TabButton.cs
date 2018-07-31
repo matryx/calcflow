@@ -16,7 +16,7 @@ public class TabButton : QuickButton
     {
         base.Start();
 
-        uncollapsedPos = new Vector3(1.876f, -3.52f, 0.006999969f);
+        uncollapsedPos = new Vector3(1.876f, -3.52f, 0.007f);
         uncollapsedScale = new Vector3(1f, 1f, 1f);
         buttonPos = new Vector3(1.882f, -6.718f, -0.025f);
     }

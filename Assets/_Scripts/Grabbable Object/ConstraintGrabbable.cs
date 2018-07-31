@@ -77,7 +77,7 @@ public class ConstraintGrabbable : GrabbableObject {
 		return;
     }
 
-    private void MoveTowards()
+    protected void MoveTowards()
     {
         Vector3 localpos = transform.localPosition;
         localpos.x = (localpos.x < x_min) ? x_min : localpos.x;

@@ -2,21 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using VoxelBusters.RuntimeSerialization;
+using Calcflow.UserStatistics;
 
-[RuntimeSerializable(null, true, true)]
 [System.Serializable]
-public class ExpressionSet : ManualSerialize
+public class ExpressionSet
 {
     public enum ExpOptions
     {
         X, Y, Z
     }
+    public enum RangeOptions
+    {
+        p, q, r, s, t, u, v, w
+    }
 
     public Dictionary<ExpOptions, Expression> expressions;
     public Dictionary<string, RangePair> ranges;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
-    [NonRuntimeSerializedField]
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
 
     string GetExpression(int i)
@@ -151,6 +153,7 @@ public class ExpressionSet : ManualSerialize
 
     public bool CompileAll()
     {
+        Debug.Log("compiling");
         bool isValid = true;
         foreach (string RO in ranges.Keys)
         {
@@ -167,7 +170,18 @@ public class ExpressionSet : ManualSerialize
             expValidity[EX.ToString()] = expressions[EX].GenerateAKSolver(solver);
             isValid &= expValidity[EX.ToString()];
         }
+        StatisticsTracking.InstantEvent("Expression Value", "Value Updated", new Dictionary<string, object>() { { "valid", isValid } });
         return isValid;
+    }
+
+    public bool IsCompiled()
+    {
+        bool isCompiled = true;
+        foreach (ExpOptions EX in expressions.Keys)
+        {
+            isCompiled &= (expressions[EX].AKExpression != null);
+        }
+        return isCompiled;
     }
 
     public void PrintOut()
@@ -190,27 +204,13 @@ public class ExpressionSet : ManualSerialize
     {
 
     }
-
-    protected override void manualSerialize()
-    {
-
-    }
-
-    protected override void manualDeserialize()
-    {
-        CompileAll();
-    }
 }
 
-[RuntimeSerializable(null, true, true)]
 [System.Serializable]
-public abstract class CalcOutput //: ManualSerialize
+public abstract class CalcOutput
 {
-    [RuntimeSerializeField]
     public List<string> tokens;
-    [RuntimeSerializeField]
     public string rawText;
-    [NonRuntimeSerializedField]
     public AK.Expression AKExpression;
 
     public void PrintOut()
@@ -335,7 +335,6 @@ public abstract class CalcOutput //: ManualSerialize
     #endregion
 }
 
-[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class Expression : CalcOutput
 {
@@ -366,18 +365,11 @@ public class Expression : CalcOutput
     }
 }
 
-[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class RangePair
 {
     public Range Min;
     public Range Max;
-
-    public RangePair()
-    {
-        Min = new Range();
-        Max = new Range();
-    }
 
     public RangePair(Range min, Range max)
     {
@@ -392,7 +384,6 @@ public class RangePair
     }
 }
 
-[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class Range : CalcOutput
 {
@@ -451,7 +442,6 @@ public class Range : CalcOutput
 
 }
 
-[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class SerializableExpressionSet
 {
@@ -492,7 +482,6 @@ public class SerializableExpressionSet
     }
 }
 
-[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class SerializableRangePair
 {
@@ -511,7 +500,6 @@ public class SerializableRangePair
     }
 }
 
-[RuntimeSerializable(null, true, true)]
 [System.Serializable]
 public class SerializableRange
 {

@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
-using VoxelBusters.RuntimeSerialization;
+using Calcflow.UserStatistics;
 
-[RuntimeSerializable(typeof(MonoBehaviour), false)]
 public class ExpressionSaveLoad : MonoBehaviour
 {
     const string jsonExtension = ".json";
@@ -35,7 +34,6 @@ public class ExpressionSaveLoad : MonoBehaviour
     {
         savePath = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Calcflow"), "Saves");
         imagePath = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Calcflow"), "Images");
-        SceneExtension = gameObject.scene.name;
 
         if (!Directory.Exists(savePath))
         {
@@ -127,7 +125,7 @@ public class ExpressionSaveLoad : MonoBehaviour
         string image = Path.Combine(imagePath, name + imageExtension);
         string save = Path.Combine(savePath, name + jsonExtension);
         List<ExpressionSet> ess = JsonHelper.FromJson<SerializableExpressionSet>(File.ReadAllText(save)).Select(x => x.ConvertToExpressionSet()).ToList();
-        SavePackage package = new SavePackage(name, image, ess);
+        SavePackage package = new SavePackage(name.Replace("-", "/").Replace("_", ":"), image, ess);
         return package;
     }
 

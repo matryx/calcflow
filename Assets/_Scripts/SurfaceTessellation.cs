@@ -4,18 +4,18 @@ using UnityEngine;
 using AK;
 using System.Threading;
 using System.IO;
-using VoxelBusters.RuntimeSerialization;
+using Nanome.Core;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
-public class SurfaceTessellation : MonoBehaviour { 
-    public struct EquationSet {
-        
-
+public class SurfaceTessellation : MonoBehaviour
+{
+    public struct EquationSet
+    {
+        public float scale;
         public string exprX, exprY, exprZ;
         public float uMin, uMax, vMin, vMax;
     }
 
-    Queue<EquationSet> queue;
+    Queue<EquationSet> queue = new Queue<EquationSet>();
     private ExpressionSolver solver;
     AK.Expression expX, expY, expZ;
     Variable varU, varV;
@@ -28,26 +28,39 @@ public class SurfaceTessellation : MonoBehaviour {
 
     Coroutine tessel;
     bool isRunning;
-    [SerializeField] MeshFilter mesh;
+    List<MeshFilter> meshVisuals = new List<MeshFilter>();
 
-    private void Start()
+    private void Awake()
     {
-        queue = new Queue<EquationSet>();
+        // queue = new Queue<EquationSet>();
         solver = new ExpressionSolver();
         positions = new List<Vector3>();
         normals = new List<Vector3>();
         uvs = new List<Vector2>();
         faces = new List<int>();
         gameObject.SetActive(false);
+        ExportMenu em = this.transform.Find("ExportMenu").gameObject.GetComponent<ExportMenu>();
+        if (em != null){
+            em.Initialize(this);
+        }
     }
 
     private void Update()
     {
-        if(queue.Count != 0)
+        if (queue.Count != 0)
         {
-            if(isRunning == false)
+            if (isRunning == false)
             {
                 EquationSet es = queue.Dequeue();
+                var go = new GameObject("Mesh Visualizer" + meshVisuals.Count);
+                go.transform.SetParent(transform);
+                go.transform.localPosition = Vector3.zero;
+                go.transform.localRotation = Quaternion.identity;
+                var mrenderer = go.AddComponent<MeshRenderer>();
+                mrenderer.material = new Material(Shader.Find("Wireframe"));
+                MeshFilter meshVisual = go.AddComponent<MeshFilter>();
+                meshVisuals.Add(meshVisual);
+
                 uMin = es.uMin; uMax = es.uMax; vMin = es.vMin; vMax = es.vMax;
                 solver.SetGlobalVariable("u", uMin * Mathf.PI);
                 solver.SetGlobalVariable("v", vMin * Mathf.PI);
@@ -56,6 +69,8 @@ public class SurfaceTessellation : MonoBehaviour {
                 expZ = solver.SymbolicateExpression(es.exprZ);
                 varU = solver.GetGlobalVariable("u");
                 varV = solver.GetGlobalVariable("v");
+
+                meshVisual.transform.localScale = Vector3.one * es.scale;
 
                 positions.Clear();
                 normals.Clear();
@@ -75,17 +90,33 @@ public class SurfaceTessellation : MonoBehaviour {
                 Vector3 v3 = MapPoint01(1, 0);
                 Vector3 n3 = GetNormal01(1, 0);
                 positions.Add(v3); normals.Add(n3); uvs.Add(new Vector2(1, 0));
-                Tessellate(0, 1, 2, 3);
+
+                Tessellate(ref meshVisual, 0, 1, 2, 3);
                 //tessel = StartCoroutine(Tessellate(0, 1, 2, 3));
             }
         }
     }
 
-    public void EnqueueEquation(string exprX, string exprY, string exprZ, float uMin, float uMax, float vMin, float vMax)
+    // Removes all Mesh Visualizers from the Parent, Clears the meshVisuals List
+    public void ClearMeshVisualizers()
+    {
+        for (int i = 0; i < meshVisuals.Count; i++)
+        {
+            var go = transform.Find("Mesh Visualizer" + i);
+            if (go != null)
+            {
+                Destroy(go.gameObject);
+            }
+        }
+        meshVisuals.Clear();
+    }
+
+    public void EnqueueEquation(float scale, string exprX, string exprY, string exprZ, float uMin, float uMax, float vMin, float vMax)
     {
         EquationSet es;
-        es.exprX = exprX;es.exprY = exprY;es.exprZ = exprZ;
-        es.uMin = uMin;es.uMax = uMax;es.vMin = vMin;es.vMax = vMax;
+        es.scale = scale;
+        es.exprX = exprX; es.exprY = exprY; es.exprZ = exprZ;
+        es.uMin = uMin; es.uMax = uMax; es.vMin = vMin; es.vMax = vMax;
         queue.Enqueue(es);
     }
 
@@ -96,7 +127,7 @@ public class SurfaceTessellation : MonoBehaviour {
         {
             return mappingCache[uv];
         }
-        
+
         varU.value = uMin + (uMax - uMin) * u;
         varV.value = vMin + (vMax - vMin) * v;
         mappingCache[uv] = new Vector3((float)expX.Evaluate(), (float)expZ.Evaluate(), (float)expY.Evaluate());
@@ -123,8 +154,8 @@ public class SurfaceTessellation : MonoBehaviour {
         return v.x >= 20f || v.x <= -20f || v.y >= 20f || v.y <= -20f || v.z >= 20f || v.z <= -20f;
     }
 
-    Dictionary<Vector2,Vector3> mappingCache = new Dictionary<Vector2, Vector3>();
-    IEnumerator Tessellate(int x, int y, int z, int w, float umin_ = 0f, float umax_ = 1f, float vmin_ = 0f, float vmax_ = 1f)
+    Dictionary<Vector2, Vector3> mappingCache = new Dictionary<Vector2, Vector3>();
+    IEnumerator Tessellate(ref MeshFilter meshVisual, int x, int y, int z, int w, float umin_ = 0f, float umax_ = 1f, float vmin_ = 0f, float vmax_ = 1f)
     {
         isRunning = true;
         float alloweddist = 0.03f;
@@ -167,7 +198,7 @@ public class SurfaceTessellation : MonoBehaviour {
             i3 = indices.Pop(); i2 = indices.Pop(); i1 = indices.Pop(); i0 = indices.Pop();
             vmax = uvRanges.Pop(); vmin = uvRanges.Pop(); umax = uvRanges.Pop(); umin = uvRanges.Pop();
 
-            if(positions.Count > 65500)
+            if (positions.Count > 65500)
             {
                 faces.Add(i0);
                 faces.Add(i1);
@@ -481,38 +512,40 @@ public class SurfaceTessellation : MonoBehaviour {
             }
         }
 
-        mesh.mesh.Clear();
-        mesh.mesh.SetVertices(positions);
-        mesh.mesh.SetNormals(normals);
-        mesh.mesh.SetUVs(0, uvs);
-        mesh.mesh.RecalculateNormals();
-        mesh.mesh.SetTriangles(faces, 0);
+        // var mesh = new Mesh();
+        // mesh.Clear();
+        // mesh.SetVertices(positions);
+        // mesh.SetNormals(normals);
+        // mesh.SetUVs(0, uvs);
+        // mesh.RecalculateNormals();
+        // mesh.SetTriangles(faces, 0);
 
         //string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
         //ObjExporter.MeshToFile(mesh, filename + ".obj");
 
-        GameObject inst = Instantiate(mesh.gameObject, transform.position, transform.rotation);
-        inst.transform.localScale = transform.localScale;
-        Mesh newMesh = inst.GetComponent<MeshFilter>().mesh;
-        newMesh.SetVertices(positions);
-        newMesh.SetNormals(normals);
-        newMesh.SetUVs(0, uvs);
-        newMesh.RecalculateNormals();
-        newMesh.SetTriangles(faces, 0);
+        // meshVisual.transform.localScale = transform.localScale;
+        
+
+        meshVisual.mesh.Clear();
+        meshVisual.mesh.SetVertices(positions);
+        meshVisual.mesh.SetNormals(normals);
+        meshVisual.mesh.SetUVs(0, uvs);
+        // meshVisual.mesh.RecalculateNormals();
+        meshVisual.mesh.SetTriangles(faces, 0);
         //inst.AddComponent<MeshCollider>();
         //inst.GetComponent<MeshCollider>().sharedMesh = newMesh;
-        inst.transform.parent = this.transform;
+        isRunning = false;
+        return null;
+    }
 
+    public void ExportAsFile(string filetype)
+    {
         string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
         string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-        if (!Directory.Exists(Path.Combine(path, "CalcflowExports")));
+        if (!Directory.Exists(Path.Combine(path, "CalcflowExports")))
         {
             Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
         }
-        ObjExporter.SaveMesh(inst.GetComponent<MeshFilter>(), Path.Combine(Path.Combine(path, "CalcflowExports"), filename + ".obj"));
-
-        mesh.mesh.Clear();
-        isRunning = false;
-        return null;
+        FileExporter.SaveMesh(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename), filetype);
     }
 }

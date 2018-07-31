@@ -19,24 +19,17 @@
 using UnityEngine;
 using System.Collections;
 using System;
-using VoxelBusters.RuntimeSerialization;
+using Calcflow.UserStatistics;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class FlexButtonComponent : FlexActionableComponent
 {
-    [RuntimeSerializeField]
-    public Transform body;
     public Color passiveColor;
     public Color hoveringColor;
     public Color selectedColor;
     public Color disabledColor;
 
-    private void Start()
-    {   
-        //Debug.Log(gameObject.name + " start");
-        if(!body){
-            body = transform.Find("Body");
-        }
+    private void Awake()
+    {
         State = -1;
         SetState(0);
     }
@@ -50,27 +43,18 @@ public class FlexButtonComponent : FlexActionableComponent
             virtualButton.OnButtonExit -= endAction;
         }
 
-        TouchRayButton rayTouchButton = GetComponent<TouchRayButton>();
-        if (rayTouchButton != null)
+        RayCastButton rcButton = GetComponent<RayCastButton>();
+        if (rcButton != null)
         {
-            rayTouchButton.OnButtonEnter -= startAction;
-            rayTouchButton.OnButtonExit -= endAction;
+            rcButton.OnButtonEnter -= startAction;
+            rcButton.OnButtonExit -= endAction;
         }
-        else
-        {
-            RayCastButton rcButton = GetComponent<RayCastButton>();
-            if (rcButton != null)
-            {
-                rcButton.OnButtonEnter -= startAction;
-                rcButton.OnButtonExit -= endAction;
-            }
 
-            TouchButton touchButton = GetComponent<TouchButton>();
-            if (touchButton != null)
-            {
-                touchButton.OnButtonEnter -= startAction;
-                touchButton.OnButtonExit -= endAction;
-            }
+        TouchButton touchButton = GetComponent<TouchButton>();
+        if (touchButton != null)
+        {
+            touchButton.OnButtonEnter -= startAction;
+            touchButton.OnButtonExit -= endAction;
         }
     }
 
@@ -83,27 +67,18 @@ public class FlexButtonComponent : FlexActionableComponent
             virtualButton.OnButtonExit += endAction;
         }
 
-        TouchRayButton rayTouchButton = GetComponent<TouchRayButton>();
-        if (rayTouchButton != null)
+        RayCastButton rcButton = GetComponent<RayCastButton>();
+        if (rcButton != null)
         {
-            rayTouchButton.OnButtonEnter += startAction;
-            rayTouchButton.OnButtonExit += endAction;
+            rcButton.OnButtonEnter += startAction;
+            rcButton.OnButtonExit += endAction;
         }
-        else
-        {
-            RayCastButton rcButton = GetComponent<RayCastButton>();
-            if (rcButton != null)
-            {
-                rcButton.OnButtonEnter += startAction;
-                rcButton.OnButtonExit += endAction;
-            }
 
-            TouchButton touchButton = GetComponent<TouchButton>();
-            if (touchButton != null)
-            {
-                touchButton.OnButtonEnter += startAction;
-                touchButton.OnButtonExit += endAction;
-            }
+        TouchButton touchButton = GetComponent<TouchButton>();
+        if (touchButton != null)
+        {
+            touchButton.OnButtonEnter += startAction;
+            touchButton.OnButtonExit += endAction;
         }
 
         if (State != 2)
@@ -112,25 +87,38 @@ public class FlexButtonComponent : FlexActionableComponent
 
     protected override void StateChanged(int _old, int _new)
     {
-        if (body == null)
+        if (_new == -1)
         {
-            print("body not found: " + gameObject.name);
-        }
-        else if (_new == -1)
+            transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;
+        } else if (_new == 1)
         {
-            body.GetComponent<Renderer>().material.color = disabledColor;
-        }
-        else if (_new == 1)
-        {
-            body.GetComponent<Renderer>().material.color = hoveringColor;
+            transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
+            string eventName = "Unknown";
+            if (gameObject != null)
+            {
+                eventName = gameObject.name;
+            }
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.StartEvent("Button Hover", eventName);
+            }
         }
         else if (_new == 2)
         {
-            body.GetComponent<Renderer>().material.color = selectedColor;
+            transform.Find("Body").GetComponent<Renderer>().material.color = selectedColor;
         }
         else
         {
-            body.GetComponent<Renderer>().material.color = passiveColor;
+            transform.Find("Body").GetComponent<Renderer>().material.color = passiveColor;
+            string eventName = "Unknown";
+            if (gameObject != null)
+            {
+                eventName = gameObject.name;
+            }
+            if (!eventName.Equals("Body") && _old == 1)
+            {
+                StatisticsTracking.EndEvent("Button Hover", eventName);
+            }
         }
     }
 
@@ -150,3 +138,4 @@ public class FlexButtonComponent : FlexActionableComponent
         }
     }
 }
+

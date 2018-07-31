@@ -6,6 +6,8 @@ using VoxelBusters.RuntimeSerialization;
 [RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class OutputMenu : MonoBehaviour
 {
+    [SerializeField]
+    SecondaryMenu secondaryMenu;
 
     [RuntimeSerializable(null, true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
@@ -41,16 +43,25 @@ public class OutputMenu : MonoBehaviour
             if (saveable == false && value == true)
             {
                 saveButton.SetState(0);
+                if (exportButton != null)
+                {
+                    exportButton.SetState(0);
+                }
             }
             else if (value == false)
             {
                 saveButton.SetState(-1);
+                if (exportButton != null)
+                {
+                    exportButton.SetState(-1);
+                }
             }
             saveable = value;
         }
     }
 
     FlexActionableComponent saveButton;
+    FlexActionableComponent exportButton;
 
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
@@ -67,6 +78,7 @@ public class OutputMenu : MonoBehaviour
 
         calcManager = cm;
         saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
+        exportButton = transform.Find("ControlPanel/GenerateMesh").GetComponent<FlexActionableComponent>();
     }
 
     protected void HandleInput(string source)
@@ -117,6 +129,9 @@ public class OutputMenu : MonoBehaviour
                 {
                     calcManager.saveLoadMenu.Save();
                 }
+                break;
+            case "Matryx":
+                secondaryMenu.gameObject.SetActive(true);
                 break;
         }
         calcManager.manageText();

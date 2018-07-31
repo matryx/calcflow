@@ -1,19 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
-using VoxelBusters.RuntimeSerialization;
+using Calcflow.UserStatistics;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
-public class CalcManager : Nanome.Core.Behaviour
+public class CalcManager : MonoBehaviour
 {
-
     #region constants
     const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-
+    const ExpressionSet.RangeOptions u = ExpressionSet.RangeOptions.u;
+    const ExpressionSet.RangeOptions v = ExpressionSet.RangeOptions.v;
     #endregion
+
+    ExpressionSet currExpressionSet;
+    CalcOutput currOutput;
 
     [HideInInspector]
     public bool inputReceived;
@@ -24,11 +25,17 @@ public class CalcManager : Nanome.Core.Behaviour
     [HideInInspector]
     public SaveLoadMenu saveLoadMenu;
 
+    [HideInInspector]
+    public TournamentMenu tournamentMenu;
+
+    [HideInInspector]
+    public SubmissionsMenu submissionsMenu;
+
     public CustomParametrizedSurface paramSurface;
-    [RuntimeSerializeField]
     private CalcInput calcInput;
     private PieceWiseControl pieceWiseControl;
     private BoundsManager boundsManager;
+
     private Color positiveFeedback = new Color(0, 204, 54);
     private Color negativeFeedback = Color.red;
 
@@ -41,19 +48,15 @@ public class CalcManager : Nanome.Core.Behaviour
     public FlexActionableComponent defaultSpeed;
     public FlexActionableComponent defaultEffect;
 
-    [RuntimeSerializeField]
     [SerializeField]
     ConnectedMenus connectedMenus;
 
-    [RuntimeSerializeField]
     [SerializeField]
     FeedBacks feedbacks;
 
-    [RuntimeSerializeField]
     [SerializeField]
     Inputs inputs;
 
-    [RuntimeSerializable(null, true, true)]
     [System.Serializable]
     internal class ConnectedMenus
     {
@@ -71,9 +74,14 @@ public class CalcManager : Nanome.Core.Behaviour
         internal SaveLoadMenu saveLoadMenu;
         [SerializeField]
         internal ParticleAnimationSettings particleAnimationSettings;
+        [SerializeField]
+        internal TournamentMenu tournamentMenu;
+        [SerializeField]
+        internal SubmissionsMenu submissionsMenu;
+        [SerializeField]
+        internal SubmissionMenu submissionMenu;
     }
 
-    [RuntimeSerializable(null, true, true)]
     [System.Serializable]
     internal class FeedBacks
     {
@@ -93,12 +101,11 @@ public class CalcManager : Nanome.Core.Behaviour
         internal Renderer wFeedback;
     }
 
-    [RuntimeSerializable(null, true, true)]
     [System.Serializable]
     internal class Inputs
     {
         [SerializeField]
-        internal TextMeshPro xInputbox, yInputbox, zInputbox,
+        internal TextMesh xInputbox, yInputbox, zInputbox,
                 tMinInput, tMaxInput,
                 uMinInput, uMaxInput,
                 vMinInput, vMaxInput,
@@ -115,17 +122,31 @@ public class CalcManager : Nanome.Core.Behaviour
 
     public void LoadSavedExpressionSets(List<ExpressionSet> expressionSets)
     {
+
         List<ExpressionSet> ess = new List<ExpressionSet>();
         for (int i = 0; i < expressionSets.Count; i++)
         {
             ess.Add(expressionSets[i].DeepCopy());
             ess[ess.Count - 1].CompileAll();
         }
+
+        //var expression = new Dictionary<string, object>();
+        var expressionString = "";
+        foreach(var es in ess)
+        {
+            foreach (var e in es.expressions)
+            {
+                expressionString += e.Value.AKExpression.ToString() + "\n";
+            }
+        }
+        //expression["expression"] = expressionString;
+        StatisticsTracking.InstantEvent("Load Expression", expressionString);
+
         paramSurface.expressionSets = ess;
         pieceWiseControl.ForceNumberOfTabs(ess.Count);
         expressionSet = paramSurface.expressionSets[0];
         calcInput.ChangeOutput(expressionSet.expressions[X]);
-        if (boundsManager != null) boundsManager.UpdateButtonText();
+        if(boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
     }
 
@@ -134,15 +155,15 @@ public class CalcManager : Nanome.Core.Behaviour
         calcInput.ChangeOutput(output);
     }
 
-
     private void Initialize()
     {
-        if (null == connectedMenus) return;
         calcInput = connectedMenus.calcInput;
         boundsManager = connectedMenus.boundsManager;
         pieceWiseControl = connectedMenus.pieceWiseControl;
         boundsManager = connectedMenus.boundsManager;
         saveLoadMenu = connectedMenus.saveLoadMenu;
+        tournamentMenu = connectedMenus.tournamentMenu;
+        submissionsMenu = connectedMenus.submissionsMenu;
 
         if (connectedMenus.boundsManager != null) connectedMenus.boundsManager.Initialize(this);
         connectedMenus.calcInput.Initialize(this);
@@ -157,6 +178,16 @@ public class CalcManager : Nanome.Core.Behaviour
         connectedMenus.presetMenu.Initialize(this);
 
         connectedMenus.saveLoadMenu.Initialize(this);
+
+        if(connectedMenus.tournamentMenu != null)
+        {
+            connectedMenus.tournamentMenu.Initialize(this);
+        }
+
+        if(connectedMenus.submissionsMenu != null)
+        {
+            connectedMenus.submissionsMenu.Initialize(this);
+        }
 
         if (connectedMenus.particleAnimationSettings != null)
             connectedMenus.particleAnimationSettings.Initialize(this);
@@ -181,8 +212,6 @@ public class CalcManager : Nanome.Core.Behaviour
     // Update is called once per frame
     void Update()
     {
-        if (null == connectedMenus) return;
-
         if (updateText || inputReceived)
         {
             manageText();
@@ -196,12 +225,7 @@ public class CalcManager : Nanome.Core.Behaviour
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
             if (isValid)
-            {
-                if (!Replayer.Replaying)
-                {
-                    paramSurface.GenerateParticles();
-                }
-            }
+                paramSurface.GenerateParticles();
         }
         if (toExport)
         {

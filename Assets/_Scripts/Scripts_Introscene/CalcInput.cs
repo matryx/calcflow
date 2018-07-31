@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using VoxelBusters.RuntimeSerialization;
 
-[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
+
 public class CalcInput : MonoBehaviour
 {
-    [RuntimeSerializable(null, true, true)]
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         CalcInput calcInput;
@@ -14,7 +12,6 @@ public class CalcInput : MonoBehaviour
         {
             this.calcInput = calcInput;
         }
-        public KeyboardInputResponder(){}
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {
@@ -37,6 +34,10 @@ public class CalcInput : MonoBehaviour
     private FlexMenu keyboard;
 
     KeyboardInputResponder responder;
+
+    ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
+    ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
+    ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
 
     public void ChangeOutput(CalcOutput calcOutput)
     {

@@ -24,14 +24,25 @@ public class SecondaryMenu : MonoBehaviour
 
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
     }
-
+    static SecondaryMenu _instance;
     public Transform functionMenu;
     public Transform animationMenu;
     public Transform saveLoadMenu;
     public Transform settingsMenu;
-    public GameObject volumeBall; 
+    public Transform tournamentMenu;
+    public GameObject volumeBall;
 
     SecondaryMenuResponder responder;
+
+    public static SecondaryMenu GetInstance()
+    {
+        return _instance;
+    }
+
+    void Awake()
+    {
+        _instance = this;
+    }
 
     void Start()
     {
@@ -40,12 +51,15 @@ public class SecondaryMenu : MonoBehaviour
         saveLoadMenu.GetComponentInChildren<Scroll>().setUpMenu();
         saveLoadMenu.gameObject.SetActive(false);
         settingsMenu.gameObject.SetActive(false);
+        tournamentMenu.gameObject.SetActive(false);
 
         responder = new SecondaryMenuResponder();
         responder.initialize(this);
         GetComponent<FlexMenu>().RegisterResponder(responder);
         volumeBall.GetComponent<Collider>().enabled = false;
         volumeBall.GetComponent<MeshRenderer>().enabled = false;
+
+        transform.parent.gameObject.SetActive(false);
     }
 
     void toggleMenu(string menuName)
@@ -57,24 +71,36 @@ public class SecondaryMenu : MonoBehaviour
                 animationMenu.gameObject.SetActive(false);
                 saveLoadMenu.gameObject.SetActive(false);
                 settingsMenu.gameObject.SetActive(false);
+                tournamentMenu.gameObject.SetActive(false);
                 break;
             case "Animation":
                 functionMenu.gameObject.SetActive(false);
                 animationMenu.gameObject.SetActive(true);
                 saveLoadMenu.gameObject.SetActive(false);
                 settingsMenu.gameObject.SetActive(false);
+                tournamentMenu.gameObject.SetActive(false);
                 break;
             case "SaveLoad":
                 functionMenu.gameObject.SetActive(false);
                 animationMenu.gameObject.SetActive(false);
                 saveLoadMenu.gameObject.SetActive(true);
                 settingsMenu.gameObject.SetActive(false);
+                tournamentMenu.gameObject.SetActive(false);
                 break;
             case "Settings":
                 functionMenu.gameObject.SetActive(false);
                 animationMenu.gameObject.SetActive(false);
                 saveLoadMenu.gameObject.SetActive(false);
                 settingsMenu.gameObject.SetActive(true);
+                tournamentMenu.gameObject.SetActive(false);
+                break;
+            case "Matryx":
+                functionMenu.gameObject.SetActive(false);
+                animationMenu.gameObject.SetActive(false);
+                saveLoadMenu.gameObject.SetActive(false);
+                settingsMenu.gameObject.SetActive(false);
+                tournamentMenu.gameObject.SetActive(true);
+                //tournamentMenu.GetComponent<TournamentMenu>().LoadTournaments();
                 break;
         }
     }

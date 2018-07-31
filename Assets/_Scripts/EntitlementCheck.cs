@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if OCULUS
+using UnityEngine;
 using System.Collections;
 using Oculus.Platform;
 
@@ -29,3 +30,4 @@ public class EntitlementCheck
     }
 
 }
+#endif
