@@ -17,7 +17,7 @@ public class ScalableObject : GrabbableObject
 
     protected override void Update()
     {
-        if(activeGrabbers.Count > 0)
+        if (activeGrabbers.Count > 0)
             UpdatePivot();
     }
 
@@ -48,7 +48,7 @@ public class ScalableObject : GrabbableObject
 
     protected override void CreatePivot()
     {
-        pivot = Instantiate(Resources.Load(EmptyUIDPrefab, typeof(GameObject))) as GameObject;
+        pivot = RSUtility.Instantiate(Resources.Load(EmptyUIDPrefab, typeof(GameObject)) as GameObject);
         pivot.name = "pivot";
 
         if (activeGrabbers.Count == 1)

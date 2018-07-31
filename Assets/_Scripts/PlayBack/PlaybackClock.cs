@@ -4,7 +4,7 @@ using UnityEngine;
 using Nanome.Core.Daemon;
 using System.Diagnostics;
 
-public class PlaybackClock : Nanome.Core.Behaviour
+public class PlaybackClock// : Nanome.Core.Behaviour
 {
     public static Stopwatch timer = new Stopwatch();
 
@@ -22,29 +22,9 @@ public class PlaybackClock : Nanome.Core.Behaviour
     static int numUpdates = 0;
     static int numFUpdates = 0;
 
-    void Update()
-    {
-        numUpdates++;
-        if (running)
-        {
-            if (callBackList == null) return;
-            int i = thisRot;
-            while (i < callBackList.Count)
-            {
-                callBackList[i].Invoke();
-                i+=numRot;
-            }
-            thisRot = (thisRot + 1) % numRot;
-        }
-    }
-
-    void FixedUpdate()
-    {
-        numFUpdates++;
-    }
     public static void StartClock()
     {
-        print("clock start");
+        UnityEngine.Debug.Log("clock start");
         timer.Start();
         running = true;
         Dispatcher.queue(runTimer());
@@ -58,7 +38,7 @@ public class PlaybackClock : Nanome.Core.Behaviour
 
     public static void StopClock()
     {
-        print("clock stop");
+        UnityEngine.Debug.Log("clock stop");
         running = false;
         timer.Stop();
         callBackList = new List<ClockCallBack>();
@@ -87,17 +67,26 @@ public class PlaybackClock : Nanome.Core.Behaviour
     {
         while (running)
         {
-            if (CheckTimer())
-            {
-                // UnityEngine.Debug.Log("updates: " + numUpdates);
-                // UnityEngine.Debug.Log("fupdates: " + numFUpdates);
-                // numUpdates = 0; numFUpdates = 0;
 
-                // if (triggerTimer != null)
-                // {
-                //     triggerTimer.Invoke();
-                // }
+            int i = thisRot;
+            while (i < callBackList.Count)
+            {
+                callBackList[i].Invoke();
+                i += numRot;
             }
+            thisRot = (thisRot + 1) % numRot;
+
+            // if (CheckTimer())
+            // {
+            // UnityEngine.Debug.Log("updates: " + numUpdates);
+            // UnityEngine.Debug.Log("fupdates: " + numFUpdates);
+            // numUpdates = 0; numFUpdates = 0;
+
+            // if (triggerTimer != null)
+            // {
+            //     triggerTimer.Invoke();
+            // }
+            // }
             yield return null;
         }
     }

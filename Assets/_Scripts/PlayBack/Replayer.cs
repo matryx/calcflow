@@ -7,7 +7,6 @@ using System.Diagnostics;
 
 public static class Replayer
 {
-    public static Stopwatch timer = new Stopwatch();
 
     public static List<PlaybackLogEntry> log;
     private static bool replaying = false;
@@ -35,11 +34,8 @@ public static class Replayer
         loadingScreen.SetRemaining(100);
         LoggerManager.SetupReenactors();
         yield return null;
-        timer.Start();
         PreLoad();
-        timer.Stop();
         yield return null;
-        UnityEngine.Debug.Log("LoadTime: " + timer.Elapsed);
 
         EndLoadingScreen(loadingScreen);
         replaying = true;

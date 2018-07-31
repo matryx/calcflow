@@ -73,8 +73,8 @@ public class GrabbableObject : Grippable
     protected string EmptyUIDPrefab = "Prefabs/EmptyUID";
     protected virtual void CreatePivot()
     {
-        pivot = Instantiate(Resources.Load(EmptyUIDPrefab, typeof(GameObject))) as GameObject;
-
+        pivot = RSUtility.Instantiate(Resources.Load(EmptyUIDPrefab, typeof(GameObject)) as GameObject) as GameObject;
+        
         pivot.name = "pivot";
         UpdatePivot();
     }
