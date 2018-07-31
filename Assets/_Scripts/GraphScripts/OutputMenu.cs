@@ -67,13 +67,14 @@ public class OutputMenu : MonoBehaviour
     const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
     const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
 
-    public FlexMenu menu;
+    private FlexMenu menu;
 
     CalcManager calcManager;
 
     public void Initialize(CalcManager cm)
     {
         KeyboardInputResponder responder = new KeyboardInputResponder(this);
+        menu = GetComponent<FlexMenu>();
         menu.RegisterResponder(responder);
 
         calcManager = cm;

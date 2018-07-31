@@ -135,4 +135,15 @@ public static class Replayer
         replaying = false;
     }
 
+    public static void PauseReplaying()
+    {
+        PlaybackClock.StopClock();
+        replaying = false;
+    }
+    public static void ResumeReplaying()
+    {
+        PlaybackClock.StartClock();
+        replaying = true;
+    }
+
 }
