@@ -20,7 +20,9 @@ using UnityEngine;
 using System.Collections;
 using System;
 using Calcflow.UserStatistics;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class FlexButtonComponent : FlexActionableComponent
 {
     public Color passiveColor;
@@ -90,7 +92,8 @@ public class FlexButtonComponent : FlexActionableComponent
         if (_new == -1)
         {
             transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;
-        } else if (_new == 1)
+        }
+        else if (_new == 1)
         {
             transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
             string eventName = "Unknown";

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
-
+using VoxelBusters.RuntimeSerialization.Internal;
 public class ClearObjects : MonoBehaviour
 {
 
     public bool clearAll = false;
+    public bool resetCache = false;
 
     // Use this for initialization
     void Start()
@@ -21,6 +22,11 @@ public class ClearObjects : MonoBehaviour
             ClearAllObjects();
             clearAll = false;
         }
+        if (resetCache)
+        {
+            ResetUIDCache( );
+            resetCache = false;
+        }
     }
     // Update is called once per frame
     void ClearAllObjects()
@@ -33,6 +39,10 @@ public class ClearObjects : MonoBehaviour
         }
     }
 
+    void ResetUIDCache()
+    {
+        UnityObjectSerializationUtil.Reset();
+    }
 
     List<UIDSystem> GetAllUIDSInScene()
     {

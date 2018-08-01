@@ -21,7 +21,7 @@ public class PBT_Grab_Sim : QuickButton
 
     IEnumerator GrabSim()
     {
-        pivot = RSUtility.Instantiate(Resources.Load(EmptyUIDPrefab, typeof(GameObject)) as GameObject) as GameObject;
+        pivot = RSUtility.CreateGameObject("Pivot");
         grabTarget.transform.parent = pivot.transform;
         yield return null;
         pivot.MoveTo(new Vector3(3f, 0, 0), 1);

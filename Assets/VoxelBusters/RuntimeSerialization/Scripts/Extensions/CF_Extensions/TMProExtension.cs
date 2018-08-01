@@ -3,7 +3,7 @@ using System.Collections;
 using VoxelBusters.RuntimeSerialization;
 using TMPro;
 
-public class TMProExtension1
+public class TMProExtension
 { }
 
 // [RuntimeSerializable]

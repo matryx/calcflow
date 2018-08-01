@@ -19,7 +19,7 @@ public class ReenactableActionMove : ReenactableAction
 
         if (subject == null)
         {
-            Debug.LogError("Could not reenact " + key + " becaused object with id " + entry.subjectKey + "does not exist");
+            Debug.LogError(entry.timeStamp + " " + "Could not reenact " + key + " on object " + entry.name + " because object with id " + entry.subjectKey + "does not exist");
             return;
         }
 
@@ -38,8 +38,8 @@ public class ReenactableActionMove : ReenactableAction
             Debug.Log(entry.timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist.");
         }
 
-        subject.LocalMoveTo(position, ((float)duration)/1000f);
-        subject.LocalRotateTo(rotation, ((float)duration)/1000f);
-        subject.LocalScaleTo(scale, ((float)duration)/1000f);
+        subject.LocalMoveTo(position, ((float)duration) / 1000f);
+        subject.LocalRotateTo(rotation, ((float)duration) / 1000f);
+        subject.LocalScaleTo(scale, ((float)duration) / 1000f);
     }
 }

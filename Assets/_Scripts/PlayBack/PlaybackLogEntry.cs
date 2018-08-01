@@ -32,6 +32,8 @@ public partial class PlaybackLogEntry
     public string subjectKey;
     [SerializeField]
     public long timeStamp;
+    [SerializeField]
+    public string name;
 
     [SerializeField]
     public LogInfo _info = new LogInfo();

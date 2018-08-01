@@ -26,7 +26,7 @@ public static class Recorder
     static bool paused = false;
     public static bool Paused { get { return paused; } }
 
-   public static PlaybackLog debugRecordLog
+    public static PlaybackLog debugRecordLog
     {
         get
         {
@@ -50,21 +50,20 @@ public static class Recorder
     {
         UnityEngine.Debug.Log("paused recording");
         PlaybackClock.StopClock();
-        PlaybackClock.RemoveFromTimer(CheckForSpawns);
+        //PlaybackClock.RemoveFromTimer(CheckForSpawns);
         paused = true;
     }
     public static void ResumeRecording()
     {
         UnityEngine.Debug.Log("resumed recording");
         PlaybackClock.StartClock();
-        PlaybackClock.AddToTimer(CheckForSpawns);
+        //PlaybackClock.AddToTimer(CheckForSpawns);
         paused = false;
     }
     public static void EndRecording()
     {
         UnityEngine.Debug.Log("stop recording");
         PlaybackClock.StopClock();
-        PlaybackClock.RemoveFromTimer(CheckForSpawns);
         SavedLog = JsonUtility.ToJson(recordLog);
         recording = false;
         paused = false;
@@ -133,7 +132,7 @@ public static class Recorder
         PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
         recording = true;
-        PlaybackClock.AddToTimer(CheckForSpawns);
+        Async.runInCoroutine(CheckForSpawns);
         paused = false;
     }
     #region loadingScreenStuff
@@ -152,22 +151,29 @@ public static class Recorder
     }
     #endregion
 
-    static void CheckForSpawns()
+    static IEnumerator CheckForSpawns(Async process)
     {
-        while (allUIDs.Count > 0)
+        while (recording)
         {
-            UIDSystem uid;
-            uid = allUIDs[allUIDs.Count - 1];
-            allUIDs.RemoveAt(allUIDs.Count - 1);
-            if (uid)
+            if (!paused)
             {
-                LoggerManager.SetupLoggers(uid.gameObject);
-                RecordSpawn(uid);
+                while (allUIDs.Count > 0)
+                {
+                    UIDSystem uid;
+                    uid = allUIDs[allUIDs.Count - 1];
+                    allUIDs.RemoveAt(allUIDs.Count - 1);
+                    if (uid)
+                    {
+                        LoggerManager.SetupLoggers(uid.gameObject);
+                        RecordSpawn(uid);
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.Log("uid was deleted");
+                    }
+                }
             }
-            else
-            {
-                UnityEngine.Debug.Log("uid was deleted");
-            }
+            yield return null;
         }
     }
 
@@ -180,7 +186,7 @@ public static class Recorder
 
     static void RecordSpawn(GameObject subject)
     {
-        long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1.1f);
+        long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 3f);
         recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateSpawn(time,
             subject,
             subject.transform.position,

@@ -73,8 +73,7 @@ public class GrabbableObject : Grippable
     protected string EmptyUIDPrefab = "Prefabs/EmptyUID";
     protected virtual void CreatePivot()
     {
-        pivot = RSUtility.Instantiate(Resources.Load(EmptyUIDPrefab, typeof(GameObject)) as GameObject) as GameObject;
-        
+        pivot = RSUtility.CreateGameObject("disabledSphere");
         pivot.name = "pivot";
         UpdatePivot();
     }

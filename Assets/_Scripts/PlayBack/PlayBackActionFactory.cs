@@ -20,6 +20,7 @@ public partial class PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = key,
+                name = subject.name,
             };
             newAction._info.AddValue("key", "movement");
             newAction._info.AddValue("duration", duration);
@@ -36,6 +37,7 @@ public partial class PlaybackLogEntry
             {
                 timeStamp = timestamp,
                 subjectKey = PlaybackLogEntry.GetUniqueID(subject),
+                name = subject.name,
             };
             newAction._info.AddValue("key", "enable");
 

@@ -9,6 +9,11 @@ public class LogViewer : MonoBehaviour
     public int replayLogCount;
     public int recordLogCount;
 
+    public bool displayLog;
+
+    public PlaybackLogEntry[] actionLog;
+
+
     // Use this for initialization
     void Start()
     {
@@ -26,6 +31,12 @@ public class LogViewer : MonoBehaviour
         if (Recorder.debugRecordLog != null)
         {
             recordLogCount = Recorder.debugRecordLog.log.Count;
+        }
+
+        if (displayLog)
+        {
+            displayLog = false;
+            actionLog = Recorder.debugRecordLog.log.ToArray();
         }
 
     }

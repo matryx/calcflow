@@ -11,6 +11,16 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
     bool added = false;
 
+    // private void Awake()
+    // {
+    //     long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1.5f);
+    //     Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateSpawn(time,
+    //         gameObject,
+    //         gameObject.transform.position,
+    //         gameObject.transform.rotation,
+    //         gameObject.transform.lossyScale));
+    // }
+
     private void Update()
     {
         if (Recorder.Recording && !added)

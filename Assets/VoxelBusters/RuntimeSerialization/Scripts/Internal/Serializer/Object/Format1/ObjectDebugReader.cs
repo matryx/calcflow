@@ -29,15 +29,15 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             logPath = Path.Combine(logPath, "failedSerialization" + filenum++ + ".txt");
             //System.IO.File.WriteAllText(logPath, String.Empty);
             _objectType = null;
-            try
-            {
+            // try
+            // {
                 ReadObjectValue(_binaryReader, out _objectType, _object);
-            }
-            catch (Exception p)
-            {
-                Debug.Log("<color=red>Debugger Error</color>");
-                Debug.LogError(p);
-            }
+            // }
+            // catch (Exception p)
+            // {
+            //     Debug.Log("<color=red>Debugger Error</color>");
+            //     Debug.LogError(p);
+            // }
 
         }
 
