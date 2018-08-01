@@ -51,7 +51,6 @@ public class ModeSwitcher : MonoBehaviour
         penMode = !penMode;
     }
 
-
     void SwitchToPenMode()
     {
         penModel.SetActive(true);

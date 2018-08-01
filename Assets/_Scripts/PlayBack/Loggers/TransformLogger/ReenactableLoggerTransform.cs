@@ -82,7 +82,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
     {
         if (Recorder.Recording)
         {
-            long time = PlaybackClock.GetTime();
+            long time = PlaybackClock.GetTime() + (long)(PlaybackLog.Period * 0.1f);
             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateDestroy(time, gameObject));
         }
         PlaybackClock.RemoveFromTimer(RecordPosition);

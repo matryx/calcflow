@@ -127,9 +127,9 @@ public partial class PlaybackLogEntry
         Vector3 position;
         Vector3 scale;
         Quaternion rotation;
-        long duration;
 
         subject = Spawn();
+        subject.SetActive(false);
         position = _info.GetValue<Vector3>("position");
         scale = _info.GetValue<Vector3>("scale");
         rotation = _info.GetValue<Quaternion>("rotation");
@@ -142,6 +142,7 @@ public partial class PlaybackLogEntry
         subject.RotateTo(rotation, 0);
         subject.GlobalScaleTo(scale, 0);
     }
+
 
     #endregion
     public static GameObject GetObject(string ID)
