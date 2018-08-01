@@ -74,7 +74,8 @@ public partial class PlaybackLogEntry
                 subjectKey = PlaybackLogEntry.GetUniqueID(subject)
             };
             newAction._info.AddValue("key", "buttonPress");
-            newAction._info.AddValue("buttonPresser", GetUniqueID(presser));
+            string presserID = (presser != null) ? GetUniqueID(presser) : null;
+            newAction._info.AddValue("buttonPresser", presserID);
             return newAction;
         }
 
@@ -86,7 +87,8 @@ public partial class PlaybackLogEntry
                 subjectKey = PlaybackLogEntry.GetUniqueID(subject)
             };
             newAction._info.AddValue("key", "buttonUnpress");
-            newAction._info.AddValue("buttonPresser", GetUniqueID(presser));
+            string presserID = (presser != null) ? GetUniqueID(presser) : null;
+            newAction._info.AddValue("buttonPresser", presserID);
             return newAction;
         }
         #endregion

@@ -13,7 +13,10 @@ public class PBT_Grab_Sim : QuickButton
     protected string EmptyUIDPrefab = "Prefabs/EmptyUID";
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        StartCoroutine(GrabSim());
+        if (!Replayer.Replaying)
+        {
+            StartCoroutine(GrabSim());
+        }
     }
 
     IEnumerator GrabSim()

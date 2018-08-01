@@ -43,26 +43,18 @@ public class ReenactableLoggerTransform : ReenactableLogger
         }
     }
 
-    private bool gObjEnabled = false;
-    void Awake()
-    {
-        if (!Recorder.Recording)
-        {
-            gObjEnabled = true;
-        }
-    }
+
     void OnDisable()
     {
         if (Recorder.Recording)
         {
-            if (!gameObject.activeSelf && gObjEnabled)
+            if (!gameObject.activeSelf)
             {
                 long time = PlaybackClock.GetTime();
                 Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateDisable(time, gameObject));
                 Debug.Log("logged Disable");
             }
         }
-        gObjEnabled = true;
     }
 
     void OnEnable()
@@ -70,13 +62,12 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
         if (Recorder.Recording)
         {
-            if (gameObject.activeSelf && !gObjEnabled)
+            if (gameObject.activeSelf)
             {
                 long time = PlaybackClock.GetTime();
                 Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateEnable(time, gameObject));
             }
         }
-        gObjEnabled = true;
     }
     public override void OnDestroy()
     {
