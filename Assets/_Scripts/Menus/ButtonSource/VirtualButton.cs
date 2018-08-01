@@ -11,6 +11,7 @@ public class VirtualButton : Button
     public KeyCode debugHotKey;
     protected override void Update()
     {
+        base.Update();
         if (Input.GetKeyDown(debugHotKey))
             PressButton(null);
     }

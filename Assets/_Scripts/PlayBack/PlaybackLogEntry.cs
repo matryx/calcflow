@@ -129,7 +129,6 @@ public partial class PlaybackLogEntry
         Quaternion rotation;
 
         subject = Spawn();
-        subject.SetActive(false);
         position = _info.GetValue<Vector3>("position");
         scale = _info.GetValue<Vector3>("scale");
         rotation = _info.GetValue<Quaternion>("rotation");

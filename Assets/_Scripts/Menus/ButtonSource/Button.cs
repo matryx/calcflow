@@ -29,7 +29,8 @@ namespace CalcFlowUI
 
             string eventName = gameObject.name;
             var extra = new Dictionary<string, object>();
-            extra["parent"] = gameObject.transform.parent.name;
+
+            extra["parent"] = (gameObject.transform.parent != null) ? gameObject.transform.parent.name : null;
             if (!eventName.Equals("Body"))
             {
                 StatisticsTracking.StartEvent("Button Press", eventName, extra);
@@ -56,33 +57,22 @@ namespace CalcFlowUI
 
 #if UNITY_EDITOR
         public bool verbose = false;
-        public bool press = false;
-        bool pressed = false;
-        bool Pressed
-        {
-            get
-            {
-                return pressed;
-            }
-            set
-            {
-                if (!pressed && value)
-                {
-                    pressed = value;
-                    PressButton(this.gameObject);
-                }
-                else if (pressed && !value)
-                {
-                    pressed = value;
-                    UnpressButton(this.gameObject);
-                }
-            }
-        }
+        public bool editorPress = false;
+        bool editorPressed = false;
 #endif
         protected virtual void Update()
         {
 #if UNITY_EDITOR
-            Pressed = press;
+            if (!editorPressed && editorPress)
+            {
+                editorPressed = editorPress;
+                PressButton(this.gameObject);
+            }
+            else if (editorPressed && !editorPress)
+            {
+                editorPressed = editorPress;
+                UnpressButton(this.gameObject);
+            }
 #endif
         }
 
