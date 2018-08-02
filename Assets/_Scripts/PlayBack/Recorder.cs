@@ -155,28 +155,34 @@ public static class Recorder
     {
         while (recording)
         {
-            if (!paused)
-            {
-                while (allUIDs.Count > 0)
-                {
-                    UIDSystem uid;
-                    uid = allUIDs[allUIDs.Count - 1];
-                    allUIDs.RemoveAt(allUIDs.Count - 1);
-                    if (uid)
-                    {
-                        LoggerManager.SetupLoggers(uid.gameObject);
-                        RecordSpawn(uid);
-                    }
-                    else
-                    {
-                        UnityEngine.Debug.Log("uid was deleted");
-                    }
-                }
-            }
+
+            ResolveSpawns();
+
             yield return null;
         }
     }
 
+    public static void ResolveSpawns()
+    {
+        if (!paused)
+        {
+            while (allUIDs.Count > 0)
+            {
+                UIDSystem uid;
+                uid = allUIDs[allUIDs.Count - 1];
+                allUIDs.RemoveAt(allUIDs.Count - 1);
+                if (uid)
+                {
+                    LoggerManager.SetupLoggers(uid.gameObject);
+                    RecordSpawn(uid);
+                }
+                else
+                {
+                    UnityEngine.Debug.Log("uid was deleted");
+                }
+            }
+        }
+    }
 
     #region logCode
     public static void RecordAction(PlaybackLogEntry entry)

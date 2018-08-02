@@ -43,6 +43,7 @@ public class RSUtility
 		// Unsetting prefab flag and assign UID's
 		_UIDSystem.IsPrefab		= false;
 		_UIDSystem.ReassignUIDs(_recursive: true);
+		Recorder.ResolveSpawns();
 
 		return _newClone;
 	}
