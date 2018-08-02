@@ -6,12 +6,15 @@ public class PtManager : MonoBehaviour
 {
     [HideInInspector]
     public bool inputReceived;
+    [HideInInspector]
+    public bool eqnInput;
+
 
     [HideInInspector]
     public PtSet ptSet;
 
     [HideInInspector]
-    public EqnSet eqnSet;    
+    public EqnSet eqnSet;
 
     [HideInInspector]
     public SaveLoadMenu saveLoadMenu;
@@ -22,7 +25,7 @@ public class PtManager : MonoBehaviour
     private Color negativeFeedback = Color.red;
 
     int maxDisplayLength = 9;
-    
+
     int maxEqnLength = 7;
 
     [SerializeField]
@@ -72,15 +75,17 @@ public class PtManager : MonoBehaviour
                 aInput, bInput, cInput, dInput;
     }
 
-    public bool eqnInput;
     public GeneratePlanePts generatePlanePts;
 
     public void SetOutput(CalcOutput output)
     {
         ptInput.ChangeOutput(output);
-        if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"]) {
+        if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
+        {
             eqnInput = false;
-        } else {
+        }
+        else
+        {
             eqnInput = true;
         }
     }
@@ -90,17 +95,24 @@ public class PtManager : MonoBehaviour
         ptInput = connectedMenus.ptInput;
         connectedMenus.ptInput.Initialize(this);
         connectedMenus.ptOutputMenu.Initialize(this);
+        List<string> neg1 = new List<string>() { "-", "1" };
+        List<string> pos1 = new List<string>() { "1" };
         ptSet = new PtSet();
+        
         eqnSet = new EqnSet();
+
         ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
+        updatePoint("pt1", new Vector3(-1, 1, 1), false);
+        updatePoint("pt2", new Vector3(1, -1, 1), false);
+        updatePoint("pt3", new Vector3(1, 1, -1), false);
     }
 
 
-    void Awake()
+    void Start()
     {
-        Initialize();
         inputReceived = true;
-        eqnInput = false;
+        //eqnInput = false;
+        Initialize();
     }
     public bool updateText = false;
 
@@ -116,14 +128,18 @@ public class PtManager : MonoBehaviour
         {
             inputReceived = false;
             bool isValid = ptSet.CompileAll();
-            
+
             ManageFeedback();
-            if (isValid) {
-                if (presentPlane.CalculatePlane()) {
+            if (isValid)
+            {
+                if (presentPlane.CalculatePlane())
+                {
                     presentPlane.ApplyGraphAdjustment();
                     presentPlane.GetLocalPoint();
                     presentPlane.GetPlaneDirection();
-                } else {
+                }
+                else
+                {
                     presentPlane.ApplyGraphAdjustment();
                     presentPlane.GetLocalPoint();
                 }
@@ -132,11 +148,11 @@ public class PtManager : MonoBehaviour
 
         if (inputReceived && eqnInput)
         {
-            print("4");
             inputReceived = false;
             bool isValid = eqnSet.CompileAll();
             ManageFeedback();
-            if (isValid) {
+            if (isValid)
+            {
                 if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
                 {
                     feedbacks.eqnFeedback.material.color = negativeFeedback;
@@ -159,10 +175,12 @@ public class PtManager : MonoBehaviour
         if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback;
     }
 
-    public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane) 
+    public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
     {
         CalcOutput originalExpression = ptInput.currExpression;
         eqnInput = false;
+        //inputReceived = true;
+
         SetOutput(ptSet.ptCoords[ptName].X);
         ptInput.RewriteInput(newLoc.x);
         SetOutput(ptSet.ptCoords[ptName].Y);
@@ -170,19 +188,21 @@ public class PtManager : MonoBehaviour
         SetOutput(ptSet.ptCoords[ptName].Z);
         ptInput.RewriteInput(newLoc.z);
         SetOutput(originalExpression);
-        if (fixedPlane) 
+        if (fixedPlane)
         {
             manageText();
             ManageFeedback();
             ptSet.CompileAll();
-        } else 
+        }
+        else
         {
             manageText();
             bool isValid = ptSet.CompileAll();
             ManageFeedback();
-            if (isValid) 
+            if (isValid)
             {
-                if (presentPlane.CalculatePlane()) {
+                if (presentPlane.CalculatePlane())
+                {
                     presentPlane.ApplyUnroundCenter(ptName, newLoc);
                     presentPlane.GetPlaneDirection();
                 }
@@ -218,10 +238,10 @@ public class PtManager : MonoBehaviour
         presentPlane.GetLocalPoint();
         presentPlane.GetPlaneDirection();
         presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
-		presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+        presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
     }
 
-    public void updateEqn(float newA, float newB, float newC, float newD) 
+    public void updateEqn(float newA, float newB, float newC, float newD)
     {
         CalcOutput originalExpression = ptInput.currExpression;
         SetOutput(eqnSet.eqnCoefs["a"]);
@@ -235,7 +255,7 @@ public class PtManager : MonoBehaviour
         SetOutput(originalExpression);
         manageText();
         eqnSet.CompileAll();
-        ManageFeedback();        
+        ManageFeedback();
     }
 
     public void updateEqn()
@@ -296,7 +316,7 @@ public class PtManager : MonoBehaviour
         if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
         if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
         if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
-        
+
         if (inputs.aInput != null && inputs.aInput.text.Length == 0) inputs.aInput.text = "0";
         if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
         if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";

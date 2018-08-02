@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AvatarSelector : MonoBehaviour {
+public class AvatarSelector : MonoBehaviour
+{
 
-    public static AvatarSelector Avatar;
+    public static GameObject Avatar;
 
     //public AvatarTypes Type;
     private GameObject OculusAvatar;
@@ -16,10 +17,10 @@ public class AvatarSelector : MonoBehaviour {
     //    OCULUS
     //}
 
-	// Use this for initialization
-	void Awake () {
+    // Use this for initialization
+    void Awake()
+    {
         Debug.Log(UnityEngine.VR.VRDevice.model);
-        Avatar = this;
         OculusAvatar = transform.Find("OculusAvatar").gameObject;
         SteamAvatar = transform.Find("SteamAvatar").gameObject;
 
@@ -27,11 +28,13 @@ public class AvatarSelector : MonoBehaviour {
         {
             SteamAvatar.SetActive(false);
             OculusAvatar.SetActive(true);
+            Avatar = OculusAvatar;
         }
         else
         {
             SteamAvatar.SetActive(true);
             OculusAvatar.SetActive(false);
+            Avatar = SteamAvatar;
         }
     }
 
