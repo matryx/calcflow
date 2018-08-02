@@ -359,7 +359,6 @@ public class PresetMenu : MonoBehaviour
                 vmax = ExpressionParser.Parse("2pi");
                 break;
             case "Px":
-                // NOTE : Unsure whether the last part of the angular function is sin or cos
                 x = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*sin(u)*cos(v)");
                 y = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*sin(u)*sin(v)");
                 z = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*cos(u)");

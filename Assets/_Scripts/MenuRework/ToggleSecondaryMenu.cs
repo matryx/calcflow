@@ -11,20 +11,24 @@ public class ToggleSecondaryMenu : QuickButton {
 	// Use this for initialization
 	void Awake () {
         setMenuPos();
-        zRotation = secondaryMenu.localEulerAngles.z;
-        secondaryMenu.gameObject.SetActive(false);
+        if (secondaryMenu != null){
+            zRotation = secondaryMenu.localEulerAngles.z;
+            secondaryMenu.gameObject.SetActive(false);
+        }
 	}
 	
     void setMenuPos()
     {
-        secondaryMenu.SetParent(view);
-        secondaryMenu.localPosition = new Vector3(0, 0, 0.7f);
-        secondaryMenu.localEulerAngles = new Vector3(0, 0, 0);
-        secondaryMenu.SetParent(null);
-        secondaryMenu.localEulerAngles = new Vector3(secondaryMenu.localEulerAngles.x,
-            secondaryMenu.localEulerAngles.y, zRotation);
-        secondaryMenu.localScale = Vector3.one;
+        if (secondaryMenu != null){
+            secondaryMenu.SetParent(view);
+            secondaryMenu.localPosition = new Vector3(0, 0, 0.7f);
+            secondaryMenu.localEulerAngles = new Vector3(0, 0, 0);
+            secondaryMenu.SetParent(null);
+            secondaryMenu.localEulerAngles = new Vector3(secondaryMenu.localEulerAngles.x,
+                secondaryMenu.localEulerAngles.y, zRotation);
+            secondaryMenu.localScale = Vector3.one;
         circle.localScale = new Vector3(0.5f, 0.01f, 0.5f);
+        }
     }
 
 	// Update is called once per frame
@@ -40,14 +44,16 @@ public class ToggleSecondaryMenu : QuickButton {
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        if (secondaryMenu.gameObject.activeSelf)
-        {
-            secondaryMenu.gameObject.SetActive(false);
-        }
-        else
-        {
-            secondaryMenu.gameObject.SetActive(true);
-            setMenuPos();
+        if (secondaryMenu != null){
+            if (secondaryMenu.gameObject.activeSelf)
+            {
+                secondaryMenu.gameObject.SetActive(false);
+            }
+            else
+            {
+                secondaryMenu.gameObject.SetActive(true);
+                setMenuPos();
+            }
         }
     }
 
