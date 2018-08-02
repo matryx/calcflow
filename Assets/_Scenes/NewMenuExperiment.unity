@@ -5695,7 +5695,6 @@ GameObject:
   - component: {fileID: 221092727}
   - component: {fileID: 221092730}
   - component: {fileID: 221092729}
-  - component: {fileID: 221092728}
   m_Layer: 11
   m_Name: GrabBar
   m_TagString: Untagged
@@ -5717,18 +5716,6 @@ Transform:
   m_Father: {fileID: 345170932}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90.00001}
---- !u!114 &221092728
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114536561732141378, guid: 130e0d3060edfd945b2bc1e3d2d6f024,
-    type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 221092726}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ac25ea7332ea4a41bc0f3e760e27af7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!23 &221092729
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9510,6 +9497,10 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 345170932}
+  - component: {fileID: 345170933}
+  - component: {fileID: 345170935}
+  - component: {fileID: 345170934}
+  - component: {fileID: 345170936}
   m_Layer: 11
   m_Name: ExpressionMenu
   m_TagString: Untagged
@@ -9540,6 +9531,55 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &345170933
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 345170931}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.3
+  m_Height: 5.2
+  m_Direction: 0
+  m_Center: {x: 0, y: -2.28, z: 0}
+--- !u!114 &345170934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 345170931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ac25ea7332ea4a41bc0f3e760e27af7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &345170935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 345170931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 188df4449c34a89439883f7a60437655, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  priority: 0
+  momentumOn: 0
+--- !u!114 &345170936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 345170931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47deb6d08a0f00243ae92f309442d96c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recursive: 0
 --- !u!1 &345475940
 GameObject:
   m_ObjectHideFlags: 0
@@ -53854,6 +53894,7 @@ MonoBehaviour:
   updateOverlay: 0
   toExport: 0
   expressionSetList: []
+  flowline: {fileID: 0}
 --- !u!136 &1700445638
 CapsuleCollider:
   m_ObjectHideFlags: 0

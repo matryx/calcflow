@@ -74,6 +74,8 @@ public class VecFieldManager : CalculatorManager
         inputReceived = true;
     }
 
+    public FlowLineParticles flowline;
+
     void Update()
     {
         if (inputReceived)
@@ -81,17 +83,20 @@ public class VecFieldManager : CalculatorManager
             manageText();
             inputReceived = false;
             updateOverlay = true;
+            vecField.dens = CustomVectorField.SampleDensity.HIGH;
+
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
             if (isValid)
             {
-                vecField.UpdateExpressionSet(expressionSetList);
+                vecField.es = expressionSet.ShallowCopy();
+                vecField.UpdateFunctions();
             }
-        }
-        if (toExport)
-        {
-            toExport = false;
-            vecField.DrawVectorField();
+
+            if (flowline != null)
+            {
+                flowline.ForceUpdate();
+            }
         }
     }
 

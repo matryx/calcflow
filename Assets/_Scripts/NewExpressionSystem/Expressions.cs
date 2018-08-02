@@ -17,9 +17,7 @@ public class Expressions : MonoBehaviour
     public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
-    // 1 - add x, y and z ranges to every vector field expression
-    //     note that these ranges don't need to be shown in UI
-    //     their ranges should be -9 to 9
+    // 1 - add flowline object
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
@@ -31,6 +29,9 @@ public class Expressions : MonoBehaviour
     //   - NOTE: pretty sure I already fixed this but need a headset to test
     //           but there still should be a bug: check what happens when X isn't visible 
     //           on scroll and add a new expr while that expr with the hidden x is selected
+    //
+    // 1 - can't delete vector field equation
+    //  
 
     void Awake()
     {

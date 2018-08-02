@@ -52,6 +52,8 @@ public class ExpressionButtonsHandler : MonoBehaviour {
         if (end == Vector3.zero) obj.gameObject.SetActive(false);
     }
 
+    //BUG: not working with vec field
+    //     maybe get expression parent not set 
     public void HandleInput(string buttonID)
     {
         switch (buttonID)

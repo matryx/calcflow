@@ -188,7 +188,7 @@ public class ExpressionBody : QuickButton
                 selectedBody.unSelect();
             }
 
-            //TODO: handle hiding of graph
+            //TODO: refactor so that it calls one function that does all this
             if (selectedBody.expressionParent != expressionParent && selectedBody.getManager() == VecFieldManager._instance)
             {
                 selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(grayHide);
@@ -204,7 +204,7 @@ public class ExpressionBody : QuickButton
         expression.setSelectedExpr(expressionParent, this);
         calcManager.ChangeExpressionSet(expressionParent.gameObject.GetInterface<ExpressionTabInterface>().getExpSet());
 
-        //TODO: handle showing of graph
+        //TODO: refactor so that it calls one function that does all this
         if (calcManager == VecFieldManager._instance)
         {
             expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(Color.black);

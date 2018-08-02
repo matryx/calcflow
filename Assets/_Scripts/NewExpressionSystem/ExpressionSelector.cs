@@ -108,9 +108,7 @@ public class ExpressionSelector : QuickButton
         if (expressions.getSelectedExpr())
         {
             prevXExpression = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getExpressionX();
-            startingIndex = thisScroll.getIndex(prevXExpression) - 1;
-
-            if (startingIndex < 0) startingIndex = 0;
+            startingIndex = thisScroll.getIndex(prevXExpression);
         }
 
         thisScroll.addToScroll(toAdd, null, startingIndex);
@@ -215,6 +213,8 @@ public class ExpressionSelector : QuickButton
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
         var.gameObject.SetActive(true);
         var.transform.localScale = Vector3.one;
+        var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setManager(VecFieldManager._instance);
+        var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setManager(VecFieldManager._instance);
         var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(v.transform);
         var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setExpressionParent(v.transform);
         var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/VectorFieldPanel").transform);

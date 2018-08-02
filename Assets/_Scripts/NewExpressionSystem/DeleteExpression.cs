@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DeleteExpression : QuickButton {
+public class DeleteExpression : QuickButton
+{
 
     Expressions expressions;
     private FlexMenu keyboard;
