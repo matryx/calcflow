@@ -14,18 +14,12 @@ public class ManageUIDSystem : MonoBehaviour
     public bool removeUIDSystem = false;
     public bool resetUIDSystem = false;
     public bool updateUIDs = false;
-    // Use this for initialization
-    void Start()
-    {
 
-    }
-
-    // Update is called once per frame
     void Update()
     {
         if (turnOffRecursive || turnOnRecursive)
         {
-            UIDSystem[] allObjects = Resources.FindObjectsOfTypeAll<UIDSystem>();
+            UIDSystem[] allObjects = GetAllUIDSInScene().ToArray();
             foreach (UIDSystem UIDS in allObjects)
             {
                 UIDS.SerializeChildren = turnOnRecursive;
@@ -36,10 +30,10 @@ public class ManageUIDSystem : MonoBehaviour
 
         if (addUIDSystem)
         {
-            GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            GameObject[] allObjects = GetAllObjectsInScene().ToArray();
             foreach (GameObject obj in allObjects)
             {
-                if (obj.GetComponentInParent<AvatarSelector>() == null)
+                if (obj.GetComponentInParent<DoNotRecord>() == null)
                 {
                     obj.EnsureOneOf<UIDSystem>();
                 }
@@ -49,17 +43,17 @@ public class ManageUIDSystem : MonoBehaviour
 
         if (removeUIDSystem)
         {
-            GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
-            foreach (GameObject obj in allObjects)
+            UIDSystem[] allObjects = GetAllUIDSInScene().ToArray();
+            foreach (UIDSystem UIDS in allObjects)
             {
-                obj.EnsureNoneOf<UIDSystem>();
+                UIDS.gameObject.EnsureNoneOf<UIDSystem>();
             }
             removeUIDSystem = false;
         }
 
         if (resetUIDSystem)
         {
-            UIDSystem[] allObjects = Resources.FindObjectsOfTypeAll<UIDSystem>();
+            UIDSystem[] allObjects = GetAllUIDSInScene().ToArray();
             resetUIDSystem = false;
             foreach (UIDSystem UIDS in allObjects)
             {
@@ -72,7 +66,7 @@ public class ManageUIDSystem : MonoBehaviour
 
         if (updateUIDs)
         {
-            UIDSystem[] allObjects = Resources.FindObjectsOfTypeAll<UIDSystem>();
+            UIDSystem[] allObjects = GetAllUIDSInScene().ToArray();
             foreach (UIDSystem UID in allObjects)
             {
                 UID.UpdateUIDs(false);

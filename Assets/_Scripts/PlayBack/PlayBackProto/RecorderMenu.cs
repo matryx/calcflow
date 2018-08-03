@@ -23,7 +23,7 @@ public class RecorderMenu : MonoBehaviour
 
     }
 
-    public void Initialize()
+    void Awake()
     {
         KeyboardInputResponder responder = new KeyboardInputResponder(this);
         GetComponent<FlexMenu>().RegisterResponder(responder);
@@ -35,16 +35,20 @@ public class RecorderMenu : MonoBehaviour
         {
 
             case "Start":
-                Recorder.StartRecording();
+                RecordAndReplayManager._instance.EditorRecord = true;
+                //Recorder.StartRecording();
                 break;
             case "Pause":
-                Recorder.PauseRecording();
+                RecordAndReplayManager._instance.EditorPause = true;
+                //Recorder.PauseRecording();
                 break;
             case "Resume":
-                Recorder.ResumeRecording();
+                RecordAndReplayManager._instance.EditorPause = false;
+                //Recorder.ResumeRecording();
                 break;
             case "Stop":
-                Recorder.EndRecording();
+                RecordAndReplayManager._instance.EditorRecord = true;
+                //Recorder.EndRecording();
                 break;
             default:
                 print("unknown input: " + source);

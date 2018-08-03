@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VoxelBusters.RuntimeSerialization;
 
+[RuntimeSerializable(typeof(MonoBehaviour), true, true)]
 public class ScrollBar : MonoBehaviour
 {
     Transform bar, scroller, scroll;
@@ -27,10 +29,8 @@ public class ScrollBar : MonoBehaviour
         if (bar && scroller) return;
         if (scroll == null) scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
         scrollerMaterial = scroll.GetComponent<Scroll>().scrollerMaterial;
+        bar = transform.Find("Bar");
 
-        bar = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
-        bar.gameObject.layer = LayerMask.NameToLayer("Keyboard");
-        bar.name = "Bar";
         bar.GetComponent<Renderer>().material = scroll.GetComponent<Renderer>().material;
         bar.transform.SetParent(scroll.parent);
         bar.transform.localPosition = Vector3.zero;
@@ -48,9 +48,8 @@ public class ScrollBar : MonoBehaviour
         bar.transform.localPosition = (orientation == Scroll.orientation.VERTICAL) ?
                                new Vector3(moveBy, 0, 0) : new Vector3(0, -moveBy, 0);
 
-        scroller = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
-        scroller.gameObject.layer = LayerMask.NameToLayer("Keyboard");
-        scroller.name = "Scroller";
+        scroller = transform.Find("Scroller");
+
         scroller.GetComponent<Renderer>().material = scrollerMaterial;
         scroller.transform.SetParent(transform);
         scroller.transform.localScale = Vector3.zero;

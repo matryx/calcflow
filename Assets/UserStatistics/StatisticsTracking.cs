@@ -14,6 +14,8 @@ namespace Calcflow.UserStatistics
     public class StatisticsTracking
     {
 
+        static bool verbose = false;
+
         static Dictionary<string, double> startTimesSaved = new Dictionary<string, double>();
         static Dictionary<string, double> startTimes = new Dictionary<string, double>();
 
@@ -383,10 +385,13 @@ namespace Calcflow.UserStatistics
 
         private static void ColorPrint(string toPrint)
         {
-            string prepend = "<color=#707000>";
-            string append = "</color>";
+            if (verbose)
+            {
+                string prepend = "<color=#707000>";
+                string append = "</color>";
 
-            Debug.Log(prepend + toPrint + append);
+                Debug.Log(prepend + toPrint + append);
+            }
         }
 
     }

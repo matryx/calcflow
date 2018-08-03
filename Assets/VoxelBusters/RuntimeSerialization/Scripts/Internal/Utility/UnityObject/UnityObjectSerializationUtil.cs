@@ -241,6 +241,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             string _trimmedHierarchyMetadata = _hierarchyMetadata.TrimStart('/');
             string[] _pathComponents = _trimmedHierarchyMetadata.Split('/');
             int _pathComponentCount = _pathComponents.Length;
+            //Debug.Log("_pathComponentCount: " + _pathComponentCount + "_trimmedHierarchyMetadata: " + _trimmedHierarchyMetadata);
 
             if (_pathComponentCount == 0)
                 throw new Exception(string.Format("[RS] The operation could not be completed because hierarchy metadata is invalid. Processed hierarchy metadata: {0}.", _hierarchyMetadata));
@@ -346,7 +347,7 @@ namespace VoxelBusters.RuntimeSerialization.Internal
             int _componentsCount = _components.Length;
 
             if (_componentsCount != 2)
-                throw new Exception("[RS] Root gameObject name is invalid.");
+                throw new Exception("[RS] Root gameObject name is invalid." + " num splits: " + _componentsCount + " metadata: " + _metadata);
 
             // Iterate through immediate child and find gameobject with given UID
             string _gameObjectName = _components[0];

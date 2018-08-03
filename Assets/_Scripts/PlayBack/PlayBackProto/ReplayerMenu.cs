@@ -23,7 +23,7 @@ public class ReplayerMenu : MonoBehaviour
 
     }
 
-    public void Initialize()
+    void Awake()
     {
         KeyboardInputResponder responder = new KeyboardInputResponder(this);
         GetComponent<FlexMenu>().RegisterResponder(responder);
@@ -35,18 +35,20 @@ public class ReplayerMenu : MonoBehaviour
         {
 
             case "Start":
-                Replayer.StartReplaying();
+                //Replayer.StartReplaying();
+                RecordAndReplayManager._instance.EditorReplay = true;
                 break;
             case "Pause":
-                Replayer.PauseReplaying();
-
+                //Replayer.PauseReplaying();
+                //RecordAndReplayManager._instance.EditorPause = true;
                 break;
             case "Resume":
-                Replayer.ResumeReplaying();
-
+                //RecordAndReplayManager._instance.EditorPause = false;
+                //Replayer.ResumeReplaying();
                 break;
             case "Stop":
-                Replayer.StopReplaying();
+                RecordAndReplayManager._instance.EditorReplay = false;
+                //Replayer.StopReplaying();
                 break;
             default:
                 print("unknown input: " + source);

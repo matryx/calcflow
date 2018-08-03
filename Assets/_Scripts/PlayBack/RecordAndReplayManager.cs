@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class RecordAndReplayManager : MonoBehaviour
 {
+    public static RecordAndReplayManager _instance;
     public bool EditorRecord = false;
     public bool EditorPause = false;
     public bool EditorReplay = false;
@@ -64,6 +65,11 @@ public class RecordAndReplayManager : MonoBehaviour
             }
             replaying = value;
         }
+    }
+
+    void Awake()
+    {
+        _instance = this;
     }
 
     void Update()

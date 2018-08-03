@@ -132,8 +132,9 @@ public static class Recorder
         PlaybackClock.RestartClock();
         PlaybackClock.StartClock();
         recording = true;
-        Async.runInCoroutine(CheckForSpawns);
         paused = false;
+
+        Async.runInCoroutine(CheckForSpawns);
     }
     #region loadingScreenStuff
     static string LoadingScreenPrefab = "Prefabs\\LoadingScreen";
@@ -164,7 +165,7 @@ public static class Recorder
 
     public static void ResolveSpawns()
     {
-        if (!paused)
+        if (recording && !paused)
         {
             while (allUIDs.Count > 0)
             {

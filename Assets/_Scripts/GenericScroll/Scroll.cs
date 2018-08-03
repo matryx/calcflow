@@ -124,9 +124,7 @@ public class Scroll : MonoBehaviour
 
         if (scrollBar == null)
         {
-            Transform sbTransform = (Instantiate(Resources.Load(scrollBarPrefab, typeof(GameObject)), transform.parent) as GameObject).transform;
-
-            //sbTransform.SetParent(transform.parent);
+            Transform sbTransform = (RSUtility.Instantiate(Resources.Load(scrollBarPrefab, typeof(GameObject)) as GameObject, transform.parent)).transform;
         
             scrollBar = sbTransform.GetComponent<ScrollBar>();
             scrollBar.setOrientation(currOrientation);
