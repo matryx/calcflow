@@ -90,7 +90,7 @@ public class CustomDensityPlot : MonoBehaviour
                 delta = (xmax - xmin) / 6.0f;
                 break;
             case SampleDensity.HIGH:
-                delta = (xmax - xmin) / 35.0f;
+                delta = (xmax - xmin) / 100.0f;
                 break;
         }
 
@@ -168,7 +168,7 @@ public class CustomDensityPlot : MonoBehaviour
             if(c.a> 0){
                 // rawGeom.Add(CreateCone(target, target, 0.3f, 0.15f, c));
                 // rawGeom.Add(CreateCone(target, -1 * target, 0.3f, 0.15f, c));
-                rawGeom.Add(CreateCube(target, 0.3f, c));
+                rawGeom.Add(CreateCube(target, delta, c));
             }
             //rawGeom.Add(CreateCone(target, offset, offset.magnitude, offset.magnitude, c));
             //rawGeom.Add(CreateCone(target, -1*offset, offset.magnitude, offset.magnitude, c));
