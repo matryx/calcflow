@@ -33,19 +33,27 @@ public class CustomDensityPlot : MonoBehaviour
     AK.Variable varX, varY, varZ;
     public ExpressionSet es;
 
-    public float xmin = -4.5f;
-    public float xmax = 4.5f;
-    public float ymin = -4.5f;
-    public float ymax = 4.5f;
-    public float zmin = -4.5f;
-    public float zmax = 4.5f;
+    public float minmaxVal = 4.5f;
     public float delta = 1f;
-    public enum SampleDensity { HIGH, MEDIUM, LOW};
+    public enum SampleDensity { HIGH, MEDIUM, LOW };
     public SampleDensity dens = SampleDensity.LOW;
+
+    float xmin;
+    float xmax;
+    float ymin;
+    float ymax;
+    float zmin;
+    float zmax;
 
     // Use this for initialization
     void Start()
     {
+        xmin = -1f * minmaxVal;
+        xmax = minmaxVal;
+        ymin = -1f * minmaxVal;
+        ymax = minmaxVal;
+        zmin = -1f * minmaxVal;
+        zmax = minmaxVal;
         vectors = new List<Transform>();
         startPts = new List<Vector3>();
         offsets = new List<Vector3>();
@@ -74,10 +82,10 @@ public class CustomDensityPlot : MonoBehaviour
                 delta = (xmax - xmin) / 4.0f;
                 break;
             case SampleDensity.MEDIUM:
-                delta = (xmax - xmin) / 6.0f;
+                delta = (xmax - xmin) / 14.0f;
                 break;
             case SampleDensity.HIGH:
-                delta = (xmax - xmin) / 9.0f;
+                delta = (xmax - xmin) / 19.0f;
                 break;
         }
 
@@ -94,22 +102,22 @@ public class CustomDensityPlot : MonoBehaviour
                     float x = (float)expX.Evaluate();
                     //Mathf.Clamp(x, -Mathf.Exp(20), Mathf.Exp(20));
 
-                    float y = (float)expY.Evaluate();
+                    //float y = (float)expY.Evaluate();
                     //Mathf.Clamp(y, -Mathf.Exp(20), Mathf.Exp(20));
 
-                    float z = (float)expZ.Evaluate();
+                    //float z = (float)expZ.Evaluate();
                     //Mathf.Clamp(z, -Mathf.Exp(20), Mathf.Exp(20));
 
 
                     Vector3 target = new Vector3(x_temp, y_temp, z_temp);
 
-                    Vector3 result = new Vector3(x, z, y);
-                    if(float.IsNaN(x) 
-                        || float.IsNaN(y)
-                        || float.IsNaN(z)
+                    Vector3 result = new Vector3(x, 0, 0);
+                    if (float.IsNaN(x)
+                        //   || float.IsNaN(y)
+                        //   || float.IsNaN(z)
                         || result.magnitude == 0)
                     {
-                        continue;
+                        result = new Vector3(0, 0, 0);
                     }
 
                     //Vector3 direction = result.normalized;
@@ -150,8 +158,13 @@ public class CustomDensityPlot : MonoBehaviour
             //top.endColor = c;
             //body.startColor = c;
             //body.endColor = c;
-            rawGeom.Add(CreateCylinder(target, offset, offset.magnitude, 0.05f, c));
-            rawGeom.Add(CreateCone(target + offset, offset, 0.3f, 0.15f, c));
+            //rawGeom.Add(CreateSphere(target, offset, offset.magnitude, offset.magnitude, c));
+            if(c.a> 0){
+                rawGeom.Add(CreateCone(target, offset, 0.3f, 0.15f, c));
+                rawGeom.Add(CreateCone(target, -1 * offset, 0.3f, 0.15f, c));
+            }
+            //rawGeom.Add(CreateCone(target, offset, offset.magnitude, offset.magnitude, c));
+            //rawGeom.Add(CreateCone(target, -1*offset, offset.magnitude, offset.magnitude, c));
         }
 
         List<Geometry> combined = CombineGeometry(rawGeom);
@@ -199,9 +212,9 @@ public class CustomDensityPlot : MonoBehaviour
         //if (es.CompileAll())
         //{
         es.CompileAll();
-            expX = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
-            expY = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Y].expression);
-            expZ = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Z].expression);
+        expX = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
+        expY = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Y].expression);
+        expZ = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Z].expression);
         //}
         //else
         //{
@@ -337,6 +350,52 @@ public class CustomDensityPlot : MonoBehaviour
         return geom;
     }
 
+    private Geometry CreateSphere(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
+    {
+        int vertNum = tessel + 3;
+        int triNum = tessel * 4;
+
+        var vertices = new Vector3[vertNum];
+        var normals = new Vector3[vertNum];
+        var colors = new Color32[vertNum];
+        var faces = new int[triNum * 3];
+
+        Matrix4x4 prefix = Matrix4x4.TRS(Vector3.zero, Quaternion.LookRotation(Vector3.up, Vector3.forward), Vector3.one);
+        Matrix4x4 trs = Matrix4x4.TRS(position, Quaternion.LookRotation(dir, Vector3.up), Vector3.one) * prefix;
+
+        Vector3 bottom = new Vector3(0, 0, 0);
+        Vector3 top = new Vector3(0, length, 0);
+        vertices[0] = trs.MultiplyPoint(bottom); vertices[1] = trs.MultiplyPoint(top);
+        normals[0] = trs.MultiplyVector(Vector3.down); normals[1] = trs.MultiplyVector(Vector3.up);
+        colors[0] = color; colors[1] = color;
+
+        int index = 1;
+        int tri = 0;
+        for (int i = 0; i < tessel; i++)
+        {
+            index++;
+            float cos = Mathf.Cos((float)i / (tessel - 1) * 2.0f * Mathf.PI);
+            float sin = Mathf.Sin((float)i / (tessel - 1) * 2.0f * Mathf.PI);
+            vertices[index] = trs.MultiplyPoint(new Vector3(cos * radius, 0, sin * radius));
+            normals[index] = trs.MultiplyVector(new Vector3(cos, 0, sin));
+            colors[index] = color;
+            if (i == 0) continue;
+            int i0 = index - 1;
+            int i1 = index;
+            faces[tri++] = i0; faces[tri++] = 1; faces[tri++] = i1;
+            faces[tri++] = i0; faces[tri++] = i1; faces[tri++] = 0;
+        }
+        Geometry geom = new Geometry()
+        {
+            vertices = vertices,
+            normals = normals,
+            vertexColors = colors,
+            faces = faces
+        };
+        return geom;
+    }
+
+    //TODO: Edit this function to be more like the one written in FileExporter
     private List<Geometry> CombineGeometry(List<Geometry> geoms, int maxVertices = 65535)
     {
         int combinedIndex = 0;

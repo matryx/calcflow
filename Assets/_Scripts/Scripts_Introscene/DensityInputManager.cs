@@ -29,7 +29,6 @@ internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
         zText = z;
         tminText = tmin;
         tmaxText = tmax;
-        dens = CustomDensityPlot.SampleDensity.LOW;
 
         currExpression = es.expressions[ExpressionSet.ExpOptions.X];
         currText = xText;
@@ -40,11 +39,21 @@ internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
         es = new ExpressionSet();
         es.expressions[ExpressionSet.ExpOptions.X].tokens = new List<string>
                 {
-                    "y"
+                    //2Pz
+                    "(","1","/","4","*","1","/","2","^","(","1","/","2",")","*","1","/","pi","^","(","1","/","2",")",
+                    "*","z","*","e","^","(","-","1","*","(","x","^","2","+","y","^","2","+","z","^","2",")","/","2",")",")","^","2"
+                    //3Pz
+                    //"(","2","^","(","1","/","2",")","*","1","/","8","1","*","1","/","pi","^","(","1","/","2",")","*",
+                    //"(","6","-","(","x","^","2","+","y","^","2","+","z","^","2",")","^","(","1","/","2",")",")",
+                    //"*","z","*","e","^","(","-","1","*","(","x","^","2","+","y","^","2","+","z","^","2",")","/","3",")",")","^","2"
+                    //3Dz2
+                    //"(","1","/","81","*","1","/","6","^","(","1","/","2",")","*","1","/","pi","^","(","1","/","2",")",
+                    //"*","(","3","*","z","^","2","-","x","^","2","+","y","^","2","+","z","^","2",")",
+                    //"*","e","^","(","-","1","*","(","x","^","2","+","y","^","2","+","z","^","2",")","/","3",")",")","^","2"
                 };
         es.expressions[ExpressionSet.ExpOptions.Y].tokens = new List<string>
                 {
-                    "-x"
+                    "0"
                 };
         es.expressions[ExpressionSet.ExpOptions.Z].tokens = new List<string>
                 {
