@@ -393,7 +393,7 @@ public class CustomVectorField : MonoBehaviour
                 tri += geom.faces.Length;
 
             }
-            combinedIndex += mesh_to_combine;
+            combinedIndex = mesh_to_combine;
             combined.Add(newGeom);
         }
         return combined;

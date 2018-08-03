@@ -76,6 +76,7 @@ public class CustomDensityPlot : MonoBehaviour
 
     }
 
+    // Set point spread and calculate vector values at all points
     void CalculateVectors()
     {
         max_magnitude = 0f;
@@ -89,7 +90,7 @@ public class CustomDensityPlot : MonoBehaviour
                 delta = (xmax - xmin) / 6.0f;
                 break;
             case SampleDensity.HIGH:
-                delta = (xmax - xmin) / 50.0f;
+                delta = (xmax - xmin) / 35.0f;
                 break;
         }
 
@@ -137,6 +138,7 @@ public class CustomDensityPlot : MonoBehaviour
         }
     }
 
+    // Draw shapes at all points
     void DrawDensityPlot()
     {
         List<Geometry> rawGeom = new List<Geometry>();
@@ -164,8 +166,9 @@ public class CustomDensityPlot : MonoBehaviour
             //body.endColor = c;
             //rawGeom.Add(CreateSphere(target, offset, offset.magnitude, offset.magnitude, c));
             if(c.a> 0){
-                rawGeom.Add(CreateCone(target, target, 0.3f, 0.15f, c));
-                rawGeom.Add(CreateCone(target, -1 * target, 0.3f, 0.15f, c));
+                // rawGeom.Add(CreateCone(target, target, 0.3f, 0.15f, c));
+                // rawGeom.Add(CreateCone(target, -1 * target, 0.3f, 0.15f, c));
+                rawGeom.Add(CreateCube(target, 0.3f, c));
             }
             //rawGeom.Add(CreateCone(target, offset, offset.magnitude, offset.magnitude, c));
             //rawGeom.Add(CreateCone(target, -1*offset, offset.magnitude, offset.magnitude, c));
@@ -236,6 +239,65 @@ public class CustomDensityPlot : MonoBehaviour
         //}
         CalculateVectors();
         DrawDensityPlot();
+    }
+
+    private Geometry CreateCube(Vector3 position, float length, Color32 color)
+    {
+        int vertNum = 8; // top & bottom center
+        float x = position.x;
+        float y = position.y;
+        float z = position.z;
+
+		Vector3[] vertices = {
+			new Vector3 (x, y, z),
+			new Vector3 (length + x, y, z),
+			new Vector3 (length + x, length + y, z),
+			new Vector3 (x, length + y, z),
+			new Vector3 (x, length + y, length + z),
+			new Vector3 (length + x, length + y, length + z),
+			new Vector3 (length + x, y, length + z),
+			new Vector3 (x, y, length + z),
+		};
+
+		int[] faces = {
+			0, 2, 1, //face front
+			0, 3, 2,
+			2, 3, 4, //face top
+			2, 4, 5,
+			1, 2, 5, //face right
+			1, 5, 6,
+			0, 7, 4, //face left
+			0, 4, 3,
+			5, 4, 7, //face back
+			5, 7, 6,
+			0, 6, 7, //face bottom
+			0, 1, 6
+		};
+
+        var normals = new Vector3[vertNum];
+        var colors = new Color32[vertNum];
+
+        normals[0] = Vector3.Cross((vertices[1]-vertices[0]),(vertices[2]-vertices[0])) / Vector3.Cross((vertices[1]-vertices[0]),(vertices[2]-vertices[0])).magnitude;
+        normals[1] = Vector3.Cross((vertices[0]-vertices[1]),(vertices[2]-vertices[1])) / Vector3.Cross((vertices[0]-vertices[1]),(vertices[2]-vertices[1])).magnitude;
+        normals[2] = Vector3.Cross((vertices[0]-vertices[2]),(vertices[1]-vertices[2])) / Vector3.Cross((vertices[0]-vertices[2]),(vertices[1]-vertices[2])).magnitude;
+        normals[3] = Vector3.Cross((vertices[4]-vertices[3]),(vertices[2]-vertices[3])) / Vector3.Cross((vertices[4]-vertices[3]),(vertices[2]-vertices[3])).magnitude;
+        normals[4] = Vector3.Cross((vertices[3]-vertices[4]),(vertices[2]-vertices[4])) / Vector3.Cross((vertices[3]-vertices[4]),(vertices[2]-vertices[4])).magnitude;
+        normals[5] = Vector3.Cross((vertices[6]-vertices[5]),(vertices[7]-vertices[5])) / Vector3.Cross((vertices[6]-vertices[5]),(vertices[7]-vertices[5])).magnitude;
+        normals[6] = Vector3.Cross((vertices[5]-vertices[6]),(vertices[7]-vertices[6])) / Vector3.Cross((vertices[5]-vertices[6]),(vertices[7]-vertices[6])).magnitude;
+        normals[7] = Vector3.Cross((vertices[5]-vertices[7]),(vertices[6]-vertices[7])) / Vector3.Cross((vertices[5]-vertices[7]),(vertices[6]-vertices[7])).magnitude;
+
+        for (int i = 0; i < vertNum; i++){
+            colors[i] = color;
+        }
+
+        Geometry geom = new Geometry()
+        {
+            vertices = vertices,
+            normals = normals,
+            vertexColors = colors,
+            faces = faces
+        };
+        return geom;
     }
 
     private Geometry CreateCylinder(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
