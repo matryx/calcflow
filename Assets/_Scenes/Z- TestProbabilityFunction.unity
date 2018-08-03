@@ -5025,7 +5025,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   calcManager: {fileID: 0}
-  vecManager: {fileID: 2115878852}
+  vecManager: {fileID: 0}
   xInput: {fileID: 214588029}
   yInput: {fileID: 1953037566}
   zInput: {fileID: 2119579018}
@@ -18357,60 +18357,6 @@ MonoBehaviour:
   hoveringColor: {r: 0.5176471, g: 0.8745098, b: 0.99215686, a: 1}
   selectedColor: {r: 0.2509804, g: 0.44705883, b: 0.67058825, a: 1}
   disabledColor: {r: 0, g: 0, b: 0, a: 0}
---- !u!114 &1702551751
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114814009588474126, guid: f2373a84fecd89041937cf29d9725b3e,
-    type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1710298108}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8585ca823978b594595a291fda318762, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gradient:
-    serializedVersion: 2
-    key0: {r: 0, g: 0, b: 1, a: 1}
-    key1: {r: 0, g: 1, b: 0, a: 1}
-    key2: {r: 1, g: 0, b: 0, a: 0}
-    key3: {r: 1, g: 0, b: 0, a: 0}
-    key4: {r: 0.53333336, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 32768
-    ctime2: 65535
-    ctime3: 65535
-    ctime4: 65535
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_NumColorKeys: 3
-    m_NumAlphaKeys: 2
-  vPrefab: {fileID: 0}
-  arrowMat: {fileID: 2100000, guid: 885325a222f2d8d49983b0a0dd04c840, type: 2}
-  expressionX: 0
-  expressionY: 0
-  expressionZ: 0
-  xmin: -9
-  xmax: 9
-  ymin: -9
-  ymax: 9
-  zmin: -9
-  zmax: 9
-  delta: 4
-  dens: 2
 --- !u!1 &1704010793
 GameObject:
   m_ObjectHideFlags: 0
@@ -18644,8 +18590,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1710298109}
-  - component: {fileID: 1710298110}
-  - component: {fileID: 1702551751}
   - component: {fileID: 1710298111}
   m_Layer: 12
   m_Name: DensityPlot
@@ -18668,49 +18612,6 @@ Transform:
   m_Father: {fileID: 411551470}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1710298110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114570491831238054, guid: f2373a84fecd89041937cf29d9725b3e,
-    type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1710298108}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db6893d0d5dfc1949a7846321ff69751, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gradient:
-    serializedVersion: 2
-    key0: {r: 1, g: 1, b: 1, a: 1}
-    key1: {r: 1, g: 1, b: 1, a: 1}
-    key2: {r: 0, g: 0, b: 0, a: 0}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 65535
-    ctime2: 0
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_NumColorKeys: 2
-    m_NumAlphaKeys: 2
-  vPrefab: {fileID: 467872, guid: 24a217e454e0b764aa85d8c341d814d5, type: 2}
-  sampleFunction: 2
 --- !u!114 &1710298111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18725,7 +18626,7 @@ MonoBehaviour:
   gradient:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 1, a: 0}
-    key1: {r: 0.22315957, g: 0, b: 0.54844296, a: 0.11764706}
+    key1: {r: 0.22315957, g: 0, b: 0.54844296, a: 0.23529412}
     key2: {r: 0.93235296, g: 0, b: 0.06764704, a: 0.60784316}
     key3: {r: 0.93235296, g: 0, b: 0.06764704, a: 1}
     key4: {r: 0.53333336, g: 0, b: 0, a: 0}
@@ -18741,7 +18642,7 @@ MonoBehaviour:
     ctime6: 0
     ctime7: 0
     atime0: 0
-    atime1: 10794
+    atime1: 10987
     atime2: 65535
     atime3: 65535
     atime4: 0
@@ -18755,9 +18656,9 @@ MonoBehaviour:
   expressionX: 0
   expressionY: 0
   expressionZ: 0
-  minmaxVal: 3
-  delta: 1
-  dens: 0
+  minmaxVal: 6
+  delta: 4
+  dens: 2
 --- !u!1 &1710586416
 GameObject:
   m_ObjectHideFlags: 0
@@ -22595,7 +22496,6 @@ GameObject:
   - component: {fileID: 2115878850}
   - component: {fileID: 2115878849}
   - component: {fileID: 2115878848}
-  - component: {fileID: 2115878852}
   - component: {fileID: 2115878851}
   - component: {fileID: 2115878854}
   - component: {fileID: 2115878853}
@@ -22690,26 +22590,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   priority: 0
   momentumOn: 1
---- !u!114 &2115878852
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2115878846}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 476953c3436707c4488ff22354634cfa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  keyboard: {fileID: 853269175}
-  xInputbox: {fileID: 1710586419}
-  yInputbox: {fileID: 1022019154}
-  zInputbox: {fileID: 342263803}
-  tminInput: {fileID: 1242225553}
-  tmaxInput: {fileID: 1751750103}
-  vectorField: {fileID: 1702551751}
-  flowline: {fileID: 0}
-  overlayUpdate: 0
 --- !u!114 &2115878853
 MonoBehaviour:
   m_ObjectHideFlags: 0

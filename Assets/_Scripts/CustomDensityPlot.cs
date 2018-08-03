@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System;
+using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 using MathFunctions;
+using Nanome.Core;
 
 public class CustomDensityPlot : MonoBehaviour
 {
@@ -31,12 +33,14 @@ public class CustomDensityPlot : MonoBehaviour
     AK.ExpressionSolver solver;
     AK.Expression expX, expY, expZ;
     AK.Variable varX, varY, varZ;
+    [HideInInspector]
     public ExpressionSet es;
 
-    public float minmaxVal = 4.5f;
+    public float minmaxVal;
     public float delta = 1f;
     public enum SampleDensity { HIGH, MEDIUM, LOW };
-    public SampleDensity dens = SampleDensity.LOW;
+    [HideInInspector]
+    public SampleDensity dens;
 
     float xmin;
     float xmax;
@@ -63,7 +67,7 @@ public class CustomDensityPlot : MonoBehaviour
         varX = solver.GetGlobalVariable("x"); varY = solver.GetGlobalVariable("y"); varZ = solver.GetGlobalVariable("z");
         max_magnitude = 0f;
         //CalculateVectors();
-        //DrawVectorField();
+        //DrawDensityPlot();
     }
 
     // Update is called once per frame
@@ -82,10 +86,10 @@ public class CustomDensityPlot : MonoBehaviour
                 delta = (xmax - xmin) / 4.0f;
                 break;
             case SampleDensity.MEDIUM:
-                delta = (xmax - xmin) / 14.0f;
+                delta = (xmax - xmin) / 6.0f;
                 break;
             case SampleDensity.HIGH:
-                delta = (xmax - xmin) / 19.0f;
+                delta = (xmax - xmin) / 50.0f;
                 break;
         }
 
@@ -95,9 +99,9 @@ public class CustomDensityPlot : MonoBehaviour
             {
                 for (float z_temp = zmin; z_temp <= zmax; z_temp += delta)
                 {
-                    varX.value = (x_temp);
-                    varY.value = (z_temp);
-                    varZ.value = (y_temp);
+                    varX.value = x_temp;
+                    varY.value = z_temp;
+                    varZ.value = y_temp;
 
                     float x = (float)expX.Evaluate();
                     //Mathf.Clamp(x, -Mathf.Exp(20), Mathf.Exp(20));
@@ -133,7 +137,7 @@ public class CustomDensityPlot : MonoBehaviour
         }
     }
 
-    void DrawVectorField()
+    void DrawDensityPlot()
     {
         List<Geometry> rawGeom = new List<Geometry>();
 
@@ -160,8 +164,8 @@ public class CustomDensityPlot : MonoBehaviour
             //body.endColor = c;
             //rawGeom.Add(CreateSphere(target, offset, offset.magnitude, offset.magnitude, c));
             if(c.a> 0){
-                rawGeom.Add(CreateCone(target, offset, 0.3f, 0.15f, c));
-                rawGeom.Add(CreateCone(target, -1 * offset, 0.3f, 0.15f, c));
+                rawGeom.Add(CreateCone(target, target, 0.3f, 0.15f, c));
+                rawGeom.Add(CreateCone(target, -1 * target, 0.3f, 0.15f, c));
             }
             //rawGeom.Add(CreateCone(target, offset, offset.magnitude, offset.magnitude, c));
             //rawGeom.Add(CreateCone(target, -1*offset, offset.magnitude, offset.magnitude, c));
@@ -231,7 +235,7 @@ public class CustomDensityPlot : MonoBehaviour
         //    return;
         //}
         CalculateVectors();
-        DrawVectorField();
+        DrawDensityPlot();
     }
 
     private Geometry CreateCylinder(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
@@ -350,53 +354,7 @@ public class CustomDensityPlot : MonoBehaviour
         return geom;
     }
 
-    private Geometry CreateSphere(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
-    {
-        int vertNum = tessel + 3;
-        int triNum = tessel * 4;
-
-        var vertices = new Vector3[vertNum];
-        var normals = new Vector3[vertNum];
-        var colors = new Color32[vertNum];
-        var faces = new int[triNum * 3];
-
-        Matrix4x4 prefix = Matrix4x4.TRS(Vector3.zero, Quaternion.LookRotation(Vector3.up, Vector3.forward), Vector3.one);
-        Matrix4x4 trs = Matrix4x4.TRS(position, Quaternion.LookRotation(dir, Vector3.up), Vector3.one) * prefix;
-
-        Vector3 bottom = new Vector3(0, 0, 0);
-        Vector3 top = new Vector3(0, length, 0);
-        vertices[0] = trs.MultiplyPoint(bottom); vertices[1] = trs.MultiplyPoint(top);
-        normals[0] = trs.MultiplyVector(Vector3.down); normals[1] = trs.MultiplyVector(Vector3.up);
-        colors[0] = color; colors[1] = color;
-
-        int index = 1;
-        int tri = 0;
-        for (int i = 0; i < tessel; i++)
-        {
-            index++;
-            float cos = Mathf.Cos((float)i / (tessel - 1) * 2.0f * Mathf.PI);
-            float sin = Mathf.Sin((float)i / (tessel - 1) * 2.0f * Mathf.PI);
-            vertices[index] = trs.MultiplyPoint(new Vector3(cos * radius, 0, sin * radius));
-            normals[index] = trs.MultiplyVector(new Vector3(cos, 0, sin));
-            colors[index] = color;
-            if (i == 0) continue;
-            int i0 = index - 1;
-            int i1 = index;
-            faces[tri++] = i0; faces[tri++] = 1; faces[tri++] = i1;
-            faces[tri++] = i0; faces[tri++] = i1; faces[tri++] = 0;
-        }
-        Geometry geom = new Geometry()
-        {
-            vertices = vertices,
-            normals = normals,
-            vertexColors = colors,
-            faces = faces
-        };
-        return geom;
-    }
-
-    //TODO: Edit this function to be more like the one written in FileExporter
-    private List<Geometry> CombineGeometry(List<Geometry> geoms, int maxVertices = 65535)
+    private List<Geometry> CombineGeometry(List<Geometry> geoms, int maxVertices = 64000)
     {
         int combinedIndex = 0;
         List<Geometry> combined = new List<Geometry>();
@@ -419,11 +377,11 @@ public class CustomDensityPlot : MonoBehaviour
                 vertices_to_combine += geom.vertices.Length;
                 faces_to_combine += geom.faces.Length;
             }
-            if (mesh_to_combine == 1)
-            {
-                combined.Add(geoms[combinedIndex++]);
-                continue;
-            }
+            // if (mesh_to_combine == 1)
+            // {
+            //     combined.Add(geoms[combinedIndex++]);
+            //     continue;
+            // }
             Geometry newGeom = new Geometry()
             {
                 vertices = new Vector3[vertices_to_combine],
@@ -451,9 +409,10 @@ public class CustomDensityPlot : MonoBehaviour
                 tri += geom.faces.Length;
 
             }
-            combinedIndex += mesh_to_combine;
+            combinedIndex = mesh_to_combine;
             combined.Add(newGeom);
         }
         return combined;
     }
+
 }
