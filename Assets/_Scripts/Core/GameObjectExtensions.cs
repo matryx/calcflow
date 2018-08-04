@@ -208,6 +208,12 @@ namespace Extensions
 
         public static void LerpMove(GameObject gObj, Vector3 destination, float seconds)
         {
+            if (seconds == 0)
+            {
+                Debug.Log("not lerping");
+                gObj.transform.position = destination;
+                return;
+            }
             gObj.EnsureNoneOf<LerpMover>();
             LerpMover l = gObj.AddComponent<LerpMover>();
             l.lerper = new LerpVector3(gObj.transform.position, destination, seconds);
@@ -216,6 +222,11 @@ namespace Extensions
 
         public static void LocalLerpMove(GameObject gObj, Vector3 destination, float seconds)
         {
+            if (seconds == 0)
+            {
+                gObj.transform.localPosition = destination;
+                return;
+            }
             gObj.EnsureNoneOf<LerpMover>();
             LerpMover l = gObj.AddComponent<LerpMover>();
             l.lerper = new LerpVector3(gObj.transform.localPosition, destination, seconds);
@@ -256,6 +267,11 @@ namespace Extensions
 
         public static void LerpRotate(GameObject gObj, Quaternion destination, float seconds)
         {
+            if (seconds == 0)
+            {
+                gObj.transform.rotation = destination;
+                return;
+            }
             Quaternion badQ = new Quaternion(0, 0, 0, 0);
             if (destination.Equals(badQ))
             {
@@ -270,6 +286,11 @@ namespace Extensions
 
         public static void LocalLerpRotate(GameObject gObj, Quaternion destination, float seconds)
         {
+            if (seconds == 0)
+            {
+                gObj.transform.localRotation = destination;
+                return;
+            }
             Quaternion badQ = new Quaternion(0, 0, 0, 0);
             if (destination.Equals(badQ))
             {
@@ -316,6 +337,11 @@ namespace Extensions
 
         public static void LerpLocalScale(GameObject gObj, Vector3 destination, float seconds)
         {
+            if (seconds == 0)
+            {
+                gObj.transform.localScale = destination;
+                return;
+            }
             gObj.EnsureNoneOf<LerpScaler>();
             LerpScaler s = gObj.AddComponent<LerpScaler>();
             s.lerper = new LerpVector3(gObj.transform.localScale, destination, seconds);
@@ -324,6 +350,12 @@ namespace Extensions
 
         public static void LerpGlobalScale(GameObject gObj, Vector3 destination, float seconds)
         {
+            if (seconds == 0)
+            {
+                gObj.transform.SetGlobalScale(destination);
+                return;
+            }
+
             gObj.EnsureNoneOf<LerpScaler>();
             LerpScaler s = gObj.AddComponent<LerpScaler>();
             s.lerper = new LerpVector3(gObj.transform.lossyScale, destination, seconds);

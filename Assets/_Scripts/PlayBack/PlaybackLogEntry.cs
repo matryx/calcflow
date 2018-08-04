@@ -123,9 +123,9 @@ public partial class PlaybackLogEntry
         }
     }
     //Basic Reenactors
-    #region basic reenactors
     private void ReenactSpawn(LogInfo _info, GameObject subject, PlaybackLogEntry entry)
     {
+        UnityEngine.Debug.Log("<color=green>replaying spawn " + subjectKey + "</color");
         Vector3 position;
         Vector3 scale;
         Quaternion rotation;
@@ -144,8 +144,6 @@ public partial class PlaybackLogEntry
         subject.GlobalScaleTo(scale, 0);
     }
 
-
-    #endregion
     public static GameObject GetObject(string ID)
     {
         GameObject outObject;

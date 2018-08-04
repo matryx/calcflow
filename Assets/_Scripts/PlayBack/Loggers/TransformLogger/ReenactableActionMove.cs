@@ -11,11 +11,6 @@ public class ReenactableActionMove : ReenactableAction
 
     public override void Reenact(LogInfo info, GameObject subject, PlaybackLogEntry entry)
     {
-        string parentKey;
-        Vector3 position;
-        Vector3 scale;
-        Quaternion rotation;
-        long duration;
 
         if (subject == null)
         {
@@ -23,23 +18,63 @@ public class ReenactableActionMove : ReenactableAction
             return;
         }
 
-        position = info.GetValue<Vector3>("position");
-        scale = info.GetValue<Vector3>("scale");
-        rotation = info.GetValue<Quaternion>("rotation");
-        parentKey = info.GetValue<string>("parentKey");
-        duration = info.GetValue<long>("duration");
-        GameObject newParent;
-        if (PlaybackLogEntry.TryGetObject(parentKey, out newParent))
+        string parentKey = info.GetValue<string>("parentKey");
+
+        Transform newParent = GetParent(subject, entry, parentKey);
+        Transform oldParent = subject.transform.parent;
+
+        if (oldParent != newParent)
         {
-            subject.transform.SetParent((parentKey == "") ? null : newParent.transform, false);
+            subject.transform.SetParent(newParent);
+
+            GlobalReposition(info, subject);
         }
         else
         {
-            Debug.Log(entry.timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist.");
+            //Debug.Log("Local Reposition");
+
+            LocalReposition(info, subject);
         }
+    }
+
+    static void LocalReposition(LogInfo info, GameObject subject)
+    {
+        Vector3 position = info.GetValue<Vector3>("position");
+        Vector3 scale = info.GetValue<Vector3>("scale");
+        Quaternion rotation = info.GetValue<Quaternion>("rotation");
+        long duration = info.GetValue<long>("duration");
 
         subject.LocalMoveTo(position, ((float)duration) / 1000f);
         subject.LocalRotateTo(rotation, ((float)duration) / 1000f);
         subject.LocalScaleTo(scale, ((float)duration) / 1000f);
+    }
+
+    static void GlobalReposition(LogInfo info, GameObject subject)
+    {
+        Vector3 position = info.GetValue<Vector3>("position");
+        Vector3 scale = info.GetValue<Vector3>("scale");
+        Quaternion rotation = info.GetValue<Quaternion>("rotation");
+        long duration = info.GetValue<long>("duration");
+
+        subject.MoveTo(position, ((float)duration) / 1000f);
+        subject.RotateTo(rotation, ((float)duration) / 1000f);
+        subject.GlobalScaleTo(scale, ((float)duration) / 1000f);
+    }
+
+    static Transform GetParent(GameObject subject, PlaybackLogEntry entry, string parentKey)
+    {
+        Transform newParentTransform = null;
+        GameObject newParent;
+        if (PlaybackLogEntry.TryGetObject(parentKey, out newParent))
+        {
+            newParentTransform = (parentKey == "") ? null : newParent.transform;
+        }
+        else
+        {
+            Debug.Log("<color=blue>" + subject.name + " -> " + parentKey + "</color>");
+            Debug.LogError(entry.timeStamp + " " + subject.name + " could not reparent because parent " + parentKey + " does not exist.");
+        }
+
+        return newParentTransform;
     }
 }

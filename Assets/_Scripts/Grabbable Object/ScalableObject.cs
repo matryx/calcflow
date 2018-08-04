@@ -84,8 +84,7 @@ public class ScalableObject : GrabbableObject
 
     protected override void CreatePivot()
     {
-        pivot = RSUtility.CreateGameObject("disabledSphere");
-        pivot.name = "pivot";
+        pivot = RSUtility.CreateGameObject("pivot");
 
         if (activeGrabbers.Count == 1)
         {

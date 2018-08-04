@@ -11,48 +11,112 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
     bool added = false;
 
-    // private void Awake()
-    // {
-    //     long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 1.5f);
-    //     Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateSpawn(time,
-    //         gameObject,
-    //         gameObject.transform.position,
-    //         gameObject.transform.rotation,
-    //         gameObject.transform.lossyScale));
-    // }
+    long lastTime = -999;
 
-    private void Update()
+    void Awake()
     {
-        if (Recorder.Recording && !added)
+        if (Recorder.Recording)
         {
-            PlaybackClock.AddToTimer(RecordPosition);
-            added = true;
+            UnityEngine.Debug.Log("move first rec frame: " + PBT_FrameCounter.GetFrame());
+
+            long currTime = PlaybackClock.GetTime(); ;
+            LogMovement(currTime);
         }
     }
 
+    void Update()
+    {
+        if (Recorder.Recording)
+        {
+            RecordPosition();
+        }
+    }
 
     void RecordPosition()
     {
         if (Recorder.Recording)
         {
-            if (lastParent != transform.parent || lastLocalPos != transform.localPosition || lastRotation != transform.localRotation || lastScale != transform.localScale)
+            if (Changed())
             {
-                GameObject nextParent = (transform.parent == null) ? null : transform.parent.gameObject;
-                bool lerp = lastParent == transform.parent;
-
-                long time = PlaybackClock.GetTime() - ((long)PlaybackLog.Period);
-                long duration = lerp ? ((long)PlaybackLog.Period) : 0;
-                Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(time, duration, gameObject, transform.localPosition,
-                                                                                         transform.localRotation, transform.localScale, nextParent));
-
-                lastParent = transform.parent;
-                lastLocalPos = transform.localPosition;
-                lastRotation = transform.localRotation;
-                lastScale = transform.localScale;
+                long currTime = PlaybackClock.GetTime(); ;
+                LogMovement(currTime);
             }
         }
     }
 
+    // returns true if any of the transform paramteres have changed since last check.
+    bool Changed()
+    {
+        bool changed = false;
+
+        changed |= lastParent != transform.parent;
+        changed |= lastLocalPos != transform.localPosition;
+        changed |= lastRotation != transform.localRotation;
+        changed |= lastScale != transform.localScale;
+
+        return changed;
+    }
+
+    void LogMovement(long currTime)
+    {
+        long startTime;
+        long endTime;
+        long duration;
+
+
+        GameObject nextParent = (transform.parent == null) ? null : transform.parent.gameObject;
+        bool lerp = true;
+        bool world = false;
+
+        if (lastTime == -999)
+        {
+            lerp = false;
+        }
+        if (lastParent != transform.parent)
+        {
+            //string debugLastParent = (lastParent == null) ? "null" : PlaybackLogEntry.GetUniqueID(lastParent.gameObject);
+            string debugNextParent = (transform.parent == null) ? "null" : PlaybackLogEntry.GetUniqueID(transform.parent.gameObject);
+            Debug.Log("<color=blue>" + gameObject.name + " -> " + debugNextParent + "</color>");
+
+            world = true;
+        }
+
+        if (lerp)
+        {
+            startTime = lastTime;
+            endTime = currTime;
+            duration = endTime - startTime;
+        }
+        else
+        {
+            startTime = currTime;
+            endTime = currTime;
+            duration = 0;
+        }
+
+        if (world)
+        {
+            Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.position,
+                                                                                     transform.rotation, transform.lossyScale, nextParent));
+        }
+        else
+        {
+            Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.localPosition,
+                                                                                     transform.localRotation, transform.localScale, nextParent));
+        }
+
+
+        UpdateHistory(currTime);
+    }
+
+    private void UpdateHistory(long currTime)
+    {
+        lastParent = transform.parent;
+        lastLocalPos = transform.localPosition;
+        lastRotation = transform.localRotation;
+        lastScale = transform.localScale;
+        lastTime = currTime;
+    }
 
     void OnDisable()
     {

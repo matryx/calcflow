@@ -8,13 +8,14 @@ using UnityEditor;
 using UnityEngine;
 using VoxelBusters.RuntimeSerialization;
 using System.Diagnostics;
+using System.IO;
+
 
 
 public static class Recorder
 {
     public static GameObject _instanceGO;
 
-    public static string SavedLog;
     static HashSet<int> AllGameObjects = new HashSet<int>();
     static List<UIDSystem> allUIDs = new List<UIDSystem>();
     public static int SpawnQueueSize()
@@ -60,13 +61,36 @@ public static class Recorder
         //PlaybackClock.AddToTimer(CheckForSpawns);
         paused = false;
     }
+
     public static void EndRecording()
     {
         UnityEngine.Debug.Log("stop recording");
         PlaybackClock.StopClock();
-        SavedLog = JsonUtility.ToJson(recordLog);
+        SaveRecording(recordLog);
+
         recording = false;
         paused = false;
+    }
+
+    static void SaveRecording(PlaybackLog recordLog)
+    {
+        string SavedLog = JsonUtility.ToJson(recordLog);
+        using (StreamWriter sw = new StreamWriter(GetFileName() + ".txt"))
+        {
+            sw.Write(SavedLog);
+        }
+    }
+
+    static string GetFileName()
+    {
+        string filename = "testRecording";
+        string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        string folder = Path.Combine(path, "Recordings");
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+        return Path.Combine(folder, filename);
     }
 
     public static void AddUID(UIDSystem uid)
@@ -174,8 +198,8 @@ public static class Recorder
                 allUIDs.RemoveAt(allUIDs.Count - 1);
                 if (uid)
                 {
-                    LoggerManager.SetupLoggers(uid.gameObject);
                     RecordSpawn(uid);
+                    LoggerManager.SetupLoggers(uid.gameObject);
                 }
                 else
                 {
@@ -193,7 +217,9 @@ public static class Recorder
 
     static void RecordSpawn(GameObject subject)
     {
-        long time = PlaybackClock.GetTime() - (long)(PlaybackLog.Period * 3f);
+        UnityEngine.Debug.Log("<color=green>recording spawn " + PlaybackLogEntry.GetUniqueID(subject) + "</color");
+
+        long time = PlaybackClock.GetTime();
         recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateSpawn(time,
             subject,
             subject.transform.position,

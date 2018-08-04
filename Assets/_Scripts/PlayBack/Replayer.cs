@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Nanome.Core;
 using UnityEngine;
 using System.Diagnostics;
+using System.IO;
 
 public static class Replayer
 {
@@ -12,23 +13,32 @@ public static class Replayer
     private static bool replaying = false;
     public static bool Replaying { get { return replaying; } }
 
-    private static void LoadReplay(string json)
+    static string GetFileName()
     {
-        LoadReplay(JsonUtility.FromJson<PlaybackLog>(json));
+        string filename = "testRecording";
+        string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        string folder = Path.Combine(path, "Recordings");
+        return Path.Combine(folder, filename);
     }
 
-    private static void LoadReplay(PlaybackLog replay)
+    static void LoadReplay(string file)
     {
-        log = replay.GetLogCopy();
+        using (StreamReader sr = new StreamReader(file + ".txt"))
+        {
+            string json = sr.ReadToEnd();
+
+            log = JsonUtility.FromJson<PlaybackLog>(json).GetLogCopy();
+
+        }
     }
 
     public static void StartReplaying()
     {
         Async.runInCoroutine(StartUpProcess);
     }
-    private static IEnumerator StartUpProcess(Async routine)
+    static IEnumerator StartUpProcess(Async routine)
     {
-        LoadReplay(Recorder.SavedLog);
+        LoadReplay(GetFileName());
         LoadingScreen loadingScreen = StartLoadingScreen();
         loadingScreen.SetBarLimit(100);
         loadingScreen.SetRemaining(100);
