@@ -9,6 +9,8 @@ public class ReenactableLoggerTransform : ReenactableLogger
     Quaternion lastRotation;
     Transform lastParent;
 
+    bool forceNext = false;
+
     bool added = false;
 
     long lastTime = -999;
@@ -36,8 +38,9 @@ public class ReenactableLoggerTransform : ReenactableLogger
     {
         if (Recorder.Recording)
         {
-            if (Changed())
+            if (Changed() || forceNext)
             {
+                forceNext = false;
                 long currTime = PlaybackClock.GetTime(); ;
                 LogMovement(currTime);
             }
@@ -47,6 +50,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
     // returns true if any of the transform paramteres have changed since last check.
     bool Changed()
     {
+        //return true;
         bool changed = false;
 
         changed |= lastParent != transform.parent;
@@ -54,9 +58,13 @@ public class ReenactableLoggerTransform : ReenactableLogger
         changed |= lastRotation != transform.localRotation;
         changed |= lastScale != transform.localScale;
 
+
         return changed;
     }
 
+    bool ParentChanged(){
+        return lastParent != transform.parent;
+    }
     void LogMovement(long currTime)
     {
         long startTime;
@@ -70,6 +78,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
         if (lastTime == -999)
         {
+            world = true;
             lerp = false;
         }
         if (lastParent != transform.parent)
@@ -79,6 +88,8 @@ public class ReenactableLoggerTransform : ReenactableLogger
             Debug.Log("<color=blue>" + gameObject.name + " -> " + debugNextParent + "</color>");
 
             world = true;
+            lerp = false;
+            forceNext = true;
         }
 
         if (lerp)
@@ -98,6 +109,8 @@ public class ReenactableLoggerTransform : ReenactableLogger
         {
             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.position,
                                                                                      transform.rotation, transform.lossyScale, nextParent));
+//             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.localPosition,
+// transform.localRotation, transform.localScale, nextParent));
         }
         else
         {

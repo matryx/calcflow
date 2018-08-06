@@ -22,12 +22,16 @@ public class ReenactableActionMove : ReenactableAction
 
         Transform newParent = GetParent(subject, entry, parentKey);
         Transform oldParent = subject.transform.parent;
+        long duration = info.GetValue<long>("duration");
 
-        if (oldParent != newParent)
+        //if (oldParent != newParent)
+        if (duration == 0)
         {
             subject.transform.SetParent(newParent);
 
-            GlobalReposition(info, subject);
+            GlobalReposition(info, subject, entry);
+            //LocalReposition(info, subject);
+
         }
         else
         {
@@ -49,12 +53,13 @@ public class ReenactableActionMove : ReenactableAction
         subject.LocalScaleTo(scale, ((float)duration) / 1000f);
     }
 
-    static void GlobalReposition(LogInfo info, GameObject subject)
+    static void GlobalReposition(LogInfo info, GameObject subject, PlaybackLogEntry entry)
     {
         Vector3 position = info.GetValue<Vector3>("position");
         Vector3 scale = info.GetValue<Vector3>("scale");
         Quaternion rotation = info.GetValue<Quaternion>("rotation");
         long duration = info.GetValue<long>("duration");
+        Debug.Log("<color=orange>G:" + " Object " + subject.name + " Location: " + position + " time: " + entry.timeStamp + "parent " + subject.transform.parent + "</color>");
 
         subject.MoveTo(position, ((float)duration) / 1000f);
         subject.RotateTo(rotation, ((float)duration) / 1000f);
