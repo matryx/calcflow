@@ -7,26 +7,18 @@ using Calcflow.UserStatistics;
 [System.Serializable]
 public class ExpressionSet
 {
-    public enum ExpOptions
-    {
-        X, Y, Z
-    }
-    public enum RangeOptions
-    {
-        p, q, r, s, t, u, v, w
-    }
 
-    public Dictionary<ExpOptions, Expression> expressions;
+    public Dictionary<string, Expression> expressions;
     public Dictionary<string, RangePair> ranges;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
 
-    string GetExpression(int i)
-    {
-        return expressions[(ExpOptions)i].expression;
-    }
+    // string GetExpression(int i)
+    // {
+    //     return expressions[i].expression;
+    // }
 
-    public void AddExpression(ExpOptions variable, Expression expression)
+    public void AddExpression(string variable, Expression expression)
     {
         if (expression != null)
         {
@@ -41,7 +33,7 @@ public class ExpressionSet
         }
     }
 
-    public void AddExpression(ExpOptions variable, List<string> tokens)
+    public void AddExpression(string variable, List<string> tokens)
     {
         if (expressions.ContainsKey(variable))
         {
@@ -93,10 +85,10 @@ public class ExpressionSet
 
     public ExpressionSet()
     {
-        expressions = new Dictionary<ExpOptions, Expression>();
-        expressions.Add(ExpOptions.X, new Expression());
-        expressions.Add(ExpOptions.Y, new Expression());
-        expressions.Add(ExpOptions.Z, new Expression());
+        expressions = new Dictionary<string, Expression>();
+        expressions.Add("X", new Expression());
+        expressions.Add("Y", new Expression());
+        expressions.Add("Z", new Expression());
 
         ranges = new Dictionary<string, RangePair>();
         AddRange("t");
@@ -108,8 +100,8 @@ public class ExpressionSet
     public ExpressionSet DeepCopy()
     {
         ExpressionSet newEs = new ExpressionSet();
-        newEs.expressions = new Dictionary<ExpOptions, Expression>();
-        foreach (ExpOptions key in expressions.Keys)
+        newEs.expressions = new Dictionary<string, Expression>();
+        foreach (string key in expressions.Keys)
         {
             newEs.expressions.Add(key, new Expression(expressions[key]));
         }
@@ -129,14 +121,14 @@ public class ExpressionSet
     {
         ExpressionSet newEs = new ExpressionSet();
 
-        newEs.expressions = new Dictionary<ExpOptions, Expression>(expressions);
+        newEs.expressions = new Dictionary<string, Expression>(expressions);
         newEs.ranges = new Dictionary<string, RangePair>((Dictionary<string, RangePair>)ranges);
         newEs.expValidity = new Dictionary<string, bool>(expValidity);
 
         return newEs;
     }
 
-    internal ExpressionSet(string[] rangeKeys, List<RangePair> rangePairs, ExpOptions[] ExpressionKeys, List<Expression> ExpressionValues)
+    internal ExpressionSet(string[] rangeKeys, List<RangePair> rangePairs, string[] ExpressionKeys, List<Expression> ExpressionValues)
     {
         ranges = new Dictionary<string, RangePair>();
         for (int i = 0; i < rangePairs.Count; i++)
@@ -144,7 +136,7 @@ public class ExpressionSet
             ranges.Add(rangeKeys[i], rangePairs[i]);
         }
 
-        expressions = new Dictionary<ExpOptions, Expression>();
+        expressions = new Dictionary<string, Expression>();
         for (int i = 0; i < ExpressionValues.Count; i++)
         {
             expressions.Add(ExpressionKeys[i], ExpressionValues[i]);
@@ -164,7 +156,7 @@ public class ExpressionSet
             expValidity[RO] &= ranges[RO].Max.GenerateAKSolver(solver);
             isValid &= expValidity[RO];
         }
-        foreach (ExpOptions EX in expressions.Keys)
+        foreach (string EX in expressions.Keys)
         {
             expressions[EX].compileTokens();
             expValidity[EX.ToString()] = expressions[EX].GenerateAKSolver(solver);
@@ -177,7 +169,7 @@ public class ExpressionSet
     public bool IsCompiled()
     {
         bool isCompiled = true;
-        foreach (ExpOptions EX in expressions.Keys)
+        foreach (string EX in expressions.Keys)
         {
             isCompiled &= (expressions[EX].AKExpression != null);
         }
@@ -187,7 +179,7 @@ public class ExpressionSet
     public void PrintOut()
     {
 
-        foreach (ExpOptions ex in expressions.Keys)
+        foreach (string ex in expressions.Keys)
         {
             Debug.Log(ex.ToString());
             expressions[ex].PrintOut();
@@ -448,7 +440,7 @@ public class SerializableExpressionSet
     public string[] rangeKeys;
     public List<SerializableRangePair> rangePairs = new List<SerializableRangePair>();
 
-    public ExpressionSet.ExpOptions[] ExpressionKeys;
+    public string[] ExpressionKeys;
     public List<string> ExpressionValues = new List<string>();
 
     public SerializableExpressionSet(ExpressionSet es)
@@ -459,9 +451,9 @@ public class SerializableExpressionSet
         {
             rangePairs.Add(new SerializableRangePair(es.ranges[key]));
         }
-        ExpressionKeys = new ExpressionSet.ExpOptions[es.expressions.Count];
+        ExpressionKeys = new string[es.expressions.Count];
         es.expressions.Keys.CopyTo(ExpressionKeys, 0);
-        foreach (ExpressionSet.ExpOptions key in ExpressionKeys)
+        foreach (string key in ExpressionKeys)
         {
             ExpressionValues.Add(es.expressions[key].rawText);
         }
