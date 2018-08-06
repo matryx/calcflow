@@ -30,8 +30,11 @@ public class Expressions : MonoBehaviour
     //           but there still should be a bug: check what happens when X isn't visible 
     //           on scroll and add a new expr while that expr with the hidden x is selected
     //
-    // 1 - can't delete vector field equation
     //  
+
+    //DONE:
+    // 1 - fixed delete bug with vec fields
+    // 2 - made it so that action buttons disappear when you cancel a deletion of an expression
 
     void Awake()
     {

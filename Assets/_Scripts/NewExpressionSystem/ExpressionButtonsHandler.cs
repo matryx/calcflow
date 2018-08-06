@@ -25,6 +25,7 @@ public class ExpressionButtonsHandler : MonoBehaviour {
     KeyboardInputResponder responder;
     JoyStickAggregator joyStickAggregator;
 
+    ExpressionActions expressionActions;
     Transform popup;
     float distance = 1;
 
@@ -36,6 +37,7 @@ public class ExpressionButtonsHandler : MonoBehaviour {
         flex.RegisterResponder(responder);
 
         popup = transform.Find("DeleteConfirmation");
+        expressionActions = transform.Find("ActionMenu").GetComponentInChildren<ExpressionActions>();
     }
 
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
@@ -66,6 +68,7 @@ public class ExpressionButtonsHandler : MonoBehaviour {
         }
 
         StartCoroutine(ScaleTo(popup, Vector3.one, Vector3.zero, 0.1f));
+        expressionActions.disableButtons();
     }
 
     void Update() {
