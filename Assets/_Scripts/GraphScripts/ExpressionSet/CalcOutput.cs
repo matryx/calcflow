@@ -59,13 +59,26 @@ public abstract class CalcOutput
         rawText = string.Join("", equation.ToArray());
     }
 
+    public virtual bool IsValid()
+    {
+        try
+        {
+            AK.ValidityChecker.CheckValidity(AK.SolverTools.RemoveWhiteSpace(rawText));
+            return true;
+        }
+        catch (AK.ESSyntaxErrorException ex)
+        {
+            return false;
+        }
+    }
+
     public virtual bool GenerateAKSolver(AK.ExpressionSolver solver)
     {
         try
         {
             AKExpression = solver.SymbolicateExpression(rawText);
         }
-        catch (System.Exception exception)
+        catch (AK.ESSyntaxErrorException ex)
         {
             return false;
         }
