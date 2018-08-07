@@ -17,7 +17,6 @@ public class CustomVectorField : MonoBehaviour
     public static CustomVectorField _instance;
     public Gradient gradient;
 
-    public Transform vPrefab;
     public Material arrowMat;
     GameObject go;
 
@@ -59,7 +58,9 @@ public class CustomVectorField : MonoBehaviour
         startPts = new List<Vector3>();
         offsets = new List<Vector3>();
         solver = new AK.ExpressionSolver();
-        expX = new AK.Expression(); expY = new AK.Expression(); expZ = new AK.Expression();
+        expX = new AK.Expression();
+        expY = new AK.Expression();
+        expZ = new AK.Expression();
         solver.SetGlobalVariable("x", 0); solver.SetGlobalVariable("y", 0); solver.SetGlobalVariable("z", 0);
         varX = solver.GetGlobalVariable("x"); varY = solver.GetGlobalVariable("y"); varZ = solver.GetGlobalVariable("z");
         max_magnitude = 0f;
@@ -73,17 +74,17 @@ public class CustomVectorField : MonoBehaviour
 
     }
 
-    public void CreateExpressionSet()
+    void CreateExpressionSet()
     {
         expressionSets.Add(new ExpressionSet());
     }
 
-    public void UpdateExpressionSet(List<ExpressionSet> expSet)
+    void UpdateExpressionSet(List<ExpressionSet> expSet)
     {
         expressionSets = expSet;
     }
 
-    public void RemoveExpressionSet(int index)
+    void RemoveExpressionSet(int index)
     {
         if (index < expressionSets.Count)
         {
@@ -157,7 +158,7 @@ public class CustomVectorField : MonoBehaviour
         }
     }
 
-    public void DrawVectorField()
+    void DrawVectorField()
     {
         List<Geometry> rawGeom = new List<Geometry>();
 
@@ -253,7 +254,7 @@ public class CustomVectorField : MonoBehaviour
         DrawVectorField();
     }
 
-    private Geometry CreateCylinder(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
+    Geometry CreateCylinder(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
     {
         int vertNum = tessel * 2 + 2; // top & bottom center
         int triNum = tessel * 4; // top circle + bottom circle + triangle strip in the middle
@@ -324,7 +325,7 @@ public class CustomVectorField : MonoBehaviour
         return geom;
     }
 
-    private Geometry CreateCone(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
+    Geometry CreateCone(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
     {
         int vertNum = tessel + 2;
         int triNum = tessel * 2;
@@ -369,7 +370,7 @@ public class CustomVectorField : MonoBehaviour
         return geom;
     }
 
-    private List<Geometry> CombineGeometry(List<Geometry> geoms, int maxVertices = 65535)
+    List<Geometry> CombineGeometry(List<Geometry> geoms, int maxVertices = 65535)
     {
         int combinedIndex = 0;
         List<Geometry> combined = new List<Geometry>();

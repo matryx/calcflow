@@ -16,7 +16,6 @@ public class JoyStickSender : MonoBehaviour {
         controller = GetComponent<VRController>();
         sender = GetComponent<RayCastSender>();
         ConnectController();
-
     }
 
     public void ConnectController()

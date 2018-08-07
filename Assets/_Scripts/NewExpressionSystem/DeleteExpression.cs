@@ -18,6 +18,7 @@ public class DeleteExpression : QuickButton
         base.Start();
         expressions = Expressions._instance;
         popup = transform.parent.parent.parent.Find("DeleteConfirmation");
+        popup.localEulerAngles = Vector3.zero;
         deleteButton = transform.parent;
     }
 
@@ -39,7 +40,7 @@ public class DeleteExpression : QuickButton
         if (!popup.gameObject.activeSelf)
         {
             popup.gameObject.SetActive(true);
-            popup.position = deleteButton.position + new Vector3(0, -0.8f, -0.1f);
+            popup.localPosition = new Vector3(2.644f, -0.823f, 0);
             StartCoroutine(ScaleTo(popup, Vector3.zero, Vector3.one, 0.1f));
         }
     }

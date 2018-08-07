@@ -6,6 +6,7 @@ public interface ExpressionTabInterface
 {
     ExpressionSet getExpSet();
     Transform getExpressionX();
+    Transform getSeparator();
     void setButtonInputColor(Color col);
     void setElementQuadTex(Texture tex);
     void setTextColor(Color c);

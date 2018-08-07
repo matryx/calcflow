@@ -105,37 +105,44 @@ public class FlexButtonComponent : FlexActionableComponent
 
     protected override void StateChanged(int _old, int _new)
     {
-        if (_new == -1)
+        Transform body = transform.Find("Body");
+
+        if (body != null)
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;
-        } else if (_new == 1)
-        {
-            transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
-            string eventName = "Unknown";
-            if (gameObject != null)
+
+            if (_new == -1)
             {
-                eventName = gameObject.name;
+                body.GetComponent<Renderer>().material.color = disabledColor;
             }
-            if (!eventName.Equals("Body"))
+            else if (_new == 1)
             {
-                StatisticsTracking.StartEvent("Button Hover", eventName);
+                body.GetComponent<Renderer>().material.color = hoveringColor;
+                string eventName = "Unknown";
+                if (gameObject != null)
+                {
+                    eventName = gameObject.name;
+                }
+                if (!eventName.Equals("Body"))
+                {
+                    StatisticsTracking.StartEvent("Button Hover", eventName);
+                }
             }
-        }
-        else if (_new == 2)
-        {
-            transform.Find("Body").GetComponent<Renderer>().material.color = selectedColor;
-        }
-        else
-        {
-            transform.Find("Body").GetComponent<Renderer>().material.color = passiveColor;
-            string eventName = "Unknown";
-            if (gameObject != null)
+            else if (_new == 2)
             {
-                eventName = gameObject.name;
+                body.GetComponent<Renderer>().material.color = selectedColor;
             }
-            if (!eventName.Equals("Body") && _old == 1)
+            else
             {
-                StatisticsTracking.EndEvent("Button Hover", eventName);
+                body.GetComponent<Renderer>().material.color = passiveColor;
+                string eventName = "Unknown";
+                if (gameObject != null)
+                {
+                    eventName = gameObject.name;
+                }
+                if (!eventName.Equals("Body") && _old == 1)
+                {
+                    StatisticsTracking.EndEvent("Button Hover", eventName);
+                }
             }
         }
     }

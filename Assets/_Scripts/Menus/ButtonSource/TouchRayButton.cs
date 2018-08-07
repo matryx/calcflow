@@ -29,8 +29,9 @@ public class TouchRayButton : Button {
     }
 
 
-    private void Update()
+    private new void Update()
     {
+        base.Update();
         if (GetComponent<RayCastButton>() == null)
             gameObject.AddComponent<RayCastButton>();
         if (GetComponent<TouchButton>() == null)

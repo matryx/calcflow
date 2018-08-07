@@ -107,7 +107,7 @@ public class CalcInput : MonoBehaviour
 
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
-                { 
+                {
                     //prevents typing of letters when a variable body is selected
                     if (expressions.getSelectedBody() && expressions.getSelectedBody().isVariable())
                     {
@@ -119,11 +119,10 @@ public class CalcInput : MonoBehaviour
                         break;
                     }
 
-                    if (calcManager.letterPressed(buttonID))
-                    {
-                        if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
-                        variableShortcut.recordVarPress(buttonID);
-                    }
+                    calcManager.letterPressed(buttonID);
+
+                    if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
+                    variableShortcut.recordVarPress(buttonID);
                 }
 
                 currExpression.tokens.Insert(index, buttonID);

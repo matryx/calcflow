@@ -14,6 +14,8 @@ public class VecFieldManager : CalculatorManager
     PresetMenu presetMenu;
     SaveLoadMenu saveLoadMenu;
     OutputManager outputManager;
+    
+    public FlowLineParticles flowline;
 
     //public bool updateOverlay = false;
     //internal bool toExport = false;
@@ -47,6 +49,7 @@ public class VecFieldManager : CalculatorManager
         //saveLoadMenu.Initialize(this);
 
         ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback);
+        flowline = FlowLineParticles._instance;
 
         //if (connectedMenus.particleAnimationSettings != null)
         //    connectedMenus.particleAnimationSettings.Initialize(this);
@@ -74,8 +77,6 @@ public class VecFieldManager : CalculatorManager
         inputReceived = true;
     }
 
-    public FlowLineParticles flowline;
-
     void Update()
     {
         if (inputReceived)
@@ -95,6 +96,8 @@ public class VecFieldManager : CalculatorManager
 
             if (flowline != null)
             {
+                flowline.t_min = expressionSet.GetRange("t").Min.expression;
+                flowline.t_max = expressionSet.GetRange("t").Max.expression;
                 flowline.ForceUpdate();
             }
         }

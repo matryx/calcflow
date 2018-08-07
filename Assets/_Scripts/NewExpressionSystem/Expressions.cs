@@ -6,7 +6,7 @@ using Extensions;
 public class Expressions : MonoBehaviour
 {
     CalculatorManager calcManager;
-
+    
     Scroll paramScroll, vecFieldScroll, constantScroll;
     public static Expressions _instance;
     ExpressionSet selectedExpSet;
@@ -17,24 +17,21 @@ public class Expressions : MonoBehaviour
     public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
-    // 1 - add flowline object
+    // 1 - speed up scroll
+    // 2 - refactor adding expressions
+    // 3 - more debugging
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
 
     //BUGS:
-    // 1 - creating empty game object everytime a letter is pressed
-    // 2 - scroll bug? when adding expressions and not at top of page, UI gets broken
-    //   - NOTE: pretty sure I already fixed this but need a headset to test
-    //           but there still should be a bug: check what happens when X isn't visible 
-    //           on scroll and add a new expr while that expr with the hidden x is selected
-    //
-    //  
+    // * - creating empty game object everytime a letter is pressed
+    // 
 
     //DONE:
-    // 1 - fixed delete bug with vec fields
-    // 2 - made it so that action buttons disappear when you cancel a deletion of an expression
+    // 1 - flowline object added, works completely with parametric graphs
+    // 2 - fixed all bugs with adding expressions
 
     void Awake()
     {

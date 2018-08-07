@@ -135,6 +135,16 @@ public class Scroll : MonoBehaviour
         return scrollBarPlacement;
     }
 
+    public int getLowestVisIndex()
+    {
+        return lowestVisIndex;
+    }
+
+    public int getHighestVisIndex()
+    {
+        return highestVisIndex;
+    }
+
     public void setUpMenu()
     {
         if (setup) return;
@@ -230,6 +240,12 @@ public class Scroll : MonoBehaviour
     {
         if (objects == null) objects = new List<Transform>();
 
+        //TODO: NEED TO HANDLE THIS
+        if (atIndex < lowestVisIndex)
+        {
+            atIndex += objs.Count;
+        }
+
         if (atIndex < 0 || atIndex > objects.Count)
         {
             print("INDEX " + atIndex + " IS OUT OF RANGE OF SCROLL OBJECTS");
@@ -273,6 +289,11 @@ public class Scroll : MonoBehaviour
     public int getIndex(Transform obj)
     {
         return objects.IndexOf(obj);
+    }
+
+    public Transform getObj(int ind)
+    {
+        return objects[ind];
     }
 
     private void placeObject(Transform obj, int ind, bool deleting)

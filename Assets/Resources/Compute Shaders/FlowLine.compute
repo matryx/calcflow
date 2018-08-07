@@ -1,0 +1,23 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel None
+
+// Tells compute shader how to read buffer
+struct Particle
+{
+	float3 position;
+	float3 velocity;
+	float4 color;
+};
+
+// Particle data shared with the shader
+RWStructuredBuffer<Particle> particles;
+StructuredBuffer<Particle> dest;
+
+[numthreads(256, 1, 1)]
+void None(uint3 id : SV_DispatchThreadID)
+{
+	int i = id.x;
+	particles[i].position = dest[i].position;
+	particles[i].velocity = (float3) 0;
+	particles[i].color = dest[i].color;
+}

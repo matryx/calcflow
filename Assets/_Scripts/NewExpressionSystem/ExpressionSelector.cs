@@ -13,8 +13,11 @@ public class ExpressionSelector : QuickButton
     private VecFieldManager vecFieldManager;
     Transform xButton;
 
-    List<string> min = new List<string>();
-    List<string> max = new List<string>();
+    List<string> min;
+    List<string> max;
+
+    List<string> tmin;
+    List<string> tmax;
 
     protected override void Start()
     {
@@ -30,9 +33,10 @@ public class ExpressionSelector : QuickButton
 
         joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
 
-        min.Add("-");
-        min.Add("9");
-        max.Add("9");
+        min = new List<string> { "-", "9" };
+        max = new List<string> { "9" };
+        tmin = new List<string> { "-", "5", "0" };
+        tmax = new List<string> { "5", "0" };
     }
 
     private void addForwarders(Transform obj)
@@ -100,15 +104,36 @@ public class ExpressionSelector : QuickButton
         }
     }
 
+    //TODO: refactor
     private void addExpressionToScroll(List<Transform> toAdd)
     {
         Transform prevXExpression = null;
-        int startingIndex = 0;
+        Transform prevSeparator = null;
+        int lowestVisIndex = thisScroll.getLowestVisIndex();
+        int startingIndex = lowestVisIndex;
 
         if (expressions.getSelectedExpr())
         {
             prevXExpression = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getExpressionX();
             startingIndex = thisScroll.getIndex(prevXExpression);
+
+            if (startingIndex < lowestVisIndex)
+            {
+                prevSeparator = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getSeparator();
+                startingIndex = thisScroll.getIndex(prevSeparator) + 1;
+            }
+        }
+        else
+        {
+            if (thisScroll.getScrollObjectCount() > 0 && !thisScroll.getObj(startingIndex).name.Contains("Button_X"))
+            {
+                while (!thisScroll.getObj(startingIndex).name.Contains("Sep"))
+                {
+                    startingIndex += 1;
+                }
+
+                startingIndex += 1;
+            }
         }
 
         thisScroll.addToScroll(toAdd, null, startingIndex);

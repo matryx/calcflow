@@ -8,6 +8,7 @@ public class FlowLineParticles : MonoBehaviour
 {
 
     public CustomVectorField vectorField;
+    public static FlowLineParticles _instance;
 
     AK.ExpressionSolver solver;
     AK.Expression expX, expY, expZ;
@@ -15,7 +16,7 @@ public class FlowLineParticles : MonoBehaviour
     string currExpX, currExpY, currExpZ;
     Vector3 currLocalPos;
     public string t_min, t_max;
-    float tmin, tmax;
+    bool initialized;
 
     //ParticleSystem shuriken;
     //List<ParticleSystem.Particle> points;
@@ -39,7 +40,6 @@ public class FlowLineParticles : MonoBehaviour
     }
 
     private Particle[] particles;
-    private Particle[] source;
     private Particle[] dest;
     private float animProgress;
     public float particleSize = 0.05f;
@@ -48,7 +48,6 @@ public class FlowLineParticles : MonoBehaviour
     public ComputeShader particleAnimation;
     private Material particleMaterial;
     private ComputeBuffer pBuffer;
-    private ComputeBuffer sBuffer;
     private ComputeBuffer dBuffer;
     public Transform vfTransform;
 
@@ -58,34 +57,23 @@ public class FlowLineParticles : MonoBehaviour
     private int particleCount;
     private int threadGroups;
 
-    public enum ParticleEffectList
-    {
-        None, Gravity, Lerp, SmoothLerp, Explode, Swirl
-    }
-    private string[] kernels =
-    {
-        "None", "Gravity", "Lerp",
-        "SmoothLerp", "Explode", "Swirl"
-    };
-    public ParticleEffectList particleEffect = ParticleEffectList.None;
+
     [Range(0.1f, 2.0f)] public float effectStrength = 2.0f;
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         //referencePoint = GetComponent<ConstraintGrabbable>();
         //shuriken = GetComponent<ParticleSystem>();
         //points = new List<ParticleSystem.Particle>();
         positions = new SortedDictionary<int, Vector3>();
-        //InitializeParticleSystem();
         solver = new AK.ExpressionSolver();
         expX = new AK.Expression();
         expY = new AK.Expression();
         expZ = new AK.Expression();
 
         sampling = null;
-
-        SamplePoints();
+        _instance = this;
     }
 
     Coroutine sampling;
@@ -96,8 +84,17 @@ public class FlowLineParticles : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (t_min == "")
+        {
+            t_min = "0";
+        }
+        if (t_max == "")
+        {
+            t_max = "0";
+        }
+
         transform.position = referencePoint.transform.position;
-        
+
         if ((currLocalPos != referencePoint.lastLocalPos
             || currExpX != vectorField.expressionX
             || currExpY != vectorField.expressionY
@@ -110,7 +107,7 @@ public class FlowLineParticles : MonoBehaviour
             thread.Start();
         }
 
-        if(need_final_update && thread_finished)
+        if (need_final_update && thread_finished)
         {
             Thread thread = new Thread(() => SamplePoints());
             need_final_update = false;
@@ -118,9 +115,9 @@ public class FlowLineParticles : MonoBehaviour
             thread.IsBackground = true;
             thread.Start();
         }
-        
 
-        if(last_grab_state == true && referencePoint.IsGrabbed == false)
+
+        if (last_grab_state == true && referencePoint.IsGrabbed == false)
         {
             need_final_update = true;
         }
@@ -136,15 +133,14 @@ public class FlowLineParticles : MonoBehaviour
 
         animProgress = Mathf.Clamp(animProgress + effectStrength * 0.005f, 0, 1);
 
-        int kID = particleAnimation.FindKernel(kernels[(int)particleEffect]);
-        particleAnimation.SetFloat("animProgress", animProgress);
-        particleAnimation.SetFloat("strength", effectStrength);
-        particleAnimation.SetFloat("time", Time.time);
+        int kID = particleAnimation.FindKernel("None");
         particleAnimation.Dispatch(kID, threadGroups, 1, 1);
     }
 
     void OnRenderObject()
     {
+        if (!initialized) return;
+
         particleMaterial.SetPass(0);
         particleMaterial.SetVector("_size", particleSize * transform.lossyScale);
         particleMaterial.SetVector("_worldPos", transform.position);
@@ -165,12 +161,24 @@ public class FlowLineParticles : MonoBehaviour
     int thread_num;
     void SamplePoints()
     {
+        float tmin;
+        float tmax;
+
         Vector3 start = referencePoint.lastLocalPos;
         //lck = new object();
         //thread_num = SystemInfo.processorCount;
 
         //thread_num = 1;
         //thread_num = (thread_num > 2) ? 2 : thread_num;
+
+        if (t_min == "")
+        {
+            t_min = "0";
+        }
+        if (t_max == "")
+        {
+            t_max = "0";
+        }
 
         tmin = (float)solver.EvaluateExpression(t_min);
         tmin = (tmin > 0) ? 0 : tmin;
@@ -239,19 +247,19 @@ public class FlowLineParticles : MonoBehaviour
         //}
 
         Vector3 curr = start;
-        for(int i = 0; i < positiveCount; i++)
+        for (int i = 0; i < positiveCount; i++)
         {
             curr = RK4(curr, time_step);
             positions.Add(i + 1, curr);
         }
         curr = start;
-        for(int i = 0; i < negativeCount; i++)
+        for (int i = 0; i < negativeCount; i++)
         {
             curr = RK4(curr, -time_step);
             positions.Add(-i, curr);
         }
 
-        if(positions.Count != lastCount)
+        if (positions.Count != lastCount)
         {
             InitializeParticleSystem();
         }
@@ -265,18 +273,18 @@ public class FlowLineParticles : MonoBehaviour
     void ThreadedSampling(int TID, Vector3 startPos, float step, float positiveCount, float negativeCount)
     {
         Vector3 curr = startPos;
-        for(int i = 0; i < positiveCount; i++)
+        for (int i = 0; i < positiveCount; i++)
         {
             curr = ThreadedRK4(TID, curr, step);
             lock (lck)
             {
                 //curr = RK4(curr, step);
                 //positions.AddFirst(curr);
-                positions.Add(TID+thread_num*(i + 1), curr);
+                positions.Add(TID + thread_num * (i + 1), curr);
             }
         }
         curr = startPos;
-        for(int i = 0; i < negativeCount; i++)
+        for (int i = 0; i < negativeCount; i++)
         {
             curr = ThreadedRK4(TID, curr, -step);
             lock (lck)
@@ -339,43 +347,14 @@ public class FlowLineParticles : MonoBehaviour
                 color = Color.white
             };
         }
-        //pBuffer.GetData(particles);
-        //sBuffer.SetData(particles);
-        //dBuffer.SetData(dest);
     }
 
-    /* outdated because threading shuffled the order of particles */
-    //void HighlightParticle()
-    //{
-    //    if (particles == null)
-    //    {
-    //        return;
-    //    }
-    //    for (int i = 0; i < particles.Length; i++)
-    //    {
-    //        if (i >= currHighlight && i < currHighlight + 10)
-    //        {
-    //            particles[i].startColor = Color.red;
-    //        }
-    //        else
-    //        {
-    //            particles[i].startColor = Color.white;
-    //        }
-    //        //points[i].startColor = Color.red;
-    //    }
-    //    shuriken.SetParticles(particles, particles.Length);
-    //    currHighlight += 1;
-    //    if (currHighlight > particles.Length)
-    //    {
-    //        currHighlight = 0f;
-    //    }
-    //}
     void Highlight()
     {
         if (dest == null) return;
-        for(int i = 0; i < dest.Length; i++)
+        for (int i = 0; i < dest.Length; i++)
         {
-            if(i > currHighlight && i < currHighlight + 40)
+            if (i > currHighlight && i < currHighlight + 40)
             {
                 dest[i].color = Color.red;
             }
@@ -384,13 +363,12 @@ public class FlowLineParticles : MonoBehaviour
                 dest[i].color = Color.white;
             }
         }
-        currHighlight+=4;
+        currHighlight += 4;
         if (currHighlight > dest.Length)
         {
             currHighlight = 0;
         }
         pBuffer.GetData(particles);
-        sBuffer.SetData(particles);
         dBuffer.SetData(dest);
     }
 
@@ -402,7 +380,6 @@ public class FlowLineParticles : MonoBehaviour
         int l = particleCount;
 
         particles = new Particle[l];
-        source = new Particle[l];
         dest = new Particle[l];
 
         for (int i = 0; i < l; i++)
@@ -412,32 +389,23 @@ public class FlowLineParticles : MonoBehaviour
             Color col = new Color(1, 1, 1);
 
             particles[i].color = col;
-            source[i].color = col;
             dest[i].color = col;
 
             particles[i].position = pos;
-            source[i].position = pos;
             dest[i].position = pos;
         }
 
         pBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
-        sBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
         dBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
 
         pBuffer.SetData(particles);
-        sBuffer.SetData(source);
         dBuffer.SetData(dest);
-
-        foreach (string effect in kernels)
-        {
-            int kID = particleAnimation.FindKernel(effect);
-            particleAnimation.SetBuffer(kID, "particles", pBuffer);
-            particleAnimation.SetBuffer(kID, "source", sBuffer);
-            particleAnimation.SetBuffer(kID, "dest", dBuffer);
-        }
-
+        int kID = particleAnimation.FindKernel("None");
+        particleAnimation.SetBuffer(kID, "particles", pBuffer);
+        particleAnimation.SetBuffer(kID, "dest", dBuffer);
         particleMaterial = new Material(particleShader);
         particleMaterial.SetTexture("_Sprite", particleSprite);
         particleMaterial.SetBuffer("particles", pBuffer);
+        initialized = true;
     }
 }

@@ -52,11 +52,6 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void setSeparator(Transform sep)
-    {
-        separator = sep;
-    }
-
     public ExpressionActions getExpActions()
     {
         return expActions;
@@ -137,6 +132,16 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         return expressionX;
     }
 
+    public void setSeparator(Transform sep)
+    {
+        separator = sep;
+    }
+
+    public Transform getSeparator()
+    {
+        return separator;
+    }
+
     public ExpressionSet getExpSet()
     {
         return expSet;
@@ -187,6 +192,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         var.SetParent(variableClumps[variableClumps.Count - 1]);
         var.localPosition = new Vector3(xPos, 0, 0);
         var.localScale = Vector3.one;
+        var.localEulerAngles = Vector3.zero;
         var.gameObject.SetActive(true);
     }
 
@@ -206,6 +212,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         var.SetParent(newVarClump);
         var.localPosition = new Vector3(-xPos, 0, 0);
         var.localScale = Vector3.one;
+        var.localEulerAngles = Vector3.zero;
         var.gameObject.SetActive(true);
     }
 

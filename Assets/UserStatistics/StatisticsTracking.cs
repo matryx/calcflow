@@ -41,7 +41,7 @@ namespace Calcflow.UserStatistics
                     inited = true;
 
                     // Log
-                    Debug.Log("Starting user statistics");
+                    //Debug.Log("Starting user statistics");
 
                     // Generate unique session id
                     session = Guid.NewGuid().ToString();
@@ -64,7 +64,7 @@ namespace Calcflow.UserStatistics
                     tracking = true;
 
                     // Log
-                    Debug.Log("Initialized tracking objects");
+                    //Debug.Log("Initialized tracking objects");
 
                     // Mac addresses
                     var macAddresses =
@@ -80,7 +80,7 @@ namespace Calcflow.UserStatistics
                     user = host + ":" + mac;
 
                     // Log
-                    Debug.Log("Read user infos");
+                    //Debug.Log("Read user infos");
 
                     // Machine details
                     var machine = new Dictionary<string, object>();
@@ -93,12 +93,12 @@ namespace Calcflow.UserStatistics
                     StatsIdentify(user, host, machine);
 
                     // Log
-                    Debug.Log("Start the tracking");
+                    //Debug.Log("Start the tracking");
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("Could not initialize user tracking: " + e);
+                //Debug.LogError("Could not initialize user tracking: " + e);
             }
         }
 
@@ -112,7 +112,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                Debug.Log("EventTracking Instant: " + eventType + " -> " + eventName);
+                //Debug.Log("EventTracking Instant: " + eventType + " -> " + eventName);
                 // Build props
                 var props = EventProperties(eventName, "Unique", extras);
                 // Send stats
@@ -125,7 +125,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                // Debug.Log("EventTracking Start: " + eventType + " -> " + eventName);
+                // //Debug.Log("EventTracking Start: " + eventType + " -> " + eventName);
                 // Build props
                 var props = EventProperties(eventName, "Start", extras);
                 // Event key
@@ -155,7 +155,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                //Debug.Log("EventTracking End: " + eventType + " -> " + eventName);
+                ////Debug.Log("EventTracking End: " + eventType + " -> " + eventName);
                 // Build props
                 var props = EventProperties(eventName, "End", extras);
                 // Event key
@@ -192,7 +192,7 @@ namespace Calcflow.UserStatistics
             SafeStatsCall(delegate ()
             {
                 // Log
-                //Debug.Log("EventTracking, Clearing pending started events");
+                ////Debug.Log("EventTracking, Clearing pending started events");
                 // Fetch non finished events
                 var keys = new List<string>();
                 lock (startTimes)
@@ -325,7 +325,7 @@ namespace Calcflow.UserStatistics
             }
             catch (Exception e)
             {
-                Debug.LogError("Could not track event: " + e);
+                //Debug.LogError("Could not track event: " + e);
             }
         }
 

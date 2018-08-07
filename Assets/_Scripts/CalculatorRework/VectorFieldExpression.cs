@@ -52,11 +52,6 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
         range = r;
     }
 
-    public void setSeparator(Transform sep)
-    {
-        separator = sep;
-    }
-
     public void setExpressionX(Transform e)
     {
         expressionX = e;
@@ -65,6 +60,16 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
     public Transform getExpressionX()
     {
         return expressionX;
+    }
+
+    public void setSeparator(Transform sep)
+    {
+        separator = sep;
+    }
+
+    public Transform getSeparator()
+    {
+        return separator;
     }
 
     public ExpressionSet getExpSet()

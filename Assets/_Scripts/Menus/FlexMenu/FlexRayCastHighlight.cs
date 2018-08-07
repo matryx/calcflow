@@ -9,10 +9,14 @@ public class FlexRayCastHighlight : MonoBehaviour {
     void Start()
     {
         flexActionableComponent = GetComponent<FlexActionableComponent>();
-        RayCastReceiver receiver = transform.Find("Body").GetComponent<RayCastReceiver>();
+        Transform body = transform.Find("Body");
 
-        receiver.OnRayCastStart += OnRayCastStart;
-        receiver.OnRayCastEnd += OnRayCastEnd;
+        if  (body!=null)
+        {
+            RayCastReceiver receiver = body.GetComponent<RayCastReceiver>();
+            receiver.OnRayCastStart += OnRayCastStart;
+            receiver.OnRayCastEnd += OnRayCastEnd;
+        }
     }
 
     void OnRayCastEnd(RayCastSender sender)

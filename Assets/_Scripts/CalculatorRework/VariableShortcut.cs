@@ -11,7 +11,7 @@ public class VariableShortcut : MonoBehaviour
     List<string> varsPressed = new List<string>();
     Transform buttonToRemove;
 
-    int maxLength = 5;
+    int maxLength = 6;
 
     void Start()
     {
