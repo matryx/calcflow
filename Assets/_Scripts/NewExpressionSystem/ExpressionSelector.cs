@@ -7,17 +7,14 @@ public class ExpressionSelector : QuickButton
 {
     Scroll thisScroll;
     Expressions expressions;
-    JoyStickAggregator joyStickAggregator;
-    Transform paramPanel, vecPanel, constPanel;
+    Transform paramPanel, vecPanel;
+    //Transform constPanel;
     private ParametricManager paramManager;
     private VecFieldManager vecFieldManager;
     Transform xButton;
 
     List<string> min;
     List<string> max;
-
-    List<string> tmin;
-    List<string> tmax;
 
     protected override void Start()
     {
@@ -28,20 +25,18 @@ public class ExpressionSelector : QuickButton
 
         paramPanel = transform.parent.parent.Find("ParametrizationPanel");
         vecPanel = transform.parent.parent.Find("VectorFieldPanel");
-        constPanel = transform.parent.parent.Find("ConstantPanel");
+        //constPanel = transform.parent.parent.Find("ConstantPanel");
         thisScroll = expressions.getScroll(Expressions.ExpressionType.PARAMET);
-
-        joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
 
         min = new List<string> { "-", "9" };
         max = new List<string> { "9" };
-        tmin = new List<string> { "-", "5", "0" };
-        tmax = new List<string> { "5", "0" };
     }
 
     private void addForwarders(Transform obj)
     {
-        JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>();
+        JoyStickAggregator joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
+        JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>(true);
+
         foreach (JoyStickForwarder j in forwarders)
         {
             joyStickAggregator.AddForwarder(j);
@@ -50,10 +45,10 @@ public class ExpressionSelector : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        List<Transform> toAdd = setToAdd();
         Expressions.ExpressionType panelType = setPanelType();
-
         thisScroll = expressions.getScroll(panelType);
+
+        List<Transform> toAdd = setToAdd();
         addExpressionToScroll(toAdd);
 
         if (xButton)
@@ -73,10 +68,10 @@ public class ExpressionSelector : QuickButton
         {
             return createVecExpression();
         }
-        else if (constPanel.gameObject.activeSelf)
-        {
-            return createConstant();
-        }
+        //else if (constPanel.gameObject.activeSelf)
+        //{
+        //    return createConstant();
+        //}
         else
         {
             return null;
@@ -93,10 +88,10 @@ public class ExpressionSelector : QuickButton
         {
             return Expressions.ExpressionType.VECFIELD;
         }
-        else if (constPanel.gameObject.activeSelf)
-        {
-            return Expressions.ExpressionType.CONSTANT;
-        }
+        //else if (constPanel.gameObject.activeSelf)
+        //{
+        //    return Expressions.ExpressionType.CONSTANT;
+        //}
         else
         {
             Debug.Log("<color=red>PANEL TYPE NOT SET</color>");
@@ -104,22 +99,19 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    //TODO: refactor
     private void addExpressionToScroll(List<Transform> toAdd)
     {
-        Transform prevXExpression = null;
-        Transform prevSeparator = null;
         int lowestVisIndex = thisScroll.getLowestVisIndex();
         int startingIndex = lowestVisIndex;
 
         if (expressions.getSelectedExpr())
         {
-            prevXExpression = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getExpressionX();
+            Transform prevXExpression = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getExpressionX();
             startingIndex = thisScroll.getIndex(prevXExpression);
 
             if (startingIndex < lowestVisIndex)
             {
-                prevSeparator = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getSeparator();
+                Transform prevSeparator = expressions.getSelectedExpr().gameObject.GetInterface<ExpressionTabInterface>().getSeparator();
                 startingIndex = thisScroll.getIndex(prevSeparator) + 1;
             }
         }
@@ -147,7 +139,6 @@ public class ExpressionSelector : QuickButton
         GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
         param.GetComponent<ParametricExpression>().Initialize();
         expressionSet = param.GetComponent<ParametricExpression>().getExpSet();
-        addForwarders(param.transform);
 
         if (!paramManager) paramManager = ParametricManager._instance;
         paramManager.AddExpressionSet(expressionSet);
@@ -182,6 +173,7 @@ public class ExpressionSelector : QuickButton
                     gchild.GetComponentInChildren<ExpressionBody>().setManager(ParametricManager._instance);
                     gchild.GetComponentInChildren<ExpressionBody>().setExpressionParent(p);
                     gchild.GetComponentInChildren<ExpressionBody>().setPanel(paramPanel);
+                    addForwarders(gchild);
                     pComp.Add(gchild);
                 }
             }
@@ -196,13 +188,13 @@ public class ExpressionSelector : QuickButton
         GameObject vec = Instantiate(Resources.Load("Expressions/VectorFieldExpression", typeof(GameObject))) as GameObject;
         vec.GetComponent<VectorFieldExpression>().Initialize();
         expressionSet = vec.GetComponent<VectorFieldExpression>().getExpSet();
-        addForwarders(vec.transform);
 
         if (!vecFieldManager) vecFieldManager = VecFieldManager._instance;
         vecFieldManager.AddExpressionSet(expressionSet);
         vecSetUp(vec.transform, vecComponents);
 
         Transform var = createVariable(vec.transform);
+        addForwarders(var.transform);
         vecComponents.Add(var.transform);
 
         GameObject sepVec = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
@@ -229,6 +221,7 @@ public class ExpressionSelector : QuickButton
             child.GetComponentInChildren<ExpressionBody>().setManager(VecFieldManager._instance);
             child.GetComponentInChildren<ExpressionBody>().setExpressionParent(vec.transform);
             child.GetComponentInChildren<ExpressionBody>().setPanel(vecPanel);
+            addForwarders(child);
             vComp.Add(child);
         }
     }
@@ -252,31 +245,30 @@ public class ExpressionSelector : QuickButton
         v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("y", min, max);
         v.GetComponent<VectorFieldExpression>().getExpSet().AddRange("z", min, max);
 
-        addForwarders(v.transform);
         return var.transform;
     }
 
-    private List<Transform> createConstant()
-    {
-        List<Transform> constComponents = new List<Transform>();
+    //private List<Transform> createConstant()
+    //{
+    //    List<Transform> constComponents = new List<Transform>();
 
-        GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
-        cons.GetComponent<Constant>().Initialize();
-        cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
-        cons.GetComponentInChildren<ExpressionComponent>().setExpressionParent(cons.transform);
-        cons.GetComponentInChildren<ExpressionComponent>().setPanel(constPanel);
-        addForwarders(cons.transform);
+    //    GameObject cons = Instantiate(Resources.Load("Expressions/ConstantExpression", typeof(GameObject))) as GameObject;
+    //    cons.GetComponent<Constant>().Initialize();
+    //    cons.GetComponent<Constant>().addComponent(cons.transform.Find("Constant"));
+    //    cons.GetComponentInChildren<ExpressionComponent>().setExpressionParent(cons.transform);
+    //    cons.GetComponentInChildren<ExpressionComponent>().setPanel(constPanel);
+    //    addForwarders(cons.transform);
 
-        constComponents.Add(cons.transform.Find("Constant"));
+    //    constComponents.Add(cons.transform.Find("Constant"));
 
-        GameObject sepConst = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
-        addForwarders(sepConst.transform);
-        constComponents.Add(sepConst.transform);
+    //    GameObject sepConst = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+    //    addForwarders(sepConst.transform);
+    //    constComponents.Add(sepConst.transform);
 
-        expressions.addExpr(cons.transform);
+    //    expressions.addExpr(cons.transform);
 
-        return constComponents;
-    }
+    //    return constComponents;
+    //}
 
     protected override void ButtonExitBehavior(GameObject other) { }
 

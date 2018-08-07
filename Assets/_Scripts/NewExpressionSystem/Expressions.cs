@@ -17,9 +17,7 @@ public class Expressions : MonoBehaviour
     public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
-    // 1 - speed up scroll
-    // 2 - refactor adding expressions
-    // 3 - more debugging
+    // 1 - more debugging
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
@@ -28,10 +26,13 @@ public class Expressions : MonoBehaviour
     //BUGS:
     // * - creating empty game object everytime a letter is pressed
     // 
+    // 1 - paramet stopped scrolling and being able to add at some point
+    // 2 - sometimes feedback is only half deselected
+    // 3 - need to make it so that switching back into vec tab selects prev selected vec field
 
     //DONE:
-    // 1 - flowline object added, works completely with parametric graphs
-    // 2 - fixed all bugs with adding expressions
+    // 1 - fixed scroll issue with vec field
+    // 2 - made it so that vec field isn't deselected when you scroll away 
 
     void Awake()
     {

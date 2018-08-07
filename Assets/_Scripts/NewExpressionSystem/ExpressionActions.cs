@@ -42,6 +42,8 @@ public class ExpressionActions : QuickButton
 
     public void disableButtons()
     {
+        if (!menuActive) return;
+
         if (scaleButtonsUp != null) StopCoroutine(scaleButtonsUp);
 
         scaleButtonsDown = ScaleButtonsDown();

@@ -6,6 +6,7 @@ using Extensions;
 public class ExpressionBody : QuickButton
 {
     Expressions expression;
+
     Transform expressionParent;
     Transform panel;
     Transform feedBack;
@@ -13,24 +14,27 @@ public class ExpressionBody : QuickButton
     string title = "X";
     OutputManager outputManager;
     CalcInput calcInput;
+    CalcOutput currVecFieldEq;
+
     ParametricExpression param;
     VectorFieldExpression vec;
+
     [SerializeField]
     CalculatorManager calcManager;
 
     Texture quadShow, quadHide;
     Color grayHide, grayShow;
 
-    private bool thisBodySelected = false;
-    private bool finishedScalingUp = true;
-    private bool finishedScalingDown = true;
-    private bool variable = false;
+    bool thisBodySelected = false;
+    bool finishedScalingUp = true;
+    bool finishedScalingDown = true;
+    bool variable = false;
 
-    private Vector3 idleScale, selectedScale;
+    Vector3 idleScale, selectedScale;
 
-    private IEnumerator scaleUp, scaleDown;
+    IEnumerator scaleUp, scaleDown;
 
-    private void Awake()
+    void Awake()
     {
         calcManager = ParametricManager._instance;
 
@@ -139,6 +143,7 @@ public class ExpressionBody : QuickButton
     {
         if (expression == null) expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         ExpressionBody selectedBody = expression.getSelectedBody();
+
         if (selectedBody)
         {
             TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
@@ -149,7 +154,8 @@ public class ExpressionBody : QuickButton
         }
     }
 
-    private void disableActionButtons(ExpressionBody selectedBody)
+    //TODO: refactor to get rid of param and vec
+    void disableActionButtons(ExpressionBody selectedBody)
     {
         if (selectedBody.getExpressionParent().GetComponent<ParametricExpression>())
         {
@@ -266,14 +272,14 @@ public class ExpressionBody : QuickButton
         {
             obj.gameObject.SetActive(false);
             finishedScalingDown = true;
-        } 
+        }
         else if (end == selectedScale)
         {
             finishedScalingUp = true;
         }
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
         if (feedBack && feedBack.localScale == selectedScale)
         {
@@ -282,13 +288,31 @@ public class ExpressionBody : QuickButton
 
             if (thisBodySelected)
             {
-                ExpressionBody selectedBody = expression.getSelectedBody();
-                TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
-                oldTextInput.text = oldTextInput.text.Replace("_", "");
-                expression.setSelectedExpr(null, null);
-                thisBodySelected = false;
+                if (calcManager == ParametricManager._instance)
+                {
+                    ExpressionBody selectedBody = expression.getSelectedBody();
+                    TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+                    oldTextInput.text = oldTextInput.text.Replace("_", "");
+                    expression.setSelectedExpr(null, null);
+                    thisBodySelected = false;
+                }
+                else
+                {
+                    currVecFieldEq = calcInput.currExpression;
+                }
+
                 calcInput.ChangeOutput(null, calcManager);
             }
+        }
+    }
+
+    void OnEnable()
+    {
+        if (calcManager == VecFieldManager._instance && expression.getSelectedBody() == this)
+        {
+            feedBack.gameObject.SetActive(true);
+            feedBack.localScale = selectedScale;
+            calcInput.ChangeOutput(currVecFieldEq, calcManager);
         }
     }
 
