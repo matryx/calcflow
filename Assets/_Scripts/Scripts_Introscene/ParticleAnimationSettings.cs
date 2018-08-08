@@ -27,47 +27,47 @@ internal class ParticleSettingsResponder : FlexMenu.FlexMenuResponder
         switch (sender.name)
         {
             case "None":
-                paramSurface.particleEffect = CustomParametrizedSurface.ParticleEffectList.None;
+                paramSurface.SetParticleEffect(AnimatedParticleGrapher.ParticleEffectList.None);
                 if (effect != null) effect.SetState(0);
                 effect = sender;
                 break;
             case "Gravity":
-                paramSurface.particleEffect = CustomParametrizedSurface.ParticleEffectList.Gravity;
+                paramSurface.SetParticleEffect(AnimatedParticleGrapher.ParticleEffectList.Gravity);
                 if (effect != null) effect.SetState(0);
                 effect = sender;
                 break;
             case "Lerp":
-                paramSurface.particleEffect = CustomParametrizedSurface.ParticleEffectList.Lerp;
+                paramSurface.SetParticleEffect(AnimatedParticleGrapher.ParticleEffectList.Lerp);
                 if (effect != null) effect.SetState(0);
                 effect = sender;
                 break;
             case "SmoothLerp":
-                paramSurface.particleEffect = CustomParametrizedSurface.ParticleEffectList.SmoothLerp;
+                paramSurface.SetParticleEffect(AnimatedParticleGrapher.ParticleEffectList.SmoothLerp);
                 if (effect != null) effect.SetState(0);
                 effect = sender;
                 break;
             case "Explode":
-                paramSurface.particleEffect = CustomParametrizedSurface.ParticleEffectList.Explode;
+                paramSurface.SetParticleEffect(AnimatedParticleGrapher.ParticleEffectList.Explode);
                 if (effect != null) effect.SetState(0);
                 effect = sender;
                 break;
             case "Swirl":
-                paramSurface.particleEffect = CustomParametrizedSurface.ParticleEffectList.Swirl;
+                paramSurface.SetParticleEffect(AnimatedParticleGrapher.ParticleEffectList.Swirl);
                 if (effect != null) effect.SetState(0);
                 effect = sender;
                 break;
             case "SpeedFast":
-                paramSurface.effectStrength = 2f;
+                paramSurface.SetEffectStrength(2f);
                 if (speed != null) speed.SetState(0);
                 speed = sender;
                 break;
             case "SpeedMed":
-                paramSurface.effectStrength = 1f;
+                paramSurface.SetEffectStrength(1f);
                 if (speed != null) speed.SetState(0);
                 speed = sender;
                 break;
             case "SpeedSlow":
-                paramSurface.effectStrength = 0.5f;
+                paramSurface.SetEffectStrength(0.5f);
                 if (speed != null) speed.SetState(0);
                 speed = sender;
                 break;

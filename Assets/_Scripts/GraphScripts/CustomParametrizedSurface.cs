@@ -11,11 +11,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     List<Particle[]> threadResults = new List<Particle[]>();
     public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
 
-    private List<string> emptyTokens = new List<string>();
     ExpressionSet emptyExprSet;
-
-    private float uMin, uMax;
-    private float vMin, vMax;
 
     #region axis labels
     public AxisLabelManager xAxis;
@@ -25,64 +21,27 @@ public class CustomParametrizedSurface : MonoBehaviour
 
     public float currentScale = 10;
 
-    private struct Particle
-    {
-        public Vector3 position;
-        public Vector3 velocity;
-        public Color color;
-    }
-
-    private Particle[] particles;
-    private Particle[] source;
     private Particle[] dest;
 
-    private float animProgress;
-
-    public float particleSize = 0.05f;
-    public Texture2D particleSprite;
-    public Shader particleShader;
-    public ComputeShader particleAnimation;
-
-    private Material particleMaterial;
-    private ComputeBuffer pBuffer;
-    private ComputeBuffer sBuffer;
-    private ComputeBuffer dBuffer;
-
-    private Coroutine anim;
     private Coroutine setup;
 
-    // size of a particle struct in bytes
-    private const int PARTICLE_SIZE = 2 * 12 + 16;
-    // number of threads for a group
-    private const int GROUP_SIZE = 256;
-
-    private int threadGroups;
-
-    public enum ParticleEffectList
+    public void SetParticleEffect(AnimatedParticleGrapher.ParticleEffectList effect)
     {
-        None, Gravity, Lerp,
-        SmoothLerp, Explode,
-        Swirl
+        AnimatedParticleGrapher._instance.particleEffect = effect;
     }
-    private string[] kernels =
-    {
-        "None", "Gravity", "Lerp",
-        "SmoothLerp", "Explode",
-        "Swirl"
-    };
-    public ParticleEffectList particleEffect = ParticleEffectList.None;
 
-    [Range(0.1f, 2.0f)]
-    public float effectStrength = 2.0f;
+    public void SetEffectStrength(float strength){
+        AnimatedParticleGrapher._instance.effectStrength = strength;
+    }
 
     public int particleCount;
-    public Gradient gradient;
 
     AK.ExpressionSolver solver;
 
     private void Awake()
     {
         _instance = this;
+        List<string> emptyTokens = new List<string>();
         emptyTokens.Add("0");
         emptyExprSet = new ExpressionSet(emptyTokens);
     }
@@ -91,8 +50,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     protected virtual void Start()
     {
         solver = new AK.ExpressionSolver();
-        InitializeParticleSystem();
-        //InitializeCorrespondingPoint();
+        AnimatedParticleGrapher._instance.ChangeParticleCount(particleCount);
     }
 
     public MeshFilter mesh;
@@ -125,81 +83,12 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
         foreach (ExpressionSet expressionSet in expressionSets)
         {
-            tessel.EnqueueEquation(currentScale, expressionSet.GetExpression("X").expression, expressionSet.GetExpression("Y").expression, 
-                                   expressionSet.GetExpression("Z").expression, expressionSet.GetRange("u").Min.Value, 
-                                   expressionSet.GetRange("u").Max.Value, expressionSet.GetRange("v").Min.Value, 
+            tessel.EnqueueEquation(currentScale, expressionSet.GetExpression("X").expression, expressionSet.GetExpression("Y").expression,
+                                   expressionSet.GetExpression("Z").expression, expressionSet.GetRange("u").Min.Value,
+                                   expressionSet.GetRange("u").Max.Value, expressionSet.GetRange("v").Min.Value,
                                    expressionSet.GetRange("v").Max.Value);
         }
     }
-
-    void InitializeParticleSystem()
-    {
-        threadGroups = Mathf.CeilToInt((float)particleCount / GROUP_SIZE);
-
-        int l = particleCount;
-
-        particles = new Particle[l];
-        source = new Particle[l];
-        dest = new Particle[l];
-
-        for (int i = 0; i < l; i++)
-        {
-            Vector3 pos = UnityEngine.Random.onUnitSphere;
-            Color col = new Color(1, 1, 1);
-
-            particles[i].color = col;
-            source[i].color = col;
-            dest[i].color = col;
-
-            particles[i].position = pos;
-            source[i].position = pos;
-            dest[i].position = pos;
-        }
-
-        pBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
-        sBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
-        dBuffer = new ComputeBuffer(l, PARTICLE_SIZE);
-
-        pBuffer.SetData(particles);
-        sBuffer.SetData(source);
-        dBuffer.SetData(dest);
-
-        foreach (string effect in kernels)
-        {
-            int kID = particleAnimation.FindKernel(effect);
-            particleAnimation.SetBuffer(kID, "particles", pBuffer);
-            particleAnimation.SetBuffer(kID, "source", sBuffer);
-            particleAnimation.SetBuffer(kID, "dest", dBuffer);
-        }
-
-        particleMaterial = new Material(particleShader);
-        particleMaterial.SetTexture("_Sprite", particleSprite);
-        particleMaterial.SetBuffer("particles", pBuffer);
-    }
-
-    void FixedUpdate()
-    {
-
-        animProgress = Mathf.Clamp(animProgress + effectStrength * 0.005f, 0, 1);
-        if (particleEffect == ParticleEffectList.None) animProgress = 1;
-        int kID = particleAnimation.FindKernel(kernels[(int)particleEffect]);
-        particleAnimation.SetFloat("animProgress", animProgress);
-        particleAnimation.SetFloat("strength", effectStrength);
-        particleAnimation.SetFloat("time", Time.time);
-        particleAnimation.Dispatch(kID, threadGroups, 1, 1);
-    }
-
-    void OnRenderObject()
-    {
-        particleMaterial.SetPass(0);
-        particleMaterial.SetVector("_size", particleSize * transform.lossyScale);
-        particleMaterial.SetVector("_worldPos", transform.position);
-
-        var m = Matrix4x4.TRS(Vector3.zero, transform.rotation, transform.lossyScale);
-        particleMaterial.SetMatrix("_worldRot", m);
-        Graphics.DrawProcedural(MeshTopology.Points, particleCount);
-    }
-
 
     /// <summary>
     /// runs the grapher.
@@ -207,14 +96,6 @@ public class CustomParametrizedSurface : MonoBehaviour
     public void GenerateParticles()
     {
         if (setup != null) StopCoroutine(setup);
-
-        //foreach (ExpressionSet es in expressionSets)
-        //{
-        //    if (es.GetRangeCount() == 0) return;
-        //}
-
-        //if (!expressionSets.Contains(emptyExprSet))
-        //    expressionSets.Add(emptyExprSet);
 
         if (expressionSets.Count == 0)
         {
@@ -230,7 +111,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     public void ChangeParticleCount(int count)
     {
         particleCount = count;
-        InitializeParticleSystem();
+        AnimatedParticleGrapher._instance.ChangeParticleCount(particleCount);
         GenerateParticles();
     }
 
@@ -242,15 +123,12 @@ public class CustomParametrizedSurface : MonoBehaviour
     List<Particle> dest_list = new List<Particle>();
     int particlesPerES;
 
-    bool calculating = false;
 
     IEnumerator SetupParticles()
     {
         calculating = true;
         lck = new object();
         maxRange = Mathf.NegativeInfinity;
-
-        if (anim != null) StopCoroutine(anim);
 
         int totalFrames = 30;
         int defaultParticlesPerES = particleCount / expressionSets.Count;
@@ -328,7 +206,9 @@ public class CustomParametrizedSurface : MonoBehaviour
 
         ScaleCartesian();
 
-        MoveParticles();
+        calculating = false;
+
+        AnimatedParticleGrapher._instance.PlotParticles(dest);
     }
 
     private void CombineResults(int missingParticles)
@@ -365,23 +245,14 @@ public class CustomParametrizedSurface : MonoBehaviour
         currentScale = (maxRange == 0) ? 0 : 10 / maxRange;
     }
 
-    private void MoveParticles()
-    {
-        pBuffer.GetData(particles);
-        sBuffer.SetData(particles);
-        dBuffer.SetData(dest);
-        animProgress = 0;
-        calculating = false;
-    }
-
-    internal void ThreadedEvaluate(List<int[]> samples, ExpressionSet expressionSet, int TID)
+    void ThreadedEvaluate(List<int[]> samples, ExpressionSet expressionSet, int TID)
     {
         Dictionary<string, AK.Variable> vars = new Dictionary<string, AK.Variable>();
         int depth = expressionSet.GetRangeCount();
         int width = (int)Mathf.Pow(particlesPerES, 1f / (float)depth);
         System.Random rand = new System.Random();
 
-        ThreadHelper threadHelper = SetupSolver(expressionSet);
+        AKSolverPackage threadHelper = SetupSolver(expressionSet);
 
         Dictionary<int, string> indexedParam = new Dictionary<int, string>();
         int k = 0;
@@ -436,12 +307,12 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
     }
 
-    internal struct ThreadHelper
+    private struct AKSolverPackage
     {
-        internal Dictionary<string, float> parameterMin;
-        internal Dictionary<string, float> parameterMax;
-        internal List<AK.Expression> expressionList;
-        internal AK.ExpressionSolver solver;
+        public Dictionary<string, float> parameterMin;
+        public Dictionary<string, float> parameterMax;
+        public List<AK.Expression> expressionList;
+        public AK.ExpressionSolver solver;
 
     }
 
@@ -475,9 +346,9 @@ public class CustomParametrizedSurface : MonoBehaviour
 
     public float exclusiveModifier = 0.01f;
 
-    private ThreadHelper SetupSolver(ExpressionSet es)
+    private AKSolverPackage SetupSolver(ExpressionSet es)
     {
-        ThreadHelper threadHelper = new ThreadHelper();
+        AKSolverPackage threadHelper = new AKSolverPackage();
         threadHelper.parameterMin = new Dictionary<string, float>();
         threadHelper.parameterMax = new Dictionary<string, float>();
         threadHelper.solver = new AK.ExpressionSolver();
@@ -510,9 +381,9 @@ public class CustomParametrizedSurface : MonoBehaviour
 
         return threadHelper;
     }
-
+    bool calculating = false;
     public bool isGraphing()
     {
-        return !(animProgress == 1 || calculating);
+        return !(calculating || AnimatedParticleGrapher._instance.isGraphing());
     }
 }
