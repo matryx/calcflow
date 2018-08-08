@@ -13,11 +13,16 @@ public class Expressions : MonoBehaviour
     [SerializeField]
     Transform selectedExpression;
     ExpressionBody selectedBody;
+
+    ExpressionBody selectedVecBody;
+
     List<Transform> expressions;
     public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
     //TODO:
     // 1 - more debugging
+    // 2 - make arrow buttons images
+    // 3 - add errorpopup when typing variables into vec expression
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
@@ -26,13 +31,14 @@ public class Expressions : MonoBehaviour
     //BUGS:
     // * - creating empty game object everytime a letter is pressed
     // 
-    // 1 - paramet stopped scrolling and being able to add at some point
+    // 1 - paramet stopped scrolling and being able to add at some point 
+    //     (happened after adding multiple vec and parametric equations)
     // 2 - sometimes feedback is only half deselected
-    // 3 - need to make it so that switching back into vec tab selects prev selected vec field
+    // 3 - fix pi symbol
+    // 4 - fade in issue when expr has variables
 
     //DONE:
-    // 1 - fixed scroll issue with vec field
-    // 2 - made it so that vec field isn't deselected when you scroll away 
+    // 1 - made it so that switching back into vec tab selects prev selected vec field
 
     void Awake()
     {
@@ -88,6 +94,11 @@ public class Expressions : MonoBehaviour
         return selectedExpSet;
     }
 
+    public void reselectVecExpression()
+    {
+        if (selectedVecBody != null) selectedVecBody.selectBody();
+    }
+
     public void setSelectedExpr(Transform expr, ExpressionBody body)
     {
         if (expr == null)
@@ -100,6 +111,11 @@ public class Expressions : MonoBehaviour
 
         selectedExpression = expr;
         selectedBody = body;
+
+        if (calcManager == VecFieldManager._instance)
+        {
+            selectedVecBody = selectedBody;
+        }
     }
 
     public bool selectedNotNull()

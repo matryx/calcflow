@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ToggleKeyboardState : QuickButton {
-    private Transform calculatorPanel, letterPanel;
-    private TextMesh stateText;
+    Transform calculatorPanel, letterPanel;
+    TMPro.TextMeshPro stateText;
 
 	protected override void Start ()
     {
@@ -18,7 +18,7 @@ public class ToggleKeyboardState : QuickButton {
         calculatorPanel = transform.parent.parent.Find("KeyboardPanel");
         letterPanel = transform.parent.parent.Find("LetterPanel");
 
-        stateText = transform.parent.GetComponentInChildren<TextMesh>();
+        stateText = transform.parent.GetComponentInChildren<TMPro.TextMeshPro>();
     }
 
     protected override void ButtonEnterBehavior(GameObject other)

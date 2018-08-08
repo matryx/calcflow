@@ -105,8 +105,6 @@ public abstract class CalculatorManager : MonoBehaviour
             int displayLength = (exprBody.isVariable()) ? rangeDisplayLength : expressionDisplayLength;
             textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
         }
-
-        //inputReceived = true;
     }
 
     public bool letterPressed(string buttonID)
@@ -123,12 +121,7 @@ public abstract class CalculatorManager : MonoBehaviour
             }
             else if (expressionSet.GetRange(buttonID) == null)
             {
-                GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
-                var.transform.localScale = Vector3.one;
-                var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
-                var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
-                var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
-                var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
+                GameObject var = createVariable(param);
 
                 param.GetComponent<ParametricExpression>().addVariable(buttonID, var.transform);
                 var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().setTitle(buttonID);
@@ -140,6 +133,18 @@ public abstract class CalculatorManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    GameObject createVariable(Transform param)
+    {
+        GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
+        var.transform.localScale = Vector3.one;
+        var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
+        var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setExpressionParent(param.transform);
+        var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
+        var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().setPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
+
+        return var;
     }
 
     public string displayText(List<string> exp, int index0, bool mark, int displayLength)

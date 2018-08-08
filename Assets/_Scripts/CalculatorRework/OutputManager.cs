@@ -6,7 +6,7 @@ public class OutputManager : MonoBehaviour {
     CalculatorManager calcManager;
     public static OutputManager _instance;
 
-    private void Awake()
+    void Awake()
     {
         _instance = this;
         calcManager = ParametricManager._instance;
@@ -55,11 +55,7 @@ public class OutputManager : MonoBehaviour {
                 //}
                 break;
         }
-        //calcManager.manageText();
     }
 
-    private void Update()
-    {
-        //Saveable = !calcManager.paramSurface.isGraphing();
-    }
+    void Update() { }
 }

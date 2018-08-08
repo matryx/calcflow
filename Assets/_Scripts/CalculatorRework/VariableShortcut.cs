@@ -8,8 +8,9 @@ public class VariableShortcut : MonoBehaviour
     public Dictionary<string, Transform> shortcuts = new Dictionary<string, Transform>();
 
     Scroll thisScroll;
-    List<string> varsPressed = new List<string>();
     Transform buttonToRemove;
+
+    List<string> varsPressed = new List<string>();
 
     int maxLength = 6;
 
@@ -19,7 +20,7 @@ public class VariableShortcut : MonoBehaviour
         thisScroll = GetComponentInChildren<Scroll>();
     }
 
-    private void addVarShortcut(string varName)
+    void addVarShortcut(string varName)
     {
         if (shortcuts.Count == maxLength) removeVarShortcut();
 

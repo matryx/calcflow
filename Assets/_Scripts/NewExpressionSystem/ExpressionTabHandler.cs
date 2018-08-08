@@ -67,6 +67,7 @@ public class ExpressionTabHandler : MonoBehaviour {
 
                 outputManager.setManager(VecFieldManager._instance);
                 expressions.setManager(VecFieldManager._instance);
+                expressions.reselectVecExpression();
                 break;
             case "ConstantTab":
                 paramPanel.gameObject.SetActive(false);

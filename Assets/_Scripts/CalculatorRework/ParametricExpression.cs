@@ -187,7 +187,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         deleteVar = true;
     }
 
-    private void addToVarClump(Transform var)
+    void addToVarClump(Transform var)
     {
         var.SetParent(variableClumps[variableClumps.Count - 1]);
         var.localPosition = new Vector3(xPos, 0, 0);
@@ -196,7 +196,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         var.gameObject.SetActive(true);
     }
 
-    private void addNewVariableClump(Transform var)
+    void addNewVariableClump(Transform var)
     {
         int lastComponentInd = (variableClumps.Count > 0) ?
                            scroll.getIndex(variableClumps[variableClumps.Count - 1]) : scroll.getIndex(expressionsList[2]);
@@ -238,37 +238,15 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
             return;
         }
 
-        bool noMoreSlots = false;
-
         if (destroyCalled)
         {
-            for (int i = 0; i < variableClumps.Count; i++)
-            {
-                if (noMoreSlots) break;
-
-                Transform currSlot = variableClumps[i];
-
-                if (currSlot.childCount < 2)
-                {
-                    if (currSlot.childCount == 1)
-                    {
-                        StartCoroutine(MoveTo(currSlot.GetChild(0), currSlot.GetChild(0).localPosition, new Vector3(-xPos, 0, 0), 0.3f));
-                    }
-                    else
-                    {
-                        noMoreSlots = findNextSlot(currSlot, i, 0, -xPos, false);
-                    }
-
-                    noMoreSlots = findNextSlot(currSlot, i, 1, xPos, true);
-                }
-            }
-
+            rearrangeVariables();
             destroyEmptyClumps();
             destroyCalled = false;
         }
     }
 
-    private void hideVariables()
+    void hideVariables()
     {
         foreach (string s in varsToDelete)
         {
@@ -286,7 +264,33 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    private bool findNextSlot(Transform currClump, int currClumpIndex, int childIndex, float xpos, bool checkNoSlot)
+    void rearrangeVariables()
+    {
+        bool noMoreSlots = false;
+
+        for (int i = 0; i < variableClumps.Count; i++)
+        {
+            if (noMoreSlots) break;
+
+            Transform currSlot = variableClumps[i];
+
+            if (currSlot.childCount < 2)
+            {
+                if (currSlot.childCount == 1)
+                {
+                    StartCoroutine(MoveTo(currSlot.GetChild(0), currSlot.GetChild(0).localPosition, new Vector3(-xPos, 0, 0), 0.3f));
+                }
+                else
+                {
+                    noMoreSlots = findNextSlot(currSlot, i, 0, -xPos, false);
+                }
+
+                noMoreSlots = findNextSlot(currSlot, i, 1, xPos, true);
+            }
+        }
+    }
+
+    bool findNextSlot(Transform currClump, int currClumpIndex, int childIndex, float xpos, bool checkNoSlot)
     {
         for (int ni = currClumpIndex + 1; ni < variableClumps.Count; ni++)
         {
@@ -306,7 +310,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         return false;
     }
 
-    private void destroyEmptyClumps()
+    void destroyEmptyClumps()
     {
         int removeFrom = 0;
         bool remove = false;

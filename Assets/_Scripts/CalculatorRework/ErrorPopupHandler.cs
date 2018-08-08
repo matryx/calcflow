@@ -20,7 +20,7 @@ public class ErrorPopupHandler : MonoBehaviour {
     }
 
     FlexMenu flex;
-    private FlexMenu keyboard;
+    FlexMenu keyboard;
     KeyboardInputResponder responder;
 
     CalcInput calcInput;

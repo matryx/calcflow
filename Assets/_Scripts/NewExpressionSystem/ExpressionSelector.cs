@@ -6,12 +6,14 @@ using Extensions;
 public class ExpressionSelector : QuickButton
 {
     Scroll thisScroll;
+
+    ParametricManager paramManager;
+    VecFieldManager vecFieldManager;
+
+    Transform xButton;
     Expressions expressions;
     Transform paramPanel, vecPanel;
     //Transform constPanel;
-    private ParametricManager paramManager;
-    private VecFieldManager vecFieldManager;
-    Transform xButton;
 
     List<string> min;
     List<string> max;
@@ -32,7 +34,7 @@ public class ExpressionSelector : QuickButton
         max = new List<string> { "9" };
     }
 
-    private void addForwarders(Transform obj)
+    void addForwarders(Transform obj)
     {
         JoyStickAggregator joyStickAggregator = thisScroll.GetComponent<JoyStickAggregator>();
         JoyStickForwarder[] forwarders = obj.GetComponentsInChildren<JoyStickForwarder>(true);
@@ -58,7 +60,7 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    private List<Transform> setToAdd()
+    List<Transform> setToAdd()
     {
         if (paramPanel.gameObject.activeSelf)
         {
@@ -78,7 +80,7 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    private Expressions.ExpressionType setPanelType()
+    Expressions.ExpressionType setPanelType()
     {
         if (paramPanel.gameObject.activeSelf)
         {
@@ -99,7 +101,7 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    private void addExpressionToScroll(List<Transform> toAdd)
+    void addExpressionToScroll(List<Transform> toAdd)
     {
         int lowestVisIndex = thisScroll.getLowestVisIndex();
         int startingIndex = lowestVisIndex;
@@ -131,7 +133,7 @@ public class ExpressionSelector : QuickButton
         thisScroll.addToScroll(toAdd, null, startingIndex);
     }
 
-    private List<Transform> createParametricExpression()
+    List<Transform> createParametricExpression()
     {
         List<Transform> paramComponents = new List<Transform>();
         ExpressionSet expressionSet = null;
@@ -155,7 +157,7 @@ public class ExpressionSelector : QuickButton
         return paramComponents;
     }
 
-    private void paramSetUp(Transform p, List<Transform> pComp)
+    void paramSetUp(Transform p, List<Transform> pComp)
     {
         foreach (Transform child in p)
         {
@@ -180,7 +182,7 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    private List<Transform> createVecExpression()
+    List<Transform> createVecExpression()
     {
         List<Transform> vecComponents = new List<Transform>();
         ExpressionSet expressionSet = null;
@@ -207,7 +209,7 @@ public class ExpressionSelector : QuickButton
         return vecComponents;
     }
 
-    private void vecSetUp(Transform vec, List<Transform> vComp)
+    void vecSetUp(Transform vec, List<Transform> vComp)
     {
         foreach (Transform child in vec.transform.Find("ExpressionSet"))
         {
@@ -226,7 +228,7 @@ public class ExpressionSelector : QuickButton
         }
     }
 
-    private Transform createVariable(Transform v)
+    Transform createVariable(Transform v)
     {
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
         var.gameObject.SetActive(true);

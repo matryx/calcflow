@@ -40,7 +40,7 @@ public class DeleteExpression : QuickButton
         if (!popup.gameObject.activeSelf)
         {
             popup.gameObject.SetActive(true);
-            popup.localPosition = new Vector3(2.644f, -0.823f, 0);
+            popup.localPosition = new Vector3(3.67f, 0.31f, -0.02f);
             StartCoroutine(ScaleTo(popup, Vector3.zero, Vector3.one, 0.1f));
         }
     }

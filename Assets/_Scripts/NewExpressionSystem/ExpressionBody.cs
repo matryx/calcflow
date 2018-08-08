@@ -10,8 +10,7 @@ public class ExpressionBody : QuickButton
     Transform expressionParent;
     Transform panel;
     Transform feedBack;
-    TMPro.TextMeshPro textInput;
-    string title = "X";
+
     OutputManager outputManager;
     CalcInput calcInput;
     CalcOutput currVecFieldEq;
@@ -22,6 +21,8 @@ public class ExpressionBody : QuickButton
     [SerializeField]
     CalculatorManager calcManager;
 
+    TMPro.TextMeshPro textInput;
+    string title = "X";
     Texture quadShow, quadHide;
     Color grayHide, grayShow;
 
@@ -194,12 +195,9 @@ public class ExpressionBody : QuickButton
                 selectedBody.unSelect();
             }
 
-            //TODO: refactor so that it calls one function that does all this
             if (selectedBody.expressionParent != expressionParent && selectedBody.getManager() == VecFieldManager._instance)
             {
-                selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(grayHide);
-                selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setButtonInputColor(grayHide);
-                selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setElementQuadTex(quadHide);
+                hideUI(selectedBody);
             }
         }
     }
@@ -210,12 +208,9 @@ public class ExpressionBody : QuickButton
         expression.setSelectedExpr(expressionParent, this);
         calcManager.ChangeExpressionSet(expressionParent.gameObject.GetInterface<ExpressionTabInterface>().getExpSet());
 
-        //TODO: refactor so that it calls one function that does all this
         if (calcManager == VecFieldManager._instance)
         {
-            expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(Color.black);
-            expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setButtonInputColor(grayShow);
-            expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setElementQuadTex(quadShow);
+            showUI();
         }
 
         if (variable)
@@ -239,6 +234,20 @@ public class ExpressionBody : QuickButton
         StartCoroutine(scaleUp);
         finishedScalingUp = false;
         thisBodySelected = true;
+    }
+
+    void hideUI(ExpressionBody selectedBody)
+    {
+        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(grayHide);
+        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setButtonInputColor(grayHide);
+        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setElementQuadTex(quadHide);
+    }
+
+    void showUI()
+    {
+        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(Color.black);
+        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setButtonInputColor(grayShow);
+        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setElementQuadTex(quadShow);
     }
 
     protected override void ButtonEnterBehavior(GameObject other)

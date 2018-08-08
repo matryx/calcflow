@@ -9,41 +9,41 @@ public class Scroll : MonoBehaviour
 {
     //REQUIRED: some type of transparent shaders(not standard), Unlit/UnlitAlphaWithFade recommended
 
-    private List<Transform> objects;
-    private List<Transform> toAdd = new List<Transform>();
+    List<Transform> objects;
+    List<Transform> toAdd = new List<Transform>();
 
-    private Transform scrollBar;
-    private Vector3 toPos;
-    private JoyStickReceiver jsReceiver;
+    Transform scrollBar;
+    Vector3 toPos;
+    JoyStickReceiver jsReceiver;
 
     public Transform objectParent;
     [SerializeField]
     public Material scrollerMaterial;
     [SerializeField]
-    private Vector3 margin;
+    Vector3 margin;
     [SerializeField]
-    private Vector3 padding;
+    Vector3 padding;
 
     [SerializeField]
-    private int fixedRowOrCol;
+    int fixedRowOrCol;
     [SerializeField]
-    private int numberOfVisibleThings;
+    int numberOfVisibleThings;
 
     [SerializeField]
-    private float movementSpeed = 0.3f;
+    float movementSpeed = 0.3f;
     [SerializeField]
-    private float fadeSpeed = 0.15f;
+    float fadeSpeed = 0.15f;
     [SerializeField]
-    private float fadeInDelay = 0.2f;
+    float fadeInDelay = 0.5f;
 
     public enum orientation { VERTICAL, HORIZONTAL }
     public enum placement { RIGHT, BOTTOM, LEFT, TOP }
     public enum direction { UP, DOWN, LEFT, RIGHT }
 
     [SerializeField]
-    private orientation currOrientation = orientation.VERTICAL;
+    orientation currOrientation = orientation.VERTICAL;
     [SerializeField]
-    private placement scrollBarPlacement = placement.RIGHT;
+    placement scrollBarPlacement = placement.RIGHT;
     public direction currDirection = direction.UP;
 
     int numPages;
@@ -59,7 +59,7 @@ public class Scroll : MonoBehaviour
     bool adding = false;
     bool setup = false;
 
-    private void Awake()
+    void Awake()
     {
         if (setup) return;
         setUpMenu();
@@ -115,7 +115,7 @@ public class Scroll : MonoBehaviour
         tryMoveObjects();
     }
 
-    private int calculateJoystickAngle(ControllerComponentArgs e)
+    int calculateJoystickAngle(ControllerComponentArgs e)
     {
         float roundBy = 90;
         float temp = Mathf.Atan2(e.y, e.x);             //calculate angle in rad
@@ -168,7 +168,7 @@ public class Scroll : MonoBehaviour
         setup = true;
     }
 
-    private void createScrollBar()
+    void createScrollBar()
     {
         scrollBar = new GameObject().transform;
         scrollBar.name = "ScrollBar";
@@ -193,7 +193,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    private void executeAdd()
+    void executeAdd()
     {
         int temp = atIndexAdd;
 
@@ -216,7 +216,7 @@ public class Scroll : MonoBehaviour
         adding = false;
     }
 
-    private void setNumPagesAndHighestVisIndex()
+    void setNumPagesAndHighestVisIndex()
     {
         numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
             1 + (int)System.Math.Ceiling((double)(objects.Count - numberOfVisibleThings) / fixedRowOrCol);
@@ -239,12 +239,6 @@ public class Scroll : MonoBehaviour
     public void addToScroll(List<Transform> objs, Transform obj, int atIndex)
     {
         if (objects == null) objects = new List<Transform>();
-
-        //TODO: NEED TO HANDLE THIS
-        if (atIndex < lowestVisIndex)
-        {
-            atIndex += objs.Count;
-        }
 
         if (atIndex < 0 || atIndex > objects.Count)
         {
@@ -288,7 +282,16 @@ public class Scroll : MonoBehaviour
 
     public int getIndex(Transform obj)
     {
-        return objects.IndexOf(obj);
+        if (objects == null) objects = new List<Transform>();
+
+        if (objects.Count == 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return objects.IndexOf(obj);
+        } 
     }
 
     public Transform getObj(int ind)
@@ -296,7 +299,7 @@ public class Scroll : MonoBehaviour
         return objects[ind];
     }
 
-    private void placeObject(Transform obj, int ind, bool deleting)
+    void placeObject(Transform obj, int ind, bool deleting)
     {
         obj.transform.localEulerAngles = Vector3.zero;
 
@@ -321,7 +324,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    private Vector3 calculateNewPos(int ind, bool deleting)
+    Vector3 calculateNewPos(int ind, bool deleting)
     {
         float offset = (float)System.Math.Floor((double)ind / fixedRowOrCol);
 
@@ -368,7 +371,7 @@ public class Scroll : MonoBehaviour
         for (int i = 0; i < objects.Count; i++) placeObject(objects[i], i, true);
     }
 
-    private List<int> getIndeces(List<Transform> objs)
+    List<int> getIndeces(List<Transform> objs)
     {
         List<int> indeces = new List<int>();
 
@@ -388,7 +391,7 @@ public class Scroll : MonoBehaviour
         return indeces;
     }
 
-    private void reassignVisIndeces()
+    void reassignVisIndeces()
     {
         int prevNum = numPages;
         numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
@@ -410,7 +413,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    private void tryMoveObjects()
+    void tryMoveObjects()
     {
         if (objects == null || objects.Count == 0) return;
 
@@ -424,7 +427,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    private void moveObjects()
+    void moveObjects()
     {
         moving = true;
         fading = true;
@@ -444,7 +447,7 @@ public class Scroll : MonoBehaviour
         setLowAndHighIndeces();
     }
 
-    private Vector3 calculateMovedPos(Transform obj)
+    Vector3 calculateMovedPos(Transform obj)
     {
         float newX = (currDirection == direction.RIGHT) ?
                           (float)System.Math.Round((double)obj.localPosition.x + padding.x, 2) :
@@ -459,7 +462,7 @@ public class Scroll : MonoBehaviour
                 new Vector3(newX, obj.localPosition.y, obj.localPosition.z);
     }
 
-    private void tryFadeObject(Transform obj, int i)
+    void tryFadeObject(Transform obj, int i)
     {
         if (currDirection == direction.UP || currDirection == direction.LEFT)
         {
@@ -538,7 +541,7 @@ public class Scroll : MonoBehaviour
         if (mat.HasProperty("_FaceColor")) colorName = "_FaceColor";
         if (mat.HasProperty(colorName)) col = mat.GetColor(colorName);
 
-        for (float i = 0.0f; i < 1.0f; i += Time.deltaTime * (1 / fadeSpeed))
+        for (float i = 0.0f; i < 1.0f; i += Time.deltaTime / fadeSpeed)
         {
             col = mat.GetColor(colorName);
             col.a = Mathf.Lerp(start, end, i);

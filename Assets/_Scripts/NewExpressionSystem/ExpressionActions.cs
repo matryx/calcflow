@@ -8,12 +8,12 @@ public class ExpressionActions : QuickButton
     Transform delete;
     Transform toggleHide;
     Transform select;
-    private Vector3 buttonActiveScale;
+    Vector3 buttonActiveScale;
 
-    private bool menuActive = false;
-    private IEnumerator scaleButtonsUp, scaleButtonsDown;
+    bool menuActive = false;
+    IEnumerator scaleButtonsUp, scaleButtonsDown;
 
-    private void Initialize()
+    void Initialize()
     {
         buttons = new List<Transform>();
 
@@ -109,7 +109,7 @@ public class ExpressionActions : QuickButton
 
     protected override void ButtonExitBehavior(GameObject other) { }
 
-    private void OnDisable()
+    void OnDisable()
     {
         foreach(Transform b in buttons)
         {
