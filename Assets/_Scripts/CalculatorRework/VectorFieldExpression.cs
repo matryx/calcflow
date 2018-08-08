@@ -8,13 +8,13 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
     ExpressionSet expSet;
     ExpressionActions expActions;
 
-    List<Transform> expressionsList;
+    Scroll scroll;
 
     Transform range;
     Transform expressionX;
     Transform separator;
 
-    Scroll scroll;
+    List<Transform> expressionsList;
 
     bool initialized = false;
     bool isActive = true;

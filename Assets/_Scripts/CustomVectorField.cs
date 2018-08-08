@@ -200,10 +200,12 @@ public class CustomVectorField : MonoBehaviour
             };
             meshes.Add(mesh);
         }
+
         go = Instantiate(new GameObject(), transform);
         go.name = "vector field mesh";
         go.transform.localPosition = new Vector3(0, 0, 0);
         go.transform.localRotation = Quaternion.identity;
+
         for (int i = 0; i < meshes.Count; i++)
         {
             Mesh mesh = meshes[i];

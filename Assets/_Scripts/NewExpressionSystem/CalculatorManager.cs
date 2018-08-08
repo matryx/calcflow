@@ -14,7 +14,7 @@ public abstract class CalculatorManager : MonoBehaviour
     protected TMPro.TextMeshPro textInput;
     protected string title;
 
-    protected Color positiveFeedback;  //GREEN
+    protected Color positiveFeedback;  
     protected Color negativeFeedback = Color.red;
 
     protected int expressionDisplayLength = 20;
@@ -70,7 +70,7 @@ public abstract class CalculatorManager : MonoBehaviour
         inputReceived = true;
     }
 
-    private string getExpOption()
+    string getExpOption()
     {
         title = (expressions.getSelectedBody()) ? expressions.getSelectedBody().getTitle() : "X";
         return title;

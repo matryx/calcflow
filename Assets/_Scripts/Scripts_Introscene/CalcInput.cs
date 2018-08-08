@@ -27,23 +27,26 @@ public class CalcInput : MonoBehaviour
     public int index = 0;
     [HideInInspector]
 
-    private CalculatorManager calcManager;
     public static CalcInput _instance;
 
+    CalculatorManager calcManager;
+    VariableShortcut variableShortcut;
     Expressions expressions;
 
-    private FlexMenu keyboard;
-    private Transform letterPanel, variablePanel;
-    bool capitalized = false;
-
+    FlexMenu keyboard;
     KeyboardInputResponder responder;
-    VariableShortcut variableShortcut;
-    Color errorColor;
-    Color selectedColor;
-    GameObject errorPopup;
+
     List<string> varsToDelete = new List<string>();
 
-    private void Awake()
+    Transform letterPanel, variablePanel;
+    GameObject errorPopup;
+    Color errorColor, selectedColor;
+
+    string variableErrorMessage = "Typing letters in variables is not allowed.";
+    string vectorFieldErrorMessage = "Typing non-xyz letters in vector field expressions is not allowed.";
+    bool capitalized = false;
+
+    void Awake()
     {
         _instance = this;
     }
@@ -56,9 +59,11 @@ public class CalcInput : MonoBehaviour
         keyboard = GetComponent<FlexMenu>();
         responder = new KeyboardInputResponder(this);
         keyboard.RegisterResponder(responder);
-        variableShortcut = VariableShortcut._instance;
+
         letterPanel = transform.Find("LetterPanel");
         variablePanel = transform.Find("VariableShortcut");
+        variableShortcut = VariableShortcut._instance;
+
         errorColor = Color.red;
         ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
         errorPopup = Instantiate(Resources.Load("Popups/VariableError")) as GameObject;
@@ -93,10 +98,56 @@ public class CalcInput : MonoBehaviour
         if (end == Vector3.zero) obj.gameObject.SetActive(false);
     }
 
+    bool checkForError(string buttonID)
+    {
+        //prevents typing of letters when a variable body is selected
+        if (!expressions.getSelectedBody())
+        {
+            return true;
+        }
+        else
+        {
+            if (expressions.getSelectedBody().isVariable())
+            {
+                showError(variableErrorMessage);
+                return true;
+            }
+        }
+
+        List<string> vectorFieldVars = new List<string> { "x", "y", "z" };
+
+        if (calcManager == VecFieldManager._instance)
+        {
+            if (!vectorFieldVars.Contains(buttonID))
+            {
+                showError(vectorFieldErrorMessage);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void showError(string message)
+    {
+        letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
+        variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
+
+        if (!errorPopup.activeSelf)
+        {
+            errorPopup.SetActive(true);
+            errorPopup.transform.GetComponentInChildren<TMPro.TextMeshPro>().text = message;
+            errorPopup.transform.SetParent(transform);
+            errorPopup.transform.localPosition = new Vector3(0, -1.5f, -0.5f);
+            StartCoroutine(ScaleTo(errorPopup.transform, Vector3.zero, Vector3.one, 0.1f));
+        }
+    }
+
     //called when button on keyboard pressed
     public void HandleInput(string buttonID)
     {
         if (currExpression == null) return;
+        bool error = false;
 
         #region switch
         switch (buttonID)
@@ -108,25 +159,23 @@ public class CalcInput : MonoBehaviour
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
                 {
-                    //prevents typing of letters when a variable body is selected
-                    if (expressions.getSelectedBody() && expressions.getSelectedBody().isVariable())
-                    {
-                        errorPopup.SetActive(true);
-                        errorPopup.transform.position = transform.position + new Vector3(0, -1.5f, -1);
-                        StartCoroutine(ScaleTo(errorPopup.transform, Vector3.zero, Vector3.one, 0.1f));
-                        letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
-                        variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
-                        break;
-                    }
-
+                    error = checkForError(buttonID);
                     calcManager.letterPressed(buttonID);
 
-                    if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
-                    variableShortcut.recordVarPress(buttonID);
+                    //BUG: shouldn't create variable shortcut when nothing selected
+                    if (!error)
+                    {
+                        if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
+                        variableShortcut.recordVarPress(buttonID);
+                    }
                 }
 
-                currExpression.tokens.Insert(index, buttonID);
-                index++;
+                if (!error)
+                {
+                    currExpression.tokens.Insert(index, buttonID);
+                    index++;
+                }
+
                 break;
             case "Paste":
                 string temp = GUIUtility.systemCopyBuffer;
@@ -187,7 +236,7 @@ public class CalcInput : MonoBehaviour
         calcManager.inputReceived = true;
     }
 
-    private void toggleCapital()
+    void toggleCapital()
     {
         foreach (Transform child in letterPanel)
         {

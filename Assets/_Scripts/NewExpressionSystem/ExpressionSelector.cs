@@ -5,13 +5,14 @@ using Extensions;
 
 public class ExpressionSelector : QuickButton
 {
-    Scroll thisScroll;
+    Expressions expressions;
 
     ParametricManager paramManager;
     VecFieldManager vecFieldManager;
 
+    Scroll thisScroll;
+
     Transform xButton;
-    Expressions expressions;
     Transform paramPanel, vecPanel;
     //Transform constPanel;
 

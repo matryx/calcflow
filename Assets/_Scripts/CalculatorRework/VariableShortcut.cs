@@ -8,11 +8,7 @@ public class VariableShortcut : MonoBehaviour
     public Dictionary<string, Transform> shortcuts = new Dictionary<string, Transform>();
 
     Scroll thisScroll;
-    Transform buttonToRemove;
-
     List<string> varsPressed = new List<string>();
-
-    int maxLength = 6;
 
     void Start()
     {
@@ -22,12 +18,15 @@ public class VariableShortcut : MonoBehaviour
 
     void addVarShortcut(string varName)
     {
+        int maxLength = 6;
+
         if (shortcuts.Count == maxLength) removeVarShortcut();
 
         GameObject varButton = Instantiate(Resources.Load("Prefabs/VarShortcut", typeof(GameObject))) as GameObject;
         varButton.transform.GetComponentInChildren<TMPro.TextMeshPro>().text = varName;
         varButton.name = varName;
         shortcuts.Add(varName, varButton.transform);
+
         int objCount = thisScroll.getScrollObjectCount();
         int atIndex = (objCount > 0) ? objCount : 0;
         thisScroll.addToScroll(null, varButton.transform, atIndex);
@@ -50,10 +49,12 @@ public class VariableShortcut : MonoBehaviour
 
     public void removeVarShortcut()
     {
+        Transform buttonToRemove;
         string[] tempArray = varsPressed.ToArray();
         string varToRemove = tempArray[0];
 
         shortcuts.TryGetValue(varToRemove, out buttonToRemove);
+
         List<Transform> removeList = new List<Transform>();
         removeList.Add(buttonToRemove);
 

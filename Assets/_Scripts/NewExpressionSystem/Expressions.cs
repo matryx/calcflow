@@ -5,40 +5,37 @@ using Extensions;
 
 public class Expressions : MonoBehaviour
 {
-    CalculatorManager calcManager;
-    
-    Scroll paramScroll, vecFieldScroll, constantScroll;
     public static Expressions _instance;
-    ExpressionSet selectedExpSet;
-    [SerializeField]
-    Transform selectedExpression;
-    ExpressionBody selectedBody;
-
-    ExpressionBody selectedVecBody;
-
-    List<Transform> expressions;
     public enum ExpressionType { CONSTANT, PARAMET, VECFIELD }
 
+    CalculatorManager calcManager;
+    Scroll paramScroll, vecFieldScroll, constantScroll;
+
+    ExpressionSet selectedExpSet;
+    ExpressionBody selectedBody;
+    ExpressionBody selectedVecBody;
+
+    [SerializeField]
+    Transform selectedExpression;
+
+    List<Transform> expressions;
+
     //TODO:
-    // 1 - more debugging
-    // 2 - make arrow buttons images
-    // 3 - add errorpopup when typing variables into vec expression
+    // 1 -  fix pi symbol
+    // 2 - make add button bigger
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
     //  2 - enable underscore movement by raycast hit
 
     //BUGS:
-    // * - creating empty game object everytime a letter is pressed
-    // 
-    // 1 - paramet stopped scrolling and being able to add at some point 
-    //     (happened after adding multiple vec and parametric equations)
-    // 2 - sometimes feedback is only half deselected
-    // 3 - fix pi symbol
-    // 4 - fade in issue when expr has variables
+    // 1 - parametric won't graph until you type a variable
 
     //DONE:
-    // 1 - made it so that switching back into vec tab selects prev selected vec field
+    // 1 - fixed fade in when things coming in from bottom but not from top
+    // 2 - fixed feedback issue
+    // 3 - added error popups for vec field
+    // 4 - replaced all texts with tmpro/image
 
     void Awake()
     {

@@ -17,14 +17,8 @@ public class ExpressionActions : QuickButton
     {
         buttons = new List<Transform>();
 
-        Transform check = transform.parent.Find("Delete");
-        if (check != null) buttons.Add(check);
-
-        check = transform.parent.Find("ToggleHide");
-        if (check != null) buttons.Add(check);
-
-        check = transform.parent.Find("Select");
-        if (check != null) buttons.Add(check);
+        lookForButton("Delete");
+        lookForButton("ToggleHide");
 
         foreach (Transform b in buttons)
         {
@@ -32,6 +26,12 @@ public class ExpressionActions : QuickButton
         }
 
         buttonActiveScale = new Vector3(1f, 1f, 1f);
+    }
+
+    void lookForButton(string name)
+    {
+        Transform check = transform.parent.Find(name);
+        if (check != null) buttons.Add(check);
     }
 
     protected override void Start()
@@ -54,24 +54,24 @@ public class ExpressionActions : QuickButton
 
     IEnumerator ScaleButtonsDown()
     {
+        buttons.Reverse();
+
         foreach (Transform b in buttons)
         {
             yield return StartCoroutine(ScaleTo(b, buttonActiveScale, Vector3.zero, 0.1f));
             b.gameObject.SetActive(false);
         }
+
+        buttons.Reverse();
     }
 
     IEnumerator ScaleButtonsUp()
     {
-        buttons.Reverse();
-
         foreach (Transform b in buttons)
         {
             b.gameObject.SetActive(true);
             yield return StartCoroutine(ScaleTo(b, Vector3.zero, buttonActiveScale, 0.1f));
         }
-
-        buttons.Reverse();
     }
 
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
