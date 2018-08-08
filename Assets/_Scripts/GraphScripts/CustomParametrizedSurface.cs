@@ -259,16 +259,14 @@ public class CustomParametrizedSurface : MonoBehaviour
         int framesPerES = totalFrames / expressionSets.Count;
 
         num_threads = SystemInfo.processorCount;
-        int missingParticles = 0;
+        int ExcessParticles = 0;
         threadResults = new List<Particle[]>();
 
-        int expressionNumber = 0;
 
         foreach (ExpressionSet es in expressionSets)
         {
-            particlesPerES = defaultParticlesPerES + missingParticles;
-            missingParticles = 0;
-            expressionNumber++;
+            particlesPerES = defaultParticlesPerES + ExcessParticles;
+            ExcessParticles = 0;
             //soft copy of the expressionSet. Do not edit actual expressions using this.
             ExpressionSet expressionSet = es.ShallowCopy();
             //remove unused parameters
@@ -303,7 +301,7 @@ public class CustomParametrizedSurface : MonoBehaviour
             List<int[]> samples = SetupSamples(depth, width);
             int thread_chunk = Mathf.CeilToInt((float)samples.Count / (float)num_threads);
             int used_threads = Math.Min(num_threads, samples.Count);
-            missingParticles += particlesPerES - samples.Count;
+            ExcessParticles += particlesPerES - samples.Count;
             Thread[] threads = new Thread[num_threads];
             int t = 0;
             for (t = 0; t < used_threads; t++)
@@ -324,29 +322,51 @@ public class CustomParametrizedSurface : MonoBehaviour
             }
             framesPerES = totalFrames / expressionSets.Count;
         }
+        CombineResults(ExcessParticles);
+
+        ScaleParticles();
+
+        ScaleCartesian();
+
+        MoveParticles();
+    }
+
+    private void CombineResults(int missingParticles)
+    {
         List<Particle> temp = new List<Particle>();
         foreach (Particle[] array in threadResults)
         {
             temp.AddRange(array);
         }
         Particle lastParticle = temp[temp.Count - 1];
-        for (int i = 0; i < missingParticles; i++) {
+        for (int i = 0; i < missingParticles; i++)
+        {
             temp.Add(lastParticle);
         }
         dest = temp.ToArray();
+    }
+
+    private void ScaleParticles()
+    {
         for (int i = 0; i < dest.Length; i++)
         {
             Vector3 pos = (maxRange == 0) ? Vector3.zero : dest[i].position * 10f / maxRange;
             dest[i].position = pos;
             dest[i].color = new Color(Mathf.Pow((pos.x + 10) / 20, 2), Mathf.Pow((pos.y + 10) / 20, 2), Mathf.Pow((pos.z + 10) / 20, 2));
         }
+    }
 
+    private void ScaleCartesian()
+    {
         xAxis.Max = maxRange; xAxis.Min = -maxRange;
         yAxis.Max = maxRange; yAxis.Min = -maxRange;
         zAxis.Max = maxRange; zAxis.Min = -maxRange;
 
         currentScale = (maxRange == 0) ? 0 : 10 / maxRange;
+    }
 
+    private void MoveParticles()
+    {
         pBuffer.GetData(particles);
         sBuffer.SetData(particles);
         dBuffer.SetData(dest);
