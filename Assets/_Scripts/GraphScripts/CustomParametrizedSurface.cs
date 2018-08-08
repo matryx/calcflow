@@ -66,7 +66,6 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
     #region Dynamic Fields
     //Fields that do not need to be serialized because they are calculated during runtime.
     private Material particleMaterial;
-    List<Particle[]> threadResults = new List<Particle[]>();
     private Particle[] particles;
     private Particle[] source;
     private Particle[] dest;
@@ -82,9 +81,6 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
 
 
     #region constants
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
     // size of a particle struct in bytes
     [RuntimeSerializeField]
     public const int PARTICLE_SIZE = 2 * 12 + 16;

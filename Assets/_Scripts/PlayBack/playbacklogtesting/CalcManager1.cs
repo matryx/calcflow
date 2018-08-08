@@ -11,13 +11,6 @@ public class CalcManager1 : Nanome.Core.Behaviour
     [RuntimeSerializeField]
     public int testint = 100;
 
-    #region constants
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-
-    #endregion
-
     [HideInInspector]
     public bool inputReceived;
 
