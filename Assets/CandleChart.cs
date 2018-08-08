@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Text;
+using System.Threading;
 using UnityEngine.Networking;
 using Nanome.Core;
 
@@ -12,6 +13,20 @@ public class CandleChart : MonoBehaviour
     internal class monthData
     {
         public double open, close, high, low;
+        public DateTime date;
+
+        public monthData()
+        {
+
+        }
+        public monthData(double open, double close, double high, double low, DateTime date)
+        {
+            this.open = open;
+            this.close = close;
+            this.high = high;
+            this.close = close;
+            this.date = date;
+        }
 
         public double getOpen()
         {
@@ -31,6 +46,16 @@ public class CandleChart : MonoBehaviour
         public double getLow()
         {
             return this.low;
+        }
+
+        public DateTime getDate()
+        {
+            return this.date;
+        }
+
+        public void setDate(DateTime date)
+        {
+            this.date = date;
         }
 
         public void setOpen(double open)
@@ -56,8 +81,24 @@ public class CandleChart : MonoBehaviour
 
     }
 
+    internal class dayData
+    {
+        string start, end;
+        public dayData(string start, string end)
+        {
+            this.start = start;
+            this.end = end;
+        }
 
-
+        public string getStart()
+        {
+            return start;
+        }
+        public string getEnd()
+        {
+            return end;
+        }
+    }
 
     private static CandleChart _instance;
     public static CandleChart GetInstance()
@@ -77,12 +118,18 @@ public class CandleChart : MonoBehaviour
     private List<string> times = new List<string>();
     private List<string> prices = new List<string>();
     private List<monthData> months = new List<monthData>();
+    private List<monthData> day = new List<monthData>();
     private List<monthData> scaledMonths = new List<monthData>();
 
+    private List<dayData> dayTimes = new List<dayData>();
+
+    List<int> temp = new List<int>();
     public List<GameObject> pointList = new List<GameObject>();
     float[] scaledPrices;
     float[] monthlyPrices;
 
+    string startTime = "null", lastTime, firstTime, secondTime;
+    DateTime firstDay, secondDay;
 
     GameObject frameObj;
     LineRenderer frameLine;
@@ -115,15 +162,14 @@ public class CandleChart : MonoBehaviour
         DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         double currTime = Math.Round((double)(DateTime.UtcNow - epoch).TotalMilliseconds);
         // Debug.Log("CURRTIME: " + currTime);
-        //SetURL("https://graphs2.coinmarketcap.com/currencies/matryx/0/" + currTime + "/");
-        SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/1367174841000/1532635142000/");
+        SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/0/" + currTime + "/");
         updateGraph();
     }
 
     public void kill()
     {
         StopAllCoroutines();
-        Destroy(frameLine);
+        // Destroy(frameLine);
         times = new List<string>();
         prices = new List<string>();
 
@@ -135,11 +181,183 @@ public class CandleChart : MonoBehaviour
         pointList = new List<GameObject>();
         builder = new StringBuilder();
     }
+
     public void updateGraph()
     {
         Async obj = Async.runInCoroutine(GetText);
         obj.onEvent("Done", parseData);
     }
+
+    void testMethod(object tmp)
+    {
+        string text = ((StringBuilder)tmp).ToString();
+        text = text.Substring(text.IndexOf("Aug 06, 2018"), 600);
+        Debug.Log(text);
+    }
+
+    void testDays()
+    {
+        Async obj = Async.runInCoroutine(GetAllText);
+
+        // count++;
+        // for (int i = 0; i < dayTimes.Count; ++i)
+        // {
+        //     SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/" + dayTimes[i].getStart() + "/" + dayTimes[i].getEnd() + "/");
+        //     Async obj = Async.runInCoroutine(GetText);
+        //     obj.onEvent("Days", printData);
+        // }
+    }
+
+    void printData(object tmp)
+    {
+        Debug.Log(((StringBuilder)tmp).ToString().Substring(0, 10));
+    }
+
+    int count = 0;
+    void getDayDates(object tmp)
+    {
+        if (startTime.Equals("null"))
+        {
+            string data = ((StringBuilder)tmp).ToString();
+            int startIndex = data.IndexOf("price_usd");
+            int endIndex = data.IndexOf("]]", startIndex);
+
+            string first = data.Substring(startIndex + 14, 13);
+
+            int currIndex = endIndex;
+            while (data[currIndex] != '[')
+            {
+                currIndex--;
+            }
+            string last = data.Substring(currIndex + 1, 13);
+
+            startTime = first;
+            firstTime = first;
+            lastTime = last;
+
+            firstDay = convertFromEpoch(firstTime);
+            secondDay = new DateTime(firstDay.Year, firstDay.Month, firstDay.Day, 0, 0, 0).AddHours(23);
+            secondDay = secondDay.AddMinutes(59);
+            secondDay = secondDay.AddSeconds(59);
+
+            secondTime = convertFromDateTime(secondDay);
+
+            dayTimes.Add(new dayData(firstTime, secondTime));
+            SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/" + firstTime + "/" + secondTime + "/");
+            //updateGraph();
+            getDayDates(tmp);
+        }
+        else
+        {
+            //lock(day);
+            //parseDaysData(tmp);
+            while (Convert.ToDouble(lastTime) - Convert.ToDouble(secondTime) > 0)
+            {
+                firstDay = convertFromEpoch(secondTime).AddSeconds(1);
+                secondDay = new DateTime(firstDay.Year, firstDay.Month, firstDay.Day, 0, 0, 0).AddHours(23);
+                secondDay = secondDay.AddMinutes(59);
+                secondDay = secondDay.AddSeconds(59);
+
+                secondTime = convertFromDateTime(secondDay);
+                firstTime = convertFromDateTime(firstDay);
+
+                dayTimes.Add(new dayData(firstTime, secondTime));
+
+            }
+            /* 
+                        if (Convert.ToDouble(lastTime) - Convert.ToDouble(secondTime) > 0)
+                        {
+                            updateGraph();
+                        }
+                        else
+                        { */
+            Async obj = Async.runInCoroutine(GetAllText);
+            // }
+
+
+            /* 
+                        SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/" + firstTime + "/" + secondTime + "/");
+
+                        if (Convert.ToDouble(lastTime) - Convert.ToDouble(secondTime) > 0)
+                        {
+                            builder = new StringBuilder();
+                            tmp = new object();
+                            updateGraph();
+                        }
+                        else
+                        {
+                            tempMethod();
+                        }
+             */
+        }
+    }
+
+    void parseDaysData(object tmp)
+    {
+        string data = ((StringBuilder)tmp).ToString();
+        int startIndex = data.IndexOf("price_usd");
+        int endIndex = data.IndexOf("]]", startIndex);
+
+        //Debug.Log ("start: " + startIndex + ", End: " + endIndex);
+        data = data.Substring(startIndex + 13, endIndex - startIndex);
+        fillDayData(data);
+
+    }
+
+    void fillDayData(string allData)
+    {
+        prices = new List<string>();
+        times = new List<string>();
+
+        //Debug.Log(allData);
+
+        while (allData.IndexOf("]]") > 5)
+        {
+            int endIndex = allData.IndexOf(",");
+            times.Add(allData.Substring(1, endIndex - 1));
+            //Debug.Log("CURR TIME: " + convertFromEpoch(allData.Substring(1, endIndex - 1)));
+
+            allData = allData.Substring(endIndex + 2, allData.Length - endIndex - 2);
+            endIndex = allData.IndexOf("]");
+            prices.Add(allData.Substring(0, endIndex));
+            allData = allData.Substring(endIndex + 3, allData.Length - endIndex - 3);
+        }
+
+        monthData currDay = new monthData();
+        currDay.setOpen(Convert.ToDouble(prices[0]));
+        currDay.setClose(Convert.ToDouble(prices[prices.Count - 1]));
+
+        double max = currDay.getOpen(), min = currDay.getOpen();
+        for (int i = 0; i < prices.Count; i++)
+        {
+            double currPrice = Convert.ToDouble(prices[i]);
+
+            if (currPrice > max)
+                max = currPrice;
+            currDay.setDate(convertFromEpoch(times[i]));
+            if (currPrice < min)
+                min = currPrice;
+        }
+
+        currDay.setHigh(max);
+        currDay.setLow(min);
+
+
+        day.Add(currDay);
+        Debug.Log(currDay.getDate());
+    }
+
+    void tempMethod()
+    {
+        for (int i = 0; i < dayTimes.Count; i++)
+        {
+            Debug.Log("START: " + convertFromEpoch(dayTimes[i].getStart()) + ", END: " + convertFromEpoch(dayTimes[i].getEnd()));
+            /*         Debug.Log("MONTH: " + day[i].getDate() + ", HIGH: " + day[i].getHigh() + ", LOW: " + day[i].getLow());
+                    Debug.Log("MONTH: " + day[i].getDate() + ", OPEN: " + day[i].getOpen() + ", CLOSE: " + day[i].getClose()); */
+
+        }
+    }
+
 
     // Extracts the usd price time/price data from the text
     void parseData(object tmp)
@@ -185,9 +403,9 @@ public class CandleChart : MonoBehaviour
         string[] Ys = prices.ToArray();
         rescaleData(Ys, 0);
 
-        for (int i = 0; i < (numMonths-1); i++)
+        for (int i = 0; i < (numMonths - 1); i++)
         {
-            float xPos = ((float)i) / ((numMonths-1) / resolution) - 12.25f;
+            float xPos = ((float)i) / ((numMonths - 1) / resolution) - 12.25f;
             float hiLowDiff = (float)scaledMonths[i].getHigh() - (float)scaledMonths[i].getLow();
             float barLen = (float)months[i].getHigh() - (float)months[i].getLow();
             float openCloseDiff = Math.Abs((float)months[i].getClose() - (float)months[i].getOpen());
@@ -202,7 +420,7 @@ public class CandleChart : MonoBehaviour
             {
                 topDiff = (float)months[i].getHigh() - (float)months[i].getClose();
                 botDiff = (float)months[i].getOpen() - (float)months[i].getLow();
-                botPercent = 1- ((float)months[i].getLow() / (float)months[i].getOpen());
+                botPercent = 1 - ((float)months[i].getLow() / (float)months[i].getOpen());
                 topPercent = (float)months[i].getClose() / (float)months[i].getHigh();
             }
             // Red
@@ -210,15 +428,15 @@ public class CandleChart : MonoBehaviour
             {
                 topDiff = (float)months[i].getHigh() - (float)months[i].getOpen();
                 botDiff = (float)months[i].getClose() - (float)months[i].getLow();
-                botPercent = 1-((float)months[i].getLow() /(float)months[i].getClose());
+                botPercent = 1 - ((float)months[i].getLow() / (float)months[i].getClose());
                 topPercent = (float)months[i].getOpen() / (float)months[i].getHigh();
             }
-/* 
-            Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
-            Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose());
-            Debug.Log("MONTH: " + i + ", TOPD: " + topDiff + ", BOTD: " + botDiff);
-            Debug.Log("MONTH: " + i + ", TOPP: " + topPercent + ", BOTP: " + botPercent);
- */
+
+            /*             Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
+                        Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose());
+                        Debug.Log("MONTH: " + i + ", TOPD: " + topDiff + ", BOTD: " + botDiff);
+                        Debug.Log("MONTH: " + i + ", TOPP: " + topPercent + ", BOTP: " + botPercent); */
+
 
 
             float lineScale = Math.Abs(hiLowDiff) + .5f;
@@ -248,7 +466,7 @@ public class CandleChart : MonoBehaviour
             currLine.localPosition = Vector3.zero;
             currLine.localScale += new Vector3(0, -1 + hiLowDiff, 0);
 
-            createDataPoint(stickHolder, "HIGH: " + months[i].getHigh(), new Vector3(.05f,0,0));
+            createDataPoint(stickHolder, "HIGH: " + months[i].getHigh(), new Vector3(.05f, 0, 0));
 
             float barSize = -1 + barPercent * hiLowDiff;
             // Debug.Log("MONTH: " + i + ", SIZE: " + barSize);
@@ -269,7 +487,7 @@ public class CandleChart : MonoBehaviour
             }
             else
             {
-                diffToUse = (-currLine.localScale.y / 2) + (currLine.localScale.y * (((topPercent+botPercent)/2)));
+                diffToUse = (-currLine.localScale.y / 2) + (currLine.localScale.y * (((topPercent + botPercent) / 2)));
             }
 
             currBar.localPosition = new Vector3(0, diffToUse, 0);
@@ -283,12 +501,13 @@ public class CandleChart : MonoBehaviour
 
     }
 
-    void createDataPoint(Transform parent, string text, Vector3 pos){
-            Transform currData = Instantiate(dataPoint, Vector3.zero, Quaternion.identity, parent);
-            currData.localRotation = Quaternion.identity;
-            currData.localPosition = pos;
-            dataContent = currData.GetComponent<TextMesh>();
-            dataContent.text = text;
+    void createDataPoint(Transform parent, string text, Vector3 pos)
+    {
+        Transform currData = Instantiate(dataPoint, Vector3.zero, Quaternion.identity, parent);
+        currData.localRotation = Quaternion.identity;
+        currData.localPosition = pos;
+        dataContent = currData.GetComponent<TextMesh>();
+        dataContent.text = text;
     }
 
     void fillMonthData()
@@ -308,6 +527,11 @@ public class CandleChart : MonoBehaviour
 
         for (int i = -1; i < times.Count - 1; ++i)
         {
+
+            /*             if(currMonthIndex == 56){
+                            Debug.Log("TIMESTAMP: " + times[i]);
+                            Debug.Log("TIMES: " + convertFromEpoch(times[i]) + ", PRICES: " + prices[i]);
+                        } */
             if (currMonthNum != convertFromEpoch(times[i + 1]).Month)
             {
                 months[currMonthIndex + 1].setOpen(Convert.ToDouble(prices[i + 1]));
@@ -445,20 +669,61 @@ public class CandleChart : MonoBehaviour
         return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(timestamp));
     }
 
+    public string convertFromDateTime(DateTime currDate)
+    {
+        DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        TimeSpan elapsed = currDate - epoch;
+        return "" + elapsed.TotalMilliseconds;
+    }
+
     public double getNumMonths(DateTime start, DateTime end)
     {
         return Math.Ceiling((end.Subtract(start)).Days / (double)30);
     }
 
+
+    IEnumerator GetAllText(Async routine)
+    {
+        WWW[] wwws = new WWW[dayTimes.Count];
+        for (int i = 0; i < dayTimes.Count; ++i)
+        {
+            SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/" + dayTimes[i].getStart() + "/" + dayTimes[i].getEnd() + "/");
+            wwws[i] = new WWW(URL);
+        }
+        Debug.Log("sentWWW");
+
+        while (!AllDone(wwws))
+        {
+            yield return new WaitForSeconds(.1f);
+        }
+
+        Debug.Log("alldone");
+    }
+
+    bool AllDone(WWW[] wws)
+    {
+        bool AllDone = true;
+        foreach (WWW www in wws)
+        {
+            AllDone &= www.isDone;
+        }
+        return AllDone;
+    }
+
+
+
     IEnumerator GetText(Async routine)
     {
         using (WWW www = new WWW(URL))
         {
+            /*             while(!www.isDone){
+                            Thread.Sleep(1);
+                        } */
             yield return www;
             yield return www.text;
+            builder = new StringBuilder();
             builder.Append(www.text);
             routine.pushEvent("Done", builder);
         }
     }
-
 }

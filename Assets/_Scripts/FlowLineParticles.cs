@@ -50,7 +50,6 @@ public class FlowLineParticles : MonoBehaviour
     private ComputeBuffer pBuffer;
     private ComputeBuffer sBuffer;
     private ComputeBuffer dBuffer;
-    public Transform vfTransform;
 
     private const int PARTICLE_SIZE = 2 * 12 + 16;
     private const int GROUP_SIZE = 256;

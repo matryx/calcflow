@@ -32,6 +32,8 @@ public class CryptoPresetMenu : MonoBehaviour
     LineChart lineChart;
     CandleChart candleChart;
 
+    ScatterChart scatterChart;
+
     KeyboardMenu board;
 
     GameObject graph;
@@ -57,6 +59,8 @@ public class CryptoPresetMenu : MonoBehaviour
     {
         lineChart = LineChart.GetInstance();
         candleChart = CandleChart.GetInstance();
+        scatterChart = ScatterChart.GetInstance();
+
         board = KeyboardMenu.GetInstance();
         scroll = GetComponentInChildren<Scroll>(true);
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
@@ -182,6 +186,10 @@ public class CryptoPresetMenu : MonoBehaviour
         lineChart.kill();
         lineChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
         lineChart.updateGraph();
+
+        scatterChart.kill();
+        scatterChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
+        scatterChart.updateGraph();
     }
 
     void getTimeStamps(string source)

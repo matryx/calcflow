@@ -52,7 +52,7 @@ public class LineChart : MonoBehaviour
         DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         double currTime = Math.Round((double)(DateTime.UtcNow - epoch).TotalMilliseconds);
         Debug.Log("CURRTIME: " + currTime);
-        SetURL("https://graphs2.coinmarketcap.com/currencies/matryx/0/" + currTime + "/");
+        SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/0/" + currTime + "/");
         updateGraph();
     }
 
@@ -137,11 +137,11 @@ public class LineChart : MonoBehaviour
             //Ys [i] = Random.Range (-2f, 2f);
             float xPos = ((float)i) / (prices.Count / resolution) - 12.5f;
             frameLine.SetPosition(i, new Vector3(xPos, scaledPrices[i], 0));
-            if (i % numPoints == 0)
+/*             if (i % numPoints == 0)
             {
                 Transform currPoint = Instantiate(point, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currPoint.localPosition = new Vector3(xPos, scaledPrices[i], 0);
-            }
+            } */
 
 
             //pointList.Add(currPoint);
