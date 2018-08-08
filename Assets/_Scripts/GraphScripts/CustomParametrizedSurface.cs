@@ -13,16 +13,8 @@ using VoxelBusters.RuntimeSerialization;
 public class CustomParametrizedSurface : ManualSerializeBehavior
 {
 
-    public bool changeTestVals;
 
-    public void LateUpdate()
-    {
-        if (changeTestVals)
-        {
-            particleCount = 100;
-            changeTestVals = false;
-        }
-    }
+    List<Particle[]> threadResults = new List<Particle[]>();
 
     #region Serializable Fields
     [RuntimeSerializeField]
@@ -208,7 +200,7 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
         }
         foreach (ExpressionSet expressionSet in expressionSets)
         {
-            tessel.EnqueueEquation(currentScale, expressionSet.expressions[X].expression, expressionSet.expressions[Y].expression, expressionSet.expressions[Z].expression, expressionSet.ranges["u"].Min.Value, expressionSet.ranges["u"].Max.Value, expressionSet.ranges["v"].Min.Value, expressionSet.ranges["v"].Max.Value);
+            tessel.EnqueueEquation(currentScale, expressionSet.expressions["X"].expression, expressionSet.expressions["Y"].expression, expressionSet.expressions["Z"].expression, expressionSet.ranges["u"].Min.Value, expressionSet.ranges["u"].Max.Value, expressionSet.ranges["v"].Min.Value, expressionSet.ranges["v"].Max.Value);
         }
     }
 
@@ -343,7 +335,7 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
             foreach (string op in keys)
             {
                 bool used = false;
-                foreach (ExpressionSet.ExpOptions key in expressionSet.expressions.Keys)
+                foreach (string key in expressionSet.expressions.Keys)
                 {
                     if (expressionSet.expressions[key].tokens.Contains(op))
                     {
@@ -535,7 +527,7 @@ public class CustomParametrizedSurface : ManualSerializeBehavior
             threadHelper.solver.SetGlobalVariable(name, threadHelper.parameterMin[name]);
         }
 
-        foreach (ExpressionSet.ExpOptions op in es.expressions.Keys)
+        foreach (string op in es.expressions.Keys)
         {
             Expression ex = es.expressions[op];
             AK.Expression exp = threadHelper.solver.SymbolicateExpression(ex.expression);

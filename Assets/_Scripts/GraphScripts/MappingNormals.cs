@@ -37,9 +37,9 @@ public class MappingNormals : MonoBehaviour
 
         Vector3 uvw = _1dMapper.swapYandZ(_1dMapper.uvwSelector.lastLocalPos);
 
-        if (es.expressions[ExpressionSet.ExpOptions.X].expression == "cos(t^2)" &&
-            es.expressions[ExpressionSet.ExpOptions.Y].expression == "sin(t^2)" &&
-            es.expressions[ExpressionSet.ExpOptions.Z].expression == "0" &&
+        if (es.expressions["X"].expression == "cos(t^2)" &&
+            es.expressions["Y"].expression == "sin(t^2)" &&
+            es.expressions["Z"].expression == "0" &&
             es.ranges["t"].Min.expression == "0" &&
             es.ranges["t"].Max.expression == "(2*pi)^(1/2)" &&
             _1dMapper.findUVW(uvw).x == 0)

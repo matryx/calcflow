@@ -35,10 +35,6 @@ public class CalcInput : MonoBehaviour
 
     KeyboardInputResponder responder;
 
-    ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-
     public void ChangeOutput(CalcOutput calcOutput)
     {
         currExpression = calcOutput;
