@@ -7,23 +7,23 @@ public class ExpressionBody : QuickButton
 {
     Expressions expression;
 
-    Transform expressionParent;
-    Transform panel;
-    Transform feedBack;
-
-    OutputManager outputManager;
     CalcInput calcInput;
     CalcOutput currVecFieldEq;
+
+    [SerializeField]
+    CalculatorManager calcManager;
+    OutputManager outputManager;
 
     ParametricExpression param;
     VectorFieldExpression vec;
 
-    [SerializeField]
-    CalculatorManager calcManager;
+    Transform expressionParent;
+    Transform panel;
+    Transform feedBack;
 
     TMPro.TextMeshPro textInput;
-    string title = "X";
     Texture quadShow, quadHide;
+    string title = "X";
     Color grayHide, grayShow;
 
     bool thisBodySelected = false;
@@ -123,23 +123,6 @@ public class ExpressionBody : QuickButton
         return variable;
     }
 
-    //NOTE: sets selected expression and body to be null
-    public void unSelect()
-    {
-        if (!finishedScalingUp)
-        {
-            StopCoroutine(scaleUp);
-            finishedScalingUp = true;
-        }
-
-        scaleDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
-        StartCoroutine(scaleDown);
-        finishedScalingDown = false;
-
-        expression.setSelectedExpr(null, null);
-        thisBodySelected = false;
-    }
-
     public void deselectCurrBody()
     {
         if (expression == null) expression = GameObject.Find("Expressions").GetComponent<Expressions>();
@@ -152,29 +135,6 @@ public class ExpressionBody : QuickButton
 
             disableActionButtons(selectedBody);
             unSelect();
-        }
-    }
-
-    //TODO: refactor to get rid of param and vec
-    void disableActionButtons(ExpressionBody selectedBody)
-    {
-        if (selectedBody.getExpressionParent().GetComponent<ParametricExpression>())
-        {
-            param = selectedBody.getExpressionParent().GetComponent<ParametricExpression>();
-            param.getExpActions().disableButtons();
-        }
-        else if (selectedBody.getExpressionParent().GetComponent<VectorFieldExpression>())
-        {
-            vec = selectedBody.getExpressionParent().GetComponent<VectorFieldExpression>();
-            vec.getExpActions().disableButtons();
-        }
-    }
-
-    private void selectBodyIfActive()
-    {
-        if (expressionParent.gameObject.GetInterface<ExpressionTabInterface>().getActiveStatus())
-        {
-            selectBody();
         }
     }
 
@@ -200,6 +160,28 @@ public class ExpressionBody : QuickButton
                 hideUI(selectedBody);
             }
         }
+    }
+
+    void disableActionButtons(ExpressionBody selectedBody)
+    {
+        selectedBody.getExpressionParent().gameObject.GetInterface<ExpressionTabInterface>().getExpActions().disableButtons();
+    }
+
+    //NOTE: sets selected expression and body to be null
+    public void unSelect()
+    {
+        if (!finishedScalingUp)
+        {
+            StopCoroutine(scaleUp);
+            finishedScalingUp = true;
+        }
+
+        scaleDown = ScaleTo(feedBack, feedBack.localScale, idleScale, 0.5f);
+        StartCoroutine(scaleDown);
+        finishedScalingDown = false;
+
+        expression.setSelectedExpr(null, null);
+        thisBodySelected = false;
     }
 
     public void selectBody()
@@ -262,6 +244,14 @@ public class ExpressionBody : QuickButton
         }
     }
 
+    private void selectBodyIfActive()
+    {
+        if (expressionParent.gameObject.GetInterface<ExpressionTabInterface>().getActiveStatus())
+        {
+            selectBody();
+        }
+    }
+
     protected override void ButtonExitBehavior(GameObject other) { }
 
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
@@ -290,28 +280,32 @@ public class ExpressionBody : QuickButton
 
     void OnDisable()
     {
-        if (feedBack && feedBack.localScale == selectedScale)
+        if (feedBack && feedBack.gameObject.activeSelf)
         {
             feedBack.localScale = idleScale;
             feedBack.gameObject.SetActive(false);
 
             if (thisBodySelected)
             {
-                if (calcManager == ParametricManager._instance)
-                {
-                    ExpressionBody selectedBody = expression.getSelectedBody();
-                    TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
-                    oldTextInput.text = oldTextInput.text.Replace("_", "");
-                    expression.setSelectedExpr(null, null);
-                    thisBodySelected = false;
-                }
-                else
-                {
-                    currVecFieldEq = calcInput.currExpression;
-                }
-
+                hideThisBody();
                 calcInput.ChangeOutput(null, calcManager);
             }
+        }
+    }
+
+    void hideThisBody()
+    {
+        if (calcManager == ParametricManager._instance)
+        {
+            ExpressionBody selectedBody = expression.getSelectedBody();
+            TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+            oldTextInput.text = oldTextInput.text.Replace("_", "");
+            expression.setSelectedExpr(null, null);
+            thisBodySelected = false;
+        }
+        else
+        {
+            currVecFieldEq = calcInput.currExpression;
         }
     }
 

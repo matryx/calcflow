@@ -68,7 +68,6 @@ public class ExpressionButtonsHandler : MonoBehaviour {
         }
 
         StartCoroutine(ScaleTo(popup, Vector3.one, Vector3.zero, 0.1f));
-        expressionActions.disableButtons();
     }
 
     void Update() {

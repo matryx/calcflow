@@ -6,17 +6,21 @@ public class DeleteExpression : QuickButton
 {
 
     Expressions expressions;
-    private FlexMenu keyboard;
+    ExpressionActions expressionActions;
+
+    FlexMenu keyboard;
     JoyStickAggregator joyStickAggregator;
 
     Transform popup;
-    float distance = -0.04f;
     Transform deleteButton;
+
+    float distance = -0.04f;
 
     protected override void Start()
     {
         base.Start();
         expressions = Expressions._instance;
+        expressionActions = transform.parent.parent.GetComponentInChildren<ExpressionActions>();
         popup = transform.parent.parent.parent.Find("DeleteConfirmation");
         popup.localEulerAngles = Vector3.zero;
         deleteButton = transform.parent;
@@ -37,12 +41,10 @@ public class DeleteExpression : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        if (!popup.gameObject.activeSelf)
-        {
-            popup.gameObject.SetActive(true);
-            popup.localPosition = new Vector3(3.67f, 0.31f, -0.02f);
-            StartCoroutine(ScaleTo(popup, Vector3.zero, Vector3.one, 0.1f));
-        }
+        popup.gameObject.SetActive(true);
+        popup.localPosition = new Vector3(3.67f, 0.31f, -0.02f);
+        StartCoroutine(ScaleTo(popup, Vector3.zero, Vector3.one, 0.1f));
+        expressionActions.disableButtons();
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }

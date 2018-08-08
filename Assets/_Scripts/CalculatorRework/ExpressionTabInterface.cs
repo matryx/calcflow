@@ -5,6 +5,7 @@ using UnityEngine;
 public interface ExpressionTabInterface
 {
     ExpressionSet getExpSet();
+    ExpressionActions getExpActions();
     Transform getExpressionX();
     Transform getSeparator();
 

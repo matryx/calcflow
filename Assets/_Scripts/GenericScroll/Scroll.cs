@@ -87,7 +87,6 @@ public class Scroll : MonoBehaviour
         if (jsReceiver != null) jsReceiver.JoyStickTouched += scroll;
     }
 
-    //TODO: make sure scroll still works
     void scroll(VRController c, ControllerComponentArgs e)
     {
         if (e.x == 0 && e.y == 0) return;
@@ -189,7 +188,7 @@ public class Scroll : MonoBehaviour
 
         for (int ind = 0; ind < objects.Count; ind++)
         {
-            placeObject(objects[ind], ind, false);
+            placeObject(objects[ind], ind, false, 0);
         }
     }
 
@@ -208,7 +207,7 @@ public class Scroll : MonoBehaviour
         temp = atIndexAdd;
         for (temp = atIndexAdd; temp < objects.Count; temp++)
         {
-            placeObject(objects[temp], temp, false);
+            placeObject(objects[temp], temp, false, 0);
             objects[temp].localScale = Vector3.one;
         }
 
@@ -227,7 +226,6 @@ public class Scroll : MonoBehaviour
 
         if (scrollBar.GetComponent<ScrollBar>().getCurrPage() == 1 && numPages > 1)
             highestVisIndex = numberOfVisibleThings - 1;
-
     }
 
     public int getScrollObjectCount()
@@ -242,7 +240,7 @@ public class Scroll : MonoBehaviour
 
         if (atIndex < 0 || atIndex > objects.Count)
         {
-            print("INDEX " + atIndex + " IS OUT OF RANGE OF SCROLL OBJECTS");
+            Debug.Log("<color=red>INDEX " + atIndex + " IS OUT OF RANGE OF SCROLL OBJECTS</color>");
             return;
         }
 
@@ -273,7 +271,7 @@ public class Scroll : MonoBehaviour
 
         if (newObj.localScale != Vector3.one)
         {
-            print("MAKE THE SCALE OF THE TOP HIERARCHY OF THE SCROLL OBECT VECTOR3.ONE TO AVOID SCALING ISSUES");
+            Debug.Log("<color=red>MAKE THE SCALE OF THE TOP HIERARCHY OF THE SCROLL OBECT VECTOR3.ONE TO AVOID SCALING ISSUES</color>");
         }
 
         newObj.localScale = Vector3.zero;
@@ -291,7 +289,7 @@ public class Scroll : MonoBehaviour
         else
         {
             return objects.IndexOf(obj);
-        } 
+        }
     }
 
     public Transform getObj(int ind)
@@ -299,7 +297,7 @@ public class Scroll : MonoBehaviour
         return objects[ind];
     }
 
-    void placeObject(Transform obj, int ind, bool deleting)
+    void placeObject(Transform obj, int ind, bool deleting, float delayTime)
     {
         obj.transform.localEulerAngles = Vector3.zero;
 
@@ -320,7 +318,7 @@ public class Scroll : MonoBehaviour
         }
         else
         {
-            if (deleting && !obj.gameObject.activeSelf) fadeButton(obj, true);
+            if (deleting && !obj.gameObject.activeSelf) fadeButton(obj, true, delayTime);
         }
     }
 
@@ -356,7 +354,11 @@ public class Scroll : MonoBehaviour
 
     public void deleteObjects(List<Transform> objs)
     {
+        bool removingLastObject = false;
+
         List<int> indecesToDelete = getIndeces(objs);
+        if (indecesToDelete[indecesToDelete.Count-1] == objects.Count-1) removingLastObject = true;
+
         indecesToDelete.Reverse(); //delete from end of list to beginning so that indeces don't get messed up
 
         for (int i = 0; i < indecesToDelete.Count; i++)
@@ -368,7 +370,20 @@ public class Scroll : MonoBehaviour
 
         reassignVisIndeces();
 
-        for (int i = 0; i < objects.Count; i++) placeObject(objects[i], i, true);
+        float scale = 0.04f;
+        float baseTime = 0.05f;
+        float delayTime = (removingLastObject) ? baseTime*7: baseTime;
+
+        for (int i = 0; i < objects.Count; i++)
+        {
+            if (i >= lowestVisIndex && i <= highestVisIndex)
+            {
+                delayTime = (removingLastObject) ? 
+                            delayTime : delayTime + scale;
+            }
+
+            placeObject(objects[i], i, true, delayTime);
+        }
     }
 
     List<int> getIndeces(List<Transform> objs)
@@ -464,15 +479,18 @@ public class Scroll : MonoBehaviour
 
     void tryFadeObject(Transform obj, int i)
     {
+        bool fadeIn = true;
+        bool fadeOut = false;
+
         if (currDirection == direction.UP || currDirection == direction.LEFT)
         {
             if (i >= lowestVisIndex && i < lowestVisIndex + fixedRowOrCol)
             {
-                fadeButton(obj, false);
+                fadeButton(obj, fadeOut, 0);
             }
             else if (i > highestVisIndex && i <= highestVisIndex + fixedRowOrCol)
             {
-                fadeButton(obj, true);
+                fadeButton(obj, fadeIn, fadeInDelay);
             }
         }
         else if (currDirection == direction.DOWN || currDirection == direction.RIGHT)
@@ -481,11 +499,11 @@ public class Scroll : MonoBehaviour
             {
                 if (((highestVisIndex + 1) % fixedRowOrCol == 0) ||
                     (i > (highestVisIndex - ((highestVisIndex + 1) % fixedRowOrCol))))
-                    fadeButton(obj, false);
+                    fadeButton(obj, fadeOut, 0);
             }
             else if (i < lowestVisIndex && i >= lowestVisIndex - fixedRowOrCol)
             {
-                fadeButton(obj, true);
+                fadeButton(obj, fadeIn, fadeInDelay);
             }
         }
     }
@@ -509,9 +527,9 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    void fadeButton(Transform obj, bool fadeIn)
+    void fadeButton(Transform obj, bool fadeIn, float delayTime)
     {
-        if (fadeIn) StartCoroutine(DelayFadeIn(obj));
+        if (fadeIn) StartCoroutine(DelayFadeIn(obj, delayTime));
 
         float to = (fadeIn) ? opaque : transparent;
         Renderer[] childrenRenderer = obj.GetComponentsInChildren<Renderer>(true);
@@ -526,9 +544,9 @@ public class Scroll : MonoBehaviour
     }
 
     #region Coroutines
-    IEnumerator DelayFadeIn(Transform obj)
+    IEnumerator DelayFadeIn(Transform obj, float delayTime)
     {
-        yield return new WaitForSecondsRealtime(fadeInDelay);
+        yield return new WaitForSecondsRealtime(delayTime);
         obj.gameObject.SetActive(true);
     }
 
