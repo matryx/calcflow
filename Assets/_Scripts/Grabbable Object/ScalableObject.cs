@@ -93,7 +93,6 @@ public class ScalableObject : GrabbableObject
         }
         else
         {
-            pivot = new GameObject();
             Vector3 dir = activeGrabbers.First.Value.transform.position - activeGrabbers.Last.Value.transform.position;
             Vector3 mid = (activeGrabbers.First.Value.transform.position + activeGrabbers.Last.Value.transform.position) * 0.5f;
             Vector3 forward = activeGrabbers.First.Value.transform.forward + activeGrabbers.Last.Value.transform.forward;

@@ -48,7 +48,13 @@ public partial class PlaybackLogEntry
 
     public static string GetUniqueID(GameObject subject)
     {
-        return subject.GetComponent<UIDSystem>().GetGameObjectIdentifier();
+        UIDSystem uid = subject.GetComponent<UIDSystem>();
+        if (uid == null)
+        {
+            Debug.LogError("subject " + subject.name + " does not have a uidSystem");
+        }
+
+        return uid.GetGameObjectIdentifier();
     }
 
     // function that will serialize the spawn and assign the binary output to "binaryRepresentation".

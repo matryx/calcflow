@@ -21,13 +21,13 @@ public class ReenactableLoggerTransform : ReenactableLogger
         lastParent = transform.parent;
         AllTransformLoggers.Add(this);
 
-        if (Recorder.Recording)
-        {
-            UnityEngine.Debug.Log("move first rec frame: " + PBT_FrameCounter.GetFrame());
+        // if (Recorder.Recording)
+        // {
+        //     UnityEngine.Debug.Log("move first rec frame: " + PBT_FrameCounter.GetFrame());
 
-            long currTime = PlaybackClock.GetTime(); ;
-            LogMovement(currTime);
-        }
+        //     long currTime = PlaybackClock.GetTime(); ;
+        //     LogMovement(currTime);
+        // }
     }
 
 
@@ -38,7 +38,6 @@ public class ReenactableLoggerTransform : ReenactableLogger
             if (Changed())
             {
                 LogMovement(currTime);
-                lastChildren = GetChildren();
             }
         }
     }
@@ -48,14 +47,22 @@ public class ReenactableLoggerTransform : ReenactableLogger
         if (Recorder.Recording)
         {
             RecordPosition(currTime);
-            foreach (Transform child in lastChildren)
+            if (lastChildren != null)
             {
-                child.GetComponent<ReenactableLoggerTransform>().FinalRecordChildren(currTime);
+                foreach (Transform child in lastChildren)
+                {
+                    if (child != null)
+                    {
+                        child.GetComponent<ReenactableLoggerTransform>().FinalRecordChildren(currTime);
+                    }
+                }
             }
+
             foreach (Transform child in transform)
             {
                 child.GetComponent<ReenactableLoggerTransform>().FinalRecordChildren(currTime);
             }
+            lastChildren = GetChildren();
         }
     }
     public void RecursiveRecordPosition(long currTime)
@@ -67,6 +74,7 @@ public class ReenactableLoggerTransform : ReenactableLogger
             {
                 child.GetComponent<ReenactableLoggerTransform>().RecursiveRecordPosition(currTime);
             }
+            lastChildren = GetChildren();
         }
     }
 
@@ -95,13 +103,16 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
         if (lastTime == -999)
         {
+            Debug.Log("<color=orange>" + gameObject.name + " First" + "</color>");
+
             world = false;
             lerp = false;
         }
+
         if (ParentChanged())
         {
 
-            string debugNextParent = (transform.parent == null) ? "null" : PlaybackLogEntry.GetUniqueID(transform.parent.gameObject);
+            string debugNextParent = (transform.parent == null) ? "null" : transform.parent.name;
             Debug.Log("<color=blue>" + gameObject.name + " -> " + debugNextParent + "</color>");
 
             world = false;
@@ -121,6 +132,12 @@ public class ReenactableLoggerTransform : ReenactableLogger
             duration = 0;
         }
 
+        CreateLogEntry(startTime, duration, nextParent, world);
+        UpdateHistory(currTime);
+    }
+
+    private void CreateLogEntry(long startTime, long duration, GameObject nextParent, bool world)
+    {
         if (world)
         {
             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.position,
@@ -131,8 +148,6 @@ public class ReenactableLoggerTransform : ReenactableLogger
             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.localPosition,
                                                                                      transform.localRotation, transform.localScale, nextParent));
         }
-
-        UpdateHistory(currTime);
     }
 
     private void UpdateHistory(long currTime)
@@ -179,13 +194,12 @@ public class ReenactableLoggerTransform : ReenactableLogger
             FinalRecordChildren(currTime);
 
 
-            long time = currTime + (long)(PlaybackLog.Period * 2f);
+            long time = PlaybackClock.GetTime();
             Debug.Log("<color=purple>" + "Destroying " + gameObject.name + "</color>");
 
 
             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateDestroy(time, gameObject));
         }
-        PlaybackClock.RemoveFromTimer(RecordPosition);
         base.OnDestroy();
     }
 

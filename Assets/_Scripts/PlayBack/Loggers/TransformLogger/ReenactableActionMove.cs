@@ -8,7 +8,6 @@ public class ReenactableActionMove : ReenactableAction
 
     public override string key { get { return "movement"; } }
 
-
     public override void Reenact(LogInfo info, GameObject subject, PlaybackLogEntry entry)
     {
 
@@ -23,12 +22,13 @@ public class ReenactableActionMove : ReenactableAction
         Transform newParent = GetParent(subject, entry, parentKey);
         Transform oldParent = subject.transform.parent;
 
-        if (oldParent != newParent)
-        //if (duration == 0)
-        {
 
+        if (oldParent != newParent)
+        {
             string debugNextParent = (newParent == null) ? "null" : newParent.name;
             Debug.Log("<color=blue>" + subject.name + " -> " + debugNextParent + "</color>");
+
+
             subject.transform.SetParent(newParent);
 
             //GlobalReposition(info, subject, entry);
@@ -37,6 +37,10 @@ public class ReenactableActionMove : ReenactableAction
         }
         else
         {
+            if (info.GetValue<long>("duration") == 0)
+            {
+                Debug.Log("<color=orange>" + subject.name + " First" + "</color>");
+            }
             //Debug.Log("Local Reposition");
 
             LocalReposition(info, subject);

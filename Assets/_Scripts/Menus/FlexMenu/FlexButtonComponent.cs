@@ -89,13 +89,15 @@ public class FlexButtonComponent : FlexActionableComponent
 
     protected override void StateChanged(int _old, int _new)
     {
+        Transform body = transform.Find("Body");
+        if (body == null) { return; }
         if (_new == -1)
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;
+            body.GetComponent<Renderer>().material.color = disabledColor;
         }
         else if (_new == 1)
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
+            body.GetComponent<Renderer>().material.color = hoveringColor;
             string eventName = "Unknown";
             if (gameObject != null)
             {
@@ -108,11 +110,11 @@ public class FlexButtonComponent : FlexActionableComponent
         }
         else if (_new == 2)
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = selectedColor;
+            body.GetComponent<Renderer>().material.color = selectedColor;
         }
         else
         {
-            transform.Find("Body").GetComponent<Renderer>().material.color = passiveColor;
+            body.GetComponent<Renderer>().material.color = passiveColor;
             string eventName = "Unknown";
             if (gameObject != null)
             {

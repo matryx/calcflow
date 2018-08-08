@@ -47,7 +47,7 @@ public class RecorderMenu : MonoBehaviour
                 //Recorder.ResumeRecording();
                 break;
             case "Stop":
-                RecordAndReplayManager._instance.EditorRecord = true;
+                RecordAndReplayManager._instance.EditorRecord = false;
                 //Recorder.EndRecording();
                 break;
             default:
