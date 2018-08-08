@@ -4,12 +4,13 @@ using Extensions;
 using UnityEngine;
 public class ReenactableLoggerTransform : ReenactableLogger
 {
+
+    public static HashSet<ReenactableLoggerTransform> AllTransformLoggers = new HashSet<ReenactableLoggerTransform>();
     Vector3 lastLocalPos;
     Vector3 lastScale;
     Quaternion lastRotation;
     Transform lastParent;
-
-    bool forceNext = false;
+    Transform[] lastChildren;
 
     bool added = false;
 
@@ -17,6 +18,9 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
     void Awake()
     {
+        lastParent = transform.parent;
+        AllTransformLoggers.Add(this);
+
         if (Recorder.Recording)
         {
             UnityEngine.Debug.Log("move first rec frame: " + PBT_FrameCounter.GetFrame());
@@ -26,51 +30,64 @@ public class ReenactableLoggerTransform : ReenactableLogger
         }
     }
 
-    void Update()
-    {
-        if (Recorder.Recording)
-        {
-            RecordPosition();
-        }
-    }
 
-    void RecordPosition()
+    void RecordPosition(long currTime)
     {
         if (Recorder.Recording)
         {
-            if (Changed() || forceNext)
+            if (Changed())
             {
-                forceNext = false;
-                long currTime = PlaybackClock.GetTime(); ;
                 LogMovement(currTime);
+                lastChildren = GetChildren();
             }
         }
     }
 
-    // returns true if any of the transform paramteres have changed since last check.
-    bool Changed()
+    void FinalRecordChildren(long currTime)
     {
-        //return true;
-        bool changed = false;
-
-        changed |= lastParent != transform.parent;
-        changed |= lastLocalPos != transform.localPosition;
-        changed |= lastRotation != transform.localRotation;
-        changed |= lastScale != transform.localScale;
-
-
-        return changed;
+        if (Recorder.Recording)
+        {
+            RecordPosition(currTime);
+            foreach (Transform child in lastChildren)
+            {
+                child.GetComponent<ReenactableLoggerTransform>().FinalRecordChildren(currTime);
+            }
+            foreach (Transform child in transform)
+            {
+                child.GetComponent<ReenactableLoggerTransform>().FinalRecordChildren(currTime);
+            }
+        }
+    }
+    public void RecursiveRecordPosition(long currTime)
+    {
+        if (Recorder.Recording)
+        {
+            RecordPosition(currTime);
+            foreach (Transform child in transform)
+            {
+                child.GetComponent<ReenactableLoggerTransform>().RecursiveRecordPosition(currTime);
+            }
+        }
     }
 
-    bool ParentChanged(){
-        return lastParent != transform.parent;
+    Transform[] GetChildren()
+    {
+        Transform[] children = new Transform[transform.childCount];
+        int i = 0;
+
+        foreach (Transform child in transform)
+        {
+            children[i] = child;
+            i++;
+        }
+        return children;
     }
-    void LogMovement(long currTime)
+
+    public void LogMovement(long currTime)
     {
         long startTime;
         long endTime;
         long duration;
-
 
         GameObject nextParent = (transform.parent == null) ? null : transform.parent.gameObject;
         bool lerp = true;
@@ -78,18 +95,17 @@ public class ReenactableLoggerTransform : ReenactableLogger
 
         if (lastTime == -999)
         {
-            world = true;
+            world = false;
             lerp = false;
         }
-        if (lastParent != transform.parent)
+        if (ParentChanged())
         {
-            //string debugLastParent = (lastParent == null) ? "null" : PlaybackLogEntry.GetUniqueID(lastParent.gameObject);
+
             string debugNextParent = (transform.parent == null) ? "null" : PlaybackLogEntry.GetUniqueID(transform.parent.gameObject);
             Debug.Log("<color=blue>" + gameObject.name + " -> " + debugNextParent + "</color>");
 
-            world = true;
+            world = false;
             lerp = false;
-            forceNext = true;
         }
 
         if (lerp)
@@ -109,15 +125,12 @@ public class ReenactableLoggerTransform : ReenactableLogger
         {
             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.position,
                                                                                      transform.rotation, transform.lossyScale, nextParent));
-//             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.localPosition,
-// transform.localRotation, transform.localScale, nextParent));
         }
         else
         {
             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateMovement(startTime, duration, gameObject, transform.localPosition,
                                                                                      transform.localRotation, transform.localScale, nextParent));
         }
-
 
         UpdateHistory(currTime);
     }
@@ -156,14 +169,42 @@ public class ReenactableLoggerTransform : ReenactableLogger
             }
         }
     }
+
     public override void OnDestroy()
     {
+        AllTransformLoggers.Remove(this);
         if (Recorder.Recording)
         {
-            long time = PlaybackClock.GetTime() + (long)(PlaybackLog.Period * 0.1f);
+            long currTime = PlaybackClock.GetTime();
+            FinalRecordChildren(currTime);
+
+
+            long time = currTime + (long)(PlaybackLog.Period * 2f);
+            Debug.Log("<color=purple>" + "Destroying " + gameObject.name + "</color>");
+
+
             Recorder.RecordAction(PlaybackLogEntry.PlayBackActionFactory.CreateDestroy(time, gameObject));
         }
         PlaybackClock.RemoveFromTimer(RecordPosition);
         base.OnDestroy();
+    }
+
+    bool Changed()
+    {
+        //return true;
+        bool changed = false;
+
+        changed |= lastParent != transform.parent;
+        changed |= lastLocalPos != transform.localPosition;
+        changed |= lastRotation != transform.localRotation;
+        changed |= lastScale != transform.localScale;
+
+
+        return changed;
+    }
+
+    bool ParentChanged()
+    {
+        return lastParent != transform.parent;
     }
 }

@@ -217,7 +217,7 @@ public static class Recorder
 
     static void RecordSpawn(GameObject subject)
     {
-        UnityEngine.Debug.Log("<color=green>recording spawn " + PlaybackLogEntry.GetUniqueID(subject) + "</color");
+        UnityEngine.Debug.Log("<color=green>recording spawn " + PlaybackLogEntry.GetUniqueID(subject) + "</color>");
 
         long time = PlaybackClock.GetTime();
         recordLog.log.Add(PlaybackLogEntry.PlayBackActionFactory.CreateSpawn(time,

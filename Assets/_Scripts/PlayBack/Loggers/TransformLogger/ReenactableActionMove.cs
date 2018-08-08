@@ -22,15 +22,17 @@ public class ReenactableActionMove : ReenactableAction
 
         Transform newParent = GetParent(subject, entry, parentKey);
         Transform oldParent = subject.transform.parent;
-        long duration = info.GetValue<long>("duration");
 
-        //if (oldParent != newParent)
-        if (duration == 0)
+        if (oldParent != newParent)
+        //if (duration == 0)
         {
+
+            string debugNextParent = (newParent == null) ? "null" : newParent.name;
+            Debug.Log("<color=blue>" + subject.name + " -> " + debugNextParent + "</color>");
             subject.transform.SetParent(newParent);
 
-            GlobalReposition(info, subject, entry);
-            //LocalReposition(info, subject);
+            //GlobalReposition(info, subject, entry);
+            LocalReposition(info, subject);
 
         }
         else
