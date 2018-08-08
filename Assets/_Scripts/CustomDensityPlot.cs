@@ -18,7 +18,8 @@ public class CustomDensityPlot : MonoBehaviour
 
     public Gradient gradient;
 
-    public Material arrowMat;
+    public Material densityMat;
+    
     GameObject go;
 
     List<Transform> vectors;
@@ -49,6 +50,8 @@ public class CustomDensityPlot : MonoBehaviour
     float zmin;
     float zmax;
 
+    Texture3D textureMap;
+
     // Use this for initialization
     void Start()
     {
@@ -66,6 +69,8 @@ public class CustomDensityPlot : MonoBehaviour
         solver.SetGlobalVariable("x", 0); solver.SetGlobalVariable("y", 0); solver.SetGlobalVariable("z", 0);
         varX = solver.GetGlobalVariable("x"); varY = solver.GetGlobalVariable("y"); varZ = solver.GetGlobalVariable("z");
         max_magnitude = 0f;
+        textureMap = new Texture3D(99, 99, 99, TextureFormat.RGBA32, true);
+        densityMat.SetTexture("_MainTex", textureMap);
         //CalculateVectors();
         //DrawDensityPlot();
     }
@@ -90,7 +95,7 @@ public class CustomDensityPlot : MonoBehaviour
                 delta = (xmax - xmin) / 6.0f;
                 break;
             case SampleDensity.HIGH:
-                delta = (xmax - xmin) / 100.0f;
+                delta = (xmax - xmin) / 99.0f;
                 break;
         }
 
@@ -142,6 +147,7 @@ public class CustomDensityPlot : MonoBehaviour
     void DrawDensityPlot()
     {
         List<Geometry> rawGeom = new List<Geometry>();
+        Color32[] colors = new Color32[startPts.Count];
 
         for (int i = 0; i < startPts.Count; i++)
         {
@@ -160,20 +166,27 @@ public class CustomDensityPlot : MonoBehaviour
             //vectors.Add(l);
 
             Color32 c = gradient.Evaluate(offset.magnitude);
+            colors[i] = c;
             //top.startColor = c;
             //top.endColor = c;
             //body.startColor = c;
             //body.endColor = c;
             //rawGeom.Add(CreateSphere(target, offset, offset.magnitude, offset.magnitude, c));
+            /*
             if(c.a> 0){
                 // rawGeom.Add(CreateCone(target, target, 0.3f, 0.15f, c));
                 // rawGeom.Add(CreateCone(target, -1 * target, 0.3f, 0.15f, c));
                 rawGeom.Add(CreateCube(target, delta, c));
             }
+            */
             //rawGeom.Add(CreateCone(target, offset, offset.magnitude, offset.magnitude, c));
             //rawGeom.Add(CreateCone(target, -1*offset, offset.magnitude, offset.magnitude, c));
         }
 
+        textureMap.SetPixels32(colors);
+        textureMap.Apply();
+
+/*
         List<Geometry> combined = CombineGeometry(rawGeom);
         List<Mesh> meshes = new List<Mesh>();
         foreach (var geom in combined)
@@ -201,8 +214,9 @@ public class CustomDensityPlot : MonoBehaviour
             MeshFilter mf = g.AddComponent<MeshFilter>();
             mf.mesh = mesh;
             MeshRenderer mr = g.AddComponent<MeshRenderer>();
-            mr.material = arrowMat;
+            mr.material = densityMat;
         }
+*/
     }
 
     void Clear()
