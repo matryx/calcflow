@@ -3,10 +3,11 @@
 	Properties
 	{
 		_MainTex ("Texture", 3D) = "white" {}
+		_Scale ("Scale", Float) = 1
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Transparent" }
+		Tags { "Queue"="Transparent" "RenderType"="Transparent" }
 		LOD 100
 
 		Pass
@@ -22,54 +23,54 @@
 			struct appdata
 			{
 				float4 vertex : POSITION;
-				float2 uv : TEXCOORD0;
 			};
 
 			struct v2f
 			{
-				float2 uv : TEXCOORD0;
-				UNITY_FOG_COORDS(1)
 				float4 vertex : SV_POSITION;
+				float3 uvw : TEXCOORD0;
+				float4 worldPos : TEXCOORD1;
 			};
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-/*			
-			fixed4 raymarch(float3 ro, float3 rd) {
-				fixed4 ret = fixed4(0,0,0,0);
+			const int maxIterations = 1000;
 
-				const int maxstep = 64;
-				float t = 0;
-				for (int i = 0; i < maxstep; ++i) {
-					float3 p = ro + rd * t;
-					float d = map(p);
+			float inCube(float length, float3 currLoc){
+				float3 c = float3(length, length, length);
+				float3 d = abs(currLoc) - c;
+				return max(max(d.x,max(d.y, d.z)), 0);
+			}
 
-					if (d < 0.001) {
-						ret = fixed4(0.5, 0.5, 0.5, 1);
+			fixed4 raymarchColor(float3 start, float length, float3 uvw){
+				float rayDepth = 0;
+				fixed4 color = fixed4(0,0,0,0);
+				fixed4 tempColor = fixed4(0,0,0,0);
+				for (int i = 0; i < maxIterations; i++){
+					if(!inCube(length, TRANSFORM(rayDepth)){
 						break;
 					}
-					
-					t += d;
-				}
 
-				return ret;
+					tempColor = tex3D(_MainTex, uvw);
+					color ?= Color(_MainTex@rayDepth);
+					rayDepth += STEP_SIZE;
+				}
+				return color;
 			}
-*/
+
 			v2f vert (appdata v)
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-				UNITY_TRANSFER_FOG(o,o.vertex);
+				o.uvw = v.vertex + float4(_Scale/2, _Scale/2, _Scale/2, 1);
+				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				fixed4 col = tex3D(_MainTex, i.uv);
-				// apply fog
-				UNITY_APPLY_FOG(i.fogCoord, col);
+				fixed4 col = raymarchColor(???, _Scale, i.uvw);
 				return col;
 			}
 			ENDCG
