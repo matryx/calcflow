@@ -156,7 +156,6 @@ public class AnimatedParticleGrapher : MonoBehaviour
 
     public void PlotParticles(Particle[] particles)
     {
-        Debug.Log("plottingPoints");
         animProgress = 0;
 
         if (particles.Length != particleCount)

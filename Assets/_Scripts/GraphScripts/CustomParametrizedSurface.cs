@@ -19,8 +19,6 @@ public class CustomParametrizedSurface : MonoBehaviour
     public AxisLabelManager zAxis;
     #endregion
 
-    public float currentScale = 10;
-
     private Particle[] dest;
 
     private Coroutine setup;
@@ -30,7 +28,8 @@ public class CustomParametrizedSurface : MonoBehaviour
         AnimatedParticleGrapher._instance.particleEffect = effect;
     }
 
-    public void SetEffectStrength(float strength){
+    public void SetEffectStrength(float strength)
+    {
         AnimatedParticleGrapher._instance.effectStrength = strength;
     }
 
@@ -81,6 +80,8 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
         foreach (ExpressionSet expressionSet in expressionSets)
         {
+            float currentScale = CartesianManager._instance.GetScale();
+
             tessel.EnqueueEquation(currentScale, expressionSet.GetExpression("X").expression, expressionSet.GetExpression("Y").expression,
                                    expressionSet.GetExpression("Z").expression, expressionSet.GetRange("u").Min.Value,
                                    expressionSet.GetRange("u").Max.Value, expressionSet.GetRange("v").Min.Value,
@@ -242,11 +243,7 @@ public class CustomParametrizedSurface : MonoBehaviour
 
     private void ScaleCartesian()
     {
-        xAxis.Max = maxRange; xAxis.Min = -maxRange;
-        yAxis.Max = maxRange; yAxis.Min = -maxRange;
-        zAxis.Max = maxRange; zAxis.Min = -maxRange;
-
-        currentScale = (maxRange == 0) ? 0 : 10 / maxRange;
+        CartesianManager._instance.SetScale(maxRange);
     }
 
     void ThreadedEvaluate(List<int[]> samples, ExpressionSet expressionSet, int TID)
