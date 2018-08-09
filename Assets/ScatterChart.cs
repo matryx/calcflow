@@ -26,17 +26,21 @@ public class ScatterChart : MonoBehaviour
     private Particle[] particles;
     private Particle[] source;
     private Particle[] dest;
+
+    private List<Particle> temp = new List<Particle>();
+
     private int threadGroups;
     private Material particleMaterial;
     private ComputeBuffer pBuffer;
     private ComputeBuffer sBuffer;
     private ComputeBuffer dBuffer;
-    public float particleSize = 0.05f;
+    public float particleSize = 0.02f;
     public Texture2D particleSprite;
     public Shader particleShader;
     public ComputeShader particleAnimation;
     private const int PARTICLE_SIZE = 2 * 12 + 16;
     private const int GROUP_SIZE = 256;
+    private float STEP_SIZE = .01f;
     private float animProgress;
     public float currentScale = 10;
     public ParticleEffectList particleEffect = ParticleEffectList.None;
@@ -60,7 +64,7 @@ public class ScatterChart : MonoBehaviour
     float maxRange = 10;
     bool calculating = false;
 
-    int particleCount;
+    int particleCount = 20000;
     int[] additonalParticles;
 
     Distance[] distances;
@@ -74,6 +78,7 @@ public class ScatterChart : MonoBehaviour
     private string URL;
     public void SetURL(string newURL)
     {
+        Debug.Log("URL SET TO: " + newURL);
         URL = newURL;
     }
 
@@ -108,6 +113,7 @@ public class ScatterChart : MonoBehaviour
         DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         double currTime = Math.Round((double)(DateTime.UtcNow - epoch).TotalMilliseconds);
         Debug.Log("CURRTIME: " + currTime);
+        InitializeParticleSystem();
         SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/0/" + currTime + "/");
         updateGraph();
     }
@@ -115,14 +121,9 @@ public class ScatterChart : MonoBehaviour
     public void kill()
     {
         StopAllCoroutines();
-        Destroy(frameLine);
         times = new List<string>();
         prices = new List<string>();
-
-        foreach (Transform child in transform)
-        {
-            Destroy(child.gameObject);
-        }
+        temp = new List<Particle>();
 
         pointList = new List<GameObject>();
         builder = new StringBuilder();
@@ -167,15 +168,32 @@ public class ScatterChart : MonoBehaviour
         makeGraph(times, prices);
     }
 
+    void findStepSize()
+    {
+        float totalDist = 0;
+        for (int i = 0; i < prices.Count - 1; i++)
+        {
+            float xPos = ((float)i) / (prices.Count / resolution) - 12.5f;
+            float xPosNext = ((float)i + 1) / (prices.Count / resolution) - 12.5f;
+            float distance = (float)Math.Sqrt(Math.Pow(xPosNext - xPos, 2) + Math.Pow(scaledPrices[i + 1] - scaledPrices[i], 2));
+
+            // Debug.Log("DISTANCE: " + distance);
+
+            totalDist += distance;
+        }
+
+        STEP_SIZE = totalDist / (particleCount - prices.Count);
+        Debug.Log("STEP_SIZE: " + STEP_SIZE);
+    }
+
     void makeGraph(List<string> times, List<string> prices)
     {
         this.times = times;
         this.prices = prices;
 
-        particleCount = prices.Count;
-
         string[] Ys = prices.ToArray();
         rescaleData(Ys, 0);
+        //findStepSize();
 
         //Debug.Log("test: " + prices.Count);
 
@@ -189,49 +207,86 @@ public class ScatterChart : MonoBehaviour
 
         distances = new Distance[prices.Count - 1];
         additonalParticles = new int[prices.Count];
-
+        int adds = 0;
+        Particle tmpParticle;
         for (int i = 0; i < prices.Count - 1; i++)
         {
             float xPos = ((float)i) / (prices.Count / resolution) - 12.5f;
             float xPosNext = ((float)i + 1) / (prices.Count / resolution) - 12.5f;
 
+            float yPos = scaledPrices[i];
+            float yPosNext = scaledPrices[i + 1];
+
+            Vector2 position = new Vector2(xPos, yPos);
+            Vector2 positionNext = new Vector2(xPosNext, yPosNext);
+
             //Debug.Log("POINT: " + i + ", DISTANCE: " + Math.Sqrt(Math.Pow(temp[i+1].position.x-temp[i].position.x, 2) + Math.Pow(temp[i+1].position.y-temp[i].position.y, 2)));
-            distances[i].distance = (float)Math.Sqrt(Math.Pow(xPosNext - xPos, 2) + Math.Pow(scaledPrices[i + 1] - scaledPrices[i], 2));
-            distances[i].point1 = new Particle();
-            distances[i].point1.position = new Vector3(xPos, scaledPrices[i]);
+            //float distance = (float)Math.Sqrt(Math.Pow(xPosNext - xPos, 2) + Math.Pow(scaledPrices[i + 1] - scaledPrices[i], 2));
+            float distance = Vector2.Distance(position, positionNext);
+            // Debug.Log("INDEX: " + i + ", DISTANCE: " + distance);
 
-            distances[i].point2 = new Particle();
-            distances[i].point2.position = new Vector3(xPosNext, scaledPrices[i + 1]);
 
-            float distance = 1000f * distances[i].distance;
-            additonalParticles[i] = (int)Mathf.Floor(distance);
+            tmpParticle = new Particle();
+            tmpParticle.position = new Vector3(xPos, yPos, 0);
+            temp.Add(tmpParticle);
 
-            particleCount += additonalParticles[i];
+
+
+            if (distance > STEP_SIZE)
+            {
+                float currDist = distance;
+
+                while (currDist > STEP_SIZE)
+                {
+                    adds++;
+                    // Debug.Log("PLACING ADDITIONAL POINT, " + adds);
+                    Vector2 norm = (positionNext - position).normalized;
+
+                    position += norm * STEP_SIZE;
+
+                    //xPos += norm.x * STEP_SIZE;
+                    //yPos += norm.y * STEP_SIZE;
+
+                    //position = new Vector2(xPos, yPos);
+
+                    tmpParticle = new Particle();
+                    tmpParticle.position = new Vector3(position.x, position.y, 0);
+                    temp.Add(tmpParticle);
+
+
+                    currDist = Vector2.Distance(position, positionNext);
+                }
+            }
 
         }
 
-        Particle[] temp = new Particle[particleCount];
+        int count = temp.Count;
+        tmpParticle = new Particle();
+        tmpParticle.position = new Vector3(((float)resolution) - 12.5f, scaledPrices[prices.Count - 1], 0);
+        for (int i = count; i < particleCount; i++)
+        {
+            temp.Add(tmpParticle);
+        }
 
         int fillIndex = 0;
-        Debug.Log("COUNT: " + particleCount);
+        //Debug.Log("COUNT: " + particleCount);
+        /* 
+                for (int i = 0; i < particleCount;)
+                {
+                    //Ys [i] = Random.Range (-2f, 2f);
+                    float xPos = ((float)i) / (particleCount / resolution) - 12.5f;
+                    temp[i] = new Particle();
+                    temp[i].position = new Vector3(xPos, scaledPrices[fillIndex], 0);
 
-        for (int i = 0; i < particleCount;)
-        {
-            //Ys [i] = Random.Range (-2f, 2f);
-            float xPos = ((float)i) / (particleCount / resolution) - 12.5f;
-            temp[i] = new Particle();
-            temp[i].position = new Vector3(xPos, scaledPrices[fillIndex], 0);
+                    //Debug.Log("INDEX: " + i + ", FILLINDEX: " + fillIndex);
 
-            Debug.Log("INDEX: " + i + ", FILLINDEX: " + fillIndex);
+                    i += additonalParticles[fillIndex] + 1;
+                    fillIndex++;
+                    //pointList.Add(currPoint);
+                } */
 
-            i += additonalParticles[fillIndex]+1;
-            fillIndex++;
-            //pointList.Add(currPoint);
-        }
 
-        InitializeParticleSystem();
-
-        dest = temp;
+        dest = temp.ToArray();
         int space = 0;
         bool isGap = false;
         Debug.Log("LENGTH: " + dest.Length);
@@ -239,33 +294,37 @@ public class ScatterChart : MonoBehaviour
         for (int i = 0; i < dest.Length; i++)
         {
             Vector3 pos = temp[i].position;
-            if (space > 1900)
-                Debug.Log("INDEX: " + i + ", SPACE: " + space);
-            if (temp[i].position == Vector3.zero)
-            {
-                isGap = true;
+            //if (space > 1900)
+            // Debug.Log("INDEX: " + i + ", SPACE: " + space);
+            /*             if (temp[i].position == Vector3.zero)
+                        {
+                            isGap = true;
 
-                float distance = distances[space].distance;
-                float numPoints = additonalParticles[space];
+                            float distance = distances[space].distance;
+                            float numPoints = additonalParticles[space];
 
-                float xDist = (distances[space].point2.position.x - distances[space].point1.position.x) / numPoints;
-                float yDist = (distances[space].point2.position.y - distances[space].point1.position.y) / numPoints;
+                            float xDist = (distances[space].point2.position.x - distances[space].point1.position.x) / numPoints;
+                            float yDist = (distances[space].point2.position.y - distances[space].point1.position.y) / numPoints;
 
-                for (int j = 0; j < numPoints; j++)
-                {
-                    pos = new Vector3(xDist * j, yDist * j, 0);
-                    dest[i + j].position = pos;
-                    dest[i + j].color = new Color(Mathf.Pow((pos.x + 10) / 20, 2), Mathf.Pow((pos.y + 10) / 20, 2), Mathf.Pow((pos.z + 10) / 20, 2));
-                }
-            }
-            else
-            {
-                if (isGap) space++;
+                            for (int j = 0; j < numPoints; j++)
+                            {
+                                pos = new Vector3(distances[space].point1.position.x + (xDist * j), distances[space].point1.position.y + (yDist * j), 0);
+                                dest[i + j].position = pos;
+                                dest[i + j].color = new Color(Mathf.Pow((pos.x + 10) / 20, 2), Mathf.Pow((pos.y + 10) / 20, 2), Mathf.Pow((pos.z + 10) / 20, 2));
 
-                isGap = false;
-                dest[i].position = pos;
-                dest[i].color = new Color(Mathf.Pow((pos.x + 10) / 20, 2), Mathf.Pow((pos.y + 10) / 20, 2), Mathf.Pow((pos.z + 10) / 20, 2));
-            }
+                            }
+                            i += (int)numPoints - 1;
+                        }
+                        else
+                        {
+                            if (isGap) space++;
+             */
+            isGap = false;
+            dest[i].position = pos;
+            dest[i].color = new Color(Mathf.Pow((pos.x + 10) / 20, 2), Mathf.Pow((pos.y + 10) / 20, 2), Mathf.Pow((pos.z + 10) / 20, 2));
+
+            //Debug.Log("INDEX: " + i + ", DATA: " + dest[i].position.x);
+            //}
         }
 
         currentScale = (maxRange == 0) ? 0 : 10 / maxRange;
@@ -358,7 +417,7 @@ public class ScatterChart : MonoBehaviour
     void InitializeParticleSystem()
     {
         threadGroups = Mathf.CeilToInt((float)particleCount / GROUP_SIZE);
-        int l = prices.Count;
+        int l = particleCount;
 
         particles = new Particle[l];
         source = new Particle[l];
@@ -424,7 +483,7 @@ public class ScatterChart : MonoBehaviour
 
             var m = Matrix4x4.TRS(Vector3.zero, transform.rotation, transform.lossyScale);
             particleMaterial.SetMatrix("_worldRot", m);
-            Graphics.DrawProcedural(MeshTopology.Points, prices.Count);
+            Graphics.DrawProcedural(MeshTopology.Points, particleCount);
         }
     }
 

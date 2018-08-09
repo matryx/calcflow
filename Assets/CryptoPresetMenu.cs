@@ -41,7 +41,7 @@ public class CryptoPresetMenu : MonoBehaviour
 
     double first, second;
     string baseURL = "https://graphs2.coinmarketcap.com/currencies/";
-    string currCrypto, currTime = "All", toSearch;
+    string currCrypto = "bitcoin", currTime = "All", toSearch;
     StringBuilder builder = new StringBuilder();
     StringBuilder customInput = new StringBuilder();
 
@@ -183,9 +183,9 @@ public class CryptoPresetMenu : MonoBehaviour
     }
     void newGraph()
     {
-        lineChart.kill();
-        lineChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
-        lineChart.updateGraph();
+//        lineChart.kill();
+//        lineChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
+//        lineChart.updateGraph();
 
         scatterChart.kill();
         scatterChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
