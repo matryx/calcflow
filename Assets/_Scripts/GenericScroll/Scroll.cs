@@ -82,10 +82,10 @@ public class Scroll : MonoBehaviour
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
-        if (jsReceiver != null) jsReceiver.JoyStickTouched += Scroll;
+        if (jsReceiver != null) jsReceiver.JoyStickTouched += ScrollPage;
     }
 
-    void Scroll(VRController c, ControllerComponentArgs e)
+    void ScrollPage(VRController c, ControllerComponentArgs e)
     {
         if (e.x == 0 && e.y == 0) return;
 

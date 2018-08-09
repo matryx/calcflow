@@ -62,7 +62,7 @@ public class Mapping1D : MonoBehaviour
     {
         Vector3 output = new Vector3();
         ExpressionSet es = calcManager.expressionSet;
-        float scale = calcManager.paramSurface.currentScale;
+        float scale = CartesianManager._instance.GetScale();
 
         foreach (string key in es.GetExprKeys())
         {
