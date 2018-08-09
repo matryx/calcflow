@@ -13,8 +13,8 @@ public class JoyStickSender : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        controller = GetComponent<VRController>();
-        sender = GetComponent<RayCastSender>();
+        controller = GetComponentInParent<VRController>();
+        sender = GetComponentInParent<RayCastSender>();
         ConnectController();
     }
 

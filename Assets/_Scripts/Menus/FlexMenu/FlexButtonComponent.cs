@@ -43,15 +43,6 @@ public class FlexButtonComponent : FlexActionableComponent
             virtualButton.OnButtonExit -= endAction;
         }
 
-        TouchRayButton rayTouchButton = GetComponent<TouchRayButton>();
-        if (rayTouchButton != null)
-        {
-            rayTouchButton.OnButtonEnter -= startAction;
-            rayTouchButton.OnButtonExit -= endAction;
-            return;
-        }
-
-
         RayCastButton rcButton = GetComponent<RayCastButton>();
         if (rcButton != null)
         {
@@ -75,15 +66,6 @@ public class FlexButtonComponent : FlexActionableComponent
             virtualButton.OnButtonEnter += startAction;
             virtualButton.OnButtonExit += endAction;
         }
-
-        TouchRayButton rayTouchButton = GetComponent<TouchRayButton>();
-        if (rayTouchButton != null)
-        {
-            rayTouchButton.OnButtonEnter += startAction;
-            rayTouchButton.OnButtonExit += endAction;
-            return;
-        }
-
 
         RayCastButton rcButton = GetComponent<RayCastButton>();
         if (rcButton != null)

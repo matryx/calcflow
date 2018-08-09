@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Calcflow.UserStatistics;
 
 namespace CalcFlowUI
 {
@@ -16,29 +17,44 @@ namespace CalcFlowUI
 
         public virtual void PressButton(GameObject other)
         {
-            #if UNITY_EDITOR
+
+#if UNITY_EDITOR
             if (verbose)
             {
                 print("button pressed");
             }
-            #endif
+#endif
             if (OnButtonEnter != null)
                 OnButtonEnter.Invoke(other);
+
+            string eventName = gameObject.name;
+            var extra = new Dictionary<string, object>();
+            extra["parent"] = gameObject.transform.parent.name;
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.StartEvent("Button Press", eventName, extra);
+            }
         }
 
         public virtual void UnpressButton(GameObject other)
         {
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (verbose)
             {
                 print("button released");
             }
-            #endif
+#endif
             if (OnButtonExit != null)
                 OnButtonExit.Invoke(other);
+
+            string eventName = gameObject.name;
+            if (!eventName.Equals("Body"))
+            {
+                StatisticsTracking.EndEvent("Button Press", eventName);
+            }
         }
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         public bool verbose = false;
         public bool press = false;
         bool pressed = false;
@@ -62,6 +78,14 @@ namespace CalcFlowUI
                 }
             }
         }
+#endif
+        protected virtual void Update()
+        {
+#if UNITY_EDITOR
+            Pressed = press;
+#endif
+        }
+
 
         public void Disable()
         {
@@ -77,11 +101,5 @@ namespace CalcFlowUI
                 Destroy(highlight);
             }
         }
-
-        public void Update()
-        {
-            Pressed = press;
-        }
-        #endif
     }
 }

@@ -31,8 +31,8 @@ public class Mapping3D : MonoBehaviour
             CorrespondingPoint.transform.localPosition = swapYandZ(xyz);
             if (tmpro != null)
             {
-                tmpro.text = "(x,y,z) = (" + System.String.Format("{0:F2}", xyz.x) + "," 
-                                           + System.String.Format("{0:F2}", xyz.y) + "," 
+                tmpro.text = "(x,y,z) = (" + System.String.Format("{0:F2}", xyz.x) + ","
+                                           + System.String.Format("{0:F2}", xyz.y) + ","
                                            + System.String.Format("{0:F2}", xyz.z) + ")";
             }
             ManageText();
@@ -43,27 +43,27 @@ public class Mapping3D : MonoBehaviour
 
     void ApplyRangeAdjustements()
     {
-        ExpressionSet es = calcManager.expressionSet;
-
+        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
         float min, max;
         if (ULabelManager != null)
         {
 
-            min = -10 + (es.GetRange("u").Min.Exclusive ? exclusivemodifier : 0);
-            max = 10 - (es.GetRange("u").Max.Exclusive ? exclusivemodifier : 0);
+            min = -10 + (_params["u"].Min.Exclusive ? exclusivemodifier : 0);
+            max = 10 - (_params["u"].Max.Exclusive ? exclusivemodifier : 0);
             uvwSelector.SetXRange(min, max);
         }
         if (VLabelManager != null)
         {
 
-            min = -10 + (es.GetRange("v").Min.Exclusive ? exclusivemodifier : 0);
-            max = 10 - (es.GetRange("v").Max.Exclusive ? exclusivemodifier : 0);
+            min = -10 + (_params["v"].Min.Exclusive ? exclusivemodifier : 0);
+            max = 10 - (_params["v"].Max.Exclusive ? exclusivemodifier : 0);
             uvwSelector.SetZRange(min, max);
         }
         if (WLabelManager != null)
         {
-            min = -10 + (es.GetRange("w").Min.Exclusive ? exclusivemodifier : 0);
-            max = 10 - (es.GetRange("w").Max.Exclusive ? exclusivemodifier : 0);
+
+            min = -10 + (_params["w"].Min.Exclusive ? exclusivemodifier : 0);
+            max = 10 - (_params["w"].Max.Exclusive ? exclusivemodifier : 0);
             uvwSelector.SetYRange(min, max);
         }
 
@@ -77,14 +77,13 @@ public class Mapping3D : MonoBehaviour
     public Vector3 findUVW(Vector3 xyz)
     {
         Vector3 temp = Vector3.zero;
-        ExpressionSet es = calcManager.expressionSet;
-
-        if (es.GetRange("u") != null)
-            temp.x = (10 + xyz.x) * (es.GetRange("u").Max.Value - es.GetRange("u").Min.Value) / 20 + es.GetRange("u").Min.Value;
-        if (es.GetRange("v") != null)
-            temp.y = (10 + xyz.y) * (es.GetRange("v").Max.Value - es.GetRange("v").Min.Value) / 20 + es.GetRange("v").Min.Value;
-        if (es.GetRange("w") != null)
-            temp.z = (10 + xyz.z) * (es.GetRange("w").Max.Value - es.GetRange("w").Min.Value) / 20 + es.GetRange("w").Min.Value;
+        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
+        if (_params.ContainsKey("u"))
+            temp.x = (10 + xyz.x) * (_params["u"].Max.Value - _params["u"].Min.Value) / 20 + _params["u"].Min.Value;
+        if (_params.ContainsKey("v"))
+            temp.y = (10 + xyz.y) * (_params["v"].Max.Value - _params["v"].Min.Value) / 20 + _params["v"].Min.Value;
+        if (_params.ContainsKey("w"))
+            temp.z = (10 + xyz.z) * (_params["w"].Max.Value - _params["w"].Min.Value) / 20 + _params["w"].Min.Value;
         return temp;
     }
 
@@ -92,40 +91,42 @@ public class Mapping3D : MonoBehaviour
     {
         Vector3 output = new Vector3();
         ExpressionSet es = calcManager.expressionSet;
-        float scale = CartesianManager._instance.GetScale();
+        float scale = calcManager.paramSurface.currentScale;
 
-        foreach (string key in es.GetExprKeys())
+        foreach (string key in es.expressions.Keys)
         {
             AK.ExpressionSolver solver = es.solver;
-            if (es.GetRange("u") != null) solver.SetGlobalVariable("u", uvw.x);
-            if (es.GetRange("v") != null) solver.SetGlobalVariable("v", uvw.y);
-            if (es.GetRange("w") != null) solver.SetGlobalVariable("w", uvw.z);
+            if (es.ranges.ContainsKey("u")) solver.SetGlobalVariable("u", uvw.x);
+            if (es.ranges.ContainsKey("v")) solver.SetGlobalVariable("v", uvw.y);
+            if (es.ranges.ContainsKey("w")) solver.SetGlobalVariable("w", uvw.z);
         }
-
-        output.x = (float)es.GetExpression("X").AKExpression.Evaluate();
-        output.y = (float)es.GetExpression("Y").AKExpression.Evaluate();
-        output.z = (float)es.GetExpression("Z").AKExpression.Evaluate();
+        if (es.IsCompiled())
+        {
+            output.x = (float)es.expressions["X"].AKExpression.Evaluate();
+            output.y = (float)es.expressions["Y"].AKExpression.Evaluate();
+            output.z = (float)es.expressions["Z"].AKExpression.Evaluate();
+        }
         return output * scale;
     }
 
 
     void ManageText()
     {
-        ExpressionSet es = calcManager.expressionSet;
-        if (es.GetRange("u") != null && ULabelManager != null)
+        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
+        if (_params.ContainsKey("u") && ULabelManager != null)
         {
-            ULabelManager.Min = es.GetRange("u").Min.Value;
-            ULabelManager.Max = es.GetRange("u").Max.Value;
+            ULabelManager.Min = _params["u"].Min.Value;
+            ULabelManager.Max = _params["u"].Max.Value;
         }
-        if (es.GetRange("v") != null && VLabelManager != null)
+        if (_params.ContainsKey("v") && VLabelManager != null)
         {
-            VLabelManager.Max = es.GetRange("v").Max.Value;
-            VLabelManager.Min = es.GetRange("v").Min.Value;
+            VLabelManager.Max = _params["v"].Max.Value;
+            VLabelManager.Min = _params["v"].Min.Value;
         }
-        if (es.GetRange("w") != null && WLabelManager != null)
+        if (_params.ContainsKey("w") && WLabelManager != null)
         {
-            WLabelManager.Min = es.GetRange("w").Min.Value;
-            WLabelManager.Max = es.GetRange("w").Max.Value;
+            WLabelManager.Min = _params["w"].Min.Value;
+            WLabelManager.Max = _params["w"].Max.Value;
         }
 
 

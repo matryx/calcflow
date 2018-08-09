@@ -85,12 +85,12 @@ public class TournamentMenu : MonoBehaviour
         var newTournaments = new List<Matryx_Tournament>();
         foreach (var rpcTournament in rpcTournaments)
         {
-            var unique = rpcTournament.UniqueId;
+            var address = rpcTournament.address;
             var title = rpcTournament.title;
             var bounty = rpcTournament.bounty;
-            Matryx_Tournament aTournament = new Matryx_Tournament(unique, title, bounty);
+            Matryx_Tournament aTournament = new Matryx_Tournament(address, title, bounty);
             aTournament.description = rpcTournament.description;
-            tournaments.Add(unique, aTournament);
+            tournaments.Add(address, aTournament);
             newTournaments.Add(aTournament);
         }
         DisplayTournaments(newTournaments);

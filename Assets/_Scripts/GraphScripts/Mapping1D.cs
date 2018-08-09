@@ -32,13 +32,13 @@ public class Mapping1D : MonoBehaviour
 
     void ApplyRangeAdjustements()
     {
-        RangePair range_t = calcManager.expressionSet.GetRange("t");
+        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
         float min, max;
         if (TLabelManager != null)
         {
 
-            min = -10 + (range_t.Min.Exclusive ? exclusivemodifier : 0);
-            max = 10 - (range_t.Max.Exclusive ? exclusivemodifier : 0);
+            min = -10 + (_params["t"].Min.Exclusive ? exclusivemodifier : 0);
+            max = 10 - (_params["t"].Max.Exclusive ? exclusivemodifier : 0);
             uvwSelector.SetXRange(min, max);
         }
     }
@@ -51,10 +51,9 @@ public class Mapping1D : MonoBehaviour
     public Vector3 findUVW(Vector3 xyz)
     {
         Vector3 temp = Vector3.zero;
-        RangePair range_t = calcManager.expressionSet.GetRange("t");
-
-        if (calcManager.expressionSet.GetRange("t") != null)
-            temp.x = (10 + xyz.x) * (range_t.Max.Value - range_t.Min.Value) / 20 + range_t.Min.Value;
+        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
+        if (_params.ContainsKey("t"))
+            temp.x = (10 + xyz.x) * (_params["t"].Max.Value - _params["t"].Min.Value) / 20 + _params["t"].Min.Value;
         return temp;
     }
 
@@ -62,20 +61,18 @@ public class Mapping1D : MonoBehaviour
     {
         Vector3 output = new Vector3();
         ExpressionSet es = calcManager.expressionSet;
-        float scale = CartesianManager._instance.GetScale();
+        float scale = calcManager.paramSurface.currentScale;
 
-        foreach (string key in es.GetExprKeys())
+        foreach (string key in es.expressions.Keys)
         {
             AK.ExpressionSolver solver = es.solver;
-            if (es.GetRange("t") != null) solver.SetGlobalVariable("t", uvw.x);
+            if (es.ranges.ContainsKey("t")) solver.SetGlobalVariable("t", uvw.x);
         }
-        if (es.GetExpression("X").AKExpression != null &&
-            es.GetExpression("Y").AKExpression != null &&
-            es.GetExpression("Z").AKExpression != null)
+        if (es.IsCompiled())
         {
-            output.x = (float)es.GetExpression("X").AKExpression.Evaluate();
-            output.y = (float)es.GetExpression("Y").AKExpression.Evaluate();
-            output.z = (float)es.GetExpression("Z").AKExpression.Evaluate();
+            output.x = (float)es.expressions["X"].AKExpression.Evaluate();
+            output.y = (float)es.expressions["Y"].AKExpression.Evaluate();
+            output.z = (float)es.expressions["Z"].AKExpression.Evaluate();
         }
         return output * scale;
     }
@@ -83,11 +80,11 @@ public class Mapping1D : MonoBehaviour
 
     void ManageText()
     {
-        RangePair range_t = calcManager.expressionSet.GetRange("t");
-        if (calcManager.expressionSet.GetRange("t") != null && TLabelManager != null)
+        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
+        if (_params.ContainsKey("t") && TLabelManager != null)
         {
-            TLabelManager.Min = range_t.Min.Value;
-            TLabelManager.Max = range_t.Max.Value;
+            TLabelManager.Min = _params["t"].Min.Value;
+            TLabelManager.Max = _params["t"].Max.Value;
         }
     }
 
