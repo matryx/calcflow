@@ -5,24 +5,15 @@ using UnityEngine;
 public class CartesianManager : MonoBehaviour
 {
     public static CartesianManager _instance;
-    void Awake(){
+    public delegate void ScaleChangedCallback(float newScale);
+    event ScaleChangedCallback ScaleChangedEvent;
+    void Awake()
+    {
         _instance = this;
     }
 
-    [SerializeField]
-    public AxisLabelManager xLabel;
-    [SerializeField]
-    public AxisLabelManager yLabel;
-    [SerializeField]
-    public AxisLabelManager zLabel;
-
+[SerializeField]
     private float range = 10;
-    private void UpdateAxis(float newRange)
-    {
-        xLabel.Max = range; xLabel.Min = -range;
-        yLabel.Max = range; yLabel.Min = -range;
-        zLabel.Max = range; zLabel.Min = -range;
-    }
 
     public float GetScale()
     {
@@ -38,8 +29,22 @@ public class CartesianManager : MonoBehaviour
         else if (newScale != range)
         {
             range = newScale;
-            UpdateAxis(range);
+            //UpdateAxis(range);
+            if (ScaleChangedEvent != null)
+            {
+                ScaleChangedEvent.Invoke(newScale);
+            }
         }
+    }
 
+    public void AddScaleCallback(ScaleChangedCallback callback)
+    {
+        callback(range);
+        ScaleChangedEvent += callback;
+    }
+
+    public void RemoveScaleCallback(ScaleChangedCallback callback)
+    {
+        ScaleChangedEvent -= callback;
     }
 }

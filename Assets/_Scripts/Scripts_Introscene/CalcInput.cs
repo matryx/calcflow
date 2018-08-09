@@ -67,6 +67,8 @@ public class CalcInput : MonoBehaviour
         errorColor = Color.red;
         ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
         errorPopup = Instantiate(Resources.Load("Popups/VariableError")) as GameObject;
+        errorPopup.transform.localEulerAngles = Vector3.zero;
+
         errorPopup.SetActive(false);
     }
 
