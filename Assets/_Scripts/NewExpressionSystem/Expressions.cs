@@ -22,8 +22,8 @@ public class Expressions : MonoBehaviour
 
     //TODO:
     // 1 - fix pi symbol
-    // 2 - make add button bigger
-    // 3 - edit files to follow coding standard
+    // 2 - integrate secondary menu with new calc
+    // 3 - get generate mesh and save expression working with new calc system 
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
@@ -31,12 +31,13 @@ public class Expressions : MonoBehaviour
 
     //BUGS:
     // 1 - parametric won't graph until you type a variable
-    // 3 - no option to have no vec fields showing
+    // 2 - no option to have no vec fields showing
+    // 3 - fading in isn't quite working (not lerping like fadeOut does)
 
     //DONE:
     // 1 - fixed fade in when things coming in from bottom but not from top
-    // 2 - fixed bug with variable errors and variable text size 
-    // 3 - fixed bug with parametric only graphing one expression after hiding
+    // 2 - merged develop into my branch
+    // 3 - got presetMenu showing up properly and graphing default but UI not updating unless you select body
 
     void Awake()
     {

@@ -106,7 +106,7 @@ public class ParticleAnimationSettings : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (responder.isReady)
+        if (responder != null && responder.isReady)
         {
             responder.isReady = false;
         }

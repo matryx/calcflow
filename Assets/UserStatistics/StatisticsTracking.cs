@@ -386,7 +386,7 @@ namespace Calcflow.UserStatistics
             string prepend = "<color=#707000>";
             string append = "</color>";
 
-            Debug.Log(prepend + toPrint + append);
+            //Debug.Log(prepend + toPrint + append);
         }
 
     }

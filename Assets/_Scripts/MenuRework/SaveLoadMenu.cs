@@ -51,12 +51,15 @@ public class SaveLoadMenu : MonoBehaviour
     JoyStickAggregator joyStickAggregator;
     FlexMenu flexMenu;
 
+    //TODO:
+    // 1 - change calls to AddObject to AddToScroll
+
     private void Awake()
     {
         _instance = this;
     }
 
-    //public void Initialize(CalcManager calcManager)
+    //public void Initialize(CalculatorManager calcManager)
     public void Initialize(ParametricManager paramManager)
     {
         this.calcManager = paramManager;

@@ -23,7 +23,7 @@ public class ScrollEditor : Editor
 
     SerializedProperty movementSpeed;
     SerializedProperty fadeSpeed;
-    SerializedProperty fadeInDelay;
+    //SerializedProperty fadeInDelay;
 
     void OnEnable()
     {
@@ -39,7 +39,7 @@ public class ScrollEditor : Editor
 
         movementSpeed = serializedObject.FindProperty("movementSpeed");
         fadeSpeed = serializedObject.FindProperty("fadeSpeed");
-        fadeInDelay = serializedObject.FindProperty("fadeInDelay");
+        //fadeInDelay = serializedObject.FindProperty("fadeInDelay");
     }
 
     protected static bool placementFold = true;
@@ -76,7 +76,7 @@ public class ScrollEditor : Editor
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(movementSpeed);
             EditorGUILayout.PropertyField(fadeSpeed);
-            EditorGUILayout.PropertyField(fadeInDelay);
+            //EditorGUILayout.PropertyField(fadeInDelay);
             EditorGUI.indentLevel--;
         }
 

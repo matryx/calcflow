@@ -67,10 +67,10 @@ public class CalcInput : MonoBehaviour
         errorColor = Color.red;
         ColorUtility.TryParseHtmlString("#4072ABFF", out selectedColor);
         errorPopup = Instantiate(Resources.Load("Popups/VariableError")) as GameObject;
+        errorPopup.transform.localEulerAngles = Vector3.zero;
         errorPopup.SetActive(false);
     }
 
-    //called by CalculatorManager
     public void ChangeOutput(CalcOutput calcOutput, CalculatorManager cm)
     {
         this.calcManager = cm;
@@ -79,7 +79,7 @@ public class CalcInput : MonoBehaviour
                 0 : currExpression.tokens.Count;
     }
 
-    public void disablePopup()
+    public void DisablePopup()
     {
         StartCoroutine(ScaleTo(errorPopup.transform, Vector3.one, Vector3.zero, 0.1f));
     }
@@ -98,7 +98,7 @@ public class CalcInput : MonoBehaviour
         if (end == Vector3.zero) obj.gameObject.SetActive(false);
     }
 
-    bool checkForError(string buttonID)
+    bool CheckForError(string buttonID)
     {
         //prevents typing of letters when a variable body is selected
         if (!expressions.GetSelectedBody())
@@ -109,7 +109,7 @@ public class CalcInput : MonoBehaviour
         {
             if (expressions.GetSelectedBody().IsVariable())
             {
-                showError(variableErrorMessage);
+                ShowError(variableErrorMessage);
                 return true;
             }
         }
@@ -120,7 +120,7 @@ public class CalcInput : MonoBehaviour
         {
             if (!vectorFieldVars.Contains(buttonID))
             {
-                showError(vectorFieldErrorMessage);
+                ShowError(vectorFieldErrorMessage);
                 return true;
             }
         }
@@ -128,7 +128,7 @@ public class CalcInput : MonoBehaviour
         return false;
     }
 
-    void showError(string message)
+    void ShowError(string message)
     {
         letterPanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
         variablePanel.GetComponent<KeyboardFlexPanel>().ChangeSelectedColor(errorColor);
@@ -159,9 +159,8 @@ public class CalcInput : MonoBehaviour
                 //if typing a single letter
                 if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
                 {
-                    error = checkForError(buttonID);
+                    error = CheckForError(buttonID);
 
-                    //BUG: shouldn't create variable shortcut when nothing selected
                     if (!error)
                     {
                         calcManager.LetterPressed(buttonID);
@@ -227,9 +226,10 @@ public class CalcInput : MonoBehaviour
             case "Button_end":
                 index = currExpression.tokens.Count;
                 break;
-            case "ToggleCaps":
-                toggleCapital();
-                break;
+            //TODO: re-enable once constants implemented
+            //case "ToggleCaps":
+            //    ToggleCapital();
+            //    break;
                 #endregion
         }
         #endregion
@@ -237,7 +237,7 @@ public class CalcInput : MonoBehaviour
         calcManager.inputReceived = true;
     }
 
-    void toggleCapital()
+    void ToggleCapital()
     {
         foreach (Transform child in letterPanel)
         {

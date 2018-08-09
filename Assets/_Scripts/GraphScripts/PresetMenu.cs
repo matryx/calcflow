@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PresetMenu : MonoBehaviour
 {
-
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         PresetMenu presetMenu;
@@ -23,13 +22,11 @@ public class PresetMenu : MonoBehaviour
 
     public FlexMenu menu;
     public string defaultFunction = "Astroidal Ellipse";
-    //CalcManager calcManager;
-    ParametricManager calcManager;
     public static PresetMenu _instance;
 
     [SerializeField]
     private bool cinquefoilKnot, circle, sphereOutline, hypocloid, hypocloidSurface, trefoilKnot,
-             turnip, wavySurface, highResSphere;
+                 turnip, wavySurface, highResSphere;
     [SerializeField]
     private bool astroidalEllipse, bumpySphere, dinisSurface, figure8, graysSurface, knot, mobius,
                  radialWave, torus;
@@ -37,6 +34,9 @@ public class PresetMenu : MonoBehaviour
     private bool cone, cube, cylinder, sphere, tetrahedron;
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
+
+    ParametricManager calcManager;
+    ExpressionSelector expressionSelector;
     Scroll scroll;
     JoyStickAggregator joyStickAggregator;
 
@@ -48,17 +48,19 @@ public class PresetMenu : MonoBehaviour
     //public void Initialize(CalcManager cm)
     public void Initialize(ParametricManager pm)
     {
+        calcManager = pm;
+        expressionSelector = ExpressionSelector._instance;
         scroll = GetComponentInChildren<Scroll>(true);
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
-        calcManager = pm;
+
         HandleInput(defaultFunction);
         KeyboardInputResponder responder = new KeyboardInputResponder(this);
         menu.RegisterResponder(responder);
-        initializePresetButtons();
+        InitializePresetButtons();
     }
 
     //NOTE: make sure actions aren't getting double registered. 
-    private void initializePresetButtons()
+    private void InitializePresetButtons()
     {
         #region add to presets
         //R1 -> R1
@@ -98,8 +100,7 @@ public class PresetMenu : MonoBehaviour
                 GameObject presetButton = Instantiate(Resources.Load("Preset", typeof(GameObject))) as GameObject;
                 presetButton.GetComponentInChildren<TMPro.TextMeshPro>().text = pair.Key;
                 presetButton.name = pair.Key;
-                presetButton.SetActive(false);
-                scroll.AddObject(presetButton.transform);
+                scroll.AddToScroll(null, presetButton.transform, scroll.GetScrollObjectCount());
                 scroll.objectParent.GetComponent<FlexPanelComponent>().AddAction(presetButton.GetComponent<FlexActionableComponent>());
                 joyStickAggregator.AddForwarder(presetButton.GetComponentInChildren<JoyStickForwarder>());
             }
@@ -119,6 +120,8 @@ public class PresetMenu : MonoBehaviour
         List<string> vmax = ExpressionParser.Parse("");
         List<string> wmin = ExpressionParser.Parse("");
         List<string> wmax = ExpressionParser.Parse("");
+
+        expressionSelector.GenerateNewExpression();
 
         ExpressionSet expressionSet = calcManager.expressionSet;
 
@@ -341,10 +344,10 @@ public class PresetMenu : MonoBehaviour
         expressionSet.AddExpression("X", x);
         expressionSet.AddExpression("Y", y);
         expressionSet.AddExpression("Z", z);
-        expressionSet.AddRange("t", tmin, tmax);
-        expressionSet.AddRange("u", umin, umax);
-        expressionSet.AddRange("v", vmin, vmax);
-        expressionSet.AddRange("w", wmin, wmax);
+        if (tmin.Count > 0) expressionSet.AddRange("t", tmin, tmax);
+        if (umin.Count > 0) expressionSet.AddRange("u", umin, umax);
+        if (vmin.Count > 0) expressionSet.AddRange("v", vmin, vmax);
+        if (wmin.Count > 0) expressionSet.AddRange("w", wmin, wmax);
         calcManager.PresetPressed();
     }
 }

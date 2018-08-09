@@ -5,6 +5,7 @@ using Extensions;
 
 public class ExpressionSelector : QuickButton
 {
+    public static ExpressionSelector _instance;
     Expressions expressions;
 
     ParametricManager paramManager;
@@ -19,12 +20,18 @@ public class ExpressionSelector : QuickButton
     List<string> min;
     List<string> max;
 
+    void Awake()
+    {
+        _instance = this; 
+    }
+
     protected override void Start()
     {
         base.Start();
+
         paramManager = ParametricManager._instance;
         vecFieldManager = VecFieldManager._instance;
-        expressions = GameObject.Find("ExpressionMenu").GetComponentInChildren<Expressions>();
+        expressions = Expressions._instance;
 
         paramPanel = transform.parent.parent.Find("ParametrizationPanel");
         vecPanel = transform.parent.parent.Find("VectorFieldPanel");
@@ -48,6 +55,11 @@ public class ExpressionSelector : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
+        GenerateNewExpression();
+    }
+
+    public void GenerateNewExpression()
+    {
         Expressions.ExpressionType panelType = SetPanelType();
         thisScroll = expressions.GetScroll(panelType);
 
@@ -56,6 +68,7 @@ public class ExpressionSelector : QuickButton
 
         if (xButton)
         {
+            //enables typing 
             xButton.GetComponentInChildren<ExpressionBody>().SelectBody();
             xButton = null;
         }
@@ -83,6 +96,9 @@ public class ExpressionSelector : QuickButton
 
     Expressions.ExpressionType SetPanelType()
     {
+        if (paramPanel == null) paramPanel = transform.parent.parent.Find("ParametrizationPanel");
+        if (vecPanel == null) vecPanel = transform.parent.parent.Find("VectorFieldPanel");
+
         if (paramPanel.gameObject.activeSelf)
         {
             return Expressions.ExpressionType.PARAMET;
@@ -137,11 +153,10 @@ public class ExpressionSelector : QuickButton
     List<Transform> CreateParametricExpression()
     {
         List<Transform> paramComponents = new List<Transform>();
-        ExpressionSet expressionSet = null;
 
         GameObject param = Instantiate(Resources.Load("Expressions/ParametricExpression", typeof(GameObject))) as GameObject;
         param.GetComponent<ParametricExpression>().Initialize();
-        expressionSet = param.GetComponent<ParametricExpression>().GetExpSet();
+        ExpressionSet expressionSet = param.GetComponent<ParametricExpression>().GetExpSet();
 
         if (!paramManager) paramManager = ParametricManager._instance;
         paramManager.AddExpressionSet(expressionSet);

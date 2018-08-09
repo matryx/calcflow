@@ -32,7 +32,7 @@ public abstract class CalculatorManager : MonoBehaviour
     protected int expressionDisplayLength = 20;
     protected int rangeDisplayLength = 4;
 
-    void Awake()
+    void Start()
     {
         Initialize();
     }
@@ -71,6 +71,7 @@ public abstract class CalculatorManager : MonoBehaviour
     public void ChangeExpressionSet(ExpressionSet ES)
     {
         expressionSet = ES;
+        print("<color=blue>EXPRESSION SET: </color>" + expressionSet);
         inputReceived = true;
     }
 

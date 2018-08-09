@@ -192,6 +192,8 @@ public class Scroll : MonoBehaviour
 
     void ExecuteAdd()
     {
+        if (objects == null) objects = new List<Transform>();
+
         int temp = atIndexAdd;
 
         foreach (Transform o in toAdd)
@@ -263,6 +265,7 @@ public class Scroll : MonoBehaviour
         adding = true;
     }
 
+    //TODO: make this a private call, things should be calling AddToScroll only
     public void AddObject(Transform newObj)
     {
         adding = true;

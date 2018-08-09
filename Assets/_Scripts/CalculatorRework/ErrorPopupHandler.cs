@@ -30,7 +30,7 @@ public class ErrorPopupHandler : MonoBehaviour {
         switch (buttonID)
         {
             case "Close":
-                calcInput.disablePopup();
+                calcInput.DisablePopup();
                 break;
         }
     }

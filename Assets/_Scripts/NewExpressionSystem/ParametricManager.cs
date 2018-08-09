@@ -20,8 +20,12 @@ public class ParametricManager : CalculatorManager
         calcInput = CalcInput._instance;
         boundsManager = BoundsManager._instance;
         outputManager = OutputManager._instance;
+
         //saveLoadMenu = SaveLoadMenu._instance;
-        //presetMenu = PresetMenu._instance;
+        //saveLoadMenu.Initialize(this);
+
+        presetMenu = PresetMenu._instance;
+        presetMenu.Initialize(this);
 
         paramScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
         joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
@@ -35,8 +39,6 @@ public class ParametricManager : CalculatorManager
             print("OUTPUT INIIALIZED");
             outputManager.Initialize();
         }
-        //presetMenu.Initialize(this);
-        //saveLoadMenu.Initialize(this);
 
         ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback);
 
@@ -97,6 +99,7 @@ public class ParametricManager : CalculatorManager
 
             if (isValid)
             {
+                print("<color=blue>EPXR SET COUNT: </color>" + expressionSetList.Count);
                 paramSurface.UpdateExpressionSet(expressionSetList);
                 paramSurface.GenerateParticles();
             }
