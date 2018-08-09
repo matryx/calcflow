@@ -35,11 +35,11 @@ public class MappingNormals : MonoBehaviour
 
         Vector3 uvw = _1dMapper.swapYandZ(_1dMapper.uvwSelector.lastLocalPos);
 
-        if (es.expressions["X"].expression == "cos(t^2)" &&
-            es.expressions["Y"].expression == "sin(t^2)" &&
-            es.expressions["Z"].expression == "0" &&
-            es.ranges["t"].Min.expression == "0" &&
-            es.ranges["t"].Max.expression == "(2*pi)^(1/2)" &&
+        if (es.GetExpression("X").expression == "cos(t^2)" &&
+            es.GetExpression("Y").expression == "sin(t^2)" &&
+            es.GetExpression("Z").expression == "0" &&
+            es.GetRange("t").Min.expression == "0" &&
+            es.GetRange("t").Max.expression == "(2*pi)^(1/2)" &&
             _1dMapper.findUVW(uvw).x == 0)
         {
             uTangent.gameObject.SetActive(false);

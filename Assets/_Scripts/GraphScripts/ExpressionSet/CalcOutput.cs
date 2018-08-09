@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 [System.Serializable]
 public abstract class CalcOutput
 {
     public List<string> tokens;
     public string rawText;
     public AK.Expression AKExpression;
+    public abstract List<string> ClearTokens();
+
 
     public void PrintOut()
     {
@@ -43,8 +44,6 @@ public abstract class CalcOutput
             {
                 equation.Insert(i++, "*");
             }
-
-
         }
         while (paren < 0)
         {
@@ -59,26 +58,13 @@ public abstract class CalcOutput
         rawText = string.Join("", equation.ToArray());
     }
 
-    public virtual bool IsValid()
-    {
-        try
-        {
-            AK.ValidityChecker.CheckValidity(AK.SolverTools.RemoveWhiteSpace(rawText));
-            return true;
-        }
-        catch (AK.ESSyntaxErrorException ex)
-        {
-            return false;
-        }
-    }
-
     public virtual bool GenerateAKSolver(AK.ExpressionSolver solver)
     {
         try
         {
             AKExpression = solver.SymbolicateExpression(rawText);
         }
-        catch (AK.ESSyntaxErrorException ex)
+        catch (System.Exception exception)
         {
             return false;
         }

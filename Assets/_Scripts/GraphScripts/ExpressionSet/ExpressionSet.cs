@@ -7,17 +7,77 @@ using Calcflow.UserStatistics;
 [System.Serializable]
 public class ExpressionSet
 {
-
-
-    public Dictionary<string, Expression> expressions;
-    public Dictionary<string, RangePair> ranges;
+    private Dictionary<string, Expression> expressions;
+    private Dictionary<string, RangePair> ranges;
+    public Dictionary<string, RangePair> hiddenRanges;
     public Dictionary<string, bool> expValidity = new Dictionary<string, bool>();
     public AK.ExpressionSolver solver = new AK.ExpressionSolver();
 
-    // string GetExpression(int i)
-    // {
-    //     return expressions[i].expression;
-    // }
+    private static Dictionary<CalcOutput, ExpressionSet> expressionSetDict = new Dictionary<CalcOutput, ExpressionSet>();
+    private void setExpressionSet(CalcOutput calcOutput)
+    {
+        if (expressionSetDict.ContainsKey(calcOutput))
+        {
+            expressionSetDict[calcOutput] = this;
+        }
+        else
+        {
+            expressionSetDict.Add(calcOutput, this);
+        }
+    }
+    public static ExpressionSet getExpressionSet(CalcOutput calcOutput)
+    {
+        ExpressionSet result;
+        if (expressionSetDict.TryGetValue(calcOutput, out result))
+        {
+            return result;
+        }
+        else
+        {
+            Debug.Log("<color=red> calcOutput not in any ExpressionSet </color>");
+            return null;
+        }
+    }
+    private static void removeExpressionSet(CalcOutput calcOutput)
+    {
+        expressionSetDict.Remove(calcOutput);
+    }
+
+    public int GetTotalOccurence(string target)
+    {
+        int totalCount = 0;
+
+        foreach (KeyValuePair<string, Expression> entry in expressions)
+        {
+            totalCount += entry.Value.GetOccurences(target);
+        }
+
+        return totalCount;
+    }
+
+    public int GetExprCount()
+    {
+        return expressions.Count;
+    }
+
+    public List<string> GetExprKeys()
+    {
+        return new List<string>(expressions.Keys);
+    }
+
+    public Expression GetExpression(string name)
+    {
+        Expression value;
+        if (expressions.TryGetValue(name, out value))
+        {
+            return value;
+        }
+        else
+        {
+            Debug.Log("<color=red> Expression does not exist </color>");
+            return null;
+        }
+    }
 
     public void AddExpression(string variable, Expression expression)
     {
@@ -31,6 +91,51 @@ public class ExpressionSet
             {
                 expressions.Add(variable, expression);
             }
+            setExpressionSet(expression);
+        }
+    }
+
+    public int GetRangeCount()
+    {
+        return ranges.Count;
+    }
+
+    public List<string> GetRangeKeys()
+    {
+        return new List<string>(ranges.Keys);
+    }
+
+    public RangePair GetRange(string name)
+    {
+        RangePair value;
+        if (ranges.TryGetValue(name, out value))
+        {
+            return value;
+        }
+        else
+        {
+            Debug.Log("<color=red> Range does not exist </color>");
+            return null;
+        }
+    }
+
+    public void ReAddVariable(string v)
+    {
+        RangePair temp = hiddenRanges[v];
+        hiddenRanges.Remove(v);
+
+        AddRange(v, temp);
+    }
+
+    public void RemoveVariable(string v)
+    {
+        RangePair temp;
+        if (ranges.TryGetValue(v, out temp))
+        {
+            ranges.Remove(v);
+            removeExpressionSet(temp.Min);
+            removeExpressionSet(temp.Max);
+            hiddenRanges.Add(v, temp);
         }
     }
 
@@ -42,7 +147,9 @@ public class ExpressionSet
         }
         else
         {
-            expressions.Add(variable, new Expression(tokens));
+            Expression newES = new Expression(tokens);
+            expressions.Add(variable, newES);
+            setExpressionSet(newES);
         }
     }
 
@@ -58,6 +165,8 @@ public class ExpressionSet
             {
                 ranges.Add(variable, rangePair);
             }
+            setExpressionSet(rangePair.Min);
+            setExpressionSet(rangePair.Max);
         }
     }
     public void AddRange(string variable, Range rangeMin, Range rangeMax)
@@ -80,6 +189,8 @@ public class ExpressionSet
     {
         if (ranges.ContainsKey(variable))
         {
+            removeExpressionSet(ranges[variable].Min);
+            removeExpressionSet(ranges[variable].Max);
             ranges.Remove(variable);
         }
     }
@@ -87,15 +198,30 @@ public class ExpressionSet
     public ExpressionSet()
     {
         expressions = new Dictionary<string, Expression>();
-        expressions.Add("X", new Expression());
-        expressions.Add("Y", new Expression());
-        expressions.Add("Z", new Expression());
+        AddExpression("X", new Expression());
+        AddExpression("Y", new Expression());
+        AddExpression("Z", new Expression());
 
+        //need to change later
         ranges = new Dictionary<string, RangePair>();
-        AddRange("t");
-        AddRange("u");
-        AddRange("v");
-        AddRange("w");
+        hiddenRanges = new Dictionary<string, RangePair>();
+    }
+
+    public static ExpressionSet CreateEmptySet()
+    {
+        List<string> emptyTokens = new List<string>();
+        emptyTokens.Add("0");
+
+        ExpressionSet ES = new ExpressionSet();
+        emptyTokens.Add("x");
+        ES.AddExpression("X", new Expression(emptyTokens));
+        emptyTokens.Remove("x");
+        ES.AddExpression("Y", new Expression(emptyTokens));
+        ES.AddExpression("Z", new Expression(emptyTokens));
+
+        ES.AddRange("x", new RangePair(new Range(emptyTokens), new Range(emptyTokens)));
+        ES.CompileAll();
+        return ES;
     }
 
     public ExpressionSet DeepCopy()
@@ -104,13 +230,13 @@ public class ExpressionSet
         newEs.expressions = new Dictionary<string, Expression>();
         foreach (string key in expressions.Keys)
         {
-            newEs.expressions.Add(key, new Expression(expressions[key]));
+            newEs.AddExpression(key, new Expression(expressions[key]));
         }
 
         newEs.ranges = new Dictionary<string, RangePair>();
         foreach (string key in ranges.Keys)
         {
-            newEs.ranges.Add(key, new RangePair(ranges[key]));
+            newEs.AddRange(key, new RangePair(ranges[key]));
         }
 
         newEs.expValidity = new Dictionary<string, bool>(expValidity);
@@ -132,21 +258,22 @@ public class ExpressionSet
     internal ExpressionSet(string[] rangeKeys, List<RangePair> rangePairs, string[] ExpressionKeys, List<Expression> ExpressionValues)
     {
         ranges = new Dictionary<string, RangePair>();
+        hiddenRanges = new Dictionary<string, RangePair>();
+
         for (int i = 0; i < rangePairs.Count; i++)
         {
-            ranges.Add(rangeKeys[i], rangePairs[i]);
+            AddRange(rangeKeys[i], rangePairs[i]);
         }
 
         expressions = new Dictionary<string, Expression>();
         for (int i = 0; i < ExpressionValues.Count; i++)
         {
-            expressions.Add(ExpressionKeys[i], ExpressionValues[i]);
+            AddExpression(ExpressionKeys[i], ExpressionValues[i]);
         }
     }
 
     public bool CompileAll()
     {
-        Debug.Log("compiling");
         bool isValid = true;
         foreach (string RO in ranges.Keys)
         {
@@ -206,34 +333,48 @@ public class SerializableExpressionSet
 
     public SerializableExpressionSet(ExpressionSet es)
     {
-        rangeKeys = new string[es.ranges.Count];
-        es.ranges.Keys.CopyTo(rangeKeys, 0);
+        rangeKeys = new string[es.GetRangeCount()];
+        es.GetRangeKeys().CopyTo(rangeKeys, 0);
         foreach (string key in rangeKeys)
         {
-            rangePairs.Add(new SerializableRangePair(es.ranges[key]));
+            rangePairs.Add(new SerializableRangePair(es.GetRange(key)));
         }
-        ExpressionKeys = new string[es.expressions.Count];
-        es.expressions.Keys.CopyTo(ExpressionKeys, 0);
+        ExpressionKeys = new string[es.GetExprCount()];
+        es.GetExprKeys().CopyTo(ExpressionKeys, 0);
         foreach (string key in ExpressionKeys)
         {
-            ExpressionValues.Add(es.expressions[key].rawText);
+            ExpressionValues.Add(es.GetExpression(key).rawText);
         }
     }
 
     public ExpressionSet ConvertToExpressionSet()
     {
-        return new ExpressionSet(rangeKeys, DeserializeRangePairs(), ExpressionKeys, DeserializeExpression());
+        ExpressionSet es = new ExpressionSet();
+        List<RangePair> rps = DeserializeRangePairs(es);
+        for (int i = 0; i < rps.Count(); i++)
+        {
+            es.AddRange(rangeKeys[i], rps[i]);
+        }
+        List<Expression> expl = DeserializeExpression(es);
+        for (int i = 0; i < rps.Count(); i++)
+        {
+            es.AddExpression(ExpressionKeys[i], expl[i]);
+        }
+
+        return es;
     }
 
-    private List<RangePair> DeserializeRangePairs()
+    private List<RangePair> DeserializeRangePairs(ExpressionSet es)
     {
         return rangePairs.Select(x => x.Deserialize()).ToList();
     }
-    private List<Expression> DeserializeExpression()
+    private List<Expression> DeserializeExpression(ExpressionSet es)
     {
         return ExpressionValues.Select(exp => new Expression(ExpressionParser.Parse(exp))).ToList();
     }
 }
+
+
 
 [System.Serializable]
 public class SerializableRangePair

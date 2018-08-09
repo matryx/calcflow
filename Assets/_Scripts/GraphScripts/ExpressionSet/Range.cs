@@ -9,6 +9,12 @@ public class Range : CalcOutput
     float val;
     public bool Exclusive = false;
 
+    public override List<string> ClearTokens()
+    {
+        tokens.Clear();
+        return null;
+    }
+
     public float Value
     {
         get
@@ -41,7 +47,6 @@ public class Range : CalcOutput
         rawText = "";
         this.tokens = tokens;
     }
-
 
     public Range()
     {

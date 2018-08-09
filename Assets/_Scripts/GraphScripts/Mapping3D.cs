@@ -43,27 +43,28 @@ public class Mapping3D : MonoBehaviour
 
     void ApplyRangeAdjustements()
     {
-        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
+        ExpressionSet es = calcManager.expressionSet;
+
         float min, max;
         if (ULabelManager != null)
         {
 
-            min = -10 + (_params["u"].Min.Exclusive ? exclusivemodifier : 0);
-            max = 10 - (_params["u"].Max.Exclusive ? exclusivemodifier : 0);
+            min = -10 + (es.GetRange("u").Min.Exclusive ? exclusivemodifier : 0);
+            max = 10 - (es.GetRange("u").Max.Exclusive ? exclusivemodifier : 0);
             uvwSelector.SetXRange(min, max);
         }
         if (VLabelManager != null)
         {
 
-            min = -10 + (_params["v"].Min.Exclusive ? exclusivemodifier : 0);
-            max = 10 - (_params["v"].Max.Exclusive ? exclusivemodifier : 0);
+            min = -10 + (es.GetRange("v").Min.Exclusive ? exclusivemodifier : 0);
+            max = 10 - (es.GetRange("v").Max.Exclusive ? exclusivemodifier : 0);
             uvwSelector.SetZRange(min, max);
         }
         if (WLabelManager != null)
         {
 
-            min = -10 + (_params["w"].Min.Exclusive ? exclusivemodifier : 0);
-            max = 10 - (_params["w"].Max.Exclusive ? exclusivemodifier : 0);
+            min = -10 + (es.GetRange("w").Min.Exclusive ? exclusivemodifier : 0);
+            max = 10 - (es.GetRange("w").Max.Exclusive ? exclusivemodifier : 0);
             uvwSelector.SetYRange(min, max);
         }
 
@@ -77,13 +78,13 @@ public class Mapping3D : MonoBehaviour
     public Vector3 findUVW(Vector3 xyz)
     {
         Vector3 temp = Vector3.zero;
-        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
-        if (_params.ContainsKey("u"))
-            temp.x = (10 + xyz.x) * (_params["u"].Max.Value - _params["u"].Min.Value) / 20 + _params["u"].Min.Value;
-        if (_params.ContainsKey("v"))
-            temp.y = (10 + xyz.y) * (_params["v"].Max.Value - _params["v"].Min.Value) / 20 + _params["v"].Min.Value;
-        if (_params.ContainsKey("w"))
-            temp.z = (10 + xyz.z) * (_params["w"].Max.Value - _params["w"].Min.Value) / 20 + _params["w"].Min.Value;
+        ExpressionSet es = calcManager.expressionSet;
+        if (es.GetRangeKeys().Contains("u"))
+            temp.x = (10 + xyz.x) * (es.GetRange("u").Max.Value - es.GetRange("u").Min.Value) / 20 + es.GetRange("u").Min.Value;
+        if (es.GetRangeKeys().Contains("v"))
+            temp.y = (10 + xyz.y) * (es.GetRange("v").Max.Value - es.GetRange("v").Min.Value) / 20 + es.GetRange("v").Min.Value;
+        if (es.GetRangeKeys().Contains("w"))
+            temp.z = (10 + xyz.z) * (es.GetRange("w").Max.Value - es.GetRange("w").Min.Value) / 20 + es.GetRange("w").Min.Value;
         return temp;
     }
 
@@ -91,20 +92,20 @@ public class Mapping3D : MonoBehaviour
     {
         Vector3 output = new Vector3();
         ExpressionSet es = calcManager.expressionSet;
-        float scale = calcManager.paramSurface.currentScale;
+        float scale = CartesianManager._instance.GetScale();
 
-        foreach (string key in es.expressions.Keys)
+        foreach (string key in es.GetExprKeys())
         {
             AK.ExpressionSolver solver = es.solver;
-            if (es.ranges.ContainsKey("u")) solver.SetGlobalVariable("u", uvw.x);
-            if (es.ranges.ContainsKey("v")) solver.SetGlobalVariable("v", uvw.y);
-            if (es.ranges.ContainsKey("w")) solver.SetGlobalVariable("w", uvw.z);
+            if (es.GetRangeKeys().Contains("u")) solver.SetGlobalVariable("u", uvw.x);
+            if (es.GetRangeKeys().Contains("v")) solver.SetGlobalVariable("v", uvw.y);
+            if (es.GetRangeKeys().Contains("w")) solver.SetGlobalVariable("w", uvw.z);
         }
         if (es.IsCompiled())
         {
-            output.x = (float)es.expressions["X"].AKExpression.Evaluate();
-            output.y = (float)es.expressions["Y"].AKExpression.Evaluate();
-            output.z = (float)es.expressions["Z"].AKExpression.Evaluate();
+            output.x = (float)es.GetExpression("X").AKExpression.Evaluate();
+            output.y = (float)es.GetExpression("Y").AKExpression.Evaluate();
+            output.z = (float)es.GetExpression("Z").AKExpression.Evaluate();
         }
         return output * scale;
     }
@@ -112,21 +113,22 @@ public class Mapping3D : MonoBehaviour
 
     void ManageText()
     {
-        Dictionary<string, RangePair> _params = calcManager.expressionSet.ranges;
-        if (_params.ContainsKey("u") && ULabelManager != null)
+        ExpressionSet es = calcManager.expressionSet;
+
+        if (es.GetRangeKeys().Contains("u") && ULabelManager != null)
         {
-            ULabelManager.Min = _params["u"].Min.Value;
-            ULabelManager.Max = _params["u"].Max.Value;
+            ULabelManager.Min = es.GetRange("u").Min.Value;
+            ULabelManager.Max = es.GetRange("u").Max.Value;
         }
-        if (_params.ContainsKey("v") && VLabelManager != null)
+        if (es.GetRangeKeys().Contains("v") && VLabelManager != null)
         {
-            VLabelManager.Max = _params["v"].Max.Value;
-            VLabelManager.Min = _params["v"].Min.Value;
+            VLabelManager.Max = es.GetRange("v").Max.Value;
+            VLabelManager.Min = es.GetRange("v").Min.Value;
         }
-        if (_params.ContainsKey("w") && WLabelManager != null)
+        if (es.GetRangeKeys().Contains("w") && WLabelManager != null)
         {
-            WLabelManager.Min = _params["w"].Min.Value;
-            WLabelManager.Max = _params["w"].Max.Value;
+            WLabelManager.Min = es.GetRange("w").Min.Value;
+            WLabelManager.Max = es.GetRange("w").Max.Value;
         }
 
 
