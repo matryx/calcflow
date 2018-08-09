@@ -11,10 +11,7 @@ public class VecFieldManager : CalculatorManager
     OutputManager outputManager;
 
     Scroll vecScroll;
-    PresetMenu presetMenu;
-    SaveLoadMenu saveLoadMenu;
-    
-    //called by calculatorManager on start
+
     protected override void Initialize()
     {
         _instance = this;
@@ -65,27 +62,39 @@ public class VecFieldManager : CalculatorManager
     {
         if (inputReceived)
         {
-            manageText();
+            ManageText();
             inputReceived = false;
             updateOverlay = true;
             vecField.dens = CustomVectorField.SampleDensity.HIGH;
 
-            bool isValid = expressionSet.CompileAll();
-            ManageFeedback();
+
+            bool isValid;
+
+            if (expressionSet != null)
+            {
+                isValid = expressionSet.CompileAll();
+                ManageFeedback();
+            }
+            else
+            {
+                isValid = true;
+            }
+
+
             if (isValid)
             {
-                vecField.es = expressionSet.ShallowCopy();
+                vecField.es = (expressionSet == null) ? null : expressionSet.ShallowCopy();
                 vecField.UpdateFunctions();
             }
 
             if (flowline != null)
             {
-                flowline.t_min = expressionSet.GetRange("t").Min.expression;
-                flowline.t_max = expressionSet.GetRange("t").Max.expression;
+                flowline.t_min = (expressionSet == null) ? "0" : expressionSet.GetRange("t").Min.expression;
+                flowline.t_max = (expressionSet == null) ? "0" : expressionSet.GetRange("t").Max.expression;
                 flowline.ForceUpdate();
             }
         }
     }
 
-    public override void deleteVariables(List<string> toDelete) { }
+    public override void DeleteVariables(List<string> toDelete) { }
 }

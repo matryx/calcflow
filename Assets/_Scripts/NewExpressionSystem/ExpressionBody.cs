@@ -164,7 +164,7 @@ public class ExpressionBody : QuickButton
 
     void DisableActionButtons(ExpressionBody selectedBody)
     {
-        selectedBody.GetExpressionParent().gameObject.GetInterface<ExpressionTabInterface>().GetExpActions().disableButtons();
+        selectedBody.GetExpressionParent().gameObject.GetInterface<ExpressionTabInterface>().GetExpActions().DisableButtons();
     }
 
     //NOTE: sets selected expression and body to be null
@@ -287,13 +287,13 @@ public class ExpressionBody : QuickButton
 
             if (thisBodySelected)
             {
-                hideThisBody();
+                HideThisBody();
                 calcInput.ChangeOutput(null, calcManager);
             }
         }
     }
 
-    void hideThisBody()
+    void HideThisBody()
     {
         if (calcManager == ParametricManager._instance)
         {

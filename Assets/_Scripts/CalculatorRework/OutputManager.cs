@@ -3,17 +3,49 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class OutputManager : MonoBehaviour {
-    CalculatorManager calcManager;
     public static OutputManager _instance;
+
+    CalculatorManager calcManager;
+    CustomParametrizedSurface paramSurface;
+    SaveLoadMenu saveLoadMenu;
+
+    FlexActionableComponent saveButton;
+
+    //PRESTREAM CODE
+    bool saveable = true;
+    bool Saveable
+    {
+        get
+        {
+            return saveable;
+        }
+        set
+        {
+            if (saveable == false && value == true)
+            {
+                saveButton.SetState(0);
+            }
+            else if (value == false)
+            {
+                saveButton.SetState(-1);
+            }
+            saveable = value;
+        }
+    }
 
     void Awake()
     {
-        _instance = this;
-        calcManager = ParametricManager._instance;
+        Initialize();
     }
 
     public void Initialize()
     {
+        _instance = this;
+        calcManager = ParametricManager._instance;
+        paramSurface = CustomParametrizedSurface._instance;
+        saveLoadMenu = SaveLoadMenu._instance;
+
+        //TODO: initialize saveButton
         //saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
     }
 
@@ -48,14 +80,17 @@ public class OutputManager : MonoBehaviour {
                 calcManager.toExport = true;
                 break;
             case "Save":
-                //calcManager.saveLoadMenu.Save();
-
-                //if (Saveable)
-                //{
-                //}
+                if (Saveable)
+                {
+                    saveLoadMenu.Save();
+                }
                 break;
         }
     }
 
-    void Update() { }
+    void Update()
+    {
+        //TODO: uncomment
+        //Saveable = !paramSurface.isGraphing();
+    }
 }

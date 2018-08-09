@@ -82,10 +82,10 @@ public class Scroll : MonoBehaviour
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
-        if (jsReceiver != null) jsReceiver.JoyStickTouched += Scroll;
+        if (jsReceiver != null) jsReceiver.JoyStickTouched += ScrollPage;
     }
 
-    void Scroll(VRController c, ControllerComponentArgs e)
+    void ScrollPage(VRController c, ControllerComponentArgs e)
     {
         if (e.x == 0 && e.y == 0) return;
 
@@ -479,7 +479,7 @@ public class Scroll : MonoBehaviour
     {
         bool fadeIn = true;
         bool fadeOut = false;
-        float fadeInDelay = 0.5f;
+        float fadeInDelay = 0.2f;
 
         if (currDirection == direction.UP || currDirection == direction.LEFT)
         {

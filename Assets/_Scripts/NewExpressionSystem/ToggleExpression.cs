@@ -68,7 +68,7 @@ public class ToggleExpression : QuickButton
             param.SetButtonInputColor(grayShow);
         }
 
-        expressionActions.GetComponent<ExpressionActions>().disableButtons();
+        expressionActions.GetComponent<ExpressionActions>().DisableButtons();
         transform.GetComponent<Renderer>().material = (active) ? hideMat : showMat;
         active = !active;
     }

@@ -231,29 +231,17 @@ public class CustomVectorField : MonoBehaviour
     public void UpdateFunctions()
     {
         Clear();
-        //if (es.CompileAll())
-        //{
-        es.CompileAll();
-        expX = solver.SymbolicateExpression(es.GetExpression("X").expression);
-        expY = solver.SymbolicateExpression(es.GetExpression("Y").expression);
-        expZ = solver.SymbolicateExpression(es.GetExpression("Z").expression);
-        //}
-        //else
-        //{
-        //    return;
-        //}
-        //try
-        //{
-        //    expX = solver.SymbolicateExpression(expressionX);
-        //    expY = solver.SymbolicateExpression(expressionY);
-        //    expZ = solver.SymbolicateExpression(expressionZ);
-        //}
-        //catch
-        //{
-        //    return;
-        //}
-        CalculateVectors();
-        DrawVectorField();
+
+        if (es != null)
+        {
+            es.CompileAll();
+            expX = solver.SymbolicateExpression(es.GetExpression("X").expression);
+            expY = solver.SymbolicateExpression(es.GetExpression("Y").expression);
+            expZ = solver.SymbolicateExpression(es.GetExpression("Z").expression);
+
+            CalculateVectors();
+            DrawVectorField();
+        }
     }
 
     Geometry CreateCylinder(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)

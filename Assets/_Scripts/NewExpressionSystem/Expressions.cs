@@ -31,12 +31,12 @@ public class Expressions : MonoBehaviour
 
     //BUGS:
     // 1 - parametric won't graph until you type a variable
+    // 3 - no option to have no vec fields showing
 
     //DONE:
     // 1 - fixed fade in when things coming in from bottom but not from top
-    // 2 - fixed feedback issue
-    // 3 - added error popups for vec field
-    // 4 - replaced all texts with tmpro/image
+    // 2 - fixed bug with variable errors and variable text size 
+    // 3 - fixed bug with parametric only graphing one expression after hiding
 
     void Awake()
     {

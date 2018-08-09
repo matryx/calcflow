@@ -44,7 +44,7 @@ public class DeleteExpression : QuickButton
         popup.gameObject.SetActive(true);
         popup.localPosition = new Vector3(3.67f, 0.31f, -0.02f);
         StartCoroutine(ScaleTo(popup, Vector3.zero, Vector3.one, 0.1f));
-        expressionActions.disableButtons();
+        expressionActions.DisableButtons();
     }
 
     protected override void ButtonExitBehavior(GameObject other) { }

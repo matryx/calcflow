@@ -165,6 +165,11 @@ public class FlowLineParticles : MonoBehaviour
         float tmax;
 
         Vector3 start = referencePoint.lastLocalPos;
+        ExpressionSet vecES = vectorField.es;
+        if (vecES == null)
+        {
+            vecES = ExpressionSet.CreateEmptySet();
+        }
         //lck = new object();
         //thread_num = SystemInfo.processorCount;
 
@@ -198,9 +203,9 @@ public class FlowLineParticles : MonoBehaviour
         solver.SetGlobalVariable("x", referencePoint.lastLocalPos.x);
         solver.SetGlobalVariable("y", referencePoint.lastLocalPos.y);
         solver.SetGlobalVariable("z", referencePoint.lastLocalPos.z);
-        expX = solver.SymbolicateExpression(vectorField.es.GetExpression("X").expression);
-        expY = solver.SymbolicateExpression(vectorField.es.GetExpression("Y").expression);
-        expZ = solver.SymbolicateExpression(vectorField.es.GetExpression("Z").expression);
+        expX = solver.SymbolicateExpression(vecES.GetExpression("X").expression);
+        expY = solver.SymbolicateExpression(vecES.GetExpression("Y").expression);
+        expZ = solver.SymbolicateExpression(vecES.GetExpression("Z").expression);
         varX = solver.GetGlobalVariable("x");
         varY = solver.GetGlobalVariable("y");
         varZ = solver.GetGlobalVariable("z");

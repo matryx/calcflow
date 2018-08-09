@@ -4,23 +4,13 @@ using UnityEngine;
 
 public class ParametricManager : CalculatorManager
 {
-    //[HideInInspector]
-    //public bool inputReceived;
-
     public static ParametricManager _instance;
     Scroll paramScroll;
     CustomParametrizedSurface paramSurface;
     BoundsManager boundsManager;
-    PresetMenu presetMenu;
-    SaveLoadMenu saveLoadMenu;
+ 
     OutputManager outputManager;
   
-    //Variables in calcManager:
-
-    //public bool updateOverlay = false;
-    //internal bool toExport = false;
-
-    //called by calculatorManager on start
     protected override void Initialize()
     {
         _instance = this;
@@ -76,7 +66,7 @@ public class ParametricManager : CalculatorManager
         inputReceived = true;
     }
 
-    public override void deleteVariables(List<string> toDelete)
+    public override void DeleteVariables(List<string> toDelete)
     {
         foreach (string del in toDelete)
         {
@@ -90,11 +80,21 @@ public class ParametricManager : CalculatorManager
     {
         if (inputReceived)
         {
-            manageText();
+            ManageText();
             inputReceived = false;
             updateOverlay = true;
-            bool isValid = expressionSet.CompileAll();
-            ManageFeedback();
+            bool isValid;
+
+            if (expressionSet != null)
+            {
+                isValid = expressionSet.CompileAll();
+                ManageFeedback();
+            }
+            else
+            {
+                isValid = true;
+            }
+
             if (isValid)
             {
                 paramSurface.UpdateExpressionSet(expressionSetList);

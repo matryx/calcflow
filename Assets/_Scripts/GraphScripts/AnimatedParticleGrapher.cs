@@ -162,6 +162,7 @@ public class AnimatedParticleGrapher : MonoBehaviour
         if (particles.Length != particleCount)
         {
             Debug.LogError("Number of particles not equal to number of passed points");
+            Debug.LogError("Particles: " + particleCount + " Points: " + particles.Length);
             return;
         }
         if (!initialized)

@@ -207,22 +207,21 @@ public class ExpressionSet
         hiddenRanges = new Dictionary<string, RangePair>();
     }
 
-    //CREATES EMPTY EXPRESSION SET
-    public ExpressionSet(List<string> emptyTokens)
+    public static ExpressionSet CreateEmptySet()
     {
-        if (emptyTokens.Count == 0) emptyTokens.Add("0");
+        List<string> emptyTokens = new List<string>();
+        emptyTokens.Add("0");
 
-        expressions = new Dictionary<string, Expression>();
+        ExpressionSet ES = new ExpressionSet();
         emptyTokens.Add("x");
-        AddExpression("X", new Expression(emptyTokens));
+        ES.AddExpression("X", new Expression(emptyTokens));
         emptyTokens.Remove("x");
-        AddExpression("Y", new Expression(emptyTokens));
-        AddExpression("Z", new Expression(emptyTokens));
+        ES.AddExpression("Y", new Expression(emptyTokens));
+        ES.AddExpression("Z", new Expression(emptyTokens));
 
-        ranges = new Dictionary<string, RangePair>();
-        AddRange("x", new RangePair(new Range(emptyTokens), new Range(emptyTokens)));
-        hiddenRanges = new Dictionary<string, RangePair>();
-        this.CompileAll();
+        ES.AddRange("x", new RangePair(new Range(emptyTokens), new Range(emptyTokens)));
+        ES.CompileAll();
+        return ES;
     }
 
     public ExpressionSet DeepCopy()

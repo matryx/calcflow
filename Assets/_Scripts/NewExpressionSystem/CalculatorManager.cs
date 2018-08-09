@@ -6,11 +6,23 @@ public abstract class CalculatorManager : MonoBehaviour
 {
     [HideInInspector]
     public bool inputReceived;
+
     public ExpressionSet expressionSet;
+    public List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
+    public bool updateOverlay = false;
+    public bool toExport = false;
 
     protected CalcInput calcInput;
+    protected JoyStickAggregator joyStickAggregator;
 
+    protected PresetMenu presetMenu;
+    protected SaveLoadMenu saveLoadMenu;
+
+    protected Expressions expressions;
+
+    protected Transform selectedExpr;
     protected Transform feedBack;
+
     protected TMPro.TextMeshPro textInput;
     protected string title;
 
@@ -18,16 +30,7 @@ public abstract class CalculatorManager : MonoBehaviour
     protected Color negativeFeedback = Color.red;
 
     protected int expressionDisplayLength = 20;
-    //TODO: decrease text size to increase range length
-    protected int rangeDisplayLength = 3;
-
-    public bool updateOverlay = false;
-    public bool toExport = false;
-    public List<ExpressionSet> expressionSetList = new List<ExpressionSet>();
-
-    protected Expressions expressions;
-    protected Transform selectedExpr;
-    protected JoyStickAggregator joyStickAggregator;
+    protected int rangeDisplayLength = 4;
 
     void Awake()
     {
@@ -35,7 +38,7 @@ public abstract class CalculatorManager : MonoBehaviour
     }
 
     protected abstract void Initialize();
-    public abstract void deleteVariables(List<string> toDelete);
+    public abstract void DeleteVariables(List<string> toDelete);
 
     protected void addForwarders(Transform obj)
     {
@@ -60,6 +63,7 @@ public abstract class CalculatorManager : MonoBehaviour
 
     public void RemoveExpressionSet(ExpressionSet ES)
     {
+        if (ES == expressionSet) expressionSet = null;
         expressionSetList.Remove(ES);
         inputReceived = true;
     }
@@ -68,12 +72,6 @@ public abstract class CalculatorManager : MonoBehaviour
     {
         expressionSet = ES;
         inputReceived = true;
-    }
-
-    string getExpOption()
-    {
-        title = (expressions.GetSelectedBody()) ? expressions.GetSelectedBody().GetTitle() : "X";
-        return title;
     }
 
     public void ManageFeedback()
@@ -88,7 +86,7 @@ public abstract class CalculatorManager : MonoBehaviour
         if (feedBack != null) feedBack.GetComponent<Renderer>().material.color = expressionSet.expValidity[title] ? positiveFeedback : negativeFeedback;
     }
 
-    public void manageText()
+    public void ManageText()
     {
         selectedExpr = expressions.GetSelectedExpr();
         ExpressionBody exprBody = expressions.GetSelectedBody();
@@ -103,11 +101,19 @@ public abstract class CalculatorManager : MonoBehaviour
         if (textInput != null)
         {
             int displayLength = (exprBody.IsVariable()) ? rangeDisplayLength : expressionDisplayLength;
-            textInput.text = displayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
+
+            if (calcInput.currExpression == null)
+            {
+                textInput.text = "";
+            }
+            else
+            {
+                textInput.text = DisplayText(calcInput.currExpression.tokens, calcInput.index, true, displayLength);
+            }
         }
     }
 
-    public bool letterPressed(string buttonID)
+    public void LetterPressed(string buttonID)
     {
         Transform param = expressions.GetSelectedExpr();
 
@@ -121,21 +127,18 @@ public abstract class CalculatorManager : MonoBehaviour
             }
             else if (expressionSet.GetRange(buttonID) == null)
             {
-                GameObject var = createVariable(param);
+                print("NEW RANGE");
+                GameObject var = CreateVariable(param);
 
                 param.GetComponent<ParametricExpression>().AddVariable(buttonID, var.transform);
                 var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().SetTitle(buttonID);
                 expressionSet.AddRange(buttonID);
                 addForwarders(var.transform);
             }
-
-            return true;
         }
-
-        return false;
     }
 
-    GameObject createVariable(Transform param)
+    GameObject CreateVariable(Transform param)
     {
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
         var.transform.localScale = Vector3.one;
@@ -147,7 +150,7 @@ public abstract class CalculatorManager : MonoBehaviour
         return var;
     }
 
-    public string displayText(List<string> exp, int index0, bool mark, int displayLength)
+    public string DisplayText(List<string> exp, int index0, bool mark, int displayLength)
     {
         string test = "";
         foreach (string s in exp)

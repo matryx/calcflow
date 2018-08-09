@@ -8,17 +8,18 @@ public class ExpressionActions : QuickButton
     Transform delete;
     Transform toggleHide;
     Transform select;
-    Vector3 buttonActiveScale;
+
+    IEnumerator scaleButtonsUp, scaleButtonsDown;
 
     bool menuActive = false;
-    IEnumerator scaleButtonsUp, scaleButtonsDown;
+    Vector3 buttonActiveScale;
 
     void Initialize()
     {
         buttons = new List<Transform>();
 
-        lookForButton("Delete");
-        lookForButton("ToggleHide");
+        LookForButton("Delete");
+        LookForButton("ToggleHide");
 
         foreach (Transform b in buttons)
         {
@@ -28,7 +29,7 @@ public class ExpressionActions : QuickButton
         buttonActiveScale = new Vector3(1f, 1f, 1f);
     }
 
-    void lookForButton(string name)
+    void LookForButton(string name)
     {
         Transform check = transform.parent.Find(name);
         if (check != null) buttons.Add(check);
@@ -40,7 +41,7 @@ public class ExpressionActions : QuickButton
         Initialize();
     }
 
-    public void disableButtons()
+    public void DisableButtons()
     {
         if (!menuActive) return;
 

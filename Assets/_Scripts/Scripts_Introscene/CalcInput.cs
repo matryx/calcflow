@@ -160,11 +160,12 @@ public class CalcInput : MonoBehaviour
                 if (buttonID.Length == 1 && buttonID[0] > 96 && buttonID[0] < 123)
                 {
                     error = checkForError(buttonID);
-                    calcManager.letterPressed(buttonID);
 
                     //BUG: shouldn't create variable shortcut when nothing selected
                     if (!error)
                     {
+                        calcManager.LetterPressed(buttonID);
+
                         if (variableShortcut == null) variableShortcut = VariableShortcut._instance;
                         variableShortcut.recordVarPress(buttonID);
                     }
@@ -197,7 +198,7 @@ public class CalcInput : MonoBehaviour
                     if (ExpressionSet.getExpressionSet(currExpression) == null) break;
                     if (ExpressionSet.getExpressionSet(currExpression).GetTotalOccurence(s) == 0)
                     {
-                        calcManager.deleteVariables(toDelete);
+                        calcManager.DeleteVariables(toDelete);
                     }
                 }
 
@@ -207,7 +208,7 @@ public class CalcInput : MonoBehaviour
                 List<string> toDel = currExpression.ClearTokens();
                 if (toDel == null) break;
 
-                calcManager.deleteVariables(toDel);
+                calcManager.DeleteVariables(toDel);
                 break;
             case "Button_Enter":
                 calcManager.inputReceived = true;

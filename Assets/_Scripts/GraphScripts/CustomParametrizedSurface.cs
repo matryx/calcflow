@@ -41,9 +41,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     private void Awake()
     {
         _instance = this;
-        List<string> emptyTokens = new List<string>();
-        emptyTokens.Add("0");
-        emptyExprSet = new ExpressionSet(emptyTokens);
+        emptyExprSet = ExpressionSet.CreateEmptySet();
     }
 
     // Use this for initialization
@@ -223,6 +221,12 @@ public class CustomParametrizedSurface : MonoBehaviour
         {
             temp.Add(lastParticle);
         }
+        int brokenParticles = particleCount - temp.Count;
+        for (int i = 0; i < brokenParticles; i++)
+        {
+            temp.Add(lastParticle);
+        }
+        Debug.Log("Number of misplaced particles: " + brokenParticles);
         dest = temp.ToArray();
     }
 
