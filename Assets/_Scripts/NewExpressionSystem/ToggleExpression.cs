@@ -25,10 +25,10 @@ public class ToggleExpression : QuickButton
         base.Start();
         expressions = Expressions._instance;
         calcManager = ParametricManager._instance;
-        expressionSet = expressions.getSelectedExprSet();
+        expressionSet = expressions.GetSelectedExprSet();
 
         thisBody = transform.parent.parent.parent.Find("Button_Input").GetComponent<ExpressionBody>();
-        thisExpr = thisBody.getExpressionParent();
+        thisExpr = thisBody.GetExpressionParent();
 
         expressionActions = transform.parent.parent.Find("Body");
 
@@ -48,24 +48,24 @@ public class ToggleExpression : QuickButton
             if (thisExpr.GetComponent<ParametricExpression>())
             {
                 param = thisExpr.GetComponent<ParametricExpression>();
-                expressionSet = param.getExpSet();
+                expressionSet = param.GetExpSet();
                 calcManager.RemoveExpressionSet(expressionSet);
-                param.setTextColor(grayHide);
-                param.setButtonInputColor(grayHide);
-                param.setElementQuadTex(quadHide);
-                param.setActiveStatus(false);
+                param.SetTextColor(grayHide);
+                param.SetButtonInputColor(grayHide);
+                param.SetElementQuadTex(quadHide);
+                param.SetActiveStatus(false);
             }
 
-            if (expressions.getSelectedBody()) expressions.getSelectedBody().deselectCurrBody();
+            if (expressions.GetSelectedBody()) expressions.GetSelectedBody().DeselectCurrBody();
         }
         else            //SHOW
         {
             calcManager.AddExpressionSet(expressionSet);
-            param.setActiveStatus(true);
-            thisBody.selectBody();
-            param.setTextColor(Color.black);
-            param.setElementQuadTex(quadShow);
-            param.setButtonInputColor(grayShow);
+            param.SetActiveStatus(true);
+            thisBody.SelectBody();
+            param.SetTextColor(Color.black);
+            param.SetElementQuadTex(quadShow);
+            param.SetButtonInputColor(grayShow);
         }
 
         expressionActions.GetComponent<ExpressionActions>().disableButtons();

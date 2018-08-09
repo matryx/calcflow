@@ -21,8 +21,9 @@ public class Expressions : MonoBehaviour
     List<Transform> expressions;
 
     //TODO:
-    // 1 -  fix pi symbol
+    // 1 - fix pi symbol
     // 2 - make add button bigger
+    // 3 - edit files to follow coding standard
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
@@ -49,12 +50,12 @@ public class Expressions : MonoBehaviour
         expressions = new List<Transform>();
     }
 
-    public void setManager(CalculatorManager cm)
+    public void SetManager(CalculatorManager cm)
     {
         calcManager = cm;
     }
 
-    public Scroll getScroll(ExpressionType type)
+    public Scroll GetScroll(ExpressionType type)
     {
         switch (type)
         {
@@ -70,33 +71,33 @@ public class Expressions : MonoBehaviour
         return null;
     }
 
-    public void addExpr(Transform exp)
+    public void AddExpr(Transform exp)
     {
         expressions.Add(exp);
         exp.SetParent(transform);
     }
 
-    public Transform getSelectedExpr()
+    public Transform GetSelectedExpr()
     {
         return selectedExpression;
     }
 
-    public ExpressionBody getSelectedBody()
+    public ExpressionBody GetSelectedBody()
     {
         return selectedBody;
     }
 
-    public ExpressionSet getSelectedExprSet()
+    public ExpressionSet GetSelectedExprSet()
     {
         return selectedExpSet;
     }
 
-    public void reselectVecExpression()
+    public void ReselectVecExpression()
     {
-        if (selectedVecBody != null) selectedVecBody.selectBody();
+        if (selectedVecBody != null) selectedVecBody.SelectBody();
     }
 
-    public void setSelectedExpr(Transform expr, ExpressionBody body)
+    public void SetSelectedExpr(Transform expr, ExpressionBody body)
     {
         if (expr == null)
         {
@@ -115,15 +116,15 @@ public class Expressions : MonoBehaviour
         }
     }
 
-    public bool selectedNotNull()
+    public bool SelectedNotNull()
     {
         return (selectedExpression != null);
     }
 
-    public void deleteExpression(Transform del)
+    public void DeleteExpression(Transform del)
     {
-        calcManager.RemoveExpressionSet(del.gameObject.GetInterface<ExpressionTabInterface>().getExpSet());
-        del.gameObject.GetInterface<ExpressionTabInterface>().deleteExpressionFromScroll();
+        calcManager.RemoveExpressionSet(del.gameObject.GetInterface<ExpressionTabInterface>().GetExpSet());
+        del.gameObject.GetInterface<ExpressionTabInterface>().DeleteExpressionFromScroll();
         expressions.Remove(del);
     }
 

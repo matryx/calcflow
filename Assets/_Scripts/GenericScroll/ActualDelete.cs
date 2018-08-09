@@ -20,7 +20,7 @@ public class ActualDelete : QuickButton
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        scroll.deleteObjects(toDelete);
+        scroll.DeleteObjects(toDelete);
         toDelete.Clear();
     }
 

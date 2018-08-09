@@ -27,9 +27,9 @@ public class VariableShortcut : MonoBehaviour
         varButton.name = varName;
         shortcuts.Add(varName, varButton.transform);
 
-        int objCount = thisScroll.getScrollObjectCount();
+        int objCount = thisScroll.GetScrollObjectCount();
         int atIndex = (objCount > 0) ? objCount : 0;
-        thisScroll.addToScroll(null, varButton.transform, atIndex);
+        thisScroll.AddToScroll(null, varButton.transform, atIndex);
         transform.GetComponent<KeyboardFlexPanel>().AddAction(varButton.transform.GetComponent<FlexActionableComponent>());
     }
 
@@ -61,7 +61,7 @@ public class VariableShortcut : MonoBehaviour
         transform.GetComponent<KeyboardFlexPanel>().RemoveAction(buttonToRemove.GetComponent<FlexActionableComponent>());
         varsPressed.Remove(varToRemove);
         shortcuts.Remove(varToRemove);
-        thisScroll.deleteObjects(removeList);
+        thisScroll.DeleteObjects(removeList);
     }
 
     void Update() { }

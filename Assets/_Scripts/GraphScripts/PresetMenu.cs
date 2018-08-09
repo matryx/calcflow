@@ -99,7 +99,7 @@ public class PresetMenu : MonoBehaviour
                 presetButton.GetComponentInChildren<TMPro.TextMeshPro>().text = pair.Key;
                 presetButton.name = pair.Key;
                 presetButton.SetActive(false);
-                scroll.addObject(presetButton.transform);
+                scroll.AddObject(presetButton.transform);
                 scroll.objectParent.GetComponent<FlexPanelComponent>().AddAction(presetButton.GetComponent<FlexActionableComponent>());
                 joyStickAggregator.AddForwarder(presetButton.GetComponentInChildren<JoyStickForwarder>());
             }

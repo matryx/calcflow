@@ -108,7 +108,7 @@ public class SubmissionsMenu : MonoBehaviour
     {
         page = 0;
         submissions.Clear();
-        scroll.clear();
+        scroll.Clear();
     }
 
     public void ProcessTournament(object result)
@@ -203,7 +203,7 @@ public class SubmissionsMenu : MonoBehaviour
 
         button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = submission.getTitle();
 
-        scroll.addObject(button.transform);
+        scroll.AddObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
 
         return button;
@@ -219,7 +219,7 @@ public class SubmissionsMenu : MonoBehaviour
 
         button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = "Load More...";
 
-        scroll.addObject(button.transform);
+        scroll.AddObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
 
         return button;
@@ -231,7 +231,7 @@ public class SubmissionsMenu : MonoBehaviour
         {
             List<Transform> loadButtonTransform = new List<Transform>();
             loadButtonTransform.Add(loadButton.transform);
-            scroll.deleteObjects(new List<Transform>(loadButtonTransform));
+            scroll.DeleteObjects(new List<Transform>(loadButtonTransform));
 
             Destroy(loadButton);
         }

@@ -27,7 +27,7 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
         expressionsList = new List<Transform>();
 
         expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
-        scroll = expressionsClass.getScroll(Expressions.ExpressionType.VECFIELD);
+        scroll = expressionsClass.GetScroll(Expressions.ExpressionType.VECFIELD);
 
         initialized = true;
     }
@@ -41,53 +41,53 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
             expressionsList = new List<Transform>();
 
             expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
-            scroll = expressionsClass.getScroll(Expressions.ExpressionType.VECFIELD);
+            scroll = expressionsClass.GetScroll(Expressions.ExpressionType.VECFIELD);
 
             initialized = true;
         }
     }
 
-    public void setRange(Transform r)
+    public void SetRange(Transform r)
     {
         range = r;
     }
 
-    public void setExpressionX(Transform e)
+    public void SetExpressionX(Transform e)
     {
         expressionX = e;
     }
 
-    public Transform getExpressionX()
+    public Transform GetExpressionX()
     {
         return expressionX;
     }
 
-    public void setSeparator(Transform sep)
+    public void SetSeparator(Transform sep)
     {
         separator = sep;
     }
 
-    public Transform getSeparator()
+    public Transform GetSeparator()
     {
         return separator;
     }
 
-    public ExpressionSet getExpSet()
+    public ExpressionSet GetExpSet()
     {
         return expSet;
     }
 
-    public ExpressionActions getExpActions()
+    public ExpressionActions GetExpActions()
     {
         return expActions;
     }
 
-    public bool getActiveStatus()
+    public bool GetActiveStatus()
     {
         return isActive;
     }
 
-    public void setButtonInputColor(Color col)
+    public void SetButtonInputColor(Color col)
     {
         foreach (Transform t in expressionsList)
         {
@@ -98,12 +98,12 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
         range.Find("Max").Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
     }
 
-    public void setElementQuadTex(Texture tex)
+    public void SetElementQuadTex(Texture tex)
     {
         range.GetChild(0).Find("Quad").GetComponent<Renderer>().material.mainTexture = tex;
     }
 
-    public void setTextColor(Color c)
+    public void SetTextColor(Color c)
     {
         foreach (Transform t in expressionsList)
         {
@@ -128,24 +128,19 @@ public class VectorFieldExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public Scroll getScroll()
-    {
-        return scroll;
-    }
-
-    public void addExpression(Transform expr)
+    public void AddExpression(Transform expr)
     {
         expressionsList.Add(expr);
     }
 
-    public void deleteExpressionFromScroll()
+    public void DeleteExpressionFromScroll()
     {
         List<Transform> rest = new List<Transform>();
         rest.Add(range);
         rest.Add(separator);
 
-        scroll.deleteObjects(expressionsList);
-        scroll.deleteObjects(rest);
+        scroll.DeleteObjects(expressionsList);
+        scroll.DeleteObjects(rest);
     }
     
     void Update() { }

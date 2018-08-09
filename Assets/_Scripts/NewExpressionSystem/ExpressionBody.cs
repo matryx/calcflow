@@ -67,108 +67,108 @@ public class ExpressionBody : QuickButton
         base.Start();
     }
 
-    public void setManager(CalculatorManager cm)
+    public void SetManager(CalculatorManager cm)
     {
         calcManager = cm;
     }
 
-    public CalculatorManager getManager()
+    public CalculatorManager GetManager()
     {
         return calcManager;
     }
 
-    public void setExpressionParent(Transform p)
+    public void SetExpressionParent(Transform p)
     {
         expressionParent = p;
     }
 
-    public Transform getExpressionParent()
+    public Transform GetExpressionParent()
     {
         return expressionParent;
     }
 
-    public void setPanel(Transform p)
+    public void SetPanel(Transform p)
     {
         panel = p;
     }
 
-    public Transform getPanel()
+    public Transform GetPanel()
     {
         return panel;
     }
 
-    public Transform getFeedBack()
+    public Transform GetFeedBack()
     {
         return feedBack;
     }
 
-    public TMPro.TextMeshPro getTextInput()
+    public TMPro.TextMeshPro GetTextInput()
     {
         return textInput;
     }
 
-    public void setTitle(string t)
+    public void SetTitle(string t)
     {
         transform.parent.Find("Title").GetComponent<TMPro.TextMeshPro>().text = t;
         title = t;
     }
 
-    public string getTitle()
+    public string GetTitle()
     {
         return title;
     }
 
-    public bool isVariable()
+    public bool IsVariable()
     {
         return variable;
     }
 
-    public void deselectCurrBody()
+    public void DeselectCurrBody()
     {
         if (expression == null) expression = GameObject.Find("Expressions").GetComponent<Expressions>();
-        ExpressionBody selectedBody = expression.getSelectedBody();
+        ExpressionBody selectedBody = expression.GetSelectedBody();
 
         if (selectedBody)
         {
-            TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+            TMPro.TextMeshPro oldTextInput = selectedBody.GetTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
 
-            disableActionButtons(selectedBody);
-            unSelect();
+            DisableActionButtons(selectedBody);
+            UnSelect();
         }
     }
 
-    public void deselectPrevBody()
+    public void DeselectPrevBody()
     {
         if (expression == null) expression = GameObject.Find("Expressions").GetComponent<Expressions>();
-        ExpressionBody selectedBody = expression.getSelectedBody();
+        ExpressionBody selectedBody = expression.GetSelectedBody();
 
         if (selectedBody)
         {
-            TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+            TMPro.TextMeshPro oldTextInput = selectedBody.GetTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
 
-            disableActionButtons(selectedBody);
+            DisableActionButtons(selectedBody);
 
             if (selectedBody.transform != transform)
             {
-                selectedBody.unSelect();
+                selectedBody.UnSelect();
             }
 
-            if (selectedBody.expressionParent != expressionParent && selectedBody.getManager() == VecFieldManager._instance)
+            if (selectedBody.expressionParent != expressionParent && selectedBody.GetManager() == VecFieldManager._instance)
             {
-                hideUI(selectedBody);
+                HideUI(selectedBody);
             }
         }
     }
 
-    void disableActionButtons(ExpressionBody selectedBody)
+    void DisableActionButtons(ExpressionBody selectedBody)
     {
-        selectedBody.getExpressionParent().gameObject.GetInterface<ExpressionTabInterface>().getExpActions().disableButtons();
+        selectedBody.GetExpressionParent().gameObject.GetInterface<ExpressionTabInterface>().GetExpActions().disableButtons();
     }
 
     //NOTE: sets selected expression and body to be null
-    public void unSelect()
+    public void UnSelect()
     {
         if (!finishedScalingUp)
         {
@@ -180,19 +180,19 @@ public class ExpressionBody : QuickButton
         StartCoroutine(scaleDown);
         finishedScalingDown = false;
 
-        expression.setSelectedExpr(null, null);
+        expression.SetSelectedExpr(null, null);
         thisBodySelected = false;
     }
 
-    public void selectBody()
+    public void SelectBody()
     {
-        deselectPrevBody();
-        expression.setSelectedExpr(expressionParent, this);
-        calcManager.ChangeExpressionSet(expressionParent.gameObject.GetInterface<ExpressionTabInterface>().getExpSet());
+        DeselectPrevBody();
+        expression.SetSelectedExpr(expressionParent, this);
+        calcManager.ChangeExpressionSet(expressionParent.gameObject.GetInterface<ExpressionTabInterface>().GetExpSet());
 
         if (calcManager == VecFieldManager._instance)
         {
-            showUI();
+            ShowUI();
         }
 
         if (variable)
@@ -218,37 +218,37 @@ public class ExpressionBody : QuickButton
         thisBodySelected = true;
     }
 
-    void hideUI(ExpressionBody selectedBody)
+    void HideUI(ExpressionBody selectedBody)
     {
-        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(grayHide);
-        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setButtonInputColor(grayHide);
-        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setElementQuadTex(quadHide);
+        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetTextColor(grayHide);
+        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetButtonInputColor(grayHide);
+        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetElementQuadTex(quadHide);
     }
 
-    void showUI()
+    void ShowUI()
     {
-        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setTextColor(Color.black);
-        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setButtonInputColor(grayShow);
-        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().setElementQuadTex(quadShow);
+        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetTextColor(Color.black);
+        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetButtonInputColor(grayShow);
+        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetElementQuadTex(quadShow);
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
         if (thisBodySelected)
         {
-            deselectCurrBody();
+            DeselectCurrBody();
         }
         else
         {
-            selectBodyIfActive();
+            SelectBodyIfActive();
         }
     }
 
-    private void selectBodyIfActive()
+    private void SelectBodyIfActive()
     {
-        if (expressionParent.gameObject.GetInterface<ExpressionTabInterface>().getActiveStatus())
+        if (expressionParent.gameObject.GetInterface<ExpressionTabInterface>().GetActiveStatus())
         {
-            selectBody();
+            SelectBody();
         }
     }
 
@@ -297,10 +297,10 @@ public class ExpressionBody : QuickButton
     {
         if (calcManager == ParametricManager._instance)
         {
-            ExpressionBody selectedBody = expression.getSelectedBody();
-            TMPro.TextMeshPro oldTextInput = selectedBody.getTextInput();
+            ExpressionBody selectedBody = expression.GetSelectedBody();
+            TMPro.TextMeshPro oldTextInput = selectedBody.GetTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
-            expression.setSelectedExpr(null, null);
+            expression.SetSelectedExpr(null, null);
             thisBodySelected = false;
         }
         else
@@ -311,7 +311,7 @@ public class ExpressionBody : QuickButton
 
     void OnEnable()
     {
-        if (calcManager == VecFieldManager._instance && expression.getSelectedBody() == this)
+        if (calcManager == VecFieldManager._instance && expression.GetSelectedBody() == this)
         {
             feedBack.gameObject.SetActive(true);
             feedBack.localScale = selectedScale;

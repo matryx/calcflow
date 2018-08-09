@@ -101,13 +101,13 @@ public class CalcInput : MonoBehaviour
     bool checkForError(string buttonID)
     {
         //prevents typing of letters when a variable body is selected
-        if (!expressions.getSelectedBody())
+        if (!expressions.GetSelectedBody())
         {
             return true;
         }
         else
         {
-            if (expressions.getSelectedBody().isVariable())
+            if (expressions.GetSelectedBody().IsVariable())
             {
                 showError(variableErrorMessage);
                 return true;

@@ -7,14 +7,14 @@ public class ExpressionTabHandler : MonoBehaviour {
     {
         ExpressionTabHandler menu;
 
-        internal void initialize(ExpressionTabHandler m)
+        internal void Initialize(ExpressionTabHandler m)
         {
             menu = m;
         }
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {
-            menu.toggleMenu(sender.name);
+            menu.ToggleMenu(sender.name);
         }
 
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
@@ -30,25 +30,25 @@ public class ExpressionTabHandler : MonoBehaviour {
 
     void Start()
     {
-        paramPanel.GetComponentInChildren<Scroll>().setUpMenu();
+        paramPanel.GetComponentInChildren<Scroll>().SetUpMenu();
         paramPanel.gameObject.SetActive(true);
-        vecFieldPanel.GetComponentInChildren<Scroll>().setUpMenu();
+        vecFieldPanel.GetComponentInChildren<Scroll>().SetUpMenu();
         vecFieldPanel.gameObject.SetActive(false);
-        constantPanel.GetComponentInChildren<Scroll>().setUpMenu();
+        constantPanel.GetComponentInChildren<Scroll>().SetUpMenu();
         constantPanel.gameObject.SetActive(false);
 
         responder = new ExpressionTabResponder();
-        responder.initialize(this);
+        responder.Initialize(this);
         GetComponent<FlexMenu>().RegisterResponder(responder);
 
         outputManager = OutputManager._instance;
         outputManager.setManager(ParametricManager._instance);
 
         expressions = Expressions._instance;
-        expressions.setManager(ParametricManager._instance);
+        expressions.SetManager(ParametricManager._instance);
     }
 
-    void toggleMenu(string menuName)
+    void ToggleMenu(string menuName)
     {
         switch (menuName)
         {
@@ -58,7 +58,7 @@ public class ExpressionTabHandler : MonoBehaviour {
                 constantPanel.gameObject.SetActive(false);
 
                 outputManager.setManager(ParametricManager._instance);
-                expressions.setManager(ParametricManager._instance);
+                expressions.SetManager(ParametricManager._instance);
                 break;
             case "VectorFieldTab":
                 paramPanel.gameObject.SetActive(false);
@@ -66,8 +66,8 @@ public class ExpressionTabHandler : MonoBehaviour {
                 constantPanel.gameObject.SetActive(false);
 
                 outputManager.setManager(VecFieldManager._instance);
-                expressions.setManager(VecFieldManager._instance);
-                expressions.reselectVecExpression();
+                expressions.SetManager(VecFieldManager._instance);
+                expressions.ReselectVecExpression();
                 break;
             case "ConstantTab":
                 paramPanel.gameObject.SetActive(false);

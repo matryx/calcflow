@@ -4,16 +4,16 @@ using UnityEngine;
 
 public interface ExpressionTabInterface
 {
-    ExpressionSet getExpSet();
-    ExpressionActions getExpActions();
-    Transform getExpressionX();
-    Transform getSeparator();
+    ExpressionSet GetExpSet();
+    ExpressionActions GetExpActions();
+    Transform GetExpressionX();
+    Transform GetSeparator();
 
-    void setButtonInputColor(Color col);
-    void setElementQuadTex(Texture tex);
-    void setTextColor(Color c);
-    void setExpressionX(Transform e);
-    void setSeparator(Transform sep);
-    void deleteExpressionFromScroll();
-    bool getActiveStatus();
+    void SetButtonInputColor(Color col);
+    void SetElementQuadTex(Texture tex);
+    void SetTextColor(Color c);
+    void SetExpressionX(Transform e);
+    void SetSeparator(Transform sep);
+    void DeleteExpressionFromScroll();
+    bool GetActiveStatus();
 }

@@ -38,7 +38,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         varsToDelete = new List<string>();
         expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
 
-        scroll = expressionsClass.getScroll(Expressions.ExpressionType.PARAMET);
+        scroll = expressionsClass.GetScroll(Expressions.ExpressionType.PARAMET);
         initialized = true;
     }
 
@@ -52,27 +52,28 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public ExpressionActions getExpActions()
+    //TODO: maybe make this disablebuttons internally 
+    public ExpressionActions GetExpActions()
     {
         return expActions;
     }
 
-    public void setActiveStatus(bool status)
+    public void SetActiveStatus(bool status)
     {
         isActive = status;
     }
 
-    public bool getActiveStatus()
+    public bool GetActiveStatus()
     {
         return isActive;
     }
 
-    public Scroll getScroll()
+    public Scroll GetScroll()
     {
         return scroll;
     }
 
-    public void setButtonInputColor(Color col)
+    public void SetButtonInputColor(Color col)
     {
         foreach (Transform t in expressionsList)
         {
@@ -86,7 +87,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void setElementQuadTex(Texture tex)
+    public void SetElementQuadTex(Texture tex)
     {
         foreach (KeyValuePair<string, Transform> t in variables)
         {
@@ -94,7 +95,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void setTextColor(Color c)
+    public void SetTextColor(Color c)
     {
         foreach (Transform t in expressionsList)
         {
@@ -122,37 +123,37 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void setExpressionX(Transform e)
+    public void SetExpressionX(Transform e)
     {
         expressionX = e;
     }
 
-    public Transform getExpressionX()
+    public Transform GetExpressionX()
     {
         return expressionX;
     }
 
-    public void setSeparator(Transform sep)
+    public void SetSeparator(Transform sep)
     {
         separator = sep;
     }
 
-    public Transform getSeparator()
+    public Transform GetSeparator()
     {
         return separator;
     }
 
-    public ExpressionSet getExpSet()
+    public ExpressionSet GetExpSet()
     {
         return expSet;
     }
 
-    public void addExpression(Transform expr)
+    public void AddExpression(Transform expr)
     {
         expressionsList.Add(expr);
     }
 
-    public void addVariable(string varName, Transform varValue)
+    public void AddVariable(string varName, Transform varValue)
     {
         if (hiddenVariables.ContainsKey(varName))
         {
@@ -164,30 +165,30 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
 
         if (variables.Count % 2 == 0)
         {
-            addNewVariableClump(varValue);
+            AddNewVariableClump(varValue);
         }
         else
         {
-            addToVarClump(varValue);
+            AddToVarClump(varValue);
         }
 
         variables.Add(varName, varValue);
     }
 
-    public void deleteExpressionFromScroll()
+    public void DeleteExpressionFromScroll()
     {
-        scroll.deleteObjects(expressionsList);
+        scroll.DeleteObjects(expressionsList);
         variableClumps.Add(separator);
-        scroll.deleteObjects(variableClumps);
+        scroll.DeleteObjects(variableClumps);
     }
 
-    public void deleteVariable(List<string> vars)
+    public void DeleteVariable(List<string> vars)
     {
         varsToDelete = vars;
         deleteVar = true;
     }
 
-    void addToVarClump(Transform var)
+    void AddToVarClump(Transform var)
     {
         var.SetParent(variableClumps[variableClumps.Count - 1]);
         var.localPosition = new Vector3(xPos, 0, 0);
@@ -196,17 +197,17 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         var.gameObject.SetActive(true);
     }
 
-    void addNewVariableClump(Transform var)
+    void AddNewVariableClump(Transform var)
     {
         int lastComponentInd = (variableClumps.Count > 0) ?
-                           scroll.getIndex(variableClumps[variableClumps.Count - 1]) : scroll.getIndex(expressionsList[2]);
+                           scroll.GetIndex(variableClumps[variableClumps.Count - 1]) : scroll.GetIndex(expressionsList[2]);
 
         Transform newVarClump = new GameObject().transform;
         newVarClump.name = "Var Clump";
         newVarClump.localScale = Vector3.one;
         newVarClump.localPosition = Vector3.zero;
         newVarClump.localEulerAngles = Vector3.zero;
-        scroll.addToScroll(null, newVarClump, lastComponentInd + 1);
+        scroll.AddToScroll(null, newVarClump, lastComponentInd + 1);
         variableClumps.Add(newVarClump);
 
         var.SetParent(newVarClump);
@@ -234,19 +235,19 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
     {
         if (deleteVar)
         {
-            hideVariables();
+            HideVariables();
             return;
         }
 
         if (destroyCalled)
         {
-            rearrangeVariables();
-            destroyEmptyClumps();
+            RearrangeVariables();
+            DestroyEmptyClumps();
             destroyCalled = false;
         }
     }
 
-    void hideVariables()
+    void HideVariables()
     {
         foreach (string s in varsToDelete)
         {
@@ -264,7 +265,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    void rearrangeVariables()
+    void RearrangeVariables()
     {
         bool noMoreSlots = false;
 
@@ -282,15 +283,15 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
                 }
                 else
                 {
-                    noMoreSlots = findNextSlot(currSlot, i, 0, -xPos, false);
+                    noMoreSlots = FindNextSlot(currSlot, i, 0, -xPos, false);
                 }
 
-                noMoreSlots = findNextSlot(currSlot, i, 1, xPos, true);
+                noMoreSlots = FindNextSlot(currSlot, i, 1, xPos, true);
             }
         }
     }
 
-    bool findNextSlot(Transform currClump, int currClumpIndex, int childIndex, float xpos, bool checkNoSlot)
+    bool FindNextSlot(Transform currClump, int currClumpIndex, int childIndex, float xpos, bool checkNoSlot)
     {
         for (int ni = currClumpIndex + 1; ni < variableClumps.Count; ni++)
         {
@@ -310,7 +311,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         return false;
     }
 
-    void destroyEmptyClumps()
+    void DestroyEmptyClumps()
     {
         int removeFrom = 0;
         bool remove = false;
@@ -331,7 +332,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         {
             emptyClumps = variableClumps.GetRange(removeFrom, variableClumps.Count - removeFrom);
             variableClumps.RemoveRange(removeFrom, variableClumps.Count - removeFrom);
-            scroll.deleteObjects(emptyClumps);
+            scroll.DeleteObjects(emptyClumps);
         }
     }
 }

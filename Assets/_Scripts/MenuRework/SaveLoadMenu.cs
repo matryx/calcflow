@@ -90,7 +90,7 @@ public class SaveLoadMenu : MonoBehaviour
                         saves.Remove(toDelete);
                         selectPanel.RemoveAction(deleteObj.GetComponent<FlexActionableComponent>());
                     }
-                    scroll.deleteObjects(deleteList.Values.Select(x => x.transform).ToList());
+                    scroll.DeleteObjects(deleteList.Values.Select(x => x.transform).ToList());
                     goto case "delete";
                 case "delete":
                     deleteList.Clear();
@@ -172,7 +172,7 @@ public class SaveLoadMenu : MonoBehaviour
         button.transform.SetParent(panelTransform);
 
         initializeButton(save, button);
-        scroll.addObject(button.transform);
+        scroll.AddObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
 
         return button;
@@ -192,7 +192,7 @@ public class SaveLoadMenu : MonoBehaviour
         for (int ind = 0; ind < files.Length; ind++)
         {
             GameObject button = Instantiate(Resources.Load("Screenshot", typeof(GameObject))) as GameObject;
-            scroll.addObject(button.transform);
+            scroll.AddObject(button.transform);
             button.name = button.name + (ind + 1);
         }
     }

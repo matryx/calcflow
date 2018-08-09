@@ -83,7 +83,7 @@ public class ParametricManager : CalculatorManager
             expressionSet.RemoveVariable(del);
         }
 
-        expressions.getSelectedExpr().GetComponent<ParametricExpression>().deleteVariable(toDelete);
+        expressions.GetSelectedExpr().GetComponent<ParametricExpression>().DeleteVariable(toDelete);
     }
 
     void Update()

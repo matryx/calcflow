@@ -17,8 +17,8 @@ public class ScrollBar : MonoBehaviour
     {
         scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
         scrollerMaterial = scroll.GetComponent<Scroll>().scrollerMaterial;
-        orientation = scroll.GetComponent<Scroll>().getOrientation();
-        placement = scroll.GetComponent<Scroll>().getScrollBarPlacement();
+        orientation = scroll.GetComponent<Scroll>().GetOrientation();
+        placement = scroll.GetComponent<Scroll>().GetScrollBarPlacement();
         currPage = 1;
 
         if (bar == null || scroller == null) initializeScrollBar();
@@ -30,8 +30,8 @@ public class ScrollBar : MonoBehaviour
 
         if (scroll == null) scroll = transform.parent.GetComponentInChildren<Scroll>().transform;
         scrollerMaterial = scroll.GetComponent<Scroll>().scrollerMaterial;
-        orientation = scroll.GetComponent<Scroll>().getOrientation();
-        placement = scroll.GetComponent<Scroll>().getScrollBarPlacement();
+        orientation = scroll.GetComponent<Scroll>().GetOrientation();
+        placement = scroll.GetComponent<Scroll>().GetScrollBarPlacement();
         currPage = 1;
 
         bar = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;

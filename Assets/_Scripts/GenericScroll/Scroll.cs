@@ -33,8 +33,6 @@ public class Scroll : MonoBehaviour
     float movementSpeed = 0.3f;
     [SerializeField]
     float fadeSpeed = 0.15f;
-    [SerializeField]
-    float fadeInDelay = 0.5f;
 
     public enum orientation { VERTICAL, HORIZONTAL }
     public enum placement { RIGHT, BOTTOM, LEFT, TOP }
@@ -62,7 +60,7 @@ public class Scroll : MonoBehaviour
     void Awake()
     {
         if (setup) return;
-        setUpMenu();
+        SetUpMenu();
     }
 
     void Start()
@@ -84,14 +82,14 @@ public class Scroll : MonoBehaviour
         }
 
         jsReceiver = GetComponent<JoyStickReceiver>();
-        if (jsReceiver != null) jsReceiver.JoyStickTouched += scroll;
+        if (jsReceiver != null) jsReceiver.JoyStickTouched += Scroll;
     }
 
-    void scroll(VRController c, ControllerComponentArgs e)
+    void Scroll(VRController c, ControllerComponentArgs e)
     {
         if (e.x == 0 && e.y == 0) return;
 
-        switch (calculateJoystickAngle(e))
+        switch (CalculateJoystickAngle(e))
         {
             case 0:
                 if (currOrientation != orientation.HORIZONTAL) return;
@@ -111,10 +109,10 @@ public class Scroll : MonoBehaviour
                 break;
         }
 
-        tryMoveObjects();
+        TryMoveObjects();
     }
 
-    int calculateJoystickAngle(ControllerComponentArgs e)
+    int CalculateJoystickAngle(ControllerComponentArgs e)
     {
         float roundBy = 90;
         float temp = Mathf.Atan2(e.y, e.x);             //calculate angle in rad
@@ -124,31 +122,31 @@ public class Scroll : MonoBehaviour
         return (int)temp;
     }
 
-    public orientation getOrientation()
+    public orientation GetOrientation()
     {
         return currOrientation;
     }
 
-    public placement getScrollBarPlacement()
+    public placement GetScrollBarPlacement()
     {
         return scrollBarPlacement;
     }
 
-    public int getLowestVisIndex()
+    public int GetLowestVisibleIndex()
     {
         return lowestVisIndex;
     }
 
-    public int getHighestVisIndex()
+    public int GetHighestVisibleIndex()
     {
         return highestVisIndex;
     }
 
-    public void setUpMenu()
+    public void SetUpMenu()
     {
         if (setup) return;
 
-        if (scrollBar == null) createScrollBar();
+        if (scrollBar == null) CreateScrollBar();
 
         Vector3 startPos = transform.localPosition;
 
@@ -167,7 +165,7 @@ public class Scroll : MonoBehaviour
         setup = true;
     }
 
-    void createScrollBar()
+    void CreateScrollBar()
     {
         scrollBar = new GameObject().transform;
         scrollBar.name = "ScrollBar";
@@ -180,19 +178,19 @@ public class Scroll : MonoBehaviour
         scrollBar.GetComponent<ScrollBar>().initializeScrollBar();
     }
 
-    public void initializeObjects(List<Transform> objectList)
+    public void InitializeObjects(List<Transform> objectList)
     {
         objects = objectList;
 
-        setNumPagesAndHighestVisIndex();
+        SetNumPagesAndHighestVisibleIndex();
 
         for (int ind = 0; ind < objects.Count; ind++)
         {
-            placeObject(objects[ind], ind, false, 0);
+            PlaceObject(objects[ind], ind, false, 0);
         }
     }
 
-    void executeAdd()
+    void ExecuteAdd()
     {
         int temp = atIndexAdd;
 
@@ -202,12 +200,12 @@ public class Scroll : MonoBehaviour
             ++temp;
         }
 
-        setNumPagesAndHighestVisIndex();
+        SetNumPagesAndHighestVisibleIndex();
 
         temp = atIndexAdd;
         for (temp = atIndexAdd; temp < objects.Count; temp++)
         {
-            placeObject(objects[temp], temp, false, 0);
+            PlaceObject(objects[temp], temp, false, 0);
             objects[temp].localScale = Vector3.one;
         }
 
@@ -215,7 +213,7 @@ public class Scroll : MonoBehaviour
         adding = false;
     }
 
-    void setNumPagesAndHighestVisIndex()
+    void SetNumPagesAndHighestVisibleIndex()
     {
         numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
             1 + (int)System.Math.Ceiling((double)(objects.Count - numberOfVisibleThings) / fixedRowOrCol);
@@ -228,13 +226,13 @@ public class Scroll : MonoBehaviour
             highestVisIndex = numberOfVisibleThings - 1;
     }
 
-    public int getScrollObjectCount()
+    public int GetScrollObjectCount()
     {
         if (objects == null) objects = new List<Transform>();
         return objects.Count;
     }
 
-    public void addToScroll(List<Transform> objs, Transform obj, int atIndex)
+    public void AddToScroll(List<Transform> objs, Transform obj, int atIndex)
     {
         if (objects == null) objects = new List<Transform>();
 
@@ -265,7 +263,7 @@ public class Scroll : MonoBehaviour
         adding = true;
     }
 
-    public void addObject(Transform newObj)
+    public void AddObject(Transform newObj)
     {
         adding = true;
 
@@ -278,7 +276,7 @@ public class Scroll : MonoBehaviour
         toAdd.Add(newObj);
     }
 
-    public int getIndex(Transform obj)
+    public int GetIndex(Transform obj)
     {
         if (objects == null) objects = new List<Transform>();
 
@@ -292,16 +290,16 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    public Transform getObj(int ind)
+    public Transform GetObj(int ind)
     {
         return objects[ind];
     }
 
-    void placeObject(Transform obj, int ind, bool deleting, float delayTime)
+    void PlaceObject(Transform obj, int ind, bool deleting, float delayTime)
     {
         obj.transform.localEulerAngles = Vector3.zero;
 
-        Vector3 newPos = calculateNewPos(ind, deleting);
+        Vector3 newPos = CalculateNewPos(ind, deleting);
 
         if (deleting)
         {
@@ -318,11 +316,11 @@ public class Scroll : MonoBehaviour
         }
         else
         {
-            if (deleting && !obj.gameObject.activeSelf) fadeButton(obj, true, delayTime);
+            if (deleting && !obj.gameObject.activeSelf) FadeButton(obj, true, delayTime);
         }
     }
 
-    Vector3 calculateNewPos(int ind, bool deleting)
+    Vector3 CalculateNewPos(int ind, bool deleting)
     {
         float offset = (float)System.Math.Floor((double)ind / fixedRowOrCol);
 
@@ -344,19 +342,19 @@ public class Scroll : MonoBehaviour
                 new Vector3(xPos, yPos, objectParent.localPosition.z) : offsetToFirst;
     }
 
-    public void clear()
+    public void Clear()
     {
         if (objects != null)
         {
-            deleteObjects(objects);
+            DeleteObjects(objects);
         }
     }
 
-    public void deleteObjects(List<Transform> objs)
+    public void DeleteObjects(List<Transform> objs)
     {
         bool removingLastObject = false;
 
-        List<int> indecesToDelete = getIndeces(objs);
+        List<int> indecesToDelete = GetIndeces(objs);
         if (indecesToDelete[indecesToDelete.Count-1] == objects.Count-1) removingLastObject = true;
 
         indecesToDelete.Reverse(); //delete from end of list to beginning so that indeces don't get messed up
@@ -368,7 +366,7 @@ public class Scroll : MonoBehaviour
             Destroy(d.gameObject);
         }
 
-        reassignVisIndeces();
+        ReassignVisibleIndeces();
 
         float scale = 0.04f;
         float baseTime = 0.05f;
@@ -382,11 +380,11 @@ public class Scroll : MonoBehaviour
                             delayTime : delayTime + scale;
             }
 
-            placeObject(objects[i], i, true, delayTime);
+            PlaceObject(objects[i], i, true, delayTime);
         }
     }
 
-    List<int> getIndeces(List<Transform> objs)
+    List<int> GetIndeces(List<Transform> objs)
     {
         List<int> indeces = new List<int>();
 
@@ -406,7 +404,7 @@ public class Scroll : MonoBehaviour
         return indeces;
     }
 
-    void reassignVisIndeces()
+    void ReassignVisibleIndeces()
     {
         int prevNum = numPages;
         numPages = (objects.Count <= numberOfVisibleThings) ? 1 :
@@ -428,7 +426,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    void tryMoveObjects()
+    void TryMoveObjects()
     {
         if (objects == null || objects.Count == 0) return;
 
@@ -438,11 +436,11 @@ public class Scroll : MonoBehaviour
 
         if (!moving && !fading)
         {
-            moveObjects();
+            MoveObjects();
         }
     }
 
-    void moveObjects()
+    void MoveObjects()
     {
         moving = true;
         fading = true;
@@ -450,19 +448,19 @@ public class Scroll : MonoBehaviour
         for (int i = 0; i < objects.Count; i++)
         {
             Transform obj = objects[i];
-            Vector3 newPos = calculateMovedPos(obj);
+            Vector3 newPos = CalculateMovedPos(obj);
 
             if (i == 0) toPos = newPos;
 
             StartCoroutine(MoveTo(obj, obj.localPosition, newPos, movementSpeed));
-            tryFadeObject(obj, i);
+            TryFadeObject(obj, i);
         }
 
         scrollBar.GetComponent<ScrollBar>().moveScroller(currDirection);
-        setLowAndHighIndeces();
+        SetLowAndHighIndeces();
     }
 
-    Vector3 calculateMovedPos(Transform obj)
+    Vector3 CalculateMovedPos(Transform obj)
     {
         float newX = (currDirection == direction.RIGHT) ?
                           (float)System.Math.Round((double)obj.localPosition.x + padding.x, 2) :
@@ -477,20 +475,21 @@ public class Scroll : MonoBehaviour
                 new Vector3(newX, obj.localPosition.y, obj.localPosition.z);
     }
 
-    void tryFadeObject(Transform obj, int i)
+    void TryFadeObject(Transform obj, int i)
     {
         bool fadeIn = true;
         bool fadeOut = false;
+        float fadeInDelay = 0.5f;
 
         if (currDirection == direction.UP || currDirection == direction.LEFT)
         {
             if (i >= lowestVisIndex && i < lowestVisIndex + fixedRowOrCol)
             {
-                fadeButton(obj, fadeOut, 0);
+                FadeButton(obj, fadeOut, 0);
             }
             else if (i > highestVisIndex && i <= highestVisIndex + fixedRowOrCol)
             {
-                fadeButton(obj, fadeIn, fadeInDelay);
+                FadeButton(obj, fadeIn, fadeInDelay);
             }
         }
         else if (currDirection == direction.DOWN || currDirection == direction.RIGHT)
@@ -499,16 +498,16 @@ public class Scroll : MonoBehaviour
             {
                 if (((highestVisIndex + 1) % fixedRowOrCol == 0) ||
                     (i > (highestVisIndex - ((highestVisIndex + 1) % fixedRowOrCol))))
-                    fadeButton(obj, fadeOut, 0);
+                    FadeButton(obj, fadeOut, 0);
             }
             else if (i < lowestVisIndex && i >= lowestVisIndex - fixedRowOrCol)
             {
-                fadeButton(obj, fadeIn, fadeInDelay);
+                FadeButton(obj, fadeIn, fadeInDelay);
             }
         }
     }
 
-    void setLowAndHighIndeces()
+    void SetLowAndHighIndeces()
     {
         if (currDirection == direction.UP || currDirection == direction.LEFT)
         {
@@ -527,7 +526,7 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    void fadeButton(Transform obj, bool fadeIn, float delayTime)
+    void FadeButton(Transform obj, bool fadeIn, float delayTime)
     {
         if (fadeIn) StartCoroutine(DelayFadeIn(obj, delayTime));
 
@@ -593,6 +592,6 @@ public class Scroll : MonoBehaviour
     {
         if (moving && objects.Count > 0 && objects[0].localPosition == toPos) moving = false;
 
-        if (adding && !moving) executeAdd();
+        if (adding && !moving) ExecuteAdd();
     }
 }

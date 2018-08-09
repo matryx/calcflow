@@ -23,7 +23,7 @@ public class TempObjectCreator : MonoBehaviour {
             example.Add(obj.transform);
         }
 
-        scroll.initializeObjects(example);
+        scroll.InitializeObjects(example);
         scroll.enabled = true;
     }
 	
@@ -31,7 +31,7 @@ public class TempObjectCreator : MonoBehaviour {
 		if (add && !prevAdd)
         {
             GameObject newObj = Instantiate(Resources.Load("TestObject", typeof(GameObject))) as GameObject;
-            scroll.addObject(newObj.transform);
+            scroll.AddObject(newObj.transform);
         }
 
         prevAdd = add;

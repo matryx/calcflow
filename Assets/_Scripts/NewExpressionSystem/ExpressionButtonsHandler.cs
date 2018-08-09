@@ -61,7 +61,7 @@ public class ExpressionButtonsHandler : MonoBehaviour {
         switch (buttonID)
         {
             case "Yes":
-                expressions.deleteExpression(transform.GetComponentInChildren<ExpressionBody>().getExpressionParent());
+                expressions.DeleteExpression(transform.GetComponentInChildren<ExpressionBody>().GetExpressionParent());
                 break;
             case "No":
                 break;

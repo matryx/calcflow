@@ -34,7 +34,7 @@ public class SecondaryMenu : MonoBehaviour
     {
         functionMenu.gameObject.SetActive(true);
         animationMenu.gameObject.SetActive(false);
-        saveLoadMenu.GetComponentInChildren<Scroll>().setUpMenu();
+        saveLoadMenu.GetComponentInChildren<Scroll>().SetUpMenu();
         saveLoadMenu.gameObject.SetActive(false);
         settingsMenu.gameObject.SetActive(false);
         tournamentMenu.gameObject.SetActive(false);

@@ -76,7 +76,7 @@ public class TournamentMenu : MonoBehaviour
     {
         page = 0;
         tournaments.Clear();
-        scroll.clear();
+        scroll.Clear();
     }
 
     private void ProcessTournaments(object results)
@@ -150,7 +150,7 @@ public class TournamentMenu : MonoBehaviour
         TMPro.TextMeshPro matryxBountyTMP = button.transform.Find("MTX_Amount").GetComponent<TMPro.TextMeshPro>();
         matryxBountyTMP.text = "";
 
-        scroll.addObject(button.transform);
+        scroll.AddObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
 
         // Add this action to the panel
@@ -165,7 +165,7 @@ public class TournamentMenu : MonoBehaviour
         {
             List<Transform> loadButtonTransform = new List<Transform>();
             loadButtonTransform.Add(loadButton.transform);
-            scroll.deleteObjects(new List<Transform>(loadButtonTransform));
+            scroll.DeleteObjects(new List<Transform>(loadButtonTransform));
 
             Destroy(loadButton);
         }
@@ -185,7 +185,7 @@ public class TournamentMenu : MonoBehaviour
         TMPro.TextMeshPro matryxBountyTMP = button.transform.Find("MTX_Amount").GetComponent<TMPro.TextMeshPro>();
         matryxBountyTMP.text = tournament.bounty + " " + matryxBountyTMP.text;
 
-        scroll.addObject(button.transform);
+        scroll.AddObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
 
         return button;
