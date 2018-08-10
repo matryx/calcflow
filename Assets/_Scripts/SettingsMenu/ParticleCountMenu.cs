@@ -46,6 +46,7 @@ public class ParticleCountMenu : MonoBehaviour
                 paramSurface.ChangeParticleCount(ultra);
                 break;
         }
+        paramSurface.GenerateParticles();
         #endregion
     }
 

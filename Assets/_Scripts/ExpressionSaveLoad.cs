@@ -57,7 +57,7 @@ public class ExpressionSaveLoad : MonoBehaviour
 
     public void SaveDefault()
     {
-        SaveExpression(customParametrizedSurface.expressionSets);
+        SaveExpression(customParametrizedSurface.ExpressionSets);
     }
 
     public void SaveExpression(List<ExpressionSet> expressions)

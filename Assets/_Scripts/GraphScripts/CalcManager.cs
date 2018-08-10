@@ -113,9 +113,9 @@ public class CalcManager : MonoBehaviour
             ess.Add(expressionSets[i].DeepCopy());
             ess[ess.Count - 1].CompileAll();
         }
-        paramSurface.expressionSets = ess;
+        paramSurface.ExpressionSets = ess;
         pieceWiseControl.ForceNumberOfTabs(ess.Count);
-        expressionSet = paramSurface.expressionSets[0];
+        expressionSet = paramSurface.ExpressionSets[0];
         //calcInput.ChangeOutput(expressionSet.expressions["X"]);
         if(boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
@@ -183,7 +183,7 @@ public class CalcManager : MonoBehaviour
         if (toExport)
         {
             toExport = false;
-            paramSurface.GenerateMesh();
+            SurfaceTessellation._instance.GenerateMesh(paramSurface.ExpressionSets);
         }
     }
 

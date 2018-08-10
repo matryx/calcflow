@@ -8,9 +8,9 @@ public class ParametricManager : CalculatorManager
     Scroll paramScroll;
     CustomParametrizedSurface paramSurface;
     BoundsManager boundsManager;
- 
+
     OutputManager outputManager;
-  
+
     protected override void Initialize()
     {
         _instance = this;
@@ -59,8 +59,8 @@ public class ParametricManager : CalculatorManager
             ess.Add(expressionSets[i].DeepCopy());
             ess[ess.Count - 1].CompileAll();
         }
-        paramSurface.expressionSets = ess;
-        expressionSet = paramSurface.expressionSets[0];
+        paramSurface.ExpressionSets = ess;
+        expressionSet = paramSurface.ExpressionSets[0];
         calcInput.ChangeOutput(expressionSet.GetExpression("X"), this); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
@@ -97,14 +97,13 @@ public class ParametricManager : CalculatorManager
 
             if (isValid)
             {
-                paramSurface.UpdateExpressionSet(expressionSetList);
-                paramSurface.GenerateParticles();
+                paramSurface.GenerateParticles(expressionSetList);
             }
         }
         if (toExport)
         {
             toExport = false;
-            paramSurface.GenerateMesh();
+            SurfaceTessellation._instance.GenerateMesh(expressionSetList);
         }
     }
 }

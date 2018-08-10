@@ -9,19 +9,22 @@ public class CustomParametrizedSurface : MonoBehaviour
 {
     public static CustomParametrizedSurface _instance;
     List<Particle[]> threadResults = new List<Particle[]>();
-    public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
+    private List<ExpressionSet> expressionSets = new List<ExpressionSet>();
 
     ExpressionSet emptyExprSet;
 
-    #region axis labels
-    public AxisLabelManager xAxis;
-    public AxisLabelManager yAxis;
-    public AxisLabelManager zAxis;
-    #endregion
+    Particle[] dest;
 
-    private Particle[] dest;
+    Coroutine setup;
 
-    private Coroutine setup;
+    [SerializeField]
+    float exclusiveModifier = 0.01f;
+    [SerializeField]
+    int particleCount;
+
+    AK.ExpressionSolver solver;
+
+    bool calculating = false;
 
     public void SetParticleEffect(AnimatedParticleGrapher.ParticleEffectList effect)
     {
@@ -32,11 +35,10 @@ public class CustomParametrizedSurface : MonoBehaviour
     {
         AnimatedParticleGrapher._instance.effectStrength = strength;
     }
-
-    public int particleCount;
-
-    AK.ExpressionSolver solver;
-
+    public bool isGraphing()
+    {
+        return !(calculating || AnimatedParticleGrapher._instance.isGraphing());
+    }
     private void Awake()
     {
         _instance = this;
@@ -50,52 +52,15 @@ public class CustomParametrizedSurface : MonoBehaviour
         AnimatedParticleGrapher._instance.ChangeParticleCount(particleCount);
     }
 
-    public MeshFilter mesh;
-    Coroutine tessellate;
     public SurfaceTessellation tessel;
-
-    public void CreateExpressionSet()
-    {
-        expressionSets.Add(new ExpressionSet());
-    }
-
-    public void UpdateExpressionSet(List<ExpressionSet> expSet)
-    {
-        expressionSets = expSet;
-    }
-
-    public void RemoveExpressionSet(int index)
-    {
-        if (index < expressionSets.Count)
-        {
-            expressionSets.RemoveAt(index);
-        }
-    }
-
-    public void GenerateMesh()
-    {
-        if (tessel != null)
-        {
-            tessel.gameObject.SetActive(true);
-        }
-        foreach (ExpressionSet expressionSet in expressionSets)
-        {
-            float currentScale = CartesianManager._instance.GetScale();
-
-            tessel.EnqueueEquation(currentScale, expressionSet.GetExpression("X").expression, expressionSet.GetExpression("Y").expression,
-                                   expressionSet.GetExpression("Z").expression, expressionSet.GetRange("u").Min.Value,
-                                   expressionSet.GetRange("u").Max.Value, expressionSet.GetRange("v").Min.Value,
-                                   expressionSet.GetRange("v").Max.Value);
-        }
-    }
 
     /// <summary>
     /// runs the grapher.
     /// </summary>
-    public void GenerateParticles()
+    public void GenerateParticles(List<ExpressionSet> expressionsToGraph)
     {
         if (setup != null) StopCoroutine(setup);
-
+        expressionSets = expressionsToGraph;
         if (expressionSets.Count == 0)
         {
             expressionSets.Add(emptyExprSet);
@@ -111,16 +76,13 @@ public class CustomParametrizedSurface : MonoBehaviour
     {
         particleCount = count;
         AnimatedParticleGrapher._instance.ChangeParticleCount(particleCount);
-        GenerateParticles();
     }
-
-
     int num_threads;
-
     private object lck;
     float maxRange;
     List<Particle> dest_list = new List<Particle>();
     int particlesPerES;
+
 
 
     IEnumerator SetupParticles()
@@ -147,23 +109,7 @@ public class CustomParametrizedSurface : MonoBehaviour
             //soft copy of the expressionSet. Do not edit actual expressions using this.
             ExpressionSet expressionSet = es.ShallowCopy();
             //remove unused parameters
-            string[] keys = new string[expressionSet.GetRangeCount()];
-            expressionSet.GetRangeKeys().CopyTo(keys, 0);
-            foreach (string op in keys)
-            {
-                bool used = false;
-                foreach (string key in expressionSet.GetExprKeys())
-                {
-                    if (expressionSet.GetExpression(key).tokens.Contains(op))
-                    {
-                        used = true;
-                    }
-                }
-                if (!used && expressionSet.GetRangeCount() > 1)
-                {
-                    expressionSet.RemoveRange(op);
-                }
-            }
+            RemoveUnusedRanges(expressionSet);
 
             int depth = expressionSet.GetRangeCount();
             int width = 1;
@@ -210,7 +156,28 @@ public class CustomParametrizedSurface : MonoBehaviour
         AnimatedParticleGrapher._instance.PlotParticles(dest);
     }
 
-    private void CombineResults(int missingParticles)
+    private static void RemoveUnusedRanges(ExpressionSet expressionSet)
+    {
+        string[] keys = new string[expressionSet.GetRangeCount()];
+        expressionSet.GetRangeKeys().CopyTo(keys, 0);
+        foreach (string op in keys)
+        {
+            bool used = false;
+            foreach (string key in expressionSet.GetExprKeys())
+            {
+                if (expressionSet.GetExpression(key).tokens.Contains(op))
+                {
+                    used = true;
+                }
+            }
+            if (!used && expressionSet.GetRangeCount() > 1)
+            {
+                expressionSet.RemoveRange(op);
+            }
+        }
+    }
+
+    void CombineResults(int missingParticles)
     {
         List<Particle> temp = new List<Particle>();
         foreach (Particle[] array in threadResults)
@@ -231,7 +198,7 @@ public class CustomParametrizedSurface : MonoBehaviour
         dest = temp.ToArray();
     }
 
-    private void ScaleParticles()
+    void ScaleParticles()
     {
         for (int i = 0; i < dest.Length; i++)
         {
@@ -241,7 +208,7 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
     }
 
-    private void ScaleCartesian()
+    void ScaleCartesian()
     {
         CartesianManager._instance.SetScale(maxRange);
     }
@@ -308,7 +275,7 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
     }
 
-    private struct AKSolverPackage
+    struct AKSolverPackage
     {
         public Dictionary<string, float> parameterMin;
         public Dictionary<string, float> parameterMax;
@@ -316,8 +283,9 @@ public class CustomParametrizedSurface : MonoBehaviour
         public AK.ExpressionSolver solver;
 
     }
-
-    public List<int[]> SetupSamples(int depth, int width)
+    
+    #region helpers
+    List<int[]> SetupSamples(int depth, int width)
     {
         List<int[]> samples = new List<int[]>();
 
@@ -345,9 +313,8 @@ public class CustomParametrizedSurface : MonoBehaviour
         return samples;
     }
 
-    public float exclusiveModifier = 0.01f;
 
-    private AKSolverPackage SetupSolver(ExpressionSet es)
+    AKSolverPackage SetupSolver(ExpressionSet es)
     {
         AKSolverPackage threadHelper = new AKSolverPackage();
         threadHelper.parameterMin = new Dictionary<string, float>();
@@ -382,9 +349,56 @@ public class CustomParametrizedSurface : MonoBehaviour
 
         return threadHelper;
     }
-    bool calculating = false;
-    public bool isGraphing()
+    #endregion helpers
+
+    #region obsolete
+    [Obsolete("Method1 is deprecated, please use Method2 instead.")]
+    public List<ExpressionSet> ExpressionSets
     {
-        return !(calculating || AnimatedParticleGrapher._instance.isGraphing());
+        get
+        {
+            return expressionSets;
+        }
+
+        set
+        {
+            expressionSets = value;
+        }
     }
+
+    [Obsolete("Method1 is deprecated, please use Method2 instead.")]
+    public void CreateExpressionSet()
+    {
+        ExpressionSets.Add(new ExpressionSet());
+    }
+    [Obsolete("Method1 is deprecated, please use Method2 instead.")]
+    public void UpdateExpressionSet(List<ExpressionSet> expSet)
+    {
+        ExpressionSets = expSet;
+    }
+
+    /// <summary>
+    /// runs the grapher.
+    /// </summary>
+    [Obsolete("Method1 is deprecated, please use Method2 instead.")]
+    public void GenerateParticles()
+    {
+        if (setup != null) StopCoroutine(setup);
+
+        if (ExpressionSets.Count == 0)
+        {
+            ExpressionSets.Add(emptyExprSet);
+        }
+
+        setup = StartCoroutine(SetupParticles());
+    }
+    [Obsolete("Method1 is deprecated, please use Method2 instead.")]
+    public void RemoveExpressionSet(int index)
+    {
+        if (index < ExpressionSets.Count)
+        {
+            ExpressionSets.RemoveAt(index);
+        }
+    }
+    #endregion obsolete
 }
