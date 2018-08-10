@@ -57,15 +57,13 @@ public class FlowLineParticles : MonoBehaviour
     private int particleCount;
     private int threadGroups;
 
+    float scale;
 
     [Range(0.1f, 2.0f)] public float effectStrength = 2.0f;
 
     // Use this for initialization
     void Awake()
     {
-        //referencePoint = GetComponent<ConstraintGrabbable>();
-        //shuriken = GetComponent<ParticleSystem>();
-        //points = new List<ParticleSystem.Particle>();
         positions = new SortedDictionary<int, Vector3>();
         solver = new AK.ExpressionSolver();
         expX = new AK.Expression();
@@ -74,6 +72,22 @@ public class FlowLineParticles : MonoBehaviour
 
         sampling = null;
         _instance = this;
+    }
+
+    void Start()
+    {
+        CartesianManager._instance.AddScaleCallback(ScaleUpdated);
+    }
+
+    void OnDestroy()
+    {
+        CartesianManager._instance.RemoveScaleCallback(ScaleUpdated);
+    }
+
+    void ScaleUpdated(float newScale)
+    {
+        scale = newScale;
+        ForceUpdate();
     }
 
     Coroutine sampling;
@@ -200,9 +214,9 @@ public class FlowLineParticles : MonoBehaviour
 
         solver = new AK.ExpressionSolver();
 
-        solver.SetGlobalVariable("x", referencePoint.lastLocalPos.x);
-        solver.SetGlobalVariable("y", referencePoint.lastLocalPos.y);
-        solver.SetGlobalVariable("z", referencePoint.lastLocalPos.z);
+        solver.SetGlobalVariable("x", referencePoint.lastLocalPos.x * 10 / scale);
+        solver.SetGlobalVariable("y", referencePoint.lastLocalPos.y * 10 / scale);
+        solver.SetGlobalVariable("z", referencePoint.lastLocalPos.z * 10 / scale);
         expX = solver.SymbolicateExpression(vecES.GetExpression("X").expression);
         expY = solver.SymbolicateExpression(vecES.GetExpression("Y").expression);
         expZ = solver.SymbolicateExpression(vecES.GetExpression("Z").expression);
@@ -275,32 +289,6 @@ public class FlowLineParticles : MonoBehaviour
         thread_finished = true;
     }
 
-    void ThreadedSampling(int TID, Vector3 startPos, float step, float positiveCount, float negativeCount)
-    {
-        Vector3 curr = startPos;
-        for (int i = 0; i < positiveCount; i++)
-        {
-            curr = ThreadedRK4(TID, curr, step);
-            lock (lck)
-            {
-                //curr = RK4(curr, step);
-                //positions.AddFirst(curr);
-                positions.Add(TID + thread_num * (i + 1), curr);
-            }
-        }
-        curr = startPos;
-        for (int i = 0; i < negativeCount; i++)
-        {
-            curr = ThreadedRK4(TID, curr, -step);
-            lock (lck)
-            {
-                //curr = RK4(curr, -step);
-                //positions.AddFirst(curr);
-                positions.Add(TID - thread_num * i, curr);
-            }
-        }
-    }
-
     /// <summary>
     /// vectorized 4th order Runge-Kutta ODE solver for vector field
     /// </summary>
@@ -317,23 +305,6 @@ public class FlowLineParticles : MonoBehaviour
         Vector3 m3 = new Vector3((float)expX.Evaluate(), (float)expZ.Evaluate(), (float)expY.Evaluate()).normalized;
         varX.value = v0.x + m3.x * dt; varY.value = v0.z + m3.z * dt; varZ.value = v0.y + m3.y * dt;
         Vector3 m4 = new Vector3((float)expX.Evaluate(), (float)expZ.Evaluate(), (float)expY.Evaluate()).normalized;
-        Vector3 m = (m1 + m2 * 2.0f + m3 * 2.0f + m4) / 6.0f;
-        return v0 + m * dt;
-    }
-
-    Vector3 ThreadedRK4(int TID, Vector3 v0, float dt)
-    {
-        AK.Variable varX_ = solvers[TID].GetGlobalVariable("x");
-        AK.Variable varY_ = solvers[TID].GetGlobalVariable("y");
-        AK.Variable varZ_ = solvers[TID].GetGlobalVariable("z");
-        varX_.value = v0.x; varY_.value = v0.z; varZ_.value = v0.y;
-        Vector3 m1 = new Vector3((float)expXs[TID].Evaluate(), (float)expZs[TID].Evaluate(), (float)expYs[TID].Evaluate()).normalized;
-        varX_.value = v0.x + m1.x * dt / 2.0f; varY_.value = v0.z + m1.z * dt / 2.0f; varZ_.value = v0.y + m1.y * dt / 2.0f;
-        Vector3 m2 = new Vector3((float)expXs[TID].Evaluate(), (float)expZs[TID].Evaluate(), (float)expYs[TID].Evaluate()).normalized;
-        varX_.value = v0.x + m2.x * dt / 2.0f; varY_.value = v0.z + m2.z * dt / 2.0f; varZ_.value = v0.y + m2.y * dt / 2.0f;
-        Vector3 m3 = new Vector3((float)expXs[TID].Evaluate(), (float)expZs[TID].Evaluate(), (float)expYs[TID].Evaluate()).normalized;
-        varX_.value = v0.x + m3.x * dt; varY_.value = v0.z + m3.z * dt; varZ_.value = v0.y + m3.y * dt;
-        Vector3 m4 = new Vector3((float)expXs[TID].Evaluate(), (float)expZs[TID].Evaluate(), (float)expYs[TID].Evaluate()).normalized;
         Vector3 m = (m1 + m2 * 2.0f + m3 * 2.0f + m4) / 6.0f;
         return v0 + m * dt;
     }
@@ -383,7 +354,11 @@ public class FlowLineParticles : MonoBehaviour
         threadGroups = Mathf.CeilToInt((float)particleCount / GROUP_SIZE);
 
         int l = particleCount;
-
+        if (l == 0)
+        {
+            initialized = false;
+            return;
+        }
         particles = new Particle[l];
         dest = new Particle[l];
 

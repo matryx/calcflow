@@ -36,12 +36,9 @@ public class CustomVectorField : MonoBehaviour
 
     public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
 
-    public float xmin = -4.5f;
-    public float xmax = 4.5f;
-    public float ymin = -4.5f;
-    public float ymax = 4.5f;
-    public float zmin = -4.5f;
-    public float zmax = 4.5f;
+
+    float range;
+
     public float delta = 1f;
     public enum SampleDensity { HIGH, MEDIUM, LOW };
     public SampleDensity dens = SampleDensity.LOW;
@@ -64,9 +61,21 @@ public class CustomVectorField : MonoBehaviour
         solver.SetGlobalVariable("x", 0); solver.SetGlobalVariable("y", 0); solver.SetGlobalVariable("z", 0);
         varX = solver.GetGlobalVariable("x"); varY = solver.GetGlobalVariable("y"); varZ = solver.GetGlobalVariable("z");
         max_magnitude = 0f;
-        //CalculateVectors();
-        //DrawVectorField();
+
+        CartesianManager._instance.AddScaleCallback(RangeUpdated);
     }
+
+    void OnDestroy()
+    {
+        CartesianManager._instance.RemoveScaleCallback(RangeUpdated);
+    }
+
+    void RangeUpdated(float newRange)
+    {
+        range = newRange;
+        UpdateFunctions();
+    }
+
 
     // Update is called once per frame
     void Update()
@@ -104,21 +113,21 @@ public class CustomVectorField : MonoBehaviour
         switch (dens)
         {
             case SampleDensity.LOW:
-                delta = (xmax - xmin) / 4.0f;
+                delta = range*2 / 4.0f;
                 break;
             case SampleDensity.MEDIUM:
-                delta = (xmax - xmin) / 6.0f;
+                delta = range*2 / 6.0f;
                 break;
             case SampleDensity.HIGH:
-                delta = (xmax - xmin) / 9.0f;
+                delta = range*2 / 9.0f;
                 break;
         }
 
-        for (float x_temp = xmin; x_temp <= xmax; x_temp += delta)
+        for (float x_temp = -range; x_temp <= range; x_temp += delta)
         {
-            for (float y_temp = ymin; y_temp <= ymax; y_temp += delta)
+            for (float y_temp = -range; y_temp <= range; y_temp += delta)
             {
-                for (float z_temp = zmin; z_temp <= zmax; z_temp += delta)
+                for (float z_temp = -range; z_temp <= range; z_temp += delta)
                 {
                     varX.value = (x_temp);
                     varY.value = (z_temp);
@@ -164,7 +173,7 @@ public class CustomVectorField : MonoBehaviour
 
         for (int i = 0; i < startPts.Count; i++)
         {
-            Vector3 target = startPts[i];
+            Vector3 target = startPts[i]*10/range;
             Vector3 offset = offsets[i] / max_magnitude;
             //Vector3 tip = offset * 0.4f;
 

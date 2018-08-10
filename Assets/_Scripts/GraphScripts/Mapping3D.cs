@@ -15,10 +15,22 @@ public class Mapping3D : MonoBehaviour
 
     public TMPro.TextMeshPro tmpro;
 
+    float range;
+
     // Use this for initialization
-    void Awake()
+    void Start()
     {
-        //uvwSelector = GetComponentInChildren<ConstraintGrabbable>();
+        CartesianManager._instance.AddScaleCallback(RangeUpdated);
+    }
+
+    void OnDestroy()
+    {
+        CartesianManager._instance.RemoveScaleCallback(RangeUpdated);
+    }
+
+    void RangeUpdated(float newRange)
+    {
+        range = newRange;
     }
 
     // Update is called once per frame
@@ -92,7 +104,7 @@ public class Mapping3D : MonoBehaviour
     {
         Vector3 output = new Vector3();
         ExpressionSet es = calcManager.expressionSet;
-        float scale = CartesianManager._instance.GetScale();
+        float scale = range;
 
         foreach (string key in es.GetExprKeys())
         {
