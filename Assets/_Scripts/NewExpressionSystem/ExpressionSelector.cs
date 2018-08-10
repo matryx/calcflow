@@ -20,15 +20,24 @@ public class ExpressionSelector : QuickButton
     List<string> min;
     List<string> max;
 
+    bool initialized = false;
+
     void Awake()
     {
-        _instance = this; 
+        _instance = this;
     }
 
     protected override void Start()
     {
         base.Start();
+        if (!initialized)
+        {
+            Initialize();
+        }
+    }
 
+    void Initialize()
+    {
         paramManager = ParametricManager._instance;
         vecFieldManager = VecFieldManager._instance;
         expressions = Expressions._instance;
@@ -40,6 +49,7 @@ public class ExpressionSelector : QuickButton
 
         min = new List<string> { "-", "9" };
         max = new List<string> { "9" };
+        initialized = true;
     }
 
     void AddForwarders(Transform obj)
@@ -60,6 +70,10 @@ public class ExpressionSelector : QuickButton
 
     public void GenerateNewExpression()
     {
+        if (!initialized)
+        {
+            Initialize();
+        }
         Expressions.ExpressionType panelType = SetPanelType();
         thisScroll = expressions.GetScroll(panelType);
 

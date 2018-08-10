@@ -127,15 +127,20 @@ public abstract class CalculatorManager : MonoBehaviour
             }
             else if (expressionSet.GetRange(buttonID) == null)
             {
-                print("NEW RANGE");
-                GameObject var = CreateVariable(param);
-
-                param.GetComponent<ParametricExpression>().AddVariable(buttonID, var.transform);
-                var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().SetTitle(buttonID);
-                expressionSet.AddRange(buttonID);
-                addForwarders(var.transform);
+                AddNewVariable(buttonID, param);
             }
         }
+    }
+
+    void AddNewVariable (string buttonID, Transform param)
+    {
+        print("NEW RANGE");
+        GameObject var = CreateVariable(param);
+
+        param.GetComponent<ParametricExpression>().AddVariable(buttonID, var.transform);
+        var.transform.Find("VariableTitle").Find("Body").GetComponent<ExpressionBody>().SetTitle(buttonID);
+        expressionSet.AddRange(buttonID);
+        addForwarders(var.transform);
     }
 
     GameObject CreateVariable(Transform param)
@@ -150,7 +155,7 @@ public abstract class CalculatorManager : MonoBehaviour
         return var;
     }
 
-    public string DisplayText(List<string> exp, int index0, bool mark, int displayLength)
+    string DisplayText(List<string> exp, int index0, bool mark, int displayLength)
     {
         string test = "";
         foreach (string s in exp)

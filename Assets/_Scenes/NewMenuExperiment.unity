@@ -10856,6 +10856,7 @@ GameObject:
   m_Component:
   - component: {fileID: 684791799}
   - component: {fileID: 684791800}
+  - component: {fileID: 684791801}
   m_Layer: 11
   m_Name: ParametrizationPanel
   m_TagString: Untagged
@@ -10891,6 +10892,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   panelList: []
+--- !u!114 &684791801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 684791798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e18412e082fd724bb9c13343bacf651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputReceived: 0
+  expressionSetList: []
+  updateOverlay: 0
+  toExport: 0
 --- !u!1 &688693166
 GameObject:
   m_ObjectHideFlags: 0
@@ -14848,6 +14864,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 1732697228036684, guid: 9725cfd47d87712469474e288bf6442c, type: 2}
+      propertyPath: m_Name
+      value: CartesianGraph
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9725cfd47d87712469474e288bf6442c, type: 2}
   m_IsPrefabParent: 0
@@ -14907,24 +14927,6 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 5
     m_NumAlphaKeys: 2
---- !u!114 &876324449 stripped
-MonoBehaviour:
-  m_PrefabParentObject: {fileID: 114050484183445090, guid: 9725cfd47d87712469474e288bf6442c,
-    type: 2}
-  m_PrefabInternal: {fileID: 876324445}
-  m_Script: {fileID: 11500000, guid: 40f641fc045eddf4e9a9b6e53f465731, type: 3}
---- !u!114 &876324450 stripped
-MonoBehaviour:
-  m_PrefabParentObject: {fileID: 114124241077500576, guid: 9725cfd47d87712469474e288bf6442c,
-    type: 2}
-  m_PrefabInternal: {fileID: 876324445}
-  m_Script: {fileID: 11500000, guid: 40f641fc045eddf4e9a9b6e53f465731, type: 3}
---- !u!114 &876324451 stripped
-MonoBehaviour:
-  m_PrefabParentObject: {fileID: 114403385514348444, guid: 9725cfd47d87712469474e288bf6442c,
-    type: 2}
-  m_PrefabInternal: {fileID: 876324445}
-  m_Script: {fileID: 11500000, guid: 40f641fc045eddf4e9a9b6e53f465731, type: 3}
 --- !u!1 &886121059
 GameObject:
   m_ObjectHideFlags: 0
@@ -16022,7 +16024,6 @@ MonoBehaviour:
   particleSprite: {fileID: 2800000, guid: 121779cf5566e7b468f7f1ff757a00a4, type: 3}
   particleShader: {fileID: 4800000, guid: c93605556ea3b8f4790dd47da0c5282a, type: 3}
   particleAnimation: {fileID: 7200000, guid: 1e19f33a92058a04f9b7d5a8168dd9e6, type: 3}
-  vfTransform: {fileID: 0}
   effectStrength: 2
 --- !u!1 &924100622
 GameObject:
@@ -21127,6 +21128,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1259983391}
   - component: {fileID: 1259983392}
+  - component: {fileID: 1259983393}
   m_Layer: 11
   m_Name: VectorFieldPanel
   m_TagString: Untagged
@@ -21162,6 +21164,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   panelList: []
+--- !u!114 &1259983393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1259983390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcfb984f5521e6349aeecf24aa9e8773, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputReceived: 0
+  expressionSetList: []
+  updateOverlay: 0
+  toExport: 0
+  flowline: {fileID: 0}
 --- !u!1 &1269399552
 GameObject:
   m_ObjectHideFlags: 0
@@ -23100,9 +23118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3a82efb5260f3e4f93d00eb4fad5125, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xLabel: {fileID: 876324451}
-  yLabel: {fileID: 876324450}
-  zLabel: {fileID: 876324449}
+  range: 10
 --- !u!1 &1368970216
 GameObject:
   m_ObjectHideFlags: 0
@@ -26381,12 +26397,6 @@ MonoBehaviour:
   expressionY: -x
   expressionZ: 0
   expressionSets: []
-  xmin: -9
-  xmax: 9
-  ymin: -9
-  ymax: 9
-  zmin: -9
-  zmax: 9
   delta: 4
   dens: 2
 --- !u!1 &1532760022

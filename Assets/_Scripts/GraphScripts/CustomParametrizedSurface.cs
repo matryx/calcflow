@@ -13,12 +13,6 @@ public class CustomParametrizedSurface : MonoBehaviour
 
     ExpressionSet emptyExprSet;
 
-    #region axis labels
-    public AxisLabelManager xAxis;
-    public AxisLabelManager yAxis;
-    public AxisLabelManager zAxis;
-    #endregion
-
     private Particle[] dest;
 
     private Coroutine setup;
