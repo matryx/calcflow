@@ -69,8 +69,7 @@ public class CustomDensityPlot : MonoBehaviour
         solver.SetGlobalVariable("x", 0); solver.SetGlobalVariable("y", 0); solver.SetGlobalVariable("z", 0);
         varX = solver.GetGlobalVariable("x"); varY = solver.GetGlobalVariable("y"); varZ = solver.GetGlobalVariable("z");
         max_magnitude = 0f;
-        textureMap = new Texture3D(99, 99, 99, TextureFormat.RGBA32, true);
-        densityMat.SetTexture("_MainTex", textureMap);
+        textureMap = new Texture3D(128, 128, 128, TextureFormat.RGBA32, true);
         //CalculateVectors();
         //DrawDensityPlot();
     }
@@ -95,15 +94,15 @@ public class CustomDensityPlot : MonoBehaviour
                 delta = (xmax - xmin) / 6.0f;
                 break;
             case SampleDensity.HIGH:
-                delta = (xmax - xmin) / 99.0f;
+                delta = (xmax - xmin) / 127.0f;
                 break;
         }
 
-        for (float x_temp = xmin; x_temp <= xmax; x_temp += delta)
+        for (float x_temp = xmin; x_temp < xmax; x_temp += delta)
         {
-            for (float y_temp = ymin; y_temp <= ymax; y_temp += delta)
+            for (float y_temp = ymin; y_temp < ymax; y_temp += delta)
             {
-                for (float z_temp = zmin; z_temp <= zmax; z_temp += delta)
+                for (float z_temp = zmin; z_temp < zmax; z_temp += delta)
                 {
                     varX.value = x_temp;
                     varY.value = z_temp;
@@ -185,6 +184,7 @@ public class CustomDensityPlot : MonoBehaviour
 
         textureMap.SetPixels32(colors);
         textureMap.Apply();
+        densityMat.SetTexture("_VolumeTex", textureMap);
 
 /*
         List<Geometry> combined = CombineGeometry(rawGeom);

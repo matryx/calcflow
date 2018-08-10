@@ -1,9 +1,10 @@
-﻿Shader "Unlit/RaymarchedDensity"
+﻿Shader "RaymarchedDensity"
 {
 	Properties
 	{
-		_MainTex ("Texture", 3D) = "white" {}
+		_VolumeTex ("Texture", 3D) = "white" {}
 		_Scale ("Scale", Float) = 1
+		_MaxSteps("Step Limit", Float)=64
 	}
 	SubShader
 	{
@@ -30,11 +31,13 @@
 				float4 vertex : SV_POSITION;
 				float3 uvw : TEXCOORD0;
 				float4 worldPos : TEXCOORD1;
+				float4 localPos : TEXCOORD2;
 			};
 
-			sampler2D _MainTex;
+			sampler3D _VolumeTex;
 			float4 _MainTex_ST;
-			const int maxIterations = 1000;
+			float _Scale;
+			int _MaxSteps;
 
 			float inCube(float length, float3 currLoc){
 				float3 c = float3(length, length, length);
@@ -42,18 +45,25 @@
 				return max(max(d.x,max(d.y, d.z)), 0);
 			}
 
-			fixed4 raymarchColor(float3 start, float length, float3 uvw){
+			inline fixed4 getTexColor (float3 uvw){
+				return tex3D(_VolumeTex, uvw);
+			}
+
+			fixed4 raymarchColor(float4 start, float3 dir, float length, float3 uvw){
 				float rayDepth = 0;
 				fixed4 color = fixed4(0,0,0,0);
 				fixed4 tempColor = fixed4(0,0,0,0);
-				for (int i = 0; i < maxIterations; i++){
-					if(!inCube(length, TRANSFORM(rayDepth)){
-						break;
-					}
-
-					tempColor = tex3D(_MainTex, uvw);
-					color ?= Color(_MainTex@rayDepth);
-					rayDepth += STEP_SIZE;
+				int shifter = 0;
+				[loop]
+				for (int i = 0; i < _MaxSteps; i++){
+					// if(!inCube(length, start+rayDepth*dir)){
+					// 	break;
+					// }
+					tempColor = getTexColor(uvw);
+					color = (1-tempColor.a) * tempColor + color;
+					//shifter = step(color.a, tempColor.a);
+					//color = (color+(tempColor*shifter))/(1+(1*tempColor));
+					rayDepth += .5;
 				}
 				return color;
 			}
@@ -62,15 +72,21 @@
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uvw = v.vertex + float4(_Scale/2, _Scale/2, _Scale/2, 1);
+				o.uvw = v.vertex.xyz*.5+.5;
+				//o.uvw = float3(v.vertex.x + _Scale/2, v.vertex.y + _Scale/2, v.vertex.z + _Scale/2);
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+				o.uvw = o.worldPos.xyz*.5+.5;
+				o.localPos = v.vertex;
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				// sample the texture
-				fixed4 col = raymarchColor(???, _Scale, i.uvw);
+				float3 worldDir = i.worldPos - _WorldSpaceCameraPos;
+				float3 localDir = normalize (mul(unity_WorldToObject, worldDir));
+				fixed4 col = raymarchColor(i.localPos, localDir, _Scale, i.uvw);
+				//fixed4 col = tex3D(_VolumeTex, i.uvw);
 				return col;
 			}
 			ENDCG
