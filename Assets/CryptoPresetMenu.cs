@@ -34,6 +34,8 @@ public class CryptoPresetMenu : MonoBehaviour
 
     ScatterChart scatterChart;
 
+    TimeSelect timeSelect;
+
     KeyboardMenu board;
 
     GameObject graph;
@@ -49,7 +51,7 @@ public class CryptoPresetMenu : MonoBehaviour
     private TextMeshPro textMesh;
     public Transform view;
 
-    
+
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
     Scroll scroll;
@@ -60,6 +62,7 @@ public class CryptoPresetMenu : MonoBehaviour
         lineChart = LineChart.GetInstance();
         candleChart = CandleChart.GetInstance();
         scatterChart = ScatterChart.GetInstance();
+        timeSelect = TimeSelect.GetInstance();
 
         board = KeyboardMenu.GetInstance();
         scroll = GetComponentInChildren<Scroll>(true);
@@ -95,7 +98,8 @@ public class CryptoPresetMenu : MonoBehaviour
         }
     }
 
-    public void sendSignal(string source){
+    public void sendSignal(string source)
+    {
         HandleInput(source);
     }
     protected void HandleInput(string source)
@@ -104,18 +108,25 @@ public class CryptoPresetMenu : MonoBehaviour
         switch (source)
         {
             default:
-            if(source.Equals("Enter")){
-                toSearch = customInput.ToString();
-                textMesh.text = "Custom Input " + "(" + toSearch + ")";
-                webCall();
-                customInput = new StringBuilder();
-            }else if (source.Equals("Del")){
-                customInput.Remove(customInput.Length-1, 1);
-            }else if (source.Equals("Exit")){
-                Keyboard.SetActive(false);
-            }else{
-                customInput.Append(source);
-            }
+                if (source.Equals("Enter"))
+                {
+                    toSearch = customInput.ToString();
+                    textMesh.text = "Custom Input " + "(" + toSearch + ")";
+                    webCall();
+                    customInput = new StringBuilder();
+                }
+                else if (source.Equals("Del"))
+                {
+                    customInput.Remove(customInput.Length - 1, 1);
+                }
+                else if (source.Equals("Exit"))
+                {
+                    Keyboard.SetActive(false);
+                }
+                else
+                {
+                    customInput.Append(source);
+                }
                 break;
             //R1 -> R1
             case "Toggle":
@@ -183,13 +194,16 @@ public class CryptoPresetMenu : MonoBehaviour
     }
     void newGraph()
     {
-//        lineChart.kill();
-//        lineChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
-//        lineChart.updateGraph();
-
+        //        lineChart.kill();
+        //        lineChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
+        //        lineChart.updateGraph();
+        scatterChart.createLabels = true;
         scatterChart.kill();
         scatterChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
         scatterChart.updateGraph();
+
+        timeSelect.setCoin(currCrypto);
+        timeSelect.updateTimes();
     }
 
     void getTimeStamps(string source)
@@ -258,25 +272,30 @@ public class CryptoPresetMenu : MonoBehaviour
         }
     }
 
-	void parseJSON(object tmp){ 
-		string data = ((StringBuilder)tmp).ToString ();
-		findName(data, toSearch);
-	}
+    void parseJSON(object tmp)
+    {
+        string data = ((StringBuilder)tmp).ToString();
+        findName(data, toSearch);
+    }
 
-    void findName(string text, string search){
+    void findName(string text, string search)
+    {
         text = text.ToLower();
         search = search.ToLower();
         search = "\"" + search + "\"";
-        int start = text.IndexOf(search)+1;
-        if(start == 0){
+        int start = text.IndexOf(search) + 1;
+        if (start == 0)
+        {
             Keyboard.SetActive(true);
             board.notFoundError();
-        }else{
+        }
+        else
+        {
             //Keyboard.SetActive(false);
-            text = text.Substring(start, text.Length-1-start);
+            text = text.Substring(start, text.Length - 1 - start);
             int name = text.IndexOf("website_slug") + 16;
             int nameEnd = text.IndexOf("}");
-            currCrypto = text.Substring(name, nameEnd - name-10);
+            currCrypto = text.Substring(name, nameEnd - name - 10);
             newGraph();
         }
     }

@@ -101,7 +101,10 @@ public class ScatterChart : MonoBehaviour
     float resolution = 25f;
     //public int numPoints = 10;
     public Material frameMaterial;
-    public Transform point;
+    public Transform datePoint;
+    public Transform line;
+
+    public bool createLabels = true;
 
     void Awake()
     {
@@ -124,6 +127,14 @@ public class ScatterChart : MonoBehaviour
         times = new List<string>();
         prices = new List<string>();
         temp = new List<Particle>();
+
+        if (createLabels)
+        {
+            foreach (Transform child in transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
 
         pointList = new List<GameObject>();
         builder = new StringBuilder();
@@ -203,8 +214,6 @@ public class ScatterChart : MonoBehaviour
 
         //Particle[] particles = new Particle[prices.Count];
 
-
-
         distances = new Distance[prices.Count - 1];
         additonalParticles = new int[prices.Count];
         int adds = 0;
@@ -230,6 +239,23 @@ public class ScatterChart : MonoBehaviour
             tmpParticle.position = new Vector3(xPos, yPos, 0);
             temp.Add(tmpParticle);
 
+            int labelCount = (int)Mathf.Round(prices.Count / 35);
+
+            if ((i % labelCount == 0 || i == times.Count-1) && createLabels)
+            {
+                Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                currPoint.localPosition = new Vector3(xPos, -3f, -2.5f);
+                TextMesh dataContent = currPoint.GetComponent<TextMesh>();
+                /*                 string text = "" + convertFromTimestamp(times[i]).Month + "/" + convertFromTimestamp(times[i]).Month + "/" + convertFromTimestamp(times[i]).Year;
+
+                                if((convertFromTimestamp(times[0]).Subtract(convertFromTimestamp(times[times.Count-1]))).Days <= 7){
+                                    text += ", " + convertFromTimestamp(times[i]).TimeOfDay;
+                                } */
+                dataContent.text = convertFromTimestamp(times[i]).ToString();
+                Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                currLine.localPosition = new Vector3(xPos, -2.75f, -2.5f);
+                currLine.localScale += new Vector3(0, -0.5f, 0);
+            }
 
 
             if (distance > STEP_SIZE)
@@ -259,6 +285,8 @@ public class ScatterChart : MonoBehaviour
             }
 
         }
+
+        createLabels = false;
 
         int count = temp.Count;
         tmpParticle = new Particle();
@@ -486,5 +514,29 @@ public class ScatterChart : MonoBehaviour
             Graphics.DrawProcedural(MeshTopology.Points, particleCount);
         }
     }
+
+    public string getFirstTime()
+    {
+        //return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(times[0]));
+        return this.times[0];
+    }
+
+    public string getLastTime()
+    {
+        //return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(times[times.Count-1]));
+        return this.times[this.times.Count - 1];
+    }
+
+    public List<string> getTimeList()
+    {
+        return this.times;
+    }
+
+    public DateTime convertFromTimestamp(string timestamp)
+    {
+        return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(timestamp));
+    }
+
+
 
 }
