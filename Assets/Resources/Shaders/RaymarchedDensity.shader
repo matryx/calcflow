@@ -10,6 +10,8 @@
 	{
 		Tags { "Queue"="Transparent" "RenderType"="Transparent" }
 		LOD 100
+		ZWrite Off
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass
 		{
@@ -29,7 +31,7 @@
 			struct v2f
 			{
 				float4 vertex : SV_POSITION;
-				float3 uvw : TEXCOORD0;
+				//float3 uvw : TEXCOORD0;
 				float4 worldPos : TEXCOORD1;
 				float4 localPos : TEXCOORD2;
 			};
@@ -49,21 +51,23 @@
 				return tex3D(_VolumeTex, uvw);
 			}
 
-			fixed4 raymarchColor(float4 start, float3 dir, float length, float3 uvw){
+			fixed4 raymarchColor(float4 start, float3 dir){
 				float rayDepth = 0;
 				fixed4 color = fixed4(0,0,0,0);
 				fixed4 tempColor = fixed4(0,0,0,0);
 				int shifter = 0;
 				[loop]
 				for (int i = 0; i < _MaxSteps; i++){
-					// if(!inCube(length, start+rayDepth*dir)){
+					// if(!inCube(_Scale, start+rayDepth*dir)){
 					// 	break;
 					// }
-					tempColor = getTexColor(uvw);
-					color = (1-tempColor.a) * tempColor + color;
+					tempColor = getTexColor((start.xyz+rayDepth*dir)+.5);
+					tempColor.a *= .5;
+					tempColor.rgb *= tempColor.a;
+					color = (1-color.a) * tempColor + color;
 					//shifter = step(color.a, tempColor.a);
 					//color = (color+(tempColor*shifter))/(1+(1*tempColor));
-					rayDepth += .5;
+					rayDepth += .025;
 				}
 				return color;
 			}
@@ -72,10 +76,10 @@
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.uvw = v.vertex.xyz*.5+.5;
+				//o.uvw = v.vertex.xyz+.5;
 				//o.uvw = float3(v.vertex.x + _Scale/2, v.vertex.y + _Scale/2, v.vertex.z + _Scale/2);
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-				o.uvw = o.worldPos.xyz*.5+.5;
+				//o.uvw = o.worldPos.xyz*.5+.5;
 				o.localPos = v.vertex;
 				return o;
 			}
@@ -85,7 +89,7 @@
 				// sample the texture
 				float3 worldDir = i.worldPos - _WorldSpaceCameraPos;
 				float3 localDir = normalize (mul(unity_WorldToObject, worldDir));
-				fixed4 col = raymarchColor(i.localPos, localDir, _Scale, i.uvw);
+				fixed4 col = raymarchColor(i.localPos, localDir);
 				//fixed4 col = tex3D(_VolumeTex, i.uvw);
 				return col;
 			}
