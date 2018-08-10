@@ -99,11 +99,12 @@ public class ParametricManager : CalculatorManager
 
             if (isValid)
             {
-                print("<color=blue>EPXR SET COUNT: </color>" + expressionSetList.Count);
+                //print("<color=blue>EPXR SET COUNT: </color>" + expressionSetList.Count);
                 paramSurface.UpdateExpressionSet(expressionSetList);
                 paramSurface.GenerateParticles();
             }
         }
+        
         if (toExport)
         {
             toExport = false;

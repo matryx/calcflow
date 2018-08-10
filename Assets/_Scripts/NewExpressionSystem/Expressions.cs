@@ -24,6 +24,7 @@ public class Expressions : MonoBehaviour
     // 1 - fix pi symbol
     // 2 - integrate secondary menu with new calc
     // 3 - get generate mesh and save expression working with new calc system 
+    // 4 - add hover text to buttons
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
@@ -35,9 +36,8 @@ public class Expressions : MonoBehaviour
     // 3 - fading in isn't quite working (not lerping like fadeOut does)
 
     //DONE:
-    // 1 - fixed fade in when things coming in from bottom but not from top
-    // 2 - merged develop into my branch
-    // 3 - got presetMenu showing up properly and graphing default but UI not updating unless you select body
+    // 1 - got presetMenu showing up properly and graphing default but UI not updating unless you select body
+
 
     void Awake()
     {

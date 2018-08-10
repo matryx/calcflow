@@ -266,6 +266,7 @@ public class ExpressionSelector : QuickButton
         return var.transform;
     }
 
+    #region Constant
     //private List<Transform> createConstant()
     //{
     //    List<Transform> constComponents = new List<Transform>();
@@ -287,6 +288,7 @@ public class ExpressionSelector : QuickButton
 
     //    return constComponents;
     //}
+    #endregion
 
     protected override void ButtonExitBehavior(GameObject other) { }
 
