@@ -62,9 +62,10 @@
 					// 	break;
 					// }
 					tempColor = getTexColor((start.xyz+rayDepth*dir)+.5);
-					tempColor.a *= .5;
+					tempColor.a *= 1;
 					tempColor.rgb *= tempColor.a;
 					color = (1-color.a) * tempColor + color;
+					color = fixed4(1.08*color.rgb,color.a);
 					//shifter = step(color.a, tempColor.a);
 					//color = (color+(tempColor*shifter))/(1+(1*tempColor));
 					rayDepth += .025;

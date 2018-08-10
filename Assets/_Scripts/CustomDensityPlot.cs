@@ -17,6 +17,8 @@ public class CustomDensityPlot : MonoBehaviour {
     public Gradient gradient;
 
     public Material densityMat;
+    public Material oldDensity;
+    public Boolean oldFunctionality;
 
     GameObject go;
 
@@ -165,13 +167,13 @@ public class CustomDensityPlot : MonoBehaviour {
             //body.startColor = c;
             //body.endColor = c;
             //rawGeom.Add(CreateSphere(target, offset, offset.magnitude, offset.magnitude, c));
-            /*
-            if(c.a> 0){
+            
+            if(c.a> 0 && oldFunctionality){
                 // rawGeom.Add(CreateCone(target, target, 0.3f, 0.15f, c));
                 // rawGeom.Add(CreateCone(target, -1 * target, 0.3f, 0.15f, c));
                 rawGeom.Add(CreateCube(target, delta, c));
             }
-            */
+            
             //rawGeom.Add(CreateCone(target, offset, offset.magnitude, offset.magnitude, c));
             //rawGeom.Add(CreateCone(target, -1*offset, offset.magnitude, offset.magnitude, c));
         }
@@ -180,37 +182,38 @@ public class CustomDensityPlot : MonoBehaviour {
         textureMap.Apply ();
         densityMat.SetTexture ("_VolumeTex", textureMap);
 
-        /*
-                List<Geometry> combined = CombineGeometry(rawGeom);
-                List<Mesh> meshes = new List<Mesh>();
-                foreach (var geom in combined)
+        if (oldFunctionality){
+            List<Geometry> combined = CombineGeometry(rawGeom);
+            List<Mesh> meshes = new List<Mesh>();
+            foreach (var geom in combined)
+            {
+                Mesh mesh = new Mesh()
                 {
-                    Mesh mesh = new Mesh()
-                    {
-                        vertices = geom.vertices,
-                        normals = geom.normals,
-                        colors32 = geom.vertexColors,
-                        triangles = geom.faces
-                    };
-                    meshes.Add(mesh);
-                }
-                go = Instantiate(new GameObject(), transform);
-                go.name = "vector field mesh";
-                go.transform.localPosition = new Vector3(0, 0, 0);
-                go.transform.localRotation = Quaternion.identity;
-                for (int i = 0; i < meshes.Count; i++)
-                {
-                    Mesh mesh = meshes[i];
-                    GameObject g = Instantiate(new GameObject(), go.transform);
-                    g.name = "submesh" + i;
-                    g.transform.localPosition = new Vector3(0, 0, 0);
-                    g.transform.localRotation = Quaternion.identity;
-                    MeshFilter mf = g.AddComponent<MeshFilter>();
-                    mf.mesh = mesh;
-                    MeshRenderer mr = g.AddComponent<MeshRenderer>();
-                    mr.material = densityMat;
-                }
-        */
+                    vertices = geom.vertices,
+                    normals = geom.normals,
+                    colors32 = geom.vertexColors,
+                    triangles = geom.faces
+                };
+                meshes.Add(mesh);
+            }
+            go = Instantiate(new GameObject(), transform);
+            go.name = "vector field mesh";
+            go.transform.localPosition = new Vector3(0, 0, 0);
+            go.transform.localRotation = Quaternion.identity;
+            for (int i = 0; i < meshes.Count; i++)
+            {
+                Mesh mesh = meshes[i];
+                GameObject g = Instantiate(new GameObject(), go.transform);
+                g.name = "submesh" + i;
+                g.transform.localPosition = new Vector3(0, 0, 0);
+                g.transform.localRotation = Quaternion.identity;
+                MeshFilter mf = g.AddComponent<MeshFilter>();
+                mf.mesh = mesh;
+                MeshRenderer mr = g.AddComponent<MeshRenderer>();
+                mr.material = oldDensity;
+            }
+        }
+        
     }
 
     void Clear () {
