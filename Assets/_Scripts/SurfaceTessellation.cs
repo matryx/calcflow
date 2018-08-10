@@ -8,13 +8,14 @@ using Nanome.Core;
 
 public class SurfaceTessellation : MonoBehaviour
 {
+
+    public static SurfaceTessellation _instance;
     public struct EquationSet
     {
         public float scale;
         public string exprX, exprY, exprZ;
         public float uMin, uMax, vMin, vMax;
     }
-
     Queue<EquationSet> queue = new Queue<EquationSet>();
     private ExpressionSolver solver;
     AK.Expression expX, expY, expZ;
@@ -25,77 +26,21 @@ public class SurfaceTessellation : MonoBehaviour
     List<Vector3> normals;
     List<Vector2> uvs;
     List<int> faces;
-
-    Coroutine tessel;
     bool isRunning;
+    Dictionary<Vector2, Vector3> mappingCache = new Dictionary<Vector2, Vector3>();
     List<MeshFilter> meshVisuals = new List<MeshFilter>();
 
-    private void Awake()
+    public void ExportAsFile(string filetype)
     {
-        // queue = new Queue<EquationSet>();
-        solver = new ExpressionSolver();
-        positions = new List<Vector3>();
-        normals = new List<Vector3>();
-        uvs = new List<Vector2>();
-        faces = new List<int>();
-        gameObject.SetActive(false);
-        ExportMenu em = this.transform.Find("ExportMenu").gameObject.GetComponent<ExportMenu>();
-        if (em != null){
-            em.Initialize(this);
-        }
-    }
-
-    private void Update()
-    {
-        if (queue.Count != 0)
+        string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
+        string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        if (!Directory.Exists(Path.Combine(path, "CalcflowExports")))
         {
-            if (isRunning == false)
-            {
-                EquationSet es = queue.Dequeue();
-                var go = new GameObject("Mesh Visualizer" + meshVisuals.Count);
-                go.transform.SetParent(transform);
-                go.transform.localPosition = Vector3.zero;
-                go.transform.localRotation = Quaternion.identity;
-                var mrenderer = go.AddComponent<MeshRenderer>();
-                mrenderer.material = new Material(Shader.Find("Wireframe"));
-                MeshFilter meshVisual = go.AddComponent<MeshFilter>();
-                meshVisuals.Add(meshVisual);
-
-                uMin = es.uMin; uMax = es.uMax; vMin = es.vMin; vMax = es.vMax;
-                solver.SetGlobalVariable("u", uMin * Mathf.PI);
-                solver.SetGlobalVariable("v", vMin * Mathf.PI);
-                expX = solver.SymbolicateExpression(es.exprX);
-                expY = solver.SymbolicateExpression(es.exprY);
-                expZ = solver.SymbolicateExpression(es.exprZ);
-                varU = solver.GetGlobalVariable("u");
-                varV = solver.GetGlobalVariable("v");
-
-                meshVisual.transform.localScale = Vector3.one * es.scale;
-
-                positions.Clear();
-                normals.Clear();
-                faces.Clear();
-                uvs.Clear();
-                mappingCache = new Dictionary<Vector2, Vector3>();
-
-                Vector3 v0 = MapPoint01(0, 0);
-                Vector3 n0 = GetNormal01(0, 0);
-                positions.Add(v0); normals.Add(n0); uvs.Add(new Vector2(0, 0));
-                Vector3 v1 = MapPoint01(0, 1);
-                Vector3 n1 = GetNormal01(0, 1);
-                positions.Add(v1); normals.Add(n1); uvs.Add(new Vector2(0, 1));
-                Vector3 v2 = MapPoint01(1, 1);
-                Vector3 n2 = GetNormal01(1, 1);
-                positions.Add(v2); normals.Add(n2); uvs.Add(new Vector2(1, 1));
-                Vector3 v3 = MapPoint01(1, 0);
-                Vector3 n3 = GetNormal01(1, 0);
-                positions.Add(v3); normals.Add(n3); uvs.Add(new Vector2(1, 0));
-
-                Tessellate(ref meshVisual, 0, 1, 2, 3);
-                //tessel = StartCoroutine(Tessellate(0, 1, 2, 3));
-            }
+            Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
         }
+        FileExporter.SaveMesh(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename), filetype);
     }
+
 
     // Removes all Mesh Visualizers from the Parent, Clears the meshVisuals List
     public void ClearMeshVisualizers()
@@ -109,6 +54,22 @@ public class SurfaceTessellation : MonoBehaviour
             }
         }
         meshVisuals.Clear();
+    }
+
+    public void GenerateMesh(List<ExpressionSet> expressionSets)
+    {
+
+        gameObject.SetActive(true);
+
+        foreach (ExpressionSet expressionSet in expressionSets)
+        {
+            float currentScale = CartesianManager._instance.GetScale();
+
+            EnqueueEquation(currentScale, expressionSet.GetExpression("X").expression, expressionSet.GetExpression("Y").expression,
+                                   expressionSet.GetExpression("Z").expression, expressionSet.GetRange("u").Min.Value,
+                                   expressionSet.GetRange("u").Max.Value, expressionSet.GetRange("v").Min.Value,
+                                   expressionSet.GetRange("v").Max.Value);
+        }
     }
 
     public void EnqueueEquation(float scale, string exprX, string exprY, string exprZ, float uMin, float uMax, float vMin, float vMax)
@@ -154,7 +115,6 @@ public class SurfaceTessellation : MonoBehaviour
         return v.x >= 20f || v.x <= -20f || v.y >= 20f || v.y <= -20f || v.z >= 20f || v.z <= -20f;
     }
 
-    Dictionary<Vector2, Vector3> mappingCache = new Dictionary<Vector2, Vector3>();
     IEnumerator Tessellate(ref MeshFilter meshVisual, int x, int y, int z, int w, float umin_ = 0f, float umax_ = 1f, float vmin_ = 0f, float vmax_ = 1f)
     {
         isRunning = true;
@@ -524,7 +484,7 @@ public class SurfaceTessellation : MonoBehaviour
         //ObjExporter.MeshToFile(mesh, filename + ".obj");
 
         // meshVisual.transform.localScale = transform.localScale;
-        
+
 
         meshVisual.mesh.Clear();
         meshVisual.mesh.SetVertices(positions);
@@ -538,14 +498,73 @@ public class SurfaceTessellation : MonoBehaviour
         return null;
     }
 
-    public void ExportAsFile(string filetype)
+    private void Awake()
     {
-        string filename = System.DateTime.Now.ToString("yyyyMMddHHmmss");
-        string path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-        if (!Directory.Exists(Path.Combine(path, "CalcflowExports")))
+        _instance = this;
+        // queue = new Queue<EquationSet>();
+        solver = new ExpressionSolver();
+        positions = new List<Vector3>();
+        normals = new List<Vector3>();
+        uvs = new List<Vector2>();
+        faces = new List<int>();
+        gameObject.SetActive(false);
+        ExportMenu em = this.transform.Find("ExportMenu").gameObject.GetComponent<ExportMenu>();
+        if (em != null)
         {
-            Directory.CreateDirectory(Path.Combine(path, "CalcflowExports"));
+            em.Initialize(this);
         }
-        FileExporter.SaveMesh(meshVisuals, Path.Combine(Path.Combine(path, "CalcflowExports"), filename), filetype);
     }
+
+    private void Update()
+    {
+        if (queue.Count != 0)
+        {
+            if (isRunning == false)
+            {
+                EquationSet es = queue.Dequeue();
+                var go = new GameObject("Mesh Visualizer" + meshVisuals.Count);
+                go.transform.SetParent(transform);
+                go.transform.localPosition = Vector3.zero;
+                go.transform.localRotation = Quaternion.identity;
+                var mrenderer = go.AddComponent<MeshRenderer>();
+                mrenderer.material = new Material(Shader.Find("Wireframe"));
+                MeshFilter meshVisual = go.AddComponent<MeshFilter>();
+                meshVisuals.Add(meshVisual);
+
+                uMin = es.uMin; uMax = es.uMax; vMin = es.vMin; vMax = es.vMax;
+                solver.SetGlobalVariable("u", uMin * Mathf.PI);
+                solver.SetGlobalVariable("v", vMin * Mathf.PI);
+                expX = solver.SymbolicateExpression(es.exprX);
+                expY = solver.SymbolicateExpression(es.exprY);
+                expZ = solver.SymbolicateExpression(es.exprZ);
+                varU = solver.GetGlobalVariable("u");
+                varV = solver.GetGlobalVariable("v");
+
+                meshVisual.transform.localScale = Vector3.one * es.scale;
+
+                positions.Clear();
+                normals.Clear();
+                faces.Clear();
+                uvs.Clear();
+                mappingCache = new Dictionary<Vector2, Vector3>();
+
+                Vector3 v0 = MapPoint01(0, 0);
+                Vector3 n0 = GetNormal01(0, 0);
+                positions.Add(v0); normals.Add(n0); uvs.Add(new Vector2(0, 0));
+                Vector3 v1 = MapPoint01(0, 1);
+                Vector3 n1 = GetNormal01(0, 1);
+                positions.Add(v1); normals.Add(n1); uvs.Add(new Vector2(0, 1));
+                Vector3 v2 = MapPoint01(1, 1);
+                Vector3 n2 = GetNormal01(1, 1);
+                positions.Add(v2); normals.Add(n2); uvs.Add(new Vector2(1, 1));
+                Vector3 v3 = MapPoint01(1, 0);
+                Vector3 n3 = GetNormal01(1, 0);
+                positions.Add(v3); normals.Add(n3); uvs.Add(new Vector2(1, 0));
+
+                Tessellate(ref meshVisual, 0, 1, 2, 3);
+                //tessel = StartCoroutine(Tessellate(0, 1, 2, 3));
+            }
+        }
+    }
+
 }

@@ -144,7 +144,7 @@ public class SubmitMenu : MonoBehaviour {
 
     public string SerializeSurface()
     {
-        List<SerializableExpressionSet> serializableExpressions = customParametrizedSurface.expressionSets.Select(x => new SerializableExpressionSet(x)).ToList();
+        List<SerializableExpressionSet> serializableExpressions = customParametrizedSurface.ExpressionSets.Select(x => new SerializableExpressionSet(x)).ToList();
         return JsonHelper.ToJson(serializableExpressions);
     }
 

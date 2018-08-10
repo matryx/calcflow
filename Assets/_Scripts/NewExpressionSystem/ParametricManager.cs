@@ -8,9 +8,9 @@ public class ParametricManager : CalculatorManager
     Scroll paramScroll;
     CustomParametrizedSurface paramSurface;
     BoundsManager boundsManager;
- 
+
     OutputManager outputManager;
-  
+
     protected override void Initialize()
     {
         _instance = this;
@@ -20,12 +20,8 @@ public class ParametricManager : CalculatorManager
         calcInput = CalcInput._instance;
         boundsManager = BoundsManager._instance;
         outputManager = OutputManager._instance;
-
         //saveLoadMenu = SaveLoadMenu._instance;
-        //saveLoadMenu.Initialize(this);
-
-        presetMenu = PresetMenu._instance;
-        presetMenu.Initialize(this);
+        //presetMenu = PresetMenu._instance;
 
         paramScroll = GameObject.Find("PanelBodyParam").transform.GetComponent<Scroll>();
         joyStickAggregator = paramScroll.GetComponent<JoyStickAggregator>();
@@ -39,6 +35,8 @@ public class ParametricManager : CalculatorManager
             print("OUTPUT INIIALIZED");
             outputManager.Initialize();
         }
+        //presetMenu.Initialize(this);
+        //saveLoadMenu.Initialize(this);
 
         ColorUtility.TryParseHtmlString("#64C3A7FF", out positiveFeedback);
 
@@ -61,8 +59,8 @@ public class ParametricManager : CalculatorManager
             ess.Add(expressionSets[i].DeepCopy());
             ess[ess.Count - 1].CompileAll();
         }
-        paramSurface.expressionSets = ess;
-        expressionSet = paramSurface.expressionSets[0];
+        paramSurface.ExpressionSets = ess;
+        expressionSet = paramSurface.ExpressionSets[0];
         calcInput.ChangeOutput(expressionSet.GetExpression("X"), this); //need to fix
         if (boundsManager != null) boundsManager.UpdateButtonText();
         inputReceived = true;
@@ -99,16 +97,13 @@ public class ParametricManager : CalculatorManager
 
             if (isValid)
             {
-                //print("<color=blue>EPXR SET COUNT: </color>" + expressionSetList.Count);
-                paramSurface.UpdateExpressionSet(expressionSetList);
-                paramSurface.GenerateParticles();
+                paramSurface.GenerateParticles(expressionSetList);
             }
         }
-        
         if (toExport)
         {
             toExport = false;
-            paramSurface.GenerateMesh();
+            SurfaceTessellation._instance.GenerateMesh(expressionSetList);
         }
     }
 }

@@ -139,8 +139,8 @@ public class PieceWiseControl : MonoBehaviour
         currTab = tab;
         currTab.GetComponent<FlexActionableComponent>().SetState(2);
         int index = tabList.FindIndex(x => x.name == tab.name);
-        index = System.Math.Min(index, paramSurface.expressionSets.Count - 1);
-        calcManager.ChangeExpressionSet(paramSurface.expressionSets[index]);
+        index = System.Math.Min(index, paramSurface.ExpressionSets.Count - 1);
+        calcManager.ChangeExpressionSet(paramSurface.ExpressionSets[index]);
     }
 
     void ClearAll()
