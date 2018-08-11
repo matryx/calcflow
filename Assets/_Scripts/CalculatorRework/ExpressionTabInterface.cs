@@ -5,13 +5,13 @@ using UnityEngine;
 public interface ExpressionTabInterface
 {
     ExpressionSet GetExpSet();
-    ExpressionActions GetExpActions();
     Transform GetExpressionX();
     Transform GetSeparator();
 
-    void SetButtonInputColor(Color col);
-    void SetElementQuadTex(Texture tex);
-    void SetTextColor(Color c);
+    void DisableExpression_UI();
+    void EnableExpression_UI();
+    void DisableActionButtons_UI();
+
     void SetExpressionX(Transform e);
     void SetSeparator(Transform sep);
     void DeleteExpressionFromScroll();

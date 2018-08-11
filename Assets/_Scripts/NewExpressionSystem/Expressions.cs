@@ -25,6 +25,7 @@ public class Expressions : MonoBehaviour
     // 2 - integrate secondary menu with new calc
     // 3 - get generate mesh and save expression working with new calc system 
     // 4 - add hover text to buttons
+    // 5 - do room set up to get rid of million warning messages
     //
     // nice to haves - 
     //  1 - slide variable shortcuts in and out 
@@ -34,10 +35,12 @@ public class Expressions : MonoBehaviour
     // 1 - parametric won't graph until you type a variable
     // 2 - no option to have no vec fields showing
     // 3 - fading in isn't quite working (not lerping like fadeOut does)
+    // 4 - UI of paramet getting disabled when you switch to vecor tab and back
+    // 5 - outputmanager and vecfield manager's update threw null error but couldn't replicate bug
 
     //DONE:
     // 1 - got presetMenu showing up properly and graphing default but UI not updating unless you select body
-
+    // 2 - major refactoring and fixed bugs caused by refactor
 
     void Awake()
     {

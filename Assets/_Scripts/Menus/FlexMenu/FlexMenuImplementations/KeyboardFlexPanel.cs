@@ -33,7 +33,7 @@ public class KeyboardFlexPanel : FlexPanelComponent {
     // Use this for initialization
     void Start()
     {
-        Actions.Clear();
+        RemoveAllActions();
         AddAllChildActions();
     }
 }

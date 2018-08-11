@@ -18,13 +18,10 @@ public class ExpressionBody : QuickButton
     VectorFieldExpression vec;
 
     Transform expressionParent;
-    Transform panel;
     Transform feedBack;
 
     TMPro.TextMeshPro textInput;
-    Texture quadShow, quadHide;
     string title = "X";
-    Color grayHide, grayShow;
 
     bool thisBodySelected = false;
     bool finishedScalingUp = true;
@@ -37,8 +34,6 @@ public class ExpressionBody : QuickButton
 
     void Awake()
     {
-        calcManager = ParametricManager._instance;
-
         expression = GameObject.Find("Expressions").GetComponent<Expressions>();
         feedBack = transform.parent.Find("Feedback");
 
@@ -55,11 +50,6 @@ public class ExpressionBody : QuickButton
         selectedScale = (variable) ? new Vector3(0.7f, 0.04f, 0.002f) :
                                      new Vector3(4.3f, 0.04f, 0.002f);
         idleScale = new Vector3(0f, 0.04f, 0.002f);
-
-        quadShow = Resources.Load("Icons/element", typeof(Texture2D)) as Texture;
-        quadHide = Resources.Load("Icons/element_gray", typeof(Texture2D)) as Texture;
-        ColorUtility.TryParseHtmlString("#9E9E9EFF", out grayShow);
-        ColorUtility.TryParseHtmlString("#D4D4D4FF", out grayHide);
     }
 
     protected override void Start()
@@ -69,6 +59,15 @@ public class ExpressionBody : QuickButton
 
     public void SetManager(CalculatorManager cm)
     {
+        //if (cm == VecFieldManager._instance)
+        //{
+        //    print("<color=blue>SETTING </color>" + transform.parent.name + "<color=blue>TO VEC FIELD MANAGER </color>");
+        //}
+        //else if (cm == ParametricManager._instance)
+        //{
+        //    print("<color=blue>SETTING </color>" + transform.parent.name + "<color=blue>TO PARAMETRIC MANAGER </color>");
+        //}
+
         calcManager = cm;
     }
 
@@ -85,16 +84,6 @@ public class ExpressionBody : QuickButton
     public Transform GetExpressionParent()
     {
         return expressionParent;
-    }
-
-    public void SetPanel(Transform p)
-    {
-        panel = p;
-    }
-
-    public Transform GetPanel()
-    {
-        return panel;
     }
 
     public Transform GetFeedBack()
@@ -133,7 +122,7 @@ public class ExpressionBody : QuickButton
             TMPro.TextMeshPro oldTextInput = selectedBody.GetTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
 
-            DisableActionButtons(selectedBody);
+            selectedBody.GetExpressionParent().gameObject.GetInterface<ExpressionTabInterface>().DisableActionButtons_UI();
             UnSelect();
         }
     }
@@ -141,30 +130,26 @@ public class ExpressionBody : QuickButton
     public void DeselectPrevBody()
     {
         if (expression == null) expression = GameObject.Find("Expressions").GetComponent<Expressions>();
-        ExpressionBody selectedBody = expression.GetSelectedBody();
+        ExpressionBody currentSelectedBody = expression.GetSelectedBody();
 
-        if (selectedBody)
+        if (currentSelectedBody)
         {
-            TMPro.TextMeshPro oldTextInput = selectedBody.GetTextInput();
+            TMPro.TextMeshPro oldTextInput = currentSelectedBody.GetTextInput();
             oldTextInput.text = oldTextInput.text.Replace("_", "");
 
-            DisableActionButtons(selectedBody);
+            currentSelectedBody.GetExpressionParent().gameObject.GetInterface<ExpressionTabInterface>().DisableActionButtons_UI();
 
-            if (selectedBody.transform != transform)
+            if (calcManager == VecFieldManager._instance && currentSelectedBody.expressionParent != expressionParent && currentSelectedBody.GetManager() == VecFieldManager._instance)
+            //if (currentSelectedBody.expressionParent != expressionParent && currentSelectedBody.GetManager() == VecFieldManager._instance)
             {
-                selectedBody.UnSelect();
+                currentSelectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().DisableExpression_UI();
             }
 
-            if (selectedBody.expressionParent != expressionParent && selectedBody.GetManager() == VecFieldManager._instance)
+            if (currentSelectedBody.transform != transform)
             {
-                HideUI(selectedBody);
+                currentSelectedBody.UnSelect();
             }
         }
-    }
-
-    void DisableActionButtons(ExpressionBody selectedBody)
-    {
-        selectedBody.GetExpressionParent().gameObject.GetInterface<ExpressionTabInterface>().GetExpActions().DisableButtons();
     }
 
     //NOTE: sets selected expression and body to be null
@@ -188,11 +173,12 @@ public class ExpressionBody : QuickButton
     {
         DeselectPrevBody();
         expression.SetSelectedExpr(expressionParent, this);
+
         calcManager.ChangeExpressionSet(expressionParent.gameObject.GetInterface<ExpressionTabInterface>().GetExpSet());
 
         if (calcManager == VecFieldManager._instance)
         {
-            ShowUI();
+            expressionParent.gameObject.GetInterface<ExpressionTabInterface>().EnableExpression_UI();
         }
 
         if (variable)
@@ -216,21 +202,7 @@ public class ExpressionBody : QuickButton
         StartCoroutine(scaleUp);
         finishedScalingUp = false;
         thisBodySelected = true;
-    }
-
-    void HideUI(ExpressionBody selectedBody)
-    {
-        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetTextColor(grayHide);
-        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetButtonInputColor(grayHide);
-        selectedBody.expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetElementQuadTex(quadHide);
-    }
-
-    void ShowUI()
-    {
-        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetTextColor(Color.black);
-        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetButtonInputColor(grayShow);
-        expressionParent.gameObject.GetInterface<ExpressionTabInterface>().SetElementQuadTex(quadShow);
-    }
+    } 
 
     protected override void ButtonEnterBehavior(GameObject other)
     {

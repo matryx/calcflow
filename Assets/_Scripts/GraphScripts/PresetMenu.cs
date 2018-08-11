@@ -22,6 +22,7 @@ public class PresetMenu : MonoBehaviour
 
     public FlexMenu menu;
     public string defaultFunction = "Astroidal Ellipse";
+
     public static PresetMenu _instance;
 
     [SerializeField]
@@ -36,7 +37,7 @@ public class PresetMenu : MonoBehaviour
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
 
     ParametricManager calcManager;
-    ExpressionSelector expressionSelector;
+    ExpressionCreator_UI expressionCreator_UI;
     Scroll scroll;
     JoyStickAggregator joyStickAggregator;
 
@@ -49,7 +50,7 @@ public class PresetMenu : MonoBehaviour
     public void Initialize(ParametricManager pm)
     {
         calcManager = pm;
-        expressionSelector = ExpressionSelector._instance;
+        expressionCreator_UI = ExpressionCreator_UI._instance;
         scroll = GetComponentInChildren<Scroll>(true);
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
 
@@ -121,9 +122,7 @@ public class PresetMenu : MonoBehaviour
         List<string> wmin = ExpressionParser.Parse("");
         List<string> wmax = ExpressionParser.Parse("");
 
-        expressionSelector.GenerateNewExpression();
-
-        ExpressionSet expressionSet = calcManager.expressionSet;
+        expressionCreator_UI.GenerateNewExpression();
 
         switch (source)
         {
@@ -341,6 +340,8 @@ public class PresetMenu : MonoBehaviour
                 break;
         }
 
+        //TODO: change in data should trigger change in UI
+        ExpressionSet expressionSet = calcManager.expressionSet;
         expressionSet.AddExpression("X", x);
         expressionSet.AddExpression("Y", y);
         expressionSet.AddExpression("Z", z);
@@ -348,6 +349,7 @@ public class PresetMenu : MonoBehaviour
         if (umin.Count > 0) expressionSet.AddRange("u", umin, umax);
         if (vmin.Count > 0) expressionSet.AddRange("v", vmin, vmax);
         if (wmin.Count > 0) expressionSet.AddRange("w", wmin, wmax);
+
         calcManager.PresetPressed();
     }
 }

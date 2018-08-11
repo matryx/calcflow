@@ -39,7 +39,7 @@ public class CustomParametrizedSurface : MonoBehaviour
     {
         return !(calculating || AnimatedParticleGrapher._instance.isGraphing());
     }
-    private void Awake()
+    void Awake()
     {
         _instance = this;
         emptyExprSet = ExpressionSet.CreateEmptySet();

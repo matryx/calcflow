@@ -49,6 +49,8 @@ public abstract class CalculatorManager : MonoBehaviour
         }
     }
 
+    //TODO: make graph update when data changes
+
     public virtual void SetOutput(CalcOutput output)
     {
         calcInput.ChangeOutput(output, this);
@@ -127,14 +129,13 @@ public abstract class CalculatorManager : MonoBehaviour
             }
             else if (expressionSet.GetRange(buttonID) == null)
             {
-                AddNewVariable(buttonID, param);
+                AddNewParametricVariable(buttonID, param);
             }
         }
     }
 
-    void AddNewVariable (string buttonID, Transform param)
+    void AddNewParametricVariable (string buttonID, Transform param)
     {
-        print("NEW RANGE");
         GameObject var = CreateVariable(param);
 
         param.GetComponent<ParametricExpression>().AddVariable(buttonID, var.transform);
@@ -147,10 +148,10 @@ public abstract class CalculatorManager : MonoBehaviour
     {
         GameObject var = Instantiate(Resources.Load("Expressions/Variable", typeof(GameObject))) as GameObject;
         var.transform.localScale = Vector3.one;
+        var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().SetManager(ParametricManager._instance);
+        var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().SetManager(ParametricManager._instance);
         var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().SetExpressionParent(param.transform);
         var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().SetExpressionParent(param.transform);
-        var.transform.Find("Min").GetComponentInChildren<ExpressionBody>().SetPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
-        var.transform.Find("Max").GetComponentInChildren<ExpressionBody>().SetPanel(GameObject.Find("ExpressionMenu/ParametrizationPanel").transform);
 
         return var;
     }

@@ -15,8 +15,6 @@ public class ToggleExpression : QuickButton
     Transform thisExpr;
 
     Material showMat, hideMat;
-    Texture quadShow, quadHide;
-    Color grayHide, grayShow;
 
     bool active = true;
     
@@ -34,11 +32,6 @@ public class ToggleExpression : QuickButton
 
         showMat = transform.GetComponent<Renderer>().material;
         hideMat = Resources.Load("Icons/HideMat", typeof(Material)) as Material;
-
-        quadShow = Resources.Load("Icons/element", typeof(Texture2D)) as Texture;
-        quadHide = Resources.Load("Icons/element_gray", typeof(Texture2D)) as Texture;
-        ColorUtility.TryParseHtmlString("#9E9E9EFF", out grayShow);
-        ColorUtility.TryParseHtmlString("#D4D4D4FF", out grayHide);
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
@@ -48,24 +41,18 @@ public class ToggleExpression : QuickButton
             if (thisExpr.GetComponent<ParametricExpression>())
             {
                 param = thisExpr.GetComponent<ParametricExpression>();
+                param.DisableExpression_UI();
                 expressionSet = param.GetExpSet();
                 calcManager.RemoveExpressionSet(expressionSet);
-                param.SetTextColor(grayHide);
-                param.SetButtonInputColor(grayHide);
-                param.SetElementQuadTex(quadHide);
-                param.SetActiveStatus(false);
             }
 
             if (expressions.GetSelectedBody()) expressions.GetSelectedBody().DeselectCurrBody();
         }
         else            //SHOW
         {
+            param.EnableExpression_UI();
             calcManager.AddExpressionSet(expressionSet);
-            param.SetActiveStatus(true);
             thisBody.SelectBody();
-            param.SetTextColor(Color.black);
-            param.SetElementQuadTex(quadShow);
-            param.SetButtonInputColor(grayShow);
         }
 
         expressionActions.GetComponent<ExpressionActions>().DisableButtons();

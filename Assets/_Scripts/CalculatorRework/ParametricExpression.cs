@@ -3,79 +3,88 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
-{
+{ 
     Expressions expressionsClass;
     ExpressionSet expSet;
     ExpressionActions expActions;
 
-    List<Transform> expressionsList;
-    List<Transform> variableClumps;
-    List<string> varsToDelete;
+    ParametricManager parametricManager;
+    Scroll scroll;
 
     Dictionary<string, Transform> variables;
     Dictionary<string, Transform> hiddenVariables;
 
+    List<string> varsToDelete;
+    List<Transform> expressionsList_UI;
+    List<Transform> variableClumps_UI;
+
     Transform expressionX;
     Transform separator;
 
-    Scroll scroll;
+    Texture quadShow, quadHide;
+    Color grayHide, grayShow;
 
-    bool initialized = false;
     float xPos = 1.2f;
+    bool initialized = false;
     bool deleteVar = false;
     bool destroyCalled = false;
     bool isActive = true;
 
     void Awake()
     {
-        if (initialized) return;
-        expressionsClass = Expressions._instance;
-        expSet = new ExpressionSet();
-        expressionsList = new List<Transform>();
-        variableClumps = new List<Transform>();
-        variables = new Dictionary<string, Transform>();
-        hiddenVariables = new Dictionary<string, Transform>();
-        varsToDelete = new List<string>();
-        expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
-
-        scroll = expressionsClass.GetScroll(Expressions.ExpressionType.PARAMET);
-        initialized = true;
+        Initialize();       
     }
 
     public void Initialize()
     {
         if (!initialized)
         {
-            expressionsList = new List<Transform>();
-            variableClumps = new List<Transform>();
+            expressionsClass = Expressions._instance;
+            expSet = new ExpressionSet();
+            expressionsList_UI = new List<Transform>();
+            variableClumps_UI = new List<Transform>();
+            variables = new Dictionary<string, Transform>();
+            hiddenVariables = new Dictionary<string, Transform>();
+            varsToDelete = new List<string>();
+            expActions = transform.GetChild(0).GetChild(0).GetChild(0).GetComponentInChildren<ExpressionActions>();
+
+            parametricManager = ParametricManager._instance;
+            scroll = expressionsClass.GetScroll(Expressions.ExpressionType.PARAMET);
+
+            InitializeColors();
+            SetupUI();
+
             initialized = true;
         }
     }
 
-    //TODO: maybe make this disablebuttons internally 
-    public ExpressionActions GetExpActions()
+    private void InitializeColors()
     {
-        return expActions;
+        quadShow = Resources.Load("Icons/element", typeof(Texture2D)) as Texture;
+        quadHide = Resources.Load("Icons/element_gray", typeof(Texture2D)) as Texture;
+        ColorUtility.TryParseHtmlString("#9E9E9EFF", out grayShow);
+        ColorUtility.TryParseHtmlString("#D4D4D4FF", out grayHide);
     }
 
-    public void SetActiveStatus(bool status)
+    public void DisableExpression_UI()
     {
-        isActive = status;
+        SetTextColor(grayHide);
+        SetButtonInputColor(grayHide);
+        SetElementQuadTex(quadHide);
+        SetActiveStatus(false);
     }
 
-    public bool GetActiveStatus()
+    public void EnableExpression_UI()
     {
-        return isActive;
+        SetActiveStatus(true);
+        SetTextColor(Color.black);
+        SetElementQuadTex(quadShow);
+        SetButtonInputColor(grayShow);
     }
 
-    public Scroll GetScroll()
+    void SetButtonInputColor(Color col)
     {
-        return scroll;
-    }
-
-    public void SetButtonInputColor(Color col)
-    {
-        foreach (Transform t in expressionsList)
+        foreach (Transform t in expressionsList_UI)
         {
             t.Find("Button_Input").GetComponent<HighlightOnRaycast>().setDefaultColor(col);
         }
@@ -87,7 +96,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void SetElementQuadTex(Texture tex)
+    void SetElementQuadTex(Texture tex)
     {
         foreach (KeyValuePair<string, Transform> t in variables)
         {
@@ -95,9 +104,9 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         }
     }
 
-    public void SetTextColor(Color c)
+    void SetTextColor(Color c)
     {
-        foreach (Transform t in expressionsList)
+        foreach (Transform t in expressionsList_UI)
         {
             foreach (Transform child in t)
             {
@@ -122,6 +131,26 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
             }
         }
     }
+
+    public void DisableActionButtons_UI()
+    {
+        expActions.DisableButtons();
+    }
+
+    public void SetActiveStatus(bool status)
+    {
+        isActive = status;
+    }
+
+    public bool GetActiveStatus()
+    {
+        return isActive;
+    }
+
+    public Scroll GetScroll()
+    {
+        return scroll;
+    } 
 
     public void SetExpressionX(Transform e)
     {
@@ -148,9 +177,50 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         return expSet;
     }
 
-    public void AddExpression(Transform expr)
+    void SetupUI()
     {
-        expressionsList.Add(expr);
+        ExpressionSet expressionSet = expSet;
+
+        if (!parametricManager) parametricManager = ParametricManager._instance;
+        parametricManager.AddExpressionSet(expressionSet);
+
+        SetupComponents();
+
+        GameObject sep = Instantiate(Resources.Load("Expressions/Separator", typeof(GameObject))) as GameObject;
+        SetSeparator(sep.transform);
+
+        expressionsClass.AddExpr(transform);
+    }
+
+    void SetupComponents()
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.name == "ExpressionSet")
+            {
+                foreach (Transform gchild in child)
+                {
+                    if (gchild.name == "Button_Xinput")
+                    {
+                        SetExpressionX(gchild);
+                    }
+
+                    expressionsList_UI.Add(gchild);
+                    gchild.GetComponentInChildren<ExpressionBody>().SetManager(ParametricManager._instance);
+                    gchild.GetComponentInChildren<ExpressionBody>().SetExpressionParent(transform);
+                }
+            }
+        }
+    }
+
+    public List<Transform> GetAllComponents()
+    {
+        List<Transform> allComponents = new List<Transform>();
+        allComponents.AddRange(expressionsList_UI);
+        allComponents.AddRange(variables.Values);
+        allComponents.Add(separator);
+
+        return allComponents;
     }
 
     public void AddVariable(string varName, Transform varValue)
@@ -177,9 +247,9 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
 
     public void DeleteExpressionFromScroll()
     {
-        scroll.DeleteObjects(expressionsList);
-        variableClumps.Add(separator);
-        scroll.DeleteObjects(variableClumps);
+        scroll.DeleteObjects(expressionsList_UI);
+        variableClumps_UI.Add(separator);
+        scroll.DeleteObjects(variableClumps_UI);
     }
 
     public void DeleteVariable(List<string> vars)
@@ -190,7 +260,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
 
     void AddToVarClump(Transform var)
     {
-        var.SetParent(variableClumps[variableClumps.Count - 1]);
+        var.SetParent(variableClumps_UI[variableClumps_UI.Count - 1]);
         var.localPosition = new Vector3(xPos, 0, 0);
         var.localScale = Vector3.one;
         var.localEulerAngles = Vector3.zero;
@@ -199,8 +269,8 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
 
     void AddNewVariableClump(Transform var)
     {
-        int lastComponentInd = (variableClumps.Count > 0) ?
-                           scroll.GetIndex(variableClumps[variableClumps.Count - 1]) : scroll.GetIndex(expressionsList[2]);
+        int lastComponentInd = (variableClumps_UI.Count > 0) ?
+                           scroll.GetIndex(variableClumps_UI[variableClumps_UI.Count - 1]) : scroll.GetIndex(expressionsList_UI[2]);
 
         Transform newVarClump = new GameObject().transform;
         newVarClump.name = "Var Clump";
@@ -208,7 +278,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         newVarClump.localPosition = Vector3.zero;
         newVarClump.localEulerAngles = Vector3.zero;
         scroll.AddToScroll(null, newVarClump, lastComponentInd + 1);
-        variableClumps.Add(newVarClump);
+        variableClumps_UI.Add(newVarClump);
 
         var.SetParent(newVarClump);
         var.localPosition = new Vector3(-xPos, 0, 0);
@@ -269,11 +339,11 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
     {
         bool noMoreSlots = false;
 
-        for (int i = 0; i < variableClumps.Count; i++)
+        for (int i = 0; i < variableClumps_UI.Count; i++)
         {
             if (noMoreSlots) break;
 
-            Transform currSlot = variableClumps[i];
+            Transform currSlot = variableClumps_UI[i];
 
             if (currSlot.childCount < 2)
             {
@@ -293,9 +363,9 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
 
     bool FindNextSlot(Transform currClump, int currClumpIndex, int childIndex, float xpos, bool checkNoSlot)
     {
-        for (int ni = currClumpIndex + 1; ni < variableClumps.Count; ni++)
+        for (int ni = currClumpIndex + 1; ni < variableClumps_UI.Count; ni++)
         {
-            Transform nSlot = variableClumps[ni];
+            Transform nSlot = variableClumps_UI[ni];
 
             if (nSlot.childCount > 0)
             {
@@ -305,7 +375,7 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
             }
 
             //only want to do check when finding a slot for second var spot
-            if (checkNoSlot && ni == variableClumps.Count - 1) return true;
+            if (checkNoSlot && ni == variableClumps_UI.Count - 1) return true;
         }
 
         return false;
@@ -316,9 +386,9 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
         int removeFrom = 0;
         bool remove = false;
 
-        for (int ind = 0; ind < variableClumps.Count; ind++)
+        for (int ind = 0; ind < variableClumps_UI.Count; ind++)
         {
-            if (variableClumps[ind].childCount == 0)
+            if (variableClumps_UI[ind].childCount == 0)
             {
                 removeFrom = ind;
                 remove = true;
@@ -330,8 +400,8 @@ public class ParametricExpression : MonoBehaviour, ExpressionTabInterface
 
         if (remove)
         {
-            emptyClumps = variableClumps.GetRange(removeFrom, variableClumps.Count - removeFrom);
-            variableClumps.RemoveRange(removeFrom, variableClumps.Count - removeFrom);
+            emptyClumps = variableClumps_UI.GetRange(removeFrom, variableClumps_UI.Count - removeFrom);
+            variableClumps_UI.RemoveRange(removeFrom, variableClumps_UI.Count - removeFrom);
             scroll.DeleteObjects(emptyClumps);
         }
     }

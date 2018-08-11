@@ -89,6 +89,7 @@ public class VecFieldManager : CalculatorManager
 
             if (flowline != null)
             {
+                //BUG: null error again
                 flowline.t_min = (expressionSet == null) ? "0" : expressionSet.GetRange("t").Min.expression;
                 flowline.t_max = (expressionSet == null) ? "0" : expressionSet.GetRange("t").Max.expression;
                 flowline.ForceUpdate();

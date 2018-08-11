@@ -71,6 +71,25 @@ public class OutputManager : MonoBehaviour {
                 calcManager.SetOutput(calcManager.expressionSet.GetExpression("Z"));
                 break;
             case "Min":
+                //TODO: debug null
+
+                if (calcManager == null)
+                {
+                    print("CALC MANAGER NULL");
+                }
+                else if (calcManager.expressionSet == null) 
+                {
+                    print("EXPRESSION SET NULL");
+                }
+                else if (calcManager.expressionSet.GetRange(rangeTitle) == null) 
+                {
+                    print("RANGE NULL");
+                }
+                else if (calcManager.expressionSet.GetRange(rangeTitle).Min == null) 
+                {
+                    print("MIN NULL");
+                }
+
                 calcManager.SetOutput(calcManager.expressionSet.GetRange(rangeTitle).Min); 
                 break;
             case "Max":
