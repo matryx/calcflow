@@ -560,10 +560,11 @@ public class Scroll : MonoBehaviour
 
         if (mat.HasProperty("_FaceColor")) colorName = "_FaceColor";
         if (mat.HasProperty(colorName)) col = mat.GetColor(colorName);
+        col.a = start;
 
         for (float i = 0.0f; i < 1.0f; i += Time.deltaTime / fadeSpeed)
         {
-            col = mat.GetColor(colorName);
+            //col = mat.GetColor(colorName);
             col.a = Mathf.Lerp(start, end, i);
             rend.material.SetColor(colorName, col);
             yield return null;
