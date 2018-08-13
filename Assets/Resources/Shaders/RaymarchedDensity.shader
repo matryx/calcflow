@@ -47,6 +47,10 @@
 				return max(max(d.x,max(d.y, d.z)), 0);
 			}
 
+			bool inSphere(float rad, float3 currLoc){
+				return bool(max(length(currLoc)-rad, 0));
+			}
+
 			inline fixed4 getTexColor (float3 uvw){
 				return tex3D(_VolumeTex, uvw);
 			}
@@ -61,8 +65,11 @@
 					// if(!inCube(_Scale, start+rayDepth*dir)){
 					// 	break;
 					// }
+					if(inSphere(_Scale, start.xyz+rayDepth*dir)){
+						break;
+					}
 					tempColor = getTexColor((start.xyz+rayDepth*dir)+.5);
-					tempColor.a *= 1;
+					//tempColor.a *= 1;
 					tempColor.rgb *= tempColor.a;
 					color = (1-color.a) * tempColor + color;
 					color = fixed4(1.08*color.rgb,color.a);
