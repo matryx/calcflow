@@ -5,7 +5,7 @@ using System.Collections.Generic;
 internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
 {
     internal bool isReady = false;
-    internal TextMesh xText, yText, zText, currText, tminText, tmaxText;
+    //internal TextMesh xText, yText, zText, currText, tminText, tmaxText;
     //internal List<string> xExpression = new List<string>();
     //internal List<string> yExpression = new List<string>();
     //internal List<string> zExpression = new List<string>();
@@ -24,15 +24,15 @@ internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
     internal DensityKeyboardInputResponder(TextMesh x, TextMesh y, TextMesh z, TextMesh tmin, TextMesh tmax)
     {
         es = new ExpressionSet();
-        xText = x;
-        yText = y;
-        zText = z;
-        tminText = tmin;
-        tmaxText = tmax;
+        // xText = x;
+        // yText = y;
+        // zText = z;
+        // tminText = tmin;
+        // tmaxText = tmax;
         dens = CustomDensityPlot.SampleDensity.HIGH;
 
         currExpression = es.expressions[ExpressionSet.ExpOptions.X];
-        currText = xText; 
+        // currText = xText; 
     }
 
     public void initialize()
@@ -69,101 +69,101 @@ internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
             "5", "0"
         };
         currExpression = es.expressions[ExpressionSet.ExpOptions.X];
-        currText = xText;
+        // currText = xText;
         index = currExpression.tokens.Count;
         isReady = true;
-        xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
-        yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
-        zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
-        tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
-        tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
-        currText.text = displayText(currExpression.tokens, index, true);
+        // xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
+        // yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
+        // zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
+        // tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
+        // tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
+        // currText.text = displayText(currExpression.tokens, index, true);
     }
 
     public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
     {
-        switch (sender.name)
-        {
-            case "Button_del":
-                if (index > 0)
-                {
-                    currExpression.tokens.RemoveAt(index - 1);
-                    index--;
-                }
-                break;
-            case "Button_Clear":
-                index = 0;
-                currExpression.tokens.Clear();
-                break;
-            case "Button_Enter":
-                isReady = true;
-                break;
-            default:
-                currExpression.tokens.Insert(index, sender.name);
-                isReady = true;
-                index++;
-                break;
-            case "Button_left":
-                index--;
-                if (index < 0) index = 0;
-                break;
-            case "Button_right":
-                index++;
-                if (index > currExpression.tokens.Count) index = currExpression.tokens.Count;
-                break;
-            case "Button_start":
-                index = 0;
-                break;
-            case "Button_end":
-                index = currExpression.tokens.Count;
-                break;
-            case "Button_Xinput":
-                currExpression = es.expressions[ExpressionSet.ExpOptions.X];
-                currText = xText;
-                index = currExpression.tokens.Count;
-                break;
-            case "Button_Yinput":
-                currExpression = es.expressions[ExpressionSet.ExpOptions.Y];
-                currText = yText;
-                index = currExpression.tokens.Count;
-                break;
-            case "Button_Zinput":
-                currExpression = es.expressions[ExpressionSet.ExpOptions.Z];
-                currText = zText;
-                index = currExpression.tokens.Count;
-                break;
-            case "tmin":
-                currExpression = es.ranges["t"].Min;
-                currText = tminText;
-                index = currExpression.tokens.Count;
-                break;
-            case "tmax":
-                currExpression = es.ranges["t"].Max;
-                currText = tmaxText;
-                index = currExpression.tokens.Count;
-                break;
-            case "high":
-                dens = CustomDensityPlot.SampleDensity.HIGH;
-                isReady = true;
-                break;
-            case "medium":
-                dens = CustomDensityPlot.SampleDensity.MEDIUM;
-                isReady = true;
-                break;
-            case "low":
-                dens = CustomDensityPlot.SampleDensity.LOW;
-                isReady = true;
-                break;
-        }
-        //index++;
-        xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
-        yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
-        zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
-        tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
-        tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
-        currText.text = displayText(currExpression.tokens, index, true);
+        // switch (sender.name)
+        // {
+        //     case "Button_del":
+        //         if (index > 0)
+        //         {
+        //             currExpression.tokens.RemoveAt(index - 1);
+        //             index--;
+        //         }
+        //         break;
+        //     case "Button_Clear":
+        //         index = 0;
+        //         currExpression.tokens.Clear();
+        //         break;
+        //     case "Button_Enter":
+        //         isReady = true;
+        //         break;
+        //     default:
+        //         currExpression.tokens.Insert(index, sender.name);
+        //         isReady = true;
+        //         index++;
+        //         break;
+        //     case "Button_left":
+        //         index--;
+        //         if (index < 0) index = 0;
+        //         break;
+        //     case "Button_right":
+        //         index++;
+        //         if (index > currExpression.tokens.Count) index = currExpression.tokens.Count;
+        //         break;
+        //     case "Button_start":
+        //         index = 0;
+        //         break;
+        //     case "Button_end":
+        //         index = currExpression.tokens.Count;
+        //         break;
+        //     case "Button_Xinput":
+        //         currExpression = es.expressions[ExpressionSet.ExpOptions.X];
+        //         currText = xText;
+        //         index = currExpression.tokens.Count;
+        //         break;
+        //     case "Button_Yinput":
+        //         currExpression = es.expressions[ExpressionSet.ExpOptions.Y];
+        //         currText = yText;
+        //         index = currExpression.tokens.Count;
+        //         break;
+        //     case "Button_Zinput":
+        //         currExpression = es.expressions[ExpressionSet.ExpOptions.Z];
+        //         currText = zText;
+        //         index = currExpression.tokens.Count;
+        //         break;
+        //     case "tmin":
+        //         currExpression = es.ranges["t"].Min;
+        //         currText = tminText;
+        //         index = currExpression.tokens.Count;
+        //         break;
+        //     case "tmax":
+        //         currExpression = es.ranges["t"].Max;
+        //         currText = tmaxText;
+        //         index = currExpression.tokens.Count;
+        //         break;
+        //     case "high":
+        //         dens = CustomDensityPlot.SampleDensity.HIGH;
+        //         isReady = true;
+        //         break;
+        //     case "medium":
+        //         dens = CustomDensityPlot.SampleDensity.MEDIUM;
+        //         isReady = true;
+        //         break;
+        //     case "low":
+        //         dens = CustomDensityPlot.SampleDensity.LOW;
+        //         isReady = true;
+        //         break;
+        // }
+        // //index++;
+        // xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
+        // yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
+        // zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
+        // tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
+        // tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
+        // currText.text = displayText(currExpression.tokens, index, true);
 
-        sender.SetState(1);
+        // sender.SetState(1);
     }
     public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider)
     {
@@ -171,17 +171,17 @@ internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
             sender.SetState(0);
     }
 
-    public void UpdateText()
-    {
-        xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
-        yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
-        zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
-        tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
-        tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
-        currExpression = es.expressions[ExpressionSet.ExpOptions.X];
-        index = currExpression.tokens.Count;
-        currText.text = displayText(currExpression.tokens, index, true);
-    }
+    // public void UpdateText()
+    // {
+    //     xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
+    //     yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
+    //     zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
+    //     tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
+    //     tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
+    //     currExpression = es.expressions[ExpressionSet.ExpOptions.X];
+    //     index = currExpression.tokens.Count;
+    //     currText.text = displayText(currExpression.tokens, index, true);
+    // }
 
     public string displayText(List<string> exp, int index0, bool mark)
     {
@@ -237,49 +237,75 @@ public class DensityInputManager : MonoBehaviour
     private delegate void InsertOptions(int option);
     int currIndex;
 
-    public FlexMenu keyboard;
-    public TextMesh xInputbox, yInputbox, zInputbox, tminInput, tmaxInput;
+    // public FlexMenu keyboard;
+    // public TextMesh xInputbox, yInputbox, zInputbox, tminInput, tmaxInput;
     DensityKeyboardInputResponder responder;
 
     public CustomDensityPlot densityPlot;
-    public FlowLineDensityParticles flowline;
+    public DensityPresetMenu densityPreset;
     public ExpressionSet es;
-    public bool overlayUpdate = false;
+
+    public bool graphNew;
 
     // Use this for initialization
     void Start()
     {
-        print("START");
-        responder = new DensityKeyboardInputResponder(xInputbox, yInputbox, zInputbox, tminInput, tmaxInput);
-        keyboard.RegisterResponder(responder);
+        es = new ExpressionSet();
+        es.expressions[ExpressionSet.ExpOptions.X].tokens = new List<string>
+                {
+                    //2Pz
+                    //"(","1","/","4","*","1","/","2","^","(","1","/","2",")","*","1","/","pi","^","(","1","/","2",")",
+                    //"*","z","*","e","^","(","-","1","*","(","x","^","2","+","y","^","2","+","z","^","2",")","/","2",")",")","^","2"
+                    //3Pz
+                    "(","2","^","(","1","/","2",")","*","1","/","8","1","*","1","/","pi","^","(","1","/","2",")","*",
+                    "(","6","-","(","x","^","2","+","y","^","2","+","z","^","2",")","^","(","1","/","2",")",")",
+                    "*","z","*","e","^","(","-","1","*","(","x","^","2","+","y","^","2","+","z","^","2",")","^","(","1","/","2",")","/","3",")",")","^","2"
+                    //3Dz2
+                    //"(","1","/","81","*","1","/","6","^","(","1","/","2",")","*","1","/","pi","^","(","1","/","2",")",
+                    //"*","(","3","*","z","^","2","-","x","^","2","+","y","^","2","+","z","^","2",")",
+                    //"*","e","^","(","-","1","*","(","x","^","2","+","y","^","2","+","z","^","2",")","/","3",")",")","^","2"
+                };
+        es.expressions[ExpressionSet.ExpOptions.Y].tokens = new List<string>
+                {
+                    "0"
+                };
+        es.expressions[ExpressionSet.ExpOptions.Z].tokens = new List<string>
+                {
+                    "0"
+                };
+        es.ranges["t"].Min.tokens = new List<string>
+        {
+            "-", "5", "0"
+        };
+        es.ranges["t"].Max.tokens = new List<string>
+        {
+            "5", "0"
+        };
+        densityPreset = GetComponentInChildren<DensityPresetMenu>();
+        densityPreset.Initialize(this);
+        //print("START");
+        // responder = new DensityKeyboardInputResponder(xInputbox, yInputbox, zInputbox, tminInput, tmaxInput);
+        // keyboard.RegisterResponder(responder);
 
-        responder.initialize();
-        print(responder);
+        //responder.initialize();
+        //print(responder);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (responder.isReady)
-        {
-            responder.isReady = false;
+        // if (responder.isReady)
+        // {
+        //     responder.isReady = false;
 
-            //densityPlot.expressionX = compileTokens(responder.xExpression);
-            //densityPlot.expressionY = compileTokens(responder.yExpression);
-            //densityPlot.expressionZ = compileTokens(responder.zExpression);
-            densityPlot.dens = responder.dens;
-            es = responder.es;
-            densityPlot.es = responder.es.ShallowCopy();
-            densityPlot.UpdateFunctions();
-
-            if (flowline != null)
-            {
-                flowline.t_min = compileTokens(responder.es.ranges["t"].Min.tokens);
-                flowline.t_max = compileTokens(responder.es.ranges["t"].Max.tokens);
-                flowline.ForceUpdate();
-            }
-            overlayUpdate = true;
-        }
+        //     //densityPlot.expressionX = compileTokens(responder.xExpression);
+        //     //densityPlot.expressionY = compileTokens(responder.yExpression);
+        //     //densityPlot.expressionZ = compileTokens(responder.zExpression);
+        //     densityPlot.dens = responder.dens;
+        //     es = responder.es;
+        //     densityPlot.es = responder.es.ShallowCopy();
+        //     densityPlot.UpdateFunctions();
+        // }
     }
 
     public void UpdateEquation()
@@ -290,13 +316,18 @@ public class DensityInputManager : MonoBehaviour
         print(responder.es);
         densityPlot.es = responder.es.ShallowCopy();
         densityPlot.UpdateFunctions();
-        if (flowline != null)
-        {
-            flowline.t_min = compileTokens(responder.es.ranges["t"].Min.tokens);
-            flowline.t_max = compileTokens(responder.es.ranges["t"].Max.tokens);
-            flowline.ForceUpdate();
-        }
-        responder.UpdateText();
+        // responder.UpdateText();
+    }
+
+    public void PresetPressed()
+    {
+        densityPlot.es = es.ShallowCopy();
+        densityPlot.UpdateFunctions();
+    }
+
+    public void setRange(int range)
+    {
+        densityPlot.minmaxVal = range;
     }
 
     public string compileTokens(List<string> equation)
