@@ -117,25 +117,25 @@ public class DensityPresetMenu : MonoBehaviour
                 break;
             // Orbitals
             case "1S":
-                x = ExpressionParser.Parse("(1/pi^(1/2)*e^(-1*(x^2+y^2+z^2)^(1/2)))^2");
+                x = ExpressionParser.Parse("(1.772454*e^(-1*(x^2+y^2+z^2)^(1/2)))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(3);
                 break;
             case "2S":
-                x = ExpressionParser.Parse("(1/4*1/(2*pi)^(1/2)*(2-(x^2+y^2+z^2)^(1/2))*e^(-1*(x^2+y^2+z^2)^(1/2)/2))^2");
+                x = ExpressionParser.Parse("(0.099735*(2-(x^2+y^2+z^2)^(1/2))*e^(-1*((x^2+y^2+z^2)^(1/2))/2))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(5);
                 break;
             case "2P":
-                x = ExpressionParser.Parse("(1/4*1/2^(1/2)*1/pi^(1/2)*z*e^(-1*(x^2+y^2+z^2)/2))^2");
+                x = ExpressionParser.Parse("(0.099735*z*e^(-1*((x^2+y^2+z^2)^(1/2))/2))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
-                densManager.setRange(5);
+                densManager.setRange(10);
                 break;
             case "3P":
-                x = ExpressionParser.Parse("(2^(1/2)*1/81*1/pi^(1/2)*(6-(x^2+y^2+z^2)^(1/2))*z*e^(-1*(x^2+y^2+z^2)^(1/2)/3))^2");
+                x = ExpressionParser.Parse("(0.004925*(6-(x^2+y^2+z^2)^(1/2))*z*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(20);
@@ -143,7 +143,7 @@ public class DensityPresetMenu : MonoBehaviour
             case "3Dz\x00B2":
                 goto case "3Dz2";
             case "3Dz2":
-                x = ExpressionParser.Parse("(1/81*1/(6*pi)^(1/2)*(3*z^2-(x^2+y^2+z^2))*e^(-1*(x^2+y^2+z^2)^(1/2)/3))^2");
+                x = ExpressionParser.Parse("(0.002844*(3*z^2-(x^2+y^2+z^2))*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(20);

@@ -25,8 +25,8 @@ public class CustomDensityPlot : MonoBehaviour
     GameObject go;
 
     List<Transform> vectors;
-    List<Vector3> startPts;
-    List<Vector3> offsets;
+    Vector3[] startPts;
+    Vector3[] offsets;
     float max_magnitude;
 
     public string expressionX;
@@ -35,7 +35,6 @@ public class CustomDensityPlot : MonoBehaviour
 
     AK.ExpressionSolver solver;
     AK.Expression expX, expY, expZ;
-    AK.Variable varX, varY, varZ;
     [HideInInspector]
     public ExpressionSet es;
 
@@ -54,6 +53,11 @@ public class CustomDensityPlot : MonoBehaviour
 
     Texture3D textureMap;
 
+    private object lck = new object();
+
+    int numComplete;
+    bool drawn;
+
     // Use this for initialization
     void Awake()
     {
@@ -64,8 +68,8 @@ public class CustomDensityPlot : MonoBehaviour
         zmin = -1f * minmaxVal;
         zmax = minmaxVal;
         vectors = new List<Transform>();
-        startPts = new List<Vector3>();
-        offsets = new List<Vector3>();
+        startPts = new Vector3[2097152];
+        offsets = new Vector3[2097152];
         solver = new AK.ExpressionSolver();
         expX = new AK.Expression();
         expY = new AK.Expression();
@@ -73,12 +77,11 @@ public class CustomDensityPlot : MonoBehaviour
         solver.SetGlobalVariable("x", 0);
         solver.SetGlobalVariable("y", 0);
         solver.SetGlobalVariable("z", 0);
-        varX = solver.GetGlobalVariable("x");
-        varY = solver.GetGlobalVariable("y");
-        varZ = solver.GetGlobalVariable("z");
         max_magnitude = 0f;
         textureMap = new Texture3D(128, 128, 128, TextureFormat.RGBA32, true);
         textureMap.wrapMode = TextureWrapMode.Clamp;
+        numComplete = 0;
+        drawn = true;
         //CalculateVectors();
         //DrawDensityPlot();
     }
@@ -102,94 +105,135 @@ public class CustomDensityPlot : MonoBehaviour
 
         delta = (xmax - xmin) / 127.0f;
 
+        int counter = 0;
+
         for (float x_temp = xmin; x_temp < xmax; x_temp += delta)
         {
-            for (float y_temp = ymin; y_temp < ymax; y_temp += delta)
+            float tempX_temp = x_temp;
+            int tempCount = counter;
+            //Thread thread = new Thread(() => ThreadedEvaluate(tempX_temp, tempCount));
+            //thread.Start();
+            Async.runInThread((Async thread) =>
+             {
+                 ThreadedEvaluate(tempX_temp, tempCount);
+                 thread.pushEvent("Finished", null);
+             }).onEvent("Finished", (object data) =>
+             {
+                 numComplete++;
+                 if (numComplete == 128)
+                 {
+                     DrawDensityPlot();
+                 }
+             });
+            counter += 16384;
+        }
+        // while (!drawn)
+        // {
+        //     if (numComplete == 127)
+        //     {
+        //         drawn = true;
+        //         DrawDensityPlot();
+        //     }
+        // }
+    }
+
+    void ThreadedEvaluate(float x_temp, int inOrderCount)
+    {
+        AK.ExpressionSolver subSolver = new AK.ExpressionSolver();
+        AK.Expression subExp = new AK.Expression();
+        subSolver.SetGlobalVariable("x", 0);
+        subSolver.SetGlobalVariable("y", 0);
+        subSolver.SetGlobalVariable("z", 0);
+        AK.Variable subX = subSolver.GetGlobalVariable("x");
+        AK.Variable subY = subSolver.GetGlobalVariable("y");
+        AK.Variable subZ = subSolver.GetGlobalVariable("z");
+        subExp = subSolver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
+
+        for (float y_temp = ymin; y_temp < ymax; y_temp += delta)
+        {
+
+            for (float z_temp = zmin; z_temp < zmax; z_temp += delta)
             {
-                for (float z_temp = zmin; z_temp < zmax; z_temp += delta)
+
+                if ((int)((z_temp - zmin) / delta) % 62 == 0)
                 {
-                    varX.value = x_temp;
-                    varY.value = z_temp;
-                    varZ.value = y_temp;
-
-                    float x = (float)expX.Evaluate();
-                    //Mathf.Clamp(x, -Mathf.Exp(20), Mathf.Exp(20));
-
-                    //float y = (float)expY.Evaluate();
-                    //Mathf.Clamp(y, -Mathf.Exp(20), Mathf.Exp(20));
-
-                    //float z = (float)expZ.Evaluate();
-                    //Mathf.Clamp(z, -Mathf.Exp(20), Mathf.Exp(20));
-
-                    Vector3 target = new Vector3(x_temp, y_temp, z_temp);
-
-                    Vector3 result = new Vector3(x, 0, 0);
-                    if (float.IsNaN(x)
-                        //   || float.IsNaN(y)
-                        //   || float.IsNaN(z)
-                        ||
-                        result.magnitude == 0)
-                    {
-                        result = new Vector3(0, 0, 0);
-                    }
-
-                    //Vector3 direction = result.normalized;
-                    float length = result.magnitude;
-                    if (length > max_magnitude)
-                    {
-                        max_magnitude = length;
-                    }
-                    startPts.Add(target);
-                    offsets.Add(result);
+                    Thread.Sleep(1);
                 }
+
+                subX.value = x_temp;
+                subY.value = z_temp;
+                subZ.value = y_temp;
+
+                float x = (float)subExp.Evaluate();
+
+                //Mathf.Clamp(x, -Mathf.Exp(20), Mathf.Exp(20));
+
+                //float y = (float)expY.Evaluate();
+                //Mathf.Clamp(y, -Mathf.Exp(20), Mathf.Exp(20));
+
+                //float z = (float)expZ.Evaluate();
+                //Mathf.Clamp(z, -Mathf.Exp(20), Mathf.Exp(20));
+
+                Vector3 target = new Vector3(x_temp, y_temp, z_temp);
+
+                Vector3 result = new Vector3(x, 0, 0);
+                if (float.IsNaN(x)
+                    //   || float.IsNaN(y)
+                    //   || float.IsNaN(z)
+                    ||
+                    Mathf.Abs(x) == 0)
+                {
+                    result = new Vector3(0, 0, 0);
+                }
+
+                //Vector3 direction = result.normalized;
+                lock (lck)
+                {
+                    max_magnitude = (Mathf.Abs(x) > max_magnitude) ? Mathf.Abs(x) : max_magnitude;
+                }
+                startPts[inOrderCount] = target;
+                offsets[inOrderCount] = result;
+                inOrderCount++;
             }
         }
+        // numComplete++;
     }
 
     // Draw shapes at all points
     void DrawDensityPlot()
     {
+        //Debug.LogError(max_magnitude);
         List<Geometry> rawGeom = new List<Geometry>();
-        Color32[] colors = new Color32[startPts.Count];
-
-        for (int i = 0; i < startPts.Count; i++)
+        Color32[] colors = new Color32[startPts.Length];
+        Async.runInThread((Async thread) =>
         {
-            Vector3 target = startPts[i];
-            Vector3 offset = offsets[i] / max_magnitude;
-            //Vector3 tip = offset * 0.4f;
-
-            //Transform l = Instantiate(vPrefab);
-            //l.SetParent(transform, false);
-            //LineRenderer top = l.Find("Top").GetComponent<LineRenderer>();
-            //top.SetPosition(0, target + offset - tip);
-            //top.SetPosition(1, target + offset);
-            //LineRenderer body = l.Find("Body").GetComponent<LineRenderer>();
-            //body.SetPosition(0, target + offset - tip);
-            //body.SetPosition(1, target);
-            //vectors.Add(l);
-
-            Color32 c = gradient.Evaluate(offset.magnitude);
-            colors[i] = c;
-            //top.startColor = c;
-            //top.endColor = c;
-            //body.startColor = c;
-            //body.endColor = c;
-            //rawGeom.Add(CreateSphere(target, offset, offset.magnitude, offset.magnitude, c));
-
-            if (c.a > 0 && oldFunctionality)
+            for (int i = 0; i < startPts.Length; i++)
             {
-                // rawGeom.Add(CreateCone(target, target, 0.3f, 0.15f, c));
-                // rawGeom.Add(CreateCone(target, -1 * target, 0.3f, 0.15f, c));
-                rawGeom.Add(CreateCube(target, delta, c));
+                Vector3 target = startPts[i];
+                Vector3 offset = offsets[i] / max_magnitude;
+
+                Color32 c = gradient.Evaluate(offset.magnitude);
+                colors[i] = c;
+
+                if (c.a > 0 && oldFunctionality)
+                {
+                    // rawGeom.Add(CreateCone(target, target, 0.3f, 0.15f, c));
+                    // rawGeom.Add(CreateCone(target, -1 * target, 0.3f, 0.15f, c));
+                    rawGeom.Add(CreateCube(target, delta, c));
+                }
+
+
+                //rawGeom.Add(CreateCone(target, offset, offset.magnitude, offset.magnitude, c));
+                //rawGeom.Add(CreateCone(target, -1*offset, offset.magnitude, offset.magnitude, c));
             }
-
-            //rawGeom.Add(CreateCone(target, offset, offset.magnitude, offset.magnitude, c));
-            //rawGeom.Add(CreateCone(target, -1*offset, offset.magnitude, offset.magnitude, c));
-        }
-
-        textureMap.SetPixels32(colors);
-        textureMap.Apply();
-        densityMat.SetTexture("_VolumeTex", textureMap);
+            thread.pushEvent("Finished", null);
+        }).onEvent("Finished", (object data) =>
+        {
+            textureMap.SetPixels32(colors);
+            textureMap.Apply();
+            densityMat.SetTexture("_VolumeTex", textureMap);
+            drawn = true;
+        });
 
         if (oldFunctionality)
         {
@@ -229,37 +273,42 @@ public class CustomDensityPlot : MonoBehaviour
     void Clear()
     {
         Destroy(go);
+        numComplete = 0;
         vectors.Clear();
-        startPts.Clear();
-        offsets.Clear();
+        //startPts.Clear();
+        //offsets.Clear();
     }
 
     public void UpdateFunctions()
     {
-        Clear();
-        //if (es.CompileAll())
-        //{
-        es.CompileAll();
-        expX = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
-        expY = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Y].expression);
-        expZ = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Z].expression);
-        //}
-        //else
-        //{
-        //    return;
-        //}
-        //try
-        //{
-        //    expX = solver.SymbolicateExpression(expressionX);
-        //    expY = solver.SymbolicateExpression(expressionY);
-        //    expZ = solver.SymbolicateExpression(expressionZ);
-        //}
-        //catch
-        //{
-        //    return;
-        //}
-        CalculateVectors();
-        DrawDensityPlot();
+        if (drawn)
+        {
+            drawn = false;
+            Clear();
+            //if (es.CompileAll())
+            //{
+            es.CompileAll();
+            expX = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
+            //expY = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Y].expression);
+            //expZ = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Z].expression);
+            //}
+            //else
+            //{
+            //    return;
+            //}
+            //try
+            //{
+            //    expX = solver.SymbolicateExpression(expressionX);
+            //    expY = solver.SymbolicateExpression(expressionY);
+            //    expZ = solver.SymbolicateExpression(expressionZ);
+            //}
+            //catch
+            //{
+            //    return;
+            //}
+            CalculateVectors();
+        }
+        //DrawDensityPlot();
     }
 
     private Geometry CreateCube(Vector3 position, float length, Color32 color)
