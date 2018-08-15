@@ -27,7 +27,7 @@ public class DensityPresetMenu : MonoBehaviour
     DensityInputManager densManager;
 
     [SerializeField]
-    private bool s1, s2, p2, p3, d3z2, d3xy, p4, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3, fxz2, fyz2, fxyz, fzx2y2, fxx23y2, fy3x2y2;
+    private bool s1, s2, p2, s3, p3, d3z2, d3xy, s4, p4, d4z2, d4xy, f4z3, f4xz2, f4xyz;
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
     Scroll scroll;
@@ -51,27 +51,19 @@ public class DensityPresetMenu : MonoBehaviour
 
         //Oribals
         presets.Add("1S", s1);
-        presets.Add("2S", s2);        
+        presets.Add("2S", s2);
         presets.Add("2Pz", p2);
+        presets.Add("3S", s3);
         presets.Add("3Pz", p3);
         presets.Add("3Dz\x00B2", d3z2);
         presets.Add("3Dxy", d3xy);
+        presets.Add("4S", s4);
         presets.Add("4Pz", p4);
-        presets.Add("Px", px);
-        presets.Add("Py", py);
-        presets.Add("Pz", pz);
-        presets.Add("Dz\x00B2", dz2);
-        presets.Add("Dxz", dxz);
-        presets.Add("Dyz", dyz);
-        presets.Add("Dxy", dxy);
-        presets.Add("Dx\x00B2-y\x00B2", dx2y2);
-        presets.Add("Fz\x00B3", fz3);
-        presets.Add("Fxz\x00B2", fxz2);
-        presets.Add("Fyz\x00B2", fyz2);
-        presets.Add("Fxyz", fxyz);
-        presets.Add("Fz\x0028x\x00B2-y\x00B2\x0029", fzx2y2);
-        presets.Add("Fx\x0028x\x00B2-3y\x00B2\x0029", fxx23y2);
-        presets.Add("Fy\x00283x\x00B2-y\x00B2\x0029", fy3x2y2);
+        presets.Add("4Dz\x00B2", d4z2);
+        presets.Add("4Dxy", d4xy);
+        presets.Add("4Fz\x00B3", f4z3);
+        presets.Add("4Fxz\x00B2", f4xz2);
+        presets.Add("4Fxyz", f4xyz);
         #endregion
 
         foreach (KeyValuePair<string, bool> pair in presets)
@@ -136,6 +128,12 @@ public class DensityPresetMenu : MonoBehaviour
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(12);
                 break;
+            case "3S":
+                x = ExpressionParser.Parse("(0.004021*(27-18*(x^2+y^2+z^2)^(1/2)+2*(x^2+y^2+z^2))*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(20);
+                break;
             case "3Pz":
                 x = ExpressionParser.Parse("(0.004925*(6-(x^2+y^2+z^2)^(1/2))*z*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
                 y = ExpressionParser.Parse("0");
@@ -156,162 +154,53 @@ public class DensityPresetMenu : MonoBehaviour
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(24);
                 break;
+            case "4S":
+                x = ExpressionParser.Parse("(0.006965*(1-0.75*(x^2+y^2+z^2)^(1/2)+0.125*(x^2+y^2+z^2)-0.005208*(x^2+y^2+z^2)^(3/2))*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(30);
+                break;
             case "4Pz":
-                x = ExpressionParser.Parse("(0.039424*(1-1/4*(x^2+y^2+z^2)^(1/2)+1/80*(x^2+y^2+z^2))*z*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
+                x = ExpressionParser.Parse("(0.039424*(1-0.25*(x^2+y^2+z^2)^(1/2)+0.0125*(x^2+y^2+z^2))*z*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(34);
                 break;
-            case "Px":
-                x = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
+            case "4Dz\x00B2":
+                goto case "4Dz2";
+            case "4Dz2":
+                x = ExpressionParser.Parse("(0.002204*(3*z^2-0.25*z^2*(x^2+y^2+z^2)^(1/2)-(x^2+y^2+z^2)+0.083333*(x^2+y^2+z^2)^(3/2))*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(40);
                 break;
-            case "Py":
-                x = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*cos(v))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*cos(v))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*cos(v))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
+            case "4Dxy":
+                x = ExpressionParser.Parse("(0.003817*x*y*(1-0.083333*(x^2+y^2+z^2)^(1/2))*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(40);
                 break;
-            case "Pz":
-                x = ExpressionParser.Parse("(3^(1/2)/2*cos(u)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(3^(1/2)/2*cos(u)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(3^(1/2)/2*cos(u)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
+            case "4Fz\x00B3":
+                goto case "4Fz3";
+            case "4Fz3":
+                x = ExpressionParser.Parse("(0.000082*z*(5*z^2-3*(x^2+y^2+z^2))*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(40);
                 break;
-            case "Dz\x00B2":
-                goto case "Dz2";
-            case "Dz2":
-                x = ExpressionParser.Parse("(5^(1/2)/4*(3*((cos(u))^2)-1)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(5^(1/2)/4*(3*((cos(u))^2)-1)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(5^(1/2)/4*(3*((cos(u))^2)-1)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
+            case "4Fxz\x00B2":
+                goto case "4Fxz2";
+            case "4Fxz2":
+                x = ExpressionParser.Parse("(0.000101*x*(5*z^2-(x^2+y^2+z^2))*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(40);
                 break;
-            case "Dxz":
-                x = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*sin(v))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*sin(v))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*sin(v))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Dyz":
-                x = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*cos(v))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*cos(v))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(15^(1/2)/2*sin(u)*cos(u)*1/pi^(1/2)*cos(v))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Dxy":
-                x = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*sin(2v))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*sin(2v))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*sin(2v))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Dx\x00B2-y\x00B2":
-                goto case "Dx2-y2";
-            case "Dx2-y2":
-                x = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(15^(1/2)/4*sin(u)^2*1/pi^(1/2)*cos(2v))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Fz\x00B3":
-                goto case "Fz3";
-            case "Fz3":
-                x = ExpressionParser.Parse("(7^(1/2)/4*(5*((cos(u))^2)-3)*cos(u)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(7^(1/2)/4*(5*((cos(u))^2)-3)*cos(u)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(7^(1/2)/4*(5*((cos(u))^2)-3)*cos(u)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Fxz\x00B2":
-                goto case "Fxz2";
-            case "Fxz2":
-                x = ExpressionParser.Parse("(42^(1/2)/8*(5*((cos(u))^2)-1)*sin(u)*sin(v)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(42^(1/2)/8*(5*((cos(u))^2)-1)*sin(u)*sin(v)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(42^(1/2)/8*(5*((cos(u))^2)-1)*sin(u)*sin(v)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Fyz\x00B2":
-                goto case "Fyz2";
-            case "Fyz2":
-                x = ExpressionParser.Parse("(42^(1/2)/8*(5*((cos(u))^2)-1)*sin(u)*cos(v)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(42^(1/2)/8*(5*((cos(u))^2)-1)*sin(u)*cos(v)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(42^(1/2)/8*(5*((cos(u))^2)-1)*sin(u)*cos(v)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Fxyz":
-                x = ExpressionParser.Parse("(105^(1/2)/4*sin(u)^2*cos(u)*cos(2v)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(105^(1/2)/4*sin(u)^2*cos(u)*cos(2v)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(105^(1/2)/4*sin(u)^2*cos(u)*cos(2v)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Fz\x0028x\x00B2-y\x00B2\x0029":
-                goto case "Fzx2y2";
-            case "Fzx2y2":
-                x = ExpressionParser.Parse("(105^(1/2)/4*sin(u)^2*cos(u)*sin(2v)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(105^(1/2)/4*sin(u)^2*cos(u)*sin(2v)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(105^(1/2)/4*sin(u)^2*cos(u)*sin(2v)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Fx\x0028x\x00B2-3y\x00B2\x0029":
-                goto case "Fxx23y2";
-            case "Fxx23y2":
-                x = ExpressionParser.Parse("(70^(1/2)/8*sin(u)^3*sin(3v)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(70^(1/2)/8*sin(u)^3*sin(3v)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(70^(1/2)/8*sin(u)^3*sin(3v)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
-                break;
-            case "Fy\x00283x\x00B2-y\x00B2\x0029":
-                goto case "Fy3x2y2";
-            case "Fy3x2y2":
-                x = ExpressionParser.Parse("(70^(1/2)/8*sin(u)^3*cos(3v)*1/pi^(1/2))^2*sin(u)*cos(v)");
-                y = ExpressionParser.Parse("(70^(1/2)/8*sin(u)^3*cos(3v)*1/pi^(1/2))^2*sin(u)*sin(v)");
-                z = ExpressionParser.Parse("(70^(1/2)/8*sin(u)^3*cos(3v)*1/pi^(1/2))^2*cos(u)");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("pi");
-                vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("2pi");
+            case "4Fxyz":
+                x = ExpressionParser.Parse("(0.000636*x*y*z*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(40);
                 break;
         }
 

@@ -13,7 +13,7 @@ public class DensityPresetMenuEditor : Editor
 {
     SerializedProperty flexMenu;
     SerializedProperty defaultFunction;
-    SerializedProperty s1, s2, p2, p3, d3z2, d3xy, p4, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3, fxz2, fyz2, fxyz, fzx2y2, fxx23y2, fy3x2y2;
+    SerializedProperty s1, s2, p2, s3, p3, d3z2, d3xy, s4, p4, d4z2, d4xy, f4z3, f4xz2, f4xyz;
 
     private void OnEnable()
     {
@@ -24,25 +24,17 @@ public class DensityPresetMenuEditor : Editor
         s1 = serializedObject.FindProperty("s1");
         s2 = serializedObject.FindProperty("s2");
         p2 = serializedObject.FindProperty("p2");
+        s3 = serializedObject.FindProperty("s3");
         p3 = serializedObject.FindProperty("p3");
         d3z2 = serializedObject.FindProperty("d3z2");
         d3xy = serializedObject.FindProperty("d3xy");
+        s4 = serializedObject.FindProperty("s4");
         p4 = serializedObject.FindProperty("p4");
-        px = serializedObject.FindProperty("px");
-        py = serializedObject.FindProperty("py");
-        pz = serializedObject.FindProperty("pz");
-        dz2 = serializedObject.FindProperty("dz2");
-        dxz = serializedObject.FindProperty("dxz");
-        dyz = serializedObject.FindProperty("dyz");
-        dxy = serializedObject.FindProperty("dxy");
-        dx2y2 = serializedObject.FindProperty("dx2y2");
-        fz3 = serializedObject.FindProperty("fz3");
-        fxz2 = serializedObject.FindProperty("fxz2");
-        fyz2 = serializedObject.FindProperty("fyz2");
-        fxyz = serializedObject.FindProperty("fxyz");
-        fzx2y2 = serializedObject.FindProperty("fzx2y2");
-        fxx23y2 = serializedObject.FindProperty("fxx23y2");
-        fy3x2y2 = serializedObject.FindProperty("fy3x2y2");
+        d4z2 = serializedObject.FindProperty("d4z2");
+        d4xy = serializedObject.FindProperty("d4xy");
+        f4z3 = serializedObject.FindProperty("f4z3");
+        f4xz2 = serializedObject.FindProperty("f4xz2");
+        f4xyz = serializedObject.FindProperty("f4xyz");
     }
 
     protected static bool presetsFold = true;
@@ -68,26 +60,18 @@ public class DensityPresetMenuEditor : Editor
 
             EditorGUILayout.PropertyField(s1);
             EditorGUILayout.PropertyField(s2);
+            EditorGUILayout.PropertyField(s3);
             EditorGUILayout.PropertyField(p2);
             EditorGUILayout.PropertyField(p3);
             EditorGUILayout.PropertyField(d3z2);
             EditorGUILayout.PropertyField(d3xy);
+            EditorGUILayout.PropertyField(s4);
             EditorGUILayout.PropertyField(p4);
-            EditorGUILayout.PropertyField(px);
-            EditorGUILayout.PropertyField(py);
-            EditorGUILayout.PropertyField(pz);
-            EditorGUILayout.PropertyField(dz2);
-            EditorGUILayout.PropertyField(dxz);
-            EditorGUILayout.PropertyField(dyz);
-            EditorGUILayout.PropertyField(dxy);
-            EditorGUILayout.PropertyField(dx2y2);
-            EditorGUILayout.PropertyField(fz3);
-            EditorGUILayout.PropertyField(fxz2);
-            EditorGUILayout.PropertyField(fyz2);
-            EditorGUILayout.PropertyField(fxyz);
-            EditorGUILayout.PropertyField(fzx2y2);
-            EditorGUILayout.PropertyField(fxx23y2);
-            EditorGUILayout.PropertyField(fy3x2y2);
+            EditorGUILayout.PropertyField(d4z2);
+            EditorGUILayout.PropertyField(d4xy);
+            EditorGUILayout.PropertyField(f4z3);
+            EditorGUILayout.PropertyField(f4xz2);
+            EditorGUILayout.PropertyField(f4xyz);
             EditorGUI.indentLevel--;
         }
 
