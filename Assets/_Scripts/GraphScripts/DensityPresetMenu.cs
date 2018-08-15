@@ -27,7 +27,7 @@ public class DensityPresetMenu : MonoBehaviour
     DensityInputManager densManager;
 
     [SerializeField]
-    private bool s1, s2, p2, p3, d3z2, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3, fxz2, fyz2, fxyz, fzx2y2, fxx23y2, fy3x2y2;
+    private bool s1, s2, p2, p3, d3z2, d3xy, p4, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3, fxz2, fyz2, fxyz, fzx2y2, fxx23y2, fy3x2y2;
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
     Scroll scroll;
@@ -52,9 +52,11 @@ public class DensityPresetMenu : MonoBehaviour
         //Oribals
         presets.Add("1S", s1);
         presets.Add("2S", s2);        
-        presets.Add("2P", p2);
-        presets.Add("3P", p3);
+        presets.Add("2Pz", p2);
+        presets.Add("3Pz", p3);
         presets.Add("3Dz\x00B2", d3z2);
+        presets.Add("3Dxy", d3xy);
+        presets.Add("4Pz", p4);
         presets.Add("Px", px);
         presets.Add("Py", py);
         presets.Add("Pz", pz);
@@ -126,19 +128,19 @@ public class DensityPresetMenu : MonoBehaviour
                 x = ExpressionParser.Parse("(0.099735*(2-(x^2+y^2+z^2)^(1/2))*e^(-1*((x^2+y^2+z^2)^(1/2))/2))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
-                densManager.setRange(5);
+                densManager.setRange(10);
                 break;
-            case "2P":
+            case "2Pz":
                 x = ExpressionParser.Parse("(0.099735*z*e^(-1*((x^2+y^2+z^2)^(1/2))/2))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
-                densManager.setRange(10);
+                densManager.setRange(12);
                 break;
-            case "3P":
+            case "3Pz":
                 x = ExpressionParser.Parse("(0.004925*(6-(x^2+y^2+z^2)^(1/2))*z*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
-                densManager.setRange(20);
+                densManager.setRange(22);
                 break;
             case "3Dz\x00B2":
                 goto case "3Dz2";
@@ -146,7 +148,19 @@ public class DensityPresetMenu : MonoBehaviour
                 x = ExpressionParser.Parse("(0.002844*(3*z^2-(x^2+y^2+z^2))*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
-                densManager.setRange(20);
+                densManager.setRange(24);
+                break;
+            case "3Dxy":
+                x = ExpressionParser.Parse("(0.009850*x*y*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(24);
+                break;
+            case "4Pz":
+                x = ExpressionParser.Parse("(0.039424*(1-1/4*(x^2+y^2+z^2)^(1/2)+1/80*(x^2+y^2+z^2))*z*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
+                y = ExpressionParser.Parse("0");
+                z = ExpressionParser.Parse("0");
+                densManager.setRange(34);
                 break;
             case "Px":
                 x = ExpressionParser.Parse("(3^(1/2)/2*sin(u)*1/pi^(1/2)*sin(v))^2*sin(u)*cos(v)");

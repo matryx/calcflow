@@ -13,7 +13,7 @@ public class DensityPresetMenuEditor : Editor
 {
     SerializedProperty flexMenu;
     SerializedProperty defaultFunction;
-    SerializedProperty s1, s2, p2, p3, d3z2, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3, fxz2, fyz2, fxyz, fzx2y2, fxx23y2, fy3x2y2;
+    SerializedProperty s1, s2, p2, p3, d3z2, d3xy, p4, px, py, pz, dz2, dxz, dyz, dxy, dx2y2, fz3, fxz2, fyz2, fxyz, fzx2y2, fxx23y2, fy3x2y2;
 
     private void OnEnable()
     {
@@ -26,6 +26,8 @@ public class DensityPresetMenuEditor : Editor
         p2 = serializedObject.FindProperty("p2");
         p3 = serializedObject.FindProperty("p3");
         d3z2 = serializedObject.FindProperty("d3z2");
+        d3xy = serializedObject.FindProperty("d3xy");
+        p4 = serializedObject.FindProperty("p4");
         px = serializedObject.FindProperty("px");
         py = serializedObject.FindProperty("py");
         pz = serializedObject.FindProperty("pz");
@@ -69,6 +71,8 @@ public class DensityPresetMenuEditor : Editor
             EditorGUILayout.PropertyField(p2);
             EditorGUILayout.PropertyField(p3);
             EditorGUILayout.PropertyField(d3z2);
+            EditorGUILayout.PropertyField(d3xy);
+            EditorGUILayout.PropertyField(p4);
             EditorGUILayout.PropertyField(px);
             EditorGUILayout.PropertyField(py);
             EditorGUILayout.PropertyField(pz);
