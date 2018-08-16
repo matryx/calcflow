@@ -102,7 +102,7 @@ public class CustomDensityPlot : MonoBehaviour
             if(loadingMsg != null){
                 loadingMsg.SetActive(true);
                 float percent = numComplete/128f * 100;
-                loadingMsgText.text = ("Calculating, please wait...\n" + percent + "% complete."); 
+                loadingMsgText.text = ("Calculating, please wait...\n" + percent + "% complete"); 
             }
         }
         else{
