@@ -1394,7 +1394,7 @@ TextMesh:
   m_Anchor: 0
   m_Alignment: 0
   m_TabSize: 4
-  m_FontSize: 50
+  m_FontSize: 100
   m_FontStyle: 0
   m_RichText: 1
   m_Font: {fileID: 12800000, guid: 9271b4be71752424997f0b5cb785ad68, type: 3}
@@ -6003,8 +6003,9 @@ GameObject:
   - component: {fileID: 486700047}
   - component: {fileID: 486700046}
   - component: {fileID: 486700049}
+  - component: {fileID: 486700050}
   m_Layer: 12
-  m_Name: Cartesian
+  m_Name: DensityBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6024,6 +6025,7 @@ Transform:
   - {fileID: 71423784}
   - {fileID: 857907188}
   - {fileID: 1901493257}
+  - {fileID: 1257537722}
   m_Father: {fileID: 0}
   m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6075,6 +6077,57 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 20, y: 20, z: 20}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &486700050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 486700044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 965c81d44c1f19a48876753c164d7ea7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 0, b: 1, a: 0}
+    key1: {r: 1, g: 0.9724138, b: 0, a: 0.39215687}
+    key2: {r: 0.93235296, g: 0, b: 0.06764704, a: 0.78431374}
+    key3: {r: 0.93235296, g: 0, b: 0.06764704, a: 0.72156864}
+    key4: {r: 0.53333336, g: 0, b: 0, a: 0.60784316}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 45296
+    ctime3: 65535
+    ctime4: 65535
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 10794
+    atime2: 65535
+    atime3: 65535
+    atime4: 65535
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 3
+  densityMat: {fileID: 2100000, guid: d6809284e46484a4ea95d5cdc006f56d, type: 2}
+  oldDensity: {fileID: 2100000, guid: ac9f94e295ed03d429e06d9f83843ce4, type: 2}
+  oldFunctionality: 0
+  expressionX: 0
+  expressionY: 0
+  expressionZ: 0
+  minmaxVal: 20
+  delta: 4
+  dens: 2
+  loadingMsg: {fileID: 1257537721}
+  densityVisualization: {fileID: 857907181}
 --- !u!1 &492132184
 GameObject:
   m_ObjectHideFlags: 0
@@ -9322,8 +9375,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfe0dc30bb0ed5e4080f77b6b1119d4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  densityPlot: {fileID: 857907189}
-  densityPreset: {fileID: 0}
+  densityPlot: {fileID: 486700050}
+  densityPreset: {fileID: 1878269188}
   graphNew: 0
 --- !u!1 &799928160
 GameObject:
@@ -10318,7 +10371,6 @@ GameObject:
   - component: {fileID: 857907187}
   - component: {fileID: 857907186}
   - component: {fileID: 857907185}
-  - component: {fileID: 857907189}
   - component: {fileID: 857907182}
   m_Layer: 0
   m_Name: DensityVisualization
@@ -10402,55 +10454,6 @@ Transform:
   m_Father: {fileID: 486700045}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &857907189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 857907181}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 965c81d44c1f19a48876753c164d7ea7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gradient:
-    serializedVersion: 2
-    key0: {r: 0, g: 0, b: 1, a: 0}
-    key1: {r: 1, g: 0.9724138, b: 0, a: 0.39215687}
-    key2: {r: 0.93235296, g: 0, b: 0.06764704, a: 0.78431374}
-    key3: {r: 0.93235296, g: 0, b: 0.06764704, a: 0.72156864}
-    key4: {r: 0.53333336, g: 0, b: 0, a: 0.60784316}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 65535
-    ctime2: 45296
-    ctime3: 65535
-    ctime4: 65535
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 10794
-    atime2: 65535
-    atime3: 65535
-    atime4: 65535
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_NumColorKeys: 2
-    m_NumAlphaKeys: 3
-  densityMat: {fileID: 2100000, guid: d6809284e46484a4ea95d5cdc006f56d, type: 2}
-  oldDensity: {fileID: 2100000, guid: ac9f94e295ed03d429e06d9f83843ce4, type: 2}
-  oldFunctionality: 0
-  expressionX: 0
-  expressionY: 0
-  expressionZ: 0
-  minmaxVal: 20
-  delta: 4
-  dens: 2
 --- !u!1 &865928681
 GameObject:
   m_ObjectHideFlags: 0
@@ -15431,6 +15434,107 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4278190080
+--- !u!1 &1257537721
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 1450427478946338, guid: 9725cfd47d87712469474e288bf6442c,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1257537722}
+  - component: {fileID: 1257537725}
+  - component: {fileID: 1257537724}
+  - component: {fileID: 1257537723}
+  m_Layer: 12
+  m_Name: Loading
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1257537722
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 4717335785287028, guid: 9725cfd47d87712469474e288bf6442c,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1257537721}
+  m_LocalRotation: {x: 0.000000029802322, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 486700045}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1257537723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 114840198420081244, guid: 9725cfd47d87712469474e288bf6442c,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1257537721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20378b78d7fd504fb262a2c3e52131d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 0}
+--- !u!102 &1257537724
+TextMesh:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 102049975527097268, guid: 9725cfd47d87712469474e288bf6442c,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1257537721}
+  m_Text: Calculating, please wait...
+  m_OffsetZ: -0.06
+  m_CharacterSize: 0.1
+  m_LineSpacing: 1
+  m_Anchor: 4
+  m_Alignment: 1
+  m_TabSize: 4
+  m_FontSize: 150
+  m_FontStyle: 0
+  m_RichText: 1
+  m_Font: {fileID: 12800000, guid: 9271b4be71752424997f0b5cb785ad68, type: 3}
+  m_Color:
+    serializedVersion: 2
+    rgba: 4294967295
+--- !u!23 &1257537725
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 23097162960228852, guid: 9725cfd47d87712469474e288bf6442c,
+    type: 2}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1257537721}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_Materials:
+  - {fileID: 2100000, guid: c8b0f3a8a0a6c1944bb68cbb6681e648, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
 --- !u!1 &1259303420
 GameObject:
   m_ObjectHideFlags: 0
@@ -20195,6 +20299,8 @@ MonoBehaviour:
   minmaxVal: 20
   delta: 4
   dens: 2
+  loadingMsg: {fileID: 0}
+  densityVisualization: {fileID: 0}
 --- !u!1 &1710586416
 GameObject:
   m_ObjectHideFlags: 0
@@ -23254,7 +23360,7 @@ TextMesh:
   m_Anchor: 0
   m_Alignment: 0
   m_TabSize: 4
-  m_FontSize: 50
+  m_FontSize: 100
   m_FontStyle: 0
   m_RichText: 1
   m_Font: {fileID: 12800000, guid: 9271b4be71752424997f0b5cb785ad68, type: 3}
@@ -23355,7 +23461,7 @@ TextMesh:
   m_Anchor: 0
   m_Alignment: 0
   m_TabSize: 4
-  m_FontSize: 50
+  m_FontSize: 100
   m_FontStyle: 0
   m_RichText: 1
   m_Font: {fileID: 12800000, guid: 9271b4be71752424997f0b5cb785ad68, type: 3}

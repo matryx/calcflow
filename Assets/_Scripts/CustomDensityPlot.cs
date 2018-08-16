@@ -57,6 +57,9 @@ public class CustomDensityPlot : MonoBehaviour
 
     int numComplete;
     bool drawn;
+    public GameObject loadingMsg;
+    TextMesh loadingMsgText;
+    public GameObject densityVisualization;
 
     // Use this for initialization
     void Awake()
@@ -82,6 +85,9 @@ public class CustomDensityPlot : MonoBehaviour
         textureMap.wrapMode = TextureWrapMode.Clamp;
         numComplete = 0;
         drawn = true;
+        if (loadingMsg != null){
+            loadingMsgText = loadingMsg.GetComponent<TextMesh>();
+        }
         //CalculateVectors();
         //DrawDensityPlot();
     }
@@ -89,7 +95,24 @@ public class CustomDensityPlot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if(!drawn){
+            if(densityVisualization != null){
+                densityVisualization.SetActive(false);
+            }
+            if(loadingMsg != null){
+                loadingMsg.SetActive(true);
+                float percent = numComplete/128f * 100;
+                loadingMsgText.text = ("Calculating, please wait...\n" + percent + "% complete."); 
+            }
+        }
+        else{
+            if(densityVisualization != null){
+                densityVisualization.SetActive(true);
+            }
+            if(loadingMsg != null){
+                loadingMsg.SetActive(false);
+            }
+        }
     }
 
     // Set point spread and calculate vector values at all points
@@ -155,7 +178,7 @@ public class CustomDensityPlot : MonoBehaviour
             for (float z_temp = zmin; z_temp < zmax; z_temp += delta)
             {
 
-                if ((int)((z_temp - zmin) / delta) % 62 == 0)
+                if ((int)((z_temp - zmin) / delta) % 42 == 0)
                 {
                     Thread.Sleep(1);
                 }
