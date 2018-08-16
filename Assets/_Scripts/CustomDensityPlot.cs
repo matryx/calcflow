@@ -92,7 +92,7 @@ public class CustomDensityPlot : MonoBehaviour
         //DrawDensityPlot();
     }
 
-    // Update is called once per frame
+    // Update is called once per frame to show either the loading message or completed graph
     void Update()
     {
         if(!drawn){
@@ -160,6 +160,7 @@ public class CustomDensityPlot : MonoBehaviour
         // }
     }
 
+    // Evaluate all equations for a given x (called by a thread), and popluate arrays with the results
     void ThreadedEvaluate(float x_temp, int inOrderCount)
     {
         AK.ExpressionSolver subSolver = new AK.ExpressionSolver();
@@ -222,7 +223,8 @@ public class CustomDensityPlot : MonoBehaviour
         // numComplete++;
     }
 
-    // Draw shapes at all points
+    // Create a 3D texture based on the result arrays and a color gradient. 
+    // If old functionality is enabled, a graph with cube meshes is also created. TESTING PURPOSES ONLY
     void DrawDensityPlot()
     {
         //Debug.LogError(max_magnitude);
@@ -302,6 +304,7 @@ public class CustomDensityPlot : MonoBehaviour
         //offsets.Clear();
     }
 
+    // Reset the threads and prepare to run new calculations so long as the plotter is not graphing
     public void UpdateFunctions()
     {
         if (drawn)
@@ -334,6 +337,7 @@ public class CustomDensityPlot : MonoBehaviour
         //DrawDensityPlot();
     }
 
+    // Creates cube data to be drawn to a mesh
     private Geometry CreateCube(Vector3 position, float length, Color32 color)
     {
         int vertNum = 8; // top & bottom center
@@ -418,6 +422,7 @@ public class CustomDensityPlot : MonoBehaviour
         return geom;
     }
 
+    // Creates Cylinder data to be drawn to a mesh
     private Geometry CreateCylinder(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
     {
         int vertNum = tessel * 2 + 2; // top & bottom center
@@ -511,6 +516,7 @@ public class CustomDensityPlot : MonoBehaviour
         return geom;
     }
 
+    // Creates Cone data to be drawn to a mesh
     private Geometry CreateCone(Vector3 position, Vector3 dir, float length, float radius, Color32 color, int tessel = 25)
     {
         int vertNum = tessel + 2;
@@ -563,6 +569,9 @@ public class CustomDensityPlot : MonoBehaviour
         return geom;
     }
 
+    // Combines the mesh data of as many objects as possible until the vertex count has
+    // surpassed the limit, then adds the combined data to a list. Repeats until
+    // there is no more mesh data to combine, and returns a list of the combined data.
     private List<Geometry> CombineGeometry(List<Geometry> geoms, int maxVertices = 64000)
     {
         int combinedIndex = 0;

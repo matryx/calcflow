@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// THIS FILE WILL BE DELETED, IT IS MERELY FOR QUICK BUILDING PURPOSES
 public class DensityPresetMenu : MonoBehaviour
 {
 

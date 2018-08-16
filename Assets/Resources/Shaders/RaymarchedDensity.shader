@@ -41,20 +41,24 @@
 			float _Scale;
 			int _MaxSteps;
 
+/*
 			float inCube(float length, float3 currLoc){
 				float3 c = float3(length, length, length);
 				float3 d = abs(currLoc) - c;
 				return max(max(d.x,max(d.y, d.z)), 0);
 			}
-
+*/
+			// Returns 0 if currLoc is inside the sphere; Returns a positive number otherwise.
 			bool inSphere(float rad, float3 currLoc){
 				return bool(max(length(currLoc)-rad, 0));
 			}
 
+			// Samples the 3D texture
 			inline fixed4 getTexColor (float3 uvw){
 				return tex3D(_VolumeTex, uvw);
 			}
 
+			// Raymarch at a fixed interval of .025, blending alpha and color values along the way
 			fixed4 raymarchColor(float4 start, float3 dir){
 				float rayDepth = 0;
 				fixed4 color = fixed4(0,0,0,0);
@@ -69,14 +73,8 @@
 						break;
 					}
 					tempColor = getTexColor((start.xyz+rayDepth*dir)+.5);
-					//tempColor.a *= 1;
-					//tempColor.rgb *= tempColor.a;
-					// color = (1-color.a) * tempColor + color;
 					color.rgb = (1-color.a) * tempColor.rgb + color.rgb;
 					color.a = (1-color.a) * tempColor.a + color.a;
-					//color = fixed4(1.08*color.rgb,color.a);
-					//shifter = step(color.a, tempColor.a);
-					//color = (color+(tempColor*shifter))/(1+(1*tempColor));
 					rayDepth += .025;
 				}
 				return color;
@@ -86,21 +84,16 @@
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				//o.uvw = v.vertex.xyz+.5;
-				//o.uvw = float3(v.vertex.x + _Scale/2, v.vertex.y + _Scale/2, v.vertex.z + _Scale/2);
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-				//o.uvw = o.worldPos.xyz*.5+.5;
 				o.localPos = v.vertex;
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				// sample the texture
 				float3 worldDir = i.worldPos - _WorldSpaceCameraPos;
 				float3 localDir = normalize (mul(unity_WorldToObject, worldDir));
 				fixed4 col = raymarchColor(i.localPos, localDir);
-				//fixed4 col = tex3D(_VolumeTex, i.uvw);
 				return col;
 			}
 			ENDCG

@@ -7,7 +7,6 @@ using UnityEditor;
 
 #if UNITY_EDITOR
 //[CustomEditor(typeof(PresetMenu))]
-// THIS FILE WILL BE DELETED, IT IS MERELY FOR QUICK BUILDING PURPOSES
 [CustomEditor(typeof(DensityPresetMenu))]
 public class DensityPresetMenuEditor : Editor
 {
