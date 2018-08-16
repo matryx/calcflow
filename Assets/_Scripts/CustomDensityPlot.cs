@@ -60,6 +60,7 @@ public class CustomDensityPlot : MonoBehaviour
     public GameObject loadingMsg;
     TextMesh loadingMsgText;
     public GameObject densityVisualization;
+    int drawQueue;
 
     // Use this for initialization
     void Awake()
@@ -85,6 +86,7 @@ public class CustomDensityPlot : MonoBehaviour
         textureMap.wrapMode = TextureWrapMode.Clamp;
         numComplete = 0;
         drawn = true;
+        drawQueue = 0;
         if (loadingMsg != null){
             loadingMsgText = loadingMsg.GetComponent<TextMesh>();
         }
@@ -99,19 +101,28 @@ public class CustomDensityPlot : MonoBehaviour
             if(densityVisualization != null){
                 densityVisualization.SetActive(false);
             }
-            if(loadingMsg != null){
+            if(loadingMsg != null && drawQueue == 0){
                 loadingMsg.SetActive(true);
                 float percent = numComplete/128f * 100;
                 loadingMsgText.text = ("Calculating, please wait...\n" + percent + "% complete"); 
             }
+            if(loadingMsg != null && drawQueue > 0){
+                loadingMsg.SetActive(true);
+                float percent = numComplete/128f * 100;
+                loadingMsgText.text = ("Finishing old Calculation\n" + percent + "% complete"); 
+            }
         }
-        else{
+        else if(drawn && drawQueue == 0){
             if(densityVisualization != null){
                 densityVisualization.SetActive(true);
             }
             if(loadingMsg != null){
                 loadingMsg.SetActive(false);
             }
+        }
+        else{
+            drawQueue = 0;
+            UpdateFunctions();
         }
     }
 
@@ -315,24 +326,10 @@ public class CustomDensityPlot : MonoBehaviour
             //{
             es.CompileAll();
             expX = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
-            //expY = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Y].expression);
-            //expZ = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.Z].expression);
-            //}
-            //else
-            //{
-            //    return;
-            //}
-            //try
-            //{
-            //    expX = solver.SymbolicateExpression(expressionX);
-            //    expY = solver.SymbolicateExpression(expressionY);
-            //    expZ = solver.SymbolicateExpression(expressionZ);
-            //}
-            //catch
-            //{
-            //    return;
-            //}
             CalculateVectors();
+        }
+        else{
+            drawQueue++;
         }
         //DrawDensityPlot();
     }

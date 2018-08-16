@@ -22,7 +22,7 @@ public class DensityPresetMenu : MonoBehaviour
     }
 
     public FlexMenu menu;
-    public string defaultFunction = "3P";
+    public string defaultFunction = "3Pz";
     DensityInputManager densManager;
 
     [SerializeField]
@@ -31,6 +31,7 @@ public class DensityPresetMenu : MonoBehaviour
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
     Scroll scroll;
     JoyStickAggregator joyStickAggregator;
+
 
     public void Initialize(DensityInputManager dm)
     {
@@ -76,6 +77,10 @@ public class DensityPresetMenu : MonoBehaviour
                 scroll.addObject(presetButton.transform);
                 scroll.objectParent.GetComponent<FlexPanelComponent>().AddAction(presetButton.GetComponent<FlexActionableComponent>());
                 joyStickAggregator.AddForwarder(presetButton.GetComponentInChildren<JoyStickForwarder>());
+
+                if (pair.Key == defaultFunction){
+                    presetButton.GetComponent<FlexActionableComponent>().SetState(2);
+                }
             }
         }
     }
