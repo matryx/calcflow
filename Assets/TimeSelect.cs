@@ -90,21 +90,11 @@ public class TimeSelect : MonoBehaviour
 		leftSphere.lastLocalPos.z = -50;
 		rightSphere.lastLocalPos.z = 50;
     }
-
-    int count = 0;
-    bool last_grab_state = false;
     void FixedUpdate()
     {
-        count++;
         leftPos = leftSphere.lastLocalPos.z + 50;
         rightPos = rightSphere.lastLocalPos.z + 50;
 
-        if (count % 100 == 0)
-        {
-            // Debug.Log("LEFT: " + leftPos + ", OLDLEFT: " + oldLeft + ", RIGHT: " + rightPos + ", OLDRIGHT: " + oldRight);
-        }
-
-        //Debug.Log("HERE");
         if (oldLeft != leftPos || oldRight != rightPos)
         {
             StartCoroutine(waiting());
@@ -114,17 +104,8 @@ public class TimeSelect : MonoBehaviour
 
     private IEnumerator waiting()
     {
-        Debug.Log("MOVED");
-        //yield return new WaitForSeconds(2);
-        //yield return null;
-
-        /*         last_grab_state = true;
-                while (last_grab_state)
-                {
-                    last_grab_state = leftSphere.IsGrabbed || rightSphere.IsGrabbed;
-                }
-                yield return !last_grab_state; */
-
+       // Debug.Log("MOVED");
+    
         while(leftSphere.IsGrabbed || rightSphere.IsGrabbed){
             yield return new WaitForSeconds(.1f);
         }
@@ -136,13 +117,13 @@ public class TimeSelect : MonoBehaviour
 
     public string getTimestamp(float percent)
     {
-        //if (percent > .95f) percent = .94f;
+
         Debug.Log("PERCENT: " + percent);
         Debug.Log("INDEX: " + (int)Mathf.Round((float)this.times.Count * percent));
         int index = (int)Mathf.Round((float)this.times.Count * percent);
         if (index == times.Count) index--;
         return this.times[index];
-        //return times[(int)percent];
+
     }
 
 }

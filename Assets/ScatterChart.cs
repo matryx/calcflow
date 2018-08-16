@@ -43,7 +43,7 @@ public class ScatterChart : MonoBehaviour
     private float STEP_SIZE = .01f;
     private float animProgress;
     public float currentScale = 10;
-    public ParticleEffectList particleEffect = ParticleEffectList.None;
+    public ParticleEffectList particleEffect = ParticleEffectList.SmoothLerp;
     public enum ParticleEffectList
     {
         None, Gravity, Lerp,
@@ -131,6 +131,14 @@ public class ScatterChart : MonoBehaviour
         if (createLabels)
         {
             foreach (Transform child in transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        foreach (Transform child in transform)
+        {
+            if (child.name.Contains("top"))
             {
                 Destroy(child.gameObject);
             }
@@ -229,8 +237,6 @@ public class ScatterChart : MonoBehaviour
             Vector2 position = new Vector2(xPos, yPos);
             Vector2 positionNext = new Vector2(xPosNext, yPosNext);
 
-            //Debug.Log("POINT: " + i + ", DISTANCE: " + Math.Sqrt(Math.Pow(temp[i+1].position.x-temp[i].position.x, 2) + Math.Pow(temp[i+1].position.y-temp[i].position.y, 2)));
-            //float distance = (float)Math.Sqrt(Math.Pow(xPosNext - xPos, 2) + Math.Pow(scaledPrices[i + 1] - scaledPrices[i], 2));
             float distance = Vector2.Distance(position, positionNext);
             // Debug.Log("INDEX: " + i + ", DISTANCE: " + distance);
 
@@ -241,20 +247,39 @@ public class ScatterChart : MonoBehaviour
 
             int labelCount = (int)Mathf.Round(prices.Count / 35);
 
-            if ((i % labelCount == 0 || i == times.Count-1) && createLabels)
+
+            // Bottom labels:
+            // Only updates when the user selects new time / currency
+            if ((i % labelCount == 0 || i == times.Count - 2) && createLabels)
             {
                 Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currPoint.localPosition = new Vector3(xPos, -3f, -2.5f);
                 TextMesh dataContent = currPoint.GetComponent<TextMesh>();
-                /*                 string text = "" + convertFromTimestamp(times[i]).Month + "/" + convertFromTimestamp(times[i]).Month + "/" + convertFromTimestamp(times[i]).Year;
 
-                                if((convertFromTimestamp(times[0]).Subtract(convertFromTimestamp(times[times.Count-1]))).Days <= 7){
-                                    text += ", " + convertFromTimestamp(times[i]).TimeOfDay;
-                                } */
                 dataContent.text = convertFromTimestamp(times[i]).ToString();
                 Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currLine.localPosition = new Vector3(xPos, -2.75f, -2.5f);
                 currLine.localScale += new Vector3(0, -0.5f, 0);
+            }
+
+
+            labelCount = (int)Mathf.Round(prices.Count / 15);
+
+            // Top labels:
+            // Updates always to show displayed timespan
+            if ((i % labelCount == 0 || i == times.Count - 2))
+            {
+                Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                currPoint.localPosition = new Vector3(xPos, 3.25f, -2.5f);
+                TextMesh dataContent = currPoint.GetComponent<TextMesh>();
+                dataContent.text = convertFromTimestamp(times[i]).ToString();
+                currPoint.name = "topPoint";
+                dataContent.name = "topText";
+
+                Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                currLine.localPosition = new Vector3(xPos, 2.75f, -2.5f);
+                currLine.localScale += new Vector3(0, -0.5f, 0);
+                currLine.name = "topLine";
             }
 
 
@@ -269,11 +294,6 @@ public class ScatterChart : MonoBehaviour
                     Vector2 norm = (positionNext - position).normalized;
 
                     position += norm * STEP_SIZE;
-
-                    //xPos += norm.x * STEP_SIZE;
-                    //yPos += norm.y * STEP_SIZE;
-
-                    //position = new Vector2(xPos, yPos);
 
                     tmpParticle = new Particle();
                     tmpParticle.position = new Vector3(position.x, position.y, 0);
@@ -291,27 +311,14 @@ public class ScatterChart : MonoBehaviour
         int count = temp.Count;
         tmpParticle = new Particle();
         tmpParticle.position = new Vector3(((float)resolution) - 12.5f, scaledPrices[prices.Count - 1], 0);
+
+        // Fills in all extra particles to the last position
         for (int i = count; i < particleCount; i++)
         {
             temp.Add(tmpParticle);
         }
 
         int fillIndex = 0;
-        //Debug.Log("COUNT: " + particleCount);
-        /* 
-                for (int i = 0; i < particleCount;)
-                {
-                    //Ys [i] = Random.Range (-2f, 2f);
-                    float xPos = ((float)i) / (particleCount / resolution) - 12.5f;
-                    temp[i] = new Particle();
-                    temp[i].position = new Vector3(xPos, scaledPrices[fillIndex], 0);
-
-                    //Debug.Log("INDEX: " + i + ", FILLINDEX: " + fillIndex);
-
-                    i += additonalParticles[fillIndex] + 1;
-                    fillIndex++;
-                    //pointList.Add(currPoint);
-                } */
 
 
         dest = temp.ToArray();
@@ -322,31 +329,7 @@ public class ScatterChart : MonoBehaviour
         for (int i = 0; i < dest.Length; i++)
         {
             Vector3 pos = temp[i].position;
-            //if (space > 1900)
-            // Debug.Log("INDEX: " + i + ", SPACE: " + space);
-            /*             if (temp[i].position == Vector3.zero)
-                        {
-                            isGap = true;
 
-                            float distance = distances[space].distance;
-                            float numPoints = additonalParticles[space];
-
-                            float xDist = (distances[space].point2.position.x - distances[space].point1.position.x) / numPoints;
-                            float yDist = (distances[space].point2.position.y - distances[space].point1.position.y) / numPoints;
-
-                            for (int j = 0; j < numPoints; j++)
-                            {
-                                pos = new Vector3(distances[space].point1.position.x + (xDist * j), distances[space].point1.position.y + (yDist * j), 0);
-                                dest[i + j].position = pos;
-                                dest[i + j].color = new Color(Mathf.Pow((pos.x + 10) / 20, 2), Mathf.Pow((pos.y + 10) / 20, 2), Mathf.Pow((pos.z + 10) / 20, 2));
-
-                            }
-                            i += (int)numPoints - 1;
-                        }
-                        else
-                        {
-                            if (isGap) space++;
-             */
             isGap = false;
             dest[i].position = pos;
             dest[i].color = new Color(Mathf.Pow((pos.x + 10) / 20, 2), Mathf.Pow((pos.y + 10) / 20, 2), Mathf.Pow((pos.z + 10) / 20, 2));
