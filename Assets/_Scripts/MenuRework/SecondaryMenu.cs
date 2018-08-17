@@ -29,6 +29,7 @@ public class SecondaryMenu : MonoBehaviour
     public GameObject volumeBall;
 
     SecondaryMenuResponder responder;
+    Scroll saveLoadScroll;
 
     public static SecondaryMenu GetInstance()
     {
@@ -44,7 +45,10 @@ public class SecondaryMenu : MonoBehaviour
     {
         functionMenu.gameObject.SetActive(true);
         animationMenu.gameObject.SetActive(false);
-        saveLoadMenu.GetComponentInChildren<Scroll>().setUpMenu();
+        saveLoadScroll = saveLoadMenu.GetComponentInChildren<Scroll>();
+        if (saveLoadScroll!=null) {
+            saveLoadScroll.setUpMenu();
+        }
         saveLoadMenu.gameObject.SetActive(false);
         settingsMenu.gameObject.SetActive(false);
         tournamentMenu.gameObject.SetActive(false);

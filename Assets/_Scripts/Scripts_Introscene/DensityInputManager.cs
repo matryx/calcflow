@@ -281,7 +281,6 @@ public class DensityInputManager : MonoBehaviour
         {
             "5", "0"
         };
-        densityPreset = GetComponentInChildren<DensityPresetMenu>();
         densityPreset.Initialize(this);
         //print("START");
         // responder = new DensityKeyboardInputResponder(xInputbox, yInputbox, zInputbox, tminInput, tmaxInput);
