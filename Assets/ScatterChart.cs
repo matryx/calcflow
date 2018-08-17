@@ -91,6 +91,9 @@ public class ScatterChart : MonoBehaviour
     public List<GameObject> pointList = new List<GameObject>();
     float[] scaledPrices;
 
+    float max, min;
+    int maxI, minI;
+
     GameObject frameObj;
     LineRenderer frameLine;
 
@@ -138,7 +141,7 @@ public class ScatterChart : MonoBehaviour
 
         foreach (Transform child in transform)
         {
-            if (child.name.Contains("top"))
+            if (child.name.Contains("top") || child.name.Contains("min") || child.name.Contains("max"))
             {
                 Destroy(child.gameObject);
             }
@@ -205,6 +208,24 @@ public class ScatterChart : MonoBehaviour
         Debug.Log("STEP_SIZE: " + STEP_SIZE);
     }
 
+    int findSpace()
+    {
+        int lowestVal = times.Count - 2;
+        for (int i = 200; i > 50; i--)
+        {
+            //Debug.Log("i: " + i + ", " + ((times.Count - 2) % i));
+            if ((times.Count - 2) % i == 0)
+            {
+                Debug.Log("ZERO AT " + i);
+                return i;
+            }
+            if ((times.Count - 2) % i < lowestVal) lowestVal = i;
+        }
+
+        Debug.Log("LOWEST AT " + lowestVal);
+        return lowestVal;
+    }
+
     void makeGraph(List<string> times, List<string> prices)
     {
         this.times = times;
@@ -212,7 +233,7 @@ public class ScatterChart : MonoBehaviour
 
         string[] Ys = prices.ToArray();
         rescaleData(Ys, 0);
-        //findStepSize();
+        findStepSize();
 
         //Debug.Log("test: " + prices.Count);
 
@@ -224,8 +245,11 @@ public class ScatterChart : MonoBehaviour
 
         distances = new Distance[prices.Count - 1];
         additonalParticles = new int[prices.Count];
-        int adds = 0;
         Particle tmpParticle;
+
+        //int labelCount = findSpace();
+        //Debug.Log("COUNT: " + labelCount);
+
         for (int i = 0; i < prices.Count - 1; i++)
         {
             float xPos = ((float)i) / (prices.Count / resolution) - 12.5f;
@@ -245,12 +269,11 @@ public class ScatterChart : MonoBehaviour
             tmpParticle.position = new Vector3(xPos, yPos, 0);
             temp.Add(tmpParticle);
 
-            int labelCount = (int)Mathf.Round(prices.Count / 35);
-
 
             // Bottom labels:
             // Only updates when the user selects new time / currency
-            if ((i % labelCount == 0 || i == times.Count - 2) && createLabels)
+            int labelCount = (int)Mathf.Round(prices.Count / 35);
+            if ((i % labelCount == 0 || i == times.Count - 1) && createLabels)
             {
                 Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currPoint.localPosition = new Vector3(xPos, -3f, -2.5f);
@@ -260,14 +283,14 @@ public class ScatterChart : MonoBehaviour
                 Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currLine.localPosition = new Vector3(xPos, -2.75f, -2.5f);
                 currLine.localScale += new Vector3(0, -0.5f, 0);
+                currLine.localRotation = Quaternion.identity;
             }
 
 
             labelCount = (int)Mathf.Round(prices.Count / 15);
-
             // Top labels:
             // Updates always to show displayed timespan
-            if ((i % labelCount == 0 || i == times.Count - 2))
+            if ((i % labelCount == 0 || i == times.Count - 1))
             {
                 Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currPoint.localPosition = new Vector3(xPos, 3.25f, -2.5f);
@@ -279,18 +302,19 @@ public class ScatterChart : MonoBehaviour
                 Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currLine.localPosition = new Vector3(xPos, 2.75f, -2.5f);
                 currLine.localScale += new Vector3(0, -0.5f, 0);
+                currLine.localRotation = Quaternion.identity;
                 currLine.name = "topLine";
             }
 
 
+
+            // Adds additional particles between points that are far away
             if (distance > STEP_SIZE)
             {
                 float currDist = distance;
 
                 while (currDist > STEP_SIZE)
                 {
-                    adds++;
-                    // Debug.Log("PLACING ADDITIONAL POINT, " + adds);
                     Vector2 norm = (positionNext - position).normalized;
 
                     position += norm * STEP_SIZE;
@@ -299,12 +323,29 @@ public class ScatterChart : MonoBehaviour
                     tmpParticle.position = new Vector3(position.x, position.y, 0);
                     temp.Add(tmpParticle);
 
-
                     currDist = Vector2.Distance(position, positionNext);
                 }
             }
 
         }
+
+        // Labels graph with the minimum amount
+        Transform minAmount = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
+        minAmount.localPosition = new Vector3(-12.35f, scaledPrices[minI] + 0.1f, -2.25f);
+        TextMesh minContent = minAmount.GetComponent<TextMesh>();
+        minContent.text = "$" + min;
+        minAmount.name = "minPoint";
+        minContent.name = "minText";
+        minContent.fontSize = 150;
+
+        // Labels graph with the maximum amount
+        Transform maxAmount = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
+        maxAmount.localPosition = new Vector3(-12.35f, scaledPrices[maxI] - 0.05f, -2.25f);
+        TextMesh maxContent = maxAmount.GetComponent<TextMesh>();
+        maxContent.text = "$" + max;
+        maxAmount.name = "maxPoint";
+        maxContent.name = "maxText";
+        maxContent.fontSize = 150;
 
         createLabels = false;
 
@@ -317,8 +358,6 @@ public class ScatterChart : MonoBehaviour
         {
             temp.Add(tmpParticle);
         }
-
-        int fillIndex = 0;
 
 
         dest = temp.ToArray();
@@ -347,19 +386,21 @@ public class ScatterChart : MonoBehaviour
 
     }
 
-    // Rescales the y-values to fit between [-2,2] so that it can fit in the graph
+    // Rescales the y-values so that they can fit in the graph
     void rescaleData(string[] oldData, int fineTune)
     {
         scaledPrices = new float[oldData.Length];
-        float max = float.Parse(oldData[0]);
-        float min = float.Parse(oldData[0]);
-        int minI = 0;
+        max = float.Parse(oldData[0]);
+        min = float.Parse(oldData[0]);
+        minI = 0;
+        maxI = 0;
         for (int i = 0; i < oldData.Length; ++i)
         {
 
             if (float.Parse(oldData[i]) > max)
             {
                 max = float.Parse(oldData[i]);
+                maxI = i;
             }
             if (float.Parse(oldData[i]) < min)
             {
@@ -386,7 +427,7 @@ public class ScatterChart : MonoBehaviour
     }
 
     // The scale, min/max, represent how close together all of the points are.
-    // As scale approaces 0, the points are well disbursed. As scale approaces 1, the points 
+    // As scale approaces 0, the points are well dispersed. As scale approaces 1, the points 
     // Are clumped together.
     // The closer to 1 the scale is, the more the points need to be stretched out.
     float findScale(float min, float max, int fineTune)
