@@ -245,8 +245,6 @@ public class DensityInputManager : MonoBehaviour
     public DensityPresetMenu densityPreset;
     public ExpressionSet es;
 
-    public bool graphNew;
-
     // Use this for initialization
     void Start()
     {

@@ -59,7 +59,7 @@ public class SecondaryMenu : MonoBehaviour
         volumeBall.GetComponent<Collider>().enabled = false;
         volumeBall.GetComponent<MeshRenderer>().enabled = false;
 
-        transform.parent.gameObject.SetActive(false);
+        //transform.parent.gameObject.SetActive(false);
     }
 
     void toggleMenu(string menuName)

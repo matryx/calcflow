@@ -22,7 +22,7 @@ public class SelectorFlexPanel : FlexPanelComponent
     }
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         if(defaultSetting != null)
         {

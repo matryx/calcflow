@@ -75,7 +75,7 @@ public class DensityPresetMenu : MonoBehaviour
                 presetButton.name = pair.Key;
                 presetButton.SetActive(false);
                 scroll.addObject(presetButton.transform);
-                scroll.objectParent.GetComponent<FlexPanelComponent>().AddAction(presetButton.GetComponent<FlexActionableComponent>());
+                scroll.objectParent.GetComponent<SelectorFlexPanel>().AddAction(presetButton.GetComponent<FlexActionableComponent>());
                 joyStickAggregator.AddForwarder(presetButton.GetComponentInChildren<JoyStickForwarder>());
 
                 if (pair.Key == defaultFunction)
