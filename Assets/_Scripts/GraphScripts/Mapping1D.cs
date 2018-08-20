@@ -11,10 +11,6 @@ public class Mapping1D : MonoBehaviour
 
     public AxisLabelManager TLabelManager;
 
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-
     // Use this for initialization
     void Awake()
     {
@@ -67,16 +63,16 @@ public class Mapping1D : MonoBehaviour
         ExpressionSet es = calcManager.expressionSet;
         float scale = calcManager.paramSurface.currentScale;
 
-        foreach (ExpressionSet.ExpOptions key in es.expressions.Keys)
+        foreach (string key in es.expressions.Keys)
         {
             AK.ExpressionSolver solver = es.solver;
             if (es.ranges.ContainsKey("t")) solver.SetGlobalVariable("t", uvw.x);
         }
         if (es.IsCompiled())
         {
-            output.x = (float)es.expressions[X].AKExpression.Evaluate();
-            output.y = (float)es.expressions[Y].AKExpression.Evaluate();
-            output.z = (float)es.expressions[Z].AKExpression.Evaluate();
+            output.x = (float)es.expressions["X"].AKExpression.Evaluate();
+            output.y = (float)es.expressions["Y"].AKExpression.Evaluate();
+            output.z = (float)es.expressions["Z"].AKExpression.Evaluate();
         }
         return output * scale;
     }

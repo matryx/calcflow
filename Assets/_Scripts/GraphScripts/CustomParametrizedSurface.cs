@@ -8,12 +8,6 @@ using System.Threading;
 public class CustomParametrizedSurface : MonoBehaviour
 {
 
-    #region constants
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
-    #endregion
-
     List<Particle[]> threadResults = new List<Particle[]>();
 
     public List<ExpressionSet> expressionSets = new List<ExpressionSet>();
@@ -119,7 +113,7 @@ public class CustomParametrizedSurface : MonoBehaviour
         }
         foreach (ExpressionSet expressionSet in expressionSets)
         {
-            tessel.EnqueueEquation(currentScale, expressionSet.expressions[X].expression, expressionSet.expressions[Y].expression, expressionSet.expressions[Z].expression, expressionSet.ranges["u"].Min.Value, expressionSet.ranges["u"].Max.Value, expressionSet.ranges["v"].Min.Value, expressionSet.ranges["v"].Max.Value);
+            tessel.EnqueueEquation(currentScale, expressionSet.expressions["X"].expression, expressionSet.expressions["Y"].expression, expressionSet.expressions["Z"].expression, expressionSet.ranges["u"].Min.Value, expressionSet.ranges["u"].Max.Value, expressionSet.ranges["v"].Min.Value, expressionSet.ranges["v"].Max.Value);
         }
     }
 
@@ -253,7 +247,7 @@ public class CustomParametrizedSurface : MonoBehaviour
             foreach (string op in keys)
             {
                 bool used = false;
-                foreach (ExpressionSet.ExpOptions key in expressionSet.expressions.Keys)
+                foreach (string key in expressionSet.expressions.Keys)
                 {
                     if (expressionSet.expressions[key].tokens.Contains(op))
                     {
@@ -446,7 +440,7 @@ public class CustomParametrizedSurface : MonoBehaviour
             threadHelper.solver.SetGlobalVariable(name, threadHelper.parameterMin[name]);
         }
 
-        foreach (ExpressionSet.ExpOptions op in es.expressions.Keys)
+        foreach (string op in es.expressions.Keys)
         {
             Expression ex = es.expressions[op];
             AK.Expression exp = threadHelper.solver.SymbolicateExpression(ex.expression);
