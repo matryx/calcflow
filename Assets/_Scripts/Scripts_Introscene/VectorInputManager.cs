@@ -58,6 +58,9 @@ internal class VectorKeyboardInputResponder : FlexMenu.FlexMenuResponder
         {
             "5", "0"
         };
+        es.AddRange("x");
+        es.AddRange("y");
+        es.AddRange("z");
         currExpression = es.expressions["X"];
         currText = xText;
         index = currExpression.tokens.Count;
