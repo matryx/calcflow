@@ -22,13 +22,13 @@ public class SelectorFlexPanel : FlexPanelComponent
     }
 
     // Use this for initialization
-    void Awake()
+    void Start()
     {
         if(defaultSetting != null)
         {
             defaultSetting.SetState(2);
         }
-        Actions.Clear();
+        //Actions.Clear();
         AddAllChildActions();
     }
 }
