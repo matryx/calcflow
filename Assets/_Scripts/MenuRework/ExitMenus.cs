@@ -38,6 +38,7 @@ public class ExitMenus : QuickButton
     IEnumerator DeActivate()
     {
         yield return StartCoroutine(ScaleTo(menu, menu.localScale, Vector3.zero, 0.3f));
+        transform.localScale = activeScale;
         menu.gameObject.SetActive(false);
     }
 
