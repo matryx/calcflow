@@ -31,14 +31,14 @@ internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
         // tmaxText = tmax;
         dens = CustomDensityPlot.SampleDensity.HIGH;
 
-        currExpression = es.expressions[ExpressionSet.ExpOptions.X];
+        currExpression = es.expressions["X"];
         // currText = xText; 
     }
 
     public void initialize()
     {
         es = new ExpressionSet();
-        es.expressions[ExpressionSet.ExpOptions.X].tokens = new List<string>
+        es.expressions["X"].tokens = new List<string>
                 {
                     //2Pz
                     //"(","1","/","4","*","1","/","2","^","(","1","/","2",")","*","1","/","pi","^","(","1","/","2",")",
@@ -52,11 +52,11 @@ internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
                     //"*","(","3","*","z","^","2","-","x","^","2","+","y","^","2","+","z","^","2",")",
                     //"*","e","^","(","-","1","*","(","x","^","2","+","y","^","2","+","z","^","2",")","/","3",")",")","^","2"
                 };
-        es.expressions[ExpressionSet.ExpOptions.Y].tokens = new List<string>
+        es.expressions["Y"].tokens = new List<string>
                 {
                     "0"
                 };
-        es.expressions[ExpressionSet.ExpOptions.Z].tokens = new List<string>
+        es.expressions["Z"].tokens = new List<string>
                 {
                     "0"
                 };
@@ -68,7 +68,7 @@ internal class DensityKeyboardInputResponder : FlexMenu.FlexMenuResponder
         {
             "5", "0"
         };
-        currExpression = es.expressions[ExpressionSet.ExpOptions.X];
+        currExpression = es.expressions["X"];
         // currText = xText;
         index = currExpression.tokens.Count;
         isReady = true;
@@ -249,7 +249,7 @@ public class DensityInputManager : MonoBehaviour
     void Start()
     {
         es = new ExpressionSet();
-        es.expressions[ExpressionSet.ExpOptions.X].tokens = new List<string>
+        es.expressions["X"].tokens = new List<string>
                 {
                     //2Pz
                     //"(","1","/","4","*","1","/","2","^","(","1","/","2",")","*","1","/","pi","^","(","1","/","2",")",
@@ -263,14 +263,17 @@ public class DensityInputManager : MonoBehaviour
                     //"*","(","3","*","z","^","2","-","x","^","2","+","y","^","2","+","z","^","2",")",
                     //"*","e","^","(","-","1","*","(","x","^","2","+","y","^","2","+","z","^","2",")","/","3",")",")","^","2"
                 };
-        es.expressions[ExpressionSet.ExpOptions.Y].tokens = new List<string>
+        es.expressions["Y"].tokens = new List<string>
                 {
                     "0"
                 };
-        es.expressions[ExpressionSet.ExpOptions.Z].tokens = new List<string>
+        es.expressions["Z"].tokens = new List<string>
                 {
                     "0"
                 };
+        es.AddRange("x");
+        es.AddRange("y");
+        es.AddRange("z");
         es.ranges["t"].Min.tokens = new List<string>
         {
             "-", "5", "0"

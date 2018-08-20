@@ -182,7 +182,7 @@ public class CustomDensityPlot : MonoBehaviour
         AK.Variable subX = subSolver.GetGlobalVariable("x");
         AK.Variable subY = subSolver.GetGlobalVariable("y");
         AK.Variable subZ = subSolver.GetGlobalVariable("z");
-        subExp = subSolver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
+        subExp = subSolver.SymbolicateExpression(es.expressions["X"].expression);
 
         for (float y_temp = ymin; y_temp < ymax; y_temp += delta)
         {
@@ -325,7 +325,7 @@ public class CustomDensityPlot : MonoBehaviour
             //if (es.CompileAll())
             //{
             es.CompileAll();
-            expX = solver.SymbolicateExpression(es.expressions[ExpressionSet.ExpOptions.X].expression);
+            expX = solver.SymbolicateExpression(es.expressions["X"].expression);
             CalculateVectors();
         }
         else{

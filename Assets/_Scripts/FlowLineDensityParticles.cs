@@ -190,9 +190,9 @@ public class FlowLineDensityParticles : MonoBehaviour
         solver.SetGlobalVariable("x", referencePoint.lastLocalPos.x);
         solver.SetGlobalVariable("y", referencePoint.lastLocalPos.y);
         solver.SetGlobalVariable("z", referencePoint.lastLocalPos.z);
-        expX = solver.SymbolicateExpression(densityPlot.es.expressions[ExpressionSet.ExpOptions.X].expression);
-        expY = solver.SymbolicateExpression(densityPlot.es.expressions[ExpressionSet.ExpOptions.Y].expression);
-        expZ = solver.SymbolicateExpression(densityPlot.es.expressions[ExpressionSet.ExpOptions.Z].expression);
+        expX = solver.SymbolicateExpression(densityPlot.es.expressions["X"].expression);
+        expY = solver.SymbolicateExpression(densityPlot.es.expressions["Y"].expression);
+        expZ = solver.SymbolicateExpression(densityPlot.es.expressions["Z"].expression);
         varX = solver.GetGlobalVariable("x");
         varY = solver.GetGlobalVariable("y");
         varZ = solver.GetGlobalVariable("z");
