@@ -121,30 +121,35 @@ public class DensityPresetMenu : MonoBehaviour
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(3);
+                densManager.setSleepInterval(126);
                 break;
             case "2S":
                 x = ExpressionParser.Parse("(0.099735*(2-(x^2+y^2+z^2)^(1/2))*e^(-1*((x^2+y^2+z^2)^(1/2))/2))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(10);
+                densManager.setSleepInterval(63);
                 break;
             case "2Pz":
                 x = ExpressionParser.Parse("(0.099735*z*e^(-1*((x^2+y^2+z^2)^(1/2))/2))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(12);
+                densManager.setSleepInterval(63);
                 break;
             case "3S":
                 x = ExpressionParser.Parse("(0.004021*(27-18*(x^2+y^2+z^2)^(1/2)+2*(x^2+y^2+z^2))*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(20);
+                densManager.setSleepInterval(42);
                 break;
             case "3Pz":
                 x = ExpressionParser.Parse("(0.004925*(6-(x^2+y^2+z^2)^(1/2))*z*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(22);
+                densManager.setSleepInterval(63);
                 break;
             case "3Dz\x00B2":
                 goto case "3Dz2";
@@ -153,24 +158,28 @@ public class DensityPresetMenu : MonoBehaviour
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(24);
+                densManager.setSleepInterval(63);
                 break;
             case "3Dxy":
                 x = ExpressionParser.Parse("(0.009850*x*y*e^(-1*((x^2+y^2+z^2)^(1/2))/3))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(24);
+                densManager.setSleepInterval(63);
                 break;
             case "4S":
                 x = ExpressionParser.Parse("(0.006965*(1-0.75*(x^2+y^2+z^2)^(1/2)+0.125*(x^2+y^2+z^2)-0.005208*(x^2+y^2+z^2)^(3/2))*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(30);
+                densManager.setSleepInterval(42);
                 break;
             case "4Pz":
                 x = ExpressionParser.Parse("(0.039424*(1-0.25*(x^2+y^2+z^2)^(1/2)+0.0125*(x^2+y^2+z^2))*z*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(34);
+                densManager.setSleepInterval(42);
                 break;
             case "4Dz\x00B2":
                 goto case "4Dz2";
@@ -179,12 +188,14 @@ public class DensityPresetMenu : MonoBehaviour
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(40);
+                densManager.setSleepInterval(21);
                 break;
             case "4Dxy":
                 x = ExpressionParser.Parse("(0.003817*x*y*(1-0.083333*(x^2+y^2+z^2)^(1/2))*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(40);
+                densManager.setSleepInterval(42);
                 break;
             case "4Fz\x00B3":
                 goto case "4Fz3";
@@ -193,6 +204,7 @@ public class DensityPresetMenu : MonoBehaviour
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(40);
+                densManager.setSleepInterval(63);
                 break;
             case "4Fxz\x00B2":
                 goto case "4Fxz2";
@@ -201,12 +213,14 @@ public class DensityPresetMenu : MonoBehaviour
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(40);
+                densManager.setSleepInterval(63);
                 break;
             case "4Fxyz":
                 x = ExpressionParser.Parse("(0.000636*x*y*z*e^(-1*((x^2+y^2+z^2)^(1/2))/4))^2");
                 y = ExpressionParser.Parse("0");
                 z = ExpressionParser.Parse("0");
                 densManager.setRange(40);
+                densManager.setSleepInterval(63);
                 break;
         }
 

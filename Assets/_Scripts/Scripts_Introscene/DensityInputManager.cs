@@ -330,6 +330,10 @@ public class DensityInputManager : MonoBehaviour
         densityPlot.minmaxVal = range;
     }
 
+    public void setSleepInterval(int interval){
+        densityPlot.sleepInterval = interval;
+    }
+
     public string compileTokens(List<string> equation)
     {
         List<string> eq = new List<string>(equation);

@@ -40,6 +40,7 @@ public class CustomDensityPlot : MonoBehaviour
 
     public float minmaxVal;
     public float delta = 1f;
+    public int sleepInterval;
     public enum SampleDensity { HIGH, MEDIUM, LOW };
     [HideInInspector]
     public SampleDensity dens;
@@ -90,6 +91,7 @@ public class CustomDensityPlot : MonoBehaviour
         if (loadingMsg != null){
             loadingMsgText = loadingMsg.GetComponent<TextMesh>();
         }
+        sleepInterval = 126;
         //CalculateVectors();
         //DrawDensityPlot();
     }
@@ -103,12 +105,12 @@ public class CustomDensityPlot : MonoBehaviour
             }
             if(loadingMsg != null && drawQueue == 0){
                 loadingMsg.SetActive(true);
-                float percent = numComplete/128f * 100;
+                float percent = Mathf.Round(numComplete/128f * 10000)/100;
                 loadingMsgText.text = ("Calculating, please wait...\n" + percent + "% complete"); 
             }
             if(loadingMsg != null && drawQueue > 0){
                 loadingMsg.SetActive(true);
-                float percent = numComplete/128f * 100;
+                float percent = Mathf.Round(numComplete/128f * 10000)/100;
                 loadingMsgText.text = ("Finishing old Calculation\n" + percent + "% complete"); 
             }
         }
@@ -190,7 +192,7 @@ public class CustomDensityPlot : MonoBehaviour
             for (float z_temp = zmin; z_temp < zmax; z_temp += delta)
             {
 
-                if ((int)((z_temp - zmin) / delta) % 42 == 0)
+                if ((int)((z_temp - zmin) / delta) % sleepInterval == 0)
                 {
                     Thread.Sleep(1);
                 }
