@@ -62,11 +62,13 @@ public class MainMenu : MonoBehaviour
     }
     void HideButtons()
     {
+        StopAllCoroutines();
         StartCoroutine(HideButtonsCoroutine());
     }
 
     void RevealButtons()
     {
+        StopAllCoroutines();
         StartCoroutine(RevealButtonsCoroutine());
     }
     IEnumerator HideButtonsCoroutine()
