@@ -51,6 +51,7 @@ public class CryptoPresetMenu : MonoBehaviour
     private TextMeshPro textMesh;
     public Transform view;
 
+    public Transform cryptoName;
 
 
     private Dictionary<string, bool> presets = new Dictionary<string, bool>();
@@ -197,6 +198,10 @@ public class CryptoPresetMenu : MonoBehaviour
         //        lineChart.kill();
         //        lineChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
         //        lineChart.updateGraph();
+
+        TextMesh text = cryptoName.GetComponent<TextMesh>();
+        text.text = currCrypto;
+
         scatterChart.createLabels = true;
         scatterChart.kill();
         scatterChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");

@@ -107,6 +107,8 @@ public class ScatterChart : MonoBehaviour
     public Transform datePoint;
     public Transform line;
 
+    public Transform point;
+
     public bool createLabels = true;
 
     void Awake()
@@ -155,6 +157,7 @@ public class ScatterChart : MonoBehaviour
         Async obj = Async.runInCoroutine(GetText);
         obj.onEvent("Done", parseData);
     }
+
 
     // Extracts the usd price time/price data from the text
     void parseData(object tmp)
@@ -241,7 +244,7 @@ public class ScatterChart : MonoBehaviour
 
         float[] Xs = new float[prices.Count];
 
-        //Particle[] particles = new Particle[prices.Count];
+        //Particle[] particles = new Particle[prices.Count];    
 
         distances = new Distance[prices.Count - 1];
         additonalParticles = new int[prices.Count];
@@ -269,17 +272,23 @@ public class ScatterChart : MonoBehaviour
             tmpParticle.position = new Vector3(xPos, yPos, 0);
             temp.Add(tmpParticle);
 
+/*             Transform dataPoint = Instantiate(point, new Vector3(0, 0, 0), Quaternion.identity, transform);
+            dataPoint.localPosition = new Vector3(xPos, yPos, 0);
+            dataPoint.name = "topminmax"; */
+
 
             // Bottom labels:
             // Only updates when the user selects new time / currency
-            int labelCount = (int)Mathf.Round(prices.Count / 35);
+            int labelCount = (int)Mathf.Round(prices.Count / 15);
             if ((i % labelCount == 0 || i == times.Count - 1) && createLabels)
             {
                 Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currPoint.localPosition = new Vector3(xPos, -3f, -2.5f);
                 TextMesh dataContent = currPoint.GetComponent<TextMesh>();
-
                 dataContent.text = convertFromTimestamp(times[i]).ToString();
+                dataContent.fontSize = 150;
+
+
                 Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currLine.localPosition = new Vector3(xPos, -2.75f, -2.5f);
                 currLine.localScale += new Vector3(0, -0.5f, 0);
@@ -298,6 +307,7 @@ public class ScatterChart : MonoBehaviour
                 dataContent.text = convertFromTimestamp(times[i]).ToString();
                 currPoint.name = "topPoint";
                 dataContent.name = "topText";
+                dataContent.fontSize = 150;
 
                 Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currLine.localPosition = new Vector3(xPos, 2.75f, -2.5f);
@@ -305,8 +315,6 @@ public class ScatterChart : MonoBehaviour
                 currLine.localRotation = Quaternion.identity;
                 currLine.name = "topLine";
             }
-
-
 
             // Adds additional particles between points that are far away
             if (distance > STEP_SIZE)
@@ -361,15 +369,12 @@ public class ScatterChart : MonoBehaviour
 
 
         dest = temp.ToArray();
-        int space = 0;
-        bool isGap = false;
         Debug.Log("LENGTH: " + dest.Length);
 
         for (int i = 0; i < dest.Length; i++)
         {
             Vector3 pos = temp[i].position;
 
-            isGap = false;
             dest[i].position = pos;
             dest[i].color = new Color(Mathf.Pow((pos.x + 10) / 20, 2), Mathf.Pow((pos.y + 10) / 20, 2), Mathf.Pow((pos.z + 10) / 20, 2));
 
@@ -425,6 +430,7 @@ public class ScatterChart : MonoBehaviour
             }
         }
     }
+
 
     // The scale, min/max, represent how close together all of the points are.
     // As scale approaces 0, the points are well dispersed. As scale approaces 1, the points 
