@@ -37,17 +37,13 @@ namespace MatryxJsonRpc
         private static Serializer serializer = new Serializer();
         private static string explorerEndpt = "http://13.57.163.24";
         //private static string explorerEndpt = "http://13.56.237.75/";
-        private static string latestPlatformInfoEndpt = explorerEndpt+"/platform/getLatestInfo";
-        private static string latestTokenInfoEndpt = explorerEndpt + "/token/getLatestInfo";
+        private static string latestPlatformInfoEndpt = explorerEndpt + "/platform/getInfo";
+        private static string latestTokenInfoEndpt = explorerEndpt + "/token/getInfo";
         private static string allTournamentsEndpt = "/tournaments";
-        private static string latestTournamentAbiEndpt = explorerEndpt + allTournamentsEndpt + "/getLatestAbi";
-        private static string sharedUrl = explorerEndpt + "/tempAPI";
+        private static string latestTournamentAbiEndpt = explorerEndpt + allTournamentsEndpt + "/getAbi";
         private static string tournamentDetailByAddressEndpt = "/tournaments/address/";
-        private static string tournamentDetailByIdEndpt = "/tournaments/";
         private static string submissionDetailByAddressEndpt = "/submissions/address/";
-		private static string submissionUploadEndpt = explorerEndpt + "/ipfs/upload/";
-
-        private static string roundDetailEndpt = sharedUrl + "/rounds/id/";
+        private static string submissionUploadEndpt = explorerEndpt + "/ipfs/upload/";
 
         // Contract info
         private static string mtxNode = "http://localhost:8545";
@@ -135,16 +131,16 @@ namespace MatryxJsonRpc
                 yield return www;
                 // Debug.Log(www.text);
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
-                var tournamentList = jsonObj["data"] as List<object>;
+                var tournamentList = jsonObj["tournaments"] as List<object>;
                 for (int i = 0; i < 10; i++)
                 {
                     try
                     {
                         var tourna = tournamentList[i + (int)offset] as Dictionary<string, object>;
                         var tournament = new Tournament();
-                        tournament.title = tourna["tournamentTitle"] as string;
-                        tournament.description = tourna["tournamentDescription"] as string;
-                        tournament.bounty = (long)Convert.ToDouble(tourna["mtx"]);
+                        tournament.title = tourna["title"] as string;
+                        tournament.description = tourna["description"] as string;
+                        tournament.bounty = (long)Convert.ToDouble(tourna["bounty"]);
                         tournament.address = tourna["address"] as string;
                         tournaments.Add(tournament);
                     }
@@ -242,44 +238,44 @@ namespace MatryxJsonRpc
             var tournamentAddress = (string)param[0];
             var page = (long)param[1];
             var offset = page * 10;
-            var url = explorerEndpt + tournamentDetailByIdEndpt + tournamentAddress;
+            var url = explorerEndpt + tournamentDetailByAddressEndpt + tournamentAddress;
             using (WWW www = new WWW(url))
             {
                 yield return www;
                 // Debug.Log(www.text);
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
-				if (jsonObj["error"] != null)
-				{
-					context.done(submissions);
-				}
-				else
-				{
-					Debug.Log(url + " - " + jsonObj["message"] as string);
-					var dataObj = jsonObj["data"] as Dictionary<string, object>;
-					var title = dataObj["tournamentTitle"] as string;
-					var bounty = Convert.ToDouble(dataObj["mtx"] as string);
-					var description = dataObj["tournamentDescription"] as string;
-					var submissionList = dataObj["recentSubmissions"] as List<object>;
-					for (int i = 0; i < 10; i++)
-					{
-						try
-						{
-							var sub = submissionList[i + (int)offset] as Dictionary<string, object>;
-							var submission = new Submission();
-							submission.address = tournamentAddress + ":" + sub["submissionAddress"] as string;
-							submission.title = sub["submissionTitle"] as string;
-							submission.address += submission.title;
-							submission.author = sub["authorName"] as string;
-							submissions.Add(submission);
-						}
-						catch (System.ArgumentOutOfRangeException e) { break; }
-						catch (Exception e) { Debug.Log(e); }
-					}
+                if (jsonObj["error"] != null)
+                {
+                    context.done(submissions);
+                }
+                else
+                {
+                    Debug.Log(url + " - " + jsonObj["message"] as string);
+                    var dataObj = jsonObj["tournament"] as Dictionary<string, object>;
+                    var title = dataObj["title"] as string;
+                    var bounty = Convert.ToDouble(dataObj["bounty"] as string);
+                    var description = dataObj["description"] as string;
+                    var submissionList = dataObj["recentSubmissions"] as List<object>;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        try
+                        {
+                            var sub = submissionList[i + (int)offset] as Dictionary<string, object>;
+                            var submission = new Submission();
+                            submission.address = tournamentAddress + ":" + sub["address"] as string;
+                            submission.title = sub["title"] as string;
+                            submission.address += submission.title;
+                            submission.author = sub["owner"] as string;
+                            submissions.Add(submission);
+                        }
+                        catch (System.ArgumentOutOfRangeException e) { break; }
+                        catch (Exception e) { Debug.Log(e); }
+                    }
 
-					Debug.Log("Fetched submissions: " + submissions.Count);
-					context.done(submissions);
-				}
-			}
+                    Debug.Log("Fetched submissions: " + submissions.Count);
+                    context.done(submissions);
+                }
+            }
         }
 
         // DETAIL SUBMISSION
@@ -340,19 +336,21 @@ namespace MatryxJsonRpc
                 Debug.Log(www.text);
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
                 Debug.Log(url + " - " + jsonObj["message"] as string);
-                var dataObj = jsonObj["data"] as Dictionary<string, object>;
+                var dataObj = jsonObj["submission"] as Dictionary<string, object>;
                 try
                 {
                     var submission = new Submission();
                     submission.tournamentAddress = tournamentAddress;
-                    submission.title = dataObj["submissionTitle"] as string;
-                    submission.address = tournamentAddress + ":" + dataObj["submissionAddress"] as string;
-                    submission.author = dataObj["submissionAuthor"] as string;
-                    submission.references = (dataObj["submissionReferences"] as List<object>)[0] as string;
-                    submission.contributors = (dataObj["submissionCollaborators"] as List<object>)[0] as string;
-                    var bodyObj = (dataObj["submissionJson"] as List<object>)[0] as Dictionary<string, object>;
-                    var jsonContent = (bodyObj["Items"] as List<object>)[0] as string;
-                    submission.body = "{ \"Items\" : [\"" + jsonContent + "\"] }";
+                    submission.title = dataObj["title"] as string;
+                    submission.address = tournamentAddress + ":" + dataObj["address"] as string;
+                    submission.author = dataObj["owner"] as string;
+                    submission.references = (dataObj["references"] as List<object>)[0] as string;
+                    submission.contributors = (dataObj["collaborators"] as List<object>)[0] as string;
+
+                    // TODO: no longer submissionJson, but
+                    // var bodyObj = (dataObj["submissionJson"] as List<object>)[0] as Dictionary<string, object>;
+                    // var jsonContent = (bodyObj["Items"] as List<object>)[0] as string;
+                    // submission.body = "{ \"Items\" : [\"" + jsonContent + "\"] }";
                     context.done(submission);
                 }
                 catch (Exception e)
@@ -577,14 +575,14 @@ namespace MatryxJsonRpc
             var requestAccounts = new EthAccountsUnityRequest(mtxNode);
             yield return requestAccounts.SendRequest();
             var resultsAccounts = requestAccounts.Result;
-			if(resultsAccounts != null && resultsAccounts[0] != null)
-			{
+            if(resultsAccounts != null && resultsAccounts[0] != null)
+            {
                 StatisticsTracking.InstantEvent("Matryx Init", "Eth Node", new Dictionary<string, object>(){
                     {"Node Found", true},
                 });
 
                 var usedAccount = resultsAccounts[0];
-				Debug.Log("Used account:" + usedAccount);
+                Debug.Log("Used account:" + usedAccount);
                 var function = platformContract.GetFunction("prepareBalance");
                 var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
                 transactionInput.Gas = new HexBigInteger(3000000);
