@@ -398,11 +398,16 @@ public class CandleChart : MonoBehaviour
         this.times = times;
         this.prices = prices;
 
-        int numMonths = (int)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1]));
-        fillMonthData();
+        int numMonths = (int)Mathf.Ceil((float)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1])) * 4.348f);
+        //int numMonths = (int)Mathf.Ceil(times.Count / 7f);;
+        Debug.Log("weeks: " + numMonths);
+        //fillMonthData();
+        fillWeekData();
         string[] Ys = prices.ToArray();
+        Debug.Log("Here");
         rescaleData(Ys, 0);
 
+        
         for (int i = 0; i < (numMonths - 1); i++)
         {
             float xPos = ((float)i) / ((numMonths - 1) / resolution) - 12.25f;
@@ -414,6 +419,7 @@ public class CandleChart : MonoBehaviour
 
             Transform barType;
             barType = months[i].getOpen() < months[i].getClose() ? bullish : boorish;
+
 
             // Green
             if (months[i].getOpen() < months[i].getClose())
@@ -432,11 +438,8 @@ public class CandleChart : MonoBehaviour
                 topPercent = (float)months[i].getOpen() / (float)months[i].getHigh();
             }
 
-            /*             Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
-                        Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose());
-                        Debug.Log("MONTH: " + i + ", TOPD: " + topDiff + ", BOTD: " + botDiff);
-                        Debug.Log("MONTH: " + i + ", TOPP: " + topPercent + ", BOTP: " + botPercent); */
-
+/*             Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
+            Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose()); */
 
 
             float lineScale = Math.Abs(hiLowDiff) + .5f;
@@ -466,7 +469,7 @@ public class CandleChart : MonoBehaviour
             currLine.localPosition = Vector3.zero;
             currLine.localScale += new Vector3(0, -1 + hiLowDiff, 0);
 
-            createDataPoint(stickHolder, "HIGH: " + months[i].getHigh(), new Vector3(.05f, 0, 0));
+            //createDataPoint(stickHolder, "HIGH: " + months[i].getHigh(), new Vector3(.05f, 0, 0));
 
             float barSize = -1 + barPercent * hiLowDiff;
             // Debug.Log("MONTH: " + i + ", SIZE: " + barSize);
@@ -590,6 +593,85 @@ public class CandleChart : MonoBehaviour
                     }
                 }
          */
+
+    }
+
+    void fillWeekData()
+    {
+        int numWeeks = (int)Mathf.Ceil((float)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1])) * 4.348f);
+        //int numWeeks = (int)Mathf.Ceil(times.Count / 7f) + 3;
+        Debug.Log("num weeks: " + numWeeks);
+
+        monthlyPrices = new float[numWeeks];
+        for (int i = 0; i < numWeeks; ++i)
+        {
+            months.Add(new monthData());
+            scaledMonths.Add(new monthData());
+        }
+
+        int currDayNum = (int)convertFromEpoch(times[0]).DayOfWeek;
+        int currWeekIndex = -1;
+        float monthlyTotal = 0;
+        int dayCount = 0;
+
+        int oldDay;
+
+        oldDay = (int)convertFromEpoch(times[0]).Day;
+
+        for (int i = -1; i < times.Count - 1; ++i)
+        {
+            
+
+            Debug.Log("index: " + i + ", times: " + times.Count);
+            Debug.Log("week: " + currWeekIndex);
+
+            // Multiple timestamps from same day are counting as new weeks
+            if (((int)convertFromEpoch(times[i + 1]).DayOfWeek == 0 && (int)convertFromEpoch(times[i+1]).Day != oldDay) || i == -1)
+            {
+                Debug.Log("New Week, " + currWeekIndex);
+                months[currWeekIndex + 1].setOpen(Convert.ToDouble(prices[i + 1]));
+                months[currWeekIndex + 1].setClose(Convert.ToDouble(prices[i + 1]));
+                months[currWeekIndex + 1].setHigh(Convert.ToDouble(prices[i + 1]));
+                months[currWeekIndex + 1].setLow(Convert.ToDouble(prices[i + 1]));
+
+                if (i != -1)
+                {
+                    months[currWeekIndex].setClose(Convert.ToDouble(prices[i]));
+                    if (Convert.ToDouble(prices[i]) > months[currWeekIndex].getHigh())
+                        months[currWeekIndex].setHigh(Convert.ToDouble(prices[i]));
+
+                    if (Convert.ToDouble(prices[i]) < months[currWeekIndex].getLow())
+                        months[currWeekIndex].setLow(Convert.ToDouble(prices[i]));
+
+                    monthlyPrices[currWeekIndex] = monthlyTotal / dayCount;
+                    dayCount = 0;
+                    monthlyTotal = 0;
+                }
+
+                currWeekIndex++;
+            }
+            else
+            {
+                // Checks for and sets a new high
+                if (Convert.ToDouble(prices[i]) > months[currWeekIndex].getHigh())
+                {
+                    months[currWeekIndex].setHigh(Convert.ToDouble(prices[i]));
+                }
+
+                // Checks for and sets a new low
+                if (Convert.ToDouble(prices[i]) < months[currWeekIndex].getLow())
+                {
+                    months[currWeekIndex].setLow(Convert.ToDouble(prices[i]));
+                }
+
+                monthlyTotal += (float)Convert.ToDouble(prices[i]);
+                dayCount++;
+            }
+
+            oldDay = (int)convertFromEpoch(times[i+1]).Day;
+        }
+
+        Debug.Log("Here1");
 
     }
 

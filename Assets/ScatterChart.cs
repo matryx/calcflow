@@ -285,8 +285,8 @@ public class ScatterChart : MonoBehaviour
                 Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currPoint.localPosition = new Vector3(xPos, -3f, -2.5f);
                 TextMesh dataContent = currPoint.GetComponent<TextMesh>();
-                dataContent.text = convertFromTimestamp(times[i]).ToString();
-                dataContent.fontSize = 150;
+                dataContent.text = convertFromTimestamp(times[i]).Month + "/" + convertFromTimestamp(times[i]).Day + "/" + convertFromTimestamp(times[i]).Year;
+                dataContent.fontSize = 175;
 
 
                 Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
@@ -296,7 +296,7 @@ public class ScatterChart : MonoBehaviour
             }
 
 
-            labelCount = (int)Mathf.Round(prices.Count / 15);
+            labelCount = (int)Mathf.Round(prices.Count / 10);
             // Top labels:
             // Updates always to show displayed timespan
             if ((i % labelCount == 0 || i == times.Count - 1))
@@ -307,7 +307,7 @@ public class ScatterChart : MonoBehaviour
                 dataContent.text = convertFromTimestamp(times[i]).ToString();
                 currPoint.name = "topPoint";
                 dataContent.name = "topText";
-                dataContent.fontSize = 150;
+                dataContent.fontSize = 175;
 
                 Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
                 currLine.localPosition = new Vector3(xPos, 2.75f, -2.5f);
@@ -344,7 +344,7 @@ public class ScatterChart : MonoBehaviour
         minContent.text = "$" + min;
         minAmount.name = "minPoint";
         minContent.name = "minText";
-        minContent.fontSize = 150;
+        minContent.fontSize = 200;
 
         // Labels graph with the maximum amount
         Transform maxAmount = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
@@ -353,7 +353,7 @@ public class ScatterChart : MonoBehaviour
         maxContent.text = "$" + max;
         maxAmount.name = "maxPoint";
         maxContent.name = "maxText";
-        maxContent.fontSize = 150;
+        maxContent.fontSize = 200;
 
         createLabels = false;
 
