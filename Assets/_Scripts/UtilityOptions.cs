@@ -36,12 +36,12 @@ public class UtilityOptions : MonoBehaviour
         //}
         #endregion
 
-        //audioSource = transform.Find("Voiceover").GetComponent<AudioSource>();
+        audioSource = transform.Find("Voiceover").GetComponent<AudioSource>();
     }
 
     void Update()
     {
-        /*
+        
         if (!SettingsVariables.narration && audioSource && audioSource.isPlaying)
         {
             audioSource.Stop();
@@ -54,6 +54,6 @@ public class UtilityOptions : MonoBehaviour
             audioSource.Play();
             alreadyPlayed = true;
         }
-        */
+        
     }
 }
