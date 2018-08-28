@@ -11,6 +11,7 @@ public class MainMenu : MonoBehaviour
     private Transform resetPos, resetScene, home, menus, matryx;
     private void FindButtons()
     {
+
         home = this.transform.parent.Find("HomeButton");
         menus = this.transform.parent.Find("MenuButton");
         resetPos = this.transform.parent.Find("ResetPositionButton");
@@ -61,11 +62,13 @@ public class MainMenu : MonoBehaviour
     }
     void HideButtons()
     {
+        StopAllCoroutines();
         StartCoroutine(HideButtonsCoroutine());
     }
 
     void RevealButtons()
     {
+        StopAllCoroutines();
         StartCoroutine(RevealButtonsCoroutine());
     }
     IEnumerator HideButtonsCoroutine()

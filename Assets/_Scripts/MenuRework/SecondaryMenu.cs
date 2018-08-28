@@ -20,7 +20,7 @@ public class SecondaryMenu : MonoBehaviour
 
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
     }
-    static SecondaryMenu _instance;
+    public static SecondaryMenu _instance;
     public Transform functionMenu;
     public Transform animationMenu;
     public Transform saveLoadMenu;
@@ -29,6 +29,7 @@ public class SecondaryMenu : MonoBehaviour
     public GameObject volumeBall;
 
     SecondaryMenuResponder responder;
+    Scroll saveLoadScroll;
 
     public static SecondaryMenu GetInstance()
     {
@@ -44,7 +45,10 @@ public class SecondaryMenu : MonoBehaviour
     {
         functionMenu.gameObject.SetActive(true);
         animationMenu.gameObject.SetActive(false);
-        saveLoadMenu.GetComponentInChildren<Scroll>().setUpMenu();
+        saveLoadScroll = saveLoadMenu.GetComponentInChildren<Scroll>();
+        if (saveLoadScroll!=null) {
+            saveLoadScroll.setUpMenu();
+        }
         saveLoadMenu.gameObject.SetActive(false);
         settingsMenu.gameObject.SetActive(false);
         tournamentMenu.gameObject.SetActive(false);
@@ -55,7 +59,7 @@ public class SecondaryMenu : MonoBehaviour
         volumeBall.GetComponent<Collider>().enabled = false;
         volumeBall.GetComponent<MeshRenderer>().enabled = false;
 
-        transform.parent.gameObject.SetActive(false);
+        //transform.parent.gameObject.SetActive(false);
     }
 
     void toggleMenu(string menuName)

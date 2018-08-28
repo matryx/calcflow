@@ -23,15 +23,16 @@ public class ToggleSecondaryMenu : QuickButton
         }
     }
 
+
     protected override void ButtonEnterBehavior(GameObject other)
     {
         if (secondaryMenu.gameObject.activeSelf)
         {
-            secondaryMenu.gameObject.SetActive(false);
+            StartCoroutine(secondaryMenu.GetComponent<ExpandContract>().Contract());
         }
         else
         {
-            secondaryMenu.gameObject.SetActive(true);
+            StartCoroutine(secondaryMenu.GetComponent<ExpandContract>().Expand());
         }
     }
 
@@ -39,4 +40,5 @@ public class ToggleSecondaryMenu : QuickButton
     {
         //fuseButton.ForceCold();
     }
+
 }

@@ -31,14 +31,10 @@ public class ExitMenus : QuickButton
 
         if (transform.localScale == inactiveScale)
         {
-            StartCoroutine(DeActivate());
+            transform.localScale = activeScale;
+            StartCoroutine(menu.GetComponent<ExpandContract>().Contract());
+            //StartCoroutine(DeActivate());
         }
-    }
-
-    IEnumerator DeActivate()
-    {
-        yield return StartCoroutine(ScaleTo(menu, menu.localScale, Vector3.zero, 0.3f));
-        menu.gameObject.SetActive(false);
     }
 
     IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)

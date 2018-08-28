@@ -31,22 +31,22 @@ internal class VectorKeyboardInputResponder : FlexMenu.FlexMenuResponder
         tmaxText = tmax;
         dens = CustomVectorField.SampleDensity.LOW;
 
-        currExpression = es.expressions[ExpressionSet.ExpOptions.X];
+        currExpression = es.expressions["X"];
         currText = xText;
     }
 
     public void initialize()
     {
         es = new ExpressionSet();
-        es.expressions[ExpressionSet.ExpOptions.X].tokens = new List<string>
+        es.expressions["X"].tokens = new List<string>
                 {
                     "y"
                 };
-        es.expressions[ExpressionSet.ExpOptions.Y].tokens = new List<string>
+        es.expressions["Y"].tokens = new List<string>
                 {
                     "-x"
                 };
-        es.expressions[ExpressionSet.ExpOptions.Z].tokens = new List<string>
+        es.expressions["Z"].tokens = new List<string>
                 {
                     "0"
                 };
@@ -58,13 +58,16 @@ internal class VectorKeyboardInputResponder : FlexMenu.FlexMenuResponder
         {
             "5", "0"
         };
-        currExpression = es.expressions[ExpressionSet.ExpOptions.X];
+        es.AddRange("x");
+        es.AddRange("y");
+        es.AddRange("z");
+        currExpression = es.expressions["X"];
         currText = xText;
         index = currExpression.tokens.Count;
         isReady = true;
-        xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
-        yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
-        zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
+        xText.text = displayText(es.expressions["X"].tokens, es.expressions["X"].tokens.Count, false);
+        yText.text = displayText(es.expressions["Y"].tokens, es.expressions["Y"].tokens.Count, false);
+        zText.text = displayText(es.expressions["Z"].tokens, es.expressions["Z"].tokens.Count, false);
         tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
         tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
         currText.text = displayText(currExpression.tokens, index, true);
@@ -108,17 +111,17 @@ internal class VectorKeyboardInputResponder : FlexMenu.FlexMenuResponder
                 index = currExpression.tokens.Count;
                 break;
             case "Button_Xinput":
-                currExpression = es.expressions[ExpressionSet.ExpOptions.X];
+                currExpression = es.expressions["X"];
                 currText = xText;
                 index = currExpression.tokens.Count;
                 break;
             case "Button_Yinput":
-                currExpression = es.expressions[ExpressionSet.ExpOptions.Y];
+                currExpression = es.expressions["Y"];
                 currText = yText;
                 index = currExpression.tokens.Count;
                 break;
             case "Button_Zinput":
-                currExpression = es.expressions[ExpressionSet.ExpOptions.Z];
+                currExpression = es.expressions["Z"];
                 currText = zText;
                 index = currExpression.tokens.Count;
                 break;
@@ -146,9 +149,9 @@ internal class VectorKeyboardInputResponder : FlexMenu.FlexMenuResponder
                 break;
         }
         //index++;
-        xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
-        yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
-        zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
+        xText.text = displayText(es.expressions["X"].tokens, es.expressions["X"].tokens.Count, false);
+        yText.text = displayText(es.expressions["Y"].tokens, es.expressions["Y"].tokens.Count, false);
+        zText.text = displayText(es.expressions["Z"].tokens, es.expressions["Z"].tokens.Count, false);
         tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
         tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
         currText.text = displayText(currExpression.tokens, index, true);
@@ -163,12 +166,12 @@ internal class VectorKeyboardInputResponder : FlexMenu.FlexMenuResponder
 
     public void UpdateText()
     {
-        xText.text = displayText(es.expressions[ExpressionSet.ExpOptions.X].tokens, es.expressions[ExpressionSet.ExpOptions.X].tokens.Count, false);
-        yText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Y].tokens, es.expressions[ExpressionSet.ExpOptions.Y].tokens.Count, false);
-        zText.text = displayText(es.expressions[ExpressionSet.ExpOptions.Z].tokens, es.expressions[ExpressionSet.ExpOptions.Z].tokens.Count, false);
+        xText.text = displayText(es.expressions["X"].tokens, es.expressions["X"].tokens.Count, false);
+        yText.text = displayText(es.expressions["Y"].tokens, es.expressions["Y"].tokens.Count, false);
+        zText.text = displayText(es.expressions["Z"].tokens, es.expressions["Z"].tokens.Count, false);
         tminText.text = displayText(es.ranges["t"].Min.tokens, es.ranges["t"].Min.tokens.Count, false);
         tmaxText.text = displayText(es.ranges["t"].Max.tokens, es.ranges["t"].Max.tokens.Count, false);
-        currExpression = es.expressions[ExpressionSet.ExpOptions.X];
+        currExpression = es.expressions["X"];
         index = currExpression.tokens.Count;
         currText.text = displayText(currExpression.tokens, index, true);
     }
