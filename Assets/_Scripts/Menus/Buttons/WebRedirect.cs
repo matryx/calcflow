@@ -15,7 +15,8 @@ public class WebRedirect : QuickButton {
     protected override void ButtonEnterBehavior(GameObject other)
     {
       Application.OpenURL("http://nanome.ai/nanome");
-      StartCoroutine(Darken(feedback, 2f, 1f));
+      StopAllCoroutines();
+      StartCoroutine(Darken(feedback, .5f, .3f, 1f));
     }
 
 	protected override void ButtonExitBehavior(GameObject other)
@@ -23,7 +24,7 @@ public class WebRedirect : QuickButton {
 
     }
 
-    IEnumerator Darken(Transform obj, float animTime, float waitDuration){
+    IEnumerator Darken(Transform obj, float animTime, float animFade, float waitDuration){
         float startTime = Time.time;
         while (Time.time < startTime + animTime)
         {
@@ -40,16 +41,17 @@ public class WebRedirect : QuickButton {
             yield return null;
         }
         startTime = Time.time;
-        while (Time.time < startTime + animTime)
+        while (Time.time < startTime + animFade)
         {
             if (obj == null)
             {
                 yield break;
             }
-            float a = Mathf.Lerp(1f, 0f, (Time.time - startTime) / animTime);
+            float a = Mathf.Lerp(1f, 0f, (Time.time - startTime) / animFade);
             obj.GetComponent<SpriteRenderer>().color = new Color(1f,1f,1f,a);
             yield return null;
         }
+        obj.GetComponent<SpriteRenderer>().color = new Color(1f,1f,1f,0f);
     }
 
 }
