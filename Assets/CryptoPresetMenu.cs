@@ -84,19 +84,19 @@ public class CryptoPresetMenu : MonoBehaviour
 
         #endregion
 
-        foreach (KeyValuePair<string, bool> pair in presets)
-        {
-            if (pair.Value == true)
-            {
-                GameObject presetButton = Instantiate(Resources.Load("Preset", typeof(GameObject))) as GameObject;
-                presetButton.GetComponentInChildren<TMPro.TextMeshPro>().text = pair.Key;
-                presetButton.name = pair.Key;
-                presetButton.SetActive(false);
-                scroll.addObject(presetButton.transform);
-                scroll.objectParent.GetComponent<FlexPanelComponent>().AddAction(presetButton.GetComponent<FlexActionableComponent>());
-                joyStickAggregator.AddForwarder(presetButton.GetComponentInChildren<JoyStickForwarder>());
-            }
-        }
+        /*         foreach (KeyValuePair<string, bool> pair in presets)
+                {
+                    if (pair.Value == true)
+                    {
+                        GameObject presetButton = Instantiate(Resources.Load("Preset", typeof(GameObject))) as GameObject;
+                        presetButton.GetComponentInChildren<TMPro.TextMeshPro>().text = pair.Key;
+                        presetButton.name = pair.Key;
+                        presetButton.SetActive(false);
+                        scroll.addObject(presetButton.transform);
+                        scroll.objectParent.GetComponent<FlexPanelComponent>().AddAction(presetButton.GetComponent<FlexActionableComponent>());
+                        joyStickAggregator.AddForwarder(presetButton.GetComponentInChildren<JoyStickForwarder>());
+                    }
+                } */
     }
 
     public void sendSignal(string source)
@@ -202,6 +202,10 @@ public class CryptoPresetMenu : MonoBehaviour
         TextMesh text = cryptoName.GetComponent<TextMesh>();
         text.text = currCrypto;
 
+        candleChart.kill();
+        candleChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
+        candleChart.updateGraph();
+
         scatterChart.createLabels = true;
         scatterChart.kill();
         scatterChart.SetURL(baseURL + currCrypto + "/" + first + "/" + second + "/");
@@ -214,6 +218,8 @@ public class CryptoPresetMenu : MonoBehaviour
     void getTimeStamps(string source)
     {
         second = Math.Round(getCurrTime());
+        DateTime now = convertFromEpoch("" + getCurrTime());
+        int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
         switch (source)
         {
             default:
@@ -230,11 +236,11 @@ public class CryptoPresetMenu : MonoBehaviour
                 break;
             case "1m":
                 currTime = source;
-                first = second - getMillis(24 * 30);
+                first = second - getMillis(24 * daysInMonth);
                 break;
             case "3m":
                 currTime = source;
-                first = second - getMillis(24 * 30 * 3);
+                first = second - getMillis(24 * daysInMonth * 3);
                 break;
             case "1yr":
                 currTime = source;
@@ -253,6 +259,11 @@ public class CryptoPresetMenu : MonoBehaviour
         DateTime epochstart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         double currTime = (double)(DateTime.UtcNow - epochstart).TotalMilliseconds;
         return currTime;
+    }
+
+    public DateTime convertFromEpoch(string timestamp)
+    {
+        return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(timestamp));
     }
     double getMillis(double numHours)
     {

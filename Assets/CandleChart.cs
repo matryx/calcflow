@@ -172,6 +172,11 @@ public class CandleChart : MonoBehaviour
         // Destroy(frameLine);
         times = new List<string>();
         prices = new List<string>();
+        months = new List<monthData>();
+        day = new List<monthData>();
+        scaledMonths = new List<monthData>();
+        dayTimes = new List<dayData>();
+
 
         foreach (Transform child in transform)
         {
@@ -398,19 +403,19 @@ public class CandleChart : MonoBehaviour
         this.times = times;
         this.prices = prices;
 
-        int numMonths = (int)Mathf.Ceil((float)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1])) * 4.348f);
-        //int numMonths = (int)Mathf.Ceil(times.Count / 7f);;
+        //int numMonths = (int)Mathf.Ceil((float)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1])) * 4.348f);
+        //int numMonths = findNumWeeks();
+        int numMonths = (int)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1]));
         Debug.Log("weeks: " + numMonths);
-        //fillMonthData();
-        fillWeekData();
+        fillMonthData();
+        //fillWeekData();
         string[] Ys = prices.ToArray();
         Debug.Log("Here");
         rescaleData(Ys, 0);
 
-        
-        for (int i = 0; i < (numMonths - 1); i++)
+        for (int i = 0; i < (numMonths); i++)
         {
-            float xPos = ((float)i) / ((numMonths - 1) / resolution) - 12.25f;
+            float xPos = ((float)i) / ((numMonths) / resolution) - 12.45f;
             float hiLowDiff = (float)scaledMonths[i].getHigh() - (float)scaledMonths[i].getLow();
             float barLen = (float)months[i].getHigh() - (float)months[i].getLow();
             float openCloseDiff = Math.Abs((float)months[i].getClose() - (float)months[i].getOpen());
@@ -419,7 +424,6 @@ public class CandleChart : MonoBehaviour
 
             Transform barType;
             barType = months[i].getOpen() < months[i].getClose() ? bullish : boorish;
-
 
             // Green
             if (months[i].getOpen() < months[i].getClose())
@@ -438,8 +442,8 @@ public class CandleChart : MonoBehaviour
                 topPercent = (float)months[i].getOpen() / (float)months[i].getHigh();
             }
 
-/*             Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
-            Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose()); */
+            /*             Debug.Log("MONTH: " + i + ", HIGH: " + months[i].getHigh() + ", LOW: " + months[i].getLow());
+                        Debug.Log("MONTH: " + i + ", OPEN: " + months[i].getOpen() + ", CLOSE: " + months[i].getClose()); */
 
 
             float lineScale = Math.Abs(hiLowDiff) + .5f;
@@ -471,30 +475,37 @@ public class CandleChart : MonoBehaviour
 
             //createDataPoint(stickHolder, "HIGH: " + months[i].getHigh(), new Vector3(.05f, 0, 0));
 
+            barPercent = float.IsNaN(barPercent) ? 0 : barPercent;
+
             float barSize = -1 + barPercent * hiLowDiff;
-            // Debug.Log("MONTH: " + i + ", SIZE: " + barSize);
+            //Debug.Log("index: " + i + ", barSize: " + barSize);
+            //Debug.Log("percent: " + barPercent + ", hiLowDiff: " + hiLowDiff);
+            Debug.Log("MONTH: " + i + ", SIZE: " + barSize);
             float barPos = (.5f * barSize) * botDiff;
 
             float diffToUse = 0;
 
-            Transform currBar = Instantiate(barType, Vector3.zero, Quaternion.identity, stickHolder);
-            currBar.localScale += new Vector3(0, barSize, 0);
+            if (!float.IsNaN(barSize))
+            {
+                Transform currBar = Instantiate(barType, Vector3.zero, Quaternion.identity, stickHolder);
+                currBar.localScale += new Vector3(0, barSize, 0);
 
-            if (botDiff == 0)
-            {
-                diffToUse = (-currLine.localScale.y / 2) + currBar.localScale.y / 2 - 0.01f;
-            }
-            else if (topDiff == 0)
-            {
-                diffToUse = currLine.localScale.y / 2 - currBar.localScale.y / 2 + 0.01f;
-            }
-            else
-            {
-                diffToUse = (-currLine.localScale.y / 2) + (currLine.localScale.y * (((topPercent + botPercent) / 2)));
-            }
+                if (botDiff == 0)
+                {
+                    diffToUse = (-currLine.localScale.y / 2) + currBar.localScale.y / 2 - 0.01f;
+                }
+                else if (topDiff == 0)
+                {
+                    diffToUse = currLine.localScale.y / 2 - currBar.localScale.y / 2 + 0.01f;
+                }
+                else
+                {
+                    diffToUse = (-currLine.localScale.y / 2) + (currLine.localScale.y * (((topPercent + botPercent) / 2)));
+                }
 
-            currBar.localPosition = new Vector3(0, diffToUse, 0);
-            currBar.localRotation = Quaternion.identity;
+                currBar.localPosition = new Vector3(0, diffToUse, 0);
+                currBar.localRotation = Quaternion.identity;
+            }
 
         }
 
@@ -528,6 +539,8 @@ public class CandleChart : MonoBehaviour
         float monthlyTotal = 0;
         int dayCount = 0;
 
+        Debug.Log("Start");
+
         for (int i = -1; i < times.Count - 1; ++i)
         {
 
@@ -535,8 +548,11 @@ public class CandleChart : MonoBehaviour
                             Debug.Log("TIMESTAMP: " + times[i]);
                             Debug.Log("TIMES: " + convertFromEpoch(times[i]) + ", PRICES: " + prices[i]);
                         } */
+
+            Debug.Log("currTime: " + convertFromEpoch(times[i + 1]));
             if (currMonthNum != convertFromEpoch(times[i + 1]).Month)
             {
+                Debug.Log("new month: " + currMonthIndex);
                 months[currMonthIndex + 1].setOpen(Convert.ToDouble(prices[i + 1]));
                 months[currMonthIndex + 1].setClose(Convert.ToDouble(prices[i + 1]));
                 months[currMonthIndex + 1].setHigh(Convert.ToDouble(prices[i + 1]));
@@ -561,7 +577,7 @@ public class CandleChart : MonoBehaviour
                 if (currMonthNum == 12)
                     currMonthNum = 0;
 
-                currMonthNum++;
+                currMonthNum = convertFromEpoch(times[i+1]).Month;
 
             }
             else
@@ -582,7 +598,13 @@ public class CandleChart : MonoBehaviour
                 dayCount++;
             }
 
+            if(i == times.Count-2){
+                months[currMonthIndex].setClose(Convert.ToDouble(prices[i]));
+            }
+
         }
+
+        Debug.Log("End");
 
         /* 
                 for (int i = 0; i < numMonths; ++i)
@@ -598,8 +620,8 @@ public class CandleChart : MonoBehaviour
 
     void fillWeekData()
     {
-        int numWeeks = (int)Mathf.Ceil((float)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1])) * 4.348f);
-        //int numWeeks = (int)Mathf.Ceil(times.Count / 7f) + 3;
+        //int numWeeks = (int)Mathf.Ceil((float)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1])) * 4.348f);
+        int numWeeks = findNumWeeks();
         Debug.Log("num weeks: " + numWeeks);
 
         monthlyPrices = new float[numWeeks];
@@ -615,20 +637,21 @@ public class CandleChart : MonoBehaviour
         int dayCount = 0;
 
         int oldDay;
+        DateTime startDay;
 
         oldDay = (int)convertFromEpoch(times[0]).Day;
+        startDay = convertFromEpoch(times[0]);
 
         for (int i = -1; i < times.Count - 1; ++i)
         {
-            
-
-            Debug.Log("index: " + i + ", times: " + times.Count);
-            Debug.Log("week: " + currWeekIndex);
-
+            //Debug.Log("index: " + i + ", times: " + times.Count);
+            //Debug.Log("week: " + currWeekIndex);
+            Debug.Log("currTime: " + convertFromEpoch(times[i + 1]));
             // Multiple timestamps from same day are counting as new weeks
-            if (((int)convertFromEpoch(times[i + 1]).DayOfWeek == 0 && (int)convertFromEpoch(times[i+1]).Day != oldDay) || i == -1)
+            if (convertFromEpoch(times[i + 1]).Subtract(startDay).Days > 7 || i == -1)
             {
                 Debug.Log("New Week, " + currWeekIndex);
+
                 months[currWeekIndex + 1].setOpen(Convert.ToDouble(prices[i + 1]));
                 months[currWeekIndex + 1].setClose(Convert.ToDouble(prices[i + 1]));
                 months[currWeekIndex + 1].setHigh(Convert.ToDouble(prices[i + 1]));
@@ -649,6 +672,7 @@ public class CandleChart : MonoBehaviour
                 }
 
                 currWeekIndex++;
+                startDay = convertFromEpoch(times[i + 1]);
             }
             else
             {
@@ -668,11 +692,27 @@ public class CandleChart : MonoBehaviour
                 dayCount++;
             }
 
-            oldDay = (int)convertFromEpoch(times[i+1]).Day;
+            oldDay = (int)convertFromEpoch(times[i + 1]).Day;
         }
 
         Debug.Log("Here1");
 
+    }
+
+    int findNumWeeks()
+    {
+        DateTime startDay = convertFromEpoch(times[0]);
+        int numWeeks = 0;
+        for (int i = 0; i < times.Count - 1; i++)
+        {
+            if (convertFromEpoch(times[i + 1]).Subtract(startDay).Days > 7)
+            {
+                numWeeks++;
+                startDay = convertFromEpoch(times[i + 1]);
+            }
+        }
+
+        return numWeeks + 1;
     }
 
     // Rescales the y-values to fit between [-2,2] so that it can fit in the graph
@@ -760,7 +800,19 @@ public class CandleChart : MonoBehaviour
 
     public double getNumMonths(DateTime start, DateTime end)
     {
-        return Math.Ceiling((end.Subtract(start)).Days / (double)30);
+        //return Math.Ceiling((end.Subtract(start)).Days / (double)30.42);
+        int currMonth = start.Month;
+        int numMonths = 1;
+        for (int i = 0; i < times.Count - 1; i++)
+        {
+            if (convertFromEpoch(times[i]).Month != currMonth)
+            {
+                numMonths++;
+                currMonth = convertFromEpoch(times[i]).Month;
+            }
+        }
+
+        return numMonths;
     }
 
 
