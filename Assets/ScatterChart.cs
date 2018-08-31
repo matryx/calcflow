@@ -86,7 +86,7 @@ public class ScatterChart : MonoBehaviour
     string output;
     StringBuilder builder = new StringBuilder();
     public List<string> times = new List<string>();
-    public List<string> prices = new List<string>();
+    public List<double> prices = new List<double>();
 
     public List<GameObject> pointList = new List<GameObject>();
     float[] scaledPrices;
@@ -130,18 +130,18 @@ public class ScatterChart : MonoBehaviour
     {
         StopAllCoroutines();
         times = new List<string>();
-        prices = new List<string>();
+        prices = new List<double>();
         temp = new List<Particle>();
 
         if (createLabels)
         {
-            foreach (Transform child in transform)
+            foreach (Transform child in transform.parent.Find("dataLabels").transform)
             {
                 Destroy(child.gameObject);
             }
         }
 
-        foreach (Transform child in transform)
+        foreach (Transform child in transform.parent.Find("dataLabels").transform)
         {
             if (child.name.Contains("top") || child.name.Contains("min") || child.name.Contains("max"))
             {
@@ -183,12 +183,12 @@ public class ScatterChart : MonoBehaviour
 
             allData = allData.Substring(endIndex + 2, allData.Length - endIndex - 2);
             endIndex = allData.IndexOf("]");
-            prices.Add(allData.Substring(0, endIndex));
+            prices.Add(Convert.ToDouble(allData.Substring(0, endIndex)));
             allData = allData.Substring(endIndex + 3, allData.Length - endIndex - 3);
         }
 
-        Debug.Log("Times: " + times.Count + ", Prices: " + prices.Count);
-        Debug.Log("lastTime: " + times[times.Count - 1] + ", lastPrice: " + prices[prices.Count - 1]);
+       // Debug.Log("Times: " + times.Count + ", Prices: " + prices.Count);
+      //  Debug.Log("lastTime: " + times[times.Count - 1] + ", lastPrice: " + prices[prices.Count - 1]);
 
         makeGraph(times, prices);
     }
@@ -208,33 +208,15 @@ public class ScatterChart : MonoBehaviour
         }
 
         STEP_SIZE = totalDist / (particleCount - prices.Count);
-        Debug.Log("STEP_SIZE: " + STEP_SIZE);
+      //  Debug.Log("STEP_SIZE: " + STEP_SIZE);
     }
 
-    int findSpace()
-    {
-        int lowestVal = times.Count - 2;
-        for (int i = 200; i > 50; i--)
-        {
-            //Debug.Log("i: " + i + ", " + ((times.Count - 2) % i));
-            if ((times.Count - 2) % i == 0)
-            {
-                Debug.Log("ZERO AT " + i);
-                return i;
-            }
-            if ((times.Count - 2) % i < lowestVal) lowestVal = i;
-        }
-
-        Debug.Log("LOWEST AT " + lowestVal);
-        return lowestVal;
-    }
-
-    void makeGraph(List<string> times, List<string> prices)
+    void makeGraph(List<string> times, List<double> prices)
     {
         this.times = times;
         this.prices = prices;
 
-        string[] Ys = prices.ToArray();
+        double[] Ys = prices.ToArray();
         rescaleData(Ys, 0);
         findStepSize();
 
@@ -282,14 +264,14 @@ public class ScatterChart : MonoBehaviour
             int labelCount = (int)Mathf.Round(prices.Count / 15);
             if ((i % labelCount == 0 || i == times.Count - 1) && createLabels)
             {
-                Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform.parent.Find("dataLabels").transform);
                 currPoint.localPosition = new Vector3(xPos, -3f, -2.5f);
                 TextMesh dataContent = currPoint.GetComponent<TextMesh>();
                 dataContent.text = convertFromTimestamp(times[i]).Month + "/" + convertFromTimestamp(times[i]).Day + "/" + convertFromTimestamp(times[i]).Year;
                 dataContent.fontSize = 175;
 
 
-                Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform.parent.Find("dataLabels").transform);
                 currLine.localPosition = new Vector3(xPos, -2.75f, -2.5f);
                 currLine.localScale += new Vector3(0, -0.5f, 0);
                 currLine.localRotation = Quaternion.identity;
@@ -301,7 +283,7 @@ public class ScatterChart : MonoBehaviour
             // Updates always to show displayed timespan
             if ((i % labelCount == 0 || i == times.Count - 1))
             {
-                Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                Transform currPoint = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform.parent.Find("dataLabels").transform);
                 currPoint.localPosition = new Vector3(xPos, 3.25f, -2.5f);
                 TextMesh dataContent = currPoint.GetComponent<TextMesh>();
                 dataContent.text = convertFromTimestamp(times[i]).ToString();
@@ -309,7 +291,7 @@ public class ScatterChart : MonoBehaviour
                 dataContent.name = "topText";
                 dataContent.fontSize = 175;
 
-                Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                Transform currLine = Instantiate(line, new Vector3(0, 0, 0), Quaternion.identity, transform.parent.Find("dataLabels").transform);
                 currLine.localPosition = new Vector3(xPos, 2.75f, -2.5f);
                 currLine.localScale += new Vector3(0, -0.5f, 0);
                 currLine.localRotation = Quaternion.identity;
@@ -338,7 +320,7 @@ public class ScatterChart : MonoBehaviour
         }
 
         // Labels graph with the minimum amount
-        Transform minAmount = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
+        Transform minAmount = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform.parent.Find("dataLabels").transform);
         minAmount.localPosition = new Vector3(-12.35f, scaledPrices[minI] + 0.1f, -2.25f);
         TextMesh minContent = minAmount.GetComponent<TextMesh>();
         minContent.text = "$" + min;
@@ -347,7 +329,7 @@ public class ScatterChart : MonoBehaviour
         minContent.fontSize = 200;
 
         // Labels graph with the maximum amount
-        Transform maxAmount = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform);
+        Transform maxAmount = Instantiate(datePoint, new Vector3(0, 0, 0), Quaternion.identity, transform.parent.Find("dataLabels").transform);
         maxAmount.localPosition = new Vector3(-12.35f, scaledPrices[maxI] - 0.05f, -2.25f);
         TextMesh maxContent = maxAmount.GetComponent<TextMesh>();
         maxContent.text = "$" + max;
@@ -369,7 +351,7 @@ public class ScatterChart : MonoBehaviour
 
 
         dest = temp.ToArray();
-        Debug.Log("LENGTH: " + dest.Length);
+      //  Debug.Log("LENGTH: " + dest.Length);
 
         for (int i = 0; i < dest.Length; i++)
         {
@@ -392,36 +374,36 @@ public class ScatterChart : MonoBehaviour
     }
 
     // Rescales the y-values so that they can fit in the graph
-    void rescaleData(string[] oldData, int fineTune)
+    void rescaleData(double[] oldData, int fineTune)
     {
         scaledPrices = new float[oldData.Length];
-        max = float.Parse(oldData[0]);
-        min = float.Parse(oldData[0]);
+        max = (float)(oldData[0]);
+        min = (float)(oldData[0]);
         minI = 0;
         maxI = 0;
         for (int i = 0; i < oldData.Length; ++i)
         {
 
-            if (float.Parse(oldData[i]) > max)
+            if ((float)(oldData[i]) > max)
             {
-                max = float.Parse(oldData[i]);
+                max = (float)(oldData[i]);
                 maxI = i;
             }
-            if (float.Parse(oldData[i]) < min)
+            if ((float)(oldData[i]) < min)
             {
-                min = float.Parse(oldData[i]);
+                min = (float)(oldData[i]);
                 minI = i;
             }
         }
 
         float scale;
 
-        Debug.Log("SCALE: " + min / max);
+  //      Debug.Log("SCALE: " + min / max);
     scalePrices:
         scale = findScale(min, max, fineTune);
         for (int i = 0; i < oldData.Length; ++i)
         {
-            scaledPrices[i] = (float.Parse(oldData[i]) / max * scale) - scale + 2;
+            scaledPrices[i] = ((float)(oldData[i]) / max * scale) - scale + 2;
             // Temporarily adjusts the scale if the data goes below the graph.
             if (scaledPrices[i] < -2.5)
             {
@@ -438,7 +420,7 @@ public class ScatterChart : MonoBehaviour
     // The closer to 1 the scale is, the more the points need to be stretched out.
     float findScale(float min, float max, int fineTune)
     {
-        Debug.Log("Finding Scale");
+   //     Debug.Log("Finding Scale");
         if (min / max > 0.9f)
         {
             return min / max * (70 + fineTune);
@@ -565,6 +547,12 @@ public class ScatterChart : MonoBehaviour
     public DateTime convertFromTimestamp(string timestamp)
     {
         return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(timestamp));
+    }
+
+    public void changeChildren(){
+        foreach (Transform child in transform){
+            child.parent = CandleChart.GetInstance().transform;
+        }
     }
 
 

@@ -47,7 +47,7 @@ public class CryptoPresetMenu : MonoBehaviour
     StringBuilder builder = new StringBuilder();
     StringBuilder customInput = new StringBuilder();
 
-    public GameObject inputButton;
+    public GameObject inputButton, toggleButton;
     private TextMeshPro textMesh;
     public Transform view;
 
@@ -67,7 +67,6 @@ public class CryptoPresetMenu : MonoBehaviour
 
         board = KeyboardMenu.GetInstance();
         scroll = GetComponentInChildren<Scroll>(true);
-        joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
         //HandleInput(defaultFunction);
         KeyboardInputResponder responder = new KeyboardInputResponder(this);
         menu.RegisterResponder(responder);
@@ -131,8 +130,23 @@ public class CryptoPresetMenu : MonoBehaviour
                 break;
             //R1 -> R1
             case "Toggle":
-                lineChart.gameObject.SetActive(!lineChart.gameObject.activeInHierarchy);
-                candleChart.gameObject.SetActive(!candleChart.gameObject.activeInHierarchy);
+
+                textMesh = toggleButton.GetComponent<TextMeshPro>();
+
+                if(scatterChart.gameObject.activeInHierarchy && candleChart.gameObject.activeInHierarchy){
+                    scatterChart.gameObject.SetActive(true);
+                    candleChart.gameObject.SetActive(false);
+                    textMesh.text = "Toggle Graph\n(Scatter Chart)";
+                }else if (scatterChart.gameObject.activeInHierarchy){
+                    //scatterChart.changeChildren();
+                    scatterChart.gameObject.SetActive(false);
+                    candleChart.gameObject.SetActive(true);
+                    textMesh.text = "Toggle Graph\n(Candlestick Chart)";
+                }else if (candleChart.gameObject.activeInHierarchy){
+                    scatterChart.gameObject.SetActive(true);
+                    candleChart.gameObject.SetActive(true);
+                    textMesh.text = "Toggle Graph\n(Both)";
+                }
                 break;
             case "MTX":
                 currCrypto = "matryx";

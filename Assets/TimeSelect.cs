@@ -8,6 +8,7 @@ public class TimeSelect : MonoBehaviour
     public ConstraintGrabbable leftSphere, rightSphere;
 
     ScatterChart scatterChart;
+    CandleChart candleChart;
 
     static TimeSelect _instance;
 
@@ -41,6 +42,7 @@ public class TimeSelect : MonoBehaviour
     {
         _instance = this;
         scatterChart = ScatterChart.GetInstance();
+        candleChart = CandleChart.GetInstance();
         times = scatterChart.getTimeList();
         ogStart = scatterChart.getFirstTime();
         ogEnd = scatterChart.getFirstTime();
@@ -55,7 +57,7 @@ public class TimeSelect : MonoBehaviour
     void updateInfo()
     {
 
-        Debug.Log("LEFT: " + leftPos + ", RIGHT: " + rightPos);
+       // Debug.Log("LEFT: " + leftPos + ", RIGHT: " + rightPos);
 
         leftPos = leftSphere.lastLocalPos.z + 50;
         rightPos = rightSphere.lastLocalPos.z + 50;
@@ -65,13 +67,13 @@ public class TimeSelect : MonoBehaviour
 
         if (leftPos < rightPos)
         {
-            Debug.Log("LEFT ON LEFT");
+           // Debug.Log("LEFT ON LEFT");
             leftTimeStamp = getTimestamp(leftPos / 100);
             rightTimeStamp = getTimestamp(rightPos / 100);
         }
         else
         {
-            Debug.Log("LEFT ON RIGHT");
+           // Debug.Log("LEFT ON RIGHT");
             leftTimeStamp = getTimestamp(rightPos / 100);
             rightTimeStamp = getTimestamp(leftPos / 100);
         }
@@ -79,6 +81,10 @@ public class TimeSelect : MonoBehaviour
         scatterChart.kill();
         scatterChart.SetURL("https://graphs2.coinmarketcap.com/currencies/" + coin + "/" + leftTimeStamp + "/" + rightTimeStamp + "/");
         scatterChart.updateGraph();
+
+        candleChart.kill();
+        candleChart.SetURL("https://graphs2.coinmarketcap.com/currencies/" + coin + "/" + leftTimeStamp + "/" + rightTimeStamp + "/");
+        candleChart.updateGraph();
 
         StopAllCoroutines();
 
@@ -118,8 +124,8 @@ public class TimeSelect : MonoBehaviour
     public string getTimestamp(float percent)
     {
 
-        Debug.Log("PERCENT: " + percent);
-        Debug.Log("INDEX: " + (int)Mathf.Round((float)this.times.Count * percent));
+       // Debug.Log("PERCENT: " + percent);
+       // Debug.Log("INDEX: " + (int)Mathf.Round((float)this.times.Count * percent));
         int index = (int)Mathf.Round((float)this.times.Count * percent);
         if (index == times.Count) index--;
         return this.times[index];

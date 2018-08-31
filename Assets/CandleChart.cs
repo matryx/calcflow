@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using UnityEngine.Networking;
 using Nanome.Core;
+using Nanome.Maths.Serializers.JsonSerializer;
 
 public class CandleChart : MonoBehaviour
 {
@@ -116,7 +117,7 @@ public class CandleChart : MonoBehaviour
     string output;
     StringBuilder builder = new StringBuilder();
     private List<string> times = new List<string>();
-    private List<string> prices = new List<string>();
+    private List<double> prices = new List<double>();
     private List<monthData> months = new List<monthData>();
     private List<monthData> day = new List<monthData>();
     private List<monthData> scaledMonths = new List<monthData>();
@@ -151,6 +152,8 @@ public class CandleChart : MonoBehaviour
 
     float max, min;
 
+    private static Serializer serializer = new Serializer();
+
     void Awake()
     {
         _instance = this;
@@ -164,6 +167,7 @@ public class CandleChart : MonoBehaviour
         // Debug.Log("CURRTIME: " + currTime);
         SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/0/" + currTime + "/");
         updateGraph();
+        //gameObject.SetActive(false);
     }
 
     public void kill()
@@ -171,7 +175,7 @@ public class CandleChart : MonoBehaviour
         StopAllCoroutines();
         // Destroy(frameLine);
         times = new List<string>();
-        prices = new List<string>();
+        prices = new List<double>();
         months = new List<monthData>();
         day = new List<monthData>();
         scaledMonths = new List<monthData>();
@@ -193,188 +197,27 @@ public class CandleChart : MonoBehaviour
         obj.onEvent("Done", parseData);
     }
 
-    void testMethod(object tmp)
-    {
-        string text = ((StringBuilder)tmp).ToString();
-        text = text.Substring(text.IndexOf("Aug 06, 2018"), 600);
-        Debug.Log(text);
-    }
-
-    void testDays()
-    {
-        Async obj = Async.runInCoroutine(GetAllText);
-
-        // count++;
-        // for (int i = 0; i < dayTimes.Count; ++i)
-        // {
-        //     SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/" + dayTimes[i].getStart() + "/" + dayTimes[i].getEnd() + "/");
-        //     Async obj = Async.runInCoroutine(GetText);
-        //     obj.onEvent("Days", printData);
-        // }
-    }
-
-    void printData(object tmp)
-    {
-        Debug.Log(((StringBuilder)tmp).ToString().Substring(0, 10));
-    }
-
-    int count = 0;
-    void getDayDates(object tmp)
-    {
-        if (startTime.Equals("null"))
-        {
-            string data = ((StringBuilder)tmp).ToString();
-            int startIndex = data.IndexOf("price_usd");
-            int endIndex = data.IndexOf("]]", startIndex);
-
-            string first = data.Substring(startIndex + 14, 13);
-
-            int currIndex = endIndex;
-            while (data[currIndex] != '[')
-            {
-                currIndex--;
-            }
-            string last = data.Substring(currIndex + 1, 13);
-
-            startTime = first;
-            firstTime = first;
-            lastTime = last;
-
-            firstDay = convertFromEpoch(firstTime);
-            secondDay = new DateTime(firstDay.Year, firstDay.Month, firstDay.Day, 0, 0, 0).AddHours(23);
-            secondDay = secondDay.AddMinutes(59);
-            secondDay = secondDay.AddSeconds(59);
-
-            secondTime = convertFromDateTime(secondDay);
-
-            dayTimes.Add(new dayData(firstTime, secondTime));
-            SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/" + firstTime + "/" + secondTime + "/");
-            //updateGraph();
-            getDayDates(tmp);
-        }
-        else
-        {
-            //lock(day);
-            //parseDaysData(tmp);
-            while (Convert.ToDouble(lastTime) - Convert.ToDouble(secondTime) > 0)
-            {
-                firstDay = convertFromEpoch(secondTime).AddSeconds(1);
-                secondDay = new DateTime(firstDay.Year, firstDay.Month, firstDay.Day, 0, 0, 0).AddHours(23);
-                secondDay = secondDay.AddMinutes(59);
-                secondDay = secondDay.AddSeconds(59);
-
-                secondTime = convertFromDateTime(secondDay);
-                firstTime = convertFromDateTime(firstDay);
-
-                dayTimes.Add(new dayData(firstTime, secondTime));
-
-            }
-            /* 
-                        if (Convert.ToDouble(lastTime) - Convert.ToDouble(secondTime) > 0)
-                        {
-                            updateGraph();
-                        }
-                        else
-                        { */
-            Async obj = Async.runInCoroutine(GetAllText);
-            // }
-
-
-            /* 
-                        SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/" + firstTime + "/" + secondTime + "/");
-
-                        if (Convert.ToDouble(lastTime) - Convert.ToDouble(secondTime) > 0)
-                        {
-                            builder = new StringBuilder();
-                            tmp = new object();
-                            updateGraph();
-                        }
-                        else
-                        {
-                            tempMethod();
-                        }
-             */
-        }
-    }
-
-    void parseDaysData(object tmp)
-    {
-        string data = ((StringBuilder)tmp).ToString();
-        int startIndex = data.IndexOf("price_usd");
-        int endIndex = data.IndexOf("]]", startIndex);
-
-        //Debug.Log ("start: " + startIndex + ", End: " + endIndex);
-        data = data.Substring(startIndex + 13, endIndex - startIndex);
-        fillDayData(data);
-
-    }
-
-    void fillDayData(string allData)
-    {
-        prices = new List<string>();
-        times = new List<string>();
-
-        //Debug.Log(allData);
-
-        while (allData.IndexOf("]]") > 5)
-        {
-            int endIndex = allData.IndexOf(",");
-            times.Add(allData.Substring(1, endIndex - 1));
-            //Debug.Log("CURR TIME: " + convertFromEpoch(allData.Substring(1, endIndex - 1)));
-
-            allData = allData.Substring(endIndex + 2, allData.Length - endIndex - 2);
-            endIndex = allData.IndexOf("]");
-            prices.Add(allData.Substring(0, endIndex));
-            allData = allData.Substring(endIndex + 3, allData.Length - endIndex - 3);
-        }
-
-        monthData currDay = new monthData();
-        currDay.setOpen(Convert.ToDouble(prices[0]));
-        currDay.setClose(Convert.ToDouble(prices[prices.Count - 1]));
-
-        double max = currDay.getOpen(), min = currDay.getOpen();
-        for (int i = 0; i < prices.Count; i++)
-        {
-            double currPrice = Convert.ToDouble(prices[i]);
-
-            if (currPrice > max)
-                max = currPrice;
-            currDay.setDate(convertFromEpoch(times[i]));
-            if (currPrice < min)
-                min = currPrice;
-        }
-
-        currDay.setHigh(max);
-        currDay.setLow(min);
-
-
-        day.Add(currDay);
-        Debug.Log(currDay.getDate());
-    }
-
-    void tempMethod()
-    {
-        for (int i = 0; i < dayTimes.Count; i++)
-        {
-            Debug.Log("START: " + convertFromEpoch(dayTimes[i].getStart()) + ", END: " + convertFromEpoch(dayTimes[i].getEnd()));
-            /*         Debug.Log("MONTH: " + day[i].getDate() + ", HIGH: " + day[i].getHigh() + ", LOW: " + day[i].getLow());
-                    Debug.Log("MONTH: " + day[i].getDate() + ", OPEN: " + day[i].getOpen() + ", CLOSE: " + day[i].getClose()); */
-
-        }
-    }
-
-
     // Extracts the usd price time/price data from the text
     void parseData(object tmp)
     {
+        var tournamentList = (List<object>)tmp;
         //  Debug.Log("parseData");
-        string data = ((StringBuilder)tmp).ToString();
-        int startIndex = data.IndexOf("price_usd");
-        int endIndex = data.IndexOf("]]", startIndex);
+        /*         string data = ((StringBuilder)tmp).ToString();
+                int startIndex = data.IndexOf("price_usd");
+                int endIndex = data.IndexOf("]]", startIndex);
 
-        //Debug.Log ("start: " + startIndex + ", End: " + endIndex);
-        data = data.Substring(startIndex + 13, endIndex - startIndex);
-        fillData(data);
+                //Debug.Log ("start: " + startIndex + ", End: " + endIndex);
+                data = data.Substring(startIndex + 13, endIndex - startIndex);
+                fillData(data); */
+        Debug.Log(tournamentList.Count);
+        for (int i = 0; i < tournamentList.Count; i++)
+        {
+            List<object> curr = tournamentList[i] as List<object>;
+            times.Add(curr[0].ToString());
+            prices.Add(Convert.ToDouble(curr[1]));
+
+            Debug.Log("time: " + times[i] + ", price: " + prices[i]);
+        }
         //Debug.Log (data);
     }
 
@@ -388,7 +231,7 @@ public class CandleChart : MonoBehaviour
 
             allData = allData.Substring(endIndex + 2, allData.Length - endIndex - 2);
             endIndex = allData.IndexOf("]");
-            prices.Add(allData.Substring(0, endIndex));
+            prices.Add(Convert.ToDouble(allData.Substring(0, endIndex)));
             allData = allData.Substring(endIndex + 3, allData.Length - endIndex - 3);
         }
 
@@ -398,19 +241,18 @@ public class CandleChart : MonoBehaviour
         makeGraph(times, prices);
     }
 
-    void makeGraph(List<string> times, List<string> prices)
+    void makeGraph(List<string> times, List<double> prices)
     {
         this.times = times;
         this.prices = prices;
 
-        //int numMonths = (int)Mathf.Ceil((float)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1])) * 4.348f);
-        //int numMonths = findNumWeeks();
-        int numMonths = (int)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1]));
-        Debug.Log("weeks: " + numMonths);
-        fillMonthData();
-        //fillWeekData();
-        string[] Ys = prices.ToArray();
-        Debug.Log("Here");
+        int numMonths = findNumWeeks();
+        //int numMonths = (int)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1]));
+        //Debug.Log("weeks: " + numMonths);
+        //fillMonthData();
+        fillWeekData();
+        double[] Ys = prices.ToArray();
+        //Debug.Log("Here");
         rescaleData(Ys, 0);
 
         for (int i = 0; i < (numMonths); i++)
@@ -480,7 +322,7 @@ public class CandleChart : MonoBehaviour
             float barSize = -1 + barPercent * hiLowDiff;
             //Debug.Log("index: " + i + ", barSize: " + barSize);
             //Debug.Log("percent: " + barPercent + ", hiLowDiff: " + hiLowDiff);
-            Debug.Log("MONTH: " + i + ", SIZE: " + barSize);
+            //Debug.Log("MONTH: " + i + ", SIZE: " + barSize);
             float barPos = (.5f * barSize) * botDiff;
 
             float diffToUse = 0;
@@ -539,7 +381,7 @@ public class CandleChart : MonoBehaviour
         float monthlyTotal = 0;
         int dayCount = 0;
 
-        Debug.Log("Start");
+        // Debug.Log("Start");
 
         for (int i = -1; i < times.Count - 1; ++i)
         {
@@ -549,23 +391,23 @@ public class CandleChart : MonoBehaviour
                             Debug.Log("TIMES: " + convertFromEpoch(times[i]) + ", PRICES: " + prices[i]);
                         } */
 
-            Debug.Log("currTime: " + convertFromEpoch(times[i + 1]));
+            // Debug.Log("currTime: " + convertFromEpoch(times[i + 1]));
             if (currMonthNum != convertFromEpoch(times[i + 1]).Month)
             {
-                Debug.Log("new month: " + currMonthIndex);
-                months[currMonthIndex + 1].setOpen(Convert.ToDouble(prices[i + 1]));
-                months[currMonthIndex + 1].setClose(Convert.ToDouble(prices[i + 1]));
-                months[currMonthIndex + 1].setHigh(Convert.ToDouble(prices[i + 1]));
-                months[currMonthIndex + 1].setLow(Convert.ToDouble(prices[i + 1]));
+                // Debug.Log("new month: " + currMonthIndex);
+                months[currMonthIndex + 1].setOpen((prices[i + 1]));
+                months[currMonthIndex + 1].setClose((prices[i + 1]));
+                months[currMonthIndex + 1].setHigh((prices[i + 1]));
+                months[currMonthIndex + 1].setLow((prices[i + 1]));
 
                 if (i != -1)
                 {
-                    months[currMonthIndex].setClose(Convert.ToDouble(prices[i]));
-                    if (Convert.ToDouble(prices[i]) > months[currMonthIndex].getHigh())
-                        months[currMonthIndex].setHigh(Convert.ToDouble(prices[i]));
+                    months[currMonthIndex].setClose((prices[i]));
+                    if ((prices[i]) > months[currMonthIndex].getHigh())
+                        months[currMonthIndex].setHigh((prices[i]));
 
-                    if (Convert.ToDouble(prices[i]) < months[currMonthIndex].getLow())
-                        months[currMonthIndex].setLow(Convert.ToDouble(prices[i]));
+                    if ((prices[i]) < months[currMonthIndex].getLow())
+                        months[currMonthIndex].setLow((prices[i]));
 
                     monthlyPrices[currMonthIndex] = monthlyTotal / dayCount;
                     dayCount = 0;
@@ -577,34 +419,35 @@ public class CandleChart : MonoBehaviour
                 if (currMonthNum == 12)
                     currMonthNum = 0;
 
-                currMonthNum = convertFromEpoch(times[i+1]).Month;
+                currMonthNum = convertFromEpoch(times[i + 1]).Month;
 
             }
             else
             {
                 // Checks for and sets a new high
-                if (Convert.ToDouble(prices[i]) > months[currMonthIndex].getHigh())
+                if ((prices[i]) > months[currMonthIndex].getHigh())
                 {
-                    months[currMonthIndex].setHigh(Convert.ToDouble(prices[i]));
+                    months[currMonthIndex].setHigh((prices[i]));
                 }
 
                 // Checks for and sets a new low
-                if (Convert.ToDouble(prices[i]) < months[currMonthIndex].getLow())
+                if ((prices[i]) < months[currMonthIndex].getLow())
                 {
-                    months[currMonthIndex].setLow(Convert.ToDouble(prices[i]));
+                    months[currMonthIndex].setLow((prices[i]));
                 }
 
-                monthlyTotal += (float)Convert.ToDouble(prices[i]);
+                monthlyTotal += (float)(prices[i]);
                 dayCount++;
             }
 
-            if(i == times.Count-2){
-                months[currMonthIndex].setClose(Convert.ToDouble(prices[i]));
+            if (i == times.Count - 2)
+            {
+                months[currMonthIndex].setClose((prices[i]));
             }
 
         }
 
-        Debug.Log("End");
+        // Debug.Log("End");
 
         /* 
                 for (int i = 0; i < numMonths; ++i)
@@ -622,7 +465,7 @@ public class CandleChart : MonoBehaviour
     {
         //int numWeeks = (int)Mathf.Ceil((float)getNumMonths(convertFromEpoch(times[0]), convertFromEpoch(times[times.Count - 1])) * 4.348f);
         int numWeeks = findNumWeeks();
-        Debug.Log("num weeks: " + numWeeks);
+        // Debug.Log("num weeks: " + numWeeks);
 
         monthlyPrices = new float[numWeeks];
         for (int i = 0; i < numWeeks; ++i)
@@ -646,25 +489,25 @@ public class CandleChart : MonoBehaviour
         {
             //Debug.Log("index: " + i + ", times: " + times.Count);
             //Debug.Log("week: " + currWeekIndex);
-            Debug.Log("currTime: " + convertFromEpoch(times[i + 1]));
+            //  Debug.Log("currTime: " + convertFromEpoch(times[i + 1]));
             // Multiple timestamps from same day are counting as new weeks
             if (convertFromEpoch(times[i + 1]).Subtract(startDay).Days > 7 || i == -1)
             {
-                Debug.Log("New Week, " + currWeekIndex);
+                //   Debug.Log("New Week, " + currWeekIndex);
 
-                months[currWeekIndex + 1].setOpen(Convert.ToDouble(prices[i + 1]));
-                months[currWeekIndex + 1].setClose(Convert.ToDouble(prices[i + 1]));
-                months[currWeekIndex + 1].setHigh(Convert.ToDouble(prices[i + 1]));
-                months[currWeekIndex + 1].setLow(Convert.ToDouble(prices[i + 1]));
+                months[currWeekIndex + 1].setOpen((prices[i + 1]));
+                months[currWeekIndex + 1].setClose((prices[i + 1]));
+                months[currWeekIndex + 1].setHigh((prices[i + 1]));
+                months[currWeekIndex + 1].setLow((prices[i + 1]));
 
                 if (i != -1)
                 {
-                    months[currWeekIndex].setClose(Convert.ToDouble(prices[i]));
-                    if (Convert.ToDouble(prices[i]) > months[currWeekIndex].getHigh())
-                        months[currWeekIndex].setHigh(Convert.ToDouble(prices[i]));
+                    months[currWeekIndex].setClose((prices[i]));
+                    if ((prices[i]) > months[currWeekIndex].getHigh())
+                        months[currWeekIndex].setHigh((prices[i]));
 
-                    if (Convert.ToDouble(prices[i]) < months[currWeekIndex].getLow())
-                        months[currWeekIndex].setLow(Convert.ToDouble(prices[i]));
+                    if ((prices[i]) < months[currWeekIndex].getLow())
+                        months[currWeekIndex].setLow((prices[i]));
 
                     monthlyPrices[currWeekIndex] = monthlyTotal / dayCount;
                     dayCount = 0;
@@ -677,25 +520,25 @@ public class CandleChart : MonoBehaviour
             else
             {
                 // Checks for and sets a new high
-                if (Convert.ToDouble(prices[i]) > months[currWeekIndex].getHigh())
+                if ((prices[i]) > months[currWeekIndex].getHigh())
                 {
-                    months[currWeekIndex].setHigh(Convert.ToDouble(prices[i]));
+                    months[currWeekIndex].setHigh((prices[i]));
                 }
 
                 // Checks for and sets a new low
-                if (Convert.ToDouble(prices[i]) < months[currWeekIndex].getLow())
+                if ((prices[i]) < months[currWeekIndex].getLow())
                 {
-                    months[currWeekIndex].setLow(Convert.ToDouble(prices[i]));
+                    months[currWeekIndex].setLow((prices[i]));
                 }
 
-                monthlyTotal += (float)Convert.ToDouble(prices[i]);
+                monthlyTotal += (float)(prices[i]);
                 dayCount++;
             }
 
             oldDay = (int)convertFromEpoch(times[i + 1]).Day;
         }
 
-        Debug.Log("Here1");
+        //   Debug.Log("Here1");
 
     }
 
@@ -716,22 +559,22 @@ public class CandleChart : MonoBehaviour
     }
 
     // Rescales the y-values to fit between [-2,2] so that it can fit in the graph
-    void rescaleData(string[] oldData, int fineTune)
+    void rescaleData(double[] oldData, int fineTune)
     {
         scaledPrices = new float[oldData.Length];
-        max = float.Parse(oldData[0]);
-        min = float.Parse(oldData[0]);
+        max = (float)oldData[0];
+        min = (float)oldData[0];
         int minI = 0;
         for (int i = 0; i < oldData.Length; ++i)
         {
 
-            if (float.Parse(oldData[i]) > max)
+            if ((float)oldData[i] > max)
             {
-                max = float.Parse(oldData[i]);
+                max = (float)oldData[i];
             }
-            if (float.Parse(oldData[i]) < min)
+            if ((float)oldData[i] < min)
             {
-                min = float.Parse(oldData[i]);
+                min = (float)oldData[i];
                 minI = i;
             }
         }
@@ -815,37 +658,6 @@ public class CandleChart : MonoBehaviour
         return numMonths;
     }
 
-
-    IEnumerator GetAllText(Async routine)
-    {
-        WWW[] wwws = new WWW[dayTimes.Count];
-        for (int i = 0; i < dayTimes.Count; ++i)
-        {
-            SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/" + dayTimes[i].getStart() + "/" + dayTimes[i].getEnd() + "/");
-            wwws[i] = new WWW(URL);
-        }
-        Debug.Log("sentWWW");
-
-        while (!AllDone(wwws))
-        {
-            yield return new WaitForSeconds(.1f);
-        }
-
-        Debug.Log("alldone");
-    }
-
-    bool AllDone(WWW[] wws)
-    {
-        bool AllDone = true;
-        foreach (WWW www in wws)
-        {
-            AllDone &= www.isDone;
-        }
-        return AllDone;
-    }
-
-
-
     IEnumerator GetText(Async routine)
     {
         using (WWW www = new WWW(URL))
@@ -854,10 +666,12 @@ public class CandleChart : MonoBehaviour
                             Thread.Sleep(1);
                         } */
             yield return www;
-            yield return www.text;
-            builder = new StringBuilder();
-            builder.Append(www.text);
-            routine.pushEvent("Done", builder);
+            yield return www.bytes;
+            //builder = new StringBuilder();
+            //builder.Append(www.text);
+            var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+            var tournamentList = jsonObj["price_usd"] as List<object>;
+            routine.pushEvent("Done", tournamentList);
         }
     }
 }

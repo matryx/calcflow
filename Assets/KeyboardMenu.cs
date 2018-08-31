@@ -51,7 +51,6 @@ public class KeyboardMenu : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Initialize");
         chart = LineChart.GetInstance();
  //       scroll = GetComponentInChildren<Scroll>(true);
 //        joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
@@ -114,7 +113,6 @@ public class KeyboardMenu : MonoBehaviour
     public void notFoundError(){
         textMesh = outputObject.GetComponent<TextMeshPro>();
         textMesh.text = "Currency not found";
-        Debug.Log("Here!");
     }
 
 
