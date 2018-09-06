@@ -5,6 +5,7 @@ using System;
 using System.Text;
 using UnityEngine.Networking;
 using Nanome.Core;
+using Nanome.Maths.Serializers.JsonSerializer;
 
 public class ScatterChart : MonoBehaviour
 {
@@ -111,6 +112,7 @@ public class ScatterChart : MonoBehaviour
 
     public bool createLabels = true;
 
+    private Serializer serializer = new Serializer();
     void Awake()
     {
         _instance = this;
@@ -122,7 +124,7 @@ public class ScatterChart : MonoBehaviour
         double currTime = Math.Round((double)(DateTime.UtcNow - epoch).TotalMilliseconds);
         Debug.Log("CURRTIME: " + currTime);
         InitializeParticleSystem();
-        SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/0/" + currTime + "/");
+        SetURL("https://graphs2.coinmarketcap.com/currencies/infinitecoin/0/" + currTime + "/");
         updateGraph();
     }
 
@@ -132,6 +134,7 @@ public class ScatterChart : MonoBehaviour
         times = new List<string>();
         prices = new List<double>();
         temp = new List<Particle>();
+        serializer = new Serializer();
 
         if (createLabels)
         {
@@ -154,22 +157,37 @@ public class ScatterChart : MonoBehaviour
     }
     public void updateGraph()
     {
+        Debug.Log("updating");
         Async obj = Async.runInCoroutine(GetText);
-        obj.onEvent("Done", parseData);
+        obj.onEvent("Scatter", parseData);
     }
 
 
     // Extracts the usd price time/price data from the text
     void parseData(object tmp)
     {
-        Debug.Log("parseData");
-        string data = ((StringBuilder)tmp).ToString();
-        int startIndex = data.IndexOf("price_usd");
-        int endIndex = data.IndexOf("]]", startIndex);
+        Debug.Log("parsing");
+        var tournamentList = (List<object>)tmp;
+        //  Debug.Log("parseData");
+        /*         string data = ((StringBuilder)tmp).ToString();
+                int startIndex = data.IndexOf("price_usd");
+                int endIndex = data.IndexOf("]]", startIndex);
 
-        //Debug.Log ("start: " + startIndex + ", End: " + endIndex);
-        data = data.Substring(startIndex + 13, endIndex - startIndex);
-        fillData(data);
+                //Debug.Log ("start: " + startIndex + ", End: " + endIndex);
+                data = data.Substring(startIndex + 13, endIndex - startIndex);
+                fillData(data); */
+        Debug.Log(tournamentList.Count);
+        for (int i = 0; i < tournamentList.Count; i++)
+        {
+            List<object> curr = tournamentList[i] as List<object>;
+            times.Add(curr[0].ToString());
+            //Debug.Log("string: " + curr[1]);
+            //Debug.Log("decimal: " + Convert.ToDouble(curr[1]));
+            prices.Add(Convert.ToDouble(curr[1]));
+            //Debug.Log("time: " + times[i] + ", price: " + prices[i]);
+        }
+
+        makeGraph(times, prices);
         //Debug.Log (data);
     }
 
@@ -187,8 +205,8 @@ public class ScatterChart : MonoBehaviour
             allData = allData.Substring(endIndex + 3, allData.Length - endIndex - 3);
         }
 
-       // Debug.Log("Times: " + times.Count + ", Prices: " + prices.Count);
-      //  Debug.Log("lastTime: " + times[times.Count - 1] + ", lastPrice: " + prices[prices.Count - 1]);
+        // Debug.Log("Times: " + times.Count + ", Prices: " + prices.Count);
+        //  Debug.Log("lastTime: " + times[times.Count - 1] + ", lastPrice: " + prices[prices.Count - 1]);
 
         makeGraph(times, prices);
     }
@@ -208,7 +226,7 @@ public class ScatterChart : MonoBehaviour
         }
 
         STEP_SIZE = totalDist / (particleCount - prices.Count);
-      //  Debug.Log("STEP_SIZE: " + STEP_SIZE);
+        //  Debug.Log("STEP_SIZE: " + STEP_SIZE);
     }
 
     void makeGraph(List<string> times, List<double> prices)
@@ -254,9 +272,9 @@ public class ScatterChart : MonoBehaviour
             tmpParticle.position = new Vector3(xPos, yPos, 0);
             temp.Add(tmpParticle);
 
-/*             Transform dataPoint = Instantiate(point, new Vector3(0, 0, 0), Quaternion.identity, transform);
-            dataPoint.localPosition = new Vector3(xPos, yPos, 0);
-            dataPoint.name = "topminmax"; */
+            /*             Transform dataPoint = Instantiate(point, new Vector3(0, 0, 0), Quaternion.identity, transform);
+                        dataPoint.localPosition = new Vector3(xPos, yPos, 0);
+                        dataPoint.name = "topminmax"; */
 
 
             // Bottom labels:
@@ -351,7 +369,7 @@ public class ScatterChart : MonoBehaviour
 
 
         dest = temp.ToArray();
-      //  Debug.Log("LENGTH: " + dest.Length);
+        //  Debug.Log("LENGTH: " + dest.Length);
 
         for (int i = 0; i < dest.Length; i++)
         {
@@ -398,7 +416,7 @@ public class ScatterChart : MonoBehaviour
 
         float scale;
 
-  //      Debug.Log("SCALE: " + min / max);
+    //      Debug.Log("SCALE: " + min / max);
     scalePrices:
         scale = findScale(min, max, fineTune);
         for (int i = 0; i < oldData.Length; ++i)
@@ -420,7 +438,7 @@ public class ScatterChart : MonoBehaviour
     // The closer to 1 the scale is, the more the points need to be stretched out.
     float findScale(float min, float max, int fineTune)
     {
-   //     Debug.Log("Finding Scale");
+        //     Debug.Log("Finding Scale");
         if (min / max > 0.9f)
         {
             return min / max * (70 + fineTune);
@@ -447,10 +465,16 @@ public class ScatterChart : MonoBehaviour
     {
         using (WWW www = new WWW(URL))
         {
+            /*             while(!www.isDone){
+                            Thread.Sleep(1);
+                        } */
             yield return www;
-            yield return www.text;
-            builder.Append(www.text);
-            routine.pushEvent("Done", builder);
+            yield return www.bytes;
+            //builder = new StringBuilder();
+            //builder.Append(www.text);
+            var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+            var tournamentList = jsonObj["price_usd"] as List<object>;
+            routine.pushEvent("Scatter", tournamentList);
         }
     }
 
@@ -549,8 +573,10 @@ public class ScatterChart : MonoBehaviour
         return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(timestamp));
     }
 
-    public void changeChildren(){
-        foreach (Transform child in transform){
+    public void changeChildren()
+    {
+        foreach (Transform child in transform)
+        {
             child.parent = CandleChart.GetInstance().transform;
         }
     }

@@ -106,6 +106,8 @@ namespace Nanome.Maths.Serializers.JsonSerializer
             AddTypeDeserializer('8', numbers);
             AddTypeDeserializer('9', numbers);
             AddTypeDeserializer('.', numbers);
+            //AddTypeDeserializer('e', numbers);
+
         }
 
         public byte[] Serialize(object obj)

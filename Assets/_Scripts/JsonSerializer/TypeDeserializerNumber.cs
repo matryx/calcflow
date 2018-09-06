@@ -1,8 +1,7 @@
-using UnityEngine;
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Nanome.Maths.Serializers.JsonSerializer
 {
@@ -28,20 +27,26 @@ namespace Nanome.Maths.Serializers.JsonSerializer
             specials.Add('-');
             specials.Add('+');
             specials.Add('.');
+            specials.Add('e');
         }
 
         public override object Deserialize(ContextDeserialization context)
         {
             // Parsing flags
             var isDecimal = false;
+            var isSciNotation = false;
             var bigValue = (double)0;
             var decimalPoint = (double)1;
+            var powerTen = (double)1;
             var multiplier = 1;
+
+            var e = (double)0;
             // While we have numbers chars
             while (true)
             {
                 // Keep reading
                 var curr = context.ReadChar();
+
                 // If it is a digit
                 var digit = (double)0;
                 if (digits.TryGetValue(curr, out digit))
@@ -50,8 +55,12 @@ namespace Nanome.Maths.Serializers.JsonSerializer
                     {
                         decimalPoint *= 10;
                     }
-                    bigValue *= 10;
-                    bigValue += digit;
+
+                    if (!isSciNotation)
+                    {
+                        bigValue *= 10;
+                        bigValue += digit;
+                    }
                 }
                 // If its something else
                 else
@@ -67,6 +76,16 @@ namespace Nanome.Maths.Serializers.JsonSerializer
                         {
                             multiplier *= -1;
                         }
+
+                        // If the number being read is in scientific notation (ie. 3.5e-05)
+                        if (curr == 'e')
+                        {
+                            isSciNotation = true;
+                            isDecimal = false;
+                            context.Burn(1);
+                            e = Convert.ToDouble(Deserialize(context));
+                            break;
+                        }
                     }
                     // If no known, it means we just hit the end of the number
                     else
@@ -81,6 +100,29 @@ namespace Nanome.Maths.Serializers.JsonSerializer
             if (isDecimal)
             {
                 return (double)(multiplier * (bigValue / decimalPoint));
+            }
+
+            else if (isSciNotation)
+            {
+                bool isNeg = false;
+                if (e < 0)
+                {
+                    isNeg = true;
+                    e *= -1;
+                }
+
+                powerTen = Math.Pow(10, e);
+                
+                if (isNeg)
+                {
+                    double ret = (double)( bigValue / decimalPoint / powerTen);
+                    return ret;
+                }
+                else
+                {
+                    double ret = (double)( bigValue / decimalPoint * powerTen);
+                    return ret;
+                }
             }
             // If result is integer
             else

@@ -152,7 +152,7 @@ public class CandleChart : MonoBehaviour
 
     float max, min;
 
-    private static Serializer serializer = new Serializer();
+    private Serializer serializer = new Serializer();
 
     void Awake()
     {
@@ -167,7 +167,7 @@ public class CandleChart : MonoBehaviour
         // Debug.Log("CURRTIME: " + currTime);
         SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/0/" + currTime + "/");
         updateGraph();
-        //gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     public void kill()
@@ -215,9 +215,10 @@ public class CandleChart : MonoBehaviour
             List<object> curr = tournamentList[i] as List<object>;
             times.Add(curr[0].ToString());
             prices.Add(Convert.ToDouble(curr[1]));
-
-            Debug.Log("time: " + times[i] + ", price: " + prices[i]);
+            //Debug.Log("time: " + times[i] + ", price: " + prices[i]);
         }
+
+        makeGraph(times, prices);
         //Debug.Log (data);
     }
 
