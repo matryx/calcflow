@@ -132,12 +132,6 @@ public class CandleChart : MonoBehaviour
     string startTime = "null", lastTime, firstTime, secondTime;
     DateTime firstDay, secondDay;
 
-    GameObject frameObj;
-    LineRenderer frameLine;
-
-    // The factor by which number of points are determined. 1 = full points = lag
-    public int numPoints = 3;
-
     // Higher resolution will stretch out the graph, lower will compress it.
     float resolution = 25f;
     //public int numPoints = 10;
@@ -537,6 +531,10 @@ public class CandleChart : MonoBehaviour
             }
 
             oldDay = (int)convertFromEpoch(times[i + 1]).Day;
+
+            if(i == times.Count-2){
+                months[currWeekIndex].setClose(prices[i]);
+            }
         }
 
         //   Debug.Log("Here1");

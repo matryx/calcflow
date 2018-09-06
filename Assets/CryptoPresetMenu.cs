@@ -136,16 +136,16 @@ public class CryptoPresetMenu : MonoBehaviour
                 if(scatterChart.gameObject.activeInHierarchy && candleChart.gameObject.activeInHierarchy){
                     scatterChart.gameObject.SetActive(true);
                     candleChart.gameObject.SetActive(false);
-                    textMesh.text = "Toggle Graph\n(Scatter Chart)";
+                    textMesh.text = "Change Graph\n(Scatter Chart)";
                 }else if (scatterChart.gameObject.activeInHierarchy){
                     //scatterChart.changeChildren();
                     scatterChart.gameObject.SetActive(false);
                     candleChart.gameObject.SetActive(true);
-                    textMesh.text = "Toggle Graph\n(Candlestick Chart)";
+                    textMesh.text = "Change Graph\n(Candlestick Chart)";
                 }else if (candleChart.gameObject.activeInHierarchy){
                     scatterChart.gameObject.SetActive(true);
                     candleChart.gameObject.SetActive(true);
-                    textMesh.text = "Toggle Graph\n(Both)";
+                    textMesh.text = "Change Graph\n(Both)";
                 }
                 break;
             case "MTX":

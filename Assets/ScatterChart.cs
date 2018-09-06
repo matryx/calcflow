@@ -124,7 +124,7 @@ public class ScatterChart : MonoBehaviour
         double currTime = Math.Round((double)(DateTime.UtcNow - epoch).TotalMilliseconds);
         Debug.Log("CURRTIME: " + currTime);
         InitializeParticleSystem();
-        SetURL("https://graphs2.coinmarketcap.com/currencies/infinitecoin/0/" + currTime + "/");
+        SetURL("https://graphs2.coinmarketcap.com/currencies/bitcoin/0/" + currTime + "/");
         updateGraph();
     }
 
