@@ -5,7 +5,7 @@
 		_VolumeTex ("Texture", 3D) = "white" {}
 		_Scale ("Scale", Float) = 1
 		_MaxSteps("Step Limit", Float) = 64
-        _Movement ("Displacement", Vector) = (0,0,0)
+        _Movement ("Displacement", Float) = 0
 	}
 	SubShader
 	{
@@ -41,7 +41,7 @@
 			float4 _MainTex_ST;
 			float _Scale;
 			int _MaxSteps;
-            float3 _Movement;
+            float _Movement;
             float4x4 _DeltaPos;
             float4x4 _DeltaRot;
 
@@ -64,7 +64,7 @@
 
 			// Raymarch at a fixed interval of .025, blending alpha and color values along the way
 			fixed4 raymarchColor(float4 start, float3 dir){
-				float rayDepth = 0;
+				float rayDepth = _Movement;
 				fixed4 color = fixed4(0,0,0,0);
 				fixed4 tempColor = fixed4(0,0,0,0);
 				int shifter = 0;
