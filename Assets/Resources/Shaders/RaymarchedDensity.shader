@@ -4,7 +4,8 @@
 	{
 		_VolumeTex ("Texture", 3D) = "white" {}
 		_Scale ("Scale", Float) = 1
-		_MaxSteps("Step Limit", Float)=64
+		_MaxSteps("Step Limit", Float) = 64
+        _Movement ("Displacement", Vector) = (0,0,0)
 	}
 	SubShader
 	{
@@ -40,6 +41,9 @@
 			float4 _MainTex_ST;
 			float _Scale;
 			int _MaxSteps;
+            float3 _Movement;
+            float4x4 _DeltaPos;
+            float4x4 _DeltaRot;
 
 /*
 			float inCube(float length, float3 currLoc){
@@ -86,15 +90,18 @@
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-				o.localPos = v.vertex;
+                //float3 worldDir = mul(unity_ObjectToWorld, v.vertex) - _WorldSpaceCameraPos;
+                //float3 localDir = normalize (mul(unity_WorldToObject, worldDir));
+                o.localPos = mul(v.vertex - float4(0,0,.5,0),_DeltaPos);
+				//o.localPos = v.vertex - float4(localDir*.5,0);
 				return o;
 			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				float3 worldDir = i.worldPos - _WorldSpaceCameraPos;
-				float3 localDir = normalize (mul(unity_WorldToObject, worldDir));
-				fixed4 col = raymarchColor(i.localPos, localDir);
+				float3 localDir = normalize (mul(unity_WorldToObject, float4(worldDir,0).xyz));
+				fixed4 col = raymarchColor(i.localPos, normalize (mul(float4(localDir,0),_DeltaRot).xyz));
 				return col;
 			}
 			ENDCG
