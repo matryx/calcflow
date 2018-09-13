@@ -92,7 +92,7 @@
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
                 //float3 worldDir = mul(unity_ObjectToWorld, v.vertex) - _WorldSpaceCameraPos;
                 //float3 localDir = normalize (mul(unity_WorldToObject, worldDir));
-                o.localPos = mul(v.vertex - float4(0,0,.5,0),_DeltaPos);
+                o.localPos = mul(v.vertex - float4(0,0,.5 - _Movement,0),_DeltaPos);
 				//o.localPos = v.vertex - float4(localDir*.5,0);
 				return o;
 			}

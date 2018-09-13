@@ -10,6 +10,7 @@ public class FaceAndRotate : MonoBehaviour
     GameObject cam;
     Camera camCamera;
     float objDistance;
+    Vector3 initialPos;
     Quaternion initialRot;
     Quaternion relative;
     float movement;
@@ -25,6 +26,7 @@ public class FaceAndRotate : MonoBehaviour
             cam = Camera.main.gameObject;
         }
         camCamera = cam.GetComponent<Camera>();
+        initialPos = transform.localPosition;
         initialRot = transform.localRotation;
         movement = 0f;
     }
@@ -37,7 +39,7 @@ public class FaceAndRotate : MonoBehaviour
             Vector3 placeholder = cam.transform.position + (cam.transform.forward  * camCamera.nearClipPlane * cam.transform.lossyScale.x);
             if (bounds.bounds.Contains(placeholder)){
                 transform.position = placeholder;
-                movement = 1f/(bounds.radius*bounds.transform.lossyScale.x*2f);
+                movement = Vector3.Distance(initialPos, transform.localPosition)/(bounds.radius*bounds.transform.localScale.x*2f);
             }
             else{
                 transform.position = (bounds.transform.position) - (transform.forward * bounds.radius * bounds.transform.lossyScale.x);
