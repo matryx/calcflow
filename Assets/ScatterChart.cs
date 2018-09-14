@@ -157,7 +157,6 @@ public class ScatterChart : MonoBehaviour
     }
     public void updateGraph()
     {
-        Debug.Log("updating");
         Async obj = Async.runInCoroutine(GetText);
         obj.onEvent("Scatter", parseData);
     }
@@ -166,25 +165,14 @@ public class ScatterChart : MonoBehaviour
     // Extracts the usd price time/price data from the text
     void parseData(object tmp)
     {
-        Debug.Log("parsing");
         var tournamentList = (List<object>)tmp;
-        //  Debug.Log("parseData");
-        /*         string data = ((StringBuilder)tmp).ToString();
-                int startIndex = data.IndexOf("price_usd");
-                int endIndex = data.IndexOf("]]", startIndex);
 
-                //Debug.Log ("start: " + startIndex + ", End: " + endIndex);
-                data = data.Substring(startIndex + 13, endIndex - startIndex);
-                fillData(data); */
-        Debug.Log(tournamentList.Count);
         for (int i = 0; i < tournamentList.Count; i++)
         {
             List<object> curr = tournamentList[i] as List<object>;
             times.Add(curr[0].ToString());
-            //Debug.Log("string: " + curr[1]);
-            //Debug.Log("decimal: " + Convert.ToDouble(curr[1]));
             prices.Add(Convert.ToDouble(curr[1]));
-            //Debug.Log("time: " + times[i] + ", price: " + prices[i]);
+
         }
 
         makeGraph(times, prices);

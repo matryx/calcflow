@@ -39,20 +39,25 @@ public class OutputMenu : MonoBehaviour
             if (saveable == false && value == true)
             {
                 saveButton.SetState(0);
+                if (exportButton != null)
+                {
+                    exportButton.SetState(0);
+                }
             }
             else if (value == false)
             {
                 saveButton.SetState(-1);
+                if (exportButton != null)
+                {
+                    exportButton.SetState(-1);
+                }
             }
             saveable = value;
         }
     }
 
     FlexActionableComponent saveButton;
-
-    const ExpressionSet.ExpOptions X = ExpressionSet.ExpOptions.X;
-    const ExpressionSet.ExpOptions Y = ExpressionSet.ExpOptions.Y;
-    const ExpressionSet.ExpOptions Z = ExpressionSet.ExpOptions.Z;
+    FlexActionableComponent exportButton;
 
     public FlexMenu menu;
 
@@ -65,6 +70,7 @@ public class OutputMenu : MonoBehaviour
 
         calcManager = cm;
         saveButton = transform.Find("ControlPanel/Save").GetComponent<FlexActionableComponent>();
+        exportButton = transform.Find("ControlPanel/GenerateMesh").GetComponent<FlexActionableComponent>();
     }
 
     protected void HandleInput(string source)
@@ -75,13 +81,13 @@ public class OutputMenu : MonoBehaviour
                 print("unknown input: " + source);
                 break;
             case "Button_Xinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[X]);
+                calcManager.SetOutput(calcManager.expressionSet.expressions["X"]);
                 break;
             case "Button_Yinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[Y]);
+                calcManager.SetOutput(calcManager.expressionSet.expressions["Y"]);
                 break;
             case "Button_Zinput":
-                calcManager.SetOutput(calcManager.expressionSet.expressions[Z]);
+                calcManager.SetOutput(calcManager.expressionSet.expressions["Z"]);
                 break;
             case "umin":
                 calcManager.SetOutput(calcManager.expressionSet.ranges["u"].Min);

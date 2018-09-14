@@ -78,22 +78,25 @@ namespace CalcFlowUI
                 }
             }
         }
-        public void Update()
-        {
-            Pressed = press;
-        }
 #endif
+        protected virtual void Update()
+        {
+#if UNITY_EDITOR
+            Pressed = press;
+#endif
+        }
 
-    public void Disable()
+
+        public void Disable()
         {
             GetComponent<Renderer>().material.color = disabledColor;
-            foreach(ButtonCallBack b in OnButtonEnter.GetInvocationList())
+            foreach (ButtonCallBack b in OnButtonEnter.GetInvocationList())
             {
                 OnButtonEnter -= b;
             }
 
             HighlightOnRaycast highlight = GetComponent<HighlightOnRaycast>();
-            if(highlight != null)
+            if (highlight != null)
             {
                 Destroy(highlight);
             }

@@ -41,6 +41,7 @@ public class UtilityOptions : MonoBehaviour
 
     void Update()
     {
+        
         if (!SettingsVariables.narration && audioSource && audioSource.isPlaying)
         {
             audioSource.Stop();
@@ -53,5 +54,6 @@ public class UtilityOptions : MonoBehaviour
             audioSource.Play();
             alreadyPlayed = true;
         }
+        
     }
 }

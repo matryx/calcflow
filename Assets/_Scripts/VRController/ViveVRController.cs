@@ -24,7 +24,7 @@ namespace NanoVRController
 
             // Application Menu Button
             c = new ControllerComponent(this);
-            components.Add(ButtonId.MENU, c);
+            components.Add(ButtonId.BUTTON1, c);
 
             // Steam Home Button
             c = new ControllerComponent(this);
@@ -43,19 +43,13 @@ namespace NanoVRController
             components.Add(ButtonId.THUMBPAD, c);
         }
 
-        private void switchMode()
-        {
-            pokeMode = !pokeMode;
-        }
-
-        bool lastgrip = false;
 
         protected override void Update()
         {
             var device = SteamVR_Controller.Input((int)trackedObj.index);
             if (device.GetPress(SteamVR_Controller.ButtonMask.ApplicationMenu))
             {
-                components[ButtonId.MENU].press = true;
+                components[ButtonId.BUTTON1].press = true;
             }
             if (device.GetPress(SteamVR_Controller.ButtonMask.System))
             {
@@ -63,29 +57,14 @@ namespace NanoVRController
             }
             if (device.GetPress(SteamVR_Controller.ButtonMask.Grip))
             {
-                if (lastgrip == false)
-                {
-                    switchMode();
-                }
-                lastgrip = true;
-            }
-            else
-            {
-                lastgrip = false;
+                components[ButtonId.GRIP].axis1 = device.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger).x;
+                components[ButtonId.GRIP].press = true;
             }
             if (device.GetPress(SteamVR_Controller.ButtonMask.Trigger))
             {
-                if (pokeMode)
-                {
-                    components[ButtonId.TRIGGER].axis1 = device.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger).x;
-                    components[ButtonId.TRIGGER].press = true;
-                }
-                else
-                {
-                    components[ButtonId.GRIP].axis1 = device.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger).x;
-                    components[ButtonId.GRIP].press = true;
-                }
 
+                components[ButtonId.TRIGGER].axis1 = device.GetAxis(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger).x;
+                components[ButtonId.TRIGGER].press = true;
             }
             if (device.GetTouch(SteamVR_Controller.ButtonMask.Touchpad))
             {

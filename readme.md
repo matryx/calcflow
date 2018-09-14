@@ -39,7 +39,9 @@ Currently, the version is 5.6.2f1
 
 * **Ethan Vander Horn** - *Lead Calcflow Developer* - [EthanVanderHorn](https://github.com/EthanVanderHorn)
 * **Edward Zhou** - *Lead Calcflow Developer* - [YangZ530](https://github.com/YangZ530)
-* **Jacqueline Bontigao** - *UI Developer* - [Calcodeus](https://github.com/calcodeus)
+* **Jacqueline Bontigao** - *Lead UI Developer* - [Calcodeus](https://github.com/calcodeus)
+* **Max Howard** - *Matryx Developer* - [astrovicis](https://github.com/astrovicis)
+* **Sam Hessenauer** - *Engineering Project Leader* - [shessenauer](https://github.com/shessenauer)
 
 ## License
 

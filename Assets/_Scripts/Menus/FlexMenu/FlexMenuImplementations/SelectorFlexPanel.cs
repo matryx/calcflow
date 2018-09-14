@@ -28,7 +28,7 @@ public class SelectorFlexPanel : FlexPanelComponent
         {
             defaultSetting.SetState(2);
         }
-        Actions.Clear();
+        //Actions.Clear();
         AddAllChildActions();
     }
 }

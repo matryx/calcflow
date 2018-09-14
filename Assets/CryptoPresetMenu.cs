@@ -105,6 +105,7 @@ public class CryptoPresetMenu : MonoBehaviour
     protected void HandleInput(string source)
     {
         textMesh = inputButton.GetComponent<TextMeshPro>();
+        Debug.Log("SOURCE: " + source);
         switch (source)
         {
             default:
