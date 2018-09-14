@@ -5,7 +5,9 @@
 		_VolumeTex ("Texture", 3D) = "white" {}
 		_Scale ("Scale", Float) = 1
 		_MaxSteps("Step Limit", Float) = 64
-        _Movement ("Displacement", Float) = 0
+        _MoveX ("DisplacementX", Float) = 0
+        _MoveY ("DisplacementY", Float) = 0
+        _MoveZ ("DisplacementZ", Float) = 0
 	}
 	SubShader
 	{
@@ -41,7 +43,9 @@
 			float4 _MainTex_ST;
 			float _Scale;
 			int _MaxSteps;
-            float _Movement;
+            float _MoveX;
+            float _MoveY;
+            float _MoveZ;
             float4x4 _DeltaPos;
             float4x4 _DeltaRot;
 
@@ -64,7 +68,7 @@
 
 			// Raymarch at a fixed interval of .025, blending alpha and color values along the way
 			fixed4 raymarchColor(float4 start, float3 dir){
-				float rayDepth = _Movement;
+				float rayDepth = _MoveZ;
 				fixed4 color = fixed4(0,0,0,0);
 				fixed4 tempColor = fixed4(0,0,0,0);
 				int shifter = 0;
@@ -92,7 +96,7 @@
 				o.worldPos = mul(unity_ObjectToWorld, v.vertex);
                 //float3 worldDir = mul(unity_ObjectToWorld, v.vertex) - _WorldSpaceCameraPos;
                 //float3 localDir = normalize (mul(unity_WorldToObject, worldDir));
-                o.localPos = mul(v.vertex - float4(0,0,.5 - _Movement,0),_DeltaPos);
+                o.localPos = mul(v.vertex - float4(_MoveX,_MoveY,.5 - _MoveZ,0),_DeltaPos);
 				//o.localPos = v.vertex - float4(localDir*.5,0);
 				return o;
 			}
