@@ -68,7 +68,7 @@
 
 			// Raymarch at a fixed interval of .025, blending alpha and color values along the way
 			fixed4 raymarchColor(float4 start, float3 dir){
-				float rayDepth = _MoveZ;
+				float rayDepth = 0;
 				fixed4 color = fixed4(0,0,0,0);
 				fixed4 tempColor = fixed4(0,0,0,0);
 				int shifter = 0;
