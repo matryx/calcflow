@@ -64,7 +64,8 @@
 				fixed4 color = fixed4(0,0,0,0);
 				fixed4 tempColor = fixed4(0,0,0,0);
 				int shifter = 0;
-				[loop]
+				//[loop]
+				[unroll(64)]
 				for (int i = 0; i < _MaxSteps; i++){
 					// if(!inCube(_Scale, start+rayDepth*dir)){
 					// 	break;
