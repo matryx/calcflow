@@ -10,10 +10,12 @@ using System.Net;
 using System.Text;
 using System.IO;
 
+using Matryx;
+
 public class SubmitMenu : MonoBehaviour {
 
     string submitEndpoint = "http://13.57.11.64/v1/submit/";
-    Matryx_Tournament tournament;
+    MatryxTournament tournament;
     [SerializeField]
     CustomParametrizedSurface customParametrizedSurface;
     [SerializeField]
@@ -30,7 +32,7 @@ public class SubmitMenu : MonoBehaviour {
     [SerializeField]
     GameObject resultsCanvasObject;
 
-    public void SetTournament(Matryx_Tournament tournament)
+    public void SetTournament(MatryxTournament tournament)
     {
         this.tournament = tournament;
         Tournament_InputField.text = tournament.title;
@@ -47,20 +49,17 @@ public class SubmitMenu : MonoBehaviour {
             return;
         }
 
-        var contributorsList = ContributorsList.GetAddressList();
-        var referencesList = ReferencesList.GetAddressList();
+        var contributors = ContributorsList.GetAddressList();
+        var references = ReferencesList.GetAddressList();
         var bodyData = SerializeSurface();
 
-        var rpcSubmission = new MatryxJsonRpc.Submission();
+        var submission = new MatryxSubmission(title, contributors, references, bodyData);
         Debug.Log("Submission: " + tournament.address + " -> " + title);
-        rpcSubmission.tournamentAddress = tournament.address;
-        rpcSubmission.title = title;
-        rpcSubmission.body = bodyData;
-        rpcSubmission.contributorsList(contributorsList);
-        rpcSubmission.referencesList(referencesList);
+        // TODO: See if you can avoid creating a new Tournament
+        submission.tournament = new MatryxTournament(tournament.address);
 
         submittingCanvasObject.SetActive(true);
-        MatryxJsonRpc.Request.RunUploadSubmission(rpcSubmission, delegate (object result)
+        MatryxExplorer.RunUploadSubmission(submission, delegate (object result)
         {
             // Switch out the submitting screen for the results screen.
             submittingCanvasObject.SetActive(false);

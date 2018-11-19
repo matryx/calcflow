@@ -32,6 +32,10 @@ namespace Nanome.Core
             this.datas = new Dictionary<string, List<object>>();
         }
 
+        public Async()
+        {
+        }
+
         public void pushEvent(string type, object data)
         {
             // Error if no associated async

@@ -4,6 +4,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+using Matryx;
+
 public class SubmissionMenu : MonoBehaviour
 {
 
@@ -18,28 +20,24 @@ public class SubmissionMenu : MonoBehaviour
 
     private string submissionEndpoint = "http://13.57.11.64/v1/submission/";
 
-    Matryx_Submission submission;
+    MatryxSubmission submission;
 
-    public void SetSubmission(Matryx_Submission submission)
+    public void SetSubmission(MatryxSubmission submission)
     {
-        titleText.text = submission.getTitle();
+        titleText.text = submission.details.title;
         importSubmissionButton.Disable();
 
         if (this.submission == null ||
             this.submission.address != submission.address)
         {
             this.submission = submission;
-            MatryxJsonRpc.Request.RunDetailSubmission(submission.address, ProcessSubmission);
+            MatryxExplorer.RunDetailSubmission(submission.address, ProcessSubmission);
         }
     }
 
     void ProcessSubmission(object results)
     {
-        var rpcSubmission = (MatryxJsonRpc.Submission)results;
-        submission.title = rpcSubmission.title;
-        submission.body = rpcSubmission.body;
-        submission.contributors = rpcSubmission.contributorsList();
-        submission.references = rpcSubmission.referencesList();
+        submission = (MatryxSubmission)results;
         // Update the display
         UpdateSubmissionDisplay();
     }
@@ -97,8 +95,8 @@ public class SubmissionMenu : MonoBehaviour
 
     void UpdateSubmissionDisplay()
     {
-        titleText.text = submission.title;
-        bodyText.text = submission.body;
+        titleText.text = submission.details.title;
+        bodyText.text = submission.file;
 
         // Update the import button!
         importSubmissionButton.submission = submission;

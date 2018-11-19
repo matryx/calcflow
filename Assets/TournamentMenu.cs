@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Matryx;
+
 public class TournamentMenu : MonoBehaviour
 {
     private CalcManager calcManager;
@@ -12,9 +14,8 @@ public class TournamentMenu : MonoBehaviour
     private SubmissionsMenu submissionsMenu;
     [SerializeField]
     private SubmitMenu submitMenu;
-    private string tournamentsEndpoint = "http://13.57.11.64/v1/tournaments/?page=";
 
-    private Dictionary<string, Matryx_Tournament> tournaments = new Dictionary<string, Matryx_Tournament>();
+    private Dictionary<string, MatryxTournament> tournaments = new Dictionary<string, MatryxTournament>();
 
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
@@ -56,7 +57,7 @@ public class TournamentMenu : MonoBehaviour
     public void LoadTournaments()
     {
         ClearTournaments();
-        MatryxJsonRpc.Request.RunListTournaments(page, ProcessTournaments);
+        MatryxExplorer.RunFetchTournaments(page, ProcessTournaments);
     }
 
     /// <summary>
@@ -66,7 +67,7 @@ public class TournamentMenu : MonoBehaviour
     {
         page++;
         removeLoadButton();
-        MatryxJsonRpc.Request.RunListTournaments(page, ProcessTournaments);
+        MatryxExplorer.RunFetchTournaments(page, ProcessTournaments);
     }
 
     /// <summary>
@@ -81,19 +82,7 @@ public class TournamentMenu : MonoBehaviour
 
     private void ProcessTournaments(object results)
     {
-        var rpcTournaments = (List<MatryxJsonRpc.Tournament>)results;
-        var newTournaments = new List<Matryx_Tournament>();
-        foreach (var rpcTournament in rpcTournaments)
-        {
-            var address = rpcTournament.address;
-            var title = rpcTournament.title;
-            var bounty = rpcTournament.bounty;
-            Matryx_Tournament aTournament = new Matryx_Tournament(address, title, bounty);
-            aTournament.description = rpcTournament.description;
-            tournaments.Add(address, aTournament);
-            newTournaments.Add(aTournament);
-        }
-        DisplayTournaments(newTournaments);
+        DisplayTournaments((List<MatryxTournament>)results);
     }
 
     /*
@@ -125,10 +114,10 @@ public class TournamentMenu : MonoBehaviour
     */
 
     GameObject loadButton;
-    private void DisplayTournaments(List<Matryx_Tournament> _tournaments)
+    private void DisplayTournaments(List<MatryxTournament> _tournaments)
     {
         List<Transform> toAdd = new List<Transform>();
-        foreach (Matryx_Tournament tournament in _tournaments)
+        foreach (MatryxTournament tournament in _tournaments)
         {
             GameObject button = createButton(tournament);
             button.SetActive(false);
@@ -171,7 +160,7 @@ public class TournamentMenu : MonoBehaviour
         }
     }
 
-    private GameObject createButton(Matryx_Tournament tournament)
+    private GameObject createButton(MatryxTournament tournament)
     {
         GameObject button = Instantiate(Resources.Load("Tournament_Cell", typeof(GameObject))) as GameObject;
         button.transform.SetParent(tournamentsPanel.transform);
@@ -201,7 +190,7 @@ public class TournamentMenu : MonoBehaviour
         {
             string name = source.name;
 
-            Matryx_Tournament tournament = source.GetComponent<TournamentContainer>().GetTournament();
+            MatryxTournament tournament = source.GetComponent<TournamentContainer>().GetTournament();
             submissionsMenu.SetTournament(tournament);
             submitMenu.SetTournament(tournament);
             submissionsMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();

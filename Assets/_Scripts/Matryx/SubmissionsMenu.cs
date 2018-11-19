@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Matryx;
+
 public class SubmissionsMenu : MonoBehaviour
 {
     private CalcManager calcManager;
@@ -19,8 +21,8 @@ public class SubmissionsMenu : MonoBehaviour
     [SerializeField]
     private TMPro.TextMeshPro descriptionText;
 
-    static Matryx_Tournament tournament;
-    public static Matryx_Tournament Tournament
+    static MatryxTournament tournament;
+    public static MatryxTournament Tournament
     {
         get
         {
@@ -28,7 +30,7 @@ public class SubmissionsMenu : MonoBehaviour
         }
     }
 
-    private Dictionary<string, Matryx_Submission> submissions = new Dictionary<string, Matryx_Submission>();
+    private Dictionary<string, MatryxSubmission> submissions = new Dictionary<string, MatryxSubmission>();
 
     internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
@@ -72,13 +74,13 @@ public class SubmissionsMenu : MonoBehaviour
         }
         else
         {
-            Matryx_Submission submission = source.GetComponent<SubmissionContainer>().GetSubmission();
+            MatryxSubmission submission = source.GetComponent<SubmissionContainer>().GetSubmission();
             DisplaySubmissionUI(submission);
         }
     }
 
     int page = 0;
-    public void SetTournament(Matryx_Tournament newTournament)
+    public void SetTournament(MatryxTournament newTournament)
     {
         if (tournament == null ||
             tournament.address != newTournament.address)
@@ -87,7 +89,8 @@ public class SubmissionsMenu : MonoBehaviour
             UpdateHeaderUI();
 
             ClearSubmissions();
-            MatryxJsonRpc.Request.RunListSubmissions(tournament.address, page, ProcessTournament);
+            var roundNumber = 0;
+            MatryxExplorer.RunFetchSubmissions(tournament.address, roundNumber, page, ProcessTournament);
         }
     }
 
@@ -96,9 +99,9 @@ public class SubmissionsMenu : MonoBehaviour
     /// </summary>
     public void LoadMoreSubmissions()
     {
-        page++;
         removeLoadButton();
-        MatryxJsonRpc.Request.RunListSubmissions(tournament.address, page, ProcessTournament);
+        var roundNumber = 0;
+        MatryxExplorer.RunFetchSubmissions(tournament.address, roundNumber, ++page, ProcessTournament);
     }
 
     /// <summary>
@@ -113,17 +116,7 @@ public class SubmissionsMenu : MonoBehaviour
 
     public void ProcessTournament(object result)
     {
-        var rpcSubmissions = (List<MatryxJsonRpc.Submission>)result;
-        var newSubmissions = new List<Matryx_Submission>();
-        foreach (var rpcSubmission in rpcSubmissions)
-        {
-            var submissionAddress = rpcSubmission.address;
-            var submissionTitle = rpcSubmission.title;
-            var aSubmission = new Matryx_Submission(submissionTitle, submissionAddress);
-            submissions.Add(submissionAddress, aSubmission);
-            newSubmissions.Add(aSubmission);
-        }
-        DisplaySubmissions(newSubmissions);
+        DisplaySubmissions((List<MatryxSubmission>)result);
     }
 
     /*
@@ -167,21 +160,21 @@ public class SubmissionsMenu : MonoBehaviour
 
     private void UpdateHeaderUI()
     {
-        titleText.text = tournament.getTitle();
-        bountyText.text = "Reward: " + tournament.getBounty() + " MTX";
+        titleText.text = tournament.title;
+        bountyText.text = "Reward: " + tournament.bounty + " MTX";
         descriptionText.text = tournament.getDescription();
     }
 
-    public void DisplaySubmissionUI(Matryx_Submission submission)
+    public void DisplaySubmissionUI(MatryxSubmission submission)
     {
         submissionMenu.SetSubmission(submission);
         submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
     }
 
     GameObject loadButton;
-    public void DisplaySubmissions(List<Matryx_Submission> _submissions)
+    public void DisplaySubmissions(List<MatryxSubmission> _submissions)
     {
-        foreach (Matryx_Submission submission in _submissions)
+        foreach (MatryxSubmission submission in _submissions)
         {
             GameObject button = createButton(submission);
             button.SetActive(false);
@@ -192,16 +185,16 @@ public class SubmissionsMenu : MonoBehaviour
         submissionsPanel.AddAction(loadButton.GetComponent<FlexButtonComponent>());
     }
 
-    private GameObject createButton(Matryx_Submission submission)
+    private GameObject createButton(MatryxSubmission submission)
     {
         GameObject button = Instantiate(Resources.Load("Submission_Cell", typeof(GameObject))) as GameObject;
         button.transform.SetParent(submissionsPanel.transform);
         button.transform.localScale = Vector3.one;
 
-        button.name = submission.getTitle();
+        button.name = submission.details.title;
         button.GetComponent<SubmissionContainer>().SetSubmission(submission);
 
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = submission.getTitle();
+        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = submission.details.title;
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());

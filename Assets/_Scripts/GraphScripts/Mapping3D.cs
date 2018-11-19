@@ -105,9 +105,14 @@ public class Mapping3D : MonoBehaviour
             if (es.ranges.ContainsKey("w")) solver.SetGlobalVariable("w", uvw.z);
         }
 
-        output.x = (float)es.expressions[X].AKExpression.Evaluate();
-        output.y = (float)es.expressions[Y].AKExpression.Evaluate();
-        output.z = (float)es.expressions[Z].AKExpression.Evaluate();
+        if (es.expressions[X].AKExpression != null &&
+            es.expressions[Y].AKExpression != null &&
+            es.expressions[Z].AKExpression != null)
+        {
+            output.x = (float)es.expressions[X].AKExpression.Evaluate();
+            output.y = (float)es.expressions[Y].AKExpression.Evaluate();
+            output.z = (float)es.expressions[Z].AKExpression.Evaluate();
+        }
         return output * scale;
     }
 

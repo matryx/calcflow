@@ -120,7 +120,7 @@ public class OVRRTOverlayConnector : MonoBehaviour
 			Graphics.Blit(srcRT, overlayRTChain[overlayRTIndex]);
 			OVROverlay ovrOverlay = ovrOverlayObj.GetComponent<OVROverlay>();
 			Debug.Assert(ovrOverlay);
-			ovrOverlay.OverrideOverlayTextureInfo(overlayRTChain[overlayRTIndex], overlayTexturePtrs[overlayRTIndex], UnityEngine.VR.VRNode.LeftEye);
+			ovrOverlay.OverrideOverlayTextureInfo(overlayRTChain[overlayRTIndex], overlayTexturePtrs[overlayRTIndex], UnityEngine.XR.XRNode.LeftEye);
 			overlayRTIndex++;
 			overlayRTIndex = overlayRTIndex % overlayRTChainSize;
 		}

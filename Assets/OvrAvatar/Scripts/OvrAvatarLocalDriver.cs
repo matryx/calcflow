@@ -39,7 +39,7 @@ public class OvrAvatarLocalDriver : OvrAvatarDriver {
 
     private PoseFrame GetCurrentPose()
     {
-        Vector3 headPos = UnityEngine.VR.InputTracking.GetLocalPosition(UnityEngine.VR.VRNode.CenterEye);
+        Vector3 headPos = UnityEngine.XR.InputTracking.GetLocalPosition(UnityEngine.XR.XRNode.CenterEye);
 #if UNITY_ANDROID && !UNITY_EDITOR
         headPos.y += mobileBaseHeadHeight;
 #endif
@@ -48,7 +48,7 @@ public class OvrAvatarLocalDriver : OvrAvatarDriver {
         {
             voiceAmplitude = voiceAmplitude,
             headPosition = headPos,
-            headRotation = UnityEngine.VR.InputTracking.GetLocalRotation(UnityEngine.VR.VRNode.CenterEye),
+            headRotation = UnityEngine.XR.InputTracking.GetLocalRotation(UnityEngine.XR.XRNode.CenterEye),
             handLeftPosition = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch),
             handLeftRotation = OVRInput.GetLocalControllerRotation(OVRInput.Controller.LTouch),
             handRightPosition = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch),
