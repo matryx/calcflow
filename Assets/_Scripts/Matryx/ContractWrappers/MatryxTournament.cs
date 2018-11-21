@@ -197,6 +197,7 @@ namespace Matryx
         {
             var isEntrantRequest = new QueryUnityRequest<IsEntrantFunction, EthereumTypes.Bool>(Network.infuraProvider, Network.account);
             yield return isEntrantRequest.Query(new IsEntrantFunction() { User = user }, address);
+            Debug.Log(isEntrantRequest.Result.Value);
         }
 
         public IEnumerator enter()

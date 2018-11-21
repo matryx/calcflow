@@ -237,33 +237,6 @@ namespace Matryx
                     MatryxPlatform.ABI = abi;
                     MatryxPlatform.contract = new Nethereum.Contracts.Contract(null, abi, address);
                 }
-
-                //yield return MatryxPlatform.getInfo();
-                //yield return MatryxPlatform.createTournament("Tournament created within Calcflow", "math", "QmPG5E2R9d13BuXfyUerT88kVFgV1fYgABPhU6LFHJM2ho", "", new System.Numerics.BigInteger(100e18), new System.Numerics.BigInteger(2e18), BigInteger roundStart, BigInteger roundEnd, BigInteger roundReview, BigInteger roundBounty)
-                //yield return MatryxPlatform.hasEnteredMatryx(Network.account);
-                //yield return MatryxPlatform.hasEnteredMatryx(MatryxGlobals.account);
-                //yield return MatryxToken.approve("0x1234567890123456789012345678901234567890", new System.Numerics.BigInteger(0));
-                //yield return MatryxPlatform.hasEnteredMatryx(MatryxGlobals.account);
-                //yield return MatryxPlatform.getUsers(0, 0);
-                //var tournament = new MatryxTournament("0xea94c9F4022DD122a19cb9f7f8cD2e00064037c7");
-                //Async main = Async.runInCoroutine(delegate (Async thread)
-                //{
-                //    return tournament.enter(thread);
-                //});
-                //main.onEvent("enterTournament-success", delegate (object data)
-                //{
-                //    Debug.Log("check yo laptop");
-                //});
-                //main.onEvent("enterTournament-failure", delegate (object data)
-                //{
-                //    Debug.Log("check yo laptop");
-                //});
-
-                //yield return tournament.getRounds();
-                //yield return tournament.getCurrentRound();
-                //yield return tournament.getSubmissionCount();
-                //yield return tournament.isEntrant("0xbe385ccd6b268b82cf1fbff2e2f5a7861afbd87f");
-                //yield return tournament.enter();
             }
         }
 
@@ -307,43 +280,40 @@ namespace Matryx
             }
 
             var tournament = new MatryxTournament("0xea94c9F4022DD122a19cb9f7f8cD2e00064037c7");
-            yield return tournament.enter();
+            //yield return tournament.enter();
         }
 
-        IEnumerator InitRoutine()
+        public static IEnumerator RunTests()
         {
-            yield return 5;
-            // Get accounts
-            //var account = new Nethereum.
-            //var signer = new Nethereum.Signer.TransactionSigner();
-            //signer.SignTransaction()
-            //         var requestAccounts = new EthAccountsUnityRequest(mtxNode);
-            //         // Nethereum.RPC.EthApiService apiService = new Nethereum.RPC.EthApiService()
-            //         // Nethereum.Contracts.Contract contract = new Nethereum.Contracts.Contract(;
-            //         yield return requestAccounts.SendRequest();
-            //         var resultsAccounts = requestAccounts.Result;
-            //if(resultsAccounts != null && resultsAccounts[0] != null)
-            //{
-            //             StatisticsTracking.InstantEvent("Matryx Init", "Eth Node", new Dictionary<string, object>(){
-            //                 {"Node Found", true},
-            //             });
+            while(MatryxPlatform.address == null || MatryxToken.address == null || MatryxTournament.ABI == null)
+            {
+                yield return null;
+            }
 
-            //             var usedAccount = resultsAccounts[0];
-            //	Debug.Log("Used account:" + usedAccount);
-            //             var function = platformContract.GetFunction("prepareBalance");
-            //             var transactionInput = function.CreateTransactionInput(usedAccount, (long)42);
-            //             transactionInput.Gas = new HexBigInteger(3000000);
-            //             // Do request
-            //             var requestTransaction = new EthSendTransactionUnityRequest(provider);
-            //             yield return requestTransaction.SendRequest(transactionInput);
-            //             var resultsTransaction = requestTransaction.Result;
-            //         }
-            //         else
-            //         {
-            //             StatisticsTracking.InstantEvent("Matryx Init", "Eth Node", new Dictionary<string, object>(){
-            //                 {"Node Found", false},
-            //             });
-            //         }
+
+            var tournament = new MatryxTournament("0xc1fb995A5236632b3E0abe05aFae76dD10d69e21");
+            //yield return MatryxPlatform.createTournament("Tournament created within Calcflow", "math", "QmPG5E2R9d13BuXfyUerT88kVFgV1fYgABPhU6LFHJM2ho", "", new System.Numerics.BigInteger(100e18), new System.Numerics.BigInteger(2e18), BigInteger roundStart, BigInteger roundEnd, BigInteger roundReview, BigInteger roundBounty)
+            yield return MatryxToken.approve(tournament.address, new System.Numerics.BigInteger(2e18));
+            //yield return MatryxPlatform.hasEnteredMatryx(MatryxGlobals.account);
+            //yield return MatryxPlatform.getUsers(0, 0);
+            //Async main = Async.runInCoroutine(delegate (Async thread)
+            //{
+            //    return tournament.enter(thread);
+            //});
+            //main.onEvent("enterTournament-success", delegate (object data)
+            //{
+            //    Debug.Log("check yo laptop");
+            //});
+            //main.onEvent("enterTournament-failure", delegate (object data)
+            //{
+            //    Debug.Log("check yo laptop");
+            //});
+
+            //yield return tournament.getRounds();
+            //yield return tournament.getCurrentRound();
+            //yield return tournament.getSubmissionCount();
+            //yield return tournament.isEntrant(Network.account);
+            //yield return tournament.enter();
         }
 
         void Start()
@@ -351,6 +321,7 @@ namespace Matryx
             queue(InitializePlatformContract());
             queue(InitializeTokenContract());
             queue(InitializeTournamentContract());
+            queue(RunTests());
             //queue(InitializeMatryxGlobals());
             ///*
             Debug.Log("RunListTournaments START");

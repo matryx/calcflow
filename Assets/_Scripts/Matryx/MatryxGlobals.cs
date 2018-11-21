@@ -80,7 +80,7 @@ namespace Matryx
             yield return transactionReceiptPolling.PollForReceipt(transactionHash, 2);
             var transactionReceipt = transactionReceiptPolling.Result;
 
-            Debug.Log(transactionRequest.GetType().ToString() + " succeeded? : " + transactionReceipt.Status);
+            Debug.Log(transactionRequest.GetType().ToString() + " succeeded? : " + transactionReceipt.Status.Value);
             //if(transactionReceipt.Status.Value == 0x1)
             //{
             //    thread.pushEvent(txName+"-success", transactionHash);

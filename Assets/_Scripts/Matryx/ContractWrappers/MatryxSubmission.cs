@@ -222,7 +222,7 @@ namespace Matryx
 
             Async main = Async.runInCoroutine(delegate (Async thread)
             {
-                return MatryxPlatform.hasEnteredMatryx(thread, Network.account);
+                return MatryxPlatform.hasEnteredMatryx(Network.account);
             });
             main.onEvent("hasEnteredMatryx", delegate (object datas)
             {

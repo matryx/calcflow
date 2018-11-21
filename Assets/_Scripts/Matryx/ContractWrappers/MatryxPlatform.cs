@@ -87,13 +87,13 @@ namespace Matryx
             thread.pushEvent("getInfo", queryRequest.Result);
         }
 
-        public static IEnumerator hasEnteredMatryx(Async thread, string user)
+        public static IEnumerator hasEnteredMatryx(string user)
         {
             var queryRequest = new QueryUnityRequest<HasEnteredMatryxFunction, EthereumTypes.Bool>(Network.infuraProvider, Network.account);
             yield return queryRequest.Query(new HasEnteredMatryxFunction() { User = user }, address);
-            //Debug.Log(user + " has entered Matryx? : " + queryRequest.Result.Value);
+            Debug.Log(user + " has entered Matryx? : " + queryRequest.Result.Value);
 
-            thread.pushEvent("hasEnteredMatryx", queryRequest.Result);
+            //thread.pushEvent("hasEnteredMatryx", queryRequest.Result);
         }
 
         public static IEnumerator getUsers(Async thread, uint offset, uint count)
