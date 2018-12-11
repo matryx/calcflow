@@ -497,7 +497,7 @@ namespace LSToolKit
         {
             if(disableOVR)
             {
-                UnityEngine.VR.VRSettings.enabled = false;
+                UnityEngine.XR.XRSettings.enabled = false;
             }
             
             yield return new WaitForSeconds(0.2f);
@@ -514,7 +514,7 @@ namespace LSToolKit
             capturingEveryFrame = false;
             if (disableOVR)
             {
-                UnityEngine.VR.VRSettings.enabled = true;
+                UnityEngine.XR.XRSettings.enabled = true;
             }
         }
 
@@ -560,7 +560,7 @@ namespace LSToolKit
             }
             if (disableOVR)
             {
-                UnityEngine.VR.VRSettings.enabled = false;
+                UnityEngine.XR.XRSettings.enabled = false;
             }
             
         }
@@ -569,7 +569,7 @@ namespace LSToolKit
         {
             if (disableOVR)
             {
-                UnityEngine.VR.VRSettings.enabled = true;
+                UnityEngine.XR.XRSettings.enabled = true;
             }
             Log("Fading back in");
             float elapsedTime = 0.0f;

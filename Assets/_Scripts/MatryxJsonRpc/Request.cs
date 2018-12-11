@@ -477,7 +477,7 @@ namespace MatryxJsonRpc
             UnityWebRequest ipfsRequest = UnityWebRequest.Post(submissionUploadEndpt, form);
             yield return ipfsRequest.Send();
             print("request completed with code: " + ipfsRequest.responseCode);
-            if (ipfsRequest.isError)
+            if (ipfsRequest.isNetworkError)
             {
                 print("Error: " + ipfsRequest.error);
             }

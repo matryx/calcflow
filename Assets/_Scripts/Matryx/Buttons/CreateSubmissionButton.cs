@@ -4,7 +4,7 @@ using TMPro;
 public class CreateSubmissionButton : QuickButton {
 
     [SerializeField]
-    GameObject congratulationsMessage;
+    TMPro.TextMeshPro text;
     [SerializeField]
     private SubmitMenu canvasSubmitMenu;
     [SerializeField]
@@ -15,7 +15,10 @@ public class CreateSubmissionButton : QuickButton {
     private Color DARK_PASSIVE = new Color(0.2f, 0.475f, 0.565f);
     private Color LIGHT_PASSIVE = Color.white;
     private Color DARK_HOVERING = new Color(87f / 255f, 178f / 255f, 208f / 255f);
-    private Color LIGHT_HOVERING = new Color(132f / 255f, 223f / 255f, 253f / 255f); 
+    private Color LIGHT_HOVERING = new Color(132f / 255f, 223f / 255f, 253f / 255f);
+
+    private float defaultFontSize = 1.6f;
+    private float otherFontSize = 1.3f;
 
     public void ReturnFromSubmit()
     {
@@ -25,9 +28,10 @@ public class CreateSubmissionButton : QuickButton {
         submissionButtonFlexComponent.hoveringColor = LIGHT_HOVERING;
 
         submissionButtonFlexComponent.SetState(1);
+        SetSubmitButtonToContribute();
 
         // Hide remove headset label on wrist
-        congratulationsMessage.gameObject.SetActive(false);
+        //congratulationsMessage.gameObject.SetActive(false);
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
@@ -43,7 +47,7 @@ public class CreateSubmissionButton : QuickButton {
             submissionButtonFlexComponent.hoveringColor = DARK_HOVERING;
 
             // Display remove headset label on wrist
-            congratulationsMessage.gameObject.SetActive(true);
+            SetSubmitButtonToLiftHeadset();
         }
         else
         {
@@ -53,7 +57,8 @@ public class CreateSubmissionButton : QuickButton {
             submissionButtonFlexComponent.hoveringColor = LIGHT_HOVERING;
 
             // Hide remove headset label on wrist
-            congratulationsMessage.gameObject.SetActive(false);
+            //congratulationsMessage.gameObject.SetActive(false);
+            SetSubmitButtonToContribute();
         }
 
         // Select the button
@@ -64,5 +69,19 @@ public class CreateSubmissionButton : QuickButton {
     {
         // Deselect the button
         submissionButtonFlexComponent.SetState(1);
+    }
+
+    public void SetSubmitButtonToContribute()
+    {
+        text.text = "Contribute";
+        text.fontSize = defaultFontSize;
+        text.color = Color.black;
+    }
+
+    public void SetSubmitButtonToLiftHeadset()
+    {
+        text.text = "Lift Headset...";
+        text.fontSize = otherFontSize;
+        text.color = Color.white;
     }
 }

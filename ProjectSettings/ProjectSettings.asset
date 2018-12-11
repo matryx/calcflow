@@ -3,9 +3,10 @@
 --- !u!129 &1
 PlayerSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 14
   productGUID: 9a1ab5a2fb7101a4ba65487591aaa77b
   AndroidProfiler: 0
+  AndroidFilterTouchesWhenObscured: 0
   defaultScreenOrientation: 3
   targetDevice: 2
   useOnDemandResources: 0
@@ -14,9 +15,9 @@ PlayerSettings:
   productName: Calcflow
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
-  m_SplashScreenBackgroundColor: {r: 0.13333334, g: 0.17254902, b: 0.21176471, a: 1}
+  m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
   m_ShowUnitySplashScreen: 1
-  m_ShowUnitySplashLogo: 0
+  m_ShowUnitySplashLogo: 1
   m_SplashScreenOverlayOpacity: 1
   m_SplashScreenAnimation: 2
   m_SplashScreenLogoStyle: 1
@@ -38,8 +39,6 @@ PlayerSettings:
     width: 1
     height: 1
   m_SplashScreenLogos: []
-  m_SplashScreenBackgroundLandscape: {fileID: 0}
-  m_SplashScreenBackgroundPortrait: {fileID: 0}
   m_VirtualRealitySplashScreen: {fileID: 2800000, guid: 0d70ed55a29cd1749a72e2f62222071e,
     type: 3}
   m_HolographicTrackingLossScreen: {fileID: 0}
@@ -50,7 +49,6 @@ PlayerSettings:
   m_StereoRenderingPath: 0
   m_ActiveColorSpace: 1
   m_MTRendering: 1
-  m_MobileMTRendering: 0
   m_StackTraceTypes: 010000000100000001000000010000000100000001000000
   iosShowActivityIndicatorOnLoading: -1
   androidShowActivityIndicatorOnLoading: -1
@@ -64,13 +62,17 @@ PlayerSettings:
   allowedAutorotateToLandscapeLeft: 1
   useOSAutorotation: 1
   use32BitDisplayBuffer: 1
+  preserveFramebufferAlpha: 0
   disableDepthAndStencilBuffers: 0
+  androidBlitType: 0
   defaultIsFullScreen: 0
   defaultIsNativeResolution: 1
+  macRetinaSupport: 1
   runInBackground: 1
   captureSingleScreen: 0
   muteOtherAudioSources: 0
   Prepare IOS For Recording: 0
+  Force IOS Speakers When Recording: 0
   deferSystemGesturesMode: 0
   hideHomeButton: 0
   submitAnalytics: 1
@@ -91,21 +93,22 @@ PlayerSettings:
   allowFullscreenSwitch: 1
   graphicsJobMode: 0
   macFullscreenMode: 2
-  d3d9FullscreenMode: 1
   d3d11FullscreenMode: 1
   xboxSpeechDB: 0
   xboxEnableHeadOrientation: 0
   xboxEnableGuest: 0
   xboxEnablePIXSampling: 0
+  metalFramebufferOnly: 0
   n3dsDisableStereoscopicView: 0
   n3dsEnableSharedListOpt: 1
   n3dsEnableVSync: 0
-  ignoreAlphaClear: 0
   xboxOneResolution: 0
   xboxOneSResolution: 0
   xboxOneXResolution: 3
   xboxOneMonoLoggingLevel: 0
   xboxOneLoggingLevel: 1
+  xboxOneDisableEsram: 0
+  xboxOnePresentImmediateThreshold: 0
   videoMemoryForVertexBuffers: 0
   psp2PowerMode: 0
   psp2AcquireBGM: 1
@@ -130,6 +133,7 @@ PlayerSettings:
   - {fileID: 4800000, guid: d7662dbac0646464a9b4a48e93989adb, type: 3}
   - {fileID: 4800000, guid: 10513ef587704324487f3061a7e6699d, type: 3}
   metroInputSource: 0
+  wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
   xboxOneDisableKinectGpuReservation: 0
   xboxOneEnable7thCore: 0
@@ -140,10 +144,23 @@ PlayerSettings:
     daydream:
       depthFormat: 0
       useSustainedPerformanceMode: 0
+      enableVideoLayer: 0
+      useProtectedVideoMemory: 0
+      minimumSupportedHeadTracking: 0
+      maximumSupportedHeadTracking: 1
     hololens:
       depthFormat: 1
+      depthBufferSharingEnabled: 0
+    oculus:
+      sharedDepthBuffer: 0
+      dashSupport: 0
   protectGraphicsMemory: 0
   useHDRDisplay: 0
+  m_ColorGamuts: 00000000
+  targetPixelDensity: 30
+  resolutionScalingMode: 0
+  androidSupportedAspectRatio: 1
+  androidMaxAspectRatio: 2.1
   applicationIdentifier:
     Android: com.oculus.UnitySample
     Standalone: unity.nanome.Calcflow
@@ -171,7 +188,7 @@ PlayerSettings:
     serializedVersion: 2
     m_Bits: 238
   iPhoneSdkVersion: 988
-  iOSTargetOSVersionString: 6.0
+  iOSTargetOSVersionString: 7.0
   tvOSSdkVersion: 0
   tvOSRequireExtendedGameController: 0
   tvOSTargetOSVersionString: 9.0
@@ -198,7 +215,6 @@ PlayerSettings:
   tvOSSmallIconLayers: []
   tvOSSmallIconLayers2x: []
   tvOSLargeIconLayers: []
-  tvOSLargeIconLayers2x: []
   tvOSTopShelfImageLayers: []
   tvOSTopShelfImageLayers2x: []
   tvOSTopShelfImageWideLayers: []
@@ -220,6 +236,8 @@ PlayerSettings:
   iOSLaunchScreeniPadFillPct: 100
   iOSLaunchScreeniPadSize: 100
   iOSLaunchScreeniPadCustomXibPath: 
+  iOSUseLaunchScreenStoryboard: 0
+  iOSLaunchScreenCustomStoryboardPath: 
   iOSDeviceRequirements: []
   iOSURLSchemes: []
   iOSBackgroundModes: 0
@@ -231,6 +249,7 @@ PlayerSettings:
   iOSManualSigningProvisioningProfileID: 
   tvOSManualSigningProvisioningProfileID: 
   appleEnableAutomaticSigning: 0
+  clonedFromGUID: 00000000000000000000000000000000
   AndroidTargetDevice: 0
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
@@ -238,7 +257,9 @@ PlayerSettings:
   AndroidKeyaliasName: 
   AndroidTVCompatibility: 1
   AndroidIsGame: 1
+  AndroidEnableTango: 0
   androidEnableBanner: 1
+  androidUseLowAccuracyLocation: 0
   m_AndroidBanners:
   - width: 320
     height: 180
@@ -260,7 +281,7 @@ PlayerSettings:
     m_APIs: 1000000011000000
     m_Automatic: 1
   - m_BuildTarget: WindowsStandaloneSupport
-    m_APIs: 0200000001000000
+    m_APIs: 02000000
     m_Automatic: 1
   m_BuildTargetVRSettings:
   - m_BuildTarget: Android
@@ -318,10 +339,20 @@ PlayerSettings:
   - m_BuildTarget: tvOS
     m_Enabled: 0
     m_Devices: []
+  m_BuildTargetEnableVuforiaSettings: []
   openGLRequireES31: 0
   openGLRequireES31AEP: 0
-  webPlayerTemplate: APPLICATION:Default
   m_TemplateCustomTags: {}
+  mobileMTRendering:
+    iPhone: 1
+    tvOS: 1
+  m_BuildTargetGroupLightmapEncodingQuality:
+  - m_BuildTarget: Standalone
+    m_EncodingQuality: 1
+  - m_BuildTarget: XboxOne
+    m_EncodingQuality: 1
+  - m_BuildTarget: PS4
+    m_EncodingQuality: 1
   wiiUTitleID: 0005000011000000
   wiiUGroupID: 00010000
   wiiUCommonSaveSize: 4096
@@ -458,6 +489,7 @@ PlayerSettings:
   switchParentalControl: 0
   switchAllowsScreenshot: 1
   switchAllowsVideoCapturing: 1
+  switchAllowsRuntimeAddOnContentInstall: 0
   switchDataLossConfirmation: 0
   switchSupportedNpadStyles: 3
   switchSocketConfigEnabled: 0
@@ -489,6 +521,8 @@ PlayerSettings:
   ps4PronunciationSIGPath: 
   ps4BackgroundImagePath: 
   ps4StartupImagePath: 
+  ps4StartupImagesFolder: 
+  ps4IconImagesFolder: 
   ps4SaveDataImagePath: 
   ps4SdkOverride: 
   ps4BGMPath: 
@@ -508,7 +542,6 @@ PlayerSettings:
   ps4GarlicHeapSize: 2048
   ps4ProGarlicHeapSize: 2560
   ps4Passcode: frAQBc8Wsa1xVPfvJcrgRYwTiizs2trQ
-  ps4UseDebugIl2cppLibs: 0
   ps4pnSessions: 1
   ps4pnPresence: 1
   ps4pnFriends: 1
@@ -583,7 +616,7 @@ PlayerSettings:
   psp2UseLibLocation: 0
   psp2InfoBarOnStartup: 0
   psp2InfoBarColor: 0
-  psp2UseDebugIl2cppLibs: 0
+  psp2ScriptOptimizationLevel: 0
   psmSplashimage: {fileID: 0}
   splashScreenBackgroundSourceLandscape: {fileID: 0}
   splashScreenBackgroundSourcePortrait: {fileID: 0}
@@ -601,14 +634,16 @@ PlayerSettings:
   webGLUseWasm: 0
   webGLCompressionFormat: 1
   scriptingDefineSymbols:
-    1: TMP_PRESENT
+    1: TMP_PRESENT;OCULUS
   platformArchitecture: {}
   scriptingBackend:
     Standalone: 0
     WebPlayer: 0
   incrementalIl2cppBuild: {}
   additionalIl2CppArgs: 
-  apiCompatibilityLevelPerPlatform: {}
+  scriptingRuntimeVersion: 0
+  apiCompatibilityLevelPerPlatform:
+    Standalone: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: NGonVive
@@ -656,12 +691,6 @@ PlayerSettings:
   n3dsTitle: GameName
   n3dsProductCode: 
   n3dsApplicationId: 0xFF3FF
-  stvDeviceAddress: 
-  stvProductDescription: 
-  stvProductAuthor: 
-  stvProductAuthorEmail: 
-  stvProductLink: 
-  stvProductCategory: 0
   XboxOneProductId: 
   XboxOneUpdateKey: 
   XboxOneSandboxId: 
@@ -684,6 +713,7 @@ PlayerSettings:
   XboxOneSplashScreen: {fileID: 0}
   XboxOneAllowedProductIds: []
   XboxOnePersistentLocalStorageSize: 0
+  XboxOneXTitleMemory: 8
   xboxOneScriptCompiler: 0
   vrEditorSettings:
     daydream:
@@ -700,9 +730,10 @@ PlayerSettings:
     UNet: 1
     Unity_Ads: 0
   facebookSdkVersion: 7.9.1
-  apiCompatibilityLevel: 1
+  apiCompatibilityLevel: 2
   cloudProjectId: bdb26a80-1493-4672-983d-543cadcea333
   projectName: Calcflow (3)
   organizationId: nanomeinc
   cloudEnabled: 0
-  enableNewInputSystem: 0
+  enableNativePlatformBackendsForNewInputSystem: 0
+  disableOldInputManagerSupport: 0

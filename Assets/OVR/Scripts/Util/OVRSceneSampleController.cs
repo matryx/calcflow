@@ -148,7 +148,7 @@ public class OVRSceneSampleController : MonoBehaviour
             Screen.fullScreen = !Screen.fullScreen;
 
         if (Input.GetKeyDown(KeyCode.M))
-			VR.VRSettings.showDeviceView = !VR.VRSettings.showDeviceView;
+			UnityEngine.XR.XRSettings.showDeviceView = !UnityEngine.XR.XRSettings.showDeviceView;
 
 #if !UNITY_ANDROID || UNITY_EDITOR
         // Escape Application

@@ -128,9 +128,9 @@ public class OVROverlay : MonoBehaviour
 	/// Use this function to set texture and texNativePtr when app is running 
 	/// GetNativeTexturePtr is a slow behavior, the value should be pre-cached 
 	/// </summary>
-	public void OverrideOverlayTextureInfo(Texture srcTexture, IntPtr nativePtr, VR.VRNode node)
+	public void OverrideOverlayTextureInfo(Texture srcTexture, IntPtr nativePtr, UnityEngine.XR.XRNode node)
 	{
-		int index = (node == VR.VRNode.RightEye) ? 1 : 0;
+		int index = (node == UnityEngine.XR.XRNode.RightEye) ? 1 : 0;
 
 		if (textures.Length <= index)
 			return;
@@ -382,7 +382,7 @@ public class OVROverlay : MonoBehaviour
 						et = Texture2D.CreateExternalTexture(size.w, size.h, txFormat, mipLevels > 1, isSrgb, externalTex);
 #if UNITY_2017_1_OR_NEWER
 					else
-						et = Cubemap.CreateExternalTexture(size.w, size.h, txFormat, mipLevels > 1, isSrgb, externalTex);
+						et = Cubemap.CreateExternalTexture(size.w, txFormat, mipLevels > 1, externalTex);
 #endif
 					
 					externalTextures[eyeId][stage] = et;
