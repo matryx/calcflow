@@ -871,21 +871,21 @@ public class OVRManager : MonoBehaviour
 
 		if (enableAdaptiveResolution)
 		{
-			if (VR.VRSettings.renderScale < maxRenderScale)
+			if (UnityEngine.XR.XRSettings.eyeTextureResolutionScale < maxRenderScale)
 			{
 				// Allocate renderScale to max to avoid re-allocation
-				VR.VRSettings.renderScale = maxRenderScale;
+				UnityEngine.XR.XRSettings.eyeTextureResolutionScale = maxRenderScale;
 			}
 			else
 			{
 				// Adjusting maxRenderScale in case app started with a larger renderScale value
-				maxRenderScale = Mathf.Max(maxRenderScale, VR.VRSettings.renderScale);
+				maxRenderScale = Mathf.Max(maxRenderScale, UnityEngine.XR.XRSettings.eyeTextureResolutionScale);
 			}
 			minRenderScale = Mathf.Min(minRenderScale, maxRenderScale);
-			float minViewportScale = minRenderScale / VR.VRSettings.renderScale;
-			float recommendedViewportScale = OVRPlugin.GetEyeRecommendedResolutionScale() / VR.VRSettings.renderScale;
+			float minViewportScale = minRenderScale / UnityEngine.XR.XRSettings.eyeTextureResolutionScale;
+			float recommendedViewportScale = OVRPlugin.GetEyeRecommendedResolutionScale() / UnityEngine.XR.XRSettings.eyeTextureResolutionScale;
 			recommendedViewportScale = Mathf.Clamp(recommendedViewportScale, minViewportScale, 1.0f);
-			VR.VRSettings.renderViewportScale = recommendedViewportScale;
+			UnityEngine.XR.XRSettings.renderViewportScale = recommendedViewportScale;
 		}
 #endif
 

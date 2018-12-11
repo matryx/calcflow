@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
+using Matryx;
+
 public class ImportSubmission : QuickButton {
 
-    public Matryx_Submission submission;
+    public MatryxSubmission submission;
 
     [SerializeField]
     private CalcManager calcManager;
@@ -18,7 +20,8 @@ public class ImportSubmission : QuickButton {
         // Select the button
         submissionButtonFlexComponent.SetState(2);
 
-        List<ExpressionSet> ess = JsonHelper.FromJson<SerializableExpressionSet>(submission.body).Select(x => x.ConvertToExpressionSet()).ToList();
+        var equationJson = JsonHelper.FromJson<SerializableExpressionSet>(submission.EquationJson);
+        List<ExpressionSet> ess = equationJson.Select(x => x.ConvertToExpressionSet()).ToList();
         calcManager.LoadSavedExpressionSets(ess);
     }
 

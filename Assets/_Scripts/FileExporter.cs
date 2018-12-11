@@ -171,7 +171,7 @@ public class FileExporter {
     public static void ThreadedMeshSaveStl (Vector3[] vertices, Vector3[] normals, int[] faces, string filename) {
         uint numFacets = (uint) (faces.Length/3);
         Vector3 triangleNormal;
-        using (BinaryWriter bw = new BinaryWriter (File.Open(filename + ".stl", FileMode.Create), new ASCIIEncoding())) {           
+        using (BinaryWriter bw = new BinaryWriter (System.IO.File.Open(filename + ".stl", FileMode.Create), new ASCIIEncoding())) {           
             bw.Write(new byte[80]);
             bw.Write(numFacets);
             for (int i = 0; i < faces.Length; i += 3) {

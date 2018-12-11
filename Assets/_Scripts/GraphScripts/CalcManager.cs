@@ -18,10 +18,10 @@ public class CalcManager : MonoBehaviour
     public SaveLoadMenu saveLoadMenu;
 
     [HideInInspector]
-    public TournamentMenu tournamentMenu;
+    public TournamentsMenu tournamentMenu;
 
     [HideInInspector]
-    public SubmissionsMenu submissionsMenu;
+    public TournamentMenu submissionsMenu;
 
     public CustomParametrizedSurface paramSurface;
     private CalcInput calcInput;
@@ -67,11 +67,13 @@ public class CalcManager : MonoBehaviour
         [SerializeField]
         internal ParticleAnimationSettings particleAnimationSettings;
         [SerializeField]
-        internal TournamentMenu tournamentMenu;
+        internal TournamentsMenu tournamentMenu;
         [SerializeField]
-        internal SubmissionsMenu submissionsMenu;
+        internal TournamentMenu submissionsMenu;
         [SerializeField]
         internal SubmissionMenu submissionMenu;
+        [SerializeField]
+        internal MySubmissionsMenu mySubmissionsMenu;
     }
 
     [System.Serializable]
@@ -179,6 +181,11 @@ public class CalcManager : MonoBehaviour
         if(connectedMenus.submissionsMenu != null)
         {
             connectedMenus.submissionsMenu.Initialize(this);
+        }
+
+        if(connectedMenus.mySubmissionsMenu != null)
+        {
+            connectedMenus.mySubmissionsMenu.Initialize(this);
         }
 
         if (connectedMenus.particleAnimationSettings != null)

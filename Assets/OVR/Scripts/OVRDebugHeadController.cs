@@ -90,7 +90,7 @@ public class OVRDebugHeadController : MonoBehaviour
 			transform.position += fwdMove + strafeMove;
 		}
 
-		if ( !VR.VRDevice.isPresent && ( AllowYawLook || AllowPitchLook ) )
+		if ( !UnityEngine.XR.XRDevice.isPresent && ( AllowYawLook || AllowPitchLook ) )
 		{
 			Quaternion r = transform.rotation;
 			if ( AllowYawLook )

@@ -1,30 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using CalcFlowUI;
 
-public class MatryxKeyboardButton : QuickButton
-{
+public class MatryxKeyboardButton : QuickButton {
 
-    Button menusButton;
-    Button matryxButton;
+    [SerializeField]
+    RayCastButton menusButton;
+    [SerializeField]
+    RayCastButton matryxButton;
 
-
-    protected override void Start()
-    {
-        base.Start();
-        Transform menu = transform.parent.Find("MenuButton");
-        SecondaryMenu secondaryMenu = SecondaryMenu.GetInstance();
-        if (secondaryMenu != null && menu != null)
-        {
-            menusButton = menu.GetComponent<Button>();
-            matryxButton = secondaryMenu.transform.Find("Panel/Matryx").GetComponent<Button>();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
@@ -38,20 +22,8 @@ public class MatryxKeyboardButton : QuickButton
 
     protected IEnumerator timedPressButtons()
     {
-
-        if (!matryxButton.gameObject.activeInHierarchy)
-        {
-            menusButton.PressButton(gameObject);
-            menusButton.UnpressButton(gameObject);
-
-            yield return null;
-            yield return null;
-
-            yield return null;
-            yield return null;
-
-            matryxButton.PressButton(gameObject);
-            matryxButton.UnpressButton(gameObject);
-        }
+        menusButton.PressButton(gameObject);
+        yield return new WaitForSeconds(0.1f);
+        matryxButton.PressButton(gameObject);
     }
 }
