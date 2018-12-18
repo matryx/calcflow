@@ -13,7 +13,7 @@ using System.IO;
 using Matryx;
 using Nanome.Core;
 
-public class SubmitMenu : MonoBehaviour {
+public class CreateSubmissionMenu : MonoBehaviour {
 
     string submitEndpoint = "http://13.57.11.64/v1/submit/";
     MatryxTournament tournament;
@@ -36,7 +36,7 @@ public class SubmitMenu : MonoBehaviour {
     [SerializeField]
     GameObject resultsCanvasObject;
 
-    public static SubmitMenu Instance { get; private set; }
+    public static CreateSubmissionMenu Instance { get; private set; }
 
     public void Start()
     {
@@ -54,7 +54,7 @@ public class SubmitMenu : MonoBehaviour {
 
     public void MakeSubmission()
     {
-        Debug.Log("Making submission...");
+        this.gameObject.SetActive(false);
 
         var title = Title_InputField.text;
         if (title == "" || title == null)
@@ -71,15 +71,12 @@ public class SubmitMenu : MonoBehaviour {
 
         var submission = new MatryxSubmission(tournament, title, contributors, references, bodyData, "This submission was created with Calcflow.");
         Debug.Log("Submission: " + tournament.address + " -> " + title);
-        
-        submittingCanvasObject.SetActive(true);
+
+        resultsCanvasObject.SetActive(true);
         Async.runInCoroutine(delegate (Async thread, object param)
         {
             return submission.submit(delegate (object result)
             {
-                // Switch out the submitting screen for the results screen.
-                submittingCanvasObject.SetActive(false);
-                resultsCanvasObject.SetActive(true);
                 this.gameObject.SetActive(false);
                 // Debug
                 Debug.Log("Submission uploaded");
@@ -87,14 +84,14 @@ public class SubmitMenu : MonoBehaviour {
                 // Check success
                 if ((bool)result)
                 {
-                    resultsCanvasObject.GetComponent<ResultsMenu>().PostSuccess(tournament);
+                    ResultsMenu.Instance.PostSuccess(submission);
                 }
                 else
                 {
-                    resultsCanvasObject.GetComponent<ResultsMenu>().PostFailure(tournament);
+                    ResultsMenu.Instance.PostFailure(submission);
                 }
             });
-        }); 
+        });
     }
 
     public string SerializeSurface()

@@ -63,17 +63,17 @@ namespace Matryx
         [FunctionOutput]
         public class TournamentDetails : IFunctionOutputDTO
         {
-            [Parameter("bytes32[3]", 1)]
+            [Parameter("bytes32[3]")]
             public List<string> Title { get; set; }
-            [Parameter("bytes32", 4)]
+            [Parameter("bytes32")]
             public string Category { get; set; }
-            [Parameter("bytes32[2]", 5)]
+            [Parameter("bytes32[2]")]
             public List<string> DescHash { get; set; }
-            [Parameter("bytes32[2]", 7)]
+            [Parameter("bytes32[2]")]
             public List<string> FileHash { get; set; }
-            [Parameter("uint256", 9)]
+            [Parameter("uint256")]
             public BigInteger Bounty { get; set; }
-            [Parameter("uint256", 10)]
+            [Parameter("uint256")]
             public BigInteger EntryFee { get; set; }
         }
 
@@ -126,17 +126,25 @@ namespace Matryx
             yield return txStatus.result;
         }
 
-        // TODO: Test
-        public static IEnumerator createTournament(string title, string category, string descHash, string fileHash, BigInteger bounty, BigInteger entryFee, BigInteger roundStart, BigInteger roundEnd, BigInteger roundReview, BigInteger roundBounty, Async thread=null)
+        public static IEnumerator createTournament(MatryxTournament tournament, Async thread=null)
         {
-            TournamentDetails tDetails = new TournamentDetails() { Title = Utils.stringToBytes(title, 3), Category = Utils.stringToBytes(category, 1)[0], DescHash = Utils.stringToBytes(descHash, 2), FileHash = Utils.stringToBytes(fileHash, 2), Bounty = bounty, EntryFee = entryFee };
-            MatryxRound.RoundDetails rDetails = new MatryxRound.RoundDetails() { Start = roundStart, End = roundEnd, Review = roundReview, Bounty = roundBounty };
-            var createTournamentFnMsg = new CreateTournamentFunction() { TDetails = tDetails, RDetails = rDetails, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
+            TournamentDetails tDetails = new TournamentDetails()
+            {
+                Title = Utils.stringToString32(tournament.title, 3),
+                Category = Utils.stringToString32(tournament.category, 1)[0],
+                DescHash = Utils.stringToString32(tournament.descHash, 2),
+                FileHash = Utils.stringToString32(tournament.fileHash, 2),
+                Bounty = tournament.bounty,
+                EntryFee = tournament.entryFee,
+            };
 
+            var createTournamentFnMsg = new CreateTournamentFunction() { TDetails = tDetails, RDetails = tournament.rounds[0].Details, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
             var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.privateKey, NetworkSettings.address);
-            yield return transactionRequest.SignAndSendTransaction<CreateTournamentFunction>(new CreateTournamentFunction() { TDetails = tDetails, RDetails = rDetails }, address);
+            yield return transactionRequest.SignAndSendTransaction<CreateTournamentFunction>(createTournamentFnMsg, address);
 
-            yield return Utils.GetTransactionStatus(transactionRequest, "createTournament");
+            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, Utils.GetTransactionStatus(transactionRequest, "createTournament", thread));
+            yield return getTransactionStatus;
+            yield return getTransactionStatus.result;
         }
     }
 }

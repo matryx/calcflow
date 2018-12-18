@@ -171,7 +171,7 @@ public class TournamentMenu : MonoBehaviour
     private void UpdateHeaderUI()
     {
         titleText.text = tournament.title;
-        bountyText.text = "Reward: " + tournament.bounty + " MTX";
+        bountyText.text = "Reward: " + tournament.Bounty + " MTX";
         descriptionText.text = tournament.getDescription();
         contributeSection.SetActive(tournament.currentRoundState.Equals("isOpen"));
     }

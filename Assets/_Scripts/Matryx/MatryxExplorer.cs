@@ -55,6 +55,7 @@ namespace Matryx
             queue(InitializeTokenContract());
             queue(InitializeTournamentContract());
             queue(InitiateUser());
+            //queue(RunTests());
         }
 
         // Internal queue
@@ -112,30 +113,27 @@ namespace Matryx
             using (WWW www = new WWW(tournamentsURL))
             {
                 yield return www;
-                // Debug.Log(www.text);
                 var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
                 var tournamentList = jsonObj["tournaments"] as List<object>;
                 for (int i = 0; i < tournamentList.Count; i++)
                 {
                     try
                     {
-                        // var tourna = tournamentList[i + (int)offset] as Dictionary<string, object>;
                         var jsonTournament = tournamentList[i] as Dictionary<string, object>;
+
                         string category = jsonTournament["category"] as string;
-                        Debug.Log("tournament category at index " + i + ": " + category);
                         if (!supportedCalcflowCategories.Contains(category)) { continue; }
-                        var tournament = new MatryxTournament(jsonTournament["address"] as string);
-                        tournament.title = jsonTournament["title"] as string;
+
+                        var tournamentTitle = jsonTournament["title"] as string;
+                        var bounty = new BigInteger((long)Convert.ToDouble(jsonTournament["bounty"])) * new BigInteger(1e18);
+                        var entryFee = new BigInteger((long)Convert.ToDouble(jsonTournament["entryFee"])) * new BigInteger(1e18);
+                        var tournament = new MatryxTournament(jsonTournament["address"] as string, tournamentTitle, bounty, entryFee);
                         tournament.description = jsonTournament["description"] as string;
-                        tournament.bounty = (long)Convert.ToDouble(jsonTournament["bounty"]);
                         tournament.currentRoundState = jsonTournament["currentRoundState"] as string;
-                        Debug.Log("current round state: " + tournament.currentRoundState);
                         tournaments.Add(tournament);
                     }
                     catch (Exception e) { Debug.Log(e); }
                 }
-                Debug.Log("Fetched tournaments: " + tournaments.Count);
-                //thread.pushEvent("FetchTournaments-success", tournaments);
                 callback(tournaments);
             }
         }
@@ -419,8 +417,15 @@ namespace Matryx
 
         //public static IEnumerator RunTests()
         //{
-        //    var ESSRegEx = @"{"rangeKeys":.*,"rangePairs":.*"ExpressionKeys":.*"ExpressionValues":.*}";
-        //    calcflowCompatible = Regex.IsMatch(file, ESSRegEx);
+        //    MatryxSubmission newSubmission = new MatryxSubmission(new MatryxTournament("0x1234567890123456789012345678901234567890"), "This is a new submission", new List<string>(), new List<string>(), "This is the file for the submission", "This is the description of the submission");
+        //    var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxExplorer.Instance, Utils.uploadToIPFS(newSubmission));
+        //    yield return uploadToIPFS;
+
+        //    MatryxTournament newTournament = new MatryxTournament("new Tournament", "this is the description of the tournament", "yeeeeah pickle riiiiiick", "math", new BigInteger(1e18), new BigInteger(1e18), null);
+        //    var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxExplorer.Instance, Utils.uploadToIPFS(newTournament));
+        //    yield return uploadToIPFS;
+
+        //    Debug.Log("Description: " + uploadToIPFS.result[0] + "\n Content: " + uploadToIPFS.result[1]);
         //}
     }
 }

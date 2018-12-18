@@ -29,6 +29,8 @@ namespace Matryx
             this.address = address;
         }
 
+        public RoundDetails Details { get; set; }
+
         [FunctionOutput]
         public class RoundDetails : IFunctionOutputDTO
         {

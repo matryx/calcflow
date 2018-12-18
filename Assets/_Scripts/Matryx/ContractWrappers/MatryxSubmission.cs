@@ -27,7 +27,7 @@ namespace Matryx
             this.details.contributors = contributors;
             this.details.distribution = Enumerable.Range(0, details.contributors.Count + 1).Select(x => new BigInteger(1)).ToList();
             this.details.references = references;
-            this.details.descHash = "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
+            this.details.descHash = "";// "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
             this.file = file;
             this.description = description;
         }
@@ -196,11 +196,11 @@ namespace Matryx
         [FunctionOutput]
         public class DetailsUpdates : IFunctionOutputDTO
         {
-            [Parameter("bytes32", "title", 3)]
+            [Parameter("bytes32[3]", "title")]
             public string Title { get; set; }
-            [Parameter("bytes32", "descHash", 2)]
+            [Parameter("bytes32[2]", "descHash")]
             public string[] DescHash { get; set; }
-            [Parameter("bytes32", "fileHash", 2)]
+            [Parameter("bytes32[2]", "fileHash")]
             public string[] FileHash { get; set; }
         }
 
@@ -257,19 +257,29 @@ namespace Matryx
 
         public IEnumerator submit(Async.EventDelegate callback=null)
         {
+            ResultsMenu.transactionObject = this;
+
             var isEntrant = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.isEntrant(NetworkSettings.address));
             yield return isEntrant;
 
+            var tournamentOwner = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, tournament.getOwner());
+            yield return tournamentOwner;
+
+            if(tournamentOwner.result.Equals(NetworkSettings.address.ToLower()))
+            {
+                ResultsMenu.Instance.PostFailure(this, "You own this tournament; Unable to create submission.");
+                yield break;
+            }
+
             if(!isEntrant.result)
             {
-                yield return tournament.getEntryFee();
-                
                 var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxExplorer.Instance, MatryxToken.allowance(NetworkSettings.address, MatryxPlatform.address));
                 yield return allowance;
 
+                Debug.Log(tournament.entryFee);
                 if (allowance.result < tournament.entryFee)
                 {
-                    SubmitMenu.Instance.submissionProgressText.text = "Approving entry fee...";
+                    ResultsMenu.Instance.SetStatus("Approving entry fee...");
 
                     if (allowance.result != BigInteger.Zero)
                     {
@@ -279,6 +289,7 @@ namespace Matryx
                         if (!approveZero.result)
                         {
                             Debug.Log("Failed to reset tournament's allowance to zero for this user. Please check the allowance this user has granted the tournament");
+                            ResultsMenu.Instance.PostFailure(this);
                             yield break;
                         }
                     }
@@ -289,11 +300,12 @@ namespace Matryx
                     if (!approveEntryFee.result)
                     {
                         Debug.Log("Failed to set the tournament's allowance from this user to the tournament's entry fee");
+                        ResultsMenu.Instance.PostFailure(this);
                         yield break;
                     }
                 }
 
-                SubmitMenu.Instance.submissionProgressText.text = "Entering Tournament...";
+                ResultsMenu.Instance.SetStatus("Entering Tournament...");
 
                 var enterTournament = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.enter());
                 yield return enterTournament;
@@ -301,23 +313,31 @@ namespace Matryx
                 if (!enterTournament.result)
                 {
                     Debug.Log("Failed to enter tournament");
+                    ResultsMenu.Instance.PostFailure(this);
                     yield break;
                 }
             }
 
-            SubmitMenu.Instance.submissionProgressText.text = "Uploading content to IPFS...";
-
-            var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS(file));
+            ResultsMenu.Instance.SetStatus("Uploading content to IPFS...");
+            var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxExplorer.Instance, Utils.uploadToIPFS(this));
             yield return uploadToIPFS;
 
-            if(uploadToIPFS.result == null || !uploadToIPFS.result.Contains("Qm"))
+            if(uploadToIPFS.result == null || !uploadToIPFS.result[0].Contains("Qm"))
             {
                 Debug.Log("Failed to upload file to IPFS");
                 yield break;
             }
-            this.details.fileHash = uploadToIPFS.result;
 
-            SubmitMenu.Instance.submissionProgressText.text = "Creating Submission...";
+            if (uploadToIPFS.result[0] != null && !uploadToIPFS.result[0].Equals(string.Empty))
+            {
+                this.details.descHash = uploadToIPFS.result[0];
+            }
+            if (uploadToIPFS.result[1] != null && !uploadToIPFS.result[1].Equals(string.Empty))
+            {
+                this.details.fileHash = uploadToIPFS.result[1];
+            }
+
+            ResultsMenu.Instance.SetStatus("Creating Submission...");
 
             var createSubmission = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.createSubmission(this));
             yield return createSubmission;

@@ -128,10 +128,10 @@ namespace Matryx
             Debug.Log("result for " + eventName + ": " + txReceipt.result.Status);
         }
 
-        public static IEnumerator uploadToIPFS(string content, Async thread=null)
+        public static IEnumerator uploadToIPFS(string fieldName, string extension, string content, string contentType, Async thread=null)
         {
             WWWForm form = new WWWForm();
-            form.AddBinaryData("jsonContent", Encoding.ASCII.GetBytes(content.ToCharArray()), "jsonContent.json", "application/json");
+            form.AddBinaryData(fieldName, Encoding.ASCII.GetBytes(content.ToCharArray()), fieldName+extension, contentType);
             UnityWebRequest ipfsRequest = UnityWebRequest.Post(MatryxExplorer.uploadURL, form);
             yield return ipfsRequest.SendWebRequest();
             Debug.Log("request completed with code: " + ipfsRequest.responseCode);
@@ -145,14 +145,80 @@ namespace Matryx
             }
 
             var response = MatryxExplorer.serializer.Deserialize<object>(ipfsRequest.downloadHandler.data) as Dictionary<string, object>;
-            var fileHash = response["folderHash"];
+            var multiHash = response[response.Keys.ToArray()[0]];
 
-            yield return fileHash;
+            yield return multiHash;
 
             if(thread != null)
             {
-                thread.pushEvent("uploadToIPFS-success", fileHash);
+                thread.pushEvent("uploadToIPFS-success", multiHash);
             }
+        }
+
+        /// <summary>
+        /// Uploads a Submission's description and files to IPFS.
+        /// </summary>
+        /// <param name="submission"> The submission whose description and json content are to be uploaded. </param>
+        /// <returns> The description hash and json content hash of the submission in that order. </returns>
+        public static IEnumerator uploadToIPFS(MatryxSubmission submission)
+        {
+            string descriptionHash = "";
+            string jsonContent = "";
+
+            if(submission.details.descHash == null || submission.details.descHash.Equals(string.Empty))
+            {
+                if(submission.description != null && !submission.description.Equals(string.Empty))
+                {
+                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS("description", ".txt", "This submission was created with Calcflow.", "text/plain"));
+                    yield return uploadToIPFS;
+                    descriptionHash = uploadToIPFS.result;
+                }
+            }
+
+            if(submission.details.fileHash == null || submission.details.fileHash.Equals(string.Empty))
+            {
+                if(submission.file != null && !submission.file.Equals(string.Empty))
+                {
+                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS("jsonContent", ".json", submission.file, "application/json"));
+                    yield return uploadToIPFS;
+                    jsonContent = uploadToIPFS.result;
+                }
+            }
+
+            yield return new string[2] { descriptionHash, jsonContent };
+        }
+
+        /// <summary>
+        /// Uploads a Tournament's description and files to IPFS.
+        /// </summary>
+        /// <param name="tournament"> The tournament whose description and files are to be uploaded. </param>
+        /// <returns> The description hash and files hash of the tournament in that order. </returns>
+        public static IEnumerator uploadToIPFS(MatryxTournament tournament)
+        {
+            string descriptionHash = "";
+            string filesHash = "";
+
+            if (tournament.descHash == null || tournament.descHash.Equals(string.Empty))
+            {
+                if (tournament.description != null && !tournament.description.Equals(string.Empty))
+                {
+                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS("description", ".txt", tournament.description, "text/plain"));
+                    yield return uploadToIPFS;
+                    descriptionHash = uploadToIPFS.result;
+                }
+            }
+
+            if (tournament.fileHash == null || tournament.fileHash.Equals(string.Empty))
+            {
+                if (tournament.file != null && !tournament.file.Equals(string.Empty))
+                {
+                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS("filesContent", "", tournament.file, "text/plain"));
+                    yield return uploadToIPFS;
+                    filesHash = uploadToIPFS.result;
+                }
+            }
+
+            yield return new string[2] { descriptionHash, filesHash };
         }
 
         public class CoroutineWithData<T> : CustomYieldInstruction
