@@ -227,7 +227,7 @@ namespace Matryx
 
             if (allowance.result < bounty)
             {
-                ResultsMenu.Instance.SetStatus("Approving MatryxPlatform for "  + bounty + " MTX...");
+                ResultsMenu.Instance.SetStatus("Approving MatryxPlatform for "  + Bounty + " MTX...");
 
                 if (allowance.result != BigInteger.Zero)
                 {

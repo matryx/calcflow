@@ -24,6 +24,8 @@ public class CreateTournamentMenu : MonoBehaviour
     InputField Description;
     [SerializeField]
     NumberPicker Duration;
+    [SerializeField]
+    Text lengthRequirement;
 
     [SerializeField]
     public Text InvalidText;
@@ -45,6 +47,10 @@ public class CreateTournamentMenu : MonoBehaviour
 
     public void TakeInput()
     {
+        if (!ValidateInputs()) return;
+
+        InvalidText.gameObject.SetActive(false);
+
         float bounty = Bounty.CurrentValue;
         float entryFee = EntryFee.CurrentValue;
 
@@ -95,8 +101,46 @@ public class CreateTournamentMenu : MonoBehaviour
         Description.text = "";
     }
 
-    public static bool ValidateInput(string input)
+    public bool ValidateInputs()
     {
+        if (!Title.GetComponent<InputValidator>().isValid)
+        {
+            InvalidText.gameObject.SetActive(true);
+            InvalidText.text = "Invalid Title field";
+            return false;
+        }
+        if (!Description.GetComponent<InputValidator>().isValid)
+        {
+            InvalidText.gameObject.SetActive(true);
+            InvalidText.text = "Invalid Description field";
+            return false;
+        }
+
+        if(Bounty.CurrentValue == 0)
+        {
+            InvalidText.gameObject.SetActive(true);
+            InvalidText.text = "Tournament must have non-zero bounty";
+            return false;
+        }
+
+        if(Duration.CurrentValue == 0)
+        {
+            InvalidText.gameObject.SetActive(true);
+            InvalidText.text = "Tournament must last at least one hour";
+            return false;
+        }
+
         return true;
+    }
+
+    public void updateLengthRequirement()
+    {
+        int currentLength = -10 + Description.text.Length;
+        lengthRequirement.text = currentLength + "/1000";
+
+        float red = 1f;
+        float other = currentLength < 1000 ? 1 + (currentLength / 30f) : 0f;
+        Color lengthColor = new Color(red, other, other);
+        lengthRequirement.color = lengthColor;
     }
 }

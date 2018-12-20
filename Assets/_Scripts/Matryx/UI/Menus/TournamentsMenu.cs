@@ -18,6 +18,8 @@ public class TournamentsMenu : MonoBehaviour
     [SerializeField]
     private UnlockAccountButton accountButton;
     [SerializeField]
+    private CreateTournamentButton createTournamentButton;
+    [SerializeField]
     private TournamentMenu tournamentMenu;
     [SerializeField]
     private CreateSubmissionMenu submitMenu;
@@ -79,8 +81,9 @@ public class TournamentsMenu : MonoBehaviour
 
     public void Prepare()
     {
+        createTournamentButton.Awake();
 
-        if(NetworkSettings.declinedAccountUnlock == null )
+        if (NetworkSettings.declinedAccountUnlock == null )
         {
             SetState(TournamentMenuState.AccountUnlockRequired);
         }
@@ -105,17 +108,20 @@ public class TournamentsMenu : MonoBehaviour
                 Instance.selectTournamentText.text = "Account Unlock Required";
                 Instance.accountButton.transform.parent.gameObject.SetActive(true);
                 Instance.accountButton.SetButtonToUnlock();
+                CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(false);
                 break;
             case TournamentMenuState.WaitingForUnlock:
                 Instance.ClearTournaments();
                 Instance.selectTournamentText.text = "Lift Headset to Unlock Account";
                 Instance.accountButton.transform.parent.gameObject.SetActive(true);
                 Instance.accountButton.SetButtonToCancel();
+                CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(false);
                 break;
             case TournamentMenuState.DisplayingTournaments:
                 Instance.selectTournamentText.text = "Select a Tournament";
                 Instance.accountButton.transform.parent.gameObject.SetActive(false);
                 Instance.LoadTournaments();
+                CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(true);
                 break;
             default:
                 break;

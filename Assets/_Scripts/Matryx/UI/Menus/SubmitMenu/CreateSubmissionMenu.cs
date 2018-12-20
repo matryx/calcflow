@@ -20,19 +20,15 @@ public class CreateSubmissionMenu : MonoBehaviour {
     [SerializeField]
     CustomParametrizedSurface customParametrizedSurface;
     [SerializeField]
-    InputField Tournament_InputField;
+    InputField TournamentField;
     [SerializeField]
-    InputField Title_InputField;
+    InputField TitleField;
     [SerializeField]
     AddressListModifier ContributorsList;
     [SerializeField]
     AddressListModifier ReferencesList;
-
     [SerializeField]
-    GameObject submittingCanvasObject;
-    [SerializeField]
-    public Text submissionProgressText;
-
+    Text InvalidLabel;
     [SerializeField]
     GameObject resultsCanvasObject;
 
@@ -49,19 +45,20 @@ public class CreateSubmissionMenu : MonoBehaviour {
     public void SetTournament(MatryxTournament tournament)
     {
         this.tournament = tournament;
-        Tournament_InputField.text = tournament.title;
+        TournamentField.text = tournament.title;
     }
 
     public void MakeSubmission()
     {
-        this.gameObject.SetActive(false);
-
-        var title = Title_InputField.text;
-        if (title == "" || title == null)
+        var title = TitleField.text;
+        if(!TitleField.gameObject.GetComponent<InputValidator>().isValid)
         {
-            Title_InputField.GetComponent<Image>().color = new Color(1f, 181f / 255f, 181f / 255f);
+            InvalidLabel.gameObject.SetActive(true);
             return;
         }
+
+        this.gameObject.SetActive(false);
+        InvalidLabel.gameObject.SetActive(false);
 
         var contributors = ContributorsList.GetAddressList();
         var references = ReferencesList.GetAddressList();
@@ -102,8 +99,40 @@ public class CreateSubmissionMenu : MonoBehaviour {
 
     public void clearInputs()
     {
-        Title_InputField.text = "";
+        TitleField.text = "";
         ContributorsList.RemoveAll();
         ReferencesList.RemoveAll();
+    }
+
+    public bool ValidateInputs()
+    {
+        if (!TitleField.GetComponent<InputValidator>().isValid)
+        {
+            InvalidLabel.gameObject.SetActive(true);
+            InvalidLabel.text = "Invalid Title field";
+            return false;
+        }
+        //if (!Description.GetComponent<InputValidator>().isValid)
+        //{
+        //    InvalidLabel.gameObject.SetActive(true);
+        //    InvalidLabel.text = "Invalid Description field";
+        //    return false;
+        //}
+
+        //if (Bounty.CurrentValue == 0)
+        //{
+        //    InvalidLabel.gameObject.SetActive(true);
+        //    InvalidLabel.text = "Tournament must have non-zero bounty";
+        //    return false;
+        //}
+
+        //if (Duration.CurrentValue == 0)
+        //{
+        //    InvalidLabel.gameObject.SetActive(true);
+        //    InvalidLabel.text = "Tournament must last at least one hour";
+        //    return false;
+        //}
+
+        return true;
     }
 }

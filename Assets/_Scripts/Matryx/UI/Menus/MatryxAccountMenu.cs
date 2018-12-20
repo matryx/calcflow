@@ -111,6 +111,7 @@ public class MatryxAccountMenu : MonoBehaviour {
     {
         yield return new WaitForSeconds(15);
         ReenterVR();
+        yield break;
     }
 
     public void toggleUsePassword()
@@ -157,9 +158,6 @@ public class MatryxAccountMenu : MonoBehaviour {
             Instance.PrivateKeyField.text = "";
             Instance.PasswordField.text = "";
         }
-
-        Instance.PrivateKeyField.GetComponent<Image>().color = Color.white;
-        Instance.PasswordField.GetComponent<Image>().color = Color.white;
 
         Instance.AccountUnlockText[2].gameObject.SetActive(false);
     }
@@ -208,17 +206,15 @@ public class MatryxAccountMenu : MonoBehaviour {
         string password = Instance.PasswordField.text;
         bool usedPassword = Instance.UsePassword.isOn;
 
-        if (!ValidateInput(InputType.PrivateKey, privateKey))
+        if (!Instance.PrivateKeyField.GetComponent<InputValidator>().isValid)
         {
-            Instance.PrivateKeyField.GetComponent<Image>().color = new Color(1f, 181f / 255f, 181f / 255f);
             Instance.AccountUnlockText[2].text = "Invalid private key";
             Instance.AccountUnlockText[2].gameObject.SetActive(true);
             return false;
         }
 
-        if (usedPassword && !ValidateInput(InputType.Password, password))
+        if (usedPassword && !Instance.PasswordField.GetComponent<InputValidator>().isValid)
         {
-            Instance.PasswordField.GetComponent<Image>().color = new Color(1f, 181f / 255f, 181f / 255f);
             Instance.AccountUnlockText[2].text = "Invalid password";
             Instance.AccountUnlockText[2].gameObject.SetActive(true);
             return false;
@@ -263,5 +259,4 @@ public class MatryxAccountMenu : MonoBehaviour {
 
         return true;
     }
-
 }
