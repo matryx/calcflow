@@ -5,10 +5,23 @@ using UnityEngine;
 public class MatryxKeyboardButton : QuickButton {
 
     [SerializeField]
-    RayCastButton menusButton;
+    GameObject secondaryMenu;
     [SerializeField]
     RayCastButton matryxButton;
 
+    protected override void Start()
+    {
+        base.Start();
+        if(!UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("FreeParametrization"))
+        {
+            Debug.Log("Destroying Matryx Menu...");
+            Destroy(gameObject);
+        }
+        else
+        {
+            Debug.Log("Keeping Matryx Menu...");
+        }
+    }
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
@@ -22,8 +35,12 @@ public class MatryxKeyboardButton : QuickButton {
 
     protected IEnumerator timedPressButtons()
     {
-        menusButton.PressButton(gameObject);
-        yield return new WaitForSeconds(0.1f);
+        if(!secondaryMenu.activeSelf)
+        {
+            StartCoroutine(secondaryMenu.GetComponent<ExpandContract>().Expand());
+        }
+
         matryxButton.PressButton(gameObject);
+        yield break;
     }
 }

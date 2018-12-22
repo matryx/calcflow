@@ -59,7 +59,6 @@ public class CreateSubmissionButton : QuickButton {
         {
             ToggleOn();
         }
-        toggled = !toggled;
 
         // Select the button
         button.SetState(2);
@@ -73,6 +72,7 @@ public class CreateSubmissionButton : QuickButton {
 
     public void ToggleOff()
     {
+        toggled = false;
         button.selectedColor = TOGGLE_OFF;
         button.passiveColor = LIGHT_PASSIVE;
         button.hoveringColor = LIGHT_HOVERING;
@@ -86,6 +86,7 @@ public class CreateSubmissionButton : QuickButton {
 
     public void ToggleOn()
     {
+        toggled = true;
         button.selectedColor = TOGGLE_ON;
         button.passiveColor = DARK_PASSIVE;
         button.hoveringColor = DARK_HOVERING;

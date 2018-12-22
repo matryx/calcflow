@@ -10,6 +10,7 @@ using Valve.VR;
 
 using Nanome.Core;
 using Matryx;
+using Calcflow.UserStatistics;
 
 public class CreateTournamentMenu : MonoBehaviour
 {
@@ -51,8 +52,8 @@ public class CreateTournamentMenu : MonoBehaviour
 
         InvalidText.gameObject.SetActive(false);
 
-        float bounty = Bounty.CurrentValue;
-        float entryFee = EntryFee.CurrentValue;
+        BigInteger bounty = new BigInteger(Bounty.CurrentValue) * new BigInteger(1e18);
+        BigInteger entryFee = new BigInteger(EntryFee.CurrentValue) * new BigInteger(1e18);
 
         System.DateTime epochStart = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
         int currentTime = (int)(System.DateTime.UtcNow - epochStart).TotalSeconds;
@@ -61,10 +62,10 @@ public class CreateTournamentMenu : MonoBehaviour
         {
             Start = currentTime,
             End = new BigInteger(currentTime + Duration.CurrentValue*60*60),
-            Bounty = new BigInteger(bounty),
+            Bounty = bounty,
             Review = 60 * 60 * 24 * 14
         };
-        MatryxTournament tournament = new MatryxTournament(Title.text, Description.text, null, "math", new BigInteger(bounty) * new BigInteger(1e18), new BigInteger(entryFee) * new BigInteger(1e18), roundDetails);
+        MatryxTournament tournament = new MatryxTournament(Title.text, Description.text, null, "math", bounty, entryFee, roundDetails);
 
         Async.runInCoroutine(delegate (Async thread, object param)
         {
@@ -73,6 +74,7 @@ public class CreateTournamentMenu : MonoBehaviour
                 // Check success
                 if ((bool)result)
                 {
+                    StatisticsTracking.EndEvent("Matryx", "Tournament Creation");
                     ResultsMenu.Instance.PostSuccess(tournament);
                     StartCoroutine(ResultsMenu.Instance.ReturnToCalcflowAfterSeconds(10f));
                 }

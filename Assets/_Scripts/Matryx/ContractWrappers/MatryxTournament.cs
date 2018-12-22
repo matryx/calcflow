@@ -19,6 +19,7 @@ using Nethereum.Signer;
 
 using Matryx;
 using Nanome.Core;
+using Calcflow.UserStatistics;
 
 namespace Matryx
 {
@@ -220,6 +221,8 @@ namespace Matryx
 
         public IEnumerator create(Async.EventDelegate callback = null)
         {
+            StatisticsTracking.StartEvent("Matryx", "Tournament Creation");
+
             ResultsMenu.transactionObject = this;
 
             var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxExplorer.Instance, MatryxToken.allowance(NetworkSettings.address, MatryxPlatform.address));

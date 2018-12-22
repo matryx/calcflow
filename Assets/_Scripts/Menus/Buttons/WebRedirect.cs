@@ -16,6 +16,7 @@ public class WebRedirect : QuickButton {
     {
         transform.GetComponent<AudioSource>().Play();
         Application.OpenURL("http://nanome.ai/nanome");
+        // Application.OpenURL("http://nanome.ai/pricing");
         StopAllCoroutines();
         StartCoroutine(FadeInOut(feedback, .5f, .3f, 1f));
     }

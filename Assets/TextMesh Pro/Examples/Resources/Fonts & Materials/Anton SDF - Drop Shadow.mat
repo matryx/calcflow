@@ -8,283 +8,94 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: Anton SDF - Drop Shadow
   m_Shader: {fileID: 4800000, guid: cafd18099dfc0114896e0a8b277b81b6, type: 3}
-  m_ShaderKeywords: OUTLINE_ON UNDERLAY_ON
+  m_ShaderKeywords: ETC1_EXTERNAL_ALPHA OUTLINE_ON UNDERLAY_ON
   m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
   stringTagMap: {}
+  disabledShaderPasses: []
   m_SavedProperties:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TexEnvs:
-      data:
-        first:
-          name: _MainTex
-        second:
-          m_Texture: {fileID: 2853570, guid: f76ef802b8b940c46a31f9027f2b0158, type: 2}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
-          name: _BumpMap
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
-          name: _FaceTex
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
-          name: _OutlineTex
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
-          name: _Cube
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Cube:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FaceTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2853570, guid: f76ef802b8b940c46a31f9027f2b0158, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OutlineTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
-      data:
-        first:
-          name: _Stencil
-        second: 0
-      data:
-        first:
-          name: _StencilComp
-        second: 8
-      data:
-        first:
-          name: _StencilOp
-        second: 0
-      data:
-        first:
-          name: _StencilReadMask
-        second: 255
-      data:
-        first:
-          name: _StencilWriteMask
-        second: 255
-      data:
-        first:
-          name: _ColorMask
-        second: 15
-      data:
-        first:
-          name: _FaceDilate
-        second: .100000001
-      data:
-        first:
-          name: _OutlineWidth
-        second: .100000001
-      data:
-        first:
-          name: _OutlineSoftness
-        second: 0
-      data:
-        first:
-          name: _GlowOffset
-        second: 0
-      data:
-        first:
-          name: _GlowInner
-        second: .0500000007
-      data:
-        first:
-          name: _GlowOuter
-        second: .0500000007
-      data:
-        first:
-          name: _GlowPower
-        second: .75
-      data:
-        first:
-          name: _WeightNormal
-        second: 0
-      data:
-        first:
-          name: _WeightBold
-        second: .75
-      data:
-        first:
-          name: _ShaderFlags
-        second: 0
-      data:
-        first:
-          name: _ScaleRatioA
-        second: .833333313
-      data:
-        first:
-          name: _ScaleRatioB
-        second: .677083313
-      data:
-        first:
-          name: _ScaleRatioC
-        second: .59375
-      data:
-        first:
-          name: _TextureWidth
-        second: 512
-      data:
-        first:
-          name: _TextureHeight
-        second: 512
-      data:
-        first:
-          name: _GradientScale
-        second: 6
-      data:
-        first:
-          name: _ScaleX
-        second: 1
-      data:
-        first:
-          name: _ScaleY
-        second: 1
-      data:
-        first:
-          name: _PerspectiveFilter
-        second: .875
-      data:
-        first:
-          name: _VertexOffsetX
-        second: 0
-      data:
-        first:
-          name: _VertexOffsetY
-        second: 0
-      data:
-        first:
-          name: _FaceUVSpeedX
-        second: 0
-      data:
-        first:
-          name: _FaceUVSpeedY
-        second: 0
-      data:
-        first:
-          name: _OutlineUVSpeedX
-        second: 0
-      data:
-        first:
-          name: _OutlineUVSpeedY
-        second: 0
-      data:
-        first:
-          name: _Bevel
-        second: .5
-      data:
-        first:
-          name: _BevelOffset
-        second: 0
-      data:
-        first:
-          name: _BevelWidth
-        second: 0
-      data:
-        first:
-          name: _BevelClamp
-        second: 0
-      data:
-        first:
-          name: _BevelRoundness
-        second: 0
-      data:
-        first:
-          name: _LightAngle
-        second: 3.14159989
-      data:
-        first:
-          name: _SpecularPower
-        second: 2
-      data:
-        first:
-          name: _Reflectivity
-        second: 10
-      data:
-        first:
-          name: _Diffuse
-        second: .5
-      data:
-        first:
-          name: _Ambient
-        second: .5
-      data:
-        first:
-          name: _BumpOutline
-        second: 0
-      data:
-        first:
-          name: _BumpFace
-        second: 0
-      data:
-        first:
-          name: _UnderlayOffsetX
-        second: .5
-      data:
-        first:
-          name: _UnderlayOffsetY
-        second: -.5
-      data:
-        first:
-          name: _UnderlayDilate
-        second: 0
-      data:
-        first:
-          name: _UnderlaySoftness
-        second: .0500000007
-      data:
-        first:
-          name: _MaskSoftnessX
-        second: 0
-      data:
-        first:
-          name: _MaskSoftnessY
-        second: 0
+    - _Ambient: 0.5
+    - _Bevel: 0.5
+    - _BevelClamp: 0
+    - _BevelOffset: 0
+    - _BevelRoundness: 0
+    - _BevelWidth: 0
+    - _BumpFace: 0
+    - _BumpOutline: 0
+    - _ColorMask: 15
+    - _Diffuse: 0.5
+    - _FaceDilate: 0.1
+    - _FaceUVSpeedX: 0
+    - _FaceUVSpeedY: 0
+    - _GlowInner: 0.05
+    - _GlowOffset: 0
+    - _GlowOuter: 0.05
+    - _GlowPower: 0.75
+    - _GradientScale: 6
+    - _LightAngle: 3.1416
+    - _MaskSoftnessX: 0
+    - _MaskSoftnessY: 0
+    - _OutlineSoftness: 0
+    - _OutlineUVSpeedX: 0
+    - _OutlineUVSpeedY: 0
+    - _OutlineWidth: 0.1
+    - _PerspectiveFilter: 0.875
+    - _Reflectivity: 10
+    - _ScaleRatioA: 0.8333333
+    - _ScaleRatioB: 0.6770833
+    - _ScaleRatioC: 0.59375
+    - _ScaleX: 1
+    - _ScaleY: 1
+    - _ShaderFlags: 0
+    - _SpecularPower: 2
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _TextureHeight: 512
+    - _TextureWidth: 512
+    - _UnderlayDilate: 0
+    - _UnderlayOffsetX: 0.5
+    - _UnderlayOffsetY: -0.5
+    - _UnderlaySoftness: 0.05
+    - _VertexOffsetX: 0
+    - _VertexOffsetY: 0
+    - _WeightBold: 0.75
+    - _WeightNormal: 0
     m_Colors:
-      data:
-        first:
-          name: _ClipRect
-        second: {r: -32767, g: -32767, b: 32767, a: 32767}
-      data:
-        first:
-          name: _FaceColor
-        second: {r: 1, g: 1, b: 1, a: 1}
-      data:
-        first:
-          name: _OutlineColor
-        second: {r: 0, g: 0, b: 0, a: 1}
-      data:
-        first:
-          name: _GlowColor
-        second: {r: 0, g: 1, b: 0, a: .5}
-      data:
-        first:
-          name: _SpecularColor
-        second: {r: 1, g: 1, b: 1, a: 1}
-      data:
-        first:
-          name: _ReflectFaceColor
-        second: {r: 0, g: 0, b: 0, a: 1}
-      data:
-        first:
-          name: _ReflectOutlineColor
-        second: {r: 0, g: 0, b: 0, a: 1}
-      data:
-        first:
-          name: _EnvMatrixRotation
-        second: {r: 0, g: 0, b: 0, a: 0}
-      data:
-        first:
-          name: _UnderlayColor
-        second: {r: 0, g: 0, b: 0, a: .5}
-      data:
-        first:
-          name: _MaskCoord
-        second: {r: 0, g: 0, b: 32767, a: 32767}
+    - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
+    - _EnvMatrixRotation: {r: 0, g: 0, b: 0, a: 0}
+    - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
+    - _GlowColor: {r: 0, g: 1, b: 0, a: 0.5}
+    - _MaskCoord: {r: 0, g: 0, b: 32767, a: 32767}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ReflectFaceColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ReflectOutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+    - _UnderlayColor: {r: 0, g: 0, b: 0, a: 0.5}

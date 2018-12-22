@@ -12,6 +12,7 @@ using System.IO;
 
 using Matryx;
 using Nanome.Core;
+using Calcflow.UserStatistics;
 
 public class CreateSubmissionMenu : MonoBehaviour {
 
@@ -81,6 +82,7 @@ public class CreateSubmissionMenu : MonoBehaviour {
                 // Check success
                 if ((bool)result)
                 {
+                    StatisticsTracking.EndEvent("Matryx", "Submission Creation");
                     ResultsMenu.Instance.PostSuccess(submission);
                 }
                 else

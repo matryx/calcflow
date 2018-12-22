@@ -14,6 +14,7 @@ using System.Text;
 using Nanome.Maths.Serializers.JsonSerializer;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Calcflow.UserStatistics;
 
 namespace Matryx
 {
@@ -249,7 +250,6 @@ namespace Matryx
             {
                 yield return www;
                 file = www.text;
-                // TODO: Get Alex's help here
                 var ESSRegEx = "{.*rangeKeys.*rangePairs.*ExpressionKeys.*ExpressionValues.*}";
                 calcflowCompatible = Regex.IsMatch(file, ESSRegEx);
             }
@@ -257,6 +257,8 @@ namespace Matryx
 
         public IEnumerator submit(Async.EventDelegate callback=null)
         {
+            StatisticsTracking.StartEvent("Matryx", "Submission Creation");
+
             ResultsMenu.transactionObject = this;
 
             var isEntrant = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.isEntrant(NetworkSettings.address));
