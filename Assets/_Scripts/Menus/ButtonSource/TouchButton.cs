@@ -6,9 +6,6 @@ using System;
 
 public class TouchButton : Button
 {
-
-
-
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("ButtonPresser"))
@@ -20,5 +17,4 @@ public class TouchButton : Button
         if (other.gameObject.layer == LayerMask.NameToLayer("ButtonPresser"))
             UnpressButton(other.gameObject);
     }
-
 }

@@ -24,16 +24,12 @@ public class UnlockAccountButton : QuickButton
 
     public void ReturnFromSubmit()
     {
-        // Adjust button colors for closing submit menu
         submissionButtonFlexComponent.selectedColor = TOGGLE_OFF;
         submissionButtonFlexComponent.passiveColor = LIGHT_PASSIVE;
         submissionButtonFlexComponent.hoveringColor = LIGHT_HOVERING;
 
         submissionButtonFlexComponent.SetState(1);
         SetButtonToUnlock();
-
-        // Hide remove headset label on wrist
-        //congratulationsMessage.gameObject.SetActive(false);
     }
 
     protected override void ButtonEnterBehavior(GameObject other)

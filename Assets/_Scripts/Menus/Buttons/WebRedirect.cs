@@ -15,7 +15,8 @@ public class WebRedirect : QuickButton {
     protected override void ButtonEnterBehavior(GameObject other)
     {
         transform.GetComponent<AudioSource>().Play();
-        Application.OpenURL("http://nanome.ai/nanome");
+        //Application.OpenURL("http://nanome.ai/nanome");
+        Application.OpenURL("http://bit.ly/Nanome-Calcflow");
         StopAllCoroutines();
         StartCoroutine(FadeInOut(feedback, .5f, .3f, 1f));
     }

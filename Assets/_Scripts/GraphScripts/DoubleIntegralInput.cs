@@ -271,15 +271,17 @@ public class DoubleIntegralInput : MonoBehaviour
 
             string last = eq[i - 1];
 
+            if(isPi(curr))
+            {
+                eq[i] = "pi";
+            }
             /* Situations where we must add multiplication symbols.*/
-            if ((isNum(last) && !isSymbol(curr) && !isNum(curr) && !isCloseP(curr))
+            else if ((isNum(last) && !isSymbol(curr) && !isNum(curr) && !isCloseP(curr))
              || (isVar(last) && !isSymbol(curr) && !isCloseP(curr))
              || (isCloseP(last) && !isSymbol(curr) && !isCloseP(curr)))
             {
                 eq.Insert(i++, "*");
             }
-
-
         }
         while (paren < 0)
         {
@@ -307,6 +309,12 @@ public class DoubleIntegralInput : MonoBehaviour
         if (s[s.Length - 1] > 96 && s[s.Length - 1] < 123) return true;
         return false;
     }
+
+    bool isPi(string s)
+    {
+        return s[0] == 'π';
+    }
+
     /// <summary>
     /// checks if string represents a number.
     /// </summary>

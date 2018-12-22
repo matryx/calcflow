@@ -18,9 +18,11 @@ public class TournamentsMenu : MonoBehaviour
     [SerializeField]
     private UnlockAccountButton accountButton;
     [SerializeField]
+    private CreateTournamentButton createTournamentButton;
+    [SerializeField]
     private TournamentMenu tournamentMenu;
     [SerializeField]
-    private SubmitMenu submitMenu;
+    private CreateSubmissionMenu submitMenu;
     [SerializeField]
     private TMPro.TextMeshPro loadingText;
 
@@ -79,8 +81,9 @@ public class TournamentsMenu : MonoBehaviour
 
     public void Prepare()
     {
+        createTournamentButton.Awake();
 
-        if(NetworkSettings.declinedAccountUnlock == null )
+        if (NetworkSettings.declinedAccountUnlock == null )
         {
             SetState(TournamentMenuState.AccountUnlockRequired);
         }
@@ -105,17 +108,20 @@ public class TournamentsMenu : MonoBehaviour
                 Instance.selectTournamentText.text = "Account Unlock Required";
                 Instance.accountButton.transform.parent.gameObject.SetActive(true);
                 Instance.accountButton.SetButtonToUnlock();
+                CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(false);
                 break;
             case TournamentMenuState.WaitingForUnlock:
                 Instance.ClearTournaments();
                 Instance.selectTournamentText.text = "Lift Headset to Unlock Account";
                 Instance.accountButton.transform.parent.gameObject.SetActive(true);
                 Instance.accountButton.SetButtonToCancel();
+                CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(false);
                 break;
             case TournamentMenuState.DisplayingTournaments:
                 Instance.selectTournamentText.text = "Select a Tournament";
                 Instance.accountButton.transform.parent.gameObject.SetActive(false);
                 Instance.LoadTournaments();
+                CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(true);
                 break;
             default:
                 break;
@@ -215,7 +221,7 @@ public class TournamentsMenu : MonoBehaviour
         button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = tournament.title;
 
         TMPro.TextMeshPro matryxBountyTMP = button.transform.Find("MTX_Amount").GetComponent<TMPro.TextMeshPro>();
-        matryxBountyTMP.text = tournament.bounty + " " + matryxBountyTMP.text;
+        matryxBountyTMP.text = tournament.Bounty + " " + matryxBountyTMP.text;
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());

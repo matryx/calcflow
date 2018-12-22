@@ -12,31 +12,28 @@ using System.IO;
 
 using Matryx;
 using Nanome.Core;
+using Calcflow.UserStatistics;
 
-public class SubmitMenu : MonoBehaviour {
+public class CreateSubmissionMenu : MonoBehaviour {
 
     string submitEndpoint = "http://13.57.11.64/v1/submit/";
     MatryxTournament tournament;
     [SerializeField]
     CustomParametrizedSurface customParametrizedSurface;
     [SerializeField]
-    InputField Tournament_InputField;
+    InputField TournamentField;
     [SerializeField]
-    InputField Title_InputField;
+    InputField TitleField;
     [SerializeField]
     AddressListModifier ContributorsList;
     [SerializeField]
     AddressListModifier ReferencesList;
-
     [SerializeField]
-    GameObject submittingCanvasObject;
-    [SerializeField]
-    public Text submissionProgressText;
-
+    Text InvalidLabel;
     [SerializeField]
     GameObject resultsCanvasObject;
 
-    public static SubmitMenu Instance { get; private set; }
+    public static CreateSubmissionMenu Instance { get; private set; }
 
     public void Start()
     {
@@ -49,19 +46,20 @@ public class SubmitMenu : MonoBehaviour {
     public void SetTournament(MatryxTournament tournament)
     {
         this.tournament = tournament;
-        Tournament_InputField.text = tournament.title;
+        TournamentField.text = tournament.title;
     }
 
     public void MakeSubmission()
     {
-        Debug.Log("Making submission...");
-
-        var title = Title_InputField.text;
-        if (title == "" || title == null)
+        var title = TitleField.text;
+        if(!TitleField.gameObject.GetComponent<InputValidator>().isValid)
         {
-            Title_InputField.GetComponent<Image>().color = new Color(1f, 181f / 255f, 181f / 255f);
+            InvalidLabel.gameObject.SetActive(true);
             return;
         }
+
+        this.gameObject.SetActive(false);
+        InvalidLabel.gameObject.SetActive(false);
 
         var contributors = ContributorsList.GetAddressList();
         var references = ReferencesList.GetAddressList();
@@ -71,15 +69,12 @@ public class SubmitMenu : MonoBehaviour {
 
         var submission = new MatryxSubmission(tournament, title, contributors, references, bodyData, "This submission was created with Calcflow.");
         Debug.Log("Submission: " + tournament.address + " -> " + title);
-        
-        submittingCanvasObject.SetActive(true);
+
+        resultsCanvasObject.SetActive(true);
         Async.runInCoroutine(delegate (Async thread, object param)
         {
             return submission.submit(delegate (object result)
             {
-                // Switch out the submitting screen for the results screen.
-                submittingCanvasObject.SetActive(false);
-                resultsCanvasObject.SetActive(true);
                 this.gameObject.SetActive(false);
                 // Debug
                 Debug.Log("Submission uploaded");
@@ -87,14 +82,15 @@ public class SubmitMenu : MonoBehaviour {
                 // Check success
                 if ((bool)result)
                 {
-                    resultsCanvasObject.GetComponent<ResultsMenu>().PostSuccess(tournament);
+                    StatisticsTracking.EndEvent("Matryx", "Submission Creation");
+                    ResultsMenu.Instance.PostSuccess(submission);
                 }
                 else
                 {
-                    resultsCanvasObject.GetComponent<ResultsMenu>().PostFailure(tournament);
+                    ResultsMenu.Instance.PostFailure(submission);
                 }
             });
-        }); 
+        });
     }
 
     public string SerializeSurface()
@@ -105,8 +101,40 @@ public class SubmitMenu : MonoBehaviour {
 
     public void clearInputs()
     {
-        Title_InputField.text = "";
+        TitleField.text = "";
         ContributorsList.RemoveAll();
         ReferencesList.RemoveAll();
+    }
+
+    public bool ValidateInputs()
+    {
+        if (!TitleField.GetComponent<InputValidator>().isValid)
+        {
+            InvalidLabel.gameObject.SetActive(true);
+            InvalidLabel.text = "Invalid Title field";
+            return false;
+        }
+        //if (!Description.GetComponent<InputValidator>().isValid)
+        //{
+        //    InvalidLabel.gameObject.SetActive(true);
+        //    InvalidLabel.text = "Invalid Description field";
+        //    return false;
+        //}
+
+        //if (Bounty.CurrentValue == 0)
+        //{
+        //    InvalidLabel.gameObject.SetActive(true);
+        //    InvalidLabel.text = "Tournament must have non-zero bounty";
+        //    return false;
+        //}
+
+        //if (Duration.CurrentValue == 0)
+        //{
+        //    InvalidLabel.gameObject.SetActive(true);
+        //    InvalidLabel.text = "Tournament must last at least one hour";
+        //    return false;
+        //}
+
+        return true;
     }
 }

@@ -206,7 +206,7 @@ namespace Nanome.Core
             var running = true;
             lock (counterLock)
             {
-                running = counter < 100;
+                running = counter < 256;
             }
             if (running)
             {

@@ -19,6 +19,7 @@ using Nethereum.Signer;
 
 using Matryx;
 using Nanome.Core;
+using Calcflow.UserStatistics;
 
 namespace Matryx
 {
@@ -28,32 +29,69 @@ namespace Matryx
         public static string ABI;
         Nethereum.Contracts.Contract contract;
 
-        public MatryxTournament(string address)
-        {
-            this.address = address;
-        }
-        public MatryxTournament(string address, string title, BigInteger bounty)
-        {
-            this.address = address;
-            this.title = title;
-            this.bounty = bounty;
-        }
-
         public string owner;
         public string title;
-        public string descriptionHash;
-        public string fileHash;
+        public string descHash = string.Empty;
+        public string fileHash = string.Empty;
         public string category;
         public BigInteger bounty;
+        public BigInteger Bounty {
+            get
+            {
+                return (bounty / new BigInteger(1e18));
+            }
+            set
+            {
+                bounty = value * new BigInteger(1e18);
+            }
+        }
+        public BigInteger entryFee;
+        public BigInteger EntryFee
+        {
+            get
+            {
+                return (entryFee / new BigInteger(1e18));
+            }
+            set
+            {
+                entryFee = value * new BigInteger(1e18);
+            }
+        }
         public int currentRound;
         public string currentRoundAddress;
         public string currentRoundState;
         public long roundEndTime;
         public int numberOfParticipants;
-        public BigInteger entryFee;
 
-        public string description;
-        public byte[] file;
+        public List<MatryxRound> rounds;
+
+        public string description = "";
+        public string file = "";
+
+        public MatryxTournament(string address)
+        {
+            this.address = address;
+        }
+        public MatryxTournament(string address, string title, BigInteger bounty, BigInteger entryFee)
+        {
+            this.address = address;
+            this.title = title;
+            this.bounty = bounty;
+            this.entryFee = entryFee;
+        }
+        public MatryxTournament(string title, string description, string file, string category, BigInteger bounty, BigInteger entryFee, MatryxRound.RoundDetails roundDetails)
+        {
+            this.title = title;
+            this.description = description;
+            this.file = file;
+            this.category = category;
+            this.bounty = bounty;
+            this.entryFee = entryFee;
+
+            rounds = new List<MatryxRound>();
+            rounds.Add(new MatryxRound());
+            rounds[0].Details = roundDetails;
+        }
 
         public string getDescription()
         {
@@ -65,7 +103,7 @@ namespace Matryx
             return description;
         }
 
-        public byte[] getFile()
+        public string getFile()
         {
             if (file == null)
             {
@@ -74,6 +112,10 @@ namespace Matryx
 
             return file;
         }
+
+        [Function("getOwner", "address")]
+        public class GetOwnerFunction : FunctionMessage { }
+
         [Function("getEntryFee", "uint256")]
         public class GetEntryFeeFunction : FunctionMessage { }
 
@@ -176,6 +218,75 @@ namespace Matryx
 
         [Function("recoverFunds")]
         public class RecoverFundsFunction : FunctionMessage {}
+
+        public IEnumerator create(Async.EventDelegate callback = null)
+        {
+            StatisticsTracking.StartEvent("Matryx", "Tournament Creation");
+
+            ResultsMenu.transactionObject = this;
+
+            var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxExplorer.Instance, MatryxToken.allowance(NetworkSettings.address, MatryxPlatform.address));
+            yield return allowance;
+
+            if (allowance.result < bounty)
+            {
+                ResultsMenu.Instance.SetStatus("Approving MatryxPlatform for "  + Bounty + " MTX...");
+
+                if (allowance.result != BigInteger.Zero)
+                {
+                    var approveZero = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, MatryxToken.approve(MatryxPlatform.address, BigInteger.Zero));
+                    yield return approveZero;
+
+                    if (!approveZero.result)
+                    {
+                        Debug.Log("Failed to reset tournament's allowance to zero for this user. Please check the allowance this user has granted the tournament");
+                        yield break;
+                    }
+                }
+
+                var approveBounty = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, MatryxToken.approve(MatryxPlatform.address, bounty));
+                yield return approveBounty;
+
+                if (!approveBounty.result)
+                {
+                    Debug.Log("Failed to set the tournament's allowance from this user to the tournament's entry fee");
+                    yield break;
+                }
+            }
+
+            if (!description.Equals(string.Empty) && descHash.Equals(string.Empty))
+            {
+                ResultsMenu.Instance.SetStatus("Uploading content to IPFS...");
+                var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxExplorer.Instance, Utils.uploadToIPFS(this));
+                yield return uploadToIPFS;
+
+                if(!uploadToIPFS.result[0].Equals(string.Empty))
+                {
+                    descHash = uploadToIPFS.result[0];
+                }
+                if(!uploadToIPFS.result[1].Equals(string.Empty))
+                {
+                    fileHash = uploadToIPFS.result[1];
+                }
+            }
+
+            ResultsMenu.Instance.SetStatus("Creating Tournament " + title + "...");
+            var createTournament = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, MatryxPlatform.createTournament(this));
+            yield return createTournament;
+
+            if (callback != null)
+            {
+                callback(createTournament.result);
+            }
+        }
+
+        public IEnumerator getOwner()
+        {
+            var getOwnerRequest = new QueryUnityRequest<GetOwnerFunction, EthereumTypes.Address>(NetworkSettings.infuraProvider, NetworkSettings.address);
+            yield return getOwnerRequest.Query(new GetOwnerFunction(), address);
+            owner = getOwnerRequest.Result.Value;
+            yield return getOwnerRequest.Result.Value;
+        }
 
         public IEnumerator getEntryFee()
         {

@@ -6,9 +6,9 @@ public class CreateSubmissionButton : QuickButton {
     [SerializeField]
     TMPro.TextMeshPro text;
     [SerializeField]
-    private SubmitMenu canvasSubmitMenu;
+    private CreateSubmissionMenu canvasSubmitMenu;
     [SerializeField]
-    private FlexButtonComponent submissionButtonFlexComponent;
+    private FlexButtonComponent button;
 
     private Color TOGGLE_ON = new Color(83f / 255f, 198f / 255f, 236f / 255f);
     private Color TOGGLE_OFF = new Color(117f / 255f, 205f / 255f, 234f / 255f);
@@ -20,15 +20,27 @@ public class CreateSubmissionButton : QuickButton {
     private float defaultFontSize = 1.6f;
     private float otherFontSize = 1.3f;
 
+    private bool toggled = false;
+
+    public static CreateSubmissionButton Instance { get; private set; }
+
+    public void Awake()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+    }
+
     public void ReturnFromSubmit()
     {
         // Adjust button colors for closing submit menu
-        submissionButtonFlexComponent.selectedColor = TOGGLE_OFF;
-        submissionButtonFlexComponent.passiveColor = LIGHT_PASSIVE;
-        submissionButtonFlexComponent.hoveringColor = LIGHT_HOVERING;
+        button.selectedColor = TOGGLE_OFF;
+        button.passiveColor = LIGHT_PASSIVE;
+        button.hoveringColor = LIGHT_HOVERING;
 
-        submissionButtonFlexComponent.SetState(1);
-        SetSubmitButtonToContribute();
+        button.SetState(1);
+        ToggleOff();
 
         // Hide remove headset label on wrist
         //congratulationsMessage.gameObject.SetActive(false);
@@ -38,50 +50,51 @@ public class CreateSubmissionButton : QuickButton {
     {
         bool menuActive = canvasSubmitMenu.gameObject.activeSelf;
         canvasSubmitMenu.gameObject.SetActive(!menuActive);
-        
-        if(!menuActive)
-        {
-            // Adjust button colors for bringing up submit menu
-            submissionButtonFlexComponent.selectedColor = TOGGLE_ON;
-            submissionButtonFlexComponent.passiveColor = DARK_PASSIVE;
-            submissionButtonFlexComponent.hoveringColor = DARK_HOVERING;
 
-            // Display remove headset label on wrist
-            SetSubmitButtonToLiftHeadset();
+        if (toggled)
+        {
+            ToggleOff();
         }
         else
         {
-            // Adjust button colors for closing submit menu
-            submissionButtonFlexComponent.selectedColor = TOGGLE_OFF;
-            submissionButtonFlexComponent.passiveColor = LIGHT_PASSIVE;
-            submissionButtonFlexComponent.hoveringColor = LIGHT_HOVERING;
-
-            // Hide remove headset label on wrist
-            //congratulationsMessage.gameObject.SetActive(false);
-            SetSubmitButtonToContribute();
+            ToggleOn();
         }
 
         // Select the button
-        submissionButtonFlexComponent.SetState(2);
+        button.SetState(2);
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
         // Deselect the button
-        submissionButtonFlexComponent.SetState(1);
+        button.SetState(1);
     }
 
-    public void SetSubmitButtonToContribute()
+    public void ToggleOff()
     {
+        toggled = false;
+        button.selectedColor = TOGGLE_OFF;
+        button.passiveColor = LIGHT_PASSIVE;
+        button.hoveringColor = LIGHT_HOVERING;
+
         text.text = "Contribute";
         text.fontSize = defaultFontSize;
         text.color = Color.black;
+
+        button.SetState(1);
     }
 
-    public void SetSubmitButtonToLiftHeadset()
+    public void ToggleOn()
     {
+        toggled = true;
+        button.selectedColor = TOGGLE_ON;
+        button.passiveColor = DARK_PASSIVE;
+        button.hoveringColor = DARK_HOVERING;
+
         text.text = "Lift Headset...";
         text.fontSize = otherFontSize;
         text.color = Color.white;
+
+        button.SetState(1);
     }
 }

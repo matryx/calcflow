@@ -16,7 +16,7 @@ public class AddressListModifier : MonoBehaviour {
     [SerializeField]
     GameObject addressCellPrefab;
 
-    ColorBlock defaultColorBlock = new ColorBlock();
+    Color defaultColor;
 
     HashSet<string> addresses = new HashSet<string>();
 
@@ -27,10 +27,7 @@ public class AddressListModifier : MonoBehaviour {
 
     private void Start()
     {
-        defaultColorBlock.normalColor = Color.white;
-        defaultColorBlock.highlightedColor = new Color(245f / 255f, 245f / 255f, 245f / 255f);
-        defaultColorBlock.pressedColor = new Color(200f / 255f, 200f / 255f, 200f / 255f);
-        defaultColorBlock.disabledColor = new Color(200f / 255f, 200f / 255f, 200f / 255f, 0.5f);
+        defaultColor = inputBackgroundImage.color;
     }
 
     public void InsertFromInputField()
@@ -59,14 +56,15 @@ public class AddressListModifier : MonoBehaviour {
 
         if(list.Count == 0)
         {
-            inputBackgroundImage.color = new Color(1f, 181f/255f, 181f/255f);
+            Color redTintDefaultColor = new Color(defaultColor.r + 0.2f, defaultColor.g / 3f, defaultColor.b / 3f);
+            inputBackgroundImage.color = redTintDefaultColor;
 
             return new List<string>();
         }
         else
         {
-            inputBackgroundImage.color = Color.white;
-            
+            inputBackgroundImage.color = defaultColor;
+
             return list;
         }
     }
@@ -92,7 +90,6 @@ public class AddressListModifier : MonoBehaviour {
             // Add it to the content view
             addressCell.transform.SetParent(contentHolder.transform);
             addressCell.transform.localScale = Vector3.one;
-            
         }
 
         // Return whether or not the address was added
