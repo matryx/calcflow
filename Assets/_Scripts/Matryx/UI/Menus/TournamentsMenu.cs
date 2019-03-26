@@ -5,6 +5,7 @@ using UnityEngine;
 
 using Matryx;
 using System.Numerics;
+using Vector3 = UnityEngine.Vector3;
 
 public class TournamentsMenu : MonoBehaviour
 {

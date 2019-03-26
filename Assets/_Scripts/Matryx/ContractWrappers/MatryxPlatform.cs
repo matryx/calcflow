@@ -7,6 +7,8 @@ using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.JsonRpc.UnityClient;
 using Nanome.Core;
 
+using BigInteger = System.Numerics.BigInteger;
+
 // TODO: all of this
 namespace Matryx
 {
