@@ -148,7 +148,7 @@ namespace MatryxJsonRpc
                         tournament.address = tourna["address"] as string;
                         tournaments.Add(tournament);
                     }
-                    catch (System.ArgumentOutOfRangeException e) { break; }
+                    catch (System.ArgumentOutOfRangeException e) { Debug.Log(e); break; }
                     catch (Exception e) { Debug.Log(e); }
                 }
                 Debug.Log("Fetched tournaments: " + tournaments.Count);
@@ -226,7 +226,7 @@ namespace MatryxJsonRpc
                 catch (Exception e)
                 {
                     Debug.Log("Could not read submission at index: " + (offset + i));
-                    //Debug.Log(e);
+                    Debug.Log(e);
                     //break;
                 }
             }
@@ -272,7 +272,7 @@ namespace MatryxJsonRpc
 							submission.author = sub["authorName"] as string;
 							submissions.Add(submission);
 						}
-						catch (System.ArgumentOutOfRangeException e) { break; }
+						catch (System.ArgumentOutOfRangeException e) { Debug.Log(e); break; }
 						catch (Exception e) { Debug.Log(e); }
 					}
 
@@ -323,7 +323,7 @@ namespace MatryxJsonRpc
             catch (Exception e)
             {
                 Debug.Log("Could not read submission at:" + submissionAddress + " tournament: " + tournamentAddress);
-                //Debug.Log(e);
+                Debug.Log(e);
                 context.done(null);
             }
         }
@@ -394,6 +394,7 @@ namespace MatryxJsonRpc
             {
                 // Error
                 Debug.Log("Could not check peer status");
+                Debug.Log(e);
             }
 
             // tournament.entryFee();
@@ -412,6 +413,7 @@ namespace MatryxJsonRpc
             catch (Exception e)
             {
                 Debug.Log("Could not get tournament entry fee.");
+                Debug.Log(e);
             }
 
             // token.approve(tournament.address, tournament.entryFee)
@@ -435,6 +437,7 @@ namespace MatryxJsonRpc
                 catch (Exception e)
                 {
                     Debug.Log("Could not approve tournament to withdraw entry fee.");
+                    Debug.Log(e);
                 }
 
                 yield return tokenApproveTransaction.SendRequest(tokenApproveInput);
@@ -445,6 +448,7 @@ namespace MatryxJsonRpc
                 catch (Exception e)
                 {
                     Debug.Log("Could not approve tournament to withdraw entry fee.");
+                    Debug.Log(e);
                 }
             }
 
@@ -462,6 +466,7 @@ namespace MatryxJsonRpc
             catch (Exception e)
             {
                 Debug.Log("Could not enter tournament.");
+                Debug.Log(e);
             }
 
             // Fix the below code
@@ -521,7 +526,7 @@ namespace MatryxJsonRpc
             {
                 // Error
                 Debug.Log("Could not submit submission");
-                //Debug.Log(e);
+                Debug.Log(e);
                 context.done(null);
             }
         }

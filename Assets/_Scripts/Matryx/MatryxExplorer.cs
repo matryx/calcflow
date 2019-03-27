@@ -286,7 +286,7 @@ namespace Matryx
             
             yield break;
 
-            // TODO: Get working
+            // TODO: Get working (For gas estimation)
             //Dictionary<string, string> postData = new Dictionary<string, string>();
             //postData.Add("jsonrpc", "2.0");
             //postData.Add("method", "eth_getBlockByNumber");
