@@ -9,7 +9,6 @@ using Nanome.Core;
 
 using BigInteger = System.Numerics.BigInteger;
 
-// TODO: all of this
 namespace Matryx
 {
     public static class MatryxPlatform
@@ -18,6 +17,14 @@ namespace Matryx
         public static string ABI;
         public static Nethereum.Contracts.Contract contract;
 
+        public static void setContract(string abi, string addr)
+        {
+            address = addr;
+            ABI = abi;
+            contract = new Nethereum.Contracts.Contract(null, abi, addr);
+        }
+
+        //function getInfo() external view returns(MatryxPlatform.Info memory);
         [Function("getInfo", typeof(MatryxPlatformInfoDTO))]
         public class GetInfoFunction : FunctionMessage { }
 
@@ -26,33 +33,57 @@ namespace Matryx
         {
             [Parameter("address")]
             public static string System { get; set; }
-            [Parameter("uint256")]
-            public static BigInteger Version { get; set; }
             [Parameter("address")]
             public static string Token { get; set; }
             [Parameter("address")]
             public static string Owner { get; set; }
         }
 
-        [Function("hasEnteredMatryx", "bool")]
-        public class HasEnteredMatryxFunction : FunctionMessage
+        //function isTournament(address tournament) external view returns(bool);
+        [Function("isTournament", "address")]
+        public class IsTournamentFunction : FunctionMessage
         {
-            [Parameter("address", 1)]
-            public string User { get; set; }
+            [Parameter("address")]
+            public string TournamentAddress { get; set; }
         }
 
-        [Function("getUsers", "address[]")]
-        public class GetUsersFunction : FunctionMessage
+        //function isCommit(bytes32 commitHash) external view returns(bool);
+        [Function("isCommit", "bool")]
+        public class IsCommitFunction : FunctionMessage
         {
-            [Parameter("uint256", 1)]
-            public BigInteger Offset { get; set; }
-            [Parameter("uint256", 2)]
-            public BigInteger Count { get; set; }
+            [Parameter("bytes32")]
+            public string CommitHash { get; set; }
         }
 
-        [Function("enterMatryx")]
-        public class EnterMatryxFunction : FunctionMessage { }
+        //function isSubmission(bytes32 submissionHash) external view returns(bool);
+        [Function("isSubmission", "bool")]
+        public class IsSubmissionFunction : FunctionMessage
+        {
+            [Parameter("bytes32")]
+            public string SubmissionHash { get; set; }
+        }
 
+        //function getTotalBalance() external view returns(uint256);
+        [Function("getTotalBalance", "uint256")]
+        public class GetTotalBalanceFunction : FunctionMessage { }
+
+        //function getTournamentCount() external view returns(uint256);
+        [Function("getTournamentCount", "uint256")]
+        public class GetTournamentCountFunction : FunctionMessage { }
+
+        //function getTournaments() external view returns(address[] memory);
+        [Function("getTournaments", "address[]")]
+        public class GetTournamentsFunction : FunctionMessage {}
+
+        //function getSubmission(bytes32 submissionHash) external view returns(LibTournament.SubmissionData memory);
+        [Function("getSubmission")]
+        public class GetSubmissionFunction : FunctionMessage
+        {
+            [Parameter("bytes32")]
+            public string SubmissionHash { get; set; }
+        }
+
+        //function createTournament(LibTournament.TournamentDetails calldata, LibTournament.RoundDetails calldata) external returns(address);
         [Function("createTournament", "address")]
         public class CreateTournamentFunction : FunctionMessage
         {
@@ -65,14 +96,8 @@ namespace Matryx
         [FunctionOutput]
         public class TournamentDetails : IFunctionOutputDTO
         {
-            [Parameter("bytes32[3]")]
-            public List<string> Title { get; set; }
-            [Parameter("bytes32")]
-            public string Category { get; set; }
-            [Parameter("bytes32[2]")]
-            public List<string> DescHash { get; set; }
-            [Parameter("bytes32[2]")]
-            public List<string> FileHash { get; set; }
+            [Parameter("string")]
+            public string ContentHash { get; set; }
             [Parameter("uint256")]
             public BigInteger Bounty { get; set; }
             [Parameter("uint256")]
@@ -82,7 +107,7 @@ namespace Matryx
         //function getInfo() external view returns(MatryxPlatform.Info);
         public static IEnumerator getInfo(Async thread=null)
         {
-            var queryRequest = new QueryUnityRequest<GetInfoFunction, MatryxPlatformInfoDTO>(NetworkSettings.infuraProvider, NetworkSettings.address);
+            var queryRequest = new QueryUnityRequest<GetInfoFunction, MatryxPlatformInfoDTO>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return queryRequest.Query(new GetInfoFunction(), address);
             yield return queryRequest.Result;
 
@@ -92,59 +117,104 @@ namespace Matryx
             }
         }
 
-        public static IEnumerator hasEnteredMatryx(string user, Async thread=null)
+        public static IEnumerator isTournament(string tournamentAddress, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<HasEnteredMatryxFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.address);
-            yield return queryRequest.Query(new HasEnteredMatryxFunction() { User = user }, address);
-            yield return queryRequest.Result.Value;
+            var queryRequest = new QueryUnityRequest<IsTournamentFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            yield return queryRequest.Query(new IsTournamentFunction() { TournamentAddress = tournamentAddress }, address);
+            yield return queryRequest.Result;
 
             if (thread != null)
             {
-                thread.pushEvent("hasEnteredMatryx", queryRequest.Result.Value);
+                thread.pushEvent("isTournament", queryRequest.Result);
             }
         }
 
-        public static IEnumerator getUsers(uint offset, uint count, Async thread=null)
+        public static IEnumerator isCommit(string commitHash, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetUsersFunction, EthereumTypes.AddressArray>(NetworkSettings.infuraProvider, NetworkSettings.address);
-            yield return queryRequest.Query(new GetUsersFunction() { Offset = offset, Count = count }, address);
-            yield return queryRequest.Result.Value;
+            var queryRequest = new QueryUnityRequest<IsCommitFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            yield return queryRequest.Query(new IsCommitFunction() { CommitHash = commitHash }, address);
+            yield return queryRequest.Result;
 
             if (thread != null)
             {
-                thread.pushEvent("getUsers", queryRequest.Result.Value);
+                thread.pushEvent("isCommit", queryRequest.Result);
             }
         }
 
-        public static IEnumerator enterMatryx(Async thread=null)
+        public static IEnumerator isSubmission(string submissionHash, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.privateKey, NetworkSettings.address);
-            var enterMatryxFunctionMessage = new EnterMatryxFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
+            var queryRequest = new QueryUnityRequest<IsSubmissionFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            yield return queryRequest.Query(new IsSubmissionFunction() { SubmissionHash = submissionHash }, address);
+            yield return queryRequest.Result;
 
-            yield return transactionRequest.SignAndSendTransaction<EnterMatryxFunction>(enterMatryxFunctionMessage, address);
+            if (thread != null)
+            {
+                thread.pushEvent("isSubmission", queryRequest.Result);
+            }
+        }
 
-            var txStatus = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, Utils.GetTransactionStatus(transactionRequest, "enterMatryx", thread));
-            yield return txStatus;
-            yield return txStatus.result;
+        public static IEnumerator getTotalBalance(Async thread = null)
+        {
+            var queryRequest = new QueryUnityRequest<GetTotalBalanceFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            yield return queryRequest.Query(new GetTotalBalanceFunction(), address);
+            yield return queryRequest.Result;
+
+            if (thread != null)
+            {
+                thread.pushEvent("isSubmission", queryRequest.Result);
+            }
+        }
+
+        public static IEnumerator getTournamentCount(Async thread = null)
+        {
+            var queryRequest = new QueryUnityRequest<GetTournamentCountFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            yield return queryRequest.Query(new GetTournamentCountFunction(), address);
+            yield return queryRequest.Result;
+
+            if (thread != null)
+            {
+                thread.pushEvent("getTournamentCount", queryRequest.Result);
+            }
+        }
+
+        public static IEnumerator getTournaments(Async thread = null)
+        {
+            var queryRequest = new QueryUnityRequest<GetTournamentsFunction, EthereumTypes.AddressArray>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            yield return queryRequest.Query(new GetTournamentsFunction(), address);
+            yield return queryRequest.Result;
+
+            if (thread != null)
+            {
+                thread.pushEvent("getTournaments", queryRequest.Result);
+            }
+        }
+
+        public static IEnumerator getSubmission(string submissionHash, Async thread = null)
+        {
+            var queryRequest = new QueryUnityRequest<GetSubmissionFunction, EthereumTypes.AddressArray>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            yield return queryRequest.Query(new GetSubmissionFunction() { SubmissionHash = submissionHash }, address);
+            yield return queryRequest.Result;
+
+            if (thread != null)
+            {
+                thread.pushEvent("getSubmission", queryRequest.Result);
+            }
         }
 
         public static IEnumerator createTournament(MatryxTournament tournament, Async thread=null)
         {
             TournamentDetails tDetails = new TournamentDetails()
             {
-                Title = Utils.stringToString32(tournament.title, 3),
-                Category = Utils.stringToString32(tournament.category, 1)[0],
-                DescHash = Utils.stringToString32(tournament.descHash, 2),
-                FileHash = Utils.stringToString32(tournament.fileHash, 2),
+                ContentHash = tournament.contentHash,
                 Bounty = tournament.bounty,
                 EntryFee = tournament.entryFee,
             };
 
             var createTournamentFnMsg = new CreateTournamentFunction() { TDetails = tDetails, RDetails = tournament.rounds[0].Details, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.privateKey, NetworkSettings.address);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
             yield return transactionRequest.SignAndSendTransaction<CreateTournamentFunction>(createTournamentFnMsg, address);
 
-            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, Utils.GetTransactionStatus(transactionRequest, "createTournament", thread));
+            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createTournament", thread));
             yield return getTransactionStatus;
             yield return getTransactionStatus.result;
         }

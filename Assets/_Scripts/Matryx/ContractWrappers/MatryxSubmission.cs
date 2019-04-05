@@ -15,73 +15,57 @@ using Nanome.Maths.Serializers.JsonSerializer;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Calcflow.UserStatistics;
+using static Matryx.MatryxTournament;
 
 namespace Matryx
 {
     public class MatryxSubmission
     {
-        public MatryxSubmission(MatryxTournament tournament, string title, List<string> contributors, List<string> references, string file=null, string description=null)
+        public MatryxSubmission(MatryxTournament tournament, string title, string description=null, string content=null, int value = 1)
         {
             this.tournament = tournament;
-            this.details = new SubmissionDetails();
-            this.details.title = title;
-            this.details.contributors = contributors;
-            this.details.distribution = Enumerable.Range(0, details.contributors.Count + 1).Select(x => new BigInteger(1)).ToList();
-            this.details.references = references;
-            this.details.descHash = "";// "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
-            this.file = file;
+            this.data = new SubmissionData() { tournamentAddress = tournament.address };
+            this.title = title;
             this.description = description;
+            this.data.contentHash = "";// "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
+            commit = new MatryxCommit(content, value);
         }
-        public MatryxSubmission(string address)
+        public MatryxSubmission(string hash)
         {
-            this.address = address;
-            this.details = new SubmissionDetails();
+            this.hash = hash;
+            this.data = new SubmissionData();
         }
-        public MatryxSubmission(string title, string address)
+        public MatryxSubmission(string title, string hash)
         {
-            this.details = new SubmissionDetails();
-            this.details.title = title;
-            this.address = address;
+            this.data = new SubmissionData();
+            this.title = title;
+            this.hash = hash;
         }
 
-        public string address;
-        public MatryxTournament tournament;
-        public SubmissionInfo info;
-        public SubmissionDetails details;
-
+        public string title = "";
         public string description;
-        public string file;
+        public string hash;
+        public MatryxTournament tournament;
+        public SubmissionData data;
+        public MatryxCommit commit;
+
         public bool calcflowCompatible = true;
         public string EquationJson
         {
             get
             {
-                if (!calcflowCompatible) return ""; else return file;
+                if (!calcflowCompatible) return ""; else return commit.content;
             }
         }
 
-        public struct SubmissionInfo
+        public class SubmissionData
         {
-            public uint version;
-            public string owner;
-            public string tournament;
-            public string round;
-            public string timeSubmitted;
-            public uint timeUpdated;
-            public int reward;
-            public string[] referencedIn;
-            public uint positiveVotes;
-            public uint negativeVotes;
-        }
-
-        public class SubmissionDetails
-        {
-            public string title;
-            public List<string> contributors;
-            public List<BigInteger> distribution;
-            public List<string> references;
-            public string descHash;
-            public string fileHash;
+            public string tournamentAddress;
+            public BigInteger roundIndex;
+            public string commitHash;
+            public string contentHash;
+            public BigInteger reward;
+            public BigInteger timestamp;
         }
 
         [Function("getVersion")]
@@ -166,15 +150,15 @@ namespace Matryx
             [Parameter("uint256", "timeSubmitted")]
             public uint TimeSubmitted { get; set; }
             [Parameter("uint256", "timeUpdated")]
-            public uint TimeUpdated { get; set; }
+            public BigInteger TimeUpdated { get; set; }
             [Parameter("uint256", "reward")]
-            public uint Reward { get; set; }
+            public BigInteger Reward { get; set; }
             [Parameter("address[]", "referencedIn")]
             public string[] ReferencedIn { get; set; }
             [Parameter("uint256", "positiveVotes")]
-            public uint PositiveVotes { get; set; }
+            public BigInteger PositiveVotes { get; set; }
             [Parameter("uint256", "negativeVotes")]
-            public uint NegativeVotes { get; set; }
+            public BigInteger NegativeVotes { get; set; }
         }
 
         [FunctionOutput]
@@ -187,7 +171,7 @@ namespace Matryx
             [Parameter("bytes32[2]", "fileHash")]
             public string[] FileHash { get; set; }
             [Parameter("uint256[]", "distribution")]
-            public uint[] Distribution { get; set; }
+            public BigInteger[] Distribution { get; set; }
             [Parameter("address[]", "contributors")]
             public string[] Contributors { get; set; }
             [Parameter("address[]", "references")]
@@ -205,53 +189,69 @@ namespace Matryx
             public string[] FileHash { get; set; }
         }
 
-        public IEnumerator getTournament()
+        public IEnumerator get()
         {
-            var tournamentRequest = new QueryUnityRequest<GetTournamentFunction, EthereumTypes.Address>(NetworkSettings.infuraProvider, NetworkSettings.address);
-            yield return tournamentRequest.Query(address);
-            yield return tournamentRequest.Result.Value;
-        }
-
-        public IEnumerator getTitle()
-        {
-            if (details.title != null)
+            var url = MatryxCortex.submissionURL+hash;
+            using (var submissionWWW = new WWW(url))
             {
-                yield return details.title;
-            }
+                yield return submissionWWW;
+                var res = MatryxCortex.serializer.Deserialize<object>(submissionWWW.bytes) as Dictionary<string, object>;
+                var data = res["data"] as Dictionary<string, object>;
+                var submission = data["submission"] as Dictionary<string, object>;
 
-            var titleRequest = new QueryUnityRequest<GetTitleFunction, EthereumTypes.Bytes32_3>(NetworkSettings.infuraProvider, NetworkSettings.address);
-            yield return titleRequest.Query(address);
-            yield return titleRequest.Result.Value;
-        }
+                this.title = submission["title"] as string;
+                this.description = submission["description"] as string;
+                this.hash = submission["hash"] as string;
+                this.tournament.address = submission["tournament"] as string;
+                this.commit.hash = (submission["commit"] as Dictionary<string, object>)["hash"] as string;
+                this.commit.ipfsContentHash = (submission["commit"] as Dictionary<string, object>)["ipfsContent"] as string;
+                this.data.tournamentAddress = submission["tournament"] as string;
+                int? roundIndex = submission["roundIndex"] as int?;
+                this.data.roundIndex = new BigInteger(roundIndex.Value);
+                this.data.commitHash = this.commit.hash;
+                this.data.contentHash = submission["ipfsContent"] as string;
+                long? reward = submission["reward"] as long?;
+                this.data.reward = new BigInteger(reward.Value);
+                long? timestamp = submission["timestamp"] as long?;
+                this.data.timestamp = new BigInteger(timestamp.Value);
 
-        public IEnumerator getDescriptionHash()
-        {
-            if (description != null)
-            {
-                yield return description;
-            }
+                // TODO: Maybe optimize this by performing a separate call upon opening each submission
+                var ipfsURL = "https://ipfs.infura.io:5001/api/v0/object/get?arg=";
+                using (WWW ipfsWWW = new WWW(ipfsURL + commit.ipfsContentHash+"?encoding=json"))
+                {
+                    yield return ipfsWWW;
+                    var ipfsObj = MatryxCortex.serializer.Deserialize<object>(ipfsWWW.bytes) as Dictionary<string, object>;
+                    var links = ipfsObj["Links"] as List<Dictionary<string, object>>;
+                    // TODO: Make better when you introduce preview images
+                    commit.ipfsContentHash = links[0]["Hash"] as string;
+                }
 
-            var descriptionHashRequest = new QueryUnityRequest<GetDescriptionHashFunction, EthereumTypes.Bytes32_2>(NetworkSettings.infuraProvider, NetworkSettings.address);
-            yield return descriptionHashRequest.Query(address);
-        }
+                using (WWW ipfsWWW2 = new WWW(ipfsURL + commit.ipfsContentHash + "?encoding=json"))
+                {
+                    yield return ipfsWWW2;
+                    var ipfsObj2 = MatryxCortex.serializer.Deserialize<object>(ipfsWWW2.bytes) as Dictionary<string, object>;
+                    var ipfsData = ipfsObj2["Data"] as string;
+                    commit.content = ipfsData;
+                }
 
-        public IEnumerator getFile()
-        {
-            if(details.fileHash == null)
-            {
-                var descriptionHashRequest = new QueryUnityRequest<GetFileHashFunction, EthereumTypes.Bytes32_2>(NetworkSettings.infuraProvider, NetworkSettings.address);
-                yield return descriptionHashRequest.Query(address);
-
-                details.fileHash = descriptionHashRequest.Result.Value + descriptionHashRequest.Result.ValueTwo;
-            }
-
-            var url = "https://ipfs.infura.io:5001/api/v0/cat?arg=" + details.fileHash + "/jsonContent.json";
-            using (var www = new WWW(url))
-            {
-                yield return www;
-                file = www.text;
                 var ESSRegEx = "{.*rangeKeys.*rangePairs.*ExpressionKeys.*ExpressionValues.*}";
-                calcflowCompatible = Regex.IsMatch(file, ESSRegEx);
+                calcflowCompatible = Regex.IsMatch(commit.content, ESSRegEx);
+            }
+        }
+
+        public IEnumerator uploadContent()
+        {
+            if (data.contentHash == null || data.contentHash.Equals(string.Empty))
+            {
+                if (description != null && !description.Equals(string.Empty))
+                {
+                    if(commit.ipfsContentHash != null && commit.ipfsContentHash.Substring(0, 2) == "Qm")
+                    {
+                        var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(title, description, commit.ipfsContentHash));
+                        yield return uploadToIPFS;
+                        data.contentHash = uploadToIPFS.result;
+                    }
+                }
             }
         }
 
@@ -261,13 +261,13 @@ namespace Matryx
 
             ResultsMenu.transactionObject = this;
 
-            var isEntrant = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.isEntrant(NetworkSettings.address));
+            var isEntrant = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, tournament.isEntrant(NetworkSettings.activeAccount));
             yield return isEntrant;
 
-            var tournamentOwner = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, tournament.getOwner());
-            yield return tournamentOwner;
+            var tournamentInfo = new Utils.CoroutineWithData<TournamentInfo>(MatryxCortex.Instance, tournament.getInfo());
+            yield return tournamentInfo;
 
-            if(tournamentOwner.result.Equals(NetworkSettings.address.ToLower()))
+            if (tournament.owner.Equals(NetworkSettings.activeAccount, System.StringComparison.CurrentCultureIgnoreCase))
             {
                 ResultsMenu.Instance.PostFailure(this, "You own this tournament; Unable to create submission.");
                 yield break;
@@ -275,7 +275,7 @@ namespace Matryx
 
             if(!isEntrant.result)
             {
-                var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxExplorer.Instance, MatryxToken.allowance(NetworkSettings.address, MatryxPlatform.address));
+                var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.activeAccount, MatryxPlatform.address));
                 yield return allowance;
 
                 Debug.Log(tournament.entryFee);
@@ -285,7 +285,7 @@ namespace Matryx
 
                     if (allowance.result != BigInteger.Zero)
                     {
-                        var approveZero = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, MatryxToken.approve(MatryxPlatform.address, BigInteger.Zero));
+                        var approveZero = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, MatryxToken.approve(MatryxPlatform.address, BigInteger.Zero));
                         yield return approveZero;
 
                         if (!approveZero.result)
@@ -296,7 +296,7 @@ namespace Matryx
                         }
                     }
 
-                    var approveEntryFee = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, MatryxToken.approve(MatryxPlatform.address, tournament.entryFee));
+                    var approveEntryFee = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, MatryxToken.approve(MatryxPlatform.address, tournament.entryFee));
                     yield return approveEntryFee;
 
                     if (!approveEntryFee.result)
@@ -309,7 +309,7 @@ namespace Matryx
 
                 ResultsMenu.Instance.SetStatus("Entering Tournament...");
 
-                var enterTournament = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.enter());
+                var enterTournament = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, tournament.enter());
                 yield return enterTournament;
 
                 if (!enterTournament.result)
@@ -320,28 +320,23 @@ namespace Matryx
                 }
             }
 
-            ResultsMenu.Instance.SetStatus("Uploading content to IPFS...");
-            var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxExplorer.Instance, Utils.uploadToIPFS(this));
-            yield return uploadToIPFS;
+            ResultsMenu.Instance.SetStatus("Claiming Commit...");
+            yield return commit.claim();
 
-            if(uploadToIPFS.result == null || !uploadToIPFS.result[0].Contains("Qm"))
+            ResultsMenu.Instance.SetStatus("Creating Commit...");
+            yield return commit.create(null);
+
+            ResultsMenu.Instance.SetStatus("Uploading Submission Content to IPFS...");
+            yield return uploadContent();
+
+            if(!data.contentHash.Contains("Qm"))
             {
                 Debug.Log("Failed to upload file to IPFS");
                 yield break;
             }
 
-            if (uploadToIPFS.result[0] != null && !uploadToIPFS.result[0].Equals(string.Empty))
-            {
-                this.details.descHash = uploadToIPFS.result[0];
-            }
-            if (uploadToIPFS.result[1] != null && !uploadToIPFS.result[1].Equals(string.Empty))
-            {
-                this.details.fileHash = uploadToIPFS.result[1];
-            }
-
             ResultsMenu.Instance.SetStatus("Creating Submission...");
-
-            var createSubmission = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.createSubmission(this));
+            var createSubmission = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, tournament.createSubmission(this));
             yield return createSubmission;
 
             if(callback != null)

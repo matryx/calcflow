@@ -98,7 +98,7 @@ public class TournamentMenu : MonoBehaviour
             ClearSubmissions();
             var roundNumber = 0;
             loadingWinningSubmissions.SetActive(true);
-            MatryxExplorer.RunFetchTournament(tournament.address, roundNumber, page, ProcessTournament);
+            MatryxCortex.RunFetchTournament(tournament.address, roundNumber, page, ProcessTournament);
         }
     }
 
@@ -109,7 +109,7 @@ public class TournamentMenu : MonoBehaviour
     {
         removeLoadButton();
         var roundNumber = 0;
-        MatryxExplorer.RunFetchTournament(tournament.address, roundNumber, ++page, ProcessTournament);
+        MatryxCortex.RunFetchTournament(tournament.address, roundNumber, ++page, ProcessTournament);
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public class TournamentMenu : MonoBehaviour
         titleText.text = tournament.title;
         bountyText.text = "Reward: " + tournament.Bounty + " MTX";
         descriptionText.text = tournament.getDescription();
-        contributeSection.SetActive(tournament.currentRoundState.Equals("isOpen"));
+        contributeSection.SetActive(tournament.status.Equals(MatryxTournament.STATE_OPEN));
     }
 
     public void DisplaySubmissionUI(MatryxSubmission submission)
@@ -210,10 +210,10 @@ public class TournamentMenu : MonoBehaviour
         button.transform.SetParent(submissionsPanel.transform);
         button.transform.localScale = Vector3.one;
 
-        button.name = submission.details.title;
+        button.name = submission.title;
         button.GetComponent<SubmissionContainer>().SetSubmission(submission);
 
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = submission.details.title;
+        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = submission.title;
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());

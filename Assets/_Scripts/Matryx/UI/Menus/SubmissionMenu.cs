@@ -26,20 +26,20 @@ public class SubmissionMenu : MonoBehaviour
 
     public void SetSubmission(MatryxSubmission submission)
     {
-        titleText.text = submission.details.title;
+        titleText.text = submission.title;
         importSubmissionButton.Disable();
 
         if (this.submission == null ||
-            this.submission.address != submission.address)
+            this.submission.hash != submission.hash)
         {
             this.submission = submission;
-            MatryxExplorer.RunFetchSubmission(submission, delegate (object results) { Submission = (MatryxSubmission)results; });
+            MatryxCortex.RunFetchSubmission(submission, delegate (object results) { Submission = (MatryxSubmission)results; });
         }
     }
 
     void UpdateSubmissionDisplay()
     {
-        titleText.text = submission.details.title;
+        titleText.text = submission.title;
         bodyText.text = submission.description;
 
         // Update the import button!

@@ -68,7 +68,7 @@ public class MySubmissionsMenu : MonoBehaviour
         Instance.tournament = tournament;
         loadingText.gameObject.SetActive(true);
         ClearSubmissions();
-        MatryxExplorer.RunFetchMySubmissions(tournament, ProcessSubmissions);
+        MatryxCortex.RunFetchMySubmissions(tournament, ProcessSubmissions);
     }
 
     /// <summary>
@@ -111,11 +111,11 @@ public class MySubmissionsMenu : MonoBehaviour
         button.transform.SetParent(submissionsPanel.transform);
         button.transform.localScale = Vector3.one;
 
-        button.name = submission.details.title;
+        button.name = submission.title;
         button.GetComponent<SubmissionContainer>().SetSubmission(submission);
 
         var buttonText = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
-        buttonText.text = submission.details.title;
+        buttonText.text = submission.title;
         buttonText.alignment = TMPro.TextAlignmentOptions.Center;
 
         scroll.addObject(button.transform);
@@ -135,7 +135,9 @@ public class MySubmissionsMenu : MonoBehaviour
             string name = source.name;
 
             MatryxSubmission submission = source.GetComponent<SubmissionContainer>().GetSubmission();
-            StartCoroutine(submission.getFile());
+            // TODO: Remove? We don't need this because of submission.get(). Optimization opportunity for
+            // multiple calls (i.e. leave it in?)
+            // StartCoroutine(submission.getFile());
             submissionMenu.SetSubmission(submission);
             // TODO: Navigate the user to the corresponding tournament through the menus
             submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();

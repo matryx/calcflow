@@ -61,7 +61,7 @@ public class CreateTournamentMenu : MonoBehaviour
         MatryxRound.RoundDetails roundDetails = new MatryxRound.RoundDetails()
         {
             Start = currentTime,
-            End = new BigInteger(currentTime + Duration.CurrentValue*60*60),
+            Duration = new BigInteger(Duration.CurrentValue*60*60),
             Bounty = bounty,
             Review = 60 * 60 * 24 * 14
         };

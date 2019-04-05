@@ -54,4 +54,11 @@ public static class EthereumTypes
         [Parameter("address[]", "value", 1)]
         public List<string> Value { get; set; }
     }
+
+    [FunctionOutput]
+    public class Bytes32Array : IFunctionOutputDTO
+    {
+        [Parameter("bytes32[]", "value", 1)]
+        public List<string> Value { get; set; }
+    }
 }

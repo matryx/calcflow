@@ -168,7 +168,7 @@ namespace MatryxJsonRpc
         private class SubmissionDTO
         {
             [Parameter("uint256", "id", 1)]
-            public long id { get; set; }
+            public BigInteger id { get; set; }
             [Parameter("string", "title", 2)]
             public string title { get; set; }
             [Parameter("string", "body", 3)]

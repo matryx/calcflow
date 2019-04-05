@@ -134,7 +134,7 @@ public class TournamentsMenu : MonoBehaviour
     {
        loadingText.gameObject.SetActive(true);
        ClearTournaments();
-       MatryxExplorer.RunFetchTournaments(page, ProcessTournaments);
+       MatryxCortex.RunFetchTournaments(page, ProcessTournaments);
     }
 
     /// <summary>

@@ -15,6 +15,13 @@ public class InputValidator : MonoBehaviour
     Dictionary<string, string> validationRegexes;
     public string validationType;
 
+    public static string INPUT_VALIDATION_PRIVATE_KEY = "private key";
+    public static string INPUT_VALIDATION_MNEMONIC_PHRASE = "mnemonic";
+    public static string INPUT_VALIDATION_PASSWORD = "password";
+    public static string INPUT_VALIDATION_KEYSTORE_FILE = "keystore";
+    public static string INPUT_VALIDATION_TITLE = "title";
+    public static string INPUT_VALIDATION_NONE = "none";
+
     public bool isValid;
 
     Color defaultColor;
@@ -27,13 +34,16 @@ public class InputValidator : MonoBehaviour
         inputField.onEndEdit.AddListener(validateInput);
 
         validationRegexes = new Dictionary<string, string>();
-        validationRegexes.Add("private key", @"(0x)[0-9A-Fa-f]{64}");
-        validationRegexes.Add("mnemonic", @"^[\w+\s?]+");
-        validationRegexes.Add("password", @".+");
+        validationRegexes.Add(INPUT_VALIDATION_PRIVATE_KEY, @"(0x)[0-9A-Fa-f]{64}");
+        validationRegexes.Add(INPUT_VALIDATION_MNEMONIC_PHRASE, @"^[\w+\s?]+");
+        validationRegexes.Add(INPUT_VALIDATION_PASSWORD, @".+");
+        validationRegexes.Add(INPUT_VALIDATION_KEYSTORE_FILE, @".+");
+        validationRegexes.Add(INPUT_VALIDATION_TITLE, @"([0-9A-Za-z\-_]+\s?)+");
+        validationRegexes.Add(INPUT_VALIDATION_NONE, @".+");
         defaultColor = inputField.image.color;
     }
 
-    public void setValidation(string vType)
+    public void setValidationType(string vType)
     {
         validationType = vType;
     }

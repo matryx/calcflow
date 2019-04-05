@@ -1,12 +1,13 @@
-﻿using Matryx;
+﻿using Crosstales.FB;
+using Matryx;
 using Nanome.Core;
 using System.Collections;
+using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Valve.VR;
 
 public class MatryxAccountMenu : MonoBehaviour {
 
@@ -19,11 +20,14 @@ public class MatryxAccountMenu : MonoBehaviour {
     [SerializeField]
     InputField PrivateKeyInput;
     [SerializeField]
-    Image KeyStoreDropbox;
+    InputField PasswordInput;
     [SerializeField]
-    InputField PasswordField;
+    Button ImportButton;
     [SerializeField]
     Toggle UsePassword;
+    [SerializeField]
+    public Text ErrorMessage;
+    
 
     [SerializeField]
     GameObject AccountInfoMenu;
@@ -47,29 +51,7 @@ public class MatryxAccountMenu : MonoBehaviour {
         ShowAccountInfo
     }
 
-    public void Start()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            OVRManager.HMDMounted += ReenterVR;
-            accountImportType.onValueChanged.AddListener(delegate
-            {
-                if (accountImportType.value == 0)
-                {
-                    SetState(AccountMenuState.MnemonicPasswordInput);
-                }
-                else if (accountImportType.value == 1)
-                {
-                    SetState(AccountMenuState.PrivateKeyPasswordInput);
-                }
-                else
-                {
-                    SetState(AccountMenuState.KeyStoreInput);
-                }
-            });
-        }
-    }
+    static string keystorePath = "";
 
     public void OnEnable()
     {
@@ -79,12 +61,11 @@ public class MatryxAccountMenu : MonoBehaviour {
             OVRManager.HMDMounted += ReenterVR;
         }
 
-        // must be created on the main thread to get the right thread id.
-        //hook = new UnityDragAndDropHook();
-        //hook.InstallHook();
-        //hook.OnDroppedFiles += OnFiles;
+        ImportButton.onClick.AddListener(loadKeystore);
+        PrivateKeyInput.onValueChanged.AddListener(onAccountFieldEdited);
+        PasswordInput.onValueChanged.AddListener(onAccountFieldEdited);
 
-        var cypher = Config.getString("sKCypher", "");
+        var cypher = Config.getString("cypher", "");
         var usedPassword = Config.getBool("usedPassword", "false");
 
         if (cypher == "")
@@ -117,77 +98,101 @@ public class MatryxAccountMenu : MonoBehaviour {
         }
     }
 
-    //void OnDisable()
-    //{
-    //    //hook.UninstallHook();
-    //}
+    public void Update()
+    {
+        if (PrivateKeyInput.text.Length == 0 && Instance.State == AccountMenuState.KeyStoreInput)
+        {
+            Instance.ImportButton.gameObject.SetActive(true);
+        }
+    }
+
+    public static void loadKeystore()
+    {
+        keystorePath = FileBrowser.OpenSingleFile();
+        Instance.PrivateKeyInput.text = keystorePath;
+        Instance.ImportButton.gameObject.SetActive(false);
+
+        if (!validateKeystore())
+        {
+            throw new System.Exception("Keystore file invalid");
+        }
+    }
+
+    public static bool validateKeystore()
+    {
+        return true;
+    }
+
+    public static void onAccountFieldEdited(string fieldText)
+    {
+        MatryxAccountMenu.Instance.ErrorMessage.gameObject.SetActive(true);
+        MatryxAccountMenu.Instance.ErrorMessage.text = "";
+    }
 
     public void configurePrivateKeyField(string title, string defaultText, bool active, string validationType)
     {
         Instance.PrivateKeyInput.transform.parent.GetChild(0).GetComponent<Text>().text = title;
         Instance.PrivateKeyInput.placeholder.GetComponent<Text>().text = defaultText;
         Instance.PrivateKeyInput.transform.parent.gameObject.SetActive(active);
-        Instance.PrivateKeyInput.GetComponent<InputValidator>().setValidation(validationType);
+        Instance.PrivateKeyInput.GetComponent<InputValidator>().setValidationType(validationType);
     }
 
     public void SetState(AccountMenuState state)
     {
         Instance.gameObject.SetActive(true);
         Instance.State = state;
+        Instance.accountImportType.gameObject.SetActive(true);
+        ImportButton.gameObject.SetActive(false);
 
         switch (state)
         {
             case AccountMenuState.PrivateKeyInput:
-                Instance.PasswordField.transform.parent.gameObject.SetActive(false);
+                Instance.PasswordInput.transform.parent.gameObject.SetActive(false);
                 Instance.UsePassword.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = false;
                 Instance.UsePassword.gameObject.SetActive(true);
-                configurePrivateKeyField("Private Key", "0x...", true, "private key");
-                Instance.KeyStoreDropbox.gameObject.SetActive(false);
+                configurePrivateKeyField("Private Key", "0x...", true, InputValidator.INPUT_VALIDATION_PRIVATE_KEY);
                 break;
             case AccountMenuState.PrivateKeyPasswordInput:
-                Instance.PasswordField.transform.parent.gameObject.SetActive(true);
+                Instance.PasswordInput.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = true;
                 Instance.UsePassword.gameObject.SetActive(true);
-                configurePrivateKeyField("Private Key", "0x...", true, "private key");
-                Instance.KeyStoreDropbox.gameObject.SetActive(false);
+                configurePrivateKeyField("Private Key", "0x...", true, InputValidator.INPUT_VALIDATION_PRIVATE_KEY);
                 break;
             case AccountMenuState.MnemonicInput:
-                Instance.PasswordField.transform.parent.gameObject.SetActive(false);
+                Instance.PasswordInput.transform.parent.gameObject.SetActive(false);
                 Instance.UsePassword.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = false;
                 Instance.UsePassword.gameObject.SetActive(true);
-                configurePrivateKeyField("Mnemonic Phrase", "Your mnemonic seed", true, "mnemonic");
-                Instance.KeyStoreDropbox.gameObject.SetActive(false);
+                configurePrivateKeyField("Mnemonic Phrase", "Your mnemonic seed", true, InputValidator.INPUT_VALIDATION_MNEMONIC_PHRASE);
                 break;
             case AccountMenuState.MnemonicPasswordInput:
-                Instance.PasswordField.transform.parent.gameObject.SetActive(true);
+                Instance.PasswordInput.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = true;
                 Instance.UsePassword.gameObject.SetActive(true);
-                configurePrivateKeyField("Mnemonic Phrase", "Your mnemonic seed", true, "mnemonic");
-                Instance.KeyStoreDropbox.gameObject.SetActive(false);
+                configurePrivateKeyField("Mnemonic Phrase", "Your mnemonic seed", true, InputValidator.INPUT_VALIDATION_MNEMONIC_PHRASE);
                 break;
             case AccountMenuState.KeyStoreInput:
-                Instance.PasswordField.transform.parent.gameObject.SetActive(true);
+                ImportButton.gameObject.SetActive(true);
+                Instance.PasswordInput.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = true;
                 Instance.UsePassword.gameObject.SetActive(false);
-                configurePrivateKeyField("", "", false, "");
-                Instance.KeyStoreDropbox.gameObject.SetActive(true);
+                configurePrivateKeyField("Keystore file", "path/to/keystore", true, InputValidator.INPUT_VALIDATION_KEYSTORE_FILE);
                 break;
             case AccountMenuState.PasswordRequired:
+                Instance.accountImportType.gameObject.SetActive(false);
                 Instance.PrivateKeyInput.transform.parent.gameObject.SetActive(false);
-                Instance.PasswordField.transform.parent.gameObject.SetActive(true);
+                Instance.PasswordInput.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.gameObject.SetActive(false);
-                Instance.KeyStoreDropbox.gameObject.SetActive(false);
                 Instance.AccountUnlockText[0].text = "Welcome back!";
                 Instance.AccountUnlockText[1].text = "Your private key has been encrypted with AES and stored in AppData.\n To decrypt your private key, we need your password!";
-                Instance.PasswordField.placeholder.GetComponent<Text>().text = "password123";
+                Instance.PasswordInput.placeholder.GetComponent<Text>().text = "password123";
                 break;
             case AccountMenuState.ShowAccountInfo:
-                Instance.AccountInfoText[0].text = NetworkSettings.address;
-                Instance.AccountInfoText[1].text = "0 MTX";
+                Instance.AccountInfoText[0].text = NetworkSettings.activeAccount;
+                StartCoroutine(updateMTXBalance());
                 Instance.StartCoroutine(Instance.waitAndThenReenterVR());
                 break;
             default:
@@ -197,6 +202,14 @@ public class MatryxAccountMenu : MonoBehaviour {
         bool isAccountInfo = state == AccountMenuState.ShowAccountInfo;
         Instance.AccountUnlockMenu.SetActive(!isAccountInfo);
         Instance.AccountInfoMenu.SetActive(isAccountInfo);
+    }
+
+    public IEnumerator updateMTXBalance()
+    {
+        var tokenBalanceCoroutine = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.activeAccount));
+        yield return tokenBalanceCoroutine;
+        var balance = tokenBalanceCoroutine.result / new BigInteger(1e18);
+        Instance.AccountInfoText[1].text = balance + " MTX";
     }
 
     public IEnumerator waitAndThenReenterVR()
@@ -262,7 +275,7 @@ public class MatryxAccountMenu : MonoBehaviour {
         if (includeText)
         {
             Instance.PrivateKeyInput.text = "";
-            Instance.PasswordField.text = "";
+            Instance.PasswordInput.text = "";
         }
 
         Instance.AccountUnlockText[2].gameObject.SetActive(false);
@@ -308,16 +321,18 @@ public class MatryxAccountMenu : MonoBehaviour {
         }
     }
 
-    //// returns success
+    // returns success
     public static bool TrySetPrivateKeyAndCypher()
     {
-        string password = Instance.PasswordField.text;
-
+        string password = Instance.PasswordInput.text;
+        bool usedPassword = Instance.UsePassword.isOn;
+        string cypher = "";
+        string cypherType = "";
 
         if (Instance.State == AccountMenuState.PrivateKeyInput || Instance.State == AccountMenuState.PrivateKeyPasswordInput)
         {
             string privateKey = Instance.PrivateKeyInput.text;
-            bool usedPassword = Instance.UsePassword.isOn;
+            
 
             if (!Instance.PrivateKeyInput.GetComponent<InputValidator>().isValid)
             {
@@ -326,65 +341,125 @@ public class MatryxAccountMenu : MonoBehaviour {
                 return false;
             }
 
-            if (usedPassword && !Instance.PasswordField.GetComponent<InputValidator>().isValid)
+            if (usedPassword && !Instance.PasswordInput.GetComponent<InputValidator>().isValid)
             {
                 Instance.AccountUnlockText[2].text = "Invalid password";
                 Instance.AccountUnlockText[2].gameObject.SetActive(true);
                 return false;
             }
 
-            string cypher = Crypto.Encrypt(privateKey, usedPassword ? password : "");
+            try
+            {
+                NetworkSettings.importKey(privateKey, true);
+            }
+            catch (System.Exception e)
+            {
+                Instance.ErrorMessage.gameObject.SetActive(true);
+                Instance.ErrorMessage.text = "" + e;
+                return false;
+            }
 
-            NetworkSettings.privateKey = privateKey;
-            NetworkSettings.address = Nethereum.Signer.EthECKey.GetPublicAddress(NetworkSettings.privateKey);
-
-            Config.setString("sKCypher", cypher, true, "storage");
-            Config.setString("address", NetworkSettings.address);
-            Config.setBool("usedPassword", usedPassword, true, "storage");
-
-            TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.DisplayingTournaments);
-
-            return true;
+            // Encrypt private key
+            cypher = Crypto.Encrypt(privateKey, usedPassword ? password : "");
+            cypherType = "private key";
         }
         else if (Instance.State == AccountMenuState.MnemonicInput || Instance.State == AccountMenuState.MnemonicPasswordInput)
         {
             string mnemonic = Instance.PrivateKeyInput.text;
-            // Get private key from mnemonic
-            var wallet = new Nethereum.HdWallet.Wallet(mnemonic, password);
-            byte[] sK = wallet.GetPrivateKey(0);
+            // Store mnemonic in NetworkSettings for transactions
+            try
+            {
+                NetworkSettings.importWallet(mnemonic, password);
+            }
+            catch (System.Exception e)
+            {
+                Instance.ErrorMessage.gameObject.SetActive(true);
+                Instance.ErrorMessage.text = "" + e;
+                return false;
+            }
 
-            var zeroExPrivateKey = "0x" + System.BitConverter.ToString(sK).Replace("-", "");
-            Debug.Log("this is the private key: " + zeroExPrivateKey);
+            // Encrypt mnemonic
+            cypher = Crypto.Encrypt(mnemonic, usedPassword ? password : "");
+            cypherType = "mnemonic";
         }
         else if (Instance.State == AccountMenuState.KeyStoreInput)
         {
-            string mnemonic = Instance.PrivateKeyInput.text;
-            var service = new Nethereum.KeyStore.KeyStoreService();
-            var privateKey = service.DecryptKeyStoreFromJson(password, mnemonic);
-            Debug.Log("private key: 0x" + System.BitConverter.ToString(Encoding.Unicode.GetBytes(mnemonic.ToCharArray())).Replace("-", ""));
+            string keystore = File.readFileContent(keystorePath);
+
+            try
+            {
+                NetworkSettings.importKeystore(keystore, password);
+            }
+            catch (System.Exception e)
+            {
+                Instance.ErrorMessage.gameObject.SetActive(true);
+                Instance.ErrorMessage.text = "Invalid keystore file";
+                return false;
+            }
+            
+            // Encrypt keystore
+            cypher = Crypto.Encrypt(keystorePath, usedPassword ? password : "");
+            cypherType = "keystore";
         }
 
-        return false;
+        // Store cypher and related info
+        Config.setString("cypher", cypher, true, "storage");
+        Config.setString("cypherType", cypherType, true, "storage");
+        Config.setString("address", NetworkSettings.activeAccount);
+        Config.setBool("usedPassword", usedPassword, true, "storage");
+
+        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.DisplayingTournaments);
+        return true;
     }
 
-    //// returns success
+    // returns success
     public static bool TryUnlockAccount()
     {
-        var password = Instance.PasswordField.text;
-        string cypher = Config.getString("sKCypher", "");
-        string decrypted = Crypto.Decrypt(cypher, password);
-
-        if (decrypted.Substring(0, 2) != "0x")
-        {
-            Instance.PasswordField.GetComponent<Image>().color = new Color(1f, 181f / 255f, 181f / 255f);
-            Instance.AccountUnlockText[2].text = "Invalid password";
-            Instance.AccountUnlockText[2].gameObject.SetActive(true);
-            return false;
-        }
+        var password = Instance.PasswordInput.text;
+        string cypher = Config.getString("cypher", "");
+        string cypherType = Config.getString("cypherType", "");
+        string plainText = Crypto.Decrypt(cypher, password);
 
         NetworkSettings.declinedAccountUnlock = false;
-        NetworkSettings.privateKey = decrypted;
-        NetworkSettings.address = Nethereum.Signer.EthECKey.GetPublicAddress(NetworkSettings.privateKey);
+        switch (cypherType)
+        {
+            case "private key":
+                if (plainText.Substring(0, 2) != "0x")
+                {
+                    Instance.PasswordInput.GetComponent<Image>().color = new Color(1f, 181f / 255f, 181f / 255f);
+                    Instance.AccountUnlockText[2].text = "Invalid password";
+                    Instance.AccountUnlockText[2].gameObject.SetActive(true);
+                    return false;
+                }
+                NetworkSettings.importKey(plainText);
+                break;
+            case "mnemonic":
+                try
+                {
+                    NetworkSettings.importWallet(plainText, password);
+                }
+                catch (System.Exception e)
+                {
+                    Instance.ErrorMessage.gameObject.SetActive(true);
+                    Instance.ErrorMessage.text = "Invalid password";
+                    return false;
+                }
+                
+                break;
+            case "keystore":
+                try
+                {
+                    NetworkSettings.importKeystore(plainText, password);
+                }
+                catch (System.Exception e)
+                {
+                    Instance.ErrorMessage.gameObject.SetActive(true);
+                    Instance.ErrorMessage.text = "Invalid password";
+                    return false;
+                }
+                break;
+        }
+        
 
         TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.DisplayingTournaments);
 
