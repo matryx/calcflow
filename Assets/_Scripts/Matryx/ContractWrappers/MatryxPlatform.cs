@@ -52,7 +52,7 @@ namespace Matryx
         public class IsCommitFunction : FunctionMessage
         {
             [Parameter("bytes32")]
-            public string CommitHash { get; set; }
+            public byte[] CommitHash { get; set; }
         }
 
         //function isSubmission(bytes32 submissionHash) external view returns(bool);
@@ -60,7 +60,7 @@ namespace Matryx
         public class IsSubmissionFunction : FunctionMessage
         {
             [Parameter("bytes32")]
-            public string SubmissionHash { get; set; }
+            public byte[] SubmissionHash { get; set; }
         }
 
         //function getTotalBalance() external view returns(uint256);
@@ -76,11 +76,11 @@ namespace Matryx
         public class GetTournamentsFunction : FunctionMessage {}
 
         //function getSubmission(bytes32 submissionHash) external view returns(LibTournament.SubmissionData memory);
-        [Function("getSubmission")]
+        [Function("getSubmission", typeof(MatryxSubmission.SubmissionDataDTO))]
         public class GetSubmissionFunction : FunctionMessage
         {
             [Parameter("bytes32")]
-            public string SubmissionHash { get; set; }
+            public byte[] SubmissionHash { get; set; }
         }
 
         //function createTournament(LibTournament.TournamentDetails calldata, LibTournament.RoundDetails calldata) external returns(address);
@@ -132,7 +132,8 @@ namespace Matryx
         public static IEnumerator isCommit(string commitHash, Async thread = null)
         {
             var queryRequest = new QueryUnityRequest<IsCommitFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
-            yield return queryRequest.Query(new IsCommitFunction() { CommitHash = commitHash }, address);
+            var convertedHash = Utils.HexStringToByteArray(commitHash);
+            yield return queryRequest.Query(new IsCommitFunction() { CommitHash = convertedHash }, address);
             yield return queryRequest.Result;
 
             if (thread != null)
@@ -144,7 +145,7 @@ namespace Matryx
         public static IEnumerator isSubmission(string submissionHash, Async thread = null)
         {
             var queryRequest = new QueryUnityRequest<IsSubmissionFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
-            yield return queryRequest.Query(new IsSubmissionFunction() { SubmissionHash = submissionHash }, address);
+            yield return queryRequest.Query(new IsSubmissionFunction() { SubmissionHash = Utils.HexStringToByteArray(submissionHash) }, address);
             yield return queryRequest.Result;
 
             if (thread != null)
@@ -191,8 +192,8 @@ namespace Matryx
 
         public static IEnumerator getSubmission(string submissionHash, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetSubmissionFunction, EthereumTypes.AddressArray>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
-            yield return queryRequest.Query(new GetSubmissionFunction() { SubmissionHash = submissionHash }, address);
+            var queryRequest = new QueryUnityRequest<GetSubmissionFunction, MatryxSubmission.SubmissionDataDTO>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            yield return queryRequest.Query(new GetSubmissionFunction() { SubmissionHash = Utils.HexStringToByteArray(submissionHash) }, address);
             yield return queryRequest.Result;
 
             if (thread != null)
@@ -211,7 +212,7 @@ namespace Matryx
             };
 
             var createTournamentFnMsg = new CreateTournamentFunction() { TDetails = tDetails, RDetails = tournament.rounds[0].Details, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<CreateTournamentFunction>(createTournamentFnMsg, address);
 
             var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createTournament", thread));

@@ -80,7 +80,7 @@ namespace Matryx
 
         public static IEnumerator approve(string spender, BigInteger amount, Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             var approveFnMsg = new ApproveFunction() { Spender = spender, Amount = amount, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
             yield return transactionRequest.SignAndSendTransaction<ApproveFunction>(approveFnMsg, address);
 

@@ -24,20 +24,20 @@ namespace Matryx
         public MatryxSubmission(MatryxTournament tournament, string title, string description=null, string content=null, int value = 1)
         {
             this.tournament = tournament;
-            this.data = new SubmissionData() { tournamentAddress = tournament.address };
+            this.data = new SubmissionDataDTO() { TournamentAddress = tournament.address };
             this.title = title;
             this.description = description;
-            this.data.contentHash = "";// "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
+            this.data.ContentHash = "";// "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
             commit = new MatryxCommit(content, value);
         }
         public MatryxSubmission(string hash)
         {
             this.hash = hash;
-            this.data = new SubmissionData();
+            this.data = new SubmissionDataDTO();
         }
         public MatryxSubmission(string title, string hash)
         {
-            this.data = new SubmissionData();
+            this.data = new SubmissionDataDTO();
             this.title = title;
             this.hash = hash;
         }
@@ -46,7 +46,7 @@ namespace Matryx
         public string description;
         public string hash;
         public MatryxTournament tournament;
-        public SubmissionData data;
+        public SubmissionDataDTO data;
         public MatryxCommit commit;
 
         public bool calcflowCompatible = true;
@@ -58,124 +58,21 @@ namespace Matryx
             }
         }
 
-        public class SubmissionData
-        {
-            public string tournamentAddress;
-            public BigInteger roundIndex;
-            public string commitHash;
-            public string contentHash;
-            public BigInteger reward;
-            public BigInteger timestamp;
-        }
-
-        [Function("getVersion")]
-        public class GetVersionFunction : FunctionMessage { }
-        [Function("getTournament")]
-        public class GetTournamentFunction : FunctionMessage { }
-        [Function("getRound")]
-        public class GetRoundFunction : FunctionMessage { }
-
-        [Function("getOwner", "address")]
-        public class GetOwnerFunction : FunctionMessage { }
-        [Function("getTitle", "bytes32[3]")]
-        public class GetTitleFunction : FunctionMessage { }
-        [Function("getDescriptionHash", "bytes32[2]")]
-        public class GetDescriptionHashFunction : FunctionMessage { }
-        [Function("getFileHash", "bytes32[2]")]
-        public class GetFileHashFunction : FunctionMessage { }
-        [Function("getDistribution", "uint256[]")]
-        public class GetDistributionFunction : FunctionMessage { }
-        [Function("getContributors", "address[]")]
-        public class GetContributorsFunction : FunctionMessage { }
-        [Function("getReferences", "address[]")]
-        public class GetReferencesFunction : FunctionMessage { }
-        [Function("getTimeSubmitted", "uint256")]
-        public class GetTimeSubmittedFunction : FunctionMessage { }
-        [Function("getTimeUpdated", "uint256")]
-        public class GetTimeUpdatedFunction : FunctionMessage { }
-        [Function("getReward", "uint256")]
-        public class GetRewardFunction : FunctionMessage { }
-        [Function("getReferencedIn", "address[]")]
-        public class GetReferencedInFunction : FunctionMessage { }
-        [Function("getVotes", "(uint256,uint256)")]
-        public class GetVotesFunction : FunctionMessage { }
-        [Function("getViewers", "address[]")]
-        public class GetViewersFunction : FunctionMessage { }
-        [Function("getBalance", "uint256")]
-        public class GetBalanceFunction : FunctionMessage { }
-        [Function("getTotalWinnings", "uint256")]
-        public class GetTotalWinningsFunction : FunctionMessage { }
-        [Function("getData", typeof(SubmissionReturnDataDTO))]
-        public class GetDataFunction : FunctionMessage { }
-
-        [Function("unlockFile")]
-        public class UnlockFileFunction : FunctionMessage { }
-        [Function("updateDetails")]
-        public class UpdateDetailsFunction : FunctionMessage
-        {
-            [Parameter("DetailsUpdates", 1)]
-            public DetailsUpdates Updates { get; set; }
-        }
-        [Function("setContributorsAndReferences")]
-        public class GetContributorsAndReferencesFunction : FunctionMessage { }
-        [Function("flagMissingReference")]
-        public class FlagMissingReferenceFunction : FunctionMessage
-        {
-            [Parameter("address", "missingReference", 1)]
-            public string MissingReference { get; set; }
-        }
-        [Function("getAvailableReward", "uint256")]
-        public class GetAvailableRewardFunction : FunctionMessage { }
-        [Function("withdrawReward")]
-        public class WithdrawRewardFunction : FunctionMessage { }
-
         [FunctionOutput]
-        public class SubmissionReturnDataDTO : IFunctionOutputDTO
+        public class SubmissionDataDTO : IFunctionOutputDTO
         {
-            [Parameter("SubmissionInfo", 1)]
-            public SubmissionInfoDTO Info { get; set; }
-            [Parameter("SubmissionData", 1)]
-            public SubmissionDetailsDTO Details { get; set; }
-        }
-
-        [FunctionOutput]
-        public class SubmissionInfoDTO : IFunctionOutputDTO
-        {
-            [Parameter("address", "owner")]
-            public string Owner { get; set; }
-            [Parameter("address", "tournament")]
-            public string Tournament { get; set; }
-            [Parameter("address", "round")]
-            public string Round { get; set; }
-            [Parameter("uint256", "timeSubmitted")]
-            public uint TimeSubmitted { get; set; }
-            [Parameter("uint256", "timeUpdated")]
-            public BigInteger TimeUpdated { get; set; }
-            [Parameter("uint256", "reward")]
+            [Parameter("address", "tournament", 1)]
+            public string TournamentAddress { get; set; }
+            [Parameter("uint256", "roundIndex", 2)]
+            public long RoundIndex { get; set; }
+            [Parameter("bytes32", "commitHash", 3)]
+            public BigInteger CommitHash { get; set; }
+            [Parameter("string", "content", 4)]
+            public string ContentHash { get; set; }
+            [Parameter("uint256", "reward", 5)]
             public BigInteger Reward { get; set; }
-            [Parameter("address[]", "referencedIn")]
-            public string[] ReferencedIn { get; set; }
-            [Parameter("uint256", "positiveVotes")]
-            public BigInteger PositiveVotes { get; set; }
-            [Parameter("uint256", "negativeVotes")]
-            public BigInteger NegativeVotes { get; set; }
-        }
-
-        [FunctionOutput]
-        public class SubmissionDetailsDTO : IFunctionOutputDTO
-        {
-            [Parameter("bytes32[3]", "title")]
-            public string Title { get; set; }
-            [Parameter("bytes32[2]", "descHash")]
-            public string[] DescHash { get; set; }
-            [Parameter("bytes32[2]", "fileHash")]
-            public string[] FileHash { get; set; }
-            [Parameter("uint256[]", "distribution")]
-            public BigInteger[] Distribution { get; set; }
-            [Parameter("address[]", "contributors")]
-            public string[] Contributors { get; set; }
-            [Parameter("address[]", "references")]
-            public string[] References { get; set; }
+            [Parameter("uint256", "timestamp", 6)]
+            public BigInteger Timestamp { get; set; }
         }
 
         [FunctionOutput]
@@ -205,15 +102,15 @@ namespace Matryx
                 this.tournament.address = submission["tournament"] as string;
                 this.commit.hash = (submission["commit"] as Dictionary<string, object>)["hash"] as string;
                 this.commit.ipfsContentHash = (submission["commit"] as Dictionary<string, object>)["ipfsContent"] as string;
-                this.data.tournamentAddress = submission["tournament"] as string;
+                this.data.TournamentAddress = submission["tournament"] as string;
                 int? roundIndex = submission["roundIndex"] as int?;
-                this.data.roundIndex = new BigInteger(roundIndex.Value);
-                this.data.commitHash = this.commit.hash;
-                this.data.contentHash = submission["ipfsContent"] as string;
+                this.data.RoundIndex = roundIndex.Value;
+                this.data.CommitHash = BigInteger.Parse(this.commit.hash, System.Globalization.NumberStyles.HexNumber);
+                this.data.ContentHash = submission["ipfsContent"] as string;
                 long? reward = submission["reward"] as long?;
-                this.data.reward = new BigInteger(reward.Value);
+                this.data.Reward = new BigInteger(reward.Value);
                 long? timestamp = submission["timestamp"] as long?;
-                this.data.timestamp = new BigInteger(timestamp.Value);
+                this.data.Timestamp = new BigInteger(timestamp.Value);
 
                 // TODO: Maybe optimize this by performing a separate call upon opening each submission
                 var ipfsURL = "https://ipfs.infura.io:5001/api/v0/object/get?arg=";
@@ -241,7 +138,7 @@ namespace Matryx
 
         public IEnumerator uploadContent()
         {
-            if (data.contentHash == null || data.contentHash.Equals(string.Empty))
+            if (data.ContentHash == null || data.ContentHash.Equals(string.Empty))
             {
                 if (description != null && !description.Equals(string.Empty))
                 {
@@ -249,7 +146,7 @@ namespace Matryx
                     {
                         var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(title, description, commit.ipfsContentHash));
                         yield return uploadToIPFS;
-                        data.contentHash = uploadToIPFS.result;
+                        data.ContentHash = uploadToIPFS.result;
                     }
                 }
             }
@@ -329,7 +226,7 @@ namespace Matryx
             ResultsMenu.Instance.SetStatus("Uploading Submission Content to IPFS...");
             yield return uploadContent();
 
-            if(!data.contentHash.Contains("Qm"))
+            if(!data.ContentHash.Contains("Qm"))
             {
                 Debug.Log("Failed to upload file to IPFS");
                 yield break;

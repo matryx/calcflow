@@ -412,6 +412,44 @@ public class MatryxAccountMenu : MonoBehaviour {
         return true;
     }
 
+    public static bool UnlockAccount()
+    {
+        string cypher = Config.getString("cypher", "");
+        string cypherType = Config.getString("cypherType", "");
+        string plainText = Crypto.Decrypt(cypher);
+
+        NetworkSettings.declinedAccountUnlock = false;
+        switch (cypherType)
+        {
+            case "private key":
+                if (plainText.Substring(0, 2) != "0x")
+                {
+                    return false;
+                }
+                return NetworkSettings.importKey(plainText);
+            case "mnemonic":
+                try
+                {
+                    return NetworkSettings.importWallet(plainText);
+                }
+                catch (System.Exception e)
+                {
+                    return false;
+                }
+            case "keystore":
+                try
+                {
+                    return NetworkSettings.importKeystore(plainText, "");
+                }
+                catch (System.Exception e)
+                {
+                    return false;
+                }
+        }
+
+        return false;
+    }
+
     // returns success
     public static bool TryUnlockAccount()
     {

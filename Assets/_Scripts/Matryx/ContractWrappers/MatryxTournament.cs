@@ -430,7 +430,7 @@ namespace Matryx
 
         public IEnumerator enter(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<EnterFunction>(new EnterFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             var txStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "enter", thread));
@@ -440,7 +440,7 @@ namespace Matryx
 
         public IEnumerator exit(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<ExitFunction>(new ExitFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "exit", thread);
@@ -448,8 +448,8 @@ namespace Matryx
 
         public IEnumerator createSubmission(MatryxSubmission submission, Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
-            yield return transactionRequest.SignAndSendTransaction<CreateSubmissionFunction>(new CreateSubmissionFunction() { Content = submission.data.contentHash, CommitHash = submission.commit.hash, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            yield return transactionRequest.SignAndSendTransaction<CreateSubmissionFunction>(new CreateSubmissionFunction() { Content = submission.data.ContentHash, CommitHash = submission.commit.hash, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createSubmission", thread));
             yield return getTransactionStatus;
@@ -458,7 +458,7 @@ namespace Matryx
 
         public IEnumerator updateDetails(TournamentDetails newDetails, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<UpdateDetailsFunction>(new UpdateDetailsFunction() { TDetails = newDetails, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createSubmission", thread));
@@ -468,7 +468,7 @@ namespace Matryx
 
         public IEnumerator addToBounty(BigInteger amount, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<AddToBountyFunction>(new AddToBountyFunction() { Amount = amount, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createSubmission", thread));
@@ -478,7 +478,7 @@ namespace Matryx
 
         public IEnumerator transferToRound(BigInteger amount, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<TransferToRoundFunction>(new TransferToRoundFunction() { Amount = amount, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createSubmission", thread));
@@ -491,7 +491,7 @@ namespace Matryx
             WinnersData wData = new WinnersData() { Submissions = submissions, Distribution = distribution, Action = action };
             MatryxRound.RoundDetails rDetails = new MatryxRound.RoundDetails() { Start = start, Duration = duration, Review = review, Bounty = bounty };
 
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<SelectWinnersFunction>(new SelectWinnersFunction() { WData = wData, RDetails = rDetails, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "selectWinners", thread);
@@ -499,7 +499,7 @@ namespace Matryx
 
         public IEnumerator updateNextRound(MatryxRound.RoundDetails newDetails, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<UpdateNextRoundFunction>(new UpdateNextRoundFunction() { RDetails = newDetails, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "selectWinners", thread);
@@ -507,7 +507,7 @@ namespace Matryx
 
         public IEnumerator startNextRound(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<StartNextRoundFunction>(new StartNextRoundFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "startNextRound", thread);
@@ -515,7 +515,7 @@ namespace Matryx
 
         public IEnumerator closeTournament(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<CloseTournamentFunction>(new CloseTournamentFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "closeTournament", thread);
@@ -523,7 +523,7 @@ namespace Matryx
 
         public IEnumerator withdrawFromAbandoned(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<WithdrawFromAbandonedFunction>(new WithdrawFromAbandonedFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "withdrawFromAbandoned", thread);
@@ -531,7 +531,7 @@ namespace Matryx
 
         public IEnumerator recoverBounty(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey, NetworkSettings.activeAccount);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             yield return transactionRequest.SignAndSendTransaction<RecoverBountyFunction>(new RecoverBountyFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "recoverFunds", thread);

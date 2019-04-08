@@ -55,7 +55,7 @@ namespace Matryx
             // Make into one
             queue(InitializeContracts());
             queue(InitiateUser());
-            //queue(RunTests());
+            queue(RunTests());
         }
 
         // Internal queue
@@ -187,7 +187,7 @@ namespace Matryx
                                 var winner = roundWinners[i] as Dictionary<string, object>;
                                 var submission = new MatryxSubmission(winner["address"] as string);
                                 submission.title = winner["title"] as string;
-                                submission.data.reward = Convert.ToInt32(winner["reward"] as string);
+                                submission.data.Reward = BigInteger.Parse(winner["reward"] as string);
                                 submissions.Add(submission);
                             }
                         }
@@ -219,8 +219,8 @@ namespace Matryx
                 try
                 {
                     submission.commit.owner = jsonSubmission["owner"] as string;
-                    var timestamp = jsonSubmission["timestamp"] as long?;
-                    submission.data.timestamp = new BigInteger(timestamp.Value);
+                    var timestamp = BigInteger.Parse(jsonSubmission["timestamp"] as string);
+                    submission.data.Timestamp = timestamp;
                     submission.description = jsonSubmission["description"] as string;
                     callback(submission);
                 }
@@ -283,7 +283,6 @@ namespace Matryx
 
             NetworkSettings.network = Config.getString("network", "ropsten");
             NetworkSettings.setActiveAccount(Config.getString("address", ""));
-            Debug.Log("Is it 11am? If so, move yoself.");
             
             yield break;
 
@@ -317,6 +316,8 @@ namespace Matryx
 
         public static IEnumerator InitiateUser()
         {
+            MatryxAccountMenu.UnlockAccount();
+
             bool settingUp = true;
             while (!NetworkSettings.declinedAccountUnlock.HasValue || settingUp)
             {
@@ -332,8 +333,10 @@ namespace Matryx
             var tokenBalance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.activeAccount));
             yield return tokenBalance;
             NetworkSettings.MTXBalance = tokenBalance.result;
-            MatryxAccountMenu.Instance.AccountInfoText[1].text = (NetworkSettings.MTXBalance/new BigInteger(1e18)).ToString() + " MTX";
-
+            if(MatryxAccountMenu.Instance)
+            {
+                MatryxAccountMenu.Instance.AccountInfoText[1].text = (NetworkSettings.MTXBalance / new BigInteger(1e18)).ToString() + " MTX";
+            }
             yield break;
         }
 
@@ -378,17 +381,41 @@ namespace Matryx
             }
         }
 
-        //public static IEnumerator RunTests()
-        //{
-        //    MatryxSubmission newSubmission = new MatryxSubmission(new MatryxTournament("0x1234567890123456789012345678901234567890"), "This is a new submission", new List<string>(), new List<string>(), "This is the file for the submission", "This is the description of the submission");
-        //    var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxExplorer.Instance, Utils.uploadToIPFS(newSubmission));
-        //    yield return uploadToIPFS;
+        public static IEnumerator RunTests()
+        {
+            bool settingUp = true;
+            while (!NetworkSettings.declinedAccountUnlock.HasValue || settingUp)
+            {
+                yield return null;
+                settingUp = NetworkSettings.activeAccount == null || NetworkSettings.activeAccount == "" || MatryxPlatform.address == null || MatryxToken.address == null || MatryxCommit.address == null || MatryxTournament.ABI == null;
+            }
 
-        //    MatryxTournament newTournament = new MatryxTournament("new Tournament", "this is the description of the tournament", "yeeeeah pickle riiiiiick", "math", new BigInteger(1e18), new BigInteger(1e18), null);
-        //    var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxExplorer.Instance, Utils.uploadToIPFS(newTournament));
-        //    yield return uploadToIPFS;
+            //var request = new Utils.CoroutineWithData<MatryxCommit.Commit>(MatryxCortex.Instance, MatryxCommit.getCommitByContent("QmSFMpah9yQ7YdLCcZAgJq2doFk2G8JxhY7GvbCZowuATq"));
+            //yield return request;
+            //var hash = request.result.CommitHash;
 
-        //    Debug.Log("Description: " + uploadToIPFS.result[0] + "\n Content: " + uploadToIPFS.result[1]);
-        //}
+
+
+            //var getCommit = new Utils.CoroutineWithData<MatryxCommit.Commit>(MatryxCortex.Instance, MatryxCommit.getCommit("0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b"));
+            //yield return getCommit;
+            //var hash = getCommit.result.CommitHash;
+
+            var request = new Utils.CoroutineWithData<MatryxSubmission.SubmissionDataDTO>(MatryxCortex.Instance, MatryxPlatform.getSubmission("0xe627ceaf65decb29bc6a5f4be54b8d909f28b5ce770fd863c701ff19db28c44d"));
+            yield return request;
+            var hash = request.result.CommitHash;
+
+            //var request = new Utils.CoroutineWithData<EthereumTypes.Bool>(MatryxCortex.Instance, MatryxPlatform.isCommit("0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b"));
+            //yield return request;
+            //var hash = request.result.Value;
+
+            //var getInitialCommits = new Utils.CoroutineWithData<EthereumTypes.Bytes32Array>(MatryxCortex.Instance, MatryxCommit.getInitialCommits());
+            //yield return getInitialCommits;
+            //Debug.Log("Initial commits: " + getInitialCommits.result.Value);
+
+            //var commitHash = "0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b";
+            //var request = new Utils.CoroutineWithData<EthereumTypes.Bool>(MatryxCortex.Instance, MatryxPlatform.isCommit(commitHash));
+            //yield return request;
+            //Debug.Log("is " + commitHash.Substring(0, 10) + " a commit? " + request.result.Value);
+        }
     }
 }

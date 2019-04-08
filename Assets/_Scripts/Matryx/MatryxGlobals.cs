@@ -25,7 +25,7 @@ namespace Matryx
         public static bool? declinedAccountUnlock;
 
         public static string network = "ropsten";
-        public static string infuraProvider = "https://" + network + ".infura.io/metamask";
+        public static string infuraProvider = "https://ropsten.infura.io/v3/2373e82fc83341ff82b66c5a87edd5f5";
         public static Nethereum.HdWallet.Wallet wallet;
         public static List<string> _accounts = new List<string>();
         public static List<string> _privateKeys = new List<string>();
@@ -86,7 +86,7 @@ namespace Matryx
 
         // Importing a wallet currently overrides all imported single private keys
         // (including those from keystore files)
-        public static bool importWallet(string mnemonic, string password)
+        public static bool importWallet(string mnemonic, string password=null)
         {
             wallet = new Nethereum.HdWallet.Wallet(mnemonic, "");
             return true;
@@ -199,31 +199,27 @@ namespace Matryx
             return title;
         }
 
-        public static string HexBytesArrayToString(byte[] hexBytes)
+        public static string BytesArrayToString(byte[] hexBytes)
         {
             var chars = Encoding.Unicode.GetChars(hexBytes);
             var theString = new string(chars);
             return theString;
         }
 
-        public static byte[] HexStringToByteArray(string hex)
+        public static byte[] HexStringToByteArray(string hexString)
         {
-            if(hex[0] == '0' && hex[1] == 'x')
+            if(hexString[0] == '0' && hexString[1] == 'x')
             {
-                hex = hex.Substring(2, hex.Length - 2);
+                hexString = hexString.Substring(2, hexString.Length - 2);
             }
 
-            if (hex.Length % 2 == 1)
+            if (hexString.Length % 2 == 1)
                 throw new System.Exception("The binary key cannot have an odd number of digits");
 
-            byte[] arr = new byte[hex.Length >> 1];
-
-            for (int i = 0; i < hex.Length >> 1; ++i)
-            {
-                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1])));
-            }
-
-            return arr;
+            byte[] retval = new byte[hexString.Length / 2];
+            for (int i = 0; i < hexString.Length; i += 2)
+                retval[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
+            return retval;
         }
 
         public static int GetHexVal(char hex)
@@ -345,7 +341,7 @@ namespace Matryx
             string descriptionHash = "";
             string jsonContentHash = "";
 
-            if (submission.data.contentHash == null || submission.data.contentHash.Equals(string.Empty))
+            if (submission.data.ContentHash == null || submission.data.ContentHash.Equals(string.Empty))
             {
                 if (submission.description != null && !submission.description.Equals(string.Empty))
                 {
@@ -435,7 +431,7 @@ namespace Matryx
             return AES.Encrypt(System.Text.Encoding.UTF8.GetBytes(data), password);
         }
 
-        public static string Decrypt(string cypher, string password = null)
+        public static string Decrypt(string cypher, string password = "")
         {
             return AES.Decrypt(cypher, password);
         }
