@@ -400,9 +400,21 @@ namespace Matryx
             //yield return getCommit;
             //var hash = getCommit.result.CommitHash;
 
-            var request = new Utils.CoroutineWithData<MatryxSubmission.SubmissionDataDTO>(MatryxCortex.Instance, MatryxPlatform.getSubmission("0xe627ceaf65decb29bc6a5f4be54b8d909f28b5ce770fd863c701ff19db28c44d"));
-            yield return request;
-            var hash = request.result.CommitHash;
+            //var request = new Utils.CoroutineWithData<MatryxSubmission.SubmissionDataDTO>(MatryxCortex.Instance, MatryxPlatform.getSubmission("0xe627ceaf65decb29bc6a5f4be54b8d909f28b5ce770fd863c701ff19db28c44d"));
+            //yield return request;
+            //var hash = request.result.CommitHash;
+
+            //var tournament = new MatryxTournament("0x95405c6fcfcb43d1f11f0318d54e83521be6e7c6");
+            //var request = new Utils.CoroutineWithData<EthereumTypes.Uint256>(MatryxCortex.Instance, tournament.getCurrentRoundIndex());
+            //yield return request;
+            //var hash = request.result;
+            //Debug.Log("current round index of tournament " + tournament.address.Substring(0, 10) + " is " + request.result.Value);
+
+            //var tournament = new MatryxTournament("0x95405c6fcfcb43d1f11f0318d54e83521be6e7c6");
+            //var request = new Utils.CoroutineWithData<MatryxTournament.TournamentInfo>(MatryxCortex.Instance, tournament.getInfo());
+            //yield return request;
+            //var hash = request.result;
+            //Debug.Log("info for tournament " + tournament.address.Substring(0, 10) + " is " + request.result);
 
             //var request = new Utils.CoroutineWithData<EthereumTypes.Bool>(MatryxCortex.Instance, MatryxPlatform.isCommit("0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b"));
             //yield return request;
@@ -412,10 +424,10 @@ namespace Matryx
             //yield return getInitialCommits;
             //Debug.Log("Initial commits: " + getInitialCommits.result.Value);
 
-            //var commitHash = "0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b";
-            //var request = new Utils.CoroutineWithData<EthereumTypes.Bool>(MatryxCortex.Instance, MatryxPlatform.isCommit(commitHash));
-            //yield return request;
-            //Debug.Log("is " + commitHash.Substring(0, 10) + " a commit? " + request.result.Value);
+            var commitHash = "0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b";
+            var request = new Utils.CoroutineWithData<MatryxCommit.Commit>(MatryxCortex.Instance, MatryxCommit.getCommit(commitHash));
+            yield return request;
+            Debug.Log("is " + commitHash.Substring(0, 10) + " a commit? " + request.result.Value);
         }
     }
 }

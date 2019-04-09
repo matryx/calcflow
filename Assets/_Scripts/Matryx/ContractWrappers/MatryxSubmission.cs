@@ -64,9 +64,9 @@ namespace Matryx
             [Parameter("address", "tournament", 1)]
             public string TournamentAddress { get; set; }
             [Parameter("uint256", "roundIndex", 2)]
-            public long RoundIndex { get; set; }
+            public BigInteger RoundIndex { get; set; }
             [Parameter("bytes32", "commitHash", 3)]
-            public BigInteger CommitHash { get; set; }
+            public string CommitHash { get; set; }
             [Parameter("string", "content", 4)]
             public string ContentHash { get; set; }
             [Parameter("uint256", "reward", 5)]
@@ -105,7 +105,7 @@ namespace Matryx
                 this.data.TournamentAddress = submission["tournament"] as string;
                 int? roundIndex = submission["roundIndex"] as int?;
                 this.data.RoundIndex = roundIndex.Value;
-                this.data.CommitHash = BigInteger.Parse(this.commit.hash, System.Globalization.NumberStyles.HexNumber);
+                this.data.CommitHash = this.commit.hash;
                 this.data.ContentHash = submission["ipfsContent"] as string;
                 long? reward = submission["reward"] as long?;
                 this.data.Reward = new BigInteger(reward.Value);

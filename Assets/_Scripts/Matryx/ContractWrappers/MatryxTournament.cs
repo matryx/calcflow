@@ -371,28 +371,28 @@ namespace Matryx
         {
             var request = new QueryUnityRequest<GetBalanceFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return request.Query(new GetBalanceFunction(), address);
-            yield return request.Result.Value;
+            yield return request.Result;
         }
 
         public IEnumerator getState()
         {
             var request = new QueryUnityRequest<GetStateFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return request.Query(new GetStateFunction(), address);
-            yield return request.Result.Value;
+            yield return request.Result;
         }
 
         public IEnumerator getRoundState(BigInteger roundIndex)
         {
             var request = new QueryUnityRequest<GetRoundStateFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return request.Query(new GetRoundStateFunction() { RoundIndex = roundIndex }, address);
-            yield return request.Result.Value;
+            yield return request.Result;
         }
 
         public IEnumerator getCurrentRoundIndex()
         {
             var request = new QueryUnityRequest<GetCurrentRoundIndexFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return request.Query(new GetCurrentRoundIndexFunction(), address);
-            yield return request.Result.Value;
+            yield return request.Result;
         }
 
         public IEnumerator getRoundInfo(BigInteger roundIndex)
@@ -411,21 +411,21 @@ namespace Matryx
         {
             var request = new QueryUnityRequest<GetSubmissionCountFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return request.Query(new GetSubmissionCountFunction(), address);
-            yield return request.Result.Value;
+            yield return request.Result;
         }
 
         public IEnumerator getEntryFeePaid(string user)
         {
             var request = new QueryUnityRequest<GetEntryFeePaidFunction, EthereumTypes.Address>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return request.Query(new GetEntryFeePaidFunction() { User = user }, address);
-            yield return request.Result.Value;
+            yield return request.Result;
         }
 
         public IEnumerator isEntrant(string user)
         {
             var isEntrantRequest = new QueryUnityRequest<IsEntrantFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return isEntrantRequest.Query(new IsEntrantFunction() { User = user }, address);
-            yield return isEntrantRequest.Result.Value;
+            yield return isEntrantRequest.Result;
         }
 
         public IEnumerator enter(Async thread=null)
