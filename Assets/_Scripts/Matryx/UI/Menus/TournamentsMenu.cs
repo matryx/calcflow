@@ -135,7 +135,7 @@ public class TournamentsMenu : MonoBehaviour
     {
        loadingText.gameObject.SetActive(true);
        ClearTournaments();
-       MatryxCortex.RunFetchTournaments(page, ProcessTournaments);
+       MatryxCortex.RunFetchTournaments(page, ProcessTournaments, ShowError);
     }
 
     /// <summary>
@@ -162,6 +162,11 @@ public class TournamentsMenu : MonoBehaviour
     {
         loadingText.gameObject.SetActive(false);
         DisplayTournaments((List<MatryxTournament>)results);
+    }
+
+    private void ShowError(object results)
+    {
+        loadingText.text = "Unable to Load Any Tournaments";
     }
 
     GameObject loadButton;

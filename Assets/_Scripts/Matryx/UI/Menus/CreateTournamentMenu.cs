@@ -76,7 +76,6 @@ public class CreateTournamentMenu : MonoBehaviour
                 {
                     StatisticsTracking.EndEvent("Matryx", "Tournament Creation");
                     ResultsMenu.Instance.PostSuccess(tournament);
-                    StartCoroutine(ResultsMenu.Instance.ReturnToCalcflowAfterSeconds(10f));
                 }
                 else
                 {

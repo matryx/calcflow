@@ -15,28 +15,14 @@ public class ImportSubmission : QuickButton {
     [SerializeField]
     private FlexButtonComponent submissionButtonFlexComponent;
 
-    int x = 0;
+    static int x = 0;
     protected override void ButtonEnterBehavior(GameObject other)
     {
         // Select the button
         submissionButtonFlexComponent.SetState(2);
-
-        if(x%2 == 1)
-        {
-            var surface = CreateSubmissionMenu.Instance.SerializeSurface();
-            Debug.Log("Surface: " + surface);
-            var equationJson2 = JsonHelper.FromJson<SerializableExpressionSet>(surface);
-            List<ExpressionSet> ess2 = equationJson2.Select(x => x.ConvertToExpressionSet()).ToList();
-            CalcManager.Instance.LoadSavedExpressionSets(ess2);
-        }
-        else
-        {
-            var equationJson = JsonHelper.FromJson<SerializableExpressionSet>(submission.commit.content);
-            List<ExpressionSet> ess = equationJson.Select(x => x.ConvertToExpressionSet()).ToList();
-            calcManager.LoadSavedExpressionSets(ess);
-        }
-
-        x++;
+        var equationJson = JsonHelper.FromJson<SerializableExpressionSet>(submission.commit.content);
+        List<ExpressionSet> ess = equationJson.Select(x => x.ConvertToExpressionSet()).ToList();
+        calcManager.LoadSavedExpressionSets(ess);
     }
 
     protected override void ButtonExitBehavior(GameObject other)

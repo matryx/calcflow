@@ -329,7 +329,7 @@ namespace Matryx
 
             if (contentHash.Equals(""))
             {
-                ResultsMenu.Instance.SetStatus("Uploading content to IPFS...");
+                ResultsMenu.Instance.SetStatus("Uploading Tournament Content...");
                 var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxCortex.Instance, Utils.uploadTournament(this));
                 yield return uploadToIPFS;
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Matryx;
+using UnityEngine.UI;
 
 public class TournamentMenu : MonoBehaviour
 {
@@ -26,7 +27,7 @@ public class TournamentMenu : MonoBehaviour
     [SerializeField]
     private GameObject winningSubmissions;
     [SerializeField]
-    private GameObject loadingWinningSubmissions;
+    private TMPro.TextMeshPro loadingWinningSubmissions;
 
     static MatryxTournament tournament;
     public static MatryxTournament Tournament
@@ -97,8 +98,8 @@ public class TournamentMenu : MonoBehaviour
 
             ClearSubmissions();
             var roundNumber = 0;
-            loadingWinningSubmissions.SetActive(true);
-            MatryxCortex.RunFetchTournament(tournament.address, roundNumber, page, ProcessTournament);
+            loadingWinningSubmissions.gameObject.SetActive(true);
+            MatryxCortex.RunFetchTournament(tournament.address, roundNumber, page, ProcessTournament, ErrorLoadingTournament);
         }
     }
 
@@ -109,7 +110,7 @@ public class TournamentMenu : MonoBehaviour
     {
         removeLoadButton();
         var roundNumber = 0;
-        MatryxCortex.RunFetchTournament(tournament.address, roundNumber, ++page, ProcessTournament);
+        MatryxCortex.RunFetchTournament(tournament.address, roundNumber, ++page, ProcessTournament, ErrorLoadingTournament);
     }
 
     /// <summary>
@@ -125,8 +126,21 @@ public class TournamentMenu : MonoBehaviour
 
     public void ProcessTournament(object result)
     {
-        loadingWinningSubmissions.SetActive(false);
-        DisplaySubmissions((List<MatryxSubmission>)result);
+        var submissions = (List<MatryxSubmission>)result;
+        if(submissions.Count == 0)
+        {
+            loadingWinningSubmissions.text = "No Submissions to Display";
+        }
+        else
+        {
+            loadingWinningSubmissions.gameObject.SetActive(false);
+            DisplaySubmissions((List<MatryxSubmission>)result);
+        }
+    }
+
+    public void ErrorLoadingTournament(object result)
+    {
+        loadingWinningSubmissions.text = "Could not load submissions";
     }
 
     /*
