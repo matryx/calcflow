@@ -16,6 +16,7 @@ using Nethereum.Util;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.Eth.Transactions;
 using Nethereum.Signer;
+using static Matryx.MatryxTournament;
 
 namespace Matryx
 {
@@ -32,12 +33,25 @@ namespace Matryx
         public RoundDetails Details { get; set; }
 
         [FunctionOutput]
+        public class RoundInfo : IFunctionOutputDTO
+        {
+            [Parameter("bytes32[]")]
+            public List<string> Submissions { get; set; }
+            [Parameter("uint256")]
+            public BigInteger SubmitterCount { get; set; }
+            [Parameter("tuple")]
+            public WinnersData Winners { get; set; }
+            [Parameter("bool")]
+            public bool Closed { get; set; }
+        }
+
+        [FunctionOutput]
         public class RoundDetails : IFunctionOutputDTO
         {
             [Parameter("uint256")]
             public BigInteger Start { get; set; }
             [Parameter("uint256")]
-            public BigInteger End { get; set; }
+            public BigInteger Duration { get; set; }
             [Parameter("uint256")]
             public BigInteger Review { get; set; }
             [Parameter("uint256")]

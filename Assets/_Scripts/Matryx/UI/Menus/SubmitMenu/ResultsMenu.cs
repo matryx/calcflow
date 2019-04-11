@@ -101,8 +101,14 @@ public class ResultsMenu : MonoBehaviour {
             CreateTournamentMenu.Instance.gameObject.SetActive(false);
         }
 
-        CreateTournamentButton.Instance.ToggleOff();
-        CreateSubmissionButton.Instance.ToggleOff();
+        if (CreateTournamentButton.Instance != null)
+        {
+            CreateTournamentButton.Instance.ToggleOff();
+        }
+        if (CreateSubmissionButton.Instance != null)
+        {
+            CreateSubmissionButton.Instance.ToggleOff();
+        }
     }
 
     public void TryAgain()

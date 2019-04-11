@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Numerics;
 using System.Text;
 using System.Linq;
+using System.Net.Http;
 
 using UnityEngine;
 using UnityEngine.Networking;
@@ -14,6 +15,8 @@ using Nethereum.Hex.HexTypes;
 using Nethereum.JsonRpc.UnityClient;
 
 using Assets.USecurity;
+using Nanome.Maths.Serializers.JsonSerializer;
+using System;
 
 namespace Matryx
 {
@@ -22,16 +25,114 @@ namespace Matryx
         public static bool? declinedAccountUnlock;
 
         public static string network = "ropsten";
-        public static string infuraProvider = "https://" + network + ".infura.io/metamask";
-        public static string address;
-        public static string privateKey;
+        public static string infuraProvider = "https://ropsten.infura.io/v3/2373e82fc83341ff82b66c5a87edd5f5";
+        public static Nethereum.HdWallet.Wallet wallet;
+        public static List<string> _accounts = new List<string>();
+        public static List<string> _privateKeys = new List<string>();
+        static int activeAccountIndex = 0;
+        // All accounts the network settings know about
+        public static string[] accounts
+        {
+            get
+            {
+                if (wallet != null)
+                {
+                    return wallet.GetAddresses(10);
+                }
+                else return _accounts.ToArray();
+            }
+        }
+        // The account that transactions are currently being made under
+        public static string activeAccount
+        {
+            get
+            {
+                if (wallet != null)
+                {
+                    return wallet.GetAccount(0).Address;
+                }
+                else if (_accounts.Count > 0)
+                {
+                    return _accounts.ElementAt(activeAccountIndex);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+        // The private key currently being used to make transactions
+        public static string activePrivateKey
+        {
+            get
+            {
+                if (wallet != null)
+                {
+                    return "0x" + System.BitConverter.ToString(wallet.GetPrivateKey(0)).Replace("-", "");
+                }
+                else if (_privateKeys.Count > 0)
+                {
+                    return _privateKeys[activeAccountIndex];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
         public static BigInteger MTXBalance;
         public static HexBigInteger txGas = new HexBigInteger(new BigInteger(3e6));
         public static HexBigInteger txGasPrice = new HexBigInteger(new BigInteger(5e9));
+
+        // Importing a wallet currently overrides all imported single private keys
+        // (including those from keystore files)
+        public static bool importWallet(string mnemonic, string password=null)
+        {
+            wallet = new Nethereum.HdWallet.Wallet(mnemonic, "");
+            return true;
+        }
+
+        public static bool importKey(string privateKey, bool makeActive = true)
+        {
+            _privateKeys.Add(privateKey);
+            _accounts.Add(Nethereum.Signer.EthECKey.GetPublicAddress(privateKey));
+            if(makeActive)
+            {
+                activeAccountIndex = _privateKeys.Count - 1;
+            }
+
+            return true;
+        }
+
+        public static bool importKeystore(string keystore, string password, bool makeActive = true)
+        {
+            var service = new Nethereum.KeyStore.KeyStoreService();
+            var sK = service.DecryptKeyStoreFromJson(password, keystore);
+            _privateKeys.Add("0x" + System.BitConverter.ToString(sK).Replace("-", ""));
+            _accounts.Add(Nethereum.Signer.EthECKey.GetPublicAddress(_privateKeys.Last()));
+            return true;
+        }
+
+        public static void setActiveAccount(string address)
+        {
+            activeAccountIndex = _accounts.IndexOf(address);
+            activeAccountIndex = activeAccountIndex == -1 ? 0 : activeAccountIndex;
+        }
     }
 
     public class Utils
     {
+        static System.Random random = new System.Random();
+        public static string GetRandomHexNumber(int digits)
+        {
+            byte[] buffer = new byte[digits / 2];
+            random.NextBytes(buffer);
+            string result = String.Concat(buffer.Select(x => x.ToString("X2")).ToArray());
+            if (digits % 2 == 0)
+                return result;
+            return result + random.Next(16).ToString("X");
+        }
+
         public static List<string> stringToBytes(string text, int len = 0)
         {
             var bytesTitle = new List<string>();
@@ -98,6 +199,40 @@ namespace Matryx
             return title;
         }
 
+        public static string BytesArrayToString(byte[] hexBytes)
+        {
+            var chars = Encoding.Unicode.GetChars(hexBytes);
+            var theString = new string(chars);
+            return theString;
+        }
+
+        public static byte[] HexStringToByteArray(string hexString)
+        {
+            if(hexString[0] == '0' && hexString[1] == 'x')
+            {
+                hexString = hexString.Substring(2, hexString.Length - 2);
+            }
+
+            if (hexString.Length % 2 == 1)
+                throw new System.Exception("The binary key cannot have an odd number of digits");
+
+            byte[] retval = new byte[hexString.Length / 2];
+            for (int i = 0; i < hexString.Length; i += 2)
+                retval[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
+            return retval;
+        }
+
+        public static int GetHexVal(char hex)
+        {
+            int val = (int)hex;
+            //For uppercase A-F letters:
+            return val - (val < 58 ? 48 : 55);
+            //For lowercase a-f letters:
+            //return val - (val < 58 ? 48 : 87);
+            //Or the two combined, but a bit slower:
+            //return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
+        }
+
         public static IEnumerator GetTransactionReceipt(TransactionSignedUnityRequest transactionRequest, string eventName, Async thread=null)
         {
             if (transactionRequest.Exception != null)
@@ -122,34 +257,75 @@ namespace Matryx
 
         public static IEnumerator GetTransactionStatus(TransactionSignedUnityRequest transactionRequest, string eventName, Async thread = null)
         {
-            var txReceipt = new CoroutineWithData<Nethereum.RPC.Eth.DTOs.TransactionReceipt>(MatryxExplorer.Instance, GetTransactionReceipt(transactionRequest, eventName, thread));
+            var txReceipt = new CoroutineWithData<Nethereum.RPC.Eth.DTOs.TransactionReceipt>(MatryxCortex.Instance, GetTransactionReceipt(transactionRequest, eventName, thread));
             yield return txReceipt;
             yield return txReceipt.result.Status.Value == new BigInteger(1);
-            Debug.Log("result for " + eventName + ": " + txReceipt.result.Status);
+            Debug.Log("result of " + eventName + ": " + txReceipt.result.Status.Value);
         }
 
-        public static IEnumerator uploadToIPFS(string fieldName, string extension, string content, string contentType, Async thread=null)
+        public static IEnumerator uploadFiles(List<string> fileNames, List<byte[]> contents, List<string> fileTypes, Async thread = null)
         {
             WWWForm form = new WWWForm();
-            form.AddBinaryData(fieldName, Encoding.ASCII.GetBytes(content.ToCharArray()), fieldName+extension, contentType);
-            UnityWebRequest ipfsRequest = UnityWebRequest.Post(MatryxExplorer.uploadURL, form);
-            yield return ipfsRequest.SendWebRequest();
-            Debug.Log("request completed with code: " + ipfsRequest.responseCode);
-            if (ipfsRequest.isNetworkError)
+            for (var i = 0; i < fileNames.Count; i++)
             {
-                Debug.Log("Error: " + ipfsRequest.error);
+                form.AddBinaryData("files", contents[i], fileNames[i], fileTypes[i]);
+            }
+
+            UnityWebRequest request = UnityWebRequest.Post(MatryxCortex.filesUploadURL, form);
+            yield return request.SendWebRequest();
+            Debug.Log("request completed with code: " + request.responseCode);
+            if (request.isNetworkError || request.responseCode != 200)
+            {
+                Debug.Log("Error: " + request.error);
             }
             else
             {
-                Debug.Log("Request Response: " + ipfsRequest.downloadHandler.text);
+                Debug.Log("Request Response: " + request.downloadHandler.text);
             }
 
-            var response = MatryxExplorer.serializer.Deserialize<object>(ipfsRequest.downloadHandler.data) as Dictionary<string, object>;
-            var multiHash = response[response.Keys.ToArray()[0]];
+            var response = MatryxCortex.serializer.Deserialize<object>(request.downloadHandler.data) as Dictionary<string, object>;
+            var data = response["data"] as Dictionary<string, object>;
+            string multiHash = data["hash"] as string;
+
+            if(thread != null)
+            {
+                thread.pushEvent("uploadToIPFS-success", multiHash);
+            }
+
+            yield return multiHash;
+        }
+
+        private static readonly HttpClient client = new HttpClient();
+        private static Serializer serializer = new Serializer();
+        public static IEnumerator uploadJson(string title, string description, string ipfsFiles, string category="math", Async thread = null)
+        {
+            Dictionary<string, string> jsonDictionary = new Dictionary<string, string>()
+            {
+                {"title", title },
+                {"description", description },
+                {"category", "math" },
+                { "ipfsFiles", ipfsFiles }
+            };
+
+            UnityWebRequest request = UnityWebRequest.Post(MatryxCortex.jsonUploadURL, jsonDictionary);
+            yield return request.SendWebRequest();
+
+            if (request.isNetworkError || request.responseCode != 200)
+            {
+                Debug.Log("Error: " + request.error);
+            }
+            else
+            {
+                Debug.Log("Request Response: " + request.downloadHandler.text);
+            }
+
+            var res = MatryxCortex.serializer.Deserialize<object>(request.downloadHandler.data) as Dictionary<string, object>;
+            var data = res["data"] as Dictionary<string, object>;
+            var multiHash = data["hash"] as string;
 
             yield return multiHash;
 
-            if(thread != null)
+            if (thread != null)
             {
                 thread.pushEvent("uploadToIPFS-success", multiHash);
             }
@@ -160,32 +336,22 @@ namespace Matryx
         /// </summary>
         /// <param name="submission"> The submission whose description and json content are to be uploaded. </param>
         /// <returns> The description hash and json content hash of the submission in that order. </returns>
-        public static IEnumerator uploadToIPFS(MatryxSubmission submission)
+        public static IEnumerator uploadSubmission(MatryxSubmission submission)
         {
             string descriptionHash = "";
-            string jsonContent = "";
+            string jsonContentHash = "";
 
-            if(submission.details.descHash == null || submission.details.descHash.Equals(string.Empty))
+            if (submission.dto.Content == null || submission.dto.Content.Equals(string.Empty))
             {
-                if(submission.description != null && !submission.description.Equals(string.Empty))
+                if (submission.description != null && !submission.description.Equals(string.Empty))
                 {
-                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS("description", ".txt", "This submission was created with Calcflow.", "text/plain"));
+                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(submission.title, submission.description, submission.commit.ipfsContentHash));
                     yield return uploadToIPFS;
                     descriptionHash = uploadToIPFS.result;
                 }
             }
 
-            if(submission.details.fileHash == null || submission.details.fileHash.Equals(string.Empty))
-            {
-                if(submission.file != null && !submission.file.Equals(string.Empty))
-                {
-                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS("jsonContent", ".json", submission.file, "application/json"));
-                    yield return uploadToIPFS;
-                    jsonContent = uploadToIPFS.result;
-                }
-            }
-
-            yield return new string[2] { descriptionHash, jsonContent };
+            yield return new string[2] { descriptionHash, jsonContentHash };
         }
 
         /// <summary>
@@ -193,32 +359,33 @@ namespace Matryx
         /// </summary>
         /// <param name="tournament"> The tournament whose description and files are to be uploaded. </param>
         /// <returns> The description hash and files hash of the tournament in that order. </returns>
-        public static IEnumerator uploadToIPFS(MatryxTournament tournament)
+        public static IEnumerator uploadTournament(MatryxTournament tournament)
         {
-            string descriptionHash = "";
+            string contentHash = "";
             string filesHash = "";
 
-            if (tournament.descHash == null || tournament.descHash.Equals(string.Empty))
+            // TODO: Allow for file uploading for tournaments (FileBrowser)
+            //if (tournament.fileHash == null || tournament.fileHash.Equals(string.Empty))
+            //{
+            //    if (tournament.file != null && !tournament.file.Equals(string.Empty))
+            //    {
+            //        var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadFiles("filesContent", "", tournament.file, "text/plain"));
+            //        yield return uploadToIPFS;
+            //        filesHash = uploadToIPFS.result;
+            //    }
+            //}
+
+            if (tournament.contentHash == string.Empty)
             {
                 if (tournament.description != null && !tournament.description.Equals(string.Empty))
                 {
-                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS("description", ".txt", tournament.description, "text/plain"));
+                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(tournament.title, tournament.description, ""));
                     yield return uploadToIPFS;
-                    descriptionHash = uploadToIPFS.result;
+                    contentHash = uploadToIPFS.result;
                 }
             }
 
-            if (tournament.fileHash == null || tournament.fileHash.Equals(string.Empty))
-            {
-                if (tournament.file != null && !tournament.file.Equals(string.Empty))
-                {
-                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, Utils.uploadToIPFS("filesContent", "", tournament.file, "text/plain"));
-                    yield return uploadToIPFS;
-                    filesHash = uploadToIPFS.result;
-                }
-            }
-
-            yield return new string[2] { descriptionHash, filesHash };
+            yield return new string[2] { contentHash, filesHash };
         }
 
         public class CoroutineWithData<T> : CustomYieldInstruction
@@ -264,7 +431,7 @@ namespace Matryx
             return AES.Encrypt(System.Text.Encoding.UTF8.GetBytes(data), password);
         }
 
-        public static string Decrypt(string cypher, string password = null)
+        public static string Decrypt(string cypher, string password = "")
         {
             return AES.Decrypt(cypher, password);
         }

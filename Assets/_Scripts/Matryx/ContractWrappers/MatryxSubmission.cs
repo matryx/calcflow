@@ -15,183 +15,80 @@ using Nanome.Maths.Serializers.JsonSerializer;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Calcflow.UserStatistics;
+using static Matryx.MatryxTournament;
+using System;
 
 namespace Matryx
 {
     public class MatryxSubmission
     {
-        public MatryxSubmission(MatryxTournament tournament, string title, List<string> contributors, List<string> references, string file=null, string description=null)
+        public MatryxSubmission()
+        {
+            this.dto = new SubmissionDTO();
+        }
+        public MatryxSubmission(string hash) : this()
+        {
+            this.hash = hash;
+        }
+        public MatryxSubmission(string title, string hash) : this(hash)
+        {
+            this.title = title;
+        }
+        public MatryxSubmission
+            (
+            MatryxTournament tournament, 
+            string title,
+            string hash = "",
+            string description = null,
+            string commitContent = null,
+            int value = 1
+            ) : this(title, hash)
         {
             this.tournament = tournament;
-            this.details = new SubmissionDetails();
-            this.details.title = title;
-            this.details.contributors = contributors;
-            this.details.distribution = Enumerable.Range(0, details.contributors.Count + 1).Select(x => new BigInteger(1)).ToList();
-            this.details.references = references;
-            this.details.descHash = "";// "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
-            this.file = file;
+            dto.TournamentAddress = tournament.address;
             this.description = description;
-        }
-        public MatryxSubmission(string address)
-        {
-            this.address = address;
-            this.details = new SubmissionDetails();
-        }
-        public MatryxSubmission(string title, string address)
-        {
-            this.details = new SubmissionDetails();
-            this.details.title = title;
-            this.address = address;
+            this.dto.Content = ""; // "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
+            commit = new MatryxCommit(commitContent, value);
         }
 
-        public string address;
-        public MatryxTournament tournament;
-        public SubmissionInfo info;
-        public SubmissionDetails details;
-
+        public string title = "";
         public string description;
-        public string file;
+        public string hash;
+        public MatryxTournament tournament;
+        public SubmissionDTO dto;
+        public MatryxCommit commit;
+
         public bool calcflowCompatible = true;
         public string EquationJson
         {
             get
             {
-                if (!calcflowCompatible) return ""; else return file;
+                if (!calcflowCompatible) return ""; else return commit.content;
             }
         }
 
-        public struct SubmissionInfo
-        {
-            public uint version;
-            public string owner;
-            public string tournament;
-            public string round;
-            public string timeSubmitted;
-            public uint timeUpdated;
-            public int reward;
-            public string[] referencedIn;
-            public uint positiveVotes;
-            public uint negativeVotes;
-        }
-
-        public class SubmissionDetails
-        {
-            public string title;
-            public List<string> contributors;
-            public List<BigInteger> distribution;
-            public List<string> references;
-            public string descHash;
-            public string fileHash;
-        }
-
-        [Function("getVersion")]
-        public class GetVersionFunction : FunctionMessage { }
-        [Function("getTournament")]
-        public class GetTournamentFunction : FunctionMessage { }
-        [Function("getRound")]
-        public class GetRoundFunction : FunctionMessage { }
-
-        [Function("getOwner", "address")]
-        public class GetOwnerFunction : FunctionMessage { }
-        [Function("getTitle", "bytes32[3]")]
-        public class GetTitleFunction : FunctionMessage { }
-        [Function("getDescriptionHash", "bytes32[2]")]
-        public class GetDescriptionHashFunction : FunctionMessage { }
-        [Function("getFileHash", "bytes32[2]")]
-        public class GetFileHashFunction : FunctionMessage { }
-        [Function("getDistribution", "uint256[]")]
-        public class GetDistributionFunction : FunctionMessage { }
-        [Function("getContributors", "address[]")]
-        public class GetContributorsFunction : FunctionMessage { }
-        [Function("getReferences", "address[]")]
-        public class GetReferencesFunction : FunctionMessage { }
-        [Function("getTimeSubmitted", "uint256")]
-        public class GetTimeSubmittedFunction : FunctionMessage { }
-        [Function("getTimeUpdated", "uint256")]
-        public class GetTimeUpdatedFunction : FunctionMessage { }
-        [Function("getReward", "uint256")]
-        public class GetRewardFunction : FunctionMessage { }
-        [Function("getReferencedIn", "address[]")]
-        public class GetReferencedInFunction : FunctionMessage { }
-        [Function("getVotes", "(uint256,uint256)")]
-        public class GetVotesFunction : FunctionMessage { }
-        [Function("getViewers", "address[]")]
-        public class GetViewersFunction : FunctionMessage { }
-        [Function("getBalance", "uint256")]
-        public class GetBalanceFunction : FunctionMessage { }
-        [Function("getTotalWinnings", "uint256")]
-        public class GetTotalWinningsFunction : FunctionMessage { }
-        [Function("getData", typeof(SubmissionReturnDataDTO))]
-        public class GetDataFunction : FunctionMessage { }
-
-        [Function("unlockFile")]
-        public class UnlockFileFunction : FunctionMessage { }
-        [Function("updateDetails")]
-        public class UpdateDetailsFunction : FunctionMessage
-        {
-            [Parameter("DetailsUpdates", 1)]
-            public DetailsUpdates Updates { get; set; }
-        }
-        [Function("setContributorsAndReferences")]
-        public class GetContributorsAndReferencesFunction : FunctionMessage { }
-        [Function("flagMissingReference")]
-        public class FlagMissingReferenceFunction : FunctionMessage
-        {
-            [Parameter("address", "missingReference", 1)]
-            public string MissingReference { get; set; }
-        }
-        [Function("getAvailableReward", "uint256")]
-        public class GetAvailableRewardFunction : FunctionMessage { }
-        [Function("withdrawReward")]
-        public class WithdrawRewardFunction : FunctionMessage { }
-
         [FunctionOutput]
-        public class SubmissionReturnDataDTO : IFunctionOutputDTO
+        public class SubmissionOutputDTO : IFunctionOutputDTO
         {
-            [Parameter("SubmissionInfo", 1)]
-            public SubmissionInfoDTO Info { get; set; }
-            [Parameter("SubmissionData", 1)]
-            public SubmissionDetailsDTO Details { get; set; }
+            [Parameter("tuple", 1)]
+            public virtual SubmissionDTO outSubmission { get; set; }
         }
 
         [FunctionOutput]
-        public class SubmissionInfoDTO : IFunctionOutputDTO
+        public class SubmissionDTO : IFunctionOutputDTO
         {
-            [Parameter("address", "owner")]
-            public string Owner { get; set; }
-            [Parameter("address", "tournament")]
-            public string Tournament { get; set; }
-            [Parameter("address", "round")]
-            public string Round { get; set; }
-            [Parameter("uint256", "timeSubmitted")]
-            public uint TimeSubmitted { get; set; }
-            [Parameter("uint256", "timeUpdated")]
-            public uint TimeUpdated { get; set; }
-            [Parameter("uint256", "reward")]
-            public uint Reward { get; set; }
-            [Parameter("address[]", "referencedIn")]
-            public string[] ReferencedIn { get; set; }
-            [Parameter("uint256", "positiveVotes")]
-            public uint PositiveVotes { get; set; }
-            [Parameter("uint256", "negativeVotes")]
-            public uint NegativeVotes { get; set; }
-        }
-
-        [FunctionOutput]
-        public class SubmissionDetailsDTO : IFunctionOutputDTO
-        {
-            [Parameter("bytes32[3]", "title")]
-            public string Title { get; set; }
-            [Parameter("bytes32[2]", "descHash")]
-            public string[] DescHash { get; set; }
-            [Parameter("bytes32[2]", "fileHash")]
-            public string[] FileHash { get; set; }
-            [Parameter("uint256[]", "distribution")]
-            public uint[] Distribution { get; set; }
-            [Parameter("address[]", "contributors")]
-            public string[] Contributors { get; set; }
-            [Parameter("address[]", "references")]
-            public string[] References { get; set; }
+            [Parameter("address", "tournament", 1)]
+            public string TournamentAddress { get; set; }
+            [Parameter("uint256", "roundIndex", 2)]
+            public BigInteger RoundIndex { get; set; }
+            [Parameter("bytes32", "commitHash", 3)]
+            public byte[] CommitHash { get; set; }
+            [Parameter("string", "content", 4)]
+            public string Content { get; set; }
+            [Parameter("uint256", "reward", 5)]
+            public BigInteger Reward { get; set; }
+            [Parameter("uint256", "timestamp", 6)]
+            public BigInteger Timestamp { get; set; }
         }
 
         [FunctionOutput]
@@ -205,53 +102,71 @@ namespace Matryx
             public string[] FileHash { get; set; }
         }
 
-        public IEnumerator getTournament()
+        public IEnumerator get(Async.EventDelegate callback = null)
         {
-            var tournamentRequest = new QueryUnityRequest<GetTournamentFunction, EthereumTypes.Address>(NetworkSettings.infuraProvider, NetworkSettings.address);
-            yield return tournamentRequest.Query(address);
-            yield return tournamentRequest.Result.Value;
-        }
-
-        public IEnumerator getTitle()
-        {
-            if (details.title != null)
+            var url = MatryxCortex.submissionURL+hash;
+            using (var submissionWWW = new WWW(url))
             {
-                yield return details.title;
-            }
+                yield return submissionWWW;
+                var res = MatryxCortex.serializer.Deserialize<object>(submissionWWW.bytes) as Dictionary<string, object>;
+                var data = res["data"] as Dictionary<string, object>;
+                var submission = data["submission"] as Dictionary<string, object>;
 
-            var titleRequest = new QueryUnityRequest<GetTitleFunction, EthereumTypes.Bytes32_3>(NetworkSettings.infuraProvider, NetworkSettings.address);
-            yield return titleRequest.Query(address);
-            yield return titleRequest.Result.Value;
-        }
+                this.title = submission["title"] as string;
+                this.description = submission["description"] as string;
+                this.hash = submission["hash"] as string;
+                this.tournament.address = submission["tournament"] as string;
+                this.commit.hash = (submission["commit"] as Dictionary<string, object>)["hash"] as string;
+                this.commit.ipfsContentHash = (submission["commit"] as Dictionary<string, object>)["ipfsContent"] as string;
+                this.dto.TournamentAddress = submission["tournament"] as string;
+                this.dto.RoundIndex = BigInteger.Parse(submission["roundIndex"].ToString());
+                this.dto.CommitHash = Utils.HexStringToByteArray(this.commit.hash);
+                this.dto.Content = submission["ipfsContent"] as string;
+                var testNull = ((int)0).ToString();
+                if(testNull == null) { throw new System.Exception("u suck i hate u"); }
+                this.dto.Reward = BigInteger.Parse(submission["reward"].ToString());
+                this.dto.Timestamp = BigInteger.Parse(submission["timestamp"].ToString());
 
-        public IEnumerator getDescriptionHash()
-        {
-            if (description != null)
-            {
-                yield return description;
-            }
+                var ipfsURL = "https://ipfs.infura.io:5001/api/v0";
+                var ipfsObjURL = ipfsURL + "/object/get?arg=";
+                var ipfsCatURL = ipfsURL + "/cat?arg=";
+                using (WWW ipfsWWW = new WWW(ipfsObjURL + commit.ipfsContentHash))
+                {
+                    yield return ipfsWWW;
+                    var ipfsObj = MatryxCortex.serializer.Deserialize<object>(ipfsWWW.bytes) as Dictionary<string, object>;
+                    var links = ipfsObj["Links"] as List<object>;
+                    // TODO: Make better when you introduce preview images
+                    var firstLink = links[0] as Dictionary<string, object>;
+                    commit.ipfsContentHash = firstLink["Hash"] as string;
+                }
 
-            var descriptionHashRequest = new QueryUnityRequest<GetDescriptionHashFunction, EthereumTypes.Bytes32_2>(NetworkSettings.infuraProvider, NetworkSettings.address);
-            yield return descriptionHashRequest.Query(address);
-        }
+                using (WWW ipfsWWW2 = new WWW(ipfsCatURL + commit.ipfsContentHash))
+                {
+                    yield return ipfsWWW2;
+                    var ipfsData = Encoding.UTF8.GetString(ipfsWWW2.bytes);
+                    commit.content = ipfsData.Replace("\\", "");
+                }
 
-        public IEnumerator getFile()
-        {
-            if(details.fileHash == null)
-            {
-                var descriptionHashRequest = new QueryUnityRequest<GetFileHashFunction, EthereumTypes.Bytes32_2>(NetworkSettings.infuraProvider, NetworkSettings.address);
-                yield return descriptionHashRequest.Query(address);
-
-                details.fileHash = descriptionHashRequest.Result.Value + descriptionHashRequest.Result.ValueTwo;
-            }
-
-            var url = "https://ipfs.infura.io:5001/api/v0/cat?arg=" + details.fileHash + "/jsonContent.json";
-            using (var www = new WWW(url))
-            {
-                yield return www;
-                file = www.text;
                 var ESSRegEx = "{.*rangeKeys.*rangePairs.*ExpressionKeys.*ExpressionValues.*}";
-                calcflowCompatible = Regex.IsMatch(file, ESSRegEx);
+                calcflowCompatible = Regex.IsMatch(commit.content, ESSRegEx);
+
+                callback(this);
+            }
+        }
+
+        public IEnumerator uploadContent()
+        {
+            if (dto.Content == null || dto.Content.Equals(string.Empty))
+            {
+                if (description != null && !description.Equals(string.Empty))
+                {
+                    if(commit.ipfsContentHash != null && commit.ipfsContentHash.Substring(0, 2) == "Qm")
+                    {
+                        var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(title, description, commit.ipfsContentHash));
+                        yield return uploadToIPFS;
+                        dto.Content = uploadToIPFS.result;
+                    }
+                }
             }
         }
 
@@ -260,22 +175,21 @@ namespace Matryx
             StatisticsTracking.StartEvent("Matryx", "Submission Creation");
 
             ResultsMenu.transactionObject = this;
-
-            var isEntrant = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.isEntrant(NetworkSettings.address));
+            var isEntrant = new Utils.CoroutineWithData<EthereumTypes.Bool>(MatryxCortex.Instance, tournament.isEntrant(NetworkSettings.activeAccount));
             yield return isEntrant;
 
-            var tournamentOwner = new Utils.CoroutineWithData<string>(MatryxExplorer.Instance, tournament.getOwner());
-            yield return tournamentOwner;
+            var tournamentInfo = new Utils.CoroutineWithData<TournamentInfo>(MatryxCortex.Instance, tournament.getInfo());
+            yield return tournamentInfo;
 
-            if(tournamentOwner.result.Equals(NetworkSettings.address.ToLower()))
+            if (tournament.owner.Equals(NetworkSettings.activeAccount, System.StringComparison.CurrentCultureIgnoreCase))
             {
                 ResultsMenu.Instance.PostFailure(this, "You own this tournament; Unable to create submission.");
                 yield break;
             }
 
-            if(!isEntrant.result)
+            if(!isEntrant.result.Value)
             {
-                var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxExplorer.Instance, MatryxToken.allowance(NetworkSettings.address, MatryxPlatform.address));
+                var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.activeAccount, MatryxPlatform.address));
                 yield return allowance;
 
                 Debug.Log(tournament.entryFee);
@@ -285,7 +199,7 @@ namespace Matryx
 
                     if (allowance.result != BigInteger.Zero)
                     {
-                        var approveZero = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, MatryxToken.approve(MatryxPlatform.address, BigInteger.Zero));
+                        var approveZero = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, MatryxToken.approve(MatryxPlatform.address, BigInteger.Zero));
                         yield return approveZero;
 
                         if (!approveZero.result)
@@ -296,7 +210,7 @@ namespace Matryx
                         }
                     }
 
-                    var approveEntryFee = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, MatryxToken.approve(MatryxPlatform.address, tournament.entryFee));
+                    var approveEntryFee = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, MatryxToken.approve(MatryxPlatform.address, tournament.entryFee));
                     yield return approveEntryFee;
 
                     if (!approveEntryFee.result)
@@ -309,7 +223,7 @@ namespace Matryx
 
                 ResultsMenu.Instance.SetStatus("Entering Tournament...");
 
-                var enterTournament = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.enter());
+                var enterTournament = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, tournament.enter());
                 yield return enterTournament;
 
                 if (!enterTournament.result)
@@ -320,28 +234,23 @@ namespace Matryx
                 }
             }
 
-            ResultsMenu.Instance.SetStatus("Uploading content to IPFS...");
-            var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxExplorer.Instance, Utils.uploadToIPFS(this));
-            yield return uploadToIPFS;
+            ResultsMenu.Instance.SetStatus("Claiming Commit...");
+            yield return commit.claim();
 
-            if(uploadToIPFS.result == null || !uploadToIPFS.result[0].Contains("Qm"))
+            ResultsMenu.Instance.SetStatus("Creating Commit...");
+            yield return commit.create();
+
+            ResultsMenu.Instance.SetStatus("Uploading Submission Content to IPFS...");
+            yield return uploadContent();
+
+            if(!dto.Content.Contains("Qm"))
             {
                 Debug.Log("Failed to upload file to IPFS");
                 yield break;
             }
 
-            if (uploadToIPFS.result[0] != null && !uploadToIPFS.result[0].Equals(string.Empty))
-            {
-                this.details.descHash = uploadToIPFS.result[0];
-            }
-            if (uploadToIPFS.result[1] != null && !uploadToIPFS.result[1].Equals(string.Empty))
-            {
-                this.details.fileHash = uploadToIPFS.result[1];
-            }
-
             ResultsMenu.Instance.SetStatus("Creating Submission...");
-
-            var createSubmission = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, tournament.createSubmission(this));
+            var createSubmission = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, tournament.createSubmission(this));
             yield return createSubmission;
 
             if(callback != null)

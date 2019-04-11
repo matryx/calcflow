@@ -5,6 +5,7 @@ using UnityEngine;
 
 using Matryx;
 using System.Numerics;
+using Vector3 = UnityEngine.Vector3;
 
 public class TournamentsMenu : MonoBehaviour
 {
@@ -99,6 +100,7 @@ public class TournamentsMenu : MonoBehaviour
 
     public static void SetState(TournamentMenuState state)
     {
+        if (Instance == null) return;
         Instance.state = state;
 
         switch (Instance.state)
@@ -133,7 +135,7 @@ public class TournamentsMenu : MonoBehaviour
     {
        loadingText.gameObject.SetActive(true);
        ClearTournaments();
-       MatryxExplorer.RunFetchTournaments(page, ProcessTournaments);
+       MatryxCortex.RunFetchTournaments(page, ProcessTournaments);
     }
 
     /// <summary>

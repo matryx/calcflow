@@ -43,7 +43,6 @@ public class Control2DViewer : MonoBehaviour
     void ManageMovement(bool shiftMode)
     {
         //Keyboard commands
-        float f = 0.0f;
         Vector3 p = GetBaseInput();
         if (shiftMode)
         {
