@@ -122,7 +122,7 @@ public class TournamentsMenu : MonoBehaviour
             case TournamentMenuState.DisplayingTournaments:
                 Instance.selectTournamentText.text = "Select a Tournament";
                 Instance.accountButton.transform.parent.gameObject.SetActive(false);
-                Instance.LoadTournaments();
+                Instance.LoadTournaments(0);
                 CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(true);
                 break;
             default:
@@ -131,11 +131,16 @@ public class TournamentsMenu : MonoBehaviour
     }
 
     int page = 0;
-    public void LoadTournaments()
+    bool loaded = false;
+    bool loading = false;
+    public bool LoadTournaments(int thePage)
     {
-       loadingText.gameObject.SetActive(true);
-       ClearTournaments();
-       MatryxCortex.RunFetchTournaments(page, ProcessTournaments, ShowError);
+        if ((loaded | loading ) == true) return false;
+        loading = true;
+        loadingText.gameObject.SetActive(true);
+        ClearTournaments();
+        MatryxCortex.RunFetchTournaments(thePage, ProcessTournaments, ShowError);
+        return true;
     }
 
     /// <summary>
@@ -143,9 +148,12 @@ public class TournamentsMenu : MonoBehaviour
     /// </summary>
     public void LoadMoreTournaments()
     {
-        page++;
-        removeLoadButton();
-        LoadTournaments();
+        loaded = false;
+        loading = false;
+        if (LoadTournaments(page + 1))
+        {
+            page++;
+        }
     }
 
     /// <summary>
@@ -162,11 +170,13 @@ public class TournamentsMenu : MonoBehaviour
     {
         loadingText.gameObject.SetActive(false);
         DisplayTournaments((List<MatryxTournament>)results);
+        loaded = true;
     }
 
     private void ShowError(object results)
     {
         loadingText.text = "Unable to Load Any Tournaments";
+        loaded = false;
     }
 
     GameObject loadButton;
