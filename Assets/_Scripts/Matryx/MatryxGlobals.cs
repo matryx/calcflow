@@ -341,7 +341,7 @@ namespace Matryx
             string descriptionHash = "";
             string jsonContentHash = "";
 
-            if (submission.data.ContentHash == null || submission.data.ContentHash.Equals(string.Empty))
+            if (submission.dto.Content == null || submission.dto.Content.Equals(string.Empty))
             {
                 if (submission.description != null && !submission.description.Equals(string.Empty))
                 {

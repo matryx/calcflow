@@ -100,6 +100,7 @@ public class TournamentsMenu : MonoBehaviour
 
     public static void SetState(TournamentMenuState state)
     {
+        if (Instance == null) return;
         Instance.state = state;
 
         switch (Instance.state)

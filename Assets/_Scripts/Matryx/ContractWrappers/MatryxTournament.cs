@@ -219,7 +219,7 @@ namespace Matryx
             [Parameter("string")]
             public string Content { get; set; }
             [Parameter("bytes32")]
-            public string CommitHash { get; set; }
+            public byte[] CommitHash { get; set; }
         }
 
         //function updateDetails(LibTournament.TournamentDetails calldata tournamentDetails) external;
@@ -260,7 +260,7 @@ namespace Matryx
         public class WinnersData : IFunctionOutputDTO
         {
             [Parameter("bytes32[]")]
-            public List<string> Submissions { get; set; }
+            public List<byte[]> Submissions { get; set; }
             [Parameter("uint256[]")]
             public List<BigInteger> Distribution { get; set; }
             [Parameter("uint256")]
@@ -449,7 +449,14 @@ namespace Matryx
         public IEnumerator createSubmission(MatryxSubmission submission, Async thread=null)
         {
             var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
-            yield return transactionRequest.SignAndSendTransaction<CreateSubmissionFunction>(new CreateSubmissionFunction() { Content = submission.data.ContentHash, CommitHash = submission.commit.hash, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
+            var createSubmissionMessage = new CreateSubmissionFunction()
+            {
+                Content = submission.dto.Content,
+                CommitHash = Utils.HexStringToByteArray(submission.commit.hash),
+                Gas = NetworkSettings.txGas,
+                GasPrice = NetworkSettings.txGasPrice
+            };
+            yield return transactionRequest.SignAndSendTransaction<CreateSubmissionFunction>(createSubmissionMessage, address);
 
             var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createSubmission", thread));
             yield return getTransactionStatus;
@@ -486,7 +493,7 @@ namespace Matryx
             yield return getTransactionStatus.result;
         }
 
-        public IEnumerator selectWinners(List<string> submissions, List<BigInteger> distribution, BigInteger action, BigInteger start, BigInteger duration, BigInteger review, BigInteger bounty, Async thread=null)
+        public IEnumerator selectWinners(List<byte[]> submissions, List<BigInteger> distribution, BigInteger action, BigInteger start, BigInteger duration, BigInteger review, BigInteger bounty, Async thread=null)
         {
             WinnersData wData = new WinnersData() { Submissions = submissions, Distribution = distribution, Action = action };
             MatryxRound.RoundDetails rDetails = new MatryxRound.RoundDetails() { Start = start, Duration = duration, Review = review, Bounty = bounty };

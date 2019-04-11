@@ -52,7 +52,7 @@ public class CreateSubmissionMenu : MonoBehaviour {
     public void MakeSubmission()
     {
         var title = TitleField.text;
-        if(!TitleField.gameObject.GetComponent<InputValidator>().isValid)
+        if (!TitleField.gameObject.GetComponent<InputValidator>().isValid)
         {
             InvalidLabel.gameObject.SetActive(true);
             return;
@@ -61,7 +61,7 @@ public class CreateSubmissionMenu : MonoBehaviour {
         this.gameObject.SetActive(false);
         InvalidLabel.gameObject.SetActive(false);
 
-        var submission = new MatryxSubmission(tournament, title, DescriptionField.text, SerializeSurface(), Convert.ToInt32(ValueField.text));
+        var submission = new MatryxSubmission(tournament, title, "", DescriptionField.text, SerializeSurface(), Convert.ToInt32(ValueField.text));
         clearInputs();
 
         resultsCanvasObject.SetActive(true);

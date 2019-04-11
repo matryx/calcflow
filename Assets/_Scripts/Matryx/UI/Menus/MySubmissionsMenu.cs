@@ -16,7 +16,7 @@ public class MySubmissionsMenu : MonoBehaviour
     [SerializeField]
     private TMPro.TextMeshPro mySubmissionsText;
     [SerializeField]
-    private TMPro.TextMeshPro loadingText;
+    private TMPro.TextMeshPro infoText;
     [SerializeField]
     private SubmissionMenu submissionMenu;
     
@@ -66,7 +66,8 @@ public class MySubmissionsMenu : MonoBehaviour
     public void LoadMySubmissions(MatryxTournament tournament)
     {
         Instance.tournament = tournament;
-        loadingText.gameObject.SetActive(true);
+        infoText.gameObject.SetActive(true);
+        infoText.text = "Loading Submissions...";
         ClearSubmissions();
         MatryxCortex.RunFetchMySubmissions(tournament, ProcessSubmissions);
     }
@@ -89,14 +90,18 @@ public class MySubmissionsMenu : MonoBehaviour
 
     private void ProcessSubmissions(object results)
     {
-        loadingText.gameObject.SetActive(false);
+        infoText.gameObject.SetActive(false);
         DisplaySubmissions((List<MatryxSubmission>)results);
     }
 
     GameObject loadButton;
     private void DisplaySubmissions(List<MatryxSubmission> submissions)
     {
-        List<Transform> toAdd = new List<Transform>();
+        if (submissions.Count == 0)
+        {
+            infoText.gameObject.SetActive(true);
+            infoText.text = "No Submissions On This Tournament";
+        }
         foreach (MatryxSubmission submission in submissions)
         {
             GameObject button = createButton(submission);
@@ -135,12 +140,9 @@ public class MySubmissionsMenu : MonoBehaviour
             string name = source.name;
 
             MatryxSubmission submission = source.GetComponent<SubmissionContainer>().GetSubmission();
-            // TODO: Remove? We don't need this because of submission.get(). Optimization opportunity for
-            // multiple calls (i.e. leave it in?)
-            // StartCoroutine(submission.getFile());
-            submissionMenu.SetSubmission(submission);
             // TODO: Navigate the user to the corresponding tournament through the menus
             submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
+            submissionMenu.SetSubmission(submission);
         }
     }
 }

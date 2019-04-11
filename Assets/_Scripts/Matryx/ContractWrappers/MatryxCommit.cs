@@ -86,6 +86,8 @@ namespace Matryx
             }
         }
 
+        public MatryxCommit() { }
+
         public MatryxCommit(string cont, int val)
         {
             content = cont;
@@ -94,13 +96,13 @@ namespace Matryx
 
         public static void setContract(string abi, string addr)
         {
-            address = addr;
-            ABI = abi;
-            contract = new Nethereum.Contracts.Contract(null, abi, addr);
+            address = addr; //"0x008df4de7fc42310949f3ab2f6b9ba0b54a42e53"; 
+            ABI = abi; // "[	{		\"inputs\": [],		\"payable\": false,		\"stateMutability\": \"nonpayable\",		\"type\": \"constructor\"	},	{		\"constant\": true,		\"inputs\": [],		\"name\": \"commitInstance\",		\"outputs\": [			{				\"name\": \"owner\",				\"type\": \"address\"			},			{				\"name\": \"timestamp\",				\"type\": \"uint256\"			},			{				\"name\": \"groupHash\",				\"type\": \"bytes32\"			},			{				\"name\": \"commitHash\",				\"type\": \"bytes32\"			},			{				\"name\": \"content\",				\"type\": \"string\"			},			{				\"name\": \"value\",				\"type\": \"uint256\"			},			{				\"name\": \"ownerTotalValue\",				\"type\": \"uint256\"			},			{				\"name\": \"totalValue\",				\"type\": \"uint256\"			},			{				\"name\": \"height\",				\"type\": \"uint256\"			},			{				\"name\": \"parentHash\",				\"type\": \"bytes32\"			}		],		\"payable\": false,		\"stateMutability\": \"view\",		\"type\": \"function\"	}]";
+            contract = new Nethereum.Contracts.Contract(null, ABI, address);
         }
-        
+
         //function getCommit(bytes32 commitHash) external view returns(LibCommit.Commit memory commit);
-        [Function("getCommit", typeof(Commit))]
+        [Function("getCommit")]
         public class GetCommitFunction : FunctionMessage
         {
             [Parameter("bytes32")]
@@ -108,31 +110,39 @@ namespace Matryx
         }
 
         [FunctionOutput]
-        public class Commit : IFunctionOutputDTO
+        public class CommitOutputDTO : IFunctionOutputDTO
         {
-            [Parameter("address")]
-            public string Owner { get; set; }
-            [Parameter("uint256")]
-            public BigInteger Timestamp { get; set; }
-            [Parameter("bytes32")]
-            public string GroupHash { get; set; }
-            [Parameter("bytes32")]
-            public string CommitHash { get; set; }
-            [Parameter("string")]
-            public string ContentHash { get; set; }
-            [Parameter("uint256")]
-            public BigInteger Value { get; set; }
-            [Parameter("uint256")]
-            public BigInteger OwnerTotalValue { get; set; }
-            [Parameter("uint256")]
-            public BigInteger TotalValue { get; set; }
-            [Parameter("uint256")]
-            public BigInteger Height { get; set; }
-            [Parameter("bytes32")]
-            public string ParentHash { get; set; }
-            [Parameter("bytes32[]")]
-            public List<string> Children { get; set; }
+            [Parameter("tuple", 1)]
+            public virtual CommitDTO outCommit { get; set; }
         }
+
+        [FunctionOutput]
+        public class CommitDTO : IFunctionOutputDTO
+        {
+            [Parameter("address", "owner", 1)]
+            public virtual string Owner { get; set; }
+            [Parameter("uint256", "timestamp", 2)]
+            public virtual BigInteger Timestamp { get; set; }
+            [Parameter("bytes32", "groupHash", 3)]
+            public virtual byte[] GroupHash { get; set; }
+            [Parameter("bytes32", "commitHash", 4)]
+            public virtual byte[] CommitHash { get; set; }
+            [Parameter("string", "content", 5)]
+            public virtual string ContentHash { get; set; }
+            [Parameter("uint256", "value", 6)]
+            public virtual BigInteger Value { get; set; }
+            [Parameter("uint256", "ownerTotalValue", 7)]
+            public virtual BigInteger OwnerTotalValue { get; set; }
+            [Parameter("uint256", "totalValue", 8)]
+            public virtual BigInteger TotalValue { get; set; }
+            [Parameter("uint256", "height", 9)]
+            public virtual BigInteger Height { get; set; }
+            [Parameter("bytes32", "parentHash", 10)]
+            public virtual byte[] ParentHash { get; set; }
+        }
+
+        [Function("commitInstance", typeof(CommitDTO))]
+        public class CommitInstanceFunction : FunctionMessage { }
 
         //function getBalance(bytes32 commitHash) external view returns(uint256);
         [Function("getBalance", "uint256")]
@@ -143,7 +153,7 @@ namespace Matryx
         }
 
         //function getCommitByContent(string calldata content) external view returns(LibCommit.Commit memory commit);
-        [Function("getCommitByContent", typeof(Commit))]
+        [Function("getCommitByContent", typeof(CommitOutputDTO))]
         public class GetCommitByContentFunction : FunctionMessage
         {
             [Parameter("string")]
@@ -254,9 +264,9 @@ namespace Matryx
 
         public static IEnumerator getCommit(string commitHash, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetCommitFunction, Commit>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetCommitFunction, CommitOutputDTO>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return queryRequest.Query(new GetCommitFunction() { CommitHash = Utils.HexStringToByteArray(commitHash) }, MatryxCommit.address);
-            yield return queryRequest.Result;
+            yield return queryRequest.Result.outCommit;
         }
 
         public static IEnumerator getBalance(string commitHash, Async thread = null)
@@ -268,7 +278,7 @@ namespace Matryx
 
         public static IEnumerator getCommitByContent(string content, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetCommitByContentFunction, Commit>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetCommitByContentFunction, CommitOutputDTO>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
 
             yield return queryRequest.Query(new GetCommitByContentFunction() { Content = content }, MatryxCommit.address);
             yield return queryRequest.Result;
@@ -373,9 +383,9 @@ namespace Matryx
             var txStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createCommit", thread));
             yield return txStatus;
             // Get commit hash and assign to this commit
-            var getCommit = new Utils.CoroutineWithData<Commit>(MatryxCortex.Instance, getCommitByContent(ipfsContentHash));
+            var getCommit = new Utils.CoroutineWithData<CommitOutputDTO>(MatryxCortex.Instance, getCommitByContent(ipfsContentHash));
             yield return getCommit;
-            hash = getCommit.result.CommitHash;
+            hash = getCommit.result.outCommit.CommitHash.ToHex(true);
             yield return txStatus.result;
         }
 
@@ -404,7 +414,7 @@ namespace Matryx
 
         public static IEnumerator getAvailableRewardForUser(string commitHash, string user)
         {
-            var queryRequest = new QueryUnityRequest<GetAvailableRewardForUserFunction, Commit>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetAvailableRewardForUserFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return queryRequest.Query(new GetAvailableRewardForUserFunction() { CommitHash = commitHash, User = user }, MatryxCommit.address);
         }
 

@@ -13,6 +13,7 @@ using Nanome.Core;
 using System.Numerics;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
+using Nethereum.ABI.Decoders;
 
 namespace Matryx
 {
@@ -32,7 +33,8 @@ namespace Matryx
 
         public static string tournamentURL = cortexURL + "/tournaments/address/";
         public static string roundURL = cortexURL + "/rounds/address";
-        public static string submissionURL = cortexURL + "/submissions/hash/";
+        public static string submissionURL = cortexURL + "/submissions/";
+        public static string mySubmissionsURL = cortexURL + "/submissions/owner/";
         public static string commitURL = cortexURL + "/commits/";
 
         public static string jsonUploadURL = cortexURL + "/upload/json";
@@ -187,7 +189,7 @@ namespace Matryx
                                 var winner = roundWinners[i] as Dictionary<string, object>;
                                 var submission = new MatryxSubmission(winner["address"] as string);
                                 submission.title = winner["title"] as string;
-                                submission.data.Reward = BigInteger.Parse(winner["reward"] as string);
+                                submission.dto.Reward = BigInteger.Parse(winner["reward"] as string);
                                 submissions.Add(submission);
                             }
                         }
@@ -201,36 +203,9 @@ namespace Matryx
             }
         }
 
-        // DETAIL SUBMISSION
-        public static void RunFetchSubmission(MatryxSubmission submission, Async.EventDelegate callback)
+        public static void GetSubmission(MatryxSubmission submission, Async.EventDelegate callback)
         {
-            queue(FetchSubmission(submission, callback));
-        }
-
-        private static IEnumerator FetchSubmission(MatryxSubmission submission, Async.EventDelegate callback)
-        {
-            var url = submissionURL + submission.hash;
-            using (var www = new WWW(url))
-            {
-                yield return www;
-                Debug.Log(www.text);
-                var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
-                var jsonSubmission = jsonObj["submission"] as Dictionary<string, object>;
-                try
-                {
-                    submission.commit.owner = jsonSubmission["owner"] as string;
-                    var timestamp = BigInteger.Parse(jsonSubmission["timestamp"] as string);
-                    submission.data.Timestamp = timestamp;
-                    submission.description = jsonSubmission["description"] as string;
-                    callback(submission);
-                }
-                catch (Exception e)
-                {
-                    Debug.Log("Could not read submission at:" + submission.hash + " tournament: " + submission.tournament.address);
-                    Debug.Log(e);
-                    callback(null);
-                }
-            }
+            queue(submission.get(callback));
         }
 
         public static void RunFetchMySubmissions(MatryxTournament tournament, Async.EventDelegate callback)
@@ -240,23 +215,84 @@ namespace Matryx
          
         public static IEnumerator FetchMySubmissions(MatryxTournament tournament, Async.EventDelegate callback)
         {
-            //var mySubmissionsOnTournamentCoroutine = new Utils.CoroutineWithData<List<string>>(Instance, MatryxUser.getSubmissionsByTournament(tournament.address));
-            //yield return mySubmissionsOnTournamentCoroutine;
+            var url = mySubmissionsURL + NetworkSettings.activeAccount;
+            using (var www = new WWW(url))
+            {
+                yield return www;
+                Debug.Log(www.text);
+                var res = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                var data = res["data"] as Dictionary<string, object>;
+                var submissionData = data["submissions"] as List<object>;
+                var submissions = new List<MatryxSubmission>();
 
-            //var tournamentSubmissions = mySubmissionsOnTournamentCoroutine.result;
-            //var submissions = new List<MatryxSubmission>();
-            //for(int i = 0; i < tournamentSubmissions.Count; i++)
-            //{
-            //    MatryxSubmission submission = new MatryxSubmission(tournamentSubmissions[i]);
-            //    var submissionTitleCoroutine = new Utils.CoroutineWithData<string>(Instance, submission.get());
-            //    yield return submissionTitleCoroutine;
+                try
+                {
+                    foreach (Dictionary<string, object> submissionDictionary in submissionData)
+                    {
+                        if (submissionDictionary["tournament"] as string != tournament.address) continue;
+                        var title = submissionDictionary["title"] as string;
+                        var description = submissionDictionary["description"] as string;
+                        var hash = submissionDictionary["hash"] as string;
+                        MatryxSubmission submission = new MatryxSubmission(tournament, title, hash, description);
+                        submissions.Add(submission);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e);
+                }
 
-            //    submissions.Add(submission);
-            //}
+                callback(submissions);
+            }
+        }
 
-            //callback(submissions);
+        public static void RunFetchCommit(string commitContentHash, bool fetchContent, Async.EventDelegate callback = null)
+        {
+            queue(FetchCommit(commitContentHash, fetchContent, callback));
+        }
 
-            yield return null;
+        private static IEnumerator FetchCommit(string commitContentHash, bool fetchContent, Async.EventDelegate callback = null)
+        {
+            var url = commitURL + "0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b";
+            using (var www = new WWW(url))
+            {
+                yield return www;
+                Debug.Log(www.text);
+                var res = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                var data = res["data"] as Dictionary<string, object>;
+                var commitData = data["commit"] as Dictionary<string, object>;
+                MatryxCommit commit = new MatryxCommit();
+
+                try
+                {
+                    
+                    //if (fetchContent)
+                    //{
+                    //    var ipfsContentHash = commitData["ipfsContent"] as string;
+                    //    var request = new Utils.CoroutineWithData<object>(MatryxCortex.Instance, getIPFSContents(ipfsContentHash));
+                    //}
+                    
+                    //commit.hash = commitData["hash"] as string;
+                    //commit.owner = commitData["owner"] as string;
+                    //commit.parentHash = commitData["parentHash"] as string;
+                    //commit.groupHash = commitData["groupHash"] as string;
+                    //commit.ipfsContentHash = commitData["ipfsContent"] as string;
+                    //commit.height = BigInteger.Parse(commitData["height"] as string);
+                    //commit.value = BigInteger.Parse(commitData["value"] as string);
+                    //commit.ownerTotalValue = BigInteger.Parse(commitData["ownerTotalValue"] as string);
+                    //commit.totalValue = BigInteger.Parse(commitData["totalValue"] as string);
+                    //commit.timestamp = BigInteger.Parse(commitData["timestamp"] as string);
+
+                    //yield return commit;
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("Could not fetch details of commit with content: " + commitContentHash);
+                    Debug.Log(e);
+                }
+
+                callback(commit);
+            }
         }
 
         // UPLOAD SUBMISSION
@@ -394,8 +430,6 @@ namespace Matryx
             //yield return request;
             //var hash = request.result.CommitHash;
 
-
-
             //var getCommit = new Utils.CoroutineWithData<MatryxCommit.Commit>(MatryxCortex.Instance, MatryxCommit.getCommit("0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b"));
             //yield return getCommit;
             //var hash = getCommit.result.CommitHash;
@@ -424,10 +458,36 @@ namespace Matryx
             //yield return getInitialCommits;
             //Debug.Log("Initial commits: " + getInitialCommits.result.Value);
 
-            var commitHash = "0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b";
-            var request = new Utils.CoroutineWithData<MatryxCommit.Commit>(MatryxCortex.Instance, MatryxCommit.getCommit(commitHash));
-            yield return request;
-            Debug.Log("is " + commitHash.Substring(0, 10) + " a commit? " + request.result.Value);
+            //var contentHash = "QmQuw1nGDfjMjKk8qMR4ZCfWHzgwMZvg824uZHDwCUje1i";
+            //var request = new Utils.CoroutineWithData<MatryxCommit.Commit>(MatryxCortex.Instance, MatryxCommit.getCommitByContent(contentHash));
+            //yield return request;
+            //var bytes32Decoder = new StringBytes32Decoder(); //Nethereum.ABI.Decoders
+            //var cHash = bytes32Decoder.Decode(request.result.CommitHash);
+            //Debug.Log("commitHash 0xfc8443b4 match " + cHash + "?" + cHash.Contains("0xfc8443b4"));
+
+            //var submissionHash = "0xe627ceaf65decb29bc6a5f4be54b8d909f28b5ce770fd863c701ff19db28c44d";
+            //var request = new Utils.CoroutineWithData<MatryxSubmission.Submission>(MatryxCortex.Instance, MatryxPlatform.getSubmission(submissionHash));
+            //yield return request;
+
+            //var request = new Utils.CoroutineWithData<MatryxCommit.Commit>(MatryxCortex.Instance, MatryxCommit.getInstance());
+            //yield return request;
+            //var bytes32Decoder = new StringBytes32Decoder(); //Nethereum.ABI.Decoders
+            //var cHash = bytes32Decoder.Decode(request.result.CommitHash);
+            //Debug.Log("0xf63c37c307779cf621c809125e8353eeace1ea06".Substring(0, 10) + " full commit hash: " + cHash);
+
+            //var request = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, FetchCommit("QmQuw1nGDfjMjKk8qMR4ZCfWHzgwMZvg824uZHDwCUje1i", null));
+            //yield return request;
+
+            //MatryxTournament tournament = new MatryxTournament("0x95405c6fcfcb43d1f11f0318d54e83521be6e7c6");
+            //RunFetchMySubmissions(tournament, Instance.ProcessSubmissions);
+
+            Debug.Log("Active account set to: " + NetworkSettings.activeAccount);
+        }
+
+        private void ProcessSubmissions(object results)
+        {
+            var submissions = results as List<MatryxSubmission>;
+            Debug.Log(submissions[0].title);
         }
     }
 }

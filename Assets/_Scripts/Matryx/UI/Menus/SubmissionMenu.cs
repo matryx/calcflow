@@ -24,6 +24,16 @@ public class SubmissionMenu : MonoBehaviour
       set { submission = value; UpdateSubmissionDisplay(); } 
     }
 
+    public static SubmissionMenu Instance { get; private set; }
+
+    public void OnEnable()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+    }
+
     public void SetSubmission(MatryxSubmission submission)
     {
         titleText.text = submission.title;
@@ -32,8 +42,20 @@ public class SubmissionMenu : MonoBehaviour
         if (this.submission == null ||
             this.submission.hash != submission.hash)
         {
+            DisableImport();
             this.submission = submission;
-            MatryxCortex.RunFetchSubmission(submission, delegate (object results) { Submission = (MatryxSubmission)results; });
+            MatryxCortex.GetSubmission(submission, (result) =>
+            {
+                Submission = (MatryxSubmission)result;
+                if (Submission.calcflowCompatible)
+                {
+                    EnableImport();
+                }
+                else
+                {
+                    DisableImport();
+                }
+            });
         }
     }
 
@@ -45,5 +67,15 @@ public class SubmissionMenu : MonoBehaviour
         // Update the import button!
         importSubmissionButton.submission = submission;
         importSubmissionButton.Reenable();
+    }
+
+    public void EnableImport()
+    {
+        importSubmissionButton.Reenable();
+    }
+
+    public void DisableImport()
+    {
+        importSubmissionButton.Disable();
     }
 }

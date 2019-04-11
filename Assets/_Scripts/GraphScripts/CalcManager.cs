@@ -5,6 +5,7 @@ using Calcflow.UserStatistics;
 
 public class CalcManager : MonoBehaviour
 {
+    public static CalcManager Instance { get; private set; }
     ExpressionSet currExpressionSet;
     CalcOutput currOutput;
 
@@ -151,6 +152,7 @@ public class CalcManager : MonoBehaviour
 
     private void Initialize()
     {
+        if(Instance == null) { Instance = this; }
         calcInput = connectedMenus.calcInput;
         boundsManager = connectedMenus.boundsManager;
         pieceWiseControl = connectedMenus.pieceWiseControl;

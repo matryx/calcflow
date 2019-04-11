@@ -16,37 +16,46 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Calcflow.UserStatistics;
 using static Matryx.MatryxTournament;
+using System;
 
 namespace Matryx
 {
     public class MatryxSubmission
     {
-        public MatryxSubmission(MatryxTournament tournament, string title, string description=null, string content=null, int value = 1)
+        public MatryxSubmission()
+        {
+            this.dto = new SubmissionDTO();
+        }
+        public MatryxSubmission(string hash) : this()
+        {
+            this.hash = hash;
+        }
+        public MatryxSubmission(string title, string hash) : this(hash)
+        {
+            this.title = title;
+        }
+        public MatryxSubmission
+            (
+            MatryxTournament tournament, 
+            string title,
+            string hash = "",
+            string description = null,
+            string commitContent = null,
+            int value = 1
+            ) : this(title, hash)
         {
             this.tournament = tournament;
-            this.data = new SubmissionDataDTO() { TournamentAddress = tournament.address };
-            this.title = title;
+            dto.TournamentAddress = tournament.address;
             this.description = description;
-            this.data.ContentHash = "";// "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
-            commit = new MatryxCommit(content, value);
-        }
-        public MatryxSubmission(string hash)
-        {
-            this.hash = hash;
-            this.data = new SubmissionDataDTO();
-        }
-        public MatryxSubmission(string title, string hash)
-        {
-            this.data = new SubmissionDataDTO();
-            this.title = title;
-            this.hash = hash;
+            this.dto.Content = ""; // "QmTDNWPTf6nM5sAwqKN1unTqvRDhr5sDxDEkLRMxbwAokz";
+            commit = new MatryxCommit(commitContent, value);
         }
 
         public string title = "";
         public string description;
         public string hash;
         public MatryxTournament tournament;
-        public SubmissionDataDTO data;
+        public SubmissionDTO dto;
         public MatryxCommit commit;
 
         public bool calcflowCompatible = true;
@@ -59,16 +68,23 @@ namespace Matryx
         }
 
         [FunctionOutput]
-        public class SubmissionDataDTO : IFunctionOutputDTO
+        public class SubmissionOutputDTO : IFunctionOutputDTO
+        {
+            [Parameter("tuple", 1)]
+            public virtual SubmissionDTO outSubmission { get; set; }
+        }
+
+        [FunctionOutput]
+        public class SubmissionDTO : IFunctionOutputDTO
         {
             [Parameter("address", "tournament", 1)]
             public string TournamentAddress { get; set; }
             [Parameter("uint256", "roundIndex", 2)]
             public BigInteger RoundIndex { get; set; }
             [Parameter("bytes32", "commitHash", 3)]
-            public string CommitHash { get; set; }
+            public byte[] CommitHash { get; set; }
             [Parameter("string", "content", 4)]
-            public string ContentHash { get; set; }
+            public string Content { get; set; }
             [Parameter("uint256", "reward", 5)]
             public BigInteger Reward { get; set; }
             [Parameter("uint256", "timestamp", 6)]
@@ -86,7 +102,7 @@ namespace Matryx
             public string[] FileHash { get; set; }
         }
 
-        public IEnumerator get()
+        public IEnumerator get(Async.EventDelegate callback = null)
         {
             var url = MatryxCortex.submissionURL+hash;
             using (var submissionWWW = new WWW(url))
@@ -102,43 +118,45 @@ namespace Matryx
                 this.tournament.address = submission["tournament"] as string;
                 this.commit.hash = (submission["commit"] as Dictionary<string, object>)["hash"] as string;
                 this.commit.ipfsContentHash = (submission["commit"] as Dictionary<string, object>)["ipfsContent"] as string;
-                this.data.TournamentAddress = submission["tournament"] as string;
-                int? roundIndex = submission["roundIndex"] as int?;
-                this.data.RoundIndex = roundIndex.Value;
-                this.data.CommitHash = this.commit.hash;
-                this.data.ContentHash = submission["ipfsContent"] as string;
-                long? reward = submission["reward"] as long?;
-                this.data.Reward = new BigInteger(reward.Value);
-                long? timestamp = submission["timestamp"] as long?;
-                this.data.Timestamp = new BigInteger(timestamp.Value);
+                this.dto.TournamentAddress = submission["tournament"] as string;
+                this.dto.RoundIndex = BigInteger.Parse(submission["roundIndex"].ToString());
+                this.dto.CommitHash = Utils.HexStringToByteArray(this.commit.hash);
+                this.dto.Content = submission["ipfsContent"] as string;
+                var testNull = ((int)0).ToString();
+                if(testNull == null) { throw new System.Exception("u suck i hate u"); }
+                this.dto.Reward = BigInteger.Parse(submission["reward"].ToString());
+                this.dto.Timestamp = BigInteger.Parse(submission["timestamp"].ToString());
 
-                // TODO: Maybe optimize this by performing a separate call upon opening each submission
-                var ipfsURL = "https://ipfs.infura.io:5001/api/v0/object/get?arg=";
-                using (WWW ipfsWWW = new WWW(ipfsURL + commit.ipfsContentHash+"?encoding=json"))
+                var ipfsURL = "https://ipfs.infura.io:5001/api/v0";
+                var ipfsObjURL = ipfsURL + "/object/get?arg=";
+                var ipfsCatURL = ipfsURL + "/cat?arg=";
+                using (WWW ipfsWWW = new WWW(ipfsObjURL + commit.ipfsContentHash))
                 {
                     yield return ipfsWWW;
                     var ipfsObj = MatryxCortex.serializer.Deserialize<object>(ipfsWWW.bytes) as Dictionary<string, object>;
-                    var links = ipfsObj["Links"] as List<Dictionary<string, object>>;
+                    var links = ipfsObj["Links"] as List<object>;
                     // TODO: Make better when you introduce preview images
-                    commit.ipfsContentHash = links[0]["Hash"] as string;
+                    var firstLink = links[0] as Dictionary<string, object>;
+                    commit.ipfsContentHash = firstLink["Hash"] as string;
                 }
 
-                using (WWW ipfsWWW2 = new WWW(ipfsURL + commit.ipfsContentHash + "?encoding=json"))
+                using (WWW ipfsWWW2 = new WWW(ipfsCatURL + commit.ipfsContentHash))
                 {
                     yield return ipfsWWW2;
-                    var ipfsObj2 = MatryxCortex.serializer.Deserialize<object>(ipfsWWW2.bytes) as Dictionary<string, object>;
-                    var ipfsData = ipfsObj2["Data"] as string;
-                    commit.content = ipfsData;
+                    var ipfsData = Encoding.UTF8.GetString(ipfsWWW2.bytes);
+                    commit.content = ipfsData.Replace("\\", "");
                 }
 
                 var ESSRegEx = "{.*rangeKeys.*rangePairs.*ExpressionKeys.*ExpressionValues.*}";
                 calcflowCompatible = Regex.IsMatch(commit.content, ESSRegEx);
+
+                callback(this);
             }
         }
 
         public IEnumerator uploadContent()
         {
-            if (data.ContentHash == null || data.ContentHash.Equals(string.Empty))
+            if (dto.Content == null || dto.Content.Equals(string.Empty))
             {
                 if (description != null && !description.Equals(string.Empty))
                 {
@@ -146,7 +164,7 @@ namespace Matryx
                     {
                         var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(title, description, commit.ipfsContentHash));
                         yield return uploadToIPFS;
-                        data.ContentHash = uploadToIPFS.result;
+                        dto.Content = uploadToIPFS.result;
                     }
                 }
             }
@@ -157,8 +175,7 @@ namespace Matryx
             StatisticsTracking.StartEvent("Matryx", "Submission Creation");
 
             ResultsMenu.transactionObject = this;
-
-            var isEntrant = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, tournament.isEntrant(NetworkSettings.activeAccount));
+            var isEntrant = new Utils.CoroutineWithData<EthereumTypes.Bool>(MatryxCortex.Instance, tournament.isEntrant(NetworkSettings.activeAccount));
             yield return isEntrant;
 
             var tournamentInfo = new Utils.CoroutineWithData<TournamentInfo>(MatryxCortex.Instance, tournament.getInfo());
@@ -170,7 +187,7 @@ namespace Matryx
                 yield break;
             }
 
-            if(!isEntrant.result)
+            if(!isEntrant.result.Value)
             {
                 var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.activeAccount, MatryxPlatform.address));
                 yield return allowance;
@@ -221,12 +238,12 @@ namespace Matryx
             yield return commit.claim();
 
             ResultsMenu.Instance.SetStatus("Creating Commit...");
-            yield return commit.create(null);
+            yield return commit.create();
 
             ResultsMenu.Instance.SetStatus("Uploading Submission Content to IPFS...");
             yield return uploadContent();
 
-            if(!data.ContentHash.Contains("Qm"))
+            if(!dto.Content.Contains("Qm"))
             {
                 Debug.Log("Failed to upload file to IPFS");
                 yield break;

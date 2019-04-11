@@ -76,7 +76,7 @@ namespace Matryx
         public class GetTournamentsFunction : FunctionMessage {}
 
         //function getSubmission(bytes32 submissionHash) external view returns(LibTournament.SubmissionData memory);
-        [Function("getSubmission", typeof(MatryxSubmission.SubmissionDataDTO))]
+        [Function("getSubmission", typeof(MatryxSubmission.SubmissionOutputDTO))]
         public class GetSubmissionFunction : FunctionMessage
         {
             [Parameter("bytes32")]
@@ -192,7 +192,7 @@ namespace Matryx
 
         public static IEnumerator getSubmission(string submissionHash, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetSubmissionFunction, MatryxSubmission.SubmissionDataDTO>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetSubmissionFunction, MatryxSubmission.SubmissionOutputDTO>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
             yield return queryRequest.Query(new GetSubmissionFunction() { SubmissionHash = Utils.HexStringToByteArray(submissionHash) }, address);
             yield return queryRequest.Result;
 
