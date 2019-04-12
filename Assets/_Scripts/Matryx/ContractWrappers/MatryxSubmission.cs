@@ -137,7 +137,9 @@ namespace Matryx
                     var links = ipfsObj["Links"] as List<object>;
                     // TODO: Make better when you introduce preview images
                     var firstLink = links[0] as Dictionary<string, object>;
+                    var secondLink = links[1] as Dictionary<string, object>;
                     commit.ipfsContentHash = firstLink["Hash"] as string;
+                    commit.previewImageHash = secondLink["Hash"] as string;
                 }
 
                 using (WWW ipfsWWW2 = new WWW(ipfsCatURL + commit.ipfsContentHash))
@@ -156,6 +158,12 @@ namespace Matryx
                         // TODO: Have fun with this
                         commit.content = "";
                     }
+                }
+
+                using (WWW ipfsWWW3 = new WWW(ipfsCatURL + commit.previewImageHash))
+                {
+                    yield return ipfsWWW3;
+                    commit.previewImage = ipfsWWW3.bytes;
                 }
 
                 var ESSRegEx = "{.*rangeKeys.*rangePairs.*ExpressionKeys.*ExpressionValues.*}";

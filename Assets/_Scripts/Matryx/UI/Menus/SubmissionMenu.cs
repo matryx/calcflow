@@ -36,12 +36,12 @@ public class SubmissionMenu : MonoBehaviour
 
     public void SetSubmission(MatryxSubmission submission)
     {
-        titleText.text = submission.title;
-        importSubmissionButton.Disable();
-
         if (this.submission == null ||
             this.submission.hash != submission.hash)
         {
+            titleText.text = submission.title;
+            bodyText.text = "Loading...";
+            ClearPreview();
             DisableImport();
             this.submission = submission;
             MatryxCortex.GetSubmission(submission, (result) =>
@@ -63,10 +63,23 @@ public class SubmissionMenu : MonoBehaviour
     {
         titleText.text = submission.title;
         bodyText.text = submission.description;
+        LoadPreviewImage();
 
         // Update the import button!
         importSubmissionButton.submission = submission;
         importSubmissionButton.Reenable();
+    }
+
+    void LoadPreviewImage()
+    {
+        Texture2D imageTexture = new Texture2D(2, 2);
+        imageTexture.LoadImage(submission.commit.previewImage);
+        transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = imageTexture;
+    }
+
+    void ClearPreview()
+    {
+        transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = null;
     }
 
     public void EnableImport()

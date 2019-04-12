@@ -33,11 +33,11 @@ public class ImportSubmission : QuickButton {
 
     public void Disable()
     {
-        submissionButtonFlexComponent.SetState(0);
+        submissionButtonFlexComponent.SetState(-1);
     }
 
     public void Reenable()
     {
-        submissionButtonFlexComponent.SetState(1);
+        submissionButtonFlexComponent.SetState(0);
     }
 }

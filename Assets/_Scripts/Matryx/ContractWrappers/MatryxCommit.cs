@@ -57,7 +57,11 @@ namespace Matryx
             }
         }
 
+        public string previewImageHash;
+        public byte[] previewImage;
+
         public static Dictionary<string, Claim> contentClaims = new Dictionary<string, Claim>();
+
         public class Claim
         {
             public string sender;
@@ -325,9 +329,9 @@ namespace Matryx
         {
             if (!content.Equals(""))
             {
-                List<string> fileNames = new List<string>() { "jsonContent.json" };
-                List<byte[]> contents = new List<byte[]>() { MatryxCortex.serializer.Serialize(content) };
-                List<string> fileTypes = new List<string>() { "application/json" };
+                List<string> fileNames = new List<string>() { "jsonContent.json", "preview.png" };
+                List<byte[]> contents = new List<byte[]>() { MatryxCortex.serializer.Serialize(content), HiResScreenShots.Instance.GetScreenshotBytes(800, 600) };
+                List<string> fileTypes = new List<string>() { "application/json", "image/png" };
                 var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadFiles(fileNames, contents, fileTypes));
                 yield return uploadToIPFS;
                 ipfsContentHash = uploadToIPFS.result;
