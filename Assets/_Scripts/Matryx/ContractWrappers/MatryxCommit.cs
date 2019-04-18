@@ -57,7 +57,11 @@ namespace Matryx
             }
         }
 
+        public string previewImageHash;
+        public byte[] previewImage;
+
         public static Dictionary<string, Claim> contentClaims = new Dictionary<string, Claim>();
+
         public class Claim
         {
             public string sender;
@@ -323,12 +327,11 @@ namespace Matryx
 
         public IEnumerator uploadContent()
         {
-            ResultsMenu.Instance.SetStatus("Uploading Your Content...");
             if (!content.Equals(""))
             {
-                List<string> fileNames = new List<string>() { "jsonContent.json" };
-                List<byte[]> contents = new List<byte[]>() { MatryxCortex.serializer.Serialize(content) };
-                List<string> fileTypes = new List<string>() { "application/json" };
+                List<string> fileNames = new List<string>() { "jsonContent.json", "preview.png" };
+                List<byte[]> contents = new List<byte[]>() { MatryxCortex.serializer.Serialize(content), HiResScreenShots.Instance.GetScreenshotBytes(800, 600) };
+                List<string> fileTypes = new List<string>() { "application/json", "image/png" };
                 var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadFiles(fileNames, contents, fileTypes));
                 yield return uploadToIPFS;
                 ipfsContentHash = uploadToIPFS.result;
@@ -345,10 +348,12 @@ namespace Matryx
 
         public IEnumerator claim(Async thread = null)
         {
-            // Calculate commithash from content
+            // Calculate commit hash from content
+            ResultsMenu.Instance.SetStatus("Uploading Content...");
             var uploader = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, uploadContent());
             yield return uploader;
 
+            ResultsMenu.Instance.SetStatus("Hashing Content to Matryx...");
             Claim claim = new Claim(ipfsContentHash, content);
             var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             var claimCommitMsg = new ClaimCommitFunction() { ClaimHash = claim.claimHash, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
@@ -366,6 +371,7 @@ namespace Matryx
 
         public IEnumerator create(Async thread = null)
         {
+            ResultsMenu.Instance.SetStatus("Commiting Content to Matryx...");
             Claim claim = getClaim(ipfsContentHash);
             var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             var createCommitMsg = new CreateCommitFunction()

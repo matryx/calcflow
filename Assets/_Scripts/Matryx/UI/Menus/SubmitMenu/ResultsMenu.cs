@@ -89,7 +89,8 @@ public class ResultsMenu : MonoBehaviour {
     {
         yield return new WaitForSeconds(seconds);
 
-        mayReturn.gameObject.SetActive(true);
+        mayReturn.gameObject.SetActive(false);
+        severalMinutesText.gameObject.SetActive(true);
         tryAgainButton.gameObject.SetActive(false);
         Instance.gameObject.SetActive(false);
         if(CreateSubmissionMenu.Instance != null)

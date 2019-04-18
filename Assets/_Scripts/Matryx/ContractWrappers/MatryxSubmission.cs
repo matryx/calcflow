@@ -102,7 +102,7 @@ namespace Matryx
             public string[] FileHash { get; set; }
         }
 
-        public IEnumerator get(Async.EventDelegate callback = null)
+        public IEnumerator get(Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
         {
             var url = MatryxCortex.submissionURL+hash;
             using (var submissionWWW = new WWW(url))
@@ -137,20 +137,39 @@ namespace Matryx
                     var links = ipfsObj["Links"] as List<object>;
                     // TODO: Make better when you introduce preview images
                     var firstLink = links[0] as Dictionary<string, object>;
+                    var secondLink = links[1] as Dictionary<string, object>;
                     commit.ipfsContentHash = firstLink["Hash"] as string;
+                    commit.previewImageHash = secondLink["Hash"] as string;
                 }
 
                 using (WWW ipfsWWW2 = new WWW(ipfsCatURL + commit.ipfsContentHash))
                 {
                     yield return ipfsWWW2;
-                    var ipfsData = Encoding.UTF8.GetString(ipfsWWW2.bytes);
-                    commit.content = ipfsData.Replace("\\", "");
+                    try
+                    {
+                        var ipfsJson = ipfsWWW2.text;
+                        var openIndex = ipfsJson.IndexOf('{');
+                        var closeIndex = ipfsJson.IndexOf('}', ipfsJson.Length - 4);
+                        var fixedText = ipfsJson.Substring(openIndex, closeIndex - openIndex + 1);
+                        commit.content = fixedText;
+                    }
+                    catch(System.Exception e)
+                    {
+                        // TODO: Have fun with this
+                        commit.content = "";
+                    }
+                }
+
+                using (WWW ipfsWWW3 = new WWW(ipfsCatURL + commit.previewImageHash))
+                {
+                    yield return ipfsWWW3;
+                    commit.previewImage = ipfsWWW3.bytes;
                 }
 
                 var ESSRegEx = "{.*rangeKeys.*rangePairs.*ExpressionKeys.*ExpressionValues.*}";
                 calcflowCompatible = Regex.IsMatch(commit.content, ESSRegEx);
 
-                callback(this);
+                onSuccess(this);
             }
         }
 
@@ -240,7 +259,7 @@ namespace Matryx
             ResultsMenu.Instance.SetStatus("Creating Commit...");
             yield return commit.create();
 
-            ResultsMenu.Instance.SetStatus("Uploading Submission Content to IPFS...");
+            ResultsMenu.Instance.SetStatus("Uploading Submission...");
             yield return uploadContent();
 
             if(!dto.Content.Contains("Qm"))
@@ -249,7 +268,7 @@ namespace Matryx
                 yield break;
             }
 
-            ResultsMenu.Instance.SetStatus("Creating Submission...");
+            ResultsMenu.Instance.SetStatus("Creating Submission in Matryx...");
             var createSubmission = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, tournament.createSubmission(this));
             yield return createSubmission;
 
