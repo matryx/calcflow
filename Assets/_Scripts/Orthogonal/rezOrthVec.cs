@@ -19,7 +19,7 @@ public class rezOrthVec : MonoBehaviour
     {
         //do orthog math and transform result vector 
         //transform.localPosition = constraintGrabbable.lastLocalPos;
-        transform.localPosition = constraintGrabbable.lastLocalPos;
+        //transform.localPosition = constraintGrabbable.lastLocalPos;
     }
 }
 
