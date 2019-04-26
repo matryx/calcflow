@@ -41,6 +41,8 @@ public class OrthPtManager : MonoBehaviour
 
     //[SerializeField]
     //PresentPlane presentPlane;
+    [SerializeField]
+    PresentVect presentVect;
 
     [System.Serializable]
     internal class ConnectedMenus
@@ -68,11 +70,12 @@ public class OrthPtManager : MonoBehaviour
     [System.Serializable]
     internal class Inputs
     {
+        //keyboard inputs
         [SerializeField]
         internal TextMesh pt1XInput, pt1YInput, pt1ZInput,
-                pt2XInput, pt2YInput, pt2ZInput,
-                pt3XInput, pt3YInput, pt3ZInput,
+             
                 aInput, bInput, cInput, dInput;
+
     }
 
   //  public GeneratePlanePts generatePlanePts;
@@ -103,8 +106,7 @@ public class OrthPtManager : MonoBehaviour
 
         ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
         updatePoint("pt1", new Vector3(-1, 1, 1));//, false);
-        updatePoint("pt2", new Vector3(1, -1, 1));//, false);
-        updatePoint("pt3", new Vector3(1, 1, -1));//, false);
+
     }
 
 
@@ -119,8 +121,11 @@ public class OrthPtManager : MonoBehaviour
 
     void Update()
     {
+
         if (updateText || inputReceived)
         {
+            //Debug.Log(new Vector3(ptSet.ptCoords["pt1"].X.Value + ptSet.ptCoords["pt2"].Y.Value + ptSet.ptCoords["pt3"].Z.Value);
+            Debug.Log("YEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + ptSet.ptCoords["pt1"].X.Value + " " + ptSet.ptCoords["pt1"].Y.Value + " " + ptSet.ptCoords["pt1"].Z.Value);
             manageText();
             updateText = false;
         }
@@ -171,9 +176,7 @@ public class OrthPtManager : MonoBehaviour
     public void ManageFeedback()
     {
         if (feedbacks.pt1Feedback != null) feedbacks.pt1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
-        if (feedbacks.pt2Feedback != null) feedbacks.pt2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-        if (feedbacks.pt3Feedback != null) feedbacks.pt3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
-        if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback;
+             if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback;
     }
 
     public void updatePoint(string ptName, Vector3 newLoc)//, bool fixedPlane)
@@ -211,7 +214,7 @@ public class OrthPtManager : MonoBehaviour
         //}
     }
 
-    public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
+    public void eqnUpdatePoint(Vector3 pt1NewLoc)
     {
         CalcOutput originalExpression = ptInput.currExpression;
         SetOutput(ptSet.ptCoords["pt1"].X);
@@ -220,18 +223,7 @@ public class OrthPtManager : MonoBehaviour
         ptInput.RewriteInput(pt1NewLoc.y);
         SetOutput(ptSet.ptCoords["pt1"].Z);
         ptInput.RewriteInput(pt1NewLoc.z);
-        SetOutput(ptSet.ptCoords["pt2"].X);
-        ptInput.RewriteInput(pt2NewLoc.x);
-        SetOutput(ptSet.ptCoords["pt2"].Y);
-        ptInput.RewriteInput(pt2NewLoc.y);
-        SetOutput(ptSet.ptCoords["pt2"].Z);
-        ptInput.RewriteInput(pt2NewLoc.z);
-        SetOutput(ptSet.ptCoords["pt3"].X);
-        ptInput.RewriteInput(pt3NewLoc.x);
-        SetOutput(ptSet.ptCoords["pt3"].Y);
-        ptInput.RewriteInput(pt3NewLoc.y);
-        SetOutput(ptSet.ptCoords["pt3"].Z);
-        ptInput.RewriteInput(pt3NewLoc.z);
+        
         SetOutput(originalExpression);
         manageText();
         ManageFeedback();
@@ -293,26 +285,7 @@ public class OrthPtManager : MonoBehaviour
             if (inputs.pt1YInput.text.Length == 0) inputs.pt1YInput.text = "0";
             if (inputs.pt1ZInput.text.Length == 0) inputs.pt1ZInput.text = "0";
         }
-        if (ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2XInput != null)
-        {
-            inputs.pt2XInput.text = displayText(ptSet.ptCoords["pt2"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].X, maxDisplayLength);
-            inputs.pt2YInput.text = displayText(ptSet.ptCoords["pt2"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Y, maxDisplayLength);
-            inputs.pt2ZInput.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength);
-
-            if (inputs.pt2XInput.text.Length == 0) inputs.pt2XInput.text = "0";
-            if (inputs.pt2YInput.text.Length == 0) inputs.pt2YInput.text = "0";
-            if (inputs.pt2ZInput.text.Length == 0) inputs.pt2ZInput.text = "0";
-        }
-        if (ptSet.ptCoords.ContainsKey("pt3") && inputs.pt3XInput != null)
-        {
-            inputs.pt3XInput.text = displayText(ptSet.ptCoords["pt3"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].X, maxDisplayLength);
-            inputs.pt3YInput.text = displayText(ptSet.ptCoords["pt3"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Y, maxDisplayLength);
-            inputs.pt3ZInput.text = displayText(ptSet.ptCoords["pt3"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Z, maxDisplayLength);
-
-            if (inputs.pt3XInput.text.Length == 0) inputs.pt3XInput.text = "0";
-            if (inputs.pt3YInput.text.Length == 0) inputs.pt3YInput.text = "0";
-            if (inputs.pt3ZInput.text.Length == 0) inputs.pt3ZInput.text = "0";
-        }
+  
         if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
         if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
         if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
