@@ -152,7 +152,10 @@ public class SaveLoadMenu : MonoBehaviour
         action.hoveringColor = (delete) ? colorSettings.deleteHoverColor : colorSettings.selectHoverColor;
         selectPanel.AddAction((FlexActionableComponent)action);
 
-        saves.Add(save.date, save);
+        if(!saves.ContainsKey(save.date))
+        {
+            saves.Add(save.date, save);
+        }
     }
 
     private GameObject createButton(SavePackage save)

@@ -10,6 +10,7 @@ namespace CalcFlowUI
         public delegate void ButtonCallBack(GameObject presser);
 
         public event ButtonCallBack OnButtonEnter;
+        public event ButtonCallBack OnButtonStay;
         public event ButtonCallBack OnButtonExit;
 
         [SerializeField]

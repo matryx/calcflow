@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using Calcflow.UserStatistics;
 using static Matryx.MatryxTournament;
 using System;
+using Nanome.Core.Extension;
 
 namespace Matryx
 {
@@ -59,13 +60,6 @@ namespace Matryx
         public MatryxCommit commit;
 
         public bool calcflowCompatible = true;
-        public string EquationJson
-        {
-            get
-            {
-                if (!calcflowCompatible) return ""; else return commit.content;
-            }
-        }
 
         [FunctionOutput]
         public class SubmissionOutputDTO : IFunctionOutputDTO
@@ -102,7 +96,7 @@ namespace Matryx
             public string[] FileHash { get; set; }
         }
 
-        public IEnumerator get(Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public IEnumerator get(Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
             var url = MatryxCortex.submissionURL+hash;
             using (var submissionWWW = new WWW(url))
@@ -117,55 +111,53 @@ namespace Matryx
                 this.hash = submission["hash"] as string;
                 this.tournament.address = submission["tournament"] as string;
                 this.commit.hash = (submission["commit"] as Dictionary<string, object>)["hash"] as string;
-                this.commit.ipfsContentHash = (submission["commit"] as Dictionary<string, object>)["ipfsContent"] as string;
+                var ipfsHash = (submission["commit"] as Dictionary<string, object>)["ipfsContent"] as string;
+                this.commit.ipfsContentHash = ipfsHash;
                 this.dto.TournamentAddress = submission["tournament"] as string;
                 this.dto.RoundIndex = BigInteger.Parse(submission["roundIndex"].ToString());
                 this.dto.CommitHash = Utils.HexStringToByteArray(this.commit.hash);
                 this.dto.Content = submission["ipfsContent"] as string;
-                var testNull = ((int)0).ToString();
-                if(testNull == null) { throw new System.Exception("u suck i hate u"); }
                 this.dto.Reward = BigInteger.Parse(submission["reward"].ToString());
                 this.dto.Timestamp = BigInteger.Parse(submission["timestamp"].ToString());
 
+                bool link = false;
                 var ipfsURL = "https://ipfs.infura.io:5001/api/v0";
                 var ipfsObjURL = ipfsURL + "/object/get?arg=";
                 var ipfsCatURL = ipfsURL + "/cat?arg=";
-                using (WWW ipfsWWW = new WWW(ipfsObjURL + commit.ipfsContentHash))
+                using (WWW ipfsWWW = new WWW(ipfsObjURL + ipfsHash))
                 {
                     yield return ipfsWWW;
                     var ipfsObj = MatryxCortex.serializer.Deserialize<object>(ipfsWWW.bytes) as Dictionary<string, object>;
                     var links = ipfsObj["Links"] as List<object>;
-                    // TODO: Make better when you introduce preview images
-                    var firstLink = links[0] as Dictionary<string, object>;
-                    var secondLink = links[1] as Dictionary<string, object>;
-                    commit.ipfsContentHash = firstLink["Hash"] as string;
-                    commit.previewImageHash = secondLink["Hash"] as string;
+                    var indexOfContent = links.IndexOfElementWithValue("jsonContent.json");
+                    if (indexOfContent != -1)
+                    {
+                        link = true;
+                        var contentLink = links[indexOfContent] as Dictionary<string, object>;
+                        commit.ipfsContentHash = contentLink["Hash"] as string;
+                    }
+                    
+                    // TODO: Implement previews in a good way
+                    //var secondLink = links[1] as Dictionary<string, object>;
+                    //commit.previewImageHash = secondLink["Hash"] as string;
                 }
 
-                using (WWW ipfsWWW2 = new WWW(ipfsCatURL + commit.ipfsContentHash))
+                var catUrl = link ? ipfsCatURL + commit.ipfsContentHash : ipfsCatURL + ipfsHash;
+                using (WWW ipfsWWW2 = new WWW(catUrl))
                 {
                     yield return ipfsWWW2;
                     try
                     {
-                        var ipfsJson = ipfsWWW2.text;
-                        var openIndex = ipfsJson.IndexOf('{');
-                        var closeIndex = ipfsJson.IndexOf('}', ipfsJson.Length - 4);
-                        var fixedText = ipfsJson.Substring(openIndex, closeIndex - openIndex + 1);
-                        commit.content = fixedText;
+                        commit.content = Utils.Substring(ipfsWWW2.text, '{', '}');
                     }
-                    catch(System.Exception e)
+                    catch (System.Exception e)
                     {
                         // TODO: Have fun with this
                         commit.content = "";
+                        onError?.Invoke(null);
                     }
                 }
-
-                using (WWW ipfsWWW3 = new WWW(ipfsCatURL + commit.previewImageHash))
-                {
-                    yield return ipfsWWW3;
-                    commit.previewImage = ipfsWWW3.bytes;
-                }
-
+                
                 var ESSRegEx = "{.*rangeKeys.*rangePairs.*ExpressionKeys.*ExpressionValues.*}";
                 calcflowCompatible = Regex.IsMatch(commit.content, ESSRegEx);
 
@@ -181,7 +173,7 @@ namespace Matryx
                 {
                     if(commit.ipfsContentHash != null && commit.ipfsContentHash.Substring(0, 2) == "Qm")
                     {
-                        var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(title, description, commit.ipfsContentHash));
+                        var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, MatryxCortex.uploadJson(title, description, commit.ipfsContentHash));
                         yield return uploadToIPFS;
                         dto.Content = uploadToIPFS.result;
                     }
@@ -210,8 +202,16 @@ namespace Matryx
             {
                 var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.activeAccount, MatryxPlatform.address));
                 yield return allowance;
+                var balance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.activeAccount));
+                yield return balance;
 
                 Debug.Log(tournament.entryFee);
+                if(balance.result < tournament.entryFee)
+                {
+                    ResultsMenu.Instance.SetStatus("Insufficient MTX. Please visit <link=https://app.matryx.ai/><u>our Matryx Dapp</u></link> for MTX Tokens.", true);
+                    yield break;
+                }
+
                 if (allowance.result < tournament.entryFee)
                 {
                     ResultsMenu.Instance.SetStatus("Approving entry fee...");

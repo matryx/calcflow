@@ -408,13 +408,14 @@ public class MatryxAccountMenu : MonoBehaviour {
         Config.setString("address", NetworkSettings.activeAccount);
         Config.setBool("usedPassword", usedPassword, true, "storage");
 
-        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.DisplayingTournaments);
+        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.Unlocked);
         return true;
     }
 
     public static bool UnlockAccount()
     {
         string cypher = Config.getString("cypher", "");
+        if (cypher.Equals("")) { return false; }
         string cypherType = Config.getString("cypherType", "");
         string plainText = Crypto.Decrypt(cypher);
 
@@ -447,7 +448,7 @@ public class MatryxAccountMenu : MonoBehaviour {
                 }
         }
 
-        return false;
+        return true;
     }
 
     // returns success
@@ -499,7 +500,7 @@ public class MatryxAccountMenu : MonoBehaviour {
         }
         
 
-        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.DisplayingTournaments);
+        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.Unlocked);
 
         return true;
     }

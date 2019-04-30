@@ -14,6 +14,8 @@ using System.Numerics;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
 using Nethereum.ABI.Decoders;
+using Nanome.Core.Extension;
+using System.Reflection;
 
 namespace Matryx
 {
@@ -21,6 +23,8 @@ namespace Matryx
     {
         [SerializeField]
         public MatryxAccountMenu accountMenu;
+        [SerializeField]
+        public ExpressionSaveLoad expressionSaveLoad;
 
         public static MatryxCortex Instance { get; private set; }
         public static Serializer serializer = new Serializer();
@@ -31,16 +35,25 @@ namespace Matryx
         public static string tournamentsURL = cortexURL + "/tournaments";
         public static string artifactsURL = cortexURL + "/artifacts";
 
-        public static string tournamentURL = cortexURL + "/tournaments/address/";
+        public static string tournamentURL = cortexURL + "/tournaments/";
         public static string roundURL = cortexURL + "/rounds/address";
         public static string submissionURL = cortexURL + "/submissions/";
         public static string mySubmissionsURL = cortexURL + "/submissions/owner/";
         public static string commitURL = cortexURL + "/commits/";
+        public static string myCommitsURL = commitURL + "owner/";
+
+        public static string ipfsURL = "https://ipfs.infura.io:5001/api/v0";
+        public static string ipfsObjURL = ipfsURL + "/object/get?arg=";
+        public static string ipfsCatURL = ipfsURL + "/cat?arg=";
+        public static string ipfsAddURL = ipfsURL + "/add?pin=false";
 
         public static string jsonUploadURL = cortexURL + "/upload/json";
-        public static string filesUploadURL = cortexURL + "/upload/files";
+        public static string filesUploadURL = ipfsURL + "/add?recursive=true&quieter=true";
 
         public static List<string> supportedCalcflowCategories = new List<string>();
+
+        [SerializeField]
+        GameObject claimCommitButton;
 
         public MatryxCortex()
         {
@@ -53,15 +66,18 @@ namespace Matryx
 
         void Start()
         {
+            MatryxAccountMenu.UnlockAccount();
+
             queue(InitializeNetworkSettings());
-            // Make into one
             queue(InitializeContracts());
             queue(InitiateUser());
+
             queue(RunTests());
         }
 
         // Internal queue
         private static readonly Queue<IEnumerator> _queue = new Queue<IEnumerator>();
+        private static readonly Queue<IEnumerator> _meteredQueue = new Queue<IEnumerator>();
 
         private static void queue(IEnumerator action)
         {
@@ -69,6 +85,30 @@ namespace Matryx
             {
                 _queue.Enqueue(action);
             }
+        }
+
+        public static void queueMetered(IEnumerator action)
+        {
+            lock(_meteredQueue)
+            {
+                _meteredQueue.Enqueue(action);
+                Instance.StartCoroutine(CoroutineCascade());
+            }
+        }
+
+        public static IEnumerator CoroutineCascade()
+        {
+            if(_meteredQueue.Count == 0)
+            {
+                yield return null;
+            }
+
+            if (_meteredQueue.Count > 0)
+            {
+                yield return _meteredQueue.Dequeue();
+            }
+
+            Instance.StartCoroutine(CoroutineCascade());
         }
 
         void Update()
@@ -99,22 +139,29 @@ namespace Matryx
             }
         }
 
-        public static void RunFetchTournaments(long page, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public static void RunGetTournaments(long page, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
             // Schedule query
             Async main = Async.runInCoroutine(delegate (Async thread, object param)
             {
-                return FetchTournaments(page, onSuccess, onError);
+                return GetTournaments(page, onSuccess, onError);
             });
         }
 
-        private static IEnumerator FetchTournaments(long page, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        private static IEnumerator GetTournaments(long page, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
             var tournaments = new List<MatryxTournament>();
             var offset = page * 10;
             using (WWW www = new WWW(tournamentsURL))
             {
                 yield return www;
+                if (www.error != null)
+                {
+                    Debug.Log("Error making request. Matryx Cortex down!!");
+                    onError?.Invoke(www.error);
+                    yield break;
+                }
+
                 try
                 {
                     var response = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
@@ -123,91 +170,159 @@ namespace Matryx
                     var tournamentList = data["tournaments"] as List<object>;
                     for (int i = 0; i < tournamentList.Count; i++)
                     {
-
                         var jsonTournament = tournamentList[i] as Dictionary<string, object>;
-
+                        var status = jsonTournament["status"] as string;
+                        if (!status.Equals("open", StringComparison.CurrentCultureIgnoreCase)) { continue; }
                         string category = jsonTournament["category"] as string;
                         if (!supportedCalcflowCategories.Contains(category)) { continue; }
-
                         var tournamentTitle = jsonTournament["title"] as string;
                         var bounty = new BigInteger((long)Convert.ToDouble(jsonTournament["bounty"])) * new BigInteger(1e18);
                         var entryFee = new BigInteger((long)Convert.ToDouble(jsonTournament["entryFee"])) * new BigInteger(1e18);
                         var tournament = new MatryxTournament(jsonTournament["address"] as string, tournamentTitle, bounty, entryFee);
                         tournament.description = jsonTournament["description"] as string;
-                        tournament.status = jsonTournament["status"] as string;
+                        tournament.currentRound = new MatryxRound() { status = jsonTournament["status"] as string };
                         tournaments.Add(tournament);
                     }
 
-                    onSuccess(tournaments);
+                    onSuccess?.Invoke(tournaments);
                 }
                 catch (Exception e)
                 {
                     Debug.Log(e);
-                    onError(tournaments);
+                    onError?.Invoke(tournaments);
                 }
             }
         }
 
-        public static void RunFetchTournament(string tournamentAddress, long roundNumber, long page, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public static void RunGetTournament(string tournamentAddress, bool getDescription, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
             // Schedule query
             Async main = Async.runInCoroutine(delegate (Async thread, object param)
             {
-                return FetchTournament(tournamentAddress, roundNumber, page, onSuccess, onError);
+                return GetTournament(tournamentAddress, getDescription, onSuccess, onError);
             });
         }
 
-        private static IEnumerator FetchTournament(string tournamentAddress, long roundNumber, long page, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        private static IEnumerator GetTournament(string tournamentAddress, bool getDescription, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
-            var submissions = new List<MatryxSubmission>();
-            var offset = page * 10;
+            var tournament = new MatryxTournament(tournamentAddress);
+            var winningSubmissions = new List<MatryxSubmission>();
 
             using (WWW www = new WWW(tournamentURL + tournamentAddress))
             {
                 yield return www;
+                if (www.error != null)
+                {
+                    Debug.Log("Error making request. Matryx Cortex down!!");
+                    onError?.Invoke(www.error);
+                    yield break;
+                }
+
                 try
                 {
                     var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
                     if (jsonObj.ContainsKey("error"))
                     {
-                        onError(submissions);
+                        onError?.Invoke(null);
                     }
-                    else if (jsonObj.ContainsKey("tournament"))
+                    else if (jsonObj.ContainsKey("success"))
                     {
-                        var tournament = jsonObj["tournament"] as Dictionary<string, object>;
-                        var title = tournament["title"] as string;
-                        var bounty = Convert.ToDouble(tournament["bounty"] as string);
-                        var description = tournament["description"] as string;
-                        Debug.Log("description: " + description);
-                        var winnersByRound = tournament["winners"] as List<object>;
-                        Debug.Log("submissionList count: " + winnersByRound.Count);
-                        for (int i = 0; i < winnersByRound.Count; i++)
+                        var data = jsonObj["data"] as Dictionary<string, object>;
+                        var jsonTournament = data["tournament"] as Dictionary<string, object>;
+                        tournament.owner = jsonTournament["owner"] as string;
+                        tournament.contentHash = jsonTournament["ipfsContent"] as string;
+                        tournament.title = jsonTournament["title"] as string;
+                        tournament.Bounty = new BigInteger(Convert.ToDecimal(jsonTournament["bounty"]));
+                        tournament.description = jsonTournament["description"] as string;
+                        var jsonRound = jsonTournament["round"] as Dictionary<string, object>;
+                        tournament.currentRound = new MatryxRound(Convert.ToInt32(jsonRound["index"]));
+                        tournament.currentRound.status = jsonTournament["status"] as string;
+                        DateTime start = DateTime.Parse(jsonRound["startDate"] as string);
+                        DateTime end = DateTime.Parse(jsonRound["endDate"] as string);
+                        BigInteger duration = new BigInteger((end - start).TotalSeconds);
+                        tournament.currentRound.startTime = start;
+                        tournament.currentRound.endTime = end;
+                        tournament.currentRound.Details = new MatryxRound.RoundDetails()
                         {
-                            if (winnersByRound[i] == null)
-                            {
-                                Debug.Log("round empty. Must be current round: " + i);
-                                break;
-                            }
+                            Start = new BigInteger(Utils.Time.ToUnixTime(start)),
+                            Duration = duration,
+                            Bounty = new BigInteger(Convert.ToDecimal(jsonRound["bounty"]))
+                        };
 
-                            var roundWinners = winnersByRound[i] as List<object>;
-                            for (int j = 0; j < roundWinners.Count; j++)
-                            {
-                                var winner = roundWinners[i] as Dictionary<string, object>;
-                                var submission = new MatryxSubmission(winner["address"] as string);
-                                submission.title = winner["title"] as string;
-                                submission.dto.Reward = BigInteger.Parse(winner["reward"] as string);
-                                submissions.Add(submission);
-                            }
+                        var roundWinners = jsonRound["winners"] as List<object>;
+                        for (int i = 0; i < roundWinners.Count; i++)
+                        {
+                            var submission = new MatryxSubmission(roundWinners[i] as string);
+                            winningSubmissions.Add(submission);
                         }
-                    }
 
-                    Debug.Log("Fetched submissions: " + submissions.Count);
-                    onSuccess(submissions);
+                        tournament.currentRound.winningSubmissions = winningSubmissions;
+                        onSuccess(tournament);
+                    }
                 }
                 catch (Exception e)
                 {
                     Debug.Log(e);
-                    onError(null);
+                    onError?.Invoke(null);
+                }
+            }
+        }
+
+        public static void RunGetRound(string tournamentAddress, int roundIndex, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
+        {
+            Async main = Async.runInCoroutine(delegate (Async thread, object param)
+            {
+                return GetRound(tournamentAddress, roundIndex, onSuccess, onError);
+            });
+        }
+
+        public static IEnumerator GetRound(string tournamentAddress, int roundIndex, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
+        {
+            var round = new MatryxRound(roundIndex);
+            var winningSubmissions = new List<MatryxSubmission>();
+
+            using (WWW www = new WWW(tournamentURL + tournamentAddress + "/round/" + roundIndex))
+            {
+                yield return www;
+                if (www.error != null)
+                {
+                    Debug.Log("Error making request. Matryx Cortex down!!");
+                    onError?.Invoke(www.error);
+                    yield break;
+                }
+
+                try
+                {
+                    var jsonObj = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                    if (jsonObj.ContainsKey("error"))
+                    {
+                        onError?.Invoke(null);
+                    }
+                    else if (jsonObj.ContainsKey("success"))
+                    {
+                        var data = jsonObj["data"] as Dictionary<string, object>;
+                        var jsonRound = data["round"] as Dictionary<string, object>;
+                        round.Details.Bounty = new BigInteger(Convert.ToDecimal(jsonRound["bounty"])) * new BigInteger(1e18);
+                        var startDate = DateTime.Parse(jsonRound["startDate"] as string);
+                        var endDate = DateTime.Parse(jsonRound["endDate"] as string);
+                        round.Details.Start = new BigInteger(Utils.Time.ToUnixTime(startDate));
+                        round.Details.Duration = new BigInteger((endDate - startDate).TotalSeconds);
+
+                        var roundWinners = jsonRound["winners"] as List<object>;
+                        for (int i = 0; i < roundWinners.Count; i++)
+                        {
+                            var submission = new MatryxSubmission(roundWinners[i] as string);
+                            winningSubmissions.Add(submission);
+                        }
+                        round.winningSubmissions = winningSubmissions;
+
+                        onSuccess(round);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.Log(e);
+                    onError?.Invoke(null);
                 }
             }
         }
@@ -217,12 +332,12 @@ namespace Matryx
             queue(submission.get(onSuccess, onError));
         }
 
-        public static void RunFetchMySubmissions(MatryxTournament tournament, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public static void RunGetMySubmissions(MatryxTournament tournament, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
         {
-            queue(FetchMySubmissions(tournament, onSuccess, onError));
+            queue(GetMySubmissions(tournament, onSuccess, onError));
         }
          
-        public static IEnumerator FetchMySubmissions(MatryxTournament tournament, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public static IEnumerator GetMySubmissions(MatryxTournament tournament, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
         {
             var url = mySubmissionsURL + NetworkSettings.activeAccount;
             using (var www = new WWW(url))
@@ -231,7 +346,6 @@ namespace Matryx
                 var submissions = new List<MatryxSubmission>();
                 try
                 {
-                    Debug.Log(www.text);
                     var res = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
                     var data = res["data"] as Dictionary<string, object>;
                     var submissionData = data["submissions"] as List<object>;
@@ -249,21 +363,21 @@ namespace Matryx
                 catch (Exception e)
                 {
                     Debug.Log(e);
-                    onError(submissions);
+                    onError?.Invoke(submissions);
                 }
 
-                onSuccess(submissions);
+                onSuccess?.Invoke(submissions);
             }
         }
 
-        public static void RunFetchCommit(string commitContentHash, bool fetchContent, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public static void RunGetCommit(string commitHash, bool getContent, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
-            queue(FetchCommit(commitContentHash, fetchContent, onSuccess, onError));
+            queue(GetCommit(commitHash, getContent, onSuccess, onError));
         }
 
-        private static IEnumerator FetchCommit(string commitContentHash, bool fetchContent, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        private static IEnumerator GetCommit(string commitHash, bool getContent, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
-            var url = commitURL + "0xfc8443b4fbd56883654e6103a3a643ee072c0d19722c78dde0c437075e5f448b";
+            var url = commitURL + commitHash;
             using (var www = new WWW(url))
             {
                 yield return www;
@@ -274,32 +388,233 @@ namespace Matryx
                     var res = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
                     var data = res["data"] as Dictionary<string, object>;
                     var commitData = data["commit"] as Dictionary<string, object>;
-                    //if (fetchContent)
-                    //{
-                    //    var ipfsContentHash = commitData["ipfsContent"] as string;
-                    //    var request = new Utils.CoroutineWithData<object>(MatryxCortex.Instance, getIPFSContents(ipfsContentHash));
-                    //}
 
-                    //commit.hash = commitData["hash"] as string;
-                    //commit.owner = commitData["owner"] as string;
-                    //commit.parentHash = commitData["parentHash"] as string;
-                    //commit.groupHash = commitData["groupHash"] as string;
-                    //commit.ipfsContentHash = commitData["ipfsContent"] as string;
-                    //commit.height = BigInteger.Parse(commitData["height"] as string);
-                    //commit.value = BigInteger.Parse(commitData["value"] as string);
-                    //commit.ownerTotalValue = BigInteger.Parse(commitData["ownerTotalValue"] as string);
-                    //commit.totalValue = BigInteger.Parse(commitData["totalValue"] as string);
-                    //commit.timestamp = BigInteger.Parse(commitData["timestamp"] as string);
+                    commit.hash = commitData["hash"] as string;
+                    commit.owner = commitData["owner"] as string;
+                    commit.parentHash = commitData["parentHash"] as string;
+                    commit.ipfsContentHash = commitData["ipfsContent"] as string;
+                    commit.height = BigInteger.Parse(commitData["height"].ToString());
+                    commit.value = BigInteger.Parse(commitData["value"].ToString());
+                    commit.ownerTotalValue = BigInteger.Parse(commitData["ownerTotalValue"].ToString());
+                    commit.totalValue = BigInteger.Parse(commitData["totalValue"].ToString());
+                    commit.timestamp = BigInteger.Parse(commitData["timestamp"].ToString());
 
-                    //yield return commit;
+                    if (getContent)
+                    {
+                        RunGetJSONContent(commit.ipfsContentHash, 
+                            (cont) => 
+                            {
+                                commit.content = Utils.Substring(cont as string, '{', '}');
+                                onSuccess?.Invoke(commit);
+                            }, onError);
+                    }
+                    else
+                    {
+                        onSuccess?.Invoke(commit);
+                    }
                 }
                 catch (Exception e)
                 {
-                    Debug.Log("Could not fetch details of commit with content: " + commitContentHash);
+                    Debug.Log("Could not fetch details of commit with content: " + commitHash);
                     Debug.Log(e);
+                    onError?.Invoke(null);
                 }
 
-                onSuccess(commit);
+                yield return commit;
+            }
+        }
+
+        public static void RunGetMyCommits(Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        {
+            queue(GetMyCommits(onSuccess, onError));
+        }
+
+        private static IEnumerator GetMyCommits(Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        {
+            var url = myCommitsURL + NetworkSettings.activeAccount;
+            using (var www = new WWW(url))
+            {
+                yield return www;
+                if(www.error != null)
+                {
+                    Debug.Log("Got here");
+                    onError?.Invoke(www.error);
+                    yield break;
+                }
+
+                var commits = new List<MatryxCommit>();
+                try
+                {
+                    Debug.Log(www.text);
+                    var res = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                    var data = res["data"] as Dictionary<string, object>;
+                    var jsonCommits = data["commits"] as List<object>;
+
+                    foreach (Dictionary<string, object> jsonCommit in jsonCommits)
+                    {
+                        MatryxCommit commit = new MatryxCommit();
+                        commit.hash = jsonCommit["hash"] as string;
+                        commit.owner = jsonCommit["owner"] as string;
+                        commit.parentHash = jsonCommit["parentHash"] as string;
+                        commit.ipfsContentHash = jsonCommit["ipfsContent"] as string;
+                        commit.height = BigInteger.Parse(jsonCommit["height"].ToString());
+                        commit.value = BigInteger.Parse(jsonCommit["value"].ToString());
+                        commit.ownerTotalValue = BigInteger.Parse(jsonCommit["ownerTotalValue"].ToString());
+                        commit.totalValue = BigInteger.Parse(jsonCommit["totalValue"].ToString());
+                        commit.timestamp = BigInteger.Parse(jsonCommit["timestamp"].ToString());
+                        commits.Add(commit);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e);
+                    onError?.Invoke(commits);
+                }
+
+                onSuccess?.Invoke(commits);
+            }
+        }
+
+        public static IEnumerator uploadFiles(List<string> fileNames, List<byte[]> contents, List<string> fileTypes, string urlModifier = "", Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        {
+            WWWForm form = new WWWForm();
+            for (var i = 0; i < fileNames.Count; i++)
+            {
+                form.AddBinaryData("files", contents[i], fileNames[i], fileTypes[i]);
+            }
+
+            UnityWebRequest request = UnityWebRequest.Post(filesUploadURL+urlModifier, form);
+            yield return request.SendWebRequest();
+            Debug.Log("request completed with code: " + request.responseCode);
+            if (request.isNetworkError || request.responseCode != 200)
+            {
+                Debug.Log("Error: " + request.error);
+                onError?.Invoke(request);
+            }
+            else
+            {
+                var res = serializer.Deserialize<object>(request.downloadHandler.data) as Dictionary<string, object>;
+                string multiHash = res["Hash"] as string;
+
+                onSuccess?.Invoke(multiHash);
+                yield return multiHash;
+            }
+
+            yield return "You should never see this :)";
+        }
+
+        public static IEnumerator uploadJson(string title, string description, string ipfsFiles, string category = "", Async thread = null)
+        {
+            Dictionary<string, string> jsonDictionary = new Dictionary<string, string>()
+            {
+                {"title", title },
+                {"description", description },
+                { "ipfsFiles", ipfsFiles }
+            };
+
+            if (category != "")
+            {
+                jsonDictionary.Add("category", category);
+            }
+
+            UnityWebRequest request = UnityWebRequest.Post(jsonUploadURL, jsonDictionary);
+            yield return request.SendWebRequest();
+
+            if (request.isNetworkError || request.responseCode != 200)
+            {
+                Debug.Log("Error: " + request.error);
+            }
+            else
+            {
+                Debug.Log("Request Response: " + request.downloadHandler.text);
+            }
+
+            var res = MatryxCortex.serializer.Deserialize<object>(request.downloadHandler.data) as Dictionary<string, object>;
+            var data = res["data"] as Dictionary<string, object>;
+            var multiHash = data["hash"] as string;
+
+            yield return multiHash;
+
+            if (thread != null)
+            {
+                thread.pushEvent("uploadToIPFS-success", multiHash);
+            }
+        }
+
+        public static void RunGetJSONContent(string ipfsHash, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        {
+            queueMetered(GetIPFSFilesContent(ipfsHash, "jsonContent.json", onSuccess, onError));
+        }
+
+        //public static IEnumerator GetIPFSJSONContent(string ipfsHash, string elementName = "", Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        //{
+        //    var objectURL = ipfsObjURL + ipfsHash;
+        //    using (var contwww = new WWW(objectURL))
+        //    {
+        //        yield return contwww;
+        //        try
+        //        {
+        //            var res = serializer.Deserialize<object>(contwww.bytes) as Dictionary<string, object>;
+        //            var data = res["Data"] as string;
+
+        //            var jsonRegex = "{.*}";
+        //            var json = data.
+
+                    
+        //        }
+        //        catch(System.Exception e)
+        //        {
+        //            onError("Could not fetch json: " + e);
+        //        }
+        //    }
+        //}
+
+        public static IEnumerator GetIPFSFilesContent(string ipfsHash, string elementName = "", Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        {
+            var objectURL = ipfsObjURL + ipfsHash;
+            Dictionary<string, object> res;
+            List<object> links;
+            int index;
+            Dictionary<string, object> theEntry;
+            string linkUrl = "";
+
+            bool error = false;
+            bool link = false;
+
+            using (var contwww = new WWW(objectURL))
+            {
+                yield return contwww;
+                try
+                {
+                    res = serializer.Deserialize<object>(contwww.bytes) as Dictionary<string, object>;
+                    links = res["Links"] as List<object>;
+                    index = links.IndexOfElementWithValue(elementName);
+                    if(index != -1)
+                    {
+                        link = true;
+                        theEntry = links[index] as Dictionary<string, object>;
+                        linkUrl = ipfsCatURL + theEntry["Hash"] as string;
+                    }
+                    else
+                    {
+                        onSuccess(res["Data"]);
+                    }
+                }
+                catch(System.Exception e)
+                {
+                    onError?.Invoke(null);
+                    error = true;
+                }
+            }
+
+            if (error) yield break;
+
+            var catURL = link ? linkUrl : ipfsCatURL + ipfsHash;
+            using (var itemWWW = new WWW(catURL))
+            {
+                yield return itemWWW;
+                onSuccess?.Invoke(itemWWW.text);
+                yield break;
             }
         }
 
@@ -360,8 +675,8 @@ namespace Matryx
 
         public static IEnumerator InitiateUser()
         {
-            MatryxAccountMenu.UnlockAccount();
-
+            
+          
             bool settingUp = true;
             while (!NetworkSettings.declinedAccountUnlock.HasValue || settingUp)
             {
@@ -384,11 +699,18 @@ namespace Matryx
             yield break;
         }
 
-        public static IEnumerator InitializeContracts()
+        public static IEnumerator InitializeContracts(Async.EventDelegate onError = null)
         {
             using (WWW www = new WWW(artifactsURL))
             {
                 yield return www;
+                if (www.error != null)
+                {
+                    Debug.Log("Error making request. Matryx Cortex down!!");
+                    onError?.Invoke(www.error);
+                    yield break;
+                }
+
                 var response = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
                 var data = response["data"] as Dictionary<string, object>;
 
@@ -433,6 +755,11 @@ namespace Matryx
                 yield return null;
                 settingUp = NetworkSettings.activeAccount == null || NetworkSettings.activeAccount == "" || MatryxPlatform.address == null || MatryxToken.address == null || MatryxCommit.address == null || MatryxTournament.ABI == null;
             }
+
+            //var content = "\"{\"Items\":[\"{\"rangeKeys\":[\"t\",\"u\",\"v\",\"w\"],\"rangePairs\":[{\"min\":{\"exclusive\":false,\"rawText\":\"0\"},\"max\":{\"exclusive\":false,\"rawText\":\"0\"}},{\"min\":{\"exclusive\":false,\"rawText\":\"0\"},\"max\":{\"exclusive\":false,\"rawText\":\"pi\"}},{\"min\":{\"exclusive\":false,\"rawText\":\"0\"},\"max\":{\"exclusive\":false,\"rawText\":\"2*pi\"}},{\"min\":{\"exclusive\":false,\"rawText\":\"0\"},\"max\":{\"exclusive\":false,\"rawText\":\"0\"}}],\"ExpressionKeys\":[\"X\",\"Y\",\"Z\"],\"ExpressionValues\":[\"(2*cos(u)*cos(v))^3\",\"(2*sin(u)*cos(v))^3\",\"(2*sin(v))^3\"]}\"]}\"";
+            //var bytesContent = Encoding.ASCII.GetBytes(content);
+            //var multiHash = Utils.GetMultiHash(bytesContent);
+            //Debug.Log("hash of content: " + multiHash);
 
             //var request = new Utils.CoroutineWithData<MatryxCommit.Commit>(MatryxCortex.Instance, MatryxCommit.getCommitByContent("QmSFMpah9yQ7YdLCcZAgJq2doFk2G8JxhY7GvbCZowuATq"));
             //yield return request;

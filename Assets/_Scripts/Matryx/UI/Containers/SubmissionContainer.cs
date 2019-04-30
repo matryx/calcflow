@@ -1,21 +1,10 @@
-﻿using UnityEngine;
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 using Matryx;
 
-public class SubmissionContainer : MonoBehaviour {
-
-    MatryxSubmission submission;
-
-    public void SetSubmission(MatryxSubmission submission)
-    {
-        this.submission = submission;
-    }
-
-    public MatryxSubmission GetSubmission()
-    {
-        return submission;
-    }
+public class SubmissionContainer : MonoBehaviour
+{
+    public MatryxSubmission submission { get; set; }
 }

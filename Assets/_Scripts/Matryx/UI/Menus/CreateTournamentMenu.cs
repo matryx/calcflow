@@ -24,7 +24,9 @@ public class CreateTournamentMenu : MonoBehaviour
     [SerializeField]
     InputField Description;
     [SerializeField]
-    NumberPicker Duration;
+    DatePickerControl startDatePicker;
+    [SerializeField]
+    DatePickerControl endDatePicker;
     [SerializeField]
     Text lengthRequirement;
 
@@ -42,8 +44,6 @@ public class CreateTournamentMenu : MonoBehaviour
         {
             Instance = this;
         }
-
-        Duration.maxValue = 8760; // hours in one year
     }
 
     public void TakeInput()
@@ -55,13 +55,14 @@ public class CreateTournamentMenu : MonoBehaviour
         BigInteger bounty = new BigInteger(Bounty.CurrentValue) * new BigInteger(1e18);
         BigInteger entryFee = new BigInteger(EntryFee.CurrentValue) * new BigInteger(1e18);
 
-        System.DateTime epochStart = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
-        int currentTime = (int)(System.DateTime.UtcNow - epochStart).TotalSeconds;
+        double start = Utils.Time.ToUnixTime(startDatePicker.fecha);
+        double end = Utils.Time.ToUnixTime(endDatePicker.fecha);
+        double duration = (endDatePicker.fecha - startDatePicker.fecha).TotalSeconds;
 
         MatryxRound.RoundDetails roundDetails = new MatryxRound.RoundDetails()
         {
-            Start = currentTime,
-            Duration = new BigInteger(Duration.CurrentValue*60*60),
+            Start = new BigInteger(start),
+            Duration = new BigInteger(duration),
             Bounty = bounty,
             Review = 60 * 60 * 24 * 14
         };
@@ -75,7 +76,12 @@ public class CreateTournamentMenu : MonoBehaviour
                 if ((bool)result)
                 {
                     StatisticsTracking.EndEvent("Matryx", "Tournament Creation");
-                    ResultsMenu.Instance.PostSuccess(tournament);
+                    ResultsMenu.Instance.PostSuccess(tournament, 
+                        (nothin) =>
+                        {
+                            TournamentsMenu.Instance.LoadTournaments(0);
+                        }
+                    );
                 }
                 else
                 {
@@ -124,10 +130,25 @@ public class CreateTournamentMenu : MonoBehaviour
             return false;
         }
 
-        if(Duration.CurrentValue == 0)
+        DateTime now = DateTime.Now;
+        if(startDatePicker.fecha < now && startDatePicker.fecha.Day < now.Day)
         {
             InvalidText.gameObject.SetActive(true);
-            InvalidText.text = "Tournament must last at least one hour";
+            InvalidText.text = "Tournament cannot occur in the past";
+            return false;
+        }
+
+        if(endDatePicker.fecha < startDatePicker.fecha)
+        {
+            InvalidText.gameObject.SetActive(true);
+            InvalidText.text = "This isn't Back to the Future.";
+            return false;
+        }
+
+        if((endDatePicker.fecha - startDatePicker.fecha).TotalDays > 365)
+        {
+            InvalidText.gameObject.SetActive(true);
+            InvalidText.text = "Tournament duration must be 1 year or less.";
             return false;
         }
 

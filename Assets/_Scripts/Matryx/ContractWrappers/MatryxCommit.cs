@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace Matryx
 {
@@ -40,7 +41,6 @@ namespace Matryx
         public BigInteger height;
         public string parentHash = "";
         public List<string> children;
-
         public bool fork;
 
         public string content = "";
@@ -48,49 +48,111 @@ namespace Matryx
         {
             get
             {
+                if(content == "")
+                {
+                    content = Config.getString("commitContent" + hash, "");
+                }
                 return content;
             }
             set
             {
                 content = value;
+                if (hash != "") { Config.setString("commitContent" + hash, value, true, "storage"); }
                 ipfsContentHash = "";
             }
         }
 
         public string previewImageHash;
-        public byte[] previewImage;
+        private byte[] previewImageData;
+        public byte[] PreviewImageData
+        {
+            get
+            {
+                // read from storage
+                if (previewImageData == null)
+                {
+                    byte[] storageBytes = Config.getString("commitPreview" + hash, "").HexToByteArray();
+                    if (storageBytes.Length > 0)
+                    {
+                        previewImageData = storageBytes;
+                        previewImage = new Texture2D(2, 2);
+                        previewImage.LoadImage(previewImageData);
+                    }
+                }
+
+                return previewImageData;
+            }
+            set
+            {
+                // write to storage
+                Config.setString("commitPreview" + hash, value.ToHex(), true, "storage");
+            }
+        }
+        public Texture2D previewImage;
 
         public static Dictionary<string, Claim> contentClaims = new Dictionary<string, Claim>();
+        public static Dictionary<string, MatryxCommit> contentCommits = new Dictionary<string, MatryxCommit>();
+
+        public static void LoadStoredClaims()
+        {
+            string claims = Config.getString("claims", "");
+            string[] claimPairs = claims.Split('(');
+            foreach (string claimPair in claimPairs)
+            {
+                Debug.Log("claim pair: " + claimPair);
+            }
+        }
 
         public class Claim
         {
             public string sender;
+            public string contentHash;
             public string content;
             public byte[] salt;
             public byte[] claimHash;
 
-            public Claim(string contentHash, string cont)
+            public Claim(string contHash, string cont = "")
             {
                 if (cont.Equals(String.Empty))
                 {
                     throw new System.Exception("Commit must have content");
                 }
 
-                if (!contentHash.Contains("Qm"))
+                if (!contHash.Substring(0, 2).Equals("Qm"))
                 {
                     throw new System.Exception("Commit content must already have been uploaded");
                 }
 
                 sender = NetworkSettings.activeAccount;
+                contentHash = contHash;
                 content = cont;
                 var saltString = Utils.GetRandomHexNumber(64);
                 salt = Utils.HexStringToByteArray(saltString);
-                var hexContentHash = "0x" + BitConverter.ToString(Encoding.Default.GetBytes(contentHash)).Replace("-", "");
+                var hexContentHash = "0x" + BitConverter.ToString(Encoding.Default.GetBytes(contHash)).Replace("-", "");
                 claimHash = Utils.HexStringToByteArray("0x" + new Nethereum.Util.Sha3Keccack().CalculateHashFromHex(sender, saltString, hexContentHash));
+            }
+
+            public Claim(string sdr, string slt, string contHash)
+            {
+                if (!contHash.Substring(0, 2).Equals("Qm"))
+                {
+                    throw new System.Exception("Commit content must already have been uploaded");
+                }
+
+                sender = sdr;
+                contentHash = contHash;
+                salt = Utils.HexStringToByteArray(slt);
+                var hexContentHash = "0x" + BitConverter.ToString(Encoding.Default.GetBytes(contHash)).Replace("-", "");
+                claimHash = Utils.HexStringToByteArray("0x" + new Nethereum.Util.Sha3Keccack().CalculateHashFromHex(sender, slt, hexContentHash));
             }
         }
 
         public MatryxCommit() { }
+
+        public MatryxCommit(string commitHash)
+        {
+            hash = commitHash;
+        }
 
         public MatryxCommit(string cont, int val)
         {
@@ -100,8 +162,8 @@ namespace Matryx
 
         public static void setContract(string abi, string addr)
         {
-            address = addr; //"0x008df4de7fc42310949f3ab2f6b9ba0b54a42e53"; 
-            ABI = abi; // "[	{		\"inputs\": [],		\"payable\": false,		\"stateMutability\": \"nonpayable\",		\"type\": \"constructor\"	},	{		\"constant\": true,		\"inputs\": [],		\"name\": \"commitInstance\",		\"outputs\": [			{				\"name\": \"owner\",				\"type\": \"address\"			},			{				\"name\": \"timestamp\",				\"type\": \"uint256\"			},			{				\"name\": \"groupHash\",				\"type\": \"bytes32\"			},			{				\"name\": \"commitHash\",				\"type\": \"bytes32\"			},			{				\"name\": \"content\",				\"type\": \"string\"			},			{				\"name\": \"value\",				\"type\": \"uint256\"			},			{				\"name\": \"ownerTotalValue\",				\"type\": \"uint256\"			},			{				\"name\": \"totalValue\",				\"type\": \"uint256\"			},			{				\"name\": \"height\",				\"type\": \"uint256\"			},			{				\"name\": \"parentHash\",				\"type\": \"bytes32\"			}		],		\"payable\": false,		\"stateMutability\": \"view\",		\"type\": \"function\"	}]";
+            address = addr;
+            ABI = abi;
             contract = new Nethereum.Contracts.Contract(null, ABI, address);
         }
 
@@ -329,10 +391,10 @@ namespace Matryx
         {
             if (!content.Equals(""))
             {
-                List<string> fileNames = new List<string>() { "jsonContent.json", "preview.png" };
-                List<byte[]> contents = new List<byte[]>() { MatryxCortex.serializer.Serialize(content), HiResScreenShots.Instance.GetScreenshotBytes(800, 600) };
-                List<string> fileTypes = new List<string>() { "application/json", "image/png" };
-                var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadFiles(fileNames, contents, fileTypes));
+                List<string> fileNames = new List<string>() { "jsonContent.json"};
+                List<byte[]> contents = new List<byte[]>() { MatryxCortex.serializer.Serialize(content)};
+                List<string> fileTypes = new List<string>() { "application/json" };
+                var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, MatryxCortex.uploadFiles(fileNames, contents, fileTypes));
                 yield return uploadToIPFS;
                 ipfsContentHash = uploadToIPFS.result;
                 yield return true;
@@ -346,32 +408,83 @@ namespace Matryx
             return contentClaims.ContainsKey(ipfsHash) ? contentClaims[ipfsHash] : null;
         }
 
-        public IEnumerator claim(Async thread = null)
+        public static void storeClaimLocally(Claim claim)
         {
-            // Calculate commit hash from content
-            ResultsMenu.Instance.SetStatus("Uploading Content...");
-            var uploader = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, uploadContent());
-            yield return uploader;
+            var claims = Config.getString("claims", "");
+            string prefix = claims.Length > 0 ? "," : "";
+            Config.setString("claims", claims + prefix + "(" + claim.contentHash + ":" + claim.sender + "|" + claim.salt.ToHex() + "|" + claim.claimHash.ToHex() + ")", true, "storage");
+        }
 
-            ResultsMenu.Instance.SetStatus("Hashing Content to Matryx...");
+        public static bool storageClaimsLoaded = false;
+        public static void loadLocalClaims()
+        {
+            if (storageClaimsLoaded) return;
+
+            var claimString = Config.getString("claims", "");
+            if (claimString.Length == 0) return;
+
+            var claimPairs = claimString.Split(',');
+            foreach (string claimPair in claimPairs)
+            {
+                string[] hashAndClaimData = claimPair.TrimStart('(').TrimEnd(')').Split(':');
+                string hash = hashAndClaimData[0];
+                string[] claimData = hashAndClaimData[1].Split('|');
+                string sender = claimData[0];
+                string salt = claimData[1];
+                Claim claim = new Claim(sender, salt, hash);
+
+                var claimHashString = claim.claimHash.ToHex();
+                if (claimHashString != claimData[2])
+                {
+                    throw new System.Exception("claim Hash computed incorrectly: " + claimHashString + " != " + claimData[2]);
+                }
+
+                contentClaims.Add(hash, claim);
+                //localClaims.Add(hashes[1], claim);
+            }
+
+            storageClaimsLoaded = true;
+        }
+
+        public IEnumerator claim(Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null, Async thread = null)
+        {
+            if(contentClaims.ContainsKey(ipfsContentHash))
+            {
+                onError?.Invoke(null);
+                yield return true;
+            }
+
+            ResultsMenu.Instance?.SetStatus("Uploading Content...");
+            var contentUploader = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, uploadContent());
+            yield return contentUploader;
+
+            ResultsMenu.Instance?.SetStatus("Hashing Content to Matryx...");
             Claim claim = new Claim(ipfsContentHash, content);
             var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             var claimCommitMsg = new ClaimCommitFunction() { ClaimHash = claim.claimHash, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
-            yield return transactionRequest.SignAndSendTransaction<ClaimCommitFunction>(claimCommitMsg, MatryxCommit.address);
+            yield return transactionRequest.SignAndSendTransaction(claimCommitMsg, address);
 
             var txStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "claimCommit", thread));
             yield return txStatus;
             if (txStatus.result)
             {
                 contentClaims.Add(ipfsContentHash, claim);
+                // Save screenshot and claimed content locally
+                ExpressionSaveLoad.Instance.SaveClaim(this);
+                storeClaimLocally(claim);
+                onSuccess?.Invoke(claim);
+            }
+            else
+            {
+                onError?.Invoke(claim);
             }
 
             yield return txStatus.result;
         }
 
-        public IEnumerator create(Async thread = null)
+        public IEnumerator create(Async.EventDelegate onSuccess = null, Async thread = null)
         {
-            ResultsMenu.Instance.SetStatus("Commiting Content to Matryx...");
+            ResultsMenu.Instance?.SetStatus("Committing Content to Matryx...");
             Claim claim = getClaim(ipfsContentHash);
             var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
             var createCommitMsg = new CreateCommitFunction()

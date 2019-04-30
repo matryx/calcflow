@@ -5,11 +5,13 @@ using Matryx;
 public class CreateTournamentButton : QuickButton
 {
     [SerializeField]
-    TMPro.TextMeshPro text;
+    SpriteRenderer spriteRenderer;
     [SerializeField]
     private CreateTournamentMenu createTournamentMenu;
     [SerializeField]
     private FlexButtonComponent buttonFlexComponent;
+    [SerializeField]
+    private TMPro.TextMeshPro labelText;
 
     private Color PlusButtonColor = new Color((float)0x09 / (float)0xff, (float)0x3A / (float)0xff, (float)0x2C / (float)0xff);
     private Color ToggleOnColor = new Color(83f / 255f, 198f / 255f, 236f / 255f);
@@ -21,6 +23,8 @@ public class CreateTournamentButton : QuickButton
 
     private float defaultFontSize = 1.4f;
     private float otherFontSize = 1.3f;
+    Sprite defaultSprite;
+    Sprite liftHeadsetSprite;
 
     private bool toggled = false;
 
@@ -31,6 +35,11 @@ public class CreateTournamentButton : QuickButton
         if (Instance == null)
         {
             Instance = this;
+            defaultSprite = spriteRenderer.sprite;
+            var texture = Resources.Load<Texture2D>("Icons/liftheadset_inverted_medium_ben");
+            var rect = new Rect(0f, 0f, texture.width, texture.height);
+            var pivot = spriteRenderer.sprite.pivot;
+            liftHeadsetSprite = Sprite.Create(texture, rect, new Vector2(0.56f, 0.52f));
         }
     }
 
@@ -59,23 +68,33 @@ public class CreateTournamentButton : QuickButton
 
     public void ToggleOff()
     {
-        text.color = PlusButtonColor;
+        //text.color = PlusButtonColor;
 
         buttonFlexComponent.selectedColor = ToggleOffColor;
         buttonFlexComponent.passiveColor = LightPassiveColor;
         buttonFlexComponent.hoveringColor = LightHoveringColor;
 
+        spriteRenderer.sprite = defaultSprite;
+        labelText.text = "Create\nTournament";
+
         buttonFlexComponent.SetState(1);
+
+        Tippies.DestroyTippy("Please Lift Headset");
     }
 
     public void ToggleOn()
     {
-        text.color = Color.white;
+        //text.color = Color.white;
 
         buttonFlexComponent.selectedColor = ToggleOnColor;
         buttonFlexComponent.passiveColor = DarkPassiveColor;
         buttonFlexComponent.hoveringColor = DarkHoveringColor;
 
+        spriteRenderer.sprite = liftHeadsetSprite;
+        labelText.text = "Lift\nHeadset";
+
         buttonFlexComponent.SetState(1);
+
+        Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector2(6, 1f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft);
     }
 }

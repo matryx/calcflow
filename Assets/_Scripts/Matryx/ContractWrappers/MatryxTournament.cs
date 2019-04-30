@@ -20,6 +20,7 @@ using Nethereum.Signer;
 using Matryx;
 using Nanome.Core;
 using Calcflow.UserStatistics;
+using System;
 
 namespace Matryx
 {
@@ -40,7 +41,7 @@ namespace Matryx
         public BigInteger Bounty {
             get
             {
-                return (bounty / new BigInteger(1e18));
+                return (bounty / new BigInteger((decimal)1e18));
             }
             set
             {
@@ -59,18 +60,8 @@ namespace Matryx
                 entryFee = value * new BigInteger(1e18);
             }
         }
-        public int currentRound;
-        public string currentRoundAddress;
-        public string status;
-        public long roundEndTime;
+        public MatryxRound currentRound;
         public int numberOfParticipants;
-
-        public static readonly string STATE_SCHEDULED = "scheduled";
-        public static readonly string STATE_UNFUNDED = "notFunded";
-        public static readonly string STATE_OPEN = "open";
-        public static readonly string STATE_INREVIEW = "inReview";
-        public static readonly string STATE_HASWINNERS = "hasWinners";
-        public static readonly string STATE_CLOSED = "closed";
 
         public List<MatryxRound> rounds;
 
@@ -291,6 +282,40 @@ namespace Matryx
         [Function("recoverBounty")]
         public class RecoverBountyFunction : FunctionMessage { }
 
+        /// <summary>
+        /// Uploads a Tournament's description and files to IPFS.
+        /// </summary>
+        /// <param name="tournament"> The tournament whose description and files are to be uploaded. </param>
+        /// <returns> The description hash and files hash of the tournament in that order. </returns>
+        public IEnumerator uploadContent()
+        {
+            string contentHash = "";
+            string filesHash = "";
+
+            // TODO: Allow for file uploading for tournaments (FileBrowser)
+            //if (tournament.fileHash == null || tournament.fileHash.Equals(string.Empty))
+            //{
+            //    if (tournament.file != null && !tournament.file.Equals(string.Empty))
+            //    {
+            //        var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadFiles("filesContent", "", tournament.file, "text/plain"));
+            //        yield return uploadToIPFS;
+            //        filesHash = uploadToIPFS.result;
+            //    }
+            //}
+
+            if (contentHash == string.Empty)
+            {
+                if (description != null && !description.Equals(string.Empty))
+                {
+                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, MatryxCortex.uploadJson(title, description, "", "math"));
+                    yield return uploadToIPFS;
+                    contentHash = uploadToIPFS.result;
+                }
+            }
+
+            yield return new string[2] { contentHash, filesHash };
+        }
+
         //function createSubmission(string calldata content, bytes32 commitHash) external;
         public IEnumerator create(Async.EventDelegate callback = null)
         {
@@ -300,6 +325,15 @@ namespace Matryx
 
             var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.activeAccount, MatryxPlatform.address));
             yield return allowance;
+
+            var balance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.activeAccount));
+            yield return balance;
+
+            if (balance.result < bounty)
+            {
+                ResultsMenu.Instance.SetStatus("Insufficient MTX. Please visit <link=https://app.matryx.ai/><u>our Matryx Dapp</u></link> for MTX Tokens.", true);
+                yield break;
+            }
 
             if (allowance.result < bounty)
             {
@@ -330,7 +364,7 @@ namespace Matryx
             if (contentHash.Equals(""))
             {
                 ResultsMenu.Instance.SetStatus("Uploading Tournament Content...");
-                var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxCortex.Instance, Utils.uploadTournament(this));
+                var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxCortex.Instance, uploadContent());
                 yield return uploadToIPFS;
 
                 if(!uploadToIPFS.result[0].Equals(string.Empty))

@@ -85,7 +85,7 @@ public class FlexButtonComponent : FlexActionableComponent
             State = 0;
     }
 
-    protected override void StateChanged(int _old, int _new)
+    protected override void StateChanged(int _old, int _new, GameObject source = null)
     {
         if (_new == -1)
         {
@@ -127,6 +127,14 @@ public class FlexButtonComponent : FlexActionableComponent
         if (State >= 0)
         {
             enterCallback(this, gameObject);
+        }
+    }
+
+    void stayAction(GameObject gameobject)
+    {
+        if (State == 1)
+        {
+            stayCallback(this, gameobject);
         }
     }
 

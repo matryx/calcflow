@@ -4,10 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Matryx;
+using Nanome.Core;
 
 public class ResultsMenu : MonoBehaviour {
     [SerializeField]
-    public Text statusText;
+    public TMPro.TextMeshProUGUI statusText;
+    [SerializeField]
+    public Button dumbLinkButton;
     [SerializeField]
     public Text severalMinutesText;
     [SerializeField]
@@ -30,20 +33,21 @@ public class ResultsMenu : MonoBehaviour {
         }
     }
 
-    public void SetStatus(string text)
+    public void SetStatus(string text, bool useButton = false)
     {
         Instance.statusText.text = text;
+        dumbLinkButton.gameObject.SetActive(useButton);
     }
 
-	public void PostSuccess(MatryxSubmission submission)
+	public void PostSuccess(MatryxSubmission submission, Async.EventDelegate onReturn = null)
     {
         SetStatus("Successfully Submitted to \n" + submission.tournament.title);
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
-        StartCoroutine(ReturnToCalcflowAfterSeconds(6f));
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
     }
 
-    public void PostFailure(MatryxSubmission submission, string message=null)
+    public void PostFailure(MatryxSubmission submission, string message=null, Async.EventDelegate onReturn = null)
     {
         if(message != null)
         {
@@ -57,18 +61,18 @@ public class ResultsMenu : MonoBehaviour {
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
         tryAgainButton.gameObject.SetActive(true);
-        StartCoroutine(ReturnToCalcflowAfterSeconds(6f));
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
     }
 
-    public void PostSuccess(MatryxTournament tournament)
+    public void PostSuccess(MatryxTournament tournament, Async.EventDelegate onReturn = null)
     {
         SetStatus("Successfully Created \n" + tournament.title);
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
-        StartCoroutine(ReturnToCalcflowAfterSeconds(6f));
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
     }
 
-    public void PostFailure(MatryxTournament tournament, string message = null)
+    public void PostFailure(MatryxTournament tournament, string message = null, Async.EventDelegate onReturn = null)
     {
         if (message != null)
         {
@@ -82,10 +86,10 @@ public class ResultsMenu : MonoBehaviour {
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
         tryAgainButton.gameObject.SetActive(true);
-        StartCoroutine(ReturnToCalcflowAfterSeconds(6f));
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
     }
 
-    public IEnumerator ReturnToCalcflowAfterSeconds(float seconds)
+    public IEnumerator ReturnToCalcflowAfterSeconds(float seconds, Async.EventDelegate onReturn = null)
     {
         yield return new WaitForSeconds(seconds);
 
@@ -110,6 +114,8 @@ public class ResultsMenu : MonoBehaviour {
         {
             CreateSubmissionButton.Instance.ToggleOff();
         }
+
+        onReturn?.Invoke(null);
     }
 
     public void TryAgain()
