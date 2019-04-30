@@ -79,7 +79,10 @@ public class TournamentMenu : MonoBehaviour
             submissionMenu.HandleInput(sender.gameObject);
         }
 
-        public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
+        public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider)
+        {
+            sender.SetState(0);
+        }
     }
 
     private Scroll scroll;

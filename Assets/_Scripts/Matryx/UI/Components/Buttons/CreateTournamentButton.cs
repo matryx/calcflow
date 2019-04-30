@@ -79,7 +79,7 @@ public class CreateTournamentButton : QuickButton
 
         buttonFlexComponent.SetState(1);
 
-        Tippies.DestroyTippy("Please Lift Headset");
+        Tippies.FadeDestroyTippy("Please Lift Headset");
     }
 
     public void ToggleOn()
@@ -95,6 +95,6 @@ public class CreateTournamentButton : QuickButton
 
         buttonFlexComponent.SetState(1);
 
-        Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector2(6, 1f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft);
+        Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector2(6, 1f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
     }
 }

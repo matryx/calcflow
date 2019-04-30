@@ -24,8 +24,12 @@ public class TournamentContainer : MonoBehaviour
 
             flexButton.SetExitCallback((button, source) =>
             {
-                StopCoroutine(waitCoroutine);
+                if(waitCoroutine != null)
+                {
+                    StopCoroutine(waitCoroutine);
+                }
                 fadeAndDieEarly();
+                flexButton.SetState(0);
             });
         }
     }
@@ -40,7 +44,7 @@ public class TournamentContainer : MonoBehaviour
     {
         if (tippy == null &&
             tournament != null &&
-            content.Length > 0)
+            content.Length > 37)
         {
             yield return new WaitForSeconds(0.5f);
             createTippy(content);
@@ -51,7 +55,7 @@ public class TournamentContainer : MonoBehaviour
     {
         if (tippy != null)
         {
-            tippy.fadeEarly((obj) => { Destroy(tippy.gameObject); });
+            tippy.fadeEarly(tippy.fadeOutDuration, (obj) => { Destroy(tippy.gameObject); });
         }
     }
 }

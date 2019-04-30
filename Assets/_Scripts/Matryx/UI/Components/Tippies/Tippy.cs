@@ -56,7 +56,7 @@ public class Tippy : MonoBehaviour {
             var exactLocation = (location.position + location.TransformVector(offset));
             var actualLocation = transform.position;
             var difference = exactLocation - actualLocation;
-            transform.position += difference / 30f;
+            transform.position += difference / 10f;
 
 
             var newRotation = Quaternion.Lerp(location.rotation, location.rotation*transform.rotation, 1f);
@@ -95,11 +95,13 @@ public class Tippy : MonoBehaviour {
         fadeOut((obj) => { Destroy(gameObject); });
     }
 
-    public void fadeEarly(Async.EventDelegate onDone = null)
+    public void fadeEarly(float fadeDuration, Async.EventDelegate onDone = null)
     {
         if (lifeCoroutine != null)
         {
+            fadeOutDuration = fadeDuration;
             StopCoroutine(lifeCoroutine);
+            lifeCoroutine = null;
         }
 
         fadeOut(onDone);

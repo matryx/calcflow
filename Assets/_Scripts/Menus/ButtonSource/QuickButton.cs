@@ -9,22 +9,22 @@ public abstract class QuickButton : MenuStateReceiver {
         VirtualButton virtualButton = GetComponent<VirtualButton>();
         if (virtualButton != null)
         {
-            virtualButton.OnButtonEnter += ButtonEnterBehavior;
-            virtualButton.OnButtonExit += ButtonExitBehavior;
+            virtualButton.OnButtonPress += ButtonEnterBehavior;
+            virtualButton.OnButtonUnpress += ButtonExitBehavior;
         }
 
         RayCastButton rcButton = GetComponent<RayCastButton>();
         if (rcButton != null)
         {
-            rcButton.OnButtonEnter += ButtonEnterBehavior;
-            rcButton.OnButtonExit += ButtonExitBehavior;
+            rcButton.OnButtonPress += ButtonEnterBehavior;
+            rcButton.OnButtonUnpress += ButtonExitBehavior;
         }
 
         TouchButton touchButton = GetComponent<TouchButton>();
         if (touchButton != null)
         {
-            touchButton.OnButtonEnter += ButtonEnterBehavior;
-            touchButton.OnButtonExit += ButtonExitBehavior;
+            touchButton.OnButtonPress += ButtonEnterBehavior;
+            touchButton.OnButtonUnpress += ButtonExitBehavior;
         }
     }
 

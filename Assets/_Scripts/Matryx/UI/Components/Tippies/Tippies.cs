@@ -15,8 +15,14 @@ public class Tippies : MonoBehaviour {
         }
     }
     
-    public static Tippy SpawnTippy(string text, float textSize, TMPro.TextAlignmentOptions textAlignment, Vector2 size, float lifetime, Transform location, Vector3 offset, float fadeInDuration, float fadeOutDuration, Tippy.MovementMode mode)
+    public static Tippy SpawnTippy(string text, float textSize, TMPro.TextAlignmentOptions textAlignment, Vector2 size, float lifetime, Transform location, Vector3 offset, float fadeInDuration, float fadeOutDuration, Tippy.MovementMode mode, bool exclusive = false)
     {
+        if(exclusive && tippies.ContainsKey(text))
+        {
+            tippies[text].lifetime = lifetime;
+            return tippies[text];
+        }
+
         GameObject tippyObject = Instantiate(Resources.Load("Prefabs/Tippy", typeof(GameObject))) as GameObject;
         Tippy tippy = tippyObject.GetComponent<Tippy>();
         tippy.dimensions = new Vector3(size.x, size.y, 1f);
@@ -48,6 +54,20 @@ public class Tippies : MonoBehaviour {
             {
                 Destroy(toRemove.gameObject);
             }
+        }
+    }
+
+    public static void FadeDestroyTippy(string text)
+    {
+        if(tippies.ContainsKey(text))
+        {
+            Tippy tippy = tippies[text];
+            tippies.Remove(text);
+
+            tippy.fadeEarly(0.2f, (obj) =>
+            {
+                Destroy(tippy.gameObject);
+            });
         }
     }
 }
