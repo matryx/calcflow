@@ -53,9 +53,9 @@ namespace LinearAlgebraMatrix
 
 
 
-            /////// for Matrix [1,2,0;0,1,1;0,0,0];
-            /// Column Space is a plane: span{[1,0,0],[1,2,0]}
-            /// Null Space is a line: span{[2,-1,1]}
+            /////// for Matrix [1,2,3;2,4,6;0,0,1];
+            /// Column Space is a plane: span{[1,2,0],[3,6,1]}
+            /// Null Space is a line: span{[-2,1,0]}
             colSpaceVectors = 2;
             nullSpaceVectors = 1;
 

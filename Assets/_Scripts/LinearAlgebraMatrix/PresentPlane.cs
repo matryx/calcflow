@@ -31,6 +31,8 @@ namespace LinearAlgebraMatrix
         public Vector3 normalVector;
         public Vector3 scaledNormal;
 
+        public Vector3 p1, p2, p3;
+
         public List<Vector3> vertices;
         public string rawEquation;
 
@@ -75,12 +77,13 @@ namespace LinearAlgebraMatrix
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
             }
             plane.LookAt(lookAtTarget);
+            //plane.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
-           
 
-            pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
-            pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
-            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
+
+            //pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
+            //pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
+            //pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
 
@@ -136,19 +139,21 @@ namespace LinearAlgebraMatrix
 
         public void ApplyGraphAdjustment()
         {
+           
+            //vector23 = GenerateVector(rawPt2, rawPt3);
 
-            vector23 = GenerateVector(rawPt2, rawPt3);
-
-            center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-            stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+            //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+            //stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
 
             /////////////
-            Vector3 vec1 = new Vector3(1, 0, 0);
-            Vector3 vec2 = new Vector3(2, 1, 0);
-            Vector3 vec3 = new Vector3(0, 0, 0);
-            vector23 = vec2 - vec3;
+            p1 = new Vector3(1, 2, 0);
+            p2 = new Vector3(3, 6, 1);
+            p3 = new Vector3(0, 0, 0);
+            vector23 = p2 - p3;
+            vector12 = p1 - p2;
+            vector13 = p1 - p3;
 
-            center = (vec1 + vec2 + vec3) / 3;
+            center = (p1 + p2 + p3) / 3;
             stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
             ////////////////////
 
@@ -192,8 +197,8 @@ namespace LinearAlgebraMatrix
             rawPt2 = ptManager.ptSet.ptCoords["pt2"];
             rawPt3 = ptManager.ptSet.ptCoords["pt3"];
 
-            vector12 = GenerateVector(rawPt1, rawPt2);
-            vector13 = GenerateVector(rawPt1, rawPt3);
+            //vector12 = GenerateVector(rawPt1, rawPt2);
+            //vector13 = GenerateVector(rawPt1, rawPt3);
             //Debug.Log("Vector 12 is: " + vector12 +". Vector13 is: " + vector13);
             normalVector = Vector3.Cross(vector12, vector13);
             if (PlaneValid())
@@ -245,30 +250,34 @@ namespace LinearAlgebraMatrix
 
         public void GetLocalPoint()
         {
-            scaledPt1 = ScaledPoint(PtCoordToVector(rawPt1));
-            point1.localPosition = scaledPt1;
-            scaledPt2 = ScaledPoint(PtCoordToVector(rawPt2));
-            point2.localPosition = scaledPt2;
-            scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
-            point3.localPosition = scaledPt3;
+            //scaledPt1 = ScaledPoint(PtCoordToVector(rawPt1));
+            //point1.localPosition = scaledPt1;
+            //scaledPt2 = ScaledPoint(PtCoordToVector(rawPt2));
+            //point2.localPosition = scaledPt2;
+            //scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
+            //point3.localPosition = scaledPt3;
             //centerPt.localPosition = ScaledPoint(center);
 
             ///////////////////////////////////////////
-            Vector3 p1 = new Vector3(1, 0, 0);
+            p1 = new Vector3(1, 2, 0);
             scaledPt1 = ScaledPoint(p1);
             point1.localPosition = scaledPt1;
             //point1.localPosition = p1;
 
-            Vector3 p2 = new Vector3(2, 1, 0);
+            p2 = new Vector3(3, 6, 1);
             scaledPt2 = ScaledPoint(p2);
             point2.localPosition = scaledPt2;
             //point2.localPosition = p2;
 
-            Vector3 p3 = new Vector3(0, 0, 0);
+            p3 = new Vector3(0, 0, 0);
             scaledPt3 = ScaledPoint(p3);
             point3.localPosition = scaledPt3;
             //point3.localPosition = p3;
-            ///////////////////////////////////////////
+            /////////////////////////////////////////////
+            pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
+            pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
+            pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
+           
         }
 
         public void GetPlaneDirection()
@@ -297,8 +306,8 @@ namespace LinearAlgebraMatrix
             {
                 return false;
             }
-            vector12 = GenerateVector(rawPt1, rawPt2);
-            vector13 = GenerateVector(rawPt1, rawPt3);
+            //vector12 = GenerateVector(rawPt1, rawPt2);
+            //vector13 = GenerateVector(rawPt1, rawPt3);
             // points are not in same line
             float scale;
             if (vector13.x != 0)

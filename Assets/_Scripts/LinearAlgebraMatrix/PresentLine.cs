@@ -28,6 +28,8 @@ namespace LinearAlgebraMatrix
         public Vector3 normalVector;
         public Vector3 scaledNormal;
 
+        public Vector3 p1, p2, p3;
+
         public List<Vector3> vertices;
         public string rawEquation;
 
@@ -71,14 +73,29 @@ namespace LinearAlgebraMatrix
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
             }
-            lookAtTarget.localPosition = ScaledPoint(new Vector3(2, 0, 0));
+
+            p1 = new Vector3(-2, 1, 0);
+            //p2 = new Vector3(0, 0, 0);
+            p3 = new Vector3(0, 0, 0);
+            scaledPt1 = ScaledPoint(p1);
+            point1.localPosition = scaledPt1;
+            //scaledPt2 = ScaledPoint(p2);
+            //point2.localPosition = scaledPt2;
+            scaledPt3 = ScaledPoint(p3);
+            point3.localPosition = scaledPt3;
+
+            pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
+            //pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
+            pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
+
+            lookAtTarget.localPosition = ScaledPoint(p1);
             line.LookAt(lookAtTarget);
             line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
 
-            pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
-            pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
-            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
+            //pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
+            //pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
+            //pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
 
@@ -132,41 +149,46 @@ namespace LinearAlgebraMatrix
 
         }
 
-        public void ApplyGraphAdjustment()
-        {
+        //public void ApplyGraphAdjustment()
+        //{
 
-            //vector23 = GenerateVector(rawPt2, rawPt3);
+        //    //vector23 = GenerateVector(rawPt2, rawPt3);
 
-            //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-            //stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+        //    //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+        //    //stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
 
-            /////////////
-            Vector3 vec1 = new Vector3(2, 0, 0);
-            Vector3 vec2 = new Vector3(0, 0, 0);
-            Vector3 vec3 = new Vector3(0, 0, 0);
-            vector23 = vec2 - vec3;
-            vector12 = vec1 - vec2;
+        //    /////////////
+        //    p1 = new Vector3(-2, 1, 0);
+        //    p2 = new Vector3(0, 0, 0);
+        //    p3 = new Vector3(0, 0, 0);
+        //    vector23 = p2 - p3;
+        //    vector12 = p1 - p2;
 
-            center = (vec1 + vec2 + vec3) / 3;
-            stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
-            ////////////////////
+        //    center = (p1 + p2 + p3) / 3;
+        //    stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+
+        //    pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
+        //    pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
+        //    pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
+        //    Debug.Log("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+        //    Debug.Log("(" + p1.x + "," + p1.y + "," + p1.z + ")");
 
 
-            //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
-            //Get the range of the box
-            if (stepSize == 0)
-            {
-                stepSize = defaultStepSize;
-            }
-            xLabelManager.Min = center.x - stepSize * steps;
-            yLabelManager.Min = center.y - stepSize * steps;
-            zLabelManager.Min = center.z - stepSize * steps;
-            xLabelManager.Max = center.x + stepSize * steps;
-            yLabelManager.Max = center.y + stepSize * steps;
-            zLabelManager.Max = center.z + stepSize * steps;
-            //Get the interaction points between the box edges and the plane
-            //expr = solver.SymbolicateExpression(rawEquation);
-        }
+        //    //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
+        //    //Get the range of the box
+        //    if (stepSize == 0)
+        //    {
+        //        stepSize = defaultStepSize;
+        //    }
+        //    xLabelManager.Min = center.x - stepSize * steps;
+        //    yLabelManager.Min = center.y - stepSize * steps;
+        //    zLabelManager.Min = center.z - stepSize * steps;
+        //    xLabelManager.Max = center.x + stepSize * steps;
+        //    yLabelManager.Max = center.y + stepSize * steps;
+        //    zLabelManager.Max = center.z + stepSize * steps;
+        //    //Get the interaction points between the box edges and the plane
+        //    //expr = solver.SymbolicateExpression(rawEquation);
+        //}
 
         //public void ApplyUnroundCenter(string ptName, Vector3 newLoc)
         //{
