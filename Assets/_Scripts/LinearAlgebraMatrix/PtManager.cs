@@ -42,7 +42,9 @@ namespace LinearAlgebraMatrix
         public TextMesh equation;
 
         [SerializeField]
-        PresentPlane presentPlane;
+        PresentPlane presentPlane_col;
+        [SerializeField]
+        PresentPlane presentPlane_null;
 
         [System.Serializable]
         internal class ConnectedMenus
@@ -77,7 +79,8 @@ namespace LinearAlgebraMatrix
                     aInput, bInput, cInput, dInput;
         }
 
-        public GeneratePlanePts generatePlanePts;
+        public GeneratePlanePts generatePlanePts_col;
+        public GeneratePlanePts generatePlanePts_null;
 
         public void SetOutput(CalcOutput output)
         {
@@ -104,10 +107,18 @@ namespace LinearAlgebraMatrix
             eqnSet = new EqnSet();
 
             ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
-            updatePoint("pt1", new Vector3(-1, 1, 1), false);
-            updatePoint("pt2", new Vector3(1, -1, 1), false);
-            updatePoint("pt3", new Vector3(1, 1, -1), false);
+            updatePoint("pt1", new Vector3(1, 2, 0), false);
+            updatePoint("pt2", new Vector3(0, 1, 1), false);
+            updatePoint("pt3", new Vector3(0, 0, 0), false);
         }
+
+        GameObject Planecontainer_col;
+        GameObject Planecontainer_null;
+
+        int colPrev;
+        int nullPrev;
+
+        public CalculateColNulSpace calculateColNulSpace;
 
 
         void Start()
@@ -115,11 +126,71 @@ namespace LinearAlgebraMatrix
             inputReceived = true;
             //eqnInput = false;
             Initialize();
+            Planecontainer_col = GameObject.Find("Planecontainer_col");
+            Planecontainer_null = GameObject.Find("Planecontainer_null");
+            if (calculateColNulSpace.colSpaceVectors == 2)
+            {
+                colPrev = 1;
+            }
+            else if (calculateColNulSpace.colSpaceVectors == 2)
+            {
+                colPrev = 2;
+            }
+            if (calculateColNulSpace.nullSpaceVectors == 2)
+            {
+                nullPrev = 1;
+            }
+            else if (calculateColNulSpace.nullSpaceVectors == 2)
+            {
+                nullPrev = 2;
+            }
+
+
         }
         public bool updateText = false;
 
         void Update()
         {
+            //Debug.Log(GameObject.Find("PlaneSolver_col/Planecontainer"));
+            if (calculateColNulSpace.colSpaceVectors == 2)
+            {
+                GameObject.Find("PlaneExpression_col").GetComponent<PresentPlane>().enabled = true;
+                if (colPrev == 1)
+                {
+                    Planecontainer_col.SetActive(true);
+                    colPrev = 2;
+                }
+            }
+            else if (calculateColNulSpace.colSpaceVectors == 1)
+            {
+                GameObject.Find("PlaneExpression_col").GetComponent<PresentPlane>().enabled = false;
+                if (colPrev == 2)
+                {
+                    Planecontainer_col.SetActive(false);
+                    colPrev = 1;
+                }
+                    
+            }
+
+            if (calculateColNulSpace.nullSpaceVectors == 2)
+            {
+                GameObject.Find("PlaneExpression_null").GetComponent<PresentPlane>().enabled = true;
+                if (nullPrev == 1)
+                {
+                    Planecontainer_null.SetActive(true);
+                    nullPrev = 2;
+                }
+            }
+            else if (calculateColNulSpace.nullSpaceVectors == 1)
+            {
+                GameObject.Find("PlaneExpression_null").GetComponent<PresentPlane>().enabled = false;
+                if (nullPrev == 2)
+                {
+                    Planecontainer_null.SetActive(false);
+                    nullPrev = 1;
+                }
+            }
+
             //Debug.Log("sooooooooooooooooooooooooooooooooooooooooooootext: " + inputs.pt1XInput.text);
             if (updateText || inputReceived)
             {
@@ -135,16 +206,28 @@ namespace LinearAlgebraMatrix
                 ManageFeedback();
                 if (isValid)
                 {
-                    if (presentPlane.CalculatePlane())
+                    if (presentPlane_col.CalculatePlane())
                     {
-                        presentPlane.ApplyGraphAdjustment();
-                        presentPlane.GetLocalPoint();
-                        presentPlane.GetPlaneDirection();
+                        presentPlane_col.ApplyGraphAdjustment();
+                        presentPlane_col.GetLocalPoint();
+                        presentPlane_col.GetPlaneDirection();
                     }
                     else
                     {
-                        presentPlane.ApplyGraphAdjustment();
-                        presentPlane.GetLocalPoint();
+                        presentPlane_col.ApplyGraphAdjustment();
+                        presentPlane_col.GetLocalPoint();
+                    }
+
+                    if (presentPlane_null.CalculatePlane())
+                    {
+                        presentPlane_null.ApplyGraphAdjustment();
+                        presentPlane_null.GetLocalPoint();
+                        presentPlane_null.GetPlaneDirection();
+                    }
+                    else
+                    {
+                        presentPlane_null.ApplyGraphAdjustment();
+                        presentPlane_null.GetLocalPoint();
                     }
                 }
             }
@@ -159,12 +242,23 @@ namespace LinearAlgebraMatrix
                     if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
                     {
                         feedbacks.eqnFeedback.material.color = negativeFeedback;
-                        presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                        presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                        presentPlane_col.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                        presentPlane_col.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
                     }
                     else
                     {
-                        generatePlanePts.eqnToPoints();
+                        generatePlanePts_col.eqnToPoints();
+                    }
+
+                    if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
+                    {
+                        feedbacks.eqnFeedback.material.color = negativeFeedback;
+                        presentPlane_null.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                        presentPlane_null.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                    }
+                    else
+                    {
+                        generatePlanePts_null.eqnToPoints();
                     }
                 }
             }
@@ -204,10 +298,16 @@ namespace LinearAlgebraMatrix
                 ManageFeedback();
                 if (isValid)
                 {
-                    if (presentPlane.CalculatePlane())
+                    if (presentPlane_col.CalculatePlane())
                     {
-                        presentPlane.ApplyUnroundCenter(ptName, newLoc);
-                        presentPlane.GetPlaneDirection();
+                        presentPlane_col.ApplyUnroundCenter(ptName, newLoc);
+                        presentPlane_col.GetPlaneDirection();
+                    }
+
+                    if (presentPlane_null.CalculatePlane())
+                    {
+                        presentPlane_null.ApplyUnroundCenter(ptName, newLoc);
+                        presentPlane_null.GetPlaneDirection();
                     }
                 }
             }
@@ -238,10 +338,15 @@ namespace LinearAlgebraMatrix
             manageText();
             ManageFeedback();
             ptSet.CompileAll();
-            presentPlane.GetLocalPoint();
-            presentPlane.GetPlaneDirection();
-            presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
-            presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+            presentPlane_col.GetLocalPoint();
+            presentPlane_col.GetPlaneDirection();
+            presentPlane_col.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+            presentPlane_col.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+
+            presentPlane_null.GetLocalPoint();
+            presentPlane_null.GetPlaneDirection();
+            presentPlane_null.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+            presentPlane_null.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
         }
 
         public void updateEqn(float newA, float newB, float newC, float newD)

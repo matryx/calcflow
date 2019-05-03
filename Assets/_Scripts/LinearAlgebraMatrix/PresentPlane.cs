@@ -17,6 +17,10 @@ namespace LinearAlgebraMatrix
         public Transform lookAtTarget;
         public List<GameObject> walls;
 
+        //public Transform line;
+        //public Transform forwardLine;
+        //public Transform backwardLine;
+
         public PtManager ptManager;
         private PtCoord rawPt1, rawPt2, rawPt3;
 
@@ -79,6 +83,8 @@ namespace LinearAlgebraMatrix
             pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
+
+
             var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
@@ -98,6 +104,34 @@ namespace LinearAlgebraMatrix
                 //plane normal vector is the rotated 'up' vector.
                 sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
+
+
+            //Debug.Log("dddddddddddddddddd: " + transform.gameObject.name);
+            //if(transform.gameObject.name == "PlaneExpression_null")
+            //{
+            //    var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+            //    sharedMaterial.SetInt("_planeClippingEnabled", 1);
+
+            //    for (int i = 0; i < 6; i++)
+            //    {
+            //        sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
+            //        //plane normal vector is the rotated 'up' vector.
+            //        sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+            //    }
+
+            //    sharedMaterial = backwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+            //    sharedMaterial.SetInt("_planeClippingEnabled", 1);
+
+            //    for (int i = 0; i < 6; i++)
+            //    {
+            //        sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
+            //        //plane normal vector is the rotated 'up' vector.
+            //        sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+            //    }
+            //}
+
+
+
         }
 
         public void ApplyGraphAdjustment()
@@ -107,6 +141,18 @@ namespace LinearAlgebraMatrix
 
             center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
             stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+
+            /////////////
+            Vector3 vec1 = new Vector3(1, 0, 0);
+            Vector3 vec2 = new Vector3(2, 1, 0);
+            Vector3 vec3 = new Vector3(0, 0, 0);
+            vector23 = vec2 - vec3;
+
+            center = (vec1 + vec2 + vec3) / 3;
+            stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+            ////////////////////
+
+
             //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
             //Get the range of the box
             if (stepSize == 0)
@@ -208,17 +254,20 @@ namespace LinearAlgebraMatrix
             //centerPt.localPosition = ScaledPoint(center);
 
             ///////////////////////////////////////////
-            //Vector3 p1 = new Vector3(-1, 3, 4);
-            //scaledPt1 = ScaledPoint(p1);
-            //point1.localPosition = scaledPt1;
+            Vector3 p1 = new Vector3(1, 0, 0);
+            scaledPt1 = ScaledPoint(p1);
+            point1.localPosition = scaledPt1;
+            //point1.localPosition = p1;
 
-            //Vector3 p2 = new Vector3(1, -1, 1);
-            //scaledPt2 = ScaledPoint(p2);
-            //point2.localPosition = scaledPt2;
+            Vector3 p2 = new Vector3(2, 1, 0);
+            scaledPt2 = ScaledPoint(p2);
+            point2.localPosition = scaledPt2;
+            //point2.localPosition = p2;
 
-            //Vector3 p3 = new Vector3(1, 1, -1);
-            //scaledPt3 = ScaledPoint(p3);
-            //point3.localPosition = scaledPt3;
+            Vector3 p3 = new Vector3(0, 0, 0);
+            scaledPt3 = ScaledPoint(p3);
+            point3.localPosition = scaledPt3;
+            //point3.localPosition = p3;
             ///////////////////////////////////////////
         }
 
@@ -233,6 +282,8 @@ namespace LinearAlgebraMatrix
                 Vector3 dummyPos = scaledNormal * scale;
                 //Debug.Log("The Normal vector after scale is: " + dummyPos);
                 lookAtTarget.localPosition = dummyPos + ScaledPoint(center);
+                //lookAtTarget.localPosition = new Vector3(0, 0, 4.2f);
+                //Debug.Log("lookAtTarget.localPosition: " + lookAtTarget.localPosition);
                 centerPt.localPosition = ScaledPoint(center);
                 plane.localPosition = ScaledPoint(center);
             }
