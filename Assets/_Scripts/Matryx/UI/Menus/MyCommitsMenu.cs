@@ -114,13 +114,13 @@ public class MyCommitsMenu : MonoBehaviour {
     private void ProcessCommits(object results)
     {
         var resultingCommits = (List<MatryxCommit>)results;
-        commitsListText.text = "My Commits";
+        commitsListText.text = "My Creations";
         DisplayCommits(resultingCommits);
     }
 
     private void ShowError(object results)
     {
-        commitsListText.text = "Unable to Load Commits";
+        commitsListText.text = "Unable to Load Your Creations";
     }
 
     GameObject loadButton;

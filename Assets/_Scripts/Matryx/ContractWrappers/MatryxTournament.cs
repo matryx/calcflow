@@ -37,6 +37,7 @@ namespace Matryx
         public string file = "";
         public string fileHash = "";
         public string category = "";
+        public string latestRoundState = "";
         public BigInteger bounty;
         public BigInteger Bounty {
             get
@@ -337,7 +338,7 @@ namespace Matryx
 
             if (allowance.result < bounty)
             {
-                ResultsMenu.Instance.SetStatus("Approving MatryxPlatform for "  + Bounty + " MTX...");
+                ResultsMenu.Instance.SetStatus("Approving MatryxPlatform for " + Bounty + " MTX...");
 
                 if (allowance.result != BigInteger.Zero)
                 {
@@ -367,11 +368,11 @@ namespace Matryx
                 var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxCortex.Instance, uploadContent());
                 yield return uploadToIPFS;
 
-                if(!uploadToIPFS.result[0].Equals(string.Empty))
+                if (!uploadToIPFS.result[0].Equals(string.Empty))
                 {
                     contentHash = uploadToIPFS.result[0];
                 }
-                if(!uploadToIPFS.result[1].Equals(string.Empty))
+                if (!uploadToIPFS.result[1].Equals(string.Empty))
                 {
                     fileHash = uploadToIPFS.result[1];
                 }
@@ -381,10 +382,7 @@ namespace Matryx
             var createTournament = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, MatryxPlatform.createTournament(this));
             yield return createTournament;
 
-            if (callback != null)
-            {
-                callback(createTournament.result);
-            }
+            callback?.Invoke(createTournament.result);
         }
 
         public IEnumerator getInfo()

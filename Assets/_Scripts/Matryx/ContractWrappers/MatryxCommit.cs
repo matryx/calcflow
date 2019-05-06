@@ -44,23 +44,7 @@ namespace Matryx
         public bool fork;
 
         public string content = "";
-        public string Content
-        {
-            get
-            {
-                if(content == "")
-                {
-                    content = Config.getString("commitContent" + hash, "");
-                }
-                return content;
-            }
-            set
-            {
-                content = value;
-                if (hash != "") { Config.setString("commitContent" + hash, value, true, "storage"); }
-                ipfsContentHash = "";
-            }
-        }
+        public bool mine = false;
 
         public string previewImageHash;
         private byte[] previewImageData;
@@ -71,13 +55,14 @@ namespace Matryx
                 // read from storage
                 if (previewImageData == null)
                 {
-                    byte[] storageBytes = Config.getString("commitPreview" + hash, "").HexToByteArray();
-                    if (storageBytes.Length > 0)
-                    {
-                        previewImageData = storageBytes;
-                        previewImage = new Texture2D(2, 2);
-                        previewImage.LoadImage(previewImageData);
-                    }
+                    // TODO: Change to read from saves
+                    //byte[] storageBytes = Config.getString("commitPreview" + hash, "").HexToByteArray();
+                    //if (storageBytes.Length > 0)
+                    //{
+                    //    previewImageData = storageBytes;
+                    //    previewImage = new Texture2D(2, 2);
+                    //    previewImage.LoadImage(previewImageData);
+                    //}
                 }
 
                 return previewImageData;
@@ -85,13 +70,14 @@ namespace Matryx
             set
             {
                 // write to storage
-                Config.setString("commitPreview" + hash, value.ToHex(), true, "storage");
+                //Config.setString("commitPreview" + hash, value.ToHex(), true, "storage");
             }
         }
         public Texture2D previewImage;
 
-        public static Dictionary<string, Claim> contentClaims = new Dictionary<string, Claim>();
-        public static Dictionary<string, MatryxCommit> contentCommits = new Dictionary<string, MatryxCommit>();
+        public static Dictionary<string, Claim> claims = new Dictionary<string, Claim>();
+        public static Dictionary<string, MatryxCommit> commits = new Dictionary<string, MatryxCommit>();
+        public static Dictionary<string, string> contentToIPFSHash = new Dictionary<string, string>();
 
         public static void LoadStoredClaims()
         {
@@ -100,6 +86,15 @@ namespace Matryx
             foreach (string claimPair in claimPairs)
             {
                 Debug.Log("claim pair: " + claimPair);
+            }
+        }
+
+        public static void LoadCommits(object commitsAsObject)
+        {
+            List<MatryxCommit> myCommits = (List<MatryxCommit>)commitsAsObject;
+            foreach (var commit in myCommits)
+            {
+                commits.Add(commit.ipfsContentHash, commit);
             }
         }
 
@@ -147,11 +142,16 @@ namespace Matryx
             }
         }
 
-        public MatryxCommit() { }
+        public MatryxCommit() {}
 
         public MatryxCommit(string commitHash)
         {
             hash = commitHash;
+        }
+
+        public MatryxCommit(string commitHash, string cont) : this(commitHash)
+        {
+            content = cont;
         }
 
         public MatryxCommit(string cont, int val)
@@ -405,7 +405,7 @@ namespace Matryx
 
         public static Claim getClaim(string ipfsHash)
         {
-            return contentClaims.ContainsKey(ipfsHash) ? contentClaims[ipfsHash] : null;
+            return claims.ContainsKey(ipfsHash) ? claims[ipfsHash] : null;
         }
 
         public static void storeClaimLocally(Claim claim)
@@ -439,8 +439,7 @@ namespace Matryx
                     throw new System.Exception("claim Hash computed incorrectly: " + claimHashString + " != " + claimData[2]);
                 }
 
-                contentClaims.Add(hash, claim);
-                //localClaims.Add(hashes[1], claim);
+                claims.Add(hash, claim);
             }
 
             storageClaimsLoaded = true;
@@ -448,7 +447,7 @@ namespace Matryx
 
         public IEnumerator claim(Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null, Async thread = null)
         {
-            if(contentClaims.ContainsKey(ipfsContentHash))
+            if(claims.ContainsKey(ipfsContentHash))
             {
                 onError?.Invoke(null);
                 yield return true;
@@ -468,7 +467,7 @@ namespace Matryx
             yield return txStatus;
             if (txStatus.result)
             {
-                contentClaims.Add(ipfsContentHash, claim);
+                claims.Add(ipfsContentHash, claim);
                 // Save screenshot and claimed content locally
                 ExpressionSaveLoad.Instance.SaveClaim(this);
                 storeClaimLocally(claim);

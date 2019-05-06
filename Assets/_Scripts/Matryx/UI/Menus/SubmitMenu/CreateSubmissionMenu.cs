@@ -79,7 +79,7 @@ public class CreateSubmissionMenu : MonoBehaviour {
                     ResultsMenu.Instance.PostSuccess(submission,
                         (nothin) => 
                         {
-                            TournamentMenu.Instance.ReloadSubmissions();
+                            TournamentMenu.Instance.ReloadSubmissions(3f);
                         }
                     );
                     

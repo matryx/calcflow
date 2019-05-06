@@ -69,7 +69,7 @@ public class MySubmissionsMenu : MonoBehaviour
         infoText.gameObject.SetActive(true);
         infoText.text = "Loading Submissions...";
         ClearSubmissions();
-        MatryxCortex.RunGetMySubmissions(tournament, ProcessSubmissions);
+        MatryxCortex.RunGetMySubmissions(tournament, 0, ProcessSubmissions);
     }
 
     /// <summary>

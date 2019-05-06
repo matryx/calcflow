@@ -15,6 +15,7 @@ public class RayCastButtonForwarder : MonoBehaviour
         {
             source.OnButtonPress += target.PressButton;
             source.OnButtonStay += target.HoverButton;
+            source.OnButtonLeave += target.LeaveButton;
             source.OnButtonUnpress += target.UnpressButton;
         }
     }

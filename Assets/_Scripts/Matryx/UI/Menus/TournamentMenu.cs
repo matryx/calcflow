@@ -11,10 +11,12 @@ public class TournamentMenu : MonoBehaviour
     public static TournamentMenu Instance { get; private set; }
 
     private CalcManager calcManager;
-    private MultiSelectFlexPanel submissionsPanel;
+    public MultiSelectFlexPanel submissionsPanel;
 
     [SerializeField]
     private SubmissionMenu submissionMenu;
+    [SerializeField]
+    private FlexButtonComponent continueButton;
 
     [SerializeField]
     private FlexPanelComponent mainPanel;
@@ -33,7 +35,7 @@ public class TournamentMenu : MonoBehaviour
     private TMPro.TextMeshPro descriptionText;
 
     [SerializeField]
-    private GameObject contributeButton;
+    private TournamentMenuCenterButton centerButton;
     [SerializeField]
     private TMPro.TextMeshPro roundText;
 
@@ -57,14 +59,24 @@ public class TournamentMenu : MonoBehaviour
         {
             if (value == 0) { Instance.previousRoundButton.SetState(-1); }
             else { Instance.previousRoundButton.SetState(0); }
-            if (value == Tournament.currentRound.index) { Instance.nextRoundButton.SetState(-1); }
-            else { Instance.nextRoundButton.SetState(0); }
+            if (value == Tournament.currentRound.index) { Instance.previousRoundButton.SetState(-1); }
+            else { Instance.previousRoundButton.SetState(0); }
 
             roundIndex = value;
         }
     }
 
     private Dictionary<string, MatryxSubmission> submissions = new Dictionary<string, MatryxSubmission>();
+
+    public ActionState actionState;
+
+    public enum ActionState
+    {
+        NoAction,
+        Contribute,
+        SelectWinners,
+        ManageTournament
+    }
 
     internal class TournamentMenuResponder : FlexMenu.FlexMenuResponder
     {
@@ -122,10 +134,24 @@ public class TournamentMenu : MonoBehaviour
 
             SetRound(++RoundIndex);
         }
+        else if (source.name.Contains("Continue"))
+        {
+            // Open up the Close Tournament --or-- Start New Round panel
+        }
         else
         {
-            MatryxSubmission submission = source.GetComponent<SubmissionContainer>().submission;
-            DisplaySubmissionUI(submission);
+            SubmissionContainer submissionContainer = source.GetComponent<SubmissionContainer>();
+
+            if (actionState == ActionState.SelectWinners && TournamentMenuCenterButton.Instance.Toggled)
+            {
+                // TODO: Change scroll action to grip action
+                continueButton.gameObject.SetActive(submissionsPanel.selected.Count > 0);
+                submissionContainer.distributionPicker.Toggle(submissionsPanel.selected.Count > 0);
+            }
+            else
+            {
+                DisplaySubmissionUI(submissionContainer.submission);
+            }
         }
     }
 
@@ -138,15 +164,15 @@ public class TournamentMenu : MonoBehaviour
             Tournament = newTournament;
 
             loadingSubmissions.gameObject.SetActive(true);
-            MatryxCortex.RunGetMySubmissions(Tournament, ProcessMySubmissions);
+            MatryxCortex.RunGetMySubmissions(Tournament, 0, ProcessMySubmissions);
             MatryxCortex.RunGetTournament(Tournament.address, true, ProcessTournament, ErrorLoadingTournament);
         }
     }
 
-    public void ReloadSubmissions()
+    public void ReloadSubmissions(float waitTime = 0)
     {
         ClearSubmissions();
-        MatryxCortex.RunGetMySubmissions(Tournament, ProcessMySubmissions);
+        MatryxCortex.RunGetMySubmissions(Tournament, waitTime, ProcessMySubmissions);
     }
 
     public void SetRound(int roundIndex)
@@ -186,6 +212,7 @@ public class TournamentMenu : MonoBehaviour
     public void ProcessTournament(object result)
     {
         Tournament = (MatryxTournament)result;
+        Round = Tournament.currentRound;
         RoundIndex = Tournament.currentRound.index;
 
         if (Tournament.currentRound.winningSubmissions.Count == 0)
@@ -201,16 +228,55 @@ public class TournamentMenu : MonoBehaviour
             DisplaySubmissions(Tournament.currentRound.winningSubmissions, "Winning Submissions");
         }
 
+        UpdateActionState();
         DisplayTournamentInfo();
         setSubmissionKindProcessed(1);
+    }
+
+    public void UpdateActionState()
+    {
+        if (Round != Tournament.currentRound)
+        {
+            actionState = ActionState.NoAction;
+        }
+        else if (Tournament.currentRound.status.Equals(MatryxRound.STATE_CLOSED))
+        {
+            actionState = ActionState.NoAction;
+        }
+        else if (Tournament.owner.Equals(NetworkSettings.activeAccount, StringComparison.CurrentCultureIgnoreCase))
+        {
+            if (Tournament.currentRound.status.Equals(MatryxRound.STATE_OPEN))
+            {
+                actionState = ActionState.NoAction;
+            }
+            else if(Tournament.currentRound.status.Equals(MatryxRound.STATE_INREVIEW))
+            {
+                if(Tournament.currentRound.winningSubmissions == null)
+                {
+                    actionState = ActionState.SelectWinners;
+                    TournamentMenuCenterButton.Instance.updateState();
+                }
+                else
+                {
+                    actionState = ActionState.ManageTournament;
+                    TournamentMenuCenterButton.Instance.updateState();
+                }
+            }
+        }
+        else if(Tournament.currentRound.status.Equals(MatryxRound.STATE_OPEN))
+        {
+            actionState = ActionState.Contribute;
+        }
+
+        centerButton.updateState();
     }
 
     public void ProcessRound(object result)
     {
         Round = (MatryxRound)result;
-
+        RoundIndex = Round.index;
         loadingSubmissions.gameObject.SetActive(false);
-
+        UpdateActionState();
     }
 
     public void ProcessMySubmissions(object result)
@@ -249,17 +315,6 @@ public class TournamentMenu : MonoBehaviour
         roundText.text = "Round " + Tournament.currentRound.index + "\n" + Tournament.currentRound.Details.Bounty + " MTX";
 
         descriptionText.text = Tournament.getDescription();
-        contributeButton.SetActive(Tournament.currentRound.status.Equals(MatryxRound.STATE_OPEN));
-    }
-
-    public void IncrementRound()
-    {
-        Debug.Log("up");
-    }
-
-    public void DecrementRound()
-    {
-        Debug.Log("down");
     }
 
     public void DisplaySubmissionUI(MatryxSubmission submission)

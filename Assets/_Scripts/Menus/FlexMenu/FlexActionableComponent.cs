@@ -22,9 +22,10 @@ using System;
 
 abstract public class FlexActionableComponent : MonoBehaviour {
 
-    protected Action<FlexActionableComponent, GameObject> exitCallback;
     protected Action<FlexActionableComponent, GameObject> stayCallback;
+    protected Action<FlexActionableComponent, GameObject> exitCallback;
     protected Action<FlexActionableComponent, GameObject> enterCallback;
+    protected Action<FlexActionableComponent, GameObject> leaveCallback;
     
     #region Properties
     private int state;
@@ -84,19 +85,24 @@ abstract public class FlexActionableComponent : MonoBehaviour {
         State = _new;
     }
 
-    public void SetExitCallback(System.Action<FlexActionableComponent, GameObject> exitAction)
-    {
-		this.exitCallback = exitAction;
-    }
-
     public void SetStayCallback(System.Action<FlexActionableComponent, GameObject> OnCollisionEnter)
     {
         this.stayCallback = OnCollisionEnter;
     }
 
+    public void SetExitCallback(System.Action<FlexActionableComponent, GameObject> exitAction)
+    {
+		this.exitCallback += exitAction;
+    }
+
     public void SetEnterCallback(System.Action<FlexActionableComponent, GameObject> enterAction)
     {
         this.enterCallback = enterAction;
+    }
+
+    public void SetLeaveallback(System.Action<FlexActionableComponent, GameObject> OnCollisionExit)
+    {
+        this.leaveCallback = OnCollisionExit;
     }
     #endregion
 

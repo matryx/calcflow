@@ -35,6 +35,8 @@ namespace Matryx
         {
             this.title = title;
         }
+        // This constructor is used specifically for Submissions
+        // owned by an account loaded into Calcflow
         public MatryxSubmission
             (
             MatryxTournament tournament, 

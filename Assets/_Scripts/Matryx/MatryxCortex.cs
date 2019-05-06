@@ -28,7 +28,7 @@ namespace Matryx
 
         public static MatryxCortex Instance { get; private set; }
         public static Serializer serializer = new Serializer();
-        public static string cortexURL = "https://cortex-staging.matryx.ai";
+        public static string cortexURL = "https://cortex.matryx.ai";
         public static string platformInfoURL = cortexURL + "/platform/getInfo";
         public static string userInfoURL = cortexURL + "/user/getInfo";
         public static string tokenInfoURL = cortexURL + "/token/getInfo";
@@ -48,7 +48,7 @@ namespace Matryx
         public static string ipfsAddURL = ipfsURL + "/add?pin=false";
 
         public static string jsonUploadURL = cortexURL + "/upload/json";
-        public static string filesUploadURL = ipfsURL + "/add?recursive=true&quieter=true";
+        public static string filesUploadURL = ipfsURL + "/add?recursive=true&quieter=true"; //&wrap-with-directory=true
 
         public static List<string> supportedCalcflowCategories = new List<string>();
 
@@ -139,17 +139,31 @@ namespace Matryx
             }
         }
 
-        public static void RunGetTournaments(long page, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
+        public static void RunGetTournaments(long page, float waitTime, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
             // Schedule query
             Async main = Async.runInCoroutine(delegate (Async thread, object param)
             {
-                return GetTournaments(page, onSuccess, onError);
+                return GetTournaments(page, waitTime, false, onSuccess, onError);
             });
         }
 
-        private static IEnumerator GetTournaments(long page, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
+        public static void RunGetMyTournaments(long page, float waitTime, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
+            // Schedule query
+            Async main = Async.runInCoroutine(delegate (Async thread, object param)
+            {
+                return GetTournaments(page, waitTime, true, onSuccess, onError);
+            });
+        }
+
+        private static IEnumerator GetTournaments(long page, float waitTime, bool onlyMine, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
+        {
+            if (waitTime > 0)
+            {
+                yield return new WaitForSeconds(waitTime);
+            }
+
             var tournaments = new List<MatryxTournament>();
             var offset = page * 10;
             using (WWW www = new WWW(tournamentsURL))
@@ -171,10 +185,21 @@ namespace Matryx
                     for (int i = 0; i < tournamentList.Count; i++)
                     {
                         var jsonTournament = tournamentList[i] as Dictionary<string, object>;
-                        var status = jsonTournament["status"] as string;
-                        if (!status.Equals("open", StringComparison.CurrentCultureIgnoreCase)) { continue; }
+
                         string category = jsonTournament["category"] as string;
                         if (!supportedCalcflowCategories.Contains(category)) { continue; }
+
+                        var owner = jsonTournament["owner"] as string;
+                        if (onlyMine && !owner.Equals(NetworkSettings.activeAccount, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            var status = jsonTournament["status"] as string;
+                            if (!status.Equals("open", StringComparison.CurrentCultureIgnoreCase)) { continue; }
+                        }
+
                         var tournamentTitle = jsonTournament["title"] as string;
                         var bounty = new BigInteger((long)Convert.ToDouble(jsonTournament["bounty"])) * new BigInteger(1e18);
                         var entryFee = new BigInteger((long)Convert.ToDouble(jsonTournament["entryFee"])) * new BigInteger(1e18);
@@ -332,13 +357,18 @@ namespace Matryx
             queue(submission.get(onSuccess, onError));
         }
 
-        public static void RunGetMySubmissions(MatryxTournament tournament, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public static void RunGetMySubmissions(MatryxTournament tournament, float waitTime = 0, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
         {
-            queue(GetMySubmissions(tournament, onSuccess, onError));
+            queue(GetMySubmissions(tournament, waitTime, onSuccess, onError));
         }
          
-        public static IEnumerator GetMySubmissions(MatryxTournament tournament, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public static IEnumerator GetMySubmissions(MatryxTournament tournament, float waitTime, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
         {
+            if (waitTime > 0)
+            {
+                yield return new WaitForSeconds(waitTime);
+            }
+
             var url = mySubmissionsURL + NetworkSettings.activeAccount;
             using (var www = new WWW(url))
             {
@@ -462,6 +492,7 @@ namespace Matryx
                         commit.ownerTotalValue = BigInteger.Parse(jsonCommit["ownerTotalValue"].ToString());
                         commit.totalValue = BigInteger.Parse(jsonCommit["totalValue"].ToString());
                         commit.timestamp = BigInteger.Parse(jsonCommit["timestamp"].ToString());
+                        commit.mine = true;
                         commits.Add(commit);
                     }
                 }
@@ -675,8 +706,6 @@ namespace Matryx
 
         public static IEnumerator InitiateUser()
         {
-            
-          
             bool settingUp = true;
             while (!NetworkSettings.declinedAccountUnlock.HasValue || settingUp)
             {
@@ -696,6 +725,10 @@ namespace Matryx
             {
                 MatryxAccountMenu.Instance.AccountInfoText[1].text = (NetworkSettings.MTXBalance / new BigInteger(1e18)).ToString() + " MTX";
             }
+
+            MatryxCommit.loadLocalClaims();
+            yield return GetMyCommits(MatryxCommit.LoadCommits, (obj) => { Tippies.HeadsetModal("Could not load commits"); });
+
             yield break;
         }
 
@@ -706,7 +739,7 @@ namespace Matryx
                 yield return www;
                 if (www.error != null)
                 {
-                    Debug.Log("Error making request. Matryx Cortex down!!");
+                    Debug.Log("Error making request. Either your internet is down...or Cortex is down. Fingers crossed its the internet :)");
                     onError?.Invoke(www.error);
                     yield break;
                 }

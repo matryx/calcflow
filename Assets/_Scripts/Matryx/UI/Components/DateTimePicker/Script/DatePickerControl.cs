@@ -61,9 +61,9 @@ public class DatePickerControl : MonoBehaviour {
 		custom
 	}
 
-	public nFormato formato = nFormato.Default;
+	public nFormato formato = nFormato.custom;
 	[HideInInspector]
-	public string formatoCustom="dddd dd/MM/yyyy HH:mm:ss";
+	public string formatoCustom="dddd dd/MM/yyyy h:mm tt";
 	[HideInInspector]
 	public char separator='/';
 

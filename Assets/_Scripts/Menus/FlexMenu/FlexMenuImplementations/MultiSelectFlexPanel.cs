@@ -11,6 +11,7 @@ public class MultiSelectFlexPanel : FlexPanelComponent
 {
 
     public bool MultiSelect;
+    public List<GameObject> selected;
 
     public void SwitchToMultiSelect()
     {
@@ -46,6 +47,12 @@ public class MultiSelectFlexPanel : FlexPanelComponent
         }
     }
 
+    public new void ClearSelection()
+    {
+        base.ClearSelection();
+        selected.Clear();
+    }
+
     protected override void OnActionStart(FlexActionableComponent sender, GameObject collider)
     {
         if (MultiSelect)
@@ -53,10 +60,12 @@ public class MultiSelectFlexPanel : FlexPanelComponent
             if (sender.State == 2)
             {
                 sender.SetState(1);
+                selected.Remove(collider);
             }
             else
             {
                 sender.SetState(2);
+                selected.Add(collider);
             }
         }
         else

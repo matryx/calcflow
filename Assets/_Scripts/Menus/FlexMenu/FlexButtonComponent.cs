@@ -47,7 +47,6 @@ public class FlexButtonComponent : FlexActionableComponent
         if (rcButton != null)
         {
             rcButton.OnButtonPress -= pressAction;
-            rcButton.OnButtonStay -= stayAction;
             rcButton.OnButtonUnpress -= unpressAction;
         }
 
@@ -72,7 +71,6 @@ public class FlexButtonComponent : FlexActionableComponent
         if (rcButton != null)
         {
             rcButton.OnButtonPress += pressAction;
-            rcButton.OnButtonStay += stayAction;
             rcButton.OnButtonUnpress += unpressAction;
         }
 
@@ -94,7 +92,6 @@ public class FlexButtonComponent : FlexActionableComponent
             transform.Find("Body").GetComponent<Renderer>().material.color = disabledColor;
         } else if (_new == 1)
         {
-            stayCallback?.Invoke(this, source);
             transform.Find("Body").GetComponent<Renderer>().material.color = hoveringColor;
             string eventName = "Unknown";
             if (gameObject != null)
@@ -112,7 +109,6 @@ public class FlexButtonComponent : FlexActionableComponent
         }
         else
         {
-            exitCallback?.Invoke(this, source);
             transform.Find("Body").GetComponent<Renderer>().material.color = passiveColor;
             string eventName = "Unknown";
             if (gameObject != null)
@@ -131,14 +127,6 @@ public class FlexButtonComponent : FlexActionableComponent
         if (State >= 0)
         {
             enterCallback(this, gameObject);
-        }
-    }
-
-    void stayAction(GameObject gameobject)
-    {
-        if (State == 1)
-        {
-            stayCallback(this, gameobject);
         }
     }
 

@@ -9,7 +9,7 @@ public class CreateTournamentButton : QuickButton
     [SerializeField]
     private CreateTournamentMenu createTournamentMenu;
     [SerializeField]
-    private FlexButtonComponent buttonFlexComponent;
+    private FlexButtonComponent flexButtonComponent;
     [SerializeField]
     private TMPro.TextMeshPro labelText;
 
@@ -56,45 +56,44 @@ public class CreateTournamentButton : QuickButton
         {
             ToggleOn();
         }
-        toggled = !toggled;
 
-        buttonFlexComponent.SetState(2);
+        flexButtonComponent.SetState(2);
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
-        buttonFlexComponent.SetState(1);
+        flexButtonComponent.SetState(1);
     }
 
     public void ToggleOff()
     {
-        //text.color = PlusButtonColor;
+        toggled = false;
 
-        buttonFlexComponent.selectedColor = ToggleOffColor;
-        buttonFlexComponent.passiveColor = LightPassiveColor;
-        buttonFlexComponent.hoveringColor = LightHoveringColor;
+        flexButtonComponent.selectedColor = ToggleOffColor;
+        flexButtonComponent.passiveColor = LightPassiveColor;
+        flexButtonComponent.hoveringColor = LightHoveringColor;
 
         spriteRenderer.sprite = defaultSprite;
         labelText.text = "Create\nTournament";
 
-        buttonFlexComponent.SetState(1);
+        flexButtonComponent.SetState(1);
 
         Tippies.FadeDestroyTippy("Please Lift Headset");
     }
 
     public void ToggleOn()
     {
-        //text.color = Color.white;
+        toggled = true;
 
-        buttonFlexComponent.selectedColor = ToggleOnColor;
-        buttonFlexComponent.passiveColor = DarkPassiveColor;
-        buttonFlexComponent.hoveringColor = DarkHoveringColor;
+        flexButtonComponent.selectedColor = ToggleOnColor;
+        flexButtonComponent.passiveColor = DarkPassiveColor;
+        flexButtonComponent.hoveringColor = DarkHoveringColor;
 
         spriteRenderer.sprite = liftHeadsetSprite;
         labelText.text = "Lift\nHeadset";
 
-        buttonFlexComponent.SetState(1);
+        flexButtonComponent.SetState(1);
 
-        Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector2(6, 1f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
+        Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
     }
 }

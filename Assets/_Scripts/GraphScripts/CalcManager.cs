@@ -154,7 +154,7 @@ public class CalcManager : MonoBehaviour
 
     public void Initialize()
     {
-        if(Instance == null) { Instance = this; }
+        if (Instance == null) { Instance = this; }
         calcInput = connectedMenus.calcInput;
         boundsManager = connectedMenus.boundsManager;
         pieceWiseControl = connectedMenus.pieceWiseControl;
@@ -177,19 +177,22 @@ public class CalcManager : MonoBehaviour
 
         connectedMenus.saveLoadMenu.Initialize(this);
 
-        if(connectedMenus.tournamentMenu != null)
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals("3 - FreeParametrization"))
         {
-            connectedMenus.tournamentMenu.Initialize(this);
-        }
+            if (connectedMenus.tournamentMenu != null)
+            {
+                connectedMenus.tournamentMenu.Initialize(this);
+            }
 
-        if(connectedMenus.submissionsMenu != null)
-        {
-            connectedMenus.submissionsMenu.Initialize(this);
-        }
+            if (connectedMenus.submissionsMenu != null)
+            {
+                connectedMenus.submissionsMenu.Initialize(this);
+            }
 
-        if(connectedMenus.mySubmissionsMenu != null)
-        {
-            connectedMenus.mySubmissionsMenu.Initialize(this);
+            if (connectedMenus.mySubmissionsMenu != null)
+            {
+                connectedMenus.mySubmissionsMenu.Initialize(this);
+            }
         }
 
         if (connectedMenus.particleAnimationSettings != null)

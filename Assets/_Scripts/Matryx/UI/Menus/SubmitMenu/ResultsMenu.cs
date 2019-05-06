@@ -110,9 +110,9 @@ public class ResultsMenu : MonoBehaviour {
         {
             CreateTournamentButton.Instance.ToggleOff();
         }
-        if (CreateSubmissionButton.Instance != null)
+        if (TournamentMenuCenterButton.Instance != null)
         {
-            CreateSubmissionButton.Instance.ToggleOff();
+            TournamentMenuCenterButton.Instance.ToggleOff();
         }
 
         onReturn?.Invoke(null);

@@ -15,7 +15,7 @@ public class Tippies : MonoBehaviour {
         }
     }
     
-    public static Tippy SpawnTippy(string text, float textSize, TMPro.TextAlignmentOptions textAlignment, Vector2 size, float lifetime, Transform location, Vector3 offset, float fadeInDuration, float fadeOutDuration, Tippy.MovementMode mode, bool exclusive = false)
+    public static Tippy SpawnTippy(string text, float textSize, TMPro.TextAlignmentOptions textAlignment, Vector3 size, float lifetime, Transform location, Vector3 offset, float fadeInDuration, float fadeOutDuration, Tippy.MovementMode mode, bool exclusive = false)
     {
         if(exclusive && tippies.ContainsKey(text))
         {
@@ -25,7 +25,7 @@ public class Tippies : MonoBehaviour {
 
         GameObject tippyObject = Instantiate(Resources.Load("Prefabs/Tippy", typeof(GameObject))) as GameObject;
         Tippy tippy = tippyObject.GetComponent<Tippy>();
-        tippy.dimensions = new Vector3(size.x, size.y, 1f);
+        tippy.dimensions = size;
         tippy.lifetime = lifetime;
         tippy.location = location;
         tippy.offset = offset;
@@ -42,6 +42,11 @@ public class Tippies : MonoBehaviour {
         }
 
         return tippy;
+    }
+
+    public static Tippy HeadsetModal(string text)
+    {
+        return SpawnTippy(text, 4f, TMPro.TextAlignmentOptions.Center, new Vector2(6, 1f), 3f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
     }
 
     public static void DestroyTippy(string text)
@@ -61,13 +66,16 @@ public class Tippies : MonoBehaviour {
     {
         if(tippies.ContainsKey(text))
         {
-            Tippy tippy = tippies[text];
-            tippies.Remove(text);
-
-            tippy.fadeEarly(0.2f, (obj) =>
+            if (tippies[text] != null)
             {
-                Destroy(tippy.gameObject);
-            });
+                Tippy tippy = tippies[text];
+                tippies[text].fadeEarly(0.2f, (obj) =>
+                {
+                    Destroy(tippy.gameObject);
+                });
+            }
+
+            tippies.Remove(text);
         }
     }
 }

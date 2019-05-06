@@ -21,11 +21,11 @@ public class RoundIncrementButton : QuickButton
     {
         if(increment)
         {
-            tournamentMenu.IncrementRound();
+            
         }
         else
         {
-            tournamentMenu.DecrementRound();
+            
         }
     }
 

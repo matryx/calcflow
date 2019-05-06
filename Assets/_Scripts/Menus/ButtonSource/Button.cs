@@ -9,12 +9,14 @@ namespace CalcFlowUI
     {
         public delegate void ButtonCallBack(GameObject presser);
 
-        public event ButtonCallBack OnButtonPress;
         public event ButtonCallBack OnButtonStay;
+        public event ButtonCallBack OnButtonPress;
         public event ButtonCallBack OnButtonUnpress;
+        public event ButtonCallBack OnButtonLeave;
 
         [SerializeField]
         public Color disabledColor;
+        public bool verbose = false;
 
         public virtual void PressButton(GameObject other)
         {
@@ -44,9 +46,16 @@ namespace CalcFlowUI
                 print("button hovering");
             }
 
-            if (OnButtonStay != null)
+            OnButtonStay?.Invoke(other);
+        }
+
+        public virtual void LeaveButton(GameObject other)
+        {
+            if (verbose)
             {
-                OnButtonStay?.Invoke(other);
+                print("button unhovered");
+
+                OnButtonLeave?.Invoke(other);
             }
         }
 
@@ -69,7 +78,6 @@ namespace CalcFlowUI
         }
 
 #if UNITY_EDITOR
-        public bool verbose = false;
         public bool press = false;
         bool pressed = false;
         bool Pressed

@@ -79,7 +79,8 @@ public class CreateTournamentMenu : MonoBehaviour
                     ResultsMenu.Instance.PostSuccess(tournament, 
                         (nothin) =>
                         {
-                            TournamentsMenu.Instance.LoadTournaments(0);
+                            Instance.ClearInputs(true);
+                            TournamentsMenu.Instance.ReloadTournaments(0);
                         }
                     );
                 }
@@ -158,7 +159,7 @@ public class CreateTournamentMenu : MonoBehaviour
     public void updateLengthRequirement()
     {
         int currentLength = -10 + Description.text.Length;
-        lengthRequirement.text = currentLength + "/1000";
+        lengthRequirement.text = currentLength < 0 ? (-currentLength).ToString() : Description.text.Length + "/1000";
 
         float red = 1f;
         float other = currentLength < 1000 ? 1 + (currentLength / 30f) : 0f;

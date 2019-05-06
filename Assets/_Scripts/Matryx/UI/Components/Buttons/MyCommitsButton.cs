@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
 using TMPro;
 using Matryx;
+using System.Collections;
 
 public class MyCommitsButton : QuickButton
 {
     [SerializeField]
-    Renderer iconRenderer;
-    [SerializeField]
     private MyCommitsMenu myCommitsMenu;
     [SerializeField]
-    private FlexButtonComponent buttonFlexComponent;
+    private FlexButtonComponent flexButtonComponent;
 
     private Color PlusButtonColor = new Color((float)0x09 / (float)0xff, (float)0x3A / (float)0xff, (float)0x2C / (float)0xff);
     private Color ToggleOnColor = new Color(83f / 255f, 198f / 255f, 236f / 255f);
@@ -44,34 +43,31 @@ public class MyCommitsButton : QuickButton
         {
             ToggleOn();
         }
-
-        buttonFlexComponent.SetState(2);
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
-        buttonFlexComponent.SetState(1);
+        flexButtonComponent.SetState(1);
     }
 
     public void ToggleOff()
     {
         toggled = false;
-        myCommitsMenu.GetComponent<AnimationHandler>().CloseMenu();
-        buttonFlexComponent.selectedColor = ToggleOffColor;
-        buttonFlexComponent.passiveColor = LightPassiveColor;
-        buttonFlexComponent.hoveringColor = LightHoveringColor;
+        flexButtonComponent.selectedColor = ToggleOffColor;
+        flexButtonComponent.passiveColor = LightPassiveColor;
+        flexButtonComponent.hoveringColor = LightHoveringColor;
 
-        buttonFlexComponent.SetState(1);
+        flexButtonComponent.SetState(1);
     }
 
     public void ToggleOn()
     {
         toggled = true;
-        myCommitsMenu.GetComponent<AnimationHandler>().OpenMenu( (obj) => { myCommitsMenu.LoadMyCommits(0); });
-        buttonFlexComponent.selectedColor = ToggleOnColor;
-        buttonFlexComponent.passiveColor = DarkPassiveColor;
-        buttonFlexComponent.hoveringColor = DarkHoveringColor;
-        buttonFlexComponent.SetState(1);
+        myCommitsMenu.GetComponent<AnimationHandler>().OpenMenu((obj) => { myCommitsMenu.LoadMyCommits(0); });
+        flexButtonComponent.selectedColor = ToggleOnColor;
+        flexButtonComponent.passiveColor = DarkPassiveColor;
+        flexButtonComponent.hoveringColor = DarkHoveringColor;
+        flexButtonComponent.SetState(2);
     }
 
     public override void OnMenuClose()

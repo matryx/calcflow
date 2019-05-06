@@ -40,6 +40,7 @@ public class Tippy : MonoBehaviour {
         transform.SetParent(null);
         transform.position = location.position + location.TransformVector(offset);
         transform.rotation = location.rotation;
+        size();
 
         lifeCoroutine = fadeInFadeOutDie();
         StartCoroutine(lifeCoroutine);
@@ -63,12 +64,18 @@ public class Tippy : MonoBehaviour {
             transform.rotation.Set(newRotation.x, newRotation.y, newRotation.z, newRotation.w);
         }
 
-        var scale = location.localScale;
+        size();
+        transform.rotation = location.rotation;
+    }
+
+    internal void size()
+    {
+        var scale = location.lossyScale;
         scale.Scale(dimensions);
         body.transform.localScale = scale;
         textTransform.sizeDelta = scale;
-
-        transform.rotation = location.rotation;
+        var textOffset = -(scale.z * 0.52f);
+        textTransform.localPosition = new Vector3(0f, 0f, textOffset);
     }
 
     public void resize(Vector3 dim)
@@ -104,7 +111,14 @@ public class Tippy : MonoBehaviour {
             lifeCoroutine = null;
         }
 
-        fadeOut(onDone);
+        try
+        {
+            fadeOut(onDone);
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log("Your tippy callback tried to do something bad: " + e);
+        }
     }
 
     public void fadeIn(Async.EventDelegate onDone = null)

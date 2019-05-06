@@ -16,8 +16,10 @@ public abstract class QuickButton : MenuStateReceiver {
         RayCastButton rcButton = GetComponent<RayCastButton>();
         if (rcButton != null)
         {
+            rcButton.OnButtonStay += ButtonStayBehavior;
             rcButton.OnButtonPress += ButtonEnterBehavior;
             rcButton.OnButtonUnpress += ButtonExitBehavior;
+            rcButton.OnButtonLeave += ButtonLeaveBehavior;
         }
 
         TouchButton touchButton = GetComponent<TouchButton>();
@@ -28,7 +30,11 @@ public abstract class QuickButton : MenuStateReceiver {
         }
     }
 
+    protected virtual void ButtonStayBehavior(GameObject other) { }
+
     protected abstract void ButtonEnterBehavior(GameObject other);
 
     protected abstract void ButtonExitBehavior(GameObject other);
+
+    protected virtual void ButtonLeaveBehavior(GameObject other) { }
 }
