@@ -7908,35 +7908,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e2999ec990b6b4bbfbbe4220e05d1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputReceived: 0
-  eqnInput: 0
-  saveLoadMenu: {fileID: 0}
-  connectedMenus:
-    ptInput: {fileID: 2104434826}
-    ptOutputMenu: {fileID: 1589098683}
-  feedbacks:
-    pt1Feedback: {fileID: 1250023443}
-    pt2Feedback: {fileID: 2128464750}
-    pt3Feedback: {fileID: 136795095}
-    eqnFeedback: {fileID: 1725637207}
-  inputs:
-    pt1XInput: {fileID: 1203153341}
-    pt1YInput: {fileID: 1410501627}
-    pt1ZInput: {fileID: 144302640}
-    pt2XInput: {fileID: 206992969}
-    pt2YInput: {fileID: 934538505}
-    pt2ZInput: {fileID: 459859965}
-    pt3XInput: {fileID: 1426990546}
-    pt3YInput: {fileID: 1996024747}
-    pt3ZInput: {fileID: 1615716272}
-    aInput: {fileID: 1639179452}
-    bInput: {fileID: 156143190}
-    cInput: {fileID: 1225064344}
-    dInput: {fileID: 1407951195}
-  equation: {fileID: 2052836516}
-  presentPlane: {fileID: 995311755}
-  generatePlanePts: {fileID: 374662755}
-  updateText: 0
 --- !u!1 &248688250
 GameObject:
   m_ObjectHideFlags: 0
@@ -12257,7 +12228,7 @@ MonoBehaviour:
   point3: {fileID: 1211315718}
   centerPt: {fileID: 327097198}
   presentPlane: {fileID: 995311755}
-  ptManager: {fileID: 1692795703}
+  ptManager: {fileID: 1692795711}
   steps: 3
   stepSize: 5
   xLabelManager: {fileID: 216950436}
@@ -31311,7 +31282,7 @@ MonoBehaviour:
   - {fileID: 993446490}
   - {fileID: 568356246}
   - {fileID: 668426141}
-  ptManager: {fileID: 1692795703}
+  ptManager: {fileID: 1692795711}
   center: {x: 0, y: 0, z: 0}
   vector12: {x: 0, y: 0, z: 0}
   vector13: {x: 0, y: 0, z: 0}
@@ -43049,7 +43020,7 @@ MonoBehaviour:
   point2: {fileID: 1036745350}
   point3: {fileID: 1211315718}
   presentPlane: {fileID: 995311755}
-  ptManager: {fileID: 1692795703}
+  ptManager: {fileID: 0}
   ptOutputMenu: {fileID: 1602823113}
   pt1Grabber: {fileID: 2037995248}
   pt2Grabber: {fileID: 1111997246}
@@ -57677,7 +57648,7 @@ GameObject:
   - component: {fileID: 1692795706}
   - component: {fileID: 1692795705}
   - component: {fileID: 1692795704}
-  - component: {fileID: 1692795703}
+  - component: {fileID: 1692795711}
   m_Layer: 11
   m_Name: Calculator
   m_TagString: Untagged
@@ -57685,46 +57656,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1692795703
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1692795702}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83e2999ec990b6b4bbfbbe4220e05d1a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputReceived: 0
-  eqnInput: 0
-  saveLoadMenu: {fileID: 0}
-  connectedMenus:
-    ptInput: {fileID: 857091416}
-    ptOutputMenu: {fileID: 1602823113}
-  feedbacks:
-    pt1Feedback: {fileID: 510162713}
-    pt2Feedback: {fileID: 1039793329}
-    pt3Feedback: {fileID: 1739148046}
-    eqnFeedback: {fileID: 354942795}
-  inputs:
-    pt1XInput: {fileID: 229868028}
-    pt1YInput: {fileID: 1441305214}
-    pt1ZInput: {fileID: 67769764}
-    pt2XInput: {fileID: 2031913751}
-    pt2YInput: {fileID: 851329192}
-    pt2ZInput: {fileID: 768459987}
-    pt3XInput: {fileID: 1916089899}
-    pt3YInput: {fileID: 1569576025}
-    pt3ZInput: {fileID: 847751540}
-    aInput: {fileID: 1759147527}
-    bInput: {fileID: 1460423684}
-    cInput: {fileID: 1727354365}
-    dInput: {fileID: 637275146}
-  equation: {fileID: 86610211}
-  presentPlane: {fileID: 995311755}
-  generatePlanePts: {fileID: 374662755}
-  updateText: 0
 --- !u!114 &1692795704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57844,6 +57775,46 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: -60, y: 0, z: 89.99999}
+--- !u!114 &1692795711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1692795702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0178d1468ddd17946a9a3e963cc95870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputReceived: 0
+  eqnInput: 0
+  saveLoadMenu: {fileID: 0}
+  connectedMenus:
+    ptInput: {fileID: 857091416}
+    ptOutputMenu: {fileID: 1602823113}
+  feedbacks:
+    pt1Feedback: {fileID: 510162713}
+    pt2Feedback: {fileID: 1039793329}
+    pt3Feedback: {fileID: 1739148046}
+    eqnFeedback: {fileID: 354942795}
+  inputs:
+    pt1XInput: {fileID: 229868028}
+    pt1YInput: {fileID: 1441305214}
+    pt1ZInput: {fileID: 67769764}
+    pt2XInput: {fileID: 2031913751}
+    pt2YInput: {fileID: 851329192}
+    pt2ZInput: {fileID: 768459987}
+    pt3XInput: {fileID: 1916089899}
+    pt3YInput: {fileID: 1569576025}
+    pt3ZInput: {fileID: 847751540}
+    aInput: {fileID: 1759147527}
+    bInput: {fileID: 1460423684}
+    cInput: {fileID: 1727354365}
+    dInput: {fileID: 637275146}
+  equation: {fileID: 86610211}
+  presentPlane: {fileID: 995311755}
+  generatePlanePts: {fileID: 374662755}
+  updateText: 0
 --- !u!1 &1700502489
 GameObject:
   m_ObjectHideFlags: 0
@@ -58195,6 +58166,10 @@ Prefab:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 887778332}
+    - target: {fileID: 4849953748773942, guid: c27f6dd89b1863b41baf6e28f990b1f4, type: 2}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c27f6dd89b1863b41baf6e28f990b1f4, type: 2}
   m_IsPrefabAsset: 0
