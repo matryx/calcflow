@@ -13,8 +13,17 @@ namespace orthProj
 
         public Transform line;
         public Transform forwardLine;
-
         public Transform lookAtTarget;
+
+        public Transform axisline;
+        public Transform forwardAxisLine;
+        public Transform lookAtAxisTarget;
+
+        public Transform axisline2;
+        public Transform forwardAxisLine2;
+        public Transform lookAtAxisTarget2;
+
+
         public List<GameObject> walls;
 
 
@@ -82,6 +91,8 @@ namespace orthProj
             point2.localPosition = scaledPt2;
             scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
             point3.localPosition = scaledPt3;
+            //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+            centerPt.localPosition = ScaledPoint(new Vector3(0,0,0));
             Debug.Log("dddddddddddddddddd: " + PtCoordToVector(rawPt1));
 
 
@@ -99,11 +110,22 @@ namespace orthProj
             ////pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
             //pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
 
-
+            //get the points from the users vector and for the line to look at
             lookAtTarget.localPosition = scaledPt1;
+            //have the line look at the point
             line.LookAt(lookAtTarget);
+            //set the line to have an origin of zero
             line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
+            //axis 1
+            lookAtAxisTarget.localPosition = scaledPt2;
+            axisline.LookAt(lookAtAxisTarget);
+            axisline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+
+            //axis 2
+            lookAtAxisTarget2.localPosition = scaledPt3;
+            axisline2.LookAt(lookAtAxisTarget2);
+            axisline2.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
             pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
             pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
@@ -120,6 +142,27 @@ namespace orthProj
                 sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
                 //plane normal vector is the rotated 'up' vector.
                 sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+            }
+
+
+            var sharedMaterial2 = forwardAxisLine.GetComponent<MeshRenderer>().sharedMaterial;
+            sharedMaterial2.SetInt("_planeClippingEnabled", 1);
+
+            for (int i = 0; i < 6; i++)
+            {
+                sharedMaterial2.SetVector("_planePos" + i, walls[i].transform.position);
+                //plane normal vector is the rotated 'up' vector.
+                sharedMaterial2.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+            }
+
+            var sharedMaterial3 = forwardAxisLine2.GetComponent<MeshRenderer>().sharedMaterial;
+            sharedMaterial3.SetInt("_planeClippingEnabled", 1);
+
+            for (int i = 0; i < 6; i++)
+            {
+                sharedMaterial3.SetVector("_planePos" + i, walls[i].transform.position);
+                //plane normal vector is the rotated 'up' vector.
+                sharedMaterial3.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
             //sharedMaterial = backwardLine.GetComponent<MeshRenderer>().sharedMaterial;
@@ -161,45 +204,45 @@ namespace orthProj
 
         }
 
-        //public void ApplyGraphAdjustment()
+        //public void applygraphadjustment()
         //{
 
-        //    //vector23 = GenerateVector(rawPt2, rawPt3);
+        //    //vector23 = generatevector(rawpt2, rawpt3);
 
-        //    //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-        //    //stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+        //    //center = (ptcoordtovector(rawpt1) + ptcoordtovector(rawpt2) + ptcoordtovector(rawpt3)) / 3;
+        //    //stepsize = mathf.max(vector12.magnitude, vector23.magnitude);
 
         //    /////////////
-        //    p1 = new Vector3(-2, 1, 0);
-        //    p2 = new Vector3(0, 0, 0);
-        //    p3 = new Vector3(0, 0, 0);
+        //    p1 = new vector3(-2, 1, 0);
+        //    p2 = new vector3(0, 0, 0);
+        //    p3 = new vector3(0, 0, 0);
         //    vector23 = p2 - p3;
         //    vector12 = p1 - p2;
 
         //    center = (p1 + p2 + p3) / 3;
-        //    stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+        //    stepsize = mathf.max(vector12.magnitude, vector23.magnitude);
 
-        //    pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
-        //    pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
-        //    pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
-        //    Debug.Log("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
-        //    Debug.Log("(" + p1.x + "," + p1.y + "," + p1.z + ")");
+        //    pt1label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
+        //    pt2label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
+        //    pt3label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
+        //    debug.log("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+        //    debug.log("(" + p1.x + "," + p1.y + "," + p1.z + ")");
 
 
-        //    //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
-        //    //Get the range of the box
-        //    if (stepSize == 0)
+        //    //ptcoord centerpt = new ptcoord(new axiscoord(centerx), new axiscoord(centery), new axiscoord(centerz));
+        //    //get the range of the box
+        //    if (stepsize == 0)
         //    {
-        //        stepSize = defaultStepSize;
+        //        stepsize = defaultstepsize;
         //    }
-        //    xLabelManager.Min = center.x - stepSize * steps;
-        //    yLabelManager.Min = center.y - stepSize * steps;
-        //    zLabelManager.Min = center.z - stepSize * steps;
-        //    xLabelManager.Max = center.x + stepSize * steps;
-        //    yLabelManager.Max = center.y + stepSize * steps;
-        //    zLabelManager.Max = center.z + stepSize * steps;
-        //    //Get the interaction points between the box edges and the plane
-        //    //expr = solver.SymbolicateExpression(rawEquation);
+        //    xlabelmanager.min = center.x - stepsize * steps;
+        //    ylabelmanager.min = center.y - stepsize * steps;
+        //    zlabelmanager.min = center.z - stepsize * steps;
+        //    xlabelmanager.max = center.x + stepsize * steps;
+        //    ylabelmanager.max = center.y + stepsize * steps;
+        //    zlabelmanager.max = center.z + stepsize * steps;
+        //    //get the interaction points between the box edges and the plane
+        //    //expr = solver.symbolicateexpression(rawequation);
         //}
 
         //public void ApplyUnroundCenter(string ptName, Vector3 newLoc)
@@ -365,6 +408,7 @@ namespace orthProj
             return (new Vector3(pt.X.Value, pt.Y.Value, pt.Z.Value));
         }
 
+        //maintains ratio of each point in the scaled space so the points don't go out of bounds
         public Vector3 ScaledPoint(Vector3 pt)
         {
             Vector3 result = Vector3.zero;
