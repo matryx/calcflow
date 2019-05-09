@@ -79,7 +79,7 @@ namespace LinearAlgebraMatrix
             plane.LookAt(lookAtTarget);
             //plane.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
-
+            Debug.Log("(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")");
 
             //pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
             //pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
@@ -191,42 +191,42 @@ namespace LinearAlgebraMatrix
         }
 
         // Return the raw string of the equation
-        public bool CalculatePlane()
-        {
-            rawPt1 = ptManager.ptSet.ptCoords["pt1"];
-            rawPt2 = ptManager.ptSet.ptCoords["pt2"];
-            rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+        //public bool CalculatePlane()
+        //{
+        //    rawPt1 = ptManager.ptSet.ptCoords["pt1"];
+        //    rawPt2 = ptManager.ptSet.ptCoords["pt2"];
+        //    rawPt3 = ptManager.ptSet.ptCoords["pt3"];
 
-            //vector12 = GenerateVector(rawPt1, rawPt2);
-            //vector13 = GenerateVector(rawPt1, rawPt3);
-            //Debug.Log("Vector 12 is: " + vector12 +". Vector13 is: " + vector13);
-            normalVector = Vector3.Cross(vector12, vector13);
-            if (PlaneValid())
-            {
-                forwardPlane.GetComponent<MeshRenderer>().enabled = true;
-                backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+        //    //vector12 = GenerateVector(rawPt1, rawPt2);
+        //    //vector13 = GenerateVector(rawPt1, rawPt3);
+        //    //Debug.Log("Vector 12 is: " + vector12 +". Vector13 is: " + vector13);
+        //    normalVector = Vector3.Cross(vector12, vector13);
+        //    if (PlaneValid())
+        //    {
+        //        forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+        //        backwardPlane.GetComponent<MeshRenderer>().enabled = true;
 
-                // Basic formula of the equation
-                d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
-                // string[] formattedValue = roundString(new float[] {normalVector.x, normalVector.y, normalVector.z});
-                // // Formatting equation
-                // if (formattedValue[1][0] != '-') formattedValue[1] = '+' + formattedValue[1];
-                // if (formattedValue[2][0] != '-') formattedValue[2] = '+' + formattedValue[2];
-                // rawEquation = formattedValue[0] + "x" + formattedValue[1] + "y" + formattedValue[2] + "z=" + d;
-                ptManager.updateEqn(normalVector.x, normalVector.y, normalVector.z, d);
-                return true;
-            }
-            else
-            {
-                forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                backwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                // rawEquation = "Invalid Plane";
-                ptManager.updateEqn();
-                return false;
-            }
+        //        // Basic formula of the equation
+        //        d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
+        //        // string[] formattedValue = roundString(new float[] {normalVector.x, normalVector.y, normalVector.z});
+        //        // // Formatting equation
+        //        // if (formattedValue[1][0] != '-') formattedValue[1] = '+' + formattedValue[1];
+        //        // if (formattedValue[2][0] != '-') formattedValue[2] = '+' + formattedValue[2];
+        //        // rawEquation = formattedValue[0] + "x" + formattedValue[1] + "y" + formattedValue[2] + "z=" + d;
+        //        ptManager.updateEqn(normalVector.x, normalVector.y, normalVector.z, d);
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+        //        backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+        //        // rawEquation = "Invalid Plane";
+        //        ptManager.updateEqn();
+        //        return false;
+        //    }
 
-            //Debug.Log("Normal vector is: " + normalVector);
-        }
+        //    //Debug.Log("Normal vector is: " + normalVector);
+        //}
 
         public string[] roundString(float[] input)
         {

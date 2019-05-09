@@ -107,7 +107,7 @@ namespace LinearAlgebraMatrix
             eqnSet = new EqnSet();
 
             ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
-            updatePoint("pt1", new Vector3(1, 2, 3), false);
+            updatePoint("pt1", new Vector3(1, 0, 3), false);
             updatePoint("pt2", new Vector3(2, 4, 6), false);
             updatePoint("pt3", new Vector3(0, 0, 1), false);
         }
@@ -152,44 +152,44 @@ namespace LinearAlgebraMatrix
         void Update()
         {
             //Debug.Log(GameObject.Find("PlaneSolver_col/Planecontainer"));
-            if (calculateColNulSpace.colSpaceVectors == 2)
-            {
-                GameObject.Find("PlaneExpression_col").GetComponent<PresentPlane>().enabled = true;
-                if (colPrev == 1)
-                {
-                    Planecontainer_col.SetActive(true);
-                    colPrev = 2;
-                }
-            }
-            else if (calculateColNulSpace.colSpaceVectors == 1)
-            {
-                GameObject.Find("PlaneExpression_col").GetComponent<PresentPlane>().enabled = false;
-                if (colPrev == 2)
-                {
-                    Planecontainer_col.SetActive(false);
-                    colPrev = 1;
-                }
+            //if (calculateColNulSpace.colSpaceVectors == 2)
+            //{
+            //    GameObject.Find("PlaneExpression_col").GetComponent<PresentPlane>().enabled = true;
+            //    if (colPrev == 1)
+            //    {
+            //        Planecontainer_col.SetActive(true);
+            //        colPrev = 2;
+            //    }
+            //}
+            //else if (calculateColNulSpace.colSpaceVectors == 1)
+            //{
+            //    GameObject.Find("PlaneExpression_col").GetComponent<PresentPlane>().enabled = false;
+            //    if (colPrev == 2)
+            //    {
+            //        Planecontainer_col.SetActive(false);
+            //        colPrev = 1;
+            //    }
                     
-            }
+            //}
 
-            if (calculateColNulSpace.nullSpaceVectors == 2)
-            {
-                GameObject.Find("PlaneExpression_null").GetComponent<PresentPlane>().enabled = true;
-                if (nullPrev == 1)
-                {
-                    Planecontainer_null.SetActive(true);
-                    nullPrev = 2;
-                }
-            }
-            else if (calculateColNulSpace.nullSpaceVectors == 1)
-            {
-                GameObject.Find("PlaneExpression_null").GetComponent<PresentPlane>().enabled = false;
-                if (nullPrev == 2)
-                {
-                    Planecontainer_null.SetActive(false);
-                    nullPrev = 1;
-                }
-            }
+            //if (calculateColNulSpace.nullSpaceVectors == 2)
+            //{
+            //    GameObject.Find("PlaneExpression_null").GetComponent<PresentPlane>().enabled = true;
+            //    if (nullPrev == 1)
+            //    {
+            //        Planecontainer_null.SetActive(true);
+            //        nullPrev = 2;
+            //    }
+            //}
+            //else if (calculateColNulSpace.nullSpaceVectors == 1)
+            //{
+            //    GameObject.Find("PlaneExpression_null").GetComponent<PresentPlane>().enabled = false;
+            //    if (nullPrev == 2)
+            //    {
+            //        Planecontainer_null.SetActive(false);
+            //        nullPrev = 1;
+            //    }
+            //}
 
             //Debug.Log("sooooooooooooooooooooooooooooooooooooooooooootext: " + inputs.pt1XInput.text);
             if (updateText || inputReceived)
@@ -198,70 +198,70 @@ namespace LinearAlgebraMatrix
                 updateText = false;
             }
 
-            if (inputReceived && !eqnInput)
-            {
-                inputReceived = false;
-                bool isValid = ptSet.CompileAll();
+            //if (inputReceived && !eqnInput)
+            //{
+            //    inputReceived = false;
+            //    bool isValid = ptSet.CompileAll();
 
-                ManageFeedback();
-                if (isValid)
-                {
-                    if (presentPlane_col.CalculatePlane())
-                    {
-                        presentPlane_col.ApplyGraphAdjustment();
-                        presentPlane_col.GetLocalPoint();
-                        presentPlane_col.GetPlaneDirection();
-                    }
-                    else
-                    {
-                        presentPlane_col.ApplyGraphAdjustment();
-                        presentPlane_col.GetLocalPoint();
-                    }
+            //    ManageFeedback();
+            //    if (isValid)
+            //    {
+            //        if (presentPlane_col.CalculatePlane())
+            //        {
+            //            presentPlane_col.ApplyGraphAdjustment();
+            //            presentPlane_col.GetLocalPoint();
+            //            presentPlane_col.GetPlaneDirection();
+            //        }
+            //        else
+            //        {
+            //            presentPlane_col.ApplyGraphAdjustment();
+            //            presentPlane_col.GetLocalPoint();
+            //        }
 
-                    if (presentPlane_null.CalculatePlane())
-                    {
-                        presentPlane_null.ApplyGraphAdjustment();
-                        presentPlane_null.GetLocalPoint();
-                        presentPlane_null.GetPlaneDirection();
-                    }
-                    else
-                    {
-                        presentPlane_null.ApplyGraphAdjustment();
-                        presentPlane_null.GetLocalPoint();
-                    }
-                }
-            }
+            //        if (presentPlane_null.CalculatePlane())
+            //        {
+            //            presentPlane_null.ApplyGraphAdjustment();
+            //            presentPlane_null.GetLocalPoint();
+            //            presentPlane_null.GetPlaneDirection();
+            //        }
+            //        else
+            //        {
+            //            presentPlane_null.ApplyGraphAdjustment();
+            //            presentPlane_null.GetLocalPoint();
+            //        }
+            //    }
+            //}
 
-            if (inputReceived && eqnInput)
-            {
-                inputReceived = false;
-                bool isValid = eqnSet.CompileAll();
-                ManageFeedback();
-                if (isValid)
-                {
-                    if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
-                    {
-                        feedbacks.eqnFeedback.material.color = negativeFeedback;
-                        presentPlane_col.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                        presentPlane_col.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                    }
-                    else
-                    {
-                        generatePlanePts_col.eqnToPoints();
-                    }
+            //if (inputReceived && eqnInput)
+            //{
+            //    inputReceived = false;
+            //    bool isValid = eqnSet.CompileAll();
+            //    ManageFeedback();
+            //    if (isValid)
+            //    {
+            //        if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
+            //        {
+            //            feedbacks.eqnFeedback.material.color = negativeFeedback;
+            //            presentPlane_col.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+            //            presentPlane_col.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+            //        }
+            //        else
+            //        {
+            //            generatePlanePts_col.eqnToPoints();
+            //        }
 
-                    if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
-                    {
-                        feedbacks.eqnFeedback.material.color = negativeFeedback;
-                        presentPlane_null.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                        presentPlane_null.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                    }
-                    else
-                    {
-                        generatePlanePts_null.eqnToPoints();
-                    }
-                }
-            }
+            //        if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
+            //        {
+            //            feedbacks.eqnFeedback.material.color = negativeFeedback;
+            //            presentPlane_null.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+            //            presentPlane_null.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+            //        }
+            //        else
+            //        {
+            //            generatePlanePts_null.eqnToPoints();
+            //        }
+            //    }
+            //}
         }
 
         public void ManageFeedback()
@@ -298,13 +298,13 @@ namespace LinearAlgebraMatrix
                 ManageFeedback();
                 if (isValid)
                 {
-                    if (presentPlane_col.CalculatePlane())
+                    if (true) //(presentPlane_col.CalculatePlane())
                     {
                         presentPlane_col.ApplyUnroundCenter(ptName, newLoc);
                         presentPlane_col.GetPlaneDirection();
                     }
 
-                    if (presentPlane_null.CalculatePlane())
+                    if (true)//(presentPlane_null.CalculatePlane())
                     {
                         presentPlane_null.ApplyUnroundCenter(ptName, newLoc);
                         presentPlane_null.GetPlaneDirection();
@@ -313,79 +313,79 @@ namespace LinearAlgebraMatrix
             }
         }
 
-        public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
-        {
-            CalcOutput originalExpression = ptInput.currExpression;
-            SetOutput(ptSet.ptCoords["pt1"].X);
-            ptInput.RewriteInput(pt1NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt1"].Y);
-            ptInput.RewriteInput(pt1NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt1"].Z);
-            ptInput.RewriteInput(pt1NewLoc.z);
-            SetOutput(ptSet.ptCoords["pt2"].X);
-            ptInput.RewriteInput(pt2NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt2"].Y);
-            ptInput.RewriteInput(pt2NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt2"].Z);
-            ptInput.RewriteInput(pt2NewLoc.z);
-            SetOutput(ptSet.ptCoords["pt3"].X);
-            ptInput.RewriteInput(pt3NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt3"].Y);
-            ptInput.RewriteInput(pt3NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt3"].Z);
-            ptInput.RewriteInput(pt3NewLoc.z);
-            SetOutput(originalExpression);
-            manageText();
-            ManageFeedback();
-            ptSet.CompileAll();
-            presentPlane_col.GetLocalPoint();
-            presentPlane_col.GetPlaneDirection();
-            presentPlane_col.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
-            presentPlane_col.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+        //public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
+        //{
+        //    CalcOutput originalExpression = ptInput.currExpression;
+        //    SetOutput(ptSet.ptCoords["pt1"].X);
+        //    ptInput.RewriteInput(pt1NewLoc.x);
+        //    SetOutput(ptSet.ptCoords["pt1"].Y);
+        //    ptInput.RewriteInput(pt1NewLoc.y);
+        //    SetOutput(ptSet.ptCoords["pt1"].Z);
+        //    ptInput.RewriteInput(pt1NewLoc.z);
+        //    SetOutput(ptSet.ptCoords["pt2"].X);
+        //    ptInput.RewriteInput(pt2NewLoc.x);
+        //    SetOutput(ptSet.ptCoords["pt2"].Y);
+        //    ptInput.RewriteInput(pt2NewLoc.y);
+        //    SetOutput(ptSet.ptCoords["pt2"].Z);
+        //    ptInput.RewriteInput(pt2NewLoc.z);
+        //    SetOutput(ptSet.ptCoords["pt3"].X);
+        //    ptInput.RewriteInput(pt3NewLoc.x);
+        //    SetOutput(ptSet.ptCoords["pt3"].Y);
+        //    ptInput.RewriteInput(pt3NewLoc.y);
+        //    SetOutput(ptSet.ptCoords["pt3"].Z);
+        //    ptInput.RewriteInput(pt3NewLoc.z);
+        //    SetOutput(originalExpression);
+        //    manageText();
+        //    ManageFeedback();
+        //    ptSet.CompileAll();
+        //    presentPlane_col.GetLocalPoint();
+        //    presentPlane_col.GetPlaneDirection();
+        //    presentPlane_col.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+        //    presentPlane_col.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
 
-            presentPlane_null.GetLocalPoint();
-            presentPlane_null.GetPlaneDirection();
-            presentPlane_null.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
-            presentPlane_null.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
-        }
+        //    presentPlane_null.GetLocalPoint();
+        //    presentPlane_null.GetPlaneDirection();
+        //    presentPlane_null.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+        //    presentPlane_null.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+        //}
 
-        public void updateEqn(float newA, float newB, float newC, float newD)
-        {
-            CalcOutput originalExpression = ptInput.currExpression;
-            SetOutput(eqnSet.eqnCoefs["a"]);
-            ptInput.RewriteInput(newA);
-            SetOutput(eqnSet.eqnCoefs["b"]);
-            ptInput.RewriteInput(newB);
-            SetOutput(eqnSet.eqnCoefs["c"]);
-            ptInput.RewriteInput(newC);
-            SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput.RewriteInput(newD);
-            SetOutput(originalExpression);
-            manageText();
-            eqnSet.CompileAll();
-            ManageFeedback();
-        }
+        //public void updateEqn(float newA, float newB, float newC, float newD)
+        //{
+        //    CalcOutput originalExpression = ptInput.currExpression;
+        //    SetOutput(eqnSet.eqnCoefs["a"]);
+        //    ptInput.RewriteInput(newA);
+        //    SetOutput(eqnSet.eqnCoefs["b"]);
+        //    ptInput.RewriteInput(newB);
+        //    SetOutput(eqnSet.eqnCoefs["c"]);
+        //    ptInput.RewriteInput(newC);
+        //    SetOutput(eqnSet.eqnCoefs["d"]);
+        //    ptInput.RewriteInput(newD);
+        //    SetOutput(originalExpression);
+        //    manageText();
+        //    eqnSet.CompileAll();
+        //    ManageFeedback();
+        //}
 
-        public void updateEqn()
-        {
-            CalcOutput originalExpression = ptInput.currExpression;
-            SetOutput(eqnSet.eqnCoefs["a"]);
-            ptInput.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["b"]);
-            ptInput.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["c"]);
-            ptInput.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput.RewriteInput();
-            SetOutput(originalExpression);
-            manageText();
-            eqnSet.CompileAll();
-            // inputs.aInput.text = "NaN";
-            // inputs.bInput.text = "NaN";
-            // inputs.cInput.text = "NaN";
-            // inputs.dInput.text = "NaN";
-            feedbacks.eqnFeedback.material.color = negativeFeedback;
-        }
+        //public void updateEqn()
+        //{
+        //    CalcOutput originalExpression = ptInput.currExpression;
+        //    SetOutput(eqnSet.eqnCoefs["a"]);
+        //    ptInput.RewriteInput();
+        //    SetOutput(eqnSet.eqnCoefs["b"]);
+        //    ptInput.RewriteInput();
+        //    SetOutput(eqnSet.eqnCoefs["c"]);
+        //    ptInput.RewriteInput();
+        //    SetOutput(eqnSet.eqnCoefs["d"]);
+        //    ptInput.RewriteInput();
+        //    SetOutput(originalExpression);
+        //    manageText();
+        //    eqnSet.CompileAll();
+        //    // inputs.aInput.text = "NaN";
+        //    // inputs.bInput.text = "NaN";
+        //    // inputs.cInput.text = "NaN";
+        //    // inputs.dInput.text = "NaN";
+        //    feedbacks.eqnFeedback.material.color = negativeFeedback;
+        //}
 
         public void manageText()
         {
