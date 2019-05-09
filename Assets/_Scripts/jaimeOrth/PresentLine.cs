@@ -19,6 +19,10 @@ namespace orthProj
         public Transform forwardAxisLine;
         public Transform lookAtAxisTarget;
 
+        public Transform projline;
+        public Transform forwardProjLine;
+        public Transform lookAtProjTarg;
+
         public Transform axisline2;
         public Transform forwardAxisLine2;
         public Transform lookAtAxisTarget2;
@@ -31,6 +35,8 @@ namespace orthProj
         private PtCoord rawPt1, rawPt2, rawPt3;
 
         public Vector3 center;
+        public Vector3 projectedResult;
+        public Vector3 projectedScaled;
         public Vector3 vector12, vector13, vector23;
         public Vector3 scaledPt1, scaledPt2, scaledPt3;
         public Vector3 scaledVector12, scaledVector13;
@@ -93,7 +99,7 @@ namespace orthProj
             point3.localPosition = scaledPt3;
             //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
             centerPt.localPosition = ScaledPoint(new Vector3(0,0,0));
-            Debug.Log("dddddddddddddddddd: " + PtCoordToVector(rawPt1));
+           // Debug.Log("dddddddddddddddddd: " + PtCoordToVector(rawPt1));
 
 
             //p1 = new Vector3(-2, 1, 0);
@@ -122,10 +128,39 @@ namespace orthProj
             axisline.LookAt(lookAtAxisTarget);
             axisline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
-            //axis 2
-            lookAtAxisTarget2.localPosition = scaledPt3;
-            axisline2.LookAt(lookAtAxisTarget2);
-            axisline2.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+            //calculate projection axis component
+            //vector to project and normal
+            projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2)); // give this back to them?
+            projectedScaled = Vector3.Project(scaledPt1, scaledPt2);
+
+            Debug.Log("INPUT VECT PTS: " + "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")");
+            Debug.Log("NORMAL VECT PTS: " + "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")");
+            Debug.Log("PROJECTED VECT PTS: " + "(" + projectedResult.x + "," + projectedResult.y + "," + projectedResult.z + ")");
+
+            //set that as the lookat position
+            lookAtProjTarg.localPosition = projectedScaled;
+            projline.LookAt(lookAtProjTarg);
+            projline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+
+            var sharedMaterialP = forwardProjLine.GetComponent<MeshRenderer>().sharedMaterial;
+            sharedMaterialP.SetInt("_planeClippingEnabled", 1);
+
+            for (int i = 0; i < 6; i++)
+            {
+                sharedMaterialP.SetVector("_planePos" + i, walls[i].transform.position);
+                //plane normal vector is the rotated 'up' vector.
+                sharedMaterialP.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+            }
+
+            //lookatit
+            //set the origin of the line to be scaled pt1
+
+            //SCALING OF THE LINES!! and maybe add them, greyed out, as axis
+
+            //axis 2 //TODO not working yet (maybe omit and just change the plane anyway?  
+            //lookAtAxisTarget2.localPosition = scaledPt3;
+            //axisline2.LookAt(lookAtAxisTarget2);
+            //axisline2.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
             pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
             pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
@@ -134,6 +169,7 @@ namespace orthProj
 
 
 
+            
             var sharedMaterial = forwardLine.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
@@ -155,15 +191,15 @@ namespace orthProj
                 sharedMaterial2.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
-            var sharedMaterial3 = forwardAxisLine2.GetComponent<MeshRenderer>().sharedMaterial;
-            sharedMaterial3.SetInt("_planeClippingEnabled", 1);
+            //var sharedMaterial3 = forwardAxisLine2.GetComponent<MeshRenderer>().sharedMaterial;
+            //sharedMaterial3.SetInt("_planeClippingEnabled", 1);
 
-            for (int i = 0; i < 6; i++)
-            {
-                sharedMaterial3.SetVector("_planePos" + i, walls[i].transform.position);
-                //plane normal vector is the rotated 'up' vector.
-                sharedMaterial3.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            }
+            //for (int i = 0; i < 6; i++)
+            //{
+            //    sharedMaterial3.SetVector("_planePos" + i, walls[i].transform.position);
+            //    //plane normal vector is the rotated 'up' vector.
+            //    sharedMaterial3.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+            //}
 
             //sharedMaterial = backwardLine.GetComponent<MeshRenderer>().sharedMaterial;
             //sharedMaterial.SetInt("_planeClippingEnabled", 1);
@@ -419,14 +455,14 @@ namespace orthProj
             return result;
         }
 
-        //public Vector3 UnscaledPoint(Vector3 pt)
-        //{
-        //    Vector3 result = Vector3.zero;
-        //    print("raw pt1 position: " + pt);
-        //    result.x = (pt.z + 10) / 20 * (xLabelManager.Max - xLabelManager.Min) + xLabelManager.Min;
-        //    result.y = (pt.x + 10) / 20 * (yLabelManager.Max - yLabelManager.Min) + yLabelManager.Min;
-        //    result.z = (pt.y + 10) / 20 * (zLabelManager.Max - zLabelManager.Min) + zLabelManager.Min;
-        //    return result;
-        //}
+        public Vector3 UnscaledPoint(Vector3 pt)
+        {
+            Vector3 result = Vector3.zero;
+            print("raw pt1 position: " + pt);
+            result.x = (pt.z + 10) / 20 * (xLabelManager.Max - xLabelManager.Min) + xLabelManager.Min;
+            result.y = (pt.x + 10) / 20 * (yLabelManager.Max - yLabelManager.Min) + yLabelManager.Min;
+            result.z = (pt.y + 10) / 20 * (zLabelManager.Max - zLabelManager.Min) + zLabelManager.Min;
+            return result;
+        }
     }
 }
