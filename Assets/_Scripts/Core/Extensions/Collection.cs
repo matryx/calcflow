@@ -10,6 +10,7 @@ namespace Nanome.Core.Extension
 
     public static class CollectionExtension
     {
+
         public static bool ContainsAllKeys<K, V>(this Dictionary<K, V> dictionary, params K[] keys)
         {
             foreach (var key in keys)
@@ -62,23 +63,6 @@ namespace Nanome.Core.Extension
             var result = new T[length];
             Array.Copy(data, index, result, 0, length);
             return result;
-        }
-
-        public static int IndexOfElementWithValue<T,V>(this List<T> data, V fieldValue)
-        {
-            int index = -1;
-            for (int i = 0; i < data.Count; i++)
-            {
-                Dictionary<string, object> entry = data[i] as Dictionary<string, object>;
-                //case insensitive search
-                if (entry.Values.Contains(fieldValue))
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            return index;
         }
 
         public static List<T> SubList<T>(this List<T> data, int index, int length = 0)

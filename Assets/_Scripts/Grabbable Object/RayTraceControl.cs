@@ -227,7 +227,6 @@ public class RayTraceControl : ControlScheme {
             {
                 if (target.transform.parent.GetComponent<FlexButtonComponent>().State != 2)
                     target.GetComponent<Renderer>().material.color = highlightedColor;
-
                 else
                     target.GetComponent<Renderer>().material.color = target.transform.parent.GetComponent<FlexButtonComponent>().selectedColor;
             }

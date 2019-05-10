@@ -25,7 +25,7 @@ abstract public class FlexActionableComponent : MonoBehaviour {
     protected Action<FlexActionableComponent, GameObject> exitCallback;
     protected Action<FlexActionableComponent, GameObject> stayCallback;
     protected Action<FlexActionableComponent, GameObject> enterCallback;
-    
+     
     #region Properties
     private int state;
     public int State
@@ -54,7 +54,7 @@ abstract public class FlexActionableComponent : MonoBehaviour {
     //will be called on setup
 	protected abstract void AssembleComponent();
     //will be called whenever state changes
-    protected abstract void StateChanged(int _old, int _new, GameObject source = null);
+    protected abstract void StateChanged(int _old, int _new);
     //will be called whenever button is removed from panel
     protected abstract void DisassembleComponent();
     // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -70,6 +70,8 @@ abstract public class FlexActionableComponent : MonoBehaviour {
 
         AssembleComponent();
     }
+
+
 
     public void DismantleComponent()
     {

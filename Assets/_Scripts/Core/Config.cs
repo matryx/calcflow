@@ -14,31 +14,25 @@ namespace Nanome.Core
         static public bool getBool(string key, string def)
         {
             var vv = get(key, def);
-            return bool.Parse(vv as string);
+            return vv.toBool();
         }
 
         static public float getFloat(string key, string def)
         {
             var vv = get(key, def);
-            return (float)vv;
+            return vv.toFloat();
         }
 
         static public int getInt(string key, string def)
         {
             var vv = get(key, def);
-            return (int)vv;
+            return vv.toInt();
         }
 
         static public string getString(string key, string def)
         {
             var vv = get(key, def);
-            return (string)vv;
-        }
-
-        static public byte[] getBytes(string key, string def)
-        {
-            var vv = get(key, def);
-            return vv as byte[];
+            return vv.toString();
         }
 
         static public string getFormattedString(string key, Dictionary<string, string> variables, string def)
@@ -60,11 +54,6 @@ namespace Nanome.Core
                 vv = "";
             }
             return vv;
-        }
-
-        static public void setBytes(string key, byte[] val, bool save = false, string where = null )
-        {
-            set(key, val, save);
         }
 
         static public void setString(string key, string val, bool save = false, string where = null)
@@ -157,6 +146,7 @@ namespace Nanome.Core
                     catch (Exception exc)
                     {
                         Logs.debugOnChannel("Nanome.Core", "Could not load saved config file", localConfigSaved, exc);
+                        Config.session = new Ini.Values();
                     }
                     string documentsConfigSaved = documentsConfigPath();
                     try
@@ -171,18 +161,19 @@ namespace Nanome.Core
                     catch (Exception exc)
                     {
                         Logs.debugOnChannel("Nanome.Core", "Could not load saved config file", localConfigSaved, exc);
+                        Config.session = new Ini.Values();
                     }
                 }
             }
         }
 
-        static private object get(string key, string def)
+        static private string get(string key, string def)
         {
             Config.loadIfNeeded();
             return Config.values.get(key, def);
         }
 
-        static private void set(string key, object val, bool save = false, string where=null)
+        static private void set(string key, string val, bool save = false, string where=null)
         {
             Config.loadIfNeeded();
             Config.values.set(key, val);

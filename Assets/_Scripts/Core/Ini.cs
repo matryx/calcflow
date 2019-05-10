@@ -14,16 +14,16 @@ namespace Nanome.Core.Importer
         public class Values
         {
 
-            private Dictionary<string, object> data;
+            private Dictionary<string, string> data;
 
             public Values()
             {
-                data = new Dictionary<string, object>();
+                data = new Dictionary<string, string>();
             }
 
             public Values(Values toCopy)
             {
-                data = new Dictionary<string, object>(toCopy.data);
+                data = new Dictionary<string, string>(toCopy.data);
             }
 
             public bool has(string key)
@@ -31,12 +31,12 @@ namespace Nanome.Core.Importer
                 return data.ContainsKey(key);
             }
 
-            public void set(string key, object val)
+            public void set(string key, string val)
             {
                 data[key] = val;
             }
 
-            public object get(string key, string def = null)
+            public string get(string key, string def = null)
             {
                 if (has(key))
                 {

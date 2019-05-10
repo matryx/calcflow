@@ -9,7 +9,10 @@ using UnityEngine;
 
 public class RayCastButtonPresser : MonoBehaviour {
 
+    public setRotation rotator;
+    public setPosition pos1, pos2;
     public VRController controller;
+    public GameObject exists;
     RayCastSender sender;
 
     // Use this for initialization
@@ -26,6 +29,12 @@ public class RayCastButtonPresser : MonoBehaviour {
         if (button != null)
         {
             button.PressButton(this.gameObject);
+            if ((button.name == "Button_Enter" || button.transform.parent.name == "Button_Enter") && exists != null)
+            {
+                rotator.makechanges = true;
+                pos1.makechanges = true;
+                pos2.makechanges = true;
+            }
         }
     }
 

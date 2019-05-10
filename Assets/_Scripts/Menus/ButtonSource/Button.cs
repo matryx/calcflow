@@ -9,9 +9,8 @@ namespace CalcFlowUI
     {
         public delegate void ButtonCallBack(GameObject presser);
 
-        public event ButtonCallBack OnButtonPress;
-        public event ButtonCallBack OnButtonStay;
-        public event ButtonCallBack OnButtonUnpress;
+        public event ButtonCallBack OnButtonEnter;
+        public event ButtonCallBack OnButtonExit;
 
         [SerializeField]
         public Color disabledColor;
@@ -25,8 +24,8 @@ namespace CalcFlowUI
                 print("button pressed");
             }
 #endif
-            if (OnButtonPress != null)
-                OnButtonPress.Invoke(other);
+            if (OnButtonEnter != null)
+                OnButtonEnter.Invoke(other);
 
             string eventName = gameObject.name;
             var extra = new Dictionary<string, object>();
@@ -34,19 +33,6 @@ namespace CalcFlowUI
             if (!eventName.Equals("Body"))
             {
                 StatisticsTracking.StartEvent("Button Press", eventName, extra);
-            }
-        }
-
-        public virtual void HoverButton(GameObject other)
-        {
-            if (verbose)
-            {
-                print("button hovering");
-            }
-
-            if (OnButtonStay != null)
-            {
-                OnButtonStay?.Invoke(other);
             }
         }
 
@@ -58,8 +44,8 @@ namespace CalcFlowUI
                 print("button released");
             }
 #endif
-            if (OnButtonUnpress != null)
-                OnButtonUnpress.Invoke(other);
+            if (OnButtonExit != null)
+                OnButtonExit.Invoke(other);
 
             string eventName = gameObject.name;
             if (!eventName.Equals("Body"))
@@ -104,9 +90,9 @@ namespace CalcFlowUI
         public void Disable()
         {
             GetComponent<Renderer>().material.color = disabledColor;
-            foreach (ButtonCallBack b in OnButtonPress.GetInvocationList())
+            foreach (ButtonCallBack b in OnButtonEnter.GetInvocationList())
             {
-                OnButtonPress -= b;
+                OnButtonEnter -= b;
             }
 
             HighlightOnRaycast highlight = GetComponent<HighlightOnRaycast>();

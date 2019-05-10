@@ -8,8 +8,6 @@ using UnityEngine.UI;
 
 public class TournamentMenu : MonoBehaviour
 {
-    public static TournamentMenu Instance { get; private set; }
-
     private CalcManager calcManager;
     private MultiSelectFlexPanel submissionsPanel;
 
@@ -17,59 +15,35 @@ public class TournamentMenu : MonoBehaviour
     private SubmissionMenu submissionMenu;
 
     [SerializeField]
-    private FlexPanelComponent mainPanel;
-
-    [SerializeField]
-    private TMPro.TextMeshPro timeRemainingText;
+    private TMPro.TextMeshPro titleText;
     [SerializeField]
     private TMPro.TextMeshPro bountyText;
-    [SerializeField]
-    private TMPro.TextMeshPro titleText;
-    int titlePage = 0;
-    [SerializeField]
-    private TMPro.TextMeshPro creatorText;
-    
     [SerializeField]
     private TMPro.TextMeshPro descriptionText;
 
     [SerializeField]
-    private GameObject contributeButton;
-    [SerializeField]
-    private TMPro.TextMeshPro roundText;
+    private GameObject contributeSection;
 
     [SerializeField]
-    private FlexButtonComponent previousRoundButton;
+    private GameObject winningSubmissions;
     [SerializeField]
-    private FlexButtonComponent nextRoundButton;
+    private TMPro.TextMeshPro loadingWinningSubmissions;
 
-    [SerializeField]
-    private GameObject winningAndMySubmissions;
-    [SerializeField]
-    private TMPro.TextMeshPro loadingSubmissions;
-
-    public static MatryxTournament Tournament { get; private set; }
-    public static MatryxRound Round { get; private set; }
-    public static int roundIndex;
-    public static int RoundIndex
+    static MatryxTournament tournament;
+    public static MatryxTournament Tournament
     {
-        get { return roundIndex; }
-        set
+        get
         {
-            if (value == 0) { Instance.previousRoundButton.SetState(-1); }
-            else { Instance.previousRoundButton.SetState(0); }
-            if (value == Tournament.currentRound.index) { Instance.nextRoundButton.SetState(-1); }
-            else { Instance.nextRoundButton.SetState(0); }
-
-            roundIndex = value;
+            return tournament;
         }
     }
 
     private Dictionary<string, MatryxSubmission> submissions = new Dictionary<string, MatryxSubmission>();
 
-    internal class TournamentMenuResponder : FlexMenu.FlexMenuResponder
+    internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
     {
         TournamentMenu submissionMenu;
-        internal TournamentMenuResponder(TournamentMenu submissionMenu)
+        internal KeyboardInputResponder(TournamentMenu submissionMenu)
         {
             this.submissionMenu = submissionMenu;
         }
@@ -79,10 +53,7 @@ public class TournamentMenu : MonoBehaviour
             submissionMenu.HandleInput(sender.gameObject);
         }
 
-        public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider)
-        {
-            sender.SetState(0);
-        }
+        public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
     }
 
     private Scroll scroll;
@@ -97,67 +68,49 @@ public class TournamentMenu : MonoBehaviour
 
         scroll = GetComponentInChildren<Scroll>(true);
         flexMenu = GetComponent<FlexMenu>();
-        TournamentMenuResponder responder = new TournamentMenuResponder(this);
+        KeyboardInputResponder responder = new KeyboardInputResponder(this);
+        flexMenu.RegisterResponder(responder);
         submissionsPanel = GetComponentInChildren<MultiSelectFlexPanel>().Initialize();
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
-
-        mainPanel.AddAction(previousRoundButton);
-        mainPanel.AddAction(nextRoundButton);
-        flexMenu.AddPanel(mainPanel);
-        flexMenu.RegisterResponder(responder);
     }
 
     public void HandleInput(GameObject source)
     {
         if (source.name == "Load_Button")
         {
-            //LoadMoreSubmissions();
-        }
-        else if (source.name.Contains("Previous Round"))
-        {
-            SetRound(--RoundIndex);
-        }
-        else if (source.name.Contains("Next Round"))
-        {
-
-            SetRound(++RoundIndex);
+            LoadMoreSubmissions();
         }
         else
         {
-            MatryxSubmission submission = source.GetComponent<SubmissionContainer>().submission;
+            MatryxSubmission submission = source.GetComponent<SubmissionContainer>().GetSubmission();
             DisplaySubmissionUI(submission);
         }
     }
 
+    int page = 0;
     public void SetTournament(MatryxTournament newTournament)
     {
-        if (Tournament == null ||
-            Tournament.address != newTournament.address)
+        if (tournament == null ||
+            tournament.address != newTournament.address)
         {
-            ClearSubmissions();
-            Tournament = newTournament;
+            tournament = newTournament;
+            UpdateHeaderUI();
 
-            loadingSubmissions.gameObject.SetActive(true);
-            MatryxCortex.RunGetMySubmissions(Tournament, ProcessMySubmissions);
-            MatryxCortex.RunGetTournament(Tournament.address, true, ProcessTournament, ErrorLoadingTournament);
+            ClearSubmissions();
+            var roundNumber = 0;
+            loadingWinningSubmissions.gameObject.SetActive(true);
+            MatryxCortex.RunFetchTournament(tournament.address, roundNumber, page, ProcessTournament, ErrorLoadingTournament);
         }
     }
 
-    public void ReloadSubmissions()
+    /// <summary>
+    /// Loads the next page of submissions under a tournament
+    /// </summary>
+    public void LoadMoreSubmissions()
     {
-        ClearSubmissions();
-        MatryxCortex.RunGetMySubmissions(Tournament, ProcessMySubmissions);
-    }
-
-    public void SetRound(int roundIndex)
-    {
-        if (Tournament != null)
-        {
-            ClearSubmissions();
-
-            loadingSubmissions.gameObject.SetActive(true);
-            MatryxCortex.RunGetRound(Tournament.address, roundIndex, ProcessRound);
-        }
+        removeLoadButton();
+        var roundNumber = 0;
+        MatryxCortex.RunFetchTournament(tournament.address, roundNumber, ++page, ProcessTournament, ErrorLoadingTournament);
     }
 
     /// <summary>
@@ -165,101 +118,76 @@ public class TournamentMenu : MonoBehaviour
     /// </summary>
     public void ClearSubmissions()
     {
+        page = 0;
         submissions.Clear();
         scroll.clear();
-        winningAndMySubmissions.SetActive(false);
-    }
-
-    public static int lastSubmissionKindProcessed = 0;
-    public static void setSubmissionKindProcessed(int myType)
-    {
-        if (lastSubmissionKindProcessed == 0)
-        {
-            lastSubmissionKindProcessed = myType;
-        }
-        else if (lastSubmissionKindProcessed != myType)
-        {
-            lastSubmissionKindProcessed = 0;
-        }
+        winningSubmissions.SetActive(false);
     }
 
     public void ProcessTournament(object result)
     {
-        Tournament = (MatryxTournament)result;
-        RoundIndex = Tournament.currentRound.index;
-
-        if (Tournament.currentRound.winningSubmissions.Count == 0)
+        var submissions = (List<MatryxSubmission>)result;
+        if(submissions.Count == 0)
         {
-            if (lastSubmissionKindProcessed == 0)
-            {
-                loadingSubmissions.text = "No submissions to display";
-            }
+            loadingWinningSubmissions.text = "No Submissions to Display";
         }
         else
         {
-            loadingSubmissions.gameObject.SetActive(false);
-            DisplaySubmissions(Tournament.currentRound.winningSubmissions, "Winning Submissions");
+            loadingWinningSubmissions.gameObject.SetActive(false);
+            DisplaySubmissions((List<MatryxSubmission>)result);
         }
-
-        DisplayTournamentInfo();
-        setSubmissionKindProcessed(1);
-    }
-
-    public void ProcessRound(object result)
-    {
-        Round = (MatryxRound)result;
-
-        loadingSubmissions.gameObject.SetActive(false);
-
-    }
-
-    public void ProcessMySubmissions(object result)
-    {
-        var mySubmissions = (List<MatryxSubmission>)result;
-        
-
-        if (mySubmissions.Count == 0)
-        {
-            if (lastSubmissionKindProcessed == 0)
-            {
-                loadingSubmissions.text = "No submissions to display";
-            }
-        }
-        else
-        {
-            loadingSubmissions.gameObject.SetActive(false);
-            DisplaySubmissions((List<MatryxSubmission>)result, "My Submissions");
-        }
-
-        setSubmissionKindProcessed(2);
     }
 
     public void ErrorLoadingTournament(object result)
     {
-        loadingSubmissions.text = "Something went wrong. :(";
-        descriptionText.text = "This would normally be the description of the tournament you just pulled up, but right now it's just filler because something has gone wrong. Try reloading this tournament?";
+        loadingWinningSubmissions.text = "Could not load submissions";
     }
 
-    private void DisplayTournamentInfo()
+    /*
+    public void ProcessTournamentOLD(string jsonString)
     {
-        bountyText.text = Tournament.Bounty + " MTX";
-        timeRemainingText.text = Tournament.currentRound.TimeRemaining;
-        titleText.text = Tournament.title;
-        creatorText.text = "by " + Utils.ellipseAddress(Tournament.owner);
-        roundText.text = "Round " + Tournament.currentRound.index + "\n" + Tournament.currentRound.Details.Bounty + " MTX";
+        JSONObject jsonObject = new JSONObject(jsonString);
+        jsonObject.GetField("results", delegate (JSONObject results)
+        {
+            results.GetField(tournament.address, delegate (JSONObject jsonTournament)
+            {
+                var title = jsonTournament.GetField("title").str;
+                var bounty = jsonTournament.GetField("bounty").f;
+                var description = jsonTournament.GetField("description").str;
 
-        descriptionText.text = Tournament.getDescription();
-        contributeButton.SetActive(Tournament.currentRound.status.Equals(MatryxRound.STATE_OPEN));
+                tournament.title = title;
+                tournament.bounty = new long?((long)bounty);
+                tournament.description = description;
+                UpdateHeaderUI();
+
+                List<JSONObject> submissionsList = null;
+                List<Matryx_Submission> newSubmissions = new List<Matryx_Submission>();
+                jsonTournament.GetField("submissions", delegate (JSONObject jsonSubmissions)
+                {
+                    submissionsList = jsonSubmissions.list;
+                    foreach (JSONObject jsonSubmission in submissionsList)
+                    {
+                        string submissionAddress = jsonSubmission.GetField("address").str;
+                        string submissionTitle = jsonSubmission.GetField("title").str;
+
+                        Matryx_Submission aSubmission = new Matryx_Submission(submissionTitle, submissionAddress);
+                        submissions.Add(submissionAddress, aSubmission);
+                        newSubmissions.Add(aSubmission);
+                    }
+
+                    DisplaySubmissions(newSubmissions);
+                });
+            });
+        });
     }
+    */
 
-    public void IncrementRound()
+    private void UpdateHeaderUI()
     {
-        Debug.Log("up");
-    }
-
-    public void DecrementRound()
-    {
-        Debug.Log("down");
+        titleText.text = tournament.title;
+        bountyText.text = "Reward: " + tournament.Bounty + " MTX";
+        descriptionText.text = tournament.getDescription();
+        contributeSection.SetActive(tournament.status.Equals(MatryxTournament.STATE_OPEN));
     }
 
     public void DisplaySubmissionUI(MatryxSubmission submission)
@@ -269,16 +197,15 @@ public class TournamentMenu : MonoBehaviour
     }
 
     GameObject loadButton;
-    public void DisplaySubmissions(List<MatryxSubmission> submissions, string listTitle)
+    public void DisplaySubmissions(List<MatryxSubmission> submissions)
     {
         if(submissions.Count == 0)
         {
-            winningAndMySubmissions.SetActive(false);
+            winningSubmissions.SetActive(false);
             return;
         }
 
-        winningAndMySubmissions.SetActive(true);
-        createHeaderButton(listTitle);
+        winningSubmissions.SetActive(true);
         foreach (MatryxSubmission submission in submissions)
         {
             GameObject button = createButton(submission);
@@ -298,33 +225,9 @@ public class TournamentMenu : MonoBehaviour
         button.transform.localScale = Vector3.one;
 
         button.name = submission.title;
-        button.GetComponent<SubmissionContainer>().submission = submission;
+        button.GetComponent<SubmissionContainer>().SetSubmission(submission);
 
         button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = submission.title;
-
-        scroll.addObject(button.transform);
-        joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
-
-        return button;
-    }
-
-    private GameObject createHeaderButton(string text)
-    {
-        GameObject button = Instantiate(Resources.Load("Submission_Cell", typeof(GameObject))) as GameObject;
-        button.transform.SetParent(submissionsPanel.transform);
-        button.transform.localScale = Vector3.one;
-
-        
-        button.name = text + "Header Button";
-        var tmpro = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
-        tmpro.text = text;
-        tmpro.fontSize = tmpro.fontSize * 1.5f;
-        tmpro.alignment = TMPro.TextAlignmentOptions.Center;
-
-        // Disable the button, its just for appearance
-        var flexButton = button.GetComponent<FlexButtonComponent>();
-        flexButton.disabledColor = Color.white;
-        flexButton.SetState(-1);
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
@@ -358,25 +261,5 @@ public class TournamentMenu : MonoBehaviour
 
             Destroy(loadButton);
         }
-    }
-
-    private void Start()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-    }
-
-    int counter = 0;
-    private void FixedUpdate()
-    {
-        if (counter == 0)
-        {
-            titlePage = (++titlePage) % (titleText.textInfo.pageCount + 1);
-            titleText.pageToDisplay = titlePage;
-        }
-
-        counter = (counter + 1) % 150;
     }
 }

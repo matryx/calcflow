@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PtOutputMenu : MonoBehaviour {
 
@@ -48,6 +49,8 @@ public class PtOutputMenu : MonoBehaviour {
 	public FlexMenu menu;
 
     PtManager ptManager;
+
+    public setPosition positioner;
 
     PresentPlane presentPlane;
     public PlaneSolverPointGrab grabber;

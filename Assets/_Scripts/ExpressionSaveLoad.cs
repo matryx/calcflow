@@ -5,11 +5,9 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using Calcflow.UserStatistics;
-using Matryx;
 
 public class ExpressionSaveLoad : MonoBehaviour
 {
-    public static ExpressionSaveLoad Instance { get; private set; }
     const string jsonExtension = ".json";
     const string imageExtension = ".png";
 
@@ -19,8 +17,8 @@ public class ExpressionSaveLoad : MonoBehaviour
     public delegate void fileLoadedCallback(SavePackage save);
     public event fileLoadedCallback fileLoadedEvent;
     //string defaultFile;
-    public string savePath;
-    public string imagePath;
+    string savePath;
+    string imagePath;
 
     public string SceneExtension;
 
@@ -32,10 +30,8 @@ public class ExpressionSaveLoad : MonoBehaviour
     }
 
     private bool initialized = false; 
-    public void Initialize()
+    void Initialize()
     {
-        if (Instance == null) Instance = this;
-
         savePath = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Calcflow"), "Saves");
         imagePath = Path.Combine(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Calcflow"), "Images");
 
@@ -62,11 +58,6 @@ public class ExpressionSaveLoad : MonoBehaviour
     public void SaveDefault()
     {
         SaveExpression(customParametrizedSurface.expressionSets);
-    }
-
-    public void SaveClaim(MatryxCommit commit)
-    {
-        SaveExpression(customParametrizedSurface.expressionSets, commit.ipfsContentHash);
     }
 
     public void SaveExpression(List<ExpressionSet> expressions)

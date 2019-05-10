@@ -6,13 +6,10 @@ public class CloseButton : QuickButton {
 
     [SerializeField]
     private GameObject objectParent;
-    [SerializeField]
-    private MenuStateReceiver menuStateReceiver;
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
         objectParent.GetComponent<AnimationHandler>().CloseMenu();
-        menuStateReceiver?.OnMenuClose();
         transform.parent.GetComponent<FlexActionableComponent>().SetState(2);
     }
 

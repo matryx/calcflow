@@ -2,29 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class QuickButton : MenuStateReceiver {
+public abstract class QuickButton : MonoBehaviour {
 
     protected virtual void Start()
     {
         VirtualButton virtualButton = GetComponent<VirtualButton>();
         if (virtualButton != null)
         {
-            virtualButton.OnButtonPress += ButtonEnterBehavior;
-            virtualButton.OnButtonUnpress += ButtonExitBehavior;
+            virtualButton.OnButtonEnter += ButtonEnterBehavior;
+            virtualButton.OnButtonExit += ButtonExitBehavior;
         }
 
         RayCastButton rcButton = GetComponent<RayCastButton>();
         if (rcButton != null)
         {
-            rcButton.OnButtonPress += ButtonEnterBehavior;
-            rcButton.OnButtonUnpress += ButtonExitBehavior;
+            rcButton.OnButtonEnter += ButtonEnterBehavior;
+            rcButton.OnButtonExit += ButtonExitBehavior;
         }
 
         TouchButton touchButton = GetComponent<TouchButton>();
         if (touchButton != null)
         {
-            touchButton.OnButtonPress += ButtonEnterBehavior;
-            touchButton.OnButtonUnpress += ButtonExitBehavior;
+            touchButton.OnButtonEnter += ButtonEnterBehavior;
+            touchButton.OnButtonExit += ButtonExitBehavior;
         }
     }
 

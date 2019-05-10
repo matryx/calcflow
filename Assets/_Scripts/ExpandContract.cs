@@ -1,5 +1,4 @@
-﻿using Nanome.Core;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,22 +13,20 @@ public class ExpandContract : MonoBehaviour {
 		savedRot = new Quaternion();
 	}
 
-	public IEnumerator Contract(float time = 0.3f, Async.EventDelegate afterContracted = null)
-    {
+	public IEnumerator Contract(float time = 0.3f){
 		savedPos = transform.localPosition;
 		savedScale = transform.localScale;
 		savedRot = transform.localRotation;
-		yield return StartCoroutine(ScaleTo(transform, transform.localScale, Vector3.zero, time, afterContracted));
+		yield return StartCoroutine(ScaleTo(transform, transform.localScale, Vector3.zero, time));
         transform.gameObject.SetActive(false);
 	}
 
-	public IEnumerator Expand(float time = 0.3f, Async.EventDelegate afterExpanded = null){
+	public IEnumerator Expand(float time = 0.3f){
 		transform.gameObject.SetActive(true);
-		yield return StartCoroutine(ScaleTo(transform, Vector3.zero, savedScale, time, afterExpanded));
-        afterExpanded(this);
+		yield return StartCoroutine(ScaleTo(transform, Vector3.zero, savedScale, time));
 	}
 	
-	IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime, Async.EventDelegate whenDone = null)
+	IEnumerator ScaleTo(Transform obj, Vector3 start, Vector3 end, float overTime)
     {
         float startTime = Time.time;
 
@@ -44,6 +41,5 @@ public class ExpandContract : MonoBehaviour {
         }
 
         obj.localScale = end;
-        whenDone?.Invoke(this);
     }
 }

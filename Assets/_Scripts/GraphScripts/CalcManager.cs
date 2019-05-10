@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Calcflow.UserStatistics;
-using System;
 
 public class CalcManager : MonoBehaviour
 {
@@ -12,7 +11,6 @@ public class CalcManager : MonoBehaviour
 
     [HideInInspector]
     public bool inputReceived;
-    public event EventHandler inputHandler;
 
     [HideInInspector]
     public ExpressionSet expressionSet;
@@ -152,7 +150,7 @@ public class CalcManager : MonoBehaviour
         calcInput.ChangeOutput(output);
     }
 
-    public void Initialize()
+    private void Initialize()
     {
         if(Instance == null) { Instance = this; }
         calcInput = connectedMenus.calcInput;
@@ -209,6 +207,7 @@ public class CalcManager : MonoBehaviour
         Initialize();
     }
 
+
     public bool updateOverlay = false;
     public bool updateText = false;
     // Update is called once per frame
@@ -227,10 +226,7 @@ public class CalcManager : MonoBehaviour
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
             if (isValid)
-            {
-                inputHandler?.Invoke(this, null);
                 paramSurface.GenerateParticles();
-            }
         }
         if (toExport)
         {

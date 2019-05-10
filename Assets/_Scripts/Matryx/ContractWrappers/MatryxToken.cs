@@ -4,9 +4,9 @@ using UnityEngine;
 
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts;
+using Nethereum.JsonRpc.UnityClient;
 using System.Numerics;
 using Nanome.Core;
-using Nethereum.JsonRpc.UnityClient;
 
 namespace Matryx
 {

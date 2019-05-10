@@ -16,7 +16,7 @@ public class SubmissionMenu : MonoBehaviour
     [SerializeField]
     private Material imageMaterial;
     [SerializeField]
-    private ImportCommit importCommitButton;
+    private ImportSubmission importSubmissionButton;
 
     MatryxSubmission submission;
     MatryxSubmission Submission
@@ -49,11 +49,11 @@ public class SubmissionMenu : MonoBehaviour
                 Submission = (MatryxSubmission)result;
                 if (Submission.calcflowCompatible)
                 {
-                    EnableImport("View");
+                    EnableImport();
                 }
                 else
                 {
-                    DisableImport("Incompatible");
+                    DisableImport();
                 }
             });
         }
@@ -66,13 +66,15 @@ public class SubmissionMenu : MonoBehaviour
         LoadPreviewImage();
 
         // Update the import button!
-        importCommitButton.commit = submission.commit;
-        importCommitButton.Enable();
+        importSubmissionButton.submission = submission;
+        importSubmissionButton.Reenable();
     }
 
     void LoadPreviewImage()
     {
-        transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = submission.commit.previewImage;
+        Texture2D imageTexture = new Texture2D(2, 2);
+        imageTexture.LoadImage(submission.commit.previewImage);
+        transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = imageTexture;
     }
 
     void ClearPreview()
@@ -80,13 +82,13 @@ public class SubmissionMenu : MonoBehaviour
         transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = null;
     }
 
-    public void EnableImport(string text = "")
+    public void EnableImport()
     {
-        importCommitButton.Enable(text);
+        importSubmissionButton.Reenable();
     }
 
-    public void DisableImport(string text = "")
+    public void DisableImport()
     {
-        importCommitButton.Disable(text);
+        importSubmissionButton.Disable();
     }
 }

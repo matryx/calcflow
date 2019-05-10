@@ -16,6 +16,7 @@ using Calcflow.UserStatistics;
 
 public class CreateSubmissionMenu : MonoBehaviour {
 
+    string submitEndpoint = "http://13.57.11.64/v1/submit/";
     MatryxTournament tournament;
     [SerializeField]
     CustomParametrizedSurface customParametrizedSurface;
@@ -76,13 +77,7 @@ public class CreateSubmissionMenu : MonoBehaviour {
                 if ((bool)result)
                 {
                     StatisticsTracking.EndEvent("Matryx", "Submission Creation");
-                    ResultsMenu.Instance.PostSuccess(submission,
-                        (nothin) => 
-                        {
-                            TournamentMenu.Instance.ReloadSubmissions();
-                        }
-                    );
-                    
+                    ResultsMenu.Instance.PostSuccess(submission);
                 }
                 else
                 {
