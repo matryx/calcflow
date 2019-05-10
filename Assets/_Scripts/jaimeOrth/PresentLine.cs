@@ -13,6 +13,7 @@ namespace orthProj
 
         public Transform line;
         public Transform forwardLine;
+        public Transform arrowLine;
         public Transform lookAtTarget;
 
         public Transform axisline;
@@ -20,6 +21,7 @@ namespace orthProj
         public Transform lookAtAxisTarget;
 
         public Transform projline;
+        public Transform arrow;
         public Transform forwardProjLine;
         public Transform lookAtProjTarg;
 
@@ -89,7 +91,7 @@ namespace orthProj
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
             }
 
-
+            point1.GetComponent<MeshRenderer>().enabled = false;
 
             scaledPt1 = ScaledPoint(PtCoordToVector(rawPt1));
             point1.localPosition = scaledPt1;
@@ -99,7 +101,8 @@ namespace orthProj
             point3.localPosition = scaledPt3;
             //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
             centerPt.localPosition = ScaledPoint(new Vector3(0,0,0));
-           // Debug.Log("dddddddddddddddddd: " + PtCoordToVector(rawPt1));
+            // Debug.Log("dddddddddddddddddd: " + PtCoordToVector(rawPt1));
+            Debug.Log("center of ball is: " + centerPt.localPosition.x + " " + centerPt.localPosition.y + " " + centerPt.localPosition.z);
 
 
             //p1 = new Vector3(-2, 1, 0);
@@ -122,6 +125,14 @@ namespace orthProj
             line.LookAt(lookAtTarget);
             //set the line to have an origin of zero
             line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+     
+
+            //magnitude to vector? 
+            //line.localScale = new Vector3(1, 1, rawPt1.Z.Value);
+
+            line.localScale = new Vector3(1, 1, scaledPt1.magnitude);
+            //float rawMag = (PtCoordToVector(rawPt1)).magnitude;
+            //line.localScale = new Vector3(1, 1, rawMag);
 
             //axis 1
             lookAtAxisTarget.localPosition = scaledPt2;
@@ -131,16 +142,25 @@ namespace orthProj
             //calculate projection axis component
             //vector to project and normal
             projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2)); // give this back to them?
-            projectedScaled = Vector3.Project(scaledPt1, scaledPt2);
+            //scaled to project
+            Vector3 scaledRes = ScaledPoint(projectedResult);
 
-            Debug.Log("INPUT VECT PTS: " + "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")");
-            Debug.Log("NORMAL VECT PTS: " + "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")");
-            Debug.Log("PROJECTED VECT PTS: " + "(" + projectedResult.x + "," + projectedResult.y + "," + projectedResult.z + ")");
+            //Debug.Log("INPUT VECT PTS: " + "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")");
+            //Debug.Log("NORMAL VECT PTS: " + "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")");
+            //Debug.Log("PROJECTED VECT PTS: " + "(" + projectedResult.x + "," + projectedResult.y + "," + projectedResult.z + ")");
 
-            //set that as the lookat position
-            lookAtProjTarg.localPosition = projectedScaled;
+            //show them the projected value
+            point3.localPosition = scaledRes;
+            pt3Label.text = "(" + projectedResult.x + "," + projectedResult.y + "," + projectedResult.z + ")";
+            point3.GetComponent<MeshRenderer>().enabled = false;
+
+            lookAtProjTarg.localPosition = scaledRes;
             projline.LookAt(lookAtProjTarg);
-            projline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+
+            projline.localPosition = centerPt.localPosition;
+
+            //projline.localScale = new Vector3(1, 1, scaledRes.x);
+            projline.localScale = new Vector3(1, 1, scaledRes.magnitude);
 
             var sharedMaterialP = forwardProjLine.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterialP.SetInt("_planeClippingEnabled", 1);
@@ -164,12 +184,12 @@ namespace orthProj
 
             pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
             pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
-            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
+           // pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
 
-
             
+
             var sharedMaterial = forwardLine.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
@@ -191,25 +211,7 @@ namespace orthProj
                 sharedMaterial2.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
-            //var sharedMaterial3 = forwardAxisLine2.GetComponent<MeshRenderer>().sharedMaterial;
-            //sharedMaterial3.SetInt("_planeClippingEnabled", 1);
-
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    sharedMaterial3.SetVector("_planePos" + i, walls[i].transform.position);
-            //    //plane normal vector is the rotated 'up' vector.
-            //    sharedMaterial3.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            //}
-
-            //sharedMaterial = backwardLine.GetComponent<MeshRenderer>().sharedMaterial;
-            //sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-            //    //plane normal vector is the rotated 'up' vector.
-            //    sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            //}
+            //make a button where when you hit enter you see the coords?? where to see the chords
 
 
             //Debug.Log("dddddddddddddddddd: " + transform.gameObject.name);
