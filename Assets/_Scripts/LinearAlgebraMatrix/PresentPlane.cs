@@ -17,6 +17,7 @@ namespace LinearAlgebraMatrix
         public Transform forwardPlane;
         public Transform backwardPlane;
         public Transform cubeCol;
+        public Transform cubeNull;
         public Transform lookAtTarget;
         public List<GameObject> walls;
 
@@ -114,7 +115,17 @@ namespace LinearAlgebraMatrix
                 sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
-            sharedMaterial = cubeCol.GetComponent<MeshRenderer>().sharedMaterial;
+            // sharedMaterial = cubeCol.GetComponent<MeshRenderer>().sharedMaterial;
+            // sharedMaterial.SetInt("_planeClippingEnabled", 1);
+
+            // for (int i = 0; i < 6; i++)
+            // {
+            //     sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
+            //     //plane normal vector is the rotated 'up' vector.
+            //     sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+            // }
+
+            sharedMaterial = cubeNull.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
             for (int i = 0; i < 6; i++)
