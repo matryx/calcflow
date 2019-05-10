@@ -73,9 +73,9 @@ namespace LinearAlgebraMatrix
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
             }
-
-            p1 = new Vector3(-2, 1, 0);
-            //p2 = new Vector3(0, 0, 0);
+            Debug.Log(Matrix.forLine);
+            p1 = new Vector3(Matrix.colMat[0, Matrix.forLine], Matrix.colMat[1, Matrix.forLine], Matrix.colMat[2, Matrix.forLine]);
+            p2 = new Vector3(0, 0, 0);
             p3 = new Vector3(0, 0, 0);
             scaledPt1 = ScaledPoint(p1);
             point1.localPosition = scaledPt1;
@@ -110,6 +110,8 @@ namespace LinearAlgebraMatrix
                 sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
+
+            ApplyGraphAdjustment();
             //sharedMaterial = backwardLine.GetComponent<MeshRenderer>().sharedMaterial;
             //sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
@@ -149,46 +151,46 @@ namespace LinearAlgebraMatrix
 
         }
 
-        //public void ApplyGraphAdjustment()
-        //{
+        public void ApplyGraphAdjustment()
+        {
 
-        //    //vector23 = GenerateVector(rawPt2, rawPt3);
+            //vector23 = GenerateVector(rawPt2, rawPt3);
 
-        //    //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-        //    //stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+            //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+            //stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
 
-        //    /////////////
-        //    p1 = new Vector3(-2, 1, 0);
-        //    p2 = new Vector3(0, 0, 0);
-        //    p3 = new Vector3(0, 0, 0);
-        //    vector23 = p2 - p3;
-        //    vector12 = p1 - p2;
+            /////////////
+            //p1 = new Vector3(-2, 1, 0);
+            //p2 = new Vector3(0, 0, 0);
+            //p3 = new Vector3(0, 0, 0);
+            vector23 = p2 - p3;
+            vector12 = p1 - p2;
 
-        //    center = (p1 + p2 + p3) / 3;
-        //    stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+            center = (p1 + p2 + p3) / 3;
+            stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
 
-        //    pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
-        //    pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
-        //    pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
-        //    Debug.Log("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
-        //    Debug.Log("(" + p1.x + "," + p1.y + "," + p1.z + ")");
+            pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
+            pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
+            pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
+            //Debug.Log("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+            //Debug.Log("(" + p1.x + "," + p1.y + "," + p1.z + ")");
 
 
-        //    //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
-        //    //Get the range of the box
-        //    if (stepSize == 0)
-        //    {
-        //        stepSize = defaultStepSize;
-        //    }
-        //    xLabelManager.Min = center.x - stepSize * steps;
-        //    yLabelManager.Min = center.y - stepSize * steps;
-        //    zLabelManager.Min = center.z - stepSize * steps;
-        //    xLabelManager.Max = center.x + stepSize * steps;
-        //    yLabelManager.Max = center.y + stepSize * steps;
-        //    zLabelManager.Max = center.z + stepSize * steps;
-        //    //Get the interaction points between the box edges and the plane
-        //    //expr = solver.SymbolicateExpression(rawEquation);
-        //}
+            //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
+            //Get the range of the box
+            if (stepSize == 0)
+            {
+                stepSize = defaultStepSize;
+            }
+            xLabelManager.Min = center.x - stepSize * steps;
+            yLabelManager.Min = center.y - stepSize * steps;
+            zLabelManager.Min = center.z - stepSize * steps;
+            xLabelManager.Max = center.x + stepSize * steps;
+            yLabelManager.Max = center.y + stepSize * steps;
+            zLabelManager.Max = center.z + stepSize * steps;
+            //Get the interaction points between the box edges and the plane
+            //expr = solver.SymbolicateExpression(rawEquation);
+        }
 
         //public void ApplyUnroundCenter(string ptName, Vector3 newLoc)
         //{

@@ -39,7 +39,7 @@ namespace LinearAlgebraMatrix
         [SerializeField]
         Inputs inputs;
 
-        public TextMesh equation;
+        //public TextMesh equation;
 
         [SerializeField]
         PresentPlane presentPlane_col;
@@ -65,8 +65,8 @@ namespace LinearAlgebraMatrix
             internal Renderer pt2Feedback;
             [SerializeField]
             internal Renderer pt3Feedback;
-            [SerializeField]
-            internal Renderer eqnFeedback;
+            //[SerializeField]
+            //internal Renderer eqnFeedback;
         }
 
         [System.Serializable]
@@ -75,24 +75,24 @@ namespace LinearAlgebraMatrix
             [SerializeField]
             internal TextMesh pt1XInput, pt1YInput, pt1ZInput,
                     pt2XInput, pt2YInput, pt2ZInput,
-                    pt3XInput, pt3YInput, pt3ZInput,
-                    aInput, bInput, cInput, dInput;
+                    pt3XInput, pt3YInput, pt3ZInput;
+                    //aInput, bInput, cInput, dInput;
         }
 
-        public GeneratePlanePts generatePlanePts_col;
-        public GeneratePlanePts generatePlanePts_null;
+        //public GeneratePlanePts generatePlanePts_col;
+        //public GeneratePlanePts generatePlanePts_null;
 
         public void SetOutput(CalcOutput output)
         {
             ptInput.ChangeOutput(output);
-            if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
-            {
+            //if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
+            //{
                 eqnInput = false;
-            }
-            else
-            {
-                eqnInput = true;
-            }
+            //}
+            //else
+            //{
+            //    eqnInput = true;
+            //}
         }
 
         private void Initialize()
@@ -107,13 +107,18 @@ namespace LinearAlgebraMatrix
             eqnSet = new EqnSet();
 
             ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
-            updatePoint("pt1", new Vector3(1, 0, 3), false);
+            updatePoint("pt1", new Vector3(1, 2, 3), false);
+
+
             updatePoint("pt2", new Vector3(2, 4, 6), false);
+
             updatePoint("pt3", new Vector3(0, 0, 1), false);
         }
 
         GameObject Planecontainer_col;
         GameObject Planecontainer_null;
+
+
 
         int colPrev;
         int nullPrev;
@@ -123,9 +128,13 @@ namespace LinearAlgebraMatrix
 
         void Start()
         {
+            
             inputReceived = true;
             //eqnInput = false;
             Initialize();
+            //Debug.Log("---dfedf  ");
+            //Debug.Log("---dfedf  " + ptSet.ptCoords["pt1"].X.Value);
+            //Debug.Log("  dfedf---  " + ptSet.ptCoords["pt2"].X.Value);
             Planecontainer_col = GameObject.Find("Planecontainer_col");
             Planecontainer_null = GameObject.Find("Planecontainer_null");
             if (calculateColNulSpace.colSpaceVectors == 2)
@@ -151,7 +160,7 @@ namespace LinearAlgebraMatrix
 
         void Update()
         {
-            //Debug.Log(GameObject.Find("PlaneSolver_col/Planecontainer"));
+            
             //if (calculateColNulSpace.colSpaceVectors == 2)
             //{
             //    GameObject.Find("PlaneExpression_col").GetComponent<PresentPlane>().enabled = true;
@@ -169,7 +178,7 @@ namespace LinearAlgebraMatrix
             //        Planecontainer_col.SetActive(false);
             //        colPrev = 1;
             //    }
-                    
+
             //}
 
             //if (calculateColNulSpace.nullSpaceVectors == 2)
@@ -198,39 +207,39 @@ namespace LinearAlgebraMatrix
                 updateText = false;
             }
 
-            //if (inputReceived && !eqnInput)
-            //{
-            //    inputReceived = false;
-            //    bool isValid = ptSet.CompileAll();
+            if (inputReceived && !eqnInput)
+            {
+                inputReceived = false;
+                bool isValid = ptSet.CompileAll();
 
-            //    ManageFeedback();
-            //    if (isValid)
-            //    {
-            //        if (presentPlane_col.CalculatePlane())
-            //        {
-            //            presentPlane_col.ApplyGraphAdjustment();
-            //            presentPlane_col.GetLocalPoint();
-            //            presentPlane_col.GetPlaneDirection();
-            //        }
-            //        else
-            //        {
-            //            presentPlane_col.ApplyGraphAdjustment();
-            //            presentPlane_col.GetLocalPoint();
-            //        }
+                ManageFeedback();
+                if (isValid)
+                {
+                    if (presentPlane_col.CalculatePlane())
+                    {
+                        presentPlane_col.ApplyGraphAdjustment();
+                        presentPlane_col.GetLocalPoint();
+                        presentPlane_col.GetPlaneDirection();
+                    }
+                    else
+                    {
+                        presentPlane_col.ApplyGraphAdjustment();
+                        presentPlane_col.GetLocalPoint();
+                    }
 
-            //        if (presentPlane_null.CalculatePlane())
-            //        {
-            //            presentPlane_null.ApplyGraphAdjustment();
-            //            presentPlane_null.GetLocalPoint();
-            //            presentPlane_null.GetPlaneDirection();
-            //        }
-            //        else
-            //        {
-            //            presentPlane_null.ApplyGraphAdjustment();
-            //            presentPlane_null.GetLocalPoint();
-            //        }
-            //    }
-            //}
+                    if (presentPlane_null.CalculatePlane())
+                    {
+                        presentPlane_null.ApplyGraphAdjustment();
+                        presentPlane_null.GetLocalPoint();
+                        presentPlane_null.GetPlaneDirection();
+                    }
+                    else
+                    {
+                        presentPlane_null.ApplyGraphAdjustment();
+                        presentPlane_null.GetLocalPoint();
+                    }
+                }
+            }
 
             //if (inputReceived && eqnInput)
             //{
@@ -269,7 +278,7 @@ namespace LinearAlgebraMatrix
             if (feedbacks.pt1Feedback != null) feedbacks.pt1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
             if (feedbacks.pt2Feedback != null) feedbacks.pt2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
             if (feedbacks.pt3Feedback != null) feedbacks.pt3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback;
+            //if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback;
         }
 
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
@@ -298,13 +307,13 @@ namespace LinearAlgebraMatrix
                 ManageFeedback();
                 if (isValid)
                 {
-                    if (true) //(presentPlane_col.CalculatePlane())
+                    if (presentPlane_col.CalculatePlane())
                     {
                         presentPlane_col.ApplyUnroundCenter(ptName, newLoc);
                         presentPlane_col.GetPlaneDirection();
                     }
 
-                    if (true)//(presentPlane_null.CalculatePlane())
+                    if (presentPlane_null.CalculatePlane())
                     {
                         presentPlane_null.ApplyUnroundCenter(ptName, newLoc);
                         presentPlane_null.GetPlaneDirection();
@@ -389,6 +398,13 @@ namespace LinearAlgebraMatrix
 
         public void manageText()
         {
+            //Debug.Log("ptSet.ptCoords.ContainsKey(pt1)" + ptSet.ptCoords.ContainsKey("pt1"));
+            //Debug.Log("ptSet.ptCoords.ContainsKey(pt2)" + ptSet.ptCoords.ContainsKey("pt2"));
+            //Debug.Log("ptSet.ptCoords.ContainsKey(pt3)" + ptSet.ptCoords.ContainsKey("pt3"));
+            //Debug.Log("inputs.pt1XInput" + inputs.pt1XInput);
+            //Debug.Log("inputs.pt2XInput" + inputs.pt2XInput);
+            //Debug.Log("inputs.pt3XInput" + inputs.pt3XInput);
+
             #region coords
             if (ptSet.ptCoords.ContainsKey("pt1") && inputs.pt1XInput != null)
             {
@@ -421,18 +437,18 @@ namespace LinearAlgebraMatrix
                 if (inputs.pt3YInput.text.Length == 0) inputs.pt3YInput.text = "0";
                 if (inputs.pt3ZInput.text.Length == 0) inputs.pt3ZInput.text = "0";
             }
-            if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
+            //if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
+            //if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
+            //if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
+            //if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
 
-            if (inputs.aInput != null && inputs.aInput.text.Length == 0) inputs.aInput.text = "0";
-            if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
-            if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";
-            if (inputs.dInput != null && inputs.dInput.text.Length == 0) inputs.dInput.text = "0";
+            //if (inputs.aInput != null && inputs.aInput.text.Length == 0) inputs.aInput.text = "0";
+            //if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
+            //if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";
+            //if (inputs.dInput != null && inputs.dInput.text.Length == 0) inputs.dInput.text = "0";
 
-            if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
-            if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
+            //if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
+            //if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
             #endregion
         }
 
