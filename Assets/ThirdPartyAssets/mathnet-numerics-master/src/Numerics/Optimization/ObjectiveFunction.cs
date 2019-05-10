@@ -146,7 +146,18 @@ namespace MathNet.Numerics.Optimization
             Func<Vector<double>, double, Vector<double>> derivatives,
             Vector<double> observedX, Vector<double> observedY, Vector<double> weight = null)
         {
-            Vector<double> func(Vector<double> point, Vector<double> x)
+            // Vector<double> func(Vector<double> point, Vector<double> x)
+            // {
+            //     var functionValues = CreateVector.Dense<double>(x.Count);
+            //     for (int i = 0; i < x.Count; i++)
+            //     {
+            //         functionValues[i] = function(point, x[i]);
+            //     }
+
+            //     return functionValues;
+            // }
+
+            Func<Vector<double>, Vector<double>, Vector<double>> func = (point, x) =>
             {
                 var functionValues = CreateVector.Dense<double>(x.Count);
                 for (int i = 0; i < x.Count; i++)
@@ -155,9 +166,20 @@ namespace MathNet.Numerics.Optimization
                 }
 
                 return functionValues;
-            }
+            };
 
-            Matrix<double> prime(Vector<double> point, Vector<double> x)
+            // Matrix<double> prime(Vector<double> point, Vector<double> x)
+            // {
+            //     var derivativeValues = CreateMatrix.Dense<double>(x.Count, point.Count);
+            //     for (int i = 0; i < x.Count; i++)
+            //     {
+            //         derivativeValues.SetRow(i, derivatives(point, x[i]));
+            //     }
+
+            //     return derivativeValues;
+            // }
+
+            Func<Vector<double>, Vector<double>,Matrix<double>> prime = (Vector<double> point, Vector<double> x)=>
             {
                 var derivativeValues = CreateMatrix.Dense<double>(x.Count, point.Count);
                 for (int i = 0; i < x.Count; i++)
@@ -166,7 +188,7 @@ namespace MathNet.Numerics.Optimization
                 }
 
                 return derivativeValues;
-            }
+            };
 
             var objective = new NonlinearObjectiveFunction(func, prime);
             objective.SetObserved(observedX, observedY, weight);
@@ -180,7 +202,7 @@ namespace MathNet.Numerics.Optimization
             Vector<double> observedX, Vector<double> observedY, Vector<double> weight = null,
             int accuracyOrder = 2)
         {
-            Vector<double> func(Vector<double> point, Vector<double> x)
+            Func<Vector<double>, Vector<double>, Vector<double>> func = (point, x) =>
             {
                 var functionValues = CreateVector.Dense<double>(x.Count);
                 for (int i = 0; i < x.Count; i++)
@@ -189,7 +211,7 @@ namespace MathNet.Numerics.Optimization
                 }
 
                 return functionValues;
-            }
+            };
 
             var objective = new NonlinearObjectiveFunction(func, accuracyOrder: accuracyOrder);
             objective.SetObserved(observedX, observedY, weight);

@@ -137,8 +137,8 @@ namespace MathNet.Numerics.Random
             retry:
             // Handle the special case where the value int.MaxValue is generated; this is outside
             // the range of permitted return values for this method.
-            ulong rtn = NextInnerULong() & 0x7fff_ffffUL;
-            if (rtn == 0x7fff_ffffUL)
+            ulong rtn = NextInnerULong() & 0x7fffffffUL;
+            if (rtn == 0x7fffffffUL)
             {
                 goto retry;
             }

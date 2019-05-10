@@ -23,7 +23,7 @@ namespace MathNet.Numerics.Optimization.ObjectiveFunctions
         Matrix<double> jacobianValue; // the Jacobian matrix.
         Vector<double> gradientValue; // the Gradient vector.
         Matrix<double> hessianValue; // the Hessian matrix.
-        
+
         #endregion Private Variables
 
         #region Public Variables
@@ -37,7 +37,7 @@ namespace MathNet.Numerics.Optimization.ObjectiveFunctions
         /// Set or get the values of the observations.
         /// </summary>
         public Vector<double> ObservedY { get; private set; }
-        
+
         /// <summary>
         /// Set or get the values of the weights for the observations.
         /// </summary>
@@ -53,7 +53,7 @@ namespace MathNet.Numerics.Optimization.ObjectiveFunctions
         /// Get the number of observations.
         /// </summary>
         public int NumberOfObservations { get { return (ObservedY == null) ? 0 : ObservedY.Count; } }
-        
+
         /// <summary>
         /// Get the number of unknown parameters.
         /// </summary>
@@ -235,7 +235,7 @@ namespace MathNet.Numerics.Optimization.ObjectiveFunctions
                 throw new ArgumentNullException("initialGuess");
             }
             coefficients = initialGuess;
-            
+
             if (isFixed != null && isFixed.Count != initialGuess.Count)
             {
                 throw new ArgumentException("The isFixed can't have different size from the initial guess.");
@@ -269,12 +269,12 @@ namespace MathNet.Numerics.Optimization.ObjectiveFunctions
 
         public IObjectiveFunction ToObjectiveFunction()
         {
-            Tuple<double, Vector<double>, Matrix<double>> function(Vector<double> point)
+            Func<Vector<double>, Tuple<double, Vector<double>, Matrix<double>>> function = (Vector<double> point) =>
             {
                 EvaluateAt(point);
 
                 return new Tuple<double, Vector<double>, Matrix<double>>(Value, Gradient, Hessian);
-            }
+            };
 
             var objective = new GradientHessianObjectiveFunction(function);
             return objective;
@@ -344,11 +344,11 @@ namespace MathNet.Numerics.Optimization.ObjectiveFunctions
             // approximated Hessian, H = J'WJ + ∑LRiHi ~ J'WJ near the minimum
             hessianValue = jacobianValue.Transpose() * jacobianValue;
         }
-        
+
         private Matrix<double> NumericalJacobian(Vector<double> parameters, Vector<double> currentValues, int accuracyOrder = 2)
-        {   
+        {
             const double sqrtEpsilon = 1.4901161193847656250E-8; // sqrt(machineEpsilon)
-            
+
             Matrix<double> derivertives = Matrix<double>.Build.Dense(NumberOfObservations, NumberOfParameters);
 
             var d = 0.000003 * parameters.PointwiseAbs().PointwiseMaximum(sqrtEpsilon);
