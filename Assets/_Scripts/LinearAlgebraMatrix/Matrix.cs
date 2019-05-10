@@ -10,16 +10,29 @@ namespace LinearAlgebraMatrix
 
         public PresentPlane presentPlane_col;
         public GameObject PlaneExpression_col;
-        public TextMesh pt3Label;
+        public PresentPlane presentPlane_Null;
+        public GameObject PlaneExpression_Null;
+        public TextMesh pt3ColLabel;
+        public TextMesh pt3NullLabel;
 
         public GameObject planeCol;
         public GameObject lineCol;
         public GameObject cubeCol;
-        public GameObject pt3;
+        public GameObject pt3Col;
 
-        public AxisLabelManager xLabelManager;
-        public AxisLabelManager yLabelManager;
-        public AxisLabelManager zLabelManager;
+        public GameObject planeNull;
+        public GameObject lineNull;
+        public GameObject cubeNull;
+        public GameObject pt3Null;
+
+        public AxisLabelManager xLabelManagerCol;
+        public AxisLabelManager yLabelManagerCol;
+        public AxisLabelManager zLabelManagerCol;
+
+        public AxisLabelManager xLabelManagerNull;
+        public AxisLabelManager yLabelManagerNull;
+        public AxisLabelManager zLabelManagerNull;
+
 
         //float[,] orgMat = new float[3,3];
         float[,] redMat = new float[3, 3];
@@ -96,23 +109,40 @@ namespace LinearAlgebraMatrix
                 planeCol.SetActive(false);
                 lineCol.SetActive(false);
                 cubeCol.SetActive(false);
-                pt3.SetActive(true);
+                pt3Col.SetActive(true);
                 //scaledPt3 = ScaledPoint(p3);
-                pt3.transform.localPosition = Vector3.zero;
+                pt3Col.transform.localPosition = Vector3.zero;
                 ApplyGraphAdjustment();
-                Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
-                pt3Label.text = "(0,0,0)";
+                // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
+                pt3ColLabel.text = "(0,0,0)";
                 PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
                 //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
+
+                planeNull.SetActive(false);
+                lineNull.SetActive(false);
+                cubeNull.SetActive(true);
+                pt3Null.SetActive(false);
+                PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
+
+
             }
             if (colSpaceVectorNum == 1)
             {
                 planeCol.SetActive(false);
                 lineCol.SetActive(true);
                 cubeCol.SetActive(false);
-                pt3.SetActive(false);
+                pt3Col.SetActive(false);
                 PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
                 PlaneExpression_col.GetComponent<PresentLine>().enabled = true;
+
+                planeNull.SetActive(true);
+                lineNull.SetActive(false);
+                cubeNull.SetActive(false);
+                pt3Null.SetActive(false);
+                PlaneExpression_Null.GetComponent<PresentPlane>().enabled = true;
+                PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
+
+                
                 
             }
             if (colSpaceVectorNum == 2)
@@ -120,10 +150,18 @@ namespace LinearAlgebraMatrix
                 planeCol.SetActive(true);
                 lineCol.SetActive(false);
                 cubeCol.SetActive(false);
-                pt3.SetActive(false);
+                pt3Col.SetActive(false);
                 presentPlane_col.GetPlaneDirection();
-                PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
                 PlaneExpression_col.GetComponent<PresentPlane>().enabled = true;
+                PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+                
+
+                planeNull.SetActive(false);
+                lineNull.SetActive(true);
+                cubeNull.SetActive(false);
+                pt3Null.SetActive(false);
+                PlaneExpression_Null.GetComponent<PresentPlane>().enabled = false;
+                PlaneExpression_Null.GetComponent<PresentLine>().enabled = true;
                 
             }
             if (colSpaceVectorNum == 3)
@@ -131,9 +169,19 @@ namespace LinearAlgebraMatrix
                 planeCol.SetActive(false);
                 lineCol.SetActive(false);
                 cubeCol.SetActive(true);
-                pt3.SetActive(false);
+                pt3Col.SetActive(false);
                 PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
                 //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
+
+                planeNull.SetActive(false);
+                lineNull.SetActive(false);
+                cubeNull.SetActive(false);
+                pt3Null.SetActive(true);
+                pt3Null.transform.localPosition = Vector3.zero;
+                ApplyGraphAdjustment();
+                // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
+                pt3NullLabel.text = "(0,0,0)";
+                PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
             }
         }
 
@@ -143,12 +191,19 @@ namespace LinearAlgebraMatrix
             int stepSize = 5;
             int steps = 3;
 
-            xLabelManager.Min = center.x - stepSize * steps;
-            yLabelManager.Min = center.y - stepSize * steps;
-            zLabelManager.Min = center.z - stepSize * steps;
-            xLabelManager.Max = center.x + stepSize * steps;
-            yLabelManager.Max = center.y + stepSize * steps;
-            zLabelManager.Max = center.z + stepSize * steps;
+            xLabelManagerCol.Min = center.x - stepSize * steps;
+            yLabelManagerCol.Min = center.y - stepSize * steps;
+            zLabelManagerCol.Min = center.z - stepSize * steps;
+            xLabelManagerCol.Max = center.x + stepSize * steps;
+            yLabelManagerCol.Max = center.y + stepSize * steps;
+            zLabelManagerCol.Max = center.z + stepSize * steps;
+
+            xLabelManagerNull.Min = center.x - stepSize * steps;
+            yLabelManagerNull.Min = center.y - stepSize * steps;
+            zLabelManagerNull.Min = center.z - stepSize * steps;
+            xLabelManagerNull.Max = center.x + stepSize * steps;
+            yLabelManagerNull.Max = center.y + stepSize * steps;
+            zLabelManagerNull.Max = center.z + stepSize * steps;
 
         }
 
