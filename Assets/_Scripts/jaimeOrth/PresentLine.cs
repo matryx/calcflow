@@ -11,6 +11,12 @@ namespace orthProj
         public Transform centerPt;
         public TextMesh pt1Label, pt2Label, pt3Label;
 
+        //public ConstraintGrabbable constraintGrabbable;
+        public Transform xAxis;
+        public Transform yAxis;
+        public Transform zAxis;
+
+
         public Transform line;
         public Transform forwardLine;
         public Transform arrowLine;
@@ -101,8 +107,12 @@ namespace orthProj
             point3.localPosition = scaledPt3;
             //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
             centerPt.localPosition = ScaledPoint(new Vector3(0,0,0));
+            
+            //xAxis.localPosition = ScaledPoint(center);
+            //yAxis.localPosition = ScaledPoint(center);
+            //zAxis.localPosition = ScaledPoint(center);
             // Debug.Log("dddddddddddddddddd: " + PtCoordToVector(rawPt1));
-            Debug.Log("center of ball is: " + centerPt.localPosition.x + " " + centerPt.localPosition.y + " " + centerPt.localPosition.z);
+            Debug.Log("point one is: " + point1.localPosition.x + " " + point1.localPosition.y + " " + point1.localPosition.z);
 
 
             //p1 = new Vector3(-2, 1, 0);
@@ -125,10 +135,15 @@ namespace orthProj
             line.LookAt(lookAtTarget);
             //set the line to have an origin of zero
             line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
-     
 
-            //magnitude to vector? 
-            //line.localScale = new Vector3(1, 1, rawPt1.Z.Value);
+            //constraintGrabbable.lastLocalPos = scaledPt1;
+           // constraintGrabbable.
+
+            //guessing it will grab 1/4 of where it should
+
+
+        //magnitude to vector? 
+        //line.localScale = new Vector3(1, 1, rawPt1.Z.Value);
 
             line.localScale = new Vector3(1, 1, scaledPt1.magnitude);
             //float rawMag = (PtCoordToVector(rawPt1)).magnitude;
