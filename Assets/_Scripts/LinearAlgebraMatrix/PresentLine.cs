@@ -73,8 +73,8 @@ namespace LinearAlgebraMatrix
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
             }
-            Debug.Log(Matrix.forLine);
-            p1 = new Vector3(Matrix.colMat[0, Matrix.forLine], Matrix.colMat[1, Matrix.forLine], Matrix.colMat[2, Matrix.forLine]);
+            Debug.Log(MatrixYFX.forLine);
+            p1 = new Vector3(MatrixYFX.colMat[0, MatrixYFX.forLine], MatrixYFX.colMat[1, MatrixYFX.forLine], MatrixYFX.colMat[2, MatrixYFX.forLine]);
             p2 = new Vector3(0, 0, 0);
             p3 = new Vector3(0, 0, 0);
             scaledPt1 = ScaledPoint(p1);

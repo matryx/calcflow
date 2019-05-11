@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace LinearAlgebraMatrix
 {
-    public class Matrix : MonoBehaviour
+    public class MatrixYFX : MonoBehaviour
     {
         public PtManager ptManager;
 
@@ -70,6 +71,13 @@ namespace LinearAlgebraMatrix
         // Use this for initialization
         void Start()
         {
+            var M = Matrix<double>.Build;
+            Matrix<double> m = Matrix<double>.Build.Random(3, 4);
+            double[,] x = {{ 1.0, 2.0 },
+                            { 3.0, 4.0 }};
+            M.DenseOfArray(x);
+
+
             //for (int i = 0; i < 3; i++)
             //{
             //    orgMat[i,i] = 2;

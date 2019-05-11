@@ -267,20 +267,20 @@ namespace LinearAlgebraMatrix
 
             ///////////////////////////////////////////
             //p1 = new Vector3(1, 1, 10);
-            p1 = Matrix.c1;
+            p1 = MatrixYFX.c1;
             //Debug.Log("matrix.colMat[0, 0]: " + Matrix.colMat[0,0]);
             scaledPt1 = ScaledPoint(p1);
             point1.localPosition = scaledPt1;
             //point1.localPosition = p1;
 
             //p2 = new Vector3(3, 6, 1);
-            p2 = Matrix.c2;
+            p2 = MatrixYFX.c2;
             scaledPt2 = ScaledPoint(p2);
             point2.localPosition = scaledPt2;
             //point2.localPosition = p2;
 
             //p3 = new Vector3(0, 0, 0);
-            p3 = Matrix.c3;
+            p3 = MatrixYFX.c3;
             scaledPt3 = ScaledPoint(p3);
             point3.localPosition = scaledPt3;
             //point3.localPosition = p3;
