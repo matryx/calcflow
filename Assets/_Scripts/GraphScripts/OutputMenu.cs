@@ -135,7 +135,7 @@ public class OutputMenu : MonoBehaviour
                 var button = sender.GetComponent<ClaimCommitButton>();
                 var state = button.GetState();
                 // if no account active, open up the secondary menu to the matryx tab
-                if (NetworkSettings.activeAccount == null)
+                if (NetworkSettings.currentAddress == null)
                 {
                     ExpandContract expandContract = secondaryMenu.transform.parent.gameObject.GetComponent<ExpandContract>();
                     StartCoroutine(expandContract.Expand(0.3f,
@@ -153,6 +153,10 @@ public class OutputMenu : MonoBehaviour
                         (obj) =>
                         {
                             button.SetState(ClaimCommitButton.CommitButtonState.YetToBeCommitted);
+                        },
+                        (nada) =>
+                        {
+                            button.SetState(ClaimCommitButton.CommitButtonState.CantCommit);
                         })
                     );
                 }
@@ -164,6 +168,10 @@ public class OutputMenu : MonoBehaviour
                         (obj) =>
                         {
                             button.SetState(ClaimCommitButton.CommitButtonState.Committed);
+                        },
+                        (nada) =>
+                        {
+                            button.SetState(ClaimCommitButton.CommitButtonState.CantCommit);
                         })
                     );
                 }

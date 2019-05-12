@@ -55,11 +55,35 @@ namespace Matryx
         }
 
         public string title = "";
+        public string owner = "";
         public string description;
         public string hash;
         public MatryxTournament tournament;
         public SubmissionDTO dto;
         public MatryxCommit commit;
+        public decimal Reward
+        {
+            get
+            {
+                return (decimal)dto.Reward;
+            }
+            set
+            {
+                dto.Reward = new BigInteger(value);
+            }
+        }
+        
+        public decimal Timestamp
+        {
+            get
+            {
+                return (decimal)dto.Timestamp;
+            }
+            set
+            {
+                dto.Timestamp = new BigInteger(value);
+            }
+        }
 
         public bool calcflowCompatible = true;
 
@@ -119,7 +143,8 @@ namespace Matryx
                 this.dto.RoundIndex = BigInteger.Parse(submission["roundIndex"].ToString());
                 this.dto.CommitHash = Utils.HexStringToByteArray(this.commit.hash);
                 this.dto.Content = submission["ipfsContent"] as string;
-                this.dto.Reward = BigInteger.Parse(submission["reward"].ToString());
+                var reward = new BigInteger(decimal.Parse(submission["reward"].ToString()) * (decimal)1e18);
+                this.dto.Reward = reward;
                 this.dto.Timestamp = BigInteger.Parse(submission["timestamp"].ToString());
 
                 bool link = false;
@@ -188,13 +213,13 @@ namespace Matryx
             StatisticsTracking.StartEvent("Matryx", "Submission Creation");
 
             ResultsMenu.transactionObject = this;
-            var isEntrant = new Utils.CoroutineWithData<EthereumTypes.Bool>(MatryxCortex.Instance, tournament.isEntrant(NetworkSettings.activeAccount));
+            var isEntrant = new Utils.CoroutineWithData<EthereumTypes.Bool>(MatryxCortex.Instance, tournament.isEntrant(NetworkSettings.currentAddress));
             yield return isEntrant;
 
             var tournamentInfo = new Utils.CoroutineWithData<TournamentInfo>(MatryxCortex.Instance, tournament.getInfo());
             yield return tournamentInfo;
 
-            if (tournament.owner.Equals(NetworkSettings.activeAccount, System.StringComparison.CurrentCultureIgnoreCase))
+            if (tournament.owner.Equals(NetworkSettings.currentAddress, System.StringComparison.CurrentCultureIgnoreCase))
             {
                 ResultsMenu.Instance.PostFailure(this, "You own this tournament; Unable to create submission.");
                 yield break;
@@ -202,12 +227,11 @@ namespace Matryx
 
             if(!isEntrant.result.Value)
             {
-                var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.activeAccount, MatryxPlatform.address));
+                var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.currentAddress, MatryxPlatform.address));
                 yield return allowance;
-                var balance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.activeAccount));
+                var balance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.currentAddress));
                 yield return balance;
 
-                Debug.Log(tournament.entryFee);
                 if(balance.result < tournament.entryFee)
                 {
                     ResultsMenu.Instance.SetStatus("Insufficient MTX. Please visit <link=https://app.matryx.ai/><u>our Matryx Dapp</u></link> for MTX Tokens.", true);
@@ -255,18 +279,26 @@ namespace Matryx
                 }
             }
 
-            ResultsMenu.Instance.SetStatus("Claiming Commit...");
-            yield return commit.claim();
+            ResultsMenu.Instance.SetStatus("Claiming Content...");
+            bool shouldBreak = false;
+            yield return commit.claim((res)=> { }, 
+                (nada)=> 
+                {
+                    ResultsMenu.Instance.PostFailure(this, "Could not claim your content on Matryx...");
+                    shouldBreak = true;
+                });
+            if (shouldBreak) yield break;
 
-            ResultsMenu.Instance.SetStatus("Creating Commit...");
+            ResultsMenu.Instance.SetStatus("Hashing to Matryx...");
             yield return commit.create();
 
-            ResultsMenu.Instance.SetStatus("Uploading Submission...");
+            ResultsMenu.Instance.SetStatus("Uploading submission content...");
             yield return uploadContent();
 
             if(!dto.Content.Contains("Qm"))
             {
                 Debug.Log("Failed to upload file to IPFS");
+                ResultsMenu.Instance.PostFailure(this);
                 yield break;
             }
 
@@ -274,10 +306,7 @@ namespace Matryx
             var createSubmission = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, tournament.createSubmission(this));
             yield return createSubmission;
 
-            if(callback != null)
-            {
-                callback(createSubmission.result);
-            }
+            callback?.Invoke(createSubmission.result);
 
             if (!createSubmission.result)
             {

@@ -66,7 +66,10 @@ public class ExpressionSaveLoad : MonoBehaviour
 
     public void SaveClaim(MatryxCommit commit)
     {
-        SaveExpression(customParametrizedSurface.expressionSets, commit.ipfsContentHash);
+        if(!saves.ContainsKey(commit.hash))
+        {
+            SaveExpression(customParametrizedSurface.expressionSets, commit.ipfsContentHash);
+        }
     }
 
     public void SaveExpression(List<ExpressionSet> expressions)

@@ -124,7 +124,7 @@ public class MyTournamentsMenu : MonoBehaviour
 
     private void ShowError(object results)
     {
-        myTournamentsListText.text = "Unable to Load Commits";
+        myTournamentsListText.text = "Unable to Load Tournaments";
     }
 
     GameObject loadButton;
@@ -132,7 +132,8 @@ public class MyTournamentsMenu : MonoBehaviour
     {
         foreach (MatryxTournament tournament in _tournaments)
         {
-            tournaments.Add(tournament.title, tournament);
+            if (tournaments.ContainsKey(tournament.address)) continue;
+            tournaments.Add(tournament.address, tournament);
             GameObject button = createButton(tournament);
             button.SetActive(false);
             myTournamentsPanel.AddAction(button.GetComponent<FlexButtonComponent>());
@@ -146,9 +147,13 @@ public class MyTournamentsMenu : MonoBehaviour
         GameObject button = Instantiate(Resources.Load("Tournament_Cell", typeof(GameObject))) as GameObject;
         button.transform.SetParent(myTournamentsPanel.transform);
         button.transform.localScale = Vector3.one;
+        button.transform.position = new Vector3(-500f, -500f, -500f);
 
         button.name = "Load_Button";
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = "(Reload Tournaments)";
+        var text = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
+        text.text = "Reload Tournaments";
+        text.fontStyle = TMPro.FontStyles.Bold;
+        text.alignment = TMPro.TextAlignmentOptions.Center;
 
         TMPro.TextMeshPro matryxBountyTMP = button.transform.Find("MTX_Amount").GetComponent<TMPro.TextMeshPro>();
         matryxBountyTMP.text = "";
@@ -208,6 +213,7 @@ public class MyTournamentsMenu : MonoBehaviour
             MatryxTournament tournament = source.GetComponent<TournamentContainer>().tournament;
             // TODO: Navigate the user to the corresponding tournament through the menus
             tournamentMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
+            TournamentMenuCenterButton.Instance.transform.parent.gameObject.SetActive(false);
             tournamentMenu.SetTournament(tournament);
         }
     }

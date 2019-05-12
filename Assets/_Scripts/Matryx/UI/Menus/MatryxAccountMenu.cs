@@ -129,10 +129,10 @@ public class MatryxAccountMenu : MonoBehaviour {
         MatryxAccountMenu.Instance.ErrorMessage.text = "";
     }
 
-    public void configurePrivateKeyField(string title, string defaultText, bool active, string validationType)
+    public void configurePrivateKeyField(string title, string placeholderText, bool active, string validationType)
     {
         Instance.PrivateKeyInput.transform.parent.GetChild(0).GetComponent<Text>().text = title;
-        Instance.PrivateKeyInput.placeholder.GetComponent<Text>().text = defaultText;
+        Instance.PrivateKeyInput.placeholder.GetComponent<Text>().text = placeholderText;
         Instance.PrivateKeyInput.transform.parent.gameObject.SetActive(active);
         Instance.PrivateKeyInput.GetComponent<InputValidator>().setValidationType(validationType);
     }
@@ -191,7 +191,7 @@ public class MatryxAccountMenu : MonoBehaviour {
                 Instance.PasswordInput.placeholder.GetComponent<Text>().text = "password123";
                 break;
             case AccountMenuState.ShowAccountInfo:
-                Instance.AccountInfoText[0].text = NetworkSettings.activeAccount;
+                Instance.AccountInfoText[0].text = NetworkSettings.currentAddress;
                 StartCoroutine(updateMTXBalance());
                 Instance.StartCoroutine(Instance.waitAndThenReenterVR());
                 break;
@@ -206,7 +206,7 @@ public class MatryxAccountMenu : MonoBehaviour {
 
     public IEnumerator updateMTXBalance()
     {
-        var tokenBalanceCoroutine = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.activeAccount));
+        var tokenBalanceCoroutine = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.currentAddress));
         yield return tokenBalanceCoroutine;
         var balance = tokenBalanceCoroutine.result / new BigInteger(1e18);
         Instance.AccountInfoText[1].text = balance + " MTX";
@@ -405,7 +405,7 @@ public class MatryxAccountMenu : MonoBehaviour {
         // Store cypher and related info
         Config.setString("cypher", cypher, true, "storage");
         Config.setString("cypherType", cypherType, true, "storage");
-        Config.setString("address", NetworkSettings.activeAccount);
+        Config.setString("address", NetworkSettings.currentAddress);
         Config.setBool("usedPassword", usedPassword, true, "storage");
 
         TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.Unlocked);
@@ -417,7 +417,13 @@ public class MatryxAccountMenu : MonoBehaviour {
         string cypher = Config.getString("cypher", "");
         if (cypher.Equals("")) { return false; }
         string cypherType = Config.getString("cypherType", "");
+        bool usedPassword = Config.getBool("usedPassword", "0");
         string plainText = Crypto.Decrypt(cypher);
+
+        if(usedPassword)
+        {
+            return false;
+        }
 
         NetworkSettings.declinedAccountUnlock = false;
         switch (cypherType)

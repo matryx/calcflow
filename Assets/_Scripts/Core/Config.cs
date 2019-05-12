@@ -14,7 +14,7 @@ namespace Nanome.Core
         static public bool getBool(string key, string def)
         {
             var vv = get(key, def);
-            return bool.Parse(vv as string);
+            return ((string)vv) == "0" ? false : true;
         }
 
         static public float getFloat(string key, string def)
@@ -142,7 +142,7 @@ namespace Nanome.Core
                     catch (Exception exc)
                     {
                         Logs.warningOnChannel("Nanome.Core", "Could not load local config file", localConfig, exc);
-                        Config.values = new Ini.Values();
+                        values = new Ini.Values();
                     }
                     string localConfigSaved = storageConfigPath();
                     try
@@ -152,11 +152,18 @@ namespace Nanome.Core
                         {
                             Config.values.set(key, saveds.get(key));
                         }
-                        Config.session = saveds;
+                        if (session == null)
+                        {
+                            Config.session = saveds;
+                        }
                     }
                     catch (Exception exc)
                     {
                         Logs.debugOnChannel("Nanome.Core", "Could not load saved config file", localConfigSaved, exc);
+                        if (session == null)
+                        {
+                            session = new Ini.Values();
+                        }
                     }
                     string documentsConfigSaved = documentsConfigPath();
                     try
@@ -166,11 +173,15 @@ namespace Nanome.Core
                         {
                             Config.values.set(key, saveds.get(key));
                         }
-                        Config.session = saveds;
+                        session = saveds;
                     }
                     catch (Exception exc)
                     {
                         Logs.debugOnChannel("Nanome.Core", "Could not load saved config file", localConfigSaved, exc);
+                        if (session == null)
+                        {
+                            session = new Ini.Values();
+                        }
                     }
                 }
             }
@@ -188,7 +199,7 @@ namespace Nanome.Core
             Config.values.set(key, val);
             if (save)
             {
-                Config.session.set(key, val);
+                session.set(key, val);
                 Config.save(where);
             }
         }

@@ -7,7 +7,6 @@ using Matryx;
 public class SubmissionContainer : FlexHoverTipper
 {
     public MatryxSubmission submission { get; set; }
-    [SerializeField]
     public DistributionPicker distributionPicker;
 
     public override bool shouldShowTippy()
@@ -18,6 +17,9 @@ public class SubmissionContainer : FlexHoverTipper
     private new void Start()
     {
         base.Start();
+
+        distributionPicker = transform.Find("Distribution/Body").GetComponent<DistributionPicker>();
+
         fontSize = 1.1f;
         alignment = TMPro.TextAlignmentOptions.Left;
         var body = transform.Find("Body");

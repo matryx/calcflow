@@ -20,6 +20,8 @@ public class ResultsMenu : MonoBehaviour {
     [SerializeField]
     public GameObject createTournamentCanvas;
     [SerializeField]
+    public GameObject createRoundCanvas;
+    [SerializeField]
     public GameObject createSubmissionCanvas;
 
     public static ResultsMenu Instance { get; private set; }
@@ -33,9 +35,14 @@ public class ResultsMenu : MonoBehaviour {
         }
     }
 
+    public void OnDisable()
+    {
+        SetStatus("");
+    }
+
     public void SetStatus(string text, bool useButton = false)
     {
-        Instance.statusText.text = text;
+        statusText.text = text;
         dumbLinkButton.gameObject.SetActive(useButton);
     }
 
@@ -55,7 +62,7 @@ public class ResultsMenu : MonoBehaviour {
         }
         else
         {
-            SetStatus("Failure Submitting to " + submission.tournament.address);
+            SetStatus("Failed to submit to " + submission.tournament.address);
         }
 
         severalMinutesText.gameObject.SetActive(false);
@@ -80,7 +87,32 @@ public class ResultsMenu : MonoBehaviour {
         }
         else
         {
-            SetStatus("Failure Creating " + tournament.title);
+            SetStatus("Failed to create " + tournament.title);
+        }
+
+        severalMinutesText.gameObject.SetActive(false);
+        mayReturn.gameObject.SetActive(true);
+        tryAgainButton.gameObject.SetActive(true);
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
+    }
+
+    public void PostSuccess(MatryxRound newRound, Async.EventDelegate onReturn = null)
+    {
+        SetStatus("Successfully created round " + newRound.index + "on tournament");
+        severalMinutesText.gameObject.SetActive(false);
+        mayReturn.gameObject.SetActive(true);
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
+    }
+
+    public void PostFailure(MatryxRound newRound, string message = null, Async.EventDelegate onReturn = null)
+    {
+        if (message != null)
+        {
+            SetStatus(message);
+        }
+        else
+        {
+            SetStatus("Failed to create round " + newRound.index + "on tournament");
         }
 
         severalMinutesText.gameObject.SetActive(false);
@@ -123,12 +155,17 @@ public class ResultsMenu : MonoBehaviour {
         if(transactionObject is MatryxTournament)
         {
             createTournamentCanvas.SetActive(true);
-            this.gameObject.SetActive(false);
+            gameObject.SetActive(false);
+        }
+        else if(transactionObject is MatryxRound)
+        {
+            createRoundCanvas.SetActive(true);
+            gameObject.SetActive(false);
         }
         else if(transactionObject is MatryxSubmission)
         {
             createSubmissionCanvas.SetActive(true);
-            this.gameObject.SetActive(false);
+            gameObject.SetActive(false);
         }
     }
 }

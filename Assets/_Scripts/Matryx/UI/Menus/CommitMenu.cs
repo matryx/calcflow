@@ -44,7 +44,7 @@ public class CommitMenu : MonoBehaviour {
         var datetime = TimeZoneInfo.ConvertTime(Utils.Time.FromUnixTime((double)commit.timestamp), TimeZoneInfo.Local);
         creationDate.text = datetime.ToShortDateString() + ", " + datetime.ToLongTimeString();
         description.text = "Content: \n\n";
-        creator.text = "by " + Utils.ellipseAddress(commit.owner);
+        creator.text = "by " + Utils.Accounts.ellipseAddress(commit.owner);
         importButton.Disable();
         MatryxCortex.RunGetCommit(commit.hash, true, UpdateDisplay, ErrorGettingCommit);
     }

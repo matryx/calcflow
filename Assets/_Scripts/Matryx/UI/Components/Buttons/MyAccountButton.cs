@@ -1,17 +1,18 @@
 ﻿using UnityEngine;
-using TMPro;
 using Matryx;
+using Color = UnityEngine.Color;
 
-public class AccountButton : QuickButton
+public class MyAccountButton : QuickButton
 {
     [SerializeField]
-    SpriteRenderer spriteRenderer;
-    [SerializeField]
-    private AccountMenu accountMenu;
+    private MyAccountMenu accountMenu;
     [SerializeField]
     private FlexButtonComponent flexButtonComponent;
     [SerializeField]
-    private TMPro.TextMeshPro labelText;
+    private SpriteRenderer iconRenderer;
+    private Sprite iconSprite;
+
+    bool blockieOnEnable = true;
 
     private Color PlusButtonColor = new Color((float)0x09 / (float)0xff, (float)0x3A / (float)0xff, (float)0x2C / (float)0xff);
     private Color ToggleOnColor = new Color(83f / 255f, 198f / 255f, 236f / 255f);
@@ -26,26 +27,35 @@ public class AccountButton : QuickButton
     Sprite defaultSprite;
     Sprite liftHeadsetSprite;
 
-    public static AccountButton Instance { get; private set; }
+    public static MyAccountButton Instance { get; private set; }
 
     public void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            defaultSprite = spriteRenderer.sprite;
-            var texture = Resources.Load<Texture2D>("Icons/liftheadset_inverted_medium_ben");
-            var rect = new Rect(0f, 0f, texture.width, texture.height);
-            var pivot = spriteRenderer.sprite.pivot;
-            liftHeadsetSprite = Sprite.Create(texture, rect, new Vector2(0.56f, 0.52f));
         }
+    }
+
+    private void OnEnable()
+    {
+        if (blockieOnEnable)
+        {
+            updateBlockie();
+        }
+    }
+
+    public void updateBlockie()
+    {
+        Texture2D blockieTex = Utils.Accounts.getBlockieTexture(NetworkSettings.currentAddress);
+        var rect = new Rect(0f, 0f, blockieTex.width, blockieTex.height);
+        var pivot = iconRenderer.sprite.pivot;
+        iconSprite = Sprite.Create(blockieTex, rect, new Vector2(0.5f, 0.5f));
+        iconRenderer.sprite = iconSprite;
     }
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        bool menuActive = accountMenu.gameObject.activeSelf;
-        accountMenu.gameObject.SetActive(!menuActive);
-
         Press();
     }
 
@@ -57,7 +67,7 @@ public class AccountButton : QuickButton
     public void Press()
     {
         flexButtonComponent.SetState(2);
-
-        //accountMenu.gameObject.
+        accountMenu.Refresh();
+        accountMenu.GetComponent<AnimationHandler>().OpenMenu();
     }
 }

@@ -5,6 +5,8 @@ using UnityEngine;
 
 using Matryx;
 using UnityEngine.UI;
+using System.Numerics;
+using Vector3 = UnityEngine.Vector3;
 
 public class TournamentMenu : MonoBehaviour
 {
@@ -16,7 +18,9 @@ public class TournamentMenu : MonoBehaviour
     [SerializeField]
     private SubmissionMenu submissionMenu;
     [SerializeField]
-    private FlexButtonComponent continueButton;
+    public FlexButtonComponent continueButton;
+    [SerializeField]
+    public ManageTournamentMenu manageTournamentMenu;
 
     [SerializeField]
     private FlexPanelComponent mainPanel;
@@ -66,7 +70,10 @@ public class TournamentMenu : MonoBehaviour
         }
     }
 
+    string userAddress = "";
+
     private Dictionary<string, MatryxSubmission> submissions = new Dictionary<string, MatryxSubmission>();
+    private Dictionary<string, bool> processing = new Dictionary<string, bool>();
 
     public ActionState actionState;
 
@@ -80,15 +87,15 @@ public class TournamentMenu : MonoBehaviour
 
     internal class TournamentMenuResponder : FlexMenu.FlexMenuResponder
     {
-        TournamentMenu submissionMenu;
-        internal TournamentMenuResponder(TournamentMenu submissionMenu)
+        TournamentMenu tournamentMenu;
+        internal TournamentMenuResponder(TournamentMenu tournamentMenu)
         {
-            this.submissionMenu = submissionMenu;
+            this.tournamentMenu = tournamentMenu;
         }
 
         public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
         {
-            submissionMenu.HandleInput(sender.gameObject);
+            tournamentMenu.HandleInput(sender.gameObject);
         }
 
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider)
@@ -110,7 +117,15 @@ public class TournamentMenu : MonoBehaviour
         scroll = GetComponentInChildren<Scroll>(true);
         flexMenu = GetComponent<FlexMenu>();
         TournamentMenuResponder responder = new TournamentMenuResponder(this);
+
         submissionsPanel = GetComponentInChildren<MultiSelectFlexPanel>().Initialize();
+        submissionsPanel.selectedUnselectedColor = QuickButton.TOGGLE_OFF;
+        submissionsPanel.selectedSelectedColor = QuickButton.TOGGLE_ON;
+        submissionsPanel.hoverUnselectedColor = QuickButton.LIGHT_HOVERING;
+        submissionsPanel.hoverSelectedColor = QuickButton.DARK_HOVERING;
+        submissionsPanel.passiveUnselectedColor = Color.white;
+        submissionsPanel.passiveSelectedColor = QuickButton.DARK_PASSIVE;
+
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
 
         mainPanel.AddAction(previousRoundButton);
@@ -142,11 +157,10 @@ public class TournamentMenu : MonoBehaviour
         {
             SubmissionContainer submissionContainer = source.GetComponent<SubmissionContainer>();
 
-            if (actionState == ActionState.SelectWinners && TournamentMenuCenterButton.Instance.Toggled)
+            if (actionState == ActionState.SelectWinners && centerButton.Toggled)
             {
-                // TODO: Change scroll action to grip action
                 continueButton.gameObject.SetActive(submissionsPanel.selected.Count > 0);
-                submissionContainer.distributionPicker.Toggle(submissionsPanel.selected.Count > 0);
+                submissionContainer.distributionPicker.Toggle(submissionsPanel.selected.ContainsKey(source.name));
             }
             else
             {
@@ -155,13 +169,14 @@ public class TournamentMenu : MonoBehaviour
         }
     }
 
-    public void SetTournament(MatryxTournament newTournament)
+    public void SetTournament(MatryxTournament theTournament)
     {
-        if (Tournament == null ||
-            Tournament.address != newTournament.address)
+        if (Tournament == null || Tournament.address != theTournament.address || userAddress != NetworkSettings.currentAddress)
         {
             ClearSubmissions();
-            Tournament = newTournament;
+            // Show us something at least
+            PreprocessTournament(theTournament);
+            userAddress = NetworkSettings.currentAddress;
 
             loadingSubmissions.gameObject.SetActive(true);
             MatryxCortex.RunGetMySubmissions(Tournament, 0, ProcessMySubmissions);
@@ -175,6 +190,12 @@ public class TournamentMenu : MonoBehaviour
         MatryxCortex.RunGetMySubmissions(Tournament, waitTime, ProcessMySubmissions);
     }
 
+    IEnumerator closeResultsMenuCoroutine(float waitTime = 0)
+    {
+        yield return new WaitForSeconds(waitTime);
+        ResultsMenu.Instance.gameObject.SetActive(false);
+    }
+
     public void SetRound(int roundIndex)
     {
         if (Tournament != null)
@@ -182,7 +203,7 @@ public class TournamentMenu : MonoBehaviour
             ClearSubmissions();
 
             loadingSubmissions.gameObject.SetActive(true);
-            MatryxCortex.RunGetRound(Tournament.address, roundIndex, ProcessRound);
+            MatryxCortex.RunGetRound(Tournament, roundIndex, ProcessRound);
         }
     }
 
@@ -196,28 +217,61 @@ public class TournamentMenu : MonoBehaviour
         winningAndMySubmissions.SetActive(false);
     }
 
-    public static int lastSubmissionKindProcessed = 0;
-    public static void setSubmissionKindProcessed(int myType)
+    public static Dictionary<string, int> lastSubmissionKindProcessed = new Dictionary<string, int>();
+    public static void setSubmissionKindProcessed(string tournamentAddress, int submissionType)
     {
-        if (lastSubmissionKindProcessed == 0)
+        if (!lastSubmissionKindProcessed.ContainsKey(tournamentAddress))
         {
-            lastSubmissionKindProcessed = myType;
+            lastSubmissionKindProcessed[tournamentAddress] = submissionType;
+            return;
         }
-        else if (lastSubmissionKindProcessed != myType)
+
+        if (lastSubmissionKindProcessed[tournamentAddress] == 0)
         {
-            lastSubmissionKindProcessed = 0;
+            lastSubmissionKindProcessed[tournamentAddress] = submissionType;
         }
+        else if (lastSubmissionKindProcessed[tournamentAddress] != submissionType)
+        {
+            lastSubmissionKindProcessed[tournamentAddress] = 0;
+        }
+    }
+
+    public static int getKindOfSubmissionLastProcessed(string tournamentAddress)
+    {
+        if (!lastSubmissionKindProcessed.ContainsKey(tournamentAddress))
+        {
+            lastSubmissionKindProcessed[tournamentAddress] = 0;
+        }
+
+        return lastSubmissionKindProcessed[tournamentAddress];
+    }
+
+    public void PreprocessTournament(MatryxTournament tournament)
+    {
+        Tournament = tournament;
+        Round = Tournament.currentRound;
+        loadingSubmissions.text = "Loading Submissions...";
+        DisplayTournamentInfo();
     }
 
     public void ProcessTournament(object result)
     {
+        processing[((MatryxTournament)result).address] = false;
+
+        // Check preprocess tournament against resulting tournament
+        if (Tournament.address != ((MatryxTournament)result).address)
+        {
+            return;
+        }
+
         Tournament = (MatryxTournament)result;
         Round = Tournament.currentRound;
         RoundIndex = Tournament.currentRound.index;
 
-        if (Tournament.currentRound.winningSubmissions.Count == 0)
+        if (Tournament.currentRound.winningSubmissions.Count == 0 &&
+            Tournament.currentRound.allSubmissions.Count == 0)
         {
-            if (lastSubmissionKindProcessed == 0)
+            if (lastSubmissionKindProcessed[Tournament.address] == 0)
             {
                 loadingSubmissions.text = "No submissions to display";
             }
@@ -225,12 +279,21 @@ public class TournamentMenu : MonoBehaviour
         else
         {
             loadingSubmissions.gameObject.SetActive(false);
-            DisplaySubmissions(Tournament.currentRound.winningSubmissions, "Winning Submissions");
+
+            if (Tournament.currentRound.winningSubmissions.Count > 0)
+            {
+                DisplaySubmissions(Tournament.currentRound.winningSubmissions, "Winning Submissions");
+            }
+
+            if (Tournament.currentRound.allSubmissions.Count > 0)
+            {
+                DisplaySubmissions(Tournament.currentRound.allSubmissions, "All Submissions");
+            }
         }
 
         UpdateActionState();
         DisplayTournamentInfo();
-        setSubmissionKindProcessed(1);
+        setSubmissionKindProcessed(Tournament.address, 1);
     }
 
     public void UpdateActionState()
@@ -243,24 +306,26 @@ public class TournamentMenu : MonoBehaviour
         {
             actionState = ActionState.NoAction;
         }
-        else if (Tournament.owner.Equals(NetworkSettings.activeAccount, StringComparison.CurrentCultureIgnoreCase))
+        else if (Tournament.owner.Equals(NetworkSettings.currentAddress, StringComparison.CurrentCultureIgnoreCase))
         {
             if (Tournament.currentRound.status.Equals(MatryxRound.STATE_OPEN))
             {
                 actionState = ActionState.NoAction;
             }
-            else if(Tournament.currentRound.status.Equals(MatryxRound.STATE_INREVIEW))
+            else if (Tournament.currentRound.status.Equals(MatryxRound.STATE_INREVIEW))
             {
-                if(Tournament.currentRound.winningSubmissions == null)
+                if(Tournament.currentRound.winningSubmissions.Count == 0)
                 {
                     actionState = ActionState.SelectWinners;
-                    TournamentMenuCenterButton.Instance.updateState();
                 }
                 else
                 {
                     actionState = ActionState.ManageTournament;
-                    TournamentMenuCenterButton.Instance.updateState();
                 }
+            }
+            else if (Tournament.currentRound.status.Equals(MatryxRound.STATE_HASWINNERS))
+            {
+                actionState = ActionState.ManageTournament;
             }
         }
         else if(Tournament.currentRound.status.Equals(MatryxRound.STATE_OPEN))
@@ -271,22 +336,38 @@ public class TournamentMenu : MonoBehaviour
         centerButton.updateState();
     }
 
-    public void ProcessRound(object result)
+    public void ProcessRound(object result=null)
     {
-        Round = (MatryxRound)result;
+        if (result != null)
+        {
+            Round = (MatryxRound)result;
+        }
+        else
+        {
+            Round = Tournament.currentRound;
+        }
+        
         RoundIndex = Round.index;
         loadingSubmissions.gameObject.SetActive(false);
+        roundText.text = "Round " + Tournament.currentRound.index + "\n" + Tournament.currentRound.Bounty + " MTX";
         UpdateActionState();
     }
 
     public void ProcessMySubmissions(object result)
     {
         var mySubmissions = (List<MatryxSubmission>)result;
-        
+        // Avoid tournament confusion from varying callback timeouts
+        if (mySubmissions.Count > 0 && 
+            Tournament.address != mySubmissions[0].tournament.address)
+        {
+            return;
+        }
+
+        var tournamentAddress = Tournament.address;
 
         if (mySubmissions.Count == 0)
         {
-            if (lastSubmissionKindProcessed == 0)
+            if (getKindOfSubmissionLastProcessed(tournamentAddress) == 0)
             {
                 loadingSubmissions.text = "No submissions to display";
             }
@@ -297,7 +378,7 @@ public class TournamentMenu : MonoBehaviour
             DisplaySubmissions((List<MatryxSubmission>)result, "My Submissions");
         }
 
-        setSubmissionKindProcessed(2);
+        setSubmissionKindProcessed(tournamentAddress, 2);
     }
 
     public void ErrorLoadingTournament(object result)
@@ -309,18 +390,18 @@ public class TournamentMenu : MonoBehaviour
     private void DisplayTournamentInfo()
     {
         bountyText.text = Tournament.Bounty + " MTX";
-        timeRemainingText.text = Tournament.currentRound.TimeRemaining;
+        timeRemainingText.text = Tournament.currentRound.StatusText;
         titleText.text = Tournament.title;
-        creatorText.text = "by " + Utils.ellipseAddress(Tournament.owner);
-        roundText.text = "Round " + Tournament.currentRound.index + "\n" + Tournament.currentRound.Details.Bounty + " MTX";
+        creatorText.text = "by " + Utils.Accounts.ellipseAddress(Tournament.owner);
+        roundText.text = "Round " + Tournament.currentRound.index + "\n" + Tournament.currentRound.Bounty + " MTX";
 
-        descriptionText.text = Tournament.getDescription();
+        descriptionText.text = Tournament.description;
     }
 
     public void DisplaySubmissionUI(MatryxSubmission submission)
     {
-        submissionMenu.SetSubmission(submission);
         submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
+        submissionMenu.SetSubmission(submission);
     }
 
     GameObject loadButton;
@@ -351,11 +432,12 @@ public class TournamentMenu : MonoBehaviour
         GameObject button = Instantiate(Resources.Load("Submission_Cell", typeof(GameObject))) as GameObject;
         button.transform.SetParent(submissionsPanel.transform);
         button.transform.localScale = Vector3.one;
-
-        button.name = submission.title;
+        button.transform.position = new Vector3(-500f, -500f, -500f);
         button.GetComponent<SubmissionContainer>().submission = submission;
 
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = submission.title;
+        var text = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
+        button.name = submission.title;
+        text.text = submission.title;
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
@@ -377,6 +459,7 @@ public class TournamentMenu : MonoBehaviour
         tmpro.alignment = TMPro.TextAlignmentOptions.Center;
 
         // Disable the button, its just for appearance
+        Destroy(button.GetComponent<FlexRayCastHighlight>());
         var flexButton = button.GetComponent<FlexButtonComponent>();
         flexButton.disabledColor = Color.white;
         flexButton.SetState(-1);
@@ -395,7 +478,10 @@ public class TournamentMenu : MonoBehaviour
 
         button.name = "Load_Button";
 
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = "(Reload Tournaments)";
+        var text = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
+        text.text = "Reload Tournaments";
+        text.fontStyle = TMPro.FontStyles.Bold;
+        text.alignment = TMPro.TextAlignmentOptions.Center;
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
@@ -415,7 +501,7 @@ public class TournamentMenu : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         if (Instance == null)
         {

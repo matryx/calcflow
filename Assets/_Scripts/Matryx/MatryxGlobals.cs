@@ -18,6 +18,10 @@ using Assets.USecurity;
 using Nanome.Maths.Serializers.JsonSerializer;
 using System;
 using System.Security.Cryptography;
+using System.Drawing;
+using System.IO;
+using System.Drawing.Imaging;
+using Nethereum.Web3.Accounts;
 
 namespace Matryx
 {
@@ -27,34 +31,34 @@ namespace Matryx
 
         public static string network = "ropsten";
         public static string infuraProvider = "https://ropsten.infura.io/v3/2373e82fc83341ff82b66c5a87edd5f5";
-        public static Nethereum.HdWallet.Wallet wallet;
-        public static List<string> _accounts = new List<string>();
-        public static List<string> _privateKeys = new List<string>();
-        static int activeAccountIndex = 0;
+        public static Nethereum.HdWallet.Wallet mnemonicWallet;
+        public static Dictionary<string, string> aggregateWallet = new Dictionary<string, string>();
+        static string _currentAddress = "";
         // All accounts the network settings know about
         public static string[] accounts
         {
             get
             {
-                if (wallet != null)
+                if (mnemonicWallet != null)
                 {
-                    return wallet.GetAddresses(10);
+                    return mnemonicWallet.GetAddresses(10);
                 }
-                else return _accounts.ToArray();
+                else return aggregateWallet.Keys.ToArray();
             }
         }
-        // The account that transactions are currently being made under
-        public static string activeAccount
+
+        // The address that transactions are currently being made by
+        public static string currentAddress
         {
             get
             {
-                if (wallet != null)
+                if (mnemonicWallet != null && mnemonicWallet.GetAccount(_currentAddress) != null)
                 {
-                    return wallet.GetAccount(0).Address;
+                    return Nethereum.Util.AddressExtensions.ConvertToEthereumChecksumAddress(_currentAddress);
                 }
-                else if (_accounts.Count > 0)
+                else if (aggregateWallet.Count > 0 && !_currentAddress.Equals(string.Empty))
                 {
-                    return _accounts.ElementAt(activeAccountIndex);
+                    return Nethereum.Util.AddressExtensions.ConvertToEthereumChecksumAddress(_currentAddress);
                 }
                 else
                 {
@@ -62,18 +66,19 @@ namespace Matryx
                 }
             }
         }
+
         // The private key currently being used to make transactions
-        public static string activePrivateKey
+        public static string currentPrivateKey
         {
             get
             {
-                if (wallet != null)
+                if (mnemonicWallet != null)
                 {
-                    return "0x" + System.BitConverter.ToString(wallet.GetPrivateKey(0)).Replace("-", "");
+                    return mnemonicWallet.GetAccount(_currentAddress).PrivateKey;
                 }
-                else if (_privateKeys.Count > 0)
+                else if (aggregateWallet.Count > 0 && !_currentAddress.Equals(string.Empty))
                 {
-                    return _privateKeys[activeAccountIndex];
+                    return aggregateWallet[_currentAddress];
                 }
                 else
                 {
@@ -81,25 +86,29 @@ namespace Matryx
                 }
             }
         }
+
         public static BigInteger MTXBalance;
         public static HexBigInteger txGas = new HexBigInteger(new BigInteger(3e6));
         public static HexBigInteger txGasPrice = new HexBigInteger(new BigInteger(5e9));
 
-        // Importing a wallet currently overrides all imported single private keys
-        // (including those from keystore files)
-        public static bool importWallet(string mnemonic, string password=null)
+        public static bool importWallet(string mnemonic, string password="", bool makeActive = true)
         {
-            wallet = new Nethereum.HdWallet.Wallet(mnemonic, "");
+            mnemonicWallet = new Nethereum.HdWallet.Wallet(mnemonic, password);
+            if(makeActive)
+            {
+                _currentAddress = mnemonicWallet.GetAccount(0).Address;
+            }
+
             return true;
         }
 
         public static bool importKey(string privateKey, bool makeActive = true)
         {
-            _privateKeys.Add(privateKey);
-            _accounts.Add(Nethereum.Signer.EthECKey.GetPublicAddress(privateKey));
+            string address = Nethereum.Signer.EthECKey.GetPublicAddress(privateKey);
+            aggregateWallet.Add(address, privateKey);
             if(makeActive)
             {
-                activeAccountIndex = _privateKeys.Count - 1;
+                _currentAddress = address;
             }
 
             return true;
@@ -109,20 +118,74 @@ namespace Matryx
         {
             var service = new Nethereum.KeyStore.KeyStoreService();
             var sK = service.DecryptKeyStoreFromJson(password, keystore);
-            _privateKeys.Add("0x" + System.BitConverter.ToString(sK).Replace("-", ""));
-            _accounts.Add(Nethereum.Signer.EthECKey.GetPublicAddress(_privateKeys.Last()));
+            string privateKey = "0x" + System.BitConverter.ToString(sK).Replace("-", "");
+            string address = Nethereum.Signer.EthECKey.GetPublicAddress(privateKey);
+            aggregateWallet.Add(address, privateKey);
+            if (makeActive)
+            {
+                _currentAddress = address;
+            }
+
             return true;
         }
 
         public static void setActiveAccount(string address)
         {
-            activeAccountIndex = _accounts.IndexOf(address);
-            activeAccountIndex = activeAccountIndex == -1 ? 0 : activeAccountIndex;
+            if (aggregateWallet.ContainsKey(address))
+            {
+                _currentAddress = address;
+                Debug.Log("Active account set to: " + _currentAddress);
+            }
+            else if (mnemonicWallet != null)
+            {
+                Account account = mnemonicWallet.GetAccount(address);
+                if (account.Address != null)
+                {
+                    _currentAddress = account.Address;
+                    Debug.Log("Active account set to: " + _currentAddress);
+                }
+            }
+            else
+            {
+                throw new System.Exception("Could not find address (" + address + ") in wallet.");
+            }
+        }
+
+        public static void SignOut()
+        {
+            // Clear wallets
+            aggregateWallet.Clear();
+            mnemonicWallet = null;
+            TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.AccountUnlockRequired);
         }
     }
 
+    
+
     public class Utils
     {
+        public class Accounts
+        {
+            public static Texture2D getBlockieTexture(string accountAddress)
+            {
+                Texture2D blockieTex = new Texture2D(1, 1);
+                var blockies = new NetBlockies.Blockies(accountAddress);
+                Bitmap bitmap = blockies.GetBitmap(64);
+                MemoryStream ms = new MemoryStream();
+                bitmap.Save(ms, ImageFormat.Png);
+                var buffer = new byte[ms.Length];
+                ms.Position = 0;
+                ms.Read(buffer, 0, buffer.Length);
+                blockieTex.LoadImage(buffer);
+
+                return blockieTex;
+            }
+
+            public static string ellipseAddress(string address)
+            {
+                return address.Substring(0, 6) + "..." + address.Substring(address.Length - 5, 4);
+            }
+        }
 
         public class Time
         {
@@ -130,6 +193,13 @@ namespace Matryx
             public static DateTime FromUnixTime(double unixTime)
             {
                 return epoch.AddSeconds(unixTime);
+            }
+
+            public static DateTime FromUnixTime(BigInteger unixTime)
+            {
+                var timestring = unixTime.ToString();
+                double timeAsDouble = Convert.ToDouble(timestring);
+                return epoch.AddSeconds(timeAsDouble);
             }
 
             public static DateTime FromUnixTime(string unixTime)
@@ -156,11 +226,6 @@ namespace Matryx
             {
                 return "";
             }
-        }
-
-        public static string ellipseAddress(string address)
-        {
-            return address.Substring(0, 6) + "..." + address.Substring(address.Length - 5, 4);
         }
 
         public static string GetMultiHash(byte[] data)

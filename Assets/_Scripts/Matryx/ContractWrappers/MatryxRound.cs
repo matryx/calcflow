@@ -22,54 +22,129 @@ namespace Matryx
 {
     public class MatryxRound
     {
-        private string address;
+        public MatryxTournament tournament;
 
         public MatryxRound() {}
         public MatryxRound(int index)
         {
             this.index = index;
         }
+        public MatryxRound(int index, RoundDetails details) : this(index)
+        {
+            Details = details;
+            startDate = Utils.Time.FromUnixTime(details.Start);
+            endDate = Utils.Time.FromUnixTime(details.Start + Details.Duration);
+            reviewEndDate = Utils.Time.FromUnixTime(details.Start + details.Duration + details.Review);
+        }
 
         public RoundInfo Info { get; set; }
         public RoundDetails Details { get; set; }
 
-        public string status;
-        public DateTime startTime;
-        public DateTime endTime;
+        // TODO: Handle transitions (get round (winners) when round ends)
+        public string status
+        {
+            get
+            {
+                if (DateTime.Now < startDate)
+                {
+                    return STATE_SCHEDULED;
+                }
+                else if (DateTime.Now < endDate)
+                {
+                    if (Bounty == 0)
+                    {
+                        return STATE_UNFUNDED;
+                    }
+                    return STATE_OPEN;
+                }
+                else if (DateTime.Now < reviewEndDate)
+                {
+                    if (closed)
+                    {
+                        return STATE_CLOSED;
+                    }
+                    else if (totalSubmissions == 0)
+                    {
+                        return STATE_ABANDONED;
+                    }
+                    else if (winningSubmissions.Count > 0)
+                    {
+                        return STATE_HASWINNERS;
+                    }
+
+                    return STATE_INREVIEW;
+                }
+                else if (winningSubmissions.Count > 0)
+                {
+                    return STATE_CLOSED;
+                }
+
+                return STATE_ABANDONED;
+            }
+        }
+
+        public DateTime startDate;
+        public DateTime endDate;
+        public DateTime reviewEndDate;
 
         public static readonly string STATE_SCHEDULED = "scheduled";
         public static readonly string STATE_UNFUNDED = "notFunded";
         public static readonly string STATE_OPEN = "open";
-        public static readonly string STATE_INREVIEW = "inReview";
+        public static readonly string STATE_INREVIEW = "review";
         public static readonly string STATE_HASWINNERS = "hasWinners";
         public static readonly string STATE_CLOSED = "closed";
+        public static readonly string STATE_ABANDONED = "abandoned";
 
-        public string TimeRemaining
+        Dictionary<string, string> displayStates = new Dictionary<string, string>() { {STATE_SCHEDULED, "Scheduled" }, {STATE_UNFUNDED, "Unfunded" }, {STATE_OPEN, "Open" }, {STATE_INREVIEW, "In Review" }, {STATE_HASWINNERS, "Has Winners" }, { STATE_CLOSED, "Closed" }, {STATE_ABANDONED, "Abandoned" } };
+
+        public string StatusText
         {
             get
             {
-                TimeSpan timeRemaining = endTime - DateTime.Now;
-                if (timeRemaining.TotalSeconds < 0) { return "Closed"; }
-                var unitLabels = new string[] { "Sec", "Min", "Hrs", " Days", "Wks", "Yrs" };
-                var amountPerNextUnit = new double[] { 60, 60, 24, 7, 54 };
-
-                var amount = timeRemaining.TotalSeconds;
-                int i = 0;
-                for(; i < unitLabels.Length; i++)
+                TimeSpan? timeRemaining = null;
+                string sts = status;
+                string displayState = displayStates[status];
+                if (sts.Equals(STATE_OPEN))
                 {
-                    if (amount < amountPerNextUnit[i]) break;
-                    amount = amount / amountPerNextUnit[i];
+                    timeRemaining = endDate - DateTime.Now;
+                    displayState = "";
+                }
+                else if(sts.Equals(STATE_INREVIEW) || sts.Equals(STATE_HASWINNERS))
+                {
+                    timeRemaining = reviewEndDate - DateTime.Now;
+                    displayState = " ( " + displayState + " )";
                 }
 
-                return Math.Truncate(amount) + unitLabels[i];
+                if (timeRemaining.HasValue)
+                {
+                    var unitLabels = new string[] { "Seconds", "Minutes", "Hours", " Days", "Weeks", "Years" };
+                    var amountPerNextUnit = new double[] { 60, 60, 24, 7, 54 };
+
+                    var amount = timeRemaining.Value.TotalSeconds;
+                    int i = 0;
+                    for (; i < unitLabels.Length; i++)
+                    {
+                        if (amount < amountPerNextUnit[i]) break;
+                        amount = amount / amountPerNextUnit[i];
+                    }
+
+                    var time = Math.Truncate(amount) + unitLabels[i];
+                    return time + displayState;
+                }
+                else
+                {
+                    return displayState;
+                }
             }
         }
 
         public int index;
+        public bool closed;
         public int Number { get { return index + 1; } }
         public int totalParticipants;
         public int totalSubmissions;
-        public List<MatryxSubmission> winningSubmissions;
+        public List<MatryxSubmission> allSubmissions = new List<MatryxSubmission>();
+        public List<MatryxSubmission> winningSubmissions = new List<MatryxSubmission>();
         public decimal Bounty
         {
             get
@@ -78,6 +153,11 @@ namespace Matryx
             }
             set
             {
+                if (Details == null)
+                {
+                    Details = new RoundDetails();
+                }
+
                 Details.Bounty = new BigInteger(value * (decimal)1e18);
             }
         }

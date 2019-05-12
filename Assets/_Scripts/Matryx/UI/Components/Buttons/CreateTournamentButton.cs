@@ -13,7 +13,6 @@ public class CreateTournamentButton : QuickButton
     [SerializeField]
     private TMPro.TextMeshPro labelText;
 
-    private Color PlusButtonColor = new Color((float)0x09 / (float)0xff, (float)0x3A / (float)0xff, (float)0x2C / (float)0xff);
     private Color ToggleOnColor = new Color(83f / 255f, 198f / 255f, 236f / 255f);
     private Color ToggleOffColor = new Color(117f / 255f, 205f / 255f, 234f / 255f);
     private Color DarkPassiveColor = new Color(0.2f, 0.475f, 0.565f);

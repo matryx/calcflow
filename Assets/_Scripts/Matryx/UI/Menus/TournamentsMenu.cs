@@ -15,9 +15,11 @@ public class TournamentsMenu : MonoBehaviour
     private CalcManager calcManager;
     private MultiSelectFlexPanel tournamentsPanel;
     [SerializeField]
+    public MyAccountButton myAccountButton;
+    [SerializeField]
     TMPro.TextMeshPro selectTournamentText;
     [SerializeField]
-    private UnlockAccountButton accountButton;
+    public UnlockAccountButton unlockButton;
     [SerializeField]
     private CreateTournamentButton createTournamentButton;
     [SerializeField]
@@ -35,7 +37,7 @@ public class TournamentsMenu : MonoBehaviour
     JoyStickAggregator joyStickAggregator;
     FlexMenu flexMenu;
 
-    private Dictionary<string, MatryxTournament> tournaments = new Dictionary<string, MatryxTournament>();
+    private List<MatryxTournament> tournaments = new List<MatryxTournament>();
 
     public enum TournamentMenuState
     {
@@ -67,10 +69,6 @@ public class TournamentsMenu : MonoBehaviour
         if (source.name == "Load_Button")
         {
             ReloadTournaments();
-        }
-        else if(source.name.Equals("Matryx Icon"))
-        {
-            Debug.Log("gotchaaa");
         }
         else if (source.GetComponent<TournamentContainer>())
         {
@@ -133,28 +131,31 @@ public class TournamentsMenu : MonoBehaviour
             case TournamentMenuState.AccountUnlockRequired:
                 Instance.ClearTournaments();
                 Instance.selectTournamentText.text = "Account Unlock Required";
-                Instance.accountButton.transform.parent.gameObject.SetActive(true);
-                Instance.accountButton.SetButtonToUnlock();
+                Instance.unlockButton.transform.parent.gameObject.SetActive(true);
+                Instance.unlockButton.SetButtonToUnlock();
                 Instance.tournamentListText.gameObject.SetActive(false);
+                Instance.myAccountButton.transform.parent.gameObject.SetActive(false);
                 CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(false);
                 MyCommitsButton.Instance.transform.parent.gameObject.SetActive(false);
-                MyTournamentsButton.Instance.transform.parent.gameObject.SetActive(true);
+                MyTournamentsButton.Instance.transform.parent.gameObject.SetActive(false);
                 break;
             case TournamentMenuState.WaitingForUnlock:
                 Instance.ClearTournaments();
                 Instance.selectTournamentText.text = "Lift Headset to Unlock Account";
-                Instance.accountButton.transform.parent.gameObject.SetActive(true);
-                Instance.accountButton.SetButtonToCancel();
+                Instance.unlockButton.transform.parent.gameObject.SetActive(true);
+                Instance.unlockButton.SetButtonToCancel();
                 Instance.tournamentListText.gameObject.SetActive(false);
+                Instance.myAccountButton.transform.parent.gameObject.SetActive(false);
                 CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(false);
                 MyCommitsButton.Instance.transform.parent.gameObject.SetActive(false);
-                MyTournamentsButton.Instance.transform.parent.gameObject.SetActive(true);
+                MyTournamentsButton.Instance.transform.parent.gameObject.SetActive(false);
                 break;
             case TournamentMenuState.Unlocked:
                 Instance.selectTournamentText.text = "";
-                Instance.accountButton.transform.parent.gameObject.SetActive(false);
+                Instance.unlockButton.transform.parent.gameObject.SetActive(false);
                 Instance.tournamentListText.gameObject.SetActive(true);
                 Instance.LoadTournaments(0);
+                Instance.myAccountButton.transform.parent.gameObject.SetActive(true);
                 CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(true);
                 MyCommitsButton.Instance.transform.parent.gameObject.SetActive(true);
                 MyTournamentsButton.Instance.transform.parent.gameObject.SetActive(true);
@@ -203,9 +204,10 @@ public class TournamentsMenu : MonoBehaviour
 
     private void ProcessTournaments(object results)
     {
+        tournaments = (List<MatryxTournament>)results;
         tournamentListText.text = "Open Tournaments";
         tournamentListText.fontStyle = TMPro.FontStyles.Underline;
-        DisplayTournaments((List<MatryxTournament>)results);
+        DisplayTournaments(tournaments);
         loaded = true;
     }
 
@@ -233,9 +235,13 @@ public class TournamentsMenu : MonoBehaviour
         GameObject button = Instantiate(Resources.Load("Tournament_Cell", typeof(GameObject))) as GameObject;
         button.transform.SetParent(tournamentsPanel.transform);
         button.transform.localScale = Vector3.one;
+        button.transform.position = new Vector3(-500f, -500f, -500f);
 
         button.name = "Load_Button";
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = "(Reload Tournaments)";
+        var text = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
+        text.text = "Reload Tournaments";
+        text.fontStyle = TMPro.FontStyles.Bold;
+        text.alignment = TMPro.TextAlignmentOptions.Center;
 
         TMPro.TextMeshPro matryxBountyTMP = button.transform.Find("MTX_Amount").GetComponent<TMPro.TextMeshPro>();
         matryxBountyTMP.text = "";

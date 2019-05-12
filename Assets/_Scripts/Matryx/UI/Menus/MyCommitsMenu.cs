@@ -13,6 +13,8 @@ public class MyCommitsMenu : MonoBehaviour {
     [SerializeField]
     private TMPro.TextMeshPro commitsListText;
 
+    public string userAddress = "";
+
     private Scroll scroll;
     JoyStickAggregator joyStickAggregator;
     FlexMenu flexMenu;
@@ -56,16 +58,6 @@ public class MyCommitsMenu : MonoBehaviour {
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
     }
 
-    // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     public void ClearCommits()
     {
         page = 0;
@@ -76,14 +68,15 @@ public class MyCommitsMenu : MonoBehaviour {
     int page = 0;
     bool loaded
     {
-        get { return commits.Count != 0; }
+        get { return commits.Count != 0 && NetworkSettings.currentAddress == userAddress; }
     }
     bool loading = false;
     public bool LoadMyCommits(int thePage)
     {
         if ((loaded | loading) == true) return false;
+        userAddress = NetworkSettings.currentAddress;
         loading = true;
-        commitsListText.text = "Loading Commits...";
+        commitsListText.text = "Loading Creations...";
         ClearCommits();
         MatryxCortex.RunGetMyCommits(ProcessCommits, ShowError);
         return true;
@@ -139,19 +132,22 @@ public class MyCommitsMenu : MonoBehaviour {
 
     private GameObject createLoadButton()
     {
-        GameObject button = Instantiate(Resources.Load("Commit_Cell", typeof(GameObject))) as GameObject;
+        GameObject button = Instantiate(Resources.Load("Submission_Cell", typeof(GameObject))) as GameObject;
         button.transform.SetParent(commitsPanel.transform);
         button.transform.localScale = Vector3.one;
+        button.transform.position = new Vector3(-500f, -500f, -500f);
 
         button.name = "Load_Button";
-        var textMesh = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
-        textMesh.text = "(Reload Commits)";
-        textMesh.fontStyle = TMPro.FontStyles.Bold;
+        var text = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
+        text.text = "Reload";
+        text.fontStyle = TMPro.FontStyles.Bold;
+        text.alignment = TMPro.TextAlignmentOptions.Center;
+        text.fontSize = 1.8f;
 
-        var icon = button.transform.Find("Icon");
-        var notAvailable = button.transform.Find("PreviewNotAvailable");
-        icon.gameObject.SetActive(false);
-        notAvailable.gameObject.SetActive(false);
+        //var icon = button.transform.Find("Icon");
+        //var notAvailable = button.transform.Find("PreviewNotAvailable");
+        //icon.gameObject.SetActive(false);
+        //notAvailable.gameObject.SetActive(false);
 
         scroll.addObject(button.transform);
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
@@ -180,7 +176,7 @@ public class MyCommitsMenu : MonoBehaviour {
         button.transform.SetParent(commitsPanel.transform);
         button.transform.localScale = Vector3.one;
 
-        var commitTimestamp = Utils.Time.FromUnixTime(long.Parse(commit.timestamp.ToString()));
+        var commitTimestamp = Utils.Time.FromUnixTime(commit.timestamp);
         button.name = commitTimestamp.ToLongDateString();
         button.GetComponent<CommitContainer>().commit = commit;
 

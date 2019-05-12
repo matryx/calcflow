@@ -5,6 +5,8 @@ using System;
 
 public class TournamentMenuCenterButton : QuickButton {
     [SerializeField]
+    TournamentMenu tournamentMenu;
+    [SerializeField]
     TMPro.TextMeshPro text;
     [SerializeField]
     private CreateSubmissionMenu canvasSubmitMenu;
@@ -39,9 +41,6 @@ public class TournamentMenuCenterButton : QuickButton {
 
     protected override void ButtonEnterBehavior(GameObject other)
     {
-        bool menuActive = canvasSubmitMenu.gameObject.activeSelf;
-        canvasSubmitMenu.gameObject.SetActive(!menuActive);
-
         if (toggled)
         {
             ToggleOff();
@@ -68,75 +67,74 @@ public class TournamentMenuCenterButton : QuickButton {
         button.passiveColor = LIGHT_PASSIVE;
         button.hoveringColor = LIGHT_HOVERING;
 
-        text.text = "Contribute";
         text.fontSize = defaultFontSize;
         text.color = Color.black;
 
         button.SetState(1);
 
-        switch (TournamentMenu.Instance.actionState)
+        switch (tournamentMenu.actionState)
         {
             case TournamentMenu.ActionState.NoAction:
                 break;
             case TournamentMenu.ActionState.Contribute:
+                bool menuActive = canvasSubmitMenu.gameObject.activeSelf;
+                canvasSubmitMenu.gameObject.SetActive(!menuActive);
+                text.text = "Contribute";
                 Tippies.FadeDestroyTippy("Please Lift Headset");
                 break;
             case TournamentMenu.ActionState.SelectWinners:
-                TournamentMenu.Instance.submissionsPanel.MultiSelect = false;
+                text.text = "Select Winners";
+                tournamentMenu.submissionsPanel.SwitchToSingleSelect();
+                tournamentMenu.continueButton.gameObject.SetActive(false);
                 break;
             case TournamentMenu.ActionState.ManageTournament:
-                // Close this window: Close Tournament --or-- Start New Round (fun screen. get here!)
+                text.text = "Manage";
+                TournamentMenu.Instance.manageTournamentMenu.GetComponent<AnimationHandler>().CloseMenu();
                 break;
         }
     }
 
     public void ToggleOn()
     {
+        switch (tournamentMenu.actionState)
+        {
+            case TournamentMenu.ActionState.NoAction:
+                return;
+            case TournamentMenu.ActionState.Contribute:
+                bool menuActive = canvasSubmitMenu.gameObject.activeSelf;
+                canvasSubmitMenu.gameObject.SetActive(!menuActive);
+                Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
+                break;
+            case TournamentMenu.ActionState.SelectWinners:
+                // make tournament panel multi select
+                text.text = "Choose\nFrom Below...";
+                tournamentMenu.submissionsPanel.SwitchToMultiSelect();
+                if (tournamentMenu.submissionsPanel.selected.Count > 0)
+                {
+                    tournamentMenu.continueButton.gameObject.SetActive(false);
+                }
+                break;
+            case TournamentMenu.ActionState.ManageTournament:
+                text.text = "Managing...";
+                TournamentMenu.Instance.manageTournamentMenu.UpdateState();
+                TournamentMenu.Instance.manageTournamentMenu.GetComponent<AnimationHandler>().OpenMenu();
+                break;
+        }
+
         toggled = true;
         button.selectedColor = TOGGLE_ON;
         button.passiveColor = DARK_PASSIVE;
         button.hoveringColor = DARK_HOVERING;
 
-        text.text = "Lift Headset...";
         text.fontSize = otherFontSize;
         text.color = Color.white;
 
         button.SetState(1);
-
-        // Do what the 
-        switch (TournamentMenu.Instance.actionState)
-        {
-            case TournamentMenu.ActionState.NoAction:
-                break;
-            case TournamentMenu.ActionState.Contribute:
-                Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector2(6, 1f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
-                break;
-            case TournamentMenu.ActionState.SelectWinners:
-                // make tournament panel multi select
-                TournamentMenu.Instance.submissionsPanel.SwitchToMultiSelect();
-                // make sure clicking on one doesn't open up the submission (maybe use state dependency on something)
-                // (check)
-                // if at least one selected, create a button that allows you to Close Tournament --or-- Start New Round (radio)
-                // (check)
-                // Amend submission cell to contain a button that can be gripped and changed for distribution setting
-                // (check)
-                // every time a submission is selected, enable its distribution picker
-                // (check)
-                // continue button goes to same screen as Close Tournament --or-- Start New Round (radio), replace Close Tournament button with Do Nothing (radio)
-                // ...
-                // (validate the inputs for the new round: start time, endtime, bounty)
-                // last button closes the window and fires select winners with the appropriate inputs based on what the user selected
-                // in-VR transaction notification complete notifiction would be nice (Tippy? :) )
-                break;
-            case TournamentMenu.ActionState.ManageTournament:
-                // Close Tournament --or-- Start New Round (fun screen. get here!)
-                break;
-        }
     }
 
     public void updateState()
     {
-        switch (TournamentMenu.Instance.actionState)
+        switch (tournamentMenu.actionState)
         {
             case TournamentMenu.ActionState.NoAction:
                 text.text = "Contribute";
@@ -158,5 +156,10 @@ public class TournamentMenuCenterButton : QuickButton {
                 text.text = "Manage";
                 break;
         }
+    }
+
+    public override void OnMenuClose()
+    {
+        ToggleOff();
     }
 }

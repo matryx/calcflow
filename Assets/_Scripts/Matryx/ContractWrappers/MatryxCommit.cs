@@ -118,7 +118,7 @@ namespace Matryx
                     throw new System.Exception("Commit content must already have been uploaded");
                 }
 
-                sender = NetworkSettings.activeAccount;
+                sender = NetworkSettings.currentAddress;
                 contentHash = contHash;
                 content = cont;
                 var saltString = Utils.GetRandomHexNumber(64);
@@ -330,21 +330,21 @@ namespace Matryx
 
         public static IEnumerator getCommit(string commitHash, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetCommitFunction, CommitOutputDTO>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetCommitFunction, CommitOutputDTO>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return queryRequest.Query(new GetCommitFunction() { CommitHash = Utils.HexStringToByteArray(commitHash) }, MatryxCommit.address);
             yield return queryRequest.Result.outCommit;
         }
 
         public static IEnumerator getBalance(string commitHash, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetBalanceFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetBalanceFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return queryRequest.Query(new GetBalanceFunction() { CommitHash = commitHash }, MatryxCommit.address);
             yield return queryRequest.Result;
         }
 
         public static IEnumerator getCommitByContent(string content, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetCommitByContentFunction, CommitOutputDTO>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetCommitByContentFunction, CommitOutputDTO>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
 
             yield return queryRequest.Query(new GetCommitByContentFunction() { Content = content }, MatryxCommit.address);
             yield return queryRequest.Result;
@@ -352,7 +352,7 @@ namespace Matryx
 
         public static IEnumerator getInitialCommits(Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetInitialCommitsFunction, EthereumTypes.Bytes32Array>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetInitialCommitsFunction, EthereumTypes.Bytes32Array>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return queryRequest.Query(new GetInitialCommitsFunction() {}, MatryxCommit.address);
             yield return queryRequest.Result;
             Debug.Log("Hello! Initial Commits are " + queryRequest.Result);
@@ -360,14 +360,14 @@ namespace Matryx
 
         public static IEnumerator getSubmissionsForCommit(string commitHash, Async thread = null)
         {
-            var queryRequest = new QueryUnityRequest<GetSubmissionsForCommitFunction, EthereumTypes.Bytes32Array>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetSubmissionsForCommitFunction, EthereumTypes.Bytes32Array>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return queryRequest.Query(new GetSubmissionsForCommitFunction() { CommitHash = commitHash }, MatryxCommit.address);
             yield return queryRequest.Result;
         }
 
         public static IEnumerator addGroupMember(string commitHash, string member, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             var addGroupMemberMsg = new AddGroupMemberFunction() { CommitHash = commitHash, Member = member, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
             yield return transactionRequest.SignAndSendTransaction<AddGroupMemberFunction>(addGroupMemberMsg, MatryxCommit.address);
 
@@ -378,7 +378,7 @@ namespace Matryx
 
         public static IEnumerator addGroupMembers(string commitHash, List<string> members, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             var addGroupMembersMsg = new AddGroupMembersFunction() { CommitHash = commitHash, Members = members, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
             yield return transactionRequest.SignAndSendTransaction<AddGroupMembersFunction>(addGroupMembersMsg, MatryxCommit.address);
 
@@ -447,19 +447,20 @@ namespace Matryx
 
         public IEnumerator claim(Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null, Async thread = null)
         {
-            if(claims.ContainsKey(ipfsContentHash))
-            {
-                onError?.Invoke(null);
-                yield return true;
-            }
-
             ResultsMenu.Instance?.SetStatus("Uploading Content...");
             var contentUploader = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, uploadContent());
             yield return contentUploader;
 
+            if (claims.ContainsKey(ipfsContentHash))
+            {
+                onError?.Invoke(null);
+                yield return false;
+                yield break;
+            }
+
             ResultsMenu.Instance?.SetStatus("Hashing Content to Matryx...");
             Claim claim = new Claim(ipfsContentHash, content);
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             var claimCommitMsg = new ClaimCommitFunction() { ClaimHash = claim.claimHash, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
             yield return transactionRequest.SignAndSendTransaction(claimCommitMsg, address);
 
@@ -481,11 +482,11 @@ namespace Matryx
             yield return txStatus.result;
         }
 
-        public IEnumerator create(Async.EventDelegate onSuccess = null, Async thread = null)
+        public IEnumerator create(Async.EventDelegate onSuccess = null, Async.EventDelegate onFailure = null)
         {
             ResultsMenu.Instance?.SetStatus("Committing Content to Matryx...");
             Claim claim = getClaim(ipfsContentHash);
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             var createCommitMsg = new CreateCommitFunction()
             {
                 ParentHash = parentHash,
@@ -498,19 +499,26 @@ namespace Matryx
             };
             yield return transactionRequest.SignAndSendTransaction<CreateCommitFunction>(createCommitMsg, address);
 
-            var txStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createCommit", thread));
+            var txStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createCommit", null));
             yield return txStatus;
+            if(!txStatus.result)
+            {
+                onFailure?.Invoke(null);
+                yield break;
+            }
+
             // Get commit hash and assign to this commit
             var getCommit = new Utils.CoroutineWithData<CommitOutputDTO>(MatryxCortex.Instance, getCommitByContent(ipfsContentHash));
             yield return getCommit;
             hash = getCommit.result.outCommit.CommitHash.ToHex(true);
             yield return txStatus.result;
+            onSuccess?.Invoke(hash);
         }
 
         public IEnumerator createSubmission(string tournamentAddress, string parentHash, bool isFork, BigInteger value, Async thread = null)
         {
             var salt = getClaim(ipfsContentHash).salt;
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             var createSubmissionMsg = new CreateSubmissionFunction()
             {
                 TournamentAddress = tournamentAddress,
@@ -532,13 +540,13 @@ namespace Matryx
 
         public static IEnumerator getAvailableRewardForUser(string commitHash, string user)
         {
-            var queryRequest = new QueryUnityRequest<GetAvailableRewardForUserFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var queryRequest = new QueryUnityRequest<GetAvailableRewardForUserFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return queryRequest.Query(new GetAvailableRewardForUserFunction() { CommitHash = commitHash, User = user }, MatryxCommit.address);
         }
 
         public static IEnumerator withdrawAvailableReward(string commitHash, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             var withdrawRewardMsg = new WithdrawAvailableRewardFunction() { CommitHash = commitHash, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
             yield return transactionRequest.SignAndSendTransaction<WithdrawAvailableRewardFunction>(withdrawRewardMsg, MatryxCommit.address);
 

@@ -11,11 +11,16 @@ public class MultiSelectFlexPanel : FlexPanelComponent
 {
 
     public bool MultiSelect;
-    public List<GameObject> selected;
+    public Dictionary<string, GameObject> selected = new Dictionary<string, GameObject>();
+    public Color selectedUnselectedColor;
+    public Color selectedSelectedColor;
+    public Color hoverUnselectedColor;
+    public Color hoverSelectedColor;
+    public Color passiveUnselectedColor;
+    public Color passiveSelectedColor;
 
     public void SwitchToMultiSelect()
     {
-        ClearSelection();
         MultiSelect = true;
     }
 
@@ -32,6 +37,8 @@ public class MultiSelectFlexPanel : FlexPanelComponent
             if (button is FlexButtonComponent)
             {
                 ((FlexButtonComponent)button).selectedColor = newColor;
+                ((FlexButtonComponent)button).SetState(2);
+                ((FlexButtonComponent)button).SetState(0);
             }
         }
     }
@@ -43,14 +50,75 @@ public class MultiSelectFlexPanel : FlexPanelComponent
             if (button is FlexButtonComponent)
             {
                 ((FlexButtonComponent)button).hoveringColor = newColor;
+                ((FlexButtonComponent)button).SetState(2);
+                ((FlexButtonComponent)button).SetState(0);
             }
         }
     }
 
+    public void ChangePassiveColor(Color newColor)
+    {
+        foreach (FlexActionableComponent button in Actions)
+        {
+            if (button is FlexButtonComponent)
+            {
+                ((FlexButtonComponent)button).passiveColor = newColor;
+                ((FlexButtonComponent)button).SetState(2);
+                ((FlexButtonComponent)button).SetState(0);
+            }
+        }
+    }
+
+    
+    public void ChangeSelectedColor(FlexButtonComponent button, Color newColor)
+    {
+       button.selectedColor = newColor;
+    }
+
+    public void ChangeHoveringColor(FlexButtonComponent button, Color newColor)
+    {
+        button.hoveringColor = newColor;
+    }
+    
+    public void ChangePassiveColor(FlexButtonComponent button, Color newColor)
+    {
+        button.passiveColor = newColor;
+    }
+
     public new void ClearSelection()
     {
+        ChangePassiveColor(passiveUnselectedColor);
+        ChangeHoveringColor(hoverUnselectedColor);
+        ChangeSelectedColor(selectedUnselectedColor);
         base.ClearSelection();
         selected.Clear();
+    }
+
+    protected override void StartAction(FlexActionableComponent sender, GameObject collider)
+    {
+        if (menu != null)
+        {
+            if(MultiSelect)
+            {
+                if (selected.ContainsKey(sender.name))
+                {
+                    selected.Remove(sender.name);
+                    ChangeSelectedColor((FlexButtonComponent)sender, selectedUnselectedColor);
+                    ChangeHoveringColor((FlexButtonComponent)sender, hoverUnselectedColor);
+                    ChangePassiveColor((FlexButtonComponent)sender, passiveUnselectedColor);
+                }
+                else
+                {
+                    selected.Add(sender.name, sender.gameObject);
+                    ChangeSelectedColor((FlexButtonComponent)sender, selectedSelectedColor);
+                    ChangeHoveringColor((FlexButtonComponent)sender, hoverSelectedColor);
+                    ChangePassiveColor((FlexButtonComponent)sender, passiveSelectedColor);
+                }
+            }
+            
+            menu.StartAction(name, sender, collider);
+            OnActionStart(sender, collider);
+        }
     }
 
     protected override void OnActionStart(FlexActionableComponent sender, GameObject collider)
@@ -60,12 +128,10 @@ public class MultiSelectFlexPanel : FlexPanelComponent
             if (sender.State == 2)
             {
                 sender.SetState(1);
-                selected.Remove(collider);
             }
             else
             {
                 sender.SetState(2);
-                selected.Add(collider);
             }
         }
         else
@@ -83,7 +149,6 @@ public class MultiSelectFlexPanel : FlexPanelComponent
         {
             sender.SetState(0);
         }
-
     }
 
     bool initialized = false;
@@ -97,6 +162,13 @@ public class MultiSelectFlexPanel : FlexPanelComponent
     {
         if (!initialized)
         {
+            selectedUnselectedColor = QuickButton.TOGGLE_OFF;
+            selectedSelectedColor = QuickButton.TOGGLE_ON;
+            hoverUnselectedColor = QuickButton.LIGHT_PASSIVE;
+            hoverSelectedColor = QuickButton.LIGHT_HOVERING;
+            passiveUnselectedColor = Color.white;
+            passiveSelectedColor = QuickButton.DARK_PASSIVE;
+
             AddAllChildActions();
             initialized = true;
         }

@@ -67,6 +67,7 @@ public class CreateTournamentMenu : MonoBehaviour
             Review = 60 * 60 * 24 * 14
         };
         MatryxTournament tournament = new MatryxTournament(Title.text, Description.text, null, "math", bounty, entryFee, roundDetails);
+        resultsMenu.GetComponent<ResultsMenu>().Start();
 
         Async.runInCoroutine(delegate (Async thread, object param)
         {
@@ -124,7 +125,7 @@ public class CreateTournamentMenu : MonoBehaviour
             return false;
         }
 
-        if(Bounty.CurrentValue == 0)
+        if(Bounty.CurrentValue <= 0)
         {
             InvalidText.gameObject.SetActive(true);
             InvalidText.text = "Tournament must have non-zero bounty";

@@ -28,11 +28,12 @@ namespace Matryx
 
         public static MatryxCortex Instance { get; private set; }
         public static Serializer serializer = new Serializer();
-        public static string cortexURL = "https://cortex.matryx.ai";
+        public static string cortexURL = "https://cortex-staging.matryx.ai";
         public static string platformInfoURL = cortexURL + "/platform/getInfo";
         public static string userInfoURL = cortexURL + "/user/getInfo";
         public static string tokenInfoURL = cortexURL + "/token/getInfo";
-        public static string tournamentsURL = cortexURL + "/tournaments";
+        public static string tournamentsURL = cortexURL + "/tournaments?offset=0&search=&sortBy=round_end&status=open&category=math";
+        public static string myTournamentsURL = cortexURL + "/tournaments?offset=0&search=&sortBy=round_end&category=math";
         public static string artifactsURL = cortexURL + "/artifacts";
 
         public static string tournamentURL = cortexURL + "/tournaments/";
@@ -66,11 +67,14 @@ namespace Matryx
 
         void Start()
         {
-            MatryxAccountMenu.UnlockAccount();
+            if (!MatryxAccountMenu.UnlockAccount())
+            {
+                TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.AccountUnlockRequired);
+            }
 
             queue(InitializeNetworkSettings());
             queue(InitializeContracts());
-            queue(InitiateUser());
+            queue(InitializeUser());
 
             queue(RunTests());
         }
@@ -139,6 +143,19 @@ namespace Matryx
             }
         }
 
+        public static void GetMTXBalance(Async.EventDelegate onSuccess)
+        {
+            Instance.StartCoroutine(MTXBalanceCoroutine(onSuccess));
+        }
+
+        public static IEnumerator MTXBalanceCoroutine(Async.EventDelegate onSuccess)
+        {
+            var tokenBalanceCoroutine = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.currentAddress));
+            yield return tokenBalanceCoroutine;
+            var balance = tokenBalanceCoroutine.result / new BigInteger(1e18);
+            onSuccess(balance);
+        }
+
         public static void RunGetTournaments(long page, float waitTime, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
             // Schedule query
@@ -166,7 +183,8 @@ namespace Matryx
 
             var tournaments = new List<MatryxTournament>();
             var offset = page * 10;
-            using (WWW www = new WWW(tournamentsURL))
+            var url = onlyMine ? myTournamentsURL : tournamentURL;
+            using (WWW www = new WWW(url))
             {
                 yield return www;
                 if (www.error != null)
@@ -175,47 +193,60 @@ namespace Matryx
                     onError?.Invoke(www.error);
                     yield break;
                 }
+                
+                var response = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
+                var data = response["data"] as Dictionary<string, object>;
 
-                try
+                var tournamentList = data["tournaments"] as List<object>;
+                for (int i = 0; i < tournamentList.Count; i++)
                 {
-                    var response = serializer.Deserialize<object>(www.bytes) as Dictionary<string, object>;
-                    var data = response["data"] as Dictionary<string, object>;
+                    var jsonTournament = tournamentList[i] as Dictionary<string, object>;
+                    var jsonRound = jsonTournament["round"] as Dictionary<string, object>;
 
-                    var tournamentList = data["tournaments"] as List<object>;
-                    for (int i = 0; i < tournamentList.Count; i++)
+                    string category = jsonTournament["category"] as string;
+                    if (!supportedCalcflowCategories.Contains(category)) { continue; }
+
+                    var owner = jsonTournament["owner"] as string;
+                    if (onlyMine && !owner.Equals(NetworkSettings.currentAddress, StringComparison.CurrentCultureIgnoreCase))
                     {
-                        var jsonTournament = tournamentList[i] as Dictionary<string, object>;
-
-                        string category = jsonTournament["category"] as string;
-                        if (!supportedCalcflowCategories.Contains(category)) { continue; }
-
-                        var owner = jsonTournament["owner"] as string;
-                        if (onlyMine && !owner.Equals(NetworkSettings.activeAccount, StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            var status = jsonTournament["status"] as string;
-                            if (!status.Equals("open", StringComparison.CurrentCultureIgnoreCase)) { continue; }
-                        }
-
-                        var tournamentTitle = jsonTournament["title"] as string;
-                        var bounty = new BigInteger((long)Convert.ToDouble(jsonTournament["bounty"])) * new BigInteger(1e18);
-                        var entryFee = new BigInteger((long)Convert.ToDouble(jsonTournament["entryFee"])) * new BigInteger(1e18);
-                        var tournament = new MatryxTournament(jsonTournament["address"] as string, tournamentTitle, bounty, entryFee);
-                        tournament.description = jsonTournament["description"] as string;
-                        tournament.currentRound = new MatryxRound() { status = jsonTournament["status"] as string };
-                        tournaments.Add(tournament);
+                        continue;
+                    }
+                    else if (!onlyMine)
+                    {
+                        var status = jsonRound["status"] as string;
+                        if (!status.Equals("open", StringComparison.CurrentCultureIgnoreCase)) { continue; }
                     }
 
-                    onSuccess?.Invoke(tournaments);
+                    var tournamentTitle = jsonTournament["title"] as string;
+                    var bounty = new BigInteger((long)Convert.ToDouble(jsonTournament["bounty"])) * new BigInteger(1e18);
+                    var entryFee = new BigInteger((long)Convert.ToDouble(jsonTournament["entryFee"])) * new BigInteger(1e18);
+                    var tournament = new MatryxTournament(jsonTournament["address"] as string, tournamentTitle, bounty, entryFee);
+                    tournament.description = jsonTournament["description"] as string;
+                    tournament.owner = owner;
+
+                    var idx = Convert.ToInt32(jsonRound["index"] as string);
+                    var roundStart = DateTime.Parse(jsonRound["startDate"] as string);
+                    var roundEnd = DateTime.Parse(jsonRound["endDate"] as string);
+                    var roundReviewEnd = DateTime.Parse(jsonRound["reviewEndDate"] as string);
+                    var roundBounty = Convert.ToDecimal(jsonRound["bounty"]);
+                    var roundParticipants = Convert.ToInt32(jsonRound["totalParticipants"]);
+                    var roundSubmissions = Convert.ToInt32(jsonRound["totalSubmissions"]);
+                    tournament.currentRound = new MatryxRound()
+                    {
+                        tournament = tournament,
+                        index = idx,
+                        startDate = roundStart,
+                        endDate = roundEnd,
+                        reviewEndDate = roundReviewEnd,
+                        Bounty = roundBounty,
+                        totalParticipants = roundParticipants,
+                        totalSubmissions = roundSubmissions
+                    };
+
+                    tournaments.Add(tournament);
                 }
-                catch (Exception e)
-                {
-                    Debug.Log(e);
-                    onError?.Invoke(tournaments);
-                }
+
+                onSuccess?.Invoke(tournaments);
             }
         }
 
@@ -259,26 +290,65 @@ namespace Matryx
                         tournament.title = jsonTournament["title"] as string;
                         tournament.Bounty = new BigInteger(Convert.ToDecimal(jsonTournament["bounty"]));
                         tournament.description = jsonTournament["description"] as string;
+
                         var jsonRound = jsonTournament["round"] as Dictionary<string, object>;
                         tournament.currentRound = new MatryxRound(Convert.ToInt32(jsonRound["index"]));
-                        tournament.currentRound.status = jsonTournament["status"] as string;
-                        DateTime start = DateTime.Parse(jsonRound["startDate"] as string);
-                        DateTime end = DateTime.Parse(jsonRound["endDate"] as string);
-                        BigInteger duration = new BigInteger((end - start).TotalSeconds);
-                        tournament.currentRound.startTime = start;
-                        tournament.currentRound.endTime = end;
-                        tournament.currentRound.Details = new MatryxRound.RoundDetails()
+                        var idx = Convert.ToInt32(jsonRound["index"] as string);
+                        var roundClosed = (jsonRound["status"] as string).Equals("closed");
+                        var roundStart = DateTime.Parse(jsonRound["startDate"] as string);
+                        var roundEnd = DateTime.Parse(jsonRound["endDate"] as string);
+                        BigInteger duration = new BigInteger((roundEnd - roundStart).TotalSeconds);
+                        var roundReviewEnd = DateTime.Parse(jsonRound["reviewEndDate"] as string);
+                        var roundBounty = Convert.ToDecimal(jsonRound["bounty"]);
+                        var roundParticipants = Convert.ToInt32(jsonRound["totalParticipants"]);
+                        var roundSubmissions = Convert.ToInt32(jsonRound["totalSubmissions"]);
+                        tournament.currentRound = new MatryxRound()
                         {
-                            Start = new BigInteger(Utils.Time.ToUnixTime(start)),
-                            Duration = duration,
-                            Bounty = new BigInteger(Convert.ToDecimal(jsonRound["bounty"]))
+                            tournament = tournament,
+                            index = idx,
+                            closed = roundClosed,
+                            startDate = roundStart,
+                            endDate = roundEnd,
+                            reviewEndDate = roundReviewEnd,
+                            Bounty = roundBounty,
+                            totalParticipants = roundParticipants,
+                            totalSubmissions = roundSubmissions
                         };
 
+                        tournament.currentRound.Details.Start = new BigInteger(Utils.Time.ToUnixTime(roundStart));
+                        tournament.currentRound.Details.Duration = duration;
+
+                        Dictionary<string, MatryxSubmission> submissionDictionary = new Dictionary<string, MatryxSubmission>();
+                        if (roundEnd < DateTime.Now)
+                        {
+                            var tournamentSubmissions = jsonRound["submissions"] as List<object>;
+                            for (int i = 0; i < tournamentSubmissions.Count; i++)
+                            {
+                                var jsonSubmission = tournamentSubmissions[i] as Dictionary<string, object>;
+                                var subHash = jsonSubmission["hash"] as string;
+                                var subOwner = jsonSubmission["owner"] as string;
+                                var subTitle = jsonSubmission["title"] as string;
+                                var subDesc = jsonSubmission["description"] as string;
+                                var subReward = Convert.ToInt32(jsonSubmission["reward"] as string);
+                                var subTimestamp = Convert.ToDecimal(jsonSubmission["timestamp"] as string);
+
+                                var submission = new MatryxSubmission(tournament, subTitle, subHash, subDesc)
+                                {
+                                    owner = subOwner,
+                                    Reward = subReward,
+                                    Timestamp = subTimestamp
+                                };
+
+                                tournament.currentRound.allSubmissions.Add(submission);
+                                submissionDictionary.Add(submission.hash, submission);
+                            }
+                        }
+                        
                         var roundWinners = jsonRound["winners"] as List<object>;
                         for (int i = 0; i < roundWinners.Count; i++)
                         {
-                            var submission = new MatryxSubmission(roundWinners[i] as string);
-                            winningSubmissions.Add(submission);
+                            var winningSubmission = submissionDictionary[roundWinners[i] as string];
+                            winningSubmissions.Add(winningSubmission);
                         }
 
                         tournament.currentRound.winningSubmissions = winningSubmissions;
@@ -293,20 +363,21 @@ namespace Matryx
             }
         }
 
-        public static void RunGetRound(string tournamentAddress, int roundIndex, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
+        public static void RunGetRound(MatryxTournament tournament, int roundIndex, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
             Async main = Async.runInCoroutine(delegate (Async thread, object param)
             {
-                return GetRound(tournamentAddress, roundIndex, onSuccess, onError);
+                return GetRound(tournament, roundIndex, onSuccess, onError);
             });
         }
 
-        public static IEnumerator GetRound(string tournamentAddress, int roundIndex, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
+        public static IEnumerator GetRound(MatryxTournament tournament, int roundIndex, Async.EventDelegate onSuccess, Async.EventDelegate onError = null)
         {
             var round = new MatryxRound(roundIndex);
+            round.tournament = tournament;
             var winningSubmissions = new List<MatryxSubmission>();
 
-            using (WWW www = new WWW(tournamentURL + tournamentAddress + "/round/" + roundIndex))
+            using (WWW www = new WWW(tournamentURL + tournament.address + "/round/" + roundIndex))
             {
                 yield return www;
                 if (www.error != null)
@@ -369,7 +440,7 @@ namespace Matryx
                 yield return new WaitForSeconds(waitTime);
             }
 
-            var url = mySubmissionsURL + NetworkSettings.activeAccount;
+            var url = mySubmissionsURL + NetworkSettings.currentAddress;
             using (var www = new WWW(url))
             {
                 yield return www;
@@ -461,13 +532,13 @@ namespace Matryx
 
         private static IEnumerator GetMyCommits(Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
         {
-            var url = myCommitsURL + NetworkSettings.activeAccount;
+            var url = myCommitsURL + NetworkSettings.currentAddress;
             using (var www = new WWW(url))
             {
                 yield return www;
                 if(www.error != null)
                 {
-                    Debug.Log("Got here");
+                    Debug.Log("Error getting commits: " + www.error);
                     onError?.Invoke(www.error);
                     yield break;
                 }
@@ -672,7 +743,11 @@ namespace Matryx
         {
 
             NetworkSettings.network = Config.getString("network", "ropsten");
-            NetworkSettings.setActiveAccount(Config.getString("address", ""));
+            string address = Config.getString("address", "");
+            if (!address.Equals(""))
+            {
+                NetworkSettings.setActiveAccount(address);
+            }
             
             yield break;
 
@@ -704,13 +779,13 @@ namespace Matryx
             //MatryxGlobals.txGas = request.Result;
         }
 
-        public static IEnumerator InitiateUser()
+        public static IEnumerator InitializeUser()
         {
             bool settingUp = true;
             while (!NetworkSettings.declinedAccountUnlock.HasValue || settingUp)
             {
                 yield return null;
-                settingUp = NetworkSettings.activeAccount == null || NetworkSettings.activeAccount == "" || MatryxPlatform.address == null || MatryxToken.address == null || MatryxCommit.address == null || MatryxTournament.ABI == null;
+                settingUp = NetworkSettings.currentAddress == null || NetworkSettings.currentAddress == "" || MatryxPlatform.address == null || MatryxToken.address == null || MatryxCommit.address == null || MatryxTournament.ABI == null;
             }
 
             if (NetworkSettings.declinedAccountUnlock.Value)
@@ -718,7 +793,7 @@ namespace Matryx
                 yield break;
             }
 
-            var tokenBalance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.activeAccount));
+            var tokenBalance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.currentAddress));
             yield return tokenBalance;
             NetworkSettings.MTXBalance = tokenBalance.result;
             if(MatryxAccountMenu.Instance)
@@ -786,7 +861,7 @@ namespace Matryx
             while (!NetworkSettings.declinedAccountUnlock.HasValue || settingUp)
             {
                 yield return null;
-                settingUp = NetworkSettings.activeAccount == null || NetworkSettings.activeAccount == "" || MatryxPlatform.address == null || MatryxToken.address == null || MatryxCommit.address == null || MatryxTournament.ABI == null;
+                settingUp = NetworkSettings.currentAddress == null || NetworkSettings.currentAddress == "" || MatryxPlatform.address == null || MatryxToken.address == null || MatryxCommit.address == null || MatryxTournament.ABI == null;
             }
 
             //var content = "\"{\"Items\":[\"{\"rangeKeys\":[\"t\",\"u\",\"v\",\"w\"],\"rangePairs\":[{\"min\":{\"exclusive\":false,\"rawText\":\"0\"},\"max\":{\"exclusive\":false,\"rawText\":\"0\"}},{\"min\":{\"exclusive\":false,\"rawText\":\"0\"},\"max\":{\"exclusive\":false,\"rawText\":\"pi\"}},{\"min\":{\"exclusive\":false,\"rawText\":\"0\"},\"max\":{\"exclusive\":false,\"rawText\":\"2*pi\"}},{\"min\":{\"exclusive\":false,\"rawText\":\"0\"},\"max\":{\"exclusive\":false,\"rawText\":\"0\"}}],\"ExpressionKeys\":[\"X\",\"Y\",\"Z\"],\"ExpressionValues\":[\"(2*cos(u)*cos(v))^3\",\"(2*sin(u)*cos(v))^3\",\"(2*sin(v))^3\"]}\"]}\"";
@@ -848,8 +923,6 @@ namespace Matryx
 
             //MatryxTournament tournament = new MatryxTournament("0x95405c6fcfcb43d1f11f0318d54e83521be6e7c6");
             //RunFetchMySubmissions(tournament, Instance.ProcessSubmissions);
-
-            Debug.Log("Active account set to: " + NetworkSettings.activeAccount);
         }
 
         private void ProcessSubmissions(object results)
