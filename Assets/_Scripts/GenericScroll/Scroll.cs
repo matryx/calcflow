@@ -390,22 +390,12 @@ public class Scroll : MonoBehaviour
 
     void FadeButtonOut(Transform obj)
     {
-        var renderer = obj.GetComponentInChildren<Renderer>();
-        var from = 1f;
-        if (renderer != null && renderer.material.HasProperty("_Color"))
-        {
-            from = renderer.material.GetColor("_Color").a;
-            AnimateFade(obj, from, transparent, fadeSpeed);
-        }
-        else
-        {
-            obj.gameObject.SetActive(false);
-        }
+        AnimateFade(obj, obj.GetComponentInChildren<Renderer>().material.GetColor("_Color").a, transparent, fadeSpeed);
     }
 
     void AnimateFade(Transform obj, float from, float to, float time)
     {
-        foreach (Transform child in obj.GetComponentsInChildren<Transform>())
+        foreach (Transform child in obj)
         {
             StartCoroutine(FadeObj(child, from, to, time));
         }
@@ -416,27 +406,13 @@ public class Scroll : MonoBehaviour
     {
         yield return new WaitForSeconds(fadeInDelay);
 
-        var renderer = obj.GetComponentInChildren<Renderer>();
-        var from = 0f;
-        if (renderer != null && renderer.material.HasProperty("_Color"))
-        {
-            from = renderer.material.GetColor("_Color").a;
-            AnimateFade(obj, from, opaque, fadeSpeed);
-        }
-        else
-        {
-            obj.gameObject.SetActive(true);
-        }
-
-        AnimateFade(obj, from, opaque, fadeSpeed);
+        obj.gameObject.SetActive(true);
+        AnimateFade(obj, obj.GetComponentInChildren<Renderer>().material.GetColor("_Color").a, opaque, fadeSpeed);
     }
 
     IEnumerator FadeObj(Transform obj, float start, float end, float time)
     {
-        var renderer = obj.GetComponent<Renderer>();
-        if (renderer == null) { yield break; }
-
-        var mat = renderer.material;
+        Material mat = obj.GetComponent<Renderer>().material;
         string colorName = "_Color";
         Color col = Color.white;
 
@@ -451,9 +427,9 @@ public class Scroll : MonoBehaviour
             yield return null;
         }
 
-            col.a = end;
-            obj.GetComponent<Renderer>().material.SetColor(colorName, col);
-            fading = false;
+        col.a = end;
+        obj.GetComponent<Renderer>().material.SetColor(colorName, col);
+        fading = false;
 
         if (end == transparent) obj.parent.gameObject.SetActive(false);
     }

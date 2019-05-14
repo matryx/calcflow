@@ -2,6 +2,7 @@
 using TMPro;
 using Matryx;
 using System;
+using System.Collections.Generic;
 
 public class TournamentMenuCenterButton : QuickButton {
     [SerializeField]
@@ -77,13 +78,17 @@ public class TournamentMenuCenterButton : QuickButton {
             case TournamentMenu.ActionState.NoAction:
                 break;
             case TournamentMenu.ActionState.Contribute:
-                bool menuActive = canvasSubmitMenu.gameObject.activeSelf;
-                canvasSubmitMenu.gameObject.SetActive(!menuActive);
+                canvasSubmitMenu.gameObject.SetActive(false);
                 text.text = "Contribute";
                 Tippies.FadeDestroyTippy("Please Lift Headset");
                 break;
             case TournamentMenu.ActionState.SelectWinners:
                 text.text = "Select Winners";
+                foreach (KeyValuePair<string,GameObject> pair in tournamentMenu.submissionsPanel.selected)
+                {
+                    var submissionContainer = pair.Value.GetComponent<SubmissionContainer>();
+                    submissionContainer.distributionPicker.Toggle(false);
+                }
                 tournamentMenu.submissionsPanel.SwitchToSingleSelect();
                 tournamentMenu.continueButton.gameObject.SetActive(false);
                 break;
@@ -101,8 +106,7 @@ public class TournamentMenuCenterButton : QuickButton {
             case TournamentMenu.ActionState.NoAction:
                 return;
             case TournamentMenu.ActionState.Contribute:
-                bool menuActive = canvasSubmitMenu.gameObject.activeSelf;
-                canvasSubmitMenu.gameObject.SetActive(!menuActive);
+                canvasSubmitMenu.gameObject.SetActive(true);
                 Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
                 break;
             case TournamentMenu.ActionState.SelectWinners:
@@ -111,7 +115,7 @@ public class TournamentMenuCenterButton : QuickButton {
                 tournamentMenu.submissionsPanel.SwitchToMultiSelect();
                 if (tournamentMenu.submissionsPanel.selected.Count > 0)
                 {
-                    tournamentMenu.continueButton.gameObject.SetActive(false);
+                    tournamentMenu.continueButton.gameObject.SetActive(true);
                 }
                 break;
             case TournamentMenu.ActionState.ManageTournament:
@@ -157,9 +161,21 @@ public class TournamentMenuCenterButton : QuickButton {
                 break;
         }
     }
+    public void Enable()
+    {
+        transform.parent.gameObject.GetComponent<FlexButtonComponent>().SetState(0);
+    }
+    public void Disable()
+    {
+        transform.parent.gameObject.GetComponent<FlexButtonComponent>().SetState(-1);
+    }
 
     public override void OnMenuClose()
     {
-        ToggleOff();
+        if (TournamentMenu.Instance.actionState != TournamentMenu.ActionState.SelectWinners &&
+            TournamentMenu.Instance.actionState != TournamentMenu.ActionState.ManageTournament)
+        {
+            ToggleOff();
+        }
     }
 }

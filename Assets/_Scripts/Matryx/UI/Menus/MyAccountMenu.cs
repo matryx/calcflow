@@ -81,17 +81,20 @@ public class MyAccountMenu : MenuStateReceiver
         scroll.clear();
     }
 
+    string baseAccount = "";
     public void Refresh()
     {
+        var accounts = NetworkSettings.mnemonicWallet.GetAddresses();
         if (!initialized) { Initialize(); }
-
-        if (NetworkSettings.mnemonicWallet != null)
+        if (!baseAccount.Equals(accounts[0]))
         {
-            var accounts = NetworkSettings.mnemonicWallet.GetAddresses();
+            ClearAccounts();
+            baseAccount = accounts[0];
+
             for (int i = 0; i < accounts.Length; i++)
             {
                 GameObject button = createButton(accounts[i]);
-                button.SetActive(false);
+                // button.SetActive(false);
                 accountsPanel.AddAction(button.GetComponent<FlexButtonComponent>());
             }
 
@@ -104,6 +107,7 @@ public class MyAccountMenu : MenuStateReceiver
         GameObject button = Instantiate(Resources.Load("Account_Cell", typeof(GameObject))) as GameObject;
         button.transform.SetParent(accountsPanel.transform);
         button.transform.localScale = Vector3.one;
+        button.transform.position = new Vector3(-500f, -500f,-500f);
 
         button.name = account;
 

@@ -32,8 +32,8 @@ namespace Matryx
         public static string platformInfoURL = cortexURL + "/platform/getInfo";
         public static string userInfoURL = cortexURL + "/user/getInfo";
         public static string tokenInfoURL = cortexURL + "/token/getInfo";
-        public static string tournamentsURL = cortexURL + "/tournaments?offset=0&search=&sortBy=round_end&status=open&category=math";
-        public static string myTournamentsURL = cortexURL + "/tournaments?offset=0&search=&sortBy=round_end&category=math";
+        public static string tournamentsURL = cortexURL + "/tournaments?count=100&offset=0&sortBy=round_end&status=open&category=math";
+        public static string myTournamentsURL = cortexURL + "/tournaments?offset=0&sortBy=round_end&category=math&owner=";
         public static string artifactsURL = cortexURL + "/artifacts";
 
         public static string tournamentURL = cortexURL + "/tournaments/";
@@ -183,7 +183,7 @@ namespace Matryx
 
             var tournaments = new List<MatryxTournament>();
             var offset = page * 10;
-            var url = onlyMine ? myTournamentsURL : tournamentURL;
+            var url = onlyMine ? myTournamentsURL + NetworkSettings.currentAddress : tournamentsURL;
             using (WWW www = new WWW(url))
             {
                 yield return www;

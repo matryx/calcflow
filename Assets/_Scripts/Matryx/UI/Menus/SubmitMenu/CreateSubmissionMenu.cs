@@ -72,7 +72,6 @@ public class CreateSubmissionMenu : MonoBehaviour {
                 // Debug
                 Debug.Log("Submission uploaded");
                 Debug.Log(result);
-                gameObject.SetActive(false);
                 // Check success
                 if ((bool)result)
                 {

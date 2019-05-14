@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using System.Numerics;
 using Vector3 = UnityEngine.Vector3;
 
-public class TournamentMenu : MonoBehaviour
+public class TournamentMenu : MenuStateReceiver
 {
     public static TournamentMenu Instance { get; private set; }
 
@@ -149,10 +149,6 @@ public class TournamentMenu : MonoBehaviour
 
             SetRound(++RoundIndex);
         }
-        else if (source.name.Contains("Continue"))
-        {
-            // Open up the Close Tournament --or-- Start New Round panel
-        }
         else
         {
             SubmissionContainer submissionContainer = source.GetComponent<SubmissionContainer>();
@@ -169,11 +165,17 @@ public class TournamentMenu : MonoBehaviour
         }
     }
 
+    public override void OnMenuClose()
+    {
+        centerButton.ToggleOff();
+    }
+
     public void SetTournament(MatryxTournament theTournament)
     {
         if (Tournament == null || Tournament.address != theTournament.address || userAddress != NetworkSettings.currentAddress)
         {
             ClearSubmissions();
+            centerButton.transform.parent.gameObject.SetActive(false);
             // Show us something at least
             PreprocessTournament(theTournament);
             userAddress = NetworkSettings.currentAddress;
@@ -181,6 +183,10 @@ public class TournamentMenu : MonoBehaviour
             loadingSubmissions.gameObject.SetActive(true);
             MatryxCortex.RunGetMySubmissions(Tournament, 0, ProcessMySubmissions);
             MatryxCortex.RunGetTournament(Tournament.address, true, ProcessTournament, ErrorLoadingTournament);
+        }
+        else
+        {
+            centerButton.updateState();
         }
     }
 

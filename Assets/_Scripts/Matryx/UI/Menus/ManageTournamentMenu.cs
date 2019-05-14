@@ -176,9 +176,13 @@ public class ManageTournamentMenu : MenuStateReceiver {
         var state = enabled ? 0 : -1;
         foreach(KeyValuePair<string,FlexButtonComponent> pair in Instance.buttons)
         {
-            if (pair.Key.Equals("CloseButton")) continue;
             pair.Value.SetState(state);
         }
+    }
+
+    public static void Close()
+    {
+
     }
 
     void Start () {
@@ -269,6 +273,7 @@ public class ManageTournamentMenu : MenuStateReceiver {
             {
                 Debug.Log((bool) result ? "Successfully selected winners!" : "Winner selection unsuccessful.");
                 SpinForTheWin(false);
+                SetButtonsEnabled(true);
                 PressButton("WinnersOnlyButton");
                 if ((bool) result)
                 {
@@ -276,7 +281,7 @@ public class ManageTournamentMenu : MenuStateReceiver {
                     Tippies.SpawnTippy("Winner Selection Transaction Successful", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
                     TournamentMenu.Tournament.currentRound.winningSubmissions = winningSubmissions;
                     TournamentMenu.Instance.ProcessRound(TournamentMenu.Tournament.currentRound);
-                    
+                    Close();
                 }
                 else
                 {
@@ -304,7 +309,7 @@ public class ManageTournamentMenu : MenuStateReceiver {
                     {
                         StatisticsTracking.EndEvent("Matryx", "Winner Selection & Tournament Close", new Dictionary<string, object>() { { "success", true } });
                         Tippies.SpawnTippy("Close Tournament Transaction Successful", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
-                        buttons["CloseButton"].transform.Find("Body").GetComponent<RayCastButton>().PressButton(null);
+                        Close();
                     }
                     else
                     {

@@ -156,7 +156,12 @@ public class NewRoundMenu : MonoBehaviour
             {
                 StatisticsTracking.EndEvent("Matryx", "New Round Creation", new Dictionary<string, object>() { { "success", true } });
                 tournament.currentRound = newRound;
-                resultsMenu.PostSuccess(newRound, (nothin) => { TournamentMenu.Instance.SetRound(newRound.index); });
+                resultsMenu.PostSuccess(newRound, 
+                delegate (object nothin) 
+                { 
+                    TournamentMenu.Instance.SetRound(newRound.index); 
+                    ManageTournamentMenu.Close();
+                });
             }
             else
             {

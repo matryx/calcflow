@@ -70,7 +70,10 @@ public class FlexHoverTipper : MonoBehaviour {
                     StopCoroutine(waitCoroutine);
                 }
                 fadeAndDieEarly();
-                flexButton.SetState(0);
+                if (flexButton.State != -1)
+                {
+                    flexButton.SetState(0);
+                }
             };
         }
     }
