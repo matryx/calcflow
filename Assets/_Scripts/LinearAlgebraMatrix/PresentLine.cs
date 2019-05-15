@@ -13,6 +13,7 @@ namespace LinearAlgebraMatrix
 
         public Transform line;
         public Transform forwardLine;
+        public Transform forwardLineT;
         //public Transform backwardLine;
         public Transform lookAtTarget;
         public List<GameObject> walls;
@@ -73,19 +74,48 @@ namespace LinearAlgebraMatrix
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
             }
-            Debug.Log(MatrixYFX.forLine);
-            p1 = new Vector3(MatrixYFX.colMat[0, MatrixYFX.forLine], MatrixYFX.colMat[1, MatrixYFX.forLine], MatrixYFX.colMat[2, MatrixYFX.forLine]);
-            p2 = new Vector3(0, 0, 0);
-            p3 = new Vector3(0, 0, 0);
-            scaledPt1 = ScaledPoint(p1);
-            point1.localPosition = scaledPt1;
-            //scaledPt2 = ScaledPoint(p2);
-            //point2.localPosition = scaledPt2;
-            scaledPt3 = ScaledPoint(p3);
-            point3.localPosition = scaledPt3;
+            // Debug.Log(MatrixYFX.forLine);
+            if(transform.gameObject.name == "PlaneExpression_null")
+            {
+                p1 = MatrixYFX.n1;
+                scaledPt1 = ScaledPoint(p1);
+                point1.localPosition = scaledPt1;
+
+                p2 = MatrixYFX.n2;
+                scaledPt2 = ScaledPoint(p2);
+                point2.localPosition = scaledPt2;
+
+                p3 = MatrixYFX.n3;
+                scaledPt3 = ScaledPoint(p3);
+                point3.localPosition = scaledPt3;
+            }
+
+            if(transform.gameObject.name == "PlaneExpression_col") 
+            {
+                p1 = MatrixYFX.c1;
+                scaledPt1 = ScaledPoint(p1);
+                point1.localPosition = scaledPt1;
+
+                p2 = MatrixYFX.c2;
+                scaledPt2 = ScaledPoint(p2);
+                point2.localPosition = scaledPt2;
+
+                p3 = MatrixYFX.c3;
+                scaledPt3 = ScaledPoint(p3);
+                point3.localPosition = scaledPt3;
+            }
+            // p1 = MatrixYFX.c1;
+            // p2 = MatrixYFX.c2;
+            // p3 = MatrixYFX.c3;
+            // scaledPt1 = ScaledPoint(p1);
+            // point1.localPosition = scaledPt1;
+            // //scaledPt2 = ScaledPoint(p2);
+            // //point2.localPosition = scaledPt2;
+            // scaledPt3 = ScaledPoint(p3);
+            // point3.localPosition = scaledPt3;
 
             pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
-            //pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
+            pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
             pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
 
             lookAtTarget.localPosition = ScaledPoint(p1);
@@ -101,6 +131,16 @@ namespace LinearAlgebraMatrix
 
 
             var sharedMaterial = forwardLine.GetComponent<MeshRenderer>().sharedMaterial;
+            sharedMaterial.SetInt("_planeClippingEnabled", 1);
+
+            for (int i = 0; i < 6; i++)
+            {
+                sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
+                //plane normal vector is the rotated 'up' vector.
+                sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+            }
+
+            sharedMaterial = forwardLineT.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
             for (int i = 0; i < 6; i++)
