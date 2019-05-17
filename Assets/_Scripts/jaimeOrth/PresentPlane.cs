@@ -72,9 +72,9 @@ namespace orthProj
             }
             plane.LookAt(lookAtTarget);
 
-            pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
-            pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
-            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
+            // pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
+            // pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
+            // pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
             var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
@@ -102,8 +102,8 @@ namespace orthProj
         {
 
             vector23 = GenerateVector(rawPt2, rawPt3);
-
-            center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+            center = new Vector3(0,0,0);
+            //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
             stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
             //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
             //Get the range of the box
@@ -144,8 +144,8 @@ namespace orthProj
             rawPt2 = ptManager.ptSet.ptCoords["pt2"];
             rawPt3 = ptManager.ptSet.ptCoords["pt3"];
 
-            vector12 = GenerateVector(rawPt1, rawPt2);
-            vector13 = GenerateVector(rawPt1, rawPt3);
+            vector12 = new Vector3(0,0,0) - new Vector3(rawPt2.X.Value,rawPt2.Y.Value,rawPt2.Z.Value);   //(GenerateVector(new, rawPt2);
+            vector13 = new Vector3(0,0,0) - new Vector3(rawPt3.X.Value,rawPt3.Y.Value,rawPt3.Z.Value);
             //Debug.Log("Vector 12 is: " + vector12 +". Vector13 is: " + vector13);
             normalVector = Vector3.Cross(vector12, vector13);
             if (PlaneValid())
@@ -210,8 +210,8 @@ namespace orthProj
         {
             if (PlaneValid())
             {
-                scaledVector12 = point2.localPosition - point1.localPosition;
-                scaledVector13 = point3.localPosition - point1.localPosition;
+                scaledVector12 = point2.localPosition - centerPt.localPosition;
+                scaledVector13 = point3.localPosition - centerPt.localPosition;
                 scaledNormal = Vector3.Cross(scaledVector12, scaledVector13);
                 float scale = dummySteps * stepSize / scaledNormal.magnitude;
                 Vector3 dummyPos = scaledNormal * scale;

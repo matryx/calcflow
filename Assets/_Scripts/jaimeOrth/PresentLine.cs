@@ -106,6 +106,7 @@ namespace orthProj
             scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
             point3.localPosition = scaledPt3;
             //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
+            //centerPt.localPosition = point1.localPosition;
             centerPt.localPosition = ScaledPoint(new Vector3(0,0,0));
             
             //xAxis.localPosition = ScaledPoint(center);
@@ -116,17 +117,17 @@ namespace orthProj
 
 
             //p1 = new Vector3(-2, 1, 0);
-            ////p2 = new Vector3(0, 0, 0);
+            //p2 = new Vector3(0, 0, 0);
             //p3 = new Vector3(0, 0, 0);
             //scaledPt1 = ScaledPoint(p1);
             //point1.localPosition = scaledPt1;
-            ////scaledPt2 = ScaledPoint(p2);
-            ////point2.localPosition = scaledPt2;
+           // scaledPt2 = ScaledPoint(p2);
+            //point2.localPosition = scaledPt2;
             //scaledPt3 = ScaledPoint(p3);
             //point3.localPosition = scaledPt3;
 
             //pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
-            ////pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
+            // pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
             //pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
 
             //get the points from the users vector and for the line to look at
@@ -135,24 +136,15 @@ namespace orthProj
             line.LookAt(lookAtTarget);
             //set the line to have an origin of zero
             line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
-
-            //constraintGrabbable.lastLocalPos = scaledPt1;
-           // constraintGrabbable.
-
-            //guessing it will grab 1/4 of where it should
-
-
-        //magnitude to vector? 
-        //line.localScale = new Vector3(1, 1, rawPt1.Z.Value);
-
+            //scale the vector
             line.localScale = new Vector3(1, 1, scaledPt1.magnitude);
-            //float rawMag = (PtCoordToVector(rawPt1)).magnitude;
-            //line.localScale = new Vector3(1, 1, rawMag);
-
+            
             //axis 1
             lookAtAxisTarget.localPosition = scaledPt2;
             axisline.LookAt(lookAtAxisTarget);
             axisline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+            //pt2Label.text = "(" + point2.localPosition.x + "," + point2.localPosition.y + "," + point2.localPosition.z + ")";
+            Debug.Log("point two is: " + point2.localPosition.x + " " + point2.localPosition.y + " " + point2.localPosition.z);
 
             //calculate projection axis component
             //vector to project and normal
@@ -164,9 +156,12 @@ namespace orthProj
             //Debug.Log("NORMAL VECT PTS: " + "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")");
             //Debug.Log("PROJECTED VECT PTS: " + "(" + projectedResult.x + "," + projectedResult.y + "," + projectedResult.z + ")");
 
+           
             //show them the projected value
-            point3.localPosition = scaledRes;
-            pt3Label.text = "(" + projectedResult.x + "," + projectedResult.y + "," + projectedResult.z + ")";
+            scaledPt2 = scaledRes; 
+            point2.localPosition = scaledPt2; 
+            pt2Label.text = "(" + projectedResult.x + "," + projectedResult.y + "," + projectedResult.z + ")";
+
             point3.GetComponent<MeshRenderer>().enabled = false;
 
             lookAtProjTarg.localPosition = scaledRes;
@@ -187,23 +182,13 @@ namespace orthProj
                 sharedMaterialP.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
-            //lookatit
-            //set the origin of the line to be scaled pt1
-
-            //SCALING OF THE LINES!! and maybe add them, greyed out, as axis
-
             //axis 2 //TODO not working yet (maybe omit and just change the plane anyway?  
             //lookAtAxisTarget2.localPosition = scaledPt3;
             //axisline2.LookAt(lookAtAxisTarget2);
             //axisline2.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
             pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
-            pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
-           // pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
-            //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
-
-
-            
+            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";            
 
             var sharedMaterial = forwardLine.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial.SetInt("_planeClippingEnabled", 1);
@@ -226,10 +211,7 @@ namespace orthProj
                 sharedMaterial2.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
-            //make a button where when you hit enter you see the coords?? where to see the chords
-
-
-            //Debug.Log("dddddddddddddddddd: " + transform.gameObject.name);
+      
             //if(transform.gameObject.name == "PlaneExpression_null")
             //{
             //    var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
