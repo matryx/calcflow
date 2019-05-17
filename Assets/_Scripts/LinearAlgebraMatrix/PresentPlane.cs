@@ -101,6 +101,9 @@ namespace LinearAlgebraMatrix
             }
             plane.LookAt(lookAtTarget);
             planeT.LookAt(lookAtTargetT);
+            Debug.Log("lookAtTarget: "+ lookAtTarget.position + "   " + plane.gameObject.name);
+            Debug.Log("lookAtTargetT: "+ lookAtTargetT.position + "   " + planeT.gameObject.name);
+            
             //plane.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
             //Debug.Log("(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")");
@@ -309,17 +312,20 @@ namespace LinearAlgebraMatrix
                 scaledPt3 = ScaledPoint(p3);
                 point3.localPosition = scaledPt3;
 
-                p1T = MatrixYFX.n1T;
-                scaledPt1T = ScaledPoint(p1T);
-                point1T.localPosition = scaledPt1T;
+                p1T = MatrixYFX.c1T;
+                // p1T = MatrixYFX.n1;
+                scaledPt1 = ScaledPoint(p1T);
+                point1T.localPosition = scaledPt1;
 
-                p2T = MatrixYFX.n2T;
-                scaledPt2T = ScaledPoint(p2T);
-                point2T.localPosition = scaledPt2T;
+                p2T = MatrixYFX.c2T;
+                // p2T = MatrixYFX.n2;
+                scaledPt2 = ScaledPoint(p2T);
+                point2T.localPosition = scaledPt2;
 
-                p3T = MatrixYFX.n3T;
-                scaledPt3T = ScaledPoint(p3T);
-                point3T.localPosition = scaledPt3T;
+                p3T = MatrixYFX.c3T;
+                // p3T = MatrixYFX.n3;
+                scaledPt3 = ScaledPoint(p3T);
+                point3T.localPosition = scaledPt3;
             }
 
             if(transform.gameObject.name == "PlaneExpression_col") 
@@ -335,6 +341,21 @@ namespace LinearAlgebraMatrix
                 p3 = MatrixYFX.c3;
                 scaledPt3 = ScaledPoint(p3);
                 point3.localPosition = scaledPt3;
+
+                p1T = MatrixYFX.n1T;
+                // p1T = MatrixYFX.c1;
+                scaledPt1 = ScaledPoint(p1T);
+                point1T.localPosition = scaledPt1;
+
+                p2T = MatrixYFX.n2T;
+                // p2T = MatrixYFX.c2;
+                scaledPt2 = ScaledPoint(p2T);
+                point2T.localPosition = scaledPt2;
+
+                p3T = MatrixYFX.n3T;
+                // p3T = MatrixYFX.c3;
+                scaledPt3 = ScaledPoint(p3T);
+                point3T.localPosition = scaledPt3;
             }
             
 
@@ -376,8 +397,8 @@ namespace LinearAlgebraMatrix
                 
                 // Debug.Log("scaledVector12: " + point2.localPosition + point1.localPosition);
                 // Debug.Log("scaledVector13: " + point3.localPosition + point1.localPosition);
-                float scale = dummySteps * stepSize / scaledNormal.magnitude;
-                Vector3 dummyPos = scaledNormal * scale;
+                float scale = dummySteps * stepSize / scaledNormalT.magnitude;
+                Vector3 dummyPos = scaledNormalT * scale;
                 //Debug.Log("scaledNormal: " + scaledNormal + PlaneValid());
                 lookAtTargetT.localPosition = dummyPos + ScaledPoint(center);
                 //lookAtTarget.localPosition = new Vector3(0, 0, 4.2f);

@@ -10,6 +10,7 @@ namespace LinearAlgebraMatrix
         public PtManager ptManager;
 
         public PresentPlane presentPlane_col;
+        public PresentPlane presentPlane_colT;
         public GameObject PlaneExpression_col;
         public PresentPlane presentPlane_Null;
         public GameObject PlaneExpression_Null;
@@ -107,8 +108,8 @@ namespace LinearAlgebraMatrix
         // Update is called once per frame
         void Update()
         {
-            cubeNull.GetComponent<Renderer>().material = material2;
-            Debug.Log("dfefhoeuihfohe: "+cubeNull.GetComponent<Renderer>().material);
+            // cubeNull.GetComponent<Renderer>().material = material2;
+            // Debug.Log("dfefhoeuihfohe: "+cubeNull.GetComponent<Renderer>().material);
 
             // rangeCol = new HashSet<int>();
             a = PtCoordToArray(ptManager.ptSet.ptCoords["pt1"]);
@@ -136,101 +137,114 @@ namespace LinearAlgebraMatrix
             getTransColumnSpace();
             getTransNullSpace();
 
-            if (m.Rank() == 0)
-            {
-                planeCol.SetActive(false);
-                lineCol.SetActive(false);
-                cubeCol.SetActive(false);
-                // cubeCol.SetActive(true);
-                // cubeCol.GetComponent<Renderer>().material = material2;
-                pt3Col.SetActive(true);
-                //scaledPt3 = ScaledPoint(p3);
-                pt3Col.transform.localPosition = Vector3.zero;
-                ApplyGraphAdjustment();
-                // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
-                pt3ColLabel.text = "(0,0,0)";
-                PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
-                //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
+            // if (m.Rank() == 0)
+            // {
+            //     planeCol.SetActive(false);
+            //     lineCol.SetActive(false);
+            //     cubeCol.SetActive(false);
+            //     // cubeCol.SetActive(true);
+            //     // cubeCol.GetComponent<Renderer>().material = material2;
+            //     pt3Col.SetActive(true);
+            //     //scaledPt3 = ScaledPoint(p3);
+            //     pt3Col.transform.localPosition = Vector3.zero;
+            //     ApplyGraphAdjustment();
+            //     // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
+            //     pt3ColLabel.text = "(0,0,0)";
+            //     PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+            //     //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
 
-                planeNull.SetActive(false);
-                lineNull.SetActive(false);
-                cubeNull.SetActive(true);
-                cubeNull.GetComponent<Renderer>().material = material1;
-                pt3Null.SetActive(false);
-                PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
+            //     planeNull.SetActive(false);
+            //     lineNull.SetActive(false);
+            //     cubeNull.SetActive(true);
+            //     cubeNull.GetComponent<Renderer>().material = material1;
+            //     pt3Null.SetActive(false);
+            //     PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
 
-                planeColT.SetActive(false);
-                lineColT.SetActive(false);
+            //     planeColT.SetActive(false);
+            //     lineColT.SetActive(false);
+
+            //     planeNullT.SetActive(false);
+            //     lineNullT.SetActive(false);
 
 
-            }
-            if (m.Rank() == 1)
-            {
-                planeCol.SetActive(false);
-                lineCol.SetActive(true);
-                cubeCol.SetActive(false);
-                pt3Col.SetActive(false);
-                // PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
-                // PlaneExpression_col.GetComponent<PresentLine>().enabled = true;
+            // }
+            // if (m.Rank() == 1)
+            // {
+            //     planeCol.SetActive(false);
+            //     lineCol.SetActive(true);
+            //     cubeCol.SetActive(false);
+            //     pt3Col.SetActive(false);
+            //     // PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
+            //     // PlaneExpression_col.GetComponent<PresentLine>().enabled = true;
 
-                planeNull.SetActive(true);
-                lineNull.SetActive(false);
-                cubeNull.SetActive(false);
-                pt3Null.SetActive(false);
-                // PlaneExpression_Null.GetComponent<PresentPlane>().enabled = true;
-                // PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
+            //     planeNull.SetActive(true);
+            //     lineNull.SetActive(false);
+            //     cubeNull.SetActive(false);
+            //     pt3Null.SetActive(false);
+            //     // PlaneExpression_Null.GetComponent<PresentPlane>().enabled = true;
+            //     // PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
 
-                planeColT.SetActive(false);
-                lineColT.SetActive(true);
+            //     planeColT.SetActive(false);
+            //     lineColT.SetActive(true);
+
+            //     planeNullT.SetActive(true);
+            //     lineNullT.SetActive(false);
                 
-            }
-            if (m.Rank() == 2)
-            {
-                planeCol.SetActive(true);
-                lineCol.SetActive(false);
-                cubeCol.SetActive(false);
-                pt3Col.SetActive(false);
+            // }
+            // if (m.Rank() == 2)
+            // {
+            //     planeCol.SetActive(true);
+            //     lineCol.SetActive(false);
+            //     cubeCol.SetActive(false);
+            //     pt3Col.SetActive(false);
                 presentPlane_col.GetPlaneDirection();
-                // PlaneExpression_col.GetComponent<PresentPlane>().enabled = true;
-                // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+            //     // PlaneExpression_col.GetComponent<PresentPlane>().enabled = true;
+            //     // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
                 
 
-                planeNull.SetActive(false);
-                lineNull.SetActive(true);
-                cubeNull.SetActive(false);
-                pt3Null.SetActive(false);
-                // PlaneExpression_Null.GetComponent<PresentPlane>().enabled = false;
-                // PlaneExpression_Null.GetComponent<PresentLine>().enabled = true;
+            //     planeNull.SetActive(false);
+            //     lineNull.SetActive(true);
+            //     cubeNull.SetActive(false);
+            //     pt3Null.SetActive(false);
+            //     // PlaneExpression_Null.GetComponent<PresentPlane>().enabled = false;
+            //     // PlaneExpression_Null.GetComponent<PresentLine>().enabled = true;
 
-                planeColT.SetActive(true);
-                lineColT.SetActive(false);
+            //     planeColT.SetActive(true);
+            //     lineColT.SetActive(false);
+                // presentPlane_colT.GetPlaneDirection();
+
+            //     planeNullT.SetActive(false);
+            //     lineNullT.SetActive(true);
                 
-            }
-            if (m.Rank() == 3)
-            {
-                planeCol.SetActive(false);
-                lineCol.SetActive(false);
-                cubeCol.SetActive(true);
-                cubeCol.GetComponent<Renderer>().material = material1;
-                pt3Col.SetActive(false);
-                // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
-                //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
+            // }
+            // if (m.Rank() == 3)
+            // {
+            //     planeCol.SetActive(false);
+            //     lineCol.SetActive(false);
+            //     cubeCol.SetActive(true);
+            //     cubeCol.GetComponent<Renderer>().material = material1;
+            //     pt3Col.SetActive(false);
+            //     // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+            //     //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
 
-                planeNull.SetActive(false);
-                lineNull.SetActive(false);
-                cubeNull.SetActive(false);
-                // cubeNull.SetActive(true);
-                // cubeNull.GetComponent<Renderer>().material = material2;
-                pt3Null.SetActive(true);
-                pt3Null.transform.localPosition = Vector3.zero;
-                ApplyGraphAdjustment();
-                // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
-                pt3NullLabel.text = "(0,0,0)";
-                // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+            //     planeNull.SetActive(false);
+            //     lineNull.SetActive(false);
+            //     cubeNull.SetActive(false);
+            //     // cubeNull.SetActive(true);
+            //     // cubeNull.GetComponent<Renderer>().material = material2;
+            //     pt3Null.SetActive(true);
+            //     pt3Null.transform.localPosition = Vector3.zero;
+            //     ApplyGraphAdjustment();
+            //     // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
+            //     pt3NullLabel.text = "(0,0,0)";
+            //     // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
 
-                planeColT.SetActive(false);
-                lineColT.SetActive(false);
-            }
+            //     planeColT.SetActive(false);
+            //     lineColT.SetActive(false);
+
+            //     planeNullT.SetActive(false);
+            //     lineNullT.SetActive(false);
+            // }
         }
 
         public void ApplyGraphAdjustment()
