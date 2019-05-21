@@ -52,7 +52,7 @@ namespace orthProj
 
         PtManager ptManager;
 
-        PresentPlane presentPlane;
+        PresentLine presentline;
         public PlaneSolverPointGrab grabber;
         public FlexButtonLockPlane lockButton;
 

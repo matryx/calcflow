@@ -10,7 +10,7 @@ namespace orthProj
 
         public Transform point1, point2, point3;
 
-        public PresentPlane presentPlane;
+        public PresentLine presentline;
         public PtManager ptManager;
         public PtOutputMenu ptOutputMenu;
 
@@ -42,10 +42,10 @@ namespace orthProj
         private void grabbingPoint(Transform point, ConstraintGrabbable grabber)
         {
             Vector3 newLoc = Vector3.zero;
-            if (FixedPlane && presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled)
+            if (FixedPlane && presentline.forwardPlane.GetComponent<MeshRenderer>().enabled)
             {
-                newLoc = Vector3.ProjectOnPlane(grabber.lastLocalPos - presentPlane.centerPt.localPosition, presentPlane.lookAtTarget.localPosition - presentPlane.plane.localPosition);
-                newLoc = newLoc + presentPlane.centerPt.localPosition;
+                newLoc = Vector3.ProjectOnPlane(grabber.lastLocalPos - presentline.centerPt.localPosition, presentline.lookAtPlaneTarget.localPosition - presentline.plane.localPosition);
+                newLoc = newLoc + presentline.centerPt.localPosition;
                 if (newLoc.x > 10 || newLoc.x < -10 || newLoc.y > 10 || newLoc.y < -10 || newLoc.z > 10 || newLoc.z < -10)
                 {
                     grabber.transform.position = point.position;
@@ -59,7 +59,7 @@ namespace orthProj
                 newLoc = grabber.lastLocalPos;
                 point.localPosition = newLoc;
             }
-            ptManager.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
+            ptManager.updatePoint(point.name, presentline.UnscaledPoint(newLoc), FixedPlane);
         }
     }
 }

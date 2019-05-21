@@ -14,7 +14,7 @@ namespace orthProj
         public Vector3 center;
         public Transform point1, point2, point3;
         public Transform centerPt;
-        public PresentPlane presentPlane;
+        public PresentLine presentline;
         public PtManager ptManager;
         public float steps = 3;
         public float stepSize = 5;
@@ -74,7 +74,7 @@ namespace orthProj
             float y0 = (b * d) / (sqrtNormal);
             float z0 = (c * d) / (sqrtNormal);
             center = new Vector3(x0, y0, z0);
-            presentPlane.center = center;
+            presentline.center = center;
         }
 
         public void changeScale()

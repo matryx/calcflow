@@ -41,8 +41,8 @@ namespace orthProj
 
         public TextMesh equation;
 
-        [SerializeField]
-        PresentPlane presentPlane;
+    //    [SerializeField]
+     //   PresentPlane presentPlane;
         [SerializeField]
         PresentLine presentline;
 
@@ -107,9 +107,9 @@ namespace orthProj
 
             ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
             //in unity z is the right 3rd axis
-            updatePoint("pt1", new Vector3(2, 4, 6), false); // vector 
-            updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
-            updatePoint("pt3", new Vector3(0, 0, 0), false); // origin
+            updatePoint("pt1", new Vector3(3, 0, 0), false); // vector 
+            updatePoint("pt2", new Vector3(3, 3, 0), false); // first axis
+            updatePoint("pt3", new Vector3(0, 3, 3), false); // origin
         }
 
 
@@ -131,22 +131,29 @@ namespace orthProj
 
             if (inputReceived && !eqnInput)
             {
+                Debug.Log("AHHHHHHHHHHHHHHHHHHHH");
                 inputReceived = false;
                 bool isValid = ptSet.CompileAll();
 
                 ManageFeedback();
                 if (isValid)
                 {
-                    if (presentPlane.CalculatePlane())
+                    Debug.Log("VVVVVVVVVVVVVVlIIIIIIIIIIIIIIDDDDDDDDD");
+                    if (presentline.CalculatePlane())
                     {
-                        presentPlane.ApplyGraphAdjustment();
-                        presentPlane.GetLocalPoint();
-                        presentPlane.GetPlaneDirection();
+                        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CALLED!");
+                        presentline.ApplyGraphAdjustment();
+                        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CALLED!1111111111111111");
+                        presentline.GetLocalPoint();
+                        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!222222222222222222LLED!");
+                        presentline.GetPlaneDirection();
+                        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!33333333333333333!!CALLED!");
                     }
                     else
                     {
-                        presentPlane.ApplyGraphAdjustment();
-                        presentPlane.GetLocalPoint();
+                        Debug.Log("NOTCALLLLLCED?????");
+                        presentline.ApplyGraphAdjustment();
+                        presentline.GetLocalPoint();
                     }
                 }
             }
@@ -161,8 +168,8 @@ namespace orthProj
                     if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
                     {
                         feedbacks.eqnFeedback.material.color = negativeFeedback;
-                        presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                        presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                        presentline.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                        presentline.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
                     }
                     else
                     {
@@ -206,10 +213,10 @@ namespace orthProj
                 ManageFeedback();
                 if (isValid)
                 {
-                    if (presentPlane.CalculatePlane())
+                    if (presentline.CalculatePlane())
                     {
-                        presentPlane.ApplyUnroundCenter(ptName, newLoc);
-                        presentPlane.GetPlaneDirection();
+                        presentline.ApplyUnroundCenter(ptName, newLoc);
+                        presentline.GetPlaneDirection();
                     }
                 }
             }
@@ -240,10 +247,12 @@ namespace orthProj
             manageText();
             ManageFeedback();
             ptSet.CompileAll();
-            presentPlane.GetLocalPoint();
-            presentPlane.GetPlaneDirection();
-            presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
-            presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+            presentline.GetLocalPoint();
+            Debug.Log("updatI11111111111111111111111111111ng");
+            presentline.GetPlaneDirection();
+            Debug.Log("GOTTTTTTTTTTTTTTTTTTTTTTTTPLANNNNNNNNNNNNNEDIRRRRRRRRRRRRRRRRRR");
+            presentline.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+            presentline.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
         }
 
         public void updateEqn(float newA, float newB, float newC, float newD)
