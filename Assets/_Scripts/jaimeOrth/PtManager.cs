@@ -107,9 +107,9 @@ namespace orthProj
 
             ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
             //in unity z is the right 3rd axis
-            updatePoint("pt1", new Vector3(3, 0, 0), false); // vector 
-            updatePoint("pt2", new Vector3(3, 3, 0), false); // first axis
-            updatePoint("pt3", new Vector3(0, 3, 3), false); // origin
+            updatePoint("pt1", new Vector3(1, 2, 3), false); // vector 
+            updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
+            updatePoint("pt3", new Vector3(0, 0, 0), false); // origin
         }
 
 

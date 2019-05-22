@@ -20,20 +20,9 @@ namespace orthProj
         public Transform yAxis;
         public Transform zAxis;
 
-
-        public Transform line;
-        public Transform forwardLine;
-        public Transform arrowLine;
-        public Transform lookAtTarget;
-
         public Transform axisline;
         public Transform forwardAxisLine;
         public Transform lookAtAxisTarget;
-
-        public Transform projline;
-        public Transform arrow;
-        public Transform forwardProjLine;
-        public Transform lookAtProjTarg;
 
         public Transform axisline2;
         public Transform forwardAxisLine2;
@@ -117,24 +106,14 @@ namespace orthProj
             //xAxis.localPosition = ScaledPoint(center);
             //yAxis.localPosition = ScaledPoint(center);
             //zAxis.localPosition = ScaledPoint(center);
-       
-            ////get the points from the users vector and for the line to look at
-            //lookAtTarget.localPosition = scaledPt1;
-            ////have the line look at the point
-            //line.LookAt(lookAtTarget);
-            ////set the line to have an origin of zero
-            //line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+
             ////scale the vector
             //line.localScale = new Vector3(1, 1, scaledPt1.magnitude); 
             
             ////axis 1
-            lookAtAxisTarget.localPosition = ScaledPoint(PtCoordToVector(rawPt2));
-            Debug.Log("point two is: " + point2.localPosition.x + " " + point2.localPosition.y + " " + point2.localPosition.z);
-           
+            lookAtAxisTarget.localPosition = ScaledPoint(PtCoordToVector(rawPt2));   
             axisline.localPosition = (new Vector3(0, 0, 0));
             axisline.LookAt(lookAtAxisTarget);
-            Debug.Log("looking at : " + lookAtAxisTarget.localPosition.x + " " + lookAtAxisTarget.localPosition.y + " " + lookAtAxisTarget.localPosition.z);
-            Debug.Log("axis local pos is : " + axisline.localPosition.x + " " + axisline.localPosition.y + " " + axisline.localPosition.z);
 
             var sharedMaterial2 = forwardAxisLine.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial2.SetInt("_planeClippingEnabled", 1);
@@ -145,51 +124,17 @@ namespace orthProj
                 //plane normal vector is the rotated 'up' vector.
                 sharedMaterial2.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
-            Debug.Log("AFTER MATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT");
-            Debug.Log("point two is: " + point2.localPosition.x + " " + point2.localPosition.y + " " + point2.localPosition.z);
-            Debug.Log("looking at : " + lookAtAxisTarget.localPosition.x + " " + lookAtAxisTarget.localPosition.y + " " + lookAtAxisTarget.localPosition.z);
-            Debug.Log("axis local pos is : " + axisline.localPosition.x + " " + axisline.localPosition.y + " " + axisline.localPosition.z);
 
+            projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2));
 
 
             ////pt2Label.text = "(" + point2.localPosition.x + "," + point2.localPosition.y + "," + point2.localPosition.z + ")";
 
 
-            ////calculate projection axis component
-            ////vector to project and normal
-            //projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2)); // give this back to them?
-            ////scaled to project
-            //Vector3 scaledRes = ScaledPoint(projectedResult);
-
-            //show them the projected value
-            //scaledPt2 = scaledRes; 
-            //point2.localPosition = scaledPt2; 
-            //pt2Label.text = "(" + projectedResult.x + "," + projectedResult.y + "," + projectedResult.z + ")";
-
-            //point3.GetComponent<MeshRenderer>().enabled = false;
-
-            ////////////////////////////////////////////////////////////////////////////////////PROJ
-            //lookAtProjTarg.localPosition = scaledRes;
-            //projline.LookAt(lookAtProjTarg);
-
-            //projline.localPosition = centerPt.localPosition;
-
-            ////projline.localScale = new Vector3(1, 1, scaledRes.x);
-            //projline.localScale = new Vector3(1, 1, scaledRes.magnitude);
-
-            //var sharedMaterialP = forwardProjLine.GetComponent<MeshRenderer>().sharedMaterial;
-            //sharedMaterialP.SetInt("_planeClippingEnabled", 1);
-
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    sharedMaterialP.SetVector("_planePos" + i, walls[i].transform.position);
-            //    //plane normal vector is the rotated 'up' vector.
-            //    sharedMaterialP.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            //}
-
-
-            //pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
-            //pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";            
+            pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
+            pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
+            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";            
+            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";            
 
             //var sharedMaterial = forwardLine.GetComponent<MeshRenderer>().sharedMaterial;
             //sharedMaterial.SetInt("_planeClippingEnabled", 1);
@@ -228,10 +173,7 @@ namespace orthProj
             }
             //   }
 
-            Debug.Log("AFTER PLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLAAAAAAAAAAAANNNNNNNNNNNNNNEEEEEEEEEEEEEE");
-            Debug.Log("point two is: " + point2.localPosition.x + " " + point2.localPosition.y + " " + point2.localPosition.z);
-            Debug.Log("looking at : " + lookAtAxisTarget.localPosition.x + " " + lookAtAxisTarget.localPosition.y + " " + lookAtAxisTarget.localPosition.z);
-            Debug.Log("axis local pos is : " + axisline.localPosition.x + " " + axisline.localPosition.y + " " + axisline.localPosition.z);
+           
 
 
         }
@@ -293,7 +235,7 @@ namespace orthProj
             Debug.Log("Normal vector is: " + normalVector);
             if (PlaneValid())
             {
-                Debug.Log("VALID PLANE AND Normal vector is: " + normalVector);
+              
                 forwardPlane.GetComponent<MeshRenderer>().enabled = true;
                 backwardPlane.GetComponent<MeshRenderer>().enabled = true;
 
