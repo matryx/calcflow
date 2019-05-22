@@ -25850,6 +25850,7 @@ MonoBehaviour:
   pt1Label: {fileID: 1003382037}
   pt2Label: {fileID: 1193087407}
   pt3Label: {fileID: 774398880}
+  getBasisVectors: {fileID: 1159881513}
   plane: {fileID: 1933490083}
   forwardPlane: {fileID: 1660401555}
   backwardPlane: {fileID: 229335431}
@@ -25929,9 +25930,9 @@ MonoBehaviour:
   point1: {fileID: 2137019324}
   point2: {fileID: 1444401351}
   point3: {fileID: 1895207836}
-  point1T: {fileID: 1926058428}
-  point2T: {fileID: 1577877167}
-  point3T: {fileID: 1390958626}
+  point1Line: {fileID: 1926058428}
+  point2Line: {fileID: 1577877167}
+  point3Line: {fileID: 1390958626}
   centerPt: {fileID: 1497959004}
   pt1Label: {fileID: 1003382037}
   pt2Label: {fileID: 1193087407}
@@ -25949,6 +25950,7 @@ MonoBehaviour:
   - {fileID: 1879622212}
   - {fileID: 942069415}
   - {fileID: 1348451722}
+  getBasisVectors: {fileID: 1159881513}
   ptManager: {fileID: 1159881504}
   center: {x: 0, y: 0, z: 0}
   vector12: {x: 0, y: 0, z: 0}
@@ -25957,9 +25959,9 @@ MonoBehaviour:
   scaledPt1: {x: 0, y: 0, z: 0}
   scaledPt2: {x: 0, y: 0, z: 0}
   scaledPt3: {x: 0, y: 0, z: 0}
-  scaledPt1T: {x: 0, y: 0, z: 0}
-  scaledPt2T: {x: 0, y: 0, z: 0}
-  scaledPt3T: {x: 0, y: 0, z: 0}
+  scaledPt1Line: {x: 0, y: 0, z: 0}
+  scaledPt2Line: {x: 0, y: 0, z: 0}
+  scaledPt3Line: {x: 0, y: 0, z: 0}
   scaledVector12: {x: 0, y: 0, z: 0}
   scaledVector13: {x: 0, y: 0, z: 0}
   normalVector: {x: 0, y: 0, z: 0}
@@ -25967,9 +25969,9 @@ MonoBehaviour:
   p1: {x: 0, y: 0, z: 0}
   p2: {x: 0, y: 0, z: 0}
   p3: {x: 0, y: 0, z: 0}
-  p1T: {x: 0, y: 0, z: 0}
-  p2T: {x: 0, y: 0, z: 0}
-  p3T: {x: 0, y: 0, z: 0}
+  p1Line: {x: 0, y: 0, z: 0}
+  p2Line: {x: 0, y: 0, z: 0}
+  p3Line: {x: 0, y: 0, z: 0}
   vertices: []
   rawEquation: 
   xLabelManager: {fileID: 69197004}
@@ -36525,7 +36527,7 @@ GameObject:
   - component: {fileID: 848052396}
   - component: {fileID: 848052395}
   m_Layer: 12
-  m_Name: pt2 (1)
+  m_Name: pt2Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48202,7 +48204,7 @@ GameObject:
   - component: {fileID: 1109810433}
   - component: {fileID: 1109810432}
   m_Layer: 12
-  m_Name: pt1 (1)
+  m_Name: pt1Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -50285,7 +50287,7 @@ GameObject:
   - component: {fileID: 1156106821}
   - component: {fileID: 1156106820}
   m_Layer: 12
-  m_Name: pt3 (1)
+  m_Name: pt3Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -50597,6 +50599,36 @@ MonoBehaviour:
   - 0
   - 0
   - 0
+  c1: {x: 0, y: 0, z: 0}
+  c2: {x: 0, y: 0, z: 0}
+  c3: {x: 0, y: 0, z: 0}
+  n1: {x: 0, y: 0, z: 0}
+  n2: {x: 0, y: 0, z: 0}
+  n3: {x: 0, y: 0, z: 0}
+  c1T: {x: 0, y: 0, z: 0}
+  c2T: {x: 0, y: 0, z: 0}
+  c3T: {x: 0, y: 0, z: 0}
+  n1T: {x: 0, y: 0, z: 0}
+  n2T: {x: 0, y: 0, z: 0}
+  n3T: {x: 0, y: 0, z: 0}
+  c1AA: {x: 0, y: 0, z: 0}
+  c2AA: {x: 0, y: 0, z: 0}
+  c3AA: {x: 0, y: 0, z: 0}
+  S1: {x: 0, y: 0, z: 0}
+  S2: {x: 0, y: 0, z: 0}
+  S3: {x: 0, y: 0, z: 0}
+  n1AA: {x: 0, y: 0, z: 0}
+  n2AA: {x: 0, y: 0, z: 0}
+  n3AA: {x: 0, y: 0, z: 0}
+  c1TAA: {x: 0, y: 0, z: 0}
+  c2TAA: {x: 0, y: 0, z: 0}
+  c3TAA: {x: 0, y: 0, z: 0}
+  S1T: {x: 0, y: 0, z: 0}
+  S2T: {x: 0, y: 0, z: 0}
+  S3T: {x: 0, y: 0, z: 0}
+  n1TAA: {x: 0, y: 0, z: 0}
+  n2TAA: {x: 0, y: 0, z: 0}
+  n3TAA: {x: 0, y: 0, z: 0}
   material1: {fileID: 2100000, guid: 0aed0c663a2bdf84089659c8203373b4, type: 2}
   material2: {fileID: 2100000, guid: eeda3ac62e83458489e9277c083514ab, type: 2}
   planeColT: {fileID: 736842021}
@@ -61050,7 +61082,7 @@ GameObject:
   - component: {fileID: 1390958628}
   - component: {fileID: 1390958627}
   m_Layer: 12
-  m_Name: pt3 (1)
+  m_Name: pt3Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -67846,7 +67878,7 @@ GameObject:
   - component: {fileID: 1577877169}
   - component: {fileID: 1577877168}
   m_Layer: 12
-  m_Name: pt2 (1)
+  m_Name: pt2Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80910,6 +80942,7 @@ MonoBehaviour:
   pt1Label: {fileID: 1819768984}
   pt2Label: {fileID: 1100533656}
   pt3Label: {fileID: 971929560}
+  getBasisVectors: {fileID: 1159881513}
   plane: {fileID: 400016486}
   forwardPlane: {fileID: 907803651}
   backwardPlane: {fileID: 1137606096}
@@ -80976,9 +81009,9 @@ MonoBehaviour:
   point1: {fileID: 934781149}
   point2: {fileID: 644739923}
   point3: {fileID: 120292874}
-  point1T: {fileID: 1109810431}
-  point2T: {fileID: 848052394}
-  point3T: {fileID: 1156106819}
+  point1Line: {fileID: 1109810431}
+  point2Line: {fileID: 848052394}
+  point3Line: {fileID: 1156106819}
   centerPt: {fileID: 1176774339}
   pt1Label: {fileID: 1819768984}
   pt2Label: {fileID: 1100533656}
@@ -80996,6 +81029,7 @@ MonoBehaviour:
   - {fileID: 1283318990}
   - {fileID: 948963039}
   - {fileID: 1600194277}
+  getBasisVectors: {fileID: 1159881513}
   ptManager: {fileID: 1159881504}
   center: {x: 0, y: 0, z: 0}
   vector12: {x: 0, y: 0, z: 0}
@@ -81004,9 +81038,9 @@ MonoBehaviour:
   scaledPt1: {x: 0, y: 0, z: 0}
   scaledPt2: {x: 0, y: 0, z: 0}
   scaledPt3: {x: 0, y: 0, z: 0}
-  scaledPt1T: {x: 0, y: 0, z: 0}
-  scaledPt2T: {x: 0, y: 0, z: 0}
-  scaledPt3T: {x: 0, y: 0, z: 0}
+  scaledPt1Line: {x: 0, y: 0, z: 0}
+  scaledPt2Line: {x: 0, y: 0, z: 0}
+  scaledPt3Line: {x: 0, y: 0, z: 0}
   scaledVector12: {x: 0, y: 0, z: 0}
   scaledVector13: {x: 0, y: 0, z: 0}
   normalVector: {x: 0, y: 0, z: 0}
@@ -81014,9 +81048,9 @@ MonoBehaviour:
   p1: {x: 0, y: 0, z: 0}
   p2: {x: 0, y: 0, z: 0}
   p3: {x: 0, y: 0, z: 0}
-  p1T: {x: 0, y: 0, z: 0}
-  p2T: {x: 0, y: 0, z: 0}
-  p3T: {x: 0, y: 0, z: 0}
+  p1Line: {x: 0, y: 0, z: 0}
+  p2Line: {x: 0, y: 0, z: 0}
+  p3Line: {x: 0, y: 0, z: 0}
   vertices: []
   rawEquation: 
   xLabelManager: {fileID: 707049684}
@@ -81358,7 +81392,7 @@ GameObject:
   - component: {fileID: 1926058430}
   - component: {fileID: 1926058429}
   m_Layer: 12
-  m_Name: pt1 (1)
+  m_Name: pt1Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

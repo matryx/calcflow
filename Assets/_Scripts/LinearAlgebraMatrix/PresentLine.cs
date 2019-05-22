@@ -8,7 +8,7 @@ namespace LinearAlgebraMatrix
     {
 
         public Transform point1, point2, point3;
-        public Transform point1T, point2T, point3T;
+        public Transform point1Line, point2Line, point3Line;
         public Transform centerPt;
         public TextMesh pt1Label, pt2Label, pt3Label;
 
@@ -20,7 +20,7 @@ namespace LinearAlgebraMatrix
         public Transform lookAtTarget;
         public Transform lookAtTargetT;
         public List<GameObject> walls;
-
+        public MatrixYFX getBasisVectors;
 
         public PtManager ptManager;
         private PtCoord rawPt1, rawPt2, rawPt3;
@@ -28,13 +28,13 @@ namespace LinearAlgebraMatrix
         public Vector3 center;
         public Vector3 vector12, vector13, vector23;
         public Vector3 scaledPt1, scaledPt2, scaledPt3;
-        public Vector3 scaledPt1T, scaledPt2T, scaledPt3T;
+        public Vector3 scaledPt1Line, scaledPt2Line, scaledPt3Line;
         public Vector3 scaledVector12, scaledVector13;
         public Vector3 normalVector;
         public Vector3 scaledNormal;
 
         public Vector3 p1, p2, p3;
-        public Vector3 p1T, p2T, p3T;
+        public Vector3 p1Line, p2Line, p3Line;
 
         public List<Vector3> vertices;
         public string rawEquation;
@@ -94,20 +94,49 @@ namespace LinearAlgebraMatrix
                 // scaledPt3 = ScaledPoint(p3);
                 // point3.localPosition = scaledPt3;
 
-                p1T = MatrixYFX.c1T;
-                p1T = MatrixYFX.n1;
-                scaledPt1T = ScaledPoint(p1T);
-                point1T.localPosition = scaledPt1T;
+                // p1Line = MatrixYFX.c1T;
+                if(MatrixYFX.mRank==2)
+                {
+                p1Line = getBasisVectors.n1;
+                scaledPt1Line = ScaledPoint(p1Line);
+                point1Line.localPosition = scaledPt1Line;
 
-                p2T = MatrixYFX.c2T;
-                p2T = MatrixYFX.n2;
-                scaledPt2T = ScaledPoint(p2T);
-                point2T.localPosition = scaledPt2T;
+                // p2Line = MatrixYFX.c2T;
+                p2Line = getBasisVectors.n2;
+                scaledPt2Line = ScaledPoint(p2Line);
+                point2Line.localPosition = scaledPt2Line;
 
-                p3T = MatrixYFX.c3T;
-                p3T = MatrixYFX.n3;
-                scaledPt3T = ScaledPoint(p3T);
-                point3T.localPosition = scaledPt3T;
+                // p3Line = MatrixYFX.c3T;
+                p3Line = getBasisVectors.n3;
+                scaledPt3Line = ScaledPoint(p3Line);
+                point3Line.localPosition = scaledPt3Line;
+                }
+
+                if(MatrixYFX.mRank==1)
+                {
+                p1Line = getBasisVectors.c1T;
+                scaledPt1Line = ScaledPoint(p1Line);
+                point1Line.localPosition = scaledPt1Line;
+
+                // p2Line = MatrixYFX.c2T;
+                p2Line = getBasisVectors.c2T;
+                scaledPt2Line = ScaledPoint(p2Line);
+                point2Line.localPosition = scaledPt2Line;
+
+                // p3Line = MatrixYFX.c3T;
+                p3Line = getBasisVectors.c3T;
+                scaledPt3Line = ScaledPoint(p3Line);
+                point3Line.localPosition = scaledPt3Line;
+                }
+
+
+
+                lookAtTarget.localPosition = ScaledPoint(p1Line);
+                line.LookAt(lookAtTarget);
+                line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+                lineT.LookAt(lookAtTarget);
+                lineT.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+
             }
 
             if(transform.gameObject.name == "PlaneExpression_col") 
@@ -124,20 +153,46 @@ namespace LinearAlgebraMatrix
                 // scaledPt3 = ScaledPoint(p3);
                 // point3.localPosition = scaledPt3;
 
-                p1T = MatrixYFX.n1T;
-                p1 = MatrixYFX.c1;
-                scaledPt1T = ScaledPoint(p1);
-                point1T.localPosition = scaledPt1T;
+                if(MatrixYFX.mRank==2)
+                {
+                p1Line = getBasisVectors.n1T;
+                // p1Line = MatrixYFX.c1;
+                scaledPt1Line = ScaledPoint(p1Line);
+                point1Line.localPosition = scaledPt1Line;
 
-                p2T = MatrixYFX.n2T;
-                p2 = MatrixYFX.c2;
-                scaledPt2T = ScaledPoint(p2);
-                point2T.localPosition = scaledPt2T;
+                p2Line = getBasisVectors.n2T;
+                // p2Line = MatrixYFX.c2;
+                scaledPt2Line = ScaledPoint(p2Line);
+                point2Line.localPosition = scaledPt2Line;
 
-                p3T = MatrixYFX.n3T;
-                p3 = MatrixYFX.c3;
-                scaledPt3T = ScaledPoint(p3);
-                point3T.localPosition = scaledPt3T;
+                p3Line = getBasisVectors.n3T;
+                // p3Line = MatrixYFX.c3;
+                scaledPt3Line = ScaledPoint(p3Line);
+                point3Line.localPosition = scaledPt3Line;
+                }
+
+                if(MatrixYFX.mRank==1)
+                {
+                p1Line = getBasisVectors.c1;
+                scaledPt1Line = ScaledPoint(p1Line);
+                point1Line.localPosition = scaledPt1Line;
+
+                // p2Line = MatrixYFX.c2T;
+                p2Line = getBasisVectors.c2;
+                scaledPt2Line = ScaledPoint(p2Line);
+                point2Line.localPosition = scaledPt2Line;
+
+                // p3Line = MatrixYFX.c3T;
+                p3Line = getBasisVectors.c3;
+                scaledPt3Line = ScaledPoint(p3Line);
+                point3Line.localPosition = scaledPt3Line;
+                }
+
+                lookAtTarget.localPosition = ScaledPoint(p1Line);
+                line.LookAt(lookAtTarget);
+                line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+                lineT.LookAt(lookAtTarget);
+                lineT.localPosition = ScaledPoint(new Vector3(0, 0, 0));
             }
             // p1 = MatrixYFX.c1;
             // p2 = MatrixYFX.c2;
@@ -153,13 +208,13 @@ namespace LinearAlgebraMatrix
             pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
             pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
 
-            lookAtTarget.localPosition = ScaledPoint(p1);
-            line.LookAt(lookAtTarget);
-            line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+            // lookAtTarget.localPosition = ScaledPoint(p1);
+            // line.LookAt(lookAtTarget);
+            // line.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
-            lookAtTargetT.localPosition = ScaledPoint(p1T);
-            lineT.LookAt(lookAtTargetT);
-            lineT.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+            // lookAtTargetT.localPosition = ScaledPoint(p1Line);
+            // lineT.LookAt(lookAtTargetT);
+            // lineT.localPosition = ScaledPoint(new Vector3(0, 0, 0));
 
 
             //pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";

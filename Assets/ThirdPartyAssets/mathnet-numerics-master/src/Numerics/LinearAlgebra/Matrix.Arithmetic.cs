@@ -1998,6 +1998,32 @@ namespace MathNet.Numerics.LinearAlgebra
             return svd.U.EnumerateColumns(0, svd.Rank).ToArray();
         }
 
+        public virtual Vector<T>[] svdVT()
+        {
+            var svd = Svd(true);
+            return svd.VT.EnumerateRows(0, 3).ToArray();
+        }
+
+        // public virtual Vector<T>[] svdS()
+        // {
+        //     var svd = Svd(true);
+        //     // Vector<T>[] vec = vector [svd.S[0];svd.S[1];svd.S[2]];
+        //     var V = Vector<float>.Build;
+        //     Vector<T> vec = {svd.S[0],svd.S[0],svd.S[0]};
+        //     // Vector<T>[] vec = V.DenseOfArray(v);
+        //     return vec;
+        // }
+
+        /// <summary>
+        /// Computes an orthonormal basis for the column space of this matrix,
+        /// also known as the range or image of the corresponding matrix transformation.
+        /// </summary>
+        public virtual Vector<T>[] svdU()
+        {
+            var svd = Svd(true);
+            return svd.U.EnumerateColumns(0, 3).ToArray();
+        }
+
         /// <summary>Computes the inverse of this matrix.</summary>
         /// <returns>The inverse of this matrix.</returns>
         public virtual Matrix<T> Inverse()

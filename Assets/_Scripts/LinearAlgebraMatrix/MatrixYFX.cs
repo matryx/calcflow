@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Factorization;
+using MathNet.Numerics.Properties;
 
 namespace LinearAlgebraMatrix
 {
@@ -38,43 +40,69 @@ namespace LinearAlgebraMatrix
 
         //float[,] orgMat = new float[3,3];
         // float[,] redMat = new float[3, 3];
-        public static float[,] colMat = new float[3, 3];
-        public static float[,] nullMat = new float[3, 3];
-        public static float[,] colMatT = new float[3, 3];
-        public static float[,] nullMatT = new float[3, 3];
+        public float[,] colMat = new float[3, 3];
+        public float[,] nullMat = new float[3, 3];
+        public float[,] colMatT = new float[3, 3];
+        public float[,] nullMatT = new float[3, 3];
         // int pt1RowNum;
         // int pt2RowNum;
         // int pt3RowNum;
         public float[] a = new float[3];
         public float[] b = new float[3];
         public float[] c = new float[3];
+        public float[,] d = new float[3,3];
 
 
         // public Vector3 row1;
         // public Vector3 row2;
         // public Vector3 row3;
 
-        public static Vector3 c1;
-        public static Vector3 c2;
-        public static Vector3 c3;
+        public Vector3 c1;
+        public Vector3 c2;
+        public Vector3 c3;
 
-        public static Vector3 n1;
-        public static Vector3 n2;
-        public static Vector3 n3;
+        public Vector3 n1;
+        public Vector3 n2;
+        public Vector3 n3;
 
-        public static Vector3 c1T;
-        public static Vector3 c2T;
-        public static Vector3 c3T;
+        public Vector3 c1T;
+        public Vector3 c2T;
+        public Vector3 c3T;
 
-        public static Vector3 n1T;
-        public static Vector3 n2T;
-        public static Vector3 n3T;
+        public Vector3 n1T;
+        public Vector3 n2T;
+        public Vector3 n3T;
+
+        public Vector3 c1AA;
+        public Vector3 c2AA;
+        public Vector3 c3AA;
+
+        public Vector3 S1;
+        public Vector3 S2;
+        public Vector3 S3;
+
+        public Vector3 n1AA;
+        public Vector3 n2AA;
+        public Vector3 n3AA;
+
+        public Vector3 c1TAA;
+        public Vector3 c2TAA;
+        public Vector3 c3TAA;
+
+        public Vector3 S1T;
+        public Vector3 S2T;
+        public Vector3 S3T;
+
+        public Vector3 n1TAA;
+        public Vector3 n2TAA;
+        public Vector3 n3TAA;
 
         // public static int colSpaceVectorNum = 0;
         // public static int forLine;
 
         Matrix<float> m;
         Matrix<float> mT;
+        public static int mRank;
         public Material material1;
         public Material material2;
         
@@ -127,124 +155,134 @@ namespace LinearAlgebraMatrix
                            { a[2], b[2], c[2] }};
             mT = M.DenseOfArray(xT);
             
+            mRank = m.Rank();
             // arrangeRow(a, b, c);
 
             // rowReduce();
             // getColumnSpaceMatrix();
+
+
+            // var svd = Svd(true);
+            // Debug(svd.VT.EnumerateRows(0, 3).ToArray());
+
+
+            getSvd();
+
+
             
             getColumnSpace();
             getNullSpace();
             getTransColumnSpace();
             getTransNullSpace();
 
-            // if (m.Rank() == 0)
-            // {
-            //     planeCol.SetActive(false);
-            //     lineCol.SetActive(false);
-            //     cubeCol.SetActive(false);
-            //     // cubeCol.SetActive(true);
-            //     // cubeCol.GetComponent<Renderer>().material = material2;
-            //     pt3Col.SetActive(true);
-            //     //scaledPt3 = ScaledPoint(p3);
-            //     pt3Col.transform.localPosition = Vector3.zero;
-            //     ApplyGraphAdjustment();
-            //     // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
-            //     pt3ColLabel.text = "(0,0,0)";
-            //     PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
-            //     //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
+            if (m.Rank() == 0)
+            {
+                planeCol.SetActive(false);
+                lineCol.SetActive(false);
+                cubeCol.SetActive(false);
+                // cubeCol.SetActive(true);
+                // cubeCol.GetComponent<Renderer>().material = material2;
+                pt3Col.SetActive(true);
+                //scaledPt3 = ScaledPoint(p3);
+                pt3Col.transform.localPosition = Vector3.zero;
+                ApplyGraphAdjustment();
+                // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
+                pt3ColLabel.text = "(0,0,0)";
+                // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+                //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
 
-            //     planeNull.SetActive(false);
-            //     lineNull.SetActive(false);
-            //     cubeNull.SetActive(true);
-            //     cubeNull.GetComponent<Renderer>().material = material1;
-            //     pt3Null.SetActive(false);
-            //     PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
+                planeNull.SetActive(false);
+                lineNull.SetActive(false);
+                cubeNull.SetActive(true);
+                cubeNull.GetComponent<Renderer>().material = material1;
+                pt3Null.SetActive(false);
+                // PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
 
-            //     planeColT.SetActive(false);
-            //     lineColT.SetActive(false);
+                planeColT.SetActive(false);
+                lineColT.SetActive(false);
 
-            //     planeNullT.SetActive(false);
-            //     lineNullT.SetActive(false);
+                planeNullT.SetActive(false);
+                lineNullT.SetActive(false);
 
 
-            // }
-            // if (m.Rank() == 1)
-            // {
-            //     planeCol.SetActive(false);
-            //     lineCol.SetActive(true);
-            //     cubeCol.SetActive(false);
-            //     pt3Col.SetActive(false);
-            //     // PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
-            //     // PlaneExpression_col.GetComponent<PresentLine>().enabled = true;
+            }
+            if (m.Rank() == 1)
+            {
+                planeCol.SetActive(false);
+                lineCol.SetActive(true);
+                cubeCol.SetActive(false);
+                pt3Col.SetActive(false);
+                // PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
+                // PlaneExpression_col.GetComponent<PresentLine>().enabled = true;
 
-            //     planeNull.SetActive(true);
-            //     lineNull.SetActive(false);
-            //     cubeNull.SetActive(false);
-            //     pt3Null.SetActive(false);
-            //     // PlaneExpression_Null.GetComponent<PresentPlane>().enabled = true;
-            //     // PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
+                planeNull.SetActive(true);
+                lineNull.SetActive(false);
+                cubeNull.SetActive(false);
+                pt3Null.SetActive(false);
+                // PlaneExpression_Null.GetComponent<PresentPlane>().enabled = true;
+                // PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
 
-            //     planeColT.SetActive(false);
-            //     lineColT.SetActive(true);
+                planeColT.SetActive(false);
+                lineColT.SetActive(true);
 
-            //     planeNullT.SetActive(true);
-            //     lineNullT.SetActive(false);
+                planeNullT.SetActive(true);
+                lineNullT.SetActive(false);
                 
-            // }
-            // if (m.Rank() == 2)
-            // {
-            //     planeCol.SetActive(true);
-            //     lineCol.SetActive(false);
-            //     cubeCol.SetActive(false);
-            //     pt3Col.SetActive(false);
-                presentPlane_col.GetPlaneDirection();
-            //     // PlaneExpression_col.GetComponent<PresentPlane>().enabled = true;
-            //     // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+            }
+            if (m.Rank() == 2)
+            {
+                planeCol.SetActive(true);
+                lineCol.SetActive(false);
+                cubeCol.SetActive(false);
+                pt3Col.SetActive(false);
+               // presentPlane_col.GetPlaneDirection();
+                // PlaneExpression_col.GetComponent<PresentPlane>().enabled = true;
+                // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
                 
 
-            //     planeNull.SetActive(false);
-            //     lineNull.SetActive(true);
-            //     cubeNull.SetActive(false);
-            //     pt3Null.SetActive(false);
-            //     // PlaneExpression_Null.GetComponent<PresentPlane>().enabled = false;
-            //     // PlaneExpression_Null.GetComponent<PresentLine>().enabled = true;
+                planeNull.SetActive(false);
+                lineNull.SetActive(true);
+                cubeNull.SetActive(false);
+                pt3Null.SetActive(false);
+                // PlaneExpression_Null.GetComponent<PresentPlane>().enabled = false;
+                // PlaneExpression_Null.GetComponent<PresentLine>().enabled = true;
 
-            //     planeColT.SetActive(true);
-            //     lineColT.SetActive(false);
-                // presentPlane_colT.GetPlaneDirection();
+                planeColT.SetActive(true);
+                lineColT.SetActive(false);
+               // presentPlane_colT.GetPlaneDirection();
 
-            //     planeNullT.SetActive(false);
-            //     lineNullT.SetActive(true);
+                planeNullT.SetActive(false);
+                lineNullT.SetActive(true);
                 
-            // }
-            // if (m.Rank() == 3)
-            // {
-            //     planeCol.SetActive(false);
-            //     lineCol.SetActive(false);
-            //     cubeCol.SetActive(true);
-            //     cubeCol.GetComponent<Renderer>().material = material1;
-            //     pt3Col.SetActive(false);
-            //     // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
-            //     //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
+            }
+            if (m.Rank() == 3)
+            {
+                planeCol.SetActive(false);
+                lineCol.SetActive(false);
+                cubeCol.SetActive(true);
+                // cubeCol.GetComponent<Renderer>().material = material1;
+                pt3Col.SetActive(false);
+                // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+                //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
 
-            //     planeNull.SetActive(false);
-            //     lineNull.SetActive(false);
-            //     cubeNull.SetActive(false);
-            //     // cubeNull.SetActive(true);
-            //     // cubeNull.GetComponent<Renderer>().material = material2;
-            //     pt3Null.SetActive(true);
-            //     pt3Null.transform.localPosition = Vector3.zero;
-            //     ApplyGraphAdjustment();
-            //     // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
-            //     pt3NullLabel.text = "(0,0,0)";
-            //     // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
+                planeNull.SetActive(false);
+                lineNull.SetActive(false);
+                cubeNull.SetActive(false);
+                // cubeNull.SetActive(true);
+                // cubeNull.GetComponent<Renderer>().material = material2;
+                pt3Null.SetActive(true);
+                pt3Null.transform.localPosition = Vector3.zero;
+                ApplyGraphAdjustment();
+                // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
+                pt3NullLabel.text = "(0,0,0)";
+                // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
 
-            //     planeColT.SetActive(false);
-            //     lineColT.SetActive(false);
+                planeColT.SetActive(false);
+                lineColT.SetActive(false);
 
-            //     planeNullT.SetActive(false);
-            //     lineNullT.SetActive(false);
-            // }
+                planeNullT.SetActive(false);
+                lineNullT.SetActive(false);
+            }
         }
 
         public void ApplyGraphAdjustment()
@@ -331,6 +369,76 @@ namespace LinearAlgebraMatrix
             n3T = MatColToVector(nullMatT, 2);
 
         }
+
+        void getSvd()
+        {
+            // for(int i =0; i<3; i++)
+            // {
+            // Debug.Log(m.Range()[1][0]);
+            c1AA = VectorToVector3(m.svdU()[0]);
+            c2AA =  VectorToVector3(m.svdU()[1]);
+            c3AA =  VectorToVector3(m.svdU()[2]);
+            c1TAA =  VectorToVector3(mT.svdU()[0]);
+            c2TAA =  VectorToVector3(mT.svdU()[1]);
+            c3TAA =  VectorToVector3(mT.svdU()[2]);
+            n1AA = VectorToVector3( m.svdVT()[0]);
+            n2AA =  VectorToVector3(m.svdVT()[1]);
+            n3AA =  VectorToVector3(m.svdVT()[2]);
+            n1TAA =  VectorToVector3(mT.svdVT()[0]);
+            n2TAA =  VectorToVector3(mT.svdVT()[1]);
+            n3TAA =  VectorToVector3(mT.svdVT()[2]);
+
+            // S1 = VectorToVector3( m.svdS()[0]);
+            // S2 =  VectorToVector3(m.svdS()[1]);
+            // S3 =  VectorToVector3(m.svdS()[2]);
+            // S1T =  VectorToVector3(mT.svdS()[0]);
+            // S2T =  VectorToVector3(mT.svdS()[1]);
+            // S3T =  VectorToVector3(mT.svdS()[2]);
+
+
+            // }
+
+        }
+
+
+        public float[] PtCoordToArray(PtCoord pt)
+        {
+            float[] array = new float[3];
+            array[0] = pt.X.Value;
+            array[1] = pt.Y.Value;
+            array[2] = pt.Z.Value;
+            return array;
+        }
+
+        public Vector3 MatRowToVector(float[,] Mat, int num)
+        {
+            Vector3 vector = new Vector3(Mat[num, 0], Mat[num, 1], Mat[num, 2]);
+            //Vector3 v2 = new Vector3(redMat[1, 0], redMat[1, 1], redMat[1, 2]);
+            //Vector3 v3 = new Vector3(redMat[2, 0], redMat[2, 1], redMat[2, 2]);
+            return vector;
+        }
+
+        public Vector3 MatColToVector(float[,] Mat, int num)
+        {
+            Vector3 vector = new Vector3(Mat[0, num], Mat[1, num], Mat[2, num]);
+            //Vector3 v2 = new Vector3(redMat[1, 0], redMat[1, 1], redMat[1, 2]);
+            //Vector3 v3 = new Vector3(redMat[2, 0], redMat[2, 1], redMat[2, 2]);
+            return vector;
+        }
+
+        public Vector3 VectorToVector3(Vector<float> vec)
+        {
+            Vector3 vector = new Vector3(vec[0], vec[1], vec[2]);
+            // vector = Vector3.zero;
+            //Vector3 v2 = new Vector3(redMat[1, 0], redMat[1, 1], redMat[1, 2]);
+            //Vector3 v3 = new Vector3(redMat[2, 0], redMat[2, 1], redMat[2, 2]);
+            return vector;
+        }
+
+
+
+
+
         // void rowReduce()
         // {
 
@@ -575,30 +683,7 @@ namespace LinearAlgebraMatrix
         //     //return 
         // }
 
-        public float[] PtCoordToArray(PtCoord pt)
-        {
-            float[] array = new float[3];
-            array[0] = pt.X.Value;
-            array[1] = pt.Y.Value;
-            array[2] = pt.Z.Value;
-            return array;
-        }
-
-        public Vector3 MatRowToVector(float[,] Mat, int num)
-        {
-            Vector3 vector = new Vector3(Mat[num, 0], Mat[num, 1], Mat[num, 2]);
-            //Vector3 v2 = new Vector3(redMat[1, 0], redMat[1, 1], redMat[1, 2]);
-            //Vector3 v3 = new Vector3(redMat[2, 0], redMat[2, 1], redMat[2, 2]);
-            return vector;
-        }
-
-        public Vector3 MatColToVector(float[,] Mat, int num)
-        {
-            Vector3 vector = new Vector3(Mat[0, num], Mat[1, num], Mat[2, num]);
-            //Vector3 v2 = new Vector3(redMat[1, 0], redMat[1, 1], redMat[1, 2]);
-            //Vector3 v3 = new Vector3(redMat[2, 0], redMat[2, 1], redMat[2, 2]);
-            return vector;
-        }
+        
     }
 
     
