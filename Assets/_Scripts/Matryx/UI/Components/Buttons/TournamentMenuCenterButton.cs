@@ -89,6 +89,10 @@ public class TournamentMenuCenterButton : QuickButton {
                     var submissionContainer = pair.Value.GetComponent<SubmissionContainer>();
                     submissionContainer.distributionPicker.Toggle(false);
                 }
+                if(tournamentMenu == null || tournamentMenu.submissionsPanel == null)
+                {
+                    Debug.Log("here");
+                }
                 tournamentMenu.submissionsPanel.SwitchToSingleSelect();
                 tournamentMenu.continueButton.gameObject.SetActive(false);
                 break;
@@ -172,10 +176,6 @@ public class TournamentMenuCenterButton : QuickButton {
 
     public override void OnMenuClose()
     {
-        if (TournamentMenu.Instance.actionState != TournamentMenu.ActionState.SelectWinners &&
-            TournamentMenu.Instance.actionState != TournamentMenu.ActionState.ManageTournament)
-        {
-            ToggleOff();
-        }
+        ToggleOff();
     }
 }

@@ -369,7 +369,7 @@ public class MatryxAccountMenu : MonoBehaviour {
             // Store mnemonic in NetworkSettings for transactions
             try
             {
-                NetworkSettings.importWallet(mnemonic, password);
+                NetworkSettings.importWallet(mnemonic, "");
             }
             catch (System.Exception e)
             {
@@ -388,7 +388,7 @@ public class MatryxAccountMenu : MonoBehaviour {
 
             try
             {
-                NetworkSettings.importKeystore(keystore, password);
+                NetworkSettings.importKeystore(keystore, "");
             }
             catch (System.Exception e)
             {

@@ -13,9 +13,9 @@ namespace Nanome.Core.Extension
         {
             if (aBool)
             {
-                return "1";
+                return "true";
             }
-            return "0";
+            return "false";
         }
 
         public static int toInt(this bool aBool)

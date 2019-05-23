@@ -46,7 +46,10 @@ public class ManageTournamentMenu : MenuStateReceiver {
 
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider)
         {
-            sender.SetState(0);
+            if(sender.State != -1)
+            {
+                sender.SetState(0);
+            }
         }
     }
 
@@ -71,8 +74,8 @@ public class ManageTournamentMenu : MenuStateReceiver {
                 {
                     btnText = "Please Lift\nHeadset";
                     Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
-                    newRoundMenu.gameObject.SetActive(true);
                     newRoundMenu.SetTournament(TournamentMenu.Tournament);
+                    newRoundMenu.gameObject.SetActive(true);
                 }
                 else
                 {
@@ -182,7 +185,7 @@ public class ManageTournamentMenu : MenuStateReceiver {
 
     public static void Close()
     {
-
+        Instance.UpdateState();
     }
 
     void Start () {
@@ -251,6 +254,7 @@ public class ManageTournamentMenu : MenuStateReceiver {
 
     public void UpdateState()
     {
+        if (!initialized) Initialize();
         if (TournamentMenu.Tournament.currentRound.winningSubmissions.Count > 0)
         {
             buttons["WinnersOnlyButton"].gameObject.SetActive(false);
@@ -278,10 +282,13 @@ public class ManageTournamentMenu : MenuStateReceiver {
                 if ((bool) result)
                 {
                     StatisticsTracking.EndEvent("Matryx", "Winner Selection Only", new Dictionary<string, object>() { { "success", true } });
-                    Tippies.SpawnTippy("Winner Selection Transaction Successful", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
+                    Tippies.SpawnTippy("Winner Selection Transaction Successful", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 5f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
                     TournamentMenu.Tournament.currentRound.winningSubmissions = winningSubmissions;
                     TournamentMenu.Instance.ProcessRound(TournamentMenu.Tournament.currentRound);
                     Close();
+
+                    TournamentMenu.Instance.actionState = TournamentMenu.ActionState.ManageTournament;
+                    TournamentMenuCenterButton.Instance.updateState();
                 }
                 else
                 {
@@ -308,8 +315,11 @@ public class ManageTournamentMenu : MenuStateReceiver {
                     if ((bool)result)
                     {
                         StatisticsTracking.EndEvent("Matryx", "Winner Selection & Tournament Close", new Dictionary<string, object>() { { "success", true } });
-                        Tippies.SpawnTippy("Close Tournament Transaction Successful", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
+                        Tippies.SpawnTippy("Close Tournament Transaction Successful", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 5f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
                         Close();
+
+                        TournamentMenu.Instance.actionState = TournamentMenu.ActionState.NoAction;
+                        TournamentMenuCenterButton.Instance.updateState();
                     }
                     else
                     {
@@ -333,8 +343,12 @@ public class ManageTournamentMenu : MenuStateReceiver {
                     if ((bool)result)
                     {
                         StatisticsTracking.EndEvent("Matryx", "Tournament Close Only", new Dictionary<string, object>() { { "success", true } });
-                        Tippies.SpawnTippy("Close Tournament Transaction Successful", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
+                        Tippies.SpawnTippy("Close Tournament Transaction Successful", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 5f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
                         buttons["CloseButton"].transform.Find("Body").GetComponent<RayCastButton>().PressButton(null);
+                        Close();
+
+                        TournamentMenu.Instance.actionState = TournamentMenu.ActionState.NoAction;
+                        TournamentMenuCenterButton.Instance.updateState();
                     }
                     else
                     {
@@ -344,6 +358,5 @@ public class ManageTournamentMenu : MenuStateReceiver {
                 });
             });
         }
-        
     }
 }

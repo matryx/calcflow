@@ -98,7 +98,7 @@ public class ResultsMenu : MonoBehaviour {
 
     public void PostSuccess(MatryxRound newRound, Async.EventDelegate onReturn = null)
     {
-        SetStatus("Successfully created round " + newRound.index + "on tournament");
+        SetStatus("Successfully created round " + newRound.index);
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
         StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
@@ -112,7 +112,7 @@ public class ResultsMenu : MonoBehaviour {
         }
         else
         {
-            SetStatus("Failed to create round " + newRound.index + "on tournament");
+            SetStatus("Failed to create round " + newRound.index);
         }
 
         severalMinutesText.gameObject.SetActive(false);

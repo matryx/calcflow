@@ -432,10 +432,19 @@ namespace Matryx
             yield return request.Query(new GetRoundInfoFunction() { RoundIndex = roundIndex }, address);
         }
 
-        public IEnumerator getRoundDetails(BigInteger roundIndex)
+        public IEnumerator getRoundDetails(BigInteger roundIndex, Async.EventDelegate onSuccess, Async.EventDelegate onFailure)
         {
             var request = new QueryUnityRequest<GetRoundDetailsFunction, MatryxRound.RoundDetails>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetRoundDetailsFunction() { RoundIndex = roundIndex }, address);
+            yield return request.Result;
+            if(request.Result.Review > 0)
+            {
+                onSuccess?.Invoke(request.Result);
+            }
+            else
+            {
+                onFailure?.Invoke(request.Result);
+            }
         }
 
         public IEnumerator getSubmissionCount()

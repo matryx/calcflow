@@ -14,7 +14,7 @@ namespace Nanome.Core
         static public bool getBool(string key, string def)
         {
             var vv = get(key, def);
-            return ((string)vv) == "0" ? false : true;
+            return ((string)vv) == "false" ? false : true;
         }
 
         static public float getFloat(string key, string def)

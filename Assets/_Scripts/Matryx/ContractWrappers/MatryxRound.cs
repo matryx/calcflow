@@ -95,7 +95,7 @@ namespace Matryx
         public static readonly string STATE_CLOSED = "closed";
         public static readonly string STATE_ABANDONED = "abandoned";
 
-        Dictionary<string, string> displayStates = new Dictionary<string, string>() { {STATE_SCHEDULED, "Scheduled" }, {STATE_UNFUNDED, "Unfunded" }, {STATE_OPEN, "Open" }, {STATE_INREVIEW, "In Review" }, {STATE_HASWINNERS, "Has Winners" }, { STATE_CLOSED, "Closed" }, {STATE_ABANDONED, "Abandoned" } };
+        Dictionary<string, string> displayStates = new Dictionary<string, string>() { {STATE_SCHEDULED, "Scheduled" }, {STATE_UNFUNDED, "Unfunded" }, {STATE_OPEN, "Open" }, {STATE_INREVIEW, "In Review" }, {STATE_HASWINNERS, "Winners Selected" }, { STATE_CLOSED, "Closed" }, {STATE_ABANDONED, "Abandoned" } };
 
         public string StatusText
         {
@@ -112,7 +112,6 @@ namespace Matryx
                 else if(sts.Equals(STATE_INREVIEW) || sts.Equals(STATE_HASWINNERS))
                 {
                     timeRemaining = reviewEndDate - DateTime.Now;
-                    displayState = " ( " + displayState + " )";
                 }
 
                 if (timeRemaining.HasValue)
@@ -129,7 +128,7 @@ namespace Matryx
                     }
 
                     var time = Math.Truncate(amount) + unitLabels[i];
-                    return time + displayState;
+                    return time;
                 }
                 else
                 {

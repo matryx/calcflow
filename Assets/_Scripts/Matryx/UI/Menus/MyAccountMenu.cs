@@ -69,8 +69,6 @@ public class MyAccountMenu : MenuStateReceiver
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
 
         initialized = true;
-
-        Refresh();
     }
 
     /// <summary>
@@ -84,10 +82,10 @@ public class MyAccountMenu : MenuStateReceiver
     string baseAccount = "";
     public void Refresh()
     {
-        var accounts = NetworkSettings.mnemonicWallet.GetAddresses();
         if (!initialized) { Initialize(); }
-        if (!baseAccount.Equals(accounts[0]))
+        if (!baseAccount.Equals(NetworkSettings.mnemonicWallet.GetAccount(0).Address))
         {
+            var accounts = NetworkSettings.mnemonicWallet.GetAddresses();
             ClearAccounts();
             baseAccount = accounts[0];
 
@@ -98,8 +96,13 @@ public class MyAccountMenu : MenuStateReceiver
                 accountsPanel.AddAction(button.GetComponent<FlexButtonComponent>());
             }
 
-            MatryxCortex.GetMTXBalance((bal) => { accountInfoText.text = "Current:\n" + NetworkSettings.currentAddress + "\n\n Balance: " + bal + "MTX"; });
+            RefreshText();
         }
+    }
+
+    public void RefreshText()
+    {
+        MatryxCortex.GetMTXBalance((bal) => { accountInfoText.text = "Current:\n" + NetworkSettings.currentAddress + "\n\n Balance: " + bal + "MTX"; });
     }
 
     private GameObject createButton(string account)

@@ -23,6 +23,12 @@ public class NewRoundMenu : MonoBehaviour
     [SerializeField]
     GameObject InvalidLabel;
     [SerializeField]
+    GameObject currentStartText;
+    [SerializeField]
+    GameObject currentEndText;
+    [SerializeField]
+    GameObject currentReviewText;
+    [SerializeField]
     DatePickerControl startDatePicker;
     [SerializeField]
     DatePickerControl endDatePicker;
@@ -43,6 +49,34 @@ public class NewRoundMenu : MonoBehaviour
             Instance = this;
             resultsMenu = resultsCanvasObject.GetComponent<ResultsMenu>();
         }
+    }
+
+    public void OnEnable()
+    {
+        var roundDetailsCoroutine = new Utils.CoroutineWithData<MatryxRound.RoundDetails>(MatryxCortex.Instance, tournament.getRoundDetails(tournament.currentRound.index + 1,
+            delegate (object res)
+            {
+                MatryxRound.RoundDetails details = (MatryxRound.RoundDetails)res;
+                Debug.Log("Current start: " + details.Start);
+                // create dates
+                DateTime startDateTime = Utils.Time.FromUnixTime(details.Start);
+                DateTime endDateTime = Utils.Time.FromUnixTime(details.Start + details.Duration);
+                DateTime reviewDateTime = Utils.Time.FromUnixTime(details.Start + details.Duration + details.Review);
+
+                currentStartText.SetActive(true);
+                currentEndText.SetActive(true);
+                currentReviewText.SetActive(true);
+                currentStartText.GetComponent<Text>().text = "Current start date: \n" + startDateTime.ToShortDateString() + "\n" + startDateTime.ToLongTimeString();
+                currentEndText.GetComponent<Text>().text = "Current end date: \n" + endDateTime.ToShortDateString() + "\n" + endDateTime.ToLongTimeString();
+                currentReviewText.GetComponent<Text>().text = "Current review end date: \n" + reviewDateTime.ToShortDateString() + "\n" + reviewDateTime.ToLongTimeString(); ;
+            },
+            delegate (object err)
+            {
+                currentStartText.SetActive(false);
+                currentEndText.SetActive(false);
+                currentReviewText.SetActive(false);
+            }
+        ));
     }
 
     public void SetTournament(MatryxTournament tournament)
@@ -85,6 +119,8 @@ public class NewRoundMenu : MonoBehaviour
         };
         MatryxRound newRound = new MatryxRound(tournament.currentRound.index + 1, details);
         newRound.tournament = TournamentMenu.Tournament;
+
+        ManageTournamentMenu.SetButtonsEnabled(false);
 
         resultsMenu.SetStatus("Checking MTX balance and platform allowance...");
         var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.currentAddress, MatryxPlatform.address));
@@ -138,7 +174,7 @@ public class NewRoundMenu : MonoBehaviour
 
         resultsMenu.SetStatus("Creating new round...");
         var submissions = ManageTournamentMenu.winningSubmissions.Select(sub => Utils.HexStringToByteArray(sub.hash)).ToList();
-        ManageTournamentMenu.SetButtonsEnabled(false);
+        
         if (TournamentMenu.Tournament.currentRound.winningSubmissions.Count == 0)
         {
             IEnumerator selectWinnersCoroutine = tournament.selectWinners(submissions, ManageTournamentMenu.distribution, new BigInteger((int)MatryxTournament.SelectWinnerAction.StartNextRound), details.Start, details.Duration, details.Review, details.Bounty);
@@ -159,8 +195,12 @@ public class NewRoundMenu : MonoBehaviour
                 resultsMenu.PostSuccess(newRound, 
                 delegate (object nothin) 
                 { 
-                    TournamentMenu.Instance.SetRound(newRound.index); 
+                    TournamentMenu.Instance.SetRound(newRound.index);
+                    TournamentMenu.Instance.UpdateActionState();
                     ManageTournamentMenu.Close();
+
+                    TournamentMenu.Instance.actionState = TournamentMenu.ActionState.NoAction;
+                    TournamentMenuCenterButton.Instance.updateState();
                 });
             }
             else
@@ -179,13 +219,18 @@ public class NewRoundMenu : MonoBehaviour
             ClearInputs();
             gameObject.SetActive(false);
             ManageTournamentMenu.SetButtonsEnabled(true);
+            ManageTournamentMenu.Instance.PressButton("NewRoundButton");
 
-            if(updateNextRoundDataCoroutine.result)
+            if (updateNextRoundDataCoroutine.result)
             {
                 StatisticsTracking.EndEvent("Matryx", "New Round Creation", new Dictionary<string, object>() { { "success", true } });
                 tournament.currentRound = newRound;
-                resultsMenu.PostSuccess(newRound, (nothin) => { TournamentMenu.Instance.SetRound(newRound.index); });
-                ManageTournamentMenu.SetButtonsEnabled(true);
+
+                resultsMenu.PostSuccess(newRound, (nothin) => 
+                {
+                    TournamentMenu.Instance.actionState = TournamentMenu.ActionState.ManageTournament;
+                    TournamentMenuCenterButton.Instance.updateState();
+                }); 
             }
             else
             {
@@ -206,6 +251,10 @@ public class NewRoundMenu : MonoBehaviour
         if (startDatePicker.fecha < DateTime.Now - TimeSpan.FromMinutes(10))
         {
             error = "Round cannot start in the past";
+        }
+        else if(startDatePicker.fecha < tournament.currentRound.reviewEndDate)
+        {
+            error = "Round cannot begin before review period ends";
         }
         else if (endDatePicker.fecha < startDatePicker.fecha + TimeSpan.FromHours(1))
         {
