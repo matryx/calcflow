@@ -108,7 +108,7 @@ namespace orthProj
             ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
             //in unity z is the right 3rd axis
             updatePoint("pt1", new Vector3(1, 2, 3), false); // vector 
-            updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
+            updatePoint("pt2", new Vector3(0, 0, 0), false); // first axis
             updatePoint("pt3", new Vector3(0, 0, 0), false); // origin
         }
 
@@ -200,26 +200,27 @@ namespace orthProj
             SetOutput(ptSet.ptCoords[ptName].Z);
             ptInput.RewriteInput(newLoc.z);
             SetOutput(originalExpression);
-            if (fixedPlane)
-            {
+           // if (fixedPlane)
+            //{
                 manageText();
                 ManageFeedback();
                 ptSet.CompileAll();
-            }
-            else
-            {
-                manageText();
-                bool isValid = ptSet.CompileAll();
-                ManageFeedback();
-                if (isValid)
-                {
-                    if (presentline.CalculatePlane())
-                    {
-                        presentline.ApplyUnroundCenter(ptName, newLoc);
-                        presentline.GetPlaneDirection();
-                    }
-                }
-            }
+           // }
+          //  else
+            //{
+            //    manageText();
+            //    bool isValid = ptSet.CompileAll();
+            //    ManageFeedback();
+            //    //if plane is not fixed...
+            //    if (isValid)
+            //    {
+            //        if (presentline.CalculatePlane())
+            //        {
+            //            presentline.ApplyUnroundCenter(ptName, newLoc);
+            //            presentline.GetPlaneDirection();
+            //        }
+            //    }
+            //}
         }
 
         public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)

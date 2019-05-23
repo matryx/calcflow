@@ -28,6 +28,7 @@ namespace orthProj
             }
             //connect line from index 1 at 0 to the transform arrow tip that has local pos pt1
             LineRenderer line = GetComponent<LineRenderer>();
+            line.SetWidth(.05f, .05f);
             line.SetPosition(0, transform.position);
             line.SetPosition(1, origin.position);
         }

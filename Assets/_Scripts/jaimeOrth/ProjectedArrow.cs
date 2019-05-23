@@ -24,7 +24,7 @@ namespace orthProj
 
             //show them the projected value
 
-            //funcy scaling?
+            //funky scaling?
             //projline.localScale = new Vector3(1, 1, scaledRes.magnitude); 
 
             //show them the unscaled numbers
@@ -38,6 +38,7 @@ namespace orthProj
             }
 
             LineRenderer line = GetComponent<LineRenderer>();
+            line.SetWidth(.05f, .05f);
             line.SetPosition(0, transform.position);
             line.SetPosition(1, origin.position);
         }

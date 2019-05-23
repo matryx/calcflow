@@ -17,16 +17,13 @@ namespace orthProj
         public Transform lookAtPlaneTarget;
 
         public Transform xAxis;
+        public Transform xAxisText;
         public Transform yAxis;
         public Transform zAxis;
 
         public Transform axisline;
         public Transform forwardAxisLine;
         public Transform lookAtAxisTarget;
-
-        public Transform axisline2;
-        public Transform forwardAxisLine2;
-        public Transform lookAtAxisTarget2;
         public List<GameObject> walls;
 
 
@@ -90,7 +87,15 @@ namespace orthProj
 
             plane.LookAt(lookAtPlaneTarget);
 
-            //point1.GetComponent<MeshRenderer>().enabled = false;
+            //TURN OFF AND ON POINT VISABILITY
+            point1.GetComponent<MeshRenderer>().enabled = false;
+            point2.GetComponent<MeshRenderer>().enabled = false;
+            point3.GetComponent<MeshRenderer>().enabled = false;
+
+            //HERES YOUR COORD TEXT
+            pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
+            //pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
+            //pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
 
             scaledPt1 = ScaledPoint(PtCoordToVector(rawPt1));
             point1.localPosition = scaledPt1;
@@ -99,20 +104,13 @@ namespace orthProj
             scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
             point3.localPosition = scaledPt3;
 
-            //center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-            //centerPt.localPosition = point1.localPosition;
-            //centerPt.localPosition = ScaledPoint(new Vector3(0,0,0));
-            
-            //xAxis.localPosition = ScaledPoint(center);
-            //yAxis.localPosition = ScaledPoint(center);
-            //zAxis.localPosition = ScaledPoint(center);
+            xAxis.localPosition = ScaledPoint(center);
+            yAxis.localPosition = ScaledPoint(center);
+            zAxis.localPosition = ScaledPoint(center);
 
-            ////scale the vector
-            //line.localScale = new Vector3(1, 1, scaledPt1.magnitude); 
-            
-            ////axis 1
+            //projectionAxis
             lookAtAxisTarget.localPosition = ScaledPoint(PtCoordToVector(rawPt2));   
-            axisline.localPosition = (new Vector3(0, 0, 0));
+            axisline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
             axisline.LookAt(lookAtAxisTarget);
 
             var sharedMaterial2 = forwardAxisLine.GetComponent<MeshRenderer>().sharedMaterial;
@@ -125,29 +123,29 @@ namespace orthProj
                 sharedMaterial2.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
-            projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2));
+            //CHECK THAT THE SCALING IS ACTUALLY MOVING? 
 
-
-            ////pt2Label.text = "(" + point2.localPosition.x + "," + point2.localPosition.y + "," + point2.localPosition.z + ")";
-
-
-            pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
-            pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
-            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";            
-            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";            
-
-            //var sharedMaterial = forwardLine.GetComponent<MeshRenderer>().sharedMaterial;
-            //sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-            //    //plane normal vector is the rotated 'up' vector.
-            //    sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            //}
-
-
-
+            if((new Vector3(0, 0, 0)) == PtCoordToVector(rawPt2))
+            {
+                Debug.Log("NOOOOOOOOOOOOOOOOOOOOO PROJECTING LINNNNNNNNNNNNNNNNNNNNNNNNEEEEEEEEEEEEEE");
+                forwardAxisLine.GetComponent<MeshRenderer>().enabled = false;
+            }
+            //if there is no 3rd component (line)
+            else if (new Vector3(0, 0, 0) == PtCoordToVector(rawPt3))
+            {
+                forwardAxisLine.GetComponent<MeshRenderer>().enabled = true;
+                Debug.Log("calculating projection on a LIIIIIIIIIIIIIIIINNNNNNNNNNNNNNEEEEEEEEEE");
+                projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2));
+            }
+            //if there is a 3rd coord (subspace)
+            else
+            {
+                forwardAxisLine.GetComponent<MeshRenderer>().enabled = false;
+                Debug.Log("calculating projection on a PLAAAAAAAAAAAAAAAAAAAAAAAAAAAAANNNNNNNNNNNEEEEEEEEEEE");
+                projectedResult = Vector3.ProjectOnPlane(PtCoordToVector(rawPt1), normalVector);
+                Debug.Log("projected result should be: " + projectedResult);
+            }
+            
 
             //planes material
             // if(transform.gameObject.name == "PlaneExpression_null")
@@ -172,8 +170,6 @@ namespace orthProj
                 sharedMaterial3.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
             //   }
-
-           
 
 
         }
