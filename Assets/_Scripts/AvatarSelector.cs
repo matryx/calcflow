@@ -42,7 +42,7 @@ public class AvatarSelector : MonoBehaviour
             SteamAvatar.SetActive(true);
             OculusAvatar.SetActive(false);
             Avatar = SteamAvatar;
-            centerEye = Avatar.transform.Find("[CameraRig]/Camera (head)/Camera (eye)");
+            centerEye = Avatar.transform.Find("[CameraRig]/Camera (eye)/Camera (head)");
         }
     }
 }
