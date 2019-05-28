@@ -11,6 +11,8 @@ public class MyTournamentsMenu : MonoBehaviour
     [SerializeField]
     TournamentMenu tournamentMenu;
     [SerializeField]
+    TournamentMenuCenterButton centerButton;
+    [SerializeField]
     private TMPro.TextMeshPro myTournamentsListText;
     [SerializeField]
     FlexButtonComponent flexButtonComponent;
@@ -174,7 +176,9 @@ public class MyTournamentsMenu : MonoBehaviour
         button.transform.localScale = Vector3.one;
 
         button.name = tournament.title;
-        button.GetComponent<TournamentContainer>().tournament = tournament;
+        var tournamentContainer = button.GetComponent<TournamentContainer>();
+        tournamentContainer.tournament = tournament;
+        tournamentContainer.SetStatus(tournament.currentRound.status);
 
         button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = tournament.title;
 
@@ -192,6 +196,7 @@ public class MyTournamentsMenu : MonoBehaviour
     {
         if (source.name == "Load_Button")
         {
+            tournaments.Clear();
             LoadMoreMyTournaments();
         }
         else if (source.GetComponent<TournamentContainer>())
@@ -201,8 +206,8 @@ public class MyTournamentsMenu : MonoBehaviour
             MatryxTournament tournament = source.GetComponent<TournamentContainer>().tournament;
             // TODO: Navigate the user to the corresponding tournament through the menus
             tournamentMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
-            TournamentMenuCenterButton.Instance.transform.parent.gameObject.SetActive(false);
             tournamentMenu.SetTournament(tournament);
+            centerButton.transform.parent.gameObject.SetActive(false);
         }
     }
 }

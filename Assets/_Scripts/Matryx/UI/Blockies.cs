@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
+using UnityEngine;
 
 namespace NetBlockies
 {
@@ -40,7 +39,7 @@ namespace NetBlockies
 
         private bool _disposed;
         private Int32[] _randSeed = new Int32[4];
-        private Color[] _iconPixels;
+        private Color32[] _iconPixels;
         private int _size;
 
         /// <summary>
@@ -59,7 +58,7 @@ namespace NetBlockies
         /// </summary>
         /// <param name="resolution">Use multiples of BlockiesHelper.Size</param>
         /// <returns></returns>
-        public Bitmap GetBitmap(int resolution) => Create(resolution / _size);
+        public Texture2D GetTexture(int resolution=64) => Create(resolution / _size);
 
         /// <summary>
         /// Returns a base64 encoded identicon jpeg with desired resolution (nearest smaller multiple of BlockiesHelper.Size)
@@ -70,9 +69,8 @@ namespace NetBlockies
         {
             using (var ms = new System.IO.MemoryStream())
             {
-                var image = GetBitmap(resolution);
-                image.Save(ms, ImageFormat.Jpeg);
-                return $"data:image/png;base64, {Convert.ToBase64String(ms.ToArray())}";
+                var texture = GetTexture(resolution);
+                return $"data:image/png;base64, {Convert.ToBase64String(texture.GetRawTextureData())}";
             }
         }
 
@@ -106,7 +104,7 @@ namespace NetBlockies
             return p;
         }
 
-        private Color HslToRgb(double h, double s, double l)
+        private Color32 HslToRgb(double h, double s, double l)
         {
             double r, g, b;
             if (s == 0)
@@ -119,10 +117,10 @@ namespace NetBlockies
                 g = HueTorgb(p, q, h);
                 b = HueTorgb(p, q, h - 1D / 3);
             }
-            return Color.FromArgb((int)Math.Round(r * 255), (int)Math.Round(g * 255), (int)Math.Round(b * 255));
+            return new Color32((byte)Math.Round(r * 255), (byte)Math.Round(g * 255), (byte)Math.Round(b * 255), 255);
         }
 
-        private Color CreateColor()
+        private Color32 CreateColor()
         {
             var h = (Rand());
             var s = ((Rand() * 0.6) + 0.4);
@@ -154,7 +152,7 @@ namespace NetBlockies
                 Array.Copy(row.Reverse().ToArray(), 0, data, i * width + dataWidth, mirrorWidth);
             }
 
-            _iconPixels = new Color[data.Length];
+            _iconPixels = new Color32[data.Length];
             for (int i = 0; i < data.Length; i++)
             {
                 if (data[i] == 1)
@@ -166,18 +164,30 @@ namespace NetBlockies
             }
         }
 
-        private Bitmap Create(int scale)
+        private Color32[] ScalePixels(int scale)
         {
-            Bitmap pic = new Bitmap(_size * scale, _size * scale, PixelFormat.Format32bppArgb);
+            int size = _size * scale * _size * scale;
+            Color32[] pic = new Color32[size];
             for (int i = 0; i < _iconPixels.Length; i++)
             {
                 int x = i % _size;
                 int y = i / _size;
                 for (int xx = x * scale; xx < x * scale + scale; xx++)
                     for (int yy = y * scale; yy < y * scale + scale; yy++)
-                        pic.SetPixel(xx, yy, _iconPixels[i]);
+                        pic[yy*_size*scale + xx] = _iconPixels[i];
             }
+
             return pic;
+        }
+
+        private Texture2D Create(int scale)
+        {
+            Color32[] colors = ScalePixels(scale);
+            Texture2D texture = new Texture2D(_size * scale, _size * scale, TextureFormat.ARGB32, false);
+            texture.SetPixels32(colors);
+            texture.Apply();
+
+            return texture;
         }
     }
 }

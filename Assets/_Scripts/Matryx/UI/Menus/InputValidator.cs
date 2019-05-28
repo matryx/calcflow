@@ -31,7 +31,7 @@ public class InputValidator : MonoBehaviour
     {
         isValid = false;
         inputField = transform.GetComponent<InputField>();
-        inputField.onEndEdit.AddListener(validateInput);
+        inputField.onEndEdit.AddListener(endEditListener);
 
         validationRegexes = new Dictionary<string, string>();
         validationRegexes.Add(INPUT_VALIDATION_PRIVATE_KEY, @"(0x)[0-9A-Fa-f]{64}");
@@ -48,11 +48,24 @@ public class InputValidator : MonoBehaviour
         validationType = vType;
     }
 
+    public void endEditListener(string input)
+    {
+        validateInput(input);
+
+        if (!isValid)
+        {
+            inputField.onValueChanged.RemoveAllListeners();
+            inputField.onValueChanged.AddListener(validateInput);
+        }
+    }
+
     public void validateInput(string input)
     {
         isValid = Regex.IsMatch(input, validationRegexes[validationType]);
         isValid &= minimumLength > 0 ? input.Length >= minimumLength : true;
         isValid &= maximumLength > 0 ? input.Length <= maximumLength : true;
         inputField.image.color = isValid ? defaultColor : new Color(defaultColor.r + 0.2f, defaultColor.g / 3f, defaultColor.b / 3f);
+
+        if(isValid) inputField.onValueChanged.RemoveAllListeners();
     }
 }

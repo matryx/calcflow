@@ -168,17 +168,8 @@ namespace Matryx
         {
             public static Texture2D getBlockieTexture(string accountAddress)
             {
-                Texture2D blockieTex = new Texture2D(1, 1);
                 var blockies = new NetBlockies.Blockies(accountAddress);
-                Bitmap bitmap = blockies.GetBitmap(64);
-                MemoryStream ms = new MemoryStream();
-                bitmap.Save(ms, ImageFormat.Png);
-                var buffer = new byte[ms.Length];
-                ms.Position = 0;
-                ms.Read(buffer, 0, buffer.Length);
-                blockieTex.LoadImage(buffer);
-
-                return blockieTex;
+                return blockies.GetTexture();
             }
 
             public static string ellipseAddress(string address)

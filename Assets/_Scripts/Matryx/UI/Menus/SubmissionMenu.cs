@@ -44,7 +44,8 @@ public class SubmissionMenu : MonoBehaviour
             ClearPreview();
             DisableImport();
             this.submission = submission;
-            MatryxCortex.GetSubmission(submission, (result) =>
+            MatryxCortex.GetSubmission(submission,
+            (result) =>
             {
                 Submission = (MatryxSubmission)result;
                 if (Submission.calcflowCompatible)
@@ -55,6 +56,11 @@ public class SubmissionMenu : MonoBehaviour
                 {
                     DisableImport("Incompatible");
                 }
+            },
+            (err) =>
+            {
+                bodyText.text = "Something went wrong. :(";
+                DisableImport("Uh oh");
             });
         }
     }

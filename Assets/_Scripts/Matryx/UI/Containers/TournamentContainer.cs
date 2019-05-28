@@ -6,6 +6,8 @@ using Matryx;
 
 public class TournamentContainer : FlexHoverTipper
 {
+    [SerializeField]
+    public GameObject status;
     public MatryxTournament tournament { get; set; }
 
     public override bool shouldShowTippy()
@@ -25,5 +27,10 @@ public class TournamentContainer : FlexHoverTipper
         offset = new Vector3(0f, -0.25f, -0.02f);
         fadeInDuration = fadeOutDuration = 0.2f;
         movementMode = Tippy.MovementMode.Exact;
+    }
+
+    public void SetStatus(string statusText = "")
+    {
+        Textures.SetTexture("Icons/" + statusText, ref status);
     }
 }

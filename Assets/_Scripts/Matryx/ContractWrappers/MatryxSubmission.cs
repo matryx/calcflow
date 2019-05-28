@@ -147,48 +147,17 @@ namespace Matryx
                 this.dto.Reward = reward;
                 this.dto.Timestamp = BigInteger.Parse(submission["timestamp"].ToString());
 
-                bool link = false;
-                var ipfsURL = "https://ipfs.infura.io:5001/api/v0";
-                var ipfsObjURL = ipfsURL + "/object/get?arg=";
-                var ipfsCatURL = ipfsURL + "/cat?arg=";
-                using (WWW ipfsWWW = new WWW(ipfsObjURL + ipfsHash))
+                using (WWW ipfsWWW = new WWW(MatryxCortex.ipfsCatURL + ipfsHash))
                 {
                     yield return ipfsWWW;
-                    var ipfsObj = MatryxCortex.serializer.Deserialize<object>(ipfsWWW.bytes) as Dictionary<string, object>;
-                    var links = ipfsObj["Links"] as List<object>;
-                    var indexOfContent = links.IndexOfElementWithValue("jsonContent.json");
-                    if (indexOfContent != -1)
-                    {
-                        link = true;
-                        var contentLink = links[indexOfContent] as Dictionary<string, object>;
-                        commit.ipfsContentHash = contentLink["Hash"] as string;
-                    }
-                    
-                    // TODO: Implement previews in a good way
-                    //var secondLink = links[1] as Dictionary<string, object>;
-                    //commit.previewImageHash = secondLink["Hash"] as string;
+                    if(submissionWWW.error != null) { onError?.Invoke(submissionWWW); }
+                    commit.content = Utils.Substring(ipfsWWW.text as string, '{', '}');
                 }
 
-                var catUrl = link ? ipfsCatURL + commit.ipfsContentHash : ipfsCatURL + ipfsHash;
-                using (WWW ipfsWWW2 = new WWW(catUrl))
-                {
-                    yield return ipfsWWW2;
-                    try
-                    {
-                        commit.content = Utils.Substring(ipfsWWW2.text, '{', '}');
-                    }
-                    catch (System.Exception e)
-                    {
-                        // TODO: Have fun with this
-                        commit.content = "";
-                        onError?.Invoke(null);
-                    }
-                }
-                
                 var ESSRegEx = "{.*rangeKeys.*rangePairs.*ExpressionKeys.*ExpressionValues.*}";
                 calcflowCompatible = Regex.IsMatch(commit.content, ESSRegEx);
 
-                onSuccess(this);
+                onSuccess?.Invoke(this);
             }
         }
 

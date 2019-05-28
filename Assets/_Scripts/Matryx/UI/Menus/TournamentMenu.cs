@@ -28,6 +28,8 @@ public class TournamentMenu : MenuStateReceiver
     [SerializeField]
     private TMPro.TextMeshPro timeRemainingText;
     [SerializeField]
+    private GameObject timeRemainingIcon;
+    [SerializeField]
     private TMPro.TextMeshPro bountyText;
     [SerializeField]
     private TMPro.TextMeshPro titleText;
@@ -389,7 +391,7 @@ public class TournamentMenu : MenuStateReceiver
 
     public void ErrorLoadingTournament(object result)
     {
-        loadingSubmissions.text = "Something went wrong. :(";
+        loadingSubmissions.text = "Something went wrong. :( \n" + (string)result;
         descriptionText.text = "This would normally be the description of the tournament you just pulled up, but right now it's just filler because something has gone wrong. Try reloading this tournament?";
     }
 
@@ -397,6 +399,7 @@ public class TournamentMenu : MenuStateReceiver
     {
         bountyText.text = Tournament.Bounty + " MTX";
         timeRemainingText.text = Tournament.currentRound.StatusText;
+        Textures.SetTexture("Icons/"+Tournament.currentRound.status, ref timeRemainingIcon);
         titleText.text = Tournament.title;
         creatorText.text = "by " + Utils.Accounts.ellipseAddress(Tournament.owner);
         roundText.text = "Round " + Tournament.currentRound.index + "\n" + Tournament.currentRound.Bounty + " MTX";

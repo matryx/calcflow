@@ -88,6 +88,7 @@ public class MyCommitsMenu : MonoBehaviour {
     public void LoadMoreMyCommits()
     {
         loading = false;
+        ClearCommits();
         if (LoadMyCommits(page + 1))
         {
             page++;
@@ -177,7 +178,7 @@ public class MyCommitsMenu : MonoBehaviour {
         button.transform.localScale = Vector3.one;
 
         var commitTimestamp = Utils.Time.FromUnixTime(commit.timestamp);
-        button.name = commitTimestamp.ToLongDateString();
+        button.name = commitTimestamp.ToShortDateString() + ", " + commitTimestamp.ToShortTimeString();
         button.GetComponent<CommitContainer>().commit = commit;
 
         button.transform.Find("Icon").GetComponent<Renderer>().material.mainTexture = commit.previewImage;
