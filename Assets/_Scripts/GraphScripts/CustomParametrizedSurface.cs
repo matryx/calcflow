@@ -439,15 +439,24 @@ public class CustomParametrizedSurface : MonoBehaviour
             }
             threadHelper.solver.SetGlobalVariable(name, threadHelper.parameterMin[name]);
         }
+        Expression ex;
+        AK.Expression exp;
+        string op;
 
-        foreach (string op in es.expressions.Keys)
-        {
-            Expression ex = es.expressions[op];
-            AK.Expression exp = threadHelper.solver.SymbolicateExpression(ex.expression);
+        op = "X";
+        ex = es.expressions[op];
+        exp = threadHelper.solver.SymbolicateExpression(ex.expression);
+        threadHelper.expressionList.Add(exp);
 
-            threadHelper.expressionList.Add(exp);
+        op = "Y";
+        ex = es.expressions[op];
+        exp = threadHelper.solver.SymbolicateExpression(ex.expression);
+        threadHelper.expressionList.Add(exp);
 
-        }
+        op = "Z";
+        ex = es.expressions[op];
+        exp = threadHelper.solver.SymbolicateExpression(ex.expression);
+        threadHelper.expressionList.Add(exp);
 
         return threadHelper;
     }
