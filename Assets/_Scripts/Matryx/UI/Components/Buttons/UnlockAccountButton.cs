@@ -4,7 +4,6 @@ using Matryx;
 
 public class UnlockAccountButton : QuickButton
 {
-
     [SerializeField]
     TMPro.TextMeshPro text;
     [SerializeField]

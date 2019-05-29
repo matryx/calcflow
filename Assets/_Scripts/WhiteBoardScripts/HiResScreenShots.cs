@@ -2,11 +2,13 @@
 using System.Collections;
 
 public class HiResScreenShots : MonoBehaviour {
+    public static HiResScreenShots Instance { get; private set; }
 	public int resWidth = 2550; 
 	public int resHeight = 3300;
     RenderTexture rt;
     private void Start()
     {
+        if (Instance == null) Instance = this;
         rt = new RenderTexture(resWidth, resHeight, 24);
     }
 
@@ -19,6 +21,13 @@ public class HiResScreenShots : MonoBehaviour {
 	}
 	public void TakeHiResShot(string fileName) {
         fileName = fileName + ".png";
+        byte[] bytes = GetScreenshotBytes(resWidth, resHeight);
+        System.IO.File.WriteAllBytes(fileName, bytes);
+        //Debug.Log(string.Format("Took screenshot to: {0}", fileName));
+        takeHiResShot = false;
+    }
+    public byte[] GetScreenshotBytes(int width, int height)
+    {
         RenderTexture temp = RenderTexture.active;
         Camera camera = GetComponent<Camera>();
         camera.targetTexture = rt;
@@ -29,9 +38,7 @@ public class HiResScreenShots : MonoBehaviour {
         camera.targetTexture = null;
         RenderTexture.active = temp; // JC: added to avoid errors
         byte[] bytes = screenShot.EncodeToPNG();
-        System.IO.File.WriteAllBytes(fileName, bytes);
-        //Debug.Log(string.Format("Took screenshot to: {0}", fileName));
-        takeHiResShot = false;
+        return bytes;
     }
 	void LateUpdate() {
 		if (takeHiResShot) {

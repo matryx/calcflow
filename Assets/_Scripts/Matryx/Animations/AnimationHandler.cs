@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using Nanome.Core;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -33,50 +35,52 @@ public class AnimationHandler : MonoBehaviour {
         obj.localScale = end;
     }
 
-    IEnumerator ShrinkMenu()
+    IEnumerator ShrinkMenu(Async.EventDelegate onFinish = null)
     {
         closing = true;
         yield return StartCoroutine(ScaleTo(transform, transform.localScale, Vector3.zero, speed));
         gameObject.SetActive(false);
         closing = false;
         closed = true;
+        onFinish?.Invoke(this);
     }
     
-    IEnumerator GrowMenu()
+    IEnumerator GrowMenu(Async.EventDelegate onFinish = null)
     {
         opening = true;
         yield return StartCoroutine(ScaleTo(transform, transform.localScale, activeScale, speed));
         opening = false;
         open = true;
+        onFinish?.Invoke(this);
     }
 
-    public void CloseMenu()
+    public void CloseMenu(Async.EventDelegate onFinish = null)
     {
         if(open)
         {
-            scaleMenuDown = ShrinkMenu();
+            scaleMenuDown = ShrinkMenu(onFinish);
             StartCoroutine(scaleMenuDown);
         }
         else if(opening)
         {
             StopCoroutine(scaleMenuUp);
-            scaleMenuDown = ShrinkMenu();
+            scaleMenuDown = ShrinkMenu(onFinish);
             StartCoroutine(scaleMenuDown);
         }
     }
 
-    public void OpenMenu()
+    public void OpenMenu(Async.EventDelegate onFinish = null)
     {
         if (closed)
         {
             gameObject.SetActive(true);
-            scaleMenuUp = GrowMenu();
+            scaleMenuUp = GrowMenu(onFinish);
             StartCoroutine(scaleMenuUp);
         }
         else if (closing)
         {
             StopCoroutine(scaleMenuDown);
-            scaleMenuUp = GrowMenu();
+            scaleMenuUp = GrowMenu(onFinish);
             StartCoroutine(scaleMenuUp);
         }
     }

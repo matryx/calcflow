@@ -146,7 +146,6 @@ public class ExpressionSet
 
     public bool CompileAll()
     {
-        Debug.Log("compiling");
         bool isValid = true;
         foreach (string RO in ranges.Keys)
         {

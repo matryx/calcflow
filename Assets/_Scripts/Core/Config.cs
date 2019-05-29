@@ -14,25 +14,31 @@ namespace Nanome.Core
         static public bool getBool(string key, string def)
         {
             var vv = get(key, def);
-            return vv.toBool();
+            return ((string)vv) == "false" ? false : true;
         }
 
         static public float getFloat(string key, string def)
         {
             var vv = get(key, def);
-            return vv.toFloat();
+            return (float)vv;
         }
 
         static public int getInt(string key, string def)
         {
             var vv = get(key, def);
-            return vv.toInt();
+            return (int)vv;
         }
 
         static public string getString(string key, string def)
         {
             var vv = get(key, def);
-            return vv.toString();
+            return (string)vv;
+        }
+
+        static public byte[] getBytes(string key, string def)
+        {
+            var vv = get(key, def);
+            return vv as byte[];
         }
 
         static public string getFormattedString(string key, Dictionary<string, string> variables, string def)
@@ -54,6 +60,11 @@ namespace Nanome.Core
                 vv = "";
             }
             return vv;
+        }
+
+        static public void setBytes(string key, byte[] val, bool save = false, string where = null )
+        {
+            set(key, val, save);
         }
 
         static public void setString(string key, string val, bool save = false, string where = null)
@@ -131,7 +142,7 @@ namespace Nanome.Core
                     catch (Exception exc)
                     {
                         Logs.warningOnChannel("Nanome.Core", "Could not load local config file", localConfig, exc);
-                        Config.values = new Ini.Values();
+                        values = new Ini.Values();
                     }
                     string localConfigSaved = storageConfigPath();
                     try
@@ -141,12 +152,18 @@ namespace Nanome.Core
                         {
                             Config.values.set(key, saveds.get(key));
                         }
-                        Config.session = saveds;
+                        if (session == null)
+                        {
+                            Config.session = saveds;
+                        }
                     }
                     catch (Exception exc)
                     {
                         Logs.debugOnChannel("Nanome.Core", "Could not load saved config file", localConfigSaved, exc);
-                        Config.session = new Ini.Values();
+                        if (session == null)
+                        {
+                            session = new Ini.Values();
+                        }
                     }
                     string documentsConfigSaved = documentsConfigPath();
                     try
@@ -156,30 +173,33 @@ namespace Nanome.Core
                         {
                             Config.values.set(key, saveds.get(key));
                         }
-                        Config.session = saveds;
+                        session = saveds;
                     }
                     catch (Exception exc)
                     {
                         Logs.debugOnChannel("Nanome.Core", "Could not load saved config file", localConfigSaved, exc);
-                        Config.session = new Ini.Values();
+                        if (session == null)
+                        {
+                            session = new Ini.Values();
+                        }
                     }
                 }
             }
         }
 
-        static private string get(string key, string def)
+        static private object get(string key, string def)
         {
             Config.loadIfNeeded();
             return Config.values.get(key, def);
         }
 
-        static private void set(string key, string val, bool save = false, string where=null)
+        static private void set(string key, object val, bool save = false, string where=null)
         {
             Config.loadIfNeeded();
             Config.values.set(key, val);
             if (save)
             {
-                Config.session.set(key, val);
+                session.set(key, val);
                 Config.save(where);
             }
         }

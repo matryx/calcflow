@@ -4,11 +4,10 @@ using UnityEngine;
 
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts;
-using Nethereum.JsonRpc.UnityClient;
 using System.Numerics;
 using Nanome.Core;
+using Nethereum.JsonRpc.UnityClient;
 
-// TODO: all of this
 namespace Matryx
 {
     public static class MatryxToken
@@ -16,6 +15,13 @@ namespace Matryx
         public static string address;
         public static string ABI;
         public static Contract contract;
+
+        public static void setContract(string abi, string addr)
+        {
+            address = addr;
+            ABI = abi;
+            contract = new Nethereum.Contracts.Contract(null, abi, addr);
+        }
 
         [Function("getOwner", "address")]
         public class GetOwnerFunction : FunctionMessage { }
@@ -47,21 +53,21 @@ namespace Matryx
 
         public static IEnumerator getOwner(Async thread)
         {
-            var queryRequest = new QueryUnityRequest<GetOwnerFunction, EthereumTypes.Address>(NetworkSettings.infuraProvider, NetworkSettings.address);
+            var queryRequest = new QueryUnityRequest<GetOwnerFunction, EthereumTypes.Address>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return queryRequest.Query(new GetOwnerFunction() { }, MatryxToken.address);
             //Debug.Log("getOwner result: " + queryRequest.Result);
         }
 
         public static IEnumerator balanceOf(string owner, Async thread=null)
         {
-            var queryRequest = new QueryUnityRequest<BalanceOfFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.address);
+            var queryRequest = new QueryUnityRequest<BalanceOfFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return queryRequest.Query(new BalanceOfFunction() { Owner = owner }, MatryxToken.address);
             yield return queryRequest.Result.Value;
         }
 
         public static IEnumerator allowance(string owner, string spender, Async thread=null)
         {
-            var queryRequest = new QueryUnityRequest<AllowanceFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.address);
+            var queryRequest = new QueryUnityRequest<AllowanceFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             var allowanceFnMessage = new AllowanceFunction() { Owner = owner, Spender = spender };
             yield return queryRequest.Query(allowanceFnMessage, MatryxToken.address);
             yield return queryRequest.Result.Value;
@@ -74,11 +80,11 @@ namespace Matryx
 
         public static IEnumerator approve(string spender, BigInteger amount, Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.privateKey, NetworkSettings.address);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             var approveFnMsg = new ApproveFunction() { Spender = spender, Amount = amount, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice };
             yield return transactionRequest.SignAndSendTransaction<ApproveFunction>(approveFnMsg, address);
 
-            var txStatus = new Utils.CoroutineWithData<bool>(MatryxExplorer.Instance, Utils.GetTransactionStatus(transactionRequest, "approve", thread));
+            var txStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "approve", thread));
             yield return txStatus;
             yield return txStatus.result;
         }

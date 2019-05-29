@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Calcflow.UserStatistics;
+using System;
 
 public class CalcManager : MonoBehaviour
 {
+    public static CalcManager Instance { get; private set; }
     ExpressionSet currExpressionSet;
     CalcOutput currOutput;
 
     [HideInInspector]
     public bool inputReceived;
+    public event EventHandler inputHandler;
 
     [HideInInspector]
     public ExpressionSet expressionSet;
@@ -149,8 +152,9 @@ public class CalcManager : MonoBehaviour
         calcInput.ChangeOutput(output);
     }
 
-    private void Initialize()
+    public void Initialize()
     {
+        if (Instance == null) { Instance = this; }
         calcInput = connectedMenus.calcInput;
         boundsManager = connectedMenus.boundsManager;
         pieceWiseControl = connectedMenus.pieceWiseControl;
@@ -173,19 +177,22 @@ public class CalcManager : MonoBehaviour
 
         connectedMenus.saveLoadMenu.Initialize(this);
 
-        if(connectedMenus.tournamentMenu != null)
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals("3 - FreeParametrization"))
         {
-            connectedMenus.tournamentMenu.Initialize(this);
-        }
+            if (connectedMenus.tournamentMenu != null)
+            {
+                connectedMenus.tournamentMenu.Initialize(this);
+            }
 
-        if(connectedMenus.submissionsMenu != null)
-        {
-            connectedMenus.submissionsMenu.Initialize(this);
-        }
+            if (connectedMenus.submissionsMenu != null)
+            {
+                connectedMenus.submissionsMenu.Initialize(this);
+            }
 
-        if(connectedMenus.mySubmissionsMenu != null)
-        {
-            connectedMenus.mySubmissionsMenu.Initialize(this);
+            if (connectedMenus.mySubmissionsMenu != null)
+            {
+                connectedMenus.mySubmissionsMenu.Initialize(this);
+            }
         }
 
         if (connectedMenus.particleAnimationSettings != null)
@@ -205,7 +212,6 @@ public class CalcManager : MonoBehaviour
         Initialize();
     }
 
-
     public bool updateOverlay = false;
     public bool updateText = false;
     // Update is called once per frame
@@ -224,7 +230,10 @@ public class CalcManager : MonoBehaviour
             bool isValid = expressionSet.CompileAll();
             ManageFeedback();
             if (isValid)
+            {
+                inputHandler?.Invoke(this, null);
                 paramSurface.GenerateParticles();
+            }
         }
         if (toExport)
         {

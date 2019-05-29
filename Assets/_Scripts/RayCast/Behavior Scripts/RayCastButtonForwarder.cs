@@ -13,8 +13,10 @@ public class RayCastButtonForwarder : MonoBehaviour
         RayCastButton source = GetComponent<RayCastButton>();
         if (source != null)
         {
-            source.OnButtonEnter += target.PressButton;
-            source.OnButtonExit += target.UnpressButton;
+            source.OnButtonPress += target.PressButton;
+            source.OnButtonStay += target.HoverButton;
+            source.OnButtonLeave += target.LeaveButton;
+            source.OnButtonUnpress += target.UnpressButton;
         }
     }
 }

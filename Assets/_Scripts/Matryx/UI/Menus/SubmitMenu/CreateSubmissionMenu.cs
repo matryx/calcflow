@@ -16,7 +16,6 @@ using Calcflow.UserStatistics;
 
 public class CreateSubmissionMenu : MonoBehaviour {
 
-    string submitEndpoint = "http://13.57.11.64/v1/submit/";
     MatryxTournament tournament;
     [SerializeField]
     CustomParametrizedSurface customParametrizedSurface;
@@ -25,9 +24,9 @@ public class CreateSubmissionMenu : MonoBehaviour {
     [SerializeField]
     InputField TitleField;
     [SerializeField]
-    AddressListModifier ContributorsList;
+    InputField DescriptionField;
     [SerializeField]
-    AddressListModifier ReferencesList;
+    InputField ValueField;
     [SerializeField]
     Text InvalidLabel;
     [SerializeField]
@@ -52,7 +51,7 @@ public class CreateSubmissionMenu : MonoBehaviour {
     public void MakeSubmission()
     {
         var title = TitleField.text;
-        if(!TitleField.gameObject.GetComponent<InputValidator>().isValid)
+        if (!TitleField.gameObject.GetComponent<InputValidator>().isValid)
         {
             InvalidLabel.gameObject.SetActive(true);
             return;
@@ -61,21 +60,15 @@ public class CreateSubmissionMenu : MonoBehaviour {
         this.gameObject.SetActive(false);
         InvalidLabel.gameObject.SetActive(false);
 
-        var contributors = ContributorsList.GetAddressList();
-        var references = ReferencesList.GetAddressList();
-        var bodyData = SerializeSurface();
-
+        var submission = new MatryxSubmission(tournament, title, "", DescriptionField.text, SerializeSurface(), Convert.ToInt32(ValueField.text));
         clearInputs();
 
-        var submission = new MatryxSubmission(tournament, title, contributors, references, bodyData, "This submission was created with Calcflow.");
-        Debug.Log("Submission: " + tournament.address + " -> " + title);
-
         resultsCanvasObject.SetActive(true);
+        gameObject.SetActive(false);
         Async.runInCoroutine(delegate (Async thread, object param)
         {
             return submission.submit(delegate (object result)
             {
-                this.gameObject.SetActive(false);
                 // Debug
                 Debug.Log("Submission uploaded");
                 Debug.Log(result);
@@ -83,7 +76,13 @@ public class CreateSubmissionMenu : MonoBehaviour {
                 if ((bool)result)
                 {
                     StatisticsTracking.EndEvent("Matryx", "Submission Creation");
-                    ResultsMenu.Instance.PostSuccess(submission);
+                    ResultsMenu.Instance.PostSuccess(submission,
+                        (nothin) => 
+                        {
+                            
+                            TournamentMenu.Instance.ReloadSubmissions(3f);
+                        }
+                    );
                 }
                 else
                 {
@@ -102,8 +101,8 @@ public class CreateSubmissionMenu : MonoBehaviour {
     public void clearInputs()
     {
         TitleField.text = "";
-        ContributorsList.RemoveAll();
-        ReferencesList.RemoveAll();
+        DescriptionField.text = "";
+        ValueField.text = "";
     }
 
     public bool ValidateInputs()

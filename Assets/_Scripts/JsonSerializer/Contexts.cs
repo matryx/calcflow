@@ -88,6 +88,8 @@ namespace Nanome.Maths.Serializers.JsonSerializer
 
         public object ReadGeneric()
         {
+            if(str.Equals(String.Empty)) { throw new Exception("Cannot read empty string");  }
+
             // Trim
             BurnWhitespaces();
             // Read first char
@@ -109,7 +111,16 @@ namespace Nanome.Maths.Serializers.JsonSerializer
             {
                 return '\0';
             }
-            return str[idx];
+            try
+            {
+                return str[idx];
+            }
+            catch (System.Exception e)
+            {
+                Debug.Log("we got em");
+            }
+
+            return 'a';
         }
 
         public string ReadString(int len)

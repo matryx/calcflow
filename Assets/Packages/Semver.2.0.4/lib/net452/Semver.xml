@@ -1,0 +1,257 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Semver</name>
+    </assembly>
+    <members>
+        <member name="T:Semver.SemVersion">
+            <summary>
+            A semantic version implementation.
+            Conforms to v2.0.0 of http://semver.org/
+            </summary>
+        </member>
+        <member name="M:Semver.SemVersion.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Semver.SemVersion" /> class.
+            </summary>
+            <param name="info"></param>
+            <param name="context"></param>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:Semver.SemVersion.#ctor(System.Int32,System.Int32,System.Int32,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Semver.SemVersion" /> class.
+            </summary>
+            <param name="major">The major version.</param>
+            <param name="minor">The minor version.</param>
+            <param name="patch">The patch version.</param>
+            <param name="prerelease">The prerelease version (eg. "alpha").</param>
+            <param name="build">The build eg ("nightly.232").</param>
+        </member>
+        <member name="M:Semver.SemVersion.#ctor(System.Version)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Semver.SemVersion"/> class.
+            </summary>
+            <param name="version">The <see cref="T:System.Version"/> that is used to initialize 
+            the Major, Minor, Patch and Build properties.</param>
+        </member>
+        <member name="M:Semver.SemVersion.Parse(System.String,System.Boolean)">
+            <summary>
+            Parses the specified string to a semantic version.
+            </summary>
+            <param name="version">The version string.</param>
+            <param name="strict">If set to <c>true</c> minor and patch version are required, else they default to 0.</param>
+            <returns>The SemVersion object.</returns>
+            <exception cref="T:System.InvalidOperationException">When a invalid version string is passed.</exception>
+        </member>
+        <member name="M:Semver.SemVersion.TryParse(System.String,Semver.SemVersion@,System.Boolean)">
+            <summary>
+            Parses the specified string to a semantic version.
+            </summary>
+            <param name="version">The version string.</param>
+            <param name="semver">When the method returns, contains a SemVersion instance equivalent 
+            to the version string passed in, if the version string was valid, or <c>null</c> if the 
+            version string was not valid.</param>
+            <param name="strict">If set to <c>true</c> minor and patch version are required, else they default to 0.</param>
+            <returns><c>False</c> when a invalid version string is passed, otherwise <c>true</c>.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.Equals(Semver.SemVersion,Semver.SemVersion)">
+            <summary>
+            Tests the specified versions for equality.
+            </summary>
+            <param name="versionA">The first version.</param>
+            <param name="versionB">The second version.</param>
+            <returns>If versionA is equal to versionB <c>true</c>, else <c>false</c>.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.Compare(Semver.SemVersion,Semver.SemVersion)">
+            <summary>
+            Compares the specified versions.
+            </summary>
+            <param name="versionA">The version to compare to.</param>
+            <param name="versionB">The version to compare against.</param>
+            <returns>If versionA &lt; versionB <c>&lt; 0</c>, if versionA &gt; versionB <c>&gt; 0</c>,
+            if versionA is equal to versionB <c>0</c>.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.Change(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String)">
+            <summary>
+            Make a copy of the current instance with optional altered fields. 
+            </summary>
+            <param name="major">The major version.</param>
+            <param name="minor">The minor version.</param>
+            <param name="patch">The patch version.</param>
+            <param name="prerelease">The prerelease text.</param>
+            <param name="build">The build text.</param>
+            <returns>The new version object.</returns>
+        </member>
+        <member name="P:Semver.SemVersion.Major">
+            <summary>
+            Gets the major version.
+            </summary>
+            <value>
+            The major version.
+            </value>
+        </member>
+        <member name="P:Semver.SemVersion.Minor">
+            <summary>
+            Gets the minor version.
+            </summary>
+            <value>
+            The minor version.
+            </value>
+        </member>
+        <member name="P:Semver.SemVersion.Patch">
+            <summary>
+            Gets the patch version.
+            </summary>
+            <value>
+            The patch version.
+            </value>
+        </member>
+        <member name="P:Semver.SemVersion.Prerelease">
+            <summary>
+            Gets the pre-release version.
+            </summary>
+            <value>
+            The pre-release version.
+            </value>
+        </member>
+        <member name="P:Semver.SemVersion.Build">
+            <summary>
+            Gets the build version.
+            </summary>
+            <value>
+            The build version.
+            </value>
+        </member>
+        <member name="M:Semver.SemVersion.ToString">
+            <summary>
+            Returns a <see cref="T:System.String" /> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /> that represents this instance.
+            </returns>
+        </member>
+        <member name="M:Semver.SemVersion.CompareTo(System.Object)">
+            <summary>
+            Compares the current instance with another object of the same type and returns an integer that indicates 
+            whether the current instance precedes, follows, or occurs in the same position in the sort order as the 
+            other object.
+            </summary>
+            <param name="obj">An object to compare with this instance.</param>
+            <returns>
+            A value that indicates the relative order of the objects being compared. 
+            The return value has these meanings: Value Meaning Less than zero 
+             This instance precedes <paramref name="obj" /> in the sort order. 
+             Zero This instance occurs in the same position in the sort order as <paramref name="obj" />. i
+             Greater than zero This instance follows <paramref name="obj" /> in the sort order.
+            </returns>
+        </member>
+        <member name="M:Semver.SemVersion.CompareTo(Semver.SemVersion)">
+            <summary>
+            Compares the current instance with another object of the same type and returns an integer that indicates 
+            whether the current instance precedes, follows, or occurs in the same position in the sort order as the 
+            other object.
+            </summary>
+            <param name="other">An object to compare with this instance.</param>
+            <returns>
+            A value that indicates the relative order of the objects being compared. 
+            The return value has these meanings: Value Meaning Less than zero 
+             This instance precedes <paramref name="other" /> in the sort order. 
+             Zero This instance occurs in the same position in the sort order as <paramref name="other" />. i
+             Greater than zero This instance follows <paramref name="other" /> in the sort order.
+            </returns>
+        </member>
+        <member name="M:Semver.SemVersion.PrecedenceMatches(Semver.SemVersion)">
+            <summary>
+            Compares to semantic versions by precedence. This does the same as a Equals, but ignores the build information.
+            </summary>
+            <param name="other">The semantic version.</param>
+            <returns><c>true</c> if the version precedence matches.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.CompareByPrecedence(Semver.SemVersion)">
+            <summary>
+            Compares to semantic versions by precedence. This does the same as a Equals, but ignores the build information.
+            </summary>
+            <param name="other">The semantic version.</param>
+            <returns>
+            A value that indicates the relative order of the objects being compared. 
+            The return value has these meanings: Value Meaning Less than zero 
+             This instance precedes <paramref name="other" /> in the version precedence.
+             Zero This instance has the same precedence as <paramref name="other" />. i
+             Greater than zero This instance has creater precedence as <paramref name="other" />.
+            </returns>
+        </member>
+        <member name="M:Semver.SemVersion.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:System.Object" /> is equal to this instance.
+            </summary>
+            <param name="obj">The <see cref="T:System.Object" /> to compare with this instance.</param>
+            <returns>
+              <c>true</c> if the specified <see cref="T:System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Semver.SemVersion.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>
+            A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+            </returns>
+        </member>
+        <member name="M:Semver.SemVersion.op_Implicit(System.String)~Semver.SemVersion">
+            <summary>
+            Implicit conversion from string to SemVersion.
+            </summary>
+            <param name="version">The semantic version.</param>
+            <returns>The SemVersion object.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.op_Equality(Semver.SemVersion,Semver.SemVersion)">
+            <summary>
+            The override of the equals operator. 
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is equal to right <c>true</c>, else <c>false</c>.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.op_Inequality(Semver.SemVersion,Semver.SemVersion)">
+            <summary>
+            The override of the un-equal operator. 
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is not equal to right <c>true</c>, else <c>false</c>.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.op_GreaterThan(Semver.SemVersion,Semver.SemVersion)">
+            <summary>
+            The override of the greater operator. 
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is greater than right <c>true</c>, else <c>false</c>.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.op_GreaterThanOrEqual(Semver.SemVersion,Semver.SemVersion)">
+            <summary>
+            The override of the greater than or equal operator. 
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is greater than or equal to right <c>true</c>, else <c>false</c>.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.op_LessThan(Semver.SemVersion,Semver.SemVersion)">
+            <summary>
+            The override of the less operator. 
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is less than right <c>true</c>, else <c>false</c>.</returns>
+        </member>
+        <member name="M:Semver.SemVersion.op_LessThanOrEqual(Semver.SemVersion,Semver.SemVersion)">
+            <summary>
+            The override of the less than or equal operator. 
+            </summary>
+            <param name="left">The left value.</param>
+            <param name="right">The right value.</param>
+            <returns>If left is less than or equal to right <c>true</c>, else <c>false</c>.</returns>
+        </member>
+    </members>
+</doc>

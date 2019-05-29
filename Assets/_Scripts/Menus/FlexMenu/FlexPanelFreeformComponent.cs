@@ -30,7 +30,7 @@ public class FlexPanelFreeformComponent : FlexPanelComponent
     protected override void OnActionStart(FlexActionableComponent sender, GameObject collider)
     {
         ClearSelection();
-        sender.SetState(1);
+        if(sender.State != -1) sender.SetState(1);
     }
 
     // Use this for initialization

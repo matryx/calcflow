@@ -9,6 +9,7 @@ using UnityEditor;
 
 using Nanome.Core.Extension;
 using Nanome.Core;
+using Tuple = Nanome.Core.Extension.Tuple;
 
 public class Logger : EditorWindow
 {
@@ -684,11 +685,11 @@ public class Logger : EditorWindow
     }
 
     // Internal formatting function (Taken from PlayDebug.cs)
-    static List<Tuple<string, string, string>> Format(string raw)
+    static List<Nanome.Core.Extension.Tuple<string, string, string>> Format(string raw)
     {
         var lines = raw.Split("\n");
         // Carries class name, full file path, explicit file name, line number
-        var categorizedLines = new List<Tuple<string, string, string>>();
+        var categorizedLines = new List<Nanome.Core.Extension.Tuple<string, string, string>>();
         for (int i = 0; i < lines.Length; i++)
         {
             var className = "";

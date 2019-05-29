@@ -16,7 +16,7 @@ public class SubmissionMenu : MonoBehaviour
     [SerializeField]
     private Material imageMaterial;
     [SerializeField]
-    private ImportSubmission importSubmissionButton;
+    private ImportCommit importCommitButton;
 
     MatryxSubmission submission;
     MatryxSubmission Submission
@@ -24,26 +24,75 @@ public class SubmissionMenu : MonoBehaviour
       set { submission = value; UpdateSubmissionDisplay(); } 
     }
 
+    public static SubmissionMenu Instance { get; private set; }
+
+    public void OnEnable()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+    }
+
     public void SetSubmission(MatryxSubmission submission)
     {
-        titleText.text = submission.details.title;
-        importSubmissionButton.Disable();
-
         if (this.submission == null ||
-            this.submission.address != submission.address)
+            this.submission.hash != submission.hash)
         {
+            titleText.text = submission.title;
+            bodyText.text = "Loading...";
+            ClearPreview();
+            DisableImport();
             this.submission = submission;
-            MatryxExplorer.RunFetchSubmission(submission, delegate (object results) { Submission = (MatryxSubmission)results; });
+            MatryxCortex.GetSubmission(submission,
+            (result) =>
+            {
+                Submission = (MatryxSubmission)result;
+                if (Submission.calcflowCompatible)
+                {
+                    EnableImport("View");
+                }
+                else
+                {
+                    DisableImport("Incompatible");
+                }
+            },
+            (err) =>
+            {
+                bodyText.text = "Something went wrong. :(";
+                DisableImport("Uh oh");
+            });
         }
     }
 
     void UpdateSubmissionDisplay()
     {
-        titleText.text = submission.details.title;
+        titleText.text = submission.title;
         bodyText.text = submission.description;
+        LoadPreviewImage();
 
         // Update the import button!
-        importSubmissionButton.submission = submission;
-        importSubmissionButton.Reenable();
+        importCommitButton.commit = submission.commit;
+        importCommitButton.Enable();
+    }
+
+    void LoadPreviewImage()
+    {
+        transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = submission.commit.previewImage;
+    }
+
+    void ClearPreview()
+    {
+        transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = null;
+    }
+
+    public void EnableImport(string text = "")
+    {
+        importCommitButton.Enable(text);
+    }
+
+    public void DisableImport(string text = "")
+    {
+        importCommitButton.Disable(text);
     }
 }

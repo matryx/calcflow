@@ -30,28 +30,35 @@ public static class EthereumTypes
     [FunctionOutput]
     public class Address : IFunctionOutputDTO
     {
-        [Parameter("address", "value", 1)]
+        [Parameter("address", "value")]
         public string Value { get; set; }
     }
 
     [FunctionOutput]
     public class Bool : IFunctionOutputDTO
     {
-        [Parameter("bool", "value", 1)]
+        [Parameter("bool", "value")]
         public bool Value { get; set; }
     }
 
     [FunctionOutput]
     public class Uint256 : IFunctionOutputDTO
     {
-        [Parameter("uint256", "value", 1)]
+        [Parameter("uint256", "value")]
         public BigInteger Value { get; set; }
     }
 
     [FunctionOutput]
     public class AddressArray : IFunctionOutputDTO
     {
-        [Parameter("address[]", "value", 1)]
+        [Parameter("address[]", "value")]
+        public List<string> Value { get; set; }
+    }
+
+    [FunctionOutput]
+    public class Bytes32Array : IFunctionOutputDTO
+    {
+        [Parameter("bytes32[]", "value")]
         public List<string> Value { get; set; }
     }
 }
