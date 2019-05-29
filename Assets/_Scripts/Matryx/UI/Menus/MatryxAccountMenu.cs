@@ -22,6 +22,8 @@ public class MatryxAccountMenu : MonoBehaviour {
     [SerializeField]
     InputField PasswordInput;
     [SerializeField]
+    InputField ConfirmPasswordInput;
+    [SerializeField]
     Button ImportButton;
     [SerializeField]
     Toggle UsePassword;
@@ -129,10 +131,10 @@ public class MatryxAccountMenu : MonoBehaviour {
         MatryxAccountMenu.Instance.ErrorMessage.text = "";
     }
 
-    public void configurePrivateKeyField(string title, string defaultText, bool active, string validationType)
+    public void configurePrivateKeyField(string title, string placeholderText, bool active, string validationType)
     {
         Instance.PrivateKeyInput.transform.parent.GetChild(0).GetComponent<Text>().text = title;
-        Instance.PrivateKeyInput.placeholder.GetComponent<Text>().text = defaultText;
+        Instance.PrivateKeyInput.placeholder.GetComponent<Text>().text = placeholderText;
         Instance.PrivateKeyInput.transform.parent.gameObject.SetActive(active);
         Instance.PrivateKeyInput.GetComponent<InputValidator>().setValidationType(validationType);
     }
@@ -148,6 +150,7 @@ public class MatryxAccountMenu : MonoBehaviour {
         {
             case AccountMenuState.PrivateKeyInput:
                 Instance.PasswordInput.transform.parent.gameObject.SetActive(false);
+                Instance.ConfirmPasswordInput.transform.parent.gameObject.SetActive(false);
                 Instance.UsePassword.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = false;
                 Instance.UsePassword.gameObject.SetActive(true);
@@ -155,6 +158,7 @@ public class MatryxAccountMenu : MonoBehaviour {
                 break;
             case AccountMenuState.PrivateKeyPasswordInput:
                 Instance.PasswordInput.transform.parent.gameObject.SetActive(true);
+                Instance.ConfirmPasswordInput.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = true;
                 Instance.UsePassword.gameObject.SetActive(true);
@@ -162,6 +166,7 @@ public class MatryxAccountMenu : MonoBehaviour {
                 break;
             case AccountMenuState.MnemonicInput:
                 Instance.PasswordInput.transform.parent.gameObject.SetActive(false);
+                Instance.ConfirmPasswordInput.transform.parent.gameObject.SetActive(false);
                 Instance.UsePassword.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = false;
                 Instance.UsePassword.gameObject.SetActive(true);
@@ -169,6 +174,8 @@ public class MatryxAccountMenu : MonoBehaviour {
                 break;
             case AccountMenuState.MnemonicPasswordInput:
                 Instance.PasswordInput.transform.parent.gameObject.SetActive(true);
+                Instance.ConfirmPasswordInput.transform.parent.gameObject.SetActive(true);
+                Instance.ConfirmPasswordInput.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = true;
                 Instance.UsePassword.gameObject.SetActive(true);
@@ -177,6 +184,7 @@ public class MatryxAccountMenu : MonoBehaviour {
             case AccountMenuState.KeyStoreInput:
                 ImportButton.gameObject.SetActive(true);
                 Instance.PasswordInput.transform.parent.gameObject.SetActive(true);
+                Instance.ConfirmPasswordInput.transform.parent.gameObject.SetActive(true);
                 Instance.UsePassword.isOn = true;
                 Instance.UsePassword.gameObject.SetActive(false);
                 configurePrivateKeyField("Keystore file", "path/to/keystore", true, InputValidator.INPUT_VALIDATION_KEYSTORE_FILE);
@@ -185,13 +193,14 @@ public class MatryxAccountMenu : MonoBehaviour {
                 Instance.accountImportType.gameObject.SetActive(false);
                 Instance.PrivateKeyInput.transform.parent.gameObject.SetActive(false);
                 Instance.PasswordInput.transform.parent.gameObject.SetActive(true);
+                Instance.ConfirmPasswordInput.transform.parent.gameObject.SetActive(false);
                 Instance.UsePassword.gameObject.SetActive(false);
                 Instance.AccountUnlockText[0].text = "Welcome back!";
                 Instance.AccountUnlockText[1].text = "Your private key has been encrypted with AES and stored in AppData.\n To decrypt your private key, we need your password!";
                 Instance.PasswordInput.placeholder.GetComponent<Text>().text = "password123";
                 break;
             case AccountMenuState.ShowAccountInfo:
-                Instance.AccountInfoText[0].text = NetworkSettings.activeAccount;
+                Instance.AccountInfoText[0].text = NetworkSettings.currentAddress;
                 StartCoroutine(updateMTXBalance());
                 Instance.StartCoroutine(Instance.waitAndThenReenterVR());
                 break;
@@ -206,7 +215,7 @@ public class MatryxAccountMenu : MonoBehaviour {
 
     public IEnumerator updateMTXBalance()
     {
-        var tokenBalanceCoroutine = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.activeAccount));
+        var tokenBalanceCoroutine = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.currentAddress));
         yield return tokenBalanceCoroutine;
         var balance = tokenBalanceCoroutine.result / new BigInteger(1e18);
         Instance.AccountInfoText[1].text = balance + " MTX";
@@ -325,9 +334,17 @@ public class MatryxAccountMenu : MonoBehaviour {
     public static bool TrySetPrivateKeyAndCypher()
     {
         string password = Instance.PasswordInput.text;
+        string confirmPassword = Instance.ConfirmPasswordInput.text;
         bool usedPassword = Instance.UsePassword.isOn;
         string cypher = "";
         string cypherType = "";
+
+        if (password != confirmPassword)
+        {
+            Instance.ErrorMessage.gameObject.SetActive(true);
+            Instance.ErrorMessage.text = "Passwords do not match";
+            return false;
+        }
 
         if (Instance.State == AccountMenuState.PrivateKeyInput || Instance.State == AccountMenuState.PrivateKeyPasswordInput)
         {
@@ -369,7 +386,7 @@ public class MatryxAccountMenu : MonoBehaviour {
             // Store mnemonic in NetworkSettings for transactions
             try
             {
-                NetworkSettings.importWallet(mnemonic, password);
+                NetworkSettings.importWallet(mnemonic, "");
             }
             catch (System.Exception e)
             {
@@ -388,7 +405,7 @@ public class MatryxAccountMenu : MonoBehaviour {
 
             try
             {
-                NetworkSettings.importKeystore(keystore, password);
+                NetworkSettings.importKeystore(keystore, "");
             }
             catch (System.Exception e)
             {
@@ -405,18 +422,25 @@ public class MatryxAccountMenu : MonoBehaviour {
         // Store cypher and related info
         Config.setString("cypher", cypher, true, "storage");
         Config.setString("cypherType", cypherType, true, "storage");
-        Config.setString("address", NetworkSettings.activeAccount);
+        Config.setString("address", NetworkSettings.currentAddress);
         Config.setBool("usedPassword", usedPassword, true, "storage");
 
-        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.DisplayingTournaments);
+        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.Unlocked);
         return true;
     }
 
     public static bool UnlockAccount()
     {
         string cypher = Config.getString("cypher", "");
+        if (cypher.Equals("")) { return false; }
         string cypherType = Config.getString("cypherType", "");
+        bool usedPassword = Config.getBool("usedPassword", "0");
         string plainText = Crypto.Decrypt(cypher);
+
+        if(usedPassword)
+        {
+            return false;
+        }
 
         NetworkSettings.declinedAccountUnlock = false;
         switch (cypherType)
@@ -447,7 +471,7 @@ public class MatryxAccountMenu : MonoBehaviour {
                 }
         }
 
-        return false;
+        return true;
     }
 
     // returns success
@@ -474,7 +498,7 @@ public class MatryxAccountMenu : MonoBehaviour {
             case "mnemonic":
                 try
                 {
-                    NetworkSettings.importWallet(plainText, password);
+                    NetworkSettings.importWallet(plainText, "");
                 }
                 catch (System.Exception e)
                 {
@@ -487,7 +511,7 @@ public class MatryxAccountMenu : MonoBehaviour {
             case "keystore":
                 try
                 {
-                    NetworkSettings.importKeystore(plainText, password);
+                    NetworkSettings.importKeystore(plainText, "");
                 }
                 catch (System.Exception e)
                 {
@@ -497,9 +521,8 @@ public class MatryxAccountMenu : MonoBehaviour {
                 }
                 break;
         }
-        
 
-        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.DisplayingTournaments);
+        TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.Unlocked);
 
         return true;
     }

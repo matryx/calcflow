@@ -16,7 +16,6 @@ using Calcflow.UserStatistics;
 
 public class CreateSubmissionMenu : MonoBehaviour {
 
-    string submitEndpoint = "http://13.57.11.64/v1/submit/";
     MatryxTournament tournament;
     [SerializeField]
     CustomParametrizedSurface customParametrizedSurface;
@@ -65,11 +64,11 @@ public class CreateSubmissionMenu : MonoBehaviour {
         clearInputs();
 
         resultsCanvasObject.SetActive(true);
+        gameObject.SetActive(false);
         Async.runInCoroutine(delegate (Async thread, object param)
         {
             return submission.submit(delegate (object result)
             {
-                this.gameObject.SetActive(false);
                 // Debug
                 Debug.Log("Submission uploaded");
                 Debug.Log(result);
@@ -77,7 +76,13 @@ public class CreateSubmissionMenu : MonoBehaviour {
                 if ((bool)result)
                 {
                     StatisticsTracking.EndEvent("Matryx", "Submission Creation");
-                    ResultsMenu.Instance.PostSuccess(submission);
+                    ResultsMenu.Instance.PostSuccess(submission,
+                        (nothin) => 
+                        {
+                            
+                            TournamentMenu.Instance.ReloadSubmissions(3f);
+                        }
+                    );
                 }
                 else
                 {

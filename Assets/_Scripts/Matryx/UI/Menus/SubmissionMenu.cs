@@ -16,7 +16,7 @@ public class SubmissionMenu : MonoBehaviour
     [SerializeField]
     private Material imageMaterial;
     [SerializeField]
-    private ImportSubmission importSubmissionButton;
+    private ImportCommit importCommitButton;
 
     MatryxSubmission submission;
     MatryxSubmission Submission
@@ -44,17 +44,23 @@ public class SubmissionMenu : MonoBehaviour
             ClearPreview();
             DisableImport();
             this.submission = submission;
-            MatryxCortex.GetSubmission(submission, (result) =>
+            MatryxCortex.GetSubmission(submission,
+            (result) =>
             {
                 Submission = (MatryxSubmission)result;
                 if (Submission.calcflowCompatible)
                 {
-                    EnableImport();
+                    EnableImport("View");
                 }
                 else
                 {
-                    DisableImport();
+                    DisableImport("Incompatible");
                 }
+            },
+            (err) =>
+            {
+                bodyText.text = "Something went wrong. :(";
+                DisableImport("Uh oh");
             });
         }
     }
@@ -66,15 +72,13 @@ public class SubmissionMenu : MonoBehaviour
         LoadPreviewImage();
 
         // Update the import button!
-        importSubmissionButton.submission = submission;
-        importSubmissionButton.Reenable();
+        importCommitButton.commit = submission.commit;
+        importCommitButton.Enable();
     }
 
     void LoadPreviewImage()
     {
-        Texture2D imageTexture = new Texture2D(2, 2);
-        imageTexture.LoadImage(submission.commit.previewImage);
-        transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = imageTexture;
+        transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = submission.commit.previewImage;
     }
 
     void ClearPreview()
@@ -82,13 +86,13 @@ public class SubmissionMenu : MonoBehaviour
         transform.Find("Preview").GetComponent<Renderer>().material.mainTexture = null;
     }
 
-    public void EnableImport()
+    public void EnableImport(string text = "")
     {
-        importSubmissionButton.Reenable();
+        importCommitButton.Enable(text);
     }
 
-    public void DisableImport()
+    public void DisableImport(string text = "")
     {
-        importSubmissionButton.Disable();
+        importCommitButton.Disable(text);
     }
 }

@@ -432,7 +432,7 @@ namespace LinearAlgebraMatrix
 
         public Vector3 MatColToVector(float[,] Mat, int num)
         {
-            Vector3 vector = new Vector3(Mat[0, num], Mat[1, num], Mat[2, num]);
+            Vector3 vector = new Vector3(Mat[1, num], Mat[0, num], Mat[2, num]);
             //Vector3 v2 = new Vector3(redMat[1, 0], redMat[1, 1], redMat[1, 2]);
             //Vector3 v3 = new Vector3(redMat[2, 0], redMat[2, 1], redMat[2, 2]);
             return vector;

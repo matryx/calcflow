@@ -22,10 +22,11 @@ using System;
 
 abstract public class FlexActionableComponent : MonoBehaviour {
 
-    protected Action<FlexActionableComponent, GameObject> exitCallback;
     protected Action<FlexActionableComponent, GameObject> stayCallback;
+    protected Action<FlexActionableComponent, GameObject> exitCallback;
     protected Action<FlexActionableComponent, GameObject> enterCallback;
-     
+    protected Action<FlexActionableComponent, GameObject> leaveCallback;
+    
     #region Properties
     private int state;
     public int State
@@ -54,7 +55,7 @@ abstract public class FlexActionableComponent : MonoBehaviour {
     //will be called on setup
 	protected abstract void AssembleComponent();
     //will be called whenever state changes
-    protected abstract void StateChanged(int _old, int _new);
+    protected abstract void StateChanged(int _old, int _new, GameObject source = null);
     //will be called whenever button is removed from panel
     protected abstract void DisassembleComponent();
     // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
@@ -71,8 +72,6 @@ abstract public class FlexActionableComponent : MonoBehaviour {
         AssembleComponent();
     }
 
-
-
     public void DismantleComponent()
     {
         SetEnterCallback(null);
@@ -86,19 +85,24 @@ abstract public class FlexActionableComponent : MonoBehaviour {
         State = _new;
     }
 
-    public void SetExitCallback(System.Action<FlexActionableComponent, GameObject> exitAction)
-    {
-		this.exitCallback = exitAction;
-    }
-
     public void SetStayCallback(System.Action<FlexActionableComponent, GameObject> OnCollisionEnter)
     {
         this.stayCallback = OnCollisionEnter;
     }
 
+    public void SetExitCallback(System.Action<FlexActionableComponent, GameObject> exitAction)
+    {
+		this.exitCallback += exitAction;
+    }
+
     public void SetEnterCallback(System.Action<FlexActionableComponent, GameObject> enterAction)
     {
         this.enterCallback = enterAction;
+    }
+
+    public void SetLeaveallback(System.Action<FlexActionableComponent, GameObject> OnCollisionExit)
+    {
+        this.leaveCallback = OnCollisionExit;
     }
     #endregion
 

@@ -39,22 +39,22 @@ public class FlexButtonComponent : FlexActionableComponent
         VirtualButton virtualButton = GetComponent<VirtualButton>();
         if (virtualButton != null)
         {
-            virtualButton.OnButtonEnter -= startAction;
-            virtualButton.OnButtonExit -= endAction;
+            virtualButton.OnButtonPress -= pressAction;
+            virtualButton.OnButtonUnpress -= unpressAction;
         }
 
         RayCastButton rcButton = GetComponent<RayCastButton>();
         if (rcButton != null)
         {
-            rcButton.OnButtonEnter -= startAction;
-            rcButton.OnButtonExit -= endAction;
+            rcButton.OnButtonPress -= pressAction;
+            rcButton.OnButtonUnpress -= unpressAction;
         }
 
         TouchButton touchButton = GetComponent<TouchButton>();
         if (touchButton != null)
         {
-            touchButton.OnButtonEnter -= startAction;
-            touchButton.OnButtonExit -= endAction;
+            touchButton.OnButtonPress -= pressAction;
+            touchButton.OnButtonUnpress -= unpressAction;
         }
     }
 
@@ -63,29 +63,29 @@ public class FlexButtonComponent : FlexActionableComponent
         VirtualButton virtualButton = GetComponent<VirtualButton>();
         if (virtualButton != null)
         {
-            virtualButton.OnButtonEnter += startAction;
-            virtualButton.OnButtonExit += endAction;
+            virtualButton.OnButtonPress += pressAction;
+            virtualButton.OnButtonUnpress += unpressAction;
         }
 
         RayCastButton rcButton = GetComponent<RayCastButton>();
         if (rcButton != null)
         {
-            rcButton.OnButtonEnter += startAction;
-            rcButton.OnButtonExit += endAction;
+            rcButton.OnButtonPress += pressAction;
+            rcButton.OnButtonUnpress += unpressAction;
         }
 
         TouchButton touchButton = GetComponent<TouchButton>();
         if (touchButton != null)
         {
-            touchButton.OnButtonEnter += startAction;
-            touchButton.OnButtonExit += endAction;
+            touchButton.OnButtonPress += pressAction;
+            touchButton.OnButtonUnpress += unpressAction;
         }
 
         if (State != 2)
             State = 0;
     }
 
-    protected override void StateChanged(int _old, int _new)
+    protected override void StateChanged(int _old, int _new, GameObject source = null)
     {
         if (_new == -1)
         {
@@ -122,7 +122,7 @@ public class FlexButtonComponent : FlexActionableComponent
         }
     }
 
-    void startAction(GameObject gameobject)
+    void pressAction(GameObject gameobject)
     {
         if (State >= 0)
         {
@@ -130,7 +130,7 @@ public class FlexButtonComponent : FlexActionableComponent
         }
     }
 
-    void endAction(GameObject gameobject)
+    void unpressAction(GameObject gameobject)
     {
         if (State >= 0)
         {

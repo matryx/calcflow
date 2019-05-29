@@ -137,15 +137,68 @@ public class PresetMenu : MonoBehaviour
         switch (source)
         {
             default:
-                x = ExpressionParser.Parse("0");
-                y = ExpressionParser.Parse("0");
-                z = ExpressionParser.Parse("0");
-                umin = ExpressionParser.Parse("0");
-                umax = ExpressionParser.Parse("0");
+                x = ExpressionParser.Parse("0.75*sin(2*pi*v)");
+                y = ExpressionParser.Parse("sin(pi*u)*(1.5+0.75*cos(2*pi*v))");
+                z = ExpressionParser.Parse("cos(pi*u)*(1.5+0.75*cos(2*pi*v))");
+                umin = ExpressionParser.Parse("1.5");
+                umax = ExpressionParser.Parse("2.5");
                 vmin = ExpressionParser.Parse("0");
-                vmax = ExpressionParser.Parse("0");
+                vmax = ExpressionParser.Parse("1");
+
+                List<string> x2 = ExpressionParser.Parse("0.75*cos(pi*u)");
+                List<string> y2 = ExpressionParser.Parse("0.75*sin(pi*u)*cos(2*pi*v)+2.4");
+                List<string> z2 = ExpressionParser.Parse("0.75*sin(pi*u)*sin(2*pi*v)+2.6");
+                List<string> umin2 = ExpressionParser.Parse("0");
+                List<string> umax2 = ExpressionParser.Parse("1");
+                List<string> vmin2 = ExpressionParser.Parse("0");
+                List<string> vmax2 = ExpressionParser.Parse("1");
+
+                List<string> x3 = ExpressionParser.Parse("0.75*sin(2*pi*u)");
+                List<string> y3 = ExpressionParser.Parse("0.75*cos(2*pi*u)+1.5*cos(pi/8*v)");
+                List<string> z3 = ExpressionParser.Parse("-1.5*sin(pi/8*v)");
+                List<string> umin3 = ExpressionParser.Parse("0");
+                List<string> umax3 = ExpressionParser.Parse("1");
+                List<string> vmin3 = ExpressionParser.Parse("0");
+                List<string> vmax3 = ExpressionParser.Parse("1");
+
+                List<string> x4 = ExpressionParser.Parse("0.75*sin(2*pi*u)");
+                List<string> y4 = ExpressionParser.Parse("0.75*cos(2*pi*u)-1.5*cos(pi/8*v)");
+                List<string> z4 = ExpressionParser.Parse("-1.5*sin(pi/8*v)");
+                List<string> umin4 = ExpressionParser.Parse("0");
+                List<string> umax4 = ExpressionParser.Parse("1");
+                List<string> vmin4 = ExpressionParser.Parse("0");
+                List<string> vmax4 = ExpressionParser.Parse("1");
+
+                Expression X = new Expression(x);
+                Expression Y = new Expression(y);
+                Expression Z = new Expression(z);
+                Expression X2 = new Expression(x2);
+                Expression Y2 = new Expression(y2);
+                Expression Z2 = new Expression(z2);
+                Expression X3 = new Expression(x3);
+                Expression Y3 = new Expression(y3);
+                Expression Z3 = new Expression(z3);
+                Expression X4 = new Expression(x4);
+                Expression Y4 = new Expression(y4);
+                Expression Z4 = new Expression(z4);
+
+                Range zeroRange = new Range(ExpressionParser.Parse("0"));
+                Range oneRange = new Range(ExpressionParser.Parse("1"));
+                Range onePointFive = new Range(ExpressionParser.Parse("1.5"));
+                Range twoPointFive = new Range(ExpressionParser.Parse("2.5"));
+                RangePair zeroToZero = new RangePair(zeroRange, zeroRange);
+                RangePair zeroToOne = new RangePair(zeroRange, oneRange);
+                List<RangePair> rangePairs = new List<RangePair>() { zeroToZero,  new RangePair(onePointFive, twoPointFive), zeroToOne, zeroToOne };
+                List<RangePair> rangePairs2 = new List<RangePair>() { zeroToZero, zeroToOne, zeroToOne, zeroToZero };
+                ExpressionSet expSet = new ExpressionSet(new string[] { "t", "u", "v", "w" }, rangePairs, new string[] { "X", "Y", "Z" }, new List<Expression>() { X, Y, Z });
+                ExpressionSet expSet2 = new ExpressionSet(new string[] { "t", "u", "v", "w" }, rangePairs2, new string[] { "X", "Y", "Z" }, new List<Expression>() { X2, Y2, Z2 });
+                ExpressionSet expSet3 = new ExpressionSet(new string[] { "t", "u", "v", "w" }, rangePairs2, new string[] { "X", "Y", "Z" }, new List<Expression>() { X3, Y3, Z3 });
+                ExpressionSet expSet4 = new ExpressionSet(new string[] { "t", "u", "v", "w" }, rangePairs2, new string[] { "X", "Y", "Z" }, new List<Expression>() { X4, Y4, Z4 });
+
+                List<ExpressionSet> nanomeLogo = new List<ExpressionSet>() { expSet, expSet2, expSet3, expSet4 };
+                CalcManager.Instance.LoadSavedExpressionSets(nanomeLogo);
                 print("unknown preset pressed");
-                break;
+                return;
             //R1 -> R1
             case "Cinquefoil Knot":
                 x = ExpressionParser.Parse("cos(t)*(2-cos(2*t/5))");

@@ -21,11 +21,11 @@ public class MySubmissionsMenu : MonoBehaviour
     private SubmissionMenu submissionMenu;
     
 
-    internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
+    internal class SubmissionButtonResponder : FlexMenu.FlexMenuResponder
     {
         public FlexMenu menu;
         MySubmissionsMenu submissionsMenu;
-        internal KeyboardInputResponder(MySubmissionsMenu submissionsMenu, FlexMenu menu)
+        internal SubmissionButtonResponder(MySubmissionsMenu submissionsMenu, FlexMenu menu)
         {
             this.menu = menu;
             this.submissionsMenu = submissionsMenu;
@@ -57,7 +57,7 @@ public class MySubmissionsMenu : MonoBehaviour
     {
         scroll = GetComponentInChildren<Scroll>(true);
         flexMenu = GetComponent<FlexMenu>();
-        KeyboardInputResponder responder = new KeyboardInputResponder(this, flexMenu);
+        SubmissionButtonResponder responder = new SubmissionButtonResponder(this, flexMenu);
         flexMenu.RegisterResponder(responder);
         submissionsPanel = GetComponentInChildren<MultiSelectFlexPanel>().Initialize();
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
@@ -69,7 +69,7 @@ public class MySubmissionsMenu : MonoBehaviour
         infoText.gameObject.SetActive(true);
         infoText.text = "Loading Submissions...";
         ClearSubmissions();
-        MatryxCortex.RunFetchMySubmissions(tournament, ProcessSubmissions);
+        MatryxCortex.RunGetMySubmissions(tournament, 0, ProcessSubmissions);
     }
 
     /// <summary>
@@ -117,7 +117,7 @@ public class MySubmissionsMenu : MonoBehaviour
         button.transform.localScale = Vector3.one;
 
         button.name = submission.title;
-        button.GetComponent<SubmissionContainer>().SetSubmission(submission);
+        button.GetComponent<SubmissionContainer>().submission = submission;
 
         var buttonText = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
         buttonText.text = submission.title;
@@ -135,14 +135,13 @@ public class MySubmissionsMenu : MonoBehaviour
         {
             LoadMoreMySubmissions();
         }
-        else if (source.GetComponent<SubmissionContainer>() != null)
+        else if (source.GetComponent<SubmissionContainer>())
         {
             string name = source.name;
 
-            MatryxSubmission submission = source.GetComponent<SubmissionContainer>().GetSubmission();
+            MatryxSubmission submission = source.GetComponent<SubmissionContainer>().submission;
             // TODO: Navigate the user to the corresponding tournament through the menus
-            submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
-            submissionMenu.SetSubmission(submission);
+            submissionMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu((obj)=> { submissionMenu.SetSubmission(submission); });
         }
     }
 }

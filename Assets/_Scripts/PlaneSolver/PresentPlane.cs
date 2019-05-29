@@ -257,7 +257,7 @@ namespace PlaneSolver
 
         public Vector3 PtCoordToVector(PtCoord pt)
         {
-            return (new Vector3(pt.X.Value, pt.Y.Value, pt.Z.Value));
+            return (new Vector3(pt.Y.Value, pt.X.Value, pt.Z.Value));
         }
 
         public Vector3 ScaledPoint(Vector3 pt)
@@ -280,4 +280,5 @@ namespace PlaneSolver
             return result;
         }
     }
+
 }

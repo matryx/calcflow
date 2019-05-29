@@ -65,7 +65,6 @@ public class SaveLoadMenu : MonoBehaviour
     }
 
     private bool delete = false;
-    private Dictionary<string, GameObject> deleteList = new Dictionary<string, GameObject>();
 
     private void HandleInput(GameObject source)
     {
@@ -75,31 +74,26 @@ public class SaveLoadMenu : MonoBehaviour
             switch (name)
             {
                 case "DeleteSelected":
-                    foreach (string toDelete in deleteList.Keys)
+                    foreach (string toDelete in selectPanel.selected.Keys)
                     {
-                        GameObject deleteObj = deleteList[toDelete];
+                        GameObject deleteObj = selectPanel.selected[toDelete];
                         loader.DeleteSave(toDelete);
                         saves.Remove(toDelete);
                         selectPanel.RemoveAction(deleteObj.GetComponent<FlexActionableComponent>());
                     }
-                    scroll.deleteObjects(deleteList.Values.Select(x => x.transform).ToList());
+                    scroll.deleteObjects(selectPanel.selected.Values.Select(x => x.transform).ToList());
                     goto case "delete";
                 case "delete":
-                    deleteList.Clear();
-                    selectPanel.SwitchToSingleSelect();
-                    selectPanel.ChangeHoveringColor(colorSettings.selectHoverColor);
-                    selectPanel.ChangeSelectedColor(colorSettings.selectColor);
                     delete = false;
-                    break;
-                default:
-                    if (deleteList.ContainsKey(name))
-                    {
-                        deleteList.Remove(name);
-                    }
-                    else
-                    {
-                        deleteList.Add(name, source);
-                    }
+                    selectPanel.hoverUnselectedColor = QuickButton.LIGHT_HOVERING;
+                    selectPanel.hoverSelectedColor = colorSettings.selectHoverColor;
+                    selectPanel.selectedSelectedColor = colorSettings.selectColor;
+                    selectPanel.selectedUnselectedColor = colorSettings.selectColor;
+
+                    selectPanel.ChangeHoveringColor(QuickButton.LIGHT_HOVERING);
+                    selectPanel.ChangeSelectedColor(colorSettings.selectColor);
+
+                    selectPanel.SwitchToSingleSelect();
                     break;
             }
         }
@@ -108,10 +102,16 @@ public class SaveLoadMenu : MonoBehaviour
             switch (name)
             {
                 case "delete":
-                    selectPanel.SwitchToMultiSelect();
+                    delete = true;
+                    selectPanel.hoverUnselectedColor = colorSettings.deleteHoverColor;
+                    selectPanel.hoverSelectedColor = colorSettings.deleteColor;
+                    selectPanel.selectedSelectedColor = colorSettings.deleteColor;
+                    selectPanel.selectedUnselectedColor = colorSettings.deleteColor;
+
                     selectPanel.ChangeHoveringColor(colorSettings.deleteHoverColor);
                     selectPanel.ChangeSelectedColor(colorSettings.deleteColor);
-                    delete = true;
+
+                    selectPanel.SwitchToMultiSelect();
                     break;
                 default:
                     List<ExpressionSet> ess = saves[name].expressionSetSet;
@@ -152,7 +152,10 @@ public class SaveLoadMenu : MonoBehaviour
         action.hoveringColor = (delete) ? colorSettings.deleteHoverColor : colorSettings.selectHoverColor;
         selectPanel.AddAction((FlexActionableComponent)action);
 
-        saves.Add(save.date, save);
+        if(!saves.ContainsKey(save.date))
+        {
+            saves.Add(save.date, save);
+        }
     }
 
     private GameObject createButton(SavePackage save)

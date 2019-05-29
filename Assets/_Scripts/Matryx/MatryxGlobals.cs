@@ -17,6 +17,11 @@ using Nethereum.JsonRpc.UnityClient;
 using Assets.USecurity;
 using Nanome.Maths.Serializers.JsonSerializer;
 using System;
+using System.Security.Cryptography;
+using System.Drawing;
+using System.IO;
+using System.Drawing.Imaging;
+using Nethereum.Web3.Accounts;
 
 namespace Matryx
 {
@@ -26,34 +31,34 @@ namespace Matryx
 
         public static string network = "ropsten";
         public static string infuraProvider = "https://ropsten.infura.io/v3/2373e82fc83341ff82b66c5a87edd5f5";
-        public static Nethereum.HdWallet.Wallet wallet;
-        public static List<string> _accounts = new List<string>();
-        public static List<string> _privateKeys = new List<string>();
-        static int activeAccountIndex = 0;
+        public static Nethereum.HdWallet.Wallet mnemonicWallet;
+        public static Dictionary<string, string> aggregateWallet = new Dictionary<string, string>();
+        static string _currentAddress = "";
         // All accounts the network settings know about
         public static string[] accounts
         {
             get
             {
-                if (wallet != null)
+                if (mnemonicWallet != null)
                 {
-                    return wallet.GetAddresses(10);
+                    return mnemonicWallet.GetAddresses(10);
                 }
-                else return _accounts.ToArray();
+                else return aggregateWallet.Keys.ToArray();
             }
         }
-        // The account that transactions are currently being made under
-        public static string activeAccount
+
+        // The address that transactions are currently being made by
+        public static string currentAddress
         {
             get
             {
-                if (wallet != null)
+                if (mnemonicWallet != null && mnemonicWallet.GetAccount(_currentAddress) != null)
                 {
-                    return wallet.GetAccount(0).Address;
+                    return Nethereum.Util.AddressExtensions.ConvertToEthereumChecksumAddress(_currentAddress);
                 }
-                else if (_accounts.Count > 0)
+                else if (aggregateWallet.Count > 0 && !_currentAddress.Equals(string.Empty))
                 {
-                    return _accounts.ElementAt(activeAccountIndex);
+                    return Nethereum.Util.AddressExtensions.ConvertToEthereumChecksumAddress(_currentAddress);
                 }
                 else
                 {
@@ -61,18 +66,19 @@ namespace Matryx
                 }
             }
         }
+
         // The private key currently being used to make transactions
-        public static string activePrivateKey
+        public static string currentPrivateKey
         {
             get
             {
-                if (wallet != null)
+                if (mnemonicWallet != null)
                 {
-                    return "0x" + System.BitConverter.ToString(wallet.GetPrivateKey(0)).Replace("-", "");
+                    return mnemonicWallet.GetAccount(_currentAddress).PrivateKey;
                 }
-                else if (_privateKeys.Count > 0)
+                else if (aggregateWallet.Count > 0 && !_currentAddress.Equals(string.Empty))
                 {
-                    return _privateKeys[activeAccountIndex];
+                    return aggregateWallet[_currentAddress];
                 }
                 else
                 {
@@ -80,25 +86,29 @@ namespace Matryx
                 }
             }
         }
+
         public static BigInteger MTXBalance;
         public static HexBigInteger txGas = new HexBigInteger(new BigInteger(3e6));
         public static HexBigInteger txGasPrice = new HexBigInteger(new BigInteger(5e9));
 
-        // Importing a wallet currently overrides all imported single private keys
-        // (including those from keystore files)
-        public static bool importWallet(string mnemonic, string password=null)
+        public static bool importWallet(string mnemonic, string password="", bool makeActive = true)
         {
-            wallet = new Nethereum.HdWallet.Wallet(mnemonic, "");
+            mnemonicWallet = new Nethereum.HdWallet.Wallet(mnemonic, password);
+            if(makeActive)
+            {
+                _currentAddress = mnemonicWallet.GetAccount(0).Address;
+            }
+
             return true;
         }
 
         public static bool importKey(string privateKey, bool makeActive = true)
         {
-            _privateKeys.Add(privateKey);
-            _accounts.Add(Nethereum.Signer.EthECKey.GetPublicAddress(privateKey));
+            string address = Nethereum.Signer.EthECKey.GetPublicAddress(privateKey);
+            aggregateWallet.Add(address, privateKey);
             if(makeActive)
             {
-                activeAccountIndex = _privateKeys.Count - 1;
+                _currentAddress = address;
             }
 
             return true;
@@ -108,20 +118,118 @@ namespace Matryx
         {
             var service = new Nethereum.KeyStore.KeyStoreService();
             var sK = service.DecryptKeyStoreFromJson(password, keystore);
-            _privateKeys.Add("0x" + System.BitConverter.ToString(sK).Replace("-", ""));
-            _accounts.Add(Nethereum.Signer.EthECKey.GetPublicAddress(_privateKeys.Last()));
+            string privateKey = "0x" + System.BitConverter.ToString(sK).Replace("-", "");
+            string address = Nethereum.Signer.EthECKey.GetPublicAddress(privateKey);
+            aggregateWallet.Add(address, privateKey);
+            if (makeActive)
+            {
+                _currentAddress = address;
+            }
+
             return true;
         }
 
         public static void setActiveAccount(string address)
         {
-            activeAccountIndex = _accounts.IndexOf(address);
-            activeAccountIndex = activeAccountIndex == -1 ? 0 : activeAccountIndex;
+            if (aggregateWallet.ContainsKey(address))
+            {
+                _currentAddress = address;
+                Debug.Log("Active account set to: " + _currentAddress);
+            }
+            else if (mnemonicWallet != null)
+            {
+                Account account = mnemonicWallet.GetAccount(address);
+                if (account.Address != null)
+                {
+                    _currentAddress = account.Address;
+                    Debug.Log("Active account set to: " + _currentAddress);
+                }
+            }
+            else
+            {
+                throw new System.Exception("Could not find address (" + address + ") in wallet.");
+            }
+        }
+
+        public static void SignOut()
+        {
+            // Clear wallets
+            aggregateWallet.Clear();
+            mnemonicWallet = null;
+            TournamentsMenu.SetState(TournamentsMenu.TournamentMenuState.AccountUnlockRequired);
         }
     }
 
+    
+
     public class Utils
     {
+        public class Accounts
+        {
+            public static Texture2D getBlockieTexture(string accountAddress)
+            {
+                var blockies = new NetBlockies.Blockies(accountAddress);
+                return blockies.GetTexture();
+            }
+
+            public static string ellipseAddress(string address)
+            {
+                return address.Substring(0, 6) + "..." + address.Substring(address.Length - 5, 4);
+            }
+        }
+
+        public class Time
+        {
+            private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            public static DateTime FromUnixTime(double unixTime)
+            {
+                return epoch.AddSeconds(unixTime);
+            }
+
+            public static DateTime FromUnixTime(BigInteger unixTime)
+            {
+                var timestring = unixTime.ToString();
+                double timeAsDouble = Convert.ToDouble(timestring);
+                return epoch.AddSeconds(timeAsDouble);
+            }
+
+            public static DateTime FromUnixTime(string unixTime)
+            {
+                return epoch.AddSeconds(double.Parse(unixTime));
+            }
+
+            public static double ToUnixTime(DateTime time)
+            {
+                TimeSpan duration = time - epoch;
+                return duration.TotalSeconds;
+            }
+        }
+
+        public static string Substring(string toSubstring, char first, char last)
+        {
+            var openIndex = toSubstring.IndexOf(first);
+            var closeIndex = toSubstring.LastIndexOf(last);
+            if(openIndex != -1 && closeIndex != -1)
+            {
+                return toSubstring.Substring(openIndex, closeIndex - openIndex + 1);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public static string GetMultiHash(byte[] data)
+        {
+            SHA256 sha = SHA256.Create();
+            var digest = sha.ComputeHash(data);
+            var multihash = new byte[digest.Length + 2];
+            multihash[0] = 0x12;
+            multihash[1] = 0x20;
+            digest.CopyTo(multihash, 2);
+            return Crypto.B58Encode(multihash);
+        }
+
         static System.Random random = new System.Random();
         public static string GetRandomHexNumber(int digits)
         {
@@ -263,131 +371,6 @@ namespace Matryx
             Debug.Log("result of " + eventName + ": " + txReceipt.result.Status.Value);
         }
 
-        public static IEnumerator uploadFiles(List<string> fileNames, List<byte[]> contents, List<string> fileTypes, Async thread = null)
-        {
-            WWWForm form = new WWWForm();
-            for (var i = 0; i < fileNames.Count; i++)
-            {
-                form.AddBinaryData("files", contents[i], fileNames[i], fileTypes[i]);
-            }
-
-            UnityWebRequest request = UnityWebRequest.Post(MatryxCortex.filesUploadURL, form);
-            yield return request.SendWebRequest();
-            Debug.Log("request completed with code: " + request.responseCode);
-            if (request.isNetworkError || request.responseCode != 200)
-            {
-                Debug.Log("Error: " + request.error);
-            }
-            else
-            {
-                Debug.Log("Request Response: " + request.downloadHandler.text);
-            }
-
-            var response = MatryxCortex.serializer.Deserialize<object>(request.downloadHandler.data) as Dictionary<string, object>;
-            var data = response["data"] as Dictionary<string, object>;
-            string multiHash = data["hash"] as string;
-
-            if(thread != null)
-            {
-                thread.pushEvent("uploadToIPFS-success", multiHash);
-            }
-
-            yield return multiHash;
-        }
-
-        private static readonly HttpClient client = new HttpClient();
-        private static Serializer serializer = new Serializer();
-        public static IEnumerator uploadJson(string title, string description, string ipfsFiles, string category="math", Async thread = null)
-        {
-            Dictionary<string, string> jsonDictionary = new Dictionary<string, string>()
-            {
-                {"title", title },
-                {"description", description },
-                {"category", "math" },
-                { "ipfsFiles", ipfsFiles }
-            };
-
-            UnityWebRequest request = UnityWebRequest.Post(MatryxCortex.jsonUploadURL, jsonDictionary);
-            yield return request.SendWebRequest();
-
-            if (request.isNetworkError || request.responseCode != 200)
-            {
-                Debug.Log("Error: " + request.error);
-            }
-            else
-            {
-                Debug.Log("Request Response: " + request.downloadHandler.text);
-            }
-
-            var res = MatryxCortex.serializer.Deserialize<object>(request.downloadHandler.data) as Dictionary<string, object>;
-            var data = res["data"] as Dictionary<string, object>;
-            var multiHash = data["hash"] as string;
-
-            yield return multiHash;
-
-            if (thread != null)
-            {
-                thread.pushEvent("uploadToIPFS-success", multiHash);
-            }
-        }
-
-        /// <summary>
-        /// Uploads a Submission's description and files to IPFS.
-        /// </summary>
-        /// <param name="submission"> The submission whose description and json content are to be uploaded. </param>
-        /// <returns> The description hash and json content hash of the submission in that order. </returns>
-        public static IEnumerator uploadSubmission(MatryxSubmission submission)
-        {
-            string descriptionHash = "";
-            string jsonContentHash = "";
-
-            if (submission.dto.Content == null || submission.dto.Content.Equals(string.Empty))
-            {
-                if (submission.description != null && !submission.description.Equals(string.Empty))
-                {
-                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(submission.title, submission.description, submission.commit.ipfsContentHash));
-                    yield return uploadToIPFS;
-                    descriptionHash = uploadToIPFS.result;
-                }
-            }
-
-            yield return new string[2] { descriptionHash, jsonContentHash };
-        }
-
-        /// <summary>
-        /// Uploads a Tournament's description and files to IPFS.
-        /// </summary>
-        /// <param name="tournament"> The tournament whose description and files are to be uploaded. </param>
-        /// <returns> The description hash and files hash of the tournament in that order. </returns>
-        public static IEnumerator uploadTournament(MatryxTournament tournament)
-        {
-            string contentHash = "";
-            string filesHash = "";
-
-            // TODO: Allow for file uploading for tournaments (FileBrowser)
-            //if (tournament.fileHash == null || tournament.fileHash.Equals(string.Empty))
-            //{
-            //    if (tournament.file != null && !tournament.file.Equals(string.Empty))
-            //    {
-            //        var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadFiles("filesContent", "", tournament.file, "text/plain"));
-            //        yield return uploadToIPFS;
-            //        filesHash = uploadToIPFS.result;
-            //    }
-            //}
-
-            if (tournament.contentHash == string.Empty)
-            {
-                if (tournament.description != null && !tournament.description.Equals(string.Empty))
-                {
-                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadJson(tournament.title, tournament.description, ""));
-                    yield return uploadToIPFS;
-                    contentHash = uploadToIPFS.result;
-                }
-            }
-
-            yield return new string[2] { contentHash, filesHash };
-        }
-
         public class CoroutineWithData<T> : CustomYieldInstruction
         {
             private IEnumerator _target;
@@ -434,6 +417,118 @@ namespace Matryx
         public static string Decrypt(string cypher, string password = "")
         {
             return AES.Decrypt(cypher, password);
+        }
+
+        public static string SHA256(string data)
+        {
+            StringBuilder Sb = new StringBuilder();
+            using (SHA256 hash = SHA256Managed.Create())
+            {
+                Encoding enc = Encoding.UTF8;
+                byte[] result = hash.ComputeHash(enc.GetBytes(data));
+
+                foreach (byte b in result)
+                {
+                    Sb.Append(b.ToString("x"));
+                }
+            }
+
+            return Sb.ToString();
+        }
+
+        public static readonly char[] _alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".ToCharArray();
+
+        public static string B58Encode(byte[] input)
+        {
+            if (0 == input.Length)
+            {
+                return String.Empty;
+            }
+            input = CopyOfRange(input, 0, input.Length);
+            // Count leading zeroes.
+            int zeroCount = 0;
+            while (zeroCount < input.Length && input[zeroCount] == 0)
+            {
+                zeroCount++;
+            }
+            // The actual encoding.
+            byte[] temp = new byte[input.Length * 2];
+            int j = temp.Length;
+
+            int startAt = zeroCount;
+            while (startAt < input.Length)
+            {
+                byte mod = DivMod58(input, startAt);
+                if (input[startAt] == 0)
+                {
+                    startAt++;
+                }
+                temp[--j] = (byte)_alphabet[mod];
+            }
+
+            // Strip extra '1' if there are some after decoding.
+            while (j < temp.Length && temp[j] == _alphabet[0])
+            {
+                ++j;
+            }
+            // Add as many leading '1' as there were leading zeros.
+            while (--zeroCount >= 0)
+            {
+                temp[--j] = (byte)_alphabet[0];
+            }
+
+            byte[] output = CopyOfRange(temp, j, temp.Length);
+            try
+            {
+                return Encoding.ASCII.GetString(output);
+            }
+            catch (DecoderFallbackException e)
+            {
+                Console.WriteLine(e.ToString());
+                return String.Empty;
+            }
+        }
+
+        static byte DivMod58(byte[] number, int startAt)
+        {
+            int remainder = 0;
+            for (int i = startAt; i < number.Length; i++)
+            {
+                int digit256 = (int)number[i] & 0xFF;
+                int temp = remainder * 256 + digit256;
+
+                number[i] = (byte)(temp / 58);
+
+                remainder = temp % 58;
+            }
+
+            return (byte)remainder;
+        }
+
+        static byte DivMod256(byte[] number58, int startAt)
+        {
+            int remainder = 0;
+            for (int i = startAt; i < number58.Length; i++)
+            {
+                int digit58 = (int)number58[i] & 0xFF;
+                int temp = remainder * 58 + digit58;
+
+                number58[i] = (byte)(temp / 256);
+
+                remainder = temp % 256;
+            }
+
+            return (byte)remainder;
+        }
+
+        static byte[] CopyOfRange(byte[] source, int from, int to)
+        {
+            byte[] range = new byte[to - from];
+            for (int i = 0; i < to - from; i++)
+            {
+                range[i] = source[from + i];
+            }
+            return range;
         }
     }
 

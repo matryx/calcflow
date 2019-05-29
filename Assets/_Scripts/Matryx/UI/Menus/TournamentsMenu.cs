@@ -15,32 +15,42 @@ public class TournamentsMenu : MonoBehaviour
     private CalcManager calcManager;
     private MultiSelectFlexPanel tournamentsPanel;
     [SerializeField]
+    public MyAccountButton myAccountButton;
+    [SerializeField]
     TMPro.TextMeshPro selectTournamentText;
     [SerializeField]
-    private UnlockAccountButton accountButton;
+    public UnlockAccountButton unlockButton;
     [SerializeField]
     private CreateTournamentButton createTournamentButton;
+    [SerializeField]
+    private MyCommitsButton myCommitsButton;
+    [SerializeField]
+    private MyTournamentsButton myTournamentsButton;
     [SerializeField]
     private TournamentMenu tournamentMenu;
     [SerializeField]
     private CreateSubmissionMenu submitMenu;
     [SerializeField]
-    private TMPro.TextMeshPro loadingText;
+    private TMPro.TextMeshPro tournamentListText;
 
-    private Dictionary<string, MatryxTournament> tournaments = new Dictionary<string, MatryxTournament>();
+    private Scroll scroll;
+    JoyStickAggregator joyStickAggregator;
+    FlexMenu flexMenu;
+
+    private List<MatryxTournament> tournaments = new List<MatryxTournament>();
 
     public enum TournamentMenuState
     {
         AccountUnlockRequired,
         WaitingForUnlock,
-        DisplayingTournaments
+        Unlocked
     }
 
-    internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
+    internal class TournamentButtonResponder : FlexMenu.FlexMenuResponder
     {
         public FlexMenu menu;
         TournamentsMenu tournamentMenu;
-        internal KeyboardInputResponder(TournamentsMenu tournamentMenu, FlexMenu menu)
+        internal TournamentButtonResponder(TournamentsMenu tournamentMenu, FlexMenu menu)
         {
             this.menu = menu;
             this.tournamentMenu = tournamentMenu;
@@ -54,11 +64,22 @@ public class TournamentsMenu : MonoBehaviour
         public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
     }
 
-    private Scroll scroll;
-    const int maxTextLength = 400;
+    private void HandleInput(GameObject source)
+    {
+        if (source.name == "Load_Button")
+        {
+            ReloadTournaments();
+        }
+        else if (source.GetComponent<TournamentContainer>())
+        {
+            string name = source.name;
 
-    JoyStickAggregator joyStickAggregator;
-    FlexMenu flexMenu;
+            MatryxTournament tournament = source.GetComponent<TournamentContainer>().tournament;
+            tournamentMenu.SetTournament(tournament);
+            submitMenu.SetTournament(tournament);
+            tournamentMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
+        }
+    }
 
     public void Awake()
     {
@@ -74,7 +95,7 @@ public class TournamentsMenu : MonoBehaviour
 
         scroll = GetComponentInChildren<Scroll>(true);
         flexMenu = GetComponent<FlexMenu>();
-        KeyboardInputResponder responder = new KeyboardInputResponder(this, flexMenu);
+        TournamentButtonResponder responder = new TournamentButtonResponder(this, flexMenu);
         flexMenu.RegisterResponder(responder);
         tournamentsPanel = GetComponentInChildren<MultiSelectFlexPanel>().Initialize();
         joyStickAggregator = scroll.GetComponent<JoyStickAggregator>();
@@ -83,6 +104,8 @@ public class TournamentsMenu : MonoBehaviour
     public void Prepare()
     {
         createTournamentButton.Awake();
+        myCommitsButton.Awake();
+        myTournamentsButton.Awake();
 
         if (NetworkSettings.declinedAccountUnlock == null )
         {
@@ -94,7 +117,7 @@ public class TournamentsMenu : MonoBehaviour
         }
         else
         {
-            SetState(TournamentMenuState.DisplayingTournaments);
+            SetState(TournamentMenuState.Unlocked);
         }
     }
 
@@ -108,22 +131,34 @@ public class TournamentsMenu : MonoBehaviour
             case TournamentMenuState.AccountUnlockRequired:
                 Instance.ClearTournaments();
                 Instance.selectTournamentText.text = "Account Unlock Required";
-                Instance.accountButton.transform.parent.gameObject.SetActive(true);
-                Instance.accountButton.SetButtonToUnlock();
+                Instance.unlockButton.transform.parent.gameObject.SetActive(true);
+                Instance.unlockButton.SetButtonToUnlock();
+                Instance.tournamentListText.gameObject.SetActive(false);
+                Instance.myAccountButton.transform.parent.gameObject.SetActive(false);
                 CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(false);
+                MyCommitsButton.Instance.transform.parent.gameObject.SetActive(false);
+                MyTournamentsButton.Instance.transform.parent.gameObject.SetActive(false);
                 break;
             case TournamentMenuState.WaitingForUnlock:
                 Instance.ClearTournaments();
                 Instance.selectTournamentText.text = "Lift Headset to Unlock Account";
-                Instance.accountButton.transform.parent.gameObject.SetActive(true);
-                Instance.accountButton.SetButtonToCancel();
+                Instance.unlockButton.transform.parent.gameObject.SetActive(true);
+                Instance.unlockButton.SetButtonToCancel();
+                Instance.tournamentListText.gameObject.SetActive(false);
+                Instance.myAccountButton.transform.parent.gameObject.SetActive(false);
                 CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(false);
+                MyCommitsButton.Instance.transform.parent.gameObject.SetActive(false);
+                MyTournamentsButton.Instance.transform.parent.gameObject.SetActive(false);
                 break;
-            case TournamentMenuState.DisplayingTournaments:
-                Instance.selectTournamentText.text = "Select a Tournament";
-                Instance.accountButton.transform.parent.gameObject.SetActive(false);
+            case TournamentMenuState.Unlocked:
+                Instance.selectTournamentText.text = "";
+                Instance.unlockButton.transform.parent.gameObject.SetActive(false);
+                Instance.tournamentListText.gameObject.SetActive(true);
                 Instance.LoadTournaments(0);
+                Instance.myAccountButton.transform.parent.gameObject.SetActive(true);
                 CreateTournamentButton.Instance.transform.parent.gameObject.SetActive(true);
+                MyCommitsButton.Instance.transform.parent.gameObject.SetActive(true);
+                MyTournamentsButton.Instance.transform.parent.gameObject.SetActive(true);
                 break;
             default:
                 break;
@@ -133,24 +168,25 @@ public class TournamentsMenu : MonoBehaviour
     int page = 0;
     bool loaded = false;
     bool loading = false;
-    public bool LoadTournaments(int thePage)
+    public bool LoadTournaments(int thePage, float waitTime = 0)
     {
         if ((loaded | loading ) == true) return false;
         loading = true;
-        loadingText.gameObject.SetActive(true);
+        tournamentListText.text = "Loading Tournaments...";
+        tournamentListText.fontStyle = TMPro.FontStyles.Normal;
         ClearTournaments();
-        MatryxCortex.RunFetchTournaments(thePage, ProcessTournaments, ShowError);
+        MatryxCortex.RunGetTournaments(thePage, waitTime, ProcessTournaments, ShowError);
         return true;
     }
 
     /// <summary>
     /// Loads the next page of tournaments.
     /// </summary>
-    public void LoadMoreTournaments()
+    public void ReloadTournaments(float waitTime = 0)
     {
         loaded = false;
         loading = false;
-        if (LoadTournaments(page + 1))
+        if (LoadTournaments(page + 1, waitTime))
         {
             page++;
         }
@@ -168,21 +204,22 @@ public class TournamentsMenu : MonoBehaviour
 
     private void ProcessTournaments(object results)
     {
-        loadingText.gameObject.SetActive(false);
-        DisplayTournaments((List<MatryxTournament>)results);
+        tournaments = (List<MatryxTournament>)results;
+        tournamentListText.text = "Open Tournaments";
+        tournamentListText.fontStyle = TMPro.FontStyles.Underline;
+        DisplayTournaments(tournaments);
         loaded = true;
     }
 
     private void ShowError(object results)
     {
-        loadingText.text = "Unable to Load Any Tournaments";
+        tournamentListText.text = "Unable to Load Any Tournaments";
         loaded = false;
     }
 
     GameObject loadButton;
     private void DisplayTournaments(List<MatryxTournament> _tournaments)
     {
-        List<Transform> toAdd = new List<Transform>();
         foreach (MatryxTournament tournament in _tournaments)
         {
             GameObject button = createButton(tournament);
@@ -198,9 +235,13 @@ public class TournamentsMenu : MonoBehaviour
         GameObject button = Instantiate(Resources.Load("Tournament_Cell", typeof(GameObject))) as GameObject;
         button.transform.SetParent(tournamentsPanel.transform);
         button.transform.localScale = Vector3.one;
+        button.transform.position = new Vector3(-500f, -500f, -500f);
 
         button.name = "Load_Button";
-        button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = "(Reload Tournaments)";
+        var text = button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>();
+        text.text = "Reload Tournaments";
+        text.fontStyle = TMPro.FontStyles.Bold;
+        text.alignment = TMPro.TextAlignmentOptions.Center;
 
         TMPro.TextMeshPro matryxBountyTMP = button.transform.Find("MTX_Amount").GetComponent<TMPro.TextMeshPro>();
         matryxBountyTMP.text = "";
@@ -233,7 +274,7 @@ public class TournamentsMenu : MonoBehaviour
         button.transform.localScale = Vector3.one;
 
         button.name = tournament.title;
-        button.GetComponent<TournamentContainer>().SetTournament(tournament);
+        button.GetComponent<TournamentContainer>().tournament = tournament;
 
         button.transform.Find("Text").GetComponent<TMPro.TextMeshPro>().text = tournament.title;
 
@@ -244,22 +285,5 @@ public class TournamentsMenu : MonoBehaviour
         joyStickAggregator.AddForwarder(button.GetComponentInChildren<JoyStickForwarder>());
 
         return button;
-    }
-
-    private void HandleInput(GameObject source)
-    {
-        if (source.name == "Load_Button")
-        {
-            LoadMoreTournaments();
-        }
-        else if (source.GetComponent<TournamentContainer>() != null)
-        {
-            string name = source.name;
-
-            MatryxTournament tournament = source.GetComponent<TournamentContainer>().GetTournament();
-            tournamentMenu.SetTournament(tournament);
-            submitMenu.SetTournament(tournament);
-            tournamentMenu.gameObject.GetComponent<AnimationHandler>().OpenMenu();
-        }
     }
 }

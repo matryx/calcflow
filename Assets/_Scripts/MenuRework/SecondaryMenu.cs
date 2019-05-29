@@ -62,7 +62,7 @@ public class SecondaryMenu : MonoBehaviour
         //transform.parent.gameObject.SetActive(false);
     }
 
-    void toggleMenu(string menuName)
+    public void toggleMenu(string menuName)
     {
         switch (menuName)
         {

@@ -9,11 +9,14 @@ namespace CalcFlowUI
     {
         public delegate void ButtonCallBack(GameObject presser);
 
-        public event ButtonCallBack OnButtonEnter;
-        public event ButtonCallBack OnButtonExit;
+        public event ButtonCallBack OnButtonStay;
+        public event ButtonCallBack OnButtonPress;
+        public event ButtonCallBack OnButtonUnpress;
+        public event ButtonCallBack OnButtonLeave;
 
         [SerializeField]
         public Color disabledColor;
+        public bool verbose = false;
 
         public virtual void PressButton(GameObject other)
         {
@@ -24,8 +27,8 @@ namespace CalcFlowUI
                 print("button pressed");
             }
 #endif
-            if (OnButtonEnter != null)
-                OnButtonEnter.Invoke(other);
+            if (OnButtonPress != null)
+                OnButtonPress.Invoke(other);
 
             string eventName = gameObject.name;
             var extra = new Dictionary<string, object>();
@@ -33,6 +36,26 @@ namespace CalcFlowUI
             if (!eventName.Equals("Body"))
             {
                 StatisticsTracking.StartEvent("Button Press", eventName, extra);
+            }
+        }
+
+        public virtual void HoverButton(GameObject other)
+        {
+            if (verbose)
+            {
+                print("button hovering");
+            }
+
+            OnButtonStay?.Invoke(other);
+        }
+
+        public virtual void LeaveButton(GameObject other)
+        {
+            if (verbose)
+            {
+                print("button unhovered");
+
+                OnButtonLeave?.Invoke(other);
             }
         }
 
@@ -44,8 +67,8 @@ namespace CalcFlowUI
                 print("button released");
             }
 #endif
-            if (OnButtonExit != null)
-                OnButtonExit.Invoke(other);
+            if (OnButtonUnpress != null)
+                OnButtonUnpress.Invoke(other);
 
             string eventName = gameObject.name;
             if (!eventName.Equals("Body"))
@@ -55,7 +78,6 @@ namespace CalcFlowUI
         }
 
 #if UNITY_EDITOR
-        public bool verbose = false;
         public bool press = false;
         bool pressed = false;
         bool Pressed
@@ -90,9 +112,9 @@ namespace CalcFlowUI
         public void Disable()
         {
             GetComponent<Renderer>().material.color = disabledColor;
-            foreach (ButtonCallBack b in OnButtonEnter.GetInvocationList())
+            foreach (ButtonCallBack b in OnButtonPress.GetInvocationList())
             {
-                OnButtonEnter -= b;
+                OnButtonPress -= b;
             }
 
             HighlightOnRaycast highlight = GetComponent<HighlightOnRaycast>();

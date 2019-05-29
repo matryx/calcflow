@@ -4,17 +4,33 @@ using UnityEngine;
 
 using Matryx;
 
-public class TournamentContainer : MonoBehaviour {
+public class TournamentContainer : FlexHoverTipper
+{
+    [SerializeField]
+    public GameObject status;
+    public MatryxTournament tournament { get; set; }
 
-    MatryxTournament tournament;
-	
-    public void SetTournament(MatryxTournament tournament)
+    public override bool shouldShowTippy()
     {
-        this.tournament = tournament;
+        return text.textInfo.pageCount > 1;
     }
 
-    public MatryxTournament GetTournament()
+    private new void Start()
     {
-        return tournament;
+        base.Start();
+        fontSize = 1.1f;
+        alignment = TMPro.TextAlignmentOptions.Left;
+        var body = transform.Find("Body");
+        size = new Vector3(body.lossyScale.x, body.lossyScale.y / 1.5f, body.lossyScale.z);
+        lifetime = 120f;
+        location = gameObject.transform;
+        offset = new Vector3(0f, -0.25f, -0.02f);
+        fadeInDuration = fadeOutDuration = 0.2f;
+        movementMode = Tippy.MovementMode.Exact;
+    }
+
+    public void SetStatus(string statusText = "")
+    {
+        Textures.SetTexture("Icons/" + statusText, ref status);
     }
 }

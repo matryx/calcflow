@@ -20,11 +20,19 @@ using Nethereum.Signer;
 using Matryx;
 using Nanome.Core;
 using Calcflow.UserStatistics;
+using System;
 
 namespace Matryx
 {
     public class MatryxTournament
     {
+        public enum SelectWinnerAction
+        {
+            DoNothing = 0,
+            StartNextRound,
+            CloseTournament
+        }
+
         public string address;
         public static string ABI;
         Nethereum.Contracts.Contract contract;
@@ -36,11 +44,12 @@ namespace Matryx
         public string file = "";
         public string fileHash = "";
         public string category = "";
+        public string latestRoundState = "";
         public BigInteger bounty;
         public BigInteger Bounty {
             get
             {
-                return (bounty / new BigInteger(1e18));
+                return (bounty / new BigInteger((decimal)1e18));
             }
             set
             {
@@ -59,18 +68,8 @@ namespace Matryx
                 entryFee = value * new BigInteger(1e18);
             }
         }
-        public int currentRound;
-        public string currentRoundAddress;
-        public string status;
-        public long roundEndTime;
+        public MatryxRound currentRound;
         public int numberOfParticipants;
-
-        public static readonly string STATE_SCHEDULED = "scheduled";
-        public static readonly string STATE_UNFUNDED = "notFunded";
-        public static readonly string STATE_OPEN = "open";
-        public static readonly string STATE_INREVIEW = "inReview";
-        public static readonly string STATE_HASWINNERS = "hasWinners";
-        public static readonly string STATE_CLOSED = "closed";
 
         public List<MatryxRound> rounds;
 
@@ -99,16 +98,6 @@ namespace Matryx
             rounds = new List<MatryxRound>();
             rounds.Add(new MatryxRound());
             rounds[0].Details = roundDetails;
-        }
-
-        public string getDescription()
-        {
-            if (description == null)
-            {
-                // ipfs call
-            }
-
-            return description;
         }
 
         public string getFile()
@@ -291,19 +280,64 @@ namespace Matryx
         [Function("recoverBounty")]
         public class RecoverBountyFunction : FunctionMessage { }
 
+        /// <summary>
+        /// Uploads a Tournament's description and files to IPFS.
+        /// </summary>
+        /// <param name="tournament"> The tournament whose description and files are to be uploaded. </param>
+        /// <returns> The description hash and files hash of the tournament in that order. </returns>
+        public IEnumerator uploadContent()
+        {
+            string contentHash = "";
+            string filesHash = "";
+
+            // TODO: Allow for file uploading for tournaments (FileBrowser)
+            //if (tournament.fileHash == null || tournament.fileHash.Equals(string.Empty))
+            //{
+            //    if (tournament.file != null && !tournament.file.Equals(string.Empty))
+            //    {
+            //        var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, Utils.uploadFiles("filesContent", "", tournament.file, "text/plain"));
+            //        yield return uploadToIPFS;
+            //        filesHash = uploadToIPFS.result;
+            //    }
+            //}
+
+            if (contentHash == string.Empty)
+            {
+                if (description != null && !description.Equals(string.Empty))
+                {
+                    var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, MatryxCortex.uploadJson(title, description, "", "math"));
+                    yield return uploadToIPFS;
+                    contentHash = uploadToIPFS.result;
+                }
+            }
+
+            yield return new string[2] { contentHash, filesHash };
+        }
+
         //function createSubmission(string calldata content, bytes32 commitHash) external;
         public IEnumerator create(Async.EventDelegate callback = null)
         {
             StatisticsTracking.StartEvent("Matryx", "Tournament Creation");
 
             ResultsMenu.transactionObject = this;
+            ResultsMenu.Instance.SetStatus("Checking MTX balance and platform allowance...");
 
-            var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.activeAccount, MatryxPlatform.address));
+            var allowance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.allowance(NetworkSettings.currentAddress, MatryxPlatform.address));
             yield return allowance;
+
+            var balance = new Utils.CoroutineWithData<BigInteger>(MatryxCortex.Instance, MatryxToken.balanceOf(NetworkSettings.currentAddress));
+            yield return balance;
+
+            if (balance.result < bounty)
+            {
+                ResultsMenu.Instance.SetStatus("Insufficient MTX. Please visit <link=https://app.matryx.ai/><u>our Matryx Dapp</u></link> for MTX Tokens.", true);
+                ResultsMenu.Instance.ReturnToCalcflowAfterSeconds(8f);
+                yield break;
+            }
 
             if (allowance.result < bounty)
             {
-                ResultsMenu.Instance.SetStatus("Approving MatryxPlatform for "  + Bounty + " MTX...");
+                ResultsMenu.Instance.SetStatus("Approving MatryxPlatform for " + Bounty + " MTX...");
 
                 if (allowance.result != BigInteger.Zero)
                 {
@@ -312,7 +346,7 @@ namespace Matryx
 
                     if (!approveZero.result)
                     {
-                        Debug.Log("Failed to reset tournament's allowance to zero for this user. Please check the allowance this user has granted the tournament");
+                        ResultsMenu.Instance.PostFailure(this, "Failed to reset the platform allowance to zero");
                         yield break;
                     }
                 }
@@ -322,7 +356,7 @@ namespace Matryx
 
                 if (!approveBounty.result)
                 {
-                    Debug.Log("Failed to set the tournament's allowance from this user to the tournament's entry fee");
+                    ResultsMenu.Instance.PostFailure(this, "Failed to give the platform an MTX allowance");
                     yield break;
                 }
             }
@@ -330,14 +364,14 @@ namespace Matryx
             if (contentHash.Equals(""))
             {
                 ResultsMenu.Instance.SetStatus("Uploading Tournament Content...");
-                var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxCortex.Instance, Utils.uploadTournament(this));
+                var uploadToIPFS = new Utils.CoroutineWithData<string[]>(MatryxCortex.Instance, uploadContent());
                 yield return uploadToIPFS;
 
-                if(!uploadToIPFS.result[0].Equals(string.Empty))
+                if (!uploadToIPFS.result[0].Equals(string.Empty))
                 {
                     contentHash = uploadToIPFS.result[0];
                 }
-                if(!uploadToIPFS.result[1].Equals(string.Empty))
+                if (!uploadToIPFS.result[1].Equals(string.Empty))
                 {
                     fileHash = uploadToIPFS.result[1];
                 }
@@ -347,15 +381,12 @@ namespace Matryx
             var createTournament = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, MatryxPlatform.createTournament(this));
             yield return createTournament;
 
-            if (callback != null)
-            {
-                callback(createTournament.result);
-            }
+            callback?.Invoke(createTournament.result);
         }
 
         public IEnumerator getInfo()
         {
-            var request = new QueryUnityRequest<GetInfoFunction, TournamentInfo>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetInfoFunction, TournamentInfo>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetInfoFunction(), address);
             owner = request.Result.owner.ToLower();
             yield return request.Result;
@@ -363,74 +394,83 @@ namespace Matryx
 
         public IEnumerator getDetails()
         {
-            var request = new QueryUnityRequest<GetDetailsFunction, TournamentDetails>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetDetailsFunction, TournamentDetails>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetDetailsFunction(), address);
         }
 
         public IEnumerator getBalance()
         {
-            var request = new QueryUnityRequest<GetBalanceFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetBalanceFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetBalanceFunction(), address);
             yield return request.Result;
         }
 
         public IEnumerator getState()
         {
-            var request = new QueryUnityRequest<GetStateFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetStateFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetStateFunction(), address);
             yield return request.Result;
         }
 
         public IEnumerator getRoundState(BigInteger roundIndex)
         {
-            var request = new QueryUnityRequest<GetRoundStateFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetRoundStateFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetRoundStateFunction() { RoundIndex = roundIndex }, address);
             yield return request.Result;
         }
 
         public IEnumerator getCurrentRoundIndex()
         {
-            var request = new QueryUnityRequest<GetCurrentRoundIndexFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetCurrentRoundIndexFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetCurrentRoundIndexFunction(), address);
             yield return request.Result;
         }
 
         public IEnumerator getRoundInfo(BigInteger roundIndex)
         {
-            var request = new QueryUnityRequest<GetRoundInfoFunction, MatryxRound.RoundInfo>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetRoundInfoFunction, MatryxRound.RoundInfo>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetRoundInfoFunction() { RoundIndex = roundIndex }, address);
         }
 
-        public IEnumerator getRoundDetails(BigInteger roundIndex)
+        public IEnumerator getRoundDetails(BigInteger roundIndex, Async.EventDelegate onSuccess, Async.EventDelegate onFailure)
         {
-            var request = new QueryUnityRequest<GetRoundDetailsFunction, MatryxRound.RoundDetails>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetRoundDetailsFunction, MatryxRound.RoundDetails>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetRoundDetailsFunction() { RoundIndex = roundIndex }, address);
+            yield return request.Result;
+            if(request.Result.Review > 0)
+            {
+                onSuccess?.Invoke(request.Result);
+            }
+            else
+            {
+                onFailure?.Invoke(request.Result);
+            }
         }
 
         public IEnumerator getSubmissionCount()
         {
-            var request = new QueryUnityRequest<GetSubmissionCountFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetSubmissionCountFunction, EthereumTypes.Uint256>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetSubmissionCountFunction(), address);
             yield return request.Result;
         }
 
         public IEnumerator getEntryFeePaid(string user)
         {
-            var request = new QueryUnityRequest<GetEntryFeePaidFunction, EthereumTypes.Address>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var request = new QueryUnityRequest<GetEntryFeePaidFunction, EthereumTypes.Address>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return request.Query(new GetEntryFeePaidFunction() { User = user }, address);
             yield return request.Result;
         }
 
         public IEnumerator isEntrant(string user)
         {
-            var isEntrantRequest = new QueryUnityRequest<IsEntrantFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.activeAccount);
+            var isEntrantRequest = new QueryUnityRequest<IsEntrantFunction, EthereumTypes.Bool>(NetworkSettings.infuraProvider, NetworkSettings.currentAddress);
             yield return isEntrantRequest.Query(new IsEntrantFunction() { User = user }, address);
             yield return isEntrantRequest.Result;
         }
 
         public IEnumerator enter(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<EnterFunction>(new EnterFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             var txStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "enter", thread));
@@ -440,7 +480,7 @@ namespace Matryx
 
         public IEnumerator exit(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<ExitFunction>(new ExitFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "exit", thread);
@@ -448,7 +488,7 @@ namespace Matryx
 
         public IEnumerator createSubmission(MatryxSubmission submission, Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             var createSubmissionMessage = new CreateSubmissionFunction()
             {
                 Content = submission.dto.Content,
@@ -465,7 +505,7 @@ namespace Matryx
 
         public IEnumerator updateDetails(TournamentDetails newDetails, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<UpdateDetailsFunction>(new UpdateDetailsFunction() { TDetails = newDetails, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createSubmission", thread));
@@ -473,64 +513,82 @@ namespace Matryx
             yield return getTransactionStatus.result;
         }
 
-        public IEnumerator addToBounty(BigInteger amount, Async thread = null)
+        public IEnumerator addToBounty(BigInteger amount, Async.EventDelegate onComplete = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<AddToBountyFunction>(new AddToBountyFunction() { Amount = amount, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
-            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createSubmission", thread));
+            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "addToBounty", null));
             yield return getTransactionStatus;
             yield return getTransactionStatus.result;
+
+            onComplete?.Invoke(getTransactionStatus.result);
         }
 
         public IEnumerator transferToRound(BigInteger amount, Async thread = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<TransferToRoundFunction>(new TransferToRoundFunction() { Amount = amount, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
-            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "createSubmission", thread));
+            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "transferToRound", thread));
             yield return getTransactionStatus;
             yield return getTransactionStatus.result;
         }
 
-        public IEnumerator selectWinners(List<byte[]> submissions, List<BigInteger> distribution, BigInteger action, BigInteger start, BigInteger duration, BigInteger review, BigInteger bounty, Async thread=null)
+        public IEnumerator selectWinners(List<byte[]> submissions, List<BigInteger> distribution, BigInteger action, BigInteger start, BigInteger duration, BigInteger review, BigInteger bounty, Async.EventDelegate onComplete=null)
         {
             WinnersData wData = new WinnersData() { Submissions = submissions, Distribution = distribution, Action = action };
             MatryxRound.RoundDetails rDetails = new MatryxRound.RoundDetails() { Start = start, Duration = duration, Review = review, Bounty = bounty };
 
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<SelectWinnersFunction>(new SelectWinnersFunction() { WData = wData, RDetails = rDetails, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
-            yield return Utils.GetTransactionStatus(transactionRequest, "selectWinners", thread);
+            yield return Utils.GetTransactionStatus(transactionRequest, "selectWinners", null);
+            
+
+            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "selectWinners", null));
+            yield return getTransactionStatus;
+            yield return getTransactionStatus.result;
+
+            onComplete?.Invoke(getTransactionStatus.result);
         }
 
-        public IEnumerator updateNextRound(MatryxRound.RoundDetails newDetails, Async thread = null)
+        public IEnumerator updateNextRound(MatryxRound.RoundDetails newDetails, Async.EventDelegate onComplete = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<UpdateNextRoundFunction>(new UpdateNextRoundFunction() { RDetails = newDetails, Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
-            yield return Utils.GetTransactionStatus(transactionRequest, "selectWinners", thread);
+            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "updateNextRound", null));
+            yield return getTransactionStatus;
+            yield return getTransactionStatus.result;
+            onComplete?.Invoke(getTransactionStatus.result);
         }
 
-        public IEnumerator startNextRound(Async thread=null)
+        public IEnumerator startNextRound(Async.EventDelegate onComplete=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<StartNextRoundFunction>(new StartNextRoundFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
-            yield return Utils.GetTransactionStatus(transactionRequest, "startNextRound", thread);
+            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "startNextRound", null));
+            yield return getTransactionStatus;
+            yield return getTransactionStatus.result;
+            onComplete?.Invoke(getTransactionStatus.result);
         }
 
-        public IEnumerator closeTournament(Async thread=null)
+        public IEnumerator closeTournament(Async.EventDelegate onComplete = null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<CloseTournamentFunction>(new CloseTournamentFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
-            yield return Utils.GetTransactionStatus(transactionRequest, "closeTournament", thread);
+            var getTransactionStatus = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, Utils.GetTransactionStatus(transactionRequest, "closeTournament", null));
+            yield return getTransactionStatus;
+            yield return getTransactionStatus.result;
+            onComplete?.Invoke(getTransactionStatus.result);
         }
 
         public IEnumerator withdrawFromAbandoned(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<WithdrawFromAbandonedFunction>(new WithdrawFromAbandonedFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "withdrawFromAbandoned", thread);
@@ -538,7 +596,7 @@ namespace Matryx
 
         public IEnumerator recoverBounty(Async thread=null)
         {
-            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.activePrivateKey);
+            var transactionRequest = new TransactionSignedUnityRequest(NetworkSettings.infuraProvider, NetworkSettings.currentPrivateKey);
             yield return transactionRequest.SignAndSendTransaction<RecoverBountyFunction>(new RecoverBountyFunction() { Gas = NetworkSettings.txGas, GasPrice = NetworkSettings.txGasPrice }, address);
 
             yield return Utils.GetTransactionStatus(transactionRequest, "recoverFunds", thread);

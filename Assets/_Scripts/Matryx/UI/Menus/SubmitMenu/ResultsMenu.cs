@@ -4,10 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Matryx;
+using Nanome.Core;
 
 public class ResultsMenu : MonoBehaviour {
     [SerializeField]
-    public Text statusText;
+    public TMPro.TextMeshProUGUI statusText;
+    [SerializeField]
+    public Button dumbLinkButton;
     [SerializeField]
     public Text severalMinutesText;
     [SerializeField]
@@ -16,6 +19,8 @@ public class ResultsMenu : MonoBehaviour {
     public Button tryAgainButton;
     [SerializeField]
     public GameObject createTournamentCanvas;
+    [SerializeField]
+    public GameObject createRoundCanvas;
     [SerializeField]
     public GameObject createSubmissionCanvas;
 
@@ -30,20 +35,26 @@ public class ResultsMenu : MonoBehaviour {
         }
     }
 
-    public void SetStatus(string text)
+    public void OnDisable()
     {
-        Instance.statusText.text = text;
+        SetStatus("");
     }
 
-	public void PostSuccess(MatryxSubmission submission)
+    public void SetStatus(string text, bool useButton = false)
+    {
+        statusText.text = text;
+        dumbLinkButton.gameObject.SetActive(useButton);
+    }
+
+	public void PostSuccess(MatryxSubmission submission, Async.EventDelegate onReturn = null)
     {
         SetStatus("Successfully Submitted to \n" + submission.tournament.title);
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
-        StartCoroutine(ReturnToCalcflowAfterSeconds(6f));
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
     }
 
-    public void PostFailure(MatryxSubmission submission, string message=null)
+    public void PostFailure(MatryxSubmission submission, string message=null, Async.EventDelegate onReturn = null)
     {
         if(message != null)
         {
@@ -51,24 +62,24 @@ public class ResultsMenu : MonoBehaviour {
         }
         else
         {
-            SetStatus("Failure Submitting to " + submission.tournament.address);
+            SetStatus("Failed to submit to " + submission.tournament.address);
         }
 
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
         tryAgainButton.gameObject.SetActive(true);
-        StartCoroutine(ReturnToCalcflowAfterSeconds(6f));
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
     }
 
-    public void PostSuccess(MatryxTournament tournament)
+    public void PostSuccess(MatryxTournament tournament, Async.EventDelegate onReturn = null)
     {
         SetStatus("Successfully Created \n" + tournament.title);
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
-        StartCoroutine(ReturnToCalcflowAfterSeconds(6f));
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
     }
 
-    public void PostFailure(MatryxTournament tournament, string message = null)
+    public void PostFailure(MatryxTournament tournament, string message = null, Async.EventDelegate onReturn = null)
     {
         if (message != null)
         {
@@ -76,16 +87,41 @@ public class ResultsMenu : MonoBehaviour {
         }
         else
         {
-            SetStatus("Failure Creating " + tournament.title);
+            SetStatus("Failed to create " + tournament.title);
         }
 
         severalMinutesText.gameObject.SetActive(false);
         mayReturn.gameObject.SetActive(true);
         tryAgainButton.gameObject.SetActive(true);
-        StartCoroutine(ReturnToCalcflowAfterSeconds(6f));
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
     }
 
-    public IEnumerator ReturnToCalcflowAfterSeconds(float seconds)
+    public void PostSuccess(MatryxRound newRound, Async.EventDelegate onReturn = null)
+    {
+        SetStatus("Successfully created round " + newRound.index);
+        severalMinutesText.gameObject.SetActive(false);
+        mayReturn.gameObject.SetActive(true);
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
+    }
+
+    public void PostFailure(MatryxRound newRound, string message = null, Async.EventDelegate onReturn = null)
+    {
+        if (message != null)
+        {
+            SetStatus(message);
+        }
+        else
+        {
+            SetStatus("Failed to create round " + newRound.index);
+        }
+
+        severalMinutesText.gameObject.SetActive(false);
+        mayReturn.gameObject.SetActive(true);
+        tryAgainButton.gameObject.SetActive(true);
+        StartCoroutine(ReturnToCalcflowAfterSeconds(3f, onReturn));
+    }
+
+    public IEnumerator ReturnToCalcflowAfterSeconds(float seconds, Async.EventDelegate onReturn = null)
     {
         yield return new WaitForSeconds(seconds);
 
@@ -106,10 +142,12 @@ public class ResultsMenu : MonoBehaviour {
         {
             CreateTournamentButton.Instance.ToggleOff();
         }
-        if (CreateSubmissionButton.Instance != null)
+        if (TournamentMenuCenterButton.Instance != null)
         {
-            CreateSubmissionButton.Instance.ToggleOff();
+            TournamentMenuCenterButton.Instance.ToggleOff();
         }
+
+        onReturn?.Invoke(null);
     }
 
     public void TryAgain()
@@ -117,12 +155,17 @@ public class ResultsMenu : MonoBehaviour {
         if(transactionObject is MatryxTournament)
         {
             createTournamentCanvas.SetActive(true);
-            this.gameObject.SetActive(false);
+            gameObject.SetActive(false);
+        }
+        else if(transactionObject is MatryxRound)
+        {
+            createRoundCanvas.SetActive(true);
+            gameObject.SetActive(false);
         }
         else if(transactionObject is MatryxSubmission)
         {
             createSubmissionCanvas.SetActive(true);
-            this.gameObject.SetActive(false);
+            gameObject.SetActive(false);
         }
     }
 }

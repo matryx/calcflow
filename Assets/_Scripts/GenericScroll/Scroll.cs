@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NanoVRController;
+using Nanome.Core;
 
 [System.Serializable]
 [RequireComponent(typeof(JoyStickReceiver))]

@@ -5,13 +5,14 @@ using Matryx;
 public class CreateTournamentButton : QuickButton
 {
     [SerializeField]
-    TMPro.TextMeshPro text;
+    SpriteRenderer spriteRenderer;
     [SerializeField]
     private CreateTournamentMenu createTournamentMenu;
     [SerializeField]
-    private FlexButtonComponent buttonFlexComponent;
+    private FlexButtonComponent flexButtonComponent;
+    [SerializeField]
+    private TMPro.TextMeshPro labelText;
 
-    private Color PlusButtonColor = new Color((float)0x09 / (float)0xff, (float)0x3A / (float)0xff, (float)0x2C / (float)0xff);
     private Color ToggleOnColor = new Color(83f / 255f, 198f / 255f, 236f / 255f);
     private Color ToggleOffColor = new Color(117f / 255f, 205f / 255f, 234f / 255f);
     private Color DarkPassiveColor = new Color(0.2f, 0.475f, 0.565f);
@@ -21,6 +22,8 @@ public class CreateTournamentButton : QuickButton
 
     private float defaultFontSize = 1.4f;
     private float otherFontSize = 1.3f;
+    Sprite defaultSprite;
+    Sprite liftHeadsetSprite;
 
     private bool toggled = false;
 
@@ -31,6 +34,11 @@ public class CreateTournamentButton : QuickButton
         if (Instance == null)
         {
             Instance = this;
+            defaultSprite = spriteRenderer.sprite;
+            var texture = Resources.Load<Texture2D>("Icons/liftheadset_inverted_medium_ben");
+            var rect = new Rect(0f, 0f, texture.width, texture.height);
+            var pivot = spriteRenderer.sprite.pivot;
+            liftHeadsetSprite = Sprite.Create(texture, rect, new Vector2(0.56f, 0.52f));
         }
     }
 
@@ -47,35 +55,44 @@ public class CreateTournamentButton : QuickButton
         {
             ToggleOn();
         }
-        toggled = !toggled;
 
-        buttonFlexComponent.SetState(2);
+        flexButtonComponent.SetState(2);
     }
 
     protected override void ButtonExitBehavior(GameObject other)
     {
-        buttonFlexComponent.SetState(1);
+        flexButtonComponent.SetState(1);
     }
 
     public void ToggleOff()
     {
-        text.color = PlusButtonColor;
+        toggled = false;
 
-        buttonFlexComponent.selectedColor = ToggleOffColor;
-        buttonFlexComponent.passiveColor = LightPassiveColor;
-        buttonFlexComponent.hoveringColor = LightHoveringColor;
+        flexButtonComponent.selectedColor = ToggleOffColor;
+        flexButtonComponent.passiveColor = LightPassiveColor;
+        flexButtonComponent.hoveringColor = LightHoveringColor;
 
-        buttonFlexComponent.SetState(1);
+        spriteRenderer.sprite = defaultSprite;
+        labelText.text = "Create\nTournament";
+
+        flexButtonComponent.SetState(1);
+
+        Tippies.FadeDestroyTippy("Please Lift Headset");
     }
 
     public void ToggleOn()
     {
-        text.color = Color.white;
+        toggled = true;
 
-        buttonFlexComponent.selectedColor = ToggleOnColor;
-        buttonFlexComponent.passiveColor = DarkPassiveColor;
-        buttonFlexComponent.hoveringColor = DarkHoveringColor;
+        flexButtonComponent.selectedColor = ToggleOnColor;
+        flexButtonComponent.passiveColor = DarkPassiveColor;
+        flexButtonComponent.hoveringColor = DarkHoveringColor;
 
-        buttonFlexComponent.SetState(1);
+        spriteRenderer.sprite = liftHeadsetSprite;
+        labelText.text = "Lift\nHeadset";
+
+        flexButtonComponent.SetState(1);
+
+        Tippies.SpawnTippy("Please Lift Headset", 4f, TMPro.TextAlignmentOptions.Center, new Vector3(1f, 0.25f, 0.05f), 15f, AvatarSelector.centerEye, new Vector3(0f, 0f, 0.4f), 0.5f, 0.5f, Tippy.MovementMode.Soft, true);
     }
 }

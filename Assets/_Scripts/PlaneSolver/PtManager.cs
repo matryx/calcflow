@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 namespace PlaneSolver
 {
     public class PtManager : MonoBehaviour
@@ -184,9 +185,9 @@ namespace PlaneSolver
             //inputReceived = true;
 
             SetOutput(ptSet.ptCoords[ptName].X);
-            ptInput.RewriteInput(newLoc.x);
-            SetOutput(ptSet.ptCoords[ptName].Y);
             ptInput.RewriteInput(newLoc.y);
+            SetOutput(ptSet.ptCoords[ptName].Y);
+            ptInput.RewriteInput(newLoc.x);
             SetOutput(ptSet.ptCoords[ptName].Z);
             ptInput.RewriteInput(newLoc.z);
             SetOutput(originalExpression);
@@ -409,4 +410,6 @@ namespace PlaneSolver
             }
         }
     }
+
 }
+

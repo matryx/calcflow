@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 abstract public class FlexPanelComponent : MonoBehaviour
 {
-    private FlexMenu menu;
+    protected FlexMenu menu;
     private List<FlexActionableComponent> actions = new List<FlexActionableComponent>();
 
     public List<FlexActionableComponent> Actions
@@ -97,7 +97,7 @@ abstract public class FlexPanelComponent : MonoBehaviour
         }
     }
 
-    private void StartAction(FlexActionableComponent sender, GameObject collider)
+    protected virtual void StartAction(FlexActionableComponent sender, GameObject collider)
     {
         if (menu != null)
         {
@@ -109,7 +109,7 @@ abstract public class FlexPanelComponent : MonoBehaviour
     protected abstract void OnActionStart(FlexActionableComponent sender, GameObject collider);
     protected abstract void OnActionEnd(FlexActionableComponent sender, GameObject collider);
 
-    private void EndAction(FlexActionableComponent sender, GameObject collider)
+    protected virtual void EndAction(FlexActionableComponent sender, GameObject collider)
     {
         if (menu != null)
         {
