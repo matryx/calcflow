@@ -24,17 +24,19 @@ public class AvatarSelector : MonoBehaviour
         OculusAvatar = transform.Find("OculusAvatar").gameObject;
         SteamAvatar = transform.Find("SteamAvatar").gameObject;
 
-        if (UnityEngine.XR.XRDevice.model.IndexOf("Rift") > 0)
-        {
-            SteamAvatar.SetActive(false);
-            OculusAvatar.SetActive(true);
-            Avatar = OculusAvatar;
-        }
-        else
+        if (UnityEngine.XR.XRDevice.model.IndexOf("Vive") > 0)
         {
             SteamAvatar.SetActive(true);
             OculusAvatar.SetActive(false);
             Avatar = SteamAvatar;
+            Debug.Log("Using Vive");
+        }
+        else
+        {
+            SteamAvatar.SetActive(false);
+            OculusAvatar.SetActive(true);
+            Avatar = OculusAvatar;
+            Debug.Log("Using Oculus");
         }
     }
 
