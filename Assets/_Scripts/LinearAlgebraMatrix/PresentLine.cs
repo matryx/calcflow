@@ -246,42 +246,6 @@ namespace LinearAlgebraMatrix
 
 
             ApplyGraphAdjustment();
-            //sharedMaterial = backwardLine.GetComponent<MeshRenderer>().sharedMaterial;
-            //sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-            //    //plane normal vector is the rotated 'up' vector.
-            //    sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            //}
-
-
-            //Debug.Log("dddddddddddddddddd: " + transform.gameObject.name);
-            //if(transform.gameObject.name == "PlaneExpression_null")
-            //{
-            //    var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
-            //    sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            //    for (int i = 0; i < 6; i++)
-            //    {
-            //        sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-            //        //plane normal vector is the rotated 'up' vector.
-            //        sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            //    }
-
-            //    sharedMaterial = backwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
-            //    sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            //    for (int i = 0; i < 6; i++)
-            //    {
-            //        sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-            //        //plane normal vector is the rotated 'up' vector.
-            //        sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            //    }
-            //}
-
-
 
         }
 
@@ -297,18 +261,21 @@ namespace LinearAlgebraMatrix
             //p1 = new Vector3(-2, 1, 0);
             //p2 = new Vector3(0, 0, 0);
             //p3 = new Vector3(0, 0, 0);
-            vector23 = p2 - p3;
-            vector12 = p1 - p2;
+            // vector23 = p2 - p3;
+            // vector12 = p1 - p2;
 
-            center = (p1 + p2 + p3) / 3;
-            stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+            // center = (p1 + p2 + p3) / 3;
+            // stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
 
-            pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
-            pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
-            pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
+            // pt1Label.text = "(" + p1.x + "," + p1.y + "," + p1.z + ")";
+            // pt2Label.text = "(" + p2.x + "," + p2.y + "," + p2.z + ")";
+            // pt3Label.text = "(" + p3.x + "," + p3.y + "," + p3.z + ")";
             //Debug.Log("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
             //Debug.Log("(" + p1.x + "," + p1.y + "," + p1.z + ")");
 
+            center = Vector3.zero;
+            stepSize = 5;
+            steps = 3;
 
             //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
             //Get the range of the box
@@ -324,6 +291,16 @@ namespace LinearAlgebraMatrix
             zLabelManager.Max = center.z + stepSize * steps;
             //Get the interaction points between the box edges and the plane
             //expr = solver.SymbolicateExpression(rawEquation);
+        }
+
+        public Vector3 ScaledPoint(Vector3 pt)
+        {
+            Vector3 result = Vector3.zero;
+            //print("raw pt1 position: " + pt);
+            result.z = (pt.x - xLabelManager.Min) / (xLabelManager.Max - xLabelManager.Min) * 20 - 10;
+            result.x = (pt.y - yLabelManager.Min) / (yLabelManager.Max - yLabelManager.Min) * 20 - 10;
+            result.y = (pt.z - zLabelManager.Min) / (zLabelManager.Max - zLabelManager.Min) * 20 - 10;
+            return result;
         }
 
         //public void ApplyUnroundCenter(string ptName, Vector3 newLoc)
@@ -488,15 +465,7 @@ namespace LinearAlgebraMatrix
         //    return (new Vector3(pt.X.Value, pt.Y.Value, pt.Z.Value));
         //}
 
-        public Vector3 ScaledPoint(Vector3 pt)
-        {
-            Vector3 result = Vector3.zero;
-            //print("raw pt1 position: " + pt);
-            result.z = (pt.x - xLabelManager.Min) / (xLabelManager.Max - xLabelManager.Min) * 20 - 10;
-            result.x = (pt.y - yLabelManager.Min) / (yLabelManager.Max - yLabelManager.Min) * 20 - 10;
-            result.y = (pt.z - zLabelManager.Min) / (zLabelManager.Max - zLabelManager.Min) * 20 - 10;
-            return result;
-        }
+
 
         //public Vector3 UnscaledPoint(Vector3 pt)
         //{

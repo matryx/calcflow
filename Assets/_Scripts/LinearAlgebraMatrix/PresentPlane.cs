@@ -155,26 +155,6 @@ namespace LinearAlgebraMatrix
                 sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
-            // sharedMaterial = cubeCol.GetComponent<MeshRenderer>().sharedMaterial;
-            // sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            // for (int i = 0; i < 6; i++)
-            // {
-            //     sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-            //     //plane normal vector is the rotated 'up' vector.
-            //     sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            // }
-
-            // sharedMaterial = cubeNull.GetComponent<MeshRenderer>().sharedMaterial;
-            // sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            // for (int i = 0; i < 6; i++)
-            // {
-            //     sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-            //     //plane normal vector is the rotated 'up' vector.
-            //     sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            // }
-
 
             GetLocalPoint();
             ApplyGraphAdjustment();
@@ -196,14 +176,17 @@ namespace LinearAlgebraMatrix
             //p1 = new Vector3(1, 2, 0);
             //p2 = new Vector3(3, 6, 1);
             //p3 = new Vector3(0, 0, 0);
-            vector23 = p2 - p3;
-            vector12 = p1 - p2;
-            vector13 = p1 - p3;
+            // vector23 = p2 - p3;
+            // vector12 = p1 - p2;
+            // vector13 = p1 - p3;
 
-            center = (p1 + p2 + p3) / 3;
-            stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+            // center = (p1 + p2 + p3) / 3;
+            // stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
             ////////////////////
 
+            center = Vector3.zero;
+            stepSize = 5;
+            steps = 3;
 
             //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
             //Get the range of the box

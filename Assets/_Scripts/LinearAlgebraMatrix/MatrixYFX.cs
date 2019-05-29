@@ -179,15 +179,16 @@ namespace LinearAlgebraMatrix
             {
                 planeCol.SetActive(false);
                 lineCol.SetActive(false);
-                cubeCol.SetActive(false);
-                // cubeCol.SetActive(true);
-                // cubeCol.GetComponent<Renderer>().material = material2;
+                // cubeCol.SetActive(false);
+                cubeCol.SetActive(true);
+                cubeCol.GetComponent<Renderer>().material = material2;
                 pt3Col.SetActive(true);
-                //scaledPt3 = ScaledPoint(p3);
                 pt3Col.transform.localPosition = Vector3.zero;
-                ApplyGraphAdjustment();
-                // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
+                pt3Col.GetComponent<Renderer>().material = material1;
                 pt3ColLabel.text = "(0,0,0)";
+                // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
+                
+               
                 // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
                 //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
 
@@ -195,7 +196,11 @@ namespace LinearAlgebraMatrix
                 lineNull.SetActive(false);
                 cubeNull.SetActive(true);
                 cubeNull.GetComponent<Renderer>().material = material1;
-                pt3Null.SetActive(false);
+                pt3Null.SetActive(true);
+                pt3Null.transform.localPosition = Vector3.zero;
+                pt3Null.GetComponent<Renderer>().material = material2;
+                pt3NullLabel.text = "(0,0,0)";
+                ApplyGraphAdjustment();
                 // PlaneExpression_Null.GetComponent<PresentLine>().enabled = false;
 
                 planeColT.SetActive(false);
@@ -260,21 +265,28 @@ namespace LinearAlgebraMatrix
                 planeCol.SetActive(false);
                 lineCol.SetActive(false);
                 cubeCol.SetActive(true);
-                // cubeCol.GetComponent<Renderer>().material = material1;
-                pt3Col.SetActive(false);
+                cubeCol.GetComponent<Renderer>().material = material1;
+                pt3Col.SetActive(true);
+                pt3Col.transform.localPosition = Vector3.zero;
+                pt3Col.GetComponent<Renderer>().material = material2;
+                pt3ColLabel.text = "(0,0,0)";
+                
                 // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
                 //PlaneExpression_col.GetComponent<PresentPlane>().enabled = false;
 
                 planeNull.SetActive(false);
                 lineNull.SetActive(false);
-                cubeNull.SetActive(false);
-                // cubeNull.SetActive(true);
-                // cubeNull.GetComponent<Renderer>().material = material2;
+                // cubeNull.SetActive(false);
+                cubeNull.SetActive(true);
+                cubeNull.GetComponent<Renderer>().material = material2;
                 pt3Null.SetActive(true);
                 pt3Null.transform.localPosition = Vector3.zero;
+                pt3Null.GetComponent<Renderer>().material = material1;
+                pt3NullLabel.text = "(0,0,0)";
                 ApplyGraphAdjustment();
                 // Debug.Log(" pt3.transform.localPosition pt3.transform.localPosition " + pt3.transform.localPosition);
-                pt3NullLabel.text = "(0,0,0)";
+                
+                
                 // PlaneExpression_col.GetComponent<PresentLine>().enabled = false;
 
                 planeColT.SetActive(false);
