@@ -109,9 +109,13 @@ namespace orthProj
             zAxis.localPosition = ScaledPoint(center);
 
             //projectionAxis
-            lookAtAxisTarget.localPosition = ScaledPoint(PtCoordToVector(rawPt2));   
-            axisline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+            lookAtAxisTarget.localPosition = ScaledPoint(PtCoordToVector(rawPt2));
+            Debug.Log("LOOOOOOOKING AT " + lookAtAxisTarget.localPosition);
+            //  axisline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
+            axisline.localPosition = ScaledPoint(center);
             axisline.LookAt(lookAtAxisTarget);
+
+          
 
             var sharedMaterial2 = forwardAxisLine.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial2.SetInt("_planeClippingEnabled", 1);
@@ -134,6 +138,7 @@ namespace orthProj
             {
                 forwardAxisLine.GetComponent<MeshRenderer>().enabled = true;
                 projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2));
+
             }
             //if there is a 3rd coord (subspace)
             else
@@ -341,7 +346,9 @@ namespace orthProj
 
         public Vector3 PtCoordToVector(PtCoord pt)
         {
+              Debug.Log("no instance???? !!!!!!!!!!!!!!! " + pt.X.Value +  pt.Y.Value + pt.Z.Value);
             return (new Vector3(pt.X.Value, pt.Y.Value, pt.Z.Value));
+          
         }
 
         //maintains ratio of each point in the scaled space so the points don't go out of bounds

@@ -15,9 +15,10 @@ namespace orthProj
 
         void Update()
         {
+
             var mesh = GetComponentInChildren<MeshRenderer>().enabled;
             pt1 = presentline.scaledPt1; 
-
+           // pt1 = presentline.lookAtAxisTarget.localPosition;
             transform.localPosition = pt1;
 
             //rendering boundaries
@@ -31,6 +32,21 @@ namespace orthProj
             line.SetWidth(.05f, .05f);
             line.SetPosition(0, transform.position);
             line.SetPosition(1, origin.position);
+
+            Debug.Log("MOVING TOOOOOOOOO " + position);
+
+
+
+            var sharedMaterial = transform.GetComponentInChildren<MeshRenderer>().sharedMaterial;
+            sharedMaterial.SetInt("_planeClippingEnabled", 1);
+
+            for (int i = 0; i < 6; i++)
+            {
+                sharedMaterial.SetVector("_planePos" + i, presentline.walls[i].transform.position);
+                //plane normal vector is the rotated 'up' vector.
+                sharedMaterial.SetVector("_planeNorm" + i, presentline.walls[i].transform.rotation * Vector3.up);
+            }
+
         }
     }
 }

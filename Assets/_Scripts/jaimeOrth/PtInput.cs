@@ -45,6 +45,20 @@ namespace orthProj
             index = currExpression.tokens.Count;
         }
 
+        public void setPlane()
+        {
+            lineCover.SetActive(false);
+            planeButtonCover.SetActive(true);
+            lineButtonCover.SetActive(false);
+        }
+
+        public void setLine()
+        {
+            lineCover.SetActive(true);
+            planeButtonCover.SetActive(false);
+            lineButtonCover.SetActive(true);
+        }
+
         public void HandleInput(string buttonID)
         {
             print(buttonID + " fired");
@@ -56,29 +70,62 @@ namespace orthProj
                     index++;
                     ptManager.inputReceived = true;
                     break;
+                //case "xShortCut" || "yShortCut":
+                //    shortCutManager(buttonID);
+                //    break;
+                case "xShortCut":
+                    Debug.Log("xSHORT CUT FIRED!!!!!!!!!!!!!!");
+                    ptManager.updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
+                    setLine();
+                    ptManager.inputReceived = true;
+                    break;
+                case "yShortCut":
+                    Debug.Log("ySHORT CUT FIRED!!!!!!!!!!!!!!");
+                    ptManager.updatePoint("pt2", new Vector3(0, 1, 0), false); // first axis
+                    setLine();
+                    ptManager.inputReceived = true;
+                    break;
+                case "zShortCut":
+                    Debug.Log("zSHORT CUT FIRED!!!!!!!!!!!!!!");
+                    ptManager.updatePoint("pt2", new Vector3(0, 0, 1), false); // first axis
+                    setLine();
+                    ptManager.inputReceived = true;
+                    break;
+                case "xyShortCut":
+                    ptManager.updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
+                    setPlane();
+                    ptManager.updatePoint("pt3", new Vector3(0, 1, 0), false); // first axi
+                    ptManager.inputReceived = true;
+                    break;
+                case "xzShortCut":
+                    ptManager.updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
+                    setPlane();
+                    ptManager.updatePoint("pt3", new Vector3(0, 0, 1), false); // first axis
+                    ptManager.inputReceived = true;
+                    break;
+                case "yzShortCut":
+                    ptManager.updatePoint("pt2", new Vector3(0, 1, 0), false); // first axis
+                    setPlane();
+                    ptManager.updatePoint("pt3", new Vector3(0, 0, 1), false); // first axis
+                    ptManager.inputReceived = true;
+                    //  presentline.
+                    break;
                 case "ProjPlane":
                     Debug.Log("PROJPLANE FIRED!!!!!!!!!!!!!!");
                     ptManager.updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
-                    //lineCover.GetComponent<MeshRenderer>().enabled = false;
-                    lineCover.SetActive(false);
-                    planeButtonCover.SetActive(true);
-                    lineButtonCover.SetActive(false);
-                    ptManager.updatePoint("pt3", new Vector3(0, 0, 0), false); // first axis
+                    setPlane();
+
+                    //here the plane is not resetting, the point is internally staying there probably and the not actually updating the plane
+                    //call plane or disable plane?
+                    //also the line's center point becomes odd.
+                    ptManager.inputReceived = true;
                     break;
                 case "ProjLine":
                     Debug.Log("LINE FIRED!!!!!!!!!!!!!!");
                     ptManager.updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
                     //lineCover.GetComponent<MeshRenderer>().enabled = false;
-                    ptManager.updatePoint("pt3", new Vector3(0, 0, 0), false); // first axis
-                    lineCover.SetActive(true);
-                    planeButtonCover.SetActive(false);
-                    lineButtonCover.SetActive(true);
-                    break;
-                case "XY":
-                    Debug.Log("XY!!!!!!!!!!!!!!");
-                    ptManager.updatePoint("pt2", new Vector3(1, 1, 0), false); // first axis
-                    //remove grey out from point 3
-                    ptManager.updatePoint("pt3", new Vector3(0, 0, 0), false); // first axis
+                    setLine();
+                    ptManager.inputReceived = true;
                     break;
                 case "Paste":
                     /*

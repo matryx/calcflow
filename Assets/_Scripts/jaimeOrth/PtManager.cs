@@ -75,6 +75,7 @@ namespace orthProj
             internal TextMesh pt1XInput, pt1YInput, pt1ZInput,
                     pt2XInput, pt2YInput, pt2ZInput,
                     pt3XInput, pt3YInput, pt3ZInput,
+                    projXInput, projYInput, projZInput,
                     aInput, bInput, cInput, dInput;
         }
 
@@ -122,10 +123,20 @@ namespace orthProj
 
         void Update()
         {
+            //if only projecting on a line
             if (ptInput.lineCover.activeSelf)
             {
+                Debug.Log("LINEEEEEEEE COVERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+                presentline.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                presentline.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
                 updatePoint("pt3", new Vector3(0, 0, 0), false);
             }
+            else if (!ptInput.lineCover.activeSelf && presentline.PlaneValid())
+            {
+                presentline.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
+                presentline.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+            }
+
             if (updateText || inputReceived)
             {
                 manageText();
@@ -201,9 +212,13 @@ namespace orthProj
             SetOutput(originalExpression);
            // if (fixedPlane)
             //{
-                manageText();
-                ManageFeedback();
-                ptSet.CompileAll();
+            manageText();
+
+            bool isValid = ptSet.CompileAll(); ///
+            Debug.Log("is it valid? " + isValid);
+
+            ManageFeedback();
+           // ptSet.CompileAll();
            // }
           //  else
             //{
@@ -294,8 +309,19 @@ namespace orthProj
         public void manageText()
         {
             #region coords
+            if (ptSet.ptCoords.ContainsKey("pt1") && inputs.pt1XInput != null && ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2XInput != null)
+            {
+               inputs.projXInput.text = presentline.projectedResult.x.ToString();
+                inputs.projYInput.text = presentline.projectedResult.y.ToString();
+                inputs.projZInput.text = presentline.projectedResult.z.ToString();
+
+                if (inputs.projXInput.text.Length == 0) inputs.projXInput.text = "0";
+                if (inputs.projYInput.text.Length == 0) inputs.projYInput.text = "0";
+                if (inputs.projZInput.text.Length == 0) inputs.projZInput.text = "0";
+            }
             if (ptSet.ptCoords.ContainsKey("pt1") && inputs.pt1XInput != null)
             {
+         
                 inputs.pt1XInput.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength);
                 inputs.pt1YInput.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
                 inputs.pt1ZInput.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength);
