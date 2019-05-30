@@ -127,21 +127,18 @@ namespace orthProj
 
             if((new Vector3(0, 0, 0)) == PtCoordToVector(rawPt2))
             {
-                Debug.Log("NOOOOOOOOOOOOOOOOOOOOO PROJECTING LINNNNNNNNNNNNNNNNNNNNNNNNEEEEEEEEEEEEEE");
                 forwardAxisLine.GetComponent<MeshRenderer>().enabled = false;
             }
             //if there is no 3rd component (line)
             else if (new Vector3(0, 0, 0) == PtCoordToVector(rawPt3))
             {
                 forwardAxisLine.GetComponent<MeshRenderer>().enabled = true;
-                Debug.Log("calculating projection on a LIIIIIIIIIIIIIIIINNNNNNNNNNNNNNEEEEEEEEEE");
                 projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2));
             }
             //if there is a 3rd coord (subspace)
             else
             {
                 forwardAxisLine.GetComponent<MeshRenderer>().enabled = false;
-                Debug.Log("calculating projection on a PLAAAAAAAAAAAAAAAAAAAAAAAAAAAAANNNNNNNNNNNEEEEEEEEEEE");
                 projectedResult = Vector3.ProjectOnPlane(PtCoordToVector(rawPt1), normalVector);
                 Debug.Log("projected result should be: " + projectedResult);
             }

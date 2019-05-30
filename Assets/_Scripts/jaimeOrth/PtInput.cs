@@ -6,6 +6,9 @@ namespace orthProj
 {
     public class PtInput : MonoBehaviour
     {
+        public GameObject lineCover;
+        public GameObject lineButtonCover;
+        public GameObject planeButtonCover;
 
         internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
         {
@@ -52,6 +55,30 @@ namespace orthProj
                     currExpression.tokens.Insert(index, buttonID);
                     index++;
                     ptManager.inputReceived = true;
+                    break;
+                case "ProjPlane":
+                    Debug.Log("PROJPLANE FIRED!!!!!!!!!!!!!!");
+                    ptManager.updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
+                    //lineCover.GetComponent<MeshRenderer>().enabled = false;
+                    lineCover.SetActive(false);
+                    planeButtonCover.SetActive(true);
+                    lineButtonCover.SetActive(false);
+                    ptManager.updatePoint("pt3", new Vector3(0, 0, 0), false); // first axis
+                    break;
+                case "ProjLine":
+                    Debug.Log("LINE FIRED!!!!!!!!!!!!!!");
+                    ptManager.updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
+                    //lineCover.GetComponent<MeshRenderer>().enabled = false;
+                    ptManager.updatePoint("pt3", new Vector3(0, 0, 0), false); // first axis
+                    lineCover.SetActive(true);
+                    planeButtonCover.SetActive(false);
+                    lineButtonCover.SetActive(true);
+                    break;
+                case "XY":
+                    Debug.Log("XY!!!!!!!!!!!!!!");
+                    ptManager.updatePoint("pt2", new Vector3(1, 1, 0), false); // first axis
+                    //remove grey out from point 3
+                    ptManager.updatePoint("pt3", new Vector3(0, 0, 0), false); // first axis
                     break;
                 case "Paste":
                     /*

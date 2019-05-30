@@ -11,7 +11,6 @@ namespace orthProj
         [HideInInspector]
         public bool eqnInput;
 
-
         [HideInInspector]
         public PtSet ptSet;
 
@@ -108,8 +107,8 @@ namespace orthProj
             ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
             //in unity z is the right 3rd axis
             updatePoint("pt1", new Vector3(1, 2, 3), false); // vector 
-            updatePoint("pt2", new Vector3(0, 0, 0), false); // first axis
-            updatePoint("pt3", new Vector3(0, 0, 0), false); // origin
+            updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
+            updatePoint("pt3", new Vector3(0, 1, 0), false); // origin
         }
 
 
@@ -123,6 +122,10 @@ namespace orthProj
 
         void Update()
         {
+            if (ptInput.lineCover.activeSelf)
+            {
+                updatePoint("pt3", new Vector3(0, 0, 0), false);
+            }
             if (updateText || inputReceived)
             {
                 manageText();
@@ -131,27 +134,23 @@ namespace orthProj
 
             if (inputReceived && !eqnInput)
             {
-                Debug.Log("AHHHHHHHHHHHHHHHHHHHH");
                 inputReceived = false;
                 bool isValid = ptSet.CompileAll();
-
                 ManageFeedback();
+
+                //plane stuff
                 if (isValid)
                 {
-                    Debug.Log("VVVVVVVVVVVVVVlIIIIIIIIIIIIIIDDDDDDDDD");
+                    
                     if (presentline.CalculatePlane())
                     {
-                        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CALLED!");
+                        
                         presentline.ApplyGraphAdjustment();
-                        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CALLED!1111111111111111");
                         presentline.GetLocalPoint();
-                        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!222222222222222222LLED!");
                         presentline.GetPlaneDirection();
-                        Debug.Log("!!!!!!!!!!!!!!!!!!!!!!!!33333333333333333!!CALLED!");
                     }
                     else
                     {
-                        Debug.Log("NOTCALLLLLCED?????");
                         presentline.ApplyGraphAdjustment();
                         presentline.GetLocalPoint();
                     }
@@ -249,9 +248,7 @@ namespace orthProj
             ManageFeedback();
             ptSet.CompileAll();
             presentline.GetLocalPoint();
-            Debug.Log("updatI11111111111111111111111111111ng");
             presentline.GetPlaneDirection();
-            Debug.Log("GOTTTTTTTTTTTTTTTTTTTTTTTTPLANNNNNNNNNNNNNEDIRRRRRRRRRRRRRRRRRR");
             presentline.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
             presentline.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
         }
