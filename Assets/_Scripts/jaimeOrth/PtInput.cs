@@ -73,13 +73,13 @@ namespace orthProj
                 //case "xShortCut" || "yShortCut":
                 //    shortCutManager(buttonID);
                 //    break;
-                case "xShortCut":
+                case "yShortCut":  /// TODO:  WHY???
                     Debug.Log("xSHORT CUT FIRED!!!!!!!!!!!!!!");
                     ptManager.updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
                     setLine();
                     ptManager.inputReceived = true;
                     break;
-                case "yShortCut":
+                case "xShortCut":  /// TODO:  WHY???
                     Debug.Log("ySHORT CUT FIRED!!!!!!!!!!!!!!");
                     ptManager.updatePoint("pt2", new Vector3(0, 1, 0), false); // first axis
                     setLine();
@@ -97,13 +97,13 @@ namespace orthProj
                     ptManager.updatePoint("pt3", new Vector3(0, 1, 0), false); // first axi
                     ptManager.inputReceived = true;
                     break;
-                case "xzShortCut":
+                case "yzShortCut":  /// TODO:  WHY???
                     ptManager.updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
                     setPlane();
                     ptManager.updatePoint("pt3", new Vector3(0, 0, 1), false); // first axis
                     ptManager.inputReceived = true;
                     break;
-                case "yzShortCut":
+                case "xzShortCut":  /// TODO:  WHY???
                     ptManager.updatePoint("pt2", new Vector3(0, 1, 0), false); // first axis
                     setPlane();
                     ptManager.updatePoint("pt3", new Vector3(0, 0, 1), false); // first axis

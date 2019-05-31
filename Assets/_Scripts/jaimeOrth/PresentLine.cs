@@ -347,7 +347,7 @@ namespace orthProj
         public Vector3 PtCoordToVector(PtCoord pt)
         {
               Debug.Log("no instance???? !!!!!!!!!!!!!!! " + pt.X.Value +  pt.Y.Value + pt.Z.Value);
-            return (new Vector3(pt.X.Value, pt.Y.Value, pt.Z.Value));
+            return (new Vector3(pt.Y.Value, pt.X.Value, pt.Z.Value));
           
         }
 
