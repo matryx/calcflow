@@ -30,6 +30,7 @@ namespace orthProj
         public PtManager ptManager;
         private PtCoord rawPt1, rawPt2, rawPt3, zero;
 
+        public Vector3 usersPoint;
         public Vector3 center;
         public Vector3 projectedResult;
         public Vector3 projectedScaled;
@@ -72,6 +73,7 @@ namespace orthProj
                 rawPt1 = ptManager.ptSet.ptCoords["pt1"];
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+                usersPoint = PtCoordToVector(rawPt1);
             }
         }
 
@@ -84,6 +86,7 @@ namespace orthProj
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
             }
+            usersPoint = PtCoordToVector(rawPt1);
 
             plane.LookAt(lookAtPlaneTarget);
 
@@ -110,8 +113,6 @@ namespace orthProj
 
             //projectionAxis
             lookAtAxisTarget.localPosition = ScaledPoint(PtCoordToVector(rawPt2));
-            Debug.Log("LOOOOOOOKING AT " + lookAtAxisTarget.localPosition);
-            //  axisline.localPosition = ScaledPoint(new Vector3(0, 0, 0));
             axisline.localPosition = ScaledPoint(center);
             axisline.LookAt(lookAtAxisTarget);
 
@@ -126,8 +127,6 @@ namespace orthProj
                 //plane normal vector is the rotated 'up' vector.
                 sharedMaterial2.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
-
-            //CHECK THAT THE SCALING IS ACTUALLY MOVING? 
 
             if((new Vector3(0, 0, 0)) == PtCoordToVector(rawPt2))
             {
@@ -145,13 +144,8 @@ namespace orthProj
             {
                 forwardAxisLine.GetComponent<MeshRenderer>().enabled = false;
                 projectedResult = Vector3.ProjectOnPlane(PtCoordToVector(rawPt1), normalVector);
-                Debug.Log("projected result should be: " + projectedResult);
             }
             
-
-            //planes material
-            // if(transform.gameObject.name == "PlaneExpression_null")
-            //{
             var sharedMaterial3 = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial3.SetInt("_planeClippingEnabled", 1);
 
@@ -162,16 +156,15 @@ namespace orthProj
                 sharedMaterial3.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
 
-            sharedMaterial3 = backwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
-            sharedMaterial3.SetInt("_planeClippingEnabled", 1);
+            var sharedMaterial = backwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+            sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
             for (int i = 0; i < 6; i++)
             {
-                sharedMaterial3.SetVector("_planePos" + i, walls[i].transform.position);
+                sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
                 //plane normal vector is the rotated 'up' vector.
-                sharedMaterial3.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
+                sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
             }
-            //   }
 
 
         }
@@ -179,11 +172,8 @@ namespace orthProj
 
         public void ApplyGraphAdjustment()
         {
-
-            vector23 = GenerateVector(rawPt2, rawPt3);
-            center = (new Vector3(0, 0, 0) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-            stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
-            //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
+            center = new Vector3(0, 0, 0);
+            stepSize = (center - PtCoordToVector(rawPt1)).magnitude;
             //Get the range of the box
             if (stepSize == 0)
             {
@@ -196,7 +186,6 @@ namespace orthProj
             yLabelManager.Max = center.y + stepSize * steps;
             zLabelManager.Max = center.z + stepSize * steps;
             //Get the interaction points between the box edges and the plane
-            //expr = solver.SymbolicateExpression(rawEquation);
         }
 
         public void ApplyUnroundCenter(string ptName, Vector3 newLoc)
@@ -222,37 +211,27 @@ namespace orthProj
             rawPt1 = ptManager.ptSet.ptCoords["pt1"];
             rawPt2 = ptManager.ptSet.ptCoords["pt2"];
             rawPt3 = ptManager.ptSet.ptCoords["pt3"];
-             
-
-            //vector12 = GenerateVector(rawPt1, rawPt2);
-            //vector13 = GenerateVector(rawPt1, rawPt3);
-            vector12 = new Vector3(0, 0, 0) - new Vector3(rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);  
-            vector13 = new Vector3(0, 0, 0) - new Vector3(rawPt3.X.Value, rawPt3.Y.Value, rawPt3.Z.Value);
+            
+            vector12 = new Vector3(0, 0, 0) - new Vector3(rawPt2.Y.Value, rawPt2.X.Value, rawPt2.Z.Value);  
+            vector13 = new Vector3(0, 0, 0) - new Vector3(rawPt3.Y.Value, rawPt3.X.Value, rawPt3.Z.Value);
             //Debug.Log("Vector 12 is: " + vector12 +". Vector13 is: " + vector13);
             normalVector = Vector3.Cross(vector12, vector13);
-            Debug.Log("Normal vector is: " + normalVector);
             if (PlaneValid())
             {
               
                 forwardPlane.GetComponent<MeshRenderer>().enabled = true;
                 backwardPlane.GetComponent<MeshRenderer>().enabled = true;
 
+                // swapped x y
                 // Basic formula of the equation
-                d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
-                // string[] formattedValue = roundString(new float[] {normalVector.x, normalVector.y, normalVector.z});
-                // // Formatting equation
-                // if (formattedValue[1][0] != '-') formattedValue[1] = '+' + formattedValue[1];
-                // if (formattedValue[2][0] != '-') formattedValue[2] = '+' + formattedValue[2];
-                // rawEquation = formattedValue[0] + "x" + formattedValue[1] + "y" + formattedValue[2] + "z=" + d;
+                d = rawPt1.Y.Value * normalVector.y + rawPt1.X.Value * normalVector.x + rawPt1.Z.Value * normalVector.z;
                 ptManager.updateEqn(normalVector.x, normalVector.y, normalVector.z, d);
                 return true;
             }
             else
             {
-                Debug.Log("NOTVALID PLANE!!");
                 forwardPlane.GetComponent<MeshRenderer>().enabled = false;
                 backwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                // rawEquation = "Invalid Plane";
                 ptManager.updateEqn();
                 return false;
             }
@@ -295,14 +274,12 @@ namespace orthProj
         {
             if (PlaneValid())
             {
-                //scaledVector12 = point2.localPosition - point1.localPosition;
-                //scaledVector13 = point3.localPosition - point1.localPosition;
-                scaledVector12 = point2.localPosition - centerPt.localPosition;
-                scaledVector13 = point3.localPosition - centerPt.localPosition;
+
+                scaledVector12 = scaledPt2 - ScaledPoint(center);
+                scaledVector13 = scaledPt3 - ScaledPoint(center);
                 scaledNormal = Vector3.Cross(scaledVector12, scaledVector13);
                 float scale = dummySteps * stepSize / scaledNormal.magnitude;
                 Vector3 dummyPos = scaledNormal * scale;
-                Debug.Log("The Normal vector after scale is: " + dummyPos);
                 lookAtPlaneTarget.localPosition = dummyPos + ScaledPoint(center);
                 centerPt.localPosition = ScaledPoint(center);
                 plane.localPosition = ScaledPoint(center);
@@ -317,19 +294,17 @@ namespace orthProj
             {
                 return false;
             }
-            //vector12 = GenerateVector(rawPt1, rawPt2);
-            //vector13 = GenerateVector(rawPt1, rawPt3);
             vector12 = new Vector3(0, 0, 0) - new Vector3(rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
             vector13 = new Vector3(0, 0, 0) - new Vector3(rawPt3.X.Value, rawPt3.Y.Value, rawPt3.Z.Value);
             // points are not in same line
             float scale;
-            if (vector13.x != 0)
-            {
-                scale = vector12.x / vector13.x;
-            }
-            else if (vector13.y != 0)
+            if (vector13.y != 0)
             {
                 scale = vector12.y / vector13.y;
+            }
+            else if (vector13.x != 0)
+            {
+                scale = vector12.x / vector13.x;
             }
             else
             {
@@ -346,9 +321,7 @@ namespace orthProj
 
         public Vector3 PtCoordToVector(PtCoord pt)
         {
-              Debug.Log("no instance???? !!!!!!!!!!!!!!! " + pt.X.Value +  pt.Y.Value + pt.Z.Value);
             return (new Vector3(pt.Y.Value, pt.X.Value, pt.Z.Value));
-          
         }
 
         //maintains ratio of each point in the scaled space so the points don't go out of bounds
@@ -356,9 +329,9 @@ namespace orthProj
         {
             Vector3 result = Vector3.zero;
             //print("raw pt1 position: " + pt);
-            result.z = (pt.x - xLabelManager.Min) / (xLabelManager.Max - xLabelManager.Min) * 20 - 10;
-            result.x = (pt.y - yLabelManager.Min) / (yLabelManager.Max - yLabelManager.Min) * 20 - 10;
-            result.y = (pt.z - zLabelManager.Min) / (zLabelManager.Max - zLabelManager.Min) * 20 - 10;
+            result.z = (pt.x - xLabelManager.Min) / (xLabelManager.Max - xLabelManager.Min) * 40 - 20;
+            result.x = (pt.y - yLabelManager.Min) / (yLabelManager.Max - yLabelManager.Min) * 40 - 20;
+            result.y = (pt.z - zLabelManager.Min) / (zLabelManager.Max - zLabelManager.Min) * 40 - 20;
             return result;
         }
 
@@ -366,9 +339,9 @@ namespace orthProj
         {
             Vector3 result = Vector3.zero;
             print("raw pt1 position: " + pt);
-            result.x = (pt.z + 10) / 20 * (xLabelManager.Max - xLabelManager.Min) + xLabelManager.Min;
-            result.y = (pt.x + 10) / 20 * (yLabelManager.Max - yLabelManager.Min) + yLabelManager.Min;
-            result.z = (pt.y + 10) / 20 * (zLabelManager.Max - zLabelManager.Min) + zLabelManager.Min;
+            result.x = (pt.z + 20) / 40 * (xLabelManager.Max - xLabelManager.Min) + xLabelManager.Min;
+            result.y = (pt.x + 20) / 40 * (yLabelManager.Max - yLabelManager.Min) + yLabelManager.Min;
+            result.z = (pt.y + 20) / 40 * (zLabelManager.Max - zLabelManager.Min) + zLabelManager.Min;
             return result;
         }
     }

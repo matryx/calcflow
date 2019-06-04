@@ -40,8 +40,6 @@ namespace orthProj
 
         public TextMesh equation;
 
-    //    [SerializeField]
-     //   PresentPlane presentPlane;
         [SerializeField]
         PresentLine presentline;
 
@@ -112,12 +110,16 @@ namespace orthProj
             updatePoint("pt3", new Vector3(0, 1, 0), false); // origin
         }
 
-
-        void Start()
+        void Awake()
         {
             inputReceived = true;
             //eqnInput = false;
             Initialize();
+        }
+
+        void Start()
+        {
+
         }
         public bool updateText = false;
 
@@ -210,31 +212,12 @@ namespace orthProj
             SetOutput(ptSet.ptCoords[ptName].Z);
             ptInput.RewriteInput(newLoc.z);
             SetOutput(originalExpression);
-           // if (fixedPlane)
-            //{
             manageText();
 
-            bool isValid = ptSet.CompileAll(); ///
+            bool isValid = ptSet.CompileAll(); 
             Debug.Log("is it valid? " + isValid);
 
             ManageFeedback();
-           // ptSet.CompileAll();
-           // }
-          //  else
-            //{
-            //    manageText();
-            //    bool isValid = ptSet.CompileAll();
-            //    ManageFeedback();
-            //    //if plane is not fixed...
-            //    if (isValid)
-            //    {
-            //        if (presentline.CalculatePlane())
-            //        {
-            //            presentline.ApplyUnroundCenter(ptName, newLoc);
-            //            presentline.GetPlaneDirection();
-            //        }
-            //    }
-            //}
         }
 
         public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
@@ -299,10 +282,7 @@ namespace orthProj
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
-            // inputs.aInput.text = "NaN";
-            // inputs.bInput.text = "NaN";
-            // inputs.cInput.text = "NaN";
-            // inputs.dInput.text = "NaN";
+
             feedbacks.eqnFeedback.material.color = negativeFeedback;
         }
 
