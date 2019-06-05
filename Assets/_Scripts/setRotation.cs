@@ -40,7 +40,6 @@ public class setRotation : MonoBehaviour
             set();
             xAxisBefore = xAxis;
         }
-        makechanges = false;
     }
 
     public void changeRot()

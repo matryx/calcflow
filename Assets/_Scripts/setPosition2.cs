@@ -34,15 +34,27 @@ public class setPosition2 : MonoBehaviour
         line.SetPosition(0, transform.position);
         line.SetPosition(1, origin.position);
 
-        if (transform.localPosition.x != v1.xPos)
+        if(v1.xPos >= 10)
+        {
+            transform.localPosition += new Vector3(10 - transform.localPosition.x, 0, 0);
+        }
+        else
         {
             transform.localPosition += new Vector3(v1.xPos - transform.localPosition.x, 0, 0);
         }
-        if (transform.localPosition.y != v1.yPos)
+        if (v1.yPos >= 10)
+        {
+            transform.localPosition += new Vector3(0, 10 - transform.localPosition.y, 0);
+        }
+        else
         {
             transform.localPosition += new Vector3(0, v1.yPos - transform.localPosition.y, 0);
         }
-        if (transform.localPosition.z != v1.zPos)
+        if (v1.zPos >= 10)
+        {
+            transform.localPosition += new Vector3(0, 0, 10 - transform.localPosition.z);
+        }
+        else
         {
             transform.localPosition += new Vector3(0, 0, v1.zPos - transform.localPosition.z);
         }

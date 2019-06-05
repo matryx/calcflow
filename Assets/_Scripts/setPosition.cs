@@ -12,6 +12,7 @@ public class setPosition : MonoBehaviour {
     public float xPos, yPos, zPos;
     public Transform origin;
 
+    float maxScale = 0;
     int speed = 10;
     public bool makechanges = false;
     bool grabbing = false;
@@ -44,10 +45,10 @@ public class setPosition : MonoBehaviour {
         }
         else if (gameObject.name == "Vector2")
         {
+            maxScale = 0;
             float x = transform.localPosition.x;
             float y = transform.localPosition.y;
             float z = transform.localPosition.z;
-            float maxScale = 0;
             if (maxScale < Mathf.Abs(x))
             {
                 maxScale = x;
@@ -72,40 +73,42 @@ public class setPosition : MonoBehaviour {
             if (isX)
             {
                 Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(x) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(x) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(x) * 10 + origin.position.z);
+                //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                 line.SetPosition(0, -scaledAxis + origin.position * 2);
                 line.SetPosition(1, scaledAxis);
+                isX = false;
             }
             else if(isY)
             {
                 Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(y) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(y) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(y) * 10 + origin.position.z);
+                //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                 line.SetPosition(0, -scaledAxis + origin.position * 2);
                 line.SetPosition(1, scaledAxis);
+                isY = false;
             }
             else if(isZ)
             {
                 Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(z) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(z) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(z) * 10 + origin.position.z);
+                //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                 line.SetPosition(0, -scaledAxis + origin.position * 2);
                 line.SetPosition(1, scaledAxis);
+                isZ = false;
             }
         }
-
-        changePos();
-        if(gameObject.name == "Vector1")
-        {
-            v3.change = true;
-        }
+        set();
+        /*
         if (transform.localPosition.x != xPos)
         {
             set("pt1X");
         }
-        if (transform.localPosition.y != yPos)
+        if (transform.localPosition.z != yPos)
         {
             set("pt1Y");
         }
-        if (transform.localPosition.z != zPos)
+        if (transform.localPosition.y != zPos)
         {
             set("pt1Z");
-        }
+        }*/
     }
 
     public void changePos()
@@ -145,7 +148,7 @@ public class setPosition : MonoBehaviour {
             zPos = -10;
         }
     }
-
+    /*
     public void set(string name)
     {
         // Store value of input as x, y, or z of position or rotation. Then, transform.
@@ -163,5 +166,12 @@ public class setPosition : MonoBehaviour {
             default:
                 break;
         }
+    }*/
+    public void set()
+    {
+        // Store value of input as x, y, or z of position or rotation. Then, transform.
+        transform.localPosition += new Vector3(xPos - transform.localPosition.x, 0, 0);
+        transform.localPosition += new Vector3(0, yPos - transform.localPosition.y, 0);
+        transform.localPosition += new Vector3(0, 0, zPos - transform.localPosition.z);
     }
 }
