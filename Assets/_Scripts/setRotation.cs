@@ -28,22 +28,19 @@ public class setRotation : MonoBehaviour
     {
         posCurr = vectorOfRotation.transform.localPosition;
         changeRot();
-        if(makechanges)
+        if(posCurr != posBef)
         {
-            if(posCurr != posBef)
-            {
-                vector.transform.Rotate(posBef, -xAxis);
-                vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis);
-                xAxisBefore = xAxis;
-                posBef = posCurr;
-            }
-            if (xAxis != xAxisBefore)
-            {
-                set();
-                xAxisBefore = xAxis;
-            }
-            makechanges = false;
+            vector.transform.Rotate(posBef, -xAxis);
+            vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis);
+            xAxisBefore = xAxis;
+            posBef = posCurr;
         }
+        if (xAxis != xAxisBefore)
+        {
+            set();
+            xAxisBefore = xAxis;
+        }
+        makechanges = false;
     }
 
     public void changeRot()

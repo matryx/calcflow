@@ -5,17 +5,22 @@ using UnityEngine.UI;
 
 public class setPosition : MonoBehaviour {
 
+    public setPosition2 v3;
     // pt1 is te vector and pt2 is the rotation.
     public GameObject pt1X, pt1Y, pt1Z;
     public GameObject vectorSet, rotator, component;
     public float xPos, yPos, zPos;
+    public Transform origin;
 
     int speed = 10;
     public bool makechanges = false;
     bool grabbing = false;
+    bool isX = false;
+    bool isY = false;
+    bool isZ = false;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
         gameObject.transform.localScale = new Vector3(1, 1, 1);
         gameObject.transform.localPosition = new Vector3(-1, 1, 1);
         transform.SetParent(vectorSet.transform, false);
@@ -26,24 +31,80 @@ public class setPosition : MonoBehaviour {
 
         changePos();
 
-        if (makechanges)
+        if (origin.position - transform.position != Vector3.zero)
         {
-            changePos();
+            transform.rotation = Quaternion.LookRotation(origin.position - transform.position);
+        }
 
-            if (transform.localPosition.x != xPos)
+        LineRenderer line = GetComponent<LineRenderer>();
+        if(gameObject.name == "Vector1")
+        {
+            line.SetPosition(0, transform.position);
+            line.SetPosition(1, origin.position);
+        }
+        else if (gameObject.name == "Vector2")
+        {
+            float x = transform.localPosition.x;
+            float y = transform.localPosition.y;
+            float z = transform.localPosition.z;
+            float maxScale = 0;
+            if (maxScale < Mathf.Abs(x))
             {
-                set("pt1X");
+                maxScale = x;
+                isX = true;
+                isY = false;
+                isZ = false;     
             }
-            if (transform.localPosition.y != yPos)
+            if (maxScale < Mathf.Abs(y))
             {
-                set("pt1Y");
+                maxScale = x;
+                isX = false;
+                isY = true;
+                isZ = false;
             }
-            if (transform.localPosition.z != zPos)
+            if (maxScale < Mathf.Abs(z))
             {
-                set("pt1Z");
+                maxScale = x;
+                isX = false;
+                isY = false;
+                isZ = true;
             }
+            if (isX)
+            {
+                Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(x) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(x) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(x) * 10 + origin.position.z);
+                line.SetPosition(0, -scaledAxis + origin.position * 2);
+                line.SetPosition(1, scaledAxis);
+            }
+            else if(isY)
+            {
+                Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(y) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(y) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(y) * 10 + origin.position.z);
+                line.SetPosition(0, -scaledAxis + origin.position * 2);
+                line.SetPosition(1, scaledAxis);
+            }
+            else if(isZ)
+            {
+                Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(z) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(z) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(z) * 10 + origin.position.z);
+                line.SetPosition(0, -scaledAxis + origin.position * 2);
+                line.SetPosition(1, scaledAxis);
+            }
+        }
 
-            makechanges = false;
+        changePos();
+        if(gameObject.name == "Vector1")
+        {
+            v3.change = true;
+        }
+        if (transform.localPosition.x != xPos)
+        {
+            set("pt1X");
+        }
+        if (transform.localPosition.y != yPos)
+        {
+            set("pt1Y");
+        }
+        if (transform.localPosition.z != zPos)
+        {
+            set("pt1Z");
         }
     }
 
@@ -92,27 +153,12 @@ public class setPosition : MonoBehaviour {
         {
             case "pt1X":
                 transform.localPosition += new Vector3(xPos - transform.localPosition.x, 0, 0);
-                if(gameObject.name == "Vector2")
-                {
-                    rotator.transform.LookAt(component.transform);
-                    transform.Rotate(Vector3.right * 90);
-                }
                 break;
             case "pt1Y":
                 transform.localPosition += new Vector3(0, yPos - transform.localPosition.y, 0);
-                if (gameObject.name == "Vector2")
-                {
-                    rotator.transform.LookAt(component.transform);
-                    transform.Rotate(Vector3.right * 90);
-                }
                 break;
             case "pt1Z":
                 transform.localPosition += new Vector3(0, 0, zPos - transform.localPosition.z);
-                if (gameObject.name == "Vector2")
-                {
-                    rotator.transform.LookAt(component.transform);
-                    transform.Rotate(Vector3.right * 90);
-                }
                 break;
             default:
                 break;
