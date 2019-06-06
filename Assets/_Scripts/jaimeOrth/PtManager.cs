@@ -108,6 +108,7 @@ namespace orthProj
             updatePoint("pt1", new Vector3(1, 2, 3), false); // vector 
             updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
             updatePoint("pt3", new Vector3(0, 1, 0), false); // origin
+            ptInput.setPlane();
         }
 
         void Awake()
@@ -125,7 +126,7 @@ namespace orthProj
 
         void Update()
         {
-            //if only projecting on a line
+            //if only projecting on a line (cover over the 3rd basis)
             if (ptInput.lineCover.activeSelf)
             {
                 Debug.Log("LINEEEEEEEE COVERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
@@ -291,8 +292,8 @@ namespace orthProj
             #region coords
             if (ptSet.ptCoords.ContainsKey("pt1") && inputs.pt1XInput != null && ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2XInput != null)
             {
-               inputs.projXInput.text = presentline.projectedResult.x.ToString();
-                inputs.projYInput.text = presentline.projectedResult.y.ToString();
+                inputs.projXInput.text = presentline.projectedResult.y.ToString();
+                inputs.projYInput.text = presentline.projectedResult.x.ToString();
                 inputs.projZInput.text = presentline.projectedResult.z.ToString();
 
                 if (inputs.projXInput.text.Length == 0) inputs.projXInput.text = "0";

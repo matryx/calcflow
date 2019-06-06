@@ -48,15 +48,15 @@ namespace orthProj
         public void setPlane()
         {
             lineCover.SetActive(false);
-            planeButtonCover.SetActive(true);
-            lineButtonCover.SetActive(false);
+            planeButtonCover.SetActive(false); //swapped grey out
+            lineButtonCover.SetActive(true); //swapped grey out
         }
 
         public void setLine()
         {
             lineCover.SetActive(true);
-            planeButtonCover.SetActive(false);
-            lineButtonCover.SetActive(true);
+            planeButtonCover.SetActive(true); //swapped grey out
+            lineButtonCover.SetActive(false); //swapped grey out
         }
 
         public void HandleInput(string buttonID)

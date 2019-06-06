@@ -28,7 +28,7 @@ namespace orthProj
             //projline.localScale = new Vector3(1, 1, scaledRes.magnitude); 
 
             //show them the unscaled numbers
-            GetComponentInChildren<TextMesh>().text = "(" + projectedRez.x + ", " + projectedRez.y + ", " + projectedRez.z + ")";
+            GetComponentInChildren<TextMesh>().text = "(" + projectedRez.y + ", " + projectedRez.x + ", " + projectedRez.z + ")";
             transform.localPosition = scaledRes;
             Vector3 position = transform.position;
 

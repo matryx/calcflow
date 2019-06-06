@@ -137,13 +137,14 @@ namespace orthProj
             {
                 forwardAxisLine.GetComponent<MeshRenderer>().enabled = true;
                 projectedResult = Vector3.Project(PtCoordToVector(rawPt1), PtCoordToVector(rawPt2));
-
+                ptManager.manageText();
             }
             //if there is a 3rd coord (subspace)
             else
             {
                 forwardAxisLine.GetComponent<MeshRenderer>().enabled = false;
                 projectedResult = Vector3.ProjectOnPlane(PtCoordToVector(rawPt1), normalVector);
+                ptManager.manageText();
             }
             
             var sharedMaterial3 = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
