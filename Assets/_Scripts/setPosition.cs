@@ -49,40 +49,37 @@ public class setPosition : MonoBehaviour {
         else if (gameObject.name == "Vector2")
         {
             maxScale = 0;
-            float x = transform.localPosition.x;
-            float y = transform.localPosition.y;
-            float z = transform.localPosition.z;
-            if(x == 0 && y == 0 && z == 0)
+            if(xPos == 0 && yPos == 0 && zPos == 0)
             {
                 line.SetPosition(0, origin.position);
                 line.SetPosition(1, origin.position);
             }
             else
             {
-                if (maxScale < Mathf.Abs(x))
+                if (maxScale < Mathf.Abs(xPos))
                 {
-                    maxScale = x;
+                    maxScale = Mathf.Abs(xPos);
                     isX = true;
                     isY = false;
                     isZ = false;
                 }
-                if (maxScale < Mathf.Abs(y))
+                if (maxScale < Mathf.Abs(yPos))
                 {
-                    maxScale = x;
+                    maxScale = Mathf.Abs(yPos);
                     isX = false;
                     isY = true;
                     isZ = false;
                 }
-                if (maxScale < Mathf.Abs(z))
+                if (maxScale < Mathf.Abs(zPos))
                 {
-                    maxScale = x;
+                    maxScale = Mathf.Abs(zPos);
                     isX = false;
                     isY = false;
                     isZ = true;
                 }
                 if (isX)
                 {
-                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(x) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(x) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(x) * 10 + origin.position.z);
+                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(xPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(xPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(xPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                     line.SetPosition(0, -scaledAxis + origin.position * 2);
                     line.SetPosition(1, scaledAxis);
@@ -90,7 +87,7 @@ public class setPosition : MonoBehaviour {
                 }
                 else if (isY)
                 {
-                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(y) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(y) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(y) * 10 + origin.position.z);
+                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(yPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(yPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(yPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                     line.SetPosition(0, -scaledAxis + origin.position * 2);
                     line.SetPosition(1, scaledAxis);
@@ -98,7 +95,7 @@ public class setPosition : MonoBehaviour {
                 }
                 else if (isZ)
                 {
-                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(z) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(z) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(z) * 10 + origin.position.z);
+                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(zPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(zPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(zPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                     line.SetPosition(0, -scaledAxis + origin.position * 2);
                     line.SetPosition(1, scaledAxis);
@@ -112,7 +109,14 @@ public class setPosition : MonoBehaviour {
     public void changePos()
     {
         // Get position of the vector component.
-        xPos = float.Parse(pt1X.GetComponent<TextMesh>().text.Replace("_", ""));
+        if(pt1X.GetComponent<TextMesh>().text == "_" || pt1X.GetComponent<TextMesh>().text == "")
+        {
+            xPos = 0;
+        }
+        else
+        {
+            xPos = float.Parse(pt1X.GetComponent<TextMesh>().text.Replace("_", ""));
+        }
         if (xPos > 10)
         {
             pt1X.GetComponent<TextMesh>().text = "10";
@@ -123,7 +127,15 @@ public class setPosition : MonoBehaviour {
             pt1X.GetComponent<TextMesh>().text = "-10";
             xPos = -10;
         }
-        yPos = float.Parse(pt1Y.GetComponent<TextMesh>().text.Replace("_", ""));
+
+        if (pt1Y.GetComponent<TextMesh>().text == "_" || pt1Y.GetComponent<TextMesh>().text == "")
+        {
+            yPos = 0;
+        }
+        else
+        {
+            yPos = float.Parse(pt1Y.GetComponent<TextMesh>().text.Replace("_", ""));
+        }
         if (yPos > 10)
         {
             pt1Y.GetComponent<TextMesh>().text = "10";
@@ -134,7 +146,15 @@ public class setPosition : MonoBehaviour {
             pt1Y.GetComponent<TextMesh>().text = "-10";
             yPos = -10;
         }
-        zPos = float.Parse(pt1Z.GetComponent<TextMesh>().text.Replace("_", ""));
+
+        if (pt1Z.GetComponent<TextMesh>().text == "_" || pt1Z.GetComponent<TextMesh>().text == "")
+        {
+            zPos = 0;
+        }
+        else
+        {
+            zPos = float.Parse(pt1Z.GetComponent<TextMesh>().text.Replace("_", ""));
+        }
         if (zPos > 10)
         {
             pt1Z.GetComponent<TextMesh>().text = "10";
@@ -146,26 +166,7 @@ public class setPosition : MonoBehaviour {
             zPos = -10;
         }
     }
-    /*
-    public void set(string name)
-    {
-        // Store value of input as x, y, or z of position or rotation. Then, transform.
-        switch(name)
-        {
-            case "pt1X":
-                transform.localPosition += new Vector3(xPos - transform.localPosition.x, 0, 0);
 
-                break;
-            case "pt1Y":
-                transform.localPosition += new Vector3(0, yPos - transform.localPosition.y, 0);
-                break;
-            case "pt1Z":
-                transform.localPosition += new Vector3(0, 0, zPos - transform.localPosition.z);
-                break;
-            default:
-                break;
-        }
-    }*/
     public void set()
     {
         // Store value of input as x, y, or z of position or rotation. Then, transform.
