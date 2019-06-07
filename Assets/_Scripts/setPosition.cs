@@ -42,6 +42,9 @@ public class setPosition : MonoBehaviour {
         {
             line.SetPosition(0, transform.position);
             line.SetPosition(1, origin.position);
+            transform.localPosition += new Vector3(xPos - transform.localPosition.x, 0, 0);
+            transform.localPosition += new Vector3(0, yPos - transform.localPosition.y, 0);
+            transform.localPosition += new Vector3(0, 0, zPos - transform.localPosition.z);
         }
         else if (gameObject.name == "Vector2")
         {
@@ -49,66 +52,61 @@ public class setPosition : MonoBehaviour {
             float x = transform.localPosition.x;
             float y = transform.localPosition.y;
             float z = transform.localPosition.z;
-            if (maxScale < Mathf.Abs(x))
+            if(x == 0 && y == 0 && z == 0)
             {
-                maxScale = x;
-                isX = true;
-                isY = false;
-                isZ = false;     
+                line.SetPosition(0, origin.position);
+                line.SetPosition(1, origin.position);
             }
-            if (maxScale < Mathf.Abs(y))
+            else
             {
-                maxScale = x;
-                isX = false;
-                isY = true;
-                isZ = false;
+                if (maxScale < Mathf.Abs(x))
+                {
+                    maxScale = x;
+                    isX = true;
+                    isY = false;
+                    isZ = false;
+                }
+                if (maxScale < Mathf.Abs(y))
+                {
+                    maxScale = x;
+                    isX = false;
+                    isY = true;
+                    isZ = false;
+                }
+                if (maxScale < Mathf.Abs(z))
+                {
+                    maxScale = x;
+                    isX = false;
+                    isY = false;
+                    isZ = true;
+                }
+                if (isX)
+                {
+                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(x) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(x) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(x) * 10 + origin.position.z);
+                    //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
+                    line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    line.SetPosition(1, scaledAxis);
+                    isX = false;
+                }
+                else if (isY)
+                {
+                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(y) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(y) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(y) * 10 + origin.position.z);
+                    //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
+                    line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    line.SetPosition(1, scaledAxis);
+                    isY = false;
+                }
+                else if (isZ)
+                {
+                    Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(z) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(z) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(z) * 10 + origin.position.z);
+                    //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
+                    line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    line.SetPosition(1, scaledAxis);
+                    isZ = false;
+                }
             }
-            if (maxScale < Mathf.Abs(z))
-            {
-                maxScale = x;
-                isX = false;
-                isY = false;
-                isZ = true;
-            }
-            if (isX)
-            {
-                Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(x) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(x) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(x) * 10 + origin.position.z);
-                //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
-                line.SetPosition(0, -scaledAxis + origin.position * 2);
-                line.SetPosition(1, scaledAxis);
-                isX = false;
-            }
-            else if(isY)
-            {
-                Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(y) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(y) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(y) * 10 + origin.position.z);
-                //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
-                line.SetPosition(0, -scaledAxis + origin.position * 2);
-                line.SetPosition(1, scaledAxis);
-                isY = false;
-            }
-            else if(isZ)
-            {
-                Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(z) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(z) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(z) * 10 + origin.position.z);
-                //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
-                line.SetPosition(0, -scaledAxis + origin.position * 2);
-                line.SetPosition(1, scaledAxis);
-                isZ = false;
-            }
+            set();
         }
-        set();
-        /*
-        if (transform.localPosition.x != xPos)
-        {
-            set("pt1X");
-        }
-        if (transform.localPosition.z != yPos)
-        {
-            set("pt1Y");
-        }
-        if (transform.localPosition.y != zPos)
-        {
-            set("pt1Z");
-        }*/
     }
 
     public void changePos()
@@ -156,6 +154,7 @@ public class setPosition : MonoBehaviour {
         {
             case "pt1X":
                 transform.localPosition += new Vector3(xPos - transform.localPosition.x, 0, 0);
+
                 break;
             case "pt1Y":
                 transform.localPosition += new Vector3(0, yPos - transform.localPosition.y, 0);
