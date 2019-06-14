@@ -19564,7 +19564,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &502524045
 Transform:
   m_ObjectHideFlags: 0
@@ -34338,7 +34338,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &854199289
 Transform:
   m_ObjectHideFlags: 0
@@ -46018,6 +46018,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e2999ec990b6b4bbfbbe4220e05d1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputReceived: 0
+  eqnInput: 0
+  saveLoadMenu: {fileID: 0}
+  connectedMenus:
+    ptInput: {fileID: 0}
+    ptOutputMenu: {fileID: 0}
+  feedbacks:
+    pt1Feedback: {fileID: 0}
+    pt2Feedback: {fileID: 0}
+    pt3Feedback: {fileID: 0}
+    eqnFeedback: {fileID: 0}
+  inputs:
+    pt1XInput: {fileID: 0}
+    pt1YInput: {fileID: 0}
+    pt1ZInput: {fileID: 0}
+    pt2XInput: {fileID: 0}
+    pt2YInput: {fileID: 0}
+    pt2ZInput: {fileID: 0}
+    pt3XInput: {fileID: 0}
+    pt3YInput: {fileID: 0}
+    pt3ZInput: {fileID: 0}
+    aInput: {fileID: 0}
+    bInput: {fileID: 0}
+    cInput: {fileID: 0}
+    dInput: {fileID: 0}
+  equation: {fileID: 0}
+  presentPlane: {fileID: 0}
+  generatePlanePts: {fileID: 0}
+  updateText: 0
 --- !u!114 &1238288077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79968,8 +79997,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineCover: {fileID: 1870057589}
-  lineButtonCover: {fileID: 2065139594}
-  planeButtonCover: {fileID: 382190522}
+  lineButton: {fileID: 1164183713}
+  planeButton: {fileID: 29202568}
+  toggledColor: {r: 0.047058824, g: 1, b: 1, a: 0}
+  normalColor: {r: 0.95686275, g: 1, b: 0.13333334, a: 0}
   index: 0
 --- !u!65 &2112723675
 BoxCollider:

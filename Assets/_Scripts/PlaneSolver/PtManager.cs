@@ -135,16 +135,19 @@ namespace PlaneSolver
                 ManageFeedback();
                 if (isValid)
                 {
-                    if (presentPlane.CalculatePlane())
+                    if (presentPlane)
                     {
-                        presentPlane.ApplyGraphAdjustment();
-                        presentPlane.GetLocalPoint();
-                        presentPlane.GetPlaneDirection();
-                    }
-                    else
-                    {
-                        presentPlane.ApplyGraphAdjustment();
-                        presentPlane.GetLocalPoint();
+                        if (presentPlane.CalculatePlane())
+                        {
+                            presentPlane.ApplyGraphAdjustment();
+                            presentPlane.GetLocalPoint();
+                            presentPlane.GetPlaneDirection();
+                        }
+                        else
+                        {
+                            presentPlane.ApplyGraphAdjustment();
+                            presentPlane.GetLocalPoint();
+                        }
                     }
                 }
             }
@@ -159,8 +162,11 @@ namespace PlaneSolver
                     if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
                     {
                         feedbacks.eqnFeedback.material.color = negativeFeedback;
-                        presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                        presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                        if (presentPlane)
+                        {
+                            presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                            presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                        }
                     }
                     else
                     {
@@ -204,7 +210,7 @@ namespace PlaneSolver
                 ManageFeedback();
                 if (isValid)
                 {
-                    if (presentPlane.CalculatePlane())
+                    if (presentPlane && presentPlane.CalculatePlane())
                     {
                         presentPlane.ApplyUnroundCenter(ptName, newLoc);
                         presentPlane.GetPlaneDirection();

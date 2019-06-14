@@ -7,8 +7,11 @@ namespace orthProj
     public class PtInput : MonoBehaviour
     {
         public GameObject lineCover;
-        public GameObject lineButtonCover;
-        public GameObject planeButtonCover;
+        public FlexButtonComponent lineButton;
+        public FlexButtonComponent planeButton;
+
+        public Color toggledColor;
+        public Color normalColor;
 
         internal class KeyboardInputResponder : FlexMenu.FlexMenuResponder
         {
@@ -20,7 +23,7 @@ namespace orthProj
 
             public void Flex_ActionStart(string name, FlexActionableComponent sender, GameObject collider)
             {
-                ptInput.HandleInput(sender.name);
+                ptInput.HandleInput(sender.gameObject);
             }
 
             public void Flex_ActionEnd(string name, FlexActionableComponent sender, GameObject collider) { }
@@ -45,28 +48,38 @@ namespace orthProj
             index = currExpression.tokens.Count;
         }
 
+        public void resetButtons()
+        {
+            planeButton.SetState(2);
+            planeButton.SetState(1);
+            lineButton.SetState(2);
+            lineButton.SetState(1);
+        }
+
         public void setPlane()
         {
             lineCover.SetActive(false);
-            planeButtonCover.SetActive(false); //swapped grey out
-            lineButtonCover.SetActive(true); //swapped grey out
+            planeButton.passiveColor = toggledColor;
+            lineButton.passiveColor = normalColor;
+            resetButtons();
         }
 
         public void setLine()
         {
             lineCover.SetActive(true);
-            planeButtonCover.SetActive(true); //swapped grey out
-            lineButtonCover.SetActive(false); //swapped grey out
+            lineButton.passiveColor = toggledColor;
+            planeButton.passiveColor = normalColor;
+            resetButtons();
         }
 
-        public void HandleInput(string buttonID)
+        public void HandleInput(GameObject button)
         {
-            print(buttonID + " fired");
+            print(button.name + " fired");
             #region switch
-            switch (buttonID)
+            switch (button.name)
             {
                 default:
-                    currExpression.tokens.Insert(index, buttonID);
+                    currExpression.tokens.Insert(index, button.name);
                     index++;
                     ptManager.inputReceived = true;
                     break;
@@ -92,27 +105,27 @@ namespace orthProj
                     ptManager.inputReceived = true;
                     break;
                 case "xyShortCut":
-                    ptManager.updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
+                    ptManager.updatePoint("pt2", new Vector3(0, 1, 0), false); // first axis
                     setPlane();
-                    ptManager.updatePoint("pt3", new Vector3(0, 1, 0), false); // first axi
+                    ptManager.updatePoint("pt3", new Vector3(1, 0, 0), false); // second axis
                     ptManager.inputReceived = true;
                     break;
                 case "yzShortCut":  /// TODO:  WHY???
                     ptManager.updatePoint("pt2", new Vector3(1, 0, 0), false); // first axis
                     setPlane();
-                    ptManager.updatePoint("pt3", new Vector3(0, 0, 1), false); // first axis
+                    ptManager.updatePoint("pt3", new Vector3(0, 0, 1), false); // second axis
                     ptManager.inputReceived = true;
                     break;
                 case "xzShortCut":  /// TODO:  WHY???
                     ptManager.updatePoint("pt2", new Vector3(0, 1, 0), false); // first axis
                     setPlane();
-                    ptManager.updatePoint("pt3", new Vector3(0, 0, 1), false); // first axis
+                    ptManager.updatePoint("pt3", new Vector3(0, 0, 1), false); // second axis
                     ptManager.inputReceived = true;
                     //  presentline.
                     break;
                 case "ProjPlane":
                     Debug.Log("PROJPLANE FIRED!!!!!!!!!!!!!!");
-                    ptManager.updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
+                    //ptManager.updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
                     setPlane();
 
                     //here the plane is not resetting, the point is internally staying there probably and the not actually updating the plane
@@ -122,7 +135,7 @@ namespace orthProj
                     break;
                 case "ProjLine":
                     Debug.Log("LINE FIRED!!!!!!!!!!!!!!");
-                    ptManager.updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
+                    //ptManager.updatePoint("pt2", new Vector3(1, 1, 1), false); // first axis
                     //lineCover.GetComponent<MeshRenderer>().enabled = false;
                     setLine();
                     ptManager.inputReceived = true;
