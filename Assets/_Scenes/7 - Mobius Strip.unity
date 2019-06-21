@@ -769,6 +769,10 @@ Prefab:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 1114313155}
+    - target: {fileID: 4849953748773942, guid: c27f6dd89b1863b41baf6e28f990b1f4, type: 2}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c27f6dd89b1863b41baf6e28f990b1f4, type: 2}
   m_IsPrefabAsset: 0
@@ -1229,7 +1233,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4600125099093420, guid: 42a26717d1a804b4b862eaf194635d0d, type: 2}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 42a26717d1a804b4b862eaf194635d0d, type: 2}
@@ -1661,7 +1665,7 @@ Transform:
   - {fileID: 808468977}
   - {fileID: 1223719213}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!23 &808468980
 MeshRenderer:
@@ -2212,9 +2216,9 @@ MonoBehaviour:
   m_text: '<b>Mobius Strip</b>
 
 
-    This surface has 2 normal vectors. Therefore, a Mobius Strip cannot be normalized
-    because there is no sense of orientation. Drag the red ball around to see that
-    you only ever travel on one side. Trippy huh?'
+    This surface only has one side, but it looks like the normal vector is jumping
+    from top to bottom. This is an example of a non-oritenable surface. Drag the red
+    ball around to see that you only ever travel on one side. Trippy, huh?'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2283,10 +2287,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 1469767338}
-    characterCount: 220
+    characterCount: 244
     spriteCount: 0
-    spaceCount: 39
-    wordCount: 39
+    spaceCount: 46
+    wordCount: 46
     linkCount: 0
     lineCount: 8
     pageCount: 1
