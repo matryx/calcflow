@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -584,9 +585,19 @@ namespace AK
 		{
 			var symbols = new SymbolList();
 
-			int i = begin - 1;
-			int currentTermBegin = formula[begin] == '+' ? begin + 1 : begin;
-			int currentDepth = 0;
+            int i = begin - 1;
+            int currentTermBegin = 0;
+            int currentDepth = 0;
+            try
+            {
+                currentTermBegin = formula[begin] == '+' ? begin + 1 : begin;
+                currentDepth = 0;
+            }
+            catch (Exception e)
+            {
+                Debug.Log("this is where");
+            }
+			
 			
 			for (;;) 
 			{
