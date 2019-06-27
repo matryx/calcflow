@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace VectorRotation
 {
+    [System.Serializable]
     public class PtOutputMenu : MonoBehaviour
     {
 

@@ -9395,7 +9395,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 604102834}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82e548dd4ccad2a4f989300048af681b, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e500a9c4702a524db98a4e0522b20a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   index: 0
@@ -25813,7 +25813,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1610902226}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 225d4c31c36473b42a900f32b2cef528, type: 3}
+  m_Script: {fileID: 11500000, guid: e949d56289e0139458bdc41dd3ddb016, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   menu: {fileID: 1610902229}
@@ -26662,7 +26662,7 @@ GameObject:
   - component: {fileID: 1638273507}
   - component: {fileID: 1638273506}
   - component: {fileID: 1638273505}
-  - component: {fileID: 1638273512}
+  - component: {fileID: 1638273504}
   m_Layer: 11
   m_Name: Calculator
   m_TagString: Untagged
@@ -26670,6 +26670,46 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1638273504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1638273503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1595002ec618e3247bc66d18e362ccb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputReceived: 0
+  eqnInput: 0
+  saveLoadMenu: {fileID: 0}
+  connectedMenus:
+    ptInput: {fileID: 604102835}
+    ptOutputMenu: {fileID: 1610902227}
+  feedbacks:
+    pt1Feedback: {fileID: 574021874}
+    pt2Feedback: {fileID: 1117573866}
+    pt3Feedback: {fileID: 514695910}
+    eqnFeedback: {fileID: 750904410}
+  inputs:
+    pt1XInput: {fileID: 1346742600}
+    pt1YInput: {fileID: 213657667}
+    pt1ZInput: {fileID: 961675298}
+    pt2XInput: {fileID: 1416178185}
+    pt2YInput: {fileID: 475831848}
+    pt2ZInput: {fileID: 427141624}
+    pt3XInput: {fileID: 1460921426}
+    pt3YInput: {fileID: 441742548}
+    pt3ZInput: {fileID: 1441087346}
+    aInput: {fileID: 0}
+    bInput: {fileID: 0}
+    cInput: {fileID: 0}
+    dInput: {fileID: 0}
+  equation: {fileID: 0}
+  presentPlane: {fileID: 0}
+  generatePlanePts: {fileID: 0}
+  updateText: 0
 --- !u!114 &1638273505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26789,46 +26829,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: -60, y: 0, z: 89.99999}
---- !u!114 &1638273512
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1638273503}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a61e0137570bc4040a5ff1956acbe7f3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputReceived: 0
-  eqnInput: 0
-  saveLoadMenu: {fileID: 0}
-  connectedMenus:
-    ptInput: {fileID: 604102835}
-    ptOutputMenu: {fileID: 1610902227}
-  feedbacks:
-    pt1Feedback: {fileID: 574021874}
-    pt2Feedback: {fileID: 1117573866}
-    pt3Feedback: {fileID: 514695910}
-    eqnFeedback: {fileID: 750904410}
-  inputs:
-    pt1XInput: {fileID: 1346742600}
-    pt1YInput: {fileID: 213657667}
-    pt1ZInput: {fileID: 961675298}
-    pt2XInput: {fileID: 1416178185}
-    pt2YInput: {fileID: 475831848}
-    pt2ZInput: {fileID: 427141624}
-    pt3XInput: {fileID: 1460921426}
-    pt3YInput: {fileID: 441742548}
-    pt3ZInput: {fileID: 1441087346}
-    aInput: {fileID: 47755687}
-    bInput: {fileID: 1727312522}
-    cInput: {fileID: 1847665479}
-    dInput: {fileID: 60362467}
-  equation: {fileID: 214979873}
-  presentPlane: {fileID: 0}
-  generatePlanePts: {fileID: 0}
-  updateText: 0
 --- !u!1 &1640499279
 GameObject:
   m_ObjectHideFlags: 0
