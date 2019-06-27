@@ -42,6 +42,7 @@ public class setPosition : MonoBehaviour {
         {
             line.SetPosition(0, transform.position);
             line.SetPosition(1, origin.position);
+            //Debug.Log("It hit here");
             transform.localPosition += new Vector3(xPos - transform.localPosition.x, 0, 0);
             transform.localPosition += new Vector3(0, yPos - transform.localPosition.y, 0);
             transform.localPosition += new Vector3(0, 0, zPos - transform.localPosition.z);
@@ -108,6 +109,7 @@ public class setPosition : MonoBehaviour {
 
     public void changePos()
     {
+        //Debug.Log("!!!!!!!   I'm updating   !!!!!!!");
         // Get position of the vector component.
         var parsed = float.TryParse(pt1X.GetComponent<TextMesh>().text.Replace("_", ""), out xPos);
         if (!parsed)
@@ -120,7 +122,19 @@ public class setPosition : MonoBehaviour {
             pt1X.GetComponent<TextMesh>().text = xPos.ToString();
         }
 
-        parsed = float.TryParse(pt1Y.GetComponent<TextMesh>().text.Replace("_", ""), out yPos);
+        parsed = float.TryParse(pt1Y.GetComponent<TextMesh>().text.Replace("_", ""), out zPos); //changed to zPos
+        if (!parsed)
+        {
+            //yPos = 0;
+            zPos = 0;
+        }
+        else if (zPos < -10 || zPos > 10) //changed to zPos
+        {
+            zPos = Mathf.Clamp(yPos, -10, 10); //changed to zPos
+            pt1Y.GetComponent<TextMesh>().text = zPos.ToString();
+        }
+
+        parsed = float.TryParse(pt1Z.GetComponent<TextMesh>().text.Replace("_", ""), out yPos);
         if (!parsed)
         {
             yPos = 0;
@@ -128,18 +142,7 @@ public class setPosition : MonoBehaviour {
         else if (yPos < -10 || yPos > 10)
         {
             yPos = Mathf.Clamp(yPos, -10, 10);
-            pt1Y.GetComponent<TextMesh>().text = yPos.ToString();
-        }
-
-        parsed = float.TryParse(pt1Z.GetComponent<TextMesh>().text.Replace("_", ""), out zPos);
-        if (!parsed)
-        {
-            zPos = 0;
-        }
-        else if (zPos < -10 || zPos > 10)
-        {
-            zPos = Mathf.Clamp(zPos, -10, 10);
-            pt1Z.GetComponent<TextMesh>().text = zPos.ToString();
+            pt1Z.GetComponent<TextMesh>().text = yPos.ToString();
         }
     }
 
