@@ -27,7 +27,7 @@ public class setPosition2 : MonoBehaviour
     {
         if (origin.position - transform.position != Vector3.zero)
         {
-            transform.rotation = Quaternion.LookRotation(-(origin.position - transform.position));
+            transform.rotation = Quaternion.LookRotation(origin.position - transform.position);
         }
 
         LineRenderer line = GetComponent<LineRenderer>();

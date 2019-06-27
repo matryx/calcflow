@@ -46,7 +46,8 @@ public class setRotation : MonoBehaviour
     {
         // Get rotation of the vector around te cartesian axes.
         var text = pt2X.GetComponent<TextMesh>().text.Replace("_", "");
-        xAxis = float.Parse(text == "" ? "0" : text);
+        //xAxis = float.Parse(text == "" ? "0" : text);
+        xAxis = -(float.Parse(text == "" ? "0" : text)); //negative, to go counter-clockwise
     }
 
     public void setChild()
