@@ -42,7 +42,6 @@ public class setPosition : MonoBehaviour {
         {
             line.SetPosition(0, transform.position);
             line.SetPosition(1, origin.position);
-            //Debug.Log("It hit here");
             transform.localPosition += new Vector3(xPos - transform.localPosition.x, 0, 0);
             transform.localPosition += new Vector3(0, yPos - transform.localPosition.y, 0);
             transform.localPosition += new Vector3(0, 0, zPos - transform.localPosition.z);
@@ -109,7 +108,6 @@ public class setPosition : MonoBehaviour {
 
     public void changePos()
     {
-        //Debug.Log("!!!!!!!   I'm updating   !!!!!!!");
         // Get position of the vector component.
         var parsed = float.TryParse(pt1X.GetComponent<TextMesh>().text.Replace("_", ""), out xPos);
         if (!parsed)
@@ -122,27 +120,28 @@ public class setPosition : MonoBehaviour {
             pt1X.GetComponent<TextMesh>().text = xPos.ToString();
         }
 
-        parsed = float.TryParse(pt1Y.GetComponent<TextMesh>().text.Replace("_", ""), out zPos); //changed to zPos
+        //interal values for Unity "Y" are actually "Z" due to coordinate system difference
+        parsed = float.TryParse(pt1Y.GetComponent<TextMesh>().text.Replace("_", ""), out zPos); //swapped from yPos
         if (!parsed)
         {
-            //yPos = 0;
-            zPos = 0;
+            zPos = 0; //swapped from yPos
         }
-        else if (zPos < -10 || zPos > 10) //changed to zPos
+        else if (zPos < -10 || zPos > 10) //swapped from yPos
         {
-            zPos = Mathf.Clamp(yPos, -10, 10); //changed to zPos
-            pt1Y.GetComponent<TextMesh>().text = zPos.ToString();
+            zPos = Mathf.Clamp(zPos, -10, 10); //swapped from yPos
+            pt1Y.GetComponent<TextMesh>().text = zPos.ToString(); //swapped from yPos
         }
 
-        parsed = float.TryParse(pt1Z.GetComponent<TextMesh>().text.Replace("_", ""), out yPos);
+        //interal values for Unity "Z" are actually "Y" due to coordinate system difference
+        parsed = float.TryParse(pt1Z.GetComponent<TextMesh>().text.Replace("_", ""), out yPos); //swapped from zPos
         if (!parsed)
         {
-            yPos = 0;
+            yPos = 0; //swapped from zPos
         }
-        else if (yPos < -10 || yPos > 10)
+        else if (yPos < -10 || yPos > 10) //swapped from zPos
         {
-            yPos = Mathf.Clamp(yPos, -10, 10);
-            pt1Z.GetComponent<TextMesh>().text = yPos.ToString();
+            yPos = Mathf.Clamp(yPos, -10, 10); //swapped from zPos
+            pt1Z.GetComponent<TextMesh>().text = yPos.ToString(); //swapped from zPos
         }
     }
 
