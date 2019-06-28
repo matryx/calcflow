@@ -29,7 +29,7 @@ namespace Matryx
 
         public static MatryxCortex Instance { get; private set; }
         public static Serializer serializer = new Serializer();
-        public static string cortexURL = "https://cortex-staging.matryx.ai";
+        public static string cortexURL = "https://cortex.matryx.ai";
         public static string platformInfoURL = cortexURL + "/platform/getInfo";
         public static string userInfoURL = cortexURL + "/user/getInfo";
         public static string tokenInfoURL = cortexURL + "/token/getInfo";
