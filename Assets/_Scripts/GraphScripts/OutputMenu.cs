@@ -149,16 +149,7 @@ public class OutputMenu : MonoBehaviour
                 {
                     button.SetState(ClaimCommitButton.CommitButtonState.Processing);
 
-                    StartCoroutine(ClaimCommitButton.Instance.commit.claim(
-                        (obj) =>
-                        {
-                            button.SetState(ClaimCommitButton.CommitButtonState.YetToBeCommitted);
-                        },
-                        (nada) =>
-                        {
-                            button.SetState(ClaimCommitButton.CommitButtonState.CantCommit);
-                        })
-                    );
+                    StartCoroutine(claimAndCommit(button));
                 }
                 else if (state == ClaimCommitButton.CommitButtonState.YetToBeCommitted)
                 {
@@ -181,20 +172,47 @@ public class OutputMenu : MonoBehaviour
         calcManager.manageText();
     }
 
+    public IEnumerator claimAndCommit(ClaimCommitButton button)
+    {
+        var claim = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, ClaimCommitButton.Instance.commit.claim());
+        yield return claim;
+        yield return claim.result;
+
+        if (claim.result)
+        {
+            var commit = new Utils.CoroutineWithData<bool>(MatryxCortex.Instance, ClaimCommitButton.Instance.commit.create());
+            yield return commit;
+            yield return commit.result;
+
+            if (commit.result)
+            {
+                button.SetState(ClaimCommitButton.CommitButtonState.Committed);
+            }
+            else
+            {
+                button.SetState(ClaimCommitButton.CommitButtonState.CantCommit);
+            }
+        }
+        else
+        {
+            button.SetState(ClaimCommitButton.CommitButtonState.CantCommit);
+        }
+    }
+
     public static string lastSurface = "";
     private void LookupCommitStateByExpressionSet(object sender, EventArgs args)
     {
         ClaimCommitButton.Instance.SetState(ClaimCommitButton.CommitButtonState.Disabled);
 
         var surface = SerializeSurface();
+        Debug.Log("surface: " + surface);
         if (lastSurface.Equals(surface)) return;
         if (!MatryxCommit.storageClaimsLoaded) return;
 
         List<string> fileNames = new List<string> { "jsonContent.json" };
-        List<byte[]> contents = new List<byte[]> { MatryxCortex.serializer.Serialize(surface) };
-        List<string> fileTypes = new List<string> { "application/json" };
+        List<string> contents = new List<string> { surface };
         // get ipfs hash
-        var ipfsHashRequest = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, MatryxCortex.uploadFiles(fileNames, contents, fileTypes, "&only-hash=true",
+        var ipfsHashRequest = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, MatryxCortex.uploadFiles(fileNames, contents, "&only-hash=true",
             (object multiHash) =>
             {
                 // This correct? You should look at commits that've already been created and see if there is one with this hash

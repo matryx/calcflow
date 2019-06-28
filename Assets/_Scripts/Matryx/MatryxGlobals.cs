@@ -190,12 +190,12 @@ namespace Matryx
             {
                 var timestring = unixTime.ToString();
                 double timeAsDouble = Convert.ToDouble(timestring);
-                return epoch.AddSeconds(timeAsDouble);
+                return TimeZoneInfo.ConvertTimeFromUtc(epoch.AddSeconds(timeAsDouble), TimeZoneInfo.Local);
             }
 
             public static DateTime FromUnixTime(string unixTime)
             {
-                return epoch.AddSeconds(double.Parse(unixTime));
+                return TimeZoneInfo.ConvertTimeFromUtc(epoch.AddSeconds(double.Parse(unixTime)), TimeZoneInfo.Local);
             }
 
             public static double ToUnixTime(DateTime time)

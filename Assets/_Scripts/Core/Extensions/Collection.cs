@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 using System;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -75,6 +76,26 @@ namespace Nanome.Core.Extension
                 {
                     index = i;
                     break;
+                }
+            }
+
+            return index;
+        }
+
+        public static int IndexOfElementMatchingRegex<T,V>(this List<T> data, string reg)
+        {
+            int index = -1;
+            for (int i = 0; i < data.Count; i++)
+            {
+                Dictionary<string, object> entry = data[i] as Dictionary<string, object>;
+                Regex rgx = new Regex(reg);
+                foreach (string val in entry.Values)
+                {
+                    if(rgx.IsMatch(val))
+                    {
+                        index = i;
+                        break;
+                    }
                 }
             }
 

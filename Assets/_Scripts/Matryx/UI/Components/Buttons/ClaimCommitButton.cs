@@ -62,7 +62,7 @@ public class ClaimCommitButton : FlexHoverTipper
             case CommitButtonState.YetToBeClaimed:
                 return "Timestamp\nto\nMatryx";
             case CommitButtonState.Processing:
-                return "Sending\nEthereum\nTransation";
+                return "Sending\nEthereum\nTransaction";
             case CommitButtonState.YetToBeCommitted:
                 return "Commit\nto\nMatryx";
             case CommitButtonState.Committed:
