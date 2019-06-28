@@ -65,6 +65,6 @@ public class setRotation : MonoBehaviour
     // UNUSED
     public void set()
     {
-        vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis);// - xAxisBefore); //TAG
+        vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis - xAxisBefore); //TAG
     }
 }
