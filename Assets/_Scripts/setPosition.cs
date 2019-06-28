@@ -23,7 +23,7 @@ public class setPosition : MonoBehaviour {
     // Use this for initialization
     void Start () {
         gameObject.transform.localScale = new Vector3(1, 1, 1);
-        gameObject.transform.localPosition = new Vector3(-1, 1, 1);
+        gameObject.transform.localPosition = new Vector3(1, 0, 1);
         transform.SetParent(vectorSet.transform, false);
     }
 
@@ -82,7 +82,7 @@ public class setPosition : MonoBehaviour {
                     Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(xPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(xPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(xPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                     //line.SetPosition(0, -scaledAxis + origin.position * 2);
-                    line.SetPosition(0, origin.position);
+                    line.SetPosition(0, origin.position);  //axis of rotation only spans one octant
                     line.SetPosition(1, scaledAxis);
                     isX = false;
                 }
@@ -91,7 +91,7 @@ public class setPosition : MonoBehaviour {
                     Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(yPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(yPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(yPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                     //line.SetPosition(0, -scaledAxis + origin.position * 2);
-                    line.SetPosition(0, origin.position);
+                    line.SetPosition(0, origin.position); //axis of rotation only spans one octant
                     line.SetPosition(1, scaledAxis);
                     isY = false;
                 }
@@ -100,7 +100,7 @@ public class setPosition : MonoBehaviour {
                     Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(zPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(zPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(zPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
                     //line.SetPosition(0, -scaledAxis + origin.position * 2);
-                    line.SetPosition(0, origin.position);
+                    line.SetPosition(0, origin.position); //axis of rotation only spans one octant
                     line.SetPosition(1, scaledAxis);
                     isZ = false;
                 }
