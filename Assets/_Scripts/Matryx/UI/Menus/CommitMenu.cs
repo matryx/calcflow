@@ -81,6 +81,13 @@ public class CommitMenu : MonoBehaviour {
 
     public void ErrorGettingCommit(object nothing)
     {
-        description.text = "Commit content formatting error.";
+        if (nothing == "")
+        {
+            description.text = "Could not load commit contents. \n";
+        }
+        else
+        {
+            description.text = "Contents: (not Calcflow compatible)\n" + nothing.ToString();
+        }
     }
 }

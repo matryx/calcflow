@@ -147,6 +147,7 @@ namespace Matryx
         public MatryxCommit(string commitHash)
         {
             hash = commitHash;
+            value = Nethereum.Util.UnitConversion.Convert.ToWei(1);
         }
 
         public MatryxCommit(string commitHash, string cont) : this(commitHash)
@@ -392,9 +393,9 @@ namespace Matryx
             if (!content.Equals(""))
             {
                 List<string> fileNames = new List<string>() { "jsonContent.json"};
-                List<byte[]> contents = new List<byte[]>() { MatryxCortex.serializer.Serialize(content)};
+                List<string> contents = new List<string> { content };
                 List<string> fileTypes = new List<string>() { "application/json" };
-                var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, MatryxCortex.uploadFiles(fileNames, contents, fileTypes));
+                var uploadToIPFS = new Utils.CoroutineWithData<string>(MatryxCortex.Instance, MatryxCortex.uploadFiles(fileNames, contents));
                 yield return uploadToIPFS;
                 ipfsContentHash = uploadToIPFS.result;
                 yield return true;

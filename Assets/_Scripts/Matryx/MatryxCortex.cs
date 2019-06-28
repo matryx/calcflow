@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using Nethereum.ABI.Decoders;
 using Nanome.Core.Extension;
 using System.Reflection;
+using System.Linq;
 
 namespace Matryx
 {
@@ -28,7 +29,7 @@ namespace Matryx
 
         public static MatryxCortex Instance { get; private set; }
         public static Serializer serializer = new Serializer();
-        public static string cortexURL = "https://cortex.matryx.ai";
+        public static string cortexURL = "https://cortex-staging.matryx.ai";
         public static string platformInfoURL = cortexURL + "/platform/getInfo";
         public static string userInfoURL = cortexURL + "/user/getInfo";
         public static string tokenInfoURL = cortexURL + "/token/getInfo";
@@ -49,7 +50,7 @@ namespace Matryx
         public static string ipfsAddURL = ipfsURL + "/add?pin=false";
 
         public static string jsonUploadURL = cortexURL + "/upload/json";
-        public static string filesUploadURL = ipfsURL + "/add?recursive=true&quieter=true"; //&wrap-with-directory=true
+        public static string filesUploadURL = ipfsURL + "/add?quieter=true&wrap-with-directory=true";
 
         public static List<string> supportedCalcflowCategories = new List<string>();
 
@@ -506,7 +507,15 @@ namespace Matryx
                             (cont) => 
                             {
                                 commit.content = Utils.Substring(cont as string, '{', '}');
-                                onSuccess?.Invoke(commit);
+                                if (commit.content == "")
+                                {
+                                    onError(cont);
+                                }
+                                else
+                                {
+                                    onSuccess?.Invoke(commit);
+                                }
+                                
                             }, onError);
                     }
                     else
@@ -577,15 +586,16 @@ namespace Matryx
             }
         }
 
-        public static IEnumerator uploadFiles(List<string> fileNames, List<byte[]> contents, List<string> fileTypes, string urlModifier = "", Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
+        public static IEnumerator uploadFiles(List<string> fileNames, List<string> contents, string urlModifier = "", Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
         {
-            WWWForm form = new WWWForm();
+            List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
             for (var i = 0; i < fileNames.Count; i++)
             {
-                form.AddBinaryData("files", contents[i], fileNames[i], fileTypes[i]);
+                formData.Add(new MultipartFormFileSection("path", contents[i], Encoding.UTF8, fileNames[i]));
             }
 
-            UnityWebRequest request = UnityWebRequest.Post(filesUploadURL+urlModifier, form);
+            UnityWebRequest request = UnityWebRequest.Post(filesUploadURL+urlModifier, formData);
+ 
             yield return request.SendWebRequest();
             Debug.Log("request completed with code: " + request.responseCode);
             if (request.isNetworkError || request.responseCode != 200)
@@ -595,7 +605,9 @@ namespace Matryx
             }
             else
             {
-                var res = serializer.Deserialize<object>(request.downloadHandler.data) as Dictionary<string, object>;
+                var lastLine = Encoding.UTF8.GetBytes(request.downloadHandler.text.Trim().Split('\n').Last());
+                var res = serializer.Deserialize<object>(lastLine) as Dictionary<string, object>;
+                
                 string multiHash = res["Hash"] as string;
 
                 onSuccess?.Invoke(multiHash);
@@ -645,7 +657,7 @@ namespace Matryx
 
         public static void RunGetJSONContent(string ipfsHash, Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
         {
-            queueMetered(GetIPFSFilesContent(ipfsHash, "jsonContent.json", onSuccess, onError));
+            queueMetered(GetIPFSFilesContent(ipfsHash, "Qm", onSuccess, onError));
         }
 
         //public static IEnumerator GetIPFSJSONContent(string ipfsHash, string elementName = "", Async.EventDelegate onSuccess = null, Async.EventDelegate onError = null)
@@ -690,7 +702,7 @@ namespace Matryx
                 {
                     res = serializer.Deserialize<object>(contwww.bytes) as Dictionary<string, object>;
                     links = res["Links"] as List<object>;
-                    index = links.IndexOfElementWithValue(elementName);
+                    index = links.IndexOfElementMatchingRegex<object, string>(@"^Qm[0-9a-zA-Z]{44}$");
                     if(index != -1)
                     {
                         link = true;
