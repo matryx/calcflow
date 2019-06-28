@@ -30,8 +30,8 @@ public class setRotation : MonoBehaviour
         changeRot();
         if(posCurr != posBef)
         {
-            vector.transform.Rotate(posBef, -xAxis);
-            vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis);
+            vector.transform.Rotate(posBef, -xAxis); //TAG
+            vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis); //TAG
             xAxisBefore = xAxis;
             posBef = posCurr;
         }
@@ -65,6 +65,6 @@ public class setRotation : MonoBehaviour
     // UNUSED
     public void set()
     {
-        vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis - xAxisBefore);
+        vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis);// - xAxisBefore); //TAG
     }
 }
