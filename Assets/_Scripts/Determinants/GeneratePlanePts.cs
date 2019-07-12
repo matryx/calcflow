@@ -43,24 +43,24 @@ namespace Determinants
             }
         }
 
-        //public void eqnToPoints()
-        //{
-        //    getCenter();
-        //    changeScale();
-        //    bool check = getSidePoints(null, center.y, center.z);
-        //    Debug.Log("fixing x axis " + check);
-        //    if (check == false)
-        //    {
-        //        check = getSidePoints(center.x, null, center.z);
-        //        Debug.Log("fixing y " + check);
-        //    }
-        //    if (check == false)
-        //    {
-        //        check = getSidePoints(center.x, center.y, null);
-        //        Debug.Log("fixing z " + check);
-        //    }
-        //    ptManager.eqnUpdatePoint(pt1, pt2, pt3);
-        //}
+        public void eqnToPoints()
+        {
+            getCenter();
+            changeScale();
+            bool check = getSidePoints(null, center.y, center.z);
+            Debug.Log("fixing x axis " + check);
+            if (check == false)
+            {
+                check = getSidePoints(center.x, null, center.z);
+                Debug.Log("fixing y " + check);
+            }
+            if (check == false)
+            {
+                check = getSidePoints(center.x, center.y, null);
+                Debug.Log("fixing z " + check);
+            }
+            ptManager.eqnUpdatePoint(pt1, pt2, pt3);
+        }
 
         public void getCenter()
         {

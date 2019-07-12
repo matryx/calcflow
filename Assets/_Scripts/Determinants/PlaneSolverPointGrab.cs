@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 namespace Determinants
@@ -31,12 +32,12 @@ namespace Determinants
         }
         void Update()
         {
-            if (!pt1Grabber.IsGrabbed) pt1Grabber.lastLocalPos = point1.localPosition;
-            else grabbingPoint(point1, pt1Grabber);
-            if (!pt2Grabber.IsGrabbed) pt2Grabber.lastLocalPos = point2.localPosition;
-            else grabbingPoint(point2, pt2Grabber);
-            if (!pt3Grabber.IsGrabbed) pt3Grabber.lastLocalPos = point3.localPosition;
-            else grabbingPoint(point3, pt3Grabber);
+                if (!pt1Grabber.IsGrabbed) pt1Grabber.lastLocalPos = point1.localPosition;
+                else grabbingPoint(point1, pt1Grabber);
+                if (!pt2Grabber.IsGrabbed) pt2Grabber.lastLocalPos = point2.localPosition;
+                else grabbingPoint(point2, pt2Grabber);
+                if (!pt3Grabber.IsGrabbed) pt3Grabber.lastLocalPos = point3.localPosition;
+                else grabbingPoint(point3, pt3Grabber);
         }
 
         private void grabbingPoint(Transform point, ConstraintGrabbable grabber)

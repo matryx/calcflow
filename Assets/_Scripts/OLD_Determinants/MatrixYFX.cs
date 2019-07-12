@@ -5,7 +5,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Factorization;
 using MathNet.Numerics.Properties;
 
-namespace Determinants
+namespace OLD_Determinants
 {
     public class MatrixYFX : MonoBehaviour
     {

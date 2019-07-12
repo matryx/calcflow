@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace Determinants
+namespace OLD_Determinants
 {
     public class PlaneSolverPointGrab : MonoBehaviour
     {
