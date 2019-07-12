@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LinearAlgebraMatrix
+namespace Determinants
 {
     public class PtOutputMenu : MonoBehaviour
     {
