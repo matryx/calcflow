@@ -23,7 +23,7 @@ public class setPosition : MonoBehaviour {
     // Use this for initialization
     void Start () {
         gameObject.transform.localScale = new Vector3(1, 1, 1);
-        gameObject.transform.localPosition = new Vector3(-1, 1, 1);
+        gameObject.transform.localPosition = new Vector3(1, 0, 1);
         transform.SetParent(vectorSet.transform, false);
     }
 
@@ -81,7 +81,8 @@ public class setPosition : MonoBehaviour {
                 {
                     Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(xPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(xPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(xPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
-                    line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    //line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    line.SetPosition(0, origin.position);  //axis of rotation only spans one octant
                     line.SetPosition(1, scaledAxis);
                     isX = false;
                 }
@@ -89,7 +90,8 @@ public class setPosition : MonoBehaviour {
                 {
                     Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(yPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(yPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(yPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
-                    line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    //line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    line.SetPosition(0, origin.position); //axis of rotation only spans one octant
                     line.SetPosition(1, scaledAxis);
                     isY = false;
                 }
@@ -97,7 +99,8 @@ public class setPosition : MonoBehaviour {
                 {
                     Vector3 scaledAxis = new Vector3((transform.position.x - origin.position.x) / Mathf.Abs(zPos) * 10 + origin.position.x, (transform.position.y - origin.position.y) / Mathf.Abs(zPos) * 10 + origin.position.y, (transform.position.z - origin.position.z) / Mathf.Abs(zPos) * 10 + origin.position.z);
                     //scaledAxis = new Vector3(scaledAxis.x, scaledAxis.z, scaledAxis.y);
-                    line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    //line.SetPosition(0, -scaledAxis + origin.position * 2);
+                    line.SetPosition(0, origin.position); //axis of rotation only spans one octant
                     line.SetPosition(1, scaledAxis);
                     isZ = false;
                 }
@@ -120,26 +123,28 @@ public class setPosition : MonoBehaviour {
             pt1X.GetComponent<TextMesh>().text = xPos.ToString();
         }
 
-        parsed = float.TryParse(pt1Y.GetComponent<TextMesh>().text.Replace("_", ""), out yPos);
+        //interal values for Unity "Y" are actually "Z" due to coordinate system difference
+        parsed = float.TryParse(pt1Y.GetComponent<TextMesh>().text.Replace("_", ""), out zPos); //swapped from yPos
         if (!parsed)
         {
-            yPos = 0;
+            zPos = 0; //swapped from yPos
         }
-        else if (yPos < -10 || yPos > 10)
+        else if (zPos < -10 || zPos > 10) //swapped from yPos
         {
-            yPos = Mathf.Clamp(yPos, -10, 10);
-            pt1Y.GetComponent<TextMesh>().text = yPos.ToString();
+            zPos = Mathf.Clamp(zPos, -10, 10); //swapped from yPos
+            pt1Y.GetComponent<TextMesh>().text = zPos.ToString(); //swapped from yPos
         }
 
-        parsed = float.TryParse(pt1Z.GetComponent<TextMesh>().text.Replace("_", ""), out zPos);
+        //interal values for Unity "Z" are actually "Y" due to coordinate system difference
+        parsed = float.TryParse(pt1Z.GetComponent<TextMesh>().text.Replace("_", ""), out yPos); //swapped from zPos
         if (!parsed)
         {
-            zPos = 0;
+            yPos = 0; //swapped from zPos
         }
-        else if (zPos < -10 || zPos > 10)
+        else if (yPos < -10 || yPos > 10) //swapped from zPos
         {
-            zPos = Mathf.Clamp(zPos, -10, 10);
-            pt1Z.GetComponent<TextMesh>().text = zPos.ToString();
+            yPos = Mathf.Clamp(yPos, -10, 10); //swapped from zPos
+            pt1Z.GetComponent<TextMesh>().text = yPos.ToString(); //swapped from zPos
         }
     }
 

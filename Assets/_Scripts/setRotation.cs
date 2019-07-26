@@ -30,7 +30,8 @@ public class setRotation : MonoBehaviour
         changeRot();
         if(posCurr != posBef)
         {
-            vector.transform.Rotate(posBef, -xAxis);
+            vector.transform.Rotate(posBef, -xAxis); //Possibly re-examine this line
+            //Possibly re-examine the line below
             vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis);
             xAxisBefore = xAxis;
             posBef = posCurr;
@@ -45,8 +46,12 @@ public class setRotation : MonoBehaviour
     public void changeRot()
     {
         // Get rotation of the vector around te cartesian axes.
-        var text = pt2X.GetComponent<TextMesh>().text.Replace("_", "");
-        xAxis = float.Parse(text == "" ? "0" : text);
+        var parsed = float.TryParse(pt2X.GetComponent<TextMesh>().text.Replace("_", ""), out xAxis);
+        if(!parsed)
+        {
+            xAxis = 0;
+        }
+        xAxis = -xAxis;
     }
 
     public void setChild()
@@ -57,6 +62,7 @@ public class setRotation : MonoBehaviour
     // UNUSED
     public void set()
     {
+        //Possibly re-examine the line below
         vector.transform.Rotate(new Vector3(vectorOfRotation.transform.localPosition.x, vectorOfRotation.transform.localPosition.y, vectorOfRotation.transform.localPosition.z), xAxis - xAxisBefore);
     }
 }

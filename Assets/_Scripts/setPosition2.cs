@@ -18,7 +18,7 @@ public class setPosition2 : MonoBehaviour
     void Start()
     {
         gameObject.transform.localScale = new Vector3(1, 1, 1);
-        gameObject.transform.localPosition = new Vector3(-1, 1, 1);
+        gameObject.transform.localPosition = new Vector3(1, 0, 1);
         transform.SetParent(vectorSet.transform, false);
     }
 

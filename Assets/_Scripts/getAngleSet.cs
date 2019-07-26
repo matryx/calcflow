@@ -20,8 +20,13 @@ public class getAngleSet : MonoBehaviour
     void Update()
     {
         transform.LookAt(user.transform);
-        var text = aText.GetComponent<TextMesh>().text.Replace("_", "");
-        angle = float.Parse(text == "" ? "0" : text);
+        //var text = aText.GetComponent<TextMesh>().text.Replace("_", ""); //REMOVE
+        //angle = float.Parse(text == "" ? "0" : text); //REMOVE
+        var parsed = float.TryParse(aText.GetComponent<TextMesh>().text.Replace("_", ""), out angle);
+        if(!parsed)
+        {
+            angle = 0;
+        }
         angleTxt.text = angle + "\u00B0";
     }
 }
