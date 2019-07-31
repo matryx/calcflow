@@ -77,7 +77,7 @@ namespace Determinants
             pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
-            var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+            /*var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
             sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
             for (int i = 0; i < 6; i++)
@@ -95,16 +95,20 @@ namespace Determinants
                 sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
                 //plane normal vector is the rotated 'up' vector.
                 sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            }
+            }*/
         }
 
         public void ApplyGraphAdjustment()
         {
 
-            vector23 = GenerateVector(rawPt2, rawPt3);
+            
+            center = new Vector3(0, 0, 0);
+            
+            //TODO: modify graph adjustments - need to incorporate flipped rows vs columns
+            //v1_len = PtCoordToVector(rawPt1).magnitude;
+            //v2_len = PtCoordToVector(rawPt2).magnitude;
 
-            center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-            stepSize = Mathf.Max(vector12.magnitude, vector23.magnitude);
+            stepSize = Mathf.Max(vector12.magnitude, vector13.magnitude);
             //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
             //Get the range of the box
             if (stepSize == 0)
@@ -150,8 +154,8 @@ namespace Determinants
             normalVector = Vector3.Cross(vector12, vector13);
             if (PlaneValid())
             {
-                forwardPlane.GetComponent<MeshRenderer>().enabled = true;
-                backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+                //forwardPlane.GetComponent<MeshRenderer>().enabled = true;  TM edit
+                //backwardPlane.GetComponent<MeshRenderer>().enabled = true;  TM edit
 
                 // Basic formula of the equation
                 d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
