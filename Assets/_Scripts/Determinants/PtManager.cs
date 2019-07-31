@@ -59,11 +59,11 @@ namespace Determinants
         internal class FeedBacks
         {
             [SerializeField]
-            internal Renderer pt1Feedback;
+            internal Renderer row1Feedback;
             [SerializeField]
-            internal Renderer pt2Feedback;
+            internal Renderer row2Feedback;
             [SerializeField]
-            internal Renderer pt3Feedback;
+            internal Renderer row3Feedback;
             [SerializeField]
             internal Renderer eqnFeedback;
         }
@@ -72,9 +72,9 @@ namespace Determinants
         internal class Inputs
         {
             [SerializeField]
-            internal TextMesh pt1XInput, pt1YInput, pt1ZInput,
-                    pt2XInput, pt2YInput, pt2ZInput,
-                    pt3XInput, pt3YInput, pt3ZInput,
+            internal TextMesh a11Input, a12Input, a13Input,
+                    a21Input, a22Input, a23Input,
+                    a31Input, a32Input, a33Input,
                     aInput, bInput, cInput, dInput;
         }
 
@@ -105,9 +105,9 @@ namespace Determinants
             eqnSet = new EqnSet();
 
             ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
-            updatePoint("pt1", new Vector3(-1, 1, 1), false);
-            updatePoint("pt2", new Vector3(1, -1, 1), false);
-            updatePoint("pt3", new Vector3(1, 1, -1), false);
+            updatePoint("pt1", new Vector3(0, 1, 0), false);
+            updatePoint("pt2", new Vector3(1, 0, 0), false);
+            updatePoint("pt3", new Vector3(0, 0, 1), false);
         }
 
 
@@ -178,9 +178,9 @@ namespace Determinants
 
         public void ManageFeedback()
         {
-            if (feedbacks.pt1Feedback != null) feedbacks.pt1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.pt2Feedback != null) feedbacks.pt2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.pt3Feedback != null) feedbacks.pt3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
+            if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
+            if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
+            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
             if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback;
         }
 
@@ -291,35 +291,35 @@ namespace Determinants
         public void manageText()
         {
             #region coords
-            if (ptSet.ptCoords.ContainsKey("pt1") && inputs.pt1XInput != null)
+            if (ptSet.ptCoords.ContainsKey("pt1") && inputs.a11Input != null)
             {
-                inputs.pt1XInput.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength);
-                inputs.pt1YInput.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
-                inputs.pt1ZInput.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength);
+                inputs.a11Input.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength);
+                inputs.a12Input.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
+                inputs.a13Input.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength);
 
-                if (inputs.pt1XInput.text.Length == 0) inputs.pt1XInput.text = "0";
-                if (inputs.pt1YInput.text.Length == 0) inputs.pt1YInput.text = "0";
-                if (inputs.pt1ZInput.text.Length == 0) inputs.pt1ZInput.text = "0";
+                if (inputs.a11Input.text.Length == 0) inputs.a11Input.text = "0";
+                if (inputs.a12Input.text.Length == 0) inputs.a12Input.text = "0";
+                if (inputs.a13Input.text.Length == 0) inputs.a13Input.text = "0";
             }
-            if (ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2XInput != null)
+            if (ptSet.ptCoords.ContainsKey("pt2") && inputs.a21Input != null)
             {
-                inputs.pt2XInput.text = displayText(ptSet.ptCoords["pt2"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].X, maxDisplayLength);
-                inputs.pt2YInput.text = displayText(ptSet.ptCoords["pt2"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Y, maxDisplayLength);
-                inputs.pt2ZInput.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength);
+                inputs.a21Input.text = displayText(ptSet.ptCoords["pt2"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].X, maxDisplayLength);
+                inputs.a22Input.text = displayText(ptSet.ptCoords["pt2"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Y, maxDisplayLength);
+                inputs.a23Input.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength);
 
-                if (inputs.pt2XInput.text.Length == 0) inputs.pt2XInput.text = "0";
-                if (inputs.pt2YInput.text.Length == 0) inputs.pt2YInput.text = "0";
-                if (inputs.pt2ZInput.text.Length == 0) inputs.pt2ZInput.text = "0";
+                if (inputs.a21Input.text.Length == 0) inputs.a21Input.text = "0";
+                if (inputs.a22Input.text.Length == 0) inputs.a22Input.text = "0";
+                if (inputs.a23Input.text.Length == 0) inputs.a23Input.text = "0";
             }
-            if (ptSet.ptCoords.ContainsKey("pt3") && inputs.pt3XInput != null)
+            if (ptSet.ptCoords.ContainsKey("pt3") && inputs.a31Input != null)
             {
-                inputs.pt3XInput.text = displayText(ptSet.ptCoords["pt3"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].X, maxDisplayLength);
-                inputs.pt3YInput.text = displayText(ptSet.ptCoords["pt3"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Y, maxDisplayLength);
-                inputs.pt3ZInput.text = displayText(ptSet.ptCoords["pt3"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Z, maxDisplayLength);
+                inputs.a31Input.text = displayText(ptSet.ptCoords["pt3"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].X, maxDisplayLength);
+                inputs.a32Input.text = displayText(ptSet.ptCoords["pt3"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Y, maxDisplayLength);
+                inputs.a33Input.text = displayText(ptSet.ptCoords["pt3"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Z, maxDisplayLength);
 
-                if (inputs.pt3XInput.text.Length == 0) inputs.pt3XInput.text = "0";
-                if (inputs.pt3YInput.text.Length == 0) inputs.pt3YInput.text = "0";
-                if (inputs.pt3ZInput.text.Length == 0) inputs.pt3ZInput.text = "0";
+                if (inputs.a31Input.text.Length == 0) inputs.a31Input.text = "0";
+                if (inputs.a32Input.text.Length == 0) inputs.a32Input.text = "0";
+                if (inputs.a33Input.text.Length == 0) inputs.a33Input.text = "0";
             }
             if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
             if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
