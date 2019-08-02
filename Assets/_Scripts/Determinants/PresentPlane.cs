@@ -116,8 +116,8 @@ namespace Determinants
                 stepSize = defaultStepSize;
             }
 
-            Debug.Log("step size: " + stepSize);
-            Debug.Log("steps: " + steps);
+            //Debug.Log("step size: " + stepSize);
+            //Debug.Log("steps: " + steps);
 
             xLabelManager.Min = center.x - stepSize * steps;
             yLabelManager.Min = center.y - stepSize * steps;
@@ -129,7 +129,7 @@ namespace Determinants
             //expr = solver.SymbolicateExpression(rawEquation);
         }
 
-        public void ApplyUnroundCenter(string ptName, Vector3 newLoc)
+        public void ApplyUnroundCenter(string ptName, Vector3 newLoc) //TAG
         {
             /* 
             if (ptName.Equals("pt1")) center = (newLoc + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;

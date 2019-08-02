@@ -83,6 +83,7 @@ namespace Determinants
         public void SetOutput(CalcOutput output)
         {
             ptInput.ChangeOutput(output);
+            /* //TAG
             if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
             {
                 eqnInput = false;
@@ -91,6 +92,7 @@ namespace Determinants
             {
                 eqnInput = true;
             }
+            */
         }
 
         private void Initialize()
@@ -98,8 +100,8 @@ namespace Determinants
             ptInput = connectedMenus.ptInput;
             connectedMenus.ptInput.Initialize(this);
             connectedMenus.ptOutputMenu.Initialize(this);
-            List<string> neg1 = new List<string>() { "-", "1" };
-            List<string> pos1 = new List<string>() { "1" };
+            //List<string> neg1 = new List<string>() { "-", "1" }; //TAG
+            //List<string> pos1 = new List<string>() { "1" }; //TAG
             ptSet = new PtSet();
 
             eqnSet = new EqnSet();
@@ -132,62 +134,68 @@ namespace Determinants
                 inputReceived = false;
                 bool isValid = ptSet.CompileAll();
 
-                ManageFeedback();
+                //ManageFeedback(); //TAG
                 if (isValid)
                 {
                     if (presentPlane)
                     {
-                        if (presentPlane.CalculatePlane())
-                        {
+                        //if (presentPlane.CalculatePlane()) //TAG
+                        //{
+                            presentPlane.CalculatePlane();
                             presentPlane.ApplyGraphAdjustment();
                             presentPlane.GetLocalPoint();
                             presentPlane.GetPlaneDirection();
-                        }
-                        else
+                        //}
+                        /* else
                         {
                             presentPlane.ApplyGraphAdjustment();
                             presentPlane.GetLocalPoint();
-                        }
-                    }
+                        }*/ //TAG
+                     }
                 }
             }
-
+            
+            /* //TAG
             if (inputReceived && eqnInput)
             {
-                inputReceived = false;
-                bool isValid = eqnSet.CompileAll();
-                ManageFeedback();
-                if (isValid)
+                //inputReceived = false;
+                //bool isValid = eqnSet.CompileAll(); //TAG
+                //ManageFeedback(); //TAG
+                if (isValid) //TAG
                 {
                     if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
                     {
-                        feedbacks.eqnFeedback.material.color = negativeFeedback;
+                        //feedbacks.eqnFeedback.material.color = negativeFeedback;
+                        //TAG 
                         if (presentPlane)
                         {
-                            presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                            presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                            //presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
+                            //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
                         }
+                    
+                    
                     }
                     else
                     {
-                        generatePlanePts.eqnToPoints();
+                        //generatePlanePts.eqnToPoints();
                     }
-                }
+                } 
             }
+            */
         }
 
         public void ManageFeedback()
         {
-            if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback;
+            //if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
+            //if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
+            //if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
+            //if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; //TAG
         }
 
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
         {
             CalcOutput originalExpression = ptInput.currExpression;
-            eqnInput = false;
+            //eqnInput = false; //TAG
             //inputReceived = true;
 
             SetOutput(ptSet.ptCoords[ptName].X);
@@ -200,22 +208,24 @@ namespace Determinants
             if (fixedPlane)
             {
                 manageText();
-                ManageFeedback();
+                //ManageFeedback(); //TAG
                 ptSet.CompileAll();
             }
             else
             {
                 manageText();
-                bool isValid = ptSet.CompileAll();
-                ManageFeedback();
+                // bool isValid = ptSet.CompileAll(); //TAG
+                //ManageFeedback(); //TAG
+                /* //TAG
                 if (isValid)
                 {
                     if (presentPlane && presentPlane.CalculatePlane())
                     {
-                        presentPlane.ApplyUnroundCenter(ptName, newLoc);
+                        //presentPlane.ApplyUnroundCenter(ptName, newLoc);  //TAG
                         presentPlane.GetPlaneDirection();
                     }
                 }
+                */
             }
         }
 
@@ -242,12 +252,12 @@ namespace Determinants
             ptInput.RewriteInput(pt3NewLoc.z);
             SetOutput(originalExpression);
             manageText();
-            ManageFeedback();
+            //ManageFeedback(); //TAG
             ptSet.CompileAll();
             presentPlane.GetLocalPoint();
             presentPlane.GetPlaneDirection();
-            presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true;
-            presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true;
+            //presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
+            //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
         }
 
         public void updateEqn(float newA, float newB, float newC, float newD)
@@ -264,7 +274,7 @@ namespace Determinants
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
-            ManageFeedback();
+            //ManageFeedback(); //TAG
         }
 
         public void updateEqn()
