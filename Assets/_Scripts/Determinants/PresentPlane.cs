@@ -20,8 +20,9 @@ namespace Determinants
         public PtManager ptManager;
         private PtCoord rawPt1, rawPt2, rawPt3;
 
-        public Vector3 center;
-        public Vector3 vector12, vector13, vector23;
+        public Vector3 center = new Vector3(0,0,0);
+        public Vector3 vector12, vector13, vector23; //TODO: remove these
+        public Vector3 vector1, vector2, vector3;
         public Vector3 scaledPt1, scaledPt2, scaledPt3;
         public Vector3 scaledVector12, scaledVector13;
         public Vector3 normalVector;
@@ -37,7 +38,7 @@ namespace Determinants
         public AxisLabelManager yLabelManager;
         public AxisLabelManager zLabelManager;
 
-        public float steps = 3;
+        public float steps = 1.5f;
         public float dummySteps = 10;
         public float stepSize;
         public float defaultStepSize = 5;
@@ -100,21 +101,24 @@ namespace Determinants
 
         public void ApplyGraphAdjustment()
         {
-
-            
-            center = new Vector3(0, 0, 0);
+            //center = new Vector3(0, 0, 0); defined globally above
             
             //TODO: modify graph adjustments - need to incorporate flipped rows vs columns
-            //v1_len = PtCoordToVector(rawPt1).magnitude;
-            //v2_len = PtCoordToVector(rawPt2).magnitude;
+            float v1 = PtCoordToVector(rawPt1).magnitude;
+            float v2 = PtCoordToVector(rawPt2).magnitude;
+            float v3 = PtCoordToVector(rawPt3).magnitude;
 
-            stepSize = Mathf.Max(vector12.magnitude, vector13.magnitude);
+            stepSize = Mathf.Max(v1, v2, v3);
             //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
             //Get the range of the box
             if (stepSize == 0)
             {
                 stepSize = defaultStepSize;
             }
+
+            Debug.Log("step size: " + stepSize);
+            Debug.Log("steps: " + steps);
+
             xLabelManager.Min = center.x - stepSize * steps;
             yLabelManager.Min = center.y - stepSize * steps;
             zLabelManager.Min = center.z - stepSize * steps;
@@ -127,9 +131,11 @@ namespace Determinants
 
         public void ApplyUnroundCenter(string ptName, Vector3 newLoc)
         {
+            /* 
             if (ptName.Equals("pt1")) center = (newLoc + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
             else if (ptName.Equals("pt2")) center = (PtCoordToVector(rawPt1) + newLoc + PtCoordToVector(rawPt3)) / 3;
             else if (ptName.Equals("pt3")) center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + newLoc) / 3;
+            */
         }
 
         public Vector3 GenerateVector(PtCoord pt1, PtCoord pt2)
@@ -142,16 +148,17 @@ namespace Determinants
         }
 
         // Return the raw string of the equation
-        public bool CalculatePlane()
+        public bool CalculatePlane()  //previously returned bool
         {
             rawPt1 = ptManager.ptSet.ptCoords["pt1"];
             rawPt2 = ptManager.ptSet.ptCoords["pt2"];
             rawPt3 = ptManager.ptSet.ptCoords["pt3"];
 
-            vector12 = GenerateVector(rawPt1, rawPt2);
-            vector13 = GenerateVector(rawPt1, rawPt3);
+            //vector1 = GenerateVector(center, rawPt1);
+            //vector2 = GenerateVector(center, rawPt2);
+            //vector3 = GenerateVector(center, rawPt3);
             //Debug.Log("Vector 12 is: " + vector12 +". Vector13 is: " + vector13);
-            normalVector = Vector3.Cross(vector12, vector13);
+            /* normalVector = Vector3.Cross(vector12, vector13);
             if (PlaneValid())
             {
                 //forwardPlane.GetComponent<MeshRenderer>().enabled = true;  TM edit
@@ -174,7 +181,9 @@ namespace Determinants
                 // rawEquation = "Invalid Plane";
                 ptManager.updateEqn();
                 return false;
-            }
+            } */
+
+            return true;
 
             //Debug.Log("Normal vector is: " + normalVector);
         }
