@@ -188,6 +188,7 @@ namespace Determinants
             //Debug.Log("Normal vector is: " + normalVector);
         }
 
+        /* //TAG 
         public string[] roundString(float[] input)
         {
             string[] result = new string[input.Length];
@@ -207,6 +208,7 @@ namespace Determinants
             }
             return result;
         }
+        */
 
         public void GetLocalPoint()
         {
@@ -221,8 +223,8 @@ namespace Determinants
 
         public void GetPlaneDirection()
         {
-            if (PlaneValid())
-            {
+            //if (PlaneValid()) //TAG
+            //{
                 scaledVector12 = point2.localPosition - point1.localPosition;
                 scaledVector13 = point3.localPosition - point1.localPosition;
                 scaledNormal = Vector3.Cross(scaledVector12, scaledVector13);
@@ -232,10 +234,10 @@ namespace Determinants
                 lookAtTarget.localPosition = dummyPos + ScaledPoint(center);
                 centerPt.localPosition = ScaledPoint(center);
                 plane.localPosition = ScaledPoint(center);
-            }
+            //}
         }
 
-
+        /*  //TAG
         public bool PlaneValid()
         {
             // no points are the same
@@ -267,6 +269,7 @@ namespace Determinants
 
             return true;
         }
+        */
 
         public Vector3 PtCoordToVector(PtCoord pt)
         {

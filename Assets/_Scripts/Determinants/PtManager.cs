@@ -83,7 +83,7 @@ namespace Determinants
         public void SetOutput(CalcOutput output)
         {
             ptInput.ChangeOutput(output);
-            ///* //TAG
+            /* //TAG
             if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
             {
                 eqnInput = false;
@@ -92,7 +92,7 @@ namespace Determinants
             {
                 eqnInput = true;
             }
-            //*/
+            */
         }
 
         private void Initialize()
@@ -155,7 +155,7 @@ namespace Determinants
                 }
             }
             
-            ///* //TAG
+            /* //TAG
             if (inputReceived && eqnInput)
             {
                 inputReceived = false; //TAG
@@ -181,7 +181,7 @@ namespace Determinants
                     }
                 } 
             }
-            //*/
+            */
         }
 
         public void ManageFeedback()
@@ -195,7 +195,7 @@ namespace Determinants
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
         {
             CalcOutput originalExpression = ptInput.currExpression;
-            eqnInput = false; //TAG
+            //eqnInput = false; //TAG
             //inputReceived = true;
 
             SetOutput(ptSet.ptCoords[ptName].X);
@@ -208,15 +208,15 @@ namespace Determinants
             if (fixedPlane)
             {
                 manageText();
-                ManageFeedback(); //TAG
+                ManageFeedback(); //KEEP
                 ptSet.CompileAll();
             }
             else
             {
                 manageText();
-                bool isValid = ptSet.CompileAll(); //TAG
-                ManageFeedback(); //TAG
-                ///* //TAG
+                bool isValid = ptSet.CompileAll(); //KEEP
+                ManageFeedback(); //KEEP
+                /* //TAG
                 if (isValid)
                 {
                     if (presentPlane && presentPlane.CalculatePlane())
@@ -225,7 +225,7 @@ namespace Determinants
                         presentPlane.GetPlaneDirection();
                     }
                 }
-                //*/
+                */
             }
         }
 
@@ -252,7 +252,7 @@ namespace Determinants
             ptInput.RewriteInput(pt3NewLoc.z);
             SetOutput(originalExpression);
             manageText();
-            ManageFeedback(); //TAG
+            //ManageFeedback(); //TAG
             ptSet.CompileAll();
             presentPlane.GetLocalPoint();
             presentPlane.GetPlaneDirection();
@@ -274,7 +274,7 @@ namespace Determinants
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
-            ManageFeedback(); //TAG
+            //ManageFeedback(); //TAG
         }
 
         public void updateEqn()
