@@ -129,7 +129,7 @@ namespace Determinants
             //expr = solver.SymbolicateExpression(rawEquation);
         }
 
-        public void ApplyUnroundCenter(string ptName, Vector3 newLoc) //TAG
+        public void ApplyUnroundCenter(string ptName, Vector3 newLoc) //TAG - changes origin location, so this should be removed
         {
             /* 
             if (ptName.Equals("pt1")) center = (newLoc + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
