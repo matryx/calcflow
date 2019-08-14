@@ -36,9 +36,11 @@ namespace Determinants
                 else grabbingPoint(point1, pt1Grabber);
                 if (!pt2Grabber.IsGrabbed) pt2Grabber.lastLocalPos = point2.localPosition;
                 else grabbingPoint(point2, pt2Grabber);
-                if (!pt3Grabber.IsGrabbed) pt3Grabber.lastLocalPos = point3.localPosition;
-                else grabbingPoint(point3, pt3Grabber);
-        }
+                if (point3 != null){
+                    if (!pt3Grabber.IsGrabbed) pt3Grabber.lastLocalPos = point3.localPosition;
+                    else grabbingPoint(point3, pt3Grabber);
+                }
+        } 
 
         private void grabbingPoint(Transform point, ConstraintGrabbable grabber)
         {

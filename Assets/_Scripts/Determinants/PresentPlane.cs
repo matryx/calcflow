@@ -58,7 +58,9 @@ namespace Determinants
                 ptSetExist = true;
                 rawPt1 = ptManager.ptSet.ptCoords["pt1"];
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
-                rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+                if (rawPt3 != null){
+                    rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+                }
             }
         }
 
@@ -69,13 +71,17 @@ namespace Determinants
                 ptSetExist = true;
                 rawPt1 = ptManager.ptSet.ptCoords["pt1"];
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
-                rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+                if (rawPt3 != null){                
+                    rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+                }
             }
             plane.LookAt(lookAtTarget);
 
             pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
             pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
-            pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
+            if (pt3Label != null){
+                pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
+            }
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
             /*var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
@@ -106,9 +112,13 @@ namespace Determinants
             //TODO: modify graph adjustments - need to incorporate flipped rows vs columns
             float v1 = PtCoordToVector(rawPt1).magnitude;
             float v2 = PtCoordToVector(rawPt2).magnitude;
-            float v3 = PtCoordToVector(rawPt3).magnitude;
-
-            stepSize = Mathf.Max(v1, v2, v3);
+            if (rawPt3 != null){
+                float v3 = PtCoordToVector(rawPt3).magnitude;
+                stepSize = Mathf.Max(v1, v2, v3);
+            } else{
+                stepSize = Mathf.Max(v1, v2);
+            }
+            
             //PtCoord centerPt = new PtCoord(new AxisCoord(centerX), new AxisCoord(centerY), new AxisCoord(centerZ));
             //Get the range of the box
             if (stepSize == 0)
@@ -121,10 +131,14 @@ namespace Determinants
 
             xLabelManager.Min = center.x - stepSize * steps;
             yLabelManager.Min = center.y - stepSize * steps;
-            zLabelManager.Min = center.z - stepSize * steps;
+            if (zLabelManager != null){
+                zLabelManager.Min = center.z - stepSize * steps; // Z 
+            }
             xLabelManager.Max = center.x + stepSize * steps;
             yLabelManager.Max = center.y + stepSize * steps;
-            zLabelManager.Max = center.z + stepSize * steps;
+            if (zLabelManager != null){
+                zLabelManager.Max = center.z + stepSize * steps; //Z
+            }
             //Get the interaction points between the box edges and the plane
             //expr = solver.SymbolicateExpression(rawEquation);
         }
@@ -152,7 +166,9 @@ namespace Determinants
         {
             rawPt1 = ptManager.ptSet.ptCoords["pt1"];
             rawPt2 = ptManager.ptSet.ptCoords["pt2"];
-            rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+            if (ptManager.ptSet.ptCoords["pt3"] != null){
+                rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+            }
 
             //vector1 = GenerateVector(center, rawPt1);
             //vector2 = GenerateVector(center, rawPt2);
@@ -216,15 +232,17 @@ namespace Determinants
             point1.localPosition = scaledPt1;
             scaledPt2 = ScaledPoint(PtCoordToVector(rawPt2));
             point2.localPosition = scaledPt2;
-            scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
-            point3.localPosition = scaledPt3;
+            if (rawPt3 != null && point3 != null){
+                scaledPt3 = ScaledPoint(PtCoordToVector(rawPt3));
+                point3.localPosition = scaledPt3;
+            }
             //centerPt.localPosition = ScaledPoint(center);
         }
 
         public void GetPlaneDirection()
         {
-            //if (PlaneValid()) //TAG
-            //{
+            if (point3 != null) 
+            {
                 scaledVector12 = point2.localPosition - point1.localPosition;
                 scaledVector13 = point3.localPosition - point1.localPosition;
                 scaledNormal = Vector3.Cross(scaledVector12, scaledVector13);
@@ -234,7 +252,7 @@ namespace Determinants
                 lookAtTarget.localPosition = dummyPos + ScaledPoint(center);
                 centerPt.localPosition = ScaledPoint(center);
                 plane.localPosition = ScaledPoint(center);
-            //}
+            }
         }
 
         /*  //TAG
@@ -282,7 +300,9 @@ namespace Determinants
             //print("raw pt1 position: " + pt);
             result.z = (pt.x - xLabelManager.Min) / (xLabelManager.Max - xLabelManager.Min) * 20 - 10;
             result.x = (pt.y - yLabelManager.Min) / (yLabelManager.Max - yLabelManager.Min) * 20 - 10;
-            result.y = (pt.z - zLabelManager.Min) / (zLabelManager.Max - zLabelManager.Min) * 20 - 10;
+            if (zLabelManager != null){
+                result.y = (pt.z - zLabelManager.Min) / (zLabelManager.Max - zLabelManager.Min) * 20 - 10;
+            }
             return result;
         }
 
@@ -292,7 +312,9 @@ namespace Determinants
             print("raw pt1 position: " + pt);
             result.x = (pt.z + 10) / 20 * (xLabelManager.Max - xLabelManager.Min) + xLabelManager.Min;
             result.y = (pt.x + 10) / 20 * (yLabelManager.Max - yLabelManager.Min) + yLabelManager.Min;
-            result.z = (pt.y + 10) / 20 * (zLabelManager.Max - zLabelManager.Min) + zLabelManager.Min;
+            if (zLabelManager != null){
+                result.z = (pt.y + 10) / 20 * (zLabelManager.Max - zLabelManager.Min) + zLabelManager.Min;
+            }
             return result;
         }
     }

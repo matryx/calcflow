@@ -2467,7 +2467,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 28158579}
-  - component: {fileID: 28158580}
+  - component: {fileID: 28158581}
   m_Layer: 12
   m_Name: PointGrabber
   m_TagString: Untagged
@@ -2488,7 +2488,7 @@ Transform:
   m_Father: {fileID: 1232667209}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &28158580
+--- !u!114 &28158581
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2501,15 +2501,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   point1: {fileID: 1051487177}
   point2: {fileID: 1119460468}
-  point3: {fileID: 712850136}
+  point3: {fileID: 0}
   presentPlane: {fileID: 1936754690}
   ptManager: {fileID: 1841890204}
-  ptOutputMenu: {fileID: 1602823116}
+  ptOutputMenu: {fileID: 480704921}
   pt1Grabber: {fileID: 124299108}
   pt2Grabber: {fileID: 1972422931}
-  pt3Grabber: {fileID: 962085408}
+  pt3Grabber: {fileID: 0}
   FixedPlane: 0
-  lockButton: {fileID: 1635967828}
+  lockButton: {fileID: 2086494087}
 --- !u!1 &32839403
 GameObject:
   m_ObjectHideFlags: 0
@@ -38270,7 +38270,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   origin: {fileID: 1919904882}
-  presentplane: {fileID: 1936754690}
+  presentplane: {fileID: 0}
 --- !u!23 &712850139
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -45246,13 +45246,13 @@ Transform:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 820471775}
-  m_LocalRotation: {x: 0.000000029802322, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: -0, w: -0.7071068}
   m_LocalPosition: {x: 0, y: 0.75, z: 0}
   m_LocalScale: {x: 2, y: 1.9999199, z: 2.0000832}
   m_Children: []
   m_Father: {fileID: 1051487177}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
 --- !u!1 &822080272
 GameObject:
   m_ObjectHideFlags: 0
@@ -57285,8 +57285,8 @@ GameObject:
   - component: {fileID: 1051487182}
   - component: {fileID: 1051487181}
   - component: {fileID: 1051487180}
-  - component: {fileID: 1051487179}
   - component: {fileID: 1051487178}
+  - component: {fileID: 1051487179}
   m_Layer: 12
   m_Name: pt1
   m_TagString: Point1
@@ -57301,7 +57301,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1051487176}
   m_LocalRotation: {x: 0.00041077437, y: 0.0002708137, z: -0.0026959185, w: 0.9999963}
-  m_LocalPosition: {x: 0, y: -1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 2}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_Children:
   - {fileID: 820471779}
@@ -59219,13 +59219,13 @@ Transform:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1081958278}
-  m_LocalRotation: {x: 0.000000029802322, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: -0, w: -0.7071068}
   m_LocalPosition: {x: 0, y: 0.75, z: 0}
   m_LocalScale: {x: 2, y: 1.9999199, z: 2.0000818}
   m_Children: []
   m_Father: {fileID: 1119460468}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
 --- !u!1 &1082623775
 GameObject:
   m_ObjectHideFlags: 0
@@ -60231,8 +60231,8 @@ GameObject:
   - component: {fileID: 1119460473}
   - component: {fileID: 1119460472}
   - component: {fileID: 1119460471}
-  - component: {fileID: 1119460470}
   - component: {fileID: 1119460469}
+  - component: {fileID: 1119460470}
   m_Layer: 12
   m_Name: pt2
   m_TagString: Point2
@@ -66374,7 +66374,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1232667201}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 10, z: 10}
+  m_LocalPosition: {x: 0, y: 10, z: 7.5}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_Children:
   - {fileID: 1978479307}
@@ -68573,7 +68573,7 @@ MonoBehaviour:
   point2: {fileID: 1119460468}
   point3: {fileID: 712850136}
   centerPt: {fileID: 1919904882}
-  presentPlane: {fileID: 1936754690}
+  presentPlane: {fileID: 0}
   ptManager: {fileID: 1692795711}
   steps: 3
   stepSize: 5
@@ -94283,7 +94283,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1746038680}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 2.5}
+  m_LocalPosition: {x: 0, y: 2, z: -1}
   m_LocalScale: {x: 0.5, y: 0.85, z: 0.5}
   m_Children: []
   m_Father: {fileID: 1119460468}
@@ -99760,7 +99760,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1841890204
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -99798,8 +99798,8 @@ MonoBehaviour:
     cInput: {fileID: 890730459}
     dInput: {fileID: 1122594454}
   equation: {fileID: 0}
-  presentPlane: {fileID: 995311755}
-  generatePlanePts: {fileID: 374662756}
+  presentPlane: {fileID: 1936754690}
+  generatePlanePts: {fileID: 1273887724}
   updateText: 0
 --- !u!114 &1841890205
 MonoBehaviour:
@@ -105326,11 +105326,6 @@ MonoBehaviour:
   lookAtTarget: {fileID: 1543661586}
   walls:
   - {fileID: 624601628}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   ptManager: {fileID: 1841890204}
   center: {x: 0, y: 0, z: 0}
   vector12: {x: 0, y: 0, z: 0}
