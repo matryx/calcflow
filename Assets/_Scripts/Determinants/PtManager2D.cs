@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Determinants
 {
-    public class PtManager : MonoBehaviour
+    public class PtManager2D : MonoBehaviour
     {
         [HideInInspector]
         public bool inputReceived;
