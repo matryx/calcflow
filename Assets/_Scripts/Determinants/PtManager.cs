@@ -78,7 +78,7 @@ namespace Determinants
                     aInput, bInput, cInput, dInput;
         }
 
-        public GeneratePlanePts generatePlanePts;
+        public GeneratePlanePts generatePlanePts;  //tag
 
         public void SetOutput(CalcOutput output)
         {

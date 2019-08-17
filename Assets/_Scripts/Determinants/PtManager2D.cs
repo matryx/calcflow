@@ -6,7 +6,8 @@ using UnityEngine;
 namespace Determinants
 {
     public class PtManager2D : MonoBehaviour
-    {
+    {	
+		
         [HideInInspector]
         public bool inputReceived;
         [HideInInspector]
@@ -16,20 +17,20 @@ namespace Determinants
         [HideInInspector]
         public PtSet ptSet;
 
-        [HideInInspector]
-        public EqnSet eqnSet;
+        //[HideInInspector]
+        //public EqnSet eqnSet;	//TAG
 
-        [HideInInspector]
-        public SaveLoadMenu saveLoadMenu;
+        //[HideInInspector]
+        //public SaveLoadMenu saveLoadMenu;	//TAG
 
-        private PtInput ptInput;
+        private PtInput2D ptInput2D;
 
         private Color positiveFeedback = new Color(0, 204, 54);
         private Color negativeFeedback = Color.red;
 
         int maxDisplayLength = 9;
 
-        int maxEqnLength = 7;
+        //int maxEqnLength = 7; //TAG
 
         [SerializeField]
         ConnectedMenus connectedMenus;
@@ -40,7 +41,7 @@ namespace Determinants
         [SerializeField]
         Inputs inputs;
 
-        public TextMesh equation;
+        //public TextMesh equation;
 
         [SerializeField]
         PresentPlane presentPlane;
@@ -49,10 +50,10 @@ namespace Determinants
         internal class ConnectedMenus
         {
             [SerializeField]
-            internal PtInput ptInput;
+            internal PtInput2D ptInput2D;
 
             [SerializeField]
-            internal PtOutputMenu ptOutputMenu;
+            internal PtOutputMenu2D ptOutputMenu2D;
         }
 
         [System.Serializable]
@@ -64,25 +65,25 @@ namespace Determinants
             internal Renderer row2Feedback;
             [SerializeField]
             internal Renderer row3Feedback;
-            [SerializeField]
-            internal Renderer eqnFeedback;
+            //[SerializeField]
+            //internal Renderer eqnFeedback;
         }
 
         [System.Serializable]
         internal class Inputs
         {
             [SerializeField]
-            internal TextMesh pt1XInput, pt1YInput, pt1ZInput,
-                    pt2XInput, pt2YInput, pt2ZInput,
-                    pt3XInput, pt3YInput, pt3ZInput,
-                    aInput, bInput, cInput, dInput;
+            internal TextMesh  pt1XInput,pt1YInput,pt1ZInput, //TAG X,Y,Z dimensionns changes in the context of 2D
+                    pt2XInput, pt2YInput,pt2ZInput, //TAG
+                    pt3XInput, pt3YInput, pt3ZInput; //TAG
+                    //aInput, bInput, cInput, dInput; //TAG
         }
 
-        public GeneratePlanePts generatePlanePts;
+        //public GeneratePlanePts generatePlanePts;
 
         public void SetOutput(CalcOutput output)
         {
-            ptInput.ChangeOutput(output);
+            ptInput2D.ChangeOutput(output);
             /* //TAG
             if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
             {
@@ -97,19 +98,19 @@ namespace Determinants
 
         private void Initialize()
         {
-            ptInput = connectedMenus.ptInput;
-            connectedMenus.ptInput.Initialize(this);
-            connectedMenus.ptOutputMenu.Initialize(this);
+            ptInput2D = connectedMenus.ptInput2D;
+            connectedMenus.ptInput2D.Initialize(this);  //tmp
+            connectedMenus.ptOutputMenu2D.Initialize(this);  //tmp
             //List<string> neg1 = new List<string>() { "-", "1" }; //TAG
             //List<string> pos1 = new List<string>() { "1" }; //TAG
             ptSet = new PtSet();
 
-            eqnSet = new EqnSet();
+            //eqnSet = new EqnSet();
 
-            ptInput.ChangeOutput(ptSet.ptCoords["pt1"].X);
-            updatePoint("pt1", new Vector3(0, 1, 0), false);
+            ptInput2D.ChangeOutput(ptSet.ptCoords["pt1"].X);
+            updatePoint("pt1", new Vector3(0, 1, 2), false);
             updatePoint("pt2", new Vector3(1, 0, 0), false);
-            updatePoint("pt3", new Vector3(0, 0, 1), false);
+            updatePoint("pt3", new Vector3(0, 0, 0), false); //TAG
 
         }
 
@@ -189,22 +190,22 @@ namespace Determinants
         {
             if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
             if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; //TAG
+            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback; //TAG
+            //if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; //TAG
         }
 
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
         {
-            CalcOutput originalExpression = ptInput.currExpression;
+            CalcOutput originalExpression = ptInput2D.currExpression;
             //eqnInput = false; //TAG
             //inputReceived = true;
 
             SetOutput(ptSet.ptCoords[ptName].X);
-            ptInput.RewriteInput(newLoc.y);
+            ptInput2D.RewriteInput(newLoc.y);
             SetOutput(ptSet.ptCoords[ptName].Y);
-            ptInput.RewriteInput(newLoc.x);
+            ptInput2D.RewriteInput(newLoc.x);
             SetOutput(ptSet.ptCoords[ptName].Z);
-            ptInput.RewriteInput(newLoc.z);
+            ptInput2D.RewriteInput(newLoc.z);
             SetOutput(originalExpression);
             if (fixedPlane)
             {
@@ -229,7 +230,8 @@ namespace Determinants
                 */
             }
         }
-
+		
+		/* 
         public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
         {
             CalcOutput originalExpression = ptInput.currExpression;
@@ -298,40 +300,44 @@ namespace Determinants
             // inputs.dInput.text = "NaN";
             feedbacks.eqnFeedback.material.color = negativeFeedback;
         }
-
+		*/
         public void manageText()
         {
             #region coords
-            if (ptSet.ptCoords.ContainsKey("pt1") && inputs.pt1XInput != null)
+            if (ptSet.ptCoords.ContainsKey("pt1") && inputs.pt1YInput != null)
             {
-                inputs.pt1XInput.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength);
-                inputs.pt1YInput.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
-                inputs.pt1ZInput.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength);
+                inputs.pt1XInput.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength); 
+                inputs.pt1YInput.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
+                inputs.pt1ZInput.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength); //TAG
 
-                if (inputs.pt1XInput.text.Length == 0) inputs.pt1XInput.text = "0";
+                if (inputs.pt1XInput.text.Length == 0) inputs.pt1XInput.text = "0"; //TAG
                 if (inputs.pt1YInput.text.Length == 0) inputs.pt1YInput.text = "0";
-                if (inputs.pt1ZInput.text.Length == 0) inputs.pt1ZInput.text = "0";
+                if (inputs.pt1ZInput.text.Length == 0) inputs.pt1ZInput.text = "0"; 
             }
-            if (ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2XInput != null)
+            if (ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2YInput != null)
             {
-                inputs.pt2XInput.text = displayText(ptSet.ptCoords["pt2"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].X, maxDisplayLength);
-                inputs.pt2YInput.text = displayText(ptSet.ptCoords["pt2"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Y, maxDisplayLength);
-                inputs.pt2ZInput.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength);
+                inputs.pt2XInput.text = displayText(ptSet.ptCoords["pt2"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].X, maxDisplayLength); //TAG
+                inputs.pt2YInput.text = displayText(ptSet.ptCoords["pt2"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].Y, maxDisplayLength);
+                inputs.pt2ZInput.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength); 
 
-                if (inputs.pt2XInput.text.Length == 0) inputs.pt2XInput.text = "0";
+                if (inputs.pt2XInput.text.Length == 0) inputs.pt2XInput.text = "0"; 
                 if (inputs.pt2YInput.text.Length == 0) inputs.pt2YInput.text = "0";
-                if (inputs.pt2ZInput.text.Length == 0) inputs.pt2ZInput.text = "0";
+                if (inputs.pt2ZInput.text.Length == 0) inputs.pt2ZInput.text = "0"; //TAG
             }
+			
             if (ptSet.ptCoords.ContainsKey("pt3") && inputs.pt3XInput != null)
             {
-                inputs.pt3XInput.text = displayText(ptSet.ptCoords["pt3"].X.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].X, maxDisplayLength);
-                inputs.pt3YInput.text = displayText(ptSet.ptCoords["pt3"].Y.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Y, maxDisplayLength);
-                inputs.pt3ZInput.text = displayText(ptSet.ptCoords["pt3"].Z.tokens, ptInput.index, ptInput.currExpression == ptSet.ptCoords["pt3"].Z, maxDisplayLength);
+                inputs.pt3XInput.text = displayText(ptSet.ptCoords["pt3"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt3"].X, maxDisplayLength);
+                inputs.pt3YInput.text = displayText(ptSet.ptCoords["pt3"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt3"].Y, maxDisplayLength);
+                inputs.pt3ZInput.text = displayText(ptSet.ptCoords["pt3"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt3"].Z, maxDisplayLength);
 
                 if (inputs.pt3XInput.text.Length == 0) inputs.pt3XInput.text = "0";
                 if (inputs.pt3YInput.text.Length == 0) inputs.pt3YInput.text = "0";
                 if (inputs.pt3ZInput.text.Length == 0) inputs.pt3ZInput.text = "0";
             }
+			//TAG
+ 
+			/* 
             if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
             if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
             if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
@@ -344,7 +350,8 @@ namespace Determinants
 
             if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
             if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
-            #endregion
+            */ //TAG
+			#endregion
         }
 
         public string displayText(List<string> exp, int index0, bool mark, int displayLength)

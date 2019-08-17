@@ -18,18 +18,19 @@ namespace Determinants
         public List<GameObject> walls;
 
         public PtManager ptManager;
+        public PtManager2D ptManager2D; 
         private PtCoord rawPt1, rawPt2, rawPt3;
 
         public Vector3 center = new Vector3(0,0,0);
-        public Vector3 vector12, vector13, vector23; //TODO: remove these
+        //public Vector3 vector12, vector13, vector23; //TODO: remove these
         public Vector3 vector1, vector2, vector3;
         public Vector3 scaledPt1, scaledPt2, scaledPt3;
         public Vector3 scaledVector12, scaledVector13;
-        public Vector3 normalVector;
+        //public Vector3 normalVector;
         public Vector3 scaledNormal;
 
         public List<Vector3> vertices;
-        public string rawEquation;
+        //public string rawEquation;
 
         AK.ExpressionSolver solver;
         AK.Expression expr;
@@ -53,29 +54,44 @@ namespace Determinants
             expr = new AK.Expression();
             vertices = new List<Vector3>();
             stepSize = defaultStepSize;
-            if (ptManager != null && ptManager.ptSet != null)
-            {
-                ptSetExist = true;
-                rawPt1 = ptManager.ptSet.ptCoords["pt1"];
-                rawPt2 = ptManager.ptSet.ptCoords["pt2"];
-                if (rawPt3 != null){
+            if (ptManager!=null){
+                if (ptManager.ptSet != null)
+                {
+                    ptSetExist = true;
+                    rawPt1 = ptManager.ptSet.ptCoords["pt1"];
+                    rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                     rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+                }
+            } else {
+                if (ptManager2D != null && ptManager2D.ptSet != null)
+                {
+                    ptSetExist = true;
+                    rawPt1 = ptManager2D.ptSet.ptCoords["pt1"];
+                    rawPt2 = ptManager2D.ptSet.ptCoords["pt2"];
                 }
             }
         }
 
         void Update()
-        {
-            if (!ptSetExist && ptManager != null && ptManager.ptSet != null)
-            {
-                ptSetExist = true;
-                rawPt1 = ptManager.ptSet.ptCoords["pt1"];
-                rawPt2 = ptManager.ptSet.ptCoords["pt2"];
-                if (rawPt3 != null){                
+        {   
+            if (ptManager!=null){
+                if (!ptSetExist && ptManager.ptSet != null)
+                {
+                    ptSetExist = true;
+                    rawPt1 = ptManager.ptSet.ptCoords["pt1"];
+                    rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                     rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+                }
+            } else {
+                if (!ptSetExist && ptManager2D != null && ptManager2D.ptSet != null)
+                {
+                    ptSetExist = true;
+                    rawPt1 = ptManager2D.ptSet.ptCoords["pt1"];
+                    rawPt2 = ptManager2D.ptSet.ptCoords["pt2"];
                 }
             }
             plane.LookAt(lookAtTarget);
+
 
             pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
             pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
@@ -164,10 +180,14 @@ namespace Determinants
         // Return the raw string of the equation
         public bool CalculatePlane()  //previously returned bool
         {
-            rawPt1 = ptManager.ptSet.ptCoords["pt1"];
-            rawPt2 = ptManager.ptSet.ptCoords["pt2"];
-            if (ptManager.ptSet.ptCoords["pt3"] != null){
+            if (ptManager!=null){
+                rawPt1 = ptManager.ptSet.ptCoords["pt1"];
+                rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
+                
+            } else {
+                rawPt1 = ptManager2D.ptSet.ptCoords["pt1"];
+                rawPt2 = ptManager2D.ptSet.ptCoords["pt2"];
             }
 
             //vector1 = GenerateVector(center, rawPt1);

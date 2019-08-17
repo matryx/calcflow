@@ -13,7 +13,8 @@ namespace Determinants
 
         public PresentPlane presentPlane;
         public PtManager ptManager;
-        public PtOutputMenu ptOutputMenu;
+        public PtManager2D ptManager2D;
+        //public PtOutputMenu ptOutputMenu; //TAG
 
         public ConstraintGrabbable pt1Grabber, pt2Grabber, pt3Grabber;
         public bool FixedPlane = false;
@@ -62,7 +63,11 @@ namespace Determinants
                 newLoc = grabber.lastLocalPos;
                 point.localPosition = newLoc;
             }
-            ptManager.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
+            if (ptManager!=null){
+                ptManager.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
+            } else{
+                ptManager2D.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
+            }
         }
     }
 }
