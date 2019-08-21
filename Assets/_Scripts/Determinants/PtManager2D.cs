@@ -108,8 +108,8 @@ namespace Determinants
             //eqnSet = new EqnSet();
 
             ptInput2D.ChangeOutput(ptSet.ptCoords["pt1"].X);
-            updatePoint("pt1", new Vector3(0, 1, 2), false);
-            updatePoint("pt2", new Vector3(1, 0, 0), false);
+            updatePoint("pt1", new Vector3(1, 0, 0), false);
+            updatePoint("pt2", new Vector3(0, 0, 1), false);
             updatePoint("pt3", new Vector3(0, 0, 0), false); //TAG
 
         }

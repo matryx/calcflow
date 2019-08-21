@@ -54,7 +54,23 @@ namespace Determinants
             expr = new AK.Expression();
             vertices = new List<Vector3>();
             stepSize = defaultStepSize;
-            if (ptManager!=null){
+            /* 
+            if (ptManager == null){
+                Debug.Log("ptManager is NULL");
+            }
+            else{
+                Debug.Log("ptManger is Present!!!!!!");
+            }
+
+            if (ptManager2D == null){
+                Debug.Log("ptManager2D is NULL !!!!!!!");
+            }
+            else{
+                Debug.Log("ptManger2D is Present");
+            }
+            */
+            if (ptManager != null && ptManager2D == null){
+                Debug.Log("if statement in ptManager !!!!!");
                 if (ptManager.ptSet != null)
                 {
                     ptSetExist = true;
@@ -62,9 +78,12 @@ namespace Determinants
                     rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                     rawPt3 = ptManager.ptSet.ptCoords["pt3"];
                 }
-            } else {
+            } 
+            if (ptManager == null && ptManager2D != null) {
+                Debug.Log("if statement in ptManager2D");
                 if (ptManager2D != null && ptManager2D.ptSet != null)
                 {
+                    Debug.Log("Double if statement in ptManager2D");
                     ptSetExist = true;
                     rawPt1 = ptManager2D.ptSet.ptCoords["pt1"];
                     rawPt2 = ptManager2D.ptSet.ptCoords["pt2"];
