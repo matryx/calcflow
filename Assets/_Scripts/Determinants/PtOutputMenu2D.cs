@@ -79,6 +79,7 @@ namespace Determinants
                     ptManager2D.SetOutput(ptManager2D.ptSet.ptCoords["pt1"].Y);
                     break;
                 case "Button_pt1Zinput":
+                    //Debug.Log("HandleInput enters Button_pt1Zinput case");
                     ptManager2D.SetOutput(ptManager2D.ptSet.ptCoords["pt1"].Z);
                     break; //TAG //X,Y,Z dimensionns changes in the context of 2D
                 case "Button_pt2Xinput":

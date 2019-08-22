@@ -70,7 +70,6 @@ namespace Determinants
             }
             */
             if (ptManager != null && ptManager2D == null){
-                Debug.Log("if statement in ptManager !!!!!");
                 if (ptManager.ptSet != null)
                 {
                     ptSetExist = true;
@@ -80,10 +79,8 @@ namespace Determinants
                 }
             } 
             if (ptManager == null && ptManager2D != null) {
-                Debug.Log("if statement in ptManager2D");
                 if (ptManager2D != null && ptManager2D.ptSet != null)
                 {
-                    Debug.Log("Double if statement in ptManager2D");
                     ptSetExist = true;
                     rawPt1 = ptManager2D.ptSet.ptCoords["pt1"];
                     rawPt2 = ptManager2D.ptSet.ptCoords["pt2"];
@@ -111,11 +108,14 @@ namespace Determinants
             }
             plane.LookAt(lookAtTarget);
 
-
-            pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
-            pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
             if (pt3Label != null){
+                pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + "," + rawPt1.Z.Value + ")";
+                pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + "," + rawPt2.Z.Value + ")";
                 pt3Label.text = "(" + rawPt3.X.Value + "," + rawPt3.Y.Value + "," + rawPt3.Z.Value + ")";
+            }
+            else{
+                pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + ")";
+                pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + ")";
             }
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
 
