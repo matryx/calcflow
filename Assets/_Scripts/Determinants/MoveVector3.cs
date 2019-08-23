@@ -28,6 +28,8 @@ namespace Determinants
                 var sharedMaterial = transform.GetComponentInChildren<MeshRenderer>().sharedMaterial;
                 sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
+                presentplane.CalculatePlane();
+
                 for (int i = 0; i < 6; i++)
                 {
                     sharedMaterial.SetVector("_planePos" + i, presentplane.walls[i].transform.position);

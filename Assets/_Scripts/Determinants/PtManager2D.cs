@@ -17,8 +17,8 @@ namespace Determinants
         [HideInInspector]
         public PtSet ptSet;
 
-        //[HideInInspector]
-        //public EqnSet eqnSet;	//TAG
+        [HideInInspector]
+        public EqnSet eqnSet;	//TAG
 
         //[HideInInspector]
         //public SaveLoadMenu saveLoadMenu;	//TAG
@@ -30,7 +30,7 @@ namespace Determinants
 
         int maxDisplayLength = 9;
 
-        //int maxEqnLength = 7; //TAG
+        int maxEqnLength = 7; //TAG
 
         [SerializeField]
         ConnectedMenus connectedMenus;
@@ -65,8 +65,8 @@ namespace Determinants
             internal Renderer row2Feedback;
             [SerializeField]
             internal Renderer row3Feedback;
-            //[SerializeField]
-            //internal Renderer eqnFeedback;
+            [SerializeField]
+            internal Renderer eqnFeedback;
         }
 
         [System.Serializable]
@@ -75,8 +75,8 @@ namespace Determinants
             [SerializeField]
             internal TextMesh  pt1XInput,pt1YInput,pt1ZInput, //TAG X,Y,Z dimensionns changes in the context of 2D
                     pt2XInput, pt2YInput,pt2ZInput, //TAG
-                    pt3XInput, pt3YInput, pt3ZInput; //TAG
-                    //aInput, bInput, cInput, dInput; //TAG
+                    pt3XInput, pt3YInput, pt3ZInput, //TAG
+                    aInput, bInput, cInput, dInput; //TAG
         }
 
         //public GeneratePlanePts generatePlanePts;
@@ -105,10 +105,10 @@ namespace Determinants
             //List<string> pos1 = new List<string>() { "1" }; //TAG
             ptSet = new PtSet();
 
-            //eqnSet = new EqnSet();
+            eqnSet = new EqnSet();
 
             ptInput2D.ChangeOutput(ptSet.ptCoords["pt1"].X);
-            updatePoint("pt1", new Vector3(2, 1, 0), false);
+            updatePoint("pt1", new Vector3(0, 1, 0), false);
             updatePoint("pt2", new Vector3(1, 0, 0), false);
             updatePoint("pt3", new Vector3(0, 0, 0), false); //TAG
 
@@ -191,7 +191,7 @@ namespace Determinants
             if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
             if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
             if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback; //TAG
-            //if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; //TAG
+            if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; //TAG
         }
 
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
@@ -262,18 +262,18 @@ namespace Determinants
             //presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
             //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
         }
-
+        */
         public void updateEqn(float newA, float newB, float newC, float newD)
         {
-            CalcOutput originalExpression = ptInput.currExpression;
+            CalcOutput originalExpression = ptInput2D.currExpression;
             SetOutput(eqnSet.eqnCoefs["a"]);
-            ptInput.RewriteInput(newA);
+            ptInput2D.RewriteInput(newA);
             SetOutput(eqnSet.eqnCoefs["b"]);
-            ptInput.RewriteInput(newB);
+            ptInput2D.RewriteInput(newB);
             SetOutput(eqnSet.eqnCoefs["c"]);
-            ptInput.RewriteInput(newC);
+            ptInput2D.RewriteInput(newC);
             SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput.RewriteInput(newD);
+            ptInput2D.RewriteInput(newD);
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
@@ -282,15 +282,15 @@ namespace Determinants
 
         public void updateEqn()
         {
-            CalcOutput originalExpression = ptInput.currExpression;
+            CalcOutput originalExpression = ptInput2D.currExpression;
             SetOutput(eqnSet.eqnCoefs["a"]);
-            ptInput.RewriteInput();
+            ptInput2D.RewriteInput();
             SetOutput(eqnSet.eqnCoefs["b"]);
-            ptInput.RewriteInput();
+            ptInput2D.RewriteInput();
             SetOutput(eqnSet.eqnCoefs["c"]);
-            ptInput.RewriteInput();
+            ptInput2D.RewriteInput();
             SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput.RewriteInput();
+            ptInput2D.RewriteInput();
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
@@ -300,7 +300,7 @@ namespace Determinants
             // inputs.dInput.text = "NaN";
             feedbacks.eqnFeedback.material.color = negativeFeedback;
         }
-		*/
+		
         public void manageText()
         {
             #region coords
@@ -337,11 +337,11 @@ namespace Determinants
             }
 			//TAG
  
-			/* 
-            if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
+			 
+            if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
+            if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
+            if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
+            if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
 
             if (inputs.aInput != null && inputs.aInput.text.Length == 0) inputs.aInput.text = "0";
             if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
@@ -350,7 +350,7 @@ namespace Determinants
 
             if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
             if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
-            */ //TAG
+            //TAG from lines 341-352
 			#endregion
         }
 

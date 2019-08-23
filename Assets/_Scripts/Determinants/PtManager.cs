@@ -85,14 +85,15 @@ namespace Determinants
             ptInput.ChangeOutput(output);
             /* //TAG
             if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
+            
+            if (output != eqnSet.eqnCoefs["d"])
             {
                 eqnInput = false;
             }
             else
             {
                 eqnInput = true;
-            }
-            */
+            }*/
         }
 
         private void Initialize()

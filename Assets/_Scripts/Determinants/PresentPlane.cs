@@ -196,7 +196,12 @@ namespace Determinants
             return result;
         }
 
-        // Return the raw string of the equation
+        public float DeterminantTwoD(float a, float b, float c, float d){
+            return a*d-b*c;
+        }
+
+
+        // Return the determinant calculation
         public bool CalculatePlane()  //previously returned bool
         {
             if (ptManager!=null){
@@ -204,10 +209,22 @@ namespace Determinants
                 rawPt2 = ptManager.ptSet.ptCoords["pt2"];
                 rawPt3 = ptManager.ptSet.ptCoords["pt3"];
                 
+                // Calculating the determinant
+                float determinant = rawPt1.X.Value*DeterminantTwoD(rawPt2.Y.Value,rawPt3.Y.Value,rawPt2.Z.Value,rawPt3.Z.Value)
+                                    - rawPt2.X.Value*DeterminantTwoD(rawPt1.Y.Value,rawPt3.Y.Value,rawPt1.Z.Value,rawPt3.Z.Value)
+                                    + rawPt3.X.Value*DeterminantTwoD(rawPt1.Y.Value,rawPt2.Y.Value,rawPt1.Z.Value,rawPt2.Z.Value);
+                
+                ptManager.updateEqn(determinant, 0f, 0f, 0f);
+                
             } else {
                 rawPt1 = ptManager2D.ptSet.ptCoords["pt1"];
                 rawPt2 = ptManager2D.ptSet.ptCoords["pt2"];
+                float determinant = DeterminantTwoD(rawPt1.X.Value, rawPt2.X.Value, rawPt1.Y.Value, rawPt2.Y.Value);
+                ptManager2D.updateEqn(determinant, 0f, 0f, 0f);
             }
+
+            //ptManager.updateEqn(-3.33f, -2.22f, -1.11f, rawPt1.X.Value);
+            //rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
 
             //vector1 = GenerateVector(center, rawPt1);
             //vector2 = GenerateVector(center, rawPt2);
