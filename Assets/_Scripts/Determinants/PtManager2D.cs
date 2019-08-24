@@ -73,10 +73,10 @@ namespace Determinants
         internal class Inputs
         {
             [SerializeField]
-            internal TextMesh  pt1XInput,pt1YInput,pt1ZInput, //TAG X,Y,Z dimensionns changes in the context of 2D
-                    pt2XInput, pt2YInput,pt2ZInput, //TAG
-                    pt3XInput, pt3YInput, pt3ZInput, //TAG
-                    aInput, bInput, cInput, dInput; //TAG
+            internal TextMesh  pt1XInput,pt1YInput,//pt1ZInput, //TAG X,Y,Z dimensionns changes in the context of 2D
+                    pt2XInput, pt2YInput,//pt2ZInput, //TAG
+                    //pt3XInput, pt3YInput, pt3ZInput, //TAG
+                    aInput; // bInput, cInput, dInput; //TAG
         }
 
         //public GeneratePlanePts generatePlanePts;
@@ -308,23 +308,24 @@ namespace Determinants
             {
                 inputs.pt1XInput.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength); 
                 inputs.pt1YInput.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
-                inputs.pt1ZInput.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength); //TAG
+                //inputs.pt1ZInput.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength); //TAG
 
                 if (inputs.pt1XInput.text.Length == 0) inputs.pt1XInput.text = "0"; //TAG
                 if (inputs.pt1YInput.text.Length == 0) inputs.pt1YInput.text = "0";
-                if (inputs.pt1ZInput.text.Length == 0) inputs.pt1ZInput.text = "0"; 
+                //if (inputs.pt1ZInput.text.Length == 0) inputs.pt1ZInput.text = "0"; 
             }
             if (ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2YInput != null)
             {
                 inputs.pt2XInput.text = displayText(ptSet.ptCoords["pt2"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].X, maxDisplayLength); //TAG
                 inputs.pt2YInput.text = displayText(ptSet.ptCoords["pt2"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].Y, maxDisplayLength);
-                inputs.pt2ZInput.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength); 
+                //inputs.pt2ZInput.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength); 
 
                 if (inputs.pt2XInput.text.Length == 0) inputs.pt2XInput.text = "0"; 
                 if (inputs.pt2YInput.text.Length == 0) inputs.pt2YInput.text = "0";
-                if (inputs.pt2ZInput.text.Length == 0) inputs.pt2ZInput.text = "0"; //TAG
+                //if (inputs.pt2ZInput.text.Length == 0) inputs.pt2ZInput.text = "0"; //TAG
             }
 			
+            /* 
             if (ptSet.ptCoords.ContainsKey("pt3") && inputs.pt3XInput != null)
             {
                 inputs.pt3XInput.text = displayText(ptSet.ptCoords["pt3"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt3"].X, maxDisplayLength);
@@ -335,21 +336,22 @@ namespace Determinants
                 if (inputs.pt3YInput.text.Length == 0) inputs.pt3YInput.text = "0";
                 if (inputs.pt3ZInput.text.Length == 0) inputs.pt3ZInput.text = "0";
             }
+            */
 			//TAG
  
 			 
             if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
+            //if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
+            //if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
+            //if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
 
             if (inputs.aInput != null && inputs.aInput.text.Length == 0) inputs.aInput.text = "0";
-            if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
-            if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";
-            if (inputs.dInput != null && inputs.dInput.text.Length == 0) inputs.dInput.text = "0";
+            //if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
+            //if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";
+            //if (inputs.dInput != null && inputs.dInput.text.Length == 0) inputs.dInput.text = "0";
 
-            if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
-            if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
+            //if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
+            //if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
             //TAG from lines 341-352
 			#endregion
         }
