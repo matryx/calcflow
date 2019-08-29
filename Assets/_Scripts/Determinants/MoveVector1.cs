@@ -30,7 +30,7 @@ namespace Determinants
 
                 presentplane.CalculatePlane();
 
-                /* 
+                /* //TAG
                 for (int i = 0; i < 6; i++)
                 {
                     sharedMaterial.SetVector("_planePos" + i, presentplane.walls[i].transform.position);

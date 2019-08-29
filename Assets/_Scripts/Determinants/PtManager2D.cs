@@ -18,7 +18,7 @@ namespace Determinants
         public PtSet ptSet;
 
         [HideInInspector]
-        public EqnSet eqnSet;	//TAG
+        public EqnSet eqnSet;	
 
         //[HideInInspector]
         //public SaveLoadMenu saveLoadMenu;	//TAG
@@ -30,7 +30,7 @@ namespace Determinants
 
         int maxDisplayLength = 9;
 
-        int maxEqnLength = 7; //TAG
+        int maxEqnLength = 7; 
 
         [SerializeField]
         ConnectedMenus connectedMenus;
@@ -41,7 +41,7 @@ namespace Determinants
         [SerializeField]
         Inputs inputs;
 
-        //public TextMesh equation;
+        //public TextMesh equation; //TAG
 
         [SerializeField]
         PresentPlane presentPlane;
@@ -79,7 +79,7 @@ namespace Determinants
                     aInput; // bInput, cInput, dInput; //TAG
         }
 
-        //public GeneratePlanePts generatePlanePts;
+        //public GeneratePlanePts generatePlanePts; //TAG
 
         public void SetOutput(CalcOutput output)
         {
@@ -190,8 +190,8 @@ namespace Determinants
         {
             if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
             if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback; //TAG
-            if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; //TAG
+            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback; 
+            if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; 
         }
 
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
@@ -231,7 +231,7 @@ namespace Determinants
             }
         }
 		
-		/* 
+		/*  //TAG
         public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
         {
             CalcOutput originalExpression = ptInput.currExpression;

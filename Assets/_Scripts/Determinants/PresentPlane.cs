@@ -26,11 +26,11 @@ namespace Determinants
         public Vector3 vector1, vector2, vector3;
         public Vector3 scaledPt1, scaledPt2, scaledPt3;
         public Vector3 scaledVector12, scaledVector13;
-        //public Vector3 normalVector;
+        //public Vector3 normalVector; // TAG
         public Vector3 scaledNormal;
 
         public List<Vector3> vertices;
-        //public string rawEquation;
+        //public string rawEquation; //TAG
 
         AK.ExpressionSolver solver;
         AK.Expression expr;
@@ -54,21 +54,6 @@ namespace Determinants
             expr = new AK.Expression();
             vertices = new List<Vector3>();
             stepSize = defaultStepSize;
-            /* 
-            if (ptManager == null){
-                Debug.Log("ptManager is NULL");
-            }
-            else{
-                Debug.Log("ptManger is Present!!!!!!");
-            }
-
-            if (ptManager2D == null){
-                Debug.Log("ptManager2D is NULL !!!!!!!");
-            }
-            else{
-                Debug.Log("ptManger2D is Present");
-            }
-            */
             if (ptManager != null && ptManager2D == null){
                 if (ptManager.ptSet != null)
                 {
@@ -117,9 +102,10 @@ namespace Determinants
                 pt1Label.text = "(" + rawPt1.X.Value + "," + rawPt1.Y.Value + ")";
                 pt2Label.text = "(" + rawPt2.X.Value + "," + rawPt2.Y.Value + ")";
             }
-            //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value);
+            //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value); //TAG
 
-            /*var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
+            /* //TAG
+            var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial; 
             sharedMaterial.SetInt("_planeClippingEnabled", 1);
 
             for (int i = 0; i < 6; i++)
@@ -137,7 +123,8 @@ namespace Determinants
                 sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
                 //plane normal vector is the rotated 'up' vector.
                 sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            }*/
+            }
+            */
         }
 
         public void ApplyGraphAdjustment()
@@ -160,9 +147,6 @@ namespace Determinants
             {
                 stepSize = defaultStepSize;
             }
-
-            //Debug.Log("step size: " + stepSize);
-            //Debug.Log("steps: " + steps);
 
             xLabelManager.Min = center.x - stepSize * steps;
             yLabelManager.Min = center.y - stepSize * steps;
@@ -222,7 +206,8 @@ namespace Determinants
                 float determinant = DeterminantTwoD(rawPt1.X.Value, rawPt2.X.Value, rawPt1.Y.Value, rawPt2.Y.Value);
                 ptManager2D.updateEqn(determinant, 0f, 0f, 0f);
             }
-
+            
+            //TAG
             //ptManager.updateEqn(-3.33f, -2.22f, -1.11f, rawPt1.X.Value);
             //rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
 

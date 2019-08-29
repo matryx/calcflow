@@ -59,7 +59,7 @@ namespace Determinants
 			// Scale        
 			float dist = Vector3.Distance(endV, startV);
 
-			cylinder.transform.localScale = new Vector3(0.1F, dist/2, 0.1F);
+			cylinder.transform.localScale = new Vector3(0.05F, dist/2, 0.05F);
 		}
 	}
 }
