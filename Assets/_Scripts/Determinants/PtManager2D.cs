@@ -26,7 +26,7 @@ namespace Determinants
         private PtInput2D ptInput2D;
 
         private Color positiveFeedback = new Color(0, 204, 54);
-        private Color negativeFeedback = Color.red;
+        private Color negativeFeedback = Color.red;//new Color(220,53,69);//Color.red;
 
         int maxDisplayLength = 9;
 
@@ -190,8 +190,9 @@ namespace Determinants
         {
             if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
             if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback; 
-            if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; 
+            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
+            bool test = ptSet.expValidity["pt1"] & ptSet.expValidity["pt2"];
+            if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = test ? positiveFeedback : negativeFeedback;
         }
 
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
