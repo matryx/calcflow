@@ -290,7 +290,7 @@ namespace Determinants
                 float scale = dummySteps * stepSize / scaledNormal.magnitude;
                 Vector3 dummyPos = scaledNormal * scale;
                 //Debug.Log("The Normal vector after scale is: " + dummyPos);
-                lookAtTarget.localPosition = dummyPos + ScaledPoint(center);
+                //lookAtTarget.localPosition = dummyPos + ScaledPoint(center);
                 centerPt.localPosition = ScaledPoint(center);
                 plane.localPosition = ScaledPoint(center);
             }

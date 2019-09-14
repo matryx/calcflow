@@ -19,7 +19,7 @@ namespace Determinants
         public ConstraintGrabbable pt1Grabber, pt2Grabber, pt3Grabber;
         public bool FixedPlane = false;
 
-        public FlexButtonLockPlane lockButton;
+        public FlexButtonLockColumns lockButton; //lock change
 
 
         void Start()
@@ -46,7 +46,7 @@ namespace Determinants
         private void grabbingPoint(Transform point, ConstraintGrabbable grabber)
         {
             Vector3 newLoc = Vector3.zero;
-            if (FixedPlane && presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled)
+            /* if (FixedPlane && presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled)
             {
                 newLoc = Vector3.ProjectOnPlane(grabber.lastLocalPos - presentPlane.centerPt.localPosition, presentPlane.lookAtTarget.localPosition - presentPlane.plane.localPosition);
                 newLoc = newLoc + presentPlane.centerPt.localPosition;
@@ -56,17 +56,20 @@ namespace Determinants
                 }
                 point.localPosition = newLoc;
             }
-            else
+            else */
+            if (!(FixedPlane && presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled))
             {
                 FixedPlane = false;
                 lockButton.LockOff();
                 newLoc = grabber.lastLocalPos;
                 point.localPosition = newLoc;
-            }
-            if (ptManager!=null){
-                ptManager.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
-            } else{
-                ptManager2D.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
+            
+                if (ptManager!=null){
+                    ptManager.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
+                }
+                else {
+                    ptManager2D.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
+                }
             }
         }
     }

@@ -54,7 +54,7 @@ namespace Determinants
 
         PresentPlane presentPlane;
         public PlaneSolverPointGrab grabber;
-        public FlexButtonLockPlane lockButton;
+        public FlexButtonLockColumns lockButton;
 
         public void Initialize(PtManager2D pm)
         {

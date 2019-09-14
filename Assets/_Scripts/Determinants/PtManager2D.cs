@@ -188,9 +188,9 @@ namespace Determinants
 
         public void ManageFeedback()
         {
-            if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-            if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
+            //if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
+            //if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
+            //if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
             bool test = ptSet.expValidity["pt1"] & ptSet.expValidity["pt2"];
             if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = test ? positiveFeedback : negativeFeedback;
         }
@@ -281,7 +281,7 @@ namespace Determinants
             //ManageFeedback(); //TAG
         }
 
-        public void updateEqn()
+        /* public void updateEqn() //tag ML
         {
             CalcOutput originalExpression = ptInput2D.currExpression;
             SetOutput(eqnSet.eqnCoefs["a"]);
@@ -300,7 +300,7 @@ namespace Determinants
             // inputs.cInput.text = "NaN";
             // inputs.dInput.text = "NaN";
             feedbacks.eqnFeedback.material.color = negativeFeedback;
-        }
+        } */
 		
         public void manageText()
         {
