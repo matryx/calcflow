@@ -7,8 +7,6 @@ namespace Determinants
     public class MoveVector1 : MonoBehaviour {
         public Transform origin; //center
         public PresentPlane presentplane;
-        //public FlexButtonLockPlane lockButton;
-        //public bool FixedMatrix = false;
 
         void Update()
         {

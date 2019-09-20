@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
 
 
 namespace Determinants
@@ -57,13 +58,16 @@ namespace Determinants
                 point.localPosition = newLoc;
             }
             else */
-            if (!(FixedPlane && presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled))
+            
+
+            if (!(FixedPlane))//&& presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled))
             {
                 FixedPlane = false;
                 lockButton.LockOff();
                 newLoc = grabber.lastLocalPos;
                 point.localPosition = newLoc;
-            
+
+                          
                 if (ptManager!=null){
                     ptManager.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
                 }
