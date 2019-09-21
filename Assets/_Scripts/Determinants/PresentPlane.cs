@@ -166,13 +166,13 @@ namespace Determinants
                                     - rawPt2.X.Value*DeterminantTwoD(rawPt1.Y.Value,rawPt3.Y.Value,rawPt1.Z.Value,rawPt3.Z.Value)
                                     + rawPt3.X.Value*DeterminantTwoD(rawPt1.Y.Value,rawPt2.Y.Value,rawPt1.Z.Value,rawPt2.Z.Value);
                 
-                ptManager.updateDet(determinant);//, 0f, 0f, 0f);
+                ptManager.updateDet(determinant);
                 
             } else {
                 rawPt1 = ptManager2D.ptSet.ptCoords["pt1"];
                 rawPt2 = ptManager2D.ptSet.ptCoords["pt2"];
                 float determinant = DeterminantTwoD(rawPt1.X.Value, rawPt2.X.Value, rawPt1.Y.Value, rawPt2.Y.Value);
-                ptManager2D.updateDet(determinant, 0f, 0f, 0f);
+                ptManager2D.updateDet(determinant);
             }
             
             return true;

@@ -18,10 +18,7 @@ namespace Determinants
         public PtSet ptSet;
 
         [HideInInspector]
-        public EqnSet eqnSet;	
-
-        //[HideInInspector]
-        //public SaveLoadMenu saveLoadMenu;	//TAG
+        public EqnSet eqnSet;
 
         private PtInput2D ptInput2D;
 
@@ -40,8 +37,6 @@ namespace Determinants
 
         [SerializeField]
         Inputs inputs;
-
-        //public TextMesh equation; //TAG
 
         [SerializeField]
         PresentPlane presentPlane;
@@ -79,21 +74,9 @@ namespace Determinants
                     aInput; // bInput, cInput, dInput; //TAG
         }
 
-        //public GeneratePlanePts generatePlanePts; //TAG
-
         public void SetOutput(CalcOutput output)
         {
             ptInput2D.ChangeOutput(output);
-            /* //TAG
-            if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
-            {
-                eqnInput = false;
-            }
-            else
-            {
-                eqnInput = true;
-            }
-            */
         }
 
         private void Initialize()
@@ -101,8 +84,6 @@ namespace Determinants
             ptInput2D = connectedMenus.ptInput2D;
             connectedMenus.ptInput2D.Initialize(this);  //tmp
             connectedMenus.ptOutputMenu2D.Initialize(this);  //tmp
-            //List<string> neg1 = new List<string>() { "-", "1" }; //TAG
-            //List<string> pos1 = new List<string>() { "1" }; //TAG
             ptSet = new PtSet();
 
             eqnSet = new EqnSet();
@@ -111,14 +92,12 @@ namespace Determinants
             updatePoint("pt1", new Vector3(0, 1, 0), false);
             updatePoint("pt2", new Vector3(1, 0, 0), false);
             updatePoint("pt3", new Vector3(0, 0, 0), false); //TAG
-
         }
 
 
         void Start()
         {
             inputReceived = true;
-            //eqnInput = false;
             Initialize();
         }
         public bool updateText = false;
@@ -141,56 +120,17 @@ namespace Determinants
                 {
                     if (presentPlane)
                     {
-                        //if (presentPlane.CalculatePlane()) //TAG
-                        //{
-                            presentPlane.CalculatePlane();
-                            presentPlane.ApplyGraphAdjustment();
-                            presentPlane.GetLocalPoint();
-                            presentPlane.GetPlaneDirection();
-                        //}
-                        /* else
-                        {
-                            presentPlane.ApplyGraphAdjustment();
-                            presentPlane.GetLocalPoint();
-                        }*/ //TAG
+                        presentPlane.CalculatePlane();
+                        presentPlane.ApplyGraphAdjustment();
+                        presentPlane.GetLocalPoint();
+                        presentPlane.GetPlaneDirection();
                      }
                 }
             }
-            
-            /* //TAG
-            if (inputReceived && eqnInput)
-            {
-                inputReceived = false; //TAG
-                bool isValid = eqnSet.CompileAll(); //TAG
-                ManageFeedback(); //TAG
-                if (isValid) //TAG
-                {
-                    if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
-                    {
-                        feedbacks.eqnFeedback.material.color = negativeFeedback; //TAG
-                        //TAG 
-                        if (presentPlane)
-                        {
-                            //presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                            //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                        }
-                    
-                    
-                    }
-                    else
-                    {
-                        generatePlanePts.eqnToPoints();//TAG
-                    }
-                } 
-            }
-            */
         }
 
         public void ManageFeedback()
         {
-            //if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
-            //if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-            //if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
             bool test = ptSet.expValidity["pt1"] & ptSet.expValidity["pt2"];
             if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = test ? positiveFeedback : negativeFeedback;
         }
@@ -198,9 +138,6 @@ namespace Determinants
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
         {
             CalcOutput originalExpression = ptInput2D.currExpression;
-            //eqnInput = false; //TAG
-            //inputReceived = true;
-
             SetOutput(ptSet.ptCoords[ptName].X);
             ptInput2D.RewriteInput(newLoc.y);
             SetOutput(ptSet.ptCoords[ptName].Y);
@@ -211,24 +148,14 @@ namespace Determinants
             if (fixedPlane)
             {
                 manageText();
-                ManageFeedback(); //KEEP
+                ManageFeedback();
                 ptSet.CompileAll();
             }
             else
             {
                 manageText();
-                bool isValid = ptSet.CompileAll(); //KEEP
-                ManageFeedback(); //KEEP
-                /* //TAG
-                if (isValid)
-                {
-                    if (presentPlane && presentPlane.CalculatePlane())
-                    {
-                        //presentPlane.ApplyUnroundCenter(ptName, newLoc);  //TAG
-                        presentPlane.GetPlaneDirection();
-                    }
-                }
-                */
+                bool isValid = ptSet.CompileAll();
+                ManageFeedback();
             }
         }
 		
@@ -264,44 +191,22 @@ namespace Determinants
             //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
         }
         */
-        public void updateDet(float newA, float newB, float newC, float newD)
+        public void updateDet(float newDet)//, float newB, float newC, float newD)
         {
             CalcOutput originalExpression = ptInput2D.currExpression;
             SetOutput(eqnSet.eqnCoefs["a"]);
-            ptInput2D.RewriteInput(newA);
-            SetOutput(eqnSet.eqnCoefs["b"]);
+            ptInput2D.RewriteInput(newDet);
+            /*SetOutput(eqnSet.eqnCoefs["b"]);
             ptInput2D.RewriteInput(newB);
             SetOutput(eqnSet.eqnCoefs["c"]);
             ptInput2D.RewriteInput(newC);
             SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput2D.RewriteInput(newD);
+            ptInput2D.RewriteInput(newD);*/
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
-            //ManageFeedback(); //TAG
         }
 
-        /* public void updateEqn() //tag ML
-        {
-            CalcOutput originalExpression = ptInput2D.currExpression;
-            SetOutput(eqnSet.eqnCoefs["a"]);
-            ptInput2D.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["b"]);
-            ptInput2D.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["c"]);
-            ptInput2D.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput2D.RewriteInput();
-            SetOutput(originalExpression);
-            manageText();
-            eqnSet.CompileAll();
-            // inputs.aInput.text = "NaN";
-            // inputs.bInput.text = "NaN";
-            // inputs.cInput.text = "NaN";
-            // inputs.dInput.text = "NaN";
-            feedbacks.eqnFeedback.material.color = negativeFeedback;
-        } */
-		
         public void manageText()
         {
             #region coords
@@ -309,51 +214,22 @@ namespace Determinants
             {
                 inputs.pt1XInput.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength); 
                 inputs.pt1YInput.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
-                //inputs.pt1ZInput.text = displayText(ptSet.ptCoords["pt1"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].Z, maxDisplayLength); //TAG
 
                 if (inputs.pt1XInput.text.Length == 0) inputs.pt1XInput.text = "0"; //TAG
                 if (inputs.pt1YInput.text.Length == 0) inputs.pt1YInput.text = "0";
-                //if (inputs.pt1ZInput.text.Length == 0) inputs.pt1ZInput.text = "0"; 
             }
             if (ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2YInput != null)
             {
                 inputs.pt2XInput.text = displayText(ptSet.ptCoords["pt2"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].X, maxDisplayLength); //TAG
                 inputs.pt2YInput.text = displayText(ptSet.ptCoords["pt2"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].Y, maxDisplayLength);
-                //inputs.pt2ZInput.text = displayText(ptSet.ptCoords["pt2"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt2"].Z, maxDisplayLength); 
 
                 if (inputs.pt2XInput.text.Length == 0) inputs.pt2XInput.text = "0"; 
                 if (inputs.pt2YInput.text.Length == 0) inputs.pt2YInput.text = "0";
-                //if (inputs.pt2ZInput.text.Length == 0) inputs.pt2ZInput.text = "0"; //TAG
             }
-			
-            /* 
-            if (ptSet.ptCoords.ContainsKey("pt3") && inputs.pt3XInput != null)
-            {
-                inputs.pt3XInput.text = displayText(ptSet.ptCoords["pt3"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt3"].X, maxDisplayLength);
-                inputs.pt3YInput.text = displayText(ptSet.ptCoords["pt3"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt3"].Y, maxDisplayLength);
-                inputs.pt3ZInput.text = displayText(ptSet.ptCoords["pt3"].Z.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt3"].Z, maxDisplayLength);
-
-                if (inputs.pt3XInput.text.Length == 0) inputs.pt3XInput.text = "0";
-                if (inputs.pt3YInput.text.Length == 0) inputs.pt3YInput.text = "0";
-                if (inputs.pt3ZInput.text.Length == 0) inputs.pt3ZInput.text = "0";
-            }
-            */
-			//TAG
- 
 			 
             if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
-            //if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
-            //if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
-            //if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput2D.index, ptInput2D.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
 
             if (inputs.aInput != null && inputs.aInput.text.Length == 0) inputs.aInput.text = "0";
-            //if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
-            //if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";
-            //if (inputs.dInput != null && inputs.dInput.text.Length == 0) inputs.dInput.text = "0";
-
-            //if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
-            //if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
-            //TAG from lines 341-352
 			#endregion
         }
 
