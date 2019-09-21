@@ -20946,7 +20946,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &374662754
 Transform:
   m_ObjectHideFlags: 0
@@ -21457,7 +21457,7 @@ Transform:
   - {fileID: 516356268}
   - {fileID: 1001841054}
   m_Father: {fileID: 443617966}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 180, y: 0, z: 180}
 --- !u!23 &391290914
 MeshRenderer:
@@ -21637,7 +21637,7 @@ Transform:
   m_LocalScale: {x: 10.365209, y: 2.9844263, z: 0.0017437299}
   m_Children: []
   m_Father: {fileID: 443617966}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 180, y: 0, z: 180}
 --- !u!23 &393366373
 MeshRenderer:
@@ -23449,7 +23449,6 @@ Transform:
   m_LocalScale: {x: 0.19230784, y: 1, z: 1}
   m_Children:
   - {fileID: 1688273064}
-  - {fileID: 2068666219}
   - {fileID: 1671487452}
   - {fileID: 1989591539}
   - {fileID: 740373211}
@@ -24041,7 +24040,7 @@ Transform:
   m_LocalScale: {x: 2.43, y: 3.60873, z: 0.0017500006}
   m_Children: []
   m_Father: {fileID: 443617966}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 180, y: 0, z: 180}
 --- !u!23 &453174040
 MeshRenderer:
@@ -24578,7 +24577,7 @@ Transform:
   m_LocalScale: {x: 2, y: 2.125765, z: 2}
   m_Children: []
   m_Father: {fileID: 443617966}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!102 &465890193
 TextMesh:
@@ -35776,7 +35775,7 @@ Transform:
   - {fileID: 1122594456}
   - {fileID: 333541182}
   m_Father: {fileID: 443617966}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &642472716
 GameObject:
@@ -39960,7 +39959,7 @@ Transform:
   - {fileID: 1015619278}
   - {fileID: 1046018695}
   m_Father: {fileID: 443617966}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &741678620
 GameObject:
@@ -54264,7 +54263,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1671487452}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!23 &991201453
 MeshRenderer:
@@ -54608,8 +54607,6 @@ MonoBehaviour:
   pt2Label: {fileID: 782138481}
   pt3Label: {fileID: 603796486}
   plane: {fileID: 456462160}
-  forwardPlane: {fileID: 1040828647}
-  backwardPlane: {fileID: 1037328224}
   lookAtTarget: {fileID: 982638188}
   walls:
   - {fileID: 624645477}
@@ -54638,7 +54635,6 @@ MonoBehaviour:
   dummySteps: 10
   stepSize: 0
   defaultStepSize: 5
-  d: 0
 --- !u!1 &1001841053
 GameObject:
   m_ObjectHideFlags: 0
@@ -56914,7 +56910,7 @@ Transform:
   m_LocalScale: {x: 0.99999994, y: 0.9999988, z: 0.9999991}
   m_Children: []
   m_Father: {fileID: 1671487452}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!23 &1035013547
 MeshRenderer:
@@ -86794,7 +86790,7 @@ Transform:
   m_LocalScale: {x: 0.99999994, y: 0.999999, z: 0.99999934}
   m_Children: []
   m_Father: {fileID: 1671487452}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!23 &1592777773
 MeshRenderer:
@@ -91870,11 +91866,12 @@ Transform:
   m_Children:
   - {fileID: 876761684}
   - {fileID: 148909882}
+  - {fileID: 2068666219}
   - {fileID: 991201452}
   - {fileID: 1592777772}
   - {fileID: 1035013546}
   m_Father: {fileID: 443617966}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1671941048
 GameObject:
@@ -93244,7 +93241,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputReceived: 0
   eqnInput: 0
-  saveLoadMenu: {fileID: 0}
   connectedMenus:
     ptInput: {fileID: 857091416}
     ptOutputMenu: {fileID: 1602823116}
@@ -93267,9 +93263,7 @@ MonoBehaviour:
     bInput: {fileID: 1460423684}
     cInput: {fileID: 1727354365}
     dInput: {fileID: 637275146}
-  equation: {fileID: 0}
   presentPlane: {fileID: 995311755}
-  generatePlanePts: {fileID: 374662756}
   updateText: 0
 --- !u!1 &1697236679
 GameObject:
@@ -106830,8 +106824,6 @@ MonoBehaviour:
   pt2Label: {fileID: 1081958279}
   pt3Label: {fileID: 0}
   plane: {fileID: 1978479307}
-  forwardPlane: {fileID: 1790847208}
-  backwardPlane: {fileID: 503039488}
   lookAtTarget: {fileID: 1543661586}
   walls:
   - {fileID: 624601628}
@@ -106855,7 +106847,6 @@ MonoBehaviour:
   dummySteps: 10
   stepSize: 0
   defaultStepSize: 5
-  d: 0
 --- !u!4 &1936754691
 Transform:
   m_ObjectHideFlags: 0
@@ -109858,7 +109849,7 @@ Transform:
   - {fileID: 39861933}
   - {fileID: 1349514446}
   m_Father: {fileID: 443617966}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1989596849
 GameObject:
@@ -114789,7 +114780,7 @@ GameObject:
   - component: {fileID: 2068666220}
   - component: {fileID: 2068666222}
   m_Layer: 11
-  m_Name: matrixFeedback
+  m_Name: row1Feedback
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -114802,12 +114793,13 @@ Transform:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2068666218}
-  m_LocalRotation: {x: -0, y: -0, z: 0.000000085681656, w: 1}
-  m_LocalPosition: {x: 0.47, y: -0, z: 0.88}
-  m_LocalScale: {x: 5.8, y: 0.05, z: 1.7}
+  m_LocalRotation: {x: -0.000000029802315, y: -0.000000007450579, z: 0.000000085681656,
+    w: 1}
+  m_LocalPosition: {x: -1.029999, y: 0, z: -0.36999983}
+  m_LocalScale: {x: 5.8000035, y: 0.05000002, z: 1.7000003}
   m_Children: []
-  m_Father: {fileID: 443617966}
-  m_RootOrder: 1
+  m_Father: {fileID: 1671487452}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &2068666220
 BoxCollider:

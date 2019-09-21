@@ -264,7 +264,7 @@ namespace Determinants
             //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
         }
         */
-        public void updateEqn(float newA, float newB, float newC, float newD)
+        public void updateDet(float newA, float newB, float newC, float newD)
         {
             CalcOutput originalExpression = ptInput2D.currExpression;
             SetOutput(eqnSet.eqnCoefs["a"]);

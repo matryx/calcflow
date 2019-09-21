@@ -12,8 +12,8 @@ namespace Determinants
         public TextMesh pt1Label, pt2Label, pt3Label;
 
         public Transform plane;
-        public Transform forwardPlane;
-        public Transform backwardPlane;
+        //public Transform forwardPlane;
+        //public Transform backwardPlane;
         public Transform lookAtTarget;
         public List<GameObject> walls;
 
@@ -45,8 +45,6 @@ namespace Determinants
         public float defaultStepSize = 5;
 
         bool ptSetExist = false;
-
-        public float d;
 
         void Awake()
         {
@@ -104,27 +102,6 @@ namespace Determinants
             }
             //pt2Label.text = string.Format("({0:F3},{1:F3},{2:F3})", rawPt2.X.Value, rawPt2.Y.Value, rawPt2.Z.Value); //TAG
 
-            /* //TAG
-            var sharedMaterial = forwardPlane.GetComponent<MeshRenderer>().sharedMaterial; 
-            sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            for (int i = 0; i < 6; i++)
-            {
-                sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-                //plane normal vector is the rotated 'up' vector.
-                sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            }
-
-            sharedMaterial = backwardPlane.GetComponent<MeshRenderer>().sharedMaterial;
-            sharedMaterial.SetInt("_planeClippingEnabled", 1);
-
-            for (int i = 0; i < 6; i++)
-            {
-                sharedMaterial.SetVector("_planePos" + i, walls[i].transform.position);
-                //plane normal vector is the rotated 'up' vector.
-                sharedMaterial.SetVector("_planeNorm" + i, walls[i].transform.rotation * Vector3.up);
-            }
-            */
         }
 
         public void ApplyGraphAdjustment()
@@ -162,15 +139,6 @@ namespace Determinants
             //expr = solver.SymbolicateExpression(rawEquation);
         }
 
-        public void ApplyUnroundCenter(string ptName, Vector3 newLoc) //TAG - changes origin location, so this should be removed
-        {
-            /* 
-            if (ptName.Equals("pt1")) center = (newLoc + PtCoordToVector(rawPt2) + PtCoordToVector(rawPt3)) / 3;
-            else if (ptName.Equals("pt2")) center = (PtCoordToVector(rawPt1) + newLoc + PtCoordToVector(rawPt3)) / 3;
-            else if (ptName.Equals("pt3")) center = (PtCoordToVector(rawPt1) + PtCoordToVector(rawPt2) + newLoc) / 3;
-            */
-        }
-
         public Vector3 GenerateVector(PtCoord pt1, PtCoord pt2)
         {
             Vector3 result = Vector3.zero;
@@ -198,74 +166,17 @@ namespace Determinants
                                     - rawPt2.X.Value*DeterminantTwoD(rawPt1.Y.Value,rawPt3.Y.Value,rawPt1.Z.Value,rawPt3.Z.Value)
                                     + rawPt3.X.Value*DeterminantTwoD(rawPt1.Y.Value,rawPt2.Y.Value,rawPt1.Z.Value,rawPt2.Z.Value);
                 
-                ptManager.updateEqn(determinant, 0f, 0f, 0f);
+                ptManager.updateDet(determinant);//, 0f, 0f, 0f);
                 
             } else {
                 rawPt1 = ptManager2D.ptSet.ptCoords["pt1"];
                 rawPt2 = ptManager2D.ptSet.ptCoords["pt2"];
                 float determinant = DeterminantTwoD(rawPt1.X.Value, rawPt2.X.Value, rawPt1.Y.Value, rawPt2.Y.Value);
-                ptManager2D.updateEqn(determinant, 0f, 0f, 0f);
+                ptManager2D.updateDet(determinant, 0f, 0f, 0f);
             }
             
-            //TAG
-            //ptManager.updateEqn(-3.33f, -2.22f, -1.11f, rawPt1.X.Value);
-            //rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
-
-            //vector1 = GenerateVector(center, rawPt1);
-            //vector2 = GenerateVector(center, rawPt2);
-            //vector3 = GenerateVector(center, rawPt3);
-            //Debug.Log("Vector 12 is: " + vector12 +". Vector13 is: " + vector13);
-            /* normalVector = Vector3.Cross(vector12, vector13);
-            if (PlaneValid())
-            {
-                //forwardPlane.GetComponent<MeshRenderer>().enabled = true;  TM edit
-                //backwardPlane.GetComponent<MeshRenderer>().enabled = true;  TM edit
-
-                // Basic formula of the equation
-                d = rawPt1.X.Value * normalVector.x + rawPt1.Y.Value * normalVector.y + rawPt1.Z.Value * normalVector.z;
-                // string[] formattedValue = roundString(new float[] {normalVector.x, normalVector.y, normalVector.z});
-                // // Formatting equation
-                // if (formattedValue[1][0] != '-') formattedValue[1] = '+' + formattedValue[1];
-                // if (formattedValue[2][0] != '-') formattedValue[2] = '+' + formattedValue[2];
-                // rawEquation = formattedValue[0] + "x" + formattedValue[1] + "y" + formattedValue[2] + "z=" + d;
-                ptManager.updateEqn(normalVector.x, normalVector.y, normalVector.z, d);
-                return true;
-            }
-            else
-            {
-                forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                backwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                // rawEquation = "Invalid Plane";
-                ptManager.updateEqn();
-                return false;
-            } */
-
             return true;
-
-            //Debug.Log("Normal vector is: " + normalVector);
         }
-
-        /* //TAG 
-        public string[] roundString(float[] input)
-        {
-            string[] result = new string[input.Length];
-            for (int i = 0; i < input.Length; i++)
-            {
-                string a = input[i].ToString();
-                string b = string.Format("{0:0.000}", input[i]);
-                print("comparing: " + a + "  " + b);
-                if (a.Length <= b.Length)
-                {
-                    result[i] = a;
-                }
-                else
-                {
-                    result[i] = b;
-                }
-            }
-            return result;
-        }
-        */
 
         public void GetLocalPoint()
         {
@@ -295,40 +206,6 @@ namespace Determinants
                 plane.localPosition = ScaledPoint(center);
             }
         }
-
-        /*  //TAG
-        public bool PlaneValid()
-        {
-            // no points are the same
-            if (PtCoordToVector(rawPt1) == PtCoordToVector(rawPt2) || PtCoordToVector(rawPt1) == PtCoordToVector(rawPt3) || PtCoordToVector(rawPt2) == PtCoordToVector(rawPt3))
-            {
-                return false;
-            }
-            vector12 = GenerateVector(rawPt1, rawPt2);
-            vector13 = GenerateVector(rawPt1, rawPt3);
-            // points are not in same line
-            float scale;
-            if (vector13.x != 0)
-            {
-                scale = vector12.x / vector13.x;
-            }
-            else if (vector13.y != 0)
-            {
-                scale = vector12.y / vector13.y;
-            }
-            else
-            {
-                scale = vector12.z / vector13.z;
-            }
-            Vector3 temp = vector13 * scale;
-            if (vector12.Equals(temp))
-            {
-                return false;
-            }
-
-            return true;
-        }
-        */
 
         public Vector3 PtCoordToVector(PtCoord pt)
         {

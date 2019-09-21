@@ -19,9 +19,6 @@ namespace Determinants
         [HideInInspector]
         public EqnSet eqnSet;
 
-        [HideInInspector]
-        public SaveLoadMenu saveLoadMenu;
-
         private PtInput ptInput;
 
         private Color positiveFeedback = new Color(0, 204, 54);
@@ -39,8 +36,6 @@ namespace Determinants
 
         [SerializeField]
         Inputs inputs;
-
-        public TextMesh equation;
 
         [SerializeField]
         PresentPlane presentPlane;
@@ -78,22 +73,9 @@ namespace Determinants
                     aInput, bInput, cInput, dInput;
         }
 
-        public GeneratePlanePts generatePlanePts;  //tag
-
         public void SetOutput(CalcOutput output)
         {
             ptInput.ChangeOutput(output);
-            /* //TAG
-            if (output != eqnSet.eqnCoefs["a"] && output != eqnSet.eqnCoefs["b"] && output != eqnSet.eqnCoefs["c"] && output != eqnSet.eqnCoefs["d"])
-            
-            if (output != eqnSet.eqnCoefs["d"])
-            {
-                eqnInput = false;
-            }
-            else
-            {
-                eqnInput = true;
-            }*/
         }
 
         private void Initialize()
@@ -101,8 +83,7 @@ namespace Determinants
             ptInput = connectedMenus.ptInput;
             connectedMenus.ptInput.Initialize(this);
             connectedMenus.ptOutputMenu.Initialize(this);
-            //List<string> neg1 = new List<string>() { "-", "1" }; //TAG
-            //List<string> pos1 = new List<string>() { "1" }; //TAG
+
             ptSet = new PtSet();
 
             eqnSet = new EqnSet();
@@ -111,14 +92,12 @@ namespace Determinants
             updatePoint("pt1", new Vector3(0, 1, 0), false);
             updatePoint("pt2", new Vector3(1, 0, 0), false);
             updatePoint("pt3", new Vector3(0, 0, 1), false);
-
         }
 
 
         void Start()
         {
             inputReceived = true;
-            //eqnInput = false;
             Initialize();
         }
         public bool updateText = false;
@@ -136,62 +115,22 @@ namespace Determinants
                 inputReceived = false;
                 bool isValid = ptSet.CompileAll();
 
-                ManageFeedback(); //TAG
+                ManageFeedback(); //keep this?
                 if (isValid)
                 {
                     if (presentPlane)
                     {
-                        //if (presentPlane.CalculatePlane()) //TAG
-                        //{
-                            presentPlane.CalculatePlane();
-                            presentPlane.ApplyGraphAdjustment();
-                            presentPlane.GetLocalPoint();
-                            presentPlane.GetPlaneDirection();
-                        //}
-                        /* else
-                        {
-                            presentPlane.ApplyGraphAdjustment();
-                            presentPlane.GetLocalPoint();
-                        }*/ //TAG
+                        presentPlane.CalculatePlane();
+                        presentPlane.ApplyGraphAdjustment();
+                        presentPlane.GetLocalPoint();
+                        presentPlane.GetPlaneDirection();
                      }
                 }
             }
-            
-            /* //TAG
-            if (inputReceived && eqnInput)
-            {
-                inputReceived = false; //TAG
-                bool isValid = eqnSet.CompileAll(); //TAG
-                ManageFeedback(); //TAG
-                if (isValid) //TAG
-                {
-                    if (eqnSet.eqnCoefs["a"].Value == 0 && eqnSet.eqnCoefs["b"].Value == 0 && eqnSet.eqnCoefs["c"].Value == 0)
-                    {
-                        feedbacks.eqnFeedback.material.color = negativeFeedback; //TAG
-                        //TAG 
-                        if (presentPlane)
-                        {
-                            //presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                            //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = false;
-                        }
-                    
-                    
-                    }
-                    else
-                    {
-                        generatePlanePts.eqnToPoints();//TAG
-                    }
-                } 
-            }
-            */
         }
 
         public void ManageFeedback()
         {
-            //if (feedbacks.row1Feedback != null) feedbacks.row1Feedback.material.color = ptSet.expValidity["pt1"] ? positiveFeedback : negativeFeedback;
-            //if (feedbacks.row2Feedback != null) feedbacks.row2Feedback.material.color = ptSet.expValidity["pt2"] ? positiveFeedback : negativeFeedback;
-            //if (feedbacks.row3Feedback != null) feedbacks.row3Feedback.material.color = ptSet.expValidity["pt3"] ? positiveFeedback : negativeFeedback;
-            //if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = eqnSet.coefValidity ? positiveFeedback : negativeFeedback; //TAG
             bool test = ptSet.expValidity["pt1"] & ptSet.expValidity["pt2"] & ptSet.expValidity["pt3"];
             if (feedbacks.eqnFeedback != null) feedbacks.eqnFeedback.material.color = test ? positiveFeedback : negativeFeedback;
         }
@@ -199,9 +138,6 @@ namespace Determinants
         public void updatePoint(string ptName, Vector3 newLoc, bool fixedPlane)
         {
             CalcOutput originalExpression = ptInput.currExpression;
-            //eqnInput = false; //TAG
-            //inputReceived = true;
-
             SetOutput(ptSet.ptCoords[ptName].X);
             ptInput.RewriteInput(newLoc.y);
             SetOutput(ptSet.ptCoords[ptName].Y);
@@ -212,24 +148,14 @@ namespace Determinants
             if (fixedPlane)
             {
                 manageText();
-                ManageFeedback(); //KEEP
+                ManageFeedback();
                 ptSet.CompileAll();
             }
             else
             {
                 manageText();
-                bool isValid = ptSet.CompileAll(); //KEEP
-                ManageFeedback(); //KEEP
-                /* //TAG
-                if (isValid)
-                {
-                    if (presentPlane && presentPlane.CalculatePlane())
-                    {
-                        //presentPlane.ApplyUnroundCenter(ptName, newLoc);  //TAG
-                        presentPlane.GetPlaneDirection();
-                    }
-                }
-                */
+                bool isValid = ptSet.CompileAll();
+                ManageFeedback();
             }
         }
 
@@ -256,51 +182,26 @@ namespace Determinants
             ptInput.RewriteInput(pt3NewLoc.z);
             SetOutput(originalExpression);
             manageText();
-            //ManageFeedback(); //TAG
             ptSet.CompileAll();
             presentPlane.GetLocalPoint();
             presentPlane.GetPlaneDirection();
-            //presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
-            //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
         }
 
-        public void updateEqn(float newA, float newB, float newC, float newD)
+        public void updateDet(float newDet)//, float newB, float newC, float newD)
         {
             CalcOutput originalExpression = ptInput.currExpression;
             SetOutput(eqnSet.eqnCoefs["a"]);
-            ptInput.RewriteInput(newA);
-            SetOutput(eqnSet.eqnCoefs["b"]);
+            ptInput.RewriteInput(newDet);
+            /* SetOutput(eqnSet.eqnCoefs["b"]);
             ptInput.RewriteInput(newB);
             SetOutput(eqnSet.eqnCoefs["c"]);
             ptInput.RewriteInput(newC);
             SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput.RewriteInput(newD);
+            ptInput.RewriteInput(newD); */
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
-            //ManageFeedback(); //TAG
         }
-
-        /* public void updateEqn() //tag ML
-        {
-            CalcOutput originalExpression = ptInput.currExpression;
-            SetOutput(eqnSet.eqnCoefs["a"]);
-            ptInput.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["b"]);
-            ptInput.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["c"]);
-            ptInput.RewriteInput();
-            SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput.RewriteInput();
-            SetOutput(originalExpression);
-            manageText();
-            eqnSet.CompileAll();
-            // inputs.aInput.text = "NaN";
-            // inputs.bInput.text = "NaN";
-            // inputs.cInput.text = "NaN";
-            // inputs.dInput.text = "NaN";
-            feedbacks.eqnFeedback.material.color = negativeFeedback;
-        } */
 
         public void manageText()
         {

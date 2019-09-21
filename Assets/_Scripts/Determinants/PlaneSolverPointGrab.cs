@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System;
 
 
 namespace Determinants
@@ -15,23 +14,13 @@ namespace Determinants
         public PresentPlane presentPlane;
         public PtManager ptManager;
         public PtManager2D ptManager2D;
-        //public PtOutputMenu ptOutputMenu; //TAG
 
         public ConstraintGrabbable pt1Grabber, pt2Grabber, pt3Grabber;
         public bool FixedPlane = false;
 
-        public FlexButtonLockColumns lockButton; //lock change
+        public FlexButtonLockColumns lockButton;
 
 
-        void Start()
-        {
-            // pt1Grabber.lastLocalPos = point1.localPosition;
-            // grabbingPoint(point1, pt1Grabber);
-            // pt2Grabber.lastLocalPos = point2.localPosition;
-            // grabbingPoint(point2, pt2Grabber);
-            // pt3Grabber.lastLocalPos = point3.localPosition;
-            // grabbingPoint(point3, pt3Grabber);
-        }
         void Update()
         {
                 if (!pt1Grabber.IsGrabbed) pt1Grabber.lastLocalPos = point1.localPosition;
@@ -47,26 +36,12 @@ namespace Determinants
         private void grabbingPoint(Transform point, ConstraintGrabbable grabber)
         {
             Vector3 newLoc = Vector3.zero;
-            /* if (FixedPlane && presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled)
-            {
-                newLoc = Vector3.ProjectOnPlane(grabber.lastLocalPos - presentPlane.centerPt.localPosition, presentPlane.lookAtTarget.localPosition - presentPlane.plane.localPosition);
-                newLoc = newLoc + presentPlane.centerPt.localPosition;
-                if (newLoc.x > 10 || newLoc.x < -10 || newLoc.y > 10 || newLoc.y < -10 || newLoc.z > 10 || newLoc.z < -10)
-                {
-                    grabber.transform.position = point.position;
-                }
-                point.localPosition = newLoc;
-            }
-            else */
-            
-
             if (!(FixedPlane))//&& presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled))
             {
                 FixedPlane = false;
                 lockButton.LockOff();
                 newLoc = grabber.lastLocalPos;
                 point.localPosition = newLoc;
-
                           
                 if (ptManager!=null){
                     ptManager.updatePoint(point.name, presentPlane.UnscaledPoint(newLoc), FixedPlane);
