@@ -12,8 +12,6 @@ namespace Determinants
         public TextMesh pt1Label, pt2Label, pt3Label;
 
         public Transform plane;
-        //public Transform forwardPlane;
-        //public Transform backwardPlane;
         public Transform lookAtTarget;
         public List<GameObject> walls;
 
@@ -22,15 +20,9 @@ namespace Determinants
         private PtCoord rawPt1, rawPt2, rawPt3;
 
         public Vector3 center = new Vector3(0,0,0);
-        //public Vector3 vector12, vector13, vector23; //TODO: remove these
-        public Vector3 vector1, vector2, vector3;
         public Vector3 scaledPt1, scaledPt2, scaledPt3;
-        public Vector3 scaledVector12, scaledVector13;
-        //public Vector3 normalVector; // TAG
-        public Vector3 scaledNormal;
 
         public List<Vector3> vertices;
-        //public string rawEquation; //TAG
 
         AK.ExpressionSolver solver;
         AK.Expression expr;
@@ -139,15 +131,6 @@ namespace Determinants
             //expr = solver.SymbolicateExpression(rawEquation);
         }
 
-        public Vector3 GenerateVector(PtCoord pt1, PtCoord pt2)
-        {
-            Vector3 result = Vector3.zero;
-            result.x = pt2.X.Value - pt1.X.Value;
-            result.y = pt2.Y.Value - pt1.Y.Value;
-            result.z = pt2.Z.Value - pt1.Z.Value;
-            return result;
-        }
-
         public float DeterminantTwoD(float a, float b, float c, float d){
             return a*d-b*c;
         }
@@ -189,22 +172,6 @@ namespace Determinants
                 point3.localPosition = scaledPt3;
             }
             //centerPt.localPosition = ScaledPoint(center);
-        }
-
-        public void GetPlaneDirection()
-        {
-            if (point3 != null) 
-            {
-                scaledVector12 = point2.localPosition - point1.localPosition;
-                scaledVector13 = point3.localPosition - point1.localPosition;
-                scaledNormal = Vector3.Cross(scaledVector12, scaledVector13);
-                float scale = dummySteps * stepSize / scaledNormal.magnitude;
-                Vector3 dummyPos = scaledNormal * scale;
-                //Debug.Log("The Normal vector after scale is: " + dummyPos);
-                //lookAtTarget.localPosition = dummyPos + ScaledPoint(center);
-                centerPt.localPosition = ScaledPoint(center);
-                plane.localPosition = ScaledPoint(center);
-            }
         }
 
         public Vector3 PtCoordToVector(PtCoord pt)

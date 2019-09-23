@@ -23,7 +23,7 @@ namespace Determinants
         private PtInput2D ptInput2D;
 
         private Color positiveFeedback = new Color(0, 204, 54);
-        private Color negativeFeedback = Color.red;//new Color(220,53,69);//Color.red;
+        private Color negativeFeedback = Color.red;//new Color(220,53,69);
 
         int maxDisplayLength = 9;
 
@@ -68,10 +68,9 @@ namespace Determinants
         internal class Inputs
         {
             [SerializeField]
-            internal TextMesh  pt1XInput,pt1YInput,//pt1ZInput, //TAG X,Y,Z dimensionns changes in the context of 2D
-                    pt2XInput, pt2YInput,//pt2ZInput, //TAG
-                    //pt3XInput, pt3YInput, pt3ZInput, //TAG
-                    aInput; // bInput, cInput, dInput; //TAG
+            internal TextMesh  pt1XInput,pt1YInput,// X,Y,Z dimensionns changes in the context of 2D
+                    pt2XInput, pt2YInput,
+                    aInput;
         }
 
         public void SetOutput(CalcOutput output)
@@ -91,7 +90,7 @@ namespace Determinants
             ptInput2D.ChangeOutput(ptSet.ptCoords["pt1"].X);
             updatePoint("pt1", new Vector3(0, 1, 0), false);
             updatePoint("pt2", new Vector3(1, 0, 0), false);
-            updatePoint("pt3", new Vector3(0, 0, 0), false); //TAG
+            updatePoint("pt3", new Vector3(0, 0, 0), false); //this line can probably be removed
         }
 
 
@@ -115,7 +114,7 @@ namespace Determinants
                 inputReceived = false;
                 bool isValid = ptSet.CompileAll();
 
-                ManageFeedback(); //TAG
+                ManageFeedback(); //keep this?
                 if (isValid)
                 {
                     if (presentPlane)
@@ -123,8 +122,7 @@ namespace Determinants
                         presentPlane.CalculatePlane();
                         presentPlane.ApplyGraphAdjustment();
                         presentPlane.GetLocalPoint();
-                        presentPlane.GetPlaneDirection();
-                     }
+                    }
                 }
             }
         }
@@ -159,49 +157,11 @@ namespace Determinants
             }
         }
 		
-		/*  //TAG
-        public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
-        {
-            CalcOutput originalExpression = ptInput.currExpression;
-            SetOutput(ptSet.ptCoords["pt1"].X);
-            ptInput.RewriteInput(pt1NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt1"].Y);
-            ptInput.RewriteInput(pt1NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt1"].Z);
-            ptInput.RewriteInput(pt1NewLoc.z);
-            SetOutput(ptSet.ptCoords["pt2"].X);
-            ptInput.RewriteInput(pt2NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt2"].Y);
-            ptInput.RewriteInput(pt2NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt2"].Z);
-            ptInput.RewriteInput(pt2NewLoc.z);
-            SetOutput(ptSet.ptCoords["pt3"].X);
-            ptInput.RewriteInput(pt3NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt3"].Y);
-            ptInput.RewriteInput(pt3NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt3"].Z);
-            ptInput.RewriteInput(pt3NewLoc.z);
-            SetOutput(originalExpression);
-            manageText();
-            //ManageFeedback(); //TAG
-            ptSet.CompileAll();
-            presentPlane.GetLocalPoint();
-            presentPlane.GetPlaneDirection();
-            //presentPlane.forwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
-            //presentPlane.backwardPlane.GetComponent<MeshRenderer>().enabled = true; //TAG
-        }
-        */
         public void updateDet(float newDet)//, float newB, float newC, float newD)
         {
             CalcOutput originalExpression = ptInput2D.currExpression;
             SetOutput(eqnSet.eqnCoefs["a"]);
             ptInput2D.RewriteInput(newDet);
-            /*SetOutput(eqnSet.eqnCoefs["b"]);
-            ptInput2D.RewriteInput(newB);
-            SetOutput(eqnSet.eqnCoefs["c"]);
-            ptInput2D.RewriteInput(newC);
-            SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput2D.RewriteInput(newD);*/
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
@@ -215,7 +175,7 @@ namespace Determinants
                 inputs.pt1XInput.text = displayText(ptSet.ptCoords["pt1"].X.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].X, maxDisplayLength); 
                 inputs.pt1YInput.text = displayText(ptSet.ptCoords["pt1"].Y.tokens, ptInput2D.index, ptInput2D.currExpression == ptSet.ptCoords["pt1"].Y, maxDisplayLength);
 
-                if (inputs.pt1XInput.text.Length == 0) inputs.pt1XInput.text = "0"; //TAG
+                if (inputs.pt1XInput.text.Length == 0) inputs.pt1XInput.text = "0";
                 if (inputs.pt1YInput.text.Length == 0) inputs.pt1YInput.text = "0";
             }
             if (ptSet.ptCoords.ContainsKey("pt2") && inputs.pt2YInput != null)

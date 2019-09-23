@@ -70,7 +70,7 @@ namespace Determinants
             internal TextMesh pt1XInput, pt1YInput, pt1ZInput,
                     pt2XInput, pt2YInput, pt2ZInput,
                     pt3XInput, pt3YInput, pt3ZInput,
-                    aInput, bInput, cInput, dInput;
+                    aInput;
         }
 
         public void SetOutput(CalcOutput output)
@@ -123,8 +123,7 @@ namespace Determinants
                         presentPlane.CalculatePlane();
                         presentPlane.ApplyGraphAdjustment();
                         presentPlane.GetLocalPoint();
-                        presentPlane.GetPlaneDirection();
-                     }
+                    }
                 }
             }
         }
@@ -159,45 +158,11 @@ namespace Determinants
             }
         }
 
-        public void eqnUpdatePoint(Vector3 pt1NewLoc, Vector3 pt2NewLoc, Vector3 pt3NewLoc)
-        {
-            CalcOutput originalExpression = ptInput.currExpression;
-            SetOutput(ptSet.ptCoords["pt1"].X);
-            ptInput.RewriteInput(pt1NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt1"].Y);
-            ptInput.RewriteInput(pt1NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt1"].Z);
-            ptInput.RewriteInput(pt1NewLoc.z);
-            SetOutput(ptSet.ptCoords["pt2"].X);
-            ptInput.RewriteInput(pt2NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt2"].Y);
-            ptInput.RewriteInput(pt2NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt2"].Z);
-            ptInput.RewriteInput(pt2NewLoc.z);
-            SetOutput(ptSet.ptCoords["pt3"].X);
-            ptInput.RewriteInput(pt3NewLoc.x);
-            SetOutput(ptSet.ptCoords["pt3"].Y);
-            ptInput.RewriteInput(pt3NewLoc.y);
-            SetOutput(ptSet.ptCoords["pt3"].Z);
-            ptInput.RewriteInput(pt3NewLoc.z);
-            SetOutput(originalExpression);
-            manageText();
-            ptSet.CompileAll();
-            presentPlane.GetLocalPoint();
-            presentPlane.GetPlaneDirection();
-        }
-
-        public void updateDet(float newDet)//, float newB, float newC, float newD)
+        public void updateDet(float newDet)
         {
             CalcOutput originalExpression = ptInput.currExpression;
             SetOutput(eqnSet.eqnCoefs["a"]);
             ptInput.RewriteInput(newDet);
-            /* SetOutput(eqnSet.eqnCoefs["b"]);
-            ptInput.RewriteInput(newB);
-            SetOutput(eqnSet.eqnCoefs["c"]);
-            ptInput.RewriteInput(newC);
-            SetOutput(eqnSet.eqnCoefs["d"]);
-            ptInput.RewriteInput(newD); */
             SetOutput(originalExpression);
             manageText();
             eqnSet.CompileAll();
@@ -237,17 +202,8 @@ namespace Determinants
                 if (inputs.pt3ZInput.text.Length == 0) inputs.pt3ZInput.text = "0";
             }
             if (eqnSet.eqnCoefs.ContainsKey("a") && inputs.aInput != null) inputs.aInput.text = displayText(eqnSet.eqnCoefs["a"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["a"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("b") && inputs.bInput != null) inputs.bInput.text = displayText(eqnSet.eqnCoefs["b"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["b"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("c") && inputs.cInput != null) inputs.cInput.text = displayText(eqnSet.eqnCoefs["c"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["c"], maxEqnLength);
-            if (eqnSet.eqnCoefs.ContainsKey("d") && inputs.dInput != null) inputs.dInput.text = displayText(eqnSet.eqnCoefs["d"].tokens, ptInput.index, ptInput.currExpression == eqnSet.eqnCoefs["d"], maxEqnLength);
 
             if (inputs.aInput != null && inputs.aInput.text.Length == 0) inputs.aInput.text = "0";
-            if (inputs.bInput != null && inputs.bInput.text.Length == 0) inputs.bInput.text = "0";
-            if (inputs.cInput != null && inputs.cInput.text.Length == 0) inputs.cInput.text = "0";
-            if (inputs.dInput != null && inputs.dInput.text.Length == 0) inputs.dInput.text = "0";
-
-            if (inputs.bInput != null && inputs.bInput.text[0] != '-') inputs.bInput.text = "+" + inputs.bInput.text;
-            if (inputs.cInput != null && inputs.cInput.text[0] != '-') inputs.cInput.text = "+" + inputs.cInput.text;
             #endregion
         }
 
@@ -333,4 +289,3 @@ namespace Determinants
     }
 
 }
-
