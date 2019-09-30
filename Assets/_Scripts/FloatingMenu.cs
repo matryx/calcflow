@@ -15,9 +15,8 @@ public class FloatingMenu : MonoBehaviour
     {
         rect = GetComponent<RectTransform>();
         Vector2 parentSize = transform.parent.GetComponent<RectTransform>().sizeDelta;
-        init.x = parentSize.x/2f;
-        target.x = parentSize.x/2f;
-        target.y = parentSize.y/2f;
+        init.x = 0;
+        init.y = -rect.sizeDelta.y;
     }
 
     // Update is called once per frame
@@ -34,10 +33,9 @@ public class FloatingMenu : MonoBehaviour
     private void FixedUpdate()
     {
         Vector2 parentSize = transform.parent.GetComponent<RectTransform>().sizeDelta;
-        init.x = parentSize.x/2f;
-        target.x = parentSize.x/2f;
-        target.y = parentSize.y/2f;
-        
+        target.x = 0;
+        target.y = 0;
+
         float currRatio = (rect.position - init).magnitude / (target - init).magnitude;
         if (expanded && currRatio < 1)
         {

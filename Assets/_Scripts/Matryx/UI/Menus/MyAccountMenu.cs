@@ -34,6 +34,8 @@ public class MyAccountMenu : MenuStateReceiver
         {
             NetworkSettings.setActiveAccount(source.name);
             Instance.GetComponent<AnimationHandler>().CloseMenu();
+
+            Instance.RefreshText();
             MyAccountButton.Instance.updateBlockie();
         }
     }
