@@ -69,6 +69,7 @@ public class MappingNormals : MonoBehaviour
 
             normal.position = correspondingPoint;
             normal.LookAt(_3dMapper.CorrespondingPoint.TransformPoint(Scale(end)));
+            //normal.localScale = (_3dMapper.CorrespondingPoint.TransformPoint(20*Scale(end)));
 
             uTangent.gameObject.SetActive(uTan != Vector3.zero);
 
@@ -99,6 +100,7 @@ public class MappingNormals : MonoBehaviour
 
     Vector3 Scale(Vector3 input)
     {
-        return Vector3.Normalize(input) * scale;
+        //return Vector3.Normalize(input) * scale;
+        return input * scale;
     }
 }
