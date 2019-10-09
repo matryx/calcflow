@@ -70,16 +70,26 @@ public class MappingNormals : MonoBehaviour
             normal.position = correspondingPoint;
             normal.LookAt(_3dMapper.CorrespondingPoint.TransformPoint(Scale(end)));
             //normal.localScale = (_3dMapper.CorrespondingPoint.TransformPoint(20*Scale(end)));
+            //Debug.Log("HAHAHA: " + 10*end.magnitude);
+            //normal.localScale = new Vector3(1.0f, 1.0f, (100*end).magnitude);
+
+            //float normalLength = end.magnitude;
 
             uTangent.gameObject.SetActive(uTan != Vector3.zero);
 
             uTangent.position = correspondingPoint;
             uTangent.LookAt(_3dMapper.CorrespondingPoint.TransformPoint(Scale(uTan)));
 
+            //float uRatio = uTan.magnitude/normalLength;
+
             vTangent.gameObject.SetActive(vTan != Vector3.zero);
 
             vTangent.position = correspondingPoint;
             vTangent.LookAt(_3dMapper.CorrespondingPoint.TransformPoint(Scale(vTan)));
+
+            //float vRatio = vTan.magnitude/normalLength;
+
+            //Debug.Log("ratios: (" + normalLength + "," + uRatio + "," + vRatio + ")");
         }
         if (_1dMapper != null && _1dMapper.paramSurfaceReady())
         {
@@ -101,6 +111,6 @@ public class MappingNormals : MonoBehaviour
     Vector3 Scale(Vector3 input)
     {
         //return Vector3.Normalize(input) * scale;
-        return input * scale;
+        return input * scale; //un-normalized
     }
 }
