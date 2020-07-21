@@ -30,19 +30,11 @@ public class AvatarSelector : MonoBehaviour
         OculusAvatar = transform.Find("OculusAvatar").gameObject;
         SteamAvatar = transform.Find("SteamAvatar").gameObject;
 
-        if (UnityEngine.XR.XRDevice.model.IndexOf("Rift") > 0)
-        {
             SteamAvatar.SetActive(false);
             OculusAvatar.SetActive(true);
             Avatar = OculusAvatar;
             centerEye = Avatar.transform.Find("OVRCameraRig/TrackingSpace/CenterEyeAnchor");
-        }
-        else
-        {
-            SteamAvatar.SetActive(true);
-            OculusAvatar.SetActive(false);
-            Avatar = SteamAvatar;
-            centerEye = Avatar.transform.Find("[CameraRig]/Camera (eye)/Camera (head)");
-        }
+
+
     }
 }

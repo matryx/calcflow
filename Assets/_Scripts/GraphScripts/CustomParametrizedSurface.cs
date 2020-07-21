@@ -182,7 +182,7 @@ public class CustomParametrizedSurface : MonoBehaviour
 
         var m = Matrix4x4.TRS(Vector3.zero, transform.rotation, transform.lossyScale);
         particleMaterial.SetMatrix("_worldRot", m);
-        Graphics.DrawProcedural(MeshTopology.Points, particleCount);
+        Graphics.DrawProceduralNow(MeshTopology.Points, particleCount);
     }
 
 
